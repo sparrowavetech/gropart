@@ -1,4 +1,4 @@
-<div class="form-group mb-3">
+<div class="mb-3">
     <label for="widget-name">{{ trans('core/base::forms.name') }}</label>
     <input
         class="form-control"
@@ -7,7 +7,7 @@
         value="{{ $config['name'] }}"
     >
 </div>
-<div class="form-group mb-3">
+<div class="mb-3">
     <label for="content">{{ trans('core/base::forms.content') }}</label>
     <textarea
         class="form-control"

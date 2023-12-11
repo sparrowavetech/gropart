@@ -9,14 +9,18 @@ use Botble\Table\Abstracts\TableAbstract;
 use Botble\Table\Actions\DeleteAction;
 use Botble\Table\Actions\EditAction;
 use Botble\Table\BulkActions\DeleteBulkAction;
-use Botble\Table\Columns\Column;
+use Botble\Table\BulkChanges\CreatedAtBulkChange;
+use Botble\Table\BulkChanges\EmailBulkChange;
+use Botble\Table\BulkChanges\NameBulkChange;
+use Botble\Table\BulkChanges\PhoneBulkChange;
+use Botble\Table\BulkChanges\StatusBulkChange;
 use Botble\Table\Columns\CreatedAtColumn;
+use Botble\Table\Columns\EmailColumn;
 use Botble\Table\Columns\IdColumn;
 use Botble\Table\Columns\NameColumn;
+use Botble\Table\Columns\PhoneColumn;
 use Botble\Table\Columns\StatusColumn;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Validation\Rule;
 
 class ContactTable extends TableAbstract
@@ -30,78 +34,38 @@ class ContactTable extends TableAbstract
             ->addActions([
                 EditAction::make()->route('contacts.edit'),
                 DeleteAction::make()->route('contacts.destroy'),
-            ]);
-    }
-
-    public function query(): Relation|Builder|QueryBuilder
-    {
-        $query = $this
-            ->getModel()
-            ->query()
-            ->select([
-                'id',
-                'name',
-                'phone',
-                'email',
-                'created_at',
-                'status',
-            ]);
-
-        return $this->applyScopes($query);
-    }
-
-    public function columns(): array
-    {
-        return [
-            IdColumn::make(),
-            NameColumn::make()->route('contacts.edit'),
-            Column::make('email')
-                ->title(trans('plugins/contact::contact.tables.email'))
-                ->alignStart(),
-            Column::make('phone')
-                ->title(trans('plugins/contact::contact.tables.phone'))
-                ->alignStart(),
-            CreatedAtColumn::make(),
-            StatusColumn::make(),
-        ];
-    }
-
-    public function bulkActions(): array
-    {
-        return [
-            DeleteBulkAction::make()->permission('contacts.destroy'),
-        ];
-    }
-
-    public function getBulkChanges(): array
-    {
-        return [
-            'name' => [
-                'title' => trans('core/base::tables.name'),
-                'type' => 'text',
-                'validate' => 'required|max:120',
-            ],
-            'email' => [
-                'title' => trans('core/base::tables.email'),
-                'type' => 'text',
-                'validate' => 'required|max:120',
-            ],
-            'phone' => [
-                'title' => trans('plugins/contact::contact.sender_phone'),
-                'type' => 'text',
-                'validate' => 'required|max:120',
-            ],
-            'status' => [
-                'title' => trans('core/base::tables.status'),
-                'type' => 'customSelect',
-                'choices' => ContactStatusEnum::labels(),
-                'validate' => 'required|' . Rule::in(ContactStatusEnum::values()),
-            ],
-            'created_at' => [
-                'title' => trans('core/base::tables.created_at'),
-                'type' => 'datePicker',
-            ],
-        ];
+            ])
+            ->addColumns([
+                IdColumn::make(),
+                NameColumn::make()->route('contacts.edit'),
+                EmailColumn::make()->linkable(),
+                PhoneColumn::make()->linkable(),
+                CreatedAtColumn::make(),
+                StatusColumn::make(),
+            ])
+            ->addBulkActions([
+                DeleteBulkAction::make()->permission('contacts.destroy'),
+            ])
+            ->addBulkChanges([
+                NameBulkChange::make(),
+                EmailBulkChange::make(),
+                StatusBulkChange::make()
+                    ->choices(ContactStatusEnum::labels())
+                    ->validate(['required', Rule::in(ContactStatusEnum::values())]),
+                CreatedAtBulkChange::make(),
+                PhoneBulkChange::make()->title(trans('plugins/contact::contact.sender_phone')),
+            ])
+            ->queryUsing(function (Builder $query) {
+                return $query
+                    ->select([
+                        'id',
+                        'name',
+                        'phone',
+                        'email',
+                        'created_at',
+                        'status',
+                    ]);
+            });
     }
 
     public function getDefaultButtons(): array

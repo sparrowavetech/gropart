@@ -16,13 +16,13 @@ class ChunkImportController extends BaseController
 
     public function __invoke(
         ChunkFileRequest $request,
-        BaseHttpResponse $response,
         ImportLocationService $importLocationService
     ): BaseHttpResponse {
         try {
             $filePath = $this->getFilePath($request->input('file'));
         } catch (Exception $exception) {
-            return $response
+            return $this
+                ->httpResponse()
                 ->setError()
                 ->setMessage($exception->getMessage());
         }
@@ -36,7 +36,8 @@ class ChunkImportController extends BaseController
         if ($rowsCount <= 0) {
             File::delete($filePath);
 
-            return $response
+            return $this
+                ->httpResponse()
                 ->setMessage(trans('plugins/location::bulk-import.imported_successfully'))
                 ->setData([
                     'total_message' => trans('plugins/location::bulk-import.total_rows', [
@@ -47,7 +48,8 @@ class ChunkImportController extends BaseController
 
         $importLocationService->handle($rows);
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setMessage(trans('plugins/location::bulk-import.importing_message', [
                 'from' => number_format($offset),
                 'to' => number_format($total),

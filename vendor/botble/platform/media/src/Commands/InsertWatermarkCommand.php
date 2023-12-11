@@ -8,6 +8,9 @@ use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
+
+use function Laravel\Prompts\{progress, table};
+
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputOption;
 
@@ -51,17 +54,22 @@ class InsertWatermarkCommand extends Command
                 ->get();
         }
 
-        $this->components->info(sprintf('Processing %d %s...', $files->count(), Str::plural('file', $files->count())));
+        $progress = progress(
+            label: sprintf('Processing %d %s...', $files->count(), Str::plural('file', $files->count())),
+            steps: $files->count()
+        );
 
         $errors = [];
 
         $watermarkImage = setting('media_watermark_source', RvMedia::getConfig('watermark.source'));
 
         foreach ($files as $file) {
+            /**
+             * @var MediaFile $file
+             */
             try {
-                /**
-                 * @var MediaFile $file
-                 */
+                $progress->label(sprintf('Processing %s...', $file->url));
+
                 if (! $file->canGenerateThumbnails()) {
                     continue;
                 }
@@ -75,24 +83,26 @@ class InsertWatermarkCommand extends Command
                 if (empty($folderIds) || in_array($file->folder_id, $folderIds)) {
                     RvMedia::insertWatermark($file->url);
                 }
+
+                $progress->advance();
             } catch (Exception $exception) {
                 $errors[] = $file->url;
                 $this->components->error($exception->getMessage());
             }
         }
 
+        $progress->finish();
+
         $this->components->info('Inserted watermark successfully!');
 
         $errors = array_unique($errors);
 
-        $errors = array_map(function ($item) {
-            return [$item];
-        }, $errors);
+        $errors = array_map(fn ($item) => [$item], $errors);
 
         if ($errors) {
             $this->components->info('We are unable to insert watermark for these files:');
 
-            $this->table(['File directory'], $errors);
+            table(['File directory'], $errors);
 
             return self::FAILURE;
         }

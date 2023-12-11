@@ -28,7 +28,8 @@ class AdsManager
     {
         $this->load();
 
-        $data = $this->data
+        $data = $this
+            ->filterExpired($this->data)
             ->where('location', $location)
             ->sortBy('order');
 
@@ -58,13 +59,14 @@ class AdsManager
     {
         $this->load();
 
-        return (bool)$this->data
+        return $this
+            ->filterExpired($this->data)
             ->where('location', $location)
             ->sortBy('order')
-            ->count();
+            ->isNotEmpty();
     }
 
-    public function displayAds(?string $key, array $attributes = [], array $linkAttributes = []): ?string
+    public function displayAds(?string $key, array $attributes = []): ?string
     {
         if (! $key) {
             return null;
@@ -72,7 +74,8 @@ class AdsManager
 
         $this->load();
 
-        $ads = $this->data
+        $ads = $this
+            ->filterExpired($this->data)
             ->where('key', $key)
             ->first();
 
@@ -92,9 +95,7 @@ class AdsManager
         }
 
         if ($isNotExpired) {
-            return $this->data
-                ->where('status', BaseStatusEnum::PUBLISHED)
-                ->filter(fn (Ads $item) => $item->expired_at->gte(Carbon::now()));
+            return $this->filterExpired($this->data);
         }
 
         return $this->data;
@@ -125,5 +126,12 @@ class AdsManager
         }
 
         return $ads;
+    }
+
+    protected function filterExpired(Collection $data): Collection
+    {
+        return $data
+            ->where('status', BaseStatusEnum::PUBLISHED)
+            ->filter(fn (Ads $item) => $item->expired_at->gte(Carbon::now()));
     }
 }

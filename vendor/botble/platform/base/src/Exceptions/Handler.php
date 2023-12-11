@@ -16,6 +16,7 @@ use Illuminate\Http\Exceptions\PostTooLargeException;
 use Illuminate\Session\TokenMismatchException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Route;
 use PhpOffice\PhpSpreadsheet\Exception as PhpSpreadsheetException;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
@@ -55,7 +56,7 @@ class Handler extends ExceptionHandler
                     ->setCode($e->getCode())
                     ->setMessage($e->getMessage());
             case $e instanceof PostTooLargeException:
-                if (count($request->allFiles())) {
+                if (! empty($request->allFiles())) {
                     return RvMedia::responseError(
                         trans('core/media::media.upload_failed', [
                             'size' => BaseHelper::humanFilesize(RvMedia::getServerConfigMaxUploadFileSize()),
@@ -65,10 +66,16 @@ class Handler extends ExceptionHandler
 
                 break;
             case $e instanceof TransportException:
+                if (is_in_admin(true)) {
+                    $message = trans('core/base::errors.error_when_sending_email');
+                } else {
+                    $message = trans('core/base::errors.error_when_sending_email_guest');
+                }
+
                 return $this->baseHttpResponse
                     ->setError()
                     ->setCode($e->getCode())
-                    ->setMessage(trans('core/base::errors.error_when_sending_email'));
+                    ->setMessage($message);
             case $e instanceof NotFoundHttpException:
                 if (setting('redirect_404_to_homepage', 0) == 1) {
                     return redirect(url('/'));
@@ -130,8 +137,10 @@ class Handler extends ExceptionHandler
         Cache::put($key, 1, Carbon::now()->addMinutes(5));
 
         if (! app()->isLocal() && ! app()->runningInConsole() && ! app()->isDownForMaintenance()) {
-            if (setting('enable_send_error_reporting_via_email', false)
-                && setting('email_driver', Mail::getDefaultDriver())) {
+            if (
+                setting('enable_send_error_reporting_via_email', false)
+                && setting('email_driver', Mail::getDefaultDriver())
+            ) {
                 EmailHandler::sendErrorException($e);
             }
 
@@ -140,6 +149,8 @@ class Handler extends ExceptionHandler
 
                 $previous = $e->getPrevious();
 
+                $inputs = $request->input() ? BaseHelper::jsonEncodePrettify($request->input()) : null;
+
                 logger()->channel('slack')->critical(
                     $e->getMessage() . ($previous ? '(' . $previous . ')' : null),
                     [
@@ -147,17 +158,21 @@ class Handler extends ExceptionHandler
                         'Request IP' => $request->ip(),
                         'Request Referer' => $request->header('referer'),
                         'Request Method' => $request->method(),
-                        'Request Form Data' => $request->method() != 'GET' ? BaseHelper::jsonEncodePrettify($request->input()) : null,
-                        'Exception Type' => get_class($e),
-                        'File Path' => ltrim(str_replace(base_path(), '', $e->getFile()), '/') . ':' .
-                            $e->getLine(),
-                        'Previous File Path' => $previous ? ltrim(str_replace(base_path(), '', $previous->getFile()), '/') . ':' . $previous->getLine() : null,
+                        'Request Form Data' => $inputs,
+                        'Exception Type' => $e::class,
+                        'File Path' => $this->getErrorFilePath($e),
+                        'Previous File Path' => $previous ? $this->getErrorFilePath($previous) : null,
                     ]
                 );
             }
         }
 
         parent::report($e);
+    }
+
+    protected function getErrorFilePath(Throwable $e): string
+    {
+        return ltrim(str_replace(base_path(), '', $e->getFile()), '/') . ':' . $e->getLine();
     }
 
     protected function isExceptionFromBot(): bool
@@ -195,18 +210,20 @@ class Handler extends ExceptionHandler
 
     protected function unauthenticated($request, AuthenticationException $exception)
     {
-        if ($exception->guards()) {
-            $defaultException = parent::unauthenticated($request, $exception);
-
-            return apply_filters('cms_unauthenticated_response', $defaultException, $request, $exception);
-        }
-
-        if ($request->expectsJson()) {
-            return $this->baseHttpResponse
+        if ($request->wantsJson() || $request->expectsJson()) {
+            return $this
+                ->baseHttpResponse
                 ->setError()
                 ->setMessage($exception->getMessage())
                 ->setCode(401)
                 ->toResponse($request);
+        }
+
+        if ($exception->guards()) {
+            $defaultException = redirect()
+                ->guest($exception->redirectTo() ?? (Route::has('login') ? route('login') : url('login')));
+
+            return apply_filters('cms_unauthenticated_response', $defaultException, $request, $exception);
         }
 
         return redirect()->guest(route('access.login'));

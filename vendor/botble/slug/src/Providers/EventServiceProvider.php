@@ -4,9 +4,11 @@ namespace Botble\Slug\Providers;
 
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
+use Botble\Base\Events\FinishedSeederEvent;
 use Botble\Base\Events\SeederPrepared;
 use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Slug\Listeners\CreatedContentListener;
+use Botble\Slug\Listeners\CreateMissingSlug;
 use Botble\Slug\Listeners\DeletedContentListener;
 use Botble\Slug\Listeners\TruncateSlug;
 use Botble\Slug\Listeners\UpdatedContentListener;
@@ -26,6 +28,9 @@ class EventServiceProvider extends ServiceProvider
         ],
         SeederPrepared::class => [
             TruncateSlug::class,
+        ],
+        FinishedSeederEvent::class => [
+            CreateMissingSlug::class,
         ],
     ];
 }

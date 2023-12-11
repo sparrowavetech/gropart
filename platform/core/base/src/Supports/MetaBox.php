@@ -87,8 +87,12 @@ class MetaBox
 
     public function doMetaBoxes(string $context, Model|string|null $object = null): void
     {
+        if (! $object) {
+            return;
+        }
+
         $data = '';
-        $reference = get_class($object);
+        $reference = $object::class;
         if (isset($this->metaBoxes[$reference][$context])) {
             foreach (['high', 'sorted', 'core', 'default', 'low'] as $priority) {
                 if (! isset($this->metaBoxes[$reference][$context][$priority])) {

@@ -35,6 +35,19 @@ class Role extends BaseModel
         'is_default' => 'bool',
     ];
 
+    protected static function booted(): void
+    {
+        self::saving(function (self $model) {
+            $model->slug = self::createSlug($model->slug ?: $model->name, $model->getKey());
+        });
+
+        self::deleted(function (self $model) {
+            $model->users()->detach();
+
+            Helper::clearCache();
+        });
+    }
+
     public function delete(): bool|null
     {
         if ($this->exists) {
@@ -74,18 +87,5 @@ class Role extends BaseModel
         }
 
         return $permissions;
-    }
-
-    protected static function booted(): void
-    {
-        self::saving(function (self $model) {
-            $model->slug = self::createSlug($model->slug ?: $model->name, $model->getKey());
-        });
-
-        self::deleted(function (self $model) {
-            $model->users()->detach();
-
-            Helper::clearCache();
-        });
     }
 }

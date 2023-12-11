@@ -328,6 +328,8 @@ class Manager
 
     public function downloadRemoteLocale(string $locale): array
     {
+        $this->ensureAllDirectoriesAreCreated();
+
         $repository = 'https://github.com/botble/translations';
 
         $destination = storage_path('app/translation-files.zip');
@@ -466,5 +468,13 @@ class Manager
         ksort($translations);
 
         return BaseHelper::saveFileData($this->getThemeTranslationPath($locale), $translations);
+    }
+
+    public function ensureAllDirectoriesAreCreated(): void
+    {
+        $this->files->ensureDirectoryExists(lang_path('vendor'));
+        $this->files->ensureDirectoryExists(lang_path('vendor/core'));
+        $this->files->ensureDirectoryExists(lang_path('vendor/packages'));
+        $this->files->ensureDirectoryExists(lang_path('vendor/plugins'));
     }
 }

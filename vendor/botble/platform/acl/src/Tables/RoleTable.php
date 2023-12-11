@@ -8,15 +8,14 @@ use Botble\Table\Abstracts\TableAbstract;
 use Botble\Table\Actions\DeleteAction;
 use Botble\Table\Actions\EditAction;
 use Botble\Table\BulkActions\DeleteBulkAction;
-use Botble\Table\Columns\Column;
+use Botble\Table\BulkChanges\NameBulkChange;
 use Botble\Table\Columns\CreatedAtColumn;
 use Botble\Table\Columns\FormattedColumn;
 use Botble\Table\Columns\IdColumn;
 use Botble\Table\Columns\LinkableColumn;
 use Botble\Table\Columns\NameColumn;
+use Botble\Table\HeaderActions\CreateHeaderAction;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Database\Query\Builder as QueryBuilder;
 
 class RoleTable extends TableAbstract
 {
@@ -24,75 +23,41 @@ class RoleTable extends TableAbstract
     {
         $this
             ->model(Role::class)
+            ->addColumns([
+                IdColumn::make(),
+                NameColumn::make()->route('roles.edit'),
+                FormattedColumn::make('description')
+                    ->title(trans('core/base::tables.description'))
+                    ->alignStart()
+                    ->withEmptyState(),
+                CreatedAtColumn::make(),
+                LinkableColumn::make('created_by')
+                    ->urlUsing(fn (LinkableColumn $column) => $column->getItem()->author->url)
+                    ->title(trans('core/acl::permissions.created_by'))
+                    ->width(100)
+                    ->getValueUsing(function (LinkableColumn $column) {
+                        return BaseHelper::clean($column->getItem()->author->name);
+                    })
+                    ->externalLink()
+                    ->withEmptyState(),
+            ])
+            ->addHeaderAction(CreateHeaderAction::make()->route('roles.create'))
             ->addActions([
                 EditAction::make()->route('roles.edit'),
                 DeleteAction::make()->route('roles.destroy'),
-            ]);
-    }
-
-    public function query(): Relation|Builder|QueryBuilder
-    {
-        $query = $this
-            ->getModel()
-            ->query()
-            ->with('author')
-            ->select([
-                'id',
-                'name',
-                'description',
-                'created_at',
-                'created_by',
-            ]);
-
-        return $this->applyScopes($query);
-    }
-
-    public function columns(): array
-    {
-        return [
-            IdColumn::make(),
-            NameColumn::make()->route('roles.edit'),
-            FormattedColumn::make('description')
-                ->title(trans('core/base::tables.description'))
-                ->alignStart()
-                ->withEmptyState(),
-            CreatedAtColumn::make(),
-            LinkableColumn::make('created_by')
-                ->route('users.profile.view')
-                ->title(trans('core/acl::permissions.created_by'))
-                ->width(100)
-                ->getValueUsing(function (Column $column) {
-                    /**
-                     * @var Role $item
-                     */
-                    $item = $column->getItem();
-
-                    return BaseHelper::clean($item->author->name);
-                })
-                ->withEmptyState(),
-        ];
-    }
-
-    public function buttons(): array
-    {
-        return $this->addCreateButton(route('roles.create'), 'roles.create');
-    }
-
-    public function bulkActions(): array
-    {
-        return [
-            DeleteBulkAction::make()->permission('roles.destroy'),
-        ];
-    }
-
-    public function getBulkChanges(): array
-    {
-        return [
-            'name' => [
-                'title' => trans('core/base::tables.name'),
-                'type' => 'text',
-                'validate' => 'required|max:120',
-            ],
-        ];
+            ])
+            ->addBulkAction(DeleteBulkAction::make()->permission('roles.destroy'))
+            ->addBulkChange(NameBulkChange::make())
+            ->queryUsing(function (Builder $query) {
+                $query
+                    ->with('author')
+                    ->select([
+                        'id',
+                        'name',
+                        'description',
+                        'created_at',
+                        'created_by',
+                    ]);
+            });
     }
 }

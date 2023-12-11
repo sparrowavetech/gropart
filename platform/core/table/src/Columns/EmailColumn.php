@@ -3,11 +3,12 @@
 namespace Botble\Table\Columns;
 
 use Botble\Base\Facades\Html;
-use Botble\Table\Contracts\FormattedColumn;
+use Botble\Table\Columns\Concerns\HasLink;
+use Botble\Table\Contracts\FormattedColumn as FormattedColumnContract;
 
-class EmailColumn extends Column implements FormattedColumn
+class EmailColumn extends FormattedColumn implements FormattedColumnContract
 {
-    protected bool $linkable = false;
+    use HasLink;
 
     public static function make(array|string $data = [], string $name = ''): static
     {
@@ -16,21 +17,9 @@ class EmailColumn extends Column implements FormattedColumn
             ->alignStart();
     }
 
-    public function linkable(bool $linkable = true): static
+    public function formattedValue($value): string|null
     {
-        $this->linkable = $linkable;
-
-        return $this;
-    }
-
-    public function isLinkable(): bool
-    {
-        return $this->linkable;
-    }
-
-    public function editedFormat($value): string|null
-    {
-        if (! $this->isLinkable()) {
+        if (! $this->isLinkable() || ! $value) {
             return null;
         }
 

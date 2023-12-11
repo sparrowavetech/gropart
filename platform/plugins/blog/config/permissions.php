@@ -67,4 +67,9 @@ return [
         'flag' => 'tags.destroy',
         'parent_flag' => 'tags.index',
     ],
+    [
+        'name' => 'Blog Settings',
+        'flag' => 'blog.settings',
+        'parent_flag' => 'plugins.blog',
+    ],
 ];

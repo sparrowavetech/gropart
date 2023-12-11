@@ -2,6 +2,7 @@
 
 return [
     'name' => 'Languages',
+    'description' => 'View and update your website languages',
     'choose_language' => 'Choose a language',
     'select_language' => 'Select language',
     'choose_language_helper' => 'You can choose a language in the list or directly edit it below.',

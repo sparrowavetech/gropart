@@ -3,83 +3,80 @@
 namespace Botble\Blog\Http\Controllers;
 
 use Botble\ACL\Models\User;
-use Botble\Base\Events\CreatedContentEvent;
-use Botble\Base\Events\DeletedContentEvent;
-use Botble\Base\Events\UpdatedContentEvent;
-use Botble\Base\Facades\PageTitle;
-use Botble\Base\Forms\FormBuilder;
+use Botble\Base\Http\Actions\DeleteResourceAction;
 use Botble\Base\Http\Controllers\BaseController;
-use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Blog\Forms\TagForm;
 use Botble\Blog\Http\Requests\TagRequest;
 use Botble\Blog\Models\Tag;
 use Botble\Blog\Tables\TagTable;
-use Exception;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class TagController extends BaseController
 {
+    public function __construct()
+    {
+        $this
+            ->breadcrumb()
+            ->add(trans('plugins/blog::base.menu_name'))
+            ->add(trans('plugins/blog::tags.menu'), route('tags.index'));
+    }
+
     public function index(TagTable $dataTable)
     {
-        PageTitle::setTitle(trans('plugins/blog::tags.menu'));
+        $this->pageTitle(trans('plugins/blog::tags.menu'));
 
         return $dataTable->renderTable();
     }
 
-    public function create(FormBuilder $formBuilder)
+    public function create()
     {
-        PageTitle::setTitle(trans('plugins/blog::tags.create'));
+        $this->pageTitle(trans('plugins/blog::tags.create'));
 
-        return $formBuilder->create(TagForm::class)->renderForm();
+        return TagForm::create()->renderForm();
     }
 
-    public function store(TagRequest $request, BaseHttpResponse $response)
+    public function store(TagRequest $request)
     {
-        $tag = Tag::query()->create(array_merge($request->input(), [
-            'author_id' => Auth::guard()->id(),
-            'author_type' => User::class,
-        ]));
-        event(new CreatedContentEvent(TAG_MODULE_SCREEN_NAME, $request, $tag));
+        $form = TagForm::create();
 
-        return $response
-            ->setPreviousUrl(route('tags.index'))
-            ->setNextUrl(route('tags.edit', $tag->id))
-            ->setMessage(trans('core/base::notices.create_success_message'));
+        $form
+            ->saving(function (TagForm $form) use ($request) {
+                $form
+                    ->getModel()
+                    ->fill([...$request->validated(),
+                        'author_id' => Auth::guard()->id(),
+                        'author_type' => User::class,
+                    ])
+                    ->save();
+            });
+
+        return $this
+            ->httpResponse()
+            ->setPreviousRoute('tags.index')
+            ->setNextRoute('tags.edit', $form->getModel()->getKey())
+            ->withCreatedSuccessMessage();
     }
 
-    public function edit(Tag $tag, FormBuilder $formBuilder)
+    public function edit(Tag $tag)
     {
-        PageTitle::setTitle(trans('core/base::forms.edit_item', ['name' => $tag->name]));
+        $this->pageTitle(trans('core/base::forms.edit_item', ['name' => $tag->name]));
 
-        return $formBuilder->create(TagForm::class, ['model' => $tag])->renderForm();
+        return TagForm::createFromModel($tag)->renderForm();
     }
 
-    public function update(Tag $tag, TagRequest $request, BaseHttpResponse $response)
+    public function update(Tag $tag, TagRequest $request)
     {
-        $tag->fill($request->input());
-        $tag->save();
+        TagForm::createFromModel($tag)->setRequest($request)->save();
 
-        event(new UpdatedContentEvent(TAG_MODULE_SCREEN_NAME, $request, $tag));
-
-        return $response
-            ->setPreviousUrl(route('tags.index'))
-            ->setMessage(trans('core/base::notices.update_success_message'));
+        return $this
+            ->httpResponse()
+            ->setPreviousRoute('tags.index')
+            ->withUpdatedSuccessMessage();
     }
 
-    public function destroy(Tag $tag, Request $request, BaseHttpResponse $response)
+    public function destroy(Tag $tag)
     {
-        try {
-            $tag->delete();
-
-            event(new DeletedContentEvent(TAG_MODULE_SCREEN_NAME, $request, $tag));
-
-            return $response->setMessage(trans('plugins/blog::tags.deleted'));
-        } catch (Exception $exception) {
-            return $response
-                ->setError()
-                ->setMessage($exception->getMessage());
-        }
+        return DeleteResourceAction::make($tag);
     }
 
     public function getAllTags()

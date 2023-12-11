@@ -5,75 +5,108 @@ namespace Botble\Blog\Providers;
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\Html;
+use Botble\Base\Forms\FieldOptions\SelectFieldOption;
+use Botble\Base\Forms\Fields\SelectField;
 use Botble\Base\Supports\ServiceProvider;
 use Botble\Blog\Models\Category;
 use Botble\Blog\Models\Post;
 use Botble\Blog\Models\Tag;
 use Botble\Blog\Services\BlogService;
+use Botble\Dashboard\Events\RenderingDashboardWidgets;
 use Botble\Dashboard\Supports\DashboardWidgetInstance;
 use Botble\Media\Facades\RvMedia;
+use Botble\Menu\Events\RenderingMenuOptions;
 use Botble\Menu\Facades\Menu;
 use Botble\Page\Models\Page;
+use Botble\Page\Tables\PageTable;
 use Botble\Shortcode\Compilers\Shortcode;
 use Botble\Shortcode\Facades\Shortcode as ShortcodeFacade;
+use Botble\Shortcode\Forms\ShortcodeForm;
 use Botble\Slug\Models\Slug;
+use Botble\Theme\Events\RenderingAdminBar;
+use Botble\Theme\Events\RenderingThemeOptionSettings;
 use Botble\Theme\Facades\AdminBar;
 use Botble\Theme\Facades\Theme;
-use Illuminate\Routing\Events\RouteMatched;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
-use Illuminate\Validation\Rule;
 
 class HookServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
-        if (defined('MENU_ACTION_SIDEBAR_OPTIONS')) {
+        $this->app['events']->listen(RenderingMenuOptions::class, function () {
             Menu::addMenuOptionModel(Category::class);
             Menu::addMenuOptionModel(Tag::class);
             add_action(MENU_ACTION_SIDEBAR_OPTIONS, [$this, 'registerMenuOptions'], 2);
-        }
-        add_filter(DASHBOARD_FILTER_ADMIN_LIST, [$this, 'registerDashboardWidgets'], 21, 2);
+        });
+
+        $this->app['events']->listen(RenderingDashboardWidgets::class, function () {
+            add_filter(DASHBOARD_FILTER_ADMIN_LIST, [$this, 'registerDashboardWidgets'], 21, 2);
+        });
+
         add_filter(BASE_FILTER_PUBLIC_SINGLE_DATA, [$this, 'handleSingleView'], 2);
+
         if (defined('PAGE_MODULE_SCREEN_NAME')) {
             add_filter(PAGE_FILTER_FRONT_PAGE_CONTENT, [$this, 'renderBlogPage'], 2, 2);
-            add_filter(PAGE_FILTER_PAGE_NAME_IN_ADMIN_LIST, [$this, 'addAdditionNameToPageName'], 147, 2);
         }
 
-        $this->app['events']->listen(RouteMatched::class, function () {
-            if (function_exists('admin_bar')) {
-                AdminBar::registerLink(
-                    trans('plugins/blog::posts.post'),
-                    route('posts.create'),
-                    'add-new',
-                    'posts.create'
-                );
-            }
+        PageTable::beforeRendering(function () {
+            add_filter(PAGE_FILTER_PAGE_NAME_IN_ADMIN_LIST, [$this, 'addAdditionNameToPageName'], 147, 2);
+        });
+
+        $this->app['events']->listen(RenderingAdminBar::class, function () {
+            AdminBar::registerLink(
+                trans('plugins/blog::posts.post'),
+                route('posts.create'),
+                'add-new',
+                'posts.create'
+            );
         });
 
         if (function_exists('add_shortcode')) {
-            add_shortcode(
-                'blog-posts',
-                trans('plugins/blog::base.short_code_name'),
-                trans('plugins/blog::base.short_code_description'),
-                [$this, 'renderBlogPosts']
-            );
+            shortcode()
+                ->register(
+                    $shortcodeName = 'blog-posts',
+                    trans('plugins/blog::base.short_code_name'),
+                    trans('plugins/blog::base.short_code_description'),
+                    [$this, 'renderBlogPosts']
+                )
+                ->setAdminConfig(
+                    $shortcodeName,
+                    function (array $attributes) {
+                        $categories = Category::query()
+                            ->wherePublished()
+                            ->pluck('name', 'id')
+                            ->all();
 
-            shortcode()->setAdminConfig('blog-posts', function (array $attributes) {
-                $categories = Category::query()
-                    ->wherePublished()
-                    ->select(['id', 'name', 'parent_id'])
-                    ->get();
-
-                return view('plugins/blog::partials.posts-short-code-admin-config', compact('attributes', 'categories'))
-                    ->render();
-            });
+                        return ShortcodeForm::createFromArray($attributes)
+                            ->add('paginate', 'number', [
+                                'label' => trans('plugins/blog::base.number_posts_per_page'),
+                                'attr' => [
+                                    'placeholder' => trans('plugins/blog::base.number_posts_per_page'),
+                                ],
+                            ])
+                            ->add(
+                                'category_ids[]',
+                                SelectField::class,
+                                SelectFieldOption::make()
+                                    ->label(__('Select categories'))
+                                    ->choices($categories)
+                                    ->selected(explode(',', Arr::get($attributes, 'category_ids')))
+                                    ->multiple()
+                                    ->searchable()
+                                    ->helperText(__('Leave categories empty if you want to show posts from all categories.'))
+                                    ->toArray()
+                            );
+                    }
+                );
         }
 
-        if (function_exists('theme_option')) {
+        $this->app['events']->listen(RenderingThemeOptionSettings::class, function () {
             add_action(RENDERING_THEME_OPTIONS_PAGE, [$this, 'addThemeOptions'], 35);
-        }
+        });
 
         if (defined('THEME_FRONT_HEADER') && setting('blog_post_schema_enabled', 1)) {
             add_action(BASE_ACTION_PUBLIC_RENDER_SINGLE, function ($screen, $post) {
@@ -103,7 +136,7 @@ class HookServiceProvider extends ServiceProvider
                         ],
                         'author' => [
                             '@type' => 'Person',
-                            'url' => route('public.index'),
+                            'url' => fn () => route('public.index'),
                             'name' => class_exists($post->author_type) ? $post->author->name : '',
                         ],
                         'publisher' => [
@@ -123,9 +156,6 @@ class HookServiceProvider extends ServiceProvider
                 }, 35);
             }, 35, 2);
         }
-
-        add_filter(BASE_FILTER_AFTER_SETTING_CONTENT, [$this, 'addSettings'], 193);
-        add_filter('cms_settings_validation_rules', [$this, 'addSettingRules'], 193);
     }
 
     public function addThemeOptions(): void
@@ -141,7 +171,7 @@ class HookServiceProvider extends ServiceProvider
                 'desc' => 'Theme options for Blog',
                 'id' => 'opt-text-subsection-blog',
                 'subsection' => true,
-                'icon' => 'fa fa-edit',
+                'icon' => 'ti ti-edit',
                 'fields' => [
                     [
                         'id' => 'blog_page_id',
@@ -208,9 +238,9 @@ class HookServiceProvider extends ServiceProvider
             ->setKey('widget_posts_recent')
             ->setTitle(trans('plugins/blog::posts.widget_posts_recent'))
             ->setIcon('fas fa-edit')
-            ->setColor('#f3c200')
+            ->setColor('yellow')
             ->setRoute(route('posts.widget.recent-posts'))
-            ->setBodyClass('scroll-table')
+            ->setBodyClass('')
             ->setColumn('col-md-6 col-sm-6')
             ->init($widgets, $widgetSettings);
     }
@@ -281,23 +311,5 @@ class HookServiceProvider extends ServiceProvider
     protected function getBlogPageId(): int|string|null
     {
         return theme_option('blog_page_id', setting('blog_page_id'));
-    }
-
-    public function addSettings(string|null $data = null): string
-    {
-        return $data . view('plugins/blog::settings')->render();
-    }
-
-    public function addSettingRules(array $rules): array
-    {
-        $rules['blog_post_schema_enabled'] = 'nullable|in:0,1';
-
-        $rules['blog_post_schema_type'] = [
-            'nullable',
-            'string',
-            Rule::in(['NewsArticle', 'News', 'Article', 'BlogPosting']),
-        ];
-
-        return $rules;
     }
 }

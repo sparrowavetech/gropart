@@ -4,9 +4,7 @@ namespace Botble\Location\Http\Controllers;
 
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
-use Botble\Base\Facades\PageTitle;
 use Botble\Base\Http\Controllers\BaseController;
-use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Base\Supports\Helper;
 use Botble\Location\Exports\TemplateLocationExport;
 use Botble\Location\Location;
@@ -16,17 +14,25 @@ use Maatwebsite\Excel\Excel;
 
 class BulkImportController extends BaseController
 {
+    public function __construct()
+    {
+        $this
+            ->breadcrumb()
+            ->add(trans('plugins/location::location.name'))
+            ->add(trans('plugins/location::bulk-import.name'), route('location.bulk-import.index'));
+    }
+
     public function index()
     {
-        PageTitle::setTitle(trans('plugins/location::bulk-import.name'));
+        $this->pageTitle(trans('plugins/location::bulk-import.name'));
 
         $mimetypes = collect(config('plugins.location.general.bulk-import.mime_types', []))->implode(',');
 
         Assets::addScriptsDirectly([
-                'vendor/core/plugins/location/js/bulk-import.js',
-            ])
-            ->addScripts(['dropzone', 'blockui'])
-            ->addStyles(['dropzone', 'blockui']);
+            'vendor/core/plugins/location/js/bulk-import.js',
+        ])
+            ->addScripts(['dropzone'])
+            ->addStyles(['dropzone']);
 
         return view('plugins/location::bulk-import.index', compact('mimetypes'));
     }
@@ -42,7 +48,7 @@ class BulkImportController extends BaseController
         return (new TemplateLocationExport($extension))->download($fileName, $writeType, $contentType);
     }
 
-    public function ajaxGetAvailableRemoteLocations(Location $location, BaseHttpResponse $response)
+    public function ajaxGetAvailableRemoteLocations(Location $location)
     {
         $remoteLocations = $location->getRemoteAvailableLocations();
 
@@ -68,17 +74,19 @@ class BulkImportController extends BaseController
 
         $locations = array_unique($locations);
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setData(view('plugins/location::partials.available-remote-locations', compact('locations'))->render());
     }
 
-    public function importLocationData(string $countryCode, Location $location, BaseHttpResponse $response)
+    public function importLocationData(string $countryCode, Location $location)
     {
         BaseHelper::maximumExecutionTimeAndMemoryLimit();
 
         $result = $location->downloadRemoteLocation($countryCode);
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setError($result['error'])
             ->setMessage($result['message']);
     }

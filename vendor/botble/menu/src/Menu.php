@@ -3,14 +3,13 @@
 namespace Botble\Menu;
 
 use Botble\Base\Enums\BaseStatusEnum;
-use Botble\Base\Events\CreatedContentEvent;
-use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\Html;
 use Botble\Base\Facades\MetaBox;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Base\Models\BaseModel;
 use Botble\Base\Supports\RepositoryHelper;
+use Botble\Menu\Forms\MenuNodeForm;
 use Botble\Menu\Models\Menu as MenuModel;
 use Botble\Menu\Models\MenuNode;
 use Botble\Support\Services\Cache\Cache;
@@ -20,8 +19,6 @@ use Illuminate\Cache\CacheManager;
 use Illuminate\Config\Repository;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Throwable;
 
@@ -83,23 +80,22 @@ class Menu
         /**
          * @var MenuNode $node
          */
+
         $node = MenuNode::query()->findOrNew(Arr::get($menuItem, 'id'));
 
-        $node->fill($menuItem);
-        $node->menu_id = $menuId;
-        $node->parent_id = $parentId;
-        $node->has_child = $hasChild;
+        MenuNodeForm::createFromModel($node)
+            ->saving(function (MenuNodeForm $form) use ($hasChild, $parentId, $menuId, $menuItem) {
+                $node = $form->getModel();
+                $node->fill($menuItem);
+                $node->menu_id = $menuId;
+                $node->parent_id = $parentId;
+                $node->has_child = $hasChild;
 
-        $node = $this->getReferenceMenuNode($menuItem, $node);
-        $node->save();
+                $node = $this->getReferenceMenuNode($menuItem, $node);
+                $node->save();
+            });
 
         $menuItem['id'] = $node->getKey();
-
-        if ($node->wasRecentlyCreated) {
-            event(new CreatedContentEvent(MENU_NODE_MODULE_SCREEN_NAME, request(), $node));
-        } else {
-            event(new UpdatedContentEvent(MENU_NODE_MODULE_SCREEN_NAME, request(), $node));
-        }
 
         return $menuItem;
     }
@@ -281,7 +277,7 @@ class Menu
         $options = Menu::generateSelect([
             'model' => new $model(),
             'options' => [
-                'class' => 'list-item',
+                'class' => 'list-unstyled list-item',
             ],
         ]);
 
@@ -373,9 +369,11 @@ class Menu
 
     public function useMenuItemIconImage(): void
     {
-        add_filter(BASE_FILTER_BEFORE_RENDER_FORM, function (FormAbstract $form, Model $data): FormAbstract {
-            if (get_class($data) == MenuNode::class) {
-                $iconImage = $data->icon_image ?: $data->getMetaData('icon_image', true);
+        FormAbstract::beforeRendering(function (FormAbstract $form): FormAbstract {
+            $model = $form->getModel();
+
+            if ($model instanceof MenuNode) {
+                $iconImage = $model->icon_image ?: $model->getMetaData('icon_image', true);
 
                 if ($form->getFormHelper()->hasCustomField('themeIcon')) {
                     $form
@@ -404,44 +402,43 @@ class Menu
             }
 
             return $form;
-        }, 124, 3);
+        }, 124);
 
-        add_action(
-            [BASE_ACTION_AFTER_CREATE_CONTENT, BASE_ACTION_AFTER_UPDATE_CONTENT],
-            function (string $type, Request $request, Model $object): void {
-                if (get_class($object) == MenuNode::class) {
-                    if ($request->has('data.icon_image')) {
-                        if ($iconImage = $request->input('data.icon_image')) {
-                            MetaBox::saveMetaBoxData($object, 'icon_image', $iconImage);
-                        } else {
-                            MetaBox::deleteMetaData($object, 'icon_image');
-                        }
+        FormAbstract::beforeSaving(function (FormAbstract $form) {
+            $model = $form->getModel();
 
-                        return;
+            if ($model instanceof MenuNode) {
+                $request = $form->getRequest();
+
+                if ($request->has('data.icon_image')) {
+                    if ($iconImage = $request->input('data.icon_image')) {
+                        MetaBox::saveMetaBoxData($model, 'icon_image', $iconImage);
+                    } else {
+                        MetaBox::deleteMetaData($model, 'icon_image');
                     }
 
-                    if ($menuNodes = $request->input('menu_nodes')) {
-                        $menuNodes = json_decode($menuNodes, true);
+                    return;
+                }
 
-                        if ($menuNodes) {
-                            foreach ($menuNodes as $node) {
-                                if ($node['menuItem']['id'] == $object->getKey() && isset($node['menuItem']['icon_image'])) {
-                                    if ($iconImage = $node['menuItem']['icon_image']) {
-                                        MetaBox::saveMetaBoxData($object, 'icon_image', $iconImage);
-                                    } else {
-                                        MetaBox::deleteMetaData($object, 'icon_image');
-                                    }
+                if ($menuNodes = $request->input('menu_nodes')) {
+                    $menuNodes = json_decode($menuNodes, true);
 
-                                    break;
+                    if ($menuNodes) {
+                        foreach ($menuNodes as $node) {
+                            if ($node['menuItem']['id'] == $model->getKey() && isset($node['menuItem']['icon_image'])) {
+                                if ($iconImage = $node['menuItem']['icon_image']) {
+                                    MetaBox::saveMetaBoxData($model, 'icon_image', $iconImage);
+                                } else {
+                                    MetaBox::deleteMetaData($model, 'icon_image');
                                 }
+
+                                break;
                             }
                         }
                     }
                 }
-            },
-            170,
-            3
-        );
+            }
+        }, 170);
 
         add_filter('menu_nodes_item_data', function (MenuNode $data): MenuNode {
             $data->icon_image = $data->getMetaData('icon_image', true);

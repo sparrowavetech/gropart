@@ -3,6 +3,8 @@
 namespace Botble\Faq\Providers;
 
 use Botble\Base\Facades\DashboardMenu;
+use Botble\Base\Facades\PanelSectionManager;
+use Botble\Base\PanelSections\PanelSectionItem;
 use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Faq\Contracts\Faq as FaqContract;
@@ -14,7 +16,7 @@ use Botble\Faq\Repositories\Eloquent\FaqRepository;
 use Botble\Faq\Repositories\Interfaces\FaqCategoryInterface;
 use Botble\Faq\Repositories\Interfaces\FaqInterface;
 use Botble\LanguageAdvanced\Supports\LanguageAdvancedManager;
-use Illuminate\Routing\Events\RouteMatched;
+use Botble\Setting\PanelSections\SettingOthersPanelSection;
 
 class FaqServiceProvider extends ServiceProvider
 {
@@ -55,25 +57,20 @@ class FaqServiceProvider extends ServiceProvider
             ]);
         }
 
-        $this->app['events']->listen(RouteMatched::class, function () {
+        DashboardMenu::default()->beforeRetrieving(function () {
             DashboardMenu::make()
                 ->registerItem([
                     'id' => 'cms-plugins-faq',
-                    'priority' => 5,
-                    'parent_id' => null,
+                    'priority' => 420,
                     'name' => 'plugins/faq::faq.name',
-                    'icon' => 'far fa-question-circle',
-                    'url' => route('faq.index'),
-                    'permissions' => ['faq.index'],
+                    'icon' => 'ti ti-help-octagon',
                 ])
                 ->registerItem([
                     'id' => 'cms-plugins-faq-list',
                     'priority' => 0,
                     'parent_id' => 'cms-plugins-faq',
-                    'name' => 'plugins/faq::faq.all',
-                    'icon' => null,
-                    'url' => route('faq.index'),
-                    'permissions' => ['faq.index'],
+                    'name' => 'plugins/faq::faq.name',
+                    'route' => 'faq.index',
                 ])
                 ->registerItem([
                     'id' => 'cms-packages-faq-category',
@@ -81,9 +78,20 @@ class FaqServiceProvider extends ServiceProvider
                     'parent_id' => 'cms-plugins-faq',
                     'name' => 'plugins/faq::faq-category.name',
                     'icon' => null,
-                    'url' => route('faq_category.index'),
-                    'permissions' => ['faq_category.index'],
+                    'route' => 'faq_category.index',
                 ]);
+        });
+
+        PanelSectionManager::default()->beforeRendering(function () {
+            PanelSectionManager::registerItem(
+                SettingOthersPanelSection::class,
+                fn () => PanelSectionItem::make('faqs')
+                    ->setTitle(trans('plugins/faq::faq.settings.title'))
+                    ->withIcon('ti ti-settings-question')
+                    ->withPriority(420)
+                    ->withDescription(trans('plugins/faq::faq.settings.description'))
+                    ->withRoute('faqs.settings')
+            );
         });
 
         $this->app->register(HookServiceProvider::class);

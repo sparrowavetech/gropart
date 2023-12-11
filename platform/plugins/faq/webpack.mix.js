@@ -7,8 +7,8 @@ const source = 'platform/plugins/' + directory
 const dist = 'public/vendor/core/plugins/' + directory
 
 mix
-    .sass(source + '/resources/assets/sass/faq.scss', dist + '/css')
-    .js(source + '/resources/assets/js/faq.js', dist + '/js')
+    .sass(source + '/resources/sass/faq.scss', dist + '/css')
+    .js(source + '/resources/js/faq.js', dist + '/js')
 
 if (mix.inProduction()) {
     mix

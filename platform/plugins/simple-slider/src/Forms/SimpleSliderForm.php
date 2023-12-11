@@ -2,7 +2,13 @@
 
 namespace Botble\SimpleSlider\Forms;
 
-use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Base\Forms\FieldOptions\DescriptionFieldOption;
+use Botble\Base\Forms\FieldOptions\NameFieldOption;
+use Botble\Base\Forms\FieldOptions\StatusFieldOption;
+use Botble\Base\Forms\FieldOptions\TextFieldOption;
+use Botble\Base\Forms\Fields\SelectField;
+use Botble\Base\Forms\Fields\TextareaField;
+use Botble\Base\Forms\Fields\TextField;
 use Botble\Base\Forms\FormAbstract;
 use Botble\SimpleSlider\Http\Requests\SimpleSliderRequest;
 use Botble\SimpleSlider\Models\SimpleSlider;
@@ -16,53 +22,42 @@ class SimpleSliderForm extends FormAbstract
         parent::__construct();
     }
 
-    public function buildForm(): void
+    public function setup(): void
     {
         $this
-            ->setupModel(new SimpleSlider())
+            ->model(SimpleSlider::class)
             ->setValidatorClass(SimpleSliderRequest::class)
-            ->withCustomFields()
-            ->add('name', 'text', [
-                'label' => trans('core/base::forms.name'),
-                'required' => true,
-                'attr' => [
-                    'data-counter' => 120,
-                ],
-            ])
-            ->add('key', 'text', [
-                'label' => trans('plugins/simple-slider::simple-slider.key'),
-                'required' => true,
-                'attr' => [
-                    'data-counter' => 120,
-                ],
-            ])
-            ->add('description', 'textarea', [
-                'label' => trans('core/base::forms.description'),
-                'attr' => [
-                    'rows' => 4,
-                    'placeholder' => trans('core/base::forms.description_placeholder'),
-                    'data-counter' => 400,
-                ],
-            ])
-            ->add('status', 'customSelect', [
-                'label' => trans('core/base::tables.status'),
-                'required' => true,
-                'choices' => BaseStatusEnum::labels(),
-            ])
-            ->setBreakFieldPoint('status');
-
-        if ($this->model->id) {
-            $this->addMetaBoxes([
-                'slider-items' => [
-                    'title' => trans('plugins/simple-slider::simple-slider.slide_items'),
-                    'content' => $this->tableBuilder->create(SimpleSliderItemTable::class)
-                        ->setAjaxUrl(route(
-                            'simple-slider-item.index',
-                            $this->getModel()->id ?: 0
-                        ))
-                        ->renderTable(),
-                ],
-            ]);
-        }
+            ->add('name', TextField::class, NameFieldOption::make()->required()->toArray())
+            ->add(
+                'key',
+                TextField::class,
+                TextFieldOption::make()
+                ->label(trans('plugins/simple-slider::simple-slider.key'))
+                ->required()
+                ->maxLength(120)
+                ->toArray()
+            )
+            ->add('description', TextareaField::class, DescriptionFieldOption::make()->toArray())
+            ->add('status', SelectField::class, StatusFieldOption::make()->toArray())
+            ->setBreakFieldPoint('status')
+            ->when($this->model->id, function () {
+                $this->addMetaBoxes([
+                    'slider-items' => [
+                        'title' => trans('plugins/simple-slider::simple-slider.slide_items'),
+                        'content' => $this->tableBuilder->create(SimpleSliderItemTable::class)
+                            ->setAjaxUrl(route(
+                                'simple-slider-item.index',
+                                $this->getModel()->id ?: 0
+                            ))
+                            ->renderTable([
+                                'simple_slider_id' => $this->getModel()->getKey(),
+                            ]),
+                        'header_actions' => view('plugins/simple-slider::partials.header-actions', [
+                            'slider' => $this->getModel(),
+                        ])->render(),
+                        'has_table' => true,
+                    ],
+                ]);
+            });
     }
 }

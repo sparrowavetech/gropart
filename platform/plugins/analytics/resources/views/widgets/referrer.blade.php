@@ -1,27 +1,35 @@
 @if (count($referrers) > 0)
-    <div class="scroller">
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th class="text-start">{{ trans('core/base::tables.url') }}</th>
-                    <th class="text-center">{{ trans('core/base::tables.views') }}</th>
-                </tr>
-            </thead>
-            <tbody>
+    <div class="table-responsive">
+        <x-core::table>
+            <x-core::table.header>
+                <x-core::table.header.cell>
+                    #
+                </x-core::table.header.cell>
+                <x-core::table.header.cell>
+                    {{ trans('plugins/analytics::analytics.url') }}
+                </x-core::table.header.cell>
+                <x-core::table.header.cell class="text-end">
+                    {{ trans('plugins/analytics::analytics.views') }}
+                </x-core::table.header.cell>
+            </x-core::table.header>
+
+            <x-core::table.body>
                 @foreach ($referrers as $referrer)
-                    <tr>
-                        <td>{{ $loop->index + 1 }}</td>
-                        <td class="text-start">{{ Str::limit($referrer['url'], 80) }}</td>
-                        <td
-                            class="text-center"
-                            style="width: 160px"
-                        >{{ $referrer['pageViews'] }} ({{ ucfirst(trans('plugins/analytics::analytics.views')) }})</td>
-                    </tr>
+                    <x-core::table.body.row>
+                        <x-core::table.body.cell>
+                            {{ $loop->index + 1 }}
+                        </x-core::table.body.cell>
+                        <x-core::table.body.cell>
+                            {{ Str::limit($referrer['url'], 80) }}
+                        </x-core::table.body.cell>
+                        <x-core::table.body.cell class="text-end">
+                            {{ number_format($referrer['pageViews']) }}
+                        </x-core::table.body.cell>
+                    </x-core::table.body.row>
                 @endforeach
-            </tbody>
-        </table>
+            </x-core::table.body>
+        </x-core::table>
     </div>
 @else
-    @include('core/dashboard::partials.no-data')
+    <x-core::empty-state :title="__('No results found')" />
 @endif

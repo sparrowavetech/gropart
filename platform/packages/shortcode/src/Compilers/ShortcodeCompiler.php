@@ -63,6 +63,15 @@ class ShortcodeCompiler
         $this->registered[$key] = compact('key', 'name', 'description', 'callback', 'previewImage');
     }
 
+    public function setPreviewImage(string $key, string $previewImage): void
+    {
+        if (! $this->hasShortcode($key)) {
+            return;
+        }
+
+        $this->registered[$key]['previewImage'] = $previewImage;
+    }
+
     public function compile(string $value, bool $force = false): string
     {
         // Only continue is shortcode have been registered
@@ -238,7 +247,7 @@ class ShortcodeCompiler
      */
     public function strip(string|null $content, array $except = []): string|null
     {
-        if (empty($this->registered)) {
+        if (empty($this->registered) || ! $content) {
             return $content;
         }
 

@@ -5,15 +5,19 @@ namespace Botble\Page\Providers;
 use Botble\Base\Facades\Html;
 use Botble\Base\Supports\RepositoryHelper;
 use Botble\Base\Supports\ServiceProvider;
+use Botble\Dashboard\Events\RenderingDashboardWidgets;
 use Botble\Dashboard\Supports\DashboardWidgetInstance;
 use Botble\Media\Facades\RvMedia;
+use Botble\Menu\Events\RenderingMenuOptions;
 use Botble\Menu\Facades\Menu;
 use Botble\Page\Models\Page;
 use Botble\Page\Services\PageService;
 use Botble\Slug\Models\Slug;
 use Botble\Table\Columns\Column;
 use Botble\Table\Columns\NameColumn;
+use Botble\Theme\Events\RenderingThemeOptionSettings;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 
@@ -21,45 +25,82 @@ class HookServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
-        if (defined('MENU_ACTION_SIDEBAR_OPTIONS')) {
+        $this->app['events']->listen(RenderingMenuOptions::class, function () {
             Menu::addMenuOptionModel(Page::class);
             add_action(MENU_ACTION_SIDEBAR_OPTIONS, [$this, 'registerMenuOptions'], 10);
-        }
+        });
 
-        add_filter(DASHBOARD_FILTER_ADMIN_LIST, [$this, 'addPageStatsWidget'], 15, 2);
+        $this->app['events']->listen(RenderingDashboardWidgets::class, function () {
+            add_filter(DASHBOARD_FILTER_ADMIN_LIST, [$this, 'addPageStatsWidget'], 15, 2);
+        });
+
         add_filter(BASE_FILTER_PUBLIC_SINGLE_DATA, [$this, 'handleSingleView'], 1);
 
-        if (function_exists('theme_option')) {
-            add_action(RENDERING_THEME_OPTIONS_PAGE, [$this, 'addThemeOptions'], 31);
-        }
+        $this->app['events']->listen(RenderingThemeOptionSettings::class, function () {
+            $pages = Page::query()
+                ->wherePublished();
 
-        if (defined('THEME_FRONT_HEADER')) {
-            add_action(BASE_ACTION_PUBLIC_RENDER_SINGLE, function ($screen, $page): void {
-                add_filter(THEME_FRONT_HEADER, function (string|null $html) use ($page): string|null {
-                    if (get_class($page) != Page::class) {
-                        return $html;
-                    }
+            $pages = RepositoryHelper::applyBeforeExecuteQuery($pages, new Page())
+                ->pluck('name', 'id')
+                ->all();
 
-                    $schema = [
-                        '@context' => 'https://schema.org',
-                        '@type' => 'Organization',
-                        'name' => theme_option('site_title'),
-                        'url' => $page->url,
-                        'logo' => [
-                            '@type' => 'ImageObject',
-                            'url' => RvMedia::getImageUrl(theme_option('logo')),
-                        ],
-                    ];
+            theme_option()
+                ->when($pages, function () use ($pages) {
+                    theme_option()
+                        ->setSection([
+                            'title' => 'Page',
+                            'desc' => 'Theme options for Page',
+                            'id' => 'opt-text-subsection-page',
+                            'subsection' => true,
+                            'icon' => 'ti ti-book',
+                            'fields' => [
+                                [
+                                    'id' => 'homepage_id',
+                                    'type' => 'customSelect',
+                                    'label' => trans('packages/page::pages.settings.show_on_front'),
+                                    'attributes' => [
+                                        'name' => 'homepage_id',
+                                        'list' => [0 => trans('packages/page::pages.settings.select')] + $pages,
+                                        'value' => '',
+                                        'options' => [
+                                            'class' => 'form-control',
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ]);
+                });
+        });
 
-                    return $html . Html::tag('script', json_encode($schema), ['type' => 'application/ld+json'])
-                            ->toHtml();
-                }, 2);
-            }, 2, 2);
-        }
+        $this->app['events']->listen(RouteMatched::class, function () {
+            if (defined('THEME_FRONT_HEADER')) {
+                add_action(BASE_ACTION_PUBLIC_RENDER_SINGLE, function ($screen, $page): void {
+                    add_filter(THEME_FRONT_HEADER, function (string|null $html) use ($page): string|null {
+                        if (get_class($page) != Page::class) {
+                            return $html;
+                        }
 
-        add_filter(PAGE_FILTER_FRONT_PAGE_CONTENT, fn (string|null $html) => (string) $html, 1, 2);
+                        $schema = [
+                            '@context' => 'https://schema.org',
+                            '@type' => 'Organization',
+                            'name' => theme_option('site_title'),
+                            'url' => $page->url,
+                            'logo' => [
+                                '@type' => 'ImageObject',
+                                'url' => RvMedia::getImageUrl(theme_option('logo')),
+                            ],
+                        ];
 
-        add_filter('table_name_column_data', [$this, 'appendPageName'], 2, 3);
+                        return $html . Html::tag('script', json_encode($schema), ['type' => 'application/ld+json'])
+                                ->toHtml();
+                    }, 2);
+                }, 2, 2);
+            }
+
+            add_filter(PAGE_FILTER_FRONT_PAGE_CONTENT, fn (string|null $html) => (string) $html, 1, 2);
+
+            add_filter('table_name_column_data', [$this, 'appendPageName'], 2, 3);
+        });
     }
 
     public function appendPageName(string $value, Model $model, Column $column)
@@ -69,40 +110,6 @@ class HookServiceProvider extends ServiceProvider
         }
 
         return $value;
-    }
-
-    public function addThemeOptions(): void
-    {
-        $pages = Page::query()
-            ->wherePublished();
-
-        $pages = RepositoryHelper::applyBeforeExecuteQuery($pages, new Page())
-            ->pluck('name', 'id')
-            ->all();
-
-        theme_option()
-            ->setSection([
-                'title' => 'Page',
-                'desc' => 'Theme options for Page',
-                'id' => 'opt-text-subsection-page',
-                'subsection' => true,
-                'icon' => 'fa fa-book',
-                'fields' => [
-                    [
-                        'id' => 'homepage_id',
-                        'type' => 'customSelect',
-                        'label' => trans('packages/page::pages.settings.show_on_front'),
-                        'attributes' => [
-                            'name' => 'homepage_id',
-                            'list' => [0 => trans('packages/page::pages.settings.select')] + $pages,
-                            'value' => '',
-                            'options' => [
-                                'class' => 'form-control',
-                            ],
-                        ],
-                    ],
-                ],
-            ]);
     }
 
     public function registerMenuOptions(): void
@@ -121,8 +128,8 @@ class HookServiceProvider extends ServiceProvider
             ->setPermission('pages.index')
             ->setTitle(trans('packages/page::pages.pages'))
             ->setKey('widget_total_pages')
-            ->setIcon('far fa-file-alt')
-            ->setColor('#32c5d2')
+            ->setIcon('ti ti-files')
+            ->setColor('yellow')
             ->setStatsTotal($pages)
             ->setRoute(route('pages.index'))
             ->init($widgets, $widgetSettings);

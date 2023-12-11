@@ -7,33 +7,36 @@ use Botble\Base\Events\UpdatedEvent;
 use Botble\Base\Events\UpdatingEvent;
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
-use Botble\Base\Facades\PageTitle;
-use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Base\Services\CleanDatabaseService;
 use Botble\Base\Services\ClearCacheService;
 use Botble\Base\Supports\Core;
-use Botble\Base\Supports\Language;
 use Botble\Base\Supports\MembershipAuthorization;
 use Botble\Base\Supports\SystemManagement;
 use Botble\Base\Tables\InfoTable;
 use Exception;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
-use Illuminate\Routing\Controller;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\HtmlString;
 use Illuminate\Validation\Rule;
 use Throwable;
 
-class SystemController extends Controller
+class SystemController extends BaseSystemController
 {
+    public function getIndex(): View
+    {
+        $this->pageTitle(trans('core/base::base.panel.system'));
+
+        return view('core/base::system.index');
+    }
+
     public function getInfo(Request $request, InfoTable $infoTable)
     {
-        PageTitle::setTitle(trans('core/base::system.info.title'));
+        $this->pageTitle(trans('core/base::system.info.title'));
 
-        Assets::addScriptsDirectly('vendor/core/core/base/js/system-info.js')
-            ->addStylesDirectly(['vendor/core/core/base/css/system-info.css']);
+        Assets::addScriptsDirectly('vendor/core/core/base/js/system-info.js');
 
         $composerArray = SystemManagement::getComposerArray();
         $packages = SystemManagement::getPackagesAndDependencies($composerArray['require']);
@@ -51,6 +54,12 @@ class SystemController extends Controller
 
         $matchPHPRequirement = version_compare(phpversion(), $requiredPhpVersion, '>=') > 0;
 
+        $statusIcon = function (bool $status): HtmlString {
+            return new HtmlString(Blade::render($status
+                ? '<x-core::icon name="ti ti-check" class="text-success" />'
+                : '<x-core::icon name="ti ti-x" class="text-danger" />'));
+        };
+
         return view(
             'core/base::system.info',
             compact(
@@ -59,21 +68,22 @@ class SystemController extends Controller
                 'systemEnv',
                 'serverEnv',
                 'matchPHPRequirement',
-                'requiredPhpVersion'
+                'requiredPhpVersion',
+                'statusIcon',
             )
         );
     }
 
     public function getCacheManagement()
     {
-        PageTitle::setTitle(trans('core/base::cache.cache_management'));
+        $this->pageTitle(trans('core/base::cache.cache_management'));
 
         Assets::addScriptsDirectly('vendor/core/core/base/js/cache.js');
 
         return view('core/base::system.cache');
     }
 
-    public function postClearCache(Request $request, BaseHttpResponse $response, ClearCacheService $clearCacheService)
+    public function postClearCache(Request $request, ClearCacheService $clearCacheService)
     {
         $request->validate([
             'type' => ['required', 'string', Rule::in([
@@ -113,42 +123,37 @@ class SystemController extends Controller
                 break;
         }
 
-        return $response->setMessage(trans('core/base::cache.commands.' . $type . '.success_msg'));
+        return $this
+            ->httpResponse()
+            ->setMessage(trans('core/base::cache.commands.' . $type . '.success_msg'));
     }
 
-    public function authorize(MembershipAuthorization $authorization, BaseHttpResponse $response)
+    public function postAuthorize(MembershipAuthorization $authorization)
     {
         $authorization->authorize();
 
-        return $response;
+        return $this->httpResponse();
     }
 
-    public function getLanguage(string $lang, Request $request)
-    {
-        if ($lang && array_key_exists($lang, Language::getAvailableLocales())) {
-            if (Auth::guard()->check()) {
-                cache()->forget(md5('cache-dashboard-menu-' . $request->user()->getKey()));
-            }
-            session()->put('site-locale', $lang);
-        }
-
-        return redirect()->back();
-    }
-
-    public function getMenuItemsCount(BaseHttpResponse $response)
+    public function getMenuItemsCount()
     {
         $data = apply_filters(BASE_FILTER_MENU_ITEMS_COUNT, []);
 
-        return $response->setData($data);
+        return $this
+            ->httpResponse()
+            ->setData($data);
     }
 
-    public function getCheckUpdate(BaseHttpResponse $response, Core $core)
+    public function getCheckUpdate(Core $core)
     {
+        $response = $this->httpResponse();
+
         if (! config('core.base.general.enable_system_updater')) {
             return $response;
         }
 
-        $response->setData(['has_new_version' => false]);
+        $response
+            ->setData(['has_new_version' => false]);
 
         $updateData = $core->checkUpdate();
 
@@ -156,7 +161,11 @@ class SystemController extends Controller
             $response
                 ->setData(['has_new_version' => true])
                 ->setMessage(
-                    sprintf('A new version (%s / released on %s) is available to update', $updateData->version, BaseHelper::formatDate($updateData->releasedDate))
+                    sprintf(
+                        'A new version (%s / released on %s) is available to update',
+                        $updateData->version,
+                        BaseHelper::formatDate($updateData->releasedDate)
+                    )
                 );
         }
 
@@ -174,12 +183,17 @@ class SystemController extends Controller
         Assets::addScriptsDirectly('vendor/core/core/base/js/system-update.js');
         Assets::usingVueJS();
 
+        $memoryLimit = SystemManagement::getMemoryLimitAsMegabyte();
+        $requiredMemoryLimit = 256;
+        $maximumExecutionTime = SystemManagement::getMaximumExecutionTime();
+        $requiredMaximumExecutionTime = 300;
+
         BaseHelper::maximumExecutionTimeAndMemoryLimit();
 
-        PageTitle::setTitle(trans('core/base::system.updater'));
+        $this->pageTitle(trans('core/base::system.updater'));
 
+        $activated = $core->verifyLicense();
         $isOutdated = false;
-
         $latestUpdate = $core->getLatestVersion();
 
         if ($latestUpdate) {
@@ -188,10 +202,19 @@ class SystemController extends Controller
 
         $updateData = ['message' => null, 'status' => false];
 
-        return view('core/base::system.updater', compact('latestUpdate', 'isOutdated', 'updateData'));
+        return view('core/base::system.updater', compact(
+            'memoryLimit',
+            'requiredMemoryLimit',
+            'maximumExecutionTime',
+            'requiredMaximumExecutionTime',
+            'activated',
+            'latestUpdate',
+            'isOutdated',
+            'updateData'
+        ));
     }
 
-    public function postUpdater(Core $core, Request $request, BaseHttpResponse $response): BaseHttpResponse
+    public function postUpdater(Core $core, Request $request)
     {
         $request->validate([
             'step' => ['required_without:step_name', 'integer', 'min:1', 'max:4'],
@@ -203,14 +226,15 @@ class SystemController extends Controller
         BaseHelper::maximumExecutionTimeAndMemoryLimit();
 
         if ($request->filled('step_name')) {
-            return $this->postUpdaterByStepName($core, $request, $response);
+            return $this->postUpdaterByStepName($core, $request);
         }
 
         if ($request->filled('step')) {
-            return $this->postUpdaterByStep($core, $request, $response);
+            return $this->postUpdaterByStep($core, $request);
         }
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setMessage(__('Something went wrong.'))
             ->setError()
             ->setCode(422);
@@ -218,10 +242,9 @@ class SystemController extends Controller
 
     public function getCleanup(
         Request $request,
-        BaseHttpResponse $response,
         CleanDatabaseService $cleanDatabaseService
-    ): BaseHttpResponse|View {
-        PageTitle::setTitle(trans('core/base::system.cleanup.title'));
+    ) {
+        $this->pageTitle(trans('core/base::system.cleanup.title'));
 
         Assets::addScriptsDirectly('vendor/core/core/base/js/cleanup.js');
 
@@ -238,7 +261,8 @@ class SystemController extends Controller
 
         if ($request->isMethod('POST')) {
             if (! config('core.base.general.enabled_cleanup_database', false)) {
-                return $response
+                return $this
+                    ->httpResponse()
                     ->setCode(401)
                     ->setError()
                     ->setMessage(strip_tags(trans('core/base::system.cleanup.not_enabled_yet')));
@@ -248,7 +272,9 @@ class SystemController extends Controller
 
             $cleanDatabaseService->execute($request->input('tables', []));
 
-            return $response->setMessage(trans('core/base::system.cleanup.success_message'));
+            return $this
+                ->httpResponse()
+                ->setMessage(trans('core/base::system.cleanup.success_message'));
         }
 
         return view('core/base::system.cleanup', compact('tables', 'disabledTables'));
@@ -257,7 +283,7 @@ class SystemController extends Controller
     /**
      * @deprecated Will be removed in the future, use postUpdaterByStepName instead.
      */
-    protected function postUpdaterByStep(Core $core, Request $request, BaseHttpResponse $response): BaseHttpResponse
+    protected function postUpdaterByStep(Core $core, Request $request)
     {
         $updateId = $request->input('update_id');
         $version = $request->input('version');
@@ -268,47 +294,60 @@ class SystemController extends Controller
                     event(new UpdatingEvent());
 
                     if ($core->downloadUpdate($updateId, $version)) {
-                        return $response->setMessage(__('The update files have been downloaded successfully.'));
+                        return $this
+                            ->httpResponse()
+                            ->setMessage(__('The update files have been downloaded successfully.'));
                     }
 
-                    return $response
-                        ->setMessage(__('Could not download updated file. Please check your license or your internet network.'))
+                    return $this
+                        ->httpResponse()
+                        ->setMessage(
+                            __('Could not download updated file. Please check your license or your internet network.')
+                        )
                         ->setError()
                         ->setCode(422);
 
                 case 2:
                     if ($core->updateFilesAndDatabase($version)) {
-                        return $response->setMessage(__('Your files and database have been updated successfully.'));
+                        return $this
+                            ->httpResponse()
+                            ->setMessage(__('Your files and database have been updated successfully.'));
                     }
 
-                    return $response
+                    return $this
+                        ->httpResponse()
                         ->setMessage(__('Could not update files & database.'))
                         ->setError()
                         ->setCode(422);
                 case 3:
                     $core->publishUpdateAssets();
 
-                    return $response->setMessage(__('Your asset files have been published successfully.'));
+                    return $this
+                        ->httpResponse()
+                        ->setMessage(__('Your asset files have been published successfully.'));
                 case 4:
                     $core->cleanCaches();
 
                     event(new UpdatedEvent());
 
-                    return $response->setMessage(__('Your system has been cleaned up successfully.'));
+                    return $this
+                        ->httpResponse()
+                        ->setMessage(__('Your system has been cleaned up successfully.'));
                 default:
                     throw new Exception(__('Invalid step.'));
             }
         } catch (Throwable $exception) {
             $core->logError($exception);
 
-            return $response
+            return $this
+                ->httpResponse()
                 ->setMessage($exception->getMessage())
                 ->setError()
                 ->setCode(422);
         }
     }
 
-    protected function postUpdaterByStepName(Core $core, Request $request, BaseHttpResponse $response): BaseHttpResponse
+    protected function postUpdaterByStepName(Core $core, Request $request)
     {
         $updateId = $request->input('update_id');
         $version = $request->input('version');
@@ -316,7 +355,8 @@ class SystemController extends Controller
         $step = SystemUpdaterStepEnum::tryFrom($stepName);
 
         if (! $step) {
-            return $response
+            return $this
+                ->httpResponse()
                 ->setMessage(__('Invalid step.'))
                 ->setError()
                 ->setCode(422);
@@ -334,12 +374,14 @@ class SystemController extends Controller
             };
 
             if (! $success) {
-                return $response
+                return $this
+                    ->httpResponse()
                     ->setError()
                     ->setMessage($step->failedMessage());
             }
 
-            return $response
+            return $this
+                ->httpResponse()
                 ->setData([
                     'next_step' => $step->nextStep(),
                     'next_message' => $step->nextStepMessage(),
@@ -349,7 +391,8 @@ class SystemController extends Controller
         } catch (Throwable $exception) {
             $core->logError($exception);
 
-            return $response
+            return $this
+                ->httpResponse()
                 ->setMessage($exception->getMessage())
                 ->setError()
                 ->setCode(422);

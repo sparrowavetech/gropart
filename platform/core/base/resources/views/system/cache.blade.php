@@ -1,90 +1,105 @@
 @extends(BaseHelper::getAdminMasterLayoutTemplate())
 @section('content')
-    <div class="widget meta-boxes">
-        <div class="widget-title">
-            <h4>
-                <span><i class="fas fa-sync"></i> {{ trans('core/base::cache.cache_commands') }}</span>
-            </h4>
+    <x-core::card>
+        <x-core::card.header>
+            <x-core::card.title>
+                <x-core::icon name="ti ti-refresh" />
+                {{ trans('core/base::cache.cache_commands') }}
+            </x-core::card.title>
+        </x-core::card.header>
+
+        <div class="list-group list-group-flush">
+            <div class="list-group-item">
+                <div class="row align-items-center justify-content-between">
+                    <div class="col-auto">
+                        {{ trans('core/base::cache.commands.clear_cms_cache.description') }}
+                    </div>
+                    <div class="col-auto">
+                        <x-core::button
+                            type="button"
+                            color="danger"
+                            class="btn-clear-cache"
+                            data-type="clear_cms_cache"
+                            data-url="{{ route('system.cache.clear') }}"
+                        >
+                            {{ trans('core/base::cache.commands.clear_cms_cache.title') }}
+                        </x-core::button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="list-group-item">
+                <div class="row align-items-center justify-content-between">
+                    <div class="col-auto">
+                        {{ trans('core/base::cache.commands.refresh_compiled_views.description') }}
+                    </div>
+                    <div class="col-auto">
+                        <x-core::button
+                            type="button"
+                            color="warning"
+                            class="btn-clear-cache"
+                            data-type="refresh_compiled_views"
+                            data-url="{{ route('system.cache.clear') }}"
+                        >
+                            {{ trans('core/base::cache.commands.refresh_compiled_views.title') }}
+                        </x-core::button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="list-group-item">
+                <div class="row align-items-center justify-content-between">
+                    <div class="col-auto">
+                        {{ trans('core/base::cache.commands.clear_config_cache.description') }}
+                    </div>
+                    <div class="col-auto">
+                        <x-core::button
+                            type="button"
+                            class="btn-clear-cache"
+                            data-type="clear_config_cache"
+                            data-url="{{ route('system.cache.clear') }}"
+                        >
+                            {{ trans('core/base::cache.commands.clear_config_cache.title') }}
+                        </x-core::button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="list-group-item">
+                <div class="row align-items-center justify-content-between">
+                    <div class="col-auto">
+                        {{ trans('core/base::cache.commands.clear_route_cache.description') }}
+                    </div>
+                    <div class="col-auto">
+                        <x-core::button
+                            type="button"
+                            class="btn-clear-cache"
+                            data-type="clear_route_cache"
+                            data-url="{{ route('system.cache.clear') }}"
+                        >
+                            {{ trans('core/base::cache.commands.clear_route_cache.title') }}
+                        </x-core::button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="list-group-item">
+                <div class="row align-items-center justify-content-between">
+                    <div class="col-auto">
+                        {{ trans('core/base::cache.commands.clear_log.description') }}
+                    </div>
+                    <div class="col-auto">
+                        <x-core::button
+                            type="button"
+                            class="btn-clear-cache"
+                            data-type="clear_log"
+                            data-url="{{ route('system.cache.clear') }}"
+                        >
+                            {{ trans('core/base::cache.commands.clear_log.title') }}
+                        </x-core::button>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="widget-body">
-            <table class="table table-bordered vertical-middle table-hover">
-                <colgroup>
-                    <col width="70%">
-                    <col width="30%">
-                </colgroup>
-                <tbody>
-                    <tr>
-                        <td>
-                            {{ trans('core/base::cache.commands.clear_cms_cache.description') }}
-                        </td>
-                        <td>
-                            <button
-                                class="btn btn-danger btn-block btn-clear-cache"
-                                data-type="clear_cms_cache"
-                                data-url="{{ route('system.cache.clear') }}"
-                            >
-                                {{ trans('core/base::cache.commands.clear_cms_cache.title') }}
-                            </button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            {{ trans('core/base::cache.commands.refresh_compiled_views.description') }}
-                        </td>
-                        <td>
-                            <button
-                                class="btn btn-warning btn-block btn-clear-cache"
-                                data-type="refresh_compiled_views"
-                                data-url="{{ route('system.cache.clear') }}"
-                            >
-                                {{ trans('core/base::cache.commands.refresh_compiled_views.title') }}
-                            </button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            {{ trans('core/base::cache.commands.clear_config_cache.description') }}
-                        </td>
-                        <td>
-                            <button
-                                class="btn green-meadow btn-block btn-clear-cache"
-                                data-type="clear_config_cache"
-                                data-url="{{ route('system.cache.clear') }}"
-                            >
-                                {{ trans('core/base::cache.commands.clear_config_cache.title') }}
-                            </button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            {{ trans('core/base::cache.commands.clear_route_cache.description') }}
-                        </td>
-                        <td>
-                            <button
-                                class="btn green-meadow btn-block btn-clear-cache"
-                                data-type="clear_route_cache"
-                                data-url="{{ route('system.cache.clear') }}"
-                            >
-                                {{ trans('core/base::cache.commands.clear_route_cache.title') }}
-                            </button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            {{ trans('core/base::cache.commands.clear_log.description') }}
-                        </td>
-                        <td>
-                            <button
-                                class="btn green-meadow btn-block btn-clear-cache"
-                                data-type="clear_log"
-                                data-url="{{ route('system.cache.clear') }}"
-                            >
-                                {{ trans('core/base::cache.commands.clear_log.title') }}
-                            </button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-@stop
+    </x-core::card>
+@endsection

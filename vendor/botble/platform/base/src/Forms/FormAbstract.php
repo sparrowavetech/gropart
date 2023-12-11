@@ -2,13 +2,16 @@
 
 namespace Botble\Base\Forms;
 
+use Botble\Base\Contracts\BaseModel;
+use Botble\Base\Contracts\Builders\Extensible as ExtensibleContract;
 use Botble\Base\Events\BeforeCreateContentEvent;
 use Botble\Base\Events\BeforeEditContentEvent;
+use Botble\Base\Events\BeforeUpdateContentEvent;
+use Botble\Base\Events\CreatedContentEvent;
+use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Base\Facades\Assets;
 use Botble\Base\Forms\Fields\AutocompleteField;
 use Botble\Base\Forms\Fields\ColorField;
-use Botble\Base\Forms\Fields\CustomRadioField;
-use Botble\Base\Forms\Fields\CustomSelectField;
 use Botble\Base\Forms\Fields\DatePickerField;
 use Botble\Base\Forms\Fields\DatetimeField;
 use Botble\Base\Forms\Fields\EditorField;
@@ -16,19 +19,36 @@ use Botble\Base\Forms\Fields\HtmlField;
 use Botble\Base\Forms\Fields\MediaFileField;
 use Botble\Base\Forms\Fields\MediaImageField;
 use Botble\Base\Forms\Fields\MediaImagesField;
+use Botble\Base\Forms\Fields\OnOffCheckboxField;
 use Botble\Base\Forms\Fields\OnOffField;
+use Botble\Base\Forms\Fields\RadioField;
 use Botble\Base\Forms\Fields\RepeaterField;
+use Botble\Base\Forms\Fields\SelectField;
+use Botble\Base\Forms\Fields\TagField;
 use Botble\Base\Forms\Fields\TimeField;
+use Botble\Base\Models\BaseModel as BaseModelInstance;
+use Botble\Base\Supports\Builders\Extensible;
+use Botble\Base\Supports\Builders\RenderingExtensible;
+use Botble\Base\Traits\Forms\HasColumns;
+use Botble\Base\Traits\Forms\HasMetadata;
 use Botble\JsValidation\Facades\JsValidator;
 use Botble\JsValidation\Javascript\JavascriptValidator;
+use Closure;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Conditionable;
+use Kris\LaravelFormBuilder\Fields\FormField;
 
-abstract class FormAbstract extends Form
+abstract class FormAbstract extends Form implements ExtensibleContract
 {
     use Conditionable;
+    use Extensible;
+    use HasColumns;
+    use HasMetadata;
+    use RenderingExtensible;
 
     protected array $options = [];
 
@@ -46,14 +66,31 @@ abstract class FormAbstract extends Form
 
     protected string $wrapperClass = 'form-body';
 
-    protected $template = 'core/base::forms.form';
+    protected bool $onlyValidatedData = false;
 
     public function __construct()
     {
         $this->setMethod('POST');
-        $this->setFormOption('template', $this->template);
-        $this->setFormOption('id', strtolower(Str::slug(Str::snake(get_class($this)))));
+        $this->template('core/base::forms.form');
+        $this->setFormOption('id', strtolower(Str::slug(Str::snake(self::class))));
         $this->setFormOption('class', 'js-base-form');
+    }
+
+    public function setup(): void
+    {
+    }
+
+    public function buildForm()
+    {
+        $this->withCustomFields();
+
+        $this->setup();
+
+        if (! $this->model) {
+            $this->model = new BaseModelInstance();
+        }
+
+        $this->setupExtended();
     }
 
     public function getOptions(): array
@@ -61,7 +98,7 @@ abstract class FormAbstract extends Form
         return $this->options;
     }
 
-    public function setOptions(array $options): self
+    public function setOptions(array $options): static
     {
         $this->options = $options;
 
@@ -73,7 +110,7 @@ abstract class FormAbstract extends Form
         return $this->title;
     }
 
-    public function setTitle(string $title): self
+    public function setTitle(string $title): static
     {
         $this->title = $title;
 
@@ -103,6 +140,10 @@ abstract class FormAbstract extends Form
 
         $metaBox = $this->metaBoxes[$name];
 
+        if ($metaBox['content'] instanceof Closure) {
+            $metaBox['content'] = call_user_func($metaBox['content'], $this->getModel());
+        }
+
         $view = view('core/base::forms.partials.meta-box', compact('metaBox'));
 
         if (Arr::get($metaBox, 'render') === false) {
@@ -112,7 +153,7 @@ abstract class FormAbstract extends Form
         return $view->render();
     }
 
-    public function addMetaBoxes(array|string $boxes): self
+    public function addMetaBoxes(array|string $boxes): static
     {
         if (! is_array($boxes)) {
             $boxes = [$boxes];
@@ -123,7 +164,7 @@ abstract class FormAbstract extends Form
         return $this;
     }
 
-    public function removeMetaBox(string $name): self
+    public function removeMetaBox(string $name): static
     {
         Arr::forget($this->metaBoxes, $name);
 
@@ -139,14 +180,14 @@ abstract class FormAbstract extends Form
         return $this->actionButtons;
     }
 
-    public function setActionButtons(string $actionButtons): self
+    public function setActionButtons(string $actionButtons): static
     {
         $this->actionButtons = $actionButtons;
 
         return $this;
     }
 
-    public function removeActionButtons(): self
+    public function removeActionButtons(): static
     {
         $this->actionButtons = '';
 
@@ -158,7 +199,7 @@ abstract class FormAbstract extends Form
         return $this->breakFieldPoint;
     }
 
-    public function setBreakFieldPoint(string $breakFieldPoint): self
+    public function setBreakFieldPoint(string $breakFieldPoint): static
     {
         $this->breakFieldPoint = $breakFieldPoint;
 
@@ -170,7 +211,7 @@ abstract class FormAbstract extends Form
         return $this->useInlineJs;
     }
 
-    public function setUseInlineJs(bool $useInlineJs): self
+    public function setUseInlineJs(bool $useInlineJs): static
     {
         $this->useInlineJs = $useInlineJs;
 
@@ -182,20 +223,21 @@ abstract class FormAbstract extends Form
         return $this->wrapperClass;
     }
 
-    public function setWrapperClass(string $wrapperClass): self
+    public function setWrapperClass(string $wrapperClass): static
     {
         $this->wrapperClass = $wrapperClass;
 
         return $this;
     }
 
-    public function withCustomFields(): self
+    public function withCustomFields(): static
     {
         $customFields = [
-            'customSelect' => CustomSelectField::class,
+            'customSelect' => SelectField::class,
             'editor' => EditorField::class,
             'onOff' => OnOffField::class,
-            'customRadio' => CustomRadioField::class,
+            'onOffCheckbox' => OnOffCheckboxField::class,
+            'customRadio' => RadioField::class,
             'mediaImage' => MediaImageField::class,
             'mediaImages' => MediaImagesField::class,
             'mediaFile' => MediaFileField::class,
@@ -206,35 +248,40 @@ abstract class FormAbstract extends Form
             'autocomplete' => AutocompleteField::class,
             'html' => HtmlField::class,
             'repeater' => RepeaterField::class,
+            'tags' => TagField::class,
         ];
 
         foreach ($customFields as $key => $field) {
             $this->addCustomField($key, $field);
         }
 
-        return apply_filters('form_custom_fields', $this, $this->formHelper);
+        return apply_filters('form_custom_fields', $this, $this->getFormHelper());
     }
 
-    public function addCustomField($name, $class): self
+    public function addCustomField($name, $class): static
     {
+        if ($this->rebuilding && $this->formHelper->hasCustomField($name)) {
+            return $this;
+        }
+
         if (! $this->formHelper->hasCustomField($name)) {
-            parent::addCustomField($name, $class);
+            $this->formHelper->addCustomField($name, $class);
         }
 
         return $this;
     }
 
-    public function hasTabs(): self
+    public function hasTabs(): static
     {
-        $this->setFormOption('template', 'core/base::forms.form-tabs');
+        $this->template('core/base::forms.form-tabs');
 
         return $this;
     }
 
-    public function hasMainFields(): int
+    public function hasMainFields(): bool
     {
         if (! $this->breakFieldPoint) {
-            return count($this->fields);
+            return ! empty($this->fields);
         }
 
         $mainFields = [];
@@ -250,12 +297,27 @@ abstract class FormAbstract extends Form
             $mainFields[] = $field;
         }
 
-        return count($mainFields);
+        return ! empty($mainFields);
     }
 
-    public function disableFields(): self
+    public function disableFields(): static
     {
         parent::disableFields();
+
+        return $this;
+    }
+
+    protected function addField(FormField $field, $modify = false): static
+    {
+        if (! $modify && ! $this->rebuilding) {
+            $this->preventDuplicate($field->getRealName());
+        }
+
+        if ($field->getType() == 'file') {
+            $this->hasFiles();
+        }
+
+        $this->fields[$field->getRealName()] = $field;
 
         return $this;
     }
@@ -269,15 +331,30 @@ abstract class FormAbstract extends Form
 
         $model = $this->getModel();
 
-        apply_filters(BASE_FILTER_BEFORE_RENDER_FORM, $this, $model);
+        $this->dispatchBeforeRendering();
 
-        if ($model->getKey()) {
-            event(new BeforeEditContentEvent($this->request, $model));
-        } else {
-            event(new BeforeCreateContentEvent($this->request, $model));
+        if ($this->getModel() instanceof BaseModel) {
+            apply_filters(BASE_FILTER_BEFORE_RENDER_FORM, $this, $this->getModel());
         }
 
-        return parent::renderForm($options, $showStart, $showFields, $showEnd);
+        $this->setupMetadataFields();
+
+        if ($model instanceof BaseModel) {
+            if ($model->getKey()) {
+                event(new BeforeEditContentEvent($this->request, $model));
+            } else {
+                event(new BeforeCreateContentEvent($this->request, $model));
+            }
+        }
+
+        $form = tap(
+            parent::renderForm($options, $showStart, $showFields, $showEnd),
+            fn ($rendered) => $this->dispatchAfterRendering($rendered)
+        );
+
+        apply_filters(BASE_FILTER_AFTER_RENDER_FORM, $this, $this->getModel());
+
+        return $form;
     }
 
     public function renderValidatorJs(): string|JavascriptValidator
@@ -297,23 +374,14 @@ abstract class FormAbstract extends Form
         return $this->validatorClass;
     }
 
-    public function setValidatorClass(string $validatorClass): self
+    public function setValidatorClass(string $validatorClass): static
     {
         $this->validatorClass = $validatorClass;
 
         return $this;
     }
 
-    public function setModel($model): self
-    {
-        $this->model = $model;
-
-        $this->rebuildForm();
-
-        return $this;
-    }
-
-    protected function setupModel($model): self
+    public function setupModel($model): static
     {
         if (! $this->model) {
             $this->model = $model;
@@ -323,7 +391,18 @@ abstract class FormAbstract extends Form
         return $this;
     }
 
-    public function setFormOptions(array $formOptions): self
+    public function model($model): static
+    {
+        if (is_string($model)) {
+            $model = new $model();
+        }
+
+        $this->setupModel($model);
+
+        return $this;
+    }
+
+    public function setFormOptions(array $formOptions): static
     {
         parent::setFormOptions($formOptions);
 
@@ -334,7 +413,7 @@ abstract class FormAbstract extends Form
         return $this;
     }
 
-    public function add($name, $type = 'text', array $options = [], $modify = false): self
+    public function add($name, $type = 'text', array $options = [], $modify = false): static
     {
         $options['attr']['v-pre'] = 1;
 
@@ -343,30 +422,187 @@ abstract class FormAbstract extends Form
         return $this;
     }
 
-    public function tap(callable $callback = null): self
+    public function tap(callable $callback = null): static
     {
         $callback($this);
 
         return $this;
     }
 
-    public function template(string $template): self
+    public function template(string $template): static
     {
         $this->setFormOption('template', $template);
 
         return $this;
     }
 
-    public function contentOnly(): self
+    public function contentOnly(): static
     {
-        $this->setFormOption('template', 'core/base::forms.form-content-only');
+        $this->template('core/base::forms.form-content-only');
 
         return $this;
     }
 
-    public function setUrl($url): self
+    public function setUrl($url): static
     {
         $this->setFormOption('url', $url);
+
+        return $this;
+    }
+
+    public function onlyValidatedData(bool $onlyValidatedData = true): static
+    {
+        $this->onlyValidatedData = $onlyValidatedData;
+
+        return $this;
+    }
+
+    public function getRequestData(): array
+    {
+        $request = $this->request;
+
+        if ($this->onlyValidatedData && $request instanceof FormRequest) {
+            return $request->validated();
+        }
+
+        return $request->input();
+    }
+
+    public static function beforeSaving(callable|Closure $callback, int $priority = 100): void
+    {
+        if (static::class === FormAbstract::class) {
+            add_filter(BASE_FILTER_BEFORE_SAVE_FORM, $callback, $priority, 2);
+
+            return;
+        }
+
+        add_filter(static::getFilterPrefix() . '_before_saving', $callback, $priority, 2);
+    }
+
+    public static function afterSaving(callable|Closure $callback, int $priority = 100): void
+    {
+        if (static::class === FormAbstract::class) {
+            add_filter(BASE_FILTER_AFTER_SAVE_FORM, $callback, $priority, 2);
+
+            return;
+        }
+
+        add_filter(static::getFilterPrefix() . '_after_saving', $callback, $priority, 2);
+    }
+
+    public function save(): void
+    {
+        $this->saving(function (FormAbstract $form) {
+            $form
+                ->getModel()
+                ->fill($form->getRequestData())
+                ->save();
+        });
+    }
+
+    public function saveOnlyValidatedData(): void
+    {
+        $this->onlyValidatedData()->save();
+    }
+
+    public function saving(callable|Closure $callback): void
+    {
+        $model = $this->getModel();
+        $request = $this->request;
+
+        if ($model instanceof BaseModel) {
+            if ($model->getKey()) {
+                BeforeUpdateContentEvent::dispatch($request, $model);
+            } else {
+                BeforeCreateContentEvent::dispatch($request, $model);
+            }
+        }
+
+        $this->dispatchBeforeSaving();
+
+        call_user_func($callback, $this);
+
+        $this->saveMetadataFields();
+
+        $this->dispatchAfterSaving();
+
+        if ($model instanceof Model) {
+            if ($model->wasRecentlyCreated) {
+                CreatedContentEvent::dispatch('form', $request, $model);
+            } else {
+                UpdatedContentEvent::dispatch('form', $request, $model);
+            }
+        }
+    }
+
+    protected function dispatchBeforeSaving(): void
+    {
+        apply_filters(BASE_FILTER_BEFORE_SAVE_FORM, $this);
+        apply_filters(static::getFilterPrefix() . '_before_saving', $this);
+    }
+
+    protected function dispatchAfterSaving(): void
+    {
+        apply_filters(BASE_FILTER_AFTER_SAVE_FORM, $this);
+        apply_filters(static::getFilterPrefix() . '_after_saving', $this);
+    }
+
+    public static function getFilterPrefix(): string
+    {
+        return sprintf(
+            'base_form_%s',
+            Str::of(static::class)->snake()->lower()->replace('\\', '')->toString()
+        );
+    }
+
+    public static function getGlobalClassName(): string
+    {
+        return FormAbstract::class;
+    }
+
+    public static function hasGlobalExtend(): bool
+    {
+        return true;
+    }
+
+    public static function globalExtendFilterName(): string
+    {
+        return BASE_FILTER_EXTENDED_FORM;
+    }
+
+    public static function hasGlobalRendering(): bool
+    {
+        return true;
+    }
+
+    public static function globalBeforeRenderingFilterName(): string
+    {
+        return BASE_FILTER_BEFORE_RENDER_FORM;
+    }
+
+    public static function globalAfterRenderingFilterName(): string
+    {
+        return BASE_FILTER_AFTER_RENDER_FORM;
+    }
+
+    public static function create(array $options = [], array $data = []): static
+    {
+        return app(FormBuilder::class)->create(static::class, $options, $data);
+    }
+
+    public static function createFromArray(array $object, array $options = [], array $data = []): static
+    {
+        return static::create([...$options, 'model' => $object], $data);
+    }
+
+    public static function createFromModel(BaseModel|Model $model, array $options = [], array $data = []): static
+    {
+        return static::create([...$options, 'model' => $model], $data);
+    }
+
+    protected function hasFiles(): static
+    {
+        $this->setFormOption('files', true);
 
         return $this;
     }

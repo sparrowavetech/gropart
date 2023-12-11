@@ -2,7 +2,7 @@
 
 namespace Botble\Base\Forms\Fields;
 
-class AutocompleteField extends SelectType
+class AutocompleteField extends SelectField
 {
     protected function getTemplate(): string
     {

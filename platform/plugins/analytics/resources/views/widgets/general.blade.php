@@ -1,83 +1,125 @@
-<div class="col-lg-7 mb-2">
-    @if ($stats->isNotEmpty())
+<div class="row mb-2">
+    <div class="col-lg-7">
         <div
             class="chart"
             id="stats-chart"
         ></div>
-    @else
-        <div class="h-100 d-flex align-items-center justify-content-center bg-light">
-            <div>{{ trans('core/base::tables.no_data') }}</div>
-        </div>
-    @endif
+    </div>
+    <div class="col-lg-5">
+        <div
+            id="world-map"
+            style="height: 20rem;"
+        ></div>
+    </div>
 </div>
-<div class="col-lg-5 mb-2">
-    <div id="world-map"></div>
-</div>
-<div class="clearfix"></div>
 
-<div class="col-lg-3 col-md-4 col-sm-6">
-    <div class="info-box">
-        <div class="info-box-icon bg-yellow-casablanca font-white">
-            <i class="fa fa-eye"></i>
+<div class="col-12 mb-5">
+    <div class="row row-cards px-2">
+        <div class="col-sm-6 col-lg-3">
+            <x-core::card class="analytic-card">
+                <x-core::card.body class="p-3">
+                    <div class="row align-items-center">
+                        <div class="col-auto">
+                            <x-core::icon
+                                class="text-white bg-pink rounded p-1"
+                                name="ti ti-eye"
+                                size="md"
+                            />
+                        </div>
+                        <div class="col mt-0">
+                            <p class="text-secondary mb-0 fs-4">
+                                {{ trans('plugins/analytics::analytics.sessions') }}
+                            </p>
+                            <h3 class="mb-n1 fs-1">
+                                {{ number_format($sessions) }}
+                            </h3>
+                        </div>
+                    </div>
+                </x-core::card.body>
+            </x-core::card>
         </div>
-        <div class="info-box-content">
-            <span class="info-box-text">{{ trans('plugins/analytics::analytics.sessions') }}</span>
-            <span
-                class="info-box-number"
-                id="sessions_total"
-            >{{ number_format($total['ga:sessions']) }}</span>
+
+        <div class="col-sm-6 col-lg-3">
+            <x-core::card class="analytic-card">
+                <x-core::card.body class="p-3">
+                    <div class="row align-items-center">
+                        <div class="col-auto">
+                            <x-core::icon
+                                class="text-white bg-lime rounded p-1"
+                                name="ti ti-users"
+                                size="md"
+                            />
+                        </div>
+                        <div class="col mt-0">
+                            <p class="text-secondary mb-0 fs-4">
+                                {{ trans('plugins/analytics::analytics.visitors') }}
+                            </p>
+                            <h3 class="mb-n1 fs-1">
+                                {{ number_format($totalUsers) }}
+                            </h3>
+                        </div>
+                    </div>
+                </x-core::card.body>
+            </x-core::card>
+        </div>
+
+        <div class="col-sm-6 col-lg-3">
+            <x-core::card class="analytic-card">
+                <x-core::card.body class="p-3">
+                    <div class="row align-items-center">
+                        <div class="col-auto">
+                            <x-core::icon
+                                class="text-white bg-azure rounded p-1"
+                                name="ti ti-traffic-cone"
+                                size="md"
+                            />
+                        </div>
+                        <div class="col mt-0">
+                            <p class="text-secondary mb-0 fs-4">
+                                {{ trans('plugins/analytics::analytics.pageviews') }}
+                            </p>
+                            <h3 class="mb-n1 fs-1">
+                                {{ number_format($screenPageViews) }}
+                            </h3>
+                        </div>
+                    </div>
+                </x-core::card.body>
+            </x-core::card>
+        </div>
+
+        <div class="col-sm-6 col-lg-3">
+            <x-core::card class="analytic-card">
+                <x-core::card.body class="p-3">
+                    <div class="row align-items-center">
+                        <div class="col-auto">
+                            <x-core::icon
+                                class="text-white bg-yellow rounded p-1"
+                                name="ti ti-bolt"
+                                size="md"
+                            />
+                        </div>
+                        <div class="col mt-0">
+                            <p class="text-secondary mb-0 fs-4">
+                                {{ trans('plugins/analytics::analytics.bounce_rate') }}
+                            </p>
+                            <h3 class="mb-n1 fs-1">
+                                {{ round($bounceRate, 2) * 100 }}%
+                            </h3>
+                        </div>
+                    </div>
+                </x-core::card.body>
+            </x-core::card>
         </div>
     </div>
 </div>
 
-<div class="col-lg-3 col-md-4 col-sm-6">
-    <div class="info-box">
-        <div class="info-box-icon bg-blue">
-            <i class="fa fa-users"></i>
-        </div>
-        <div class="info-box-content">
-            <span class="info-box-text">{{ trans('plugins/analytics::analytics.visitors') }}</span>
-            <span
-                class="info-box-number"
-                id="users_total"
-            >{{ number_format($total['ga:users']) }}</span>
-        </div>
-    </div>
-</div>
-
-<div class="col-lg-3 col-md-4 col-sm-6">
-    <div class="info-box border-green-haze">
-        <div class="info-box-icon bg-green-haze font-white">
-            <i class="icon icon-traffic-cone"></i>
-        </div>
-        <div class="info-box-content">
-            <span class="info-box-text">{{ trans('plugins/analytics::analytics.pageviews') }}</span>
-            <span
-                class="info-box-number"
-                id="page_views_total"
-            >{{ number_format($total['ga:pageviews']) }}</span>
-        </div>
-    </div>
-</div>
-
-<div class="col-lg-3 col-md-4 col-sm-6">
-    <div class="info-box">
-        <div class="info-box-icon bg-yellow">
-            <i class="icon-energy"></i>
-        </div>
-        <div class="info-box-content">
-            <span class="info-box-text">{{ trans('plugins/analytics::analytics.bounce_rate') }}</span>
-            <span
-                class="info-box-number"
-                id="bounce_rate_total"
-            >{{ round($total['ga:bounceRate'], 2) }}%</span>
-        </div>
-    </div>
-</div>
-
-<div class="clearfix"></div>
-
-<div data-stats='{{ json_encode($stats, JSON_HEX_APOS) }}'></div>
-<div data-country-stats='{{ json_encode($countryStats, JSON_HEX_APOS) }}'></div>
-<div data-lang-pageviews='{{ trans('plugins/analytics::analytics.pageviews') }}'></div>
-<div data-lang-visits='{{ trans('plugins/analytics::analytics.visitors') }}'></div>
+<script>
+    window.analyticsStats = {{ Js::from([
+        'stats' => $chartStats,
+        'countryStats' => $countryStats,
+        'translations' => [
+            'pageViews' => trans('plugins/analytics::analytics.pageviews'),
+            'visits' => trans('plugins/analytics::analytics.visitors'),
+        ],
+    ]) }}
+</script>

@@ -2,8 +2,11 @@
 
 namespace Botble\SimpleSlider\Providers;
 
+use Botble\Base\Forms\FieldOptions\SelectFieldOption;
+use Botble\Base\Forms\Fields\SelectField;
 use Botble\Base\Supports\ServiceProvider;
 use Botble\Shortcode\Compilers\Shortcode;
+use Botble\Shortcode\Forms\ShortcodeForm;
 use Botble\SimpleSlider\Models\SimpleSlider;
 use Botble\Theme\Facades\Theme;
 use Illuminate\Contracts\Foundation\Application;
@@ -22,27 +25,26 @@ class HookServiceProvider extends ServiceProvider
                 [$this, 'render']
             );
 
-            shortcode()->setAdminConfig('simple-slider', function ($attributes) {
-                $sliders = SimpleSlider::query()
-                    ->wherePublished()
-                    ->pluck('name', 'key')
-                    ->all();
+            shortcode()->setPreviewImage(
+                'simple-slider',
+                asset('vendor/core/plugins/simple-slider/images/ui-blocks/simple-slider.png')
+            );
 
-                return view('plugins/simple-slider::partials.simple-slider-admin-config', compact('sliders', 'attributes'))
-                    ->render();
+            shortcode()->setAdminConfig('simple-slider', function (array $attributes) {
+                return ShortcodeForm::createFromArray($attributes)
+                    ->add(
+                        'key',
+                        SelectField::class,
+                        SelectFieldOption::make()
+                            ->label(trans('plugins/simple-slider::simple-slider.select_slider'))
+                            ->choices(SimpleSlider::query()
+                                ->wherePublished()
+                                ->pluck('name', 'key')
+                                ->all())
+                            ->toArray()
+                    );
             });
         }
-
-        add_filter(BASE_FILTER_AFTER_SETTING_CONTENT, [$this, 'addSettings'], 301);
-
-        add_filter('cms_settings_validation_rules', [$this, 'addSettingRules'], 301);
-    }
-
-    public function addSettingRules(array $rules): array
-    {
-        return array_merge($rules, [
-            'simple_slider_using_assets' => 'nullable|in:0,1',
-        ]);
     }
 
     public function render(Shortcode $shortcode): View|Factory|Application|null
@@ -63,9 +65,21 @@ class HookServiceProvider extends ServiceProvider
             Theme::asset()
                 ->container('footer')
                 ->usePath(false)
-                ->add('simple-slider-owl-carousel-css', $dist . '/libraries/owl-carousel/owl.carousel.css', [], [], $version)
+                ->add(
+                    'simple-slider-owl-carousel-css',
+                    $dist . '/libraries/owl-carousel/owl.carousel.css',
+                    [],
+                    [],
+                    $version
+                )
                 ->add('simple-slider-css', $dist . '/css/simple-slider.css', [], [], $version)
-                ->add('simple-slider-owl-carousel-js', $dist . '/libraries/owl-carousel/owl.carousel.js', ['jquery'], [], $version)
+                ->add(
+                    'simple-slider-owl-carousel-js',
+                    $dist . '/libraries/owl-carousel/owl.carousel.js',
+                    ['jquery'],
+                    [],
+                    $version
+                )
                 ->add('simple-slider-js', $dist . '/js/simple-slider.js', ['jquery'], [], $version);
         }
 
@@ -74,10 +88,5 @@ class HookServiceProvider extends ServiceProvider
             'shortcode' => $shortcode,
             'slider' => $slider,
         ]);
-    }
-
-    public function addSettings(string|null $data = null): string
-    {
-        return $data . view('plugins/simple-slider::setting')->render();
     }
 }

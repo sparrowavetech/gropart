@@ -55,6 +55,7 @@ class MediaFileRepository extends RepositoriesAbstract implements MediaFileInter
                 DB::raw('0 as is_folder'),
                 DB::raw('NULL as slug'),
                 DB::raw('NULL as parent_id'),
+                DB::raw('NULL as color'),
             ],
             'condition' => [],
             'recent_items' => null,
@@ -86,6 +87,7 @@ class MediaFileRepository extends RepositoriesAbstract implements MediaFileInter
                     DB::raw('1 as is_folder'),
                     'media_folders.slug as slug',
                     'media_folders.parent_id as parent_id',
+                    'media_folders.color as color',
                 ],
             ], $folderParams);
 

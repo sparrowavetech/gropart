@@ -1,23 +1,15 @@
-<!DOCTYPE html>
-<html>
+@php
+    Assets::removeStyles(['fontawesome', 'select2', 'toastr', 'datepicker', 'spectrum'])->removeScripts(['spectrum', 'jquery-waypoints', 'stickytableheaders', 'toastr', 'core', 'cookie', 'select2', 'datepicker', 'modernizr', 'ie8-fix', 'excanvas']);
+@endphp
 
-<head>
-    <meta charset="UTF-8" />
-    <meta
-        name="robots"
-        content="noindex,nofollow,noarchive"
-    />
-    <title>@yield('title')</title>
-    <link
-        href="{{ asset('vendor/core/core/base/css/error-pages.css') }}"
-        rel="stylesheet"
-    >
-</head>
+<x-core::layouts.base body-class="border-top-wide border-primary d-flex flex-column">
+    <x-slot:title>
+        @yield('title')
+    </x-slot:title>
 
-<body>
-    <div class="container">
-        @yield('message')
+    <div class="page page-center">
+        <div class="container py-4 container-tight">
+            @yield('content')
+        </div>
     </div>
-</body>
-
-</html>
+</x-core::layouts.base>

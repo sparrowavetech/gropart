@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\VerifyCsrfToken;
+use Illuminate\Support\Facades\Route;
 
 Route::group(['namespace' => 'Botble\Mollie\Http\Controllers', 'middleware' => ['web', 'core']], function () {
     Route::post('mollie/payment/callback', [

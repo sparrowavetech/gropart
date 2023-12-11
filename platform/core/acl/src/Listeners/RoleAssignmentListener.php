@@ -14,7 +14,5 @@ class RoleAssignmentListener
 
         $event->user->permissions = $permissions;
         $event->user->save();
-
-        cache()->forget(md5('cache-dashboard-menu-' . $event->user->getKey()));
     }
 }

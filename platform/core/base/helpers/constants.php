@@ -23,7 +23,7 @@ if (! defined('BASE_ACTION_FORM_ACTIONS_TITLE')) {
 }
 
 if (! defined('BASE_LANGUAGE_FLAG_PATH')) {
-    define('BASE_LANGUAGE_FLAG_PATH', '/vendor/core/core/base/images/flags/');
+    define('BASE_LANGUAGE_FLAG_PATH', '/vendor/core/core/base/img/flags/');
 }
 
 if (! defined('BASE_FILTER_GROUP_PUBLIC_ROUTE')) {
@@ -118,8 +118,24 @@ if (! defined('BASE_FILTER_AFTER_LOGIN_OR_REGISTER_FORM')) {
     define('BASE_FILTER_AFTER_LOGIN_OR_REGISTER_FORM', 'base_filter_after_login_or_register_form');
 }
 
+if (! defined('BASE_FILTER_EXTENDED_FORM')) {
+    define('BASE_FILTER_EXTENDED_FORM', 'base_filter_extended_form');
+}
+
 if (! defined('BASE_FILTER_BEFORE_RENDER_FORM')) {
     define('BASE_FILTER_BEFORE_RENDER_FORM', 'base_filter_before_render_form');
+}
+
+if (! defined('BASE_FILTER_AFTER_RENDER_FORM')) {
+    define('BASE_FILTER_AFTER_RENDER_FORM', 'base_filter_after_render_form');
+}
+
+if (! defined('BASE_FILTER_BEFORE_SAVE_FORM')) {
+    define('BASE_FILTER_BEFORE_SAVE_FORM', 'base_filter_before_save_form');
+}
+
+if (! defined('BASE_FILTER_AFTER_SAVE_FORM')) {
+    define('BASE_FILTER_AFTER_SAVE_FORM', 'base_filter_after_save_form');
 }
 
 if (! defined('BASE_FILTER_AFTER_FORM_CREATED')) {
@@ -128,6 +144,14 @@ if (! defined('BASE_FILTER_AFTER_FORM_CREATED')) {
 
 if (! defined('BASE_FILTER_FORM_EDITOR_BUTTONS')) {
     define('BASE_FILTER_FORM_EDITOR_BUTTONS', 'base_filter_form_editor_buttons');
+}
+
+if (! defined('BASE_FILTER_FORM_EDITOR_BUTTONS_HEADER')) {
+    define('BASE_FILTER_FORM_EDITOR_BUTTONS_HEADER', 'base_filter_form_editor_buttons_header');
+}
+
+if (! defined('BASE_FILTER_FORM_EDITOR_BUTTONS_FOOTER')) {
+    define('BASE_FILTER_FORM_EDITOR_BUTTONS_FOOTER', 'base_filter_form_editor_buttons_footer');
 }
 
 if (! defined('BASE_ACTION_INIT')) {
@@ -160,6 +184,10 @@ if (! defined('BASE_FILTER_ADMIN_LANGUAGE_DIRECTION')) {
 
 if (! defined('BASE_FILTER_FOOTER_LAYOUT_TEMPLATE')) {
     define('BASE_FILTER_FOOTER_LAYOUT_TEMPLATE', 'base_filter_footer_layout_template');
+}
+
+if (! defined('BASE_FILTER_HEAD_LAYOUT_TEMPLATE')) {
+    define('BASE_FILTER_HEAD_LAYOUT_TEMPLATE', 'base_filter_head_layout_template');
 }
 
 if (! defined('BASE_FILTER_HEADER_LAYOUT_TEMPLATE')) {

@@ -1,9 +1,4 @@
-<a
-    class="add-faq-schema-items @if ($hasValue) hidden @endif"
-    href="#"
->{{ trans('plugins/faq::faq.add_item') }}</a>
-
-<div class="faq-schema-items @if (!$hasValue) hidden @endif">
+<div class="faq-schema-items @if (!$hasValue) d-none @endif">
     {!! Form::repeater('faq_schema_config', $value, [
         [
             'type' => 'textarea',
@@ -35,3 +30,5 @@
         ],
     ]) !!}
 </div>
+
+<a class="add-faq-schema-items @if ($hasValue) d-none @endif" href="#">{{ trans('plugins/faq::faq.add_item') }}</a>

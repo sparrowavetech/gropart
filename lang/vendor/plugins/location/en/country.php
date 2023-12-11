@@ -2,6 +2,7 @@
 
 return [
     'name' => 'Countries',
+    'description' => 'Manage location countries',
     'create' => 'New country',
     'nationality' => 'Nationality',
     'code' => 'Country ISO code',

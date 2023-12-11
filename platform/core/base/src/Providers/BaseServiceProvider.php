@@ -3,28 +3,40 @@
 namespace Botble\Base\Providers;
 
 use App\Http\Middleware\VerifyCsrfToken;
+use Botble\Base\Contracts\GlobalSearchableManager as GlobalSearchableManagerContract;
+use Botble\Base\Contracts\PanelSections\Manager;
+use Botble\Base\Events\PanelSectionsRendering;
 use Botble\Base\Exceptions\Handler;
+use Botble\Base\Facades\AdminAppearance;
+use Botble\Base\Facades\AdminHelper;
 use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\Breadcrumb as BreadcrumbFacade;
 use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Facades\MetaBox;
 use Botble\Base\Facades\PageTitle;
+use Botble\Base\Facades\PanelSectionManager;
+use Botble\Base\Facades\PanelSectionManager as PanelSectionManagerFacade;
 use Botble\Base\Forms\Form;
 use Botble\Base\Forms\FormBuilder;
 use Botble\Base\Forms\FormHelper;
+use Botble\Base\GlobalSearch\GlobalSearchableManager;
 use Botble\Base\Hooks\EmailSettingHooks;
 use Botble\Base\Http\Middleware\CoreMiddleware;
 use Botble\Base\Http\Middleware\DisableInDemoModeMiddleware;
+use Botble\Base\Http\Middleware\EnsureLicenseHasBeenActivated;
 use Botble\Base\Http\Middleware\HttpsProtocolMiddleware;
 use Botble\Base\Http\Middleware\LocaleMiddleware;
+use Botble\Base\Listeners\PushDashboardMenuToSystemPanel;
 use Botble\Base\Models\AdminNotification;
 use Botble\Base\Models\BaseModel;
 use Botble\Base\Models\MetaBox as MetaBoxModel;
+use Botble\Base\PanelSections\System\SystemPanelSection;
 use Botble\Base\Repositories\Eloquent\MetaBoxRepository;
 use Botble\Base\Repositories\Interfaces\MetaBoxInterface;
 use Botble\Base\Supports\Action;
+use Botble\Base\Supports\Breadcrumb;
 use Botble\Base\Supports\BreadcrumbsManager;
 use Botble\Base\Supports\CustomResourceRegistrar;
-use Botble\Base\Supports\DashboardMenu as DashboardMenuSupport;
 use Botble\Base\Supports\Database\Blueprint;
 use Botble\Base\Supports\Filter;
 use Botble\Base\Supports\GoogleFonts;
@@ -43,7 +55,6 @@ use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Database\Schema\Builder;
 use Illuminate\Filesystem\FilesystemManager;
 use Illuminate\Foundation\AliasLoader;
-use Illuminate\Foundation\Console\AboutCommand;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Routing\ResourceRegistrar;
@@ -65,11 +76,14 @@ class BaseServiceProvider extends ServiceProvider
 
     public function register(): void
     {
+        $this->app->instance('core.middleware', []);
+
         $this->app->bind(ResourceRegistrar::class, function ($app) {
             return new CustomResourceRegistrar($app['router']);
         });
 
-        $this->setNamespace('core/base')
+        $this
+            ->setNamespace('core/base')
             ->loadHelpers()
             ->loadAndPublishConfigurations(['general']);
 
@@ -77,7 +91,18 @@ class BaseServiceProvider extends ServiceProvider
 
         $this->app->singleton(ExceptionHandler::class, Handler::class);
 
+        $this->app->singleton(Breadcrumb::class);
+
         $this->app->singleton(BreadcrumbsManager::class, BreadcrumbsManager::class);
+
+        $this->app->singleton('core.panel-sections.manager', function () {
+            return new \Botble\Base\PanelSections\Manager('settings');
+        });
+        $this->app->alias('core.panel-sections.manager', Manager::class);
+
+        $globalSearchManager = 'core.global-search.manager';
+        $this->app->singleton($globalSearchManager, GlobalSearchableManager::class);
+        $this->app->alias($globalSearchManager, GlobalSearchableManagerContract::class);
 
         $this->app->bind(MetaBoxInterface::class, function () {
             return new MetaBoxRepository(new MetaBoxModel());
@@ -119,18 +144,17 @@ class BaseServiceProvider extends ServiceProvider
             'debugbar.enabled' => $this->app->hasDebugModeEnabled() &&
                 ! $this->app->runningInConsole() &&
                 ! $this->app->environment(['testing', 'production']),
+            'debugbar.capture_ajax' => false,
             'laravel-form-builder.plain_form_class' => Form::class,
             'laravel-form-builder.form_builder_class' => FormBuilder::class,
             'laravel-form-builder.form_helper_class' => FormHelper::class,
-            'laravel-form-builder.label_class' => 'control-label',
-            'laravel-form-builder.wrapper_class' => 'form-group',
         ]);
 
-        $this->app->singleton('core:action', function () {
+        $this->app->singleton('core.action', function () {
             return new Action();
         });
 
-        $this->app->singleton('core:filter', function () {
+        $this->app->singleton('core.filter', function () {
             return new Filter();
         });
 
@@ -171,6 +195,22 @@ class BaseServiceProvider extends ServiceProvider
             $aliasLoader->alias('DashboardMenu', DashboardMenu::class);
             $aliasLoader->alias('PageTitle', PageTitle::class);
         }
+
+        if (! class_exists('Breadcrumb')) {
+            $aliasLoader->alias('Breadcrumb', BreadcrumbFacade::class);
+        }
+
+        if (! class_exists('PanelSectionManager')) {
+            $aliasLoader->alias('PanelSectionManager', PanelSectionManagerFacade::class);
+        }
+
+        if (! class_exists('AdminAppearance')) {
+            $aliasLoader->alias('AdminAppearance', AdminAppearance::class);
+        }
+
+        if (! class_exists('AdminHelper')) {
+            $aliasLoader->alias('AdminHelper', AdminHelper::class);
+        }
     }
 
     public function boot(): void
@@ -184,11 +224,24 @@ class BaseServiceProvider extends ServiceProvider
             ->loadMigrations()
             ->publishAssets();
 
+        $config = $this->app['config'];
+
+        $config->set('laravel-form-builder.defaults', [
+            ...$config->get('laravel-form-builder.defaults', []),
+            'wrapper_class' => 'mb-3 position-relative',
+            'label_class' => 'form-label',
+            'field_error_class' => 'is-invalid',
+            'help_block_class' => 'form-hint',
+            'error_class' => 'invalid-feedback',
+            'help_block_tag' => 'small',
+            'select' => [
+                'field_class' => 'form-select',
+            ],
+        ]);
+
         $this->app['blade.compiler']->anonymousComponentPath($this->getViewsPath() . '/components', 'core');
 
         Schema::defaultStringLength(191);
-
-        $config = $this->app['config'];
 
         if (BaseHelper::hasDemoModeEnabled() || $config->get('core.base.general.disable_verify_csrf_token', false)) {
             $this->app->instance(VerifyCsrfToken::class, new BaseMiddleware());
@@ -210,7 +263,7 @@ class BaseServiceProvider extends ServiceProvider
                     $countNotificationUnread = 0;
                 }
 
-                return $options . view('core/base::notification.notification', compact('countNotificationUnread'));
+                return $options . view('core/base::notification.nav-item', compact('countNotificationUnread'));
             }, 99);
 
             add_filter(BASE_FILTER_FOOTER_LAYOUT_TEMPLATE, function ($html) {
@@ -218,7 +271,7 @@ class BaseServiceProvider extends ServiceProvider
                     return $html;
                 }
 
-                return $html . view('core/base::notification.notification-content');
+                return $html . view('core/base::notification.notification');
             }, 99);
 
             $setting = $this->app[SettingStore::class];
@@ -237,8 +290,12 @@ class BaseServiceProvider extends ServiceProvider
             }
         });
 
-        $this->app['events']->listen(RouteMatched::class, function () {
-            $this->registerDefaultMenus();
+        $this->registerDashboardMenus();
+
+        $events = $this->app['events'];
+
+        $events->listen(RouteMatched::class, function () {
+            $this->registerPanelSections();
 
             /**
              * @var Router $router
@@ -249,6 +306,12 @@ class BaseServiceProvider extends ServiceProvider
             $router->pushMiddlewareToGroup('web', HttpsProtocolMiddleware::class);
             $router->aliasMiddleware('preventDemo', DisableInDemoModeMiddleware::class);
             $router->middlewareGroup('core', [CoreMiddleware::class]);
+
+            $this->app->extend('core.middleware', function ($middleware) {
+                return array_merge($middleware, [
+                    EnsureLicenseHasBeenActivated::class,
+                ]);
+            });
         });
 
         Paginator::useBootstrap();
@@ -274,7 +337,7 @@ class BaseServiceProvider extends ServiceProvider
                 $config->get('purifier.settings', []),
                 Arr::get($baseConfig, 'purifier', [])
             ),
-            'laravel-form-builder.defaults.wrapper_class' => 'form-group mb-3',
+            'laravel-form-builder.defaults.wrapper_class' => 'mb-3 position-relative',
             'database.connections.mysql.strict' => Arr::get($baseConfig, 'db_strict_mode'),
         ]);
 
@@ -291,13 +354,6 @@ class BaseServiceProvider extends ServiceProvider
             ]);
         }
 
-        if ($this->app->runningInConsole()) {
-            AboutCommand::add('Core Information', fn () => [
-                'CMS Version' => get_cms_version(),
-                'Core Version' => get_core_version(),
-            ]);
-        }
-
         $this->app->extend('db.schema', function (Builder $schema) {
             $schema->blueprintResolver(function ($table, $callback, $prefix) {
                 return new Blueprint($table, $callback, $prefix);
@@ -306,7 +362,7 @@ class BaseServiceProvider extends ServiceProvider
             return $schema;
         });
 
-        if ($this->app->environment('local')) {
+        if ($this->app->isLocal()) {
             DB::listen(function (QueryExecuted $queryExecuted) {
                 if ($queryExecuted->time < 500) {
                     return;
@@ -315,68 +371,30 @@ class BaseServiceProvider extends ServiceProvider
                 Log::warning(sprintf('DB query exceeded %s ms. SQL: %s', $queryExecuted->time, $queryExecuted->sql));
             });
         }
+
+        $events->listen(PanelSectionsRendering::class, PushDashboardMenuToSystemPanel::class);
     }
 
-    /**
-     * Add default dashboard menu for core
-     */
-    public function registerDefaultMenus(): void
+    protected function registerDashboardMenus(): void
     {
-        $config = $this->app['config'];
-
-        DashboardMenu::make()
-            ->registerItem([
-                'id' => 'cms-core-platform-administration',
-                'priority' => 999,
-                'parent_id' => null,
-                'name' => 'core/base::layouts.platform_admin',
-                'icon' => 'fa fa-user-shield',
-                'url' => null,
-                'permissions' => ['users.index'],
-            ])
-            ->registerItem([
-                'id' => 'cms-core-system-information',
-                'priority' => 5,
-                'parent_id' => 'cms-core-platform-administration',
-                'name' => 'core/base::system.info.title',
-                'icon' => null,
-                'url' => route('system.info'),
-                'permissions' => [ACL_ROLE_SUPER_USER],
-            ])
-            ->registerItem([
-                'id' => 'cms-core-system-cache',
-                'priority' => 6,
-                'parent_id' => 'cms-core-platform-administration',
-                'name' => 'core/base::cache.cache_management',
-                'icon' => null,
-                'url' => route('system.cache'),
-                'permissions' => [ACL_ROLE_SUPER_USER],
-            ])
-            ->when(
-                ! $config->get('core.base.general.hide_cleanup_system_menu', false),
-                function (DashboardMenuSupport $menu) {
-                    $menu->registerItem([
-                        'id' => 'cms-core-system-cleanup',
-                        'priority' => 999,
-                        'parent_id' => 'cms-core-platform-administration',
-                        'name' => 'core/base::system.cleanup.title',
-                        'icon' => null,
-                        'url' => route('system.cleanup'),
-                        'permissions' => [ACL_ROLE_SUPER_USER],
-                    ]);
-                }
-            )
-            ->when($config->get('core.base.general.enable_system_updater'), function (DashboardMenuSupport $menu) {
-                $menu->registerItem([
-                    'id' => 'cms-core-system-updater',
-                    'priority' => 999,
-                    'parent_id' => 'cms-core-platform-administration',
-                    'name' => 'core/base::system.updater',
-                    'icon' => null,
-                    'url' => route('system.updater'),
-                    'permissions' => [ACL_ROLE_SUPER_USER],
+        DashboardMenu::default()->beforeRetrieving(function () {
+            DashboardMenu::make()
+                ->registerItem([
+                    'id' => 'cms-core-system',
+                    'priority' => 10000,
+                    'name' => 'core/base::layouts.platform_admin',
+                    'icon' => 'ti ti-user-shield',
+                    'route' => 'system.index',
+                    'permissions' => ['core.system'],
                 ]);
-            });
+        });
+    }
+
+    protected function registerPanelSections(): void
+    {
+        PanelSectionManager::group('system')
+            ->setGroupName(trans('core/base::layouts.platform_admin'))
+            ->register(SystemPanelSection::class);
     }
 
     protected function configureIni(): void

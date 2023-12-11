@@ -2,8 +2,8 @@
 
 namespace Botble\Newsletter\Enums;
 
-use Botble\Base\Facades\Html;
 use Botble\Base\Supports\Enum;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\HtmlString;
 
 /**
@@ -13,26 +13,19 @@ use Illuminate\Support\HtmlString;
 class NewsletterStatusEnum extends Enum
 {
     public const SUBSCRIBED = 'subscribed';
+
     public const UNSUBSCRIBED = 'unsubscribed';
 
     public static $langPath = 'plugins/newsletter::newsletter.statuses';
 
     public function toHtml(): HtmlString|string
     {
-        return match ($this->value) {
-            self::SUBSCRIBED => Html::tag(
-                'span',
-                self::SUBSCRIBED()->label(),
-                ['class' => 'label-success status-label']
-            )
-                ->toHtml(),
-            self::UNSUBSCRIBED => Html::tag(
-                'span',
-                self::UNSUBSCRIBED()->label(),
-                ['class' => 'label-warning status-label']
-            )
-                ->toHtml(),
-            default => parent::toHtml(),
+        $color = match ($this->value) {
+            self::SUBSCRIBED => 'success',
+            self::UNSUBSCRIBED => 'warning',
+            default => null,
         };
+
+        return Blade::render(sprintf('<x-core::badge label="%s" color="%s" />', $this->label(), $color));
     }
 }

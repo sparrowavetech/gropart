@@ -2,14 +2,10 @@
 
 namespace Botble\Contact\Http\Controllers;
 
-use Botble\Base\Events\DeletedContentEvent;
-use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\EmailHandler;
-use Botble\Base\Facades\PageTitle;
-use Botble\Base\Forms\FormBuilder;
+use Botble\Base\Http\Actions\DeleteResourceAction;
 use Botble\Base\Http\Controllers\BaseController;
-use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Contact\Enums\ContactStatusEnum;
 use Botble\Contact\Forms\ContactForm;
 use Botble\Contact\Http\Requests\ContactReplyRequest;
@@ -17,53 +13,40 @@ use Botble\Contact\Http\Requests\EditContactRequest;
 use Botble\Contact\Models\Contact;
 use Botble\Contact\Models\ContactReply;
 use Botble\Contact\Tables\ContactTable;
-use Exception;
-use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
 class ContactController extends BaseController
 {
     public function index(ContactTable $dataTable)
     {
-        PageTitle::setTitle(trans('plugins/contact::contact.menu'));
+        $this->pageTitle(trans('plugins/contact::contact.menu'));
 
         return $dataTable->renderTable();
     }
 
-    public function edit(Contact $contact, FormBuilder $formBuilder)
+    public function edit(Contact $contact)
     {
-        PageTitle::setTitle(trans('plugins/contact::contact.edit'));
+        $this->pageTitle(trans('plugins/contact::contact.edit'));
 
-        return $formBuilder->create(ContactForm::class, ['model' => $contact])->renderForm();
+        return ContactForm::createFromModel($contact)->renderForm();
     }
 
-    public function update(Contact $contact, EditContactRequest $request, BaseHttpResponse $response)
+    public function update(Contact $contact, EditContactRequest $request)
     {
-        $contact->fill($request->input());
-        $contact->save();
+        ContactForm::createFromModel($contact)->setRequest($request)->save();
 
-        event(new UpdatedContentEvent(CONTACT_MODULE_SCREEN_NAME, $request, $contact));
-
-        return $response
-            ->setPreviousUrl(route('contacts.index'))
-            ->setMessage(trans('core/base::notices.update_success_message'));
+        return $this
+            ->httpResponse()
+            ->setPreviousRoute('contacts.index')
+            ->withUpdatedSuccessMessage();
     }
 
-    public function destroy(Contact $contact, Request $request, BaseHttpResponse $response)
+    public function destroy(Contact $contact)
     {
-        try {
-            $contact->delete();
-            event(new DeletedContentEvent(CONTACT_MODULE_SCREEN_NAME, $request, $contact));
-
-            return $response->setMessage(trans('core/base::notices.delete_success_message'));
-        } catch (Exception $exception) {
-            return $response
-                ->setError()
-                ->setMessage($exception->getMessage());
-        }
+        return DeleteResourceAction::make($contact);
     }
 
-    public function postReply(Contact $contact, ContactReplyRequest $request, BaseHttpResponse $response)
+    public function postReply(Contact $contact, ContactReplyRequest $request)
     {
         $message = BaseHelper::clean($request->input('message'));
 
@@ -71,7 +54,7 @@ class ContactController extends BaseController
             throw ValidationException::withMessages(['message' => trans('validation.required', ['attribute' => 'message'])]);
         }
 
-        EmailHandler::send($message, 'Re: ' . $contact->subject, $contact->email);
+        EmailHandler::send($message, sprintf('Re: %s', $contact->subject), $contact->email);
 
         ContactReply::query()->create([
             'message' => $message,
@@ -81,7 +64,8 @@ class ContactController extends BaseController
         $contact->status = ContactStatusEnum::READ();
         $contact->save();
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setMessage(trans('plugins/contact::contact.message_sent_success'));
     }
 }

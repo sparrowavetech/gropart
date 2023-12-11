@@ -78,11 +78,11 @@
                 </div>
                 <div
                     id="payment-stripe-key"
-                    data-value="{{ setting('payment_stripe_client_id') }}"
+                    data-value="{{ get_payment_setting('client_id', 'stripe') }}"
                 ></div>
             @endif
 
-            @php $supportedCurrencies = (new \Botble\Stripe\Services\Gateways\StripePaymentService)->supportedCurrencyCodes(); @endphp
+            @php $supportedCurrencies = (new Botble\Stripe\Services\Gateways\StripePaymentService)->supportedCurrencyCodes(); @endphp
             @if (
                 !in_array(get_application_currency()->title, $supportedCurrencies) &&
                     !get_application_currency()->replicate()->newQuery()->where('title', 'USD')->exists())
@@ -93,7 +93,7 @@
                     {{ __(":name doesn't support :currency. List of currencies supported by :name: :currencies.", ['name' => 'Stripe', 'currency' => get_application_currency()->title, 'currencies' => implode(', ', $supportedCurrencies)]) }}
                     @php
                         $currencies = get_all_currencies();
-                        
+
                         $currencies = $currencies->filter(function ($item) use ($supportedCurrencies) {
                             return in_array($item->title, $supportedCurrencies);
                         });

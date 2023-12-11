@@ -14,8 +14,10 @@ use Botble\ACL\Repositories\Interfaces\ActivationInterface;
 use Botble\ACL\Repositories\Interfaces\RoleInterface;
 use Botble\ACL\Repositories\Interfaces\UserInterface;
 use Botble\Base\Facades\BaseHelper;
-use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Facades\EmailHandler;
+use Botble\Base\Facades\PanelSectionManager;
+use Botble\Base\PanelSections\PanelSectionItem;
+use Botble\Base\PanelSections\System\SystemPanelSection;
 use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Media\Facades\RvMedia;
@@ -61,31 +63,13 @@ class AclServiceProvider extends ServiceProvider
         $this->garbageCollect();
 
         $this->app['events']->listen(RouteMatched::class, function () {
-            DashboardMenu::make()
-                ->registerItem([
-                    'id' => 'cms-core-role-permission',
-                    'priority' => 2,
-                    'parent_id' => 'cms-core-platform-administration',
-                    'name' => 'core/acl::permissions.role_permission',
-                    'icon' => null,
-                    'url' => route('roles.index'),
-                    'permissions' => ['roles.index'],
-                ])
-                ->registerItem([
-                    'id' => 'cms-core-user',
-                    'priority' => 3,
-                    'parent_id' => 'cms-core-platform-administration',
-                    'name' => 'core/acl::users.users',
-                    'icon' => null,
-                    'url' => route('users.index'),
-                    'permissions' => ['users.index'],
-                ]);
-
             $router = $this->app['router'];
 
             $router->aliasMiddleware('auth', Authenticate::class);
             $router->aliasMiddleware('guest', RedirectIfAuthenticated::class);
         });
+
+        $this->registerPanelSections();
 
         $this->app->booted(function () {
             config()->set(['auth.providers.users.model' => User::class]);
@@ -94,10 +78,34 @@ class AclServiceProvider extends ServiceProvider
 
             $this->app->register(HookServiceProvider::class);
 
-            View::composer('core/acl::auth.master', function (IlluminateView $view) {
+            View::composer('core/acl::layouts.guest', function (IlluminateView $view) {
                 $view->with('backgroundUrl', $this->getLoginPageBackgroundUrl());
             });
         });
+    }
+
+    protected function registerPanelSections(): void
+    {
+        PanelSectionManager::group('system')
+            ->beforeRendering(function () {
+                PanelSectionManager::registerItems(
+                    SystemPanelSection::class,
+                    fn () => [
+                        PanelSectionItem::make('users')
+                            ->setTitle(trans('core/acl::users.users'))
+                            ->withIcon('ti ti-users')
+                            ->withDescription(trans('core/acl::users.users_description'))
+                            ->withPriority(-9999)
+                            ->withRoute('users.index'),
+                        PanelSectionItem::make('roles')
+                            ->setTitle(trans('core/acl::permissions.role_permission'))
+                            ->withIcon('ti ti-users-group')
+                            ->withDescription(trans('core/acl::permissions.role_permission_description'))
+                            ->withPriority(-9980)
+                            ->withRoute('roles.index'),
+                    ]
+                );
+            });
     }
 
     protected function getLoginPageBackgroundUrl(): string

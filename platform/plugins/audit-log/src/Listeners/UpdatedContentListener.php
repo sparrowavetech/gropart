@@ -14,11 +14,13 @@ class UpdatedContentListener
     {
         try {
             if ($event->data->getKey()) {
+                $model = $event->screen;
+
                 event(new AuditHandlerEvent(
-                    $event->screen,
+                    $model,
                     'updated',
                     $event->data->getKey(),
-                    AuditLog::getReferenceName($event->screen, $event->data),
+                    AuditLog::getReferenceName($model, $event->data),
                     'primary'
                 ));
             }

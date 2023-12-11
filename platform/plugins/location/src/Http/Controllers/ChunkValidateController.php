@@ -4,7 +4,6 @@ namespace Botble\Location\Http\Controllers;
 
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Http\Controllers\BaseController;
-use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Location\Concerns\ChunkFile;
 use Botble\Location\Enums\ImportType;
 use Botble\Location\Http\Requests\ChunkFileRequest;
@@ -16,12 +15,13 @@ class ChunkValidateController extends BaseController
 {
     use ChunkFile;
 
-    public function __invoke(ChunkFileRequest $request, BaseHttpResponse $response)
+    public function __invoke(ChunkFileRequest $request)
     {
         try {
             $filePath = $this->getFilePath($request->input('file'));
         } catch (Exception $exception) {
-            return $response
+            return $this
+                ->httpResponse()
                 ->setError()
                 ->setMessage($exception->getMessage());
         }
@@ -51,7 +51,8 @@ class ChunkValidateController extends BaseController
             ];
         }
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setMessage(trans('plugins/location::bulk-import.validating_message', [
                 'from' => number_format($offset),
                 'to' => number_format($offset + count($rows)),

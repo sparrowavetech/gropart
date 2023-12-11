@@ -2,13 +2,15 @@
 
 namespace Botble\Captcha\Providers;
 
+use Botble\Base\Facades\PanelSectionManager;
+use Botble\Base\PanelSections\PanelSectionItem;
 use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Captcha\Captcha;
 use Botble\Captcha\CaptchaV3;
 use Botble\Captcha\Facades\Captcha as CaptchaFacade;
 use Botble\Captcha\MathCaptcha;
-use Botble\Theme\Facades\Theme;
+use Botble\Setting\PanelSections\SettingOthersPanelSection;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
@@ -38,19 +40,25 @@ class CaptchaServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        $this->setNamespace('plugins/captcha')
-            ->loadAndPublishConfigurations(['general'])
+        $this
+            ->setNamespace('plugins/captcha')
+            ->loadAndPublishConfigurations(['general', 'permissions'])
+            ->loadRoutes()
             ->loadAndPublishViews()
             ->loadAndPublishTranslations();
 
         $this->bootValidator();
 
-        if (defined('THEME_MODULE_SCREEN_NAME') && setting('captcha_hide_badge')) {
-            Theme::asset()->writeStyle('hide-recaptcha-badge', '.grecaptcha-badge { visibility: hidden; }');
-        }
-
-        $this->app->booted(function () {
-            $this->app->register(HookServiceProvider::class);
+        PanelSectionManager::default()->beforeRendering(function () {
+            PanelSectionManager::registerItem(
+                SettingOthersPanelSection::class,
+                fn () => PanelSectionItem::make('captcha')
+                    ->setTitle(trans('plugins/captcha::captcha.settings.title'))
+                    ->withIcon('ti ti-refresh')
+                    ->withPriority(150)
+                    ->withDescription(trans('plugins/captcha::captcha.settings.panel_description'))
+                    ->withRoute('captcha.settings')
+            );
         });
     }
 
@@ -63,13 +71,17 @@ class CaptchaServiceProvider extends ServiceProvider
          */
         $validator = $app['validator'];
         $validator->extend('captcha', function ($attribute, $value, $parameters) use ($app) {
+            if (! $app['captcha']->reCaptchaEnabled()) {
+                return true;
+            }
+
             if (! is_string($value)) {
                 return false;
             }
 
             if (setting('captcha_type') === 'v3') {
                 if (empty($parameters)) {
-                    $parameters = ['form', '0.6'];
+                    $parameters = ['form', (float) setting('recaptcha_score', 0.6)];
                 }
             } else {
                 $parameters = $this->mapParameterToOptions($parameters);

@@ -1,10 +1,12 @@
-<div @class(['mb-3', 'col-md-' . $columns => $columns])>
-    <div class="rp-card bg-white h-100">
-        <div class="rp-card-header">
-            <h5 class="p-2">{{ $label }}</h5>
-        </div>
-        <div class="rp-card-content equal-height">
+<div @class(['d-flex widget-item', 'col-md-' . $columns => $columns])>
+    <x-core::card class="flex-fill">
+        <x-core::card.header>
+            <x-core::card.title>
+                {{ $label }}
+            </x-core::card.title>
+        </x-core::card.header>
+        <div class="table-responsive table-widget">
             {!! $table !!}
         </div>
-    </div>
+    </x-core::card>
 </div>

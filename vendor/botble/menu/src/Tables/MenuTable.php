@@ -2,17 +2,20 @@
 
 namespace Botble\Menu\Tables;
 
-use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Menu\Models\Menu;
 use Botble\Table\Abstracts\TableAbstract;
 use Botble\Table\Actions\DeleteAction;
 use Botble\Table\Actions\EditAction;
 use Botble\Table\BulkActions\DeleteBulkAction;
+use Botble\Table\BulkChanges\CreatedAtBulkChange;
+use Botble\Table\BulkChanges\NameBulkChange;
+use Botble\Table\BulkChanges\StatusBulkChange;
 use Botble\Table\Columns\CreatedAtColumn;
 use Botble\Table\Columns\IdColumn;
 use Botble\Table\Columns\NameColumn;
 use Botble\Table\Columns\StatusColumn;
-use Illuminate\Validation\Rule;
+use Botble\Table\HeaderActions\CreateHeaderAction;
+use Illuminate\Database\Eloquent\Builder;
 
 class MenuTable extends TableAbstract
 {
@@ -20,58 +23,31 @@ class MenuTable extends TableAbstract
     {
         $this
             ->model(Menu::class)
+            ->addColumns([
+                IdColumn::make(),
+                NameColumn::make()->route('menus.edit'),
+                CreatedAtColumn::make(),
+                StatusColumn::make(),
+            ])
+            ->addHeaderAction(CreateHeaderAction::make()->route('menus.create'))
             ->addActions([
                 EditAction::make()->route('menus.edit'),
                 DeleteAction::make()->route('menus.destroy'),
             ])
-            ->queryUsing(fn ($query) => $query->select([
-                'id',
-                'name',
-                'created_at',
-                'status',
-            ]));
-    }
-
-    public function columns(): array
-    {
-        return [
-            IdColumn::make(),
-            NameColumn::make()->route('menus.edit'),
-            CreatedAtColumn::make(),
-            StatusColumn::make(),
-        ];
-    }
-
-    public function buttons(): array
-    {
-        return $this->addCreateButton(route('menus.create'), 'menus.create');
-    }
-
-    public function bulkActions(): array
-    {
-        return [
-            DeleteBulkAction::make()->permission('menus.destroy'),
-        ];
-    }
-
-    public function getBulkChanges(): array
-    {
-        return [
-            'name' => [
-                'title' => trans('core/base::tables.name'),
-                'type' => 'text',
-                'validate' => 'required|max:120',
-            ],
-            'status' => [
-                'title' => trans('core/base::tables.status'),
-                'type' => 'customSelect',
-                'choices' => BaseStatusEnum::labels(),
-                'validate' => 'required|' . Rule::in(BaseStatusEnum::values()),
-            ],
-            'created_at' => [
-                'title' => trans('core/base::tables.created_at'),
-                'type' => 'datePicker',
-            ],
-        ];
+            ->addBulkAction(DeleteBulkAction::make()->permission('menus.destroy'))
+            ->addBulkChanges([
+                NameBulkChange::make(),
+                StatusBulkChange::make(),
+                CreatedAtBulkChange::make(),
+            ])
+            ->queryUsing(function (Builder $query) {
+                $query
+                    ->select([
+                        'id',
+                        'name',
+                        'created_at',
+                        'status',
+                    ]);
+            });
     }
 }

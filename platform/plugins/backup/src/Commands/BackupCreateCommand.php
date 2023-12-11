@@ -33,7 +33,10 @@ class BackupCreateCommand extends Command implements PromptsForMissingInput
             $backupService->backupFolder(Storage::path(''));
             do_action(BACKUP_ACTION_AFTER_BACKUP, BACKUP_MODULE_SCREEN_NAME, request());
 
-            $this->components->info('Done! The backup folder is located in ' . $backupService->getBackupPath($data['key']) . '!');
+            $this->components->info(sprintf(
+                'Done! The backup folder is located in %s!',
+                $backupService->getBackupPath($data['key'])
+            ));
         } catch (Exception $exception) {
             $this->components->error($exception->getMessage());
         }

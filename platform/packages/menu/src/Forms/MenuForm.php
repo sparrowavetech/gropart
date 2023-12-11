@@ -2,24 +2,23 @@
 
 namespace Botble\Menu\Forms;
 
-use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Facades\Assets;
+use Botble\Base\Forms\FieldOptions\NameFieldOption;
+use Botble\Base\Forms\FieldOptions\StatusFieldOption;
+use Botble\Base\Forms\Fields\SelectField;
+use Botble\Base\Forms\Fields\TextField;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Menu\Http\Requests\MenuRequest;
 use Botble\Menu\Models\Menu;
 
 class MenuForm extends FormAbstract
 {
-    public function buildForm(): void
+    public function setup(): void
     {
-        Assets::addScriptsDirectly([
-            'vendor/core/packages/menu/libraries/jquery-nestable/jquery.nestable.js',
-            'vendor/core/packages/menu/js/menu.js',
-        ])
-            ->addStylesDirectly([
-                'vendor/core/packages/menu/libraries/jquery-nestable/jquery.nestable.css',
-                'vendor/core/packages/menu/css/menu.css',
-            ]);
+        Assets::addStyles('jquery-nestable')
+            ->addScripts('jquery-nestable')
+            ->addScriptsDirectly('vendor/core/packages/menu/js/menu.js')
+            ->addStylesDirectly('vendor/core/packages/menu/css/menu.css');
 
         $locations = [];
 
@@ -28,23 +27,11 @@ class MenuForm extends FormAbstract
         }
 
         $this
-            ->setupModel(new Menu())
+            ->model(Menu::class)
             ->setFormOption('class', 'form-save-menu')
-            ->withCustomFields()
             ->setValidatorClass(MenuRequest::class)
-            ->add('name', 'text', [
-                'label' => trans('core/base::forms.name'),
-                'required' => true,
-                'attr' => [
-                    'placeholder' => trans('core/base::forms.name_placeholder'),
-                    'data-counter' => 120,
-                ],
-            ])
-            ->add('status', 'customSelect', [
-                'label' => trans('core/base::tables.status'),
-                'required' => true,
-                'choices' => BaseStatusEnum::labels(),
-            ])
+            ->add('name', TextField::class, NameFieldOption::make()->required()->maxLength(120)->toArray())
+            ->add('status', SelectField::class, StatusFieldOption::make()->toArray())
             ->addMetaBoxes([
                 'structure' => [
                     'wrap' => false,

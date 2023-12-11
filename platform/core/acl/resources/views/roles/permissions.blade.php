@@ -1,108 +1,139 @@
 <ul
     class="list-unstyled list-feature"
-    id='auto-checkboxes'
-    data-name='foo'
+    id="auto-checkboxes"
+    data-name="foo"
 >
-    <li id="mainNode">
-        <input
+    <li
+        id="mainNode"
+        class="permissions-tree border-0"
+        style="background-color: inherit;"
+    >
+        <x-core::form.checkbox
+            label="{{ trans('core/acl::permissions.all') }}"
             id="expandCollapseAllTree"
-            type="checkbox"
-        >&nbsp;&nbsp;
-        <label
             class="label label-default allTree"
-            for="expandCollapseAllTree"
-        >{{ trans('core/acl::permissions.all') }}</label>
-        <ul>
+        >
+            <x-slot:label>
+                <x-core::badge
+                    color="secondary"
+                    :label="trans('core/acl::permissions.all')"
+                />
+            </x-slot:label>
+        </x-core::form.checkbox>
+        <ul class="p-0 list-unstyled">
             @foreach ($children['root'] as $elementKey => $element)
                 <li
-                    class="collapsed"
+                    class="collapsed mx-0"
+                    style="background-color: inherit"
                     id="node{{ $elementKey }}"
                 >
-                    <input
+                    <x-core::form.checkbox
                         id="checkSelect{{ $elementKey }}"
                         name="flags[]"
-                        type="checkbox"
                         value="{{ $flags[$element]['flag'] }}"
-                        @if (in_array($flags[$element]['flag'], $active)) checked @endif
+                        checked="{{ in_array($flags[$element]['flag'], $active) }}"
                     >
-                    <label
-                        class="label label-warning"
-                        for="checkSelect{{ $elementKey }}"
-                        style="margin: 5px;"
-                    >{{ $flags[$element]['name'] }}</label>
+                        <x-slot:label>
+                            <x-core::badge
+                                lite
+                                color="primary"
+                                :label="$flags[$element]['name']"
+                            />
+                        </x-slot:label>
+                    </x-core::form.checkbox>
                     @if (isset($children[$element]))
-                        <ul>
+                        <ul class="list-unstyled">
                             @foreach ($children[$element] as $subKey => $subElements)
                                 <li
-                                    class="collapsed"
+                                    class="collapsed mx-0"
+                                    style="background-color: inherit"
                                     id="node_sub_{{ $elementKey }}_{{ $subKey }}"
                                 >
-                                    <input
+                                    <x-core::form.checkbox
                                         id="checkSelect_sub_{{ $elementKey }}_{{ $subKey }}"
                                         name="flags[]"
-                                        type="checkbox"
                                         value="{{ $flags[$subElements]['flag'] }}"
-                                        @if (in_array($flags[$subElements]['flag'], $active)) checked @endif
+                                        checked="{{ in_array($flags[$subElements]['flag'], $active) }}"
                                     >
-                                    <label
-                                        class="label label-primary nameMargin"
-                                        for="checkSelect_sub_{{ $elementKey }}_{{ $subKey }}"
-                                    >{{ $flags[$subElements]['name'] }}</label>
+                                        <x-slot:label>
+                                            <x-core::badge
+                                                lite
+                                                color="yellow"
+                                                :label="$flags[$subElements]['name']"
+                                            />
+                                        </x-slot:label>
+                                    </x-core::form.checkbox>
                                     @if (isset($children[$subElements]))
-                                        <ul>
+                                        <ul class="list-unstyled">
                                             @foreach ($children[$subElements] as $subSubKey => $subSubElements)
                                                 <li
-                                                    class="collapsed"
+                                                    class="collapsed mx-0"
+                                                    style="background-color: inherit"
                                                     id="node_sub_sub_{{ $subSubKey }}"
                                                 >
-                                                    <input
+                                                    <x-core::form.checkbox
                                                         id="checkSelect_sub_sub{{ $subSubKey }}"
                                                         name="flags[]"
-                                                        type="checkbox"
                                                         value="{{ $flags[$subSubElements]['flag'] }}"
-                                                        @if (in_array($flags[$subSubElements]['flag'], $active)) checked @endif
+                                                        checked="{{ in_array($flags[$subSubElements]['flag'], $active) }}"
                                                     >
-                                                    <label
-                                                        class="label label-success nameMargin"
-                                                        for="checkSelect_sub_sub{{ $subSubKey }}"
-                                                    >{{ $flags[$subSubElements]['name'] }}</label>
+                                                        <x-slot:label>
+                                                            <x-core::badge
+                                                                lite
+                                                                color="cyan"
+                                                                :label="$flags[$subSubElements]['name']"
+                                                            />
+                                                        </x-slot:label>
+                                                    </x-core::form.checkbox>
                                                     @if (isset($children[$subSubElements]))
-                                                        <ul>
+                                                        <ul class="list-unstyled">
                                                             @foreach ($children[$subSubElements] as $grandChildrenKey => $grandChildrenElements)
                                                                 <li
-                                                                    class="collapsed"
+                                                                    class="collapsed mx-0"
+                                                                    style="background-color: inherit"
                                                                     id="node_grand_child{{ $grandChildrenKey }}"
                                                                 >
-                                                                    <input
+                                                                    <x-core::form.checkbox
                                                                         id="checkSelect_grand_child{{ $grandChildrenKey }}"
                                                                         name="flags[]"
-                                                                        type="checkbox"
                                                                         value="{{ $flags[$grandChildrenElements]['flag'] }}"
-                                                                        @if (in_array($flags[$grandChildrenElements]['flag'], $active)) checked @endif
+                                                                        checked="{{ in_array($flags[$grandChildrenElements]['flag'], $active) }}"
                                                                     >
-                                                                    <label
-                                                                        class="label label-danger nameMargin"
-                                                                        for="checkSelect_grand_child{{ $grandChildrenKey }}"
-                                                                    >{{ $flags[$grandChildrenElements]['name'] }}</label>
+                                                                        <x-slot:label>
+                                                                            <x-core::badge
+                                                                                lite
+                                                                                color="lime"
+                                                                                :label="$flags[
+                                                                                    $grandChildrenElements
+                                                                                ]['name']"
+                                                                            />
+                                                                        </x-slot:label>
+                                                                    </x-core::form.checkbox>
                                                                     @if (isset($children[$grandChildrenElements]))
-                                                                        <ul>
+                                                                        <ul class="list-unstyled">
                                                                             @foreach ($children[$grandChildrenElements] as $grandChildrenKeySub => $greatGrandChildrenElements)
                                                                                 <li
-                                                                                    class="collapsed"
+                                                                                    class="collapsed mx-0"
+                                                                                    style="background-color: inherit"
                                                                                     id="node{{ $grandChildrenKey }}"
                                                                                 >
-                                                                                    <input
+                                                                                    <x-core::form.checkbox
+                                                                                        label="{{ $flags[$grandChildrenElements]['name'] }}"
                                                                                         id="checkSelect_grand_child{{ $grandChildrenKeySub }}"
                                                                                         name="flags[]"
-                                                                                        type="checkbox"
                                                                                         value="{{ $flags[$grandChildrenElements]['flag'] }}"
-                                                                                        @if (in_array($flags[$grandChildrenElements]['flag'], $active)) checked @endif
+                                                                                        checked="{{ in_array($flags[$grandChildrenElements]['flag'], $active) }}"
                                                                                     >
-                                                                                    <label
-                                                                                        class="label label-info nameMargin"
-                                                                                        for="checkSelect_grand_child{{ $grandChildrenKeySub }}"
-                                                                                    >{{ $flags[$grandChildrenElements]['name'] }}</label>
-                                                                                </li>
+                                                                                        <x-slot:label>
+                                                                                            <x-core::badge
+                                                                                                lite
+                                                                                                color="purple"
+                                                                                                :label="$flags[
+                                                                                                    $grandChildrenElements
+                                                                                                ]['name']"
+                                                                                            />
+                                                                                        </x-slot:label>
+                                                                                    </x-core::form.checkbox>
                                                                             @endforeach
                                                                         </ul>
                                                                     @endif

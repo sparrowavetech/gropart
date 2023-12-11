@@ -1,65 +1,88 @@
-@forelse ($notifications as $notification)
-    <li
-        id="notification-{{ $notification->id }}"
-        @class(['list-group-item', 'read' => $notification->read_at !== null])
-    >
-        <div class="notification-info">
-            <span class="icon"><i class="fa fa-bell"></i></span>
-            <p title="{{ BaseHelper::clean($notification->title) }}">{!! Str::limit(BaseHelper::clean($notification->title), 30) !!}</p>
-            <div class="txt-info">
-                <p class="time">{{ $notification->created_at->diffForHumans() }}</p>
-                <strong class="description-notification-{{ $notification->id }}">{!! Str::limit(BaseHelper::clean($notification->description), 80) !!}</strong>
-                <span
-                    class="btn-toggle-description"
-                    @if (Str::length(BaseHelper::clean($notification->description)) <= 80) style="display: none" @endif
-                >
-                    <a
-                        class="show-more-description show-more-{{ $notification->id }}"
-                        data-id="{{ $notification->id }}"
-                        data-class="description-notification-{{ $notification->id }}"
-                        data-description="{{ BaseHelper::clean($notification->description) }}"
-                        href="javascript:void(0)"
-                    >{{ trans('core/base::notifications.show_more') }}</a>
-                    <a
-                        class="show-less-description show-less-{{ $notification->id }}"
-                        data-id="{{ $notification->id }}"
-                        data-class="description-notification-{{ $notification->id }}"
-                        data-description="{{ Str::limit(BaseHelper::clean($notification->description)) }}"
-                        href="javascript:void(0)"
-                        style="display: none"
-                    >{{ trans('core/base::notifications.show_less') }}</a>
-                </span>
-                <br>
-                @if ($notification->action_url && $notification->action_url !== '#')
-                    <a
-                        class="action-view"
-                        href="{{ route('notifications.read-notification', $notification->id) }}"
-                    >{{ $notification->action_label ? __($notification->action_label) : trans('core/base::notifications.view') }}</a>
-                @endif
-            </div>
-            <a
-                class="close-notification btn-delete-notification text-danger"
-                data-href="{{ route('notifications.destroy-notification', $notification->id) }}"
-                href="#"
-            ><i class="fa fa-times"></i></a>
-        </div>
-    </li>
+@if ($notifications->isNotEmpty())
+    <div class="list-group list-group-flush">
+        @foreach ($notifications as $notification)
+            <li @class([
+                'list-group-item list-group-item-action',
+                'active' => $notification->read_at === null,
+            ])>
+                <div class="d-flex w-100 gap-2">
+                    <div>
+                        <x-core::icon
+                            name="ti ti-bell"
+                            size="md"
+                            style="font-size: 1.5rem"
+                        />
+                    </div>
+                    <div class="d-grid flex-grow-1 flex-shrink-1">
+                        <h3 class="fs-4 mb-1 text-truncate">{!! BaseHelper::clean($notification->title) !!}</h3>
+                        <time
+                            class="text-muted"
+                            datetime="{{ $notification->created_at->toIso8601String() }}"
+                        >
+                            {{ $notification->created_at->diffForHumans() }}
+                        </time>
+                        <p class="mt-2 mb-0">
+                            {!! BaseHelper::clean($notification->description) !!}
+                        </p>
+                        @if (filled($notification->action_url))
+                            <div class="mt-3">
+                                <a
+                                    class=""
+                                    href="{{ route('notifications.read-notification', $notification) }}"
+                                >
+                                    {{ $notification->action_label ?: trans('core/base::notifications.view') }}
+                                </a>
+                            </div>
+                        @endif
+                    </div>
+                    <button
+                        type="button"
+                        data-url="{{ route('notifications.destroy', $notification->id) }}"
+                        class="btn-delete-notification"
+                    >
+                        <x-core::icon name="ti ti-x" />
+                    </button>
+                </div>
+            </li>
+        @endforeach
 
-@empty
-    <div class="text-center no-data-notification">
-        <i class="fa fa-bell fa-2xl text-warning mb-4"></i>
-        <h5 class="title">{{ trans('core/base::notifications.no_notification_here') }}</h5>
-        <p class="text-dark description">{{ trans('core/base::notifications.please_check_again_later') }}</p>
+        @if ($notifications->previousPageUrl() || $notifications->nextPageUrl())
+            <li class="list-group-item">
+                <nav class="d-flex justify-content-between">
+                    @if ($notifications->previousPageUrl())
+                        <x-core::button
+                            type="button"
+                            data-url="{{ $notifications->previousPageUrl() }}"
+                            class="btn-previous"
+                        >{{ trans('core/base::notifications.previous') }}</x-core::button>
+                    @else
+                        <span></span>
+                    @endif
+
+                    @if ($notifications->nextPageUrl())
+                        <x-core::button
+                            type="button"
+                            data-url="{{ $notifications->nextPageUrl() }}"
+                            class="btn-next"
+                        >{{ trans('core/base::notifications.next') }}</x-core::button>
+                    @else
+                        <span></span>
+                    @endif
+                </nav>
+            </li>
+        @endif
     </div>
-@endforelse
-
-@if (!empty($notification) && $notifications->hasMorePages())
-    <li style="background-color: unset">
-        <div class="text-center mt-2 mb-2 wrap-view-more">
-            <a
-                class="view-more-notification"
-                href="javascript:void(0)"
-            >{{ trans('core/base::notifications.view_more') }}</a>
+@else
+    <div class="text-center">
+        <div class="mb-3">
+            <x-core::icon
+                name="ti ti-bell-off"
+                size="md"
+                class="text-secondary"
+            />
         </div>
-    </li>
+
+        <h3 class="mb-1">{{ trans('core/base::notifications.no_notification_here') }}</h3>
+        <p class="text-muted">{{ trans('core/base::notifications.please_check_again_later') }}</p>
+    </div>
 @endif

@@ -17,7 +17,6 @@ class StripeServiceProvider extends ServiceProvider
 
         $this->setNamespace('plugins/stripe')
             ->loadHelpers()
-            ->loadAndPublishTranslations()
             ->loadRoutes()
             ->loadAndPublishViews()
             ->publishAssets();

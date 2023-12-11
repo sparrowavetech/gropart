@@ -23,7 +23,7 @@ class ExportCommand extends Command implements PromptsForMissingInput
 
         $manager->exportTranslations($group);
 
-        $this->components->info('Done writing language files for ' . ($group == '*' ? 'ALL groups' : $group . ' group'));
+        $this->components->info(sprintf('Done writing language files for %s.', $group == '*' ? 'ALL groups' : $group . ' group'));
 
         return self::SUCCESS;
     }

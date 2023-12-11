@@ -6,10 +6,7 @@ use Botble\ACL\Http\Requests\LoginRequest;
 use Botble\ACL\Models\User;
 use Botble\ACL\Traits\AuthenticatesUsers;
 use Botble\Base\Facades\Assets;
-use Botble\Base\Facades\BaseHelper;
-use Botble\Base\Facades\PageTitle;
 use Botble\Base\Http\Controllers\BaseController;
-use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\JsValidation\Facades\JsValidator;
 use Carbon\Carbon;
 use Closure;
@@ -23,32 +20,38 @@ class LoginController extends BaseController
 
     protected string $redirectTo = '/';
 
-    public function __construct(protected BaseHttpResponse $response)
+    public function __construct()
     {
         $this->middleware('guest', ['except' => 'logout']);
 
-        $this->redirectTo = BaseHelper::getAdminPrefix();
+        $this->redirectTo = route('dashboard.index');
     }
 
     public function showLoginForm()
     {
-        PageTitle::setTitle(trans('core/acl::auth.login_title'));
+        $this->pageTitle(trans('core/acl::auth.login_title'));
 
-        Assets::addScripts(['jquery-validation', 'form-validation'])
-            ->addStylesDirectly('vendor/core/core/acl/css/animate.min.css')
-            ->addStylesDirectly('vendor/core/core/acl/css/login.css')
+        Assets::addScripts('form-validation')
             ->removeStyles([
                 'select2',
                 'fancybox',
                 'spectrum',
-                'simple-line-icons',
                 'custom-scrollbar',
                 'datepicker',
+                'fontawesome',
+                'toastr',
             ])
             ->removeScripts([
                 'select2',
                 'fancybox',
                 'cookie',
+                'spectrum',
+                'toastr',
+                'modernizr',
+                'excanvas',
+                'jquery-waypoints',
+                'stickytableheaders',
+                'ie8-fix',
             ]);
 
         $jsValidator = JsValidator::formRequest(LoginRequest::class);
@@ -76,7 +79,7 @@ class LoginController extends BaseController
         $user = User::query()->where([$this->username() => $request->input($this->username())])->first();
         if (! empty($user)) {
             if (! $user->activated) {
-                return $this->response
+                return $this->httpResponse()
                     ->setError()
                     ->setMessage(trans('core/acl::auth.login.not_active'));
             }
@@ -121,8 +124,8 @@ class LoginController extends BaseController
 
         $request->session()->invalidate();
 
-        return $this->response
-            ->setNextUrl(route('access.login'))
+        return $this->httpResponse()
+            ->setNextRoute('access.login')
             ->setMessage(trans('core/acl::auth.login.logout_success'));
     }
 }

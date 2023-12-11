@@ -22,6 +22,9 @@ trait HasPageSeeder
         foreach ($pages as $item) {
             $item['user_id'] = $userId;
 
+            /**
+             * @var Page $page
+             */
             $page = Page::query()->create(Arr::except($item, 'metadata'));
 
             if (Arr::has($item, 'metadata')) {

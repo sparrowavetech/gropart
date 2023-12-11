@@ -1,3 +1,3 @@
-<div class="note note-warning approve-product-warning">
-    <p>{!! BaseHelper::clean(trans('plugins/ads::ads.adblock_warning')) !!}</p>
-</div>
+<x-core::alert type="warning" class="approve-product-warning">
+    {!! BaseHelper::clean(trans('plugins/ads::ads.adblock_warning')) !!}
+</x-core::alert>

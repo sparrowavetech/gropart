@@ -2,6 +2,7 @@
 
 return [
     'name' => 'Activities Logs',
+    'description' => 'View and delete your system activity logs',
     'created' => 'created',
     'updated' => 'updated',
     'deleted' => 'deleted',
@@ -27,4 +28,6 @@ return [
     'user_agent' => 'User Agent',
     'system' => 'System',
     'delete_all' => 'Delete all records',
+    'empty_logs' => 'Empty logs',
+    'confirm_empty_logs_msg' => 'Do you really want to empty logs?',
 ];

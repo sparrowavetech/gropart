@@ -1,62 +1,29 @@
-@if (defined('LANGUAGE_MODULE_SCREEN_NAME'))
-    @php
-        $supportedLocales = Language::getSupportedLocales();
-    @endphp
-@endif
-
 @extends(BaseHelper::getAdminMasterLayoutTemplate())
 
 @section('content')
-    @push('header')
-        <style>
-            .dropzone {
-                border: 2px dashed #707070;
-                border-radius: 5px;
-                cursor: pointer;
-                min-height: 0;
-                background: #f2f2f2;
-            }
+    @php
+        $supportedLocales = defined('LANGUAGE_MODULE_SCREEN_NAME') ? Language::getSupportedLocales() : [];
+    @endphp
 
-            .dropzone .dz-message {
-                margin: 0.6rem;
-            }
-
-            .dropzone h4 {
-                margin-bottom: 0.4rem;
-            }
-
-            .dropzone.dz-clickable a,
-            .dropzone.dz-clickable i {
-                cursor: pointer;
-            }
-
-            .blockUI img {
-                display: none;
-            }
-        </style>
-    @endpush
-
-    <div
-        class="row location-import"
-        data-upload-url="{{ route('location.upload.process') }}"
-        data-validate-url="{{ route('location.upload.validate') }}"
-        data-import-url="{{ route('location.import') }}"
-    >
+    <div class="row row-cards bulk-import">
         <div class="col-md-6">
-            {!! Form::open(['class' => 'form-import-data', 'files' => 'true']) !!}
-            <div class="widget meta-boxes mt-0">
-                <div class="widget-title pl-2">
-                    <h4>{{ trans('plugins/location::bulk-import.menu') }}</h4>
-                </div>
-                <div class="widget-body">
-                    <div class="upload-form">
-                        <div class="form-group mb-3 @if ($errors->has('file')) has-error @endif">
-                            <label
-                                class="form-label required"
-                                for="input-group-file"
-                            >
-                                {{ trans('plugins/location::bulk-import.choose_file') }}
-                            </label>
+            <x-core::card class="mb-3">
+                <x-core::card.header>
+                    <x-core::card.title>{{ trans('plugins/location::bulk-import.menu') }}</x-core::card.title>
+                </x-core::card.header>
+
+                <x-core::card.body>
+                    <x-core::form
+                        method="post"
+                        class="form-bulk-import"
+                        files="true"
+                        data-upload-url="{{ route('location.upload.process') }}"
+                        data-validate-url="{{ route('location.upload.validate') }}"
+                        data-import-url="{{ route('location.import') }}"
+                    >
+                        <x-core::form-group>
+                            <x-core::form.label
+                                for="input-group-file">{{ trans('plugins/location::bulk-import.choose_file') }}</x-core::form.label>
                             <div
                                 class="location-dropzone dropzone"
                                 data-mimetypes="{{ $mimetypes }}"
@@ -65,279 +32,397 @@
                                     {{ trans('plugins/location::bulk-import.upload_file_placeholder') }}<br>
                                 </div>
                             </div>
-                            <label
-                                class="d-block mt-1 help-block"
-                                for="input-group-file"
-                            >
+
+                            <x-core::form.helper-text class="mt-1">
                                 {{ trans('plugins/location::bulk-import.choose_file_with_mime', ['types' => implode(', ', config('plugins.location.general.bulk-import.mimes', []))]) }}
-                            </label>
+                            </x-core::form.helper-text>
+                        </x-core::form-group>
 
-                            {!! Form::error('file', $errors) !!}
-                            <div class="mt-3 text-center p-2 border bg-light">
-                                <a
-                                    class="download-template"
-                                    data-url="{{ route('location.bulk-import.download-template') }}"
-                                    data-extension="csv"
-                                    data-filename="template_locations_import.csv"
-                                    data-downloading="<i class='fas fa-spinner fa-spin'></i> {{ trans('plugins/location::bulk-import.downloading') }}"
-                                    href="#"
-                                >
-                                    <i class="fas fa-file-csv"></i>
-                                    {{ trans('plugins/location::bulk-import.download-csv-file') }}
-                                </a> &nbsp; | &nbsp;
-                                <a
-                                    class="download-template"
-                                    data-url="{{ route('location.bulk-import.download-template') }}"
-                                    data-extension="xlsx"
-                                    data-filename="template_locations_import.xlsx"
-                                    data-downloading="<i class='fas fa-spinner fa-spin'></i> {{ trans('plugins/location::bulk-import.downloading') }}"
-                                    href="#"
-                                >
-                                    <i class="fas fa-file-excel"></i>
-                                    {{ trans('plugins/location::bulk-import.download-excel-file') }}
-                                </a>
-                            </div>
+                        <div class="mb-3 text-center p-2 border bg-body text-body">
+                            <a
+                                class="download-template"
+                                data-url="{{ route('location.bulk-import.download-template') }}"
+                                data-extension="csv"
+                                data-filename="template_locations_import.csv"
+                                data-downloading="<i class='fas fa-spinner fa-spin'></i> {{ trans('plugins/location::bulk-import.downloading') }}"
+                                href="#"
+                            >
+                                <i class="fas fa-file-csv"></i>
+                                {{ trans('plugins/location::bulk-import.download-csv-file') }}
+                            </a>
+                            &nbsp; | &nbsp;
+                            <a
+                                class="download-template"
+                                data-url="{{ route('location.bulk-import.download-template') }}"
+                                data-extension="xlsx"
+                                data-filename="template_locations_import.xlsx"
+                                data-downloading="<i class='fas fa-spinner fa-spin'></i> {{ trans('plugins/location::bulk-import.downloading') }}"
+                                href="#"
+                            >
+                                <i class="fas fa-file-excel"></i>
+                                {{ trans('plugins/location::bulk-import.download-excel-file') }}
+                            </a>
                         </div>
-                    </div>
-                    <div class="form-group mb-3 d-grid">
-                        <button
-                            class="btn btn-info"
-                            id="input-group-addon"
-                            data-uploading-text="{{ __('plugins/location::bulk-import.uploading') }}"
-                            data-validating-text="{{ __('plugins/location::bulk-import.validating') }}"
-                            data-importing-text="{{ __('plugins/location::bulk-import.importing') }}"
-                            type="submit"
-                        >
-                            {{ trans('plugins/location::bulk-import.start_import') }}
-                        </button>
-                    </div>
 
-                    <p
-                        class="text-center status-text text-success fw-semibold"
-                        style="display: none"
-                    ></p>
-                </div>
-            </div>
-            {!! Form::close() !!}
-            <div
-                class="main-form-message mb-3"
+                        <div class="d-grid">
+                            <x-core::button
+                                type="submit"
+                                color="primary"
+                                data-uploading-text="{{ __('plugins/location::bulk-import.uploading') }}"
+                                data-validating-text="{{ __('plugins/location::bulk-import.validating') }}"
+                                data-importing-text="{{ __('plugins/location::bulk-import.importing') }}"
+                            >
+                                {{ trans('plugins/location::bulk-import.start_import') }}
+                            </x-core::button>
+                        </div>
+                    </x-core::form>
+                </x-core::card.body>
+            </x-core::card>
+
+            <x-core::alert
+                type="info"
+                class="bulk-import-message"
+                style="display: none"
+            ></x-core::alert>
+
+            <x-core::card
+                class="show-errors mb-3 bg-danger-lt"
                 style="display: none"
             >
+                <x-core::card.header>
+                    <x-core::card.title>{{ trans('plugins/location::bulk-import.failures') }}</x-core::card.title>
+                </x-core::card.header>
+
                 <div
-                    class="alert alert-success success-message"
-                    style="display: none"
-                ></div>
-                <div
-                    class="show-errors"
-                    style="display: none"
+                    class="table-responsive overflow-auto"
+                    style="max-height: 100vh"
                 >
-                    <h3 class="text-warning text-center">{{ trans('plugins/location::bulk-import.failures') }}</h3>
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th scope="col">#_Row</th>
-                                <th scope="col">Errors</th>
-                            </tr>
-                        </thead>
-                        <tbody id="imported-listing"></tbody>
-                    </table>
-                </div>
-            </div>
-            <div class="widget meta-boxes">
-                <div class="widget-title px-3">
-                    <h4 class="text-info">{{ trans('plugins/location::bulk-import.template') }}</h4>
-                </div>
-                <div class="widget-body">
-                    <div class="table-responsive">
-                        <table class="table text-start table-striped table-bordered">
-                            <thead>
-                                <tr>
-                                    <th scope="col">Name</th>
-                                    <th scope="col">Slug</th>
-                                    <th scope="col">Abbreviation</th>
-                                    <th scope="col">State</th>
-                                    <th scope="col">Country</th>
-                                    <th scope="col">Import Type</th>
-                                    <th scope="col">Status</th>
-                                    <th scope="col">Order</th>
-                                    @if (defined('LANGUAGE_MODULE_SCREEN_NAME'))
-                                        @foreach ($supportedLocales as $localeCode => $properties)
-                                            @continue($localeCode === Language::getCurrentLocale())
+                    <x-core::table>
+                        <x-core::table.header>
+                            <x-core::table.header.cell>
+                                #_Row
+                            </x-core::table.header.cell>
+                            <x-core::table.header.cell>
+                                Errors
+                            </x-core::table.header.cell>
+                        </x-core::table.header>
 
-                                            <th scope="col">Name {{ Str::upper($properties['lang_code']) }}</th>
-                                        @endforeach
-                                    @endif
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Texas</td>
-                                    <td></td>
-                                    <td>TX</td>
-                                    <td></td>
-                                    <td>United States</td>
-                                    <td>state</td>
-                                    <td>published</td>
-                                    <td>0</td>
-                                    @if (defined('LANGUAGE_MODULE_SCREEN_NAME'))
-                                        @foreach ($supportedLocales as $localeCode => $properties)
-                                            @continue($localeCode === Language::getCurrentLocale())
-
-                                            <td>Texas {{ Str::upper($properties['lang_code']) }}</td>
-                                        @endforeach
-                                    @endif
-                                </tr>
-                                <tr>
-                                    <td>Washington</td>
-                                    <td></td>
-                                    <td>WA</td>
-                                    <td></td>
-                                    <td>United States</td>
-                                    <td>state</td>
-                                    <td>published</td>
-                                    <td>0</td>
-                                    @if (defined('LANGUAGE_MODULE_SCREEN_NAME'))
-                                        @foreach ($supportedLocales as $localeCode => $properties)
-                                            @continue($localeCode === Language::getCurrentLocale())
-
-                                            <td></td>
-                                        @endforeach
-                                    @endif
-                                </tr>
-                                <tr>
-                                    <td>Houston</td>
-                                    <td>houston</td>
-                                    <td></td>
-                                    <td>Texas</td>
-                                    <td>United States</td>
-                                    <td>city</td>
-                                    <td>published</td>
-                                    <td>0</td>
-                                    @if (defined('LANGUAGE_MODULE_SCREEN_NAME'))
-                                        @foreach ($supportedLocales as $localeCode => $properties)
-                                            @if ($localeCode != Language::getCurrentLocale())
-                                                <td></td>
-                                            @endif
-                                        @endforeach
-                                    @endif
-                                </tr>
-                                <tr>
-                                    <td>San Antonio</td>
-                                    <td>san-antonio</td>
-                                    <td></td>
-                                    <td>Texas</td>
-                                    <td>United States</td>
-                                    <td>city</td>
-                                    <td>published</td>
-                                    <td>0</td>
-                                    @if (defined('LANGUAGE_MODULE_SCREEN_NAME'))
-                                        @foreach ($supportedLocales as $localeCode => $properties)
-                                            @continue($localeCode === Language::getCurrentLocale())
-
-                                            <td></td>
-                                        @endforeach
-                                    @endif
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                        <x-core::table.body id="imported-listing"></x-core::table.body>
+                    </x-core::table>
                 </div>
-            </div>
-            <div class="widget meta-boxes">
-                <div class="widget-title px-3">
-                    <h4 class="text-info">{{ trans('plugins/location::bulk-import.rules') }}</h4>
-                </div>
-                <div class="widget-body">
-                    <table class="table text-start table-bordered">
-                        <thead>
-                            <tr>
-                                <th scope="col">Column</th>
-                                <th scope="col">Rules</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <th scope="row">Name</th>
-                                <td>(required)</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">Slug</th>
-                                <td>(nullable)</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">Abbreviation</th>
-                                <td>(nullable|max:2)</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">State</th>
-                                <td>(nullable|required_if:type,city)</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">Country</th>
-                                <td>(nullable|required_if:type,state,city)</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">Import Type</th>
-                                <td>(nullable|enum:country,state,city|default:state)</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">Status</th>
-                                <td>(required|enum:{{ implode(',', Botble\Base\Enums\BaseStatusEnum::values()) }}|default:{{ Botble\Base\Enums\BaseStatusEnum::PUBLISHED }})
-                                </td>
-                            </tr>
-                            <tr>
-                                <th scope="row">Order</th>
-                                <td>(nullable|integer|min:0|max:127|default:0)</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">Nationality</th>
-                                <td>(required_if:import_type,country|max:120)</td>
-                            </tr>
-                            @if (defined('LANGUAGE_MODULE_SCREEN_NAME'))
+            </x-core::card>
+
+            <x-core::card class="mb-3">
+                <x-core::card.header>
+                    <x-core::card.title>{{ trans('plugins/location::bulk-import.template') }}</x-core::card.title>
+                </x-core::card.header>
+                <div class="table-responsive">
+                    <x-core::table>
+                        <x-core::table.header>
+                            <x-core::table.header.cell>
+                                Name
+                            </x-core::table.header.cell>
+                            <x-core::table.header.cell>
+                                Slug
+                            </x-core::table.header.cell>
+                            <x-core::table.header.cell>
+                                Abbreviation
+                            </x-core::table.header.cell>
+                            <x-core::table.header.cell>
+                                State
+                            </x-core::table.header.cell>
+                            <x-core::table.header.cell>
+                                Country
+                            </x-core::table.header.cell>
+                            <x-core::table.header.cell>
+                                Import Type
+                            </x-core::table.header.cell>
+                            <x-core::table.header.cell>
+                                Status
+                            </x-core::table.header.cell>
+                            <x-core::table.header.cell>
+                                Order
+                            </x-core::table.header.cell>
+                            @foreach ($supportedLocales as $localeCode => $properties)
+                                @continue($localeCode === Language::getCurrentLocale())
+                                <x-core::table.header.cell>
+                                    Name {{ Str::upper($properties['lang_code']) }}
+                                </x-core::table.header.cell>
+                            @endforeach
+                        </x-core::table.header>
+
+                        <x-core::table.body>
+                            <x-core::table.body.row>
+                                <x-core::table.body.cell>
+                                    Texas
+                                </x-core::table.body.cell>
+                                <x-core::table.body.cell>
+
+                                </x-core::table.body.cell>
+                                <x-core::table.body.cell>
+                                    TX
+                                </x-core::table.body.cell>
+                                <x-core::table.body.cell>
+
+                                </x-core::table.body.cell>
+                                <x-core::table.body.cell>
+                                    United States
+                                </x-core::table.body.cell>
+                                <x-core::table.body.cell>
+                                    state
+                                </x-core::table.body.cell>
+                                <x-core::table.body.cell>
+                                    published
+                                </x-core::table.body.cell>
+                                <x-core::table.body.cell>
+                                    0
+                                </x-core::table.body.cell>
                                 @foreach ($supportedLocales as $localeCode => $properties)
                                     @continue($localeCode === Language::getCurrentLocale())
-
-                                    <tr>
-                                        <th scope="row">Name {{ $properties['lang_code'] }}
-                                            <i
-                                                class="fas fa-info-circle"
-                                                data-bs-toggle="tooltip"
-                                                data-bs-placement="top"
-                                                title="{{ trans('plugins/location::bulk-import.available_enable_multi_language') }}"
-                                            ></i>
-                                        </th>
-                                        <td>(nullable|default:{Name})</td>
-                                    </tr>
+                                    <x-core::table.body.cell>
+                                        Texas {{ Str::upper($properties['lang_code']) }}
+                                    </x-core::table.body.cell>
                                 @endforeach
-                            @endif
-                        </tbody>
-                    </table>
+                            </x-core::table.body.row>
+
+                            <x-core::table.body.row>
+                                <x-core::table.body.cell>
+                                    Washington
+                                </x-core::table.body.cell>
+                                <x-core::table.body.cell>
+
+                                </x-core::table.body.cell>
+                                <x-core::table.body.cell>
+                                    WA
+                                </x-core::table.body.cell>
+                                <x-core::table.body.cell>
+
+                                </x-core::table.body.cell>
+                                <x-core::table.body.cell>
+                                    United States
+                                </x-core::table.body.cell>
+                                <x-core::table.body.cell>
+                                    state
+                                </x-core::table.body.cell>
+                                <x-core::table.body.cell>
+                                    published
+                                </x-core::table.body.cell>
+                                <x-core::table.body.cell>
+                                    0
+                                </x-core::table.body.cell>
+
+                                @foreach ($supportedLocales as $localeCode => $properties)
+                                    @continue($localeCode === Language::getCurrentLocale())
+                                    <x-core::table.body.cell></x-core::table.body.cell>
+                                @endforeach
+                            </x-core::table.body.row>
+
+                            <x-core::table.body.row>
+                                <x-core::table.body.cell>
+                                    Houston
+                                </x-core::table.body.cell>
+                                <x-core::table.body.cell>
+                                    houston
+                                </x-core::table.body.cell>
+                                <x-core::table.body.cell>
+
+                                </x-core::table.body.cell>
+                                <x-core::table.body.cell>
+                                    Texas
+                                </x-core::table.body.cell>
+                                <x-core::table.body.cell>
+                                    United States
+                                </x-core::table.body.cell>
+                                <x-core::table.body.cell>
+                                    city
+                                </x-core::table.body.cell>
+                                <x-core::table.body.cell>
+                                    published
+                                </x-core::table.body.cell>
+                                <x-core::table.body.cell>
+                                    0
+                                </x-core::table.body.cell>
+
+                                @foreach ($supportedLocales as $localeCode => $properties)
+                                    @continue($localeCode === Language::getCurrentLocale())
+                                    <x-core::table.body.cell></x-core::table.body.cell>
+                                @endforeach
+                            </x-core::table.body.row>
+
+                            <x-core::table.body.row>
+                                <x-core::table.body.cell>
+                                    San Antonio
+                                </x-core::table.body.cell>
+                                <x-core::table.body.cell>
+                                    san-antonio
+                                </x-core::table.body.cell>
+                                <x-core::table.body.cell>
+
+                                </x-core::table.body.cell>
+                                <x-core::table.body.cell>
+                                    Texas
+                                </x-core::table.body.cell>
+                                <x-core::table.body.cell>
+                                    United States
+                                </x-core::table.body.cell>
+                                <x-core::table.body.cell>
+                                    city
+                                </x-core::table.body.cell>
+                                <x-core::table.body.cell>
+                                    published
+                                </x-core::table.body.cell>
+                                <x-core::table.body.cell>
+                                    0
+                                </x-core::table.body.cell>
+
+                                @foreach ($supportedLocales as $localeCode => $properties)
+                                    @continue($localeCode === Language::getCurrentLocale())
+                                    <x-core::table.body.cell></x-core::table.body.cell>
+                                @endforeach
+                            </x-core::table.body.row>
+                        </x-core::table.body>
+                    </x-core::table>
                 </div>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="widget meta-boxes">
-                <div class="widget-title px-3">
-                    <h4 class="text-info">{{ trans('plugins/location::bulk-import.import_available_data') }}</h4>
+            </x-core::card>
+
+            <x-core::card>
+                <x-core::card.header>
+                    <x-core::card.title>{{ trans('plugins/location::bulk-import.rules') }}</x-core::card.title>
+                </x-core::card.header>
+
+                <div class="table-responsive">
+                    <x-core::table>
+                        <x-core::table.header>
+                            <x-core::table.header.cell>
+                                Column
+                            </x-core::table.header.cell>
+                            <x-core::table.header.cell>
+                                Rules
+                            </x-core::table.header.cell>
+                        </x-core::table.header>
+                        <x-core::table.body>
+                            <x-core::table.body.row>
+                                <x-core::table.body.cell>
+                                    Name
+                                </x-core::table.body.cell>
+                                <x-core::table.body.cell>
+                                    (required)
+                                </x-core::table.body.cell>
+                            </x-core::table.body.row>
+                            <x-core::table.body.row>
+                                <x-core::table.body.cell>
+                                    Slug
+                                </x-core::table.body.cell>
+                                <x-core::table.body.cell>
+                                    (nullable)
+                                </x-core::table.body.cell>
+                            </x-core::table.body.row>
+                            <x-core::table.body.row>
+                                <x-core::table.body.cell>
+                                    Abbreviation
+                                </x-core::table.body.cell>
+                                <x-core::table.body.cell>
+                                    (nullable|max:2)
+                                </x-core::table.body.cell>
+                            </x-core::table.body.row>
+                            <x-core::table.body.row>
+                                <x-core::table.body.cell>
+                                    State
+                                </x-core::table.body.cell>
+                                <x-core::table.body.cell>
+                                    (nullable|required_if:type,city)
+                                </x-core::table.body.cell>
+                            </x-core::table.body.row>
+                            <x-core::table.body.row>
+                                <x-core::table.body.cell>
+                                    Country
+                                </x-core::table.body.cell>
+                                <x-core::table.body.cell>
+                                    (nullable|required_if:type,state,city)
+                                </x-core::table.body.cell>
+                            </x-core::table.body.row>
+                            <x-core::table.body.row>
+                                <x-core::table.body.cell>
+                                    Import Type
+                                </x-core::table.body.cell>
+                                <x-core::table.body.cell>
+                                    (nullable|enum:country,state,city|default:state)
+                                </x-core::table.body.cell>
+                            </x-core::table.body.row>
+                            <x-core::table.body.row>
+                                <x-core::table.body.cell>
+                                    Status
+                                </x-core::table.body.cell>
+                                <x-core::table.body.cell>
+                                    (required|enum:{{ implode(',', Botble\Base\Enums\BaseStatusEnum::values()) }}|default:{{ Botble\Base\Enums\BaseStatusEnum::PUBLISHED }})
+                                </x-core::table.body.cell>
+                            </x-core::table.body.row>
+                            <x-core::table.body.row>
+                                <x-core::table.body.cell>
+                                    Order
+                                </x-core::table.body.cell>
+                                <x-core::table.body.cell>
+                                    (nullable|integer|min:0|max:127|default:0)
+                                </x-core::table.body.cell>
+                            </x-core::table.body.row>
+                            <x-core::table.body.row>
+                                <x-core::table.body.cell>
+                                    Nationality
+                                </x-core::table.body.cell>
+                                <x-core::table.body.cell>
+                                    (required_if:import_type,country|max:120)
+                                </x-core::table.body.cell>
+                            </x-core::table.body.row>
+
+                            @foreach ($supportedLocales as $localeCode => $properties)
+                                @continue($localeCode === Language::getCurrentLocale())
+                                <x-core::table.body.row>
+                                    <x-core::table.body.cell>
+                                        Name {{ $properties['lang_code'] }}
+                                        <i
+                                            class="fas fa-info-circle"
+                                            data-bs-toggle="tooltip"
+                                            data-bs-placement="top"
+                                            title="{{ trans('plugins/location::bulk-import.available_enable_multi_language') }}"
+                                        ></i>
+                                    </x-core::table.body.cell>
+                                    <x-core::table.body.cell>
+                                        (nullable|default:{Name})
+                                    </x-core::table.body.cell>
+                                </x-core::table.body.row>
+                            @endforeach
+                        </x-core::table.body>
+                    </x-core::table>
                 </div>
-                <div class="widget-body">
-                    <div
-                        id="available-remote-locations"
-                        data-url="{{ route('location.bulk-import.available-remote-locations') }}"
-                    >
-                        @include('core/base::elements.loading')
-                    </div>
-                </div>
-            </div>
+            </x-core::card>
         </div>
 
-        <script type="text/x-custom-template" id="failure-template">
+        <div class="col-md-6">
+            <x-core::card>
+                <x-core::card.header>
+                    <x-core::card.title>{{ trans('plugins/location::bulk-import.import_available_data') }}</x-core::card.title>
+                </x-core::card.header>
+
+                <div
+                    id="available-remote-locations"
+                    data-url="{{ route('location.bulk-import.available-remote-locations') }}"
+                    style="max-height: 100vh; min-height: 10rem"
+                    class="overflow-auto"
+                >
+                    <x-core::loading />
+                </div>
+            </x-core::card>
+        </div>
+    </div>
+
+    @push('footer')
+        <x-core::custom-template id="failure-template">
             <tr>
                 <td scope="row">__row__</td>
                 <td>__errors__</td>
             </tr>
-        </script>
-        <script type="text/x-custom-template" id="preview-template">
+        </x-core::custom-template>
+        <x-core::custom-template id="preview-template">
             <div class="position-relative d-flex gap-3">
                 <div>
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="height: 2rem; width: 2rem">
@@ -345,9 +430,9 @@
                     </svg>
                 </div>
                 <div>
-                    <h4 class="fs-6"><span data-dz-name></span></h4>
-                    <div class="small">
-                        <span class="text-muted" data-dz-size></span>
+                    <h4><span data-dz-name></span></h4>
+                    <div class="small text-muted">
+                        <span data-dz-size></span>
                         <a href="#" class="ms-1 text-danger cursor-pointer" data-dz-remove>
                             <i class="fas fa-trash"></i>
                         </a>
@@ -355,18 +440,17 @@
                     <div class="text-danger small" data-dz-errormessage></div>
                 </div>
             </div>
-        </script>
-    </div>
+        </x-core::custom-template>
 
-    @push('footer')
-        <x-core::modal
+        <x-core::modal.action
+            id="action-modal"
             class="modal-confirm-import"
             type="info"
             :title="trans('plugins/location::bulk-import.import_available_data_confirmation')"
-            button-class="button-confirm-import"
+            :description="trans('plugins/location::bulk-import.import_available_data_confirmation_content')"
+            :submit-button-label="trans('plugins/location::bulk-import.import')"
+            :submit-button-attrs="['class' => 'button-confirm-import']"
             :button-label="trans('plugins/location::bulk-import.import')"
-        >
-            <div>{{ trans('plugins/location::bulk-import.import_available_data_confirmation_content') }}</div>
-        </x-core::modal>
+        />
     @endpush
 @endsection

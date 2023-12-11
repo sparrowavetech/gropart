@@ -11,7 +11,7 @@ return [
     'system_information' => 'System information',
 
     'theme' => 'Theme',
-    'copyright' => 'Copyright :year &copy; :company. Version: <span>:version</span>',
+    'copyright' => 'Copyright :year © :company. Version :version',
     'profile' => 'Profile',
     'logout' => 'Logout',
     'no_search_result' => 'No results found, please try with different keywords.',
@@ -19,6 +19,7 @@ return [
     'search' => 'Search',
     'add_new' => 'Add new',
     'n_a' => 'N/A',
-    'page_loaded_time' => 'Page loaded in',
+    'page_loaded_in_time' => 'Page loaded in :time seconds',
     'view_website' => 'View website',
+    'tools' => 'Tools',
 ];

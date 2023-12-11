@@ -22,7 +22,7 @@ class RouteTranslationsListCommand extends RouteListCommand implements PromptsFo
         $locale = $this->argument('locale');
 
         if (! $this->isSupportedLocale($locale)) {
-            $this->error("Unsupported locale: '{$locale}'.");
+            $this->components->error("Unsupported locale: '$locale'.");
 
             return self::FAILURE;
         }

@@ -3,6 +3,8 @@
 namespace Botble\Captcha;
 
 use Botble\Captcha\Contracts\Captcha as CaptchaContract;
+use Botble\Captcha\Events\CaptchaRendered;
+use Botble\Captcha\Events\CaptchaRendering;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
 
@@ -12,7 +14,7 @@ class CaptchaV3 extends CaptchaContract
 
     public function verify(string $response, string $clientIp, array $options = []): bool
     {
-        if (! $this->isEnabled()) {
+        if (! $this->reCaptchaEnabled()) {
             return true;
         }
 
@@ -31,7 +33,7 @@ class CaptchaV3 extends CaptchaContract
         }
 
         $action = $options[0];
-        $minScore = isset($options[1]) ? (float) $options[1] : 0.5;
+        $minScore = isset($options[1]) ? (float) $options[1] : 0.6;
 
         if ($action && (! isset($data['action']) || $action != $data['action'])) {
             return false;
@@ -44,33 +46,59 @@ class CaptchaV3 extends CaptchaContract
 
     public function display(array $attributes = ['action' => 'form'], array $options = []): string|null
     {
-        if (! $this->siteKey || ! $this->isEnabled()) {
+        if (! $this->siteKey || ! $this->reCaptchaEnabled()) {
             return null;
         }
 
         $name = Arr::get($options, 'name', self::RECAPTCHA_INPUT_NAME);
         $uniqueId = uniqid($name . '-');
-        $action = Arr::get($attributes, 'action', 'form');
-        $isRendered = $this->rendered;
+        $headContent = $this->headRender();
+        $footerContent = $this->footerRender($uniqueId, $attributes);
 
-        add_filter(THEME_FRONT_FOOTER, function (string|null $html) use ($isRendered, $uniqueId, $action): string {
-            $url = self::RECAPTCHA_CLIENT_API_URL . '?' . http_build_query([
-                    'onload' => 'onloadCallback',
-                    'render' => $this->siteKey,
-                    'hl' => app()->getLocale(),
-                ]);
+        CaptchaRendering::dispatch($attributes, $options, $headContent, $footerContent);
 
-            return $html . view('plugins/captcha::v3.script', [
-                'siteKey' => $this->siteKey,
-                'id' => $uniqueId,
-                'action' => $action,
-                'url' => $url,
-                'isRendered' => $isRendered,
-            ])->render();
-        }, 99);
+        if (defined('THEME_FRONT_HEADER')) {
+            add_filter(THEME_FRONT_HEADER, function ($html) use ($headContent) {
+                return $html . $headContent;
+            }, 299);
+        }
+
+        if (defined('THEME_FRONT_FOOTER')) {
+            add_filter(THEME_FRONT_FOOTER, function (string|null $html) use ($footerContent): string {
+                return $html . $footerContent;
+            }, 99);
+        }
 
         $this->rendered = true;
 
-        return view('plugins/captcha::v3.html', compact('name', 'uniqueId'))->render();
+        return tap(
+            view('plugins/captcha::v3.html', compact('name', 'uniqueId'))->render(),
+            fn (string $rendered) => CaptchaRendered::dispatch($rendered)
+        );
+    }
+
+    protected function headRender(): string
+    {
+        return view('plugins/captcha::v3.head')->render();
+    }
+
+    protected function footerRender(string $uniqueId, array $attributes): string
+    {
+        $action = Arr::get($attributes, 'action', 'form');
+        $isRendered = $this->rendered;
+
+        $url = self::RECAPTCHA_CLIENT_API_URL . '?' . http_build_query([
+                'onload' => 'onloadCallback',
+                'render' => $this->siteKey,
+                'hl' => app()->getLocale(),
+            ]);
+
+        return view('plugins/captcha::v3.script', [
+            'siteKey' => $this->siteKey,
+            'id' => $uniqueId,
+            'action' => $action,
+            'url' => $url,
+            'isRendered' => $isRendered,
+        ])->render();
     }
 }

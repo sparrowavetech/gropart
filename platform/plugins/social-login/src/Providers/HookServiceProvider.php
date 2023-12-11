@@ -5,20 +5,21 @@ namespace Botble\SocialLogin\Providers;
 use Botble\Base\Supports\ServiceProvider;
 use Botble\SocialLogin\Facades\SocialService;
 use Botble\Theme\Facades\Theme;
+use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\Arr;
 
 class HookServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
-        if (SocialService::setting('enable')) {
+        $this->app['events']->listen(RouteMatched::class, function () {
             add_filter(BASE_FILTER_AFTER_LOGIN_OR_REGISTER_FORM, [$this, 'addLoginOptions'], 25, 2);
-        }
+        });
     }
 
     public function addLoginOptions(string|null $html, string $module): string|null
     {
-        if (! SocialService::isSupportedModule($module)) {
+        if (! SocialService::setting('enable') || ! SocialService::isSupportedModule($module)) {
             return $html;
         }
 

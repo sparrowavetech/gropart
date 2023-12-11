@@ -3,7 +3,7 @@
 namespace Botble\PluginManagement\Http\Controllers;
 
 use Botble\Base\Facades\Assets;
-use Botble\Base\Facades\PageTitle;
+use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\PluginManagement\Services\MarketplaceService;
 use Botble\PluginManagement\Services\PluginService;
@@ -11,30 +11,32 @@ use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Routing\Controller;
 use Illuminate\Support\Str;
 use Throwable;
 
-class MarketplaceController extends Controller
+class MarketplaceController extends BaseController
 {
     public function __construct(
         protected MarketplaceService $marketplaceService,
         protected PluginService $pluginService,
     ) {
+        $this
+            ->breadcrumb()
+            ->add(trans('packages/plugin-management::plugin.plugins'), route('plugins.index'))
+            ->add(trans('packages/plugin-management::plugin.plugins_add_new'), route('plugins.new'));
     }
 
     public function index(): View
     {
-        PageTitle::setTitle(trans('packages/plugin-management::plugin.plugins_add_new'));
+        $this->pageTitle(trans('packages/plugin-management::plugin.plugins_add_new'));
 
-        Assets::addScriptsDirectly('vendor/core/packages/plugin-management/js/marketplace.js');
+        Assets::usingVueJS()
+            ->addScriptsDirectly('vendor/core/packages/plugin-management/js/marketplace.js');
 
-        Assets::usingVueJS();
-
-        return view('packages/plugin-management::marketplace.index');
+        return view('packages/plugin-management::marketplace');
     }
 
-    public function list(Request $request, BaseHttpResponse $httpResponse): array|BaseHttpResponse
+    public function list(Request $request): array|BaseHttpResponse
     {
         $request->merge([
             'type' => 'plugin',
@@ -50,7 +52,8 @@ class MarketplaceController extends Controller
         }
 
         if (isset($data['error']) && $data['error']) {
-            return $httpResponse
+            return $this
+                ->httpResponse()
                 ->setError()
                 ->setMessage($data['message']);
         }
@@ -87,37 +90,36 @@ class MarketplaceController extends Controller
         return $response->body();
     }
 
-    public function install(string $id): JsonResponse
+    public function install(string $id): BaseHttpResponse
     {
         $detail = $this->detail($id);
 
         $version = $detail['data']['minimum_core_version'];
         if (version_compare($version, get_core_version(), '>')) {
-            return response()->json([
-                'error' => true,
-                'message' => trans('packages/plugin-management::marketplace.minimum_core_version_error', compact('version')),
-            ]);
+            return $this
+                ->httpResponse()
+                ->setError()
+                ->setMessage(trans('packages/plugin-management::marketplace.minimum_core_version_error', compact('version')));
         }
 
         $name = Str::afterLast($detail['data']['package_name'], '/');
 
         try {
-            $this->marketplaceService->beginInstall($id, 'plugin', $name);
+            $this->marketplaceService->beginInstall($id, $name);
         } catch (Throwable $exception) {
-            return response()->json([
-                'error' => true,
-                'message' => $exception->getMessage(),
-            ]);
+            return $this
+                ->httpResponse()
+                ->setError()
+                ->setMessage($exception->getMessage());
         }
 
-        return response()->json([
-            'error' => false,
-            'message' => trans('packages/plugin-management::marketplace.install_success'),
-            'data' => [
+        return $this
+            ->httpResponse()
+            ->setMessage(trans('packages/plugin-management::marketplace.install_success'))
+            ->setData([
                 'name' => $name,
                 'id' => $id,
-            ],
-        ]);
+            ]);
     }
 
     public function update(string $id, string|null $name = null): JsonResponse
@@ -129,7 +131,7 @@ class MarketplaceController extends Controller
         }
 
         try {
-            $this->marketplaceService->beginInstall($id, 'plugin', $name);
+            $this->marketplaceService->beginInstall($id, $name);
         } catch (Throwable $exception) {
             return response()->json([
                 'error' => true,

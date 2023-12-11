@@ -14,11 +14,13 @@ class DeletedContentListener
     {
         try {
             if ($event->data->getKey()) {
+                $model = $event->screen;
+
                 event(new AuditHandlerEvent(
-                    $event->screen,
+                    $model,
                     'deleted',
                     $event->data->getKey(),
-                    AuditLog::getReferenceName($event->screen, $event->data),
+                    AuditLog::getReferenceName($model, $event->data),
                     'danger'
                 ));
             }

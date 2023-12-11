@@ -90,7 +90,7 @@ abstract class RepositoriesAbstract implements RepositoryInterface
             $model = $model->getModel();
         }
 
-        throw (new ModelNotFoundException())->setModel(get_class($model), $id);
+        throw (new ModelNotFoundException())->setModel($model::class, $id);
     }
 
     public function all(array $with = [])

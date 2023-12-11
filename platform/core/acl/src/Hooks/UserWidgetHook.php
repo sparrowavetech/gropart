@@ -17,8 +17,8 @@ class UserWidgetHook
             ->setPermission('users.index')
             ->setTitle(trans('core/acl::users.users'))
             ->setKey('widget_total_users')
-            ->setIcon('fas fa-users')
-            ->setColor('#3598dc')
+            ->setIcon('ti ti-users')
+            ->setColor('info')
             ->setStatsTotal($users)
             ->setRoute(route('users.index'))
             ->init($widgets, $widgetSettings);

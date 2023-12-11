@@ -1,0 +1,3 @@
+$(() => {
+    $('.editable').editable({ mode: 'inline' })
+})

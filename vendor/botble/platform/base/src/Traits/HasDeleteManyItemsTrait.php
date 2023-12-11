@@ -16,8 +16,7 @@ trait HasDeleteManyItemsTrait
     protected function executeDeleteItems(
         Request $request,
         BaseHttpResponse $response,
-        RepositoryInterface|BaseModel $repository,
-        string $screen
+        RepositoryInterface|BaseModel $repository
     ): BaseHttpResponse {
         $ids = $request->input('ids');
 
@@ -35,9 +34,9 @@ trait HasDeleteManyItemsTrait
 
             $item->delete();
 
-            event(new DeletedContentEvent($screen, $request, $item));
+            DeletedContentEvent::dispatch($item::class, $request, $item);
         }
 
-        return $response->setMessage(trans('core/base::notices.delete_success_message'));
+        return $response->withDeletedSuccessMessage();
     }
 }

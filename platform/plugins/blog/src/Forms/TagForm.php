@@ -2,40 +2,26 @@
 
 namespace Botble\Blog\Forms;
 
-use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Base\Forms\FieldOptions\DescriptionFieldOption;
+use Botble\Base\Forms\FieldOptions\NameFieldOption;
+use Botble\Base\Forms\FieldOptions\StatusFieldOption;
+use Botble\Base\Forms\Fields\SelectField;
+use Botble\Base\Forms\Fields\TextareaField;
+use Botble\Base\Forms\Fields\TextField;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Blog\Http\Requests\TagRequest;
 use Botble\Blog\Models\Tag;
 
 class TagForm extends FormAbstract
 {
-    public function buildForm(): void
+    public function setup(): void
     {
         $this
-            ->setupModel(new Tag())
+            ->model(Tag::class)
             ->setValidatorClass(TagRequest::class)
-            ->withCustomFields()
-            ->add('name', 'text', [
-                'label' => trans('core/base::forms.name'),
-                'required' => true,
-                'attr' => [
-                    'placeholder' => trans('core/base::forms.name_placeholder'),
-                    'data-counter' => 120,
-                ],
-            ])
-            ->add('description', 'textarea', [
-                'label' => trans('core/base::forms.description'),
-                'attr' => [
-                    'rows' => 4,
-                    'placeholder' => trans('core/base::forms.description_placeholder'),
-                    'data-counter' => 400,
-                ],
-            ])
-            ->add('status', 'customSelect', [
-                'label' => trans('core/base::tables.status'),
-                'required' => true,
-                'choices' => BaseStatusEnum::labels(),
-            ])
+            ->add('name', TextField::class, NameFieldOption::make()->required()->maxLength(120)->toArray())
+            ->add('description', TextareaField::class, DescriptionFieldOption::make()->toArray())
+            ->add('status', SelectField::class, StatusFieldOption::make()->toArray())
             ->setBreakFieldPoint('status');
     }
 }

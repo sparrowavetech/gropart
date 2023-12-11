@@ -464,4 +464,9 @@ class BaseHelper
     {
         return config('core.base.general.date_format.date_time');
     }
+
+    public function joinPaths(array $paths): string
+    {
+        return implode(DIRECTORY_SEPARATOR, $paths);
+    }
 }

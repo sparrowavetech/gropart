@@ -40,17 +40,14 @@ class CommandServiceProvider extends ServiceProvider
                 ClearCompiledCommand::class,
                 PluginDiscoverCommand::class,
                 PluginInstallFromMarketplaceCommand::class,
+                PluginActivateCommand::class,
+                PluginActivateAllCommand::class,
+                PluginDeactivateCommand::class,
+                PluginDeactivateAllCommand::class,
+                PluginRemoveCommand::class,
+                PluginRemoveAllCommand::class,
+                PluginListCommand::class,
             ]);
         }
-
-        $this->commands([
-            PluginActivateCommand::class,
-            PluginActivateAllCommand::class,
-            PluginDeactivateCommand::class,
-            PluginDeactivateAllCommand::class,
-            PluginRemoveCommand::class,
-            PluginRemoveAllCommand::class,
-            PluginListCommand::class,
-        ]);
     }
 }

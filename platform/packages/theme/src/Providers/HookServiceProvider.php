@@ -4,11 +4,17 @@ namespace Botble\Theme\Providers;
 
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\Html;
+use Botble\Base\Forms\Fields\NumberField;
+use Botble\Base\Forms\Fields\TextField;
 use Botble\Base\Supports\ServiceProvider;
+use Botble\Dashboard\Events\RenderingDashboardWidgets;
 use Botble\Dashboard\Supports\DashboardWidgetInstance;
 use Botble\Page\Models\Page;
+use Botble\Page\Tables\PageTable;
 use Botble\Shortcode\Compilers\Shortcode;
 use Botble\Shortcode\Compilers\ShortcodeCompiler;
+use Botble\Shortcode\Forms\ShortcodeForm;
+use Botble\Theme\Events\RenderingThemeOptionSettings;
 use Botble\Theme\Facades\AdminBar;
 use Botble\Theme\Facades\Theme;
 use Botble\Theme\Supports\ThemeSupport;
@@ -16,6 +22,7 @@ use Botble\Theme\Supports\Vimeo;
 use Botble\Theme\Supports\Youtube;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Throwable;
 
@@ -23,19 +30,21 @@ class HookServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
-        add_filter(PAGE_FILTER_PAGE_NAME_IN_ADMIN_LIST, function (string $name, Page $page) {
-            if (BaseHelper::isHomepage($page->getKey())) {
-                $name .= Html::tag('span', ' — ' . trans('packages/page::pages.front_page'), [
-                    'class' => 'additional-page-name',
-                ])->toHtml();
-            }
+        PageTable::beforeRendering(function () {
+            add_filter(PAGE_FILTER_PAGE_NAME_IN_ADMIN_LIST, function (string $name, Page $page) {
+                if (BaseHelper::isHomepage($page->getKey())) {
+                    $name .= Html::tag('span', ' — ' . trans('packages/page::pages.front_page'), [
+                        'class' => 'additional-page-name',
+                    ])->toHtml();
+                }
 
-            return $name;
-        }, 10, 2);
+                return $name;
+            }, 10, 2);
+        });
 
-        add_filter(DASHBOARD_FILTER_ADMIN_LIST, [$this, 'addStatsWidgets'], 4, 2);
-
-        add_filter(BASE_FILTER_AFTER_SETTING_CONTENT, [$this, 'addSetting'], 39);
+        $this->app['events']->listen(RenderingDashboardWidgets::class, function () {
+            add_filter(DASHBOARD_FILTER_ADMIN_LIST, [$this,  'addStatsWidgets'], 4, 2);
+        });
 
         add_filter('get_http_exception_view', function (string $defaultView, HttpExceptionInterface $exception) {
             if (view()->exists($view = Theme::getThemeNamespace('views.' . $exception->getStatusCode()))) {
@@ -45,125 +54,127 @@ class HookServiceProvider extends ServiceProvider
             return $defaultView;
         }, 10, 2);
 
-        theme_option()
-            ->setSection([
-                'title' => trans('packages/theme::theme.theme_option_general'),
-                'desc' => trans('packages/theme::theme.theme_option_general_description'),
-                'priority' => 0,
-                'id' => 'opt-text-subsection-general',
-                'subsection' => true,
-                'icon' => 'fa fa-home',
-                'fields' => [
-                    [
-                        'id' => 'site_title',
-                        'type' => 'text',
-                        'label' => trans('core/setting::setting.general.site_title'),
-                        'attributes' => [
-                            'name' => 'site_title',
-                            'value' => null,
-                            'options' => [
-                                'class' => 'form-control',
-                                'placeholder' => trans('core/setting::setting.general.site_title'),
-                                'data-counter' => 255,
+        $this->app['events']->listen(RenderingThemeOptionSettings::class, function () {
+            theme_option()
+                ->setSection([
+                    'title' => trans('packages/theme::theme.theme_option_general'),
+                    'desc' => trans('packages/theme::theme.theme_option_general_description'),
+                    'priority' => 0,
+                    'id' => 'opt-text-subsection-general',
+                    'subsection' => true,
+                    'icon' => 'ti ti-home',
+                    'fields' => [
+                        [
+                            'id' => 'site_title',
+                            'type' => 'text',
+                            'label' => trans('core/setting::setting.general.site_title'),
+                            'attributes' => [
+                                'name' => 'site_title',
+                                'value' => null,
+                                'options' => [
+                                    'class' => 'form-control',
+                                    'placeholder' => trans('core/setting::setting.general.site_title'),
+                                    'data-counter' => 255,
+                                ],
+                            ],
+                        ],
+                        [
+                            'id' => 'show_site_name',
+                            'section_id' => 'opt-text-subsection-general',
+                            'type' => 'customSelect',
+                            'label' => trans('core/setting::setting.general.show_site_name'),
+                            'attributes' => [
+                                'name' => 'show_site_name',
+                                'list' => [
+                                    '0' => __('No'),
+                                    '1' => __('Yes'),
+                                ],
+                                'value' => '0',
+                            ],
+                        ],
+                        [
+                            'id' => 'seo_title',
+                            'type' => 'text',
+                            'label' => trans('core/setting::setting.general.seo_title'),
+                            'attributes' => [
+                                'name' => 'seo_title',
+                                'value' => null,
+                                'options' => [
+                                    'class' => 'form-control',
+                                    'placeholder' => trans('core/setting::setting.general.seo_title'),
+                                    'data-counter' => 120,
+                                ],
+                            ],
+                        ],
+                        [
+                            'id' => 'seo_description',
+                            'type' => 'textarea',
+                            'label' => trans('core/setting::setting.general.seo_description'),
+                            'attributes' => [
+                                'name' => 'seo_description',
+                                'value' => null,
+                                'options' => [
+                                    'class' => 'form-control',
+                                    'rows' => 4,
+                                ],
+                            ],
+                        ],
+                        [
+                            'id' => 'seo_og_image',
+                            'type' => 'mediaImage',
+                            'label' => trans('packages/theme::theme.theme_option_seo_open_graph_image'),
+                            'attributes' => [
+                                'name' => 'seo_og_image',
+                                'value' => null,
+                            ],
+                        ],
+                        [
+                            'id' => 'theme_breadcrumb_enabled',
+                            'section_id' => 'opt-text-subsection-general',
+                            'type' => 'customSelect',
+                            'label' => trans('packages/theme::theme.breadcrumb_enabled'),
+                            'attributes' => [
+                                'name' => 'theme_breadcrumb_enabled',
+                                'list' => [
+                                    '1' => __('Yes'),
+                                    '0' => __('No'),
+                                ],
+                                'value' => '1',
                             ],
                         ],
                     ],
-                    [
-                        'id' => 'show_site_name',
-                        'section_id' => 'opt-text-subsection-general',
-                        'type' => 'customSelect',
-                        'label' => trans('core/setting::setting.general.show_site_name'),
-                        'attributes' => [
-                            'name' => 'show_site_name',
-                            'list' => [
-                                '0' => __('No'),
-                                '1' => __('Yes'),
-                            ],
-                            'value' => '0',
-                        ],
-                    ],
-                    [
-                        'id' => 'seo_title',
-                        'type' => 'text',
-                        'label' => trans('core/setting::setting.general.seo_title'),
-                        'attributes' => [
-                            'name' => 'seo_title',
-                            'value' => null,
-                            'options' => [
-                                'class' => 'form-control',
-                                'placeholder' => trans('core/setting::setting.general.seo_title'),
-                                'data-counter' => 120,
+                ])
+                ->setSection([
+                    'title' => trans('packages/theme::theme.theme_option_logo'),
+                    'desc' => trans('packages/theme::theme.theme_option_logo'),
+                    'priority' => 0,
+                    'id' => 'opt-text-subsection-logo',
+                    'subsection' => true,
+                    'icon' => 'ti ti-photo',
+                    'fields' => [
+                        [
+                            'id' => 'favicon',
+                            'type' => 'mediaImage',
+                            'label' => trans('packages/theme::theme.theme_option_favicon'),
+                            'attributes' => [
+                                'name' => 'favicon',
+                                'value' => null,
+                                'attributes' => ['allow_thumb' => false],
                             ],
                         ],
-                    ],
-                    [
-                        'id' => 'seo_description',
-                        'type' => 'textarea',
-                        'label' => trans('core/setting::setting.general.seo_description'),
-                        'attributes' => [
-                            'name' => 'seo_description',
-                            'value' => null,
-                            'options' => [
-                                'class' => 'form-control',
-                                'rows' => 4,
+                        [
+                            'id' => 'logo',
+                            'type' => 'mediaImage',
+                            'label' => trans('packages/theme::theme.theme_option_logo'),
+                            'attributes' => [
+                                'name' => 'logo',
+                                'value' => null,
+                                'attributes' => ['allow_thumb' => false],
                             ],
                         ],
                     ],
-                    [
-                        'id' => 'seo_og_image',
-                        'type' => 'mediaImage',
-                        'label' => trans('packages/theme::theme.theme_option_seo_open_graph_image'),
-                        'attributes' => [
-                            'name' => 'seo_og_image',
-                            'value' => null,
-                        ],
-                    ],
-                    [
-                        'id' => 'theme_breadcrumb_enabled',
-                        'section_id' => 'opt-text-subsection-general',
-                        'type' => 'customSelect',
-                        'label' => trans('packages/theme::theme.breadcrumb_enabled'),
-                        'attributes' => [
-                            'name' => 'theme_breadcrumb_enabled',
-                            'list' => [
-                                '1' => __('Yes'),
-                                '0' => __('No'),
-                            ],
-                            'value' => '1',
-                        ],
-                    ],
-                ],
-            ])
-            ->setSection([
-                'title' => trans('packages/theme::theme.theme_option_logo'),
-                'desc' => trans('packages/theme::theme.theme_option_logo'),
-                'priority' => 0,
-                'id' => 'opt-text-subsection-logo',
-                'subsection' => true,
-                'icon' => 'fa fa-image',
-                'fields' => [
-                    [
-                        'id' => 'favicon',
-                        'type' => 'mediaImage',
-                        'label' => trans('packages/theme::theme.theme_option_favicon'),
-                        'attributes' => [
-                            'name' => 'favicon',
-                            'value' => null,
-                            'attributes' => ['allow_thumb' => false],
-                        ],
-                    ],
-                    [
-                        'id' => 'logo',
-                        'type' => 'mediaImage',
-                        'label' => trans('packages/theme::theme.theme_option_logo'),
-                        'attributes' => [
-                            'name' => 'logo',
-                            'value' => null,
-                            'attributes' => ['allow_thumb' => false],
-                        ],
-                    ],
-                ],
-            ]);
+                ]);
+        });
 
         add_shortcode('media', 'Media', 'Media', function (Shortcode $shortcode) {
             $url = $shortcode->url;
@@ -209,6 +220,13 @@ class HookServiceProvider extends ServiceProvider
 
                     $iframe = Html::tag('iframe', '', $data)->toHtml();
                 }
+            } else {
+                $extension = File::extension($url) ?: 'mp4';
+
+                $data['width'] = $shortcode->width ?: '100%';
+                $data['height'] = $shortcode->height ?: 400;
+
+                return view('packages/theme::shortcodes.video', compact('url', 'data', 'extension'))->render();
             }
 
             if ($iframe) {
@@ -219,8 +237,24 @@ class HookServiceProvider extends ServiceProvider
             return null;
         });
 
+        shortcode()->setPreviewImage('media', asset('vendor/core/packages/theme/images/ui-blocks/media.jpg'));
+
         shortcode()->setAdminConfig('media', function (array $attributes) {
-            return view('packages/theme::shortcodes.media-admin-config', compact('attributes'))->render();
+            return ShortcodeForm::createFromArray($attributes)
+                ->add('url', TextField::class, [
+                    'label' => __('Media URL'),
+                    'attr' => [
+                        'placeholder' => 'https://www.youtube.com/watch?v=SlPhMPnQ58k',
+                    ],
+                ])
+                ->add('width', NumberField::class, [
+                    'label' => __('Width'),
+                    'default_value' => 420,
+                ])
+                ->add('height', NumberField::class, [
+                    'label' => __('Height'),
+                    'default_value' => 315,
+                ]);
         });
 
         add_filter(THEME_FRONT_HEADER, function (string|null $html): string|null {
@@ -238,9 +272,19 @@ class HookServiceProvider extends ServiceProvider
                     return html_entity_decode($shortcode->getContent());
                 });
 
+                shortcode()->setPreviewImage('custom-html', asset('vendor/core/packages/shortcode/images/placeholder-code.jpg'));
+
                 shortcode()->setAdminConfig('custom-html', function (array $attributes, string|null $content) {
-                    return view('packages/theme::shortcodes.custom-html-admin-config', compact('attributes', 'content'))
-                        ->render();
+                    return ShortcodeForm::createFromArray($attributes)
+                        ->add('content', 'textarea', [
+                            'label' => __('Content'),
+                            'attr' => [
+                                'placeholder' => __('HTML code'),
+                                'rows' => 3,
+                                'data-shortcode-attribute' => 'content',
+                            ],
+                            'value' => $content,
+                        ]);
                 });
             }
 
@@ -328,19 +372,6 @@ class HookServiceProvider extends ServiceProvider
                     ->add('ckeditor-content-styles', 'vendor/core/core/base/libraries/ckeditor/content-styles.css');
             }
         }, 15);
-
-        add_filter('cms_settings_validation_rules', [$this, 'addSettingRules'], 15);
-    }
-
-    public function addSettingRules(array $rules): array
-    {
-        return array_merge($rules, [
-            'enable_cache_site_map' => 'nullable|in:0,1',
-            'cache_time_site_map' => 'nullable|integer|min:0',
-            'show_admin_bar' => 'nullable|in:0,1',
-            'redirect_404_to_homepage' => 'nullable|in:0,1',
-            'show_theme_guideline_link' => 'nullable|in:0,1',
-        ]);
     }
 
     public function addStatsWidgets(array $widgets, Collection $widgetSettings): array
@@ -350,17 +381,12 @@ class HookServiceProvider extends ServiceProvider
         return (new DashboardWidgetInstance())
             ->setType('stats')
             ->setPermission('theme.index')
-            ->setTitle(trans('packages/theme::theme.theme'))
+            ->setTitle($themes === 1 ? trans('packages/theme::theme.theme') : trans('packages/theme::theme.themes'))
             ->setKey('widget_total_themes')
-            ->setIcon('fa fa-paint-brush')
-            ->setColor('#e7505a')
+            ->setIcon('ti ti-palette')
+            ->setColor('pink')
             ->setStatsTotal($themes)
             ->setRoute(route('theme.index'))
             ->init($widgets, $widgetSettings);
-    }
-
-    public function addSetting(string|null $data = null): string
-    {
-        return $data . view('packages/theme::setting')->render();
     }
 }

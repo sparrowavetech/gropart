@@ -42,7 +42,7 @@ class CreatedContentListener
                     'key' => $slugService->create($slug, (int)$event->data->slug_id, $class),
                     'reference_type' => $class,
                     'reference_id' => $event->data->getKey(),
-                    'prefix' => SlugHelper::getPrefix($class),
+                    'prefix' => SlugHelper::getPrefix($class, '', false),
                 ]);
             } catch (Exception $exception) {
                 BaseHelper::logError($exception);

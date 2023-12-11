@@ -3,6 +3,7 @@
 namespace Botble\Location\Http\Requests;
 
 use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Base\Rules\OnOffRule;
 use Botble\Support\Http\Requests\Request;
 use Illuminate\Validation\Rule;
 
@@ -11,7 +12,7 @@ class CityRequest extends Request
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:220',
+            'name' => 'required|string|max:250',
             'state_id' => 'nullable|exists:states,id',
             'country_id' => 'required|exists:countries,id',
             'slug' => [
@@ -22,6 +23,7 @@ class CityRequest extends Request
             'image' => 'nullable|string|max:255',
             'order' => 'required|integer|min:0|max:127',
             'status' => Rule::in(BaseStatusEnum::values()),
+            'is_default' => new OnOffRule(),
         ];
     }
 }

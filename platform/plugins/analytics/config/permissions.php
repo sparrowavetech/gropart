@@ -20,4 +20,9 @@ return [
         'flag' => 'analytics.referrer',
         'parent_flag' => 'analytics.general',
     ],
+    [
+        'name' => 'Analytics Settings',
+        'flag' => 'analytics.settings',
+        'parent_flag' => 'analytics.general',
+    ],
 ];

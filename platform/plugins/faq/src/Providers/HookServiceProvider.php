@@ -10,13 +10,14 @@ use Botble\Base\Supports\ServiceProvider;
 use Botble\Faq\Contracts\Faq as FaqContract;
 use Botble\Faq\FaqCollection;
 use Botble\Faq\FaqItem;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 
 class HookServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
-        add_action(BASE_ACTION_META_BOXES, function ($context, $object): void {
+        add_action(BASE_ACTION_META_BOXES, function (string $context, string|Model|null $object = null): void {
             if (! $object || $context != 'advanced') {
                 return;
             }
@@ -109,21 +110,5 @@ class HookServiceProvider extends ServiceProvider
                 return $html;
             }, 39);
         }, 39, 2);
-
-        add_filter(BASE_FILTER_AFTER_SETTING_CONTENT, [$this, 'addSettings'], 59);
-
-        add_filter('cms_settings_validation_rules', [$this, 'addSettingRules'], 59);
-    }
-
-    public function addSettingRules(array $rules): array
-    {
-        return array_merge($rules, [
-            'enable_faq_schema' => 'nullable|in:0,1',
-        ]);
-    }
-
-    public function addSettings(string|null $data = null): string
-    {
-        return $data . view('plugins/faq::settings')->render();
     }
 }

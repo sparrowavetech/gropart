@@ -3,6 +3,7 @@
 namespace Botble\Ads\Providers;
 
 use Botble\Ads\Facades\AdsManager;
+use Botble\Ads\Forms\AdsForm;
 use Botble\Ads\Models\Ads;
 use Botble\Ads\Repositories\Eloquent\AdsRepository;
 use Botble\Ads\Repositories\Interfaces\AdsInterface;
@@ -29,7 +30,8 @@ class AdsServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        $this->setNamespace('plugins/ads')
+        $this
+            ->setNamespace('plugins/ads')
             ->loadAndPublishConfigurations(['permissions'])
             ->loadMigrations()
             ->loadAndPublishTranslations()
@@ -37,37 +39,39 @@ class AdsServiceProvider extends ServiceProvider
             ->loadHelpers()
             ->loadAndPublishViews();
 
-        $this->app['events']->listen(RouteMatched::class, function () {
-            DashboardMenu::registerItem([
-                'id' => 'cms-plugins-ads',
-                'priority' => 5,
-                'parent_id' => null,
-                'name' => 'plugins/ads::ads.name',
-                'icon' => 'fas fa-bullhorn',
-                'url' => route('ads.index'),
-                'permissions' => ['ads.index'],
-            ]);
+        DashboardMenu::beforeRetrieving(function () {
+            DashboardMenu::make()
+                ->registerItem([
+                    'id' => 'cms-plugins-ads',
+                    'priority' => 8,
+                    'icon' => 'ti ti-ad-circle',
+                    'name' => 'plugins/ads::ads.name',
+                    'url' => fn () => route('ads.index'),
+                    'permissions' => ['ads.index'],
+                ]);
         });
 
-        if (function_exists('shortcode')) {
-            add_shortcode('ads', __('Ads'), __('Ads'), function ($shortcode) {
-                if (! $shortcode->key) {
-                    return null;
-                }
+        $this->app['events']->listen(RouteMatched::class, function () {
+            if (function_exists('shortcode')) {
+                add_shortcode('ads', __('Ads'), __('Ads'), function ($shortcode) {
+                    if (! $shortcode->key) {
+                        return null;
+                    }
 
-                return AdsManager::displayAds((string)$shortcode->key);
-            });
+                    return AdsManager::displayAds((string)$shortcode->key);
+                });
 
-            shortcode()->setAdminConfig('ads', function ($attributes) {
-                $ads = Ads::query()
-                    ->wherePublished()
-                    ->pluck('name', 'key')
-                    ->all();
+                shortcode()->setAdminConfig('ads', function ($attributes) {
+                    $ads = Ads::query()
+                        ->wherePublished()
+                        ->pluck('name', 'key')
+                        ->all();
 
-                return view('plugins/ads::partials.ads-admin-config', compact('ads', 'attributes'))
-                    ->render();
-            });
-        }
+                    return view('plugins/ads::partials.ads-admin-config', compact('ads', 'attributes'))
+                        ->render();
+                });
+            }
+        });
 
         if (defined('LANGUAGE_MODULE_SCREEN_NAME') && defined('LANGUAGE_ADVANCED_MODULE_SCREEN_NAME')) {
             LanguageAdvancedManager::registerModule(Ads::class, [
@@ -77,15 +81,17 @@ class AdsServiceProvider extends ServiceProvider
             ]);
         }
 
-        add_action(BASE_ACTION_TOP_FORM_CONTENT_NOTIFICATION, function ($request, $data = null) {
-            if (! $data instanceof Ads || ! in_array(Route::currentRouteName(), ['ads.create', 'ads.edit'])) {
-                return false;
-            }
+        AdsForm::beforeRendering(function () {
+            add_action(BASE_ACTION_TOP_FORM_CONTENT_NOTIFICATION, function ($request, $data = null) {
+                if (! $data instanceof Ads || ! in_array(Route::currentRouteName(), ['ads.create', 'ads.edit'])) {
+                    return false;
+                }
 
-            echo view('plugins/ads::partials.notification')
-                ->render();
+                echo view('plugins/ads::partials.notification')
+                    ->render();
 
-            return true;
-        }, 45, 2);
+                return true;
+            }, 45, 2);
+        });
     }
 }

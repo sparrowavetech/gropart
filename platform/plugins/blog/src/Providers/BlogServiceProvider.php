@@ -4,6 +4,8 @@ namespace Botble\Blog\Providers;
 
 use Botble\Api\Facades\ApiHelper;
 use Botble\Base\Facades\DashboardMenu;
+use Botble\Base\Facades\PanelSectionManager;
+use Botble\Base\PanelSections\PanelSectionItem;
 use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Blog\Models\Category;
@@ -18,10 +20,11 @@ use Botble\Blog\Repositories\Interfaces\TagInterface;
 use Botble\Language\Facades\Language;
 use Botble\LanguageAdvanced\Supports\LanguageAdvancedManager;
 use Botble\SeoHelper\Facades\SeoHelper;
+use Botble\Setting\PanelSections\SettingOthersPanelSection;
 use Botble\Shortcode\View\View;
 use Botble\Slug\Facades\SlugHelper;
+use Botble\Theme\Events\ThemeRoutingBeforeEvent;
 use Botble\Theme\Facades\SiteMapManager;
-use Illuminate\Routing\Events\RouteMatched;
 
 /**
  * @since 02/07/2016 09:50 AM
@@ -55,7 +58,8 @@ class BlogServiceProvider extends ServiceProvider
         SlugHelper::setPrefix(Post::class, null, true);
         SlugHelper::setPrefix(Category::class, null, true);
 
-        $this->setNamespace('plugins/blog')
+        $this
+            ->setNamespace('plugins/blog')
             ->loadHelpers()
             ->loadAndPublishConfigurations(['permissions', 'general'])
             ->loadAndPublishViews()
@@ -70,50 +74,55 @@ class BlogServiceProvider extends ServiceProvider
 
         $this->app->register(EventServiceProvider::class);
 
-        SiteMapManager::registerKey([
-            'blog-categories',
-            'blog-tags',
-            'blog-posts-((?:19|20|21|22)\d{2})-(0?[1-9]|1[012])',
-        ]);
+        $this->app['events']->listen(ThemeRoutingBeforeEvent::class, function () {
+            SiteMapManager::registerKey([
+                'blog-categories',
+                'blog-tags',
+                'blog-posts-((?:19|20|21|22)\d{2})-(0?[1-9]|1[012])',
+            ]);
+        });
 
-        $this->app['events']->listen(RouteMatched::class, function () {
+        DashboardMenu::default()->beforeRetrieving(function () {
             DashboardMenu::make()
                 ->registerItem([
                     'id' => 'cms-plugins-blog',
                     'priority' => 3,
-                    'parent_id' => null,
                     'name' => 'plugins/blog::base.menu_name',
-                    'icon' => 'fa fa-edit',
-                    'url' => route('posts.index'),
-                    'permissions' => ['posts.index'],
+                    'icon' => 'ti ti-article',
                 ])
                 ->registerItem([
                     'id' => 'cms-plugins-blog-post',
                     'priority' => 1,
                     'parent_id' => 'cms-plugins-blog',
                     'name' => 'plugins/blog::posts.menu_name',
-                    'icon' => null,
-                    'url' => route('posts.index'),
-                    'permissions' => ['posts.index'],
+                    'route' => 'posts.index',
                 ])
                 ->registerItem([
                     'id' => 'cms-plugins-blog-categories',
                     'priority' => 2,
                     'parent_id' => 'cms-plugins-blog',
                     'name' => 'plugins/blog::categories.menu_name',
-                    'icon' => null,
-                    'url' => route('categories.index'),
-                    'permissions' => ['categories.index'],
+                    'route' => 'categories.index',
                 ])
                 ->registerItem([
                     'id' => 'cms-plugins-blog-tags',
                     'priority' => 3,
                     'parent_id' => 'cms-plugins-blog',
                     'name' => 'plugins/blog::tags.menu_name',
-                    'icon' => null,
-                    'url' => route('tags.index'),
-                    'permissions' => ['tags.index'],
+                    'route' => 'tags.index',
                 ]);
+        });
+
+        PanelSectionManager::default()->beforeRendering(function () {
+            PanelSectionManager::registerItem(
+                SettingOthersPanelSection::class,
+                fn () => PanelSectionItem::make('blog')
+                    ->setTitle(trans('plugins/blog::base.settings.title'))
+                    ->withIcon('ti ti-file-settings')
+                    ->withDescription(trans('plugins/blog::base.settings.description'))
+                    ->withPriority(120)
+                    ->withRoute('blog.settings')
+            );
         });
 
         if (defined('LANGUAGE_MODULE_SCREEN_NAME')) {

@@ -6,6 +6,10 @@ use Botble\Backup\Supports\Backup;
 use Botble\Base\Facades\BaseHelper;
 use Exception;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\File;
+
+use function Laravel\Prompts\table;
+
 use Symfony\Component\Console\Attribute\AsCommand;
 
 #[AsCommand('cms:backup:list', 'List all backups')]
@@ -13,6 +17,12 @@ class BackupListCommand extends Command
 {
     public function handle(Backup $backupService): int
     {
+        if (! File::exists($backupService->getBackupPath('backup.json'))) {
+            $this->components->info('No backup found.');
+
+            return self::FAILURE;
+        }
+
         try {
             $backups = BaseHelper::getFileData($backupService->getBackupPath('backup.json'));
 
@@ -20,14 +30,12 @@ class BackupListCommand extends Command
                 $item['key'] = $key;
             }
 
-            $header = [
+            table([
                 'Name',
                 'Description',
                 'Date',
                 'Folder',
-            ];
-
-            $this->table($header, $backups);
+            ], $backups);
         } catch (Exception $exception) {
             $this->components->error($exception->getMessage());
         }

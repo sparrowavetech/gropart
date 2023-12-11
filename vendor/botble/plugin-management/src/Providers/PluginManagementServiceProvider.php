@@ -7,7 +7,6 @@ use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\PluginManagement\PluginManifest;
 use Composer\Autoload\ClassLoader;
-use Illuminate\Routing\Events\RouteMatched;
 
 class PluginManagementServiceProvider extends ServiceProvider
 {
@@ -15,7 +14,8 @@ class PluginManagementServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        $this->setNamespace('packages/plugin-management')
+        $this
+            ->setNamespace('packages/plugin-management')
             ->loadAndPublishConfigurations(['permissions', 'general'])
             ->loadAndPublishViews()
             ->loadAndPublishTranslations()
@@ -41,26 +41,34 @@ class PluginManagementServiceProvider extends ServiceProvider
             $this->app->register($provider);
         }
 
-        $this->app->register(CommandServiceProvider::class);
-
-        if ($this->app['config']->get('packages.plugin-management.general.enable_plugin_manager', true)) {
-            $this->app['events']->listen(RouteMatched::class, function () {
-                DashboardMenu::registerItem([
+        DashboardMenu::default()->beforeRetrieving(function () {
+            DashboardMenu::make()
+                ->registerItem([
                     'id' => 'cms-core-plugins',
-                    'priority' => 997,
-                    'parent_id' => null,
-                    'name' => 'core/base::layouts.plugins',
-                    'icon' => 'fa fa-plug',
-                    'url' => route('plugins.index'),
+                    'priority' => 3000,
+                    'name' => 'packages/plugin-management::plugin.plugins',
+                    'icon' => 'ti ti-plug',
                     'permissions' => ['plugins.index'],
+                ])
+                ->registerItem([
+                    'id' => 'cms-core-plugins-installed',
+                    'priority' => 1,
+                    'parent_id' => 'cms-core-plugins',
+                    'name' => 'packages/plugin-management::plugin.installed_plugins',
+                    'route' => 'plugins.index',
+                ])
+                ->registerItem([
+                    'id' => 'cms-core-plugins-marketplace',
+                    'priority' => 2,
+                    'parent_id' => 'cms-core-plugins',
+                    'name' => 'packages/plugin-management::plugin.add_new_plugin',
+                    'route' => 'plugins.new',
+                    'permissions' => ['plugins.marketplace'],
                 ]);
-            });
-        }
-
-        $this->app->booted(function () {
-            $this->app->register(HookServiceProvider::class);
         });
 
+        $this->app->register(CommandServiceProvider::class);
         $this->app->register(EventServiceProvider::class);
+        $this->app->register(HookServiceProvider::class);
     }
 }

@@ -3,6 +3,8 @@
 namespace Botble\Theme\Http\Controllers;
 
 use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Http\Controllers\BaseController;
+use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Page\Models\Page;
 use Botble\Page\Services\PageService;
 use Botble\SeoHelper\Facades\SeoHelper;
@@ -12,11 +14,10 @@ use Botble\Theme\Events\RenderingSingleEvent;
 use Botble\Theme\Events\RenderingSiteMapEvent;
 use Botble\Theme\Facades\SiteMapManager;
 use Botble\Theme\Facades\Theme;
-use Illuminate\Routing\Controller;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 
-class PublicController extends Controller
+class PublicController extends BaseController
 {
     public function getIndex()
     {
@@ -37,8 +38,6 @@ class PublicController extends Controller
         }
 
         SeoHelper::setTitle(theme_option('site_title'));
-
-        Theme::breadcrumb()->add(__('Home'), route('public.index'));
 
         event(RenderingHomePageEvent::class);
 
@@ -71,6 +70,10 @@ class PublicController extends Controller
 
         if ($extension) {
             $key = Str::replaceLast($extension, '', $key);
+        }
+
+        if ($result instanceof BaseHttpResponse) {
+            return $result;
         }
 
         if (isset($result['slug']) && $result['slug'] !== $key) {

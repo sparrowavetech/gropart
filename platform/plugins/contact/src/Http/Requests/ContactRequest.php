@@ -3,6 +3,7 @@
 namespace Botble\Contact\Http\Requests;
 
 use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Rules\EmailRule;
 use Botble\Captcha\Facades\Captcha;
 use Botble\Support\Http\Requests\Request;
 
@@ -11,9 +12,9 @@ class ContactRequest extends Request
     public function rules(): array
     {
         $rules = [
-            'name' => 'required|string|max:40',
-            'email' => 'required|email|max:80',
-            'content' => 'required|string|max:1000',
+            'name' => ['required', 'string', 'max:40'],
+            'email' => ['required', new EmailRule(), 'max:80'],
+            'content' => ['required', 'string', 'max:1000'],
             'phone' => 'nullable|' . BaseHelper::getPhoneValidationRule(),
         ];
 

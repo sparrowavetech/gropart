@@ -21,8 +21,8 @@ class ImportLocationService
 
     public function __construct()
     {
-        $this->countries = new Collection();
-        $this->states = new Collection();
+        $this->countries = collect();
+        $this->states = collect();
     }
 
     public function handle(array $rows): void
@@ -44,7 +44,7 @@ class ImportLocationService
         $country = Country::query()->firstOrCreate(
             ['name' => $row['name']],
             [
-                'order' => $row['order'],
+                'order' => $row['order'] ?: 0,
                 'status' => $row['status'],
                 'nationality' => $row['nationality'],
             ]
@@ -70,7 +70,7 @@ class ImportLocationService
             [
                 'abbreviation' => $row['abbreviation'],
                 'slug' => Str::slug($row['slug'] ?: $row['name']),
-                'order' => $row['order'],
+                'order' => $row['order'] ?: 0,
                 'status' => $row['status'],
             ]
         );
@@ -95,7 +95,7 @@ class ImportLocationService
             ],
             [
                 'slug' => Str::slug($row['slug'] ?: $row['name']),
-                'order' => $row['order'],
+                'order' => $row['order'] ?: 0,
                 'status' => $row['status'],
             ],
         );

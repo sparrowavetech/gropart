@@ -2,6 +2,7 @@
 
 namespace Botble\ACL\Traits;
 
+use Botble\Base\Rules\EmailRule;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -42,9 +43,9 @@ trait ResetsPasswords
     protected function rules(): array
     {
         return [
-            'token' => 'required|string',
-            'email' => 'required|email',
-            'password' => 'required|confirmed|min:6',
+            'token' => ['required', 'string'],
+            'email' => ['required', new EmailRule()],
+            'password' => ['required', 'confirmed', 'min:6'],
         ];
     }
 

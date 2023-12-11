@@ -2,84 +2,76 @@
 
 namespace Botble\Page\Http\Controllers;
 
-use Botble\Base\Events\BeforeUpdateContentEvent;
-use Botble\Base\Events\CreatedContentEvent;
-use Botble\Base\Events\DeletedContentEvent;
-use Botble\Base\Events\UpdatedContentEvent;
-use Botble\Base\Facades\PageTitle;
-use Botble\Base\Forms\FormBuilder;
+use Botble\Base\Http\Actions\DeleteResourceAction;
 use Botble\Base\Http\Controllers\BaseController;
-use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Page\Forms\PageForm;
 use Botble\Page\Http\Requests\PageRequest;
 use Botble\Page\Models\Page;
 use Botble\Page\Tables\PageTable;
-use Exception;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class PageController extends BaseController
 {
-    public function index(PageTable $dataTable)
+    public function __construct()
     {
-        PageTitle::setTitle(trans('packages/page::pages.menu_name'));
-
-        return $dataTable->renderTable();
+        $this
+            ->breadcrumb()
+            ->add(trans('packages/page::pages.menu_name'), route('pages.index'));
     }
 
-    public function create(FormBuilder $formBuilder)
+    public function index(PageTable $pageTable)
     {
-        PageTitle::setTitle(trans('packages/page::pages.create'));
+        $this->pageTitle(trans('packages/page::pages.menu_name'));
 
-        return $formBuilder->create(PageForm::class)->renderForm();
+        return $pageTable->renderTable();
     }
 
-    public function store(PageRequest $request, BaseHttpResponse $response)
+    public function create()
     {
-        $page = Page::query()->create(array_merge($request->input(), [
-            'user_id' => Auth::guard()->id(),
-        ]));
+        $this->pageTitle(trans('packages/page::pages.create'));
 
-        event(new CreatedContentEvent(PAGE_MODULE_SCREEN_NAME, $request, $page));
-
-        return $response->setPreviousUrl(route('pages.index'))
-            ->setNextUrl(route('pages.edit', $page->getKey()))
-            ->setMessage(trans('core/base::notices.create_success_message'));
+        return PageForm::create()->renderForm();
     }
 
-    public function edit(Page $page, FormBuilder $formBuilder)
+    public function store(PageRequest $request)
     {
-        PageTitle::setTitle(trans('core/base::forms.edit_item', ['name' => $page->name]));
+        $form = PageForm::create()->setRequest($request);
 
-        return $formBuilder->create(PageForm::class, ['model' => $page])->renderForm();
+        $form->saving(function (PageForm $form) {
+            $form
+                ->getModel()
+                ->fill([...$form->getRequest()->input(), 'user_id' => Auth::guard()->id()])
+                ->save();
+        });
+
+        return $this
+            ->httpResponse()
+            ->setPreviousRoute('pages.index')
+            ->setNextRoute('pages.edit', $form->getModel()->getKey())
+            ->withCreatedSuccessMessage();
     }
 
-    public function update(Page $page, PageRequest $request, BaseHttpResponse $response)
+    public function edit(Page $page)
     {
-        event(new BeforeUpdateContentEvent($request, $page));
+        $this->pageTitle(trans('core/base::forms.edit_item', ['name' => $page->name]));
 
-        $page->fill($request->input());
-        $page->save();
-
-        event(new UpdatedContentEvent(PAGE_MODULE_SCREEN_NAME, $request, $page));
-
-        return $response
-            ->setPreviousUrl(route('pages.index'))
-            ->setMessage(trans('core/base::notices.update_success_message'));
+        return PageForm::createFromModel($page)->renderForm();
     }
 
-    public function destroy(Page $page, Request $request, BaseHttpResponse $response)
+    public function update(Page $page, PageRequest $request)
     {
-        try {
-            $page->delete();
+        PageForm::createFromModel($page)
+            ->setRequest($request)
+            ->save();
 
-            event(new DeletedContentEvent(PAGE_MODULE_SCREEN_NAME, $request, $page));
+        return $this
+            ->httpResponse()
+            ->setPreviousRoute('pages.index')
+            ->withUpdatedSuccessMessage();
+    }
 
-            return $response->setMessage(trans('packages/page::pages.deleted'));
-        } catch (Exception $exception) {
-            return $response
-                ->setError()
-                ->setMessage($exception->getMessage());
-        }
+    public function destroy(Page $page)
+    {
+        return DeleteResourceAction::make($page);
     }
 }

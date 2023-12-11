@@ -20,7 +20,7 @@ abstract class Captcha
 
     public function rules(): array
     {
-        if (! $this->isEnabled()) {
+        if (! $this->reCaptchaEnabled()) {
             return [];
         }
 
@@ -29,11 +29,21 @@ abstract class Captcha
 
     public function isEnabled(): bool
     {
+        return $this->reCaptchaEnabled();
+    }
+
+    public function reCaptchaEnabled(): bool
+    {
         if (! $this->siteKey || ! $this->secretKey) {
             return false;
         }
 
         return (bool)setting('enable_captcha');
+    }
+
+    public function mathCaptchaEnabled(): bool
+    {
+        return (bool)setting('enable_math_captcha');
     }
 
     public function mathCaptchaRules(): array
@@ -42,6 +52,11 @@ abstract class Captcha
     }
 
     public function captchaType(): string
+    {
+        return $this->reCaptchaType();
+    }
+
+    public function reCaptchaType(): string
     {
         return setting('captcha_type', 'v2') ?: 'v2';
     }
@@ -52,5 +67,17 @@ abstract class Captcha
             'captcha' => __('Captcha'),
             'math-captcha' => __('Math Captcha'),
         ];
+    }
+
+    public function scores(): array
+    {
+        $scores = [];
+
+        foreach (range(1, 9) as $i) {
+            $key = $i / 10;
+            $scores[(string) $key] = (string) $key;
+        }
+
+        return $scores;
     }
 }

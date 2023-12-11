@@ -40,14 +40,12 @@ class Contact extends BaseModel
 
     protected function avatarUrl(): Attribute
     {
-        return Attribute::make(
-            get: function () {
-                try {
-                    return (new Avatar())->create($this->name)->toBase64();
-                } catch (Exception) {
-                    return RvMedia::getDefaultImage();
-                }
-            },
-        );
+        return Attribute::get(function () {
+            try {
+                return (new Avatar())->create($this->name)->toBase64();
+            } catch (Exception) {
+                return RvMedia::getDefaultImage();
+            }
+        });
     }
 }

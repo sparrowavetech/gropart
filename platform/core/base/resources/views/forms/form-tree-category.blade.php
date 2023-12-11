@@ -1,4 +1,5 @@
-@extends(BaseHelper::getAdminMasterLayoutTemplate())
+@extends($layout ?? BaseHelper::getAdminMasterLayoutTemplate())
+
 @section('content')
     @php
         $categories = $form->getFormOption('categories', collect());
@@ -9,73 +10,73 @@
         $createRoute = $form->getFormOption('createRoute');
         $editRoute = $form->getFormOption('editRoute');
         $deleteRoute = $form->getFormOption('deleteRoute');
+        $updateTreeRoute = $form->getFormOption('updateTreeRoute');
+
+        Assets::addStyles('jquery-nestable')->addScripts('jquery-nestable');
     @endphp
-    <div class="row">
+
+    <div class="row row-cards">
         <div class="col-12">
             <div class="my-2 text-end">
-                @php do_action(BASE_ACTION_META_BOXES, 'head', $form->getModel()) @endphp
+                @php
+                    do_action(BASE_ACTION_META_BOXES, 'head', $form->getModel());
+                @endphp
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card tree-categories-container position-relative">
-                <div class="tree-loading">
-                    @include('core/base::elements.loading')
-                </div>
-                <div class="tree-categories-body card-body">
-                    <div class="mb-3 d-flex">
-                        <button
-                            class="btn btn-primary toggle-tree"
-                            data-expand="{{ trans('core/base::forms.expand_all') }}"
-                            data-collapse="{{ trans('core/base::forms.collapse_all') }}"
-                            type="button"
-                        >
-                            {{ trans('core/base::forms.collapse_all') }}
-                        </button>
-                        @if ($createRoute)
-                            <a
-                                class="tree-categories-create btn btn-info mx-2
-                                @if (!$canCreate) d-none @endif"
-                                href="{{ route($createRoute) }}"
-                            >
-                                @include('core/table::partials.create')
-                            </a>
-                        @endif
-                    </div>
 
+        <div class="col-md-4">
+            <x-core::alert type="info">
+                {{ trans('core/base::tree-category.drag_drop_info') }}
+            </x-core::alert>
+
+            <x-core::card class="tree-categories-container">
+                <x-core::card.header>
+                    <x-core::card.actions>
+                        @if ($createRoute)
+                            <x-core::button
+                                tag="a"
+                                type="button"
+                                color="primary"
+                                :href="route($createRoute)"
+                                icon="ti ti-plus"
+                                @class(['tree-categories-create mx-2', 'd-none' => !$canCreate])
+                            >
+                                {{ trans('core/base::forms.create') }}
+                            </x-core::button>
+                        @endif
+                    </x-core::card.actions>
+                </x-core::card.header>
+                <x-core::card.body class="tree-categories-body">
                     <div
                         class="file-tree-wrapper"
                         data-url="{{ $indexRoute ? route($indexRoute) : '' }}"
+                        @if($updateTreeRoute)
+                            data-update-url="{{ route($updateTreeRoute) }}"
+                        @endif
                     >
-                        @include('core/base::forms.partials.tree-categories', [
-                            'categories' => $categories,
-                        ])
+                        @include('core/base::forms.partials.tree-categories', compact('categories'))
                     </div>
-                </div>
-            </div>
+                </x-core::card.body>
+            </x-core::card>
         </div>
 
         <div class="col-md-8">
-            <div class="card tree-form-container position-relative">
-                <div class="tree-loading d-none">
-                    @include('core/base::elements.loading')
-                </div>
-                <div class="tree-form-body card-body">
+            <x-core::card class="tree-form-container">
+                <x-core::card.body class="tree-form-body">
                     @include('core/base::forms.form-no-wrap')
-                </div>
-            </div>
+                </x-core::card.body>
+            </x-core::card>
         </div>
     </div>
-@stop
+@endsection
 
 @push('footer')
-    @include('core/table::partials.modal-item', [
-        'type' => 'danger',
-        'name' => 'modal-confirm-delete',
-        'title' => trans('core/base::tables.confirm_delete'),
-        'content' => trans('core/base::tables.confirm_delete_msg'),
-        'action_name' => trans('core/base::tables.delete'),
-        'action_button_attributes' => [
-            'class' => 'delete-crud-entry',
-        ],
-    ])
+    <x-core::modal.action
+        type="danger"
+        class="modal-confirm-delete"
+        :title="trans('core/base::tree-category.delete_modal.title')"
+        :description="trans('core/base::tree-category.delete_modal.message')"
+        :submit-button-label="trans('core/base::tree-category.delete_button')"
+        :submit-button-attrs="['data-bb-toggle' => 'modal-confirm-delete']"
+    />
 @endpush

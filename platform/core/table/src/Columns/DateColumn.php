@@ -3,9 +3,9 @@
 namespace Botble\Table\Columns;
 
 use Botble\Base\Facades\BaseHelper;
-use Botble\Table\Contracts\FormattedColumn;
+use Botble\Table\Contracts\FormattedColumn as FormattedColumnContract;
 
-class DateColumn extends Column implements FormattedColumn
+class DateColumn extends FormattedColumn implements FormattedColumnContract
 {
     protected string $dateFormat;
 
@@ -24,7 +24,7 @@ class DateColumn extends Column implements FormattedColumn
         return $this;
     }
 
-    public function editedFormat($value): string
+    public function formattedValue($value): string
     {
         if (! $value) {
             return '';

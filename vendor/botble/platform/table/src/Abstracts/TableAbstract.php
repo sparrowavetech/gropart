@@ -4,18 +4,23 @@ namespace Botble\Table\Abstracts;
 
 use Botble\ACL\Models\User;
 use Botble\Base\Contracts\BaseModel as BaseModelContract;
+use Botble\Base\Contracts\Builders\Extensible as ExtensibleContract;
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\Form;
 use Botble\Base\Facades\Html;
 use Botble\Base\Models\BaseModel;
+use Botble\Base\Supports\Builders\Extensible;
+use Botble\Base\Supports\Builders\RenderingExtensible;
 use Botble\Table\Abstracts\Concerns\DeprecatedFunctions;
 use Botble\Table\Abstracts\Concerns\HasActions;
 use Botble\Table\Abstracts\Concerns\HasBulkActions;
 use Botble\Table\Abstracts\Concerns\HasFilters;
+use Botble\Table\Abstracts\Concerns\HasHeaderActions;
 use Botble\Table\Columns\CheckboxColumn;
 use Botble\Table\Columns\Column;
 use Botble\Table\Columns\RowActionsColumn;
 use Botble\Table\Contracts\FormattedColumn;
+use Botble\Table\HeaderActions\HeaderAction;
 use Botble\Table\Supports\Builder as CustomTableBuilder;
 use Botble\Table\Supports\TableExportHandler;
 use Closure;
@@ -33,18 +38,23 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Traits\Conditionable;
 use LogicException;
 use Symfony\Component\HttpFoundation\Response;
 use Yajra\DataTables\DataTableAbstract;
 use Yajra\DataTables\DataTables;
 use Yajra\DataTables\Services\DataTable;
 
-abstract class TableAbstract extends DataTable
+abstract class TableAbstract extends DataTable implements ExtensibleContract
 {
     use DeprecatedFunctions;
+    use Extensible;
+    use HasHeaderActions;
     use HasActions;
     use HasBulkActions;
     use HasFilters;
+    use RenderingExtensible;
+    use Conditionable;
 
     public const TABLE_TYPE_ADVANCED = 'advanced';
 
@@ -80,7 +90,7 @@ abstract class TableAbstract extends DataTable
     protected string $exportClass = TableExportHandler::class;
 
     /**
-     * @var \Closure(\Botble\Table\DataTables $table): \Illuminate\Http\JsonResponse
+     * @var \Closure(static $table): \Illuminate\Http\JsonResponse
      */
     protected Closure $onAjaxCallback;
 
@@ -94,6 +104,13 @@ abstract class TableAbstract extends DataTable
      */
     protected Closure $queryUsingCallback;
 
+    /**
+     * @var \Closure(\Illuminate\Contracts\Database\Eloquent\Builder $query): void
+     */
+    protected Closure $modifyQueryUsingCallback;
+
+    protected string $dom = "f<'d-none d-md-block'B>rt<'card-footer d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2'<'d-flex justify-content-between align-items-center gap-3'l<'m-0 text-muted'i>><'d-flex justify-content-center'p>>";
+
     public function __construct(protected DataTables $table, UrlGenerator $urlGenerator)
     {
         parent::__construct();
@@ -105,10 +122,12 @@ abstract class TableAbstract extends DataTable
         }
 
         if (! $this->getOption('class')) {
-            $this->setOption('class', 'table table-striped table-hover vertical-middle');
+            $this->setOption('class', 'table card-table table-vcenter table-striped table-hover');
         }
 
         $this->setup();
+
+        $this->setupExtended();
 
         $this->booted();
     }
@@ -126,7 +145,7 @@ abstract class TableAbstract extends DataTable
         return Arr::get($this->options, $key);
     }
 
-    public function setOption(string $key, $value): self
+    public function setOption(string $key, $value): static
     {
         $this->options[$key] = $value;
 
@@ -138,7 +157,7 @@ abstract class TableAbstract extends DataTable
         return $this->type;
     }
 
-    public function setType(string $type): self
+    public function setType(string $type): static
     {
         $this->type = $type;
 
@@ -150,9 +169,16 @@ abstract class TableAbstract extends DataTable
         return $this->view;
     }
 
-    public function setView(string $view): self
+    public function setView(string $view): static
     {
         $this->view = $view;
+
+        return $this;
+    }
+
+    public function setDom(string $dom): static
+    {
+        $this->dom = $dom;
 
         return $this;
     }
@@ -162,7 +188,7 @@ abstract class TableAbstract extends DataTable
         return $this->options;
     }
 
-    public function setOptions(array $options): self
+    public function setOptions(array $options): static
     {
         $this->options = array_merge($this->options, $options);
 
@@ -242,7 +268,7 @@ abstract class TableAbstract extends DataTable
     }
 
     /**
-     * @param \Closure(\Botble\Table\DataTables $table): \Illuminate\Http\JsonResponse $onAjaxCallback
+     * @param \Closure(static $table): \Illuminate\Http\JsonResponse $onAjaxCallback
      */
     public function onAjax(Closure $onAjaxCallback): static
     {
@@ -284,7 +310,8 @@ abstract class TableAbstract extends DataTable
 
         $columns = apply_filters(BASE_FILTER_TABLE_HEADINGS, $columns, $this->getModel());
 
-        if ($this->hasOperations && ! $this->isSimpleTable() && empty($this->getRowActions())) {
+        // TODO: Will be removed after operations removed.
+        if ($this->hasOperations()) {
             $columns = array_merge($columns, $this->getOperationsHeading());
         }
 
@@ -341,12 +368,21 @@ abstract class TableAbstract extends DataTable
         return [];
     }
 
+    public function addColumn(Column $column): static
+    {
+        $this->columns[] = $column;
+
+        return $this;
+    }
+
     /**
      * @param \Botble\Table\Columns\Column[] $columns
      */
     public function addColumns(array $columns): static
     {
-        $this->columns = $columns;
+        foreach ($columns as $column) {
+            $this->addColumn($column);
+        }
 
         return $this;
     }
@@ -363,7 +399,7 @@ abstract class TableAbstract extends DataTable
         return $this->ajaxUrl;
     }
 
-    public function setAjaxUrl(string $ajaxUrl): self
+    public function setAjaxUrl(string $ajaxUrl): static
     {
         $this->ajaxUrl = $ajaxUrl;
 
@@ -373,10 +409,10 @@ abstract class TableAbstract extends DataTable
     protected function getDom(): string|null
     {
         if ($this->isSimpleTable()) {
-            return $this->simpleDom();
+            $this->dom = $this->simpleDom();
         }
 
-        return "fBrt<'datatables__info_wrap'pli<'clearfix'>>";
+        return $this->dom;
     }
 
     public function getBuilderParameters(): array
@@ -402,7 +438,12 @@ abstract class TableAbstract extends DataTable
 
     public function getButtons(): array
     {
-        $buttons = apply_filters(BASE_FILTER_TABLE_BUTTONS, $this->buttons(), $this->getModel()::class);
+        $buttons = [
+            ...$this->getHeaderActions(),
+            ...$this->buttons(),
+        ];
+
+        $buttons = apply_filters(BASE_FILTER_TABLE_BUTTONS, $buttons, $this->getModel()::class);
 
         if (! $buttons) {
             return [];
@@ -411,7 +452,15 @@ abstract class TableAbstract extends DataTable
         $data = [];
 
         foreach ($buttons as $key => $button) {
-            $buttonClass = 'action-item' . (isset($button['class']) ? ' ' . $button['class'] : ' btn-info');
+            if ($button instanceof HeaderAction) {
+                if ($button->currentUserHasAnyPermissions()) {
+                    $data[] = $button->toArray();
+                }
+
+                continue;
+            }
+
+            $buttonClass = 'action-item' . (isset($button['class']) ? ' ' . $button['class'] : null);
 
             if (Arr::get($button, 'extend') == 'collection') {
                 $button['className'] = ($button['className'] ?? null) . $buttonClass;
@@ -525,15 +574,21 @@ abstract class TableAbstract extends DataTable
 
     public function htmlDrawCallbackFunction(): string|null
     {
-        return '
-            var $tableWrapper = $(this).closest(".dataTables_wrapper");
+        return <<<JS
+            var tableWrapper = $(this).closest(".dataTables_wrapper");
             var dtDataCount = this.api().data().count();
 
-            $tableWrapper.find(".dataTables_paginate").toggle(this.api().page.info().pages > 1);
+            if (dtDataCount === 0) {
+                tableWrapper.find(".card-footer").prop('style', 'display: none !important;');
+            } else {
+                tableWrapper.find(".card-footer").prop('style', null);
+            }
 
-            $tableWrapper.find(".dataTables_length").toggle(dtDataCount >= 10);
-            $tableWrapper.find(".dataTables_info").toggle(dtDataCount > 0);
-        ' . $this->htmlInitCompleteFunction();
+            tableWrapper.find(".dataTables_paginate").toggle(this.api().page.info().pages > 1);
+
+            tableWrapper.find(".dataTables_length").toggle(dtDataCount >= 10);
+            tableWrapper.find(".dataTables_info").toggle(dtDataCount > 0);
+        JS . $this->htmlInitCompleteFunction();
     }
 
     public function renderTable(array $data = [], array $mergeData = []): View|Factory|Response
@@ -569,6 +624,10 @@ abstract class TableAbstract extends DataTable
     protected function applyScopes(
         EloquentBuilder|QueryBuilder|EloquentRelation|Collection|AnonymousResourceCollection $query
     ): EloquentBuilder|QueryBuilder|EloquentRelation|Collection|AnonymousResourceCollection {
+        if (isset($this->modifyQueryUsingCallback)) {
+            call_user_func($this->modifyQueryUsingCallback, $query);
+        }
+
         $request = $this->request();
 
         $requestFilters = [];
@@ -612,6 +671,7 @@ abstract class TableAbstract extends DataTable
         if (empty($title)) {
             $inputName = 'filter_values[]';
         }
+
         $attributes = [
             'class' => 'form-control input-value filter-column-value',
             'placeholder' => trans('core/table::table.value'),
@@ -636,7 +696,7 @@ abstract class TableAbstract extends DataTable
 
             case 'select-ajax':
                 $attributes = [
-                    'class' => $attributes['class'] . ' select-search-ajax',
+                    'class' => $attributes['class'] . ' select-autocomplete',
                     'data-url' => Arr::get($data, 'url'),
                     'data-minimum-input' => Arr::get($data, 'minimum-input', 2),
                     'multiple' => Arr::get($data, 'multiple', false),
@@ -673,7 +733,7 @@ abstract class TableAbstract extends DataTable
 
     public function getFilters(): array
     {
-        return apply_filters('base_filter_table_filters', $this->getAllBulkChanges(), $this);
+        return $this->getAllBulkChanges();
     }
 
     protected function addCreateButton(string $url, string|null $permission = null, array $buttons = []): array
@@ -695,7 +755,7 @@ abstract class TableAbstract extends DataTable
         return $buttons;
     }
 
-    protected function setupEditedColumns(DataTableAbstract $table): void
+    protected function setupFormattedColumns(DataTableAbstract $table): void
     {
         foreach ($this->getColumnsFromBuilder() as $column) {
             switch (true) {
@@ -721,14 +781,19 @@ abstract class TableAbstract extends DataTable
     public function toJson($data, array $escapeColumn = [], bool $mDataSupport = true)
     {
         if ($data instanceof DataTableAbstract) {
-            $this->setupEditedColumns($data);
+            $this->setupFormattedColumns($data);
         }
+
+        $this->dispatchBeforeRendering();
 
         $data = apply_filters(BASE_FILTER_GET_LIST_DATA, $data, $this->getModel());
 
-        return $data
+        return tap(
+            $data
             ->escapeColumns($escapeColumn)
-            ->make($mDataSupport);
+            ->make($mDataSupport),
+            fn ($response) => $this->dispatchAfterRendering($response)
+        );
     }
 
     public function htmlBuilder(): CustomTableBuilder
@@ -738,7 +803,7 @@ abstract class TableAbstract extends DataTable
 
     protected function simpleDom(): string
     {
-        return "rt<'datatables__info_wrap'pli<'clearfix'>>";
+        return "rt<'card-footer d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2'<'d-flex justify-content-between align-items-center gap-3'l<'m-0 text-muted'i>><'d-flex justify-content-center'p>>";
     }
 
     protected function isEmpty(): bool
@@ -781,6 +846,16 @@ abstract class TableAbstract extends DataTable
         return $this;
     }
 
+    /**
+     * @param \Closure|callable(\Illuminate\Contracts\Database\Eloquent\Builder $query): void $modifyQueryCallback
+     */
+    public function modifyQueryUsing(Closure|callable $modifyQueryCallback): static
+    {
+        $this->modifyQueryUsingCallback = $modifyQueryCallback;
+
+        return $this;
+    }
+
     public function query()
     {
         $query = $this->getModel()->query();
@@ -812,5 +887,40 @@ abstract class TableAbstract extends DataTable
     public function isExportingToCSV(): bool
     {
         return $this->request()->input('action') === 'csv';
+    }
+
+    public static function getFilterPrefix(): string
+    {
+        return sprintf('base_table_%s', Str::of(static::class)->snake()->lower()->replace('\\', '')->toString());
+    }
+
+    public static function getGlobalClassName(): string
+    {
+        return TableAbstract::class;
+    }
+
+    public static function hasGlobalExtend(): bool
+    {
+        return true;
+    }
+
+    public static function globalExtendFilterName(): string
+    {
+        return TableAbstract::getFilterPrefix() . '_extended';
+    }
+
+    public static function hasGlobalRendering(): bool
+    {
+        return true;
+    }
+
+    public static function globalBeforeRenderingFilterName(): string
+    {
+        return TableAbstract::getFilterPrefix() . '_before_rendering';
+    }
+
+    public static function globalAfterRenderingFilterName(): string
+    {
+        return TableAbstract::getFilterPrefix() . '_after_rendering';
     }
 }

@@ -36,7 +36,7 @@ class Breadcrumb
                 $url = URL::to($url);
             }
 
-            $this->crumbs[] = ['label' => $label, 'url' => $url];
+            $this->crumbs[$label] = ['label' => $label, 'url' => $url];
         }
 
         return $this;

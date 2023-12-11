@@ -34,16 +34,6 @@ class State extends BaseModel
         'order' => 'int',
     ];
 
-    public function country(): BelongsTo
-    {
-        return $this->belongsTo(Country::class)->withDefault();
-    }
-
-    public function cities(): HasMany
-    {
-        return $this->hasMany(City::class);
-    }
-
     protected static function booted(): void
     {
         static::deleting(function (State $state) {
@@ -53,5 +43,15 @@ class State extends BaseModel
         self::saving(function (self $model) {
             $model->slug = self::createSlug($model->slug ?: $model->name, $model->getKey());
         });
+    }
+
+    public function country(): BelongsTo
+    {
+        return $this->belongsTo(Country::class)->withDefault();
+    }
+
+    public function cities(): HasMany
+    {
+        return $this->hasMany(City::class);
     }
 }

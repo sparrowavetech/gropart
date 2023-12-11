@@ -33,6 +33,13 @@ class City extends BaseModel
         'order' => 'int',
     ];
 
+    protected static function booted(): void
+    {
+        self::saving(function (self $model) {
+            $model->slug = self::createSlug($model->slug ?: $model->name, $model->getKey());
+        });
+    }
+
     public function state(): BelongsTo
     {
         return $this->belongsTo(State::class)->withDefault();
@@ -41,12 +48,5 @@ class City extends BaseModel
     public function country(): BelongsTo
     {
         return $this->belongsTo(Country::class)->withDefault();
-    }
-
-    protected static function booted(): void
-    {
-        self::saving(function (self $model) {
-            $model->slug = self::createSlug($model->slug ?: $model->name, $model->getKey());
-        });
     }
 }

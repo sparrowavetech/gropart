@@ -6,6 +6,7 @@ use Botble\Base\Facades\Assets;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Marketplace\Enums\PayoutPaymentMethodsEnum;
 use Botble\Marketplace\Models\Withdrawal;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\ServiceProvider;
 
 class PayPalPayoutServiceProvider extends ServiceProvider
@@ -25,9 +26,10 @@ class PayPalPayoutServiceProvider extends ServiceProvider
 
         $this->app->booted(function () {
             add_filter(BASE_FILTER_BEFORE_RENDER_FORM, function ($form, $data) {
-                if (is_in_admin(true) &&
-                    auth()->check() &&
-                    get_class($data) == Withdrawal::class &&
+                if (
+                    $data instanceof Withdrawal &&
+                    is_in_admin(true) &&
+                    Auth::check() &&
                     $data->getKey() && $data->payment_channel == PayoutPaymentMethodsEnum::PAYPAL
                 ) {
                     Assets::addScriptsDirectly('vendor/core/plugins/paypal-payout/js/paypal-payout.js');

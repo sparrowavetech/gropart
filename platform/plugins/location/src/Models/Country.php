@@ -29,6 +29,14 @@ class Country extends BaseModel
         'order' => 'int',
     ];
 
+    protected static function booted(): void
+    {
+        static::deleting(function (Country $country) {
+            $country->states()->delete();
+            $country->cities()->delete();
+        });
+    }
+
     public function states(): HasMany
     {
         return $this->hasMany(State::class);
@@ -37,13 +45,5 @@ class Country extends BaseModel
     public function cities(): HasMany
     {
         return $this->hasMany(City::class);
-    }
-
-    protected static function booted(): void
-    {
-        static::deleting(function (Country $country) {
-            $country->states()->delete();
-            $country->cities()->delete();
-        });
     }
 }

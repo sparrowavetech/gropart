@@ -58,7 +58,6 @@
                 "Botble\\Base\\Providers\\BaseServiceProvider",
                 "Botble\\Base\\Providers\\CommandServiceProvider",
                 "Botble\\Base\\Providers\\EventServiceProvider",
-                "Botble\\Base\\Providers\\BreadcrumbsServiceProvider",
                 "Botble\\Base\\Providers\\ComposerServiceProvider",
                 "Botble\\Base\\Providers\\MailConfigServiceProvider",
                 "Botble\\Base\\Providers\\FormServiceProvider",
@@ -72,6 +71,8 @@
             ],
             "aliases": {
                 "Action": "Botble\\Base\\Facades\\Action",
+                "AdminAppearance": "Botble\\Base\\Facades\\AdminAppearance",
+                "AdminHelper": "Botble\\Base\\Facades\\AdminHelper",
                 "Assets": "Botble\\Base\\Facades\\Assets",
                 "BaseHelper": "Botble\\Base\\Facades\\BaseHelper",
                 "Breadcrumbs": "Botble\\Base\\Facades\\Breadcrumbs",
@@ -80,12 +81,13 @@
                 "Filter": "Botble\\Base\\Facades\\Filter",
                 "Form": "Botble\\Base\\Facades\\Form",
                 "Html": "Botble\\Base\\Facades\\Html",
+                "JsValidator": "Botble\\JsValidation\\Facades\\JsValidator",
                 "MacroableModels": "Botble\\Base\\Facades\\MacroableModels",
                 "MetaBox": "Botble\\Base\\Facades\\MetaBox",
                 "PageTitle": "Botble\\Base\\Facades\\PageTitle",
-                "JsValidator": "Botble\\JsValidation\\Facades\\JsValidator",
-                "Setting": "Botble\\Setting\\Facades\\Setting",
-                "RvMedia": "Botble\\Media\\Facades\\RvMedia"
+                "PanelSectionManager": "Botble\\Base\\Facades\\PanelSectionManager",
+                "RvMedia": "Botble\\Media\\Facades\\RvMedia",
+                "Setting": "Botble\\Setting\\Facades\\Setting"
             }
         }
     },

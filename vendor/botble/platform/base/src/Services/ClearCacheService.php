@@ -2,6 +2,7 @@
 
 namespace Botble\Base\Services;
 
+use Botble\Media\Facades\RvMedia;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Cache;
@@ -125,5 +126,7 @@ class ClearCacheService
         $this->clearLogs();
         $this->clearPurifier();
         $this->clearDebugbar();
+
+        RvMedia::refreshCache();
     }
 }

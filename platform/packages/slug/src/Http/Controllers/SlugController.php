@@ -2,19 +2,18 @@
 
 namespace Botble\Slug\Http\Controllers;
 
-use Botble\Base\Facades\PageTitle;
-use Botble\Base\Http\Controllers\BaseController;
-use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Menu\Facades\Menu;
+use Botble\Setting\Http\Controllers\SettingController;
 use Botble\Setting\Supports\SettingStore;
 use Botble\Slug\Events\UpdatedPermalinkSettings;
+use Botble\Slug\Forms\SlugSettingForm;
 use Botble\Slug\Http\Requests\SlugRequest;
 use Botble\Slug\Http\Requests\SlugSettingsRequest;
 use Botble\Slug\Models\Slug;
 use Botble\Slug\Services\SlugService;
 use Illuminate\Support\Str;
 
-class SlugController extends BaseController
+class SlugController extends SettingController
 {
     public function store(SlugRequest $request, SlugService $slugService)
     {
@@ -25,18 +24,15 @@ class SlugController extends BaseController
         );
     }
 
-    public function getSettings()
+    public function edit()
     {
-        PageTitle::setTitle(trans('packages/slug::slug.settings.title'));
+        $this->pageTitle(trans('packages/slug::slug.settings.title'));
 
-        return view('packages/slug::settings');
+        return SlugSettingForm::create()->renderForm();
     }
 
-    public function postSettings(
-        SlugSettingsRequest $request,
-        BaseHttpResponse $response,
-        SettingStore $settingStore
-    ) {
+    public function update(SlugSettingsRequest $request, SettingStore $settingStore)
+    {
         $hasChangedEndingUrl = false;
 
         foreach ($request->except(['_token', 'ref_lang']) as $settingKey => $settingValue) {
@@ -78,8 +74,9 @@ class SlugController extends BaseController
             Menu::clearCacheMenuItems();
         }
 
-        return $response
-            ->setPreviousUrl(route('slug.settings'))
-            ->setMessage(trans('core/base::notices.update_success_message'));
+        return $this
+            ->httpResponse()
+            ->setPreviousRoute('slug.settings')
+            ->withUpdatedSuccessMessage();
     }
 }

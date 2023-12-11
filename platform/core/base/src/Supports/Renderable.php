@@ -8,9 +8,9 @@ trait Renderable
 {
     protected Closure $renderUsing;
 
-    protected array $beforeRenders = [];
+    protected array $beforeRenderingCallbacks = [];
 
-    protected array $afterRenders = [];
+    protected array $afterRenderingCallbacks = [];
 
     public function renderUsing(Closure $renderUsingCallback): static
     {
@@ -19,37 +19,37 @@ trait Renderable
         return $this;
     }
 
-    public function beforeRender(Closure $beforeRenderCallback): static
+    public function beforeRendering(Closure $beforeRenderCallback): static
     {
-        $this->beforeRenders[] = $beforeRenderCallback;
+        $this->beforeRenderingCallbacks[] = $beforeRenderCallback;
 
         return $this;
     }
 
-    protected function dispatchBeforeRenders(): void
+    protected function dispatchBeforeRendering(): void
     {
-        foreach ($this->beforeRenders as $beforeRender) {
+        foreach ($this->beforeRenderingCallbacks as $beforeRender) {
             call_user_func($beforeRender, $this);
         }
     }
 
-    public function afterRender(Closure $afterRenderCallback): static
+    public function afterRendering(Closure $afterRenderCallback): static
     {
-        $this->afterRenders[] = $afterRenderCallback;
+        $this->afterRenderingCallbacks[] = $afterRenderCallback;
 
         return $this;
     }
 
-    protected function dispatchAfterRenders(mixed $rendered): void
+    protected function dispatchAfterRendering(mixed $rendered): void
     {
-        foreach ($this->afterRenders as $after) {
+        foreach ($this->afterRenderingCallbacks as $after) {
             call_user_func($after, $this, $rendered);
         }
     }
 
     public function rendering(Closure|string $content): mixed
     {
-        $this->dispatchBeforeRenders();
+        $this->dispatchBeforeRendering();
 
         $content = value($content);
 
@@ -61,6 +61,6 @@ trait Renderable
 
         $rendered = $rendered === null ? $content : $rendered;
 
-        return tap($rendered, fn (mixed $rendered) => $this->dispatchAfterRenders($rendered));
+        return tap($rendered, fn (mixed $rendered) => $this->dispatchAfterRendering($rendered));
     }
 }

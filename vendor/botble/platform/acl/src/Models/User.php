@@ -2,6 +2,7 @@
 
 namespace Botble\ACL\Models;
 
+use Botble\ACL\Contracts\HasPermissions as HasPermissionsContract;
 use Botble\ACL\Notifications\ResetPasswordNotification;
 use Botble\ACL\Traits\PermissionTrait;
 use Botble\Base\Casts\SafeContent;
@@ -25,6 +26,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends BaseModel implements
+    HasPermissionsContract,
     AuthenticatableContract,
     AuthorizableContract,
     CanResetPasswordContract
@@ -34,7 +36,10 @@ class User extends BaseModel implements
     use CanResetPassword;
     use HasApiTokens;
     use HasFactory;
-    use PermissionTrait;
+    use PermissionTrait {
+        PermissionTrait::hasPermission as traitHasPermission;
+        PermissionTrait::hasAnyPermission as traitHasAnyPermission;
+    }
     use Notifiable;
 
     protected $table = 'users';
@@ -55,12 +60,25 @@ class User extends BaseModel implements
     ];
 
     protected $casts = [
+        'password' => 'hashed',
         'email_verified_at' => 'datetime',
         'permissions' => 'json',
         'username' => SafeContent::class,
         'first_name' => SafeContent::class,
         'last_name' => SafeContent::class,
     ];
+
+    public function avatar(): BelongsTo
+    {
+        return $this->belongsTo(MediaFile::class)->withDefault();
+    }
+
+    public function roles(): BelongsToMany
+    {
+        return $this
+            ->belongsToMany(Role::class, 'role_users', 'user_id', 'role_id')
+            ->withTimestamps();
+    }
 
     protected function firstName(): Attribute
     {
@@ -85,63 +103,54 @@ class User extends BaseModel implements
         );
     }
 
-    protected function activated(): Attribute
+    protected function url(): Attribute
     {
         return Attribute::make(
-            get: fn (): bool => $this->activations()->where('completed', true)->exists(),
+            get: fn () => $this->getKey() ? route('users.profile.view', $this->getKey()) : null,
         );
+    }
+
+    protected function activated(): Attribute
+    {
+        return Attribute::get(fn (): bool => $this->activations()->where('completed', true)->exists());
     }
 
     protected function avatarUrl(): Attribute
     {
-        return Attribute::make(
-            get: function () {
-                if ($this->avatar->url) {
-                    return RvMedia::url($this->avatar->url);
-                }
+        return Attribute::get(function () {
+            if ($this->avatar && $this->avatar->url) {
+                return RvMedia::url($this->avatar->url);
+            }
 
-                try {
-                    return (new Avatar())->create($this->name)->toBase64();
-                } catch (Exception) {
-                    return RvMedia::getDefaultImage();
-                }
-            },
-        );
-    }
-
-    public function avatar(): BelongsTo
-    {
-        return $this->belongsTo(MediaFile::class)->withDefault();
-    }
-
-    public function roles(): BelongsToMany
-    {
-        return $this
-            ->belongsToMany(Role::class, 'role_users', 'user_id', 'role_id')
-            ->withTimestamps();
+            try {
+                return (new Avatar())->create($this->name)->toBase64();
+            } catch (Exception) {
+                return RvMedia::getDefaultImage();
+            }
+        });
     }
 
     public function isSuperUser(): bool
     {
-        return $this->super_user || $this->hasAccess(ACL_ROLE_SUPER_USER);
+        return $this->super_user || $this->traitHasPermission(ACL_ROLE_SUPER_USER);
     }
 
-    public function hasPermission(string $permission): bool
+    public function hasPermission(string|array $permissions): bool
     {
         if ($this->isSuperUser()) {
             return true;
         }
 
-        return $this->hasAccess($permission);
+        return $this->traitHasPermission($permissions);
     }
 
-    public function hasAnyPermission(array $permissions): bool
+    public function hasAnyPermission(string|array $permissions): bool
     {
         if ($this->isSuperUser()) {
             return true;
         }
 
-        return $this->hasAnyAccess($permissions);
+        return $this->traitHasAnyPermission($permissions);
     }
 
     public function sendPasswordResetNotification($token): void

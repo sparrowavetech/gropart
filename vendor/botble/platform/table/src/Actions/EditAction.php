@@ -9,6 +9,6 @@ class EditAction extends Action
         return parent::make($name)
             ->label(trans('core/base::tables.edit'))
             ->color('primary')
-            ->icon('fa fa-edit');
+            ->icon('ti ti-edit');
     }
 }

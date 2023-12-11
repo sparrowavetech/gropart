@@ -2,6 +2,7 @@
 
 namespace Botble\Media\Http\Controllers;
 
+use Botble\Base\Http\Controllers\BaseController;
 use Botble\Media\Chunks\Exceptions\UploadMissingFileException;
 use Botble\Media\Chunks\Handler\DropZoneUploadHandler;
 use Botble\Media\Chunks\Receiver\FileReceiver;
@@ -9,7 +10,6 @@ use Botble\Media\Facades\RvMedia;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Routing\Controller;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Validator;
 /**
  * @since 19/08/2015 07:50 AM
  */
-class MediaFileController extends Controller
+class MediaFileController extends BaseController
 {
     public function postUpload(Request $request)
     {
@@ -75,13 +75,14 @@ class MediaFileController extends Controller
     {
         $validator = Validator::make($request->input(), [
             'url' => 'required|url',
+            'folderId' => 'nullable|integer',
         ]);
 
         if ($validator->fails()) {
             return RvMedia::responseError($validator->messages()->first());
         }
 
-        $result = RvMedia::uploadFromUrl($request->input('url'), $request->input('folderId'));
+        $result = RvMedia::uploadFromUrl($request->input('url'), $request->input('folderId', 0));
 
         if (! $result['error']) {
             return RvMedia::responseSuccess([

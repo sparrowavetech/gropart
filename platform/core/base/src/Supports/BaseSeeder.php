@@ -18,11 +18,14 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Composer;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Traits\Conditionable;
 use Symfony\Component\Process\Process;
 use Throwable;
 
 class BaseSeeder extends Seeder
 {
+    use Conditionable;
+
     protected Generator $faker;
 
     protected Carbon $now;

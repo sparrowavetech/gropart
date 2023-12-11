@@ -1,57 +1,42 @@
 @extends(BaseHelper::getAdminMasterLayoutTemplate())
+
 @section('content')
-    <div class="widget meta-boxes">
-        <div class="widget-title">
-            <h4>&nbsp; {{ trans('plugins/translation::translation.theme-translations') }}</h4>
-        </div>
-        <div
-            class="widget-body box-translation"
-            v-pre
-        >
-            @if (count($groups) > 0 && $group)
-                <div class="row">
-                    <div class="col-md-6">
-                        <p>{{ trans('plugins/translation::translation.translate_from') }}
-                            <strong class="text-info">{{ $defaultLanguage ? $defaultLanguage['name'] : 'en' }}</strong>
-                            {{ trans('plugins/translation::translation.to') }}
-                            <strong class="text-info">{{ $group['name'] }}</strong>
-                        </p>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="text-end">
-                            @include(
-                                'plugins/translation::partials.list-theme-languages-to-translate',
-                                compact('groups', 'group'))
-                        </div>
+    <x-core::alert type="warning">
+        {{ trans('plugins/translation::translation.theme_translations_instruction') }}
+    </x-core::alert>
+
+    <x-core::card class="theme-translation">
+        <x-core::card.header>
+            <x-core::card.title>{{ trans('plugins/translation::translation.theme-translations') }}</x-core::card.title>
+        </x-core::card.header>
+        <x-core::card.body class="box-translation">
+            <div class="row">
+                <div class="col-md-6">
+                    <p>{{ trans('plugins/translation::translation.translate_from') }}
+                        <strong class="text-info">{{ $defaultLanguage ? $defaultLanguage['name'] : 'en' }}</strong>
+                        {{ trans('plugins/translation::translation.to') }}
+                        <strong class="text-info">{{ $group['name'] }}</strong>
+                    </p>
+                </div>
+                <div class="col-md-6">
+                    <div class="text-end">
+                        @include(
+                            'plugins/translation::partials.list-theme-languages-to-translate',
+                            ['groups' => $groups, 'group' => $group, 'route' => 'translations.theme-translations']
+                        )
                     </div>
                 </div>
-                <p
-                    class="note note-warning"
-                    style="margin-bottom: 65px;"
-                >{{ trans('plugins/translation::translation.theme_translations_instruction') }}</p>
+            </div>
 
-                {!! apply_filters('translation_theme_translation_header', null, $groups, $group) !!}
-
-                {!! $translationTable->renderTable() !!}
-                <br>
-
-                {!! Form::open(['role' => 'form', 'route' => 'translations.theme-translations.post', 'method' => 'POST']) !!}
-                <input
-                    name="locale"
-                    type="hidden"
-                    value="{{ $group['locale'] }}"
-                >
-                <div class="form-group mb-3">
-                    <button
-                        class="btn btn-info button-save-theme-translations"
-                        type="submit"
-                    >{{ trans('core/base::forms.save') }}</button>
-                </div>
-                {!! Form::close() !!}
-            @else
+            @if (count($groups) < 1)
                 <p class="text-warning">{{ trans('plugins/translation::translation.no_other_languages') }}</p>
             @endif
-        </div>
-        <div class="clearfix"></div>
-    </div>
-@stop
+        </x-core::card.body>
+
+        @if (count($groups) > 0 && $group)
+            {!! apply_filters('translation_theme_translation_header', null, $groups, $group) !!}
+
+            {!! $translationTable->renderTable() !!}
+        @endif
+    </x-core::card>
+@endsection

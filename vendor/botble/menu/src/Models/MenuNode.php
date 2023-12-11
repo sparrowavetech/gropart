@@ -53,30 +53,29 @@ class MenuNode extends BaseModel
 
     protected function url(): Attribute
     {
-        return Attribute::make(
-            get: function ($value) {
-                $value = html_entity_decode(BaseHelper::clean($value));
+        return Attribute::get(function ($value) {
+            $value = html_entity_decode(BaseHelper::clean($value));
 
-                if ($value) {
-                    return apply_filters(MENU_FILTER_NODE_URL, $value);
-                }
+            if ($value) {
+                return apply_filters(MENU_FILTER_NODE_URL, $value);
+            }
 
-                if (! $this->reference_type) {
-                    return '/';
-                }
+            if (! $this->reference_type) {
+                return '/';
+            }
 
-                if (! $this->reference) {
-                    return '/';
-                }
+            if (! $this->reference) {
+                return '/';
+            }
 
-                return (string)$this->reference->url;
-            },
-        );
+            return (string)$this->reference->url;
+        });
     }
 
     protected function title(): Attribute
     {
         return Attribute::make(
+            set: fn ($value) => str_replace('&amp;', '&', $value),
             get: function ($value) {
                 if ($value) {
                     return $value;
@@ -88,16 +87,11 @@ class MenuNode extends BaseModel
 
                 return $this->reference->name;
             },
-            set: fn ($value) => str_replace('&amp;', '&', $value),
         );
     }
 
     protected function active(): Attribute
     {
-        return Attribute::make(
-            get: function () {
-                return rtrim(url($this->url), '/') == rtrim(Request::url(), '/');
-            },
-        );
+        return Attribute::get(fn () => rtrim(url($this->url), '/') == rtrim(Request::url(), '/'));
     }
 }

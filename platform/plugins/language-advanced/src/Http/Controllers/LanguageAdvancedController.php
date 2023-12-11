@@ -4,7 +4,6 @@ namespace Botble\LanguageAdvanced\Http\Controllers;
 
 use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Base\Http\Controllers\BaseController;
-use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\LanguageAdvanced\Http\Requests\LanguageAdvancedRequest;
 use Botble\LanguageAdvanced\Supports\LanguageAdvancedManager;
 use Botble\Slug\Facades\SlugHelper;
@@ -12,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 
 class LanguageAdvancedController extends BaseController
 {
-    public function save(int|string $id, LanguageAdvancedRequest $request, BaseHttpResponse $response)
+    public function save(int|string $id, LanguageAdvancedRequest $request)
     {
         $model = $request->input('model');
 
@@ -58,7 +57,8 @@ class LanguageAdvancedController extends BaseController
             }
         }
 
-        return $response
-            ->setMessage(trans('core/base::notices.update_success_message'));
+        return $this
+            ->httpResponse()
+            ->withUpdatedSuccessMessage();
     }
 }

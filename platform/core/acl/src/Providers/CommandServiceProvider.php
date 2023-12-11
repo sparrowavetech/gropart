@@ -9,10 +9,12 @@ class CommandServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
-        if ($this->app->runningInConsole()) {
-            $this->commands([
-                UserCreateCommand::class,
-            ]);
+        if (! $this->app->runningInConsole()) {
+            return;
         }
+
+        $this->commands([
+            UserCreateCommand::class,
+        ]);
     }
 }

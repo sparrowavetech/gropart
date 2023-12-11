@@ -3,19 +3,20 @@
 namespace Botble\Slug\Providers;
 
 use Botble\Base\Facades\BaseHelper;
-use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Facades\MacroableModels;
+use Botble\Base\Facades\PanelSectionManager;
 use Botble\Base\Models\BaseModel;
+use Botble\Base\PanelSections\PanelSectionItem;
 use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Page\Models\Page;
+use Botble\Setting\PanelSections\SettingCommonPanelSection;
 use Botble\Slug\Facades\SlugHelper as SlugHelperFacade;
 use Botble\Slug\Models\Slug;
 use Botble\Slug\Repositories\Eloquent\SlugRepository;
 use Botble\Slug\Repositories\Interfaces\SlugInterface;
 use Botble\Slug\SlugCompiler;
 use Botble\Slug\SlugHelper;
-use Illuminate\Routing\Events\RouteMatched;
 
 class SlugServiceProvider extends ServiceProvider
 {
@@ -51,16 +52,17 @@ class SlugServiceProvider extends ServiceProvider
         $this->app->register(EventServiceProvider::class);
         $this->app->register(CommandServiceProvider::class);
 
-        $this->app['events']->listen(RouteMatched::class, function () {
-            DashboardMenu::registerItem([
-                'id' => 'cms-packages-slug-permalink',
-                'priority' => 5,
-                'parent_id' => 'cms-core-settings',
-                'name' => 'packages/slug::slug.permalink_settings',
-                'icon' => null,
-                'url' => route('slug.settings'),
-                'permissions' => ['settings.options'],
-            ]);
+        PanelSectionManager::default()->beforeRendering(function () {
+            PanelSectionManager::registerItem(
+                SettingCommonPanelSection::class,
+                fn () => PanelSectionItem::make('permalink')
+                    ->setTitle(trans('packages/slug::slug.permalink_settings'))
+                    ->withIcon('ti ti-link')
+                    ->withDescription(trans('packages/slug::slug.permalink_settings_description'))
+                    ->withPriority(90)
+                    ->withRoute('slug.settings')
+                    ->withPermission('settings.options')
+            );
         });
 
         $this->app->booted(function () {

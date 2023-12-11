@@ -2,6 +2,7 @@
 
 return [
     'name' => 'Products',
+    'description' => 'View and update your products settings',
     'create' => 'New product',
     'create_product_type' => [
         'physical' => 'New physical product',
@@ -179,4 +180,9 @@ return [
     'select' => 'Select',
     'set_this_variant_as_default' => 'Set this variant as default',
     'download' => 'Download',
+    'cross_sell_price_type' => [
+        'title' => 'Price type',
+        'fixed' => 'Fixed',
+        'percent' => 'Percent',
+    ],
 ];

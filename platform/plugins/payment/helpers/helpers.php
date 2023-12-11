@@ -14,11 +14,8 @@ if (! function_exists('convert_stripe_amount_from_api')) {
 if (! function_exists('get_payment_setting')) {
     function get_payment_setting(string $key, $type = null, $default = null): ?string
     {
-        if (! empty($type)) {
-            $key = 'payment_' . $type . '_' . $key;
-        } else {
-            $key = 'payment_' . $key;
-        }
+        $key = $type ? "payment_{$type}_{$key}" : "payment_$key";
+        $key = apply_filters('payment_setting_key', $key);
 
         return setting($key, $default);
     }
@@ -29,18 +26,20 @@ if (! function_exists('get_payment_is_support_refund_online')) {
     {
         $paymentService = $payment->payment_channel->getServiceClass();
 
-        if ($paymentService && class_exists($paymentService)) {
-            if (method_exists($paymentService, 'getSupportRefundOnline')) {
-                try {
-                    $isSupportRefund = (new $paymentService())->getSupportRefundOnline();
-
-                    return $isSupportRefund ? $paymentService : false;
-                } catch (Exception) {
-                    return false;
-                }
-            }
+        if (! $paymentService || ! class_exists($paymentService)) {
+            return false;
         }
 
-        return false;
+        if (! method_exists($paymentService, 'getSupportRefundOnline')) {
+            return false;
+        }
+
+        try {
+            $isSupportRefund = (new $paymentService())->getSupportRefundOnline();
+
+            return $isSupportRefund ? $paymentService : false;
+        } catch (Exception) {
+            return false;
+        }
     }
 }

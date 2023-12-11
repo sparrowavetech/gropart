@@ -9,14 +9,10 @@ use Symfony\Component\HttpFoundation\Response;
 
 class RequiresJsonRequestMiddleware
 {
-    public function __construct(protected BaseHttpResponse $response)
-    {
-    }
-
     public function handle(Request $request, Closure $next): Response
     {
         if (! $request->expectsJson()) {
-            return $this->response->setNextUrl(route('public.index'));
+            return BaseHttpResponse::make()->setNextUrl(url('/'));
         }
 
         return $next($request);

@@ -26,6 +26,8 @@ trait HasEmptyState
 
     public function renderEmptyStateIfAvailable(string|null $default): string|null
     {
+        $default = trim((string) $default);
+
         if (! isset($this->emptyState) || $default) {
             return $default;
         }

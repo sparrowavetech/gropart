@@ -1,10 +1,10 @@
 <?php
 
-use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\AdminHelper;
 use Illuminate\Support\Facades\Route;
 
-Route::group(['namespace' => 'Botble\Dashboard\Http\Controllers', 'middleware' => ['web', 'core']], function () {
-    Route::group(['prefix' => BaseHelper::getAdminPrefix(), 'middleware' => 'auth'], function () {
+Route::group(['namespace' => 'Botble\Dashboard\Http\Controllers'], function () {
+    AdminHelper::registerRoutes(function () {
         Route::get('', [
             'as' => 'dashboard.index',
             'uses' => 'DashboardController@getDashboard',

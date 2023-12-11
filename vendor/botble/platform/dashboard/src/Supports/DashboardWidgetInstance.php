@@ -16,13 +16,13 @@ class DashboardWidgetInstance
 
     protected string $title;
 
-    protected string $icon;
+    protected string $icon = '';
 
-    protected string $color;
+    protected string $color = '';
 
     protected string $route;
 
-    protected string $bodyClass;
+    protected string $bodyClass = '';
 
     protected bool $isEqualHeight = true;
 
@@ -206,9 +206,10 @@ class DashboardWidgetInstance
         $widget->icon = $this->icon;
         $widget->color = $this->color;
         $widget->route = $this->route;
+        $widget->column = $this->column;
+
         if ($this->type === 'widget') {
             $widget->bodyClass = $this->bodyClass;
-            $widget->column = $this->column;
 
             $settings = array_merge(
                 $widgetSetting && $widgetSetting->settings ? $widgetSetting->settings : [],

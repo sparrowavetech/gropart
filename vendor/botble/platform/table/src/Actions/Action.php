@@ -2,12 +2,12 @@
 
 namespace Botble\Table\Actions;
 
+use Botble\Base\Supports\Builders\HasAttributes;
+use Botble\Base\Supports\Builders\HasColor;
+use Botble\Base\Supports\Builders\HasIcon;
+use Botble\Base\Supports\Builders\HasUrl;
 use Botble\Table\Abstracts\TableActionAbstract;
 use Botble\Table\Actions\Concerns\HasAction;
-use Botble\Table\Actions\Concerns\HasAttributes;
-use Botble\Table\Actions\Concerns\HasColor;
-use Botble\Table\Actions\Concerns\HasIcon;
-use Botble\Table\Actions\Concerns\HasUrl;
 
 class Action extends TableActionAbstract
 {

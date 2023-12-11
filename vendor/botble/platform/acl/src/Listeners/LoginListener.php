@@ -12,7 +12,5 @@ class LoginListener
         if (! $event->user instanceof User) {
             return;
         }
-
-        cache()->forget(md5('cache-dashboard-menu-' . $event->user->getKey()));
     }
 }

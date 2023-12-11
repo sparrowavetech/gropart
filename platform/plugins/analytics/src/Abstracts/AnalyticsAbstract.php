@@ -19,13 +19,6 @@ abstract class AnalyticsAbstract
         return $this->propertyId;
     }
 
-    public function setPropertyId(string $propertyId): static
-    {
-        $this->propertyId = $propertyId;
-
-        return $this;
-    }
-
     abstract public function fetchMostVisitedPages(Period $period, int $maxResults = 20): Collection;
 
     abstract public function fetchTopReferrers(Period $period, int $maxResults = 20): Collection;

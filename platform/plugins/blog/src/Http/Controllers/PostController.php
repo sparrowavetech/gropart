@@ -3,12 +3,7 @@
 namespace Botble\Blog\Http\Controllers;
 
 use Botble\ACL\Models\User;
-use Botble\Base\Events\BeforeUpdateContentEvent;
-use Botble\Base\Events\CreatedContentEvent;
-use Botble\Base\Events\DeletedContentEvent;
-use Botble\Base\Events\UpdatedContentEvent;
-use Botble\Base\Facades\PageTitle;
-use Botble\Base\Forms\FormBuilder;
+use Botble\Base\Http\Actions\DeleteResourceAction;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Blog\Forms\PostForm;
@@ -17,61 +12,69 @@ use Botble\Blog\Models\Post;
 use Botble\Blog\Services\StoreCategoryService;
 use Botble\Blog\Services\StoreTagService;
 use Botble\Blog\Tables\PostTable;
-use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class PostController extends BaseController
 {
+    public function __construct()
+    {
+        $this
+            ->breadcrumb()
+            ->add(trans('plugins/blog::base.menu_name'))
+            ->add(trans('plugins/blog::posts.menu_name'), route('posts.index'));
+    }
+
     public function index(PostTable $dataTable)
     {
-        PageTitle::setTitle(trans('plugins/blog::posts.menu_name'));
+        $this->pageTitle(trans('plugins/blog::posts.menu_name'));
 
         return $dataTable->renderTable();
     }
 
-    public function create(FormBuilder $formBuilder)
+    public function create()
     {
-        PageTitle::setTitle(trans('plugins/blog::posts.create'));
+        $this->pageTitle(trans('plugins/blog::posts.create'));
 
-        return $formBuilder->create(PostForm::class)->renderForm();
+        return PostForm::create()->renderForm();
     }
 
     public function store(
         PostRequest $request,
         StoreTagService $tagService,
-        StoreCategoryService $categoryService,
-        BaseHttpResponse $response
+        StoreCategoryService $categoryService
     ) {
-        /**
-         * @var Post $post
-         */
-        $post = Post::query()->create(
-            array_merge($request->input(), [
-                'author_id' => Auth::guard()->id(),
-                'author_type' => User::class,
-            ])
-        );
+        $postForm = PostForm::create();
 
-        event(new CreatedContentEvent(POST_MODULE_SCREEN_NAME, $request, $post));
+        $postForm->saving(function (PostForm $form) use ($request, $tagService, $categoryService) {
+            $form
+                ->getModel()
+                ->fill([
+                    ...$request->input(),
+                    'author_id' => Auth::guard()->id(),
+                    'author_type' => User::class,
+                ])
+                ->save();
 
-        $request->request->remove('seo_meta');
+            $post = $form->getModel();
 
-        $tagService->execute($request, $post);
+            $tagService->execute($request, $post);
 
-        $categoryService->execute($request, $post);
+            $categoryService->execute($request, $post);
+        });
 
-        return $response
-            ->setPreviousUrl(route('posts.index'))
-            ->setNextUrl(route('posts.edit', $post->getKey()))
-            ->setMessage(trans('core/base::notices.create_success_message'));
+        return $this
+            ->httpResponse()
+            ->setPreviousRoute('posts.index')
+            ->setNextRoute('posts.edit', $postForm->getModel()->getKey())
+            ->withCreatedSuccessMessage();
     }
 
-    public function edit(Post $post, FormBuilder $formBuilder)
+    public function edit(Post $post)
     {
-        PageTitle::setTitle(trans('core/base::forms.edit_item', ['name' => $post->name]));
+        $this->pageTitle(trans('core/base::forms.edit_item', ['name' => $post->name]));
 
-        return $formBuilder->create(PostForm::class, ['model' => $post])->renderForm();
+        return PostForm::createFromModel($post)->renderForm();
     }
 
     public function update(
@@ -79,41 +82,33 @@ class PostController extends BaseController
         PostRequest $request,
         StoreTagService $tagService,
         StoreCategoryService $categoryService,
-        BaseHttpResponse $response
     ) {
-        event(new BeforeUpdateContentEvent($request, $post));
+        PostForm::createFromModel($post)
+            ->setRequest($request)
+            ->saving(function (PostForm $form) use ($categoryService, $tagService) {
+                $request = $form->getRequest();
 
-        $post->fill($request->input());
-        $post->save();
+                $model = $form->getModel();
+                $model->fill($request->input());
+                $model->save();
 
-        event(new UpdatedContentEvent(POST_MODULE_SCREEN_NAME, $request, $post));
+                $tagService->execute($request, $model);
 
-        $tagService->execute($request, $post);
+                $categoryService->execute($request, $model);
+            });
 
-        $categoryService->execute($request, $post);
-
-        return $response
-            ->setPreviousUrl(route('posts.index'))
-            ->setMessage(trans('core/base::notices.update_success_message'));
+        return $this
+            ->httpResponse()
+            ->setPreviousRoute('posts.index')
+            ->withUpdatedSuccessMessage();
     }
 
-    public function destroy(Post $post, Request $request, BaseHttpResponse $response)
+    public function destroy(Post $post)
     {
-        try {
-            $post->delete();
-
-            event(new DeletedContentEvent(POST_MODULE_SCREEN_NAME, $request, $post));
-
-            return $response
-                ->setMessage(trans('core/base::notices.delete_success_message'));
-        } catch (Exception $exception) {
-            return $response
-                ->setError()
-                ->setMessage($exception->getMessage());
-        }
+        return DeleteResourceAction::make($post);
     }
 
-    public function getWidgetRecentPosts(Request $request, BaseHttpResponse $response)
+    public function getWidgetRecentPosts(Request $request): BaseHttpResponse
     {
         $limit = $request->integer('paginate', 10);
         $limit = $limit > 0 ? $limit : 10;
@@ -124,7 +119,8 @@ class PostController extends BaseController
             ->limit($limit)
             ->get();
 
-        return $response
-            ->setData(view('plugins/blog::posts.widgets.posts', compact('posts', 'limit'))->render());
+        return $this
+            ->httpResponse()
+            ->setData(view('plugins/blog::widgets.posts', compact('posts', 'limit'))->render());
     }
 }

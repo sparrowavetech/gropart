@@ -8,6 +8,9 @@ use Botble\Base\Supports\Core;
 use Botble\Setting\Facades\Setting;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Validator;
+
+use function Laravel\Prompts\text;
+
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputOption;
 use Throwable;
@@ -25,11 +28,11 @@ class ActivateLicenseCommand extends Command
     public function handle(): int
     {
         if ($this->option('buyer') && $this->option('purchase_code')) {
-            $buyer = $this->option('buyer');
+            $username = $this->option('buyer');
             $purchasedCode = $this->option('purchase_code');
             $validator = Validator::make(
                 [
-                    'buyer' => $buyer,
+                    'buyer' => $username,
                     'purchase_code' => $purchasedCode,
                 ],
                 [
@@ -44,32 +47,37 @@ class ActivateLicenseCommand extends Command
                 return self::FAILURE;
             }
         } else {
-            $buyer = $this->askWithValidate('Enter username', 'required|string|min:2|max:60');
+            $username = text(
+                label: 'Envato username',
+                required: true,
+                validate: $this->validate('string|min:2|max:60'),
+            );
 
-            if (filter_var($buyer, FILTER_VALIDATE_URL)) {
-                $buyer = explode('/', $buyer);
-                $username = end($buyer);
-
+            if (filter_var($username, FILTER_VALIDATE_URL)) {
                 $this->components->error(
                     sprintf(
-                        'Envato username must not a URL. Please try with username <comment>%s</comment>!',
-                        $username
+                        'Envato username must not a URL. Please try "%s".',
+                        explode('/', $username)[count(explode('/', $username)) - 1]
                     )
                 );
 
                 return self::FAILURE;
             }
 
-            $purchasedCode = $this->askWithValidate('Enter purchase code', 'required|string|min:19|max:36');
+            $purchasedCode = text(
+                label: 'Purchase code',
+                required: true,
+                validate: $this->validate('string|min:19|max:36'),
+            );
         }
 
         try {
-            return $this->performUpdate($purchasedCode, $buyer);
+            return $this->performUpdate($purchasedCode, $username);
         } catch (LicenseIsAlreadyActivatedException) {
-            $this->core->revokeLicense($purchasedCode, $buyer);
+            $this->core->revokeLicense($purchasedCode, $username);
 
             return tap(
-                $this->performUpdate($purchasedCode, $buyer),
+                $this->performUpdate($purchasedCode, $username),
                 fn () => $this->components->warn('Your license on the previous domain has been revoked!')
             );
         } catch (Throwable $exception) {
@@ -79,9 +87,9 @@ class ActivateLicenseCommand extends Command
         }
     }
 
-    protected function performUpdate(string $purchasedCode, string $buyer): int
+    protected function performUpdate(string $purchasedCode, string $username): int
     {
-        $status = $this->core->activateLicense($purchasedCode, $buyer);
+        $status = $this->core->activateLicense($purchasedCode, $username);
 
         if (! $status) {
             $this->components->error('This license is invalid.');
@@ -89,7 +97,7 @@ class ActivateLicenseCommand extends Command
             return self::FAILURE;
         }
 
-        Setting::forceSet('licensed_to', $buyer)->save();
+        Setting::forceSet('licensed_to', $username)->save();
 
         $this->components->info('This license has been activated successfully.');
 

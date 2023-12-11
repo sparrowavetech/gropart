@@ -101,16 +101,18 @@ class SlugHelper
 
     public function createSlug(BaseModel $model, string $name = null): BaseModel|Slug
     {
-        $slug = new Slug();
-
-        $slug->fill([
+        /**
+         * @var Slug $slug
+         */
+        $slug = Slug::query()->firstOrNew([
             'reference_type' => $model::class,
             'reference_id' => $model->getKey(),
-            'key' => Str::slug($name ?: $model->{$this->getColumnNameToGenerateSlug($model::class)}),
             'prefix' => $this->getPrefix($model::class),
         ]);
 
-        $slug->save();
+        $slug->key = Str::slug($name ?: $model->{$this->getColumnNameToGenerateSlug($model::class)});
+
+        $slug->saveQuietly();
 
         return $slug;
     }
@@ -161,7 +163,7 @@ class SlugHelper
     {
         $prefix = setting($this->getPermalinkSettingKey($model));
 
-        if (! $prefix) {
+        if ($prefix === null) {
             $prefix = Arr::get(config('packages.slug.general.prefixes', []), $model);
         }
 
@@ -176,8 +178,31 @@ class SlugHelper
         return $default;
     }
 
-    public function getColumnNameToGenerateSlug(string|object $model): string|null
+    public function getHelperTextForPrefix(string $model, string $default = '/', bool $translate = true): string
     {
+        return $this->getHelperText(
+            $this->getPrefix($model, $default, $translate) ?: '',
+            Str::slug('Your URL Here'),
+            '/'
+        );
+    }
+
+    public function getHelperText(string $prefix, string|null $postfix = '', string|null $separation = ''): string
+    {
+        $url = ($prefix ? $prefix . $separation : '') . $postfix;
+        $url = ltrim(str_replace('//', '/', $url), '/');
+
+        return trans('packages/slug::slug.settings.helper_text', [
+            'url' => sprintf('<a href="javascript:void(0)">%s</a>', url($url)),
+        ]);
+    }
+
+    public function getColumnNameToGenerateSlug(string|object|null $model): string|null
+    {
+        if (! $model) {
+            return null;
+        }
+
         if (is_object($model)) {
             $model = get_class($model);
         }

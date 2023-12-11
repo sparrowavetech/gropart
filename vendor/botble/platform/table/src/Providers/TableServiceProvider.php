@@ -27,7 +27,8 @@ class TableServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        $this->setNamespace('core/table')
+        $this
+            ->setNamespace('core/table')
             ->loadHelpers()
             ->loadAndPublishViews()
             ->loadAndPublishTranslations()

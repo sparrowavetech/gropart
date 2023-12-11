@@ -10,6 +10,10 @@ class ShortcodeField
 {
     public function tabs(array $fields, array $attributes = [], int $max = 20): string
     {
+        if (! $fields) {
+            return '';
+        }
+
         $current = (int) Arr::get($attributes, 'quantity') ?: 6;
 
         $selector = 'quantity_' . Str::random(20);

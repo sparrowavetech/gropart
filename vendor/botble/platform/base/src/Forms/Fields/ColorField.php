@@ -9,8 +9,8 @@ class ColorField extends FormField
 {
     protected function getTemplate(): string
     {
-        Assets::addScripts(['colorpicker'])
-            ->addStyles(['colorpicker']);
+        Assets::addScripts(['coloris'])
+            ->addStyles(['coloris']);
 
         return 'core/base::forms.fields.color';
     }

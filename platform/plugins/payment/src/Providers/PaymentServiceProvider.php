@@ -9,7 +9,6 @@ use Botble\Payment\Models\Payment;
 use Botble\Payment\Repositories\Eloquent\PaymentRepository;
 use Botble\Payment\Repositories\Interfaces\PaymentInterface;
 use Illuminate\Foundation\AliasLoader;
-use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\ServiceProvider;
 
 class PaymentServiceProvider extends ServiceProvider
@@ -37,18 +36,19 @@ class PaymentServiceProvider extends ServiceProvider
             ->loadAndPublishViews()
             ->loadAndPublishTranslations()
             ->loadRoutes()
+            ->loadAnonymousComponents()
             ->loadMigrations()
             ->publishAssets();
 
-        $this->app['events']->listen(RouteMatched::class, function () {
+        DashboardMenu::beforeRetrieving(function () {
             DashboardMenu::make()
                 ->registerItem([
                     'id' => 'cms-plugins-payments',
-                    'priority' => 800,
+                    'priority' => 3,
                     'parent_id' => null,
                     'name' => 'plugins/payment::payment.name',
-                    'icon' => 'fas fa-credit-card',
-                    'url' => route('payment.index'),
+                    'icon' => 'ti ti-credit-card',
+                    'url' => fn () => route('payment.index'),
                     'permissions' => ['payment.index'],
                 ])
                 ->registerItem([
@@ -57,7 +57,7 @@ class PaymentServiceProvider extends ServiceProvider
                     'parent_id' => 'cms-plugins-payments',
                     'name' => 'plugins/payment::payment.transactions',
                     'icon' => null,
-                    'url' => route('payment.index'),
+                    'url' => fn () => route('payment.index'),
                     'permissions' => ['payment.index'],
                 ])
                 ->registerItem([
@@ -66,7 +66,7 @@ class PaymentServiceProvider extends ServiceProvider
                     'parent_id' => 'cms-plugins-payments',
                     'name' => 'plugins/payment::payment.payment_methods',
                     'icon' => null,
-                    'url' => route('payments.methods'),
+                    'url' => fn () => route('payments.methods'),
                     'permissions' => ['payments.settings'],
                 ]);
         });

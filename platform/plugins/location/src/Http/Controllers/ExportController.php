@@ -4,7 +4,6 @@ namespace Botble\Location\Http\Controllers;
 
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
-use Botble\Base\Facades\PageTitle;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Location\Exports\CsvLocationExport;
 use Botble\Location\Models\City;
@@ -16,7 +15,11 @@ class ExportController extends BaseController
 {
     public function index()
     {
-        PageTitle::setTitle(trans('plugins/location::location.export_location'));
+        $this
+            ->breadcrumb()
+            ->add(trans('plugins/location::location.name'));
+
+        $this->pageTitle(trans('plugins/location::location.export_location'));
 
         Assets::addScriptsDirectly(['vendor/core/plugins/location/js/export.js']);
 

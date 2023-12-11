@@ -2,7 +2,7 @@
 
 namespace Botble\Translation\Providers;
 
-use Botble\Base\Facades\DashboardMenu;
+use Botble\Base\Facades\PanelSectionManager;
 use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Translation\Console\CleanCommand;
@@ -13,11 +13,10 @@ use Botble\Translation\Console\RemoveLocaleCommand;
 use Botble\Translation\Console\RemoveUnusedTranslationsCommand;
 use Botble\Translation\Console\ResetCommand;
 use Botble\Translation\Console\UpdateThemeTranslationCommand;
-use Botble\Translation\Manager;
 use Botble\Translation\Models\Translation;
+use Botble\Translation\PanelSections\LocalizationPanelSection;
 use Botble\Translation\Repositories\Eloquent\TranslationRepository;
 use Botble\Translation\Repositories\Interfaces\TranslationInterface;
-use Illuminate\Routing\Events\RouteMatched;
 
 class TranslationServiceProvider extends ServiceProvider
 {
@@ -28,15 +27,26 @@ class TranslationServiceProvider extends ServiceProvider
         $this->app->bind(TranslationInterface::class, function () {
             return new TranslationRepository(new Translation());
         });
+    }
 
-        $this->app->bind('translation-manager', Manager::class);
+    public function boot(): void
+    {
+        $this
+            ->setNamespace('plugins/translation')
+            ->loadAndPublishConfigurations(['general', 'permissions'])
+            ->loadMigrations()
+            ->loadRoutes()
+            ->loadAndPublishViews()
+            ->loadAndPublishTranslations()
+            ->publishAssets();
 
-        $this->commands([
-            ImportCommand::class,
-        ]);
+        PanelSectionManager::beforeRendering(function () {
+            PanelSectionManager::register(LocalizationPanelSection::class);
+        });
 
         if ($this->app->runningInConsole()) {
             $this->commands([
+                ImportCommand::class,
                 ResetCommand::class,
                 ExportCommand::class,
                 CleanCommand::class,
@@ -46,56 +56,5 @@ class TranslationServiceProvider extends ServiceProvider
                 RemoveLocaleCommand::class,
             ]);
         }
-    }
-
-    public function boot(): void
-    {
-        $this->setNamespace('plugins/translation')
-            ->loadAndPublishConfigurations(['general', 'permissions'])
-            ->loadMigrations()
-            ->loadRoutes()
-            ->loadAndPublishViews()
-            ->loadAndPublishTranslations()
-            ->publishAssets();
-
-        $this->app['events']->listen(RouteMatched::class, function () {
-            DashboardMenu::make()
-                ->registerItem([
-                    'id' => 'cms-plugin-translation',
-                    'priority' => 997,
-                    'parent_id' => null,
-                    'name' => 'plugins/translation::translation.translations',
-                    'icon' => 'fas fa-language',
-                    'url' => route('translations.index'),
-                    'permissions' => ['translations.index'],
-                ])
-                ->registerItem([
-                    'id' => 'cms-plugin-translation-locale',
-                    'priority' => 1,
-                    'parent_id' => 'cms-plugin-translation',
-                    'name' => 'plugins/translation::translation.locales',
-                    'icon' => null,
-                    'url' => route('translations.locales'),
-                    'permissions' => ['translations.index'],
-                ])
-                ->registerItem([
-                    'id' => 'cms-plugin-translation-theme-translations',
-                    'priority' => 2,
-                    'parent_id' => 'cms-plugin-translation',
-                    'name' => 'plugins/translation::translation.theme-translations',
-                    'icon' => null,
-                    'url' => route('translations.theme-translations'),
-                    'permissions' => ['translations.index'],
-                ])
-                ->registerItem([
-                    'id' => 'cms-plugin-translation-admin-translations',
-                    'priority' => 3,
-                    'parent_id' => 'cms-plugin-translation',
-                    'name' => 'plugins/translation::translation.admin-translations',
-                    'icon' => null,
-                    'url' => route('translations.index'),
-                    'permissions' => ['translations.index'],
-                ]);
-        });
     }
 }

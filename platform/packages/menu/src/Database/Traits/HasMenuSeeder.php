@@ -23,9 +23,15 @@ trait HasMenuSeeder
         foreach ($data as $index => $item) {
             $item['slug'] = Str::slug($item['name']);
 
+            /**
+             * @var MenuModel $menu
+             */
             $menu = MenuModel::query()->create(Arr::except($item, ['items', 'location']));
 
             if (isset($item['location'])) {
+                /**
+                 * @var MenuLocation $menuLocation
+                 */
                 $menuLocation = MenuLocation::query()->create([
                     'menu_id' => $menu->getKey(),
                     'location' => $item['location'],

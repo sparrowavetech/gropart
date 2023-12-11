@@ -32,7 +32,7 @@ class RouteCacheCommand extends BaseRouteCacheCommand
 
         $this->cacheRoutesPerLocale();
 
-        $this->info('Routes cached successfully for all locales!');
+        $this->components->info('Routes cached successfully for all locales!');
 
         return self::SUCCESS;
     }

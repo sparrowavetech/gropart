@@ -20,7 +20,7 @@
                 ),
             ) !!}</p>
 
-            @php $supportedCurrencies = (new \Botble\Paystack\Services\Gateways\PaystackPaymentService)->supportedCurrencyCodes(); @endphp
+            @php $supportedCurrencies = (new Botble\Paystack\Services\Gateways\PaystackPaymentService)->supportedCurrencyCodes(); @endphp
             @if (!in_array(get_application_currency()->title, $supportedCurrencies))
                 <div
                     class="alert alert-warning"
@@ -36,7 +36,7 @@
                     </div>
                     @php
                         $currencies = get_all_currencies();
-                        
+
                         $currencies = $currencies->filter(function ($item) use ($supportedCurrencies) {
                             return in_array($item->title, $supportedCurrencies);
                         });

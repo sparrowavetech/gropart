@@ -2,23 +2,26 @@
 
 namespace Botble\Payment\Http\Controllers;
 
-use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\PageTitle;
+use Botble\Base\Http\Actions\DeleteResourceAction;
 use Botble\Base\Http\Controllers\BaseController;
-use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Payment\Enums\PaymentStatusEnum;
 use Botble\Payment\Http\Requests\PaymentMethodRequest;
 use Botble\Payment\Http\Requests\UpdatePaymentRequest;
 use Botble\Payment\Models\Payment;
+use Botble\Payment\Repositories\Interfaces\PaymentInterface;
 use Botble\Payment\Tables\PaymentTable;
 use Botble\Setting\Supports\SettingStore;
-use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 
 class PaymentController extends BaseController
 {
+    public function __construct(protected PaymentInterface $paymentRepository)
+    {
+    }
+
     public function index(PaymentTable $table)
     {
         PageTitle::setTitle(trans('plugins/payment::payment.name'));
@@ -26,27 +29,13 @@ class PaymentController extends BaseController
         return $table->renderTable();
     }
 
-    public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
+    public function destroy(Payment $payment)
     {
-        try {
-            $payment = Payment::query()->findOrFail($id);
-
-            $payment->delete();
-
-            event(new DeletedContentEvent(PAYMENT_MODULE_SCREEN_NAME, $request, $payment));
-
-            return $response->setMessage(trans('core/base::notices.delete_success_message'));
-        } catch (Exception $exception) {
-            return $response
-                ->setError()
-                ->setMessage($exception->getMessage());
-        }
+        return DeleteResourceAction::make($payment);
     }
 
-    public function show(int|string $id)
+    public function show(Payment $payment)
     {
-        $payment = Payment::query()->findOrFail($id);
-
         PageTitle::setTitle(trans('plugins/payment::payment.view_transaction', ['charge_id' => $payment->charge_id]));
 
         $detail = apply_filters(PAYMENT_FILTER_PAYMENT_INFO_DETAIL, null, $payment);
@@ -66,66 +55,70 @@ class PaymentController extends BaseController
     {
         PageTitle::setTitle(trans('plugins/payment::payment.payment_methods'));
 
-        Assets::addStylesDirectly('vendor/core/plugins/payment/css/payment-methods.css')
-            ->addScriptsDirectly('vendor/core/plugins/payment/js/payment-methods.js');
+        Assets::addScriptsDirectly('vendor/core/plugins/payment/js/payment-methods.js');
 
         return view('plugins/payment::settings.index');
     }
 
-    public function updateSettings(Request $request, BaseHttpResponse $response, SettingStore $settingStore)
+    public function updateSettings(Request $request, SettingStore $settingStore)
     {
         $data = $request->except(['_token']);
         foreach ($data as $settingKey => $settingValue) {
-            $settingStore
-                ->set($settingKey, $settingValue);
+            $settingStore->set($settingKey, $settingValue);
         }
 
         $settingStore->save();
 
-        return $response->setMessage(trans('plugins/payment::payment.saved_payment_settings_success'));
+        return $this
+            ->httpResponse()
+            ->setMessage(trans('plugins/payment::payment.saved_payment_settings_success'));
     }
 
-    public function updateMethods(PaymentMethodRequest $request, BaseHttpResponse $response, SettingStore $settingStore)
+    public function updateMethods(PaymentMethodRequest $request, SettingStore $settingStore)
     {
         $type = $request->input('type');
         $data = $request->except(['_token', 'type']);
+
         foreach ($data as $settingKey => $settingValue) {
-            $settingStore
-                ->set($settingKey, $settingValue);
+            $key = apply_filters('payment_setting_key', $settingKey);
+            $settingStore->set($key, $settingValue);
         }
 
         $settingStore
             ->set('payment_' . $type . '_status', 1)
             ->save();
 
-        return $response->setMessage(trans('plugins/payment::payment.saved_payment_method_success'));
+        return $this
+            ->httpResponse()
+            ->setMessage(trans('plugins/payment::payment.saved_payment_method_success'));
     }
 
-    public function updateMethodStatus(Request $request, BaseHttpResponse $response, SettingStore $settingStore)
+    public function updateMethodStatus(Request $request, SettingStore $settingStore)
     {
         $settingStore
             ->set('payment_' . $request->input('type') . '_status', 0)
             ->save();
 
-        return $response->setMessage(trans('plugins/payment::payment.turn_off_success'));
+        return $this
+            ->httpResponse()
+            ->setMessage(trans('plugins/payment::payment.turn_off_success'));
     }
 
-    public function update(int|string $id, UpdatePaymentRequest $request, BaseHttpResponse $response)
+    public function update(Payment $payment, UpdatePaymentRequest $request)
     {
-        $payment = Payment::query()->findOrFail($id);
-
-        $payment->update([
+        $this->paymentRepository->update(['id' => $payment->getKey()], [
             'status' => $request->input('status'),
         ]);
 
         do_action(ACTION_AFTER_UPDATE_PAYMENT, $request, $payment);
 
-        return $response
-            ->setPreviousUrl(route('payment.show', $payment->id))
-            ->setMessage(trans('core/base::notices.update_success_message'));
+        return $this
+            ->httpResponse()
+            ->setPreviousUrl(route('payment.show', $payment->getKey()))
+            ->withUpdatedSuccessMessage();
     }
 
-    public function getRefundDetail(int|string $id, int|string $refundId, BaseHttpResponse $response)
+    public function getRefundDetail(int|string $id, int|string $refundId)
     {
         $data = [];
         $payment = Payment::query()->findOrFail($id);
@@ -149,6 +142,8 @@ class PaymentController extends BaseController
         }
 
         $view = Arr::get($data, 'view');
+
+        $response = $this->httpResponse();
 
         if ($view) {
             $response->setData($view);

@@ -17,22 +17,6 @@ class SitemapServiceProvider extends ServiceProvider
 
     protected bool $defer = true;
 
-    public function boot(): void
-    {
-        $this->setNamespace('packages/sitemap')
-            ->loadAndPublishConfigurations(['config'])
-            ->loadAndPublishViews()
-            ->publishAssets();
-
-        $this->app['events']->listen([
-            CreatedContentEvent::class,
-            UpdatedContentEvent::class,
-            DeletedContentEvent::class,
-        ], function () {
-            cache()->forget('cache_site_map_key');
-        });
-    }
-
     public function register(): void
     {
         $this->app->bind('sitemap', function ($app) {
@@ -49,6 +33,23 @@ class SitemapServiceProvider extends ServiceProvider
         });
 
         $this->app->alias('sitemap', Sitemap::class);
+    }
+
+    public function boot(): void
+    {
+        $this
+            ->setNamespace('packages/sitemap')
+            ->loadAndPublishConfigurations(['config'])
+            ->loadAndPublishViews()
+            ->publishAssets();
+
+        $this->app['events']->listen([
+            CreatedContentEvent::class,
+            UpdatedContentEvent::class,
+            DeletedContentEvent::class,
+        ], function () {
+            cache()->forget('cache_site_map_key');
+        });
     }
 
     public function provides(): array

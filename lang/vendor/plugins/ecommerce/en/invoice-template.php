@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'name' => 'Invoice template',
+    'name' => 'Invoice Template',
     'setting' => 'Invoice Settings',
     'setting_description' => 'Settings for Invoice template',
     'setting_content' => 'Content',

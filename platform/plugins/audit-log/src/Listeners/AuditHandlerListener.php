@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Str;
 
 class AuditHandlerListener
 {
@@ -19,10 +20,12 @@ class AuditHandlerListener
     public function handle(AuditHandlerEvent $event): void
     {
         try {
+            $module = strtolower(Str::afterLast($event->module, '\\'));
+
             $data = [
                 'user_agent' => $this->request->userAgent(),
                 'ip_address' => $this->request->ip(),
-                'module' => $event->module,
+                'module' => $module,
                 'action' => $event->action,
                 'user_id' => $this->request->user() ? $this->request->user()->getKey() : 0,
                 'reference_user' => $event->referenceUser,

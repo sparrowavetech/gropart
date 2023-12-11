@@ -1,108 +1,89 @@
 @extends(BaseHelper::getAdminMasterLayoutTemplate())
+
 @section('content')
-    <div class="widget meta-boxes">
-        <div class="widget-title">
-            <h4>&nbsp; {{ trans('plugins/translation::translation.translations') }}</h4>
-        </div>
-        <div
-            class="widget-body box-translation"
-            v-pre
-        >
-            @if (empty($group))
-                {!! Form::open(['route' => 'translations.import', 'class' => 'form-inline', 'role' => 'form']) !!}
-                {!! Form::customSelect(
-                    'replace',
-                    [
-                        0 => trans('plugins/translation::translation.append_translation'),
-                        1 => trans('plugins/translation::translation.replace_translation'),
-                    ],
-                    null,
-                    ['wrapper_class' => 'd-inline-block mb-0'],
-                ) !!}
+    <x-core::alert type="warning">
+        {{ trans('plugins/translation::translation.theme_translations_instruction') }}
+    </x-core::alert>
 
-                <button
-                    class="btn btn-primary button-import-groups"
-                    type="submit"
-                >{{ trans('plugins/translation::translation.import_group') }}</button>
-                {!! Form::close() !!}
-                <br>
-            @endif
-            @if (!empty($group))
-                <form
-                    class="form-inline"
-                    role="form"
-                    method="POST"
-                    action="{{ route('translations.group.publish', compact('group')) }}"
-                >
-                    @csrf
-                    <button
-                        class="btn btn-info button-publish-groups"
-                        type="submit"
-                    >{{ trans('plugins/translation::translation.publish_translations') }}</button>
-                    <a
-                        class="btn btn-secondary translation-back"
-                        href="{{ route('translations.index') }}"
-                    >{{ trans('plugins/translation::translation.back') }}</a>
-                </form>
-                <div class="note note-warning">
-                    {{ trans('plugins/translation::translation.export_warning', ['lang_path' => lang_path()]) }}</div>
-
-                {!! apply_filters('translation_other_translation_header', null) !!}
-            @endif
-            {!! Form::open(['role' => 'form']) !!}
-            {!! Form::customSelect('group', $groups, $group, ['class' => 'group-select select-search-full']) !!}
-            {!! Form::close() !!}
-            @if (!empty($group))
-                <hr>
-                <div class="table-responsive">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                @foreach ($locales as $locale)
-                                    <th>{{ $locale }}</th>
-                                @endforeach
-                                {!! apply_filters('translation_other_translation_table_header', null) !!}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($translations as $key => $translation)
-                                <tr id="{{ $key }}">
-                                    @foreach ($locales as $locale)
-                                        @php $item = $translation[$locale] ?? null @endphp
-                                        <td class="text-start">
-                                            <a
-                                                class="editable status-{{ $item ? $item->status : 0 }} locale-{{ $locale }}"
-                                                data-locale="{{ $locale }}"
-                                                data-name="{{ $locale . '|' . $key }}"
-                                                data-type="textarea"
-                                                data-pk="{{ $item ? $item->id : 0 }}"
-                                                data-url="{{ $editUrl }}"
-                                                data-title="{{ trans('plugins/translation::translation.edit_title') }}"
-                                                href="#edit"
-                                            >{!! $item ? htmlentities($item->value, ENT_QUOTES, 'UTF-8', false) : '' !!}</a>
-                                        </td>
-                                    @endforeach
-                                </tr>
-                            @endforeach
-                            {!! apply_filters('translation_other_translation_table_body', null) !!}
-                        </tbody>
-                    </table>
+    <x-core::card>
+        <x-core::card.header>
+            <x-core::card.title>{{ trans('plugins/translation::translation.translations') }}</x-core::card.title>
+        </x-core::card.header>
+        <x-core::card.body @class(['box-translation', 'empty-translation' => $count < 1])>
+            <div class="row">
+                <div class="col-md-6">
+                    <p>{{ trans('plugins/translation::translation.translate_from') }}
+                        <strong class="text-info">{{ $defaultLanguage ? $defaultLanguage['name'] : 'en' }}</strong>
+                        {{ trans('plugins/translation::translation.to') }}
+                        <strong class="text-info">{{ $locale['name'] }}</strong>
+                    </p>
                 </div>
-            @else
-                <p class="text-info">{{ trans('plugins/translation::translation.choose_group_msg') }}</p>
+                <div class="col-md-6">
+                    <div class="text-end">
+                        @include(
+                            'plugins/translation::partials.list-theme-languages-to-translate',
+                            ['groups' => $locales, 'group' => $locale, 'route' => 'translations.index']
+                        )
+                    </div>
+                </div>
+            </div>
+
+            <x-core::form :url="route('translations.import')">
+                <div class="row justify-content-between">
+                    <div class="col-md-4">
+                        <x-core::form.select
+                            name="replace"
+                            :options="[
+                                0 => trans('plugins/translation::translation.append_translation'),
+                                1 => trans('plugins/translation::translation.replace_translation'),
+                            ]"
+                            :input-group="true"
+                        >
+                            <x-slot:append>
+                                <x-core::button
+                                    type="submit"
+                                    class="button-import-groups"
+                                >
+                                    {{ trans('plugins/translation::translation.import_group') }}
+                                </x-core::button>
+                            </x-slot:append>
+                        </x-core::form.select>
+                    </div>
+                    @if ($count)
+                        <div class="col">
+                            <x-core::form.select
+                                name="group"
+                                :options="$groups"
+                                :value="request()->input('group')"
+                                class="group-select"
+                                :searchable="true"
+                                :input-group="true"
+                            />
+                        </div>
+                    @endif
+                </div>
+            </x-core::form>
+
+            @if ($count < 1)
+                <div class="text-muted">
+                    {!! BaseHelper::clean(trans('plugins/translation::translation.no_translations', ['locale' => "<strong>{$locale['name']}</strong>"])) !!}
+                </div>
             @endif
-        </div>
-        <div class="clearfix"></div>
-    </div>
+        </x-core::card.body>
+
+        @if ($count > 0)
+            {{ $translationTable->renderTable() }}
+        @endif
+    </x-core::card>
+
     @if (!empty($group))
-        <x-core::modal
+        <x-core::modal.action
             id="confirm-publish-modal"
-            type="warning"
             :title="trans('plugins/translation::translation.publish_translations')"
-            button-id="button-confirm-publish-groups"
-            :button-label="trans('core/base::base.yes')"
-        >
-            {!! trans('plugins/translation::translation.confirm_publish_group', ['group' => $group]) !!}
-        </x-core::modal>
+            :description="trans('plugins/translation::translation.confirm_publish_group', ['group' => $group])"
+            type="warning"
+            :submit-button-attrs="['id' => 'button-confirm-publish-groups']"
+            :submit-button-label="trans('core/base::base.yes')"
+        />
     @endif
-@stop
+@endsection

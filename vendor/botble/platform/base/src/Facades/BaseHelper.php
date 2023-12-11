@@ -45,6 +45,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static void logError(\Throwable $throwable)
  * @method static string getDateFormat()
  * @method static string getDateTimeFormat()
+ * @method static string joinPaths(array $paths)
  *
  * @see \Botble\Base\Helpers\BaseHelper
  */

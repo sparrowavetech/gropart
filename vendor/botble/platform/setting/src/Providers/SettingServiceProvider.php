@@ -2,13 +2,20 @@
 
 namespace Botble\Setting\Providers;
 
+use Botble\Base\Events\PanelSectionsRendering;
 use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Facades\EmailHandler;
+use Botble\Base\Facades\PanelSectionManager;
+use Botble\Base\PanelSections\PanelSectionItem;
+use Botble\Base\PanelSections\System\SystemPanelSection;
 use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Setting\Commands\CronJobTestCommand;
 use Botble\Setting\Facades\Setting;
+use Botble\Setting\Listeners\PushDashboardMenuToOtherSectionPanel;
 use Botble\Setting\Models\Setting as SettingModel;
+use Botble\Setting\PanelSections\SettingCommonPanelSection;
+use Botble\Setting\PanelSections\SettingOthersPanelSection;
 use Botble\Setting\Repositories\Eloquent\SettingRepository;
 use Botble\Setting\Repositories\Interfaces\SettingInterface;
 use Botble\Setting\Supports\DatabaseSettingStore;
@@ -25,7 +32,8 @@ class SettingServiceProvider extends ServiceProvider
 
     public function register(): void
     {
-        $this->setNamespace('core/setting')
+        $this
+            ->setNamespace('core/setting')
             ->loadAndPublishConfigurations(['general']);
 
         $this->app->singleton(SettingStore::class, function () {
@@ -54,67 +62,57 @@ class SettingServiceProvider extends ServiceProvider
             ->loadMigrations()
             ->publishAssets();
 
-        $this->app['events']->listen(RouteMatched::class, function () {
+        DashboardMenu::default()->beforeRetrieving(function () {
             DashboardMenu::make()
                 ->registerItem([
                     'id' => 'cms-core-settings',
-                    'priority' => 998,
-                    'parent_id' => null,
+                    'priority' => 9999,
                     'name' => 'core/setting::setting.title',
-                    'icon' => 'fa fa-cogs',
-                    'url' => route('settings.options'),
-                    'permissions' => ['settings.options'],
-                ])
-                ->registerItem([
-                    'id' => 'cms-core-settings-general',
-                    'priority' => 1,
-                    'parent_id' => 'cms-core-settings',
-                    'name' => 'core/base::layouts.setting_general',
-                    'icon' => null,
-                    'url' => route('settings.options'),
-                    'permissions' => ['settings.options'],
-                ])
-                ->registerItem([
-                    'id' => 'cms-core-settings-email',
-                    'priority' => 2,
-                    'parent_id' => 'cms-core-settings',
-                    'name' => 'core/base::layouts.setting_email',
-                    'icon' => null,
-                    'url' => route('settings.email'),
-                    'permissions' => ['settings.email'],
-                ])
-                ->registerItem([
-                    'id' => 'cms-core-settings-media',
-                    'priority' => 3,
-                    'parent_id' => 'cms-core-settings',
-                    'name' => 'core/setting::setting.media.title',
-                    'icon' => null,
-                    'url' => route('settings.media'),
-                    'permissions' => ['settings.media'],
-                ])
-                ->registerItem([
-                    'id' => 'cms-core-settings-cronjob',
-                    'priority' => 999,
-                    'parent_id' => 'cms-core-settings',
-                    'name' => 'core/setting::setting.cronjob.name',
-                    'url' => route('settings.cronjob'),
-                    'permissions' => ['settings.cronjob'],
+                    'icon' => 'ti ti-settings',
+                    'route' => 'settings.index',
+                ]);
+        });
+
+        $events = $this->app['events'];
+
+        $events->listen(RouteMatched::class, function () {
+            PanelSectionManager::default()
+                ->setGroupName(trans('core/setting::setting.title'))
+                ->register([
+                    SettingCommonPanelSection::class,
+                    SettingOthersPanelSection::class,
                 ]);
 
             EmailHandler::addTemplateSettings('base', config('core.setting.email', []), 'core');
         });
 
-        $this->commands([
-            CronJobTestCommand::class,
-        ]);
-
-        $this->app->afterResolving(Schedule::class, function (Schedule $schedule) {
-            rescue(function () use ($schedule) {
-                $schedule
-                    ->command(CronJobTestCommand::class)
-                    ->everyMinute();
-            });
+        PanelSectionManager::group('system')->beforeRendering(function () {
+            PanelSectionManager::registerItem(
+                SystemPanelSection::class,
+                fn () => PanelSectionItem::make('cronjob')
+                    ->setTitle(trans('core/setting::setting.cronjob.name'))
+                    ->withIcon('ti ti-calendar-event')
+                    ->withDescription(trans('core/setting::setting.cronjob.description'))
+                    ->withPriority(50)
+                    ->withRoute('settings.cronjob')
+            );
         });
+
+        $events->listen(PanelSectionsRendering::class, PushDashboardMenuToOtherSectionPanel::class);
+
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                CronJobTestCommand::class,
+            ]);
+
+            $this->app->afterResolving(Schedule::class, function (Schedule $schedule) {
+                rescue(function () use ($schedule) {
+                    $schedule
+                        ->command(CronJobTestCommand::class)
+                        ->everyMinute();
+                });
+            });
+        }
     }
 
     public function provides(): array

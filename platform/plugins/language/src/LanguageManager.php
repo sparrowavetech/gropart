@@ -49,6 +49,8 @@ class LanguageManager
 
     protected string|null $currentAdminLocaleCode = null;
 
+    protected string|null $currentLocaleCode = null;
+
     protected array|Collection $activeLanguages = [];
 
     protected array|Collection $activeLanguageSelect = ['*'];
@@ -708,6 +710,10 @@ class LanguageManager
 
     public function getCurrentLocaleCode(): string|null
     {
+        if ($this->currentLocaleCode) {
+            return $this->currentLocaleCode;
+        }
+
         $supportedLocales = $this->getSupportedLocales();
 
         if (empty($supportedLocales)) {
@@ -733,16 +739,32 @@ class LanguageManager
         $this->currentAdminLocaleCode = $code;
     }
 
-    public function getCurrentAdminLocale(): string|null
+    public function setCurrentLocale(string|null $locale): void
+    {
+        $this->currentLocale = $locale;
+    }
+
+    public function setCurrentLocaleCode(string|null $code): void
+    {
+        $this->currentLocaleCode = $code;
+    }
+
+    public function getCurrentAdminLanguage(): array
     {
         $adminLocale = $this->getCurrentAdminLocaleCode();
-        foreach ($this->getSupportedLocales() as $locale => $supportedLocale) {
-            if ($supportedLocale['lang_code'] == $adminLocale) {
+
+        foreach ($this->getSupportedLocales() as $locale) {
+            if ($locale['lang_code'] === $adminLocale) {
                 return $locale;
             }
         }
 
-        return $adminLocale;
+        return [];
+    }
+
+    public function getCurrentAdminLocale(): string|null
+    {
+        return Arr::get($this->getCurrentAdminLanguage(), 'lang_locale', $this->getCurrentAdminLocaleCode());
     }
 
     public function getCurrentAdminLocaleCode(): string|null
@@ -1029,7 +1051,7 @@ class LanguageManager
 
     public function getSwitcherUrl(string $localeCode, string $languageCode): string|null
     {
-        if (count($this->switcherURLs)) {
+        if (! empty($this->switcherURLs)) {
             $url = collect($this->switcherURLs)->where('lang_code', $languageCode)->first();
 
             if ($url) {
@@ -1037,9 +1059,25 @@ class LanguageManager
             }
         }
 
-        $showRelated = setting('language_show_default_item_if_current_version_not_existed', true);
+        if (setting('language_show_default_item_if_current_version_not_existed', true)) {
+            $url = $this->getLocalizedURL($localeCode);
 
-        return $showRelated ? $this->getLocalizedURL($localeCode) : url($localeCode);
+            $query = Arr::get(parse_url($url), 'query');
+
+            $params = [];
+
+            if ($query) {
+                $url = str_replace($query, '', $url);
+
+                parse_str($query, $params);
+            }
+
+            $params['from_lang'] = $this->getCurrentLocaleCode();
+
+            return rtrim($url, '?') . '?' . http_build_query($params);
+        }
+
+        return url($localeCode);
     }
 
     /**

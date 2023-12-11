@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Hash;
 
 class GetStartedController extends BaseController
 {
-    public function save(GetStartedRequest $request, BaseHttpResponse $response): BaseHttpResponse
+    public function save(GetStartedRequest $request): BaseHttpResponse
     {
         $step = $request->input('step');
 
@@ -79,7 +79,8 @@ class GetStartedController extends BaseController
                         ->exists();
 
                     if ($users) {
-                        return $response
+                        return $this
+                            ->httpResponse()
                             ->setError()
                             ->setMessage(trans('core/acl::users.email_exist'))
                             ->withInput();
@@ -95,7 +96,8 @@ class GetStartedController extends BaseController
                         ->exists();
 
                     if ($users) {
-                        return $response
+                        return $this
+                            ->httpResponse()
                             ->setError()
                             ->setMessage(trans('core/acl::users.username_exist'))
                             ->withInput();
@@ -119,6 +121,8 @@ class GetStartedController extends BaseController
                 break;
         }
 
-        return $response->setData(['step' => $nextStep]);
+        return $this
+            ->httpResponse()
+            ->setData(['step' => $nextStep]);
     }
 }

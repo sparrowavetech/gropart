@@ -7,6 +7,9 @@ use Botble\PluginManagement\Services\PluginService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
+
+use function Laravel\Prompts\table;
+
 use Symfony\Component\Console\Attribute\AsCommand;
 use Throwable;
 
@@ -20,21 +23,13 @@ class PluginListCommand extends Command
 
     public function handle(): int
     {
-        $header = [
-            'Name',
-            'Alias',
-            'Version',
-            'Provider',
-            'Status',
-            'Author',
-        ];
         $result = [];
 
         $plugins = BaseHelper::scanFolder(plugin_path());
         if (! empty($plugins)) {
             $installed = get_active_plugins();
             foreach ($plugins as $plugin) {
-                $configFile = plugin_path($plugin . '/plugin.json');
+                $configFile = plugin_path("$plugin/plugin.json");
                 if (! File::exists($configFile)) {
                     continue;
                 }
@@ -42,8 +37,8 @@ class PluginListCommand extends Command
                 try {
                     $this->pluginService->validatePlugin($plugin, true);
                 } catch (Throwable $exception) {
-                    $this->error('Plugin ' . $plugin . ' is invalid!');
-                    $this->error($exception->getMessage());
+                    $this->components->error(sprintf('Plugin %s is invalid!', $plugin));
+                    $this->components->error($exception->getMessage());
                 }
 
                 $content = BaseHelper::getFileData($configFile);
@@ -53,14 +48,21 @@ class PluginListCommand extends Command
                         $plugin,
                         Arr::get($content, 'version'),
                         Arr::get($content, 'provider'),
-                        in_array($plugin, $installed) ? '✓ active' : '✘ inactive',
+                        in_array($plugin, $installed) ? '<fg=green>✓</> Active' : '<fg=red>✗</> Inactive',
                         Arr::get($content, 'author'),
                     ];
                 }
             }
         }
 
-        $this->table($header, $result);
+        table([
+            'Name',
+            'Alias',
+            'Version',
+            'Provider',
+            'Status',
+            'Author',
+        ], $result);
 
         return self::SUCCESS;
     }

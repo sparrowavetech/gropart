@@ -7,6 +7,9 @@ use Illuminate\Console\Command;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Support\Facades\Storage;
+
+use function Laravel\Prompts\{info, progress};
+
 use Symfony\Component\Console\Attribute\AsCommand;
 
 #[AsCommand('cms:cache:clear-expired', 'Remove all expired cache file/folder')]
@@ -46,7 +49,13 @@ class ClearExpiredCacheCommand extends Command
     protected function deleteExpiredFiles(): void
     {
         $files = $this->disk->allFiles();
-        $this->output->progressStart(count($files));
+
+        $progress = progress(
+            label: 'Removing expired cache files',
+            steps: count($files),
+        );
+
+        $progress->start();
 
         // Loop the files and get rid of any that have expired
         foreach ($files as $cacheFile) {
@@ -73,10 +82,11 @@ class ClearExpiredCacheCommand extends Command
                 $this->activeFileCount++;
                 $this->activeFileSize += $this->disk->size($cacheFile);
             }
-            $this->output->progressAdvance();
+
+            $progress->advance();
         }
 
-        $this->output->progressFinish();
+        $progress->finish();
     }
 
     protected function deleteEmptyFolders(): void
@@ -97,13 +107,13 @@ class ClearExpiredCacheCommand extends Command
         $activeFileSize = BaseHelper::humanFilesize($this->activeFileSize);
 
         if ($this->expiredFileCount) {
-            $this->info("✔ {$this->expiredFileCount} expired cache files removed");
-            $this->info("✔ {$expiredFileSize} disk cleared");
+            info("✔ $this->expiredFileCount expired cache files removed");
+            info("✔ $expiredFileSize disk cleared");
         } else {
-            $this->info('✔ No expired cache file found!');
+            info('✔ No expired cache file found!');
         }
 
-        $this->line("✔ {$this->activeFileCount} non-expired cache files remaining");
-        $this->line("✔ {$activeFileSize} disk space taken by non-expired cache files");
+        info("✔ $this->activeFileCount non-expired cache files remaining");
+        info("✔ $activeFileSize disk space taken by non-expired cache files");
     }
 }

@@ -90,7 +90,7 @@ class MarketplaceService
             ->timeout(300);
     }
 
-    public function beginInstall(string $id, string $type, string $name): bool|JsonResponse
+    public function beginInstall(string $id, string $name): bool|JsonResponse
     {
         $core = Core::make();
         $licenseFilePath = $core->getLicenseFilePath();
@@ -124,7 +124,7 @@ class MarketplaceService
         File::put($destination, $data);
 
         $this->extractFile($id, $name);
-        $this->copyToPath($id, $type, $name);
+        $this->copyToPath($id, plugin_path($name));
 
         return true;
     }
@@ -145,10 +145,9 @@ class MarketplaceService
         return $pathTo;
     }
 
-    protected function copyToPath(string $id, string $type, string $name): string
+    protected function copyToPath(string $id, string $path): string
     {
         $pathTemp = $this->publishedPath . $id;
-        $path = ($type == 'plugin' ? plugin_path($name) : theme_path($name));
 
         if (File::isDirectory($pathTemp)) {
             File::copyDirectory($pathTemp, $path);

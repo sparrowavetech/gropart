@@ -1,4 +1,4 @@
-<tr class="@if (!empty($odd) && $odd) odd @else even @endif">
+<tr>
     <td>{{ $data['name'] }}</td>
     <td>
         @if ($data['description'])
@@ -7,45 +7,57 @@
             &mdash;
         @endif
     </td>
-    <td>{{ BaseHelper::humanFilesize(get_backup_size($key)) }}</td>
-    <td style="width: 250px;">{{ $data['date'] }}</td>
-    <td style="width: 150px;">
-        @if ($backupManager->isDatabaseBackupAvailable($key))
-            <a
-                class="text-success me-1"
-                data-bs-toggle="tooltip"
-                href="{{ route('backups.download.database', $key) }}"
-                title="{{ trans('plugins/backup::backup.download_database') }}"
-            ><i class="fa fa-database"></i></a>
-        @endif
+    <td style="width: 250px;">{{ BaseHelper::humanFilesize(get_backup_size($key)) }}</td>
+    <td style="width: 200px;">{{ $data['date'] }}</td>
+    <td>
+        <div class="btn-list justify-content-end">
+            @if ($backupManager->isDatabaseBackupAvailable($key))
+                <x-core::button
+                    tag="a"
+                    size="sm"
+                    :href="route('backups.download.database', $key)"
+                    :tooltip="trans('plugins/backup::backup.download_database')"
+                    icon="ti ti-database"
+                    :icon-only="true"
+                    color="success"
+                />
+            @endif
 
-        <a
-            class="text-primary me-1"
-            data-bs-toggle="tooltip"
-            href="{{ route('backups.download.uploads.folder', $key) }}"
-            title="{{ trans('plugins/backup::backup.download_uploads_folder') }}"
-        ><i class="fa fa-download"></i></a>
+            <x-core::button
+                tag="a"
+                size="sm"
+                :href="route('backups.download.uploads.folder', $key)"
+                :tooltip="trans('plugins/backup::backup.download_uploads_folder')"
+                icon="ti ti-download"
+                :icon-only="true"
+                color="primary"
+            />
 
-        @if (
-            $driver === 'mysql' &&
-                auth()->guard()->user()->hasPermission('backups.restore'))
-            <a
-                class="text-info restoreBackup me-2"
-                data-section="{{ route('backups.restore', $key) }}"
-                data-bs-toggle="tooltip"
-                href="#"
-                title="{{ trans('plugins/backup::backup.restore_tooltip') }}"
-            ><i class="fa fa-rotate-left"></i></a>
-        @endif
+            @if (
+                $driver === 'mysql' &&
+                    auth()->guard()->user()->hasPermission('backups.restore'))
+                <x-core::button
+                    size="sm"
+                    :tooltip="trans('plugins/backup::backup.restore_tooltip')"
+                    icon="ti ti-reload"
+                    :icon-only="true"
+                    color="info"
+                    class="restoreBackup"
+                    :data-section="route('backups.restore', $key)"
+                />
+            @endif
 
-        @if (auth()->guard()->user()->hasPermission('backups.destroy'))
-            <a
-                class="text-danger deleteDialog"
-                data-section="{{ route('backups.destroy', $key) }}"
-                data-bs-toggle="tooltip"
-                href="#"
-                title="{{ trans('core/base::tables.delete_entry') }}"
-            ><i class="fa fa-trash"></i></a>
-        @endif
+            @if (auth()->guard()->user()->hasPermission('backups.destroy'))
+                <x-core::button
+                    size="sm"
+                    :tooltip="trans('core/base::tables.delete_entry')"
+                    icon="ti ti-trash"
+                    :icon-only="true"
+                    color="danger"
+                    class="deleteDialog"
+                    :data-section="route('backups.destroy', $key)"
+                />
+            @endif
+        </div>
     </td>
 </tr>

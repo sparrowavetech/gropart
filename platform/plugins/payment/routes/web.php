@@ -1,10 +1,10 @@
 <?php
 
-use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\AdminHelper;
 use Illuminate\Support\Facades\Route;
 
-Route::group(['namespace' => 'Botble\Payment\Http\Controllers', 'middleware' => ['web', 'core']], function () {
-    Route::group(['prefix' => BaseHelper::getAdminPrefix(), 'middleware' => 'auth'], function () {
+AdminHelper::registerRoutes(function () {
+    Route::group(['namespace' => 'Botble\Payment\Http\Controllers'], function () {
         Route::group(['prefix' => 'payments/methods', 'permission' => 'payments.settings'], function () {
             Route::get('', [
                 'as' => 'payments.methods',
@@ -33,13 +33,13 @@ Route::group(['namespace' => 'Botble\Payment\Http\Controllers', 'middleware' => 
         Route::group(['prefix' => 'payments/transactions', 'as' => 'payment.'], function () {
             Route::resource('', 'PaymentController')->parameters(['' => 'payment'])->only(['index', 'destroy']);
 
-            Route::get('{chargeId}', [
+            Route::get('{payment}', [
                 'as' => 'show',
                 'uses' => 'PaymentController@show',
                 'permission' => 'payment.index',
             ]);
 
-            Route::put('{chargeId}', [
+            Route::put('{payment}', [
                 'as' => 'update',
                 'uses' => 'PaymentController@update',
                 'permission' => 'payment.index',

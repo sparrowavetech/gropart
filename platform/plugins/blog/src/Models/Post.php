@@ -39,6 +39,14 @@ class Post extends BaseModel
         'author_type',
     ];
 
+    protected static function booted(): void
+    {
+        static::deleting(function (Post $post) {
+            $post->categories()->detach();
+            $post->tags()->detach();
+        });
+    }
+
     protected $casts = [
         'status' => BaseStatusEnum::class,
         'name' => SafeContent::class,
@@ -55,15 +63,18 @@ class Post extends BaseModel
         return $this->belongsToMany(Category::class, 'post_categories');
     }
 
+    public function author(): MorphTo
+    {
+        return $this->morphTo()->withDefault();
+    }
+
     protected function firstCategory(): Attribute
     {
-        return Attribute::make(
-            get: function (): ?Category {
-                $this->loadMissing('categories');
+        return Attribute::get(function (): ?Category {
+            $this->loadMissing('categories');
 
-                return $this->categories->first();
-            }
-        );
+            return $this->categories->first();
+        });
     }
 
     protected function timeReading(): Attribute
@@ -77,18 +88,5 @@ class Post extends BaseModel
                 return number_format(ceil(str_word_count(strip_tags($this->content)) / 200));
             }
         );
-    }
-
-    public function author(): MorphTo
-    {
-        return $this->morphTo()->withDefault();
-    }
-
-    protected static function booted(): void
-    {
-        static::deleting(function (Post $post) {
-            $post->categories()->detach();
-            $post->tags()->detach();
-        });
     }
 }

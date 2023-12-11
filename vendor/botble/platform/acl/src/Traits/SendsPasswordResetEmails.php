@@ -2,6 +2,7 @@
 
 namespace Botble\ACL\Traits;
 
+use Botble\Base\Rules\EmailRule;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
@@ -32,7 +33,7 @@ trait SendsPasswordResetEmails
 
     protected function validateEmail(Request $request): void
     {
-        $request->validate(['email' => 'required|email']);
+        $request->validate(['email' => ['required', new EmailRule()]]);
     }
 
     protected function credentials(Request $request)

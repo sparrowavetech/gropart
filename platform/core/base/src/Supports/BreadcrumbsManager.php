@@ -10,6 +10,9 @@ use Illuminate\Support\HtmlString;
 use Illuminate\Support\Traits\Macroable;
 use stdClass;
 
+/**
+ * @deprecated use Breadcrumb::class instead
+ */
 class BreadcrumbsManager
 {
     use Macroable;
@@ -112,14 +115,14 @@ class BreadcrumbsManager
             try {
                 [$name, $params] = $this->getCurrentRoute();
             } catch (Exception) {
-                return new Collection();
+                return collect();
             }
         }
 
         try {
             return $this->generator->generate($this->callbacks, $this->before, $this->after, $name, $params);
         } catch (Exception) {
-            return new Collection();
+            return collect();
         }
     }
 

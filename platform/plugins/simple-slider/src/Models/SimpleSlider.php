@@ -25,15 +25,15 @@ class SimpleSlider extends BaseModel
         'description' => SafeContent::class,
     ];
 
-    public function sliderItems(): HasMany
-    {
-        return $this->hasMany(SimpleSliderItem::class)->orderBy('simple_slider_items.order');
-    }
-
     protected static function booted(): void
     {
         self::deleting(function (SimpleSlider $slider) {
             $slider->sliderItems()->each(fn (SimpleSliderItem $item) => $item->delete());
         });
+    }
+
+    public function sliderItems(): HasMany
+    {
+        return $this->hasMany(SimpleSliderItem::class)->orderBy('simple_slider_items.order');
     }
 }

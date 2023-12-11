@@ -9,7 +9,7 @@ class CustomCssRequest extends Request
     public function rules(): array
     {
         return [
-            'custom_css' => 'nullable|string',
+            'custom_css' => 'nullable|string|max:100000',
         ];
     }
 }

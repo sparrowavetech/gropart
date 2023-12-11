@@ -338,7 +338,10 @@ class PluginService
     public function clearCache(): void
     {
         Helper::clearCache();
-        ClearCacheService::make()->clearConfig();
+        $cacheService = ClearCacheService::make();
+
+        $cacheService->clearConfig();
+        $cacheService->clearRoutesCache();
     }
 
     public function runMigrations(string $plugin): void

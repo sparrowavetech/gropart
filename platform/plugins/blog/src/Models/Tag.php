@@ -25,15 +25,15 @@ class Tag extends BaseModel
         'description' => SafeContent::class,
     ];
 
-    public function posts(): BelongsToMany
-    {
-        return $this->belongsToMany(Post::class, 'post_tags');
-    }
-
     protected static function booted(): void
     {
         self::deleting(function (Tag $tag) {
             $tag->posts()->detach();
         });
+    }
+
+    public function posts(): BelongsToMany
+    {
+        return $this->belongsToMany(Post::class, 'post_tags');
     }
 }

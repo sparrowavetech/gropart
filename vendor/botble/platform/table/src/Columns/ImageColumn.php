@@ -4,9 +4,9 @@ namespace Botble\Table\Columns;
 
 use Botble\Base\Facades\Html;
 use Botble\Media\Facades\RvMedia;
-use Botble\Table\Contracts\FormattedColumn;
+use Botble\Table\Contracts\FormattedColumn as FormattedColumnContract;
 
-class ImageColumn extends Column implements FormattedColumn
+class ImageColumn extends FormattedColumn implements FormattedColumnContract
 {
     protected bool $relative = false;
 
@@ -49,7 +49,7 @@ class ImageColumn extends Column implements FormattedColumn
         return $this->mediaSize(null);
     }
 
-    public function editedFormat($value): string
+    public function formattedValue($value): string
     {
         $table = $this->getTable();
 

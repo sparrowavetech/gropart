@@ -1,8 +1,8 @@
 <?php
 
 return [
-    'name' => 'core/setting::setting.email.template_title',
-    'description' => 'core/setting::setting.email.template_description',
+    'name' => 'core/setting::setting.email.base_template',
+    'description' => 'core/setting::setting.email.base_template_description',
     'templates' => [
         'header' => [
             'title' => 'core/setting::setting.email.template_header',

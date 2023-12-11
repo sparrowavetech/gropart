@@ -14,8 +14,10 @@ class Text extends AbstractWidget
             'content' => null,
         ]);
 
-        $this->setFrontendTemplate('packages/widget::widgets.text.frontend');
-        $this->setBackendTemplate('packages/widget::widgets.text.backend');
+        $widgetDirectory = $this->getWidgetDirectory();
+
+        $this->setFrontendTemplate('packages/widget::widgets.' . $widgetDirectory . '.frontend');
+        $this->setBackendTemplate('packages/widget::widgets.' . $widgetDirectory . '.backend');
     }
 
     public function getWidgetDirectory(): string

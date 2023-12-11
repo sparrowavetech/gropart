@@ -3,7 +3,7 @@
 namespace Botble\Media\Http\Controllers;
 
 use Botble\Base\Facades\BaseHelper;
-use Botble\Base\Facades\PageTitle;
+use Botble\Base\Http\Controllers\BaseController;
 use Botble\Media\Facades\RvMedia;
 use Botble\Media\Http\Resources\FileResource;
 use Botble\Media\Http\Resources\FolderResource;
@@ -18,18 +18,19 @@ use Botble\Media\Supports\Zipper;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Routing\Controller;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 /**
  * @since 19/08/2015 08:05 AM
  */
-class MediaController extends Controller
+class MediaController extends BaseController
 {
     public function __construct(
         protected MediaFileInterface $fileRepository,
@@ -40,7 +41,7 @@ class MediaController extends Controller
 
     public function getMedia()
     {
-        PageTitle::setTitle(trans('core/media::media.menu_name'));
+        $this->pageTitle(trans('core/media::media.menu_name'));
 
         return view('core/media::index');
     }
@@ -110,7 +111,13 @@ class MediaController extends Controller
                     [
                         'id' => 0,
                         'name' => trans('core/media::media.all_media'),
-                        'icon' => 'fa fa-user-secret',
+                        'icon' => '<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                            <path d="M15 8h.01"></path>
+                            <path d="M3 6a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v12a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3v-12z"></path>
+                            <path d="M3 16l5 -5c.928 -.893 2.072 -.893 3 0l5 5"></path>
+                            <path d="M14 14l1 -1c.928 -.893 2.072 -.893 3 0l3 3"></path>
+                        </svg>',
                     ],
                 ];
 
@@ -127,7 +134,14 @@ class MediaController extends Controller
                     [
                         'id' => 0,
                         'name' => trans('core/media::media.trash'),
-                        'icon' => 'fa fa-trash',
+                        'icon' => '<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                            <path d="M4 7l16 0"></path>
+                            <path d="M10 11l0 6"></path>
+                            <path d="M14 11l0 6"></path>
+                            <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12"></path>
+                            <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3"></path>
+                        </svg>',
                     ],
                 ];
 
@@ -149,7 +163,11 @@ class MediaController extends Controller
                     [
                         'id' => 0,
                         'name' => trans('core/media::media.recent'),
-                        'icon' => 'fa fa-clock',
+                        'icon' => '<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                            <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"></path>
+                            <path d="M12 7v5l3 3"></path>
+                        </svg>',
                     ],
                 ];
 
@@ -173,7 +191,10 @@ class MediaController extends Controller
                     [
                         'id' => 0,
                         'name' => trans('core/media::media.favorites'),
-                        'icon' => 'fa fa-star',
+                        'icon' => '<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                            <path d="M12 17.75l-6.172 3.245l1.179 -6.873l-5 -4.867l6.9 -1l3.086 -6.253l3.086 6.253l6.9 1l-5 4.867l1.179 6.873z"></path>
+                        </svg>',
                     ],
                 ];
 
@@ -539,26 +560,37 @@ class MediaController extends Controller
                 break;
 
             case 'rename':
-                foreach ($request->input('selected') as $item) {
-                    if (! $item['id'] || empty($item['name'])) {
-                        continue;
-                    }
+                Validator::validate($request->input(), [
+                    'selected' => ['required', 'array'],
+                    'selected.*.id' => ['required', 'string'],
+                    'selected.*.name' => ['required', 'string'],
+                    'selected.*.is_folder' => ['required', 'boolean'],
+                    'selected.*.rename_physical_file' => ['sometimes', 'boolean'],
+                ]);
 
+                foreach ($request->input('selected') as $item) {
                     $id = $item['id'];
+
                     if (! $item['is_folder']) {
                         $file = MediaFile::query()->find($id);
 
                         if (! empty($file)) {
-                            $file->name = $this->fileRepository->createName($item['name'], $file->folder_id);
-                            $file->save();
+                            RvMedia::renameFile(
+                                file: $file,
+                                newName: $item['name'],
+                                renameOnDisk: Arr::get($item, 'rename_physical_file', false)
+                            );
                         }
                     } else {
                         $name = $item['name'];
                         $folder = MediaFolder::query()->find($id);
 
                         if (! empty($folder)) {
-                            $folder->name = $this->folderRepository->createName($name, $folder->parent_id);
-                            $folder->save();
+                            RvMedia::renameFolder(
+                                folder: $folder,
+                                newName: $name,
+                                renameOnDisk: Arr::get($item, 'rename_physical_file', false)
+                            );
                         }
                     }
                 }
@@ -584,6 +616,21 @@ class MediaController extends Controller
                 $this->folderRepository->emptyTrash();
 
                 $response = RvMedia::responseSuccess([], trans('core/media::media.empty_trash_success'));
+
+                break;
+
+            case 'properties':
+                Validator::validate($request->input(), [
+                    'color' => ['required', 'string', Rule::in(RvMedia::getFolderColors())],
+                    'selected' => ['required', 'array'],
+                    'selected.*' => ['required', 'string', 'exists:media_folders,id'],
+                ]);
+
+                MediaFolder::query()->whereIn('id', $request->input('selected'))->update([
+                    'color' => $request->input('color'),
+                ]);
+
+                $response = RvMedia::responseSuccess([], trans('core/media::media.update_properties_success'));
 
                 break;
         }

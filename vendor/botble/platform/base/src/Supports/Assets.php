@@ -4,9 +4,8 @@ namespace Botble\Base\Supports;
 
 use Botble\Assets\Assets as BaseAssets;
 use Botble\Assets\HtmlBuilder;
+use Botble\Base\Facades\BaseHelper;
 use Illuminate\Config\Repository;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Str;
 
 /**
  * @since 22/07/2015 11:23 PM
@@ -29,35 +28,21 @@ class Assets extends BaseAssets
         $this->config = $config;
     }
 
+    /**
+     * @deprecated v7.0
+     */
     public function getThemes(): array
     {
-        $themeFolder = '/vendor/core/core/base/css/themes';
-
-        $themes = ['default' => $themeFolder . '/default.css'];
-
-        if (! File::isDirectory(public_path($themeFolder))) {
-            return $themes;
-        }
-
-        $files = File::files(public_path($themeFolder));
-
-        if (empty($files)) {
-            return $themes;
-        }
-
-        foreach ($files as $file) {
-            $name = $themeFolder . '/' . basename($file);
-            if (! Str::contains($file, '.css.map')) {
-                $themes[basename($file, '.css')] = $name;
-            }
-        }
-
-        return $themes;
+        return [];
     }
 
     public function renderHeader($lastStyles = []): string
     {
         do_action(BASE_ACTION_ENQUEUE_SCRIPTS);
+
+        if (BaseHelper::adminLanguageDirection() === 'rtl' || BaseHelper::isRtlEnabled()) {
+            $this->config['resources']['styles']['core']['src']['local'] = '/vendor/core/core/base/css/core.rtl.css';
+        }
 
         return parent::renderHeader($lastStyles);
     }

@@ -4,7 +4,7 @@ namespace Botble\Blog\Http\Controllers\API;
 
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Facades\BaseHelper;
-use Botble\Base\Http\Responses\BaseHttpResponse;
+use Botble\Base\Http\Controllers\BaseController;
 use Botble\Blog\Http\Resources\ListPostResource;
 use Botble\Blog\Http\Resources\PostResource;
 use Botble\Blog\Models\Post;
@@ -12,9 +12,8 @@ use Botble\Blog\Repositories\Interfaces\PostInterface;
 use Botble\Blog\Supports\FilterPost;
 use Botble\Slug\Facades\SlugHelper;
 use Illuminate\Http\Request;
-use Illuminate\Routing\Controller;
 
-class PostController extends Controller
+class PostController extends BaseController
 {
     public function __construct(protected PostInterface $postRepository)
     {
@@ -25,7 +24,7 @@ class PostController extends Controller
      *
      * @group Blog
      */
-    public function index(Request $request, BaseHttpResponse $response)
+    public function index(Request $request)
     {
         $data = $this->postRepository
             ->advancedGet([
@@ -37,7 +36,8 @@ class PostController extends Controller
                 ],
             ]);
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setData(ListPostResource::collection($data))
             ->toApiResponse();
     }
@@ -49,7 +49,7 @@ class PostController extends Controller
      *
      * @group Blog
      */
-    public function getSearch(Request $request, PostInterface $postRepository, BaseHttpResponse $response)
+    public function getSearch(Request $request, PostInterface $postRepository)
     {
         $query = BaseHelper::stringify($request->input('q'));
         $posts = $postRepository->getSearch($query);
@@ -61,10 +61,13 @@ class PostController extends Controller
         ];
 
         if ($data['count'] > 0) {
-            return $response->setData(apply_filters(BASE_FILTER_SET_DATA_SEARCH, $data));
+            return $this
+                ->httpResponse()
+                ->setData(apply_filters(BASE_FILTER_SET_DATA_SEARCH, $data));
         }
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setError()
             ->setMessage(trans('core/base::layouts.no_search_result'));
     }
@@ -90,13 +93,14 @@ class PostController extends Controller
      * @queryParam tags_exclude         Limit result set to all items except those that have the specified term assigned in the tags taxonomy.
      * @queryParam featured             Limit result set to items that are sticky.
      */
-    public function getFilters(Request $request, BaseHttpResponse $response)
+    public function getFilters(Request $request)
     {
         $filters = FilterPost::setFilters($request->input());
 
         $data = $this->postRepository->getFilters($filters);
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setData(ListPostResource::collection($data))
             ->toApiResponse();
     }
@@ -107,12 +111,16 @@ class PostController extends Controller
      * @group Blog
      * @queryParam slug Find by slug of post.
      */
-    public function findBySlug(string $slug, BaseHttpResponse $response)
+    public function findBySlug(string $slug)
     {
         $slug = SlugHelper::getSlug($slug, SlugHelper::getPrefix(Post::class));
 
         if (! $slug) {
-            return $response->setError()->setCode(404)->setMessage('Not found');
+            return $this
+                ->httpResponse()
+                ->setError()
+                ->setCode(404)
+                ->setMessage('Not found');
         }
 
         $post = Post::query()
@@ -123,10 +131,15 @@ class PostController extends Controller
             ->first();
 
         if (! $post) {
-            return $response->setError()->setCode(404)->setMessage('Not found');
+            return $this
+                ->httpResponse()
+                ->setError()
+                ->setCode(404)
+                ->setMessage('Not found');
         }
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setData(new PostResource($post))
             ->toApiResponse();
     }

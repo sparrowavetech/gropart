@@ -2,15 +2,17 @@
 
 namespace Botble\Shortcode\Http\Controllers;
 
+use Botble\Base\Facades\Html;
+use Botble\Base\Forms\FormAbstract;
 use Botble\Base\Http\Controllers\BaseController;
-use Botble\Base\Http\Responses\BaseHttpResponse;
+use Botble\Shortcode\Facades\Shortcode;
 use Botble\Shortcode\Http\Requests\GetShortcodeDataRequest;
 use Closure;
 use Illuminate\Support\Arr;
 
 class ShortcodeController extends BaseController
 {
-    public function ajaxGetAdminConfig(string|null $key, GetShortcodeDataRequest $request, BaseHttpResponse $response)
+    public function ajaxGetAdminConfig(string|null $key, GetShortcodeDataRequest $request)
     {
         $registered = shortcode()->getAll();
 
@@ -29,10 +31,17 @@ class ShortcodeController extends BaseController
 
         if ($data instanceof Closure || is_callable($data)) {
             $data = call_user_func($data, $attributes, $content);
+            $data = $data instanceof FormAbstract ? $data->renderForm() : $data;
         }
 
         $data = apply_filters(SHORTCODE_REGISTER_CONTENT_IN_ADMIN, $data, $key, $attributes);
 
-        return $response->setData($data);
+        if (! $data) {
+            $data = Html::tag('code', Shortcode::generateShortcode($key, $attributes))->toHtml();
+        }
+
+        return $this
+            ->httpResponse()
+            ->setData($data);
     }
 }

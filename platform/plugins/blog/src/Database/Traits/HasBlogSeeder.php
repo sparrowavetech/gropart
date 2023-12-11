@@ -2,6 +2,7 @@
 
 namespace Botble\Blog\Database\Traits;
 
+use Botble\ACL\Models\User;
 use Botble\Blog\Models\Category;
 use Botble\Blog\Models\Post;
 use Botble\Blog\Models\Tag;
@@ -20,14 +21,18 @@ trait HasBlogSeeder
         $faker = $this->fake();
 
         foreach ($categories as $index => $item) {
-            $item['description'] = $faker->text();
-            $item['is_featured'] = ! isset($item['parent_id']) && $index != 0;
+            $item['description'] ??= $faker->text();
+            $item['is_featured'] ??= ! isset($item['parent_id']) && $index != 0;
+            $item['author_id'] ??= 1;
+            $item['parent_id'] ??= 0;
 
-            $category = $this->createBlogCategory(Arr::except($item, 'children'), 0, $index != 0);
+            $category = $this->createBlogCategory(Arr::except($item, 'children'));
 
             if (Arr::has($item, 'children')) {
                 foreach (Arr::get($item, 'children', []) as $child) {
-                    $this->createBlogCategory($child, $category->getKey());
+                    $child['parent_id'] = $category->getKey();
+
+                    $this->createBlogCategory($child);
                 }
             }
         }
@@ -61,21 +66,15 @@ trait HasBlogSeeder
 
         $categoryIds = Category::query()->pluck('id');
         $tagIds = Tag::query()->pluck('id');
+        $userIds = User::query()->pluck('id');
 
         foreach ($posts as $item) {
-            $item['views'] = $faker->numberBetween(100, 2500);
-
-            if (! isset($item['description'])) {
-                $item['description'] = $faker->realText();
-            }
-
-            if (! isset($item['is_featured'])) {
-                $item['is_featured'] = $faker->boolean();
-            }
-
-            if (! empty($item['content'])) {
-                $item['content'] = $this->removeBaseUrlFromString($item['content']);
-            }
+            $item['views'] ??= $faker->numberBetween(100, 2500);
+            $item['description'] ??= $faker->realText();
+            $item['is_featured'] ??= $faker->boolean();
+            $item['content'] ??= $this->removeBaseUrlFromString((string) $item['content']);
+            $item['author_id'] ??= $userIds->random();
+            $item['author_type'] ??= User::class;
 
             /**
              * @var Post $post
@@ -102,17 +101,12 @@ trait HasBlogSeeder
         return Category::query()->where('name', $name)->value('id');
     }
 
-    protected function createBlogCategory(array $item, int $parentId = 0, bool $isFeatured = false): Category
+    protected function createBlogCategory(array $item): Category
     {
         /**
          * @var Category $category
          */
-        $category = Category::query()->create(array_merge($item, [
-            'description' => $this->fake()->text(),
-            'author_id' => 1,
-            'parent_id' => $parentId,
-            'is_featured' => $isFeatured,
-        ]));
+        $category = Category::query()->create($item);
 
         SlugHelper::createSlug($category);
 

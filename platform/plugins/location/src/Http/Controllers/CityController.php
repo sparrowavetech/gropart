@@ -2,90 +2,82 @@
 
 namespace Botble\Location\Http\Controllers;
 
-use Botble\Base\Events\CreatedContentEvent;
-use Botble\Base\Events\DeletedContentEvent;
-use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Base\Facades\BaseHelper;
-use Botble\Base\Facades\PageTitle;
-use Botble\Base\Forms\FormBuilder;
+use Botble\Base\Http\Actions\DeleteResourceAction;
 use Botble\Base\Http\Controllers\BaseController;
-use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Location\Forms\CityForm;
 use Botble\Location\Http\Requests\CityRequest;
 use Botble\Location\Http\Resources\CityResource;
 use Botble\Location\Models\City;
 use Botble\Location\Tables\CityTable;
-use Exception;
 use Illuminate\Http\Request;
 
 class CityController extends BaseController
 {
+    public function __construct()
+    {
+        $this
+            ->breadcrumb()
+            ->add(trans('plugins/location::location.name'))
+            ->add(trans('plugins/location::city.name'), route('city.index'));
+    }
+
     public function index(CityTable $table)
     {
-        PageTitle::setTitle(trans('plugins/location::city.name'));
+        $this->pageTitle(trans('plugins/location::city.name'));
 
         return $table->renderTable();
     }
 
-    public function create(FormBuilder $formBuilder)
+    public function create()
     {
-        PageTitle::setTitle(trans('plugins/location::city.create'));
+        $this->pageTitle(trans('plugins/location::city.create'));
 
-        return $formBuilder->create(CityForm::class)->renderForm();
+        return CityForm::create()->renderForm();
     }
 
-    public function store(CityRequest $request, BaseHttpResponse $response)
+    public function store(CityRequest $request)
     {
-        $city = City::query()->create($request->input());
+        $form = CityForm::create()->setRequest($request);
+        $form->save();
 
-        event(new CreatedContentEvent(CITY_MODULE_SCREEN_NAME, $request, $city));
-
-        return $response
-            ->setPreviousUrl(route('city.index'))
-            ->setNextUrl(route('city.edit', $city->id))
-            ->setMessage(trans('core/base::notices.create_success_message'));
+        return $this
+            ->httpResponse()
+            ->setPreviousRoute('city.index')
+            ->setNextRoute('city.edit', $form->getModel()->getKey())
+            ->withCreatedSuccessMessage();
     }
 
-    public function edit(City $city, FormBuilder $formBuilder)
+    public function edit(City $city)
     {
-        PageTitle::setTitle(trans('core/base::forms.edit_item', ['name' => $city->name]));
+        $this->pageTitle(trans('core/base::forms.edit_item', ['name' => $city->name]));
 
-        return $formBuilder->create(CityForm::class, ['model' => $city])->renderForm();
+        return CityForm::createFromModel($city)->renderForm();
     }
 
-    public function update(City $city, CityRequest $request, BaseHttpResponse $response)
+    public function update(City $city, CityRequest $request)
     {
-        $city->fill($request->input());
-        $city->save();
+        CityForm::createFromModel($city)->setRequest($request)->save();
 
-        event(new UpdatedContentEvent(CITY_MODULE_SCREEN_NAME, $request, $city));
-
-        return $response
-            ->setPreviousUrl(route('city.index'))
-            ->setMessage(trans('core/base::notices.update_success_message'));
+        return $this
+            ->httpResponse()
+            ->setPreviousRoute('city.index')
+            ->withUpdatedSuccessMessage();
     }
 
-    public function destroy(City $city, Request $request, BaseHttpResponse $response)
+    public function destroy(City $city)
     {
-        try {
-            $city->delete();
-
-            event(new DeletedContentEvent(CITY_MODULE_SCREEN_NAME, $request, $city));
-
-            return $response->setMessage(trans('core/base::notices.delete_success_message'));
-        } catch (Exception $exception) {
-            return $response
-                ->setError()
-                ->setMessage($exception->getMessage());
-        }
+        return DeleteResourceAction::make($city);
     }
 
-    public function getList(Request $request, BaseHttpResponse $response)
+    public function getList(Request $request)
     {
         $keyword = BaseHelper::stringify($request->input('q'));
 
         if (! $keyword) {
-            return $response->setData([]);
+            return $this
+                ->httpResponse()
+                ->setData([]);
         }
 
         $data = City::query()
@@ -98,10 +90,12 @@ class CityController extends BaseController
 
         $data->prepend(new City(['id' => 0, 'name' => trans('plugins/location::city.select_city')]));
 
-        return $response->setData(CityResource::collection($data));
+        return $this
+            ->httpResponse()
+            ->setData(CityResource::collection($data));
     }
 
-    public function ajaxGetCities(Request $request, BaseHttpResponse $response)
+    public function ajaxGetCities(Request $request)
     {
         $data = City::query()
             ->select(['id', 'name'])
@@ -132,11 +126,15 @@ class CityController extends BaseController
         }
 
         if ($keyword) {
-            return $response->setData([CityResource::collection($data), 'total' => $data->total()]);
+            return $this
+                ->httpResponse()
+                ->setData([CityResource::collection($data), 'total' => $data->total()]);
         }
 
         $data->prepend(new City(['id' => 0, 'name' => trans('plugins/location::city.select_city')]));
 
-        return $response->setData(CityResource::collection($data));
+        return $this
+            ->httpResponse()
+            ->setData(CityResource::collection($data));
     }
 }

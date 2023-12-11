@@ -2,14 +2,15 @@
 
 namespace Botble\Contact\Providers;
 
-use Botble\Base\Facades\Assets;
-use Botble\Base\Facades\Html;
+use Botble\Base\Rules\OnOffRule;
 use Botble\Base\Supports\ServiceProvider;
+use Botble\Captcha\Forms\CaptchaSettingForm;
 use Botble\Contact\Enums\ContactStatusEnum;
 use Botble\Contact\Models\Contact;
 use Botble\Shortcode\Compilers\Shortcode;
 use Botble\Theme\Facades\Theme;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Blade;
 
 class HookServiceProvider extends ServiceProvider
 {
@@ -19,30 +20,28 @@ class HookServiceProvider extends ServiceProvider
         add_filter(BASE_FILTER_APPEND_MENU_NAME, [$this, 'getUnreadCount'], 120, 2);
         add_filter(BASE_FILTER_MENU_ITEMS_COUNT, [$this, 'getMenuItemCount'], 120);
 
-        if (function_exists('add_shortcode')) {
-            add_shortcode(
-                'contact-form',
-                trans('plugins/contact::contact.shortcode_name'),
-                trans('plugins/contact::contact.shortcode_description'),
-                [$this, 'form']
-            );
+        if (is_plugin_active('captcha') && class_exists(CaptchaSettingForm::class)) {
+            CaptchaSettingForm::beforeRendering(function (CaptchaSettingForm $form): CaptchaSettingForm {
+                return $form
+                    ->addAfter('open_fieldset_math_captcha_setting', 'enable_math_captcha_for_contact_form', 'onOffCheckbox', [
+                        'label' => trans('plugins/contact::contact.settings.enable_math_captcha_in_contact_form'),
+                        'value' => setting('enable_math_captcha_for_contact_form', false),
+                    ]);
+            }, 9999);
 
-            shortcode()
-                ->setAdminConfig('contact-form', view('plugins/contact::partials.short-code-admin-config')->render());
+            add_filter('captcha_settings_validation_rules', [$this, 'addContactSettingRules'], 99);
         }
 
-        add_filter(BASE_FILTER_AFTER_SETTING_CONTENT, [$this, 'addSettings'], 93);
-
-        add_filter('cms_settings_validation_rules', [$this, 'addSettingRules'], 93);
-    }
-
-    public function addSettingRules(array $rules): array
-    {
-        return array_merge($rules, [
-            'blacklist_keywords' => 'nullable|string',
-            'blacklist_email_domains' => 'nullable|string',
-            'enable_math_captcha_for_contact_form' => 'nullable|in:0,1',
-        ]);
+        if (function_exists('add_shortcode')) {
+            shortcode()
+                ->register(
+                    'contact-form',
+                    trans('plugins/contact::contact.shortcode_name'),
+                    trans('plugins/contact::contact.shortcode_description'),
+                    [$this, 'form']
+                )
+                ->setAdminConfig('contact-form', fn () => view('plugins/contact::partials.short-code-admin-config')->render());
+        }
     }
 
     public function registerTopHeaderNotification(string|null $options): string|null
@@ -70,22 +69,19 @@ class HookServiceProvider extends ServiceProvider
             return $number;
         }
 
-        $attributes = [
-            'class' => 'badge badge-success menu-item-count unread-contacts',
-            'style' => 'display: none;',
-        ];
-
-        return Html::tag('span', '', $attributes)->toHtml();
+        return Blade::render('<x-core::navbar.badge-count class="unread-contacts" />');
     }
 
     public function getMenuItemCount(array $data = []): array
     {
-        if (Auth::guard()->user()->hasPermission('contacts.index')) {
-            $data[] = [
-                'key' => 'unread-contacts',
-                'value' => Contact::query()->where('status', ContactStatusEnum::UNREAD)->count(),
-            ];
+        if (! Auth::guard()->user()->hasPermission('contacts.index')) {
+            return $data;
         }
+
+        $data[] = [
+            'key' => 'unread-contacts',
+            'value' => Contact::query()->where('status', ContactStatusEnum::UNREAD)->count(),
+        ];
 
         return $data;
     }
@@ -120,14 +116,10 @@ class HookServiceProvider extends ServiceProvider
         return view($view, compact('shortcode'))->render();
     }
 
-    public function addSettings(string|null $data = null): string
+    public function addContactSettingRules(array $rules): array
     {
-        Assets::addStylesDirectly('vendor/core/core/base/libraries/tagify/tagify.css')
-            ->addScriptsDirectly([
-                'vendor/core/core/base/libraries/tagify/tagify.js',
-                'vendor/core/core/base/js/tags.js',
-            ]);
-
-        return $data . view('plugins/contact::settings')->render();
+        return array_merge($rules, [
+            'enable_math_captcha_for_contact_form' => new OnOffRule(),
+        ]);
     }
 }

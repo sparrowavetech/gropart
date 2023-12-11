@@ -1,26 +1,30 @@
 @props([
     'id' => null,
     'label' => null,
+    'labelHelperText' => null,
     'name' => null,
     'options' => [],
     'value' => null,
     'wrapperClass' => null,
     'inputGroup' => false,
-    'helpText' => null,
+    'helperText' => null,
+    'searchable' => false,
+    'required' => false,
 ])
 
 @php
-    $id = $attributes->get('id', $name) ?? Str::random(8);
-    
-    $classes = Arr::toCssClasses(['form-select', 'is-invalid' => $errors->has($name)]);
+    $id ??= $name ?? Str::random(8);
+
+    $classes = Arr::toCssClasses(['form-select', 'is-invalid' => $errors->has($name), 'select-search-full' => $searchable]);
 @endphp
 
-<div @class(['mb-3', $wrapperClass])>
+<x-core::form-group :class="$wrapperClass">
     @if ($label)
         <x-core::form.label
             :label="$label"
             :for="$id"
-            :$helpText
+            :helper-text="$labelHelperText"
+            @class(['required' => $required])
         />
     @endif
 
@@ -32,13 +36,17 @@
         {!! $prepend !!}
     @endisset
 
-    <select {{ $attributes->merge(['name' => $name, 'id' => $id])->class($classes) }}>
-        @foreach ($options as $key => $item)
-            <option
-                value="{{ $key }}"
-                @selected(old($name, $value) === $key)
-            >{{ $item }}</option>
-        @endforeach
+    <select {{ $attributes->merge(['name' => $name, 'id' => $id, 'required' => $required])->class($classes) }}>
+        @if (empty($options) && $slot->isNotEmpty())
+            {{ $slot }}
+        @else
+            @foreach ($options as $key => $item)
+                <option
+                    value="{{ $key }}"
+                    @selected(is_array($value) ? in_array($key, $value) : old($name, $value) == $key)
+                >{{ $item }}</option>
+            @endforeach
+        @endif
     </select>
 
     @isset($append)
@@ -46,6 +54,10 @@
     @endisset
 
     @if ($inputGroup)
-</div>
-@endif
-</div>
+        </div>
+    @endif
+
+    @if ($helperText)
+        <x-core::form.helper-text>{!! $helperText !!}</x-core::form.helper-text>
+    @endif
+</x-core::form-group>

@@ -12,8 +12,8 @@ class ClearCompiledCommand extends Command
 {
     public function handle(PluginManifest $manifest): int
     {
-        if (File::isFile($pluginsPath = $manifest->getManifestFilePath())) {
-            File::delete($pluginsPath);
+        if (File::isFile($pluginPath = $manifest->getManifestFilePath())) {
+            File::delete($pluginPath);
         }
 
         $this->components->info('Compiled plugins files removed successfully.');

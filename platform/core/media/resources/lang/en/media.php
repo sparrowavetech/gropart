@@ -71,6 +71,11 @@ return [
     'upload_failed' => 'The file is NOT uploaded completely. The server allows max upload file size is :size . Please check your file size OR try to upload again in case of having network errors',
     'failed_to_crop_image' => 'The file cropping must be image type',
     'menu_name' => 'Media',
+    'description' => 'Manage and view Media Files',
+    'panel' => [
+        'title' => 'Manage Media Files',
+        'description' => 'Manage and view Media Files',
+    ],
     'add' => 'Add media',
 
     'javascript' => [
@@ -87,27 +92,22 @@ return [
 
         'no_item' => [
             'all_media' => [
-                'icon' => 'fas fa-cloud-upload-alt',
                 'title' => 'Drop files and folders here',
                 'message' => 'Or use the upload button above',
             ],
             'trash' => [
-                'icon' => 'fas fa-trash-alt',
                 'title' => 'There is nothing in your trash currently',
                 'message' => 'Delete files to move them to trash automatically. Delete files from trash to remove them permanently',
             ],
             'favorites' => [
-                'icon' => 'fas fa-star',
                 'title' => 'You have not added anything to your favorites yet',
                 'message' => 'Add files to favorites to easily find them later',
             ],
             'recent' => [
-                'icon' => 'far fa-clock',
                 'title' => 'You did not opened anything yet',
                 'message' => 'All recent files that you opened will be appeared here',
             ],
             'default' => [
-                'icon' => 'fas fa-sync',
                 'title' => 'No items',
                 'message' => 'This directory has no item',
             ],
@@ -146,6 +146,7 @@ return [
                 'trash' => 'Move to trash',
                 'delete' => 'Delete permanently',
                 'restore' => 'Restore',
+                'properties' => 'Properties',
             ],
         ],
         'change_image' => 'Change image',
@@ -154,6 +155,8 @@ return [
         'preview_image' => 'Preview image',
     ],
     'name_invalid' => 'The folder name has invalid character(s).',
+    'add_from_url' => 'Add from URL',
+    'or' => 'or',
     'url_invalid' => 'Please provide a valid URL',
     'path_invalid' => 'Please provide a valid path',
     'download_link' => 'Download',
@@ -162,6 +165,8 @@ return [
     'downloading' => 'Downloading...',
     'prepare_file_to_download' => 'Preparing file to download...',
     'update_alt_text_success' => 'Update alt text successfully!',
+    'upload_from_local' => 'Upload from local',
+    'upload_from_url' => 'Upload from URL',
 
     'cropper' => [
         'height' => 'Height',
@@ -169,4 +174,12 @@ return [
         'aspect_ratio' => 'Aspect ratio?',
     ],
     'unable_to_write' => 'Unable to write file. Please chmod folder ":folder" to make it writeable!',
+    'unable_download_image_from' => 'Unable to download image from URL: :url',
+    'rename_physical_folder' => 'Rename physical folder name on disk too',
+    'rename_physical_file' => 'Rename physical file name on disk too',
+    'rename_physical_file_warning' => 'This option will rename physical file name on disk too. It may cause broken links if you are using this file in other places.',
+    'properties' => [
+        'name' => 'Properties',
+        'color_label' => 'Choose a color for this folder',
+    ],
 ];

@@ -3,6 +3,8 @@
 namespace Botble\Contact\Forms;
 
 use Botble\Base\Facades\Assets;
+use Botble\Base\Forms\FieldOptions\StatusFieldOption;
+use Botble\Base\Forms\Fields\SelectField;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Contact\Enums\ContactStatusEnum;
 use Botble\Contact\Http\Requests\EditContactRequest;
@@ -10,28 +12,26 @@ use Botble\Contact\Models\Contact;
 
 class ContactForm extends FormAbstract
 {
-    public function buildForm(): void
+    public function setup(): void
     {
         Assets::addScriptsDirectly('vendor/core/plugins/contact/js/contact.js')
             ->addStylesDirectly('vendor/core/plugins/contact/css/contact.css');
 
         $this
-            ->setupModel(new Contact())
+            ->model(Contact::class)
             ->setValidatorClass(EditContactRequest::class)
-            ->withCustomFields()
-            ->add('status', 'customSelect', [
-                'label' => trans('core/base::tables.status'),
-                'required' => true,
-                'choices' => ContactStatusEnum::labels(),
-            ])
+            ->add(
+                'status',
+                SelectField::class,
+                StatusFieldOption::make()
+                    ->choices(ContactStatusEnum::labels())
+                    ->toArray()
+            )
             ->setBreakFieldPoint('status')
             ->addMetaBoxes([
                 'information' => [
                     'title' => trans('plugins/contact::contact.contact_information'),
                     'content' => view('plugins/contact::contact-info', ['contact' => $this->getModel()])->render(),
-                    'attributes' => [
-                        'style' => 'margin-top: 0',
-                    ],
                 ],
                 'replies' => [
                     'title' => trans('plugins/contact::contact.replies'),

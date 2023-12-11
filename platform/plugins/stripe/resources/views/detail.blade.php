@@ -35,8 +35,8 @@
             >
                 <p>{{ trans('plugins/payment::payment.refunds.id') }}: {{ $item->id }}</p>
                 @php
-                    $multiplier = \Botble\Stripe\Supports\StripeHelper::getStripeCurrencyMultiplier($item->currency);
-                    
+                    $multiplier = Botble\Stripe\Supports\StripeHelper::getStripeCurrencyMultiplier($item->currency);
+
                     if ($multiplier > 1) {
                         $item->amount = round($item->amount / $multiplier, 2);
                     }

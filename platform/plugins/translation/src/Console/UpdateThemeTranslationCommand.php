@@ -22,9 +22,9 @@ class UpdateThemeTranslationCommand extends Command
 
         $data = json_encode($keys, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 
-        BaseHelper::saveFileData(theme_path(Theme::getThemeName() . '/lang/en.json'), $data, false);
+        BaseHelper::saveFileData(theme_path(sprintf('%s/lang/en.json', Theme::getThemeName())), $data, false);
 
-        $this->components->info('Found ' . count($keys) . ' keys');
+        $this->components->info(sprintf('Found %s keys.', count($keys)));
 
         return self::SUCCESS;
     }

@@ -3,6 +3,7 @@
 namespace Botble\Base\Supports;
 
 use Botble\Base\Facades\BaseHelper;
+use Botble\Media\Facades\RvMedia;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -86,9 +87,39 @@ class SystemManagement
             'pdo' => extension_loaded('pdo'),
             'fileinfo' => extension_loaded('fileinfo'),
             'tokenizer' => extension_loaded('tokenizer'),
-            'imagick_or_gd' => extension_loaded('imagick') || extension_loaded('gd'),
+            'imagick_or_gd' => (extension_loaded('imagick') || extension_loaded('gd')) && extension_loaded(RvMedia::getImageProcessingLibrary()),
             'zip' => extension_loaded('zip'),
             'iconv' => extension_loaded('iconv'),
         ];
+    }
+
+    public static function getMemoryLimitAsMegabyte(): int
+    {
+        $memoryLimit = @ini_get('memory_limit') ?: 0;
+
+        if (! $memoryLimit) {
+            return 0;
+        }
+
+        if (preg_match('/^(\d+)(.)$/', $memoryLimit, $matches)) {
+            if ($matches[2] === 'M') {
+                return $matches[1];
+            }
+
+            if ($matches[2] === 'K') {
+                return (int) ($matches[1] / 1024);
+            }
+
+            if ($matches[2] === 'G') {
+                return (int) ($matches[1] * 1024);
+            }
+        }
+
+        return $memoryLimit;
+    }
+
+    public static function getMaximumExecutionTime(): int
+    {
+        return (int) (@ini_get('max_execution_time') ?: -1);
     }
 }

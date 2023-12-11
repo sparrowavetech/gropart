@@ -2,8 +2,16 @@
 
 namespace Botble\Location\Forms;
 
-use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Facades\Assets;
+use Botble\Base\Forms\FieldOptions\IsDefaultFieldOption;
+use Botble\Base\Forms\FieldOptions\NameFieldOption;
+use Botble\Base\Forms\FieldOptions\SortOrderFieldOption;
+use Botble\Base\Forms\FieldOptions\StatusFieldOption;
+use Botble\Base\Forms\Fields\MediaImageField;
+use Botble\Base\Forms\Fields\NumberField;
+use Botble\Base\Forms\Fields\OnOffField;
+use Botble\Base\Forms\Fields\SelectField;
+use Botble\Base\Forms\Fields\TextField;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Location\Http\Requests\CityRequest;
 use Botble\Location\Models\City;
@@ -11,7 +19,7 @@ use Botble\Location\Models\Country;
 
 class CityForm extends FormAbstract
 {
-    public function buildForm(): void
+    public function setup(): void
     {
         Assets::addScriptsDirectly('vendor/core/plugins/location/js/location.js');
 
@@ -23,25 +31,17 @@ class CityForm extends FormAbstract
         }
 
         $this
-            ->setupModel(new City())
+            ->model(City::class)
             ->setValidatorClass(CityRequest::class)
-            ->withCustomFields()
-            ->add('name', 'text', [
-                'label' => trans('core/base::forms.name'),
-                'required' => true,
-                'attr' => [
-                    'placeholder' => trans('core/base::forms.name_placeholder'),
-                    'data-counter' => 120,
-                ],
-            ])
-            ->add('slug', 'text', [
+            ->add('name', TextField::class, NameFieldOption::make()->required()->toArray())
+            ->add('slug', TextField::class, [
                 'label' => __('Slug'),
                 'attr' => [
                     'placeholder' => __('Slug'),
                     'data-counter' => 120,
                 ],
             ])
-            ->add('country_id', 'customSelect', [
+            ->add('country_id', SelectField::class, [
                 'label' => trans('plugins/location::city.country'),
                 'required' => true,
                 'attr' => [
@@ -51,7 +51,7 @@ class CityForm extends FormAbstract
                 ],
                 'choices' => [0 => trans('plugins/location::city.select_country')] + $countries,
             ])
-            ->add('state_id', 'customSelect', [
+            ->add('state_id', SelectField::class, [
                 'label' => trans('plugins/location::city.state'),
                 'attr' => [
                     'id' => 'state_id',
@@ -67,23 +67,10 @@ class CityForm extends FormAbstract
                         :
                         [0 => trans('plugins/location::city.select_state')]) + $states,
             ])
-            ->add('order', 'number', [
-                'label' => trans('core/base::forms.order'),
-                'attr' => [
-                    'placeholder' => trans('core/base::forms.order_by_placeholder'),
-                ],
-                'default_value' => 0,
-            ])
-            ->add('is_default', 'onOff', [
-                'label' => trans('core/base::forms.is_default'),
-                'default_value' => false,
-            ])
-            ->add('status', 'customSelect', [
-                'label' => trans('core/base::tables.status'),
-                'required' => true,
-                'choices' => BaseStatusEnum::labels(),
-            ])
-            ->add('image', 'mediaImage')
+            ->add('order', NumberField::class, SortOrderFieldOption::make()->toArray())
+            ->add('is_default', OnOffField::class, IsDefaultFieldOption::make()->toArray())
+            ->add('status', SelectField::class, StatusFieldOption::make()->toArray())
+            ->add('image', MediaImageField::class)
             ->setBreakFieldPoint('status');
     }
 }

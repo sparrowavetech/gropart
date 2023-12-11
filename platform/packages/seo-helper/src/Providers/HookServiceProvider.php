@@ -10,18 +10,20 @@ use Botble\Base\Supports\ServiceProvider;
 use Botble\Page\Models\Page;
 use Botble\SeoHelper\Facades\SeoHelper;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Routing\Events\RouteMatched;
 
 class HookServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
-        $this->app->booted(function () {
-            add_action(BASE_ACTION_META_BOXES, [$this, 'addMetaBox'], 12, 2);
+        add_action(BASE_ACTION_META_BOXES, [$this, 'addMetaBox'], 12, 2);
+
+        $this->app['events']->listen(RouteMatched::class, function () {
             add_action(BASE_ACTION_PUBLIC_RENDER_SINGLE, [$this, 'setSeoMeta'], 56, 2);
         });
     }
 
-    public function addMetaBox(string $priority, BaseModel|null $data): void
+    public function addMetaBox(string $priority, string|BaseModel|null $data = null): void
     {
         if ($priority == 'advanced' && ! empty($data) && in_array($data::class, config('packages.seo-helper.general.supported', []))) {
             if ($data instanceof Page && BaseHelper::isHomepage($data->getKey())) {

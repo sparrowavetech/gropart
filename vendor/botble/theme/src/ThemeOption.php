@@ -8,10 +8,15 @@ use Botble\Language\Facades\Language;
 use Botble\Setting\Facades\Setting;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Traits\Conditionable;
+use Illuminate\Support\Traits\Tappable;
 use Throwable;
 
 class ThemeOption
 {
+    use Conditionable;
+    use Tappable;
+
     public array $fields = [];
 
     public array $sections = [];

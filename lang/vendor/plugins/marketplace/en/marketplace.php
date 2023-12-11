@@ -52,6 +52,8 @@ return [
     'store_name' => 'Store name',
     'store_email' => 'Store email',
     'store_phone' => 'Store phone',
+    'store_address' => 'Store address',
+    'store_url' => 'Store URL',
     'product_name' => 'Product name',
     'product_url' => 'Product URL',
     'withdrawal_amount' => 'Withdrawal amount',

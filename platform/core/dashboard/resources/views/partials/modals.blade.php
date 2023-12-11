@@ -1,91 +1,53 @@
-<div
-    class="modal fade"
-    id="hide_widget_modal"
-    role="dialog"
-    tabindex="-1"
+<x-core::modal
+    id="widgets-management-modal"
+    data-bb-toggle="widgets-management-modal"
+    :title="trans('core/dashboard::dashboard.manage_widgets')"
+    :form-action="route('dashboard.hide_widgets')"
+    :bodyAttrs="['class' => 'p-0']"
 >
-    <div class="modal-dialog modal-sm">
-        <div class="modal-content">
-            <div class="modal-header bg-danger">
-                <h4 class="modal-title"><i
-                        class="til_img"></i><strong>{{ trans('core/dashboard::dashboard.confirm_hide') }}</strong></h4>
-                <button
-                    class="btn-close"
-                    data-bs-dismiss="modal"
-                    type="button"
-                    aria-hidden="true"
-                ></button>
-            </div>
+    <x-core::table>
+        <x-core::table.body>
+            @foreach ($widgets as $widget)
+                @php
+                    $widgetId = "widgets[$widget->name]";
+                    $checked = !($widgetSetting = $widget->settings->first()) || $widgetSetting->status;
+                @endphp
 
-            <div class="modal-body with-padding">
-                <p>{{ trans('core/dashboard::dashboard.hide_message') }}</p>
-            </div>
+                <x-core::table.body.row>
+                    <x-core::table.body.cell @class([
+                        'py-0 border-0 d-flex justify-content-between align-items-center',
+                        'text-decoration-line-through text-muted' => ! $checked
+                    ])>
+                        <label
+                            for="{{ $widgetId }}"
+                            class="w-full py-3 fw-bold d-block"
+                        >
+                            {{ $widget->title }}
+                        </label>
+                        <x-core::form.toggle
+                            :name="$widgetId"
+                            :single="true"
+                            :checked="$checked"
+                            data-bb-toggle="widgets-management-item"
+                        />
+                    </x-core::table.body.cell>
+                </x-core::table.body.row>
+            @endforeach
+        </x-core::table.body>
+    </x-core::table>
+    <x-slot:footer>
+        <x-core::button
+            class="me-auto"
+            data-bs-dismiss="modal"
+        >
+            {{ trans('core/base::forms.cancel') }}
+        </x-core::button>
 
-            <div class="modal-footer">
-                <a
-                    class="float-start btn btn-danger"
-                    id="hide-widget-confirm-bttn"
-                    href="#"
-                >{{ trans('core/dashboard::dashboard.confirm_hide_btn') }}</a>
-                <button
-                    class="float-end btn btn-primary"
-                    data-bs-dismiss="modal"
-                    type="button"
-                >{{ trans('core/dashboard::dashboard.cancel_hide_btn') }}</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div
-    class="modal fade"
-    id="manage_widget_modal"
-    role="dialog"
-    tabindex="-1"
->
-    <div class="modal-dialog">
-        <div class="modal-content">
-            {!! Form::open(['route' => 'dashboard.hide_widgets']) !!}
-            <div class="modal-header">
-                <h4 class="modal-title"><i
-                        class="til_img"></i><strong>{{ trans('core/dashboard::dashboard.manage_widgets') }}</strong>
-                </h4>
-                <button
-                    class="btn-close"
-                    data-bs-dismiss="modal"
-                    type="button"
-                    aria-hidden="true"
-                >
-
-                </button>
-            </div>
-            <div class="modal-body with-padding">
-                @foreach ($widgets as $widget)
-                    @php $widget_setting = $widget->settings->first(); @endphp
-                    <section class="wrap_{{ $widget->name }}">
-                        <i
-                            class="{{ $widget->icon ?? 'box_img_sale ' . $widget->name }} @if ($widget_setting && $widget_setting->status == 0) widget_none_color @endif"
-                            style="background-color: {{ $widget->color ?? '#7c87b6' }}"
-                        ></i>
-                        <span class="widget_name">{{ $widget->title }}</span>
-                        <div class="swc_wrap">
-                            {!! Form::onOff('widgets[' . $widget->name . ']', $widget_setting ? $widget_setting->status : true) !!}
-                        </div>
-                    </section>
-                @endforeach
-            </div>
-            <div class="modal-footer">
-                <button
-                    class="btn btn-secondary"
-                    data-bs-dismiss="modal"
-                    type="button"
-                >{{ trans('core/base::forms.cancel') }}</button>
-                <button
-                    class="btn btn-primary"
-                    type="submit"
-                >{{ trans('core/base::forms.save') }}</button>
-            </div>
-            {!! Form::close() !!}
-        </div>
-    </div>
-</div>
+        <x-core::button
+            type="submit"
+            color="primary"
+        >
+            {{ trans('core/base::forms.save') }}
+        </x-core::button>
+    </x-slot:footer>
+</x-core::modal>

@@ -5,12 +5,19 @@ namespace Botble\ACL\Forms;
 use Botble\ACL\Http\Requests\RoleCreateRequest;
 use Botble\ACL\Models\Role;
 use Botble\Base\Facades\Assets;
+use Botble\Base\Forms\FieldOptions\DescriptionFieldOption;
+use Botble\Base\Forms\FieldOptions\IsDefaultFieldOption;
+use Botble\Base\Forms\FieldOptions\NameFieldOption;
+use Botble\Base\Forms\Fields\OnOffField;
+use Botble\Base\Forms\Fields\TextareaField;
+use Botble\Base\Forms\Fields\TextField;
 use Botble\Base\Forms\FormAbstract;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Blade;
 
 class RoleForm extends FormAbstract
 {
-    public function buildForm(): void
+    public function setup(): void
     {
         Assets::addStyles(['jquery-ui', 'jqueryTree'])
             ->addScripts(['jquery-ui', 'jqueryTree'])
@@ -21,41 +28,35 @@ class RoleForm extends FormAbstract
         $children = $this->getPermissionTree($flags);
         $active = [];
 
-        if ($this->getModel()) {
-            $active = array_keys($this->getModel()->permissions);
+        /** @var Role $role */
+        $role = $this->getModel();
+
+        if ($role && $role->getKey()) {
+            $active = array_keys($role->permissions);
+
+            add_filter('base_action_form_actions_extra', function () use ($role) {
+                return Blade::render(
+                    sprintf(
+                        '<x-core::button tag="a" href="%s" icon="ti ti-copy">%s</x-core::button>',
+                        route('roles.duplicate', $role->getKey()),
+                        trans('core/acl::permissions.duplicate')
+                    )
+                );
+            });
         }
 
         $this
-            ->setupModel(new Role())
+            ->model(Role::class)
             ->setValidatorClass(RoleCreateRequest::class)
-            ->withCustomFields()
-            ->add('name', 'text', [
-                'label' => trans('core/base::forms.name'),
-                'required' => true,
-                'attr' => [
-                    'placeholder' => trans('core/base::forms.name_placeholder'),
-                    'data-counter' => 120,
-                ],
-            ])
-            ->add('description', 'textarea', [
-                'label' => trans('core/base::forms.description'),
-                'attr' => [
-                    'rows' => 4,
-                    'placeholder' => trans('core/base::forms.description_placeholder'),
-                    'data-counter' => 400,
-                ],
-            ])
-            ->add('is_default', 'onOff', [
-                'label' => trans('core/base::forms.is_default'),
-                'default_value' => false,
-            ])
+            ->add('name', TextField::class, NameFieldOption::make()->required()->maxLength(120)->toArray())
+            ->add('description', TextareaField::class, DescriptionFieldOption::make()->toArray())
+            ->add('is_default', OnOffField::class, IsDefaultFieldOption::make()->toArray())
             ->addMetaBoxes([
                 'permissions' => [
                     'title' => trans('core/acl::permissions.permission_flags'),
                     'content' => view('core/acl::roles.permissions', compact('active', 'flags', 'children'))->render(),
                 ],
-            ])
-            ->setActionButtons(view('core/acl::roles.actions', ['role' => $this->getModel()])->render());
+            ]);
     }
 
     protected function getPermissionTree(array $permissions): array
@@ -74,15 +75,16 @@ class RoleForm extends FormAbstract
         return $children;
     }
 
-    protected function getChildren(string $parentFlag, array $allFlags): array
+    protected function getChildren(string $parentFlag, array $flags): array
     {
-        $newFlagArray = [];
-        foreach ($allFlags as $flagDetails) {
-            if (Arr::get($flagDetails, 'parent_flag', 'root') == $parentFlag) {
-                $newFlagArray[] = $flagDetails['flag'];
+        $newFlags = [];
+
+        foreach ($flags as $item) {
+            if (Arr::get($item, 'parent_flag', 'root') === $parentFlag) {
+                $newFlags[] = $item['flag'];
             }
         }
 
-        return $newFlagArray;
+        return $newFlags;
     }
 }

@@ -9,8 +9,8 @@ use Botble\Page\Models\Page;
 use Botble\Page\Repositories\Eloquent\PageRepository;
 use Botble\Page\Repositories\Interfaces\PageInterface;
 use Botble\Shortcode\View\View;
+use Botble\Theme\Events\RenderingAdminBar;
 use Botble\Theme\Facades\AdminBar;
-use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\Facades\View as ViewFacade;
 
 /**
@@ -39,25 +39,24 @@ class PageServiceProvider extends ServiceProvider
             ->loadRoutes()
             ->loadMigrations();
 
-        $this->app['events']->listen(RouteMatched::class, function () {
-            DashboardMenu::registerItem([
-                'id' => 'cms-core-page',
-                'priority' => 2,
-                'parent_id' => null,
-                'name' => 'packages/page::pages.menu_name',
-                'icon' => 'fa fa-book',
-                'url' => route('pages.index'),
-                'permissions' => ['pages.index'],
-            ]);
+        DashboardMenu::default()->beforeRetrieving(function () {
+            DashboardMenu::make()
+                ->registerItem([
+                    'id' => 'cms-core-page',
+                    'priority' => 2,
+                    'name' => 'packages/page::pages.menu_name',
+                    'icon' => 'ti ti-notebook',
+                    'route' => 'pages.index',
+                ]);
+        });
 
-            if (function_exists('admin_bar')) {
-                AdminBar::registerLink(
-                    trans('packages/page::pages.menu_name'),
-                    route('pages.create'),
-                    'add-new',
-                    'pages.create'
-                );
-            }
+        $this->app['events']->listen(RenderingAdminBar::class, function () {
+            AdminBar::registerLink(
+                trans('packages/page::pages.menu_name'),
+                route('pages.create'),
+                'add-new',
+                'pages.create'
+            );
         });
 
         if (function_exists('shortcode')) {

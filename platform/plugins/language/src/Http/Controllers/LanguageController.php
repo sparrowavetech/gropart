@@ -3,20 +3,19 @@
 namespace Botble\Language\Http\Controllers;
 
 use Botble\Base\Events\CreatedContentEvent;
-use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
-use Botble\Base\Facades\PageTitle;
-use Botble\Base\Http\Controllers\BaseController;
-use Botble\Base\Http\Responses\BaseHttpResponse;
+use Botble\Base\Http\Actions\DeleteResourceAction;
 use Botble\Base\Supports\Language;
 use Botble\Language\Facades\Language as LanguageFacade;
+use Botble\Language\Forms\Settings\LanguageSettingForm;
 use Botble\Language\Http\Requests\LanguageRequest;
 use Botble\Language\LanguageManager;
 use Botble\Language\Models\Language as LanguageModel;
 use Botble\Language\Models\LanguageMeta;
 use Botble\Setting\Facades\Setting;
+use Botble\Setting\Http\Controllers\SettingController;
 use Botble\Theme\Facades\Theme;
 use Botble\Theme\Facades\ThemeOption;
 use Botble\Translation\Manager;
@@ -28,11 +27,11 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\URL;
 use Throwable;
 
-class LanguageController extends BaseController
+class LanguageController extends SettingController
 {
     public function index()
     {
-        PageTitle::setTitle(trans('plugins/language::language.name'));
+        $this->pageTitle(trans('plugins/language::language.name'));
 
         Assets::addScriptsDirectly(['vendor/core/plugins/language/js/language.js']);
 
@@ -40,10 +39,12 @@ class LanguageController extends BaseController
         $flags = Language::getListLanguageFlags();
         $activeLanguages = LanguageModel::query()->get();
 
-        return view('plugins/language::index', compact('languages', 'flags', 'activeLanguages'));
+        $languageSettingForm = LanguageSettingForm::create();
+
+        return view('plugins/language::index', compact('languages', 'flags', 'activeLanguages', 'languageSettingForm'));
     }
 
-    public function store(LanguageRequest $request, BaseHttpResponse $response, LanguageManager $languageManager)
+    public function store(LanguageRequest $request, LanguageManager $languageManager)
     {
         try {
             $language = LanguageModel::query()
@@ -51,7 +52,8 @@ class LanguageController extends BaseController
                 ->first();
 
             if ($language) {
-                return $response
+                return $this
+                    ->httpResponse()
                     ->setError()
                     ->setMessage(trans('plugins/language::language.added_already'));
             }
@@ -63,7 +65,8 @@ class LanguageController extends BaseController
             File::ensureDirectoryExists(lang_path('vendor'));
 
             if (! File::isWritable(lang_path()) || ! File::isWritable(lang_path('vendor'))) {
-                return $response
+                return $this
+                    ->httpResponse()
                     ->setError()
                     ->setMessage(
                         trans('plugins/translation::translation.folder_is_not_writeable', ['lang_path' => lang_path()])
@@ -142,22 +145,25 @@ class LanguageController extends BaseController
                     }
                 }
             } catch (Throwable $exception) {
-                return $response
+                return $this
+                    ->httpResponse()
                     ->setData(view('plugins/language::partials.language-item', ['item' => $language])->render())
                     ->setMessage($exception->getMessage());
             }
 
-            return $response
+            return $this
+                ->httpResponse()
                 ->setData(view('plugins/language::partials.language-item', ['item' => $language])->render())
-                ->setMessage(trans('core/base::notices.create_success_message'));
+                ->withCreatedSuccessMessage();
         } catch (Throwable $exception) {
-            return $response
+            return $this
+                ->httpResponse()
                 ->setError()
                 ->setMessage($exception->getMessage());
         }
     }
 
-    public function update(Request $request, BaseHttpResponse $response)
+    public function update(Request $request)
     {
         try {
             $language = LanguageModel::query()->where('lang_id', $request->input('lang_id'))->first();
@@ -172,17 +178,19 @@ class LanguageController extends BaseController
 
             event(new UpdatedContentEvent(LANGUAGE_MODULE_SCREEN_NAME, $request, $language));
 
-            return $response
+            return $this
+                ->httpResponse()
                 ->setData(view('plugins/language::partials.language-item', ['item' => $language])->render())
-                ->setMessage(trans('core/base::notices.update_success_message'));
+                ->withUpdatedSuccessMessage();
         } catch (Throwable $exception) {
-            return $response
+            return $this
+                ->httpResponse()
                 ->setError()
                 ->setMessage($exception->getMessage());
         }
     }
 
-    public function postChangeItemLanguage(Request $request, BaseHttpResponse $response)
+    public function postChangeItemLanguage(Request $request)
     {
         $referenceId = $request->input('reference_id') ?: $request->input('lang_meta_created_from');
         $currentLanguage = LanguageMeta::query()
@@ -232,39 +240,34 @@ class LanguageController extends BaseController
             }
         }
 
-        return $response->setData($data);
+        return $this
+            ->httpResponse()
+            ->setData($data);
     }
 
-    public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
+    public function destroy(int|string $id)
     {
-        try {
-            $language = LanguageModel::query()->where('lang_id', $id)->first();
-            $language->delete();
-            $defaultLanguageId = false;
+        $language = LanguageModel::query()->where('lang_id', $id)->first();
 
-            if ($language->lang_is_default) {
-                $defaultLanguage = LanguageModel::query()->where('lang_is_default', 1)->first();
+        return DeleteResourceAction::make($language)
+            ->afterDeleting(function (DeleteResourceAction $action) {
+                $defaultLanguageId = false;
 
-                if ($defaultLanguage) {
-                    $defaultLanguageId = $defaultLanguage->lang_id;
+                if ($action->getModel()->lang_is_default) {
+                    $defaultLanguage = LanguageModel::query()->where('lang_is_default', 1)->first();
+
+                    if ($defaultLanguage) {
+                        $defaultLanguageId = $defaultLanguage->lang_id;
+                    }
                 }
-            }
 
-            $this->clearRoutesCache();
+                $this->clearRoutesCache();
 
-            event(new DeletedContentEvent(LANGUAGE_MODULE_SCREEN_NAME, $request, $language));
-
-            return $response
-                ->setData($defaultLanguageId)
-                ->setMessage(trans('core/base::notices.delete_success_message'));
-        } catch (Throwable $exception) {
-            return $response
-                ->setError()
-                ->setMessage($exception->getMessage());
-        }
+                $this->httpResponse()->setData($defaultLanguageId);
+            });
     }
 
-    public function getSetDefault(Request $request, BaseHttpResponse $response)
+    public function getSetDefault(Request $request)
     {
         $newLanguageId = $request->input('lang_id');
 
@@ -298,8 +301,7 @@ class LanguageController extends BaseController
                             $replicated->save();
                         }
                     } else {
-                        $currentWidgets = Widget::query()->where('theme', Widget::getThemeName($newLanguageCode))->get(
-                        );
+                        $currentWidgets = Widget::query()->where('theme', Widget::getThemeName($newLanguageCode))->get();
 
                         Widget::query()->where('theme', Widget::getThemeName($newLanguageCode))->delete();
 
@@ -388,30 +390,18 @@ class LanguageController extends BaseController
 
         event(new UpdatedContentEvent(LANGUAGE_MODULE_SCREEN_NAME, $request, $newLanguage));
 
-        return $response->setMessage(trans('core/base::notices.update_success_message'));
+        return $this
+            ->httpResponse()
+            ->withUpdatedSuccessMessage();
     }
 
-    public function getLanguage(Request $request, BaseHttpResponse $response)
+    public function getLanguage(Request $request)
     {
         $language = LanguageModel::query()->where('lang_id', $request->input('lang_id'))->first();
 
-        return $response->setData($language);
-    }
-
-    public function postEditSettings(Request $request, BaseHttpResponse $response)
-    {
-        Setting::set('language_hide_default', $request->input('language_hide_default', false))
-            ->set('language_display', $request->input('language_display'))
-            ->set('language_switcher_display', $request->input('language_switcher_display'))
-            ->set('language_hide_languages', json_encode($request->input('language_hide_languages', [])))
-            ->set('language_auto_detect_user_language', $request->input('language_auto_detect_user_language'))
-            ->set(
-                'language_show_default_item_if_current_version_not_existed',
-                $request->input('language_show_default_item_if_current_version_not_existed')
-            )
-            ->save();
-
-        return $response->setMessage(trans('core/base::notices.update_success_message'));
+        return $this
+            ->httpResponse()
+            ->setData($language);
     }
 
     public function getChangeDataLanguage($code, LanguageManager $language)

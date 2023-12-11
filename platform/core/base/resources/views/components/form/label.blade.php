@@ -1,6 +1,6 @@
-@props(['label', 'description' => null, 'helpText' => null, 'checkbox' => false])
+@props(['label', 'description' => null, 'helperText' => null])
 
-<label {{ $attributes->merge(['class' => $checkbox ? 'form-check' : 'form-label']) }}>
+<label {{ $attributes->merge(['class' => 'form-label']) }}>
     {{ $label ?? $slot }}
 
     @if ($description)
@@ -9,13 +9,13 @@
         </span>
     @endif
 
-    @if ($helpText)
+    @if ($helperText)
         <span
             class="form-help"
             data-bs-toggle="popover"
             data-bs-placement="top"
             data-bs-html="true"
-            data-bs-content="{{ $helpText }}"
+            data-bs-content="{{ $helperText }}"
         >?</span>
     @endif
 </label>

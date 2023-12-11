@@ -2,17 +2,17 @@
 
 namespace Botble\Media\Http\Controllers;
 
+use Botble\Base\Http\Controllers\BaseController;
 use Botble\Media\Facades\RvMedia;
 use Botble\Media\Http\Requests\MediaFolderRequest;
 use Botble\Media\Models\MediaFolder;
 use Exception;
-use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
 
 /**
  * @since 19/08/2015 07:55 AM
  */
-class MediaFolderController extends Controller
+class MediaFolderController extends BaseController
 {
     public function store(MediaFolderRequest $request)
     {

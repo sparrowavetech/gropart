@@ -13,8 +13,8 @@ use Botble\Theme\Commands\ThemeOptionCheckMissingCommand;
 use Botble\Theme\Commands\ThemeRemoveCommand;
 use Botble\Theme\Commands\ThemeRenameCommand;
 use Botble\Theme\Contracts\Theme as ThemeContract;
+use Botble\Theme\Events\RenderingAdminBar;
 use Botble\Theme\Theme;
-use Illuminate\Routing\Events\RouteMatched;
 
 class ThemeServiceProvider extends ServiceProvider
 {
@@ -26,15 +26,6 @@ class ThemeServiceProvider extends ServiceProvider
             ->loadHelpers();
 
         $this->app->bind(ThemeContract::class, Theme::class);
-
-        $this->commands([
-            ThemeActivateCommand::class,
-            ThemeRemoveCommand::class,
-            ThemeAssetsPublishCommand::class,
-            ThemeOptionCheckMissingCommand::class,
-            ThemeAssetsRemoveCommand::class,
-            ThemeRenameCommand::class,
-        ]);
     }
 
     public function boot(): void
@@ -46,16 +37,16 @@ class ThemeServiceProvider extends ServiceProvider
             ->loadRoutes()
             ->publishAssets();
 
-        $this->app['events']->listen(RouteMatched::class, function () {
+        DashboardMenu::default()->beforeRetrieving(function (DashboardMenuSupport $menu) {
             $config = $this->app['config'];
 
-            DashboardMenu::make()
+            $menu
                 ->registerItem([
                     'id' => 'cms-core-appearance',
-                    'priority' => 996,
+                    'priority' => 2000,
                     'parent_id' => null,
                     'name' => 'packages/theme::theme.appearance',
-                    'icon' => 'fa fa-paint-brush',
+                    'icon' => 'ti ti-brush',
                     'url' => '#',
                     'permissions' => [],
                 ])
@@ -68,7 +59,7 @@ class ThemeServiceProvider extends ServiceProvider
                             'parent_id' => 'cms-core-appearance',
                             'name' => 'packages/theme::theme.name',
                             'icon' => null,
-                            'url' => route('theme.index'),
+                            'url' => fn () => route('theme.index'),
                             'permissions' => ['theme.index'],
                         ]);
                     }
@@ -79,7 +70,7 @@ class ThemeServiceProvider extends ServiceProvider
                     'parent_id' => 'cms-core-appearance',
                     'name' => 'packages/theme::theme.theme_options',
                     'icon' => null,
-                    'url' => route('theme.options'),
+                    'url' => fn () => route('theme.options'),
                     'permissions' => ['theme.options'],
                 ])
                 ->registerItem([
@@ -88,7 +79,7 @@ class ThemeServiceProvider extends ServiceProvider
                     'parent_id' => 'cms-core-appearance',
                     'name' => 'packages/theme::theme.custom_css',
                     'icon' => null,
-                    'url' => route('theme.custom-css'),
+                    'url' => fn () => route('theme.custom-css'),
                     'permissions' => ['theme.custom-css'],
                 ])
                 ->when(
@@ -100,7 +91,7 @@ class ThemeServiceProvider extends ServiceProvider
                             'parent_id' => 'cms-core-appearance',
                             'name' => 'packages/theme::theme.custom_js',
                             'icon' => null,
-                            'url' => route('theme.custom-js'),
+                            'url' => fn () => route('theme.custom-js'),
                             'permissions' => ['theme.custom-js'],
                         ]);
                     }
@@ -114,12 +105,14 @@ class ThemeServiceProvider extends ServiceProvider
                             'parent_id' => 'cms-core-appearance',
                             'name' => 'packages/theme::theme.custom_html',
                             'icon' => null,
-                            'url' => route('theme.custom-html'),
+                            'url' => fn () => route('theme.custom-html'),
                             'permissions' => ['theme.custom-html'],
                         ]);
                     }
                 );
+        });
 
+        $this->app['events']->listen(RenderingAdminBar::class, function () {
             admin_bar()
                 ->registerLink(trans('packages/theme::theme.name'), route('theme.index'), 'appearance', 'theme.index')
                 ->registerLink(
@@ -136,5 +129,16 @@ class ThemeServiceProvider extends ServiceProvider
 
         $this->app->register(ThemeManagementServiceProvider::class);
         $this->app->register(EventServiceProvider::class);
+
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                ThemeActivateCommand::class,
+                ThemeRemoveCommand::class,
+                ThemeAssetsPublishCommand::class,
+                ThemeOptionCheckMissingCommand::class,
+                ThemeAssetsRemoveCommand::class,
+                ThemeRenameCommand::class,
+            ]);
+        }
     }
 }

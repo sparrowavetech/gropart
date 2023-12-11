@@ -11,14 +11,13 @@ class RevisionServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        $this->setNamespace('packages/revision')
+        $this
+            ->setNamespace('packages/revision')
             ->loadAndPublishViews()
             ->loadAndPublishConfigurations(['general'])
             ->loadMigrations()
             ->publishAssets();
 
-        $this->app->booted(function () {
-            $this->app->register(HookServiceProvider::class);
-        });
+        $this->app->register(HookServiceProvider::class);
     }
 }

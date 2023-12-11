@@ -2,54 +2,46 @@
 
 namespace Botble\Page\Forms;
 
-use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Base\Forms\FieldOptions\ContentFieldOption;
+use Botble\Base\Forms\FieldOptions\DescriptionFieldOption;
+use Botble\Base\Forms\FieldOptions\NameFieldOption;
+use Botble\Base\Forms\FieldOptions\SelectFieldOption;
+use Botble\Base\Forms\FieldOptions\StatusFieldOption;
+use Botble\Base\Forms\Fields\EditorField;
+use Botble\Base\Forms\Fields\MediaImageField;
+use Botble\Base\Forms\Fields\SelectField;
+use Botble\Base\Forms\Fields\TextareaField;
+use Botble\Base\Forms\Fields\TextField;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Page\Http\Requests\PageRequest;
 use Botble\Page\Models\Page;
+use Botble\Page\Supports\Template;
 
 class PageForm extends FormAbstract
 {
-    public function buildForm(): void
+    public function setup(): void
     {
         $this
-            ->setupModel(new Page())
+            ->model(Page::class)
             ->setValidatorClass(PageRequest::class)
             ->hasTabs()
-            ->withCustomFields()
-            ->add('name', 'text', [
-                'label' => trans('core/base::forms.name'),
-                'required' => true,
-                'attr' => [
-                    'placeholder' => trans('core/base::forms.name_placeholder'),
-                    'data-counter' => 120,
-                ],
-            ])
-            ->add('description', 'textarea', [
-                'label' => trans('core/base::forms.description'),
-                'attr' => [
-                    'rows' => 4,
-                    'placeholder' => trans('core/base::forms.description_placeholder'),
-                    'data-counter' => 400,
-                ],
-            ])
-            ->add('content', 'editor', [
-                'label' => trans('core/base::forms.content'),
-                'attr' => [
-                    'placeholder' => trans('core/base::forms.description_placeholder'),
-                    'with-short-code' => true,
-                ],
-            ])
-            ->add('status', 'customSelect', [
-                'label' => trans('core/base::tables.status'),
-                'required' => true,
-                'choices' => BaseStatusEnum::labels(),
-            ])
-            ->add('template', 'customSelect', [
-                'label' => trans('core/base::forms.template'),
-                'required' => true,
-                'choices' => get_page_templates(),
-            ])
-            ->add('image', 'mediaImage')
+            ->add('name', TextField::class, NameFieldOption::make()->required()->toArray())
+            ->add('description', TextareaField::class, DescriptionFieldOption::make()->toArray())
+            ->add('content', EditorField::class, ContentFieldOption::make()->allowedShortcodes()->toArray())
+            ->add('status', SelectField::class, StatusFieldOption::make()->toArray())
+            ->when(Template::getPageTemplates(), function (PageForm $form, array $templates) {
+                return $form
+                    ->add(
+                        'template',
+                        SelectField::class,
+                        SelectFieldOption::make()
+                            ->label(trans('core/base::forms.template'))
+                            ->required()
+                            ->choices($templates)
+                            ->toArray()
+                    );
+            })
+            ->add('image', MediaImageField::class)
             ->setBreakFieldPoint('status');
     }
 }

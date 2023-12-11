@@ -13,12 +13,11 @@ use Illuminate\Support\Str;
 
 class AdsForm extends FormAbstract
 {
-    public function buildForm(): void
+    public function setup(): void
     {
         $this
             ->setupModel(new Ads())
             ->setValidatorClass(AdsRequest::class)
-            ->withCustomFields()
             ->add('name', 'text', [
                 'label' => trans('core/base::forms.name'),
                 'required' => true,

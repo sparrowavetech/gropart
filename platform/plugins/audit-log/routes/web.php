@@ -1,13 +1,13 @@
 <?php
 
-use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\AdminHelper;
 use Illuminate\Support\Facades\Route;
 
-Route::group(['namespace' => 'Botble\AuditLog\Http\Controllers', 'middleware' => ['web', 'core']], function () {
-    Route::group(['prefix' => BaseHelper::getAdminPrefix(), 'middleware' => 'auth'], function () {
-        Route::resource('audit-logs', 'AuditLogController', ['names' => 'audit-log'])->only(['index', 'destroy']);
-
+Route::group(['namespace' => 'Botble\AuditLog\Http\Controllers'], function () {
+    AdminHelper::registerRoutes(function () {
         Route::group(['prefix' => 'audit-logs'], function () {
+            Route::resource('', 'AuditLogController', ['names' => 'audit-log'])->only(['index', 'destroy']);
+
             Route::get('widgets/activities', [
                 'as' => 'audit-log.widget.activities',
                 'uses' => 'AuditLogController@getWidgetActivities',

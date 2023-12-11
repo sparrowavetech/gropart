@@ -3,25 +3,15 @@
     data-menu-item="{{ json_encode(Arr::except(apply_filters('menu_nodes_item_data', $row)->toArray(), ['created_at', 'updated_at', 'child'])) }}"
 >
     <div class="dd-handle dd3-handle"></div>
-    <div class="dd3-content">
-        <span
-            class="text float-start"
-            data-update="title"
-        >{{ $row->title }}</span>
-        <span
-            class="text float-end">{{ Arr::last(explode('\\', (string) $row->reference_type)) ?: trans('packages/menu::menu.custom_link') }}</span>
-        <a
-            class="show-item-details"
-            href="#"
-            title=""
-        >
-            <i class="fa fa-angle-down"></i>
+    <div class="dd3-content d-flex justify-content-between">
+        <div data-update="title" class="fw-medium">{{ $row->title }}</div>
+        <div class="text-end me-5">{{ Arr::last(explode('\\', (string) $row->reference_type)) ?: trans('packages/menu::menu.custom_link') }}</div>
+        <a class="show-item-details" href="#">
+            <x-core::icon name="ti ti-chevron-down" />
         </a>
-        <div class="clearfix"></div>
     </div>
     <div class="item-details">
-        {!! app(Botble\Base\Forms\FormBuilder::class)->create(Botble\Menu\Forms\MenuNodeForm::class, ['model' => $row])->renderForm([], false, true, false) !!}
-        <div class="clearfix"></div>
+        {!! Botble\Menu\Forms\MenuNodeForm::createFromModel($row)->renderForm([], false, true, false) !!}
         <div class="text-end mt-2">
             <a
                 class="btn btn-danger btn-remove btn-sm"

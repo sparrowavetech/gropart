@@ -13,14 +13,16 @@ class CommandServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
-        if ($this->app->runningInConsole()) {
-            $this->commands([
-                BackupCreateCommand::class,
-                BackupRestoreCommand::class,
-                BackupRemoveCommand::class,
-                BackupListCommand::class,
-                BackupCleanCommand::class,
-            ]);
+        if (! $this->app->runningInConsole()) {
+            return;
         }
+
+        $this->commands([
+            BackupCreateCommand::class,
+            BackupRestoreCommand::class,
+            BackupRemoveCommand::class,
+            BackupListCommand::class,
+            BackupCleanCommand::class,
+        ]);
     }
 }

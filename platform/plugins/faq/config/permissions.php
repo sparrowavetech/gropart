@@ -45,4 +45,9 @@ return [
         'flag' => 'faq_category.destroy',
         'parent_flag' => 'faq_category.index',
     ],
+    [
+        'name' => 'FAQ Settings',
+        'flag' => 'faqs.settings',
+        'parent_flag' => 'plugin.faq',
+    ],
 ];

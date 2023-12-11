@@ -28,7 +28,6 @@ use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Filesystem\AwsS3V3Adapter as IlluminateAwsS3V3Adapter;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Foundation\AliasLoader;
-use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\Facades\Storage;
 use League\Flysystem\AwsS3V3\AwsS3V3Adapter;
 use League\Flysystem\Filesystem;
@@ -63,7 +62,8 @@ class MediaServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        $this->setNamespace('core/media')
+        $this
+            ->setNamespace('core/media')
             ->loadHelpers()
             ->loadAndPublishConfigurations(['permissions', 'media'])
             ->loadMigrations()
@@ -192,31 +192,32 @@ class MediaServiceProvider extends ServiceProvider
                 break;
         }
 
-        $this->app['events']->listen(RouteMatched::class, function () {
-            DashboardMenu::registerItem([
-                'id' => 'cms-core-media',
-                'priority' => 995,
-                'parent_id' => null,
-                'name' => 'core/media::media.menu_name',
-                'icon' => 'far fa-images',
-                'url' => route('media.index'),
-                'permissions' => ['media.index'],
+        DashboardMenu::default()->beforeRetrieving(function () {
+            DashboardMenu::make()
+                ->registerItem([
+                    'id' => 'cms-core-media',
+                    'priority' => 999,
+                    'icon' => 'ti ti-folder',
+                    'name' => 'core/media::media.menu_name',
+                    'route' => 'media.index',
+                ]);
+        });
+
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                GenerateThumbnailCommand::class,
+                DeleteThumbnailCommand::class,
+                InsertWatermarkCommand::class,
+                ClearChunksCommand::class,
             ]);
-        });
 
-        $this->commands([
-            GenerateThumbnailCommand::class,
-            DeleteThumbnailCommand::class,
-            InsertWatermarkCommand::class,
-            ClearChunksCommand::class,
-        ]);
-
-        $this->app->afterResolving(Schedule::class, function (Schedule $schedule) {
-            if (RvMedia::getConfig('chunk.clear.schedule.enabled')) {
-                $schedule
-                    ->command(ClearChunksCommand::class)
-                    ->cron(RvMedia::getConfig('chunk.clear.schedule.cron'));
-            }
-        });
+            $this->app->afterResolving(Schedule::class, function (Schedule $schedule) {
+                if (RvMedia::getConfig('chunk.clear.schedule.enabled')) {
+                    $schedule
+                        ->command(ClearChunksCommand::class)
+                        ->cron(RvMedia::getConfig('chunk.clear.schedule.cron'));
+                }
+            });
+        }
     }
 }

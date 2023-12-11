@@ -2,11 +2,10 @@
 
 namespace Botble\Table\Abstracts;
 
-use Botble\Base\Contracts\BaseModel;
+use Botble\Base\Supports\Builders\HasLabel;
+use Botble\Base\Supports\Builders\HasPermissions;
 use Botble\Base\Supports\Renderable;
 use Botble\Table\Abstracts\Concerns\HasConfirmation;
-use Botble\Table\Abstracts\Concerns\HasLabel;
-use Botble\Table\Abstracts\Concerns\HasPermissions;
 use Botble\Table\Abstracts\Concerns\HasPriority;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Traits\Conditionable;
@@ -21,7 +20,7 @@ abstract class TableActionAbstract implements Htmlable, Stringable
     use HasPriority;
     use Renderable;
 
-    protected BaseModel $model;
+    protected object $item;
 
     protected string $view = 'core/table::actions.action';
 
@@ -41,16 +40,16 @@ abstract class TableActionAbstract implements Htmlable, Stringable
         return $this->name;
     }
 
-    public function model(BaseModel $model): static
+    public function setItem(object $item): static
     {
-        $this->model = $model;
+        $this->item = $item;
 
         return $this;
     }
 
-    public function getModel(): BaseModel
+    public function getItem(): object
     {
-        return $this->model;
+        return $this->item;
     }
 
     public function view(string $view): static

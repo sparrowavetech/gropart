@@ -33,6 +33,7 @@ return [
     'store_name' => 'Store name',
     'store_phone' => 'Store phone',
     'store_link' => 'Store link',
+    'store_address' => 'Store URL',
     'product_approval_notification' => 'This product was created by :vendor. It needs to be approved to be shown on your website. :approve_link',
     'approve_here' => 'Approve it here.',
     'approve_product_confirmation' => 'Approve product confirmation',

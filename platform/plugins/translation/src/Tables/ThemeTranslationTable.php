@@ -14,22 +14,18 @@ class ThemeTranslationTable extends TableAbstract
 {
     protected string $locale = 'en';
 
-    protected Manager $manager;
-
     public function setup(): void
     {
         parent::setup();
 
-        $this->view = $this->simpleTableView();
+        $this->setView($this->simpleTableView());
         $this->pageLength = 100;
         $this->hasOperations = false;
-
-        $this->manager = app(Manager::class);
     }
 
     public function ajax(): JsonResponse
     {
-        $translations = collect($this->manager->getThemeTranslations($this->locale))
+        $translations = collect(app(Manager::class)->getThemeTranslations($this->locale))
             ->transform(fn ($value, $key) => compact('key', 'value'));
 
         $table = $this->table

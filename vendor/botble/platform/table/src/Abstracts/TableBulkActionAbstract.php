@@ -4,9 +4,9 @@ namespace Botble\Table\Abstracts;
 
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Base\Models\BaseModel;
+use Botble\Base\Supports\Builders\HasLabel;
+use Botble\Base\Supports\Builders\HasPermissions;
 use Botble\Table\Abstracts\Concerns\HasConfirmation;
-use Botble\Table\Abstracts\Concerns\HasLabel;
-use Botble\Table\Abstracts\Concerns\HasPermissions;
 use Botble\Table\Abstracts\Concerns\HasPriority;
 use Botble\Table\Actions\Concerns\HasAction;
 use Closure;

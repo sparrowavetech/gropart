@@ -2,65 +2,43 @@
 
 namespace Botble\SimpleSlider\Forms;
 
+use Botble\Base\Forms\FieldOptions\DescriptionFieldOption;
+use Botble\Base\Forms\FieldOptions\MediaImageFieldOption;
+use Botble\Base\Forms\FieldOptions\SortOrderFieldOption;
+use Botble\Base\Forms\Fields\MediaImageField;
+use Botble\Base\Forms\Fields\NumberField;
+use Botble\Base\Forms\Fields\TextareaField;
+use Botble\Base\Forms\Fields\TextField;
 use Botble\Base\Forms\FormAbstract;
 use Botble\SimpleSlider\Http\Requests\SimpleSliderItemRequest;
 use Botble\SimpleSlider\Models\SimpleSliderItem;
 
 class SimpleSliderItemForm extends FormAbstract
 {
-    public function buildForm(): void
+    public function setup(): void
     {
         $this
-            ->setFormOption('template', 'core/base::forms.form-modal')
-            ->setupModel(new SimpleSliderItem())
+            ->model(SimpleSliderItem::class)
             ->setValidatorClass(SimpleSliderItemRequest::class)
-            ->withCustomFields()
+            ->contentOnly()
             ->add('simple_slider_id', 'hidden', [
-                'value' => request()->input('simple_slider_id'),
+                'value' => $this->getRequest()->input('simple_slider_id'),
             ])
-            ->add('title', 'text', [
+            ->add('title', TextField::class, [
                 'label' => trans('core/base::forms.title'),
                 'attr' => [
                     'data-counter' => 120,
                 ],
             ])
-            ->add('link', 'text', [
+            ->add('link', TextField::class, [
                 'label' => trans('core/base::forms.link'),
                 'attr' => [
                     'placeholder' => 'https://',
                     'data-counter' => 120,
                 ],
             ])
-            ->add('description', 'textarea', [
-                'label' => trans('core/base::forms.description'),
-                'attr' => [
-                    'rows' => 4,
-                    'placeholder' => trans('core/base::forms.description_placeholder'),
-                    'data-counter' => 2000,
-                ],
-            ])
-            ->add('order', 'number', [
-                'label' => trans('core/base::forms.order'),
-                'attr' => [
-                    'placeholder' => trans('core/base::forms.order_by_placeholder'),
-                ],
-                'default_value' => 0,
-            ])
-            ->add('image', 'mediaImage', [
-                'required' => true,
-            ])
-            ->add('close', 'button', [
-                'label' => trans('core/base::forms.cancel'),
-                'attr' => [
-                    'class' => 'btn btn-warning',
-                    'data-fancybox-close' => true,
-                ],
-            ])
-            ->add('submitter', 'submit', [
-                'label' => trans('core/base::forms.save_and_continue'),
-                'attr' => [
-                    'class' => 'btn btn-info float-end',
-                ],
-            ]);
+            ->add('description', TextareaField::class, DescriptionFieldOption::make()->toArray())
+            ->add('order', NumberField::class, SortOrderFieldOption::make()->toArray())
+            ->add('image', MediaImageField::class, MediaImageFieldOption::make()->required()->toArray());
     }
 }

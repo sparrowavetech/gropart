@@ -3,7 +3,8 @@
 namespace Botble\Language\Providers;
 
 use Botble\Base\Facades\Assets;
-use Botble\Base\Facades\DashboardMenu;
+use Botble\Base\Facades\PanelSectionManager;
+use Botble\Base\PanelSections\PanelSectionItem;
 use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Language\Facades\Language;
@@ -16,6 +17,7 @@ use Botble\Language\Repositories\Eloquent\LanguageMetaRepository;
 use Botble\Language\Repositories\Eloquent\LanguageRepository;
 use Botble\Language\Repositories\Interfaces\LanguageInterface;
 use Botble\Language\Repositories\Interfaces\LanguageMetaInterface;
+use Botble\Setting\PanelSections\SettingCommonPanelSection;
 use Botble\Theme\Facades\Theme;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Routing\Events\RouteMatched;
@@ -67,17 +69,19 @@ class LanguageServiceProvider extends ServiceProvider
         }
 
         if (! $this->app->runningInConsole() && is_plugin_active('language')) {
-            $this->app['events']->listen(RouteMatched::class, function () {
-                DashboardMenu::registerItem([
-                    'id' => 'cms-plugins-language',
-                    'priority' => 2,
-                    'parent_id' => 'cms-core-settings',
-                    'name' => 'plugins/language::language.name',
-                    'icon' => null,
-                    'url' => route('languages.index'),
-                    'permissions' => ['languages.index'],
-                ]);
+            PanelSectionManager::default()->beforeRendering(function () {
+                PanelSectionManager::registerItem(
+                    SettingCommonPanelSection::class,
+                    fn () => PanelSectionItem::make('language')
+                        ->setTitle(trans('plugins/language::language.name'))
+                        ->withIcon('ti ti-language')
+                        ->withDescription(trans('plugins/language::language.description'))
+                        ->withPriority(100)
+                        ->withRoute('languages.index')
+                );
+            });
 
+            $this->app['events']->listen(RouteMatched::class, function () {
                 Assets::addScriptsDirectly('vendor/core/plugins/language/js/language-global.js')
                     ->addStylesDirectly(['vendor/core/plugins/language/css/language.css']);
             });

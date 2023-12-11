@@ -18,9 +18,9 @@ return [
         'not_available' => 'Not Available',
         'rejected' => 'Rejected'
     ],
-    'edit'                                                                                                            => 'View Enquiry :code',
-    'reject'                                                                                                        => 'Enquiry Rejected',
-    'information'                                                                                                     => 'Enquiry information',
-    'status'                                                            => 'Enquiry Status'
+    'edit'  => 'View Enquiry :code',
+    'reject'  => 'Enquiry Rejected',
+    'information' => 'Enquiry information',
+    'status'   => 'Enquiry Status'
 
 ];

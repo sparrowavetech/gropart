@@ -25,9 +25,7 @@ class Widget extends BaseModel
 
     protected function position(): Attribute
     {
-        return Attribute::make(
-            set: fn ($value) => $value >= 0 && $value < 127 ? $value : (int)substr($value, -1)
-        );
+        return Attribute::get(fn ($value) => $value >= 0 && $value < 127 ? $value : (int)substr($value, -1));
     }
 
     public static function getThemeName(

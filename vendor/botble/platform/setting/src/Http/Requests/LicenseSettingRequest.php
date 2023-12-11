@@ -10,7 +10,7 @@ class LicenseSettingRequest extends Request
     {
         return [
             'purchase_code' => 'required|string|min:19|max:36|regex:/^[\pL\s\ \_\-0-9]+$/u',
-            'buyer' => 'required|string|max:40|regex:/^[\pL\s\ \_\-0-9]+$/u',
+            'buyer' => 'required|string|min:2|max:60',
             'license_rules_agreement' => 'accepted:1',
         ];
     }

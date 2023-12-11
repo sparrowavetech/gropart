@@ -24,7 +24,7 @@
                 ) !!}</p>
             @endif
 
-            @php $supportedCurrencies = (new \Botble\Razorpay\Services\Gateways\RazorpayPaymentService)->supportedCurrencyCodes(); @endphp
+            @php $supportedCurrencies = (new Botble\Razorpay\Services\Gateways\RazorpayPaymentService)->supportedCurrencyCodes(); @endphp
             @if (!in_array(get_application_currency()->title, $supportedCurrencies))
                 <div
                     class="alert alert-warning"

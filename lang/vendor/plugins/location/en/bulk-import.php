@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'name' => 'Bulk Import',
+    'name' => 'Location Importer',
     'imported_successfully' => 'Your locations have been imported successfully!',
     'please_choose_the_file_mime' => 'Please choose the file mime :types',
     'please_choose_the_file' => 'Please choose the file',
@@ -17,7 +17,7 @@ return [
     'rules' => 'Rules',
     'choose_file_with_mime' => 'Choose file with mime: (:types)',
     'choose_file' => 'Choose file',
-    'menu' => 'Import locations',
+    'menu' => 'Location Importer',
     'download-csv-file' => 'Download CSV template',
     'download-excel-file' => 'Download Excel template',
     'downloading' => 'Downloading...',

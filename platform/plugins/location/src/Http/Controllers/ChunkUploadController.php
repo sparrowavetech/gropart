@@ -12,7 +12,7 @@ use Illuminate\Support\Str;
 
 class ChunkUploadController extends BaseController
 {
-    public function __invoke(Request $request, BaseHttpResponse $response): BaseHttpResponse
+    public function __invoke(Request $request): BaseHttpResponse
     {
         $receiver = new FileReceiver('file', $request, DropZoneUploadHandler::class);
 
@@ -25,10 +25,12 @@ class ChunkUploadController extends BaseController
         if (! $save->isFinished()) {
             $handler = $save->handler();
 
-            return $response->setData([
-                'done' => $handler->getPercentageDone(),
-                'status' => true,
-            ]);
+            return $this
+                ->httpResponse()
+                ->setData([
+                    'done' => $handler->getPercentageDone(),
+                    'status' => true,
+                ]);
         }
 
         $sessionId = $request->input('dzuuid', Str::uuid());
@@ -36,8 +38,10 @@ class ChunkUploadController extends BaseController
         $filePath = sprintf('%s.%s', $sessionId, $file->getClientOriginalExtension());
         $file->move(storage_path('app/location-import'), $filePath);
 
-        return $response->setData([
-            'file_path' => $filePath,
-        ]);
+        return $this
+            ->httpResponse()
+            ->setData([
+                'file_path' => $filePath,
+            ]);
     }
 }

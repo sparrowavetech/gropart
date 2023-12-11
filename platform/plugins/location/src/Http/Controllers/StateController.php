@@ -2,90 +2,82 @@
 
 namespace Botble\Location\Http\Controllers;
 
-use Botble\Base\Events\CreatedContentEvent;
-use Botble\Base\Events\DeletedContentEvent;
-use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Base\Facades\BaseHelper;
-use Botble\Base\Facades\PageTitle;
-use Botble\Base\Forms\FormBuilder;
+use Botble\Base\Http\Actions\DeleteResourceAction;
 use Botble\Base\Http\Controllers\BaseController;
-use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Location\Forms\StateForm;
 use Botble\Location\Http\Requests\StateRequest;
 use Botble\Location\Http\Resources\StateResource;
 use Botble\Location\Models\State;
 use Botble\Location\Tables\StateTable;
-use Exception;
 use Illuminate\Http\Request;
 
 class StateController extends BaseController
 {
+    public function __construct()
+    {
+        $this
+            ->breadcrumb()
+            ->add(trans('plugins/location::location.name'))
+            ->add(trans('plugins/location::state.name'), route('state.index'));
+    }
+
     public function index(StateTable $table)
     {
-        PageTitle::setTitle(trans('plugins/location::state.name'));
+        $this->pageTitle(trans('plugins/location::state.name'));
 
         return $table->renderTable();
     }
 
-    public function create(FormBuilder $formBuilder)
+    public function create()
     {
-        PageTitle::setTitle(trans('plugins/location::state.create'));
+        $this->pageTitle(trans('plugins/location::state.create'));
 
-        return $formBuilder->create(StateForm::class)->renderForm();
+        return StateForm::create()->renderForm();
     }
 
-    public function store(StateRequest $request, BaseHttpResponse $response)
+    public function store(StateRequest $request)
     {
-        $state = State::query()->create($request->input());
+        $form = StateForm::create()->setRequest($request);
+        $form->save();
 
-        event(new CreatedContentEvent(STATE_MODULE_SCREEN_NAME, $request, $state));
-
-        return $response
-            ->setPreviousUrl(route('state.index'))
-            ->setNextUrl(route('state.edit', $state->id))
-            ->setMessage(trans('core/base::notices.create_success_message'));
+        return $this
+            ->httpResponse()
+            ->setPreviousRoute('state.index')
+            ->setNextRoute('state.edit', $form->getModel()->getKey())
+            ->withCreatedSuccessMessage();
     }
 
-    public function edit(State $state, FormBuilder $formBuilder)
+    public function edit(State $state)
     {
-        PageTitle::setTitle(trans('core/base::forms.edit_item', ['name' => $state->name]));
+        $this->pageTitle(trans('core/base::forms.edit_item', ['name' => $state->name]));
 
-        return $formBuilder->create(StateForm::class, ['model' => $state])->renderForm();
+        return StateForm::createFromModel($state)->renderForm();
     }
 
-    public function update(State $state, StateRequest $request, BaseHttpResponse $response)
+    public function update(State $state, StateRequest $request)
     {
-        $state->fill($request->input());
-        $state->save();
+        StateForm::createFromModel($state)->setRequest($request)->save();
 
-        event(new UpdatedContentEvent(STATE_MODULE_SCREEN_NAME, $request, $state));
-
-        return $response
-            ->setPreviousUrl(route('state.index'))
-            ->setMessage(trans('core/base::notices.update_success_message'));
+        return $this
+            ->httpResponse()
+            ->setPreviousRoute('state.index')
+            ->withUpdatedSuccessMessage();
     }
 
-    public function destroy(State $state, Request $request, BaseHttpResponse $response)
+    public function destroy(State $state)
     {
-        try {
-            $state->delete();
-
-            event(new DeletedContentEvent(STATE_MODULE_SCREEN_NAME, $request, $state));
-
-            return $response->setMessage(trans('core/base::notices.delete_success_message'));
-        } catch (Exception $exception) {
-            return $response
-                ->setError()
-                ->setMessage($exception->getMessage());
-        }
+        return DeleteResourceAction::make($state);
     }
 
-    public function getList(Request $request, BaseHttpResponse $response)
+    public function getList(Request $request)
     {
         $keyword = BaseHelper::stringify($request->input('q'));
 
         if (! $keyword) {
-            return $response->setData([]);
+            return $this
+                ->httpResponse()
+                ->setData([]);
         }
 
         $data = State::query()
@@ -98,10 +90,12 @@ class StateController extends BaseController
 
         $data->prepend(new State(['id' => 0, 'name' => trans('plugins/location::city.select_state')]));
 
-        return $response->setData(StateResource::collection($data));
+        return $this
+            ->httpResponse()
+            ->setData(StateResource::collection($data));
     }
 
-    public function ajaxGetStates(Request $request, BaseHttpResponse $response)
+    public function ajaxGetStates(Request $request)
     {
         $data = State::query()
             ->select(['id', 'name'])
@@ -119,6 +113,8 @@ class StateController extends BaseController
 
         $data->prepend(new State(['id' => 0, 'name' => trans('plugins/location::city.select_state')]));
 
-        return $response->setData(StateResource::collection($data));
+        return $this
+            ->httpResponse()
+            ->setData(StateResource::collection($data));
     }
 }

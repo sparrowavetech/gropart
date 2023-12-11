@@ -3,42 +3,74 @@
 namespace Botble\Theme\Supports;
 
 use Botble\Base\Facades\Html;
+use Botble\Base\Forms\Fields\NumberField;
+use Botble\Base\Forms\Fields\TextField;
+use Botble\Shortcode\Compilers\Shortcode;
+use Botble\Shortcode\Forms\ShortcodeForm;
 use Illuminate\Support\Str;
 
 class ThemeSupport
 {
     public static function registerYoutubeShortcode(string $viewPath = null): void
     {
-        add_shortcode(
-            'youtube-video',
-            __('YouTube video'),
-            __('Add YouTube video'),
-            function ($shortcode) use ($viewPath) {
-                $url = Youtube::getYoutubeVideoEmbedURL($shortcode->content);
+        $viewPath = $viewPath ?: 'packages/theme::shortcodes';
 
-                $width = $shortcode->width;
-                $height = $shortcode->height;
+        shortcode()
+            ->register(
+                'youtube-video',
+                __('YouTube video'),
+                __('Add YouTube video'),
+                function ($shortcode) use ($viewPath) {
+                    $url = Youtube::getYoutubeVideoEmbedURL($shortcode->content);
+                    $width = $shortcode->width;
+                    $height = $shortcode->height;
 
-                return view(($viewPath ?: 'packages/theme::shortcodes') . '.youtube', compact('url', 'width', 'height'))
-                    ->render();
-            }
-        );
-
-        shortcode()->setAdminConfig('youtube-video', function ($attributes, $content) use ($viewPath) {
-            return view(($viewPath ?: 'packages/theme::shortcodes') . '.youtube-admin-config', compact('attributes', 'content'))->render();
-        });
+                    return view($viewPath . '.youtube', compact('url', 'width', 'height'))
+                        ->render();
+                }
+            )
+            ->setPreviewImage('youtube-video', asset('vendor/core/packages/theme/images/ui-blocks/youtube-video.jpg'))
+            ->setAdminConfig('youtube-video', function ($attributes, $content) {
+                return ShortcodeForm::createFromArray($attributes)
+                    ->add('url', TextField::class, [
+                        'label' => __('YouTube URL'),
+                        'attr' => [
+                            'placeholder' => 'https://www.youtube.com/watch?v=SlPhMPnQ58k ',
+                            'data-shortcode-attribute' => 'content',
+                        ],
+                        'value' => $content,
+                    ])
+                    ->add('width', NumberField::class, [
+                        'label' => __('Width'),
+                    ])
+                    ->add('height', NumberField::class, [
+                        'label' => __('Height'),
+                    ]);
+            });
     }
 
     public static function registerGoogleMapsShortcode(string $viewPath = null): void
     {
-        add_shortcode('google-map', __('Google map'), __('Add Google map iframe'), function ($shortcode) use ($viewPath) {
-            return view(($viewPath ?: 'packages/theme::shortcodes') . '.google-map', ['address' => $shortcode->content])
-                ->render();
-        });
+        $viewPath = $viewPath ?: 'packages/theme::shortcodes';
 
-        shortcode()->setAdminConfig('google-map', function ($attributes, $content) use ($viewPath) {
-            return view(($viewPath ?: 'packages/theme::shortcodes') . '.google-map-admin-config', compact('attributes', 'content'))->render();
-        });
+        shortcode()
+            ->register('google-map', __('Google Maps'), __('Add Google Maps iframe'), function (Shortcode $shortcode) use ($viewPath) {
+                return view($viewPath . '.google-map', ['address' => $shortcode->content])
+                    ->render();
+            })
+            ->setPreviewImage('google-map', asset('vendor/core/packages/theme/images/ui-blocks/google-map.jpg'))
+            ->setAdminConfig('google-map', function (array $attributes, string|null $content) {
+                return ShortcodeForm::createFromArray($attributes)
+                    ->add('address', 'textarea', [
+                        'label' => __('Address'),
+                        'attr' => [
+                            'data-shortcode-attribute' => 'content',
+                            'placeholder' => '24 Roberts Street, SA73, Chester',
+                            'rows' => 3,
+                        ],
+                        'value' => $content,
+                    ]);
+            });
     }
 
     public static function getCustomJS(string $location): string

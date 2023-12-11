@@ -16,7 +16,12 @@
 
 @if ($showField)
     {!! Form::mediaImage($name, $options['value'] ?? null) !!}
-    @include('core/base::forms.partials.help-block')
+
+    @if (isset($options['help_block']['text']))
+        <x-core::form.helper-text class="mt-1">
+            {!! $options['help_block']['text'] !!}
+        </x-core::form.helper-text>
+    @endif
 @endif
 
 @include('core/base::forms.partials.errors')

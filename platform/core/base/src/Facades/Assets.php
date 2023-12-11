@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\Facade;
 
 /**
  * @method static void setConfig(array $config)
- * @method static array getThemes()
  * @method static string renderHeader($lastStyles = [])
  * @method static string renderFooter()
  * @method static \Botble\Base\Supports\Assets usingVueJS()

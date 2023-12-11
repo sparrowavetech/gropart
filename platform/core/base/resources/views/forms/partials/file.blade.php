@@ -5,7 +5,7 @@
         type="hidden"
         value="{{ $value }}"
     >
-    @if (!is_in_admin(true) || !auth()->guard()->check())
+    @if (!is_in_admin(true) || !auth()->check())
         <input
             class="media-file-input"
             type="file"
@@ -13,26 +13,39 @@
             @if ($name) name="{{ $name }}_input" @endif
         >
     @endif
-    <div class="attachment-details">
+    <div class="position-relative">
+        <div @class(['d-flex align-items-center gap-1 attachment-details form-control mb-2 pe-5', 'hidden' => ! $value])>
+            <x-core::icon name="ti ti-file" class="me-1" style="--bb-icon-size: 1.5rem" />
+            <div class="attachment-info text-truncate">
+                <a href="{{ $url ?? $value }}" target="_blank" data-bs-toggle="tooltip" title="{{ $value }}">
+                    {{ $value }}
+                </a>
+                <small class="d-block">{{ RvMedia::getFileSize($value) }}</small>
+            </div>
+        </div>
+
         <a
-            href="{{ $url ?? $value }}"
-            target="_blank"
-        >{{ $value }}</a>
+            href="javascript:void(0);"
+            class="text-body text-decoration-none position-absolute end-0 me-2"
+            data-bb-toggle="media-file-remove"
+            @style(['top: 0.5rem', 'display: none' => ! $value])
+            data-bs-toggle="tooltip"
+            data-bs-placement="top"
+            title="{{ trans('core/base::forms.remove_file') }}"
+        >
+            <x-core::icon name="ti ti-x" style="--bb-icon-size: 1rem" />
+        </a>
     </div>
     <div class="image-box-actions">
         <a
-            class="@if (is_in_admin(true) && auth()->guard()->check()) btn_gallery @else media-select-file @endif"
+            href="javascript:void(0);"
+            @class(['btn_gallery' => is_in_admin(true) && auth()->check(), 'media-select-file' => !is_in_admin(true) || !auth()->check()])
             data-result="{{ $name }}"
             data-action="{{ $attributes['action'] ?? 'attachment' }}"
-            href="#"
+            size="sm"
+            icon="ti ti-paperclip"
         >
             {{ trans('core/base::forms.choose_file') }}
-        </a> |
-        <a
-            class="text-danger btn_remove_attachment"
-            href="#"
-        >
-            {{ trans('core/base::forms.remove_file') }}
         </a>
     </div>
 </div>

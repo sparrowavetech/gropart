@@ -430,4 +430,13 @@ class Language
     {
         return self::$languages;
     }
+
+    public static function getDefaultLanguage(): array
+    {
+        return [
+            'locale' => 'en',
+            'name' => 'English',
+            'flag' => 'us',
+        ];
+    }
 }

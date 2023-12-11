@@ -2,7 +2,6 @@
 
 namespace Botble\Base\Supports;
 
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Intervention\Image\AbstractFont;
@@ -17,7 +16,7 @@ class Avatar
 
     protected int $chars = 1;
 
-    protected string $shape = 'circle';
+    protected string $shape = 'square';
 
     protected int $width = 250;
 
@@ -212,7 +211,7 @@ class Avatar
             }
         } else {
             // otherwise, use initial char from each word
-            $initials = new Collection();
+            $initials = collect();
             $words->each(function ($word) use ($initials) {
                 $initials->push(Str::substr($word, 0, 1));
             });

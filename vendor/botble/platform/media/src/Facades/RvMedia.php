@@ -39,9 +39,10 @@ use Illuminate\Support\Facades\Facade;
  * @method static bool isUsingCloud()
  * @method static array|null uploadFromUrl(string $url, string|int $folderId = 0, string|null $folderSlug = null, string|null $defaultMimetype = null)
  * @method static array uploadFromPath(string $path, string|int $folderId = 0, string|null $folderSlug = null, string|null $defaultMimetype = null)
+ * @method static array uploadFromBlob(\Illuminate\Http\UploadedFile $path, string|null $fileName = null, string|int $folderId = 0, string|null $folderSlug = null)
  * @method static string getUploadPath()
  * @method static string getUploadURL()
- * @method static void setUploadPathAndURLToPublic()
+ * @method static static setUploadPathAndURLToPublic()
  * @method static string|null getMimeType(string $url)
  * @method static bool canGenerateThumbnails(string|null $mimeType)
  * @method static string|int createFolder(string $folderSlug, string|int|null $parentId = 0, bool $force = false)
@@ -58,6 +59,11 @@ use Illuminate\Support\Facades\Facade;
  * @method static void setWasabiDisk(array $config)
  * @method static void setBunnyCdnDisk(array $config)
  * @method static \Illuminate\Support\HtmlString image(string|null $url, string|null $alt = null, string|null $size = null, bool $useDefaultImage = true, array $attributes = [], bool|null $secure = null)
+ * @method static string|null getFileSize(string|null $path)
+ * @method static void renameFile(\Botble\Media\Models\MediaFile $file, string $newName, bool $renameOnDisk = true)
+ * @method static void renameFolder(\Botble\Media\Models\MediaFolder $folder, string $newName, bool $renameOnDisk = true)
+ * @method static void refreshCache()
+ * @method static array getFolderColors()
  *
  * @see \Botble\Media\RvMedia
  */

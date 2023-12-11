@@ -36,11 +36,6 @@ class Language extends BaseModel
         'lang_order' => 'int',
     ];
 
-    public function meta(): HasMany
-    {
-        return $this->hasMany(LanguageMeta::class, 'lang_meta_code', 'lang_code');
-    }
-
     protected static function booted(): void
     {
         self::deleted(function (Language $language) {
@@ -53,5 +48,10 @@ class Language extends BaseModel
             Setting::newQuery()->where('key', 'LIKE', ThemeOption::getOptionKey('%', $language->lang_code))->delete();
             Widget::query()->where('theme', 'LIKE', Widget::getThemeName($language->lang_code))->delete();
         });
+    }
+
+    public function meta(): HasMany
+    {
+        return $this->hasMany(LanguageMeta::class, 'lang_meta_code', 'lang_code');
     }
 }

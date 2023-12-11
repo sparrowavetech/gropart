@@ -1,15 +1,11 @@
-<div class="form-group mb-3">
-    <label for="widget-name">{{ trans('core/base::forms.name') }}</label>
-    <input
-        class="form-control"
-        name="name"
-        type="text"
-        value="{{ $config['name'] }}"
-    >
-</div>
-<div class="form-group mb-3">
+<x-core::form.text-input
+    :label="trans('core/base::forms.name')"
+    name="name"
+    :value="$config['name']"
+/>
 
-    <label for="content">{{ trans('core/base::forms.content') }}</label>
+<div class="pt-3 border-top">
+    <h4 class="fs-3">{{ trans('core/base::forms.content') }}</h4>
 
     {!! Form::repeater('items', $config['items'], $fields) !!}
 </div>

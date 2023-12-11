@@ -80,8 +80,8 @@ abstract class StripePaymentAbstract
 
     public function setClient(): bool
     {
-        $secret = setting('payment_stripe_secret');
-        $clientId = setting('payment_stripe_client_id');
+        $secret = get_payment_setting('secret', 'stripe');
+        $clientId = get_payment_setting('client_id', 'stripe');
 
         if (! $secret || ! $clientId) {
             return false;

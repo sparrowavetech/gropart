@@ -8,6 +8,6 @@ class NameColumn extends LinkableColumn
     {
         return parent::make($data ?: 'name', $name)
             ->title(trans('core/base::tables.name'))
-            ->alignLeft();
+            ->alignStart();
     }
 }

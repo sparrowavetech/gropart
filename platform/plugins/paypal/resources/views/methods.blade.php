@@ -8,17 +8,17 @@
             value="paypal"
             @if ($selecting == PAYPAL_PAYMENT_METHOD_NAME) checked @endif
         >
-        <label
-            class="text-start"
-            for="payment_paypal"
-        >{{ setting('payment_paypal_name', trans('plugins/payment::payment.payment_via_paypal')) }}</label>
+        <label class="text-start" for="payment_paypal">
+            {{ get_payment_setting('name', 'paypal', trans('plugins/payment::payment.payment_via_paypal')) }}
+        </label>
+
         <div
             class="payment_paypal_wrap payment_collapse_wrap collapse @if ($selecting == PAYPAL_PAYMENT_METHOD_NAME) show @endif"
             style="padding: 15px 0;"
         >
-            <p>{!! BaseHelper::clean(setting('payment_paypal_description')) !!}</p>
+            <p>{!! BaseHelper::clean(get_payment_setting('description', 'paypal')) !!}</p>
 
-            @php $supportedCurrencies = (new \Botble\PayPal\Services\Gateways\PayPalPaymentService)->supportedCurrencyCodes(); @endphp
+            @php $supportedCurrencies = (new Botble\PayPal\Services\Gateways\PayPalPaymentService)->supportedCurrencyCodes(); @endphp
             @if (function_exists('get_application_currency') &&
                     !in_array(get_application_currency()->title, $supportedCurrencies) &&
                     !get_application_currency()->replicate()->where('title', 'USD')->exists())
@@ -38,7 +38,7 @@
 
                     @php
                         $currencies = get_all_currencies();
-                        
+
                         $currencies = $currencies->filter(function ($item) use ($supportedCurrencies) {
                             return in_array($item->title, $supportedCurrencies);
                         });

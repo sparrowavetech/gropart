@@ -1,10 +1,10 @@
 <?php
 
-use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\AdminHelper;
 use Illuminate\Support\Facades\Route;
 
-Route::group(['namespace' => 'Botble\SimpleSlider\Http\Controllers', 'middleware' => ['web', 'core']], function () {
-    Route::group(['prefix' => BaseHelper::getAdminPrefix(), 'middleware' => 'auth'], function () {
+Route::group(['namespace' => 'Botble\SimpleSlider\Http\Controllers'], function () {
+    AdminHelper::registerRoutes(function () {
         Route::group(['prefix' => 'simple-sliders', 'as' => 'simple-slider.'], function () {
             Route::resource('', 'SimpleSliderController')->parameters(['' => 'simple-slider']);
 
@@ -24,12 +24,19 @@ Route::group(['namespace' => 'Botble\SimpleSlider\Http\Controllers', 'middleware
                 'as' => 'index',
                 'uses' => 'SimpleSliderItemController@index',
             ])->wherePrimaryKey();
+        });
 
-            Route::get('delete/{id}', [
-                'as' => 'destroy.get',
-                'uses' => 'SimpleSliderItemController@getDelete',
-                'permission' => 'simple-slider-item.destroy',
-            ])->wherePrimaryKey();
+        Route::group(['prefix' => 'settings', 'as' => 'simple-slider.'], function () {
+            Route::get('simple-sliders', [
+                'as' => 'settings',
+                'uses' => 'Settings\SimpleSliderSettingController@edit',
+            ]);
+
+            Route::put('simple-sliders', [
+                'as' => 'settings.update',
+                'uses' => 'Settings\SimpleSliderSettingController@update',
+                'permission' => 'simple-slider.settings',
+            ]);
         });
     });
 });

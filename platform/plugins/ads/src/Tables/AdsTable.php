@@ -3,21 +3,22 @@
 namespace Botble\Ads\Tables;
 
 use Botble\Ads\Models\Ads;
-use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Base\Facades\Html;
 use Botble\Table\Abstracts\TableAbstract;
 use Botble\Table\Actions\DeleteAction;
 use Botble\Table\Actions\EditAction;
 use Botble\Table\BulkActions\DeleteBulkAction;
+use Botble\Table\BulkChanges\DateBulkChange;
+use Botble\Table\BulkChanges\NameBulkChange;
+use Botble\Table\BulkChanges\StatusBulkChange;
 use Botble\Table\Columns\Column;
 use Botble\Table\Columns\DateColumn;
+use Botble\Table\Columns\FormattedColumn;
 use Botble\Table\Columns\IdColumn;
 use Botble\Table\Columns\ImageColumn;
 use Botble\Table\Columns\NameColumn;
 use Botble\Table\Columns\StatusColumn;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Database\Query\Builder as QueryBuilder;
-use Illuminate\Http\JsonResponse;
+use Botble\Table\HeaderActions\CreateHeaderAction;
 
 class AdsTable extends TableAbstract
 {
@@ -25,87 +26,51 @@ class AdsTable extends TableAbstract
     {
         $this
             ->model(Ads::class)
+            ->addColumns([
+                IdColumn::make(),
+                ImageColumn::make(),
+                NameColumn::make()->route('ads.edit'),
+                FormattedColumn::make('key')
+                    ->title(trans('plugins/ads::ads.shortcode'))
+                    ->alignStart()
+                    ->getValueUsing(function (FormattedColumn $column) {
+                        $value = $column->getItem()->key;
+
+                        if (! function_exists('shortcode')) {
+                            return $value;
+                        }
+
+                        return shortcode()->generateShortcode('ads', ['key' => $value]);
+                    })
+                    ->renderUsing(fn (FormattedColumn $column) => Html::tag('code', $column->getValue()))
+                    ->copyable(),
+                Column::make('clicked')
+                    ->title(trans('plugins/ads::ads.clicked'))
+                    ->alignStart(),
+                DateColumn::make('expired_at'),
+                StatusColumn::make(),
+            ])
+            ->addHeaderAction(CreateHeaderAction::make()->route('ads.create'))
             ->addActions([
                 EditAction::make()->route('ads.edit'),
                 DeleteAction::make()->route('ads.destroy'),
-            ]);
-    }
-
-    public function ajax(): JsonResponse
-    {
-        $data = $this->table
-            ->eloquent($this->query())
-            ->editColumn('key', function ($item) {
-                return generate_shortcode('ads', ['key' => $item->key]);
+            ])
+            ->addBulkAction(DeleteBulkAction::make()->permission('ads.destroy'))
+            ->addBulkChanges([
+                NameBulkChange::make(),
+                StatusBulkChange::make(),
+                DateBulkChange::make()->name('expired_at')->title(trans('plugins/ads::ads.expired_at')),
+            ])
+            ->queryUsing(function ($query) {
+                $query->select([
+                    'id',
+                    'image',
+                    'key',
+                    'name',
+                    'clicked',
+                    'expired_at',
+                    'status',
+                ]);
             });
-
-        return $this->toJson($data);
-    }
-
-    public function query(): Relation|Builder|QueryBuilder
-    {
-        $query = $this->getModel()
-            ->query()
-            ->select([
-                'id',
-                'image',
-                'key',
-                'name',
-                'clicked',
-                'expired_at',
-                'status',
-            ]);
-
-        return $this->applyScopes($query);
-    }
-
-    public function columns(): array
-    {
-        return [
-            IdColumn::make(),
-            ImageColumn::make(),
-            NameColumn::make()->route('ads.edit'),
-            Column::make('key')
-                ->title(trans('plugins/ads::ads.shortcode'))
-                ->alignStart(),
-            Column::make('clicked')
-                ->title(trans('plugins/ads::ads.clicked'))
-                ->alignStart(),
-            DateColumn::make('expired_at'),
-            StatusColumn::make(),
-        ];
-    }
-
-    public function buttons(): array
-    {
-        return $this->addCreateButton(route('ads.create'), 'ads.create');
-    }
-
-    public function bulkActions(): array
-    {
-        return [
-            DeleteBulkAction::make()->permission('ads.destroy'),
-        ];
-    }
-
-    public function getBulkChanges(): array
-    {
-        return [
-            'name' => [
-                'title' => trans('core/base::tables.name'),
-                'type' => 'text',
-                'validate' => 'required|max:120',
-            ],
-            'status' => [
-                'title' => trans('core/base::tables.status'),
-                'type' => 'select',
-                'choices' => BaseStatusEnum::labels(),
-                'validate' => 'required|in:' . implode(',', BaseStatusEnum::values()),
-            ],
-            'expired_at' => [
-                'title' => trans('plugins/ads::ads.expired_at'),
-                'type' => 'datePicker',
-            ],
-        ];
     }
 }

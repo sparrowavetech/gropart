@@ -13,7 +13,7 @@ class SaveEnvironmentRequest extends Request
         return [
             'app_name' => 'required|string|max:120',
             'app_url' => 'required|url',
-            'database_connection' => 'required|string|max:60|' . Rule::in(DatabaseConnectionsEnum::values()),
+            'database_connection' => ['required', 'string', 'max:60', Rule::in(DatabaseConnectionsEnum::values())],
             'database_hostname' => 'required|string|max:255',
             'database_port' => 'required|numeric',
             'database_name' => 'required|string|max:60',

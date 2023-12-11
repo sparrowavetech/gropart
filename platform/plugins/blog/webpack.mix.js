@@ -1,14 +1,12 @@
-let mix = require('laravel-mix')
-
+const mix = require('laravel-mix')
 const path = require('path')
-let directory = path.basename(path.resolve(__dirname))
 
-const source = 'platform/plugins/' + directory
-const dist = 'public/vendor/core/plugins/' + directory
+const directory = path.basename(path.resolve(__dirname))
+const source = `platform/plugins/${directory}`
+const dist = `public/vendor/core/plugins/${directory}`
 
-mix
-    .js(source + '/resources/assets/js/blog.js', dist + '/js')
+mix.js(`${source}/resources/js/blog.js`, `${dist}/js`)
 
 if (mix.inProduction()) {
-    mix.copy(dist + '/js/blog.js', source + '/public/js')
+    mix.copy(`${dist}/js/blog.js`, `${source}/public/js`)
 }

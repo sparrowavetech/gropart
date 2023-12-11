@@ -24,11 +24,31 @@ class MediaFolder extends BaseModel
         'slug',
         'parent_id',
         'user_id',
+        'color',
     ];
 
     protected $casts = [
         'name' => SafeContent::class,
     ];
+
+    protected static function booted(): void
+    {
+        static::deleting(function (MediaFolder $folder) {
+            if ($folder->isForceDeleting()) {
+                $folder->files()->onlyTrashed()->each(fn (MediaFile $file) => $file->forceDelete());
+
+                if (Storage::directoryExists($folder->slug)) {
+                    Storage::deleteDirectory($folder->slug);
+                }
+            } else {
+                $folder->files()->withTrashed()->each(fn (MediaFile $file) => $file->delete());
+            }
+        });
+
+        static::restoring(function (MediaFolder $folder) {
+            $folder->files()->each(fn (MediaFile $file) => $file->restore());
+        });
+    }
 
     public function files(): HasMany
     {
@@ -42,20 +62,18 @@ class MediaFolder extends BaseModel
 
     protected function parents(): Attribute
     {
-        return Attribute::make(
-            get: function (): Collection {
-                $parents = collect();
+        return Attribute::get(function (): Collection {
+            $parents = collect();
 
-                $parent = $this->parent;
+            $parent = $this->parent;
 
-                while ($parent->id) {
-                    $parents->push($parent);
-                    $parent = $parent->parent;
-                }
+            while ($parent->id) {
+                $parents->push($parent);
+                $parent = $parent->parent;
+            }
 
-                return $parents;
-            },
-        );
+            return $parents;
+        });
     }
 
     public static function getFullPath(int|string|null $folderId, string|null $path = ''): string|null
@@ -101,24 +119,5 @@ class MediaFolder extends BaseModel
         }
 
         return $newName;
-    }
-
-    protected static function booted(): void
-    {
-        static::deleting(function (MediaFolder $folder) {
-            if ($folder->isForceDeleting()) {
-                $folder->files()->onlyTrashed()->each(fn (MediaFile $file) => $file->forceDelete());
-
-                if (Storage::directoryExists($folder->slug)) {
-                    Storage::deleteDirectory($folder->slug);
-                }
-            } else {
-                $folder->files()->withTrashed()->each(fn (MediaFile $file) => $file->delete());
-            }
-        });
-
-        static::restoring(function (MediaFolder $folder) {
-            $folder->files()->each(fn (MediaFile $file) => $file->restore());
-        });
     }
 }

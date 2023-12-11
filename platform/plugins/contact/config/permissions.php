@@ -15,4 +15,9 @@ return [
         'flag' => 'contacts.destroy',
         'parent_flag' => 'contacts.index',
     ],
+    [
+        'name' => 'Contact Settings',
+        'flag' => 'contact.settings',
+        'parent_flag' => 'contacts.index',
+    ],
 ];

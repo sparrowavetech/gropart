@@ -1,200 +1,71 @@
 @extends(BaseHelper::getAdminMasterLayoutTemplate())
 
 @section('content')
-    <div class="user-profile row">
-        <div class="col-md-3 col-sm-5 crop-avatar">
-            <div class="mt-element-card mt-card-round mt-element-overlay">
-                <div class="profile-userpic mt-card-item">
-                    <div>
-                        <div class="avatar-view mt-card-avatar mt-overlay-1">
-                            <img
-                                src="{{ $user->avatar_url }}"
-                                alt="avatar"
-                            >
-                            @if ($canChangeProfile)
-                                <div class="mt-overlay">
-                                    <ul class="mt-info">
-                                        <li>
-                                            <a
-                                                class="btn default btn-outline"
-                                                href="javascript:;"
-                                            >
-                                                <i class="icon-note"></i>
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            @endif
-                        </div>
-                    </div>
-                    <div class="mt-card-content">
-                        <h3 class="mt-card-name">{{ $user->name }}</h3>
-                    </div>
-                    <div class="clearfix"></div>
-                </div>
-            </div>
-            <!-- /profile links -->
+    <div class="user-profile">
+        <x-core::card>
+            <x-core::card.header>
+                <x-core::tab class="card-header-tabs">
+                    <x-core::tab.item
+                        :is-active="true"
+                        id="profile"
+                        icon="ti ti-user"
+                        label="{{ trans('core/acl::users.info.title') }}"
+                    />
 
-            @if ($canChangeProfile)
-                <div
-                    class="modal fade"
-                    id="avatar-modal"
-                    role="dialog"
-                    aria-labelledby="avatar-modal-label"
-                    aria-hidden="true"
-                    tabindex="-1"
-                >
-                    <div class="modal-dialog modal-lg">
-                        <div class="modal-content">
-                            <form
-                                class="avatar-form"
-                                method="post"
-                                action="{{ route('users.profile.image', $user->id) }}"
-                                enctype="multipart/form-data"
-                            >
-                                <div class="modal-header">
-                                    <h4
-                                        class="modal-title"
-                                        id="avatar-modal-label"
-                                    ><i class="til_img"></i><strong>{{ trans('core/acl::users.change_profile_image') }}</strong>
-                                    </h4>
-                                    <button
-                                        class="btn-close"
-                                        data-bs-dismiss="modal"
-                                        type="button"
-                                        aria-hidden="true"
-                                    >
+                    <x-core::tab.item
+                        id="avatar"
+                        icon="ti ti-camera-selfie"
+                        label="{{ trans('core/acl::users.avatar') }}"
+                    />
 
-                                    </button>
-                                </div>
-                                <div class="modal-body">
+                    @if ($canChangeProfile)
+                        <x-core::tab.item
+                            id="change-password"
+                            icon="ti ti-lock"
+                            label="{{ trans('core/acl::users.change_password') }}"
+                        />
+                    @endif
 
-                                    <div class="avatar-body">
+                    {!! apply_filters(ACL_FILTER_PROFILE_FORM_TABS, null) !!}
+                </x-core::tab>
+            </x-core::card.header>
 
-                                        <!-- Upload image and data -->
-                                        <div class="avatar-upload">
-                                            <input
-                                                class="avatar-src"
-                                                name="avatar_src"
-                                                type="hidden"
-                                            >
-                                            <input
-                                                class="avatar-data"
-                                                name="avatar_data"
-                                                type="hidden"
-                                            >
-                                            <input
-                                                name="user_id"
-                                                type="hidden"
-                                                value="{{ $user->id }}"
-                                            />
-                                            {!! Form::token() !!}
-                                            <label for="avatarInput">{{ trans('core/acl::users.new_image') }}</label>
-                                            <input
-                                                class="avatar-input"
-                                                id="avatarInput"
-                                                name="avatar_file"
-                                                type="file"
-                                            >
-                                        </div>
+            <x-core::card.body>
+                <x-core::tab.content>
+                    <x-core::tab.pane
+                        id="profile"
+                        :is-active="true"
+                    >
+                        {!! $form !!}
+                    </x-core::tab.pane>
 
-                                        <div
-                                            class="loading"
-                                            role="img"
-                                            aria-label="{{ trans('core/acl::users.loading') }}"
-                                            tabindex="-1"
-                                        ></div>
+                    <x-core::tab.pane id="avatar">
+                        <x-core::crop-image
+                            :label="trans('core/acl::users.avatar')"
+                            name="avatar_file"
+                            :value="$user->avatar_url"
+                            :action="route('users.profile.image', $user->id)"
+                            :delete-action="route('users.profile.image.destroy', $user->getKey())"
+                            :can-delete="$user->avatar_id"
+                            rounded="pill"
+                            :hidden-copper="!$canChangeProfile"
+                            style="--bb-avatar-size: 10rem;"
+                        />
+                    </x-core::tab.pane>
+                    <x-core::tab.pane id="change-password">
+                        {!! $passwordForm !!}
+                    </x-core::tab.pane>
 
-                                        <!-- Crop and preview -->
-                                        <div class="row">
-                                            <div class="col-md-9">
-                                                <div class="avatar-wrapper"></div>
-                                            </div>
-                                            <div class="col-md-3">
-                                                <div class="avatar-preview preview-lg"></div>
-                                                <div class="avatar-preview preview-md"></div>
-                                                <div class="avatar-preview preview-sm"></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <button
-                                        class="btn btn-secondary"
-                                        data-bs-dismiss="modal"
-                                        type="button"
-                                    >{{ trans('core/acl::users.close') }}</button>
-                                    <button
-                                        class="btn btn-primary avatar-save"
-                                        type="submit"
-                                    >{{ trans('core/acl::users.save') }}</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div><!-- /.modal -->
-            @endif
-
-        </div>
-        <div class="col-md-9 col-sm-7">
-            <div class="profile-content">
-                <div class="tabbable-custom">
-                    <ul class="nav nav-tabs">
-                        <li class="nav-item">
-                            <a
-                                class="nav-link active"
-                                data-bs-toggle="tab"
-                                href="#tab_1_1"
-                                aria-expanded="true"
-                            >{{ trans('core/acl::users.info.title') }}</a>
-                        </li>
-                        @if ($canChangeProfile)
-                            <li class="nav-item">
-                                <a
-                                    class="nav-link"
-                                    data-bs-toggle="tab"
-                                    href="#tab_1_3"
-                                    aria-expanded="false"
-                                >{{ trans('core/acl::users.change_password') }}</a>
-                            </li>
-                        @endif
-                        {!! apply_filters(ACL_FILTER_PROFILE_FORM_TABS, null) !!}
-                    </ul>
-                    <div class="tab-content">
-                        <!-- PERSONAL INFO TAB -->
-                        <div
-                            class="tab-pane active"
-                            id="tab_1_1"
-                        >
-                            {!! $form !!}
-                        </div>
-                        <!-- END PERSONAL INFO TAB -->
-                        <!-- CHANGE PASSWORD TAB -->
-                        @if ($canChangeProfile)
-                            <div
-                                class="tab-pane"
-                                id="tab_1_3"
-                            >
-                                {!! $passwordForm !!}
-                            </div>
-                        @endif
-                        <!-- END CHANGE PASSWORD TAB -->
-                        {!! apply_filters(ACL_FILTER_PROFILE_FORM_TAB_CONTENTS, null) !!}
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="clearfix"></div>
+                    {!! apply_filters(ACL_FILTER_PROFILE_FORM_TAB_CONTENTS, null) !!}
+                </x-core::tab.content>
+            </x-core::card.body>
+        </x-core::card>
     </div>
-@stop
+@endsection
 
 @if ($canChangeProfile)
     @push('footer')
-        <script
-            type="text/javascript"
-            src="{{ asset('vendor/core/core/js-validation/js/js-validation.js') }}"
-        ></script>
-        {!! JsValidator::formRequest(\Botble\ACL\Http\Requests\UpdateProfileRequest::class, '#profile-form') !!}
-        {!! JsValidator::formRequest(\Botble\ACL\Http\Requests\UpdatePasswordRequest::class, '#password-form') !!}
+        {!! JsValidator::formRequest(Botble\ACL\Http\Requests\UpdateProfileRequest::class, '#profile-form') !!}
+        {!! JsValidator::formRequest(Botble\ACL\Http\Requests\UpdatePasswordRequest::class, '#password-form') !!}
     @endpush
 @endif

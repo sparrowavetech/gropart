@@ -6,14 +6,14 @@
 <div id="list-others-language">
     @foreach ($languages as $language)
         @continue(!$currentLanguage || $language->lang_code === $currentLanguage->lang_code)
-
-        {!! language_flag($language->lang_flag, $language->lang_name) !!}
         <a
-            class="d-inline-block ms-1"
+            class="gap-2 d-flex align-items-center text-decoration-none"
             href="{{ Route::has($route['edit']) ? Request::url() . ($language->lang_code != Language::getDefaultLocaleCode() ? '?' . Language::refLangKey() . '=' . $language->lang_code : null) : '#' }}"
             target="_blank"
-        >{{ $language->lang_name }} <i class="fas fa-external-link-alt"></i></a>
-        <br>
+        >
+            {!! language_flag($language->lang_flag, $language->lang_name) !!}
+            <span>{{ $language->lang_name }} <x-core::icon name="ti ti-external-link" /></span>
+        </a>
     @endforeach
 </div>
 

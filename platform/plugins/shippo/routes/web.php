@@ -1,7 +1,11 @@
 <?php
 
-Route::group(['namespace' => 'Botble\Shippo\Http\Controllers', 'middleware' => ['web', 'core']], function () {
-    Route::group(['prefix' => BaseHelper::getAdminPrefix(), 'middleware' => 'auth'], function () {
+use Botble\Base\Facades\AdminHelper;
+use Botble\Theme\Facades\Theme;
+use Illuminate\Support\Facades\Route;
+
+Route::group(['namespace' => 'Botble\Shippo\Http\Controllers'], function () {
+    AdminHelper::registerRoutes(function () {
         Route::group([
             'prefix' => 'shipments/shippo',
             'as' => 'ecommerce.shipments.shippo.',
@@ -48,7 +52,7 @@ Route::group(['namespace' => 'Botble\Shippo\Http\Controllers', 'middleware' => [
     });
 
     if (is_plugin_active('marketplace')) {
-        Route::group(apply_filters(BASE_FILTER_GROUP_PUBLIC_ROUTE, []), function () {
+        Theme::registerRoutes(function () {
             Route::group([
                 'prefix' => 'vendor',
                 'as' => 'marketplace.vendor.',

@@ -2,6 +2,7 @@
 
 return [
     'name' => 'Payments',
+    'description' => 'View and update your payments settings',
     'payment_method' => 'Payment methods',
     'view_payment' => 'View payment #',
     'charge_id' => 'Charge ID',

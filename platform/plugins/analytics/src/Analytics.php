@@ -4,134 +4,114 @@ namespace Botble\Analytics;
 
 use Botble\Analytics\Abstracts\AnalyticsAbstract;
 use Botble\Analytics\Abstracts\AnalyticsContract;
-use Google\Service\Analytics\GaData;
-use Google_Service_Analytics;
-use Illuminate\Support\Arr;
+use Botble\Analytics\Traits\DateRangeTrait;
+use Botble\Analytics\Traits\DimensionTrait;
+use Botble\Analytics\Traits\FilterByDimensionTrait;
+use Botble\Analytics\Traits\FilterByMetricTrait;
+use Botble\Analytics\Traits\MetricAggregationTrait;
+use Botble\Analytics\Traits\MetricTrait;
+use Botble\Analytics\Traits\OrderByDimensionTrait;
+use Botble\Analytics\Traits\OrderByMetricTrait;
+use Botble\Analytics\Traits\ResponseTrait;
+use Botble\Analytics\Traits\RowOperationTrait;
 use Illuminate\Support\Collection;
 
 class Analytics extends AnalyticsAbstract implements AnalyticsContract
 {
-    public function __construct(protected AnalyticsClient $client, public string|null $propertyId)
+    use DateRangeTrait;
+    use MetricTrait;
+    use DimensionTrait;
+    use OrderByMetricTrait;
+    use OrderByDimensionTrait;
+    use MetricAggregationTrait;
+    use FilterByDimensionTrait;
+    use FilterByMetricTrait;
+    use RowOperationTrait;
+    use ResponseTrait;
+
+    public array $orderBys = [];
+
+    public function __construct(int|string $propertyId, string $credentials)
     {
+        $this->propertyId = $propertyId;
+        $this->credentials = $credentials;
     }
 
-    /**
-     * Call the query method on the authenticated client.
-     */
-    public function performQuery(Period $period, string $metrics, array $others = []): Collection|array|GaData|null
+    public function getCredentials(): string
     {
-        return $this->client->performQuery(
-            $this->propertyId,
-            $period->startDate,
-            $period->endDate,
-            $metrics,
-            $others
-        );
+        return $this->credentials;
+    }
+
+    public function getClient(): BetaAnalyticsDataClient
+    {
+        return new BetaAnalyticsDataClient([
+            'credentials' => $this->getCredentials(),
+        ]);
+    }
+
+    public function get(): AnalyticsResponse
+    {
+        $response = $this->getClient()->runReport([
+            'property' => 'properties/' . $this->getPropertyId(),
+            'dateRanges' => $this->dateRanges,
+            'metrics' => $this->metrics,
+            'dimensions' => $this->dimensions,
+            'orderBys' => $this->orderBys,
+            'metricAggregations' => $this->metricAggregations,
+            'dimensionFilter' => $this->dimensionFilter,
+            'metricFilter' => $this->metricFilter,
+            'limit' => $this->limit,
+            'offset' => $this->offset,
+            'keepEmptyRows' => $this->keepEmptyRows,
+        ]);
+
+        return $this->formatResponse($response);
     }
 
     public function fetchMostVisitedPages(Period $period, int $maxResults = 20): Collection
     {
-        $response = $this->performQuery(
-            $period,
-            'ga:pageviews',
-            [
-                'dimensions' => 'ga:pagePath,ga:pageTitle',
-                'sort' => '-ga:pageviews',
-                'max-results' => $maxResults,
-            ]
-        );
-
-        return collect($response['rows'] ?? [])
-            ->map(function (array $pageRow) {
-                return [
-                    'url' => $pageRow[0],
-                    'pageTitle' => $pageRow[1],
-                    'pageViews' => (int)$pageRow[2],
-                ];
-            });
+        return $this->dateRange($period)
+            ->metrics('screenPageViews')
+            ->dimensions(['pageTitle', 'fullPageUrl'])
+            ->orderByMetricDesc('screenPageViews')
+            ->limit($maxResults)
+            ->get()
+            ->table;
     }
 
     public function fetchTopReferrers(Period $period, int $maxResults = 20): Collection
     {
-        $response = $this->performQuery(
-            $period,
-            'ga:pageviews',
-            [
-                'dimensions' => 'ga:fullReferrer',
-                'sort' => '-ga:pageviews',
-                'max-results' => $maxResults,
-            ]
-        );
-
-        return collect($response['rows'] ?? [])->map(function (array $pageRow) {
-            return [
-                'url' => $pageRow[0],
-                'pageViews' => (int)$pageRow[1],
-            ];
-        });
-    }
-
-    public function fetchUserTypes(Period $period): Collection
-    {
-        $response = $this->performQuery(
-            $period,
-            'ga:sessions',
-            [
-                'dimensions' => 'ga:userType',
-            ]
-        );
-
-        $data = Arr::map($response->rows ?? [], function (array $userRow) {
-            return [
-                'type' => $userRow[0],
-                'sessions' => (int)$userRow[1],
-            ];
-        });
-
-        return collect($data);
+        return $this->dateRange($period)
+            ->metrics('screenPageViews')
+            ->dimensions('sessionSource')
+            ->orderByMetricDesc('screenPageViews')
+            ->limit($maxResults)
+            ->get()
+            ->table;
     }
 
     public function fetchTopBrowsers(Period $period, int $maxResults = 10): Collection
     {
-        $response = $this->performQuery(
-            $period,
-            'ga:sessions',
-            [
-                'dimensions' => 'ga:browser',
-                'sort' => '-ga:sessions',
-            ]
-        );
+        return $this->dateRange($period)
+            ->metrics('sessions')
+            ->dimensions('browser')
+            ->orderByMetricDesc('sessions')
+            ->get()
+            ->table;
+    }
 
-        $topBrowsers = collect($response['rows'] ?? [])->map(function (array $browserRow) {
-            return [
-                'browser' => $browserRow[0],
-                'sessions' => (int)$browserRow[1],
-            ];
-        });
+    public function performQuery(Period $period, string|array $metrics, string|array $dimensions = []): Collection
+    {
+        $that = clone $this;
 
-        if ($topBrowsers->count() <= $maxResults) {
-            return $topBrowsers;
+        $query = $that
+            ->dateRange($period)
+            ->metrics($metrics);
+
+        if ($dimensions) {
+            $query = $query->dimensions($dimensions);
         }
 
-        return $this->summarizeTopBrowsers($topBrowsers, $maxResults);
-    }
-
-    protected function summarizeTopBrowsers(Collection $topBrowsers, int $maxResults): Collection
-    {
-        return $topBrowsers
-            ->take($maxResults - 1)
-            ->push([
-                'browser' => 'Others',
-                'sessions' => $topBrowsers->splice($maxResults - 1)->sum('sessions'),
-            ]);
-    }
-
-    /*
-     * Get the underlying Google_Service_Analytics object. You can use this
-     * to basically call anything on the Google Analytics API.
-     */
-    public function getAnalyticsService(): Google_Service_Analytics
-    {
-        return $this->client->getAnalyticsService();
+        return $query->get()->table;
     }
 }

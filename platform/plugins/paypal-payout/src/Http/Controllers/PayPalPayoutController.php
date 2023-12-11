@@ -2,6 +2,7 @@
 
 namespace Botble\PayPalPayout\Http\Controllers;
 
+use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Marketplace\Enums\PayoutPaymentMethodsEnum;
 use Botble\Marketplace\Enums\WithdrawalStatusEnum;
@@ -9,11 +10,10 @@ use Botble\Marketplace\Repositories\Interfaces\WithdrawalInterface;
 use Botble\PayPal\Services\Gateways\PayPalPaymentService;
 use Botble\PayPalPayout\PayPalPayoutsSDK\Payouts\PayoutsGetRequest;
 use Botble\PayPalPayout\PayPalPayoutsSDK\Payouts\PayoutsPostRequest;
-use Illuminate\Routing\Controller;
 use Illuminate\Support\Arr;
 use Throwable;
 
-class PayPalPayoutController extends Controller
+class PayPalPayoutController extends BaseController
 {
     public function make(
         string $withdrawalId,

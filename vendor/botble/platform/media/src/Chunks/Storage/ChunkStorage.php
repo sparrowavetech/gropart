@@ -108,7 +108,7 @@ class ChunkStorage
 
         // Build the timestamp
         $timeToCheck = strtotime($this->config['clear']['timestamp']);
-        $collection = new Collection();
+        $collection = collect();
 
         // Filter the collection with files that are not correct chunk file
         // Loop all current files and filter them by the time

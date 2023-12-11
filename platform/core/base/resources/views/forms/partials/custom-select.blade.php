@@ -1,21 +1,15 @@
-<div class="ui-select-wrapper form-group {{ Arr::get($selectAttributes, 'wrapper_class') ?: '' }}">
+<div class="mb-3 {{ Arr::get($selectAttributes, 'wrapper_class') ?: '' }}">
     @php
-        Arr::set($selectAttributes, 'class', Arr::get($selectAttributes, 'class') . ' ui-select');
+        Arr::set($selectAttributes, 'class', Arr::get($selectAttributes, 'class') . ' form-select');
+        $choices = $list ?? $choices;
+        $selectAttributes = [...$selectAttributes, 'data-placeholder' => trans('core/base::forms.select_placeholder')];
     @endphp
     {!! Form::select(
         $name,
-        $list ?? $choices,
+        $choices,
         $selected,
         $selectAttributes,
         $optionsAttributes,
         $optgroupsAttributes,
     ) !!}
-    <svg class="svg-next-icon svg-next-icon-size-16">
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 20 20"
-        >
-            <path d="M10 16l-4-4h8l-4 4zm0-12L6 8h8l-4-4z"></path>
-        </svg>
-    </svg>
 </div>

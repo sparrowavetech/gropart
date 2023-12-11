@@ -37,6 +37,8 @@ trait HasActions
 
     public function addAction(TableActionAbstract $action): static
     {
+        $this->hasOperations = false;
+
         $this->rowActions[$action->getName()] = $action;
 
         return $this;
@@ -47,15 +49,9 @@ trait HasActions
      */
     public function addActions(array $actions): static
     {
-        $newActions = [];
-
         foreach ($actions as $action) {
-            $newActions[$action->getName()] = $action;
+            $this->addAction($action);
         }
-
-        $this->rowActions = array_merge($this->rowActions, $newActions);
-
-        $this->hasOperations = false;
 
         return $this;
     }
@@ -132,7 +128,7 @@ trait HasActions
     }
 
     /**
-     * @deprecated since v6.8.0
+     * @deprecated since v6.8.0, will be removed after operations removed.
      */
     public function getOperationsHeading()
     {
@@ -150,7 +146,7 @@ trait HasActions
     }
 
     /**
-     * @deprecated since v6.8.0
+     * @deprecated since v6.8.0, will be removed after operations removed.
      */
     protected function getOperations(string|null $edit, string|null $delete, Model $item, string|null $extra = null): string
     {
@@ -162,5 +158,13 @@ trait HasActions
             $delete,
             $extra
         );
+    }
+
+    /**
+     * @deprecated since v6.8.0, will be removed after operations removed.
+     */
+    protected function hasOperations(): bool
+    {
+        return $this->hasOperations && ! $this->isSimpleTable() && empty($this->getRowActions());
     }
 }

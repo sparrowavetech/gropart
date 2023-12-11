@@ -7,6 +7,8 @@ use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Base\Models\BaseModel;
 use Botble\Table\Abstracts\TableBulkActionAbstract;
+use Botble\Table\Abstracts\TableBulkChangeAbstract;
+use Closure;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
@@ -37,9 +39,18 @@ trait HasBulkActions
 
     protected string $bulkActionDispatchUrl = '';
 
+    protected Closure $onSavingBulkChangeItemCallback;
+
     public function bulkActions(): array
     {
         return [];
+    }
+
+    public function addBulkAction(TableBulkActionAbstract $bulkAction): static
+    {
+        $this->bulkActions[] = $bulkAction;
+
+        return $this;
     }
 
     /**
@@ -47,7 +58,9 @@ trait HasBulkActions
      */
     public function addBulkActions(array $bulkActions): static
     {
-        $this->bulkActions = $bulkActions;
+        foreach ($bulkActions as $bulkAction) {
+            $this->addBulkAction($bulkAction);
+        }
 
         return $this;
     }
@@ -166,19 +179,41 @@ trait HasBulkActions
         return [];
     }
 
+    public function addBulkChange(TableBulkChangeAbstract $bulkChange): static
+    {
+        $this->bulkChanges[] = $bulkChange;
+
+        return $this;
+    }
+
     /**
-     * @param array[] $bulkChanges
+     * @param array<int|string, TableBulkChangeAbstract> $bulkChanges
      */
     public function addBulkChanges(array $bulkChanges): static
     {
-        $this->bulkChanges = $bulkChanges;
+        foreach ($bulkChanges as $bulkChange) {
+            $this->addBulkChange($bulkChange);
+        }
 
         return $this;
     }
 
     public function getAllBulkChanges(): array
     {
-        return array_merge($this->getBulkChanges(), $this->bulkChanges);
+        $bulkChanges = array_merge($this->getBulkChanges(), $this->bulkChanges);
+
+        foreach ($bulkChanges as $key => $bulkChange) {
+            if ($bulkChange instanceof TableBulkChangeAbstract) {
+                if ($bulkChange->getName()) {
+                    $bulkChanges[$bulkChange->getName()] = $bulkChange->toArray();
+                    Arr::forget($bulkChanges, $key);
+                } else {
+                    $bulkChanges[$key] = $bulkChange->toArray();
+                }
+            }
+        }
+
+        return $bulkChanges;
     }
 
     public function saveBulkChanges(array $ids, string $inputKey, string|null $inputValue): bool
@@ -203,8 +238,23 @@ trait HasBulkActions
         return true;
     }
 
+    public function onSavingBulkChangeItem(Closure $onSavingBulkChangeItemCallback): static
+    {
+        $this->onSavingBulkChangeItemCallback = $onSavingBulkChangeItemCallback;
+
+        return $this;
+    }
+
     public function saveBulkChangeItem(Model $item, string $inputKey, string|null $inputValue): Model|bool
     {
+        if (isset($this->onSavingBulkChangeItemCallback)) {
+            $result = call_user_func_array($this->onSavingBulkChangeItemCallback, [$item, $inputKey, $inputValue]);
+
+            if ($result) {
+                return $result;
+            }
+        }
+
         $item->{Auth::guard()->check() ? 'forceFill' : 'fill'}([$inputKey => $this->prepareBulkChangeValue($inputKey, $inputValue)]);
 
         $item->save();
@@ -238,7 +288,7 @@ trait HasBulkActions
 
     public function getBulkChangeUrl(): string
     {
-        return $this->bulkChangeUrl ?: route('tables.bulk-change.save');
+        return $this->bulkChangeUrl ?: route('table.bulk-change.save');
     }
 
     public function bulkChangeDataUrl(string $url): static
@@ -250,7 +300,7 @@ trait HasBulkActions
 
     public function getBulkChangeDataUrl(): string
     {
-        return $this->bulkChangeDataUrl ?: route('tables.bulk-change.data');
+        return $this->bulkChangeDataUrl ?: route('table.bulk-change.data');
     }
 
     public function bulkActionDispatchUrl(string $url): static
@@ -262,6 +312,6 @@ trait HasBulkActions
 
     public function getBulkActionDispatchUrl(): string
     {
-        return $this->bulkActionDispatchUrl ?: route('tables.bulk-actions.dispatch');
+        return $this->bulkActionDispatchUrl ?: route('table.bulk-action.dispatch');
     }
 }

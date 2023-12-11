@@ -2,6 +2,7 @@
 
 namespace Botble\Base\Commands\Traits;
 
+use Closure;
 use Illuminate\Support\Facades\Validator;
 use Throwable;
 
@@ -20,28 +21,25 @@ trait ValidateCommandInput
                 $input = $this->ask($message);
             }
 
-            $validate = $this->validate(compact('input'), ['input' => $rules]);
-            if ($validate['error']) {
-                $this->components->error($validate['message']);
+            $validator = Validator::make(compact('input'), ['input' => $rules]);
+
+            if ($validator->fails()) {
+                $this->components->error($validator->messages()->first());
             }
-        } while ($validate['error']);
+        } while ($validator->fails());
 
         return $input;
     }
 
-    protected function validate(array $data, array $rules): array
-    {
-        $validator = Validator::make($data, $rules);
-
-        if ($validator->fails()) {
-            return [
-                'error' => true,
-                'message' => $validator->messages()->first(),
-            ];
-        }
-
-        return [
-            'error' => false,
-        ];
+    protected function validate(
+        array|string $rules,
+        array $messages = [],
+        array $attributes = []
+    ): Closure {
+        return function (string $value) use ($rules, $messages, $attributes): string {
+            return Validator::make(['value' => $value], ['value' => $rules], $messages, $attributes)
+                ->errors()
+                ->first();
+        };
     }
 }

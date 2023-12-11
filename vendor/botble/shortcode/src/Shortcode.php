@@ -19,6 +19,13 @@ class Shortcode
         return $this;
     }
 
+    public function setPreviewImage(string $key, string $previewImage): Shortcode
+    {
+        $this->compiler->setPreviewImage($key, $previewImage);
+
+        return $this;
+    }
+
     public function enable(): Shortcode
     {
         $this->compiler->enable();

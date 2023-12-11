@@ -5,10 +5,10 @@ namespace Botble\Table\Columns;
 use Botble\Base\Contracts\BaseModel;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\Html;
-use Botble\Table\Contracts\FormattedColumn;
+use Botble\Table\Contracts\FormattedColumn as FormattedColumnContract;
 use Closure;
 
-class LinkableColumn extends Column implements FormattedColumn
+class LinkableColumn extends FormattedColumn implements FormattedColumnContract
 {
     protected array $route;
 
@@ -62,9 +62,11 @@ class LinkableColumn extends Column implements FormattedColumn
         }
 
         if (isset($this->route)) {
+            $item = $this->getItem();
+
             return route(
                 $this->route[0],
-                $this->route[1] ?: (($item = $this->getItem()) && $item instanceof BaseModel ? $item->getKey() : null),
+                $this->route[1] ?: ($item instanceof BaseModel ? $item->getKey() : null),
                 $this->route[2]
             );
         }
@@ -88,7 +90,7 @@ class LinkableColumn extends Column implements FormattedColumn
         return null;
     }
 
-    public function editedFormat($value): string|null
+    public function formattedValue($value): string|null
     {
         $item = $this->getItem();
 
@@ -114,6 +116,7 @@ class LinkableColumn extends Column implements FormattedColumn
 
         if ($this->externalLink) {
             $attributes['target'] = '_blank';
+            $valueTruncated = $valueTruncated . $this->renderExternalLinkIcon();
         }
 
         if ($url = $this->getUrl($value)) {
@@ -126,5 +129,13 @@ class LinkableColumn extends Column implements FormattedColumn
         }
 
         return apply_filters('table_name_column_data', $link, $item, $this);
+    }
+
+    protected function renderExternalLinkIcon(): string
+    {
+        return view('core/table::cells.icon', [
+            'icon' => 'ti ti-external-link',
+            'positionClass' => 'ms-1',
+        ])->render();
     }
 }

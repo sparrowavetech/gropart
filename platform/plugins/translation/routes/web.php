@@ -1,51 +1,40 @@
 <?php
 
-use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\AdminHelper;
 use Illuminate\Support\Facades\Route;
 
-Route::group(['namespace' => 'Botble\Translation\Http\Controllers', 'middleware' => ['web', 'core']], function () {
-    Route::group(['prefix' => BaseHelper::getAdminPrefix(), 'middleware' => 'auth'], function () {
+Route::group(['namespace' => 'Botble\Translation\Http\Controllers'], function () {
+    AdminHelper::registerRoutes(function () {
         Route::group(['prefix' => 'translations'], function () {
             Route::group(['prefix' => 'locales', 'permission' => 'translations.locales', ], function () {
                 Route::get('', [
                     'as' => 'translations.locales',
-                    'uses' => 'TranslationController@getLocales',
+                    'uses' => 'LocaleController@index',
                 ]);
 
                 Route::post('', [
                     'as' => 'translations.locales.post',
-                    'uses' => 'TranslationController@postLocales',
+                    'uses' => 'LocaleController@store',
                     'middleware' => 'preventDemo',
                 ]);
 
                 Route::delete('{locale}', [
                     'as' => 'translations.locales.delete',
-                    'uses' => 'TranslationController@deleteLocale',
+                    'uses' => 'LocaleController@destroy',
                     'middleware' => 'preventDemo',
                 ]);
 
                 Route::get('download/{locale}', [
                     'as' => 'translations.locales.download',
-                    'uses' => 'TranslationController@downloadLocale',
-                    'middleware' => 'preventDemo',
-                ]);
-
-                Route::get('ajax/available-remote-locales', [
-                    'as' => 'translations.locales.available-remote-locales',
-                    'uses' => 'TranslationController@ajaxGetAvailableRemoteLocales',
-                ]);
-
-                Route::post('ajax/download-remote-locale/{locale}', [
-                    'as' => 'translations.locales.download-remote-locale',
-                    'uses' => 'TranslationController@ajaxDownloadRemoteLocale',
+                    'uses' => 'LocaleController@download',
                     'middleware' => 'preventDemo',
                 ]);
             });
 
-            Route::group(['prefix' => 'admin', 'permission' => 'translations.index', ], function () {
-                Route::get('/', [
+            Route::group(['permission' => 'translations.index'], function () {
+                Route::match(['GET', 'POST'], '', [
                     'as' => 'translations.index',
-                    'uses' => 'TranslationController@getIndex',
+                    'uses' => 'TranslationController@index',
                 ]);
 
                 Route::post('edit', [
@@ -53,15 +42,9 @@ Route::group(['namespace' => 'Botble\Translation\Http\Controllers', 'middleware'
                     'uses' => 'TranslationController@update',
                 ]);
 
-                Route::post('publish', [
-                    'as' => 'translations.group.publish',
-                    'uses' => 'TranslationController@postPublish',
-                    'middleware' => 'preventDemo',
-                ]);
-
                 Route::post('import', [
                     'as' => 'translations.import',
-                    'uses' => 'TranslationController@postImport',
+                    'uses' => 'TranslationController@import',
 
                 ]);
             });
@@ -69,12 +52,12 @@ Route::group(['namespace' => 'Botble\Translation\Http\Controllers', 'middleware'
             Route::group(['prefix' => 'theme', 'permission' => 'translations.theme-translations'], function () {
                 Route::match(['GET', 'POST'], '', [
                     'as' => 'translations.theme-translations',
-                    'uses' => 'TranslationController@getThemeTranslations',
+                    'uses' => 'ThemeTranslationController@index',
                 ]);
 
                 Route::post('post', [
                     'as' => 'translations.theme-translations.post',
-                    'uses' => 'TranslationController@postThemeTranslations',
+                    'uses' => 'ThemeTranslationController@update',
                     'middleware' => 'preventDemo',
                 ]);
             });

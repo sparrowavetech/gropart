@@ -15,13 +15,15 @@ class AdminNotificationQueryBuilder extends BaseQueryBuilder
             return $this;
         }
 
-        $this->where(function ($query) use ($user) {
-            /**
-             * @var Builder $query
-             */
-            $query
-                ->whereNull('permission')
-                ->orWhereIn('permission', $user->permissions);
+        $this->when($user->permissions, function ($query, $permissions) {
+            $query->where(function ($query) use ($permissions) {
+                /**
+                 * @var Builder $query
+                 */
+                $query
+                    ->whereNull('permission')
+                    ->orWhereIn('permission', $permissions);
+            });
         });
 
         return $this;

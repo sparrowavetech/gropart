@@ -3,6 +3,8 @@
 namespace Botble\Table\Abstracts\Concerns;
 
 use Botble\Base\Facades\BaseHelper;
+use Botble\Table\Abstracts\TableBulkChangeAbstract;
+use Closure;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Relations\Relation as EloquentRelation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
@@ -14,6 +16,11 @@ trait HasFilters
     protected string $filterTemplate = 'core/table::filter';
 
     protected string $filterInputUrl = '';
+
+    /**
+     * @var \Closure(\Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Query\Builder|\Illuminate\Database\Eloquent\Relations\Relation $query): static
+     */
+    protected Closure $onFilterQueryCallback;
 
     /**
      * @deprecated since v6.8.0, using `hasFilters` instead.
@@ -44,6 +51,13 @@ trait HasFilters
         });
     }
 
+    public function onFilterQuery(Closure $onFilterQueryCallback): static
+    {
+        $this->onFilterQueryCallback = $onFilterQueryCallback;
+
+        return $this;
+    }
+
     public function applyFilterCondition(
         EloquentBuilder|QueryBuilder|EloquentRelation $query,
         string $key,
@@ -57,6 +71,14 @@ trait HasFilters
         $column = $this->getModel()->getTable() . '.' . $key;
 
         $key = preg_replace('/[^A-Za-z0-9_]/', '', str_replace(' ', '', $key));
+
+        if (isset($this->onFilterQueryCallback)) {
+            $result = call_user_func_array($this->onFilterQueryCallback, [$query, $key, $operator, $value]);
+
+            if ($result) {
+                return $result;
+            }
+        }
 
         switch ($key) {
             case 'created_at':
@@ -99,7 +121,18 @@ trait HasFilters
     {
         $tableId = $this->getOption('id');
         $class = $this::class;
-        $columns = $this->getFilters();
+        $columns = apply_filters('base_filter_table_filters', $this->getFilters(), $this);
+
+        foreach ($columns as $key => $bulkChange) {
+            if ($bulkChange instanceof TableBulkChangeAbstract) {
+                if ($bulkChange->getName()) {
+                    $columns[$bulkChange->getName()] = $bulkChange->toArray();
+                    Arr::forget($columns, $key);
+                } else {
+                    $columns[$key] = $bulkChange->toArray();
+                }
+            }
+        }
 
         $request = $this->request();
         $requestFilters = [
@@ -150,6 +183,6 @@ trait HasFilters
 
     public function getFilterInputUrl(): string
     {
-        return $this->filterInputUrl ?: route('tables.get-filter-input');
+        return $this->filterInputUrl ?: route('table.filter.input');
     }
 }

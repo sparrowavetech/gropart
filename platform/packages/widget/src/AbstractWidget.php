@@ -3,6 +3,7 @@
 namespace Botble\Widget;
 
 use Botble\Theme\Facades\Theme;
+use Botble\Widget\Forms\WidgetForm;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
@@ -127,6 +128,13 @@ abstract class AbstractWidget
             }
         }
 
+        $settingForm = $this->settingForm();
+
+        return $settingForm instanceof WidgetForm ? $settingForm->renderForm() : $settingForm;
+    }
+
+    protected function settingForm(): WidgetForm|string|null
+    {
         $widgetDirectory = $this->getWidgetDirectory();
         $namespace = Str::afterLast($this->backendTemplate, '.');
 

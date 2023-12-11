@@ -45,6 +45,12 @@ class FormServiceProvider extends ServiceProvider
             'attributes' => [],
         ]);
 
+        Form::component('onOffCheckbox', 'core/base::forms.partials.on-off-checkbox', [
+            'name',
+            'value' => false,
+            'attributes' => [],
+        ]);
+
         /**
          * Custom checkbox
          * Every checkbox will not have the same name
@@ -83,6 +89,7 @@ class FormServiceProvider extends ServiceProvider
              * @var string|null $selected
              */
             'selected' => null,
+            'attributes' => [],
         ]);
 
         Form::component('error', 'core/base::forms.partials.error', [
@@ -158,6 +165,12 @@ class FormServiceProvider extends ServiceProvider
             'attributes' => [],
         ]);
 
+        Form::component('codeEditor', 'core/base::forms.partials.code-editor', [
+            'name',
+            'value' => null,
+            'attributes' => [],
+        ]);
+
         Form::component('nestedSelectDropdown', 'core/base::forms.partials.nested-select-dropdown', [
             'name',
             'choices' => [],
@@ -166,6 +179,13 @@ class FormServiceProvider extends ServiceProvider
             'selectAttributes' => [],
             'optionsAttributes' => [],
             'optgroupsAttributes' => [],
+        ]);
+
+        Form::component('uiSelector', 'core/base::forms.partials.ui-selector', [
+            'name',
+            'value' => null,
+            'choices' => [],
+            'attributes' => [],
         ]);
     }
 }

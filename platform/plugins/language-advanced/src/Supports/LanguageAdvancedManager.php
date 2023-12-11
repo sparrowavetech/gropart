@@ -190,7 +190,7 @@ class LanguageAdvancedManager
                     $model,
                     $modelTable . '_translations.' . $modelTable . '_id',
                     $model->getKeyName()
-                ))->where('lang_code', $locale);
+                ))->where('lang_code', request()->input('from_lang') ?: $locale);
             });
 
             foreach ($columns as $column) {

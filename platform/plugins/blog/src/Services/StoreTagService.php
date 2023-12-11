@@ -3,7 +3,8 @@
 namespace Botble\Blog\Services;
 
 use Botble\ACL\Models\User;
-use Botble\Base\Events\CreatedContentEvent;
+use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Blog\Forms\TagForm;
 use Botble\Blog\Models\Post;
 use Botble\Blog\Models\Tag;
 use Botble\Blog\Services\Abstracts\StoreTagServiceAbstract;
@@ -34,15 +35,24 @@ class StoreTagService extends StoreTagServiceAbstract
                 $tag = Tag::query()->where('name', $tagName)->first();
 
                 if ($tag === null && ! empty($tagName)) {
-                    $tag = Tag::query()->create([
-                        'name' => $tagName,
-                        'author_id' => Auth::guard()->check() ? Auth::guard()->id() : 0,
-                        'author_type' => User::class,
-                    ]);
+                    $form = TagForm::create();
 
-                    $request->merge(['slug' => $tagName]);
+                    $form
+                        ->saving(function (TagForm $form) use ($tagName) {
+                            $form
+                                ->getModel()
+                                ->fill([
+                                    'name' => $tagName,
+                                    'author_id' => Auth::guard()->check() ? Auth::guard()->id() : 0,
+                                    'author_type' => User::class,
+                                    'status' => BaseStatusEnum::PUBLISHED,
+                                ])
+                                ->save();
 
-                    event(new CreatedContentEvent(TAG_MODULE_SCREEN_NAME, $request, $tag));
+                            $form->setRequest($form->getRequest()->merge(['slug' => $tagName]));
+                        });
+
+                    $tag = $form->getModel();
                 }
 
                 if (! empty($tag)) {

@@ -20,7 +20,6 @@ use Botble\Location\Repositories\Interfaces\CountryInterface;
 use Botble\Location\Repositories\Interfaces\StateInterface;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\AliasLoader;
-use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Schema;
 
@@ -47,7 +46,8 @@ class LocationServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        $this->setNamespace('plugins/location')
+        $this
+            ->setNamespace('plugins/location')
             ->loadHelpers()
             ->loadAndPublishConfigurations(['permissions', 'general'])
             ->loadAndPublishViews()
@@ -71,15 +71,13 @@ class LocationServiceProvider extends ServiceProvider
             ]);
         }
 
-        $this->app['events']->listen(RouteMatched::class, function () {
+        DashboardMenu::default()->beforeRetrieving(function () {
             DashboardMenu::make()
                 ->registerItem([
                     'id' => 'cms-plugins-location',
                     'priority' => 900,
-                    'parent_id' => null,
                     'name' => 'plugins/location::location.name',
-                    'icon' => 'fas fa-globe',
-                    'url' => null,
+                    'icon' => 'ti ti-world',
                     'permissions' => ['country.index'],
                 ])
                 ->registerItem([
@@ -87,45 +85,35 @@ class LocationServiceProvider extends ServiceProvider
                     'priority' => 0,
                     'parent_id' => 'cms-plugins-location',
                     'name' => 'plugins/location::country.name',
-                    'icon' => 'fas fa-globe',
-                    'url' => route('country.index'),
-                    'permissions' => ['country.index'],
+                    'route' => 'country.index',
                 ])
                 ->registerItem([
                     'id' => 'cms-plugins-state',
                     'priority' => 1,
                     'parent_id' => 'cms-plugins-location',
                     'name' => 'plugins/location::state.name',
-                    'icon' => 'fas fa-globe',
-                    'url' => route('state.index'),
-                    'permissions' => ['state.index'],
+                    'route' => 'state.index',
                 ])
                 ->registerItem([
                     'id' => 'cms-plugins-city',
                     'priority' => 2,
                     'parent_id' => 'cms-plugins-location',
                     'name' => 'plugins/location::city.name',
-                    'icon' => 'fas fa-globe',
-                    'url' => route('city.index'),
-                    'permissions' => ['city.index'],
+                    'route' => 'city.index',
                 ])
                 ->registerItem([
                     'id' => 'cms-plugins-location-bulk-import',
                     'priority' => 3,
                     'parent_id' => 'cms-plugins-location',
-                    'name' => 'plugins/location::bulk-import.menu',
-                    'icon' => 'fas fa-cloud-upload-alt',
-                    'url' => route('location.bulk-import.index'),
-                    'permissions' => ['location.bulk-import.index'],
+                    'name' => 'plugins/location::bulk-import.name',
+                    'route' => 'location.bulk-import.index',
                 ])
                 ->registerItem([
                     'id' => 'cms-plugins-location-export',
                     'priority' => 4,
                     'parent_id' => 'cms-plugins-location',
-                    'name' => 'plugins/location::location.export_location',
-                    'icon' => 'fas fa-cloud-download-alt',
-                    'url' => route('location.export.index'),
-                    'permissions' => ['location.export.index'],
+                    'name' => 'plugins/location::export.name',
+                    'route' => 'location.export.index',
                 ]);
         });
 

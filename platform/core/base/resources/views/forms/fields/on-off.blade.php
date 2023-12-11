@@ -4,11 +4,19 @@
     @endif
 @endif
 
-@if ($showLabel && $options['label'] !== false && $options['label_show'])
-    {!! Form::customLabel($name, $options['label'], $options['label_attr']) !!}
-@endif
+@php
+    $options['attr']['label'] = $options['label'];
+    $isShowLabel = $showLabel && $options['label'] && $options['label_show'];
+
+    if (!$isShowLabel) {
+        unset($options['attr']['label']);
+    }
+@endphp
 
 @if ($showField)
+    @php
+        Arr::set($options['attr'], 'class', str_replace('form-control', '', $options['attr']['class']));
+    @endphp
     {!! Form::onOff($name, $options['value'], $options['attr']) !!}
     @include('core/base::forms.partials.help-block')
 @endif

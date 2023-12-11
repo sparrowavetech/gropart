@@ -11,7 +11,6 @@ class AvatarRequest extends Request
     {
         return [
             'avatar_file' => RvMedia::imageValidationRule(),
-            'avatar_data' => 'required|string',
         ];
     }
 }

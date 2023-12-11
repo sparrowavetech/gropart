@@ -1,16 +1,16 @@
 <?php
 
+use Botble\Base\Models\BaseQueryBuilder;
 use Botble\Base\Supports\RepositoryHelper;
 use Botble\Page\Models\Page;
 use Botble\Page\Supports\Template;
-use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Database\Eloquent\Collection;
 
 if (! function_exists('get_all_pages')) {
     function get_all_pages(bool $active = true): Collection
     {
         $pages = Page::query()
-            ->when($active, function (Builder $query) {
+            ->when($active, function (BaseQueryBuilder $query) {
                 $query->wherePublished();
             })
             ->orderByDesc('created_at')

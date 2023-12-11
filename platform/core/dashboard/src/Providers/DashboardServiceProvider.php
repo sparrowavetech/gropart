@@ -11,7 +11,6 @@ use Botble\Dashboard\Repositories\Eloquent\DashboardWidgetRepository;
 use Botble\Dashboard\Repositories\Eloquent\DashboardWidgetSettingRepository;
 use Botble\Dashboard\Repositories\Interfaces\DashboardWidgetInterface;
 use Botble\Dashboard\Repositories\Interfaces\DashboardWidgetSettingInterface;
-use Illuminate\Routing\Events\RouteMatched;
 
 /**
  * @since 02/07/2016 09:50 AM
@@ -33,7 +32,8 @@ class DashboardServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        $this->setNamespace('core/dashboard')
+        $this
+            ->setNamespace('core/dashboard')
             ->loadHelpers()
             ->loadRoutes()
             ->loadAndPublishViews()
@@ -41,16 +41,16 @@ class DashboardServiceProvider extends ServiceProvider
             ->publishAssets()
             ->loadMigrations();
 
-        $this->app['events']->listen(RouteMatched::class, function () {
-            DashboardMenu::registerItem([
-                'id' => 'cms-core-dashboard',
-                'priority' => 0,
-                'parent_id' => null,
-                'name' => 'core/base::layouts.dashboard',
-                'icon' => 'fa fa-home',
-                'url' => route('dashboard.index'),
-                'permissions' => [],
-            ]);
+        DashboardMenu::default()->beforeRetrieving(function () {
+            DashboardMenu::make()
+                ->registerItem([
+                    'id' => 'cms-core-dashboard',
+                    'priority' => -9999,
+                    'name' => 'core/base::layouts.dashboard',
+                    'icon' => 'ti ti-home',
+                    'route' => 'dashboard.index',
+                    'permissions' => [],
+                ]);
         });
     }
 }

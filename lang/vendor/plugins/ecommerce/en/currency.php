@@ -2,6 +2,7 @@
 
 return [
     'currencies' => 'Currencies',
+    'currency_setting_description' => 'View and update currencies using on website',
     'setting_description' => 'List of currencies using on website',
     'name' => 'Name',
     'symbol' => 'Symbol',
@@ -15,17 +16,9 @@ return [
     'before_number' => 'Before number',
     'after_number' => 'After number',
     'require_at_least_one_currency' => 'The system requires at least one currency!',
-    'enable_auto_detect_visitor_currency' => 'Enable auto-detect visitor currency?',
-    'auto_detect_visitor_currency_description' => 'It detects visitor currency based on browser language. It will override default currency selection.',
-    'add_space_between_price_and_currency' => 'Add a space between price and currency?',
     'invalid_currency_name' => 'Invalid currency code, it must be in :currencies.',
     'instruction' => 'Please check list currency code here: https://en.wikipedia.org/wiki/ISO_4217',
     'code' => 'Code',
-    'api_key' => 'API exchange rates key',
-    'update_currency_rates' => 'Update currency rates',
-    'clear_cache_rates' => 'Clear cache rates',
     'no_api_key' => 'No API key',
-    'api_key_helper' => 'Get exchange rate API key on :link',
-    'use_exchange_rate_from_api' => 'Use exchange rate from API?',
     'clear_cache_rates_successfully' => 'Clear cache currency rates successfully.',
 ];

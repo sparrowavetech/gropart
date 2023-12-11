@@ -9,7 +9,7 @@ class BackupRequest extends Request
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:220',
+            'name' => 'required|string|max:250',
         ];
     }
 }

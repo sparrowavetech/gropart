@@ -1,58 +1,62 @@
 <tr data-id="{{ $item->lang_id }}">
-    <td class="text-start">
+    <td>
         <a
-            class="edit-language-button"
+            href="javascript:void(0);"
+            class="gap-2 edit-language-button d-flex align-items-center text-decoration-none"
+            data-id="{{ $item->lang_id }}"
             data-bs-original-title="{{ trans('plugins/language::language.edit_tooltip') }}"
             data-bs-toggle="tooltip"
-            data-id="{{ $item->lang_id }}"
-            href="#"
-        >{{ $item->lang_name }}</a>
+        >
+            {!! language_flag($item->lang_flag, $item->lang_name) !!}
+            {{ $item->lang_name }}
+        </a>
     </td>
-    <td class="text-center">{{ $item->lang_locale }}</td>
-    <td class="text-center">{{ $item->lang_code }}</td>
-    <td class="text-center">
+    <td>{{ $item->lang_locale }}</td>
+    <td>{{ $item->lang_code }}</td>
+    <td>
         @if ($item->lang_is_default)
-            <i
-                class="fa fa-star"
+            <x-core::icon
+                name="ti ti-star-filled"
+                class="text-yellow"
                 data-id="{{ $item->lang_id }}"
                 data-name="{{ $item->lang_name }}"
-            ></i>
+            />
         @else
             <a
-                class="set-language-default"
+                href="javascript:void(0);"
                 data-section="{{ route('languages.set.default') }}?lang_id={{ $item->lang_id }}"
+                class="text-decoration-none set-language-default"
                 data-bs-toggle="tooltip"
                 data-bs-original-title="{{ trans('plugins/language::language.choose_default_language', ['language' => $item->lang_name]) }}"
-            ><i
-                    class="fa fa-star"
+            >
+                <x-core::icon
+                    name="ti ti-star-filled"
                     data-id="{{ $item->lang_id }}"
                     data-name="{{ $item->lang_name }}"
-                ></i></a>
+                />
+            </a>
         @endif
     </td>
-    <td class="text-center">{{ $item->lang_order }}</td>
-    <td class="text-center">
-        {!! language_flag($item->lang_flag, $item->lang_name) !!}
-    </td>
-    <td class="text-center">
-        <span>
-            <a
-                class="edit-language-button"
-                data-bs-original-title="{{ trans('plugins/language::language.edit_tooltip') }}"
-                data-bs-toggle="tooltip"
-                data-id="{{ $item->lang_id }}"
-                href="#"
-            >{{ trans('plugins/language::language.edit') }}</a> |
-        </span>
-        <span>
-            <a
-                class="deleteDialog text-danger"
-                data-bs-toggle="tooltip"
-                data-section="{{ route('languages.destroy', $item->lang_id) }}"
-                data-bs-original-title="{{ trans('plugins/language::language.delete_tooltip') }}"
-                href="#"
-                role="button"
-            >{{ trans('plugins/language::language.delete') }}</a>
-        </span>
+    <td>{{ $item->lang_order }}</td>
+    <td>
+        <x-core::button
+            color="primary"
+            icon="ti ti-edit"
+            :icon-only="true"
+            :data-id="$item->lang_id"
+            :tooltip="trans('plugins/language::language.edit_tooltip')"
+            size="sm"
+            class="edit-language-button"
+        />
+
+        <x-core::button
+            color="danger"
+            icon="ti ti-trash"
+            :icon-only="true"
+            :tooltip="trans('plugins/language::language.delete_tooltip')"
+            size="sm"
+            class="deleteDialog"
+            data-section="{{ route('languages.destroy', $item->lang_id) }}"
+        />
     </td>
 </tr>

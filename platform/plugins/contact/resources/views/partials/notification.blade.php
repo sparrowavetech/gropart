@@ -1,48 +1,62 @@
-<li class="dropdown dropdown-extended dropdown-inbox">
-    <a
-        class="dropdown-toggle dropdown-header-name"
+<div class="nav-item dropdown d-none d-md-flex me-2">
+    <button
+        class="nav-link px-0"
         data-bs-toggle="dropdown"
-        href="javascript:;"
-        aria-haspopup="true"
-        aria-expanded="false"
+        type="button"
+        aria-label="{{ trans('plugins/contact::contact.dropdown_show_label') }}"
+        tabindex="-1"
     >
-        <i class="icon-envelope-open"></i>
-        <span class="badge badge-default"> {{ $contacts->total() }} </span>
-    </a>
-    <ul class="dropdown-menu dropdown-menu-right">
-        <li class="external">
-            <h3>{!! BaseHelper::clean(trans('plugins/contact::contact.new_msg_notice', ['count' => $contacts->total()])) !!}</h3>
-            <a href="{{ route('contacts.index') }}">{{ trans('plugins/contact::contact.view_all') }}</a>
-        </li>
-        <li>
-            <ul
-                class="dropdown-menu-list scroller"
-                data-handle-color="#637283"
-                style="height: {{ $contacts->total() * 70 }}px;"
+        <x-core::icon name="ti ti-mail" />
+        <span class="badge bg-red text-red-fg badge-pill">{{ number_format($contacts->count()) }}</span>
+    </button>
+    <div class="dropdown-menu dropdown-menu-arrow dropdown-menu-end dropdown-menu-card">
+        <x-core::card>
+            <x-core::card.header>
+                <x-core::card.title>{!! BaseHelper::clean(trans('plugins/contact::contact.new_msg_notice', ['count' => $contacts->count()])) !!}</x-core::card.title>
+                <x-core::card.actions>
+                    <a href="{{ route('contacts.index') }}">{{ trans('plugins/contact::contact.view_all') }}</a>
+                </x-core::card.actions>
+            </x-core::card.header>
+            <div
+                class="list-group list-group-flush list-group-hoverable overflow-auto"
+                style="max-height: 35rem"
             >
                 @foreach ($contacts as $contact)
-                    <li>
-                        <a href="{{ route('contacts.edit', $contact->id) }}">
-                            <span class="photo">
-                                <img
-                                    class="rounded-circle"
-                                    src="{{ $contact->avatar_url }}"
-                                    alt="{{ $contact->name }}"
-                                >
-                            </span>
-                            <span class="subject"><span class="from"> {{ $contact->name }} </span><span
-                                    class="time">{{ BaseHelper::formatDateTime($contact->created_at) }} </span></span>
-                            <span class="message"> {{ $contact->phone }} - {{ $contact->email }} </span>
-                        </a>
-                    </li>
+                    <a href="{{ route('contacts.edit', $contact->id) }}" class="text-decoration-none">
+                        <div class="list-group-item">
+                            <div class="row">
+                                <div class="col-auto">
+                                    <img
+                                        class="avatar"
+                                        src="{{ $contact->avatar_url }}"
+                                        alt="{{ $contact->name }}"
+                                    >
+                                </div>
+                                <div class="col align-items-center">
+                                    <p class="text-truncate mb-2">
+                                        {{ $contact->name }}
+                                        <time
+                                            class="small text-muted"
+                                            title="{{ $createdAt = BaseHelper::formatDateTime($contact->created_at) }}"
+                                            datetime="{{ $createdAt }}"
+                                        >
+                                            {{ $createdAt }}
+                                        </time>
+                                    </p>
+                                    <p class="text-secondary text-truncate mt-n1 mb-0">
+                                        {{ implode(' - ', [$contact->phone, $contact->email]) }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
                 @endforeach
-
-                @if ($contacts->total() > 10)
-                    <li class="text-center"><a
-                            href="{{ route('contacts.index') }}">{{ trans('plugins/contact::contact.view_all') }}</a>
-                    </li>
-                @endif
-            </ul>
-        </li>
-    </ul>
-</li>
+            </div>
+            @if ($contacts->count() > 10)
+                <x-core::card.footer class="text-center border-top">
+                    <a href="{{ route('contacts.index') }}">{{ trans('plugins/contact::contact.view_all') }}</a>
+                </x-core::card.footer>
+            @endif
+        </x-core::card>
+    </div>
+</div>

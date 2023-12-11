@@ -1,18 +1,26 @@
 @if ($histories->isNotEmpty())
-    <div class="scroller">
-        <ul class="item-list padding">
-            @foreach ($histories as $history)
-                <li>
-                    @include('plugins/audit-log::activity-line', compact('history'))
-                </li>
-            @endforeach
-        </ul>
+    <div class="table-responsive">
+        <x-core::table>
+            <x-core::table.body>
+                @foreach ($histories as $history)
+                    <x-core::table.body.row>
+                        <x-core::table.body.cell>
+                            @include('plugins/audit-log::activity-line', compact('history'))
+                        </x-core::table.body.cell>
+                    </x-core::table.body.row>
+                @endforeach
+            </x-core::table.body>
+        </x-core::table>
     </div>
+
     @if ($histories instanceof Illuminate\Pagination\LengthAwarePaginator)
-        <div class="widget_footer">
-            @include('core/dashboard::partials.paginate', ['data' => $histories, 'limit' => $limit])
-        </div>
+        <x-core::card.footer>
+            {{ $histories->links('core/base::components.simple-pagination') }}
+        </x-core::card.footer>
     @endif
 @else
-    @include('core/dashboard::partials.no-data')
+    <x-core::empty-state
+        :title="__('No results found')"
+        :subtitle="__('It looks as through there are no activities here.')"
+    />
 @endif

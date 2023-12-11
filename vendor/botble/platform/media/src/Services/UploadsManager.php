@@ -36,7 +36,14 @@ class UploadsManager
         }
 
         try {
-            return $this->mimeType->getMimeType(File::extension(RvMedia::getRealPath($path)));
+
+            $fileExtension = File::extension(RvMedia::getRealPath($path));
+
+            if (! $fileExtension) {
+                return null;
+            }
+
+            return $this->mimeType->getMimeType($fileExtension);
         } catch (UnableToRetrieveMetadata) {
             return null;
         }

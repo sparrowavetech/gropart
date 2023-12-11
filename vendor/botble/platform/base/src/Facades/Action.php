@@ -16,6 +16,6 @@ class Action extends Facade
 {
     protected static function getFacadeAccessor(): string
     {
-        return 'core:action';
+        return 'core.action';
     }
 }

@@ -28,7 +28,7 @@ class PluginInstallFromMarketplaceCommand extends Command implements PromptsForM
         ]);
 
         if ($response->failed()) {
-            $this->error($response->reason());
+            $this->components->error($response->reason());
 
             return self::FAILURE;
         }
@@ -36,7 +36,7 @@ class PluginInstallFromMarketplaceCommand extends Command implements PromptsForM
         $pluginId = $response->json('data.0.id');
 
         if (! $pluginId) {
-            $this->error(sprintf('Plugin %s doesnt exists', $plugin));
+            $this->components->error(sprintf('Plugin %s doesnt exists', $plugin));
 
             return self::FAILURE;
         }
@@ -44,13 +44,13 @@ class PluginInstallFromMarketplaceCommand extends Command implements PromptsForM
         $response = $marketplaceService->callApi('get', '/products/' . $pluginId);
 
         if ($response instanceof JsonResponse) {
-            $this->error($response->getData()->message);
+            $this->components->error($response->getData()->message);
 
             return self::FAILURE;
         }
 
         if ($response->failed()) {
-            $this->error($response->reason());
+            $this->components->error($response->reason());
 
             return self::FAILURE;
         }
@@ -59,7 +59,7 @@ class PluginInstallFromMarketplaceCommand extends Command implements PromptsForM
 
         $version = $detail['data']['minimum_core_version'];
         if (version_compare($version, get_core_version(), '>')) {
-            $this->error(trans('packages/plugin-management::marketplace.minimum_core_version_error', compact('version')));
+            $this->components->error(trans('packages/plugin-management::marketplace.minimum_core_version_error', compact('version')));
 
             return self::FAILURE;
         }
@@ -67,10 +67,10 @@ class PluginInstallFromMarketplaceCommand extends Command implements PromptsForM
         $name = Str::afterLast($detail['data']['package_name'], '/');
 
         try {
-            $response = $marketplaceService->beginInstall($pluginId, 'plugin', $name);
+            $response = $marketplaceService->beginInstall($pluginId, $name);
 
             if ($response instanceof JsonResponse) {
-                $this->error($response->getData()->message);
+                $this->components->error($response->getData()->message);
 
                 return self::FAILURE;
             }
@@ -79,7 +79,7 @@ class PluginInstallFromMarketplaceCommand extends Command implements PromptsForM
 
             return self::SUCCESS;
         } catch (Throwable $exception) {
-            $this->error($exception->getMessage());
+            $this->components->error($exception->getMessage());
 
             return self::FAILURE;
         }

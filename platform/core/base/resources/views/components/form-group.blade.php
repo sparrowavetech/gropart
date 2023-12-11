@@ -1,3 +1,5 @@
-<div {{ $attributes->merge(['class' => 'mb-3 position-relative']) }}>
+@props(['defaultClass' => 'mb-3 position-relative'])
+
+<div {{ $attributes->merge(['class' => $defaultClass]) }}>
     {{ $slot }}
 </div>

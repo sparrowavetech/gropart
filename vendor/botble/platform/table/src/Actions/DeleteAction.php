@@ -9,7 +9,7 @@ class DeleteAction extends Action
         return parent::make($name)
             ->label(trans('core/base::tables.delete_entry'))
             ->color('danger')
-            ->icon('fa fa-trash')
+            ->icon('ti ti-trash')
             ->action('DELETE')
             ->confirmation()
             ->confirmationModalTitle(trans('core/base::tables.confirm_delete'))

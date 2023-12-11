@@ -41,4 +41,9 @@ return [
         'flag' => 'simple-slider-item.destroy',
         'parent_flag' => 'simple-slider-item.index',
     ],
+    [
+        'name' => 'Simple Slider Settings',
+        'flag' => 'simple-slider.settings',
+        'parent_flag' => 'simple-slider-item.index',
+    ],
 ];

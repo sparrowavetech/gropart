@@ -28,10 +28,12 @@ class MigrateLocationCommand extends Command
         }
 
         if ($error) {
-            $this->error('Not supported model');
-        } else {
-            $this->info('Migrate location successfully!');
+            $this->components->error('Not supported model');
+
+            return self::FAILURE;
         }
+
+        $this->components->info('Migrate location successfully!');
 
         return self::SUCCESS;
     }

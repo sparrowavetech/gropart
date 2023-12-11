@@ -20,7 +20,8 @@ class InstallerServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        $this->setNamespace('packages/installer')
+        $this
+            ->setNamespace('packages/installer')
             ->loadHelpers()
             ->loadAndPublishConfigurations('installer')
             ->loadAndPublishTranslations()

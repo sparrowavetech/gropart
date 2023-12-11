@@ -16,6 +16,6 @@ class Filter extends Facade
 {
     protected static function getFacadeAccessor(): string
     {
-        return 'core:filter';
+        return 'core.filter';
     }
 }

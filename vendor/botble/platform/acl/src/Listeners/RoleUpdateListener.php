@@ -3,7 +3,6 @@
 namespace Botble\ACL\Listeners;
 
 use Botble\ACL\Events\RoleUpdateEvent;
-use Illuminate\Support\Facades\Auth;
 
 class RoleUpdateListener
 {
@@ -17,7 +16,5 @@ class RoleUpdateListener
             $user->permissions = $permissions;
             $user->save();
         }
-
-        cache()->forget(md5('cache-dashboard-menu-' . Auth::guard()->id()));
     }
 }

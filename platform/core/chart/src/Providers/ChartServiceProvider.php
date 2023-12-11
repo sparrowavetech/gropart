@@ -11,7 +11,8 @@ class ChartServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        $this->setNamespace('core/chart')
+        $this
+            ->setNamespace('core/chart')
             ->loadAndPublishViews();
     }
 }
