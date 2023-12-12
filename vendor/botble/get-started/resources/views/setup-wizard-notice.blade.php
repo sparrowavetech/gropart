@@ -1,5 +1,8 @@
-<div class="note note-success resume-setup-wizard-wrapper">
-    <p>{!! BaseHelper::clean(
+<x-core::alert
+    type="info"
+    class="resume-setup-wizard-wrapper"
+>
+    {!! BaseHelper::clean(
         trans('packages/get-started::get-started.setup_wizard_button', [
             'link' => Html::link(
                 '#',
@@ -9,5 +12,5 @@
                 false,
             )->toHtml(),
         ]),
-    ) !!}</p>
-</div>
+    ) !!}
+</x-core::alert>

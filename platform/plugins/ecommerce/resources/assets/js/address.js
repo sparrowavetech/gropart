@@ -7,29 +7,27 @@ $(function () {
     $(document).on('click', '#confirm-add-address-button', (event) => {
         event.preventDefault()
         let _self = $(event.currentTarget)
-        _self.addClass('button-loading')
 
-        $.ajax({
-            type: 'POST',
-            cache: false,
-            url: _self.closest('.modal-content').find('form').prop('action'),
-            data: _self.closest('.modal-content').find('form').serialize(),
-            success: (res) => {
-                if (!res.error) {
-                    Botble.showNotice('success', res.message)
+        Botble.showButtonLoading(_self)
+
+        const form = _self.closest('.modal-content').find('form')
+        const url = form.prop('action')
+        const formData = form.serialize()
+
+        $httpClient.make()
+            .post(url, formData)
+            .then(({ data }) => {
+                if (!data.error) {
+                    Botble.showNotice('success', data.message)
                     $('#add-address-modal').modal('hide')
-                    _self.closest('.modal-content').find('form').get(0).reset()
+                    form.get(0).reset()
                     $('#address-histories').load($('.page-content form').prop('action') + ' #address-histories > *')
                 } else {
-                    Botble.showNotice('error', res.message)
+                    Botble.showNotice('error', data.message)
                 }
-                _self.removeClass('button-loading')
-            },
-            error: (res) => {
-                Botble.handleError(res)
-                _self.removeClass('button-loading')
-            },
-        })
+            }).finally(() => {
+                Botble.hideButtonLoading(_self)
+            })
     })
 
     $(document).on('click', '.btn-trigger-edit-address', (event) => {
@@ -45,52 +43,46 @@ $(function () {
 
         $modal.modal('show')
 
-        $.ajax({
-            type: 'GET',
-            cache: false,
-            url: _self.data('section'),
-            success: (res) => {
-                if (!res.error) {
+        Botble.showButtonLoading(_self)
+
+        $httpClient.make()
+            .get(_self.data('section'))
+            .then(({ data }) => {
+                if (!data.error) {
                     $modalLoading.addClass('d-none')
-                    $modalFormContent.html(res)
+                    $modalFormContent.html(data)
                 } else {
-                    Botble.showNotice('error', res.message)
+                    Botble.showNotice('error', data.message)
                 }
-                _self.removeClass('button-loading')
-            },
-            error: (res) => {
-                Botble.handleError(res)
-                _self.removeClass('button-loading')
-            },
-        })
+            }).finally(() => {
+                Botble.hideButtonLoading(_self)
+            })
     })
 
     $(document).on('click', '#confirm-edit-address-button', (event) => {
         event.preventDefault()
         let _self = $(event.currentTarget)
-        _self.addClass('button-loading')
 
-        $.ajax({
-            type: 'POST',
-            cache: false,
-            url: _self.closest('.modal-content').find('form').prop('action'),
-            data: _self.closest('.modal-content').find('form').serialize(),
-            success: (res) => {
-                if (!res.error) {
-                    Botble.showNotice('success', res.message)
+        Botble.showButtonLoading(_self)
+
+        const form = _self.closest('.modal-content').find('form')
+        const url = form.prop('action')
+        const formData = form.serialize()
+
+        $httpClient.make()
+            .post(url, formData)
+            .then(({ data }) => {
+                if (!data.error) {
+                    Botble.showNotice('success', data.message)
                     $('#edit-address-modal').modal('hide')
-                    _self.closest('.modal-content').find('form').get(0).reset()
-                    $('#address-histories').load($('.page-content form').prop('action') + ' #address-histories > *')
+                    form.get(0).reset()
+                    $('#address-histories').load($('.page-wrapper form').prop('action') + ' #address-histories > *')
                 } else {
-                    Botble.showNotice('error', res.message)
+                    Botble.showNotice('error', data.message)
                 }
-                _self.removeClass('button-loading')
-            },
-            error: (res) => {
-                Botble.handleError(res)
-                _self.removeClass('button-loading')
-            },
-        })
+            }).finally(() => {
+                Botble.hideButtonLoading(_self)
+            })
     })
 
     $(document).on('click', '.deleteDialog', function (event) {
@@ -103,29 +95,23 @@ $(function () {
     $('.delete-crud-entry').on('click', function (event) {
         event.preventDefault()
         const _self = $(event.currentTarget)
-        _self.addClass('button-loading')
+        Botble.showButtonLoading(_self)
         const deleteURL = _self.data('section')
-        $.ajax({
-            url: deleteURL,
-            type: 'POST',
-            data: {
-                _method: 'DELETE',
-            },
-            success: function (data) {
+
+        $httpClient.make()
+            .post(deleteURL, { _method: 'DELETE' })
+            .then(({ data }) => {
                 if (data.error) {
                     Botble.showError(data.message)
                 } else {
                     Botble.showSuccess(data.message)
-                    const formAction = $('.page-content form').prop('action')
+                    const formAction = $('.page-wrapper form').prop('action')
                     $('#address-histories').load(formAction + ' #address-histories > *')
                 }
                 _self.closest('.modal').modal('hide')
-                _self.removeClass('button-loading')
-            },
-            error: function error(data) {
-                Botble.handleError(data)
-                _self.removeClass('button-loading')
-            },
-        })
+            })
+            .finally(() => {
+                Botble.hideButtonLoading(_self)
+            })
     })
 })

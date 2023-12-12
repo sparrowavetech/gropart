@@ -1,16 +1,18 @@
 @extends(BaseHelper::getAdminMasterLayoutTemplate())
 
 @section('content')
-    <div class="max-width-1200">
-        {!! Form::open(['route' => ['setting.email.template.store']]) !!}
+    <x-core::form
+        :url="$updateUrl"
+        method="put"
+    >
         <input
-            name="module"
             type="hidden"
+            name="module"
             value="{{ $pluginData['name'] }}"
         >
         <input
-            name="template_file"
             type="hidden"
+            name="template_file"
             value="{{ $pluginData['template_file'] }}"
         >
 
@@ -20,131 +22,82 @@
         >
             @if ($emailSubject)
                 <input
-                    name="email_subject_key"
                     type="hidden"
+                    name="email_subject_key"
                     value="{{ get_setting_email_subject_key($pluginData['type'], $pluginData['name'], $pluginData['template_file']) }}"
                 >
 
-                <x-core-setting::text-input
+                <x-core::form.text-input
                     name="email_subject"
-                    data-counter="300"
                     :label="trans('core/setting::setting.email.subject')"
                     :value="$emailSubject"
+                    data-counter="300"
                 />
             @endif
 
-            <x-core-setting::form-group>
-                <label
-                    class="text-title-field"
-                    for="email_content"
-                >{{ trans('core/setting::setting.email.content') }}</label>
-                <div class="d-inline-flex mb-3">
-                    <div class="dropdown me-2">
-                        <button
-                            class="btn btn-primary dropdown-toggle"
-                            data-bs-toggle="dropdown"
-                            type="button"
-                        >
-                            <i class="fa fa-code"></i> {{ __('Variables') }}
-                        </button>
-                        <ul class="dropdown-menu">
-                            @foreach (EmailHandler::getVariables($pluginData['type'], $pluginData['name'], $pluginData['template_file']) as $key => $label)
-                                <li>
-                                    <a
-                                        class="js-select-mail-variable"
-                                        data-key="{{ $key }}"
-                                        href="#"
-                                    >
-                                        <span class="text-danger">{{ $key }}</span>: {{ trans($label) }}
-                                    </a>
-                                </li>
-                            @endforeach
-                        </ul>
-                    </div>
-                    <div class="dropdown">
-                        <button
-                            class="btn btn-primary dropdown-toggle"
-                            data-bs-toggle="dropdown"
-                            type="button"
-                        >
-                            <i class="fa fa-code"></i> {{ __('Functions') }}
-                        </button>
-                        <ul class="dropdown-menu">
-                            @foreach (EmailHandler::getFunctions() as $key => $function)
-                                <li>
-                                    <a
-                                        class="js-select-mail-function"
-                                        data-key="{{ $key }}"
-                                        data-sample="{{ $function['sample'] }}"
-                                        href="#"
-                                    >
-                                        <span class="text-danger">{{ $key }}</span>:
-                                        {{ trans($function['label']) }}
-                                    </a>
-                                </li>
-                            @endforeach
-                        </ul>
-                    </div>
-                </div>
-                <textarea
-                    class="form-control"
-                    id="mail-template-editor"
-                    name="email_content"
-                    style="overflow-y:scroll; height: 500px;"
-                >{{ $emailContent }}</textarea>
-                {{ Form::helper(__('Learn more about Twig template: :url', ['url' => Html::link('https://twig.symfony.com/doc/3.x/', null, ['target' => '_blank'])])) }}
-            </x-core-setting::form-group>
+            <x-core::form-group>
+                <x-core::form.label for="mail-template-editor">
+                    {{ trans('core/setting::setting.email.content') }}
+                </x-core::form.label>
 
-            <x-slot:pre-footer>
-                <div class="mt-3">
-                    {!! apply_filters(
-                        'setting_email_template_meta_boxes',
-                        null,
-                        request()->route()->parameters(),
-                    ) !!}
-                </div>
-            </x-slot:pre-footer>
+                <x-core::twig-editor
+                    :variables="EmailHandler::getVariables($pluginData['type'], $pluginData['name'], $pluginData['template_file'])"
+                    :functions="EmailHandler::getFunctions()"
+                    :value="$emailContent"
+                    name="email_content"
+                    mode="html"
+                >
+                </x-core::twig-editor>
+            </x-core::form-group>
+
+            @if (
+                $metabox = apply_filters(
+                    'setting_email_template_meta_boxes',
+                    null,
+                    request()->route()->parameters()))
+                <x-slot:footer>
+                    <div class="mt-3">
+                        {!! $metabox !!}
+                    </div>
+                </x-slot:footer>
+            @endif
         </x-core-setting::section>
 
-        <div
-            class="flexbox-annotated-section"
-            style="border: none"
-        >
-            <div class="flexbox-annotated-section-annotation">&nbsp;</div>
-            <div class="flexbox-annotated-section-content">
-                <a
-                    class="btn btn-secondary"
-                    href="{{ route('settings.email') }}"
-                >{{ trans('core/setting::setting.email.back') }}</a>
-                <a
-                    class="btn btn-success"
-                    href="{{ route('setting.email.preview', ['type' => $pluginData['type'], 'module' => $pluginData['name'], 'template' => $pluginData['template_file']]) }}"
+        <x-core-setting::section.action>
+            <div class="btn-list">
+                <x-core::button
+                    type="submit"
+                    color="primary"
+                    icon="ti ti-device-floppy"
+                >
+                    {{ trans('core/setting::setting.save_settings') }}
+                </x-core::button>
+                <x-core::button
+                    tag="a"
+                    href="{{ $restoreUrl . BaseHelper::stringify(request()->input('ref_lang')) }}"
+                    icon="ti ti-arrow-back-up"
+                    data-bb-toggle="reset-default"
+                >
+                    {{ trans('core/setting::setting.email.reset_to_default') }}
+                </x-core::button>
+                <x-core::button
+                    tag="a"
+                    href="{{ route('settings.email.template.preview', ['type' => $pluginData['type'], 'module' => $pluginData['name'], 'template' => $pluginData['template_file']]) }}"
                     target="_blank"
+                    icon="ti ti-eye"
                 >
                     {{ trans('core/setting::setting.preview') }}
-                    <i class="fa fa-external-link"></i>
-                </a>
-                <a
-                    class="btn btn-warning btn-trigger-reset-to-default"
-                    data-target="{{ route('setting.email.template.reset-to-default', ['ref_lang' => BaseHelper::stringify(request()->input('ref_lang'))]) }}"
-                >{{ trans('core/setting::setting.email.reset_to_default') }}</a>
-                <button
-                    class="btn btn-info"
-                    name="submitter"
-                    type="submit"
-                >{{ trans('core/setting::setting.save_settings') }}</button>
+                </x-core::button>
             </div>
-        </div>
-        {!! Form::close() !!}
-    </div>
+        </x-core-setting::section.action>
+    </x-core::form>
 
-    <x-core::modal
+    <x-core::modal.action
         id="reset-template-to-default-modal"
-        type="info"
+        type="warning"
         :title="trans('core/setting::setting.email.confirm_reset')"
-        button-id="reset-template-to-default-button"
-        :button-label="trans('core/setting::setting.email.continue')"
-    >
-        {!! trans('core/setting::setting.email.confirm_message') !!}
-    </x-core::modal>
-@endsection
+        :description="trans('core/setting::setting.email.confirm_message')"
+        :submit-button-attrs="['id' => 'reset-template-to-default-button']"
+        :submit-button-label="trans('core/setting::setting.email.continue')"
+    />
+@stop

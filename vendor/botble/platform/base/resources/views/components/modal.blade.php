@@ -1,81 +1,98 @@
 @props([
     'id' => null,
-    'class' => null,
     'title' => null,
-    'buttonLabel' => null,
-    'type' => 'info',
+    'blur' => true,
+    'closeButton' => true,
     'size' => null,
-    'buttonClass' => null,
+    'bodyClass' => null,
+    'bodyAttrs' => [],
+    'formAction' => null,
+    'formMethod' => 'POST',
+    'formAttrs' => [],
+    'hasForm' => false,
+    'type' => null,
     'buttonId' => null,
-    'header' => null,
-    'footer' => null,
-    'headerIcon' => null,
-    'options' => [],
+    'buttonClass' => null,
+    'buttonLabel' => null,
+    'centered' => true,
+    'scrollable' => true,
 ])
 
+@php
+    $classes = Arr::toCssClasses(['modal', 'fade', 'modal-blur' => $blur]);
+
+    $hasForm = $hasForm || $formAction;
+@endphp
+
 <div
-    data-backdrop="static"
-    data-keyboard="false"
-    role="dialog"
-    aria-labelledby="{{ $id }}"
-    aria-hidden="true"
+    {{ $attributes->merge(['id' => $id, 'class' => $classes])->class($classes) }}
     tabindex="-1"
-    @if ($id) id="{{ $id }}" @endif
-    @class(['modal fade', $class => $class])
-    @if ($options) {!! Html::attributes(array_merge(['data-backdrop' => 'static', 'data-keyboard' => 'false'], $options)) !!} @else @endif>
-    <div @class([
-        'modal-dialog',
-        'modal-xs' => !$size && strlen($slot) < 120,
-        'modal-lg' => !$size && strlen($slot) > 1000,
-        'modal-' . str_replace('modal-', '', (string) $size) => $size,
-    ])>
+    role="dialog"
+    aria-hidden="true"
+    data-select2-dropdown-parent="true"
+>
+    <div
+        @class([
+            'modal-dialog',
+            'modal-dialog-centered' => $centered,
+            'modal-dialog-scrollable' => $scrollable,
+            $size ? "modal-$size" : null,
+        ])
+        role="document"
+    >
         <div class="modal-content">
-            @if ($header !== false)
-                @if ($header)
-                    {!! $header !!}
-                @else
-                    <div class="modal-header bg-{{ $type }}">
-                        <h4 class="modal-title">
-                            @if ($headerIcon !== false)
-                                {!! $headerIcon !!}
-                            @else
-                                <i class="til_img"></i>
-                            @endif
-                            @if ($title !== false)
-                                <strong>{!! $title !!}</strong>
-                            @endif
-                        </h4>
-                        <button
-                            class="btn-close"
-                            data-bs-dismiss="modal"
-                            type="button"
-                            aria-hidden="true"
-                        ></button>
-                    </div>
-                @endif
-            @endif
-
-            <div class="modal-body with-padding">
-                {{ $slot }}
-            </div>
-
-            @if ($footer !== false)
-                <div class="modal-footer">
-                    @if ($footer)
-                        {!! $footer !!}
-                    @else
-                        <button
-                            class="float-start btn btn-{{ $type != 'warning' ? 'warning' : 'info' }}"
-                            data-bs-dismiss="modal"
-                            type="button"
-                        >{{ trans('core/base::tables.cancel') }}</button>
-                        <button
-                            class="float-end btn btn-{{ $type }} @if ($buttonClass) {{ $buttonClass }} @endif"
-                            type="submit"
-                            @if ($buttonId) id="{{ $buttonId }}" @endif
-                        >{!! $buttonLabel !!}</button>
+            @if ($title || $closeButton)
+                <div class="modal-header">
+                    <h5 class="modal-title">{{ $title }}</h5>
+                    @if ($closeButton)
+                        <x-core::modal.close-button />
                     @endif
                 </div>
+            @endif
+            @if ($hasForm)
+                <form
+                    action="{{ $formAction }}"
+                    method="{{ $formMethod }}"
+                    {!! Html::attributes($formAttrs) !!}
+                >
+                    @csrf
+                    @endif
+
+                    @if($type)
+                        <div class="modal-status bg-{{ $type }}"></div>
+                    @endif
+
+                    @if ($slot->isNotEmpty())
+                        <div {!! Html::attributes(array_merge($bodyAttrs, ['class' => rtrim('modal-body ' . Arr::get($bodyAttrs, 'class'))])) !!}>
+                            {{ $slot }}
+                        </div>
+                    @else
+                        {{ $slot }}
+                    @endif
+
+                    @if (!empty($footer) && $footer->isNotEmpty())
+                        <div class="modal-footer">
+                            {{ $footer }}
+                        </div>
+                    @endif
+
+                    @if($buttonId && $buttonLabel)
+                        <div class="modal-footer">
+                            <x-core::button type="button" data-bs-dismiss="modal">
+                                {{ trans('core/base::tables.cancel') }}
+                            </x-core::button>
+                            <x-core::button
+                                :id="$buttonId"
+                                @class(['ms-auto', $buttonClass => $buttonClass])
+                                :color="$type ?? 'primary'"
+                            >
+                                {{ $buttonLabel }}
+                            </x-core::button>
+                        </div>
+                    @endif
+
+                    @if ($hasForm)
+                </form>
             @endif
         </div>
     </div>

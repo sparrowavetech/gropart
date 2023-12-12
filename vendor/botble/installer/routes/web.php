@@ -1,29 +1,29 @@
 <?php
 
+use Botble\Installer\Http\Controllers\AccountController;
+use Botble\Installer\Http\Controllers\EnvironmentController;
+use Botble\Installer\Http\Controllers\FinalController;
 use Botble\Installer\Http\Controllers\InstallController;
+use Botble\Installer\Http\Controllers\LicenseController;
+use Botble\Installer\Http\Controllers\RequirementController;
 use Illuminate\Support\Facades\Route;
 
 Route::group([
     'prefix' => 'install',
     'as' => 'installers.',
-    'controller' => InstallController::class,
-    'middleware' => ['web', 'core'],
+    'middleware' => ['web'],
 ], function () {
     Route::group(['middleware' => 'install'], function () {
-        Route::get('/', 'getWelcome')->name('welcome');
-
-        Route::get('requirements', 'getRequirements')->name('requirements');
-
-        Route::get('environment', 'getEnvironment')->name('environment');
-
-        Route::post('environment/save', 'postSaveEnvironment')->name('environment.save');
+        Route::get('welcome', [InstallController::class, 'index'])->name('welcome');
+        Route::resource('requirements', RequirementController::class)->only(['index']);
+        Route::resource('environments', EnvironmentController::class)->only(['index', 'store']);
     });
 
     Route::group(['middleware' => 'installing'], function () {
-        Route::get('account', 'getCreateAccount')->name('create_account');
+        Route::resource('accounts', AccountController::class)->only(['index', 'store']);
+        Route::resource('licenses', LicenseController::class)->only(['index', 'store']);
+        Route::get('final', [FinalController::class, 'index'])->name('final');
 
-        Route::post('account/save', 'postSaveAccount')->name('account.save');
-
-        Route::get('final', 'getFinish')->name('final');
+        Route::post('licenses/skip', [LicenseController::class, 'skip'])->name('licenses.skip');
     });
 });

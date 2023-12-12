@@ -1,3 +1,5 @@
+<meta name="robots" content="index,follow" />
+
 {!! SeoHelper::render() !!}
 
 @if ($favicon = theme_option('favicon'))

@@ -1,14 +1,14 @@
 @php
     $field['options'] = config('core.base.general.google_fonts', []);
-    
+
     $customGoogleFonts = config('core.base.general.custom_google_fonts');
-    
+
     if ($customGoogleFonts) {
         $field['options'] = array_merge($field['options'], explode(',', $customGoogleFonts));
     }
-    
+
     $customFonts = config('core.base.general.custom_fonts');
-    
+
     if ($customFonts) {
         $field['options'] = array_merge($field['options'], explode(',', $customFonts));
     }
@@ -18,7 +18,7 @@
     $name,
     ['' => __('-- Select --')] + array_combine($field['options'], $field['options']),
     $selected,
-    ['class' => 'select2_google_fonts_picker'],
+    ['data-bb-toggle' => 'google-font-selector'],
 ) !!}
 
 @once

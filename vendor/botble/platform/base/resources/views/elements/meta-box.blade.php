@@ -1,7 +1,7 @@
 @if (!empty($data))
     <div
-        class="meta-box-sortables"
         id="{{ $context }}-sortables"
+        class="meta-box-sortables"
     >
         {!! $data !!}
     </div>

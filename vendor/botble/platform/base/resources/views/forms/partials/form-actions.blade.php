@@ -1,65 +1,41 @@
-<div class="widget meta-boxes form-actions form-actions-default action-{{ $direction ?? 'horizontal' }}">
-    <div class="widget-title">
-        <h4>
+<x-core::card>
+    <x-core::card.header>
+        <x-core::card.title>
             @if (!empty($icon))
                 <i class="{{ $icon }}"></i>
             @endif
-            <span>{{ $title ?? apply_filters(BASE_ACTION_FORM_ACTIONS_TITLE, trans('core/base::forms.publish')) }}</span>
-        </h4>
-    </div>
-    <div class="widget-body">
-        <div class="btn-set">
-            @php do_action(BASE_ACTION_FORM_ACTIONS, 'default') @endphp
-            @if (!isset($onlySave) || !$onlySave)
-                <button
-                    class="btn btn-info"
-                    name="submitter"
-                    type="submit"
-                    value="save"
-                >
-                    <i class="{{ $saveIcon ?? 'fa fa-save' }}"></i> {{ $saveTitle ?? trans('core/base::forms.save') }}
-                </button>
-            @endif
-            &nbsp;
-            <button
-                class="btn btn-success"
-                name="submitter"
-                type="submit"
-                value="apply"
-            >
-                <i class="fa fa-check-circle"></i> {{ trans('core/base::forms.save_and_continue') }}
-            </button>
+            {{ $title ?? apply_filters(BASE_ACTION_FORM_ACTIONS_TITLE, trans('core/base::forms.publish')) }}
+        </x-core::card.title>
+    </x-core::card.header>
+    <x-core::card.body>
+        @include('core/base::forms.partials.form-buttons')
+    </x-core::card.body>
+</x-core::card>
 
-            {!! apply_filters('base_action_form_actions_extra', null) !!}
+<div
+    data-bb-waypoint
+    data-bb-target="#form-actions"
+></div>
+
+<header
+    @class(['top-0 w-100 position-fixed end-0 z-1000', 'vertical-wrapper' => AdminHelper::isInAdmin(true) && AdminAppearance::isVerticalLayout()])
+    id="form-actions"
+    @style(['display: none'])
+>
+    <div class="navbar">
+        <div class="{{ AdminAppearance::getContainerWidth() }}">
+            <div class="row g-2 align-items-center w-100">
+                @if(is_in_admin(true))
+                    <div class="col">
+                        <div class="page-pretitle">
+                            {!! Breadcrumbs::render('main', PageTitle::getTitle(false)) !!}
+                        </div>
+                    </div>
+                @endif
+                <div class="col-auto ms-auto d-print-none">
+                    @include('core/base::forms.partials.form-buttons')
+                </div>
+            </div>
         </div>
     </div>
-</div>
-<div id="waypoint"></div>
-<div class="form-actions form-actions-fixed-top hidden">
-    {!! Breadcrumbs::render('main', PageTitle::getTitle(false)) !!}
-    <div class="btn-set">
-        @php do_action(BASE_ACTION_FORM_ACTIONS, 'fixed-top') @endphp
-        @if (!isset($onlySave) || !$onlySave)
-            <button
-                class="btn btn-info"
-                name="submitter"
-                type="submit"
-                value="save"
-            >
-                <i class="{{ $saveIcon ?? 'fa fa-save' }}"></i> {{ $saveTitle ?? trans('core/base::forms.save') }}
-            </button>
-        @endif
-
-        &nbsp;
-        <button
-            class="btn btn-success"
-            name="submitter"
-            type="submit"
-            value="apply"
-        >
-            <i class="fa fa-check-circle"></i> {{ trans('core/base::forms.save_and_continue') }}
-        </button>
-
-        {!! apply_filters('base_action_form_actions_extra', null) !!}
-    </div>
-</div>
+</header>

@@ -1,15 +1,22 @@
-<a
-    class="btn-trigger-show-seo-detail"
-    href="#"
-    v-pre
->{{ trans('packages/seo-helper::seo-helper.edit_seo_meta') }}</a>
+@push('meta-box-header-seo_wrap')
+    <x-core::card.actions>
+        <a
+            href="#"
+            class="btn-trigger-show-seo-detail"
+            v-pre
+        >{{ trans('packages/seo-helper::seo-helper.edit_seo_meta') }}</a>
+    </x-core::card.actions>
+@endpush
+
 <div
     class="seo-preview"
     v-pre
 >
-    <p class="default-seo-description @if (!empty($object->id)) hidden @endif">
-        {{ trans('packages/seo-helper::seo-helper.default_description') }}</p>
-    <div class="existed-seo-meta @if (empty($object->id)) hidden @endif">
+    <p @class(['default-seo-description', 'hidden' => !empty($object->id)])>
+        {{ trans('packages/seo-helper::seo-helper.default_description') }}
+    </p>
+
+    <div @class(['existed-seo-meta', 'hidden' => empty($object->id)])>
         <span class="page-title-seo">
             {!! BaseHelper::clean($meta['seo_title'] ?? (!empty($object->id) ? $object->name ?? $object->title : null)) !!}
         </span>
@@ -23,44 +30,39 @@
                 style="color: #70757a;">{{ !empty($object->id) && $object->created_at ? $object->created_at->format('M d, Y') : Carbon\Carbon::now()->format('M d, Y') }}
                 - </span>
             <span class="page-description-seo">
-                {{ strip_tags((string) $meta['seo_description'] ?? (!empty($object->id) ? $object->description : (!empty($object->id) && $object->content ? Str::limit($object->content, 250) : old('seo_meta.seo_description')))) }}
+                @if (!empty($meta['seo_description']))
+                    {{ strip_tags($meta['seo_description']) }}
+                @elseif ($metaDescription = (!empty($object->id) ? ($object->description ?: ($object->content ? Str::limit($object->content, 250) : old('seo_meta.seo_description'))) : old('seo_meta.seo_description')))
+                    {{ strip_tags($metaDescription) }}
+                @endif
             </span>
         </div>
     </div>
 </div>
 
 <div
-    class="seo-edit-section hidden"
+    class="hidden seo-edit-section"
     v-pre
 >
-    <hr>
-    <div class="form-group mb-3">
-        <label
-            class="control-label"
-            for="seo_title"
-        >{{ trans('packages/seo-helper::seo-helper.seo_title') }}</label>
-        {!! Form::text('seo_meta[seo_title]', $meta['seo_title'] ?? old('seo_meta.seo_title'), [
-            'class' => 'form-control',
-            'id' => 'seo_title',
-            'placeholder' => trans('packages/seo-helper::seo-helper.seo_title'),
-            'data-counter' => 120,
-        ]) !!}
-    </div>
-    <div class="form-group mb-3">
-        <label
-            class="control-label"
-            for="seo_description"
-        >{{ trans('packages/seo-helper::seo-helper.seo_description') }}</label>
-        {!! Form::textarea(
-            'seo_meta[seo_description]',
-            strip_tags((string) $meta['seo_description']) ?? old('seo_meta.seo_description'),
-            [
-                'class' => 'form-control',
-                'rows' => 3,
-                'id' => 'seo_description',
-                'placeholder' => trans('packages/seo-helper::seo-helper.seo_description'),
-                'data-counter' => 160,
-            ],
-        ) !!}
-    </div>
+    <x-core::hr />
+
+    <x-core::form.text-input
+        :label="trans('packages/seo-helper::seo-helper.seo_title')"
+        id="seo_title"
+        name="seo_meta[seo_title]"
+        :value="old('seo_meta.seo_title', $meta['seo_title'])"
+        :placeholder="trans('packages/seo-helper::seo-helper.seo_title')"
+        :data-counter="120"
+    />
+
+    <x-core::form.textarea
+        :label="trans('packages/seo-helper::seo-helper.seo_description')"
+        id="seo_description"
+        name="seo_meta[seo_description]"
+        type="textarea"
+        :value="old('seo_meta.seo_description', strip_tags((string) $meta['seo_description']))"
+        :placeholder="trans('packages/seo-helper::seo-helper.seo_description')"
+        :data-counter="160"
+        rows="3"
+    />
 </div>

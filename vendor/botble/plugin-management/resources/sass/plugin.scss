@@ -1,0 +1,49 @@
+#plugin-list {
+    .app-grid--blank-slate {
+        .app-item {
+            .app-icon {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 120px;
+                background-color: #7fc8d6;
+                background-repeat: no-repeat;
+                background-size: contain;
+                background-position: center;
+                border-radius: 3px 3px 0 0;
+                overflow: hidden;
+            }
+
+            .app-details {
+                padding: 10px 10px 5px;
+                position: relative;
+
+                .app-name {
+                    margin: 0 0 5px;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                    font-size: 14px;
+                    font-weight: bold;
+                    line-height: inherit;
+                }
+            }
+
+            .app-footer {
+                padding-inline-start: 10px;
+                padding-inline-end: 10px;
+                padding-bottom: 12px;
+            }
+        }
+
+        .app-item:hover {
+            .app-details {
+                color: #59a4d2;
+            }
+
+            .app-name {
+                color: var(--bb-primary);
+            }
+        }
+    }
+}

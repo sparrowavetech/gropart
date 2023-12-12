@@ -9,7 +9,7 @@
 @endif
 
 @if ($showField)
-    {!! Form::text($name, $options['value'], $options['attr']) !!}
+    {!! Form::number($name, $options['value'], $options['attr']) !!}
     @include('core/base::forms.partials.help-block')
 @endif
 

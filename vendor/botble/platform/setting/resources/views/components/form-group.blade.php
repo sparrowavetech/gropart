@@ -1,3 +1,3 @@
-<div {{ $attributes->merge(['class' => 'form-group mb-3']) }}>
+<x-core::form-group {{ $attributes }}>
     {{ $slot }}
-</div>
+</x-core::form-group>

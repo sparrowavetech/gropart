@@ -14,7 +14,8 @@ return new class () extends Migration {
                     json_encode(['email', 'country', 'state', 'city', 'address'])
                 )->save();
             }
-        } catch (Throwable) {}
+        } catch (Throwable) {
+        }
     }
 
     public function down(): void

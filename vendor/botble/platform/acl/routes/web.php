@@ -3,12 +3,11 @@
 use Botble\ACL\Http\Controllers\Auth\ForgotPasswordController;
 use Botble\ACL\Http\Controllers\Auth\LoginController;
 use Botble\ACL\Http\Controllers\Auth\ResetPasswordController;
-use Botble\ACL\Http\Controllers\UserController;
-use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\AdminHelper;
 use Illuminate\Support\Facades\Route;
 
-Route::group(['namespace' => 'Botble\ACL\Http\Controllers', 'middleware' => ['web', 'core']], function () {
-    Route::group(['prefix' => BaseHelper::getAdminPrefix()], function () {
+Route::group(['namespace' => 'Botble\ACL\Http\Controllers'], function () {
+    AdminHelper::registerRoutes(function () {
         Route::group(['middleware' => 'guest'], function () {
             Route::get('login', [LoginController::class, 'showLoginForm'])->name('access.login');
             Route::post('login', [LoginController::class, 'login'])->name('access.login.post');
@@ -23,24 +22,28 @@ Route::group(['namespace' => 'Botble\ACL\Http\Controllers', 'middleware' => ['we
             Route::post('password/reset', [ResetPasswordController::class, 'reset'])
                 ->name('access.password.reset.post');
         });
+    }, ['web', 'core']);
 
-        Route::group(['middleware' => 'auth'], function () {
-            Route::get('logout', [
-                'as' => 'access.logout',
-                'uses' => 'Auth\LoginController@logout',
-                'permission' => false,
-            ]);
-        });
-    });
+    AdminHelper::registerRoutes(function () {
+        Route::get('logout', [
+            'as' => 'access.logout',
+            'uses' => 'Auth\LoginController@logout',
+            'permission' => false,
+        ]);
 
-    Route::group(['prefix' => BaseHelper::getAdminPrefix(), 'middleware' => 'auth'], function () {
         Route::group(['prefix' => 'system'], function () {
             Route::group(['prefix' => 'users', 'as' => 'users.'], function () {
                 Route::resource('', 'UserController')->except(['edit', 'update'])->parameters(['' => 'user']);
 
-                Route::post('modify-profile-image/{id}', [
+                Route::post('modify-profile-image/{user}', [
                     'as' => 'profile.image',
                     'uses' => 'UserController@postAvatar',
+                    'permission' => false,
+                ])->wherePrimaryKey();
+
+                Route::post('delete-profile-image/{user}', [
+                    'as' => 'profile.image.destroy',
+                    'uses' => 'UserController@removeAvatar',
                     'permission' => false,
                 ])->wherePrimaryKey();
 
@@ -100,13 +103,5 @@ Route::group(['namespace' => 'Botble\ACL\Http\Controllers', 'middleware' => ['we
                 ]);
             });
         });
-    });
-
-    Route::get('admin-theme/{theme}', [UserController::class, 'getTheme'])->name('admin.theme');
-    Route::group(['prefix' => BaseHelper::getAdminPrefix()], function () {
-        Route::post('/sidebar-menu/toggle', [
-            'as' => 'admin.sidebar-menu.toggle',
-            'uses' => 'UserController@toggleSidebarMenu',
-        ]);
     });
 });

@@ -1,11 +1,19 @@
 <?php
 
-use Botble\Base\Facades\BaseHelper;
-use Botble\Base\Http\Controllers\SystemController;
+use Botble\Base\Facades\AdminHelper;
+use Botble\Base\Http\Controllers\SearchController;
 use Illuminate\Support\Facades\Route;
 
-Route::group(['namespace' => 'Botble\Base\Http\Controllers', 'middleware' => ['web', 'core']], function () {
-    Route::group(['prefix' => BaseHelper::getAdminPrefix(), 'middleware' => 'auth'], function () {
+Route::group(['namespace' => 'Botble\Base\Http\Controllers'], function () {
+    AdminHelper::registerRoutes(function () {
+        Route::group(['prefix' => 'system'], function () {
+            Route::get('', [
+                'as' => 'system.index',
+                'uses' => 'SystemController@getIndex',
+                'permission' => 'core.system',
+            ]);
+        });
+
         Route::group(['prefix' => 'system/info'], function () {
             Route::match(['GET', 'POST'], '', [
                 'as' => 'system.info',
@@ -31,7 +39,7 @@ Route::group(['namespace' => 'Botble\Base\Http\Controllers', 'middleware' => ['w
 
         Route::post('membership/authorize', [
             'as' => 'membership.authorize',
-            'uses' => 'SystemController@authorize',
+            'uses' => 'SystemController@postAuthorize',
             'permission' => false,
         ]);
 
@@ -73,15 +81,34 @@ Route::group(['namespace' => 'Botble\Base\Http\Controllers', 'middleware' => ['w
             'middleware' => 'preventDemo',
         ]);
 
+        Route::post('system/debug-mode/turn-off', [
+            'as' => 'system.debug-mode.turn-off',
+            'uses' => 'DebugModeController@postTurnOff',
+            'permission' => 'superuser',
+            'middleware' => 'preventDemo',
+        ]);
+
+        Route::get('unlicensed', [
+            'as' => 'unlicensed',
+            'uses' => 'UnlicensedController@index',
+            'permission' => false,
+        ]);
+
+        Route::post('unlicensed', [
+            'as' => 'unlicensed.skip',
+            'uses' => 'UnlicensedController@postSkip',
+            'permission' => false,
+        ]);
+
         Route::group(['prefix' => 'notifications', 'as' => 'notifications.', 'permission' => false], function () {
-            Route::get('get-notifications', [
-                'as' => 'get-notification',
-                'uses' => 'NotificationController@getNotification',
+            Route::get('/', [
+                'as' => 'index',
+                'uses' => 'NotificationController@index',
             ]);
 
-            Route::delete('destroy-notification/{id}', [
-                'as' => 'destroy-notification',
-                'uses' => 'NotificationController@delete',
+            Route::delete('{id}', [
+                'as' => 'destroy',
+                'uses' => 'NotificationController@destroy',
             ])->wherePrimaryKey();
 
             Route::get('read-notification/{id}', [
@@ -99,12 +126,12 @@ Route::group(['namespace' => 'Botble\Base\Http\Controllers', 'middleware' => ['w
                 'uses' => 'NotificationController@deleteAll',
             ]);
 
-            Route::get('update-notifications-count', [
-                'as' => 'update-notifications-count',
-                'uses' => 'NotificationController@countNotification',
+            Route::get('count-unread', [
+                'as' => 'count-unread',
+                'uses' => 'NotificationController@countUnread',
             ]);
         });
-    });
 
-    Route::get('settings-language/{alias}', [SystemController::class, 'getLanguage'])->name('settings.language');
+        Route::get('search', [SearchController::class, '__invoke'])->name('core.global-search');
+    });
 });

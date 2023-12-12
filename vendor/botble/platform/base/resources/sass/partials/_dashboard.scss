@@ -1,0 +1,38 @@
+.dashboard-widget-item {
+    .visual {
+        height: 80px;
+        font-size: 35px;
+        line-height: 35px;
+
+        i {
+            font-size: 110px;
+            line-height: 110px;
+        }
+    }
+
+    .details {
+        height: 9rem;
+        .number {
+            font-size: 52px;
+            line-height: 78px;
+        }
+
+        .desc {
+            font-size: 14px;
+            letter-spacing: 0;
+        }
+    }
+}
+
+.widget-item {
+    .card {
+        .card-footer {
+            .simple-pagination {
+                > p {
+                    height: 28px;
+                    line-height: 28px;
+                }
+            }
+        }
+    }
+}

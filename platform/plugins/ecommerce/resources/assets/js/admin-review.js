@@ -1,76 +1,57 @@
 const toggleReviewStatus = (url, button) => {
-    $.ajax({
-        url: url,
-        type: 'POST',
-        beforeSend: () => {
-            button.prop('disabled', true)
-            button.addClass('button-loading')
-        },
-        success: ({ error, message, data }) => {
-            if (error) {
-                Botble.showError(message)
+    Botble.showButtonLoading(button)
+
+    $httpClient.make()
+        .post(url)
+        .then(({ data }) => {
+            if (data.error) {
+                Botble.showError(data.message)
                 return
             }
+            Botble.showSuccess(data.message)
+            $('#review-section-wrapper').load(window.location.href + ' #review-section-wrapper > *')
 
-            Botble.showSuccess(message)
-
-            $('#main').load(window.location.href + ' #main > *')
-        },
-        error: (error) => {
-            Botble.handleError(error)
-        },
-        complete: () => {
-            button.removeClass('button-loading')
-            button.prop('disabled', false)
-        },
-    })
+            button.closest('.modal').modal('hide')
+        })
+        .finally(() => {
+            Botble.hideButtonLoading(button)
+        })
 }
 
 $(document)
-    .on('click', '.btn-trigger-delete-review', function (e) {
-        $('#confirm-delete-review-button').data('target', $(e.currentTarget).data('target'))
+    .on('click', '[data-bb-toggle="review-delete"]', (event) => {
+        $('#confirm-delete-review-button').data('target', $(event.currentTarget).data('target'))
         $('#delete-review-modal').modal('show')
     })
-    .on('click', '#confirm-delete-review-button', function (e) {
-        const button = $(e.currentTarget)
+    .on('click', '#confirm-delete-review-button', (event) => {
+        const _self = $(event.currentTarget)
+        const url = _self.data('target')
 
-        $.ajax({
-            url: button.data('target'),
-            type: 'POST',
-            data: {
-                _method: 'DELETE',
-            },
-            beforeSend: () => {
-                button.prop('disabled', true)
-                button.addClass('button-loading')
-            },
-            success: ({ error, message, data }) => {
-                if (error) {
-                    Botble.showError(message)
+        Botble.hideButtonLoading(_self)
+
+        $httpClient.make()
+            .delete(url)
+            .then(({ data }) => {
+                if (data.error) {
+                    Botble.showError(data.message)
                     return
                 }
+                Botble.showSuccess(data.message)
+                _self.closest('.modal').modal('hide')
 
-                Botble.showSuccess(message)
-                $('#delete-review-modal').modal('hide')
-
-                setTimeout(() => (window.location.href = data.next_url), 2000)
-            },
-            error: (error) => {
-                Botble.handleError(error)
-            },
-            complete: () => {
-                button.removeClass('button-loading')
-                button.prop('disabled', false)
-            },
-        })
+                setTimeout(() => (window.location.href = data?.data?.next_url), 2000)
+            })
+            .finally(() => {
+                Botble.hideButtonLoading(_self)
+            })
     })
-    .on('click', '.btn-trigger-unpublish-review', function (e) {
-        const button = $(e.currentTarget)
+    .on('click', '[data-bb-toggle="review-unpublish"]', (event) => {
+        const button = $(event.currentTarget)
 
         toggleReviewStatus(route('reviews.unpublish', button.data('id')), button)
     })
-    .on('click', '.btn-trigger-publish-review', function (e) {
-        const button = $(e.currentTarget)
+    .on('click', '[data-bb-toggle="review-publish"]', (event) => {
+        const button = $(event.currentTarget)
 
         toggleReviewStatus(route('reviews.publish', button.data('id')), button)
     })

@@ -2,9 +2,8 @@
 
 return [
     'admin_dir' => env('ADMIN_DIR', 'admin'),
-    'default-theme' => env('DEFAULT_THEME', 'default'),
     'base_name' => env('APP_NAME', 'Botble Technologies'),
-    'logo' => '/vendor/core/core/base/images/logo_white.png',
+    'logo' => '/vendor/core/core/base/images/logo.png',
     'favicon' => '/vendor/core/core/base/images/favicon.png',
     'editor' => [
         'ckeditor' => [
@@ -686,6 +685,7 @@ return [
             ['link', 'href', 'Text'],
             ['link', 'color', 'Text'],
             ['audio', 'controls', 'Bool'],
+            ['div', 'data-bs-theme', 'Text'],
         ],
     ],
     'enable_system_updater' => env('CMS_ENABLE_SYSTEM_UPDATER', true),
@@ -697,6 +697,7 @@ return [
     'upgrade_php_require_disabled' => env('CMS_UPGRADE_PHP_REQUIRE_DISABLED', false),
     'enabled_cleanup_database' => env('CMS_ENABLED_CLEANUP_DATABASE', false),
     'hide_cleanup_system_menu' => env('CMS_HIDE_CLEANUP_SYSTEM_MENU', false),
+    'hide_activated_license_info' => env('CMS_HIDE_ACTIVATED_LICENSE_INFO', false),
     'google_fonts_url' => env('CMS_GOOGLE_FONTS_URL', 'https://fonts.bunny.net'),
     'google_fonts_enabled' => env('CMS_GOOGLE_FONTS_ENABLED', true),
     'google_fonts_enabled_cache' => env('CMS_GOOGLE_FONTS_ENABLED_CACHE', true),

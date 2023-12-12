@@ -40,4 +40,6 @@ return [
     'please_select_record' => 'Please select at least one record to perform this action!',
     'filtered' => '(filtered from _MAX_ total records)',
     'search' => 'Search...',
+    'copied' => 'Copied',
+    'copy' => 'Copy',
 ];

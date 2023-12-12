@@ -1,12 +1,25 @@
+@php
+    PageTitle::setTitle(__('500 Internal Server Error'));
+@endphp
+
 @extends('core/base::errors.master')
 
-@section('title', __('An Error Occurred: Internal Server Error'))
-
-@section('message')
-    <h1>{{ __('Oops! An Error Occurred') }}</h1>
-    <h2>{{ __('The server returned a "500 Internal Server Error".') }}</h2>
-
-    <p>
-        {{ __('Something is broken. Please let us know what you were doing when this error occurred. We will fix it as soon as possible. Sorry for any inconvenience caused.') }}
-    </p>
-@stop
+@section('content')
+    <div class="empty">
+        <div class="empty-header">500</div>
+        <p class="empty-title">{{ __('Internal Server Error') }}</p>
+        <p class="empty-subtitle text-secondary">
+            {{ __('Something is broken. Please let us know what you were doing when this error occurred. We will fix it as soon as possible. Sorry for any inconvenience caused.') }}
+        </p>
+        <div class="empty-action">
+            <x-core::button
+                tag="a"
+                href="{{ route('dashboard.index') }}"
+                color="primary"
+                icon="ti ti-arrow-left"
+            >
+                {{ __('Take me home') }}
+            </x-core::button>
+        </div>
+    </div>
+@endsection

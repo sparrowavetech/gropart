@@ -1,7 +1,6 @@
 @props([
     'type' => 'info',
     'title' => null,
-    'subtitle' => null,
     'dismissible' => false,
     'icon' => null,
     'important' => false,
@@ -14,39 +13,36 @@
         'danger' => 'alert-danger',
         default => 'alert-info',
     };
+
+    $icon ??= match ($type) {
+        'success' => 'ti ti-circle-check',
+        'danger' => 'ti ti-alert-triangle',
+        'warning' => 'ti ti-alert-circle',
+        default => 'ti ti-info-circle',
+    };
 @endphp
 
 <div
     role="alert"
-    @class([
-        'bg-white alert',
-        $color,
-        'alert-dismissible' => $dismissible,
-        'alert-important' => $important,
-    ])
+    {{ $attributes->class(['alert', $color, 'alert-dismissible' => $dismissible, 'alert-important' => $important]) }}
 >
     @if ($icon)
         <div class="d-flex">
             <div>
-                <i class="icon alert-icon {{ $icon }}"></i>
+                <x-core::icon :name="$icon" class="alert-icon" />
             </div>
-
-            <div>
+            <div class="w-100">
     @endif
 
     @if ($title)
-        <h4 @class(['alert-title' => !$important])>{!! $title !!}</h4>
-    @endif
-
-    @if ($subtitle)
-        <div @class(['text-muted' => !$important])>{!! $subtitle !!}</div>
+        <h4 @class(['alert-title' => !$important, 'mb-0'])>{!! $title !!}</h4>
     @endif
 
     {{ $slot }}
 
     @if ($icon)
-</div>
-</div>
+        </div>
+    </div>
 @endif
 
 @if ($dismissible)
@@ -56,4 +52,6 @@
         aria-label="close"
     ></a>
 @endif
+
+{{ $additional ?? '' }}
 </div>

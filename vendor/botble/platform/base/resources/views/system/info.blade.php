@@ -1,171 +1,198 @@
 @extends(BaseHelper::getAdminMasterLayoutTemplate())
+
 @section('content')
-    <div class="row">
-        <div class="col-sm-12">
-            <div class="bs-callout bs-callout-primary">
-                <p>{{ trans('core/base::system.report_description') }}:</p>
-                <button
-                    class="btn btn-info btn-sm"
-                    id="btn-report"
-                >{{ trans('core/base::system.get_system_report') }}</button>
+    <x-core::alert
+        type="primary"
+        :title="trans('core/base::system.report_description')"
+    >
+        <x-core::button
+            type="button"
+            id="btn-report"
+            color="info"
+            size="sm"
+            class="mt-2"
+        >
+            {{ trans('core/base::system.get_system_report') }}
+        </x-core::button>
 
-                <div id="report-wrapper">
-                    <textarea
-                        class="col-sm-12"
-                        id="txt-report"
-                        name="txt-report"
-                        rows="10"
-                        spellcheck="false"
-                        onfocus="this.select()"
-                    >
-                        ### {{ trans('core/base::system.system_environment') }}
+        <div class="mt-3" id="report-wrapper" style="display: none;">
+            <textarea
+                name="txt-report"
+                id="txt-report"
+                class="form-control"
+                rows="10"
+                spellcheck="false"
+                onfocus="this.select()"
+            >
+                ### {{ trans('core/base::system.system_environment') }}
 
-                        - {{ trans('core/base::system.cms_version') }}: {{ get_cms_version() }}
-                        - {{ trans('core/base::system.framework_version') }}: {{ $systemEnv['version'] }}
-                        - {{ trans('core/base::system.timezone') }}: {{ $systemEnv['timezone'] }}
-                        - {{ trans('core/base::system.debug_mode_off') }}: {!! !$systemEnv['debug_mode'] ? '&#10004;' : '&#10008;' !!}
-                        - {{ trans('core/base::system.storage_dir_writable') }}: {!! $systemEnv['storage_dir_writable'] ? '&#10004;' : '&#10008;' !!}
-                        - {{ trans('core/base::system.cache_dir_writable') }}: {!! $systemEnv['cache_dir_writable'] ? '&#10004;' : '&#10008;' !!}
-                        - {{ trans('core/base::system.app_size') }}: {{ $systemEnv['app_size'] }}
+                - {{ trans('core/base::system.cms_version') }}: {{ get_cms_version() }}
+                - {{ trans('core/base::system.framework_version') }}: {{ $systemEnv['version'] }}
+                - {{ trans('core/base::system.timezone') }}: {{ $systemEnv['timezone'] }}
+                - {{ trans('core/base::system.debug_mode_off') }}: {!! !$systemEnv['debug_mode'] ? '&#10004;' : '&#10008;' !!}
+                - {{ trans('core/base::system.storage_dir_writable') }}: {!! $systemEnv['storage_dir_writable'] ? '&#10004;' : '&#10008;' !!}
+                - {{ trans('core/base::system.cache_dir_writable') }}: {!! $systemEnv['cache_dir_writable'] ? '&#10004;' : '&#10008;' !!}
+                - {{ trans('core/base::system.app_size') }}: {{ $systemEnv['app_size'] }}
 
-                        ### {{ trans('core/base::system.server_environment') }}
+                ### {{ trans('core/base::system.server_environment') }}
 
-                        - {{ trans('core/base::system.php_version') }}: {{ $serverEnv['version'] . (!$matchPHPRequirement ? '(' . trans('core/base::system.php_version_error', ['version' => $requiredPhpVersion]) . ')' : '') }}
-                        - {{ trans('core/base::system.memory_limit') }}: {!! $serverEnv['memory_limit'] ?: '&mdash;' !!}
-                        - {{ trans('core/base::system.max_execution_time') }}: {!! $serverEnv['max_execution_time'] ?: '&mdash;' !!}
-                        - {{ trans('core/base::system.server_software') }}: {{ $serverEnv['server_software'] }}
-                        - {{ trans('core/base::system.server_os') }}: {{ $serverEnv['server_os'] }}
-                        - {{ trans('core/base::system.database') }}: {{ $serverEnv['database_connection_name'] }}
-                        - {{ trans('core/base::system.ssl_installed') }}: {!! $serverEnv['ssl_installed'] ? '&#10004;' : '&#10008;' !!}
-                        - {{ trans('core/base::system.cache_driver') }}: {{ $serverEnv['cache_driver'] }}
-                        - {{ trans('core/base::system.queue_connection') }}: {{ $serverEnv['queue_connection'] }}
-                        - {{ trans('core/base::system.session_driver') }}: {{ $serverEnv['session_driver'] }}
-                        - {{ trans('core/base::system.allow_url_fopen_enabled') }}: {!! $serverEnv['allow_url_fopen_enabled'] ? '&#10004;' : '&#10008;' !!}
-                        - {{ trans('core/base::system.mbstring_ext') }}: {!! $serverEnv['mbstring'] ? '&#10004;' : '&#10008;' !!}
-                        - {{ trans('core/base::system.openssl_ext') }}: {!! $serverEnv['openssl'] ? '&#10004;' : '&#10008;' !!}
-                        - {{ trans('core/base::system.pdo_ext') }}: {!! $serverEnv['pdo'] ? '&#10004;' : '&#10008;' !!}
-                        - {{ trans('core/base::system.curl_ext') }}: {!! $serverEnv['curl'] ? '&#10004;' : '&#10008;' !!}
-                        - {{ trans('core/base::system.exif_ext') }}: {!! $serverEnv['exif'] ? '&#10004;' : '&#10008;' !!}
-                        - {{ trans('core/base::system.file_info_ext') }}: {!! $serverEnv['fileinfo'] ? '&#10004;' : '&#10008;' !!}
-                        - {{ trans('core/base::system.tokenizer_ext') }}: {!! $serverEnv['tokenizer'] ? '&#10004;' : '&#10008;' !!}
-                        - {{ trans('core/base::system.imagick_or_gd_ext') }}: {!! $serverEnv['imagick_or_gd'] ? '&#10004;' : '&#10008;' !!}
-                        - {{ trans('core/base::system.zip') }}: {!! $serverEnv['zip'] ? '&#10004;' : '&#10008;' !!}
-                        - {{ trans('core/base::system.iconv') }}: {!! $serverEnv['iconv'] ? '&#10004;' : '&#10008;' !!}
+                - {{ trans('core/base::system.php_version') }}: {{ $serverEnv['version'] . (!$matchPHPRequirement ? '(' . trans('core/base::system.php_version_error', ['version' => $requiredPhpVersion]) . ')' : '') }}
+                - {{ trans('core/base::system.memory_limit') }}: {!! $serverEnv['memory_limit'] ?: '&mdash;' !!}
+                - {{ trans('core/base::system.max_execution_time') }}: {!! $serverEnv['max_execution_time'] ?: '&mdash;' !!}
+                - {{ trans('core/base::system.server_software') }}: {{ $serverEnv['server_software'] }}
+                - {{ trans('core/base::system.server_os') }}: {{ $serverEnv['server_os'] }}
+                - {{ trans('core/base::system.database') }}: {{ $serverEnv['database_connection_name'] }}
+                - {{ trans('core/base::system.ssl_installed') }}: {!! $serverEnv['ssl_installed'] ? '&#10004;' : '&#10008;' !!}
+                - {{ trans('core/base::system.cache_driver') }}: {{ $serverEnv['cache_driver'] }}
+                - {{ trans('core/base::system.queue_connection') }}: {{ $serverEnv['queue_connection'] }}
+                - {{ trans('core/base::system.session_driver') }}: {{ $serverEnv['session_driver'] }}
+                - {{ trans('core/base::system.allow_url_fopen_enabled') }}: {!! $serverEnv['allow_url_fopen_enabled'] ? '&#10004;' : '&#10008;' !!}
+                - {{ trans('core/base::system.mbstring_ext') }}: {!! $serverEnv['mbstring'] ? '&#10004;' : '&#10008;' !!}
+                - {{ trans('core/base::system.openssl_ext') }}: {!! $serverEnv['openssl'] ? '&#10004;' : '&#10008;' !!}
+                - {{ trans('core/base::system.pdo_ext') }}: {!! $serverEnv['pdo'] ? '&#10004;' : '&#10008;' !!}
+                - {{ trans('core/base::system.curl_ext') }}: {!! $serverEnv['curl'] ? '&#10004;' : '&#10008;' !!}
+                - {{ trans('core/base::system.exif_ext') }}: {!! $serverEnv['exif'] ? '&#10004;' : '&#10008;' !!}
+                - {{ trans('core/base::system.file_info_ext') }}: {!! $serverEnv['fileinfo'] ? '&#10004;' : '&#10008;' !!}
+                - {{ trans('core/base::system.tokenizer_ext') }}: {!! $serverEnv['tokenizer'] ? '&#10004;' : '&#10008;' !!}
+                - {{ trans('core/base::system.imagick_or_gd_ext') }}: {!! $serverEnv['imagick_or_gd'] ? '&#10004;' : '&#10008;' !!}
+                - {{ trans('core/base::system.zip') }}: {!! $serverEnv['zip'] ? '&#10004;' : '&#10008;' !!}
+                - {{ trans('core/base::system.iconv') }}: {!! $serverEnv['iconv'] ? '&#10004;' : '&#10008;' !!}
 
-                        ### {{ trans('core/base::system.installed_packages') }}
+                ### {{ trans('core/base::system.installed_packages') }}
 
-                        @foreach ($packages as $package)
+                @foreach ($packages as $package)
 - {{ $package['name'] }} : {{ $package['version'] }}
 @endforeach
-                    </textarea>
-                    <button
-                        class="btn btn-info btn-sm"
-                        id="copy-report"
-                    >{{ trans('core/base::system.copy_report') }}</button>
-                </div>
-            </div>
+            </textarea>
+            <x-core::button
+                type="button"
+                id="copy-report"
+                color="info"
+                size="sm"
+                class="mt-2"
+            >
+                {{ trans('core/base::system.copy_report') }}
+            </x-core::button>
         </div>
-    </div>
+    </x-core::alert>
 
-    <div class="row"> <!-- Main Row -->
+    <div class="row">
+        <div class="col-sm-8">
+            <x-core::card>
+                <x-core::card.header>
+                    <x-core::card.title>{{ trans('core/base::system.installed_packages') }}</x-core::card.title>
+                </x-core::card.header>
+                {!! $infoTable->renderTable() !!}
+            </x-core::card>
+        </div>
 
-        <div class="col-sm-8"> <!-- Package & Dependency column -->
-            <div class="widget meta-boxes">
-                <div class="widget-title">
-                    <h4>
-                        <span>{{ trans('core/base::system.installed_packages') }}</span>
-                    </h4>
-                </div>
-                <div class="widget-body">
-                    {!! $infoTable->renderTable() !!}
-                </div>
-            </div>
-        </div> <!-- / Package & Dependency column -->
+        <div class="col-sm-4">
+            <x-core::card class="mb-3">
+                <x-core::card.header>
+                    <x-core::card.title>{{ trans('core/base::system.system_environment') }}</x-core::card.title>
+                </x-core::card.header>
 
-        <div class="col-sm-4"> <!-- Server Environment column -->
-            <div class="widget meta-boxes">
-                <div class="widget-title">
-                    <h4>
-                        <span>{{ trans('core/base::system.system_environment') }}</span>
-                    </h4>
-                </div>
-
-                <ul class="list-group">
-                    <li class="list-group-item">{{ trans('core/base::system.cms_version') }}: {{ get_cms_version() }}</li>
-                    <li class="list-group-item">{{ trans('core/base::system.framework_version') }}:
-                        {{ $systemEnv['version'] }}</li>
-                    <li class="list-group-item">{{ trans('core/base::system.timezone') }}: {{ $systemEnv['timezone'] }}
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        {{ trans('core/base::system.cms_version') }}: {{ get_cms_version() }}
                     </li>
-                    <li class="list-group-item">{{ trans('core/base::system.debug_mode_off') }}: {!! !$systemEnv['debug_mode'] ? '<span class="fas fa-check"></span>' : '<span class="fas fa-times"></span>' !!}
+                    <li class="list-group-item">
+                        {{ trans('core/base::system.framework_version') }}: {{ $systemEnv['version'] }}
                     </li>
-                    <li class="list-group-item">{{ trans('core/base::system.storage_dir_writable') }}:
-                        {!! $systemEnv['storage_dir_writable']
-                            ? '<span class="fas fa-check"></span>'
-                            : '<span class="fas fa-times"></span>' !!}</li>
-                    <li class="list-group-item">{{ trans('core/base::system.cache_dir_writable') }}:
-                        {!! $systemEnv['cache_dir_writable']
-                            ? '<span class="fas fa-check"></span>'
-                            : '<span class="fas fa-times"></span>' !!}</li>
-                    <li class="list-group-item">{{ trans('core/base::system.app_size') }}: {{ $systemEnv['app_size'] }}
+                    <li class="list-group-item">
+                        {{ trans('core/base::system.timezone') }}: {{ $systemEnv['timezone'] }}
+                    </li>
+                    <li class="list-group-item">
+                        {{ trans('core/base::system.debug_mode_off') }}: {{ $statusIcon(!$systemEnv['debug_mode']) }}
+                    </li>
+                    <li class="list-group-item">
+                        {{ trans('core/base::system.storage_dir_writable') }}: {{ $statusIcon($systemEnv['storage_dir_writable']) }}
+                    <li class="list-group-item">
+                        {{ trans('core/base::system.cache_dir_writable') }}: {{ $statusIcon($systemEnv['cache_dir_writable']) }}
+                    </li>
+                    <li class="list-group-item">
+                        {{ trans('core/base::system.app_size') }}: {{ $systemEnv['app_size'] }}
                     </li>
                 </ul>
-            </div>
+            </x-core::card>
 
-            <div class="widget meta-boxes">
-                <div class="widget-title">
-                    <h4>
-                        <span>{{ trans('core/base::system.server_environment') }}</span>
-                    </h4>
-                </div>
+            <x-core::card>
+                <x-core::card.header>
+                    <x-core::card.title>{{ trans('core/base::system.server_environment') }}</x-core::card.title>
+                </x-core::card.header>
 
-                <ul class="list-group">
-                    <li class="list-group-item">{{ trans('core/base::system.php_version') }}: {{ $serverEnv['version'] }}
-                        @if ($matchPHPRequirement)
-                            <span class="fas fa-check"></span>
-                        @else
-                            <span class="fas fa-times"></span> <span
-                                class="text-danger">({{ trans('core/base::system.php_version_error', ['version' => $requiredPhpVersion]) }})</span>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        {{ trans('core/base::system.php_version') }}: {{ $serverEnv['version'] }}
+                        {{ $statusIcon($matchPHPRequirement) }}
+                        @if (!$matchPHPRequirement)
+                            ({{ trans('core/base::system.php_version_error', ['version' => $requiredPhpVersion]) }})
                         @endif
                     </li>
-                    <li class="list-group-item">{{ trans('core/base::system.memory_limit') }}: {!! $serverEnv['memory_limit'] ?: '&mdash;' !!}
+                    <li class="list-group-item">
+                        {{ trans('core/base::system.memory_limit') }}: {!! $serverEnv['memory_limit'] ?: '&mdash;' !!}
                     </li>
-                    <li class="list-group-item">{{ trans('core/base::system.max_execution_time') }}:
+                    <li class="list-group-item">
+                        {{ trans('core/base::system.max_execution_time') }}:
                         {!! $serverEnv['max_execution_time'] ?: '&mdash;' !!}</li>
-                    <li class="list-group-item">{{ trans('core/base::system.server_software') }}:
-                        {{ $serverEnv['server_software'] }}</li>
-                    <li class="list-group-item">{{ trans('core/base::system.server_os') }}: {{ $serverEnv['server_os'] }}
+                    <li class="list-group-item">
+                        {{ trans('core/base::system.server_software') }}:
+                        {{ $serverEnv['server_software'] }}
                     </li>
-                    <li class="list-group-item">{{ trans('core/base::system.database') }}:
-                        {{ $serverEnv['database_connection_name'] }}</li>
-                    <li class="list-group-item">{{ trans('core/base::system.ssl_installed') }}: {!! $serverEnv['ssl_installed'] ? '<span class="fas fa-check"></span>' : '<span class="fas fa-times"></span>' !!}
+                    <li class="list-group-item">
+                        {{ trans('core/base::system.server_os') }}: {{ $serverEnv['server_os'] }}
                     </li>
-                    <li class="list-group-item">{{ trans('core/base::system.cache_driver') }}:
-                        {{ $serverEnv['cache_driver'] }}</li>
-                    <li class="list-group-item">{{ trans('core/base::system.session_driver') }}:
-                        {{ $serverEnv['session_driver'] }}</li>
-                    <li class="list-group-item">{{ trans('core/base::system.queue_connection') }}:
-                        {{ $serverEnv['queue_connection'] }}</li>
-                    <li class="list-group-item">{{ trans('core/base::system.allow_url_fopen_enabled') }}:
-                        {!! $serverEnv['allow_url_fopen_enabled']
-                            ? '<span class="fas fa-check"></span>'
-                            : '<span class="fas fa-times"></span>' !!}</li>
-                    <li class="list-group-item">{{ trans('core/base::system.openssl_ext') }}: {!! $serverEnv['openssl'] ? '<span class="fas fa-check"></span>' : '<span class="fas fa-times"></span>' !!}</li>
-                    <li class="list-group-item">{{ trans('core/base::system.mbstring_ext') }}: {!! $serverEnv['mbstring'] ? '<span class="fas fa-check"></span>' : '<span class="fas fa-times"></span>' !!}
+                    <li class="list-group-item">
+                        {{ trans('core/base::system.database') }}:
+                        {{ $serverEnv['database_connection_name'] }}
                     </li>
-                    <li class="list-group-item">{{ trans('core/base::system.pdo_ext') }}: {!! $serverEnv['pdo'] ? '<span class="fas fa-check"></span>' : '<span class="fas fa-times"></span>' !!}</li>
-                    <li class="list-group-item">{{ trans('core/base::system.curl_ext') }}: {!! $serverEnv['curl'] ? '<span class="fas fa-check"></span>' : '<span class="fas fa-times"></span>' !!}</li>
-                    <li class="list-group-item">{{ trans('core/base::system.exif_ext') }}: {!! $serverEnv['exif'] ? '<span class="fas fa-check"></span>' : '<span class="fas fa-times"></span>' !!}</li>
-                    <li class="list-group-item">{{ trans('core/base::system.file_info_ext') }}: {!! $serverEnv['fileinfo'] ? '<span class="fas fa-check"></span>' : '<span class="fas fa-times"></span>' !!}
+                    <li class="list-group-item">
+                        {{ trans('core/base::system.ssl_installed') }}: {{ $statusIcon($serverEnv['ssl_installed']) }}
                     </li>
-                    <li class="list-group-item">{{ trans('core/base::system.tokenizer_ext') }}: {!! $serverEnv['tokenizer'] ? '<span class="fas fa-check"></span>' : '<span class="fas fa-times"></span>' !!}
+                    <li class="list-group-item">
+                        {{ trans('core/base::system.cache_driver') }}:
+                        {{ $serverEnv['cache_driver'] }}
                     </li>
-                    <li class="list-group-item">{{ trans('core/base::system.imagick_or_gd_ext') }}:
-                        {!! $serverEnv['imagick_or_gd'] ? '<span class="fas fa-check"></span>' : '<span class="fas fa-times"></span>' !!}</li>
-                    <li class="list-group-item">{{ trans('core/base::system.zip') }}: {!! $serverEnv['zip'] ? '<span class="fas fa-check"></span>' : '<span class="fas fa-times"></span>' !!}</li>
-                    <li class="list-group-item">{{ trans('core/base::system.iconv') }}: {!! $serverEnv['zip'] ? '<span class="fas fa-check"></span>' : '<span class="fas fa-times"></span>' !!}</li>
+                    <li class="list-group-item">
+                        {{ trans('core/base::system.session_driver') }}:
+                        {{ $serverEnv['session_driver'] }}
+                    </li>
+                    <li class="list-group-item">
+                        {{ trans('core/base::system.queue_connection') }}:
+                        {{ $serverEnv['queue_connection'] }}
+                    </li>
+                    <li class="list-group-item">
+                        {{ trans('core/base::system.allow_url_fopen_enabled') }}: {{ $statusIcon($serverEnv['allow_url_fopen_enabled']) }}
+                    </li>
+                    <li class="list-group-item">
+                        {{ trans('core/base::system.openssl_ext') }}: {{ $statusIcon($serverEnv['openssl']) }}
+                    </li>
+                    <li class="list-group-item">
+                        {{ trans('core/base::system.mbstring_ext') }}: {{ $statusIcon($serverEnv['mbstring']) }}
+                    </li>
+                    <li class="list-group-item">
+                        {{ trans('core/base::system.pdo_ext') }}: {{ $statusIcon($serverEnv['pdo']) }}
+                    </li>
+                    <li class="list-group-item">
+                        {{ trans('core/base::system.curl_ext') }}: {{ $statusIcon($serverEnv['curl']) }}
+                    <li class="list-group-item">
+                        {{ trans('core/base::system.exif_ext') }}: {{ $statusIcon($serverEnv['exif']) }}
+                    <li class="list-group-item">
+                        {{ trans('core/base::system.file_info_ext') }}: {{ $statusIcon($serverEnv['fileinfo']) }}
+                    </li>
+                    <li class="list-group-item">
+                        {{ trans('core/base::system.tokenizer_ext') }}: {{ $statusIcon($serverEnv['tokenizer']) }}
+                    </li>
+                    <li class="list-group-item">
+                        {{ trans('core/base::system.imagick_or_gd_ext') }}: {{ $statusIcon($serverEnv['imagick_or_gd']) }}
+                    </li>
+                    <li class="list-group-item">
+                        {{ trans('core/base::system.zip') }}: {{ $statusIcon($serverEnv['zip']) }}
+                    <li class="list-group-item">
+                        {{ trans('core/base::system.iconv') }}: {{ $statusIcon($serverEnv['iconv']) }}
+                    </li>
                 </ul>
-            </div>
+            </x-core::card>
         </div>
-
     </div>
-@stop
+@endsection

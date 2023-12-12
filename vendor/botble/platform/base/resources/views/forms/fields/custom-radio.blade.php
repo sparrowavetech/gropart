@@ -11,8 +11,8 @@
 @if ($showField)
     {!! Form::customRadio(
         $name,
-        $options['choices'],
-        $options['value'],
+        $options['choices'] ?? $options['values'],
+        $options['value'] ?? $options['selected'] ?? null,
         $options['attr'],
         $options['default_value'],
     ) !!}

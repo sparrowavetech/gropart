@@ -2,15 +2,17 @@
     {!! Form::open(Arr::except($formOptions, ['template'])) !!}
 @endif
 
-<div class="form-body">
-    @if ($showFields)
-        @foreach ($fields as $field)
-            @if (!in_array($field->getName(), $exclude))
-                {!! $field->render() !!}
-            @endif
-        @endforeach
-    @endif
-</div>
+@if ($showFields)
+    {{ $form->getOpenWrapperFormColumns() }}
+
+    @foreach ($fields as $field)
+        @continue(in_array($field->getName(), $exclude))
+
+        {!! $field->render() !!}
+    @endforeach
+
+    {{ $form->getCloseWrapperFormColumns() }}
+@endif
 
 @if ($showEnd)
     {!! Form::close() !!}

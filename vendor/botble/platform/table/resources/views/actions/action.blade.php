@@ -1,10 +1,12 @@
 @php
-    /** @var \Botble\Table\Actions\Action $action */
+    /** @var Botble\Table\Actions\Action $action */
 @endphp
 
 <a
-    data-bs-toggle="tooltip"
-    data-bs-original-title="{{ $action->getLabel() }}"
+    @if($action->getLabel())
+        data-bs-toggle="tooltip"
+        data-bs-original-title="{{ $action->getLabel() }}"
+    @endif
     href="{{ $action->hasUrl() ? $action->getUrl() : 'javascript:void(0);' }}"
     @if (!$action->getAttribute('class')) @class([
             'btn',
@@ -22,12 +24,12 @@
             data-confirmation-modal-cancel-button="{{ $action->getConfirmationModalCancelButton() }}" @endif
 @elseif($action->shouldOpenUrlInNewTable())
     target="_blank"
-    @endif {!! $action->getAttributes() !!}>
+    @endif {!! Html::attributes($action->getAttributes()) !!}>
     @if ($action->hasIcon())
         @if ($action->isRenderabeIcon())
             {!! BaseHelper::clean($action->getIcon()) !!}
         @else
-            <i class="{{ $action->getIcon() }}"></i>
+            <x-core::icon :name="$action->getIcon()" />
         @endif
     @endif
 

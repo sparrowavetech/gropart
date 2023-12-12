@@ -1,60 +1,71 @@
 @php
-    /** @var \Botble\Table\Abstracts\TableAbstract $table */
+    /** @var Botble\Table\Abstracts\TableAbstract $table */
 @endphp
 
 <div class="table-wrapper">
     @if ($table->hasFilters())
-        <div
-            class="table-configuration-wrap"
-            @if ($table->isFiltering()) style="display: block;" @endif
+        <x-core::card
+            class="mb-3 table-configuration-wrap"
+            @style(['display: none' => !$table->isFiltering(), 'display: block' => $table->isFiltering()])
         >
-            <span class="configuration-close-btn btn-show-table-options"><i class="fa fa-times"></i></span>
-            {!! $table->renderFilter() !!}
-        </div>
+            <x-core::card.body>
+                <x-core::button
+                    type="button"
+                    icon="ti ti-x"
+                    :icon-only="true"
+                    class="btn-show-table-options rounded-pill"
+                    size="sm"
+                />
+
+                {!! $table->renderFilter() !!}
+            </x-core::card.body>
+        </x-core::card>
     @endif
 
-    <div class="portlet light bordered portlet-no-padding">
-        <div class="portlet-title">
-            <div class="caption">
-                <div class="wrapper-action">
-                    @if ($table->hasBulkActions())
-                        <div class="btn-group">
-                            <a
-                                class="btn btn-secondary dropdown-toggle"
-                                data-bs-toggle="dropdown"
-                                href="#"
-                            >{{ trans('core/table::table.bulk_actions') }}
-                            </a>
+    <x-core::card @class([
+        'has-actions' => $table->hasBulkActions(),
+        'has-filter' => $table->hasFilters(),
+    ])>
+        <x-core::card.header>
+            <div class="btn-list">
+                @if ($table->hasBulkActions())
+                    <x-core::dropdown
+                        type="button"
+                        :label="trans('core/table::table.bulk_actions')"
+                    >
+                        @foreach ($table->getBulkActions() as $action)
+                            {!! $action !!}
+                        @endforeach
+                    </x-core::dropdown>
+                @endif
 
-                            <ul class="dropdown-menu">
-                                @foreach ($table->getBulkActions() as $action)
-                                    <li>
-                                        {!! $action !!}
-                                    </li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    @endif
-
-                    @if ($table->hasFilters())
-                        <button
-                            class="btn btn-primary btn-show-table-options">{{ trans('core/table::table.filters') }}</button>
-                    @endif
-                </div>
+                @if ($table->hasFilters())
+                    <x-core::button
+                        type="button"
+                        class="btn-show-table-options"
+                    >
+                        {{ trans('core/table::table.filters') }}
+                    </x-core::button>
+                @endif
             </div>
-        </div>
-        <div class="portlet-body">
-            <div
-                class="table-responsive @if ($table->hasBulkActions()) table-has-actions @endif @if ($table->hasFilters()) table-has-filter @endif">
+        </x-core::card.header>
+
+        <div class="card-table">
+            <div @class([
+                'table-responsive',
+                'table-has-actions' => $table->hasBulkActions(),
+                'table-has-filter' => $table->hasFilters(),
+            ])>
                 @section('main-table')
                     {!! $dataTable->table(compact('id', 'class'), false) !!}
                 @show
             </div>
         </div>
-    </div>
+    </x-core::card>
 </div>
-@include('core/table::modal')
 
 @push('footer')
+    @include('core/table::modal')
+
     {!! $dataTable->scripts() !!}
 @endpush

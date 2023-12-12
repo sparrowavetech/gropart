@@ -4,6 +4,7 @@
     'href' => null,
     'active' => false,
     'iconPlacement' => 'left',
+    'iconClass' => null,
 ])
 
 @php
@@ -13,8 +14,8 @@
 <{{ $tag }} {{ $attributes->merge(['href' => $href])->class(['dropdown-item', 'active' => $active]) }}>
     @if ($icon && $iconPlacement === 'left')
         <x-core::icon
-            class="dropdown-item-icon"
             :name="$icon"
+            @class(['dropdown-item-icon', $iconClass])
         />
     @endif
 
@@ -22,8 +23,8 @@
 
     @if ($icon && $iconPlacement === 'right')
         <x-core::icon
-            class="dropdown-item-icon"
             :name="$icon"
+            @class(['dropdown-item-icon', $iconClass])
         />
     @endif
     </{{ $tag }}>

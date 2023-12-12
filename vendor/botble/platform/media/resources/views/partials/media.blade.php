@@ -1,53 +1,68 @@
 <div
-    class="modal fade media-modal"
+    class="modal modal-blur fade media-modal rv-media-modal"
     id="rv_media_modal"
-    data-keyboard="false"
-    role="dialog"
-    aria-labelledby="myLargeModalLabel"
     tabindex="-1"
+    role="dialog"
+    aria-hidden="true"
 >
-    <div class="modal-dialog modal-full">
+    <div
+        class="modal-dialog modal-dialog-centered modal-full"
+        role="document"
+    >
         <div class="modal-content bb-loading">
             <div class="modal-header">
-                <h4 class="modal-title"><i class="til_img"></i><strong>{{ trans('core/media::media.gallery') }}</strong>
-                </h4>
-                <button
-                    class="btn-close"
-                    data-bs-dismiss="modal"
-                    type="button"
-                    aria-label="{{ trans('core/media::media.close') }}"
-                ></button>
+                <h5 class="modal-title">{{ trans('core/media::media.gallery') }}</h5>
+                <x-core::modal.close-button />
             </div>
             <div
-                class="modal-body media-modal-body media-modal-loading"
+                class="p-0 modal-body media-modal-body media-modal-loading"
                 id="rv_media_body"
-            ></div>
-            <div class="loading-wrapper">
-                <div class="loader">
-                    <svg
-                        class="circular"
-                        viewBox="25 25 50 50"
-                    >
-                        <circle
-                            class="path"
-                            cx="50"
-                            cy="50"
-                            r="20"
-                            fill="none"
-                            stroke-width="2"
-                            stroke-miterlimit="10"
-                        />
-                    </svg>
-                </div>
+            >
+                <x-core::loading />
             </div>
-        </div><!-- /.modal-content -->
-    </div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
+        </div>
+    </div>
+</div>
+
+<x-core::modal
+    id="image-picker-add-from-url"
+    :title="trans('core/media::media.add_from_url')"
+    :form-action="route('media.download_url')"
+    :form-attrs="['id' => 'image-picker-add-from-url-form']"
+>
+    <input type="hidden" name="image-box-target">
+
+    <x-core::form.text-input
+        :label="trans('core/media::media.url')"
+        type="url"
+        name="url"
+        placeholder="https://"
+        :required="true"
+    />
+
+    <x-slot:footer>
+        <x-core::button
+            type="button"
+            data-bs-dismiss="modal"
+        >
+            {{ trans('core/base::forms.cancel') }}
+        </x-core::button>
+
+        <x-core::button
+            type="submit"
+            color="primary"
+            data-bb-toggle="image-picker-add-from-url"
+            form="image-picker-add-from-url-form"
+        >
+            {{ trans('core/base::forms.save_and_continue') }}
+        </x-core::button>
+    </x-slot:footer>
+</x-core::modal>
 
 @include('core/media::config')
 <link
-    type="text/css"
     href="{{ asset('vendor/core/core/media/css/media.css?v=' . time()) }}"
     rel="stylesheet"
+    type="text/css"
 />
 <script src="{{ asset('vendor/core/core/media/js/integrate.js?v=' . time()) }}"></script>

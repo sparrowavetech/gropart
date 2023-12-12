@@ -1,17 +1,25 @@
+@php
+    PageTitle::setTitle(__('404 Page Not Found'));
+@endphp
+
 @extends('core/base::errors.master')
 
 @section('content')
-
-    <div class="m-50">
-        <div class="col-md-10">
-            <h3>{{ trans('core/base::errors.404_title') }}</h3>
-            <p>{{ trans('core/base::errors.reasons') }}</p>
-            <ul>
-                {!! BaseHelper::clean(trans('core/base::errors.404_msg')) !!}
-            </ul>
-
-            <p>{!! BaseHelper::clean(trans('core/base::errors.try_again', ['link' => route('dashboard.index')])) !!}</p>
+    <div class="empty">
+        <div class="empty-header">404</div>
+        <p class="empty-title">{{ __('Page could not be found') }}</p>
+        <p class="empty-subtitle text-secondary">
+            {{ __('The page you are looking for could not be found.') }}
+        </p>
+        <div class="empty-action">
+            <x-core::button
+                tag="a"
+                href="{{ route('dashboard.index') }}"
+                color="primary"
+                icon="ti ti-arrow-left"
+            >
+                {{ __('Take me home') }}
+            </x-core::button>
         </div>
     </div>
-
-@stop
+@endsection

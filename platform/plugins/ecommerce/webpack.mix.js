@@ -49,6 +49,7 @@ const scripts = [
     'export.js',
     'address.js',
     'tax.js',
+    'invoice.js',
 ];
 
 scripts.forEach(item => {
@@ -72,6 +73,7 @@ const styles = [
     'report.scss',
     'order-return.scss',
     'customer-admin.scss',
+    'widget.scss',
 ];
 
 styles.forEach(item => {

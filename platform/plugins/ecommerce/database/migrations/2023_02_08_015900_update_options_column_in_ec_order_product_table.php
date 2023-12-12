@@ -27,7 +27,12 @@ return new class () extends Migration {
                 $originalProduct = $product->originalProduct;
 
                 $orderOptions = [
-                    'image' => RvMedia::getImageUrl($product ? $product->image : ($originalProduct ? $originalProduct->image : ''), 'thumb', false, RvMedia::getDefaultImage()),
+                    'image' => RvMedia::getImageUrl(
+                        $product ? $product->image : ($originalProduct ? $originalProduct->image : ''),
+                        'thumb',
+                        false,
+                        RvMedia::getDefaultImage()
+                    ),
                     'attributes' => $product && $product->is_variation ? $product->variation_attributes : '',
                     'taxRate' => $originalProduct ? $originalProduct->total_taxes_percentage : 0,
                     'options' => $orderProduct->product_options,

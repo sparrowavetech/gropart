@@ -1,70 +1,71 @@
-@extends('core/acl::auth.master')
+@extends('core/acl::layouts.guest')
 
 @section('content')
-    <p>{{ trans('core/acl::auth.sign_in_below') }}:</p>
+    <h2 class="h3 text-center mb-3">
+        {{ trans('core/acl::auth.sign_in_below') }}
+    </h2>
 
-    {!! Form::open(['route' => 'access.login', 'class' => 'login-form']) !!}
-    <div
-        class="form-group mb-3"
-        id="emailGroup"
+    <x-core::form
+        :url="route('access.login')"
+        method="post"
     >
-        <label>{{ trans('core/acl::auth.login.username') }}</label>
-        {!! Form::text(
-            'username',
-            request()->input(
+        <x-core::form.text-input
+            :label="trans('core/acl::auth.login.username')"
+            name="username"
+            :value="old(
                 'email',
-                old(
-                    'username',
-                    BaseHelper::hasDemoModeEnabled() ? config('core.base.general.demo.account.username') : null,
-                ),
-            ),
-            ['class' => 'form-control', 'placeholder' => trans('core/acl::auth.login.username')],
-        ) !!}
-    </div>
+                BaseHelper::hasDemoModeEnabled() ? config('core.base.general.demo.account.username') : null,
+            )"
+            :placeholder="trans('core/acl::auth.login.placeholder.username')"
+            :required="true"
+            error-key="email"
+            tabindex="1"
+        />
 
-    <div
-        class="form-group mb-3"
-        id="passwordGroup"
-    >
-        <label>{{ trans('core/acl::auth.login.password') }}</label>
-        {!! Form::input(
-            'password',
-            'password',
-            request()->input('email')
-                ? null
-                : (BaseHelper::hasDemoModeEnabled()
-                    ? config('core.base.general.demo.account.password')
-                    : null),
-            ['class' => 'form-control', 'placeholder' => trans('core/acl::auth.login.password')],
-        ) !!}
-    </div>
+        <x-core::form.text-input
+            :label="trans('core/acl::auth.login.password')"
+            type="password"
+            name="password"
+            :value="BaseHelper::hasDemoModeEnabled()
+                ? config('core.base.general.demo.account.password')
+                : null"
+            :placeholder="trans('core/acl::auth.login.placeholder.password')"
+            :required="true"
+            tabindex="2"
+        >
+            <x-slot:label-description>
+                <a
+                    href="{{ route('access.password.request') }}"
+                    {{ trans('core/acl::auth.forgot_password.title') }}
+                    tabindex="5"
+                >{{ trans('core/acl::auth.lost_your_password') }}</a>
+            </x-slot:label-description>
+        </x-core::form.text-input>
 
-    <div>
-        <label>
-            {!! Form::checkbox('remember', '1', true) !!} {{ trans('core/acl::auth.login.remember') }}
-        </label>
-    </div>
-    <br>
+        <x-core::form-group>
+            <x-core::form.checkbox
+                :label="trans('core/acl::auth.login.remember')"
+                name="remember"
+                :checked="true"
+                tabindex="3"
+            />
+        </x-core::form-group>
 
-    <button
-        class="btn btn-block login-button"
-        type="submit"
-    >
-        <span class="signin">{{ trans('core/acl::auth.login.login') }}</span>
-    </button>
-    <div class="clearfix"></div>
+        <div class="form-footer">
+            <x-core::button
+                type="submit"
+                color="primary"
+                class="w-100"
+                icon="ti ti-login-2"
+                tabindex="4"
+            >
+                {{ trans('core/acl::auth.login.login') }}
+            </x-core::button>
+        </div>
 
-    <br>
-    <p><a
-            class="lost-pass-link"
-            href="{{ route('access.password.request') }}"
-            title="{{ trans('core/acl::auth.forgot_password.title') }}"
-        >{{ trans('core/acl::auth.lost_your_password') }}</a></p>
-
-    {!! apply_filters(BASE_FILTER_AFTER_LOGIN_OR_REGISTER_FORM, null, $model) !!}
-
-    {!! Form::close() !!}
-@stop
+        {!! apply_filters(BASE_FILTER_AFTER_LOGIN_OR_REGISTER_FORM, null, $model) !!}
+    </x-core::form>
+@endsection
 
 @push('footer')
     {!! $jsValidator !!}

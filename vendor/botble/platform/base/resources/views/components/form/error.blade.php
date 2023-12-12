@@ -3,7 +3,7 @@
 ])
 
 @error($key)
-    <div {{ $attributes->class('invalid-feedback')->merge() }}>
+    <div {{ $attributes->merge(['class' => 'invalid-feedback']) }}>
         {{ $message }}
     </div>
 @enderror

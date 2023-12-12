@@ -1,16 +1,30 @@
-@foreach ($widgetAreas as $item)
-    @if (class_exists($item->widget_id, false))
-        @php($widget = new $item->widget_id())
+@if (count($widgetAreas))
+    @foreach ($widgetAreas as $item)
+        @continue(! class_exists($item->widget_id, false))
+
+        @php
+            $widget = new $item->widget_id();
+        @endphp
+
         <li
             data-id="{{ $widget->getId() }}"
             data-position="{{ $item->position }}"
+            class="mb-3 widget-item"
         >
-            <div class="widget-handle">
-                <p class="widget-name">{{ $widget->getConfig()['name'] }} <span class="text-end"><i
-                            class="fa fa-caret-down"
-                        ></i></span></p>
-            </div>
-            <div class="widget-content">
+            <x-core::card>
+                <x-core::card.header class="d-flex py-1 px-3 justify-content-between">
+                    {{ $widget->getConfig()['name'] }}
+
+                    <x-core::card.header.button>
+                        <x-core::icon
+                            size="sm"
+                            name="ti ti-chevron-down"
+                        />
+                    </x-core::card.header.button>
+                </x-core::card.header>
+            </x-core::card>
+
+            <x-core::form.fieldset class="widget-content">
                 <form method="post">
                     <input
                         name="id"
@@ -18,19 +32,29 @@
                         value="{{ $widget->getId() }}"
                     >
                     {!! $widget->form($item->sidebar_id, $item->position) !!}
-                    <div class="widget-control-actions">
-                        <div class="float-start">
-                            <button
-                                class="btn btn-danger widget-control-delete">{{ trans('packages/widget::widget.delete') }}</button>
-                        </div>
-                        <div class="float-end text-end">
-                            <button
-                                class="btn btn-primary widget_save">{{ trans('core/base::forms.save_and_continue') }}</button>
-                        </div>
-                        <div class="clearfix"></div>
+                    <div class="widget-control-actions mt-3 d-flex justify-content-between">
+                        <x-core::button
+                            type="button"
+                            :outlined="true"
+                            class="widget-control-delete"
+                        >
+                            {{ trans('packages/widget::widget.delete') }}
+                        </x-core::button>
+
+                        <x-core::button
+                            type="button"
+                            color="primary"
+                            class="widget-save"
+                        >
+                            {{ trans('core/base::forms.save_and_continue') }}
+                        </x-core::button>
                     </div>
                 </form>
-            </div>
+            </x-core::form.fieldset>
         </li>
-    @endif
-@endforeach
+    @endforeach
+@else
+    <li class="dropzone px-1 py-3 text-center">
+        <div class="dz-default dz-message">{{ trans('packages/widget::widget.drag_widget_to_sidebar') }}</div>
+    </li>
+@endif

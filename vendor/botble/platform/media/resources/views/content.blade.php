@@ -1,21 +1,26 @@
 <div class="rv-media-container">
-    <div class="rv-media-wrapper">
+    <x-core::card class="rv-media-wrapper">
         <input
-            class="fake-click-event hidden"
+            type="checkbox"
             id="media_aside_collapse"
-            type="checkbox"
+            class="d-none fake-click-event"
         >
         <input
-            class="fake-click-event hidden"
-            id="media_details_collapse"
             type="checkbox"
+            id="media_details_collapse"
+            class="d-none fake-click-event"
         >
-        <aside class="rv-media-aside @if (RvMedia::getConfig('sidebar_display') != 'vertical') rv-media-aside-hide-desktop @endif">
+
+        <aside @class([
+            'rv-media-aside',
+            'rv-media-aside-hide-desktop' =>
+                RvMedia::getConfig('sidebar_display') !== 'vertical',
+        ])>
             <label
-                class="collapse-sidebar"
                 for="media_aside_collapse"
+                class="collapse-sidebar"
             >
-                <i class="far fa-window-close"></i>
+                <x-core::icon name="ti ti-x" />
             </label>
             <div class="rv-media-block rv-media-filters">
                 <div class="rv-media-block-title">
@@ -25,46 +30,46 @@
                     <ul class="rv-media-aside-list">
                         <li>
                             <a
+                                href="#"
                                 class="js-rv-media-change-filter"
                                 data-type="filter"
                                 data-value="everything"
-                                href="#"
                             >
-                                <i class="fa fa-recycle"></i> {{ trans('core/media::media.everything') }}
+                                <x-core::icon name="ti ti-trash" class="me-0" /> {{ trans('core/media::media.everything') }}
                             </a>
                         </li>
                         @if (array_key_exists('image', RvMedia::getConfig('mime_types', [])))
                             <li>
                                 <a
+                                    href="#"
                                     class="js-rv-media-change-filter"
                                     data-type="filter"
                                     data-value="image"
-                                    href="#"
                                 >
-                                    <i class="fa fa-file-image"></i> {{ trans('core/media::media.image') }}
+                                    <x-core::icon name="ti ti-photo" class="me-0" /> {{ trans('core/media::media.image') }}
                                 </a>
                             </li>
                         @endif
                         @if (array_key_exists('video', RvMedia::getConfig('mime_types', [])))
                             <li>
                                 <a
+                                    href="#"
                                     class="js-rv-media-change-filter"
                                     data-type="filter"
                                     data-value="video"
-                                    href="#"
                                 >
-                                    <i class="fa fa-file-video"></i> {{ trans('core/media::media.video') }}
+                                    <x-core::icon name="ti ti-video" class="me-0" /> {{ trans('core/media::media.video') }}
                                 </a>
                             </li>
                         @endif
                         <li>
                             <a
+                                href="#"
                                 class="js-rv-media-change-filter"
                                 data-type="filter"
                                 data-value="document"
-                                href="#"
                             >
-                                <i class="fa fa-file"></i> {{ trans('core/media::media.document') }}
+                                <x-core::icon name="ti ti-file" class="me-0" /> {{ trans('core/media::media.document') }}
                             </a>
                         </li>
                     </ul>
@@ -78,44 +83,44 @@
                     <ul class="rv-media-aside-list">
                         <li>
                             <a
+                                href="#"
                                 class="js-rv-media-change-filter"
                                 data-type="view_in"
                                 data-value="all_media"
-                                href="#"
                             >
-                                <i class="fa fa-globe"></i> {{ trans('core/media::media.all_media') }}
+                                <x-core::icon name="ti ti-world" /> {{ trans('core/media::media.all_media') }}
                             </a>
                         </li>
                         @if (RvMedia::hasAnyPermission(['folders.destroy', 'files.destroy']))
                             <li>
                                 <a
+                                    href="#"
                                     class="js-rv-media-change-filter"
                                     data-type="view_in"
                                     data-value="trash"
-                                    href="#"
                                 >
-                                    <i class="fa fa-trash"></i> {{ trans('core/media::media.trash') }}
+                                    <x-core::icon name="ti ti-trash" /> {{ trans('core/media::media.trash') }}
                                 </a>
                             </li>
                         @endif
                         <li>
                             <a
+                                href="#"
                                 class="js-rv-media-change-filter"
                                 data-type="view_in"
                                 data-value="recent"
-                                href="#"
                             >
-                                <i class="fa fa-clock"></i> {{ trans('core/media::media.recent') }}
+                                <x-core::icon name="ti ti-clock" /> {{ trans('core/media::media.recent') }}
                             </a>
                         </li>
                         <li>
                             <a
+                                href="#"
                                 class="js-rv-media-change-filter"
                                 data-type="view_in"
                                 data-value="favorites"
-                                href="#"
                             >
-                                <i class="fa fa-star"></i> {{ trans('core/media::media.favorites') }}
+                                <x-core::icon name="ti ti-star" /> {{ trans('core/media::media.favorites') }}
                             </a>
                         </li>
                     </ul>
@@ -123,179 +128,169 @@
             </div>
         </aside>
         <div class="rv-media-main-wrapper">
-            <header class="rv-media-header">
-                <div class="rv-media-top-header">
-                    <div class="rv-media-actions">
-                        <label
-                            class="btn btn-danger collapse-sidebar"
+            <x-core::card.header class="flex-column rv-media-header p-0">
+                <div class="rv-media-top-header flex-wrap gap-3 d-flex justify-content-between align-items-start">
+                    <div class="btn-list rv-media-actions">
+                        <x:core::button
+                            tag="label"
                             for="media_aside_collapse"
-                        >
-                            <i class="fa fa-bars"></i>
-                        </label>
+                            class="d-block d-md-none"
+                            icon="ti ti-menu-2"
+                            :icon-only="true"
+                        />
+
                         @if (RvMedia::hasPermission('files.create'))
-                            <button class="btn btn-success js-dropzone-upload">
-                                <i class="fas fa-cloud-upload-alt"></i> {{ trans('core/media::media.upload') }}
-                            </button>
-
-                            <button
-                                class="btn btn-success js-download-action"
-                                type="button"
+                            <x-core::dropdown
+                                :label="trans('core/media::media.upload')"
+                                icon="ti ti-upload"
+                                color="primary"
                             >
-                                <i class="fas fa-cloud-download-alt"></i>
-                                {{ trans('core/media::media.download_link') }}
-                            </button>
+                                <x-core::dropdown.item
+                                    :label="trans('core/media::media.upload_from_local')"
+                                    class="js-dropzone-upload dropdown-item"
+                                    icon="ti ti-upload"
+                                />
+
+                                <x-core::dropdown.item
+                                    :label="trans('core/media::media.upload_from_url')"
+                                    class="js-download-action dropdown-item"
+                                    icon="ti ti-link"
+                                />
+                            </x-core::dropdown>
                         @endif
+
                         @if (RvMedia::hasPermission('folders.create'))
-                            <button
-                                class="btn btn-success js-create-folder-action"
+                            <x-core::button
                                 type="button"
-                            >
-                                <i class="fa fa-folder"></i> {{ trans('core/media::media.create_folder') }}
-                            </button>
+                                color="primary"
+                                :tooltip="trans('core/media::media.create_folder')"
+                                class="js-create-folder-action"
+                                icon="ti ti-folder-plus"
+                                :icon-only="true"
+                            />
                         @endif
-                        <button
-                            class="btn btn-success js-change-action"
+
+                        <x-core::button
+                            type="button"
+                            color="primary"
+                            :tooltip="trans('core/media::media.refresh')"
+                            class="js-change-action"
+                            icon="ti ti-refresh"
+                            :icon-only="true"
                             data-type="refresh"
-                        >
-                            <i class="fas fa-sync"></i> {{ trans('core/media::media.refresh') }}
-                        </button>
+                        />
 
-                        @if (RvMedia::getConfig('sidebar_display') != 'vertical')
-                            <div
-                                class="btn-group"
-                                role="group"
-                            >
-                                <div class="dropdown">
-                                    <button
-                                        class="btn btn-success dropdown-toggle js-rv-media-change-filter-group js-filter-by-type"
-                                        data-bs-toggle="dropdown"
+                        @if (RvMedia::getConfig('sidebar_display') !== 'vertical')
+                            <x-core::dropdown>
+                                <x-slot:trigger>
+                                    <x-core::button
                                         type="button"
+                                        color="primary"
+                                        icon="ti ti-filter"
+                                        class="dropdown-toggle js-rv-media-change-filter-group js-filter-by-type"
+                                        data-bs-toggle="dropdown"
+                                        :tooltip="trans('core/media::media.filter')"
                                     >
-                                        <i class="fa fa-filter"></i> {{ trans('core/media::media.filter') }} <span
-                                            class="js-rv-media-filter-current"
-                                        ></span>
-                                    </button>
-                                    <ul class="dropdown-menu">
-                                        <li>
-                                            <a
-                                                class="js-rv-media-change-filter"
-                                                data-type="filter"
-                                                data-value="everything"
-                                                href="#"
-                                            >
-                                                <i class="fa fa-recycle"></i>
-                                                {{ trans('core/media::media.everything') }}
-                                            </a>
-                                        </li>
-                                        @if (array_key_exists('image', RvMedia::getConfig('mime_types', [])))
-                                            <li>
-                                                <a
-                                                    class="js-rv-media-change-filter"
-                                                    data-type="filter"
-                                                    data-value="image"
-                                                    href="#"
-                                                >
-                                                    <i class="fa fa-file-image"></i>
-                                                    {{ trans('core/media::media.image') }}
-                                                </a>
-                                            </li>
-                                        @endif
-                                        @if (array_key_exists('video', RvMedia::getConfig('mime_types', [])))
-                                            <li>
-                                                <a
-                                                    class="js-rv-media-change-filter"
-                                                    data-type="filter"
-                                                    data-value="video"
-                                                    href="#"
-                                                >
-                                                    <i class="fa fa-file-video"></i>
-                                                    {{ trans('core/media::media.video') }}
-                                                </a>
-                                            </li>
-                                        @endif
-                                        <li>
-                                            <a
-                                                class="js-rv-media-change-filter"
-                                                data-type="filter"
-                                                data-value="document"
-                                                href="#"
-                                            >
-                                                <i class="fa fa-file"></i> {{ trans('core/media::media.document') }}
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
+                                        <span class="js-rv-media-filter-current"></span>
+                                    </x-core::button>
+                                </x-slot:trigger>
 
-                            <div
-                                class="btn-group"
-                                role="group"
-                            >
-                                <div class="dropdown">
-                                    <button
-                                        class="btn btn-success dropdown-toggle js-rv-media-change-filter-group js-filter-by-view-in"
-                                        data-bs-toggle="dropdown"
+                                <x-core::dropdown.item
+                                    :label="trans('core/media::media.everything')"
+                                    icon="ti ti-recycle"
+                                    class="js-rv-media-change-filter"
+                                    data-type="filter"
+                                    data-value="everything"
+                                />
+
+                                @if (array_key_exists('image', RvMedia::getConfig('mime_types', [])))
+                                    <x-core::dropdown.item
+                                        :label="trans('core/media::media.image')"
+                                        icon="ti ti-photo"
+                                        class="js-rv-media-change-filter"
+                                        data-type="filter"
+                                        data-value="image"
+                                    />
+                                @endif
+
+                                @if (array_key_exists('video', RvMedia::getConfig('mime_types', [])))
+                                    <x-core::dropdown.item
+                                        :label="trans('core/media::media.video')"
+                                        icon="ti ti-video"
+                                        class="js-rv-media-change-filter"
+                                        data-type="filter"
+                                        data-value="video"
+                                    />
+                                @endif
+
+                                <x-core::dropdown.item
+                                    :label="trans('core/media::media.document')"
+                                    icon="ti ti-file"
+                                    class="js-rv-media-change-filter"
+                                    data-type="filter"
+                                    data-value="document"
+                                />
+                            </x-core::dropdown>
+
+                            <x-core::dropdown>
+                                <x-slot:trigger>
+                                    <x-core::button
                                         type="button"
+                                        color="primary"
+                                        icon="ti ti-eye"
+                                        class="dropdown-toggle js-rv-media-change-filter-group js-filter-by-view-in"
+                                        data-bs-toggle="dropdown"
+                                        :tooltip="trans('core/media::media.view_in')"
                                     >
-                                        <i class="fa fa-eye"></i> {{ trans('core/media::media.view_in') }} <span
-                                            class="js-rv-media-filter-current"
-                                        ></span>
-                                    </button>
-                                    <ul class="dropdown-menu">
-                                        <li>
-                                            <a
-                                                class="js-rv-media-change-filter"
-                                                data-type="view_in"
-                                                data-value="all_media"
-                                                href="#"
-                                            >
-                                                <i class="fa fa-globe"></i> {{ trans('core/media::media.all_media') }}
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a
-                                                class="js-rv-media-change-filter"
-                                                data-type="view_in"
-                                                data-value="trash"
-                                                href="#"
-                                            >
-                                                <i class="fa fa-trash"></i> {{ trans('core/media::media.trash') }}
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a
-                                                class="js-rv-media-change-filter"
-                                                data-type="view_in"
-                                                data-value="recent"
-                                                href="#"
-                                            >
-                                                <i class="fa fa-clock"></i> {{ trans('core/media::media.recent') }}
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a
-                                                class="js-rv-media-change-filter"
-                                                data-type="view_in"
-                                                data-value="favorites"
-                                                href="#"
-                                            >
-                                                <i class="fa fa-star"></i> {{ trans('core/media::media.favorites') }}
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
+                                        <span class="js-rv-media-filter-current"></span>
+                                    </x-core::button>
+                                </x-slot:trigger>
+
+                                <x-core::dropdown.item
+                                    :label="trans('core/media::media.all_media')"
+                                    icon="ti ti-world"
+                                    class="js-rv-media-change-filter"
+                                    data-type="view_in"
+                                    data-value="all_media"
+                                />
+
+                                <x-core::dropdown.item
+                                    :label="trans('core/media::media.trash')"
+                                    icon="ti ti-trash"
+                                    class="js-rv-media-change-filter"
+                                    data-type="view_in"
+                                    data-value="trash"
+                                />
+
+                                <x-core::dropdown.item
+                                    :label="trans('core/media::media.recent')"
+                                    icon="ti ti-clock"
+                                    class="js-rv-media-change-filter"
+                                    data-type="view_in"
+                                    data-value="recent"
+                                />
+
+                                <x-core::dropdown.item
+                                    :label="trans('core/media::media.favorites')"
+                                    icon="ti ti-star"
+                                    class="js-rv-media-change-filter"
+                                    data-type="view_in"
+                                    data-value="favorites"
+                                />
+                            </x-core::dropdown>
                         @endif
 
                         @if (RvMedia::hasAnyPermission(['folders.destroy', 'files.destroy']))
-                            <button
-                                class="btn btn-danger js-files-action hidden"
+                            <x-core::button
+                                type="button"
+                                color="danger"
+                                class="d-none js-files-action"
                                 data-action="empty_trash"
+                                icon="ti ti-trash"
                             >
-                                <i class="fa fa-trash"></i> {{ trans('core/media::media.empty_trash') }}
-                            </button>
+                                {{ trans('core/media::media.empty_trash') }}
+                            </x-core::button>
                         @endif
-
                     </div>
                     <div class="rv-media-search">
                         <form
@@ -303,17 +298,19 @@
                             action=""
                             method="GET"
                         >
-                            <input
-                                class="form-control"
-                                type="text"
-                                placeholder="{{ trans('core/media::media.search_file_and_folder') }}"
-                            >
-                            <button
-                                class="btn btn-link"
-                                type="submit"
-                            >
-                                <i class="fa fa-search"></i>
-                            </button>
+                            <div class="input-group">
+                                <input
+                                    type="search"
+                                    class="form-control"
+                                    name="search"
+                                    placeholder="{{ trans('core/media::media.search_file_and_folder') }}"
+                                />
+                                <x-core::button
+                                    type="submit"
+                                    icon="ti ti-search"
+                                    :icon-only="true"
+                                />
+                            </div>
                         </form>
                     </div>
                 </div>
@@ -323,139 +320,64 @@
                     </div>
                     <div class="rv-media-tools">
                         <div
-                            class="btn-group"
+                            class="btn-list"
                             role="group"
                         >
-                            <div class="dropdown">
-                                <button
-                                    class="btn btn-secondary dropdown-toggle"
-                                    data-bs-toggle="dropdown"
-                                    type="button"
-                                >
-                                    {{ trans('core/media::media.sort') }} <i class="fa fa-sort-alpha-down"></i>
-                                </button>
-                                <ul class="dropdown-menu dropdown-menu-right">
-                                    <li>
-                                        <a
-                                            class="js-rv-media-change-filter"
-                                            data-type="sort_by"
-                                            data-value="name-asc"
-                                            href="#"
-                                        >
-                                            <i class="fas fa-sort-alpha-up"></i>
-                                            {{ trans('core/media::media.file_name_asc') }}
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a
-                                            class="js-rv-media-change-filter"
-                                            data-type="sort_by"
-                                            data-value="name-desc"
-                                            href="#"
-                                        >
-                                            <i class="fas fa-sort-alpha-down"></i>
-                                            {{ trans('core/media::media.file_name_desc') }}
-                                        </a>
-                                    </li>
-                                    <li
-                                        class="divider"
-                                        role="separator"
-                                    ></li>
-                                    <li>
-                                        <a
-                                            class="js-rv-media-change-filter"
-                                            data-type="sort_by"
-                                            data-value="created_at-asc"
-                                            href="#"
-                                        >
-                                            <i class="fas fa-sort-numeric-up"></i>
-                                            {{ trans('core/media::media.uploaded_date_asc') }}
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a
-                                            class="js-rv-media-change-filter"
-                                            data-type="sort_by"
-                                            data-value="created_at-desc"
-                                            href="#"
-                                        >
-                                            <i class="fas fa-sort-numeric-down"></i>
-                                            {{ trans('core/media::media.uploaded_date_desc') }}
-                                        </a>
-                                    </li>
-                                    <li
-                                        class="divider"
-                                        role="separator"
-                                    ></li>
-                                    <li>
-                                        <a
-                                            class="js-rv-media-change-filter"
-                                            data-type="sort_by"
-                                            data-value="size-asc"
-                                            href="#"
-                                        >
-                                            <i class="fas fa-sort-numeric-up"></i>
-                                            {{ trans('core/media::media.size_asc') }}
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a
-                                            class="js-rv-media-change-filter"
-                                            data-type="sort_by"
-                                            data-value="size-desc"
-                                            href="#"
-                                        >
-                                            <i class="fas fa-sort-numeric-down"></i>
-                                            {{ trans('core/media::media.size_desc') }}
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
-                            <div class="dropdown rv-dropdown-actions disabled mx-2">
-                                <button
-                                    class="btn btn-secondary dropdown-toggle"
-                                    data-bs-toggle="dropdown"
-                                    type="button"
-                                >
-                                    {{ trans('core/media::media.actions') }} &nbsp;<i class="fa fa-ellipsis-v"></i>
-                                </button>
-                                <ul class="dropdown-menu"></ul>
-                            </div>
+                            <x-core::dropdown
+                                :label="trans('core/media::media.sort')"
+                                icon="ti ti-sort-a-z"
+                            >
+                                @foreach ($sorts as $key => $item)
+                                    <x-core::dropdown.item
+                                        :label="$item['label']"
+                                        :icon="$item['icon']"
+                                        class="js-rv-media-change-filter"
+                                        data-type="sort_by"
+                                        :data-value="$key"
+                                    />
+                                @endforeach
+                            </x-core::dropdown>
+
+                            <x-core::dropdown
+                                :label="trans('core/media::media.actions')"
+                                icon="ti ti-dots-vertical"
+                                wrapper-class="rv-dropdown-actions"
+                                :disabled="true"
+                            />
                         </div>
                         <div
-                            class="btn-group js-rv-media-change-view-type mx-0"
+                            class="ms-2 btn-group js-rv-media-change-view-type"
                             role="group"
                         >
-                            <button
-                                class="btn btn-secondary"
+                            <x-core::button
+                                type="button"
                                 data-type="tiles"
+                                icon="ti ti-layout-grid"
+                                :icon-only="true"
+                            />
+                            <x-core::button
                                 type="button"
-                            >
-                                <i class="fa fa-th-large"></i>
-                            </button>
-                            <button
-                                class="btn btn-secondary"
                                 data-type="list"
-                                type="button"
-                            >
-                                <i class="fa fa-th-list"></i>
-                            </button>
+                                icon="ti ti-layout-list"
+                                :icon-only="true"
+                            />
                         </div>
-                        <label
-                            class="btn btn-link collapse-panel"
+                        <x-core::button
+                            tag="label"
                             for="media_details_collapse"
-                        >
-                            <i class="fas fa-sign-out-alt"></i>
-                        </label>
+                            class="collapse-panel ms-2"
+                            icon="ti ti-arrow-bar-right"
+                            :icon-only="true"
+                        />
                     </div>
                 </div>
-            </header>
+            </x-core::card.header>
 
             <main class="rv-media-main">
                 <div class="rv-media-items"></div>
-                <div class="rv-media-details hidden">
+                <div class="d-none rv-media-details">
                     <div class="rv-media-thumbnail">
-                        <i class="far fa-image"></i>
+                        <x-core::icon name="ti ti-photo" />
                     </div>
                     <div class="rv-media-description">
                         <div class="rv-media-name">
@@ -464,462 +386,335 @@
                     </div>
                 </div>
             </main>
-            <footer class="rv-media-footer hidden">
-                <button
-                    class="btn btn-danger btn-lg js-insert-to-editor"
+            <footer class="d-none rv-media-footer">
+                <x-core::button
                     type="button"
-                >{{ trans('core/media::media.insert') }}</button>
+                    color="primary"
+                    class="js-insert-to-editor"
+                >
+                    {{ trans('core/media::media.insert') }}
+                </x-core::button>
             </footer>
         </div>
-        <div class="rv-upload-progress hide-the-pane">
+        <div class="rv-upload-progress hide-the-pane position-fixed bottom-0 end-0 ">
             <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title">{{ trans('core/media::media.upload_progress') }}</h3>
-                    <a
-                        class="close-pane"
-                        href="javascript:void(0);"
+                <x-core::card>
+                    <x-core::card.header class="position-relative">
+                        <h3 class="panel-title mb-0">{{ trans('core/media::media.upload_progress') }}</h3>
+                        <x-core::button
+                            class="close-pane position-absolute top-50 bg-primary text-white text-center p-0"
+                        >
+                            <x-core::icon
+                                class="m-0"
+                                name="ti ti-x"
+                            />
+                        </x-core::button>
+                    </x-core::card.header>
+                    <div
+                        class="table-responsive overflow-auto"
+                        style="max-height: 180px"
                     >
-                        <i class="fa fa-times"></i>
-                    </a>
-                </div>
-                <div class="panel-body">
-                    <ul class="rv-upload-progress-table"></ul>
-                </div>
-            </div>
-        </div>
-    </div>
+                        <x-core::table>
+                            <x-core::table.body class="rv-upload-progress-table">
 
-    <div class="rv-modals">
-        <div
-            class="modal fade"
-            id="modal_add_folder"
-            role="dialog"
-            tabindex="-1"
-        >
-            <div
-                class="modal-dialog"
-                role="document"
-            >
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h4 class="modal-title">
-                            <i class="fa fa-folder"></i> {{ trans('core/media::media.create_folder') }}
-                        </h4>
-                        <button
-                            class="btn-close"
-                            data-bs-dismiss="modal"
-                            type="button"
-                            aria-label="{{ trans('core/media::media.close') }}"
-                        >
-
-                        </button>
+                            </x-core::table.body>
+                        </x-core::table>
                     </div>
-                    <div class="modal-body">
-                        <form class="rv-form form-add-folder">
-                            <div class="input-group">
-                                <input
-                                    class="form-control"
-                                    type="text"
-                                    placeholder="{{ trans('core/media::media.folder_name') }}"
-                                >
-                                <button
-                                    class="btn btn-success rv-btn-add-folder"
-                                    type="submit"
-                                >{{ trans('core/media::media.create') }}</button>
-                            </div>
-                        </form>
-                        <div class="modal-notice"></div>
-                    </div>
-                </div>
+                </x-core::card>
             </div>
         </div>
-        <div
-            class="modal fade"
-            id="modal_rename_items"
-            role="dialog"
-            tabindex="-1"
-        >
-            <div
-                class="modal-dialog"
-                role="document"
-            >
-                <div class="modal-content">
-                    <form class="rv-form form-rename">
-                        <div class="modal-header">
-                            <h4 class="modal-title">
-                                <i class="fab fa-windows"></i> {{ trans('core/media::media.rename') }}
-                            </h4>
-                            <button
-                                class="btn-close"
-                                data-bs-dismiss="modal"
-                                type="button"
-                                aria-label="{{ trans('core/media::media.close') }}"
-                            >
-
-                            </button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="rename-items"></div>
-                            <div class="modal-notice"></div>
-                        </div>
-                        <div class="modal-footer">
-                            <button
-                                class="btn btn-secondary"
-                                data-bs-dismiss="modal"
-                                type="button"
-                            >{{ trans('core/media::media.close') }}</button>
-                            <button
-                                class="btn btn-primary"
-                                type="submit"
-                            >{{ trans('core/media::media.save_changes') }}</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-        <div
-            class="modal fade"
-            id="modal_alt_text_items"
-            role="dialog"
-            tabindex="-1"
-        >
-            <div
-                class="modal-dialog"
-                role="document"
-            >
-                <div class="modal-content">
-                    <form class="rv-form form-alt-text">
-                        <div class="modal-header">
-                            <h4 class="modal-title">
-                                <i class="fas fa-file-signature"></i> {{ trans('core/media::media.alt_text') }}
-                            </h4>
-                            <button
-                                class="btn-close"
-                                data-bs-dismiss="modal"
-                                type="button"
-                                aria-label="{{ trans('core/media::media.close') }}"
-                            ></button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="alt-text-items"></div>
-                            <div class="modal-notice"></div>
-                        </div>
-                        <div class="modal-footer">
-                            <button
-                                class="btn btn-secondary"
-                                data-bs-dismiss="modal"
-                                type="button"
-                            >{{ trans('core/media::media.close') }}</button>
-                            <button
-                                class="btn btn-primary"
-                                type="submit"
-                            >{{ trans('core/media::media.save_changes') }}</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-        <div
-            class="modal fade"
-            id="modal_trash_items"
-            role="dialog"
-            tabindex="-1"
-        >
-            <div
-                class="modal-dialog modal-danger"
-                role="document"
-            >
-                <div class="modal-content">
-                    <form class="rv-form form-delete-items">
-                        <div class="modal-header">
-                            <h4 class="modal-title">
-                                <i class="fab fa-windows"></i> {{ trans('core/media::media.move_to_trash') }}
-                            </h4>
-                            <button
-                                class="btn-close"
-                                data-bs-dismiss="modal"
-                                type="button"
-                                aria-label="{{ trans('core/media::media.close') }}"
-                            >
-
-                            </button>
-                        </div>
-                        <div class="modal-body">
-                            <p>{{ trans('core/media::media.confirm_trash') }}</p>
-                            <div class="modal-notice"></div>
-                        </div>
-                        <div class="modal-footer">
-                            <button
-                                class="btn btn-danger"
-                                type="submit"
-                            >{{ trans('core/media::media.confirm') }}</button>
-                            <button
-                                class="btn btn-primary"
-                                data-bs-dismiss="modal"
-                                type="button"
-                            >{{ trans('core/media::media.close') }}</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-        <div
-            class="modal fade"
-            id="modal_delete_items"
-            role="dialog"
-            tabindex="-1"
-        >
-            <div
-                class="modal-dialog modal-danger"
-                role="document"
-            >
-                <div class="modal-content">
-                    <form class="rv-form form-delete-items">
-                        <div class="modal-header">
-                            <h4 class="modal-title">
-                                <i class="fab fa-windows"></i> {{ trans('core/media::media.confirm_delete') }}
-                            </h4>
-                            <button
-                                class="btn-close"
-                                data-bs-dismiss="modal"
-                                type="button"
-                                aria-label="{{ trans('core/media::media.close') }}"
-                            >
-
-                            </button>
-                        </div>
-                        <div class="modal-body">
-                            <p>{{ trans('core/media::media.confirm_delete_description') }}</p>
-                            <div class="modal-notice"></div>
-                        </div>
-                        <div class="modal-footer">
-                            <button
-                                class="btn btn-danger"
-                                type="submit"
-                            >{{ trans('core/media::media.confirm') }}</button>
-                            <button
-                                class="btn btn-primary"
-                                data-bs-dismiss="modal"
-                                type="button"
-                            >{{ trans('core/media::media.close') }}</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-        <div
-            class="modal fade"
-            id="modal_empty_trash"
-            role="dialog"
-            tabindex="-1"
-        >
-            <div
-                class="modal-dialog modal-danger"
-                role="document"
-            >
-                <div class="modal-content">
-                    <form class="rv-form form-empty-trash">
-                        <div class="modal-header">
-                            <h4 class="modal-title">
-                                <i class="fab fa-windows"></i> {{ trans('core/media::media.empty_trash_title') }}
-                            </h4>
-                            <button
-                                class="btn-close"
-                                data-bs-dismiss="modal"
-                                type="button"
-                                aria-label="{{ trans('core/media::media.close') }}"
-                            >
-
-                            </button>
-                        </div>
-                        <div class="modal-body">
-                            <p>{{ trans('core/media::media.empty_trash_description') }}</p>
-                            <div class="modal-notice"></div>
-                        </div>
-                        <div class="modal-footer">
-                            <button
-                                class="btn btn-danger"
-                                type="submit"
-                            >{{ trans('core/media::media.confirm') }}</button>
-                            <button
-                                class="btn btn-primary"
-                                data-bs-dismiss="modal"
-                                type="button"
-                            >{{ trans('core/media::media.close') }}</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-        <div
-            class="modal fade"
-            id="modal_download_url"
-            role="dialog"
-            tabindex="-1"
-        >
-            <div
-                class="modal-dialog"
-                role="document"
-            >
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h4
-                            class="modal-title"
-                            data-downloading="{{ trans('core/media::media.downloading') }}"
-                            data-text="{{ trans('core/media::media.download_link') }}"
-                        >
-                            <i class="fas fa-cloud-download-alt"></i> {{ trans('core/media::media.download_link') }}
-                        </h4>
-                        <button
-                            class="btn-close"
-                            data-bs-dismiss="modal"
-                            type="button"
-                            aria-label="{{ trans('core/media::media.close') }}"
-                        >
-
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <form class="rv-form form-download-url">
-                            <div id="download-form-wrapper">
-                                <div class="form-group mb-3">
-                                    <textarea
-                                        class="form-control"
-                                        name="urls"
-                                        rows="4"
-                                        placeholder="http://example.com/image1.jpg&#10;http://example.com/image2.jpg&#10;http://example.com/image3.jpg&#10;..."
-                                    ></textarea>
-                                </div>
-                                {!! Form::helper(trans('core/media::media.download_explain')) !!}
-                            </div>
-                            <button
-                                class="btn btn-success w-100"
-                                type="submit"
-                            >{{ trans('core/media::media.download_link') }}</button>
-                        </form>
-                        <div
-                            class="modal-notice mt-2"
-                            id="modal-notice"
-                            style="max-height: 350px;overflow: auto"
-                        ></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div
-            class="modal fade"
-            id="modal_crop_image"
-            role="dialog"
-            tabindex="-1"
-        >
-            <div
-                class="modal-dialog modal-lg"
-                role="document"
-            >
-                <div class="modal-content">
-                    <form class="rv-form form-crop">
-                        <div class="modal-header">
-                            <h4 class="modal-title">
-                                <i class="fas fa-crop"></i> {{ trans('core/media::media.crop') }}
-                            </h4>
-                            <button
-                                class="btn-close"
-                                data-bs-dismiss="modal"
-                                type="button"
-                                aria-label="{{ trans('core/media::media.close') }}"
-                            ></button>
-                        </div>
-                        <div class="modal-body">
-                            <input
-                                name="image_id"
-                                type="hidden"
-                            >
-                            <input
-                                name="crop_data"
-                                type="hidden"
-                            >
-                            <div class="row">
-                                <div class="col-lg-9">
-                                    <div class="crop-image"></div>
-                                </div>
-                                <div class="col-lg-3">
-                                    <div class="mt-3">
-                                        <div class="form-group">
-                                            <label
-                                                class="form-label">{{ trans('core/media::media.cropper.height') }}</label>
-                                            <input
-                                                class="form-control"
-                                                id="dataHeight"
-                                                type="text"
-                                            >
-                                        </div>
-                                        <div class="form-group">
-                                            <label
-                                                class="form-label">{{ trans('core/media::media.cropper.width') }}</label>
-                                            <input
-                                                class="form-control"
-                                                id="dataWidth"
-                                                type="text"
-                                            >
-                                        </div>
-                                        <div class="form-group">
-                                            <input
-                                                class="custom-control-input"
-                                                id="aspectRatio"
-                                                type="checkbox"
-                                            >
-                                            <label
-                                                for="aspectRatio">{{ trans('core/media::media.cropper.aspect_ratio') }}</label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button
-                                class="btn btn-secondary"
-                                data-bs-dismiss="modal"
-                                type="button"
-                            >{{ trans('core/media::media.close') }}</button>
-                            <button
-                                class="btn btn-primary"
-                                type="submit"
-                            >{{ trans('core/media::media.crop') }}</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <button class="hidden js-rv-clipboard-temp"></button>
+    </x-core::card>
 </div>
-<script type="text/x-custom-template" id="rv_media_loading">
-    <div class="loading-wrapper">
-        <div class="showbox">
-            <div class="loader">
-                <svg class="circular" viewBox="25 25 50 50">
-                    <circle class="path" cx="50" cy="50" r="20" fill="none" stroke-width="2"
-                            stroke-miterlimit="10"/>
-                </svg>
+
+<x-core::modal
+    id="modal_add_folder"
+    :title="trans('core/media::media.create_folder')"
+    :has-form="true"
+    :form-attrs="['class' => 'rv-form form-add-folder']"
+>
+    <x-core::form.text-input
+        name="name"
+        type="text"
+        :placeholder="trans('core/media::media.folder_name')"
+    >
+        <x-slot:append>
+            <x-core::button
+                type="submit"
+                color="primary"
+            >
+                {{ trans('core/media::media.create') }}
+            </x-core::button>
+        </x-slot:append>
+    </x-core::form.text-input>
+    <div class="modal-notice"></div>
+</x-core::modal>
+
+<x-core::modal
+    id="modal_rename_items"
+    :title="trans('core/media::media.rename')"
+    :has-form="true"
+    :form-attrs="['class' => 'form-rename']"
+>
+    <div class="rename-items"></div>
+    <div class="modal-notice"></div>
+
+    <x-slot:footer>
+        <x-core::button data-bs-dismiss="modal">
+            {{ trans('core/media::media.close') }}
+        </x-core::button>
+        <x-core::button type="submit" color="primary">
+            {{ trans('core/media::media.save_changes') }}
+        </x-core::button>
+    </x-slot:footer>
+</x-core::modal>
+
+<x-core::modal
+    id="modal_alt_text_items"
+    :title="trans('core/media::media.alt_text')"
+    :has-form="true"
+    :form-attrs="['class' => 'form-alt-text']"
+>
+    <div class="alt-text-items"></div>
+    <div class="modal-notice"></div>
+
+    <x-slot:footer>
+        <x-core::button data-bs-dismiss="modal">
+            {{ trans('core/media::media.close') }}
+        </x-core::button>
+        <x-core::button type="submit" color="primary">
+            {{ trans('core/media::media.save_changes') }}
+        </x-core::button>
+    </x-slot:footer>
+</x-core::modal>
+
+<x-core::modal
+    id="modal_trash_items"
+    :title="trans('core/media::media.move_to_trash')"
+    :has-form="true"
+    :form-attrs="['class' => 'form-delete-items']"
+>
+    <p>{{ trans('core/media::media.confirm_trash') }}</p>
+    <div class="modal-notice"></div>
+
+    <x-slot:footer>
+        <button
+            type="submit"
+            class="btn btn-danger"
+        >{{ trans('core/media::media.confirm') }}</button>
+        <button
+            type="button"
+            class="btn btn-primary"
+            data-bs-dismiss="modal"
+        >{{ trans('core/media::media.close') }}</button>
+    </x-slot:footer>
+</x-core::modal>
+
+<x-core::modal
+    id="modal_delete_items"
+    :title="trans('core/media::media.confirm_delete')"
+    :has-form="true"
+    :form-attrs="['class' => 'form-delete-items']"
+>
+    <p>{{ trans('core/media::media.confirm_delete_description') }}</p>
+    <div class="modal-notice"></div>
+
+    <x-slot:footer>
+        <button
+            type="submit"
+            class="btn btn-danger"
+        >{{ trans('core/media::media.confirm') }}</button>
+        <button
+            type="button"
+            class="btn btn-primary"
+            data-bs-dismiss="modal"
+        >{{ trans('core/media::media.close') }}</button>
+    </x-slot:footer>
+</x-core::modal>
+
+<x-core::modal
+    id="modal_empty_trash"
+    :title="trans('core/media::media.empty_trash_title')"
+    :has-form="true"
+    :form-attrs="['class' => 'form-empty-trash']"
+>
+    <p>{{ trans('core/media::media.empty_trash_description') }}</p>
+    <div class="modal-notice"></div>
+
+    <x-slot:footer>
+        <button
+            type="submit"
+            class="btn btn-danger"
+        >{{ trans('core/media::media.confirm') }}</button>
+        <button
+            type="button"
+            class="btn btn-primary"
+            data-bs-dismiss="modal"
+        >{{ trans('core/media::media.close') }}</button>
+    </x-slot:footer>
+</x-core::modal>
+
+<div
+    class="modal modal-blur fade"
+    tabindex="-1"
+    role="dialog"
+    id="modal_download_url"
+>
+    <div
+        class="modal-dialog modal-dialog-centered"
+        role="document"
+    >
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4
+                    class="modal-title"
+                    data-downloading="{{ trans('core/media::media.downloading') }}"
+                    data-text="{{ trans('core/media::media.download_link') }}"
+                >
+                    <x-core::icon name="ti ti-download" />
+                    {{ trans('core/media::media.download_link') }}
+                </h4>
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="{{ trans('core/media::media.close') }}"
+                >
+                </button>
+            </div>
+            <div class="modal-body">
+                <form class="rv-form form-download-url">
+                    <div id="download-form-wrapper">
+                        <div class="mb-3">
+                        <textarea
+                            rows="4"
+                            name="urls"
+                            class="form-control"
+                            placeholder="http://example.com/image1.jpg&#10;http://example.com/image2.jpg&#10;http://example.com/image3.jpg&#10;..."
+                        ></textarea>
+
+                            <x-core::form.helper-text>
+                                {{ trans('core/media::media.download_explain') }}
+                            </x-core::form.helper-text>
+                        </div>
+                    </div>
+
+                    <x-core::button type="submit" color="primary" class="w-100">
+                        {{ trans('core/media::media.download_link') }}
+                    </x-core::button>
+                </form>
+                <div
+                    class="mt-2 modal-notice"
+                    id="modal-notice"
+                    style="max-height: 350px;overflow: auto"
+                ></div>
             </div>
         </div>
     </div>
-</script>
+</div>
+<x-core::modal
+    title="{{ trans('core/media::media.crop') }}"
+    id="modal_crop_image"
+    size="lg"
+    :form-attrs="['class' => 'rv-form form-crop']"
+    :has-form="true"
+>
+    <div>
+        <input
+            type="hidden"
+            name="image_id"
+        >
+        <input
+            type="hidden"
+            name="crop_data"
+        >
+        <div class="row">
+            <div class="col-lg-9">
+                <div class="crop-image"></div>
+            </div>
+            <div class="col-lg-3">
+                <div class="mt-3">
+                    <x-core::form.text-input
+                        label="{{ trans('core/media::media.cropper.height') }}"
+                        name="dataHeight"
+                        id="dataHeight"
+                    />
 
-<script type="text/x-custom-template" id="rv_action_item">
-    <li>
-        <a href="javascript:;" class="js-files-action" data-action="__action__">
-            <i class="__icon__"></i> __name__
-        </a>
-    </li>
-</script>
+                    <x-core::form.text-input
+                        label="{{ trans('core/media::media.cropper.width') }}"
+                        name="dataWidth"
+                        id="dataWidth"
+                    />
 
-<script type="text/x-custom-template" id="rv_media_items_list">
+                    <x-core::form.checkbox
+                        :label="trans('core/media::media.cropper.aspect_ratio')"
+                        name="aspectRatio"
+                        :checked="false"
+                        id="aspectRatio"
+                    />
+                </div>
+            </div>
+        </div>
+    </div>
+    <x-slot:footer>
+        <x-core::button data-bs-dismiss="modal">
+            {{ trans('core/media::media.close') }}
+        </x-core::button>
+
+        <x-core::button
+            type="submit"
+            color="primary"
+        >
+            {{ trans('core/media::media.crop') }}
+        </x-core::button>
+    </x-slot:footer>
+</x-core::modal>
+
+<x-core::modal
+    id="modal-properties"
+    :title="trans('core/media::media.properties.name')"
+>
+    <input type="hidden" name="selected">
+
+    <x-core::form.color-selector
+        :label="trans('core/media::media.properties.color_label')"
+        name="color"
+        :choices="RvMedia::getFolderColors()"
+    />
+
+    <x-slot:footer>
+        <x-core::button data-bs-dismiss="modal">
+            {{ trans('core/media::media.close') }}
+        </x-core::button>
+
+        <x-core::button
+            type="submit"
+            color="primary"
+        >
+            {{ trans('core/media::media.save_changes') }}
+        </x-core::button>
+    </x-slot:footer>
+</x-core::modal>
+
+<button class="d-none js-rv-clipboard-temp"></button>
+
+<x-core::custom-template id="rv_media_loading">
+    <x-core::loading />
+</x-core::custom-template>
+
+<x-core::custom-template id="rv_action_item">
+    <x-core::dropdown.item
+        class="js-files-action"
+        data-action="__action__"
+        icon="__icon__"
+        label="__name__"
+    />
+</x-core::custom-template>
+
+<x-core::custom-template id="rv_media_items_list">
     <div class="rv-media-list">
         <ul>
             <li class="no-items">
-                <i class="fas fa-cloud-upload-alt"></i>
+                <x-core::icon name="ti ti-upload" />
                 <h3>Drop files and folders here</h3>
                 <p>Or use the upload button above.</p>
             </li>
@@ -934,20 +729,20 @@
             </li>
         </ul>
     </div>
-</script>
+</x-core::custom-template>
 
-<script type="text/x-custom-template" id="rv_media_items_tiles" class="hidden">
+<x-core::custom-template id="rv_media_items_tiles" class="hidden">
     <div class="rv-media-grid">
         <ul>
             <li class="no-items">
-                <i class="__noItemIcon__"></i>
+                __noItemIcon__
                 <h3>__noItemTitle__</h3>
                 <p>__noItemMessage__</p>
             </li>
             <li class="rv-media-list-title up-one-level js-up-one-level">
                 <div class="rv-media-item" data-context="__type__" title="{{ trans('core/media::media.up_level') }}">
                     <div class="rv-media-thumbnail">
-                        <i class="fas fa-level-up-alt"></i>
+                        <x-core::icon name="ti ti-corner-up-left" size="lg" />
                     </div>
                     <div class="rv-media-description">
                         <div class="title">...</div>
@@ -956,9 +751,9 @@
             </li>
         </ul>
     </div>
-</script>
+</x-core::custom-template>
 
-<script type="text/x-custom-template" id="rv_media_items_list_element">
+<x-core::custom-template id="rv_media_items_list_element">
     <li class="rv-media-list-title js-media-list-title js-context-menu" data-context="__type__" title="__name__" data-id="__id__">
         <div class="custom-checkbox">
             <label>
@@ -973,9 +768,9 @@
         <div class="rv-media-file-size">__size__</div>
         <div class="rv-media-created-at">__date__</div>
     </li>
-</script>
+</x-core::custom-template>
 
-<script type="text/x-custom-template" id="rv_media_items_tiles_element">
+<x-core::custom-template id="rv_media_items_tiles_element">
     <li class="rv-media-list-title js-media-list-title js-context-menu" data-context="__type__" data-id="__id__">
         <input type="checkbox" class="hidden">
         <div class="rv-media-item" title="__name__">
@@ -992,54 +787,70 @@
             </div>
         </div>
     </li>
-</script>
+</x-core::custom-template>
 
-<script type="text/x-custom-template" id="rv_media_upload_progress_item">
-    <li>
-        <div class="rv-table-col">
+<x-core::custom-template id="rv_media_upload_progress_item">
+    <x-core::table.body.row>
+        <x-core::table.body.cell>
             <span class="file-name">__fileName__</span>
             <div class="file-error"></div>
-        </div>
-        <div class="rv-table-col">
+        </x-core::table.body.cell>
+        <x-core::table.body.cell>
             <span class="file-size">__fileSize__</span>
-        </div>
-        <div class="rv-table-col">
+        </x-core::table.body.cell>
+        <x-core::table.body.cell>
             <span class="label label-__status__">__message__</span>
-        </div>
-    </li>
-</script>
+        </x-core::table.body.cell>
+    </x-core::table.body.row>
+</x-core::custom-template>
 
-<script type="text/x-custom-template" id="rv_media_breadcrumb_item">
+<x-core::custom-template id="rv_media_breadcrumb_item">
     <li>
-        <a href="#" data-folder="__folderId__" class="js-change-folder">__icon__ __name__</a>
+        <a href="#" data-folder="__folderId__" class="text-decoration-none js-change-folder">
+            __icon__
+            __name__
+        </a>
     </li>
-</script>
+</x-core::custom-template>
 
-<script type="text/x-custom-template" id="rv_media_rename_item">
-    <div class="form-group mb-3">
+<x-core::custom-template id="rv_media_rename_item">
+    <div class="mb-3">
         <div class="input-group">
             <div class="input-group-text">
-                <i class="__icon__"></i>
+                __icon__
             </div>
             <input class="form-control" placeholder="__placeholder__" value="__value__">
         </div>
     </div>
-</script>
 
-<script type="text/x-custom-template" id="rv_media_alt_text_item">
-    <div class="form-group mb-3">
+    <x-core::form.checkbox
+        data-folder-label="{{ trans('core/media::media.rename_physical_folder') }}"
+        data-file-label="{{ trans('core/media::media.rename_physical_file') }}"
+        label="__label__"
+        name="rename_physical_file"
+        data-bb-toggle="collapse"
+        data-bb-target=".rename-physical-file-warning"
+    />
+
+    <x-core::alert type="warning" class="rename-physical-file-warning" style="display: none">
+        {{ trans('core/media::media.rename_physical_file_warning') }}
+    </x-core::alert>
+</x-core::custom-template>
+
+<x-core::custom-template id="rv_media_alt_text_item">
+    <div class="mb-3">
         <div class="input-group">
             <div class="input-group-text">
-                <i class="__icon__"></i>
+                <x-core::icon name="__icon__" />
             </div>
             <input class="form-control" placeholder="__placeholder__" value="__value__">
         </div>
     </div>
-</script>
+</x-core::custom-template>
 
-<script type="text/x-custom-template" id="rv_media_crop_image">
+<x-core::custom-template id="rv_media_crop_image">
     <img src="__src__" style="display: block;max-width: 100%">
-</script>
+</x-core::custom-template>
 
 <div class="media-download-popup">
     <div class="alert alert-success">

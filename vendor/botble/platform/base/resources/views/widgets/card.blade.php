@@ -1,13 +1,14 @@
 <div
     id="{{ $id . '-parent' }}"
-    @class(['mb-3', 'widget-item', 'col-md-' . $columns => $columns])
+    @class(['widget-item', 'col-md-' . $columns => $columns])
 >
-    <div class="h-100 bg-white-opacity position-relative">
+    <div class="h-100 position-relative">
         {!! $content !!}
         @if ($hasChart)
             <div
                 class="position-absolute fixed-bottom"
                 id="{{ $id }}"
+                style="z-index: 1"
             ></div>
         @endif
     </div>

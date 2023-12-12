@@ -2,22 +2,34 @@
     'id' => null,
     'label' => null,
     'name' => null,
-    'wrapperClass' => null,
+    'value' => null,
+    'checked' => false,
+    'helperText' => null,
+    'inline' => false,
+    'single' => false,
 ])
 
 @php
-    $id = $attributes->get('id', $name) ?? Str::random(8);
+    $labelClasses = Arr::toCssClasses([
+        'form-check',
+        'form-check-inline' => $inline,
+        'form-check-single' => $single,
+    ]);
 @endphp
 
-<div @class(['mb-3', $wrapperClass])>
-    <x-core::form.label
-        checkbox="true"
-        :for="$id"
+<label class="{{ $labelClasses }}">
+    <input
+        {{ $attributes->merge(['type' => 'checkbox', 'id' => $id, 'name' => $name, 'class' => 'form-check-input', 'value' => $value]) }}
+        @checked(old($name, $checked))
     >
-        <input
-            {{ $attributes->merge(['type' => 'checkbox', 'id' => $id, 'name' => $name, 'class' => 'form-check-input']) }}
-            @checked(old($name))
-        />
-        <span class="form-check-label">{{ $label }}</span>
-    </x-core::form.label>
-</div>
+
+    @if($label || $slot->isNotEmpty())
+        <span class="form-check-label">
+            {{ $label ?: $slot }}
+        </span>
+    @endif
+
+    @if ($helperText)
+        <span class="form-check-description">{!! BaseHelper::clean($helperText) !!}</span>
+    @endif
+</label>

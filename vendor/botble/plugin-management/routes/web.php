@@ -1,12 +1,13 @@
 <?php
 
-use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\AdminHelper;
 use Illuminate\Support\Facades\Route;
 
-Route::group(['namespace' => 'Botble\PluginManagement\Http\Controllers', 'middleware' => ['web', 'core']], function () {
-    Route::group(['prefix' => BaseHelper::getAdminPrefix(), 'middleware' => 'auth'], function () {
+Route::group(['namespace' => 'Botble\PluginManagement\Http\Controllers'], function () {
+    AdminHelper::registerRoutes(function () {
         Route::group(['prefix' => 'plugins'], function () {
-            Route::get('', [
+            Route::redirect('', 'plugins/installed');
+            Route::get('installed', [
                 'as' => 'plugins.index',
                 'uses' => 'PluginManagementController@index',
             ]);
@@ -30,15 +31,18 @@ Route::group(['namespace' => 'Botble\PluginManagement\Http\Controllers', 'middle
                 'uses' => 'PluginManagementController@checkRequirement',
                 'permission' => 'plugins.index',
             ]);
-        });
 
-        Route::group(['prefix' => 'plugins/marketplace', 'permission' => 'plugins.marketplace'], function () {
-            Route::get('', [
-                'as' => 'plugins.marketplace',
+            Route::get('new', [
+                'as' => 'plugins.new',
                 'uses' => 'MarketplaceController@index',
+                'permission' => 'plugins.marketplace',
             ]);
 
-            Route::group(['prefix' => 'ajax', 'as' => 'plugins.marketplace.ajax.'], function () {
+            Route::group([
+                'prefix' => 'marketplace/ajax',
+                'permission' => 'plugins.marketplace',
+                'as' => 'plugins.marketplace.ajax.',
+            ], function () {
                 Route::get('plugins', [
                     'as' => 'list',
                     'uses' => 'MarketplaceController@list',

@@ -1,80 +1,75 @@
 @if (!empty($menu) && $menu->id)
     <input
-        name="deleted_nodes"
         type="hidden"
+        name="deleted_nodes"
     >
     <textarea
-        class="form-control hidden"
-        id="nestable-output"
         name="menu_nodes"
+        id="nestable-output"
+        class="d-none"
     ></textarea>
-    <div class="row widget-menu">
+
+    <div class="row row-cards">
         <div class="col-md-4">
-            <div
-                class="panel-group"
-                id="accordion"
-            >
+            @php
+                do_action(MENU_ACTION_SIDEBAR_OPTIONS);
+            @endphp
 
-                @php do_action(MENU_ACTION_SIDEBAR_OPTIONS) @endphp
-
-                <div class="widget meta-boxes">
+            <x-core::card>
+                <x-core::card.header>
                     <a
+                        class="d-flex justify-content-between w-100 align-items-center text-decoration-none"
                         data-bs-toggle="collapse"
                         data-parent="#accordion"
                         href="#collapseCustomLink"
                     >
-                        <h4 class="widget-title">
-                            <span>{{ trans('packages/menu::menu.add_link') }}</span>
-                            <i class="fa fa-angle-down narrow-icon"></i>
-                        </h4>
-                    </a>
-                    <div
-                        class="panel-collapse collapse"
-                        id="collapseCustomLink"
-                    >
-                        <div class="widget-body">
-                            <div class="box-links-for-menu">
-                                <div
-                                    class="the-box"
-                                    id="external_link"
-                                >
-                                    <div
-                                        class="node-content"
-                                        id="menu-node-create-form"
-                                    >
-                                        {!! app(Botble\Base\Forms\FormBuilder::class)->create(Botble\Menu\Forms\MenuNodeForm::class)->renderForm([], false, true, false) !!}
+                        <x-core::card.title>
+                            {{ trans('packages/menu::menu.add_link') }}
+                        </x-core::card.title>
 
-                                        <div class="form-group mb-3">
-                                            <div class="text-end add-button">
-                                                <div class="btn-group">
-                                                    <a
-                                                        class="btn-add-to-menu btn btn-primary"
-                                                        href="#"
-                                                    >
-                                                        <span class="text">
-                                                            <i class="fa fa-plus"></i>
-                                                            {{ trans('packages/menu::menu.add_to_menu') }}
-                                                        </span>
-                                                    </a>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                        <button
+                            type="button"
+                            class="btn-action"
+                        >
+                            <x-core::icon name="ti ti-chevron-down" class="icon-sm" />
+                        </button>
+                    </a>
+                </x-core::card.header>
+                <div
+                    id="collapseCustomLink"
+                    class="box-links-for-menu collapse"
+                >
+                    <x-core::card.body>
+                        <div
+                            id="external_link"
+                            class="the-box"
+                        >
+                            <div
+                                class="node-content"
+                                id="menu-node-create-form"
+                            >
+                                {!! Botble\Menu\Forms\MenuNodeForm::create()->renderForm([], false, true, false) !!}
                             </div>
                         </div>
-                    </div>
+                    </x-core::card.body>
+                    <x-core::card.footer class="text-end">
+                        <x-core::button
+                            type="button"
+                            class="btn-add-to-menu"
+                            icon="ti ti-plus"
+                        >
+                            {{ trans('packages/menu::menu.add_to_menu') }}
+                        </x-core::button>
+                    </x-core::card.footer>
                 </div>
-            </div>
+            </x-core::card>
         </div>
         <div class="col-md-8">
-            <div class="widget meta-boxes">
-                <div class="widget-title">
-                    <h4>
-                        <span>{{ trans('packages/menu::menu.structure') }}</span>
-                    </h4>
-                </div>
-                <div class="widget-body">
+            <x-core::card class="mb-3">
+                <x-core::card.header>
+                    <x-core::card.title>{{ trans('packages/menu::menu.structure') }}</x-core::card.title>
+                </x-core::card.header>
+                <x-core::card.body>
                     <div
                         class="dd nestable-menu"
                         id="nestable"
@@ -87,41 +82,33 @@
                             'active' => false,
                         ]) !!}
                     </div>
-                </div>
-            </div>
+                </x-core::card.body>
+            </x-core::card>
 
             @if (defined('THEME_MODULE_SCREEN_NAME'))
-                <div class="widget meta-boxes">
-                    <div class="widget-title">
-                        <h4>
-                            <span>{{ trans('packages/menu::menu.menu_settings') }}</span>
-                        </h4>
-                    </div>
-                    <div
-                        class="widget-body"
-                        style="min-height: 0"
-                    >
+                <x-core::card>
+                    <x-core::card.header>
+                        <x-core::card.title>{{ trans('packages/menu::menu.menu_settings') }}</x-core::card.title>
+                    </x-core::card.header>
+                    <x-core::card.body>
                         <div class="row">
                             <div class="col-md-4">
                                 <p><i>{{ trans('packages/menu::menu.display_location') }}</i></p>
                             </div>
                             <div class="col-md-8">
                                 @foreach (Menu::getMenuLocations() as $location => $description)
-                                    <div>
-                                        <input
-                                            id="menu_location_{{ $location }}"
-                                            name="locations[]"
-                                            type="checkbox"
-                                            value="{{ $location }}"
-                                            @if (in_array($location, $locations)) checked @endif
-                                        >
-                                        <label for="menu_location_{{ $location }}">{{ $description }}</label>
-                                    </div>
+                                    <x-core::form.checkbox
+                                        :label="$description"
+                                        id="menu_location_{{ $location }}"
+                                        name="locations[]"
+                                        :checked="in_array($location, $locations)"
+                                        :value="$location"
+                                    />
                                 @endforeach
                             </div>
                         </div>
-                    </div>
-                </div>
+                    </x-core::card.body>
+                </x-core::card>
             @endif
         </div>
     </div>

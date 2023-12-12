@@ -33,6 +33,7 @@ class ChangeProductSwatches {
                 let $this = $(event.currentTarget)
 
                 let $parent = $this.closest('.product-attributes')
+
                 _self.getProductVariation($parent)
             })
 
@@ -104,6 +105,7 @@ class ChangeProductSwatches {
          * Get attributes
          */
         let $attributeSwatches = $productAttributes.find('.attribute-swatches-wrapper')
+        let referenceProduct = null
         $attributeSwatches.each((index, el) => {
             let $current = $(el)
 
@@ -121,17 +123,23 @@ class ChangeProductSwatches {
                 let setSlug = $current.find('.attribute-swatch').data('slug')
                 slugAttributes[setSlug] = slug
                 attributes.push(value)
+
+                referenceProduct = $input.data('reference-product')
             }
         })
 
-        _self.callAjax(attributes, $productAttributes, slugAttributes)
+        _self.callAjax(attributes, $productAttributes, slugAttributes, true, referenceProduct)
     }
 
-    callAjax = function (attributes, $productAttributes, slugAttributes, updateUrl = true) {
+    callAjax = function (attributes, $productAttributes, slugAttributes, updateUrl = true, referenceProduct = null) {
         let _self = this
         let formData = {
             attributes,
             _: +new Date(),
+        }
+
+        if (referenceProduct) {
+            formData.reference_product = referenceProduct
         }
 
         let id = $productAttributes.attr('id')

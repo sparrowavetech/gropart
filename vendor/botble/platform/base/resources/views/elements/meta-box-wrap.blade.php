@@ -1,11 +1,16 @@
-<div
-    class="widget meta-boxes"
-    id="{{ $box['id'] }}"
+<x-core::card
+    :id="$box['id']"
+    class="meta-boxes mb-3"
 >
-    <div class="widget-title">
-        <h4><span>{!! BaseHelper::clean($box['title']) !!}</span></h4>
-    </div>
-    <div class="widget-body">
+    <x-core::card.header>
+        <x-core::card.title>
+            {!! BaseHelper::clean($box['title']) !!}
+        </x-core::card.title>
+
+        @stack('meta-box-header-' . $box['id'])
+    </x-core::card.header>
+
+    <x-core::card.body>
         {!! $callback !!}
-    </div>
-</div>
+    </x-core::card.body>
+</x-core::card>

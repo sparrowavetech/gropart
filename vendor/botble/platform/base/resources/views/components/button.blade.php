@@ -4,6 +4,7 @@
     'disabled' => false,
     'color' => null,
     'icon' => null,
+    'iconOnly' => false,
     'square' => false,
     'pill' => false,
     'iconPosition' => 'left',
@@ -13,6 +14,7 @@
     'loadingOverlay' => false,
     'tooltip' => null,
     'tooltipPlacement' => 'top',
+    'ghost' => false,
 ])
 
 @php
@@ -21,7 +23,7 @@
         'disabled' => $disabled,
         'btn-square' => $square,
         'btn-pill' => $pill,
-        'btn-icon' => $slot->isEmpty(),
+        'btn-icon' => $iconOnly,
         'btn-loading' => $loading && $loadingOverlay,
         ...$outlined ? [$color ? "btn-outline-$color" : null] : [$color ? "btn-$color" : null],
         match ($size) {
@@ -29,6 +31,7 @@
             'lg' => 'btn-lg',
             default => null,
         },
+        "btn-ghost-$color" => $ghost && $color,
     ]);
     
     $spinnerClasses = Arr::toCssClasses(['spinner-border', 'spinner-border-sm', 'me-2' => $iconPosition === 'left', 'ms-2' => $iconPosition === 'right']);
@@ -50,17 +53,20 @@
                 role="status"
             ></span>
         @else
-            <x-core-base::icon
-                class="icon-left"
+            <x-core::icon
                 :name="$icon"
+                :size="$size"
+                class="icon-left"
             />
         @endif
     @endif
 
-    @if ($slot->isEmpty())
-        <span class="sr-only">{{ $slot }}</span>
-    @else
-        {{ $slot }}
+    @if ($slot->isNotEmpty())
+        @if ($iconOnly)
+            <span class="sr-only">{{ $slot }}</span>
+        @else
+            {{ $slot }}
+        @endif
     @endif
 
     @if ($icon && $iconPosition === 'right')
@@ -70,9 +76,10 @@
                 role="status"
             ></span>
         @else
-            <x-core-base::icon
-                class="icon-right"
+            <x-core::icon
                 :name="$icon"
+                :size="$size"
+                class="icon-right"
             />
         @endif
     @endif

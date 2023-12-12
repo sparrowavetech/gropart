@@ -1,10 +1,15 @@
 <div
     id="{{ $id . '-parent' }}"
-    @class(['mb-3', 'widget-item', 'col-md-' . $columns => $columns])
+    @class(['d-flex widget-item', 'col-md-' . $columns => $columns])
 >
-    <div class="bg-white p-3">
-        <h5>{{ $label }}</h5>
-        <div id="{{ $id }}"></div>
-    </div>
+    <x-core::card class="flex-fill">
+        <x-core::card.header>
+            <x-core::card.title>{{ $label }}</x-core::card.title>
+        </x-core::card.header>
+        <x-core::card.body
+            id="{{ $id }}"
+            class="p-0"
+        />
+    </x-core::card>
     @include('core/base::widgets.partials.chart-script')
 </div>

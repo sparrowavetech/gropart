@@ -11,6 +11,10 @@ use Illuminate\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
+        if (Schema::hasColumn('ec_product_categories', 'icon_image')) {
+            return;
+        }
+
         Schema::table('ec_product_categories', function (Blueprint $table) {
             $table->string('icon')->nullable();
             $table->string('icon_image')->nullable();

@@ -1,4 +1,4 @@
-@props(['label', 'icon' => null, 'items' => null, 'hasArrow' => false, 'wrapperClass' => null, 'trigger' => null])
+@props(['label', 'icon' => null, 'items' => null, 'hasArrow' => false, 'wrapperClass' => null, 'trigger' => null, 'position' => null])
 
 <div @class(['dropdown', $wrapperClass])>
     @if ($trigger)
@@ -19,7 +19,11 @@
         </x-core::button>
     @endif
 
-    <div @class(['dropdown-menu', 'dropdown-menu-arrow' => $hasArrow])>
+    <div @class([
+        'dropdown-menu',
+        'dropdown-menu-arrow' => $hasArrow,
+        "dropdown-menu-$position" => $position,
+    ])>
         {{ $items ?? $slot }}
     </div>
 </div>

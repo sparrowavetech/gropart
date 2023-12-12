@@ -16,9 +16,7 @@
                 @if ($items = Arr::get($group, 'items', []))
                     @php ksort($items); @endphp
                     <li class="admin-bar-dropdown">
-                        <a
-                            href="{{ Arr::get($group, 'link') }}"
-                        >
+                        <a href="{{ Arr::get($group, 'link') }}">
                             {{ Arr::get($group, 'title') }}
                         </a>
                         <ul class="admin-bar-dropdown-menu">
@@ -37,7 +35,7 @@
             @if ($noGroups = AdminBar::getLinksNoGroup())
                 @php ksort($noGroups) @endphp
                 @foreach ($noGroups as $item)
-                    @continue(Arr::get($item, 'permission') && !Auth::user()->hasPermission($item['permission']))
+                    @continue(Arr::get($item, 'permission') && !Auth::guard()->user()->hasPermission($item['permission']))
                     <li>
                         <a href="{{ Arr::get($item, 'link') }}">{{ Arr::get($item, 'title') }}</a>
                     </li>
@@ -47,13 +45,13 @@
         <ul class="admin-navbar-nav admin-navbar-nav-right">
             <li class="admin-bar-dropdown">
                 <a
-                    href="{{ route('users.profile.view', Auth::guard()->user()) }}"
+                    href="{{ Auth::guard()->user()->url }}"
                 >
                     {{ Auth::guard()->user()->name }}
                 </a>
                 <ul class="admin-bar-dropdown-menu">
                     <li><a
-                            href="{{ route('users.profile.view', Auth::guard()->user()) }}">{{ trans('core/base::layouts.profile') }}</a>
+                            href="{{ Auth::guard()->user()->url }}">{{ trans('core/base::layouts.profile') }}</a>
                     </li>
                     <li><a href="{{ route('access.logout') }}">{{ trans('core/base::layouts.logout') }}</a></li>
                 </ul>

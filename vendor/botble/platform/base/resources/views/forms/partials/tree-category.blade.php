@@ -2,61 +2,54 @@
     if (!isset($groupedCategories)) {
         $groupedCategories = $categories->groupBy('parent_id');
     }
-    
+
     $currentCategories = $groupedCategories->get($parentId = $parentId ?? 0);
 @endphp
 
 @if ($currentCategories)
-    <ul class="{{ $className ?? '' }}">
+    <ol @class(['list-group dd-list', $className ?? null])>
         @foreach ($currentCategories as $category)
             @php
                 $hasChildren = $groupedCategories->has($category->id);
             @endphp
-            <li
-                class="folder-root open"
-                data-id="{{ $category->id }}"
-            >
-                <a
-                    class="fetch-data category-name"
-                    href="{{ $canEdit && $editRoute ? route($editRoute, $category->id) : '' }}"
-                >
-                    @if ($hasChildren)
-                        <i class="far fa-folder"></i>
-                    @else
-                        <i class="far fa-file"></i>
-                    @endif
+            <li class="dd-item" data-id="{{ $category->id }}" data-name="{{ $category->name }}">
+                @if($updateTreeRoute)
+                    <div class="dd-handle dd3-handle"></div>
+                @endif
+                <div @class(['dd3-content d-flex align-items-center gap-2', 'ps-3' => !$updateTreeRoute])>
+                    <div class="d-flex align-items-center gap-1" style="width: 90%;">
+                        <x-core::icon :name="$hasChildren ? 'ti ti-folder' : 'ti ti-file'" />
+                        <span
+                            class="fetch-data text-truncate cursor-pointer"
+                            data-href="{{ $canEdit && $editRoute ? route($editRoute, $category->id) : '' }}"
+                        >{{ $category->name }}</span>
 
-                    <span>{{ $category->name }}</span>
-                    @if ($category->badge_with_count)
-                        {!! $category->badge_with_count !!}
-                    @endif
-                </a>
-                @if ($category->url)
-                    <a
-                        class="text-info"
-                        data-bs-toggle="tooltip"
-                        data-bs-original-title="{{ trans('core/base::forms.view_new_tab') }}"
-                        href="{{ $category->url }}"
-                        target="_blank"
-                    >
-                        <i class="fas fa-external-link-alt"></i>
-                    </a>
-                @endif
-                @if ($canDelete)
-                    <a
-                        class="btn btn-icon btn-danger deleteDialog"
-                        data-section="{{ route($deleteRoute, $category->id) }}"
-                        data-bs-toggle="tooltip"
-                        data-bs-original-title="{{ trans('core/table::table.delete') }}"
-                        href="#"
-                        role="button"
-                    >
-                        <i class="fa fa-trash"></i>
-                    </a>
-                @endif
+                        @if($category->badge_with_count)
+                            {{ $category->badge_with_count }}
+                        @endif
+
+                        @if ($canDelete)
+                            <span
+                                data-bs-toggle="modal"
+                                data-bs-target=".modal-confirm-delete"
+                                data-url="{{ route($deleteRoute, $category->id)}}"
+                                class="ms-2"
+                            >
+                            <x-core::button
+                                type="button"
+                                color="danger"
+                                size="sm"
+                                class="delete-button"
+                                icon="ti ti-trash"
+                                :icon-only="true"
+                                :tooltip="trans('core/base::tree-category.delete_button')"
+                                data-bs-placement="right"
+                            />
+                        </span>
+                        @endif
+                    </div>
+                </div>
                 @if ($hasChildren)
-                    <i class="far fa-minus-square file-opener-i"></i>
-
                     @include('core/base::forms.partials.tree-category', [
                         'groupedCategories' => $groupedCategories,
                         'parentId' => $category->id,
@@ -65,5 +58,5 @@
                 @endif
             </li>
         @endforeach
-    </ul>
+    </ol>
 @endif
