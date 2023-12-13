@@ -137,19 +137,6 @@ AdminHelper::registerRoutes(function () {
                     'middleware' => 'preventDemo',
                 ]);
 
-                Route::post('reset', [
-                    'as' => 'ecommerce.settings.invoice-template.reset',
-                    'uses' => 'InvoiceTemplateSettingController@reset',
-                    'permission' => 'ecommerce.invoice-template.index',
-                    'middleware' => 'preventDemo',
-                ]);
-
-                Route::get('preview', [
-                    'as' => 'ecommerce.settings.invoice-template.preview',
-                    'uses' => 'InvoiceTemplateSettingController@preview',
-                    'permission' => 'ecommerce.invoice-template.index',
-                ]);
-
                 Route::match(['GET', 'POST'], 'taxes', [
                     'as' => 'ecommerce.settings.taxes',
                     'uses' => 'TaxSettingController@index',

@@ -1,75 +1,77 @@
-<div
-    class="widget-body p-0"
-    id="address-histories"
->
-    <a
-        class="btn-trigger-add-address btn btn-sm btn-info mb-3"
-        href="#"
-    ><i class="fa fa-plus"></i> {{ trans('plugins/ecommerce::addresses.new_address') }}</a>
-    <div class="comment-log-timeline">
-        <div
-            class="column-left-history ps-relative"
-            id="order-history-wrapper"
-        >
-            <div class="item-card">
-                <div class="item-card-body ">
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th scope="col">#</th>
-                                <th scope="col">{{ trans('plugins/ecommerce::addresses.address') }}</th>
-                                <th scope="col">{{ trans('plugins/ecommerce::addresses.zip') }}</th>
-                                <th scope="col">{{ trans('plugins/ecommerce::addresses.country') }}</th>
-                                <th scope="col">{{ trans('plugins/ecommerce::addresses.state') }}</th>
-                                <th scope="col">{{ trans('plugins/ecommerce::addresses.city') }}</th>
-                                <th scope="col">{{ trans('plugins/ecommerce::addresses.action') }}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse ($addresses as $address)
-                                <tr>
-                                    <td>{{ $loop->iteration }}</td>
-                                    <td class="text-start"> {{ $address->address }}</td>
-                                    <td>{{ $address->zip_code }}</td>
-                                    <td>{{ $address->country_name }}</td>
-                                    <td>{{ $address->state_name }}</td>
-                                    <td>{{ $address->city_name }}</td>
-                                    <td
-                                        class="text-center"
-                                        style="width: 120px;"
-                                    >
-                                        <a
-                                            class="btn btn-icon btn-sm btn-info me-1 btn-trigger-edit-address"
-                                            data-bs-toggle="tooltip"
-                                            data-section="{{ route('customers.addresses.edit', $address->id) }}"
-                                            data-bs-original-title=""
-                                            href="#"
-                                            role="button"
-                                        >
-                                            <i class="fa fa-edit"></i>
-                                        </a>
-                                        <a
-                                            class="btn btn-icon btn-sm btn-danger deleteDialog"
-                                            data-bs-toggle="tooltip"
-                                            data-section="{{ route('customers.addresses.destroy', $address->id) }}"
-                                            data-bs-original-title="{{ trans('core/base::forms.edit') }}"
-                                            href="#"
-                                            role="button"
-                                        >
-                                            <i class="fa fa-trash"></i>
-                                        </a>
-                                    </td>
-                                </tr>
-                            @empty
-                                <td
-                                    class="text-center"
-                                    colspan="7"
-                                >{{ trans('plugins/ecommerce::addresses.no_data') }}</td>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
+<div id="address-histories">
+    <x-core::table>
+        <x-core::table.header>
+            <x-core::table.header.cell>
+                #
+            </x-core::table.header.cell>
+            <x-core::table.header.cell>
+                {{ trans('plugins/ecommerce::addresses.address') }}
+            </x-core::table.header.cell>
+            <x-core::table.header.cell>
+                {{ trans('plugins/ecommerce::addresses.zip') }}
+            </x-core::table.header.cell>
+            <x-core::table.header.cell>
+                {{ trans('plugins/ecommerce::addresses.country') }}
+            </x-core::table.header.cell>
+            <x-core::table.header.cell>
+                {{ trans('plugins/ecommerce::addresses.state') }}
+            </x-core::table.header.cell>
+            <x-core::table.header.cell>
+                {{ trans('plugins/ecommerce::addresses.city') }}
+            </x-core::table.header.cell>
+            <x-core::table.header.cell>
+                {{ trans('plugins/ecommerce::addresses.action') }}
+            </x-core::table.header.cell>
+        </x-core::table.header>
+
+        <x-core::table.body>
+        @forelse ($addresses as $address)
+            <x-core::table.body.row>
+                <x-core::table.body.cell>
+                    {{ $loop->iteration }}
+                </x-core::table.body.cell>
+                <x-core::table.body.cell class="text-start">
+                    {{ $address->address }}
+                </x-core::table.body.cell>
+                <x-core::table.body.cell>
+                    {{ $address->zip_code }}
+                </x-core::table.body.cell>
+                <x-core::table.body.cell>
+                    {{ $address->country_name }}
+                </x-core::table.body.cell>
+                <x-core::table.body.cell>
+                    {{ $address->state_name }}
+                </x-core::table.body.cell>
+                <x-core::table.body.cell>
+                    {{ $address->city_name }}
+                </x-core::table.body.cell>
+                <x-core::table.body.cell class="text-center">
+                    <x-core::button
+                        :title="trans('core/base::forms.edit')"
+                        :data-section="route('customers.addresses.edit', $address->id)"
+                        icon="ti ti-edit"
+                        class="me-1 btn-trigger-edit-address"
+                        color="primary"
+                        size="sm"
+                    />
+
+                    <x-core::button
+                        :title="trans('core/base::forms.delete')"
+                        :data-section="route('customers.addresses.destroy', $address->id)"
+                        icon="ti ti-trash"
+                        class="deleteDialog"
+                        size="sm"
+                        color="danger"
+                    />
+                </x-core::table.body.cell>
+            </x-core::table.body.row>
+        @empty
+            <x-core::table.body.row class="text-center text-muted">
+                <x-core::table.body.cell colspan="7">
+                    {{ trans('plugins/ecommerce::addresses.no_data') }}
+                </x-core::table.body.cell>
+            </x-core::table.body.row>
+        @endforelse
+        </x-core::table.body>
+    </x-core::table>
 </div>

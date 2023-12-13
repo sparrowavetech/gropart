@@ -2,12 +2,12 @@
 
 return [
     'name' => 'Taxes',
+    'description' => 'View and update your products settings',
     'create' => 'Create a tax',
     'edit' => 'Edit tax :title',
     'title' => 'Title',
     'percentage' => 'Percentage %',
     'priority' => 'Priority',
-    'select_tax' => '-- select --',
     'default' => 'Default',
     'country' => 'Country',
     'state' => 'State',

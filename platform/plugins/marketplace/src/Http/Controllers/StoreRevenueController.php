@@ -4,9 +4,7 @@ namespace Botble\Marketplace\Http\Controllers;
 
 use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Base\Facades\Assets;
-use Botble\Base\Facades\PageTitle;
 use Botble\Base\Http\Controllers\BaseController;
-use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Marketplace\Enums\RevenueTypeEnum;
 use Botble\Marketplace\Http\Requests\StoreRevenueRequest;
 use Botble\Marketplace\Models\Revenue;
@@ -35,12 +33,12 @@ class StoreRevenueController extends BaseController
 
         Assets::addScriptsDirectly(['vendor/core/plugins/marketplace/js/store-revenue.js']);
         $table->setAjaxUrl(route('marketplace.store.revenue.index', $customer->id));
-        PageTitle::setTitle(trans('plugins/marketplace::revenue.view_store', ['store' => $store->name]));
+        $this->pageTitle(trans('plugins/marketplace::revenue.view_store', ['store' => $store->name]));
 
         return view('plugins/marketplace::stores.index', compact('table', 'store', 'customer'))->render();
     }
 
-    public function store(int|string $id, StoreRevenueRequest $request, BaseHttpResponse $response)
+    public function store(int|string $id, StoreRevenueRequest $request)
     {
         $store = Store::query()->findOrFail($id);
 
@@ -85,16 +83,18 @@ class StoreRevenueController extends BaseController
         } catch (Throwable | Exception $th) {
             DB::rollBack();
 
-            return $response
+            return $this
+                ->httpResponse()
                 ->setError()
                 ->setMessage($th->getMessage());
         }
 
         event(new UpdatedContentEvent(STORE_MODULE_SCREEN_NAME, $request, $store));
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setData(['balance' => format_price($customer->balance)])
             ->setPreviousUrl(route('marketplace.store.index'))
-            ->setMessage(trans('core/base::notices.update_success_message'));
+            ->withUpdatedSuccessMessage();
     }
 }

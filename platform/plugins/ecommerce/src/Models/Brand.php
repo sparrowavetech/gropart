@@ -25,6 +25,13 @@ class Brand extends BaseModel
         'status' => BaseStatusEnum::class,
     ];
 
+    protected static function booted(): void
+    {
+        self::deleting(function (Brand $brand) {
+            $brand->categories()->detach();
+        });
+    }
+
     public function products(): HasMany
     {
         return $this
@@ -36,12 +43,5 @@ class Brand extends BaseModel
     public function categories(): MorphToMany
     {
         return $this->morphToMany(ProductCategory::class, 'reference', 'ec_product_categorizables', 'reference_id', 'category_id');
-    }
-
-    protected static function booted(): void
-    {
-        self::deleting(function (Brand $brand) {
-            $brand->categories()->detach();
-        });
     }
 }

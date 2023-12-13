@@ -86,7 +86,6 @@ return [
                 'max_file_number' => 'Review max file number',
             ],
             'only_allow_customers_purchased_to_review' => 'Only customers who have purchased the product can review the product',
-            'review_need_to_be_approved' => 'Review need to be approved before showing on the product page',
         ],
     ],
     'shopping' => [

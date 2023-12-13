@@ -11,7 +11,7 @@ class GlobalOptionRequest extends Request
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:220',
+            'name' => 'required|string|max:250',
             'options' => 'nullable',
             'options.*.option_value' => 'nullable|string',
             'options.*.affect_price' => 'nullable|numeric',

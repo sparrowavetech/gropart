@@ -7,31 +7,29 @@ use Botble\Base\Facades\Html;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\{Module}\Models\{Name};
 use Botble\Table\Abstracts\TableAbstract;
-use Botble\Table\Actions\DeleteAction;
-use Botble\Table\Actions\EditAction;
-use Botble\Table\BulkActions\DeleteBulkAction;
-use Botble\Table\Columns\CreatedAtColumn;
-use Botble\Table\Columns\IdColumn;
-use Botble\Table\Columns\NameColumn;
-use Botble\Table\Columns\StatusColumn;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
+use Botble\Table\DataTables;
 
 class {Name}Table extends TableAbstract
 {
-    public function setup(): void
+    public function __construct(DataTables $table, UrlGenerator $urlGenerator, {Name} ${+name})
     {
-        $this
-            ->model({Name}::class)
-            ->addActions([
-                EditAction::make()
-                    ->route('{-name}.edit'),
-                DeleteAction::make()
-                    ->route('{-name}.destroy'),
-            ]);
+        parent::__construct($table, $urlGenerator);
+
+        $this->model = ${+name};
+
+        $this->hasActions = true;
+        $this->hasFilter = true;
+
+        if (!Auth::user()->hasAnyPermission(['{-name}.edit', '{-name}.destroy'])) {
+            $this->hasOperations = false;
+            $this->hasActions = false;
+        }
     }
 
     public function ajax(): JsonResponse
@@ -39,10 +37,22 @@ class {Name}Table extends TableAbstract
         $data = $this->table
             ->eloquent($this->query())
             ->editColumn('name', function ({Name} $item) {
-                if (! $this->hasPermission('{-name}.edit')) {
+                if (!Auth::user()->hasPermission('{-name}.edit')) {
                     return BaseHelper::clean($item->name);
                 }
                 return Html::link(route('{-name}.edit', $item->getKey()), BaseHelper::clean($item->name));
+            })
+            ->editColumn('checkbox', function ({Name} $item) {
+                return $this->getCheckbox($item->getKey());
+            })
+            ->editColumn('created_at', function ({Name} $item) {
+                return BaseHelper::formatDate($item->created_at);
+            })
+            ->editColumn('status', function ({Name} $item) {
+                return $item->status->toHtml();
+            })
+            ->addColumn('operations', function ({Name} $item) {
+                return $this->getOperations('{-name}.edit', '{-name}.destroy', $item);
             });
 
         return $this->toJson($data);
@@ -66,10 +76,22 @@ class {Name}Table extends TableAbstract
     public function columns(): array
     {
         return [
-            IdColumn::make(),
-            NameColumn::make(),
-            CreatedAtColumn::make(),
-            StatusColumn::make(),
+            'id' => [
+                'title' => trans('core/base::tables.id'),
+                'width' => '20px',
+            ],
+            'name' => [
+                'title' => trans('core/base::tables.name'),
+                'class' => 'text-start',
+            ],
+            'created_at' => [
+                'title' => trans('core/base::tables.created_at'),
+                'width' => '100px',
+            ],
+            'status' => [
+                'title' => trans('core/base::tables.status'),
+                'width' => '100px',
+            ],
         ];
     }
 
@@ -80,9 +102,7 @@ class {Name}Table extends TableAbstract
 
     public function bulkActions(): array
     {
-        return [
-            DeleteBulkAction::make()->permission('{-name}.destroy'),
-        ];
+        return $this->addDeleteAction(route('{-name}.deletes'), '{-name}.destroy', parent::bulkActions());
     }
 
     public function getBulkChanges(): array

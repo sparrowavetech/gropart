@@ -1,6 +1,8 @@
 <div class="product-comments-list">
     @foreach ($reviews as $review)
-        <div class="comment-container row pb-2 mb-3 border-bottom">
+        @continue(! $review->is_approved && auth('customer')->id() != $review->customer_id)
+
+        <div @class(['comment-container row pb-2 mb-3 border-bottom', 'opacity-50' => ! $review->is_approved])>
             <div class="col-auto">
                 <img
                     class="rounded-circle"
@@ -18,8 +20,10 @@
                         datetime="{{ $review->created_at->translatedFormat('Y-m-d\TH:i:sP') }}"
                     >{{ $review->created_at->diffForHumans() }}</time>
                     @if ($review->order_created_at)
-                        <span
-                            class="ms-2">{{ __('✅ Purchased :time', ['time' => $review->order_created_at->diffForHumans()]) }}</span>
+                        <span class="ms-2">{{ __('✅ Purchased :time', ['time' => $review->order_created_at->diffForHumans()]) }}</span>
+                    @endif
+                    @if (! $review->is_approved)
+                        <span class="text-warning ms-2">{{ __('Waiting for approval') }}</span>
                     @endif
                 </div>
                 {!! Theme::partial('star-rating', ['avg' => $review->star]) !!}

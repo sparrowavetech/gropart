@@ -1,12 +1,14 @@
 <?php
 
-use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\AdminHelper;
+use Botble\Ecommerce\Facades\EcommerceHelper;
+use Botble\Theme\Facades\Theme;
 use Illuminate\Support\Facades\Route;
 
 Route::group(
-    ['namespace' => 'Botble\Ecommerce\Http\Controllers\Customers', 'middleware' => ['web', 'core']],
+    ['namespace' => 'Botble\Ecommerce\Http\Controllers\Customers'],
     function () {
-        Route::group(['prefix' => BaseHelper::getAdminPrefix(), 'middleware' => 'auth'], function () {
+        AdminHelper::registerRoutes(function () {
             Route::group(['prefix' => 'customers', 'as' => 'customers.'], function () {
                 Route::resource('', 'CustomerController')->parameters(['' => 'customer']);
 
@@ -69,10 +71,10 @@ Route::group(
 );
 
 if (defined('THEME_MODULE_SCREEN_NAME')) {
-    Route::group(apply_filters(BASE_FILTER_GROUP_PUBLIC_ROUTE, []), function () {
+    Theme::registerRoutes(function () {
         Route::group([
             'namespace' => 'Botble\Ecommerce\Http\Controllers\Customers',
-            'middleware' => ['web', 'core', 'customer.guest'],
+            'middleware' => ['customer.guest'],
             'as' => 'customer.',
         ], function () {
             Route::get('login', 'LoginController@showLoginForm')->name('login');
@@ -105,7 +107,7 @@ if (defined('THEME_MODULE_SCREEN_NAME')) {
 
         Route::group([
             'namespace' => 'Botble\Ecommerce\Http\Controllers\Customers',
-            'middleware' => ['web', 'core', 'customer'],
+            'middleware' => ['customer'],
             'prefix' => 'customer',
             'as' => 'customer.',
         ], function () {
@@ -242,7 +244,6 @@ if (defined('THEME_MODULE_SCREEN_NAME')) {
 
         Route::group([
             'namespace' => 'Botble\Ecommerce\Http\Controllers\Customers',
-            'middleware' => ['web', 'core'],
             'as' => 'public.',
         ], function () {
             Route::get('digital-products/download/{id}', [

@@ -2,7 +2,7 @@
     @php
         $tags = get_popular_tags($config['number_display']);
     @endphp
-    @if ($tags->count())
+    @if ($tags->isNotEmpty())
         <div class="widget-sidebar widget-blog-tag-cloud">
             <h2 class="widget-title">{{ BaseHelper::clean($config['name'] ?: __('Tags')) }}</h2>
             <div class="widget__inner">

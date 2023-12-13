@@ -1,5 +1,5 @@
-<div class="form-group">
-    <label for="widget-title">{{ __('Title') }}</label>
+<div class="mb-3">
+    <label class="form-label" for="widget-title">{{ __('Title') }}</label>
     <input
         class="form-control"
         id="widget-title"
@@ -9,8 +9,8 @@
     >
 </div>
 
-<div class="form-group">
-    <label for="widget-subtitle">{{ __('Subtitle') }}</label>
+<div class="mb-3">
+    <label class="form-label" for="widget-subtitle">{{ __('Subtitle') }}</label>
     <textarea
         class="form-control"
         id="widget-subtitle"

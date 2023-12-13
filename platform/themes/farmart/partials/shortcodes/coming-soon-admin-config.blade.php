@@ -1,5 +1,5 @@
-<div class="form-group">
-    <label class="control-label">{{ __('Title') }}</label>
+<div class="mb-3">
+    <label class="form-label">{{ __('Title') }}</label>
     <input
         class="form-control"
         name="title"
@@ -9,8 +9,8 @@
     >
 </div>
 
-<div class="form-group">
-    <label class="control-label">{{ __('Subtitle') }}</label>
+<div class="mb-3">
+    <label class="form-label">{{ __('Subtitle') }}</label>
     <input
         class="form-control"
         name="subtitle"
@@ -20,8 +20,8 @@
     >
 </div>
 
-<div class="form-group">
-    <label class="control-label">Time</label>
+<div class="mb-3">
+    <label class="form-label">Time</label>
     <input
         class="form-control"
         name="time"
@@ -31,8 +31,8 @@
     >
 </div>
 
-<div class="form-group">
-    <label class="control-label">{{ __('Connect social networks title') }}</label>
+<div class="mb-3">
+    <label class="form-label">{{ __('Connect social networks title') }}</label>
     <input
         class="form-control"
         name="social_title"
@@ -42,7 +42,7 @@
     >
 </div>
 
-<div class="form-group">
-    <label class="control-label">{{ __('Image') }}</label>
+<div class="mb-3">
+    <label class="form-label">{{ __('Image') }}</label>
     {!! Form::mediaImage('image', Arr::get($attributes, 'image')) !!}
 </div>

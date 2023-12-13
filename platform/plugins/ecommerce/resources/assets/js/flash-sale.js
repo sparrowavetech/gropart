@@ -1,10 +1,10 @@
-$(document).ready(function () {
+$(() => {
     $(document).on('click', '.list-search-data .selectable-item', (event) => {
         event.preventDefault()
-        let _self = $(event.currentTarget)
-        let $input = _self.closest('.form-group').find('input[type=hidden]')
+        const _self = $(event.currentTarget)
+        const $input = _self.closest('.box-search-advance').find('input[type=hidden]')
 
-        let existedValues = []
+        const existedValues = []
         $.each($input.val().split(','), (index, el) => {
             if (el && el !== '') {
                 existedValues[index] = parseInt(el)
@@ -13,14 +13,14 @@ $(document).ready(function () {
 
         if ($.inArray(_self.data('id'), existedValues) < 0) {
             if ($input.val()) {
-                $input.val($input.val() + ',' + _self.data('id'))
+                $input.val(`${$input.val()},${_self.data('id')}`)
             } else {
                 $input.val(_self.data('id'))
             }
 
-            let template = $(document).find('#selected_product_list_template').html()
+            const template = $(document).find('#selected_product_list_template').html()
 
-            let productItem = template
+            const productItem = template
                 .replace(/__name__/gi, _self.data('name'))
                 .replace(/__id__/gi, _self.data('id'))
                 .replace(/__index__/gi, existedValues.length)
@@ -28,123 +28,115 @@ $(document).ready(function () {
                 .replace(/__image__/gi, _self.data('image'))
                 .replace(/__price__/gi, _self.data('price'))
                 .replace(/__attributes__/gi, _self.find('a span').text())
-            _self.closest('.form-group').find('.list-selected-products').removeClass('hidden')
-            _self.closest('.form-group').find('.list-selected-products table tbody').append(productItem)
+            _self.closest('.box-search-advance').find('.list-selected-products').show()
+            _self.closest('.box-search-advance').find('.list-selected-products').append(productItem)
         }
-        _self.closest('.panel').addClass('hidden')
+        _self.closest('.card').hide()
     })
 
-    $(document).on('click', '.textbox-advancesearch', (event) => {
-        let _self = $(event.currentTarget)
-        let $formBody = _self.closest('.box-search-advance').find('.panel')
-        $formBody.removeClass('hidden')
+    $(document).on('click', '[data-bb-toggle="product-search-advanced"]', (event) => {
+        const _self = $(event.currentTarget)
+        const $formBody = _self.closest('.box-search-advance').find('.card')
+        $formBody.show()
         $formBody.addClass('active')
-        if ($formBody.find('.panel-body').length === 0) {
-            Botble.blockUI({
-                target: $formBody,
-                iconOnly: true,
-                overlayColor: 'none',
-            })
+        if ($formBody.find('.card-body').length === 0) {
+            Botble.showLoading($formBody)
 
             $.ajax({
-                url: _self.data('target'),
+                url: _self.data('bb-target'),
                 type: 'GET',
                 success: (res) => {
                     if (res.error) {
                         Botble.showError(res.message)
                     } else {
                         $formBody.html(res.data)
-                        Botble.unblockUI($formBody)
                     }
                 },
                 error: (data) => {
                     Botble.handleError(data)
-                    Botble.unblockUI($formBody)
                 },
+                complete: () => {
+                    Botble.hideLoading($formBody)
+                }
             })
         }
     })
 
-    $(document).on('keyup', '.textbox-advancesearch', (event) => {
-        let _self = $(event.currentTarget)
-        let $formBody = _self.closest('.box-search-advance').find('.panel')
+    $(document).on('keyup', '[data-bb-toggle="product-search-advanced"]', (event) => {
+        const _self = $(event.currentTarget)
+        const $formBody = _self.closest('.box-search-advance').find('.card')
         setTimeout(() => {
-            Botble.blockUI({
-                target: $formBody,
-                iconOnly: true,
-                overlayColor: 'none',
-            })
+            Botble.hideLoading($formBody)
 
             $.ajax({
-                url: _self.data('target') + '?keyword=' + _self.val(),
+                url: `${_self.data('bb-target')}?keyword=${_self.val()}`,
                 type: 'GET',
                 success: (res) => {
                     if (res.error) {
                         Botble.showError(res.message)
                     } else {
                         $formBody.html(res.data)
-                        Botble.unblockUI($formBody)
                     }
                 },
                 error: (data) => {
                     Botble.handleError(data)
-                    Botble.unblockUI($formBody)
                 },
+                complete: () => {
+                    Botble.hideLoading($formBody)
+                }
             })
         }, 500)
     })
 
     $(document).on('click', '.box-search-advance .page-link', (event) => {
         event.preventDefault()
-        let $searchBox = $(event.currentTarget).closest('.box-search-advance').find('.textbox-advancesearch')
-        if (!$searchBox.closest('.page-item').hasClass('disabled') && $searchBox.data('target')) {
-            let $formBody = $searchBox.closest('.box-search-advance').find('.panel')
-            Botble.blockUI({
-                target: $formBody,
-                iconOnly: true,
-                overlayColor: 'none',
-            })
+        const $searchBox = $(event.currentTarget).closest('.box-search-advance').find('[data-bb-toggle="product-search-advanced"]')
+        if (!$searchBox.closest('.page-item').hasClass('disabled') && $searchBox.data('bb-target')) {
+            const $formBody = $searchBox.closest('.box-search-advance').find('.card')
+            Botble.showLoading($formBody)
 
             $.ajax({
-                url: $(event.currentTarget).prop('href') + '&keyword=' + $searchBox.val(),
+                url: `${$(event.currentTarget).prop('href')}&keyword=${$searchBox.val()}`,
                 type: 'GET',
                 success: (res) => {
                     if (res.error) {
                         Botble.showError(res.message)
                     } else {
                         $formBody.html(res.data)
-                        Botble.unblockUI($formBody)
                     }
                 },
                 error: (data) => {
                     Botble.handleError(data)
-                    Botble.unblockUI($formBody)
                 },
+                complete: () => {
+                    Botble.hideLoading($formBody)
+                }
             })
         }
     })
 
     $(document).on('click', 'body', (e) => {
-        let container = $('.box-search-advance')
+        const container = $('.box-search-advance')
 
         if (!container.is(e.target) && container.has(e.target).length === 0) {
-            container.find('.panel').addClass('hidden')
+            container.find('.card').hide()
         }
     })
 
-    $(document).on('click', '.btn-trigger-remove-selected-product', (event) => {
+    $(document).on('click', '[data-bb-toggle="product-delete-item"]', (event) => {
         event.preventDefault()
-        let $input = $(event.currentTarget).closest('.form-group').find('input[type=hidden]')
+        const $input = $(event.currentTarget).closest('.box-search-advance').find('input[type=hidden]')
 
-        let existedValues = $input.val().split(',')
+        const existedValues = $input.val().split(',')
         $.each(existedValues, (index, el) => {
             el = el.trim()
+
             if (!_.isEmpty(el)) {
                 existedValues[index] = parseInt(el)
             }
         })
 
-        let index = existedValues.indexOf($(event.currentTarget).data('id'))
+        let index = existedValues.indexOf($(event.currentTarget).data('bb-target'))
 
         if (index > -1) {
             delete existedValues[index]
@@ -152,12 +144,13 @@ $(document).ready(function () {
 
         $input.val(existedValues.join(','))
 
-        if ($(event.currentTarget).closest('tbody').find('tr').length < 2) {
-            $(event.currentTarget).closest('.list-selected-products').addClass('hidden')
+        if ($(event.currentTarget).closest('.list-group').find('.list-group-item').length < 2) {
+            $(event.currentTarget).closest('.list-selected-products').hide()
         }
+
         $(event.currentTarget)
-            .closest('tbody')
-            .find('tr[data-product-id=' + $(event.currentTarget).data('id') + ']')
+            .closest('.list-group')
+            .find(`.list-group-item[data-product-id=${$(event.currentTarget).data('bb-target')}]`)
             .remove()
     })
 })

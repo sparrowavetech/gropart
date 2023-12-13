@@ -18,12 +18,12 @@
         </div>
         <div class="col-auto" v-if="(product.is_variation || !product.variations.length) && !product.is_out_of_stock">
             <button
-                class="btn btn-outline-primary btn-sm py-1"
+                class="btn btn-outline-primary btn-sm"
                 type="button"
                 @click="$emit('select-product', product, $refs['product_options_' + product.id] || [])"
             >
-                <i class="fa fa-plus"></i>
-                <span>{{ __('order.add') }}</span>
+                <i class="icon-sm ti ti-plus"></i>
+                {{ __('order.add') }}
             </button>
         </div>
     </div>

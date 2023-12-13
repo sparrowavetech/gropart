@@ -21,7 +21,7 @@ class RegisterRequest extends Request
                 $rules += Captcha::rules();
             }
 
-            if (get_ecommerce_setting('enable_math_captcha_in_register_page', 0)) {
+            if (Captcha::mathCaptchaEnabled() && get_ecommerce_setting('enable_math_captcha_in_register_page', 0)) {
                 $rules += Captcha::mathCaptchaRules();
             }
         }

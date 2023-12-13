@@ -1,22 +1,20 @@
-{!! Form::open(['url' => $url]) !!}
-
-<div class="form-group">
-    <label
-        class="control-label"
-        for="shipment-status"
-    >{{ trans('plugins/ecommerce::shipping.status') }}</label>
+<x-core::form :url="$url">
     @if (MarketplaceHelper::allowVendorManageShipping())
-        {!! Form::customSelect('status', \Botble\Ecommerce\Enums\ShippingStatusEnum::labels(), $shipment->status) !!}
+        <x-core::form.select
+            :label="trans('plugins/ecommerce::shipping.status')"
+            name="status"
+            :options="Botble\Ecommerce\Enums\ShippingStatusEnum::labels()"
+            :value="$shipment->status"
+        />
     @else
-        {!! Form::customSelect(
-            'status',
-            [
-                \Botble\Ecommerce\Enums\ShippingStatusEnum::ARRANGE_SHIPMENT => \Botble\Ecommerce\Enums\ShippingStatusEnum::ARRANGE_SHIPMENT()->label(),
-                \Botble\Ecommerce\Enums\ShippingStatusEnum::READY_TO_BE_SHIPPED_OUT => \Botble\Ecommerce\Enums\ShippingStatusEnum::READY_TO_BE_SHIPPED_OUT()->label(),
-            ],
-            $shipment->status,
-        ) !!}
+        <x-core::form.select
+            :label="trans('plugins/ecommerce::shipping.status')"
+            name="status"
+            :options="[
+                Botble\Ecommerce\Enums\ShippingStatusEnum::ARRANGE_SHIPMENT => Botble\Ecommerce\Enums\ShippingStatusEnum::ARRANGE_SHIPMENT()->label(),
+                Botble\Ecommerce\Enums\ShippingStatusEnum::READY_TO_BE_SHIPPED_OUT => Botble\Ecommerce\Enums\ShippingStatusEnum::READY_TO_BE_SHIPPED_OUT()->label(),
+            ]"
+            :value="$shipment->status"
+        />
     @endif
-</div>
-
-{!! Form::close() !!}
+</x-core::form>

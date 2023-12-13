@@ -22,7 +22,7 @@
                         <div class="header-countdown row align-items-center justify-content-center gx-2">
                             <div class="ends-text col-auto">
                                 <div class="d-flex align-items-center justify-content-center">
-                                    <span class="svg-icon">
+                                    <span class="svg-icon me-2">
                                         <i class="icon icon-speed-fast"></i>
                                     </span>{{ __('Expires in') }}:
                                 </div>
@@ -56,22 +56,19 @@
                                 [
                                     'breakpoint' => 1400,
                                     'settings' => [
-                                        'slidesToShow' => 6,
+                                        'slidesToShow' => 5,
                                     ],
                                 ],
                                 [
                                     'breakpoint' => 1199,
                                     'settings' => [
-                                        'slidesToShow' => 6,
+                                        'slidesToShow' => 4,
                                     ],
                                 ],
                                 [
                                     'breakpoint' => 1024,
                                     'settings' => [
-                                        'arrows' => true,
-                                        'dots' => false,
-                                        'slidesToShow' => 4,
-                                        'slidesToScroll' => 4
+                                        'slidesToShow' => 3,
                                     ],
                                 ],
                                 [

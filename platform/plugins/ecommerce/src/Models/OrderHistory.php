@@ -31,10 +31,6 @@ class OrderHistory extends BaseModel
 
     protected function extras(): Attribute
     {
-        return Attribute::make(
-            get: function (string|null $value): array {
-                return json_decode($value, true) ?: [];
-            }
-        );
+        return Attribute::get(fn (string|null $value): array => json_decode($value, true) ?: []);
     }
 }

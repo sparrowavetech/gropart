@@ -1,6 +1,6 @@
 @for ($i = 1; $i < 5; $i++)
-    <div class="form-group">
-        <label class="control-label">{{ __('Ad :number', ['number' => $i]) }}</label>
+    <div class="mb-3">
+        <label class="form-label">{{ __('Ad :number', ['number' => $i]) }}</label>
         <select
             class="form-control"
             name="key_{{ $i }}"

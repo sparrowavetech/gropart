@@ -2,9 +2,7 @@
 
 namespace Botble\Marketplace\Http\Controllers\Fronts;
 
-use Botble\Base\Facades\BaseHelper;
-use Botble\Base\Facades\PageTitle;
-use Botble\Base\Http\Responses\BaseHttpResponse;
+use Botble\Base\Http\Controllers\BaseController;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Marketplace\Enums\RevenueTypeEnum;
 use Botble\Marketplace\Facades\MarketplaceHelper;
@@ -15,11 +13,11 @@ use Carbon\CarbonPeriod;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 
-class RevenueController
+class RevenueController extends BaseController
 {
     public function index(StoreRevenueTable $table)
     {
-        PageTitle::setTitle(__('Revenues'));
+        $this->pageTitle(__('Revenues'));
 
         $table
             ->setCustomerId(auth('customer')->id())
@@ -29,7 +27,7 @@ class RevenueController
         return $table->render(MarketplaceHelper::viewPath('vendor-dashboard.table.base'));
     }
 
-    public function getMonthChart(Request $request, BaseHttpResponse $response)
+    public function getMonthChart(Request $request)
     {
         [$startDate, $endDate] = EcommerceHelper::getDateRangeInReport($request);
 
@@ -65,7 +63,7 @@ class RevenueController
 
             foreach ($period as $date) {
                 $value = $revenues
-                    ->where('date', $date->toDateString())
+                    ->where('date', $date->format('Y-m-d'))
                     ->sum('amount');
                 $data['data'][] = $value;
             }
@@ -87,11 +85,13 @@ class RevenueController
         }
 
         foreach ($period as $date) {
-            $dates[] = BaseHelper::formatDate($date);
+            $dates[] = $date->format('Y-m-d');
         }
 
         $colors = $earningSales->pluck('color');
 
-        return $response->setData(compact('dates', 'series', 'earningSales', 'colors'));
+        return $this
+            ->httpResponse()
+            ->setData(compact('dates', 'series', 'earningSales', 'colors'));
     }
 }

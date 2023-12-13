@@ -13,7 +13,7 @@
     <h3>{{ __('Cart') }} <span class="cart-counter">({{ Cart::instance('cart')->count() }})</span></h3>
 </div>
 <div class="cart__items">
-    @if (Cart::instance('cart')->count() > 0 && ($products = Cart::instance('cart')->products()) && $products->count() > 0)
+    @if (Cart::instance('cart')->isNotEmpty() && ($products = Cart::instance('cart')->products()) && $products->count() > 0)
         <ul class="mini-product-cart-list">
             @foreach (Cart::instance('cart')->content() as $key => $cartItem)
                 @if ($product = $products->find($cartItem->id))
@@ -28,7 +28,7 @@
     @endif
 </div>
 
-@if (Cart::instance('cart')->count() > 0 &&
+@if (Cart::instance('cart')->isNotEmpty() &&
         Cart::instance('cart')->products()->count() > 0)
     <div class="control-buttons">
         @if (EcommerceHelper::isTaxEnabled())

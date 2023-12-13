@@ -4,6 +4,7 @@ namespace Botble\Ecommerce\Models;
 
 use Botble\Base\Casts\SafeContent;
 use Botble\Base\Models\BaseModel;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
@@ -49,13 +50,13 @@ class InvoiceItem extends BaseModel
         return $this->morphTo();
     }
 
-    public function getAmountFormatAttribute(): string
+    protected function amountFormat(): Attribute
     {
-        return format_price($this->price);
+        return Attribute::get(fn () => format_price($this->price));
     }
 
-    public function getTotalFormatAttribute(): string
+    protected function totalFormat(): Attribute
     {
-        return format_price($this->price * $this->qty);
+        return Attribute::get(fn () => format_price($this->price * $this->qty));
     }
 }

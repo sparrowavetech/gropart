@@ -35,27 +35,27 @@
         <div class="row">
             @include('plugins/ecommerce::themes.includes.order-tracking-detail')
             <br>
-            <div class="col-md-12">
+            <div class="col-md-12 mt-4">
                 @if ($order->isInvoiceAvailable())
                     <a
-                        class="btn-print"
+                        class="btn btn-success me-1"
                         href="{{ route('customer.print-order', $order->id) }}?type=print"
                         target="_blank"
-                    >{{ __('Print invoice') }}</a>&nbsp;
+                    >{{ __('Print invoice') }}</a>
                     <a
-                        class="btn-print"
+                        class="btn btn-success me-1"
                         href="{{ route('customer.print-order', $order->id) }}"
                     >{{ __('Download invoice') }}</a>
                 @endif
                 @if ($order->canBeCanceled())
                     <a
-                        class="btn-print"
+                        class="btn btn-danger me-1"
                         href="{{ route('customer.orders.cancel', $order->id) }}"
                     >{{ __('Cancel order') }}</a>
                 @endif
                 @if ($order->canBeReturned())
                     <a
-                        class="btn-print"
+                        class="btn btn-danger me-1"
                         href="{{ route('customer.order_returns.request_view', $order->id) }}"
                     >{{ __('Return Product(s)') }}</a>
                 @endif

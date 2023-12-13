@@ -2,28 +2,28 @@
 
 namespace Botble\Ecommerce\Forms;
 
-use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Base\Forms\FieldOptions\SelectFieldOption;
+use Botble\Base\Forms\FieldOptions\StatusFieldOption;
+use Botble\Base\Forms\Fields\SelectField;
+use Botble\Base\Forms\Fields\TreeCategoryField;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Ecommerce\Facades\ProductCategoryHelper;
-use Botble\Ecommerce\Forms\Fields\CategoryMultiField;
 use Botble\Ecommerce\Http\Requests\BrandRequest;
 use Botble\Ecommerce\Models\Brand;
 
 class BrandForm extends FormAbstract
 {
-    public function buildForm(): void
+    public function setup(): void
     {
         $this
             ->setupModel(new Brand())
             ->setValidatorClass(BrandRequest::class)
-            ->addCustomField('categoryMulti', CategoryMultiField::class)
-            ->withCustomFields()
             ->add('name', 'text', [
                 'label' => trans('core/base::forms.name'),
                 'required' => true,
                 'attr' => [
                     'placeholder' => trans('core/base::forms.name_placeholder'),
-                    'data-counter' => 120,
+                    'data-counter' => 250,
                 ],
             ])
             ->add('description', 'editor', [
@@ -48,11 +48,7 @@ class BrandForm extends FormAbstract
                 ],
                 'default_value' => 0,
             ])
-            ->add('status', 'customSelect', [
-                'label' => trans('core/base::tables.status'),
-                'required' => true,
-                'choices' => BaseStatusEnum::labels(),
-            ])
+            ->add('status', SelectField::class, StatusFieldOption::make()->toArray())
             ->add('logo', 'mediaImage', [
                 'label' => trans('plugins/ecommerce::brands.logo'),
             ])
@@ -60,11 +56,16 @@ class BrandForm extends FormAbstract
                 'label' => trans('plugins/ecommerce::brands.form.is_featured'),
                 'default_value' => false,
             ])
-            ->add('categories[]', 'categoryMulti', [
-                'label' => trans('plugins/ecommerce::products.form.categories'),
-                'choices' => ProductCategoryHelper::getActiveTreeCategories(),
-                'value' => $this->getModel()->id ? $this->getModel()->categories->pluck('id')->all() : [],
-            ])
+            ->add(
+                'categories[]',
+                TreeCategoryField::class,
+                SelectFieldOption::make()
+                    ->label(trans('plugins/ecommerce::products.form.categories'))
+                    ->choices(ProductCategoryHelper::getActiveTreeCategories())
+                    ->selected($this->getModel()->id ? $this->getModel()->categories->pluck('id')->all() : [])
+                    ->addAttribute('card-body-class', 'p-0')
+                    ->toArray()
+            )
             ->setBreakFieldPoint('status');
     }
 }

@@ -2,10 +2,10 @@
 
 namespace Botble\Ecommerce\Http\Controllers\Fronts;
 
-use Botble\Base\Http\Responses\BaseHttpResponse;
+use Botble\Base\Http\Controllers\BaseController;
 use Botble\Ecommerce\Enums\OrderStatusEnum;
 use Botble\Ecommerce\Facades\EcommerceHelper;
-use Botble\Ecommerce\Http\Requests\ReviewRequest;
+use Botble\Ecommerce\Http\Requests\Fronts\ReviewRequest;
 use Botble\Ecommerce\Models\Order;
 use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Models\Review;
@@ -13,12 +13,11 @@ use Botble\Media\Facades\RvMedia;
 use Botble\SeoHelper\Facades\SeoHelper;
 use Botble\Slug\Facades\SlugHelper;
 use Botble\Theme\Facades\Theme;
-use Illuminate\Routing\Controller;
 use Illuminate\Support\Arr;
 
-class ReviewController extends Controller
+class ReviewController extends BaseController
 {
-    public function store(ReviewRequest $request, BaseHttpResponse $response): BaseHttpResponse
+    public function store(ReviewRequest $request)
     {
         if (! EcommerceHelper::isReviewEnabled()) {
             abort(404);
@@ -29,7 +28,10 @@ class ReviewController extends Controller
 
         $check = $this->check($productId);
         if (Arr::get($check, 'error')) {
-            return $response->setError()->setMessage(Arr::get($check, 'message', __('Oops! Something Went Wrong.')));
+            return $this
+                ->httpResponse()
+                ->setError()
+                ->setMessage(Arr::get($check, 'message', __('Oops! Something Went Wrong.')));
         }
 
         $results = [];
@@ -38,7 +40,10 @@ class ReviewController extends Controller
             foreach ($images as $image) {
                 $result = RvMedia::handleUpload($image, 0, 'reviews');
                 if ($result['error']) {
-                    return $response->setError()->setMessage($result['message']);
+                    return $this
+                        ->httpResponse()
+                        ->setError()
+                        ->setMessage($result['message']);
                 }
 
                 $results[] = $result;
@@ -53,10 +58,12 @@ class ReviewController extends Controller
 
         Review::query()->create($data);
 
-        return $response->setMessage(__('Added review successfully!'));
+        return $this
+            ->httpResponse()
+            ->setMessage(__('Added review successfully!'));
     }
 
-    public function destroy(int|string $id, BaseHttpResponse $response)
+    public function destroy(int|string $id)
     {
         if (! EcommerceHelper::isReviewEnabled()) {
             abort(404);
@@ -67,13 +74,15 @@ class ReviewController extends Controller
         if (auth()->check() || (auth('customer')->check() && auth('customer')->id() == $review->customer_id)) {
             $review->delete();
 
-            return $response->setMessage(__('Deleted review successfully!'));
+            return $this
+                ->httpResponse()
+                ->setMessage(__('Deleted review successfully!'));
         }
 
         abort(401);
     }
 
-    public function getProductReview(string $key, BaseHttpResponse $response)
+    public function getProductReview(string $key)
     {
         if (! EcommerceHelper::isReviewEnabled()) {
             abort(404);
@@ -100,7 +109,8 @@ class ReviewController extends Controller
 
         $check = $this->check($product->id);
         if (Arr::get($check, 'error')) {
-            return $response
+            return $this
+                ->httpResponse()
                 ->setNextUrl($product->url)
                 ->setError()
                 ->setMessage(Arr::get($check, 'message', __('Oops! Something Went Wrong.')));
@@ -114,7 +124,6 @@ class ReviewController extends Controller
         SeoHelper::setTitle(__('Review product ":product"', ['product' => $product->name]))->setDescription($product->description);
 
         Theme::breadcrumb()
-            ->add(__('Home'), route('public.index'))
             ->add(__('Products'), route('public.products'))
             ->add($product->name, $product->url)
             ->add(__('Review'));

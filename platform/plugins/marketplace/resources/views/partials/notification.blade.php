@@ -1,6 +1,6 @@
 @if (!$isApproved)
-    <div class="note note-warning approve-product-warning">
-        <p>{!! BaseHelper::clean(
+    <x-core::alert type="warning" class="approve-product-warning">
+        {!! BaseHelper::clean(
             trans('plugins/marketplace::store.product_approval_notification', [
                 'vendor' => Html::link($product->createdBy->store->url, $product->createdBy->store->name, [
                     'target' => '_blank',
@@ -11,24 +11,24 @@
                     ['class' => 'approve-product-for-selling-button'],
                 ),
             ]),
-        ) !!}</p>
-    </div>
+        ) !!}<
+    </x-core::alert>
 @else
-    <div class="note note-info approved-product-info">
-        <p>{!! BaseHelper::clean(
+    <x-core::alert type="info" class="approved-product-info">
+        {!! BaseHelper::clean(
             trans('plugins/marketplace::store.product_approved_notification', [
                 'vendor' => Html::link($product->createdBy->store->url, $product->createdBy->store->name, [
                     'target' => '_blank',
                 ]),
                 'user' => $product->approvedBy->name,
             ]),
-        ) !!}</p>
-    </div>
+        ) !!}
+    </x-core::alert>
 @endif
 
 @push('footer')
     @if (!$isApproved)
-        <x-core-base::modal
+        <x-core::modal
             id="approve-product-for-selling-modal"
             type="warning"
             :title="trans('plugins/marketplace::store.approve_product_confirmation')"
@@ -38,6 +38,6 @@
             {!! trans('plugins/marketplace::store.approve_product_confirmation_description', [
                 'vendor' => Html::link($product->createdBy->store->url, $product->createdBy->store->name, ['target' => '_blank']),
             ]) !!}
-        </x-core-base::modal>
+        </x-core::modal>
     @endif
 @endpush

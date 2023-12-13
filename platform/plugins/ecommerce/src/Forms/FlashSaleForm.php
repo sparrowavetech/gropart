@@ -2,9 +2,10 @@
 
 namespace Botble\Ecommerce\Forms;
 
-use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Forms\FieldOptions\StatusFieldOption;
+use Botble\Base\Forms\Fields\SelectField;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Ecommerce\Http\Requests\FlashSaleRequest;
 use Botble\Ecommerce\Models\FlashSale;
@@ -12,35 +13,24 @@ use Carbon\Carbon;
 
 class FlashSaleForm extends FormAbstract
 {
-    public function buildForm(): void
+    public function setup(): void
     {
         Assets::addScriptsDirectly('vendor/core/plugins/ecommerce/js/flash-sale.js')
             ->addStylesDirectly(['vendor/core/plugins/ecommerce/css/ecommerce.css'])
-            ->addScripts([
-                'blockui',
-                'input-mask',
-            ]);
+            ->addScripts(['input-mask']);
 
         $this
             ->setupModel(new FlashSale())
             ->setValidatorClass(FlashSaleRequest::class)
-            ->withCustomFields()
             ->add('name', 'text', [
                 'label' => trans('core/base::forms.name'),
                 'required' => true,
                 'attr' => [
                     'placeholder' => trans('core/base::forms.name_placeholder'),
-                    'data-counter' => 120,
+                    'data-counter' => 250,
                 ],
             ])
-            ->add('status', 'customSelect', [
-                'label' => trans('core/base::tables.status'),
-                'required' => true,
-                'attr' => [
-                    'class' => 'form-control address',
-                ],
-                'choices' => BaseStatusEnum::labels(),
-            ])
+            ->add('status', SelectField::class, StatusFieldOption::make()->toArray())
             ->add('end_date', 'datePicker', [
                 'label' => __('End date'),
                 'required' => true,

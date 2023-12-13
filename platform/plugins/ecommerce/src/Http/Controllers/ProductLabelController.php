@@ -6,10 +6,6 @@ use Botble\Base\Events\BeforeEditContentEvent;
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
-use Botble\Base\Facades\PageTitle;
-use Botble\Base\Forms\FormBuilder;
-use Botble\Base\Http\Controllers\BaseController;
-use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Forms\ProductLabelForm;
 use Botble\Ecommerce\Http\Requests\ProductLabelRequest;
 use Botble\Ecommerce\Models\ProductLabel;
@@ -19,44 +15,54 @@ use Illuminate\Http\Request;
 
 class ProductLabelController extends BaseController
 {
+    public function __construct()
+    {
+        parent::__construct();
+
+        $this
+            ->breadcrumb()
+            ->add(trans('plugins/ecommerce::product-label.name'), route('product-label.index'));
+    }
+
     public function index(ProductLabelTable $table)
     {
-        PageTitle::setTitle(trans('plugins/ecommerce::product-label.name'));
+        $this->pageTitle(trans('plugins/ecommerce::product-label.name'));
 
         return $table->renderTable();
     }
 
-    public function create(FormBuilder $formBuilder)
+    public function create()
     {
-        PageTitle::setTitle(trans('plugins/ecommerce::product-label.create'));
+        $this->pageTitle(trans('plugins/ecommerce::product-label.create'));
 
-        return $formBuilder->create(ProductLabelForm::class)->renderForm();
+        return ProductLabelForm::create()->renderForm();
     }
 
-    public function store(ProductLabelRequest $request, BaseHttpResponse $response)
+    public function store(ProductLabelRequest $request)
     {
         $productLabel = ProductLabel::query()->create($request->input());
 
         event(new CreatedContentEvent(PRODUCT_LABEL_MODULE_SCREEN_NAME, $request, $productLabel));
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setPreviousUrl(route('product-label.index'))
             ->setNextUrl(route('product-label.edit', $productLabel->id))
-            ->setMessage(trans('core/base::notices.create_success_message'));
+            ->withCreatedSuccessMessage();
     }
 
-    public function edit(int|string $id, FormBuilder $formBuilder, Request $request)
+    public function edit(int|string $id, Request $request)
     {
         $productLabel = ProductLabel::query()->findOrFail($id);
 
         event(new BeforeEditContentEvent($request, $productLabel));
 
-        PageTitle::setTitle(trans('core/base::forms.edit_item', ['name' => $productLabel->name]));
+        $this->pageTitle(trans('core/base::forms.edit_item', ['name' => $productLabel->name]));
 
-        return $formBuilder->create(ProductLabelForm::class, ['model' => $productLabel])->renderForm();
+        return ProductLabelForm::createFromModel($productLabel)->renderForm();
     }
 
-    public function update(int|string $id, ProductLabelRequest $request, BaseHttpResponse $response)
+    public function update(int|string $id, ProductLabelRequest $request)
     {
         $productLabel = ProductLabel::query()->findOrFail($id);
 
@@ -65,12 +71,13 @@ class ProductLabelController extends BaseController
 
         event(new UpdatedContentEvent(PRODUCT_LABEL_MODULE_SCREEN_NAME, $request, $productLabel));
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setPreviousUrl(route('product-label.index'))
-            ->setMessage(trans('core/base::notices.update_success_message'));
+            ->withUpdatedSuccessMessage();
     }
 
-    public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
+    public function destroy(int|string $id, Request $request)
     {
         try {
             $productLabel = ProductLabel::query()->findOrFail($id);
@@ -79,9 +86,12 @@ class ProductLabelController extends BaseController
 
             event(new DeletedContentEvent(PRODUCT_LABEL_MODULE_SCREEN_NAME, $request, $productLabel));
 
-            return $response->setMessage(trans('core/base::notices.delete_success_message'));
+            return $this
+                ->httpResponse()
+                ->setMessage(trans('core/base::notices.delete_success_message'));
         } catch (Exception $exception) {
-            return $response
+            return $this
+                ->httpResponse()
                 ->setError()
                 ->setMessage($exception->getMessage());
         }

@@ -1,11 +1,8 @@
-{!! Form::open(['url' => $url]) !!}
-
-<div class="form-group">
-    <label
-        class="control-label"
-        for="shipment-status"
-    >{{ trans('plugins/ecommerce::shipping.status') }}</label>
-    {!! Form::customSelect('status', \Botble\Ecommerce\Enums\ShippingStatusEnum::labels(), $shipment->status) !!}
-</div>
-
-{!! Form::close() !!}
+<x-core::form :url="$url">
+    <x-core::form.select
+        :label="trans('plugins/ecommerce::shipping.status')"
+        name="status"
+        :options="Botble\Ecommerce\Enums\ShippingStatusEnum::labels()"
+        :value="$shipment->status"
+    />
+</x-core::form>

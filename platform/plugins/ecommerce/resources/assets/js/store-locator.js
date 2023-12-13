@@ -1,77 +1,52 @@
 class StoreLocatorManagement {
     init() {
-        $(document).on('click', '.btn-trigger-show-store-locator', (event) => {
+        $(document).on('click', '[data-bb-toggle="store-locator-show"]', (event) => {
             event.preventDefault()
-            let $current = $(event.currentTarget)
+
+            const $button = $(event.currentTarget)
             let $modalBody
-            if ($current.data('type') === 'update') {
+
+            if ($button.data('type') === 'update') {
                 $modalBody = $('#update-store-locator-modal .modal-body')
             } else {
                 $modalBody = $('#add-store-locator-modal .modal-body')
             }
 
-            $.ajax({
-                url: $current.data('load-form'),
-                type: 'GET',
-                beforeSend: () => {
-                    $current.addClass('button-loading')
-                    $modalBody.html('')
-                },
-                success: (res) => {
-                    if (res.error) {
-                        Botble.showError(res.message)
-                    } else {
-                        $modalBody.html(res.data)
-                        Botble.initResources()
-                        $modalBody.closest('.modal.fade').modal('show')
-                    }
-                    $current.removeClass('button-loading')
-                },
-                complete: () => {
-                    $current.removeClass('button-loading')
-                },
-                error: (data) => {
-                    $current.removeClass('button-loading')
-                    Botble.handleError(data)
-                },
-            })
+            $modalBody.html('')
+
+            $httpClient
+                .make()
+                .get($button.data('load-form'))
+                .then(({ data }) => {
+                    $modalBody.html(data.data)
+                    Botble.initResources()
+                    $modalBody.closest('.modal.fade').modal('show')
+                })
         })
 
-        let createOrUpdateStoreLocator = (_self) => {
-            _self.addClass('button-loading')
+        const createOrUpdateStoreLocator = ($button) => {
+            const $form = $button.closest('.modal-content').find('form')
 
-            const $form = _self.closest('.modal-content').find('form')
+            $httpClient
+                .make()
+                .withButtonLoading($button)
+                .post($form.prop('action'), $form.serialize())
+                .then(({ data }) => {
+                    Botble.showSuccess(data.message)
 
-            $.ajax({
-                type: 'POST',
-                cache: false,
-                url: $form.prop('action'),
-                data: $form.serialize(),
-                success: (res) => {
-                    if (!res.error) {
-                        Botble.showSuccess(res.message)
-                        $('.store-locator-table').load(window.location.href + ' .store-locator-table > *')
-                        _self.removeClass('button-loading')
-                        _self.closest('.modal.fade').modal('hide')
-                    } else {
-                        Botble.showError(res.message)
-                        _self.removeClass('button-loading')
-                    }
-                },
-                error: (res) => {
-                    Botble.handleError(res)
-                    _self.removeClass('button-loading')
-                },
-            })
+                    $('.store-locator-table').load(`${window.location.href} .store-locator-table > *`)
+                    $button.closest('.modal.fade').modal('hide')
+                })
         }
 
-        $(document).on('click', '#add-store-locator-button', (event) => {
+        $('#add-store-locator-modal').on('click', 'button[type="submit"]', (event) => {
             event.preventDefault()
             createOrUpdateStoreLocator($(event.currentTarget))
         })
 
-        $(document).on('click', '#update-store-locator-button', (event) => {
+        $('#update-store-locator-modal').on('click', 'button[type="submit"]', (event) => {
             event.preventDefault()
+
             createOrUpdateStoreLocator($(event.currentTarget))
         })
 
@@ -84,66 +59,41 @@ class StoreLocatorManagement {
         $(document).on('click', '#delete-store-locator-button', (event) => {
             event.preventDefault()
 
-            let _self = $(event.currentTarget)
+            const $button = $(event.currentTarget)
 
-            _self.addClass('button-loading')
+            $httpClient
+                .make()
+                .withButtonLoading($button)
+                .post($button.data('target'))
+                .then(({ data }) => {
+                    Botble.showSuccess(data.message)
 
-            $.ajax({
-                type: 'POST',
-                cache: false,
-                url: _self.data('target'),
-                success: (res) => {
-                    if (!res.error) {
-                        Botble.showSuccess(res.message)
-                        $('.store-locator-table').load(window.location.href + ' .store-locator-table > *')
-                        _self.removeClass('button-loading')
-                        _self.closest('.modal.fade').modal('hide')
-                    } else {
-                        Botble.showError(res.message)
-                        _self.removeClass('button-loading')
-                    }
-                },
-                error: (res) => {
-                    Botble.handleError(res)
-                    _self.removeClass('button-loading')
-                },
-            })
+                    $('.store-locator-table').load(`${window.location.href} .store-locator-table > *`)
+                    $button.removeClass('button-loading')
+                    $button.closest('.modal.fade').modal('hide')
+                })
         })
 
         $(document).on('click', '#change-primary-store-locator-button', (event) => {
             event.preventDefault()
 
-            let _self = $(event.currentTarget)
+            const $button = $(event.currentTarget)
+            const $form = $button.closest('.modal-content').find('form')
 
-            const $form = _self.closest('.modal-content').find('form')
-
-            _self.addClass('button-loading')
-
-            $.ajax({
-                type: 'POST',
-                cache: false,
-                url: $form.prop('action'),
-                data: $form.serialize(),
-                success: (res) => {
-                    if (!res.error) {
-                        Botble.showSuccess(res.message)
-                        $('.store-locator-table').load(window.location.href + ' .store-locator-table > *')
-                        _self.removeClass('button-loading')
-                        _self.closest('.modal.fade').modal('hide')
-                    } else {
-                        Botble.showError(res.message)
-                        _self.removeClass('button-loading')
-                    }
-                },
-                error: (res) => {
-                    Botble.handleError(res)
-                    _self.removeClass('button-loading')
-                },
-            })
+            $httpClient
+                .make()
+                .withButtonLoading($button)
+                .post($form.prop('action'), $form.serialize())
+                .then(({ data }) => {
+                    Botble.showSuccess(data.message)
+                    $('.store-locator-table').load(`${window.location.href} .store-locator-table > *`)
+                    $button.removeClass('button-loading')
+                    $button.closest('.modal.fade').modal('hide')
+                })
         })
     }
 }
 
-$(document).ready(() => {
+$(() => {
     new StoreLocatorManagement().init()
 })

@@ -1,14 +1,15 @@
 <?php
 
+use Botble\Theme\Events\RenderingThemeOptionSettings;
 use Carbon\Carbon;
 
-app()->booted(function () {
+app('events')->listen(RenderingThemeOptionSettings::class, function () {
     theme_option()
         ->setField([
             'id' => 'sticky_header_enabled',
             'section_id' => 'opt-text-subsection-general',
             'type' => 'customSelect',
-            'label' => 'Enable sticky header?',
+            'label' => __('Enable sticky header?'),
             'attributes' => [
                 'name' => 'sticky_header_enabled',
                 'list' => [
@@ -25,7 +26,7 @@ app()->booted(function () {
             'id' => 'sticky_header_mobile_enabled',
             'section_id' => 'opt-text-subsection-general',
             'type' => 'customSelect',
-            'label' => 'Enable sticky header on mobile?',
+            'label' => __('Enable sticky header on mobile?'),
             'attributes' => [
                 'name' => 'sticky_header_mobile_enabled',
                 'list' => [
@@ -168,7 +169,7 @@ app()->booted(function () {
             'desc' => __('Style of theme'),
             'id' => 'opt-text-subsection-style',
             'subsection' => true,
-            'icon' => 'fa fa-bars',
+            'icon' => 'ti ti-brush',
         ])
         ->setField([
             'id' => 'primary_font',
@@ -315,7 +316,7 @@ app()->booted(function () {
             'desc' => __('Social links'),
             'id' => 'opt-text-subsection-social-links',
             'subsection' => true,
-            'icon' => 'fa fa-share-alt',
+            'icon' => 'ti ti-share',
         ])
         ->setField([
             'id' => 'social_links',
@@ -428,6 +429,23 @@ app()->booted(function () {
                     'class' => 'form-control',
                     'placeholder' => 'https://...',
                     'data-counter' => 255,
+                ],
+            ],
+        ])
+        ->setField([
+            'id' => 'enabled_product_categories_on_header',
+            'section_id' => 'opt-text-subsection-ecommerce',
+            'type' => 'customSelect',
+            'label' => __('Enable shop by categories on header?'),
+            'attributes' => [
+                'name' => 'enabled_product_categories_on_header',
+                'list' => [
+                    'yes' => trans('core/base::base.yes'),
+                    'no' => trans('core/base::base.no'),
+                ],
+                'value' => 'yes',
+                'options' => [
+                    'class' => 'form-control',
                 ],
             ],
         ]);

@@ -2,13 +2,13 @@
     class="tab-pane"
     id="tab_extended_info"
 >
-    <div class="form-group">
+    <div class="mb-3">
         <div class="form__content">
             <div class="row">
 
                 <div class="col-12">
-                    <div class="form-group">
-                        <label for="background">{{ __('Background') }}</label>
+                    <div class="mb-3">
+                        <label class="form-label" for="background">{{ __('Background') }}</label>
                         {!! Form::customImage('background', old('background', $background)) !!}
                         {!! Form::error('background', $errors) !!}
                     </div>
@@ -21,8 +21,8 @@
                         <div class="row">
                             @foreach ($availableSocials as $k => $name)
                                 <div class="col-sm-6">
-                                    <div class="form-group">
-                                        <label for="socials_{{ $k }}">{{ $name }}</label>
+                                    <div class="mb-3">
+                                        <label class="form-label" for="socials_{{ $k }}">{{ $name }}</label>
                                         {!! Form::url('socials[' . $k . ']', old('socials.' . $k, Arr::get($socials, $k, '')), [
                                             'class' => 'form-control',
                                             'id' => 'socials_' . $k,

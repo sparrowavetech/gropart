@@ -10,14 +10,13 @@ use Illuminate\Support\Arr;
 
 class WithdrawalForm extends FormAbstract
 {
-    public function buildForm(): void
+    public function setup(): void
     {
         $symbol = sprintf(' (%s)', get_application_currency()->symbol);
 
         $this
             ->setupModel(new Withdrawal())
             ->setValidatorClass(WithdrawalRequest::class)
-            ->withCustomFields()
             ->add('amount', 'text', [
                 'label' => trans('plugins/marketplace::withdrawal.forms.amount') . $symbol,
                 'attr' => [

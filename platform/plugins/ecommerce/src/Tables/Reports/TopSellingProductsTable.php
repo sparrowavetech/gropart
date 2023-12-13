@@ -50,7 +50,7 @@ class TopSellingProductsTable extends TableAbstract
                         ->toHtml() . ' ' . Html::tag('small', $attributeText);
             });
 
-        return $data->escapeColumns([])->make();
+        return $this->toJson($data);
     }
 
     public function query(): Relation|Builder|QueryBuilder
@@ -104,6 +104,7 @@ class TopSellingProductsTable extends TableAbstract
             Column::make('qty')
                 ->title(trans('plugins/ecommerce::reports.quantity'))
                 ->width(60)
+                ->alignEnd()
                 ->orderable(false)
                 ->searchable(false),
         ];

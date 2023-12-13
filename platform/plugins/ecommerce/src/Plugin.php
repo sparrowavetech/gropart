@@ -97,6 +97,11 @@ class Plugin extends PluginOperationAbstract
         Schema::dropIfExists('ec_product_views');
         Schema::dropIfExists('ec_customer_used_coupons');
         Schema::dropIfExists('ec_order_tax_information');
+        Schema::dropIfExists('ec_customer_recently_viewed_products');
+        Schema::dropIfExists('ec_flash_sales_translations');
+        Schema::dropIfExists('ec_product_categorizables');
+        Schema::dropIfExists('ec_product_files');
+        Schema::dropIfExists('ec_tax_rules');
 
         Widget::query()->where('name', 'widget_ecommerce_report_general')
             ->each(fn (DashboardWidget $dashboardWidget) => $dashboardWidget->delete());

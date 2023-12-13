@@ -6,9 +6,7 @@ use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Base\Facades\PageTitle;
-use Botble\Base\Forms\FormBuilder;
 use Botble\Base\Http\Controllers\BaseController;
-use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Forms\TaxRuleForm;
 use Botble\Ecommerce\Http\Requests\TaxRuleRequest;
 use Botble\Ecommerce\Models\Tax;
@@ -21,18 +19,19 @@ class TaxRuleController extends BaseController
 {
     public function index(Tax $tax, TaxRuleTable $dataTable)
     {
-        PageTitle::setTitle(trans('plugins/ecommerce::tax.rule.name', ['title' => $tax->title]));
+        $this->pageTitle(trans('plugins/ecommerce::tax.rule.name', ['title' => $tax->title]));
 
         return $dataTable->renderTable();
     }
 
-    public function create(Request $request, FormBuilder $formBuilder, BaseHttpResponse $response)
+    public function create(Request $request)
     {
-        PageTitle::setTitle(trans('plugins/ecommerce::tax.rule.create'));
+        $this->pageTitle(trans('plugins/ecommerce::tax.rule.create'));
 
-        $form = $formBuilder->create(TaxRuleForm::class)->renderForm();
+        $form = TaxRuleForm::create()->renderForm();
         if ($request->ajax()) {
-            return $response
+            return $this
+                ->httpResponse()
                 ->setData(['html' => $form])
                 ->setMessage(PageTitle::getTitle(false));
         }
@@ -40,26 +39,28 @@ class TaxRuleController extends BaseController
         return $form;
     }
 
-    public function store(TaxRuleRequest $request, BaseHttpResponse $response)
+    public function store(TaxRuleRequest $request)
     {
         $rule = TaxRule::query()->create($request->input());
 
         event(new CreatedContentEvent(TAX_RULE_MODULE_SCREEN_NAME, $request, $rule));
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setPreviousUrl(route('tax.rule.index', $rule->tax_id))
             ->setNextUrl(route('tax.rule.edit', $rule->id))
-            ->setMessage(trans('core/base::notices.create_success_message'));
+            ->withCreatedSuccessMessage();
     }
 
-    public function edit(TaxRule $rule, TaxRuleRequest $request, FormBuilder $formBuilder, BaseHttpResponse $response)
+    public function edit(TaxRule $rule, TaxRuleRequest $request)
     {
-        PageTitle::setTitle(trans('plugins/ecommerce::tax.rule.edit', ['title' => '#' . $rule->id]));
+        $this->pageTitle(trans('plugins/ecommerce::tax.rule.edit', ['title' => '#' . $rule->id]));
 
-        $form = $formBuilder->create(TaxRuleForm::class, ['model' => $rule])->renderForm();
+        $form = TaxRuleForm::createFromModel($rule)->renderForm();
 
         if ($request->ajax()) {
-            return $response
+            return $this
+                ->httpResponse()
                 ->setData(['html' => $form])
                 ->setMessage(PageTitle::getTitle(false));
         }
@@ -67,27 +68,31 @@ class TaxRuleController extends BaseController
         return $form;
     }
 
-    public function update(TaxRule $rule, TaxRuleRequest $request, BaseHttpResponse $response)
+    public function update(TaxRule $rule, TaxRuleRequest $request)
     {
         $rule->fill($request->input());
         $rule->save();
 
         event(new UpdatedContentEvent(TAX_RULE_MODULE_SCREEN_NAME, $request, $rule));
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setPreviousUrl(route('tax.rule.index', $rule->tax_id))
-            ->setMessage(trans('core/base::notices.update_success_message'));
+            ->withUpdatedSuccessMessage();
     }
 
-    public function destroy(TaxRule $rule, Request $request, BaseHttpResponse $response)
+    public function destroy(TaxRule $rule, Request $request)
     {
         try {
             $rule->delete();
             event(new DeletedContentEvent(TAX_RULE_MODULE_SCREEN_NAME, $request, $rule));
 
-            return $response->setMessage(trans('core/base::notices.delete_success_message'));
+            return $this
+                ->httpResponse()
+                ->setMessage(trans('core/base::notices.delete_success_message'));
         } catch (Exception $exception) {
-            return $response
+            return $this
+                ->httpResponse()
                 ->setError()
                 ->setMessage($exception->getMessage());
         }

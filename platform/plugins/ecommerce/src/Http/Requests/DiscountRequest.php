@@ -49,6 +49,8 @@ class DiscountRequest extends Request
             'start_date' => ['nullable', 'date', 'date_format:' . $dateFormat],
             'end_date' => ['nullable', 'date', 'date_format:' . $dateFormat, 'after_or_equal:start_date'],
             'apply_via_url' => ['nullable', 'boolean'],
+            'display_at_checkout' => ['nullable', 'boolean'],
+            'description' => ['nullable', 'string', 'max:255'],
         ];
     }
 

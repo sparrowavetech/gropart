@@ -16,6 +16,13 @@ class GlobalOption extends BaseModel
         'required',
     ];
 
+    protected static function booted(): void
+    {
+        self::deleting(function (GlobalOption $option) {
+            $option->values()->delete();
+        });
+    }
+
     public function values(): HasMany
     {
         return $this
@@ -25,15 +32,6 @@ class GlobalOption extends BaseModel
 
     protected function optionName(): Attribute
     {
-        return Attribute::make(
-            get: fn () => $this->name
-        );
-    }
-
-    protected static function booted(): void
-    {
-        self::deleting(function (GlobalOption $option) {
-            $option->values()->delete();
-        });
+        return Attribute::get(fn () => $this->name);
     }
 }

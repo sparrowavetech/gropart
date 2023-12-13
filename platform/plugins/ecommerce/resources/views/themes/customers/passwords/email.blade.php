@@ -20,7 +20,7 @@
 
                         <div class="form-group{{ $errors->has('email') ? ' has-error' : '' }}">
                             <label
-                                class="col-md-4 control-label"
+                                class="col-md-4 form-label"
                                 for="email"
                             >{{ __('E-Mail Address') }}</label>
                             <div class="col-md-6">

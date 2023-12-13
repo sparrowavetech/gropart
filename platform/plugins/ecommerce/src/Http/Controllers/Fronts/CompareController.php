@@ -2,7 +2,7 @@
 
 namespace Botble\Ecommerce\Http\Controllers\Fronts;
 
-use Botble\Base\Http\Responses\BaseHttpResponse;
+use Botble\Base\Http\Controllers\BaseController;
 use Botble\Ecommerce\Facades\Cart;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Models\Product;
@@ -10,9 +10,8 @@ use Botble\Ecommerce\Models\ProductAttributeSet;
 use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
 use Botble\SeoHelper\Facades\SeoHelper;
 use Botble\Theme\Facades\Theme;
-use Illuminate\Routing\Controller;
 
-class CompareController extends Controller
+class CompareController extends BaseController
 {
     public function __construct(protected ProductInterface $productRepository)
     {
@@ -27,7 +26,6 @@ class CompareController extends Controller
         SeoHelper::setTitle(__('Compare'));
 
         Theme::breadcrumb()
-            ->add(__('Home'), route('public.index'))
             ->add(__('Compare'), route('public.compare'));
 
         $itemIds = collect(Cart::instance('compare')->content())
@@ -53,7 +51,7 @@ class CompareController extends Controller
         )->render();
     }
 
-    public function store(int|string $productId, BaseHttpResponse $response)
+    public function store(int|string $productId)
     {
         if (! EcommerceHelper::isCompareEnabled()) {
             abort(404);
@@ -71,7 +69,8 @@ class CompareController extends Controller
         });
 
         if (! $duplicates->isEmpty()) {
-            return $response
+            return $this
+                ->httpResponse()
                 ->setMessage(__(':product is already in your compare list!', ['product' => $product->name]))
                 ->setError();
         }
@@ -79,12 +78,13 @@ class CompareController extends Controller
         Cart::instance('compare')->add($productId, $product->name, 1, $product->front_sale_price)
             ->associate(Product::class);
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setMessage(__('Added product :product to compare list successfully!', ['product' => $product->name]))
             ->setData(['count' => Cart::instance('compare')->count()]);
     }
 
-    public function destroy(int|string $productId, BaseHttpResponse $response)
+    public function destroy(int|string $productId)
     {
         if (! EcommerceHelper::isCompareEnabled()) {
             abort(404);
@@ -102,7 +102,8 @@ class CompareController extends Controller
             return false;
         });
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setMessage(__('Removed product :product from compare list successfully!', ['product' => $product->name]))
             ->setData(['count' => Cart::instance('compare')->count()]);
     }

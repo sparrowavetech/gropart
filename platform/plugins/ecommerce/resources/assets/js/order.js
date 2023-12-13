@@ -2,29 +2,21 @@ class OrderAdminManagement {
     init() {
         $(document).on('click', '.btn-confirm-order', (event) => {
             event.preventDefault()
-            let _self = $(event.currentTarget)
-            _self.addClass('button-loading')
 
-            $.ajax({
-                type: 'POST',
-                cache: false,
-                url: _self.closest('form').prop('action'),
-                data: _self.closest('form').serialize(),
-                success: (res) => {
-                    if (!res.error) {
-                        $('#main-order-content').load(window.location.href + ' #main-order-content > *')
+            const _self = $(event.currentTarget)
+
+            $httpClient.make()
+                .withButtonLoading(_self)
+                .post(_self.closest('form').prop('action'), _self.closest('form').serialize())
+                .then(({ data }) => {
+                    if (!data.error) {
+                        $('#main-order-content').load(`${window.location.href} #main-order-content > *`)
                         _self.closest('div').remove()
-                        Botble.showSuccess(res.message)
+                        Botble.showSuccess(data.message)
                     } else {
-                        Botble.showError(res.message)
+                        Botble.showError(data.message)
                     }
-                    _self.removeClass('button-loading')
-                },
-                error: (res) => {
-                    Botble.handleError(res)
-                    _self.removeClass('button-loading')
-                },
-            })
+                })
         })
 
         $(document).on('click', '.btn-trigger-resend-order-confirmation-modal', (event) => {
@@ -35,138 +27,99 @@ class OrderAdminManagement {
 
         $(document).on('click', '#confirm-resend-confirmation-email-button', (event) => {
             event.preventDefault()
-            let _self = $(event.currentTarget)
 
-            _self.addClass('button-loading')
+            const _self = $(event.currentTarget)
 
-            $.ajax({
-                type: 'POST',
-                cache: false,
-                url: _self.data('action'),
-                success: (res) => {
-                    if (!res.error) {
-                        Botble.showSuccess(res.message)
+            $httpClient.make()
+                .withButtonLoading(_self)
+                .post(_self.data('action'))
+                .then(({ data }) => {
+                    if (!data.error) {
+                        Botble.showSuccess(data.message)
                     } else {
-                        Botble.showError(res.message)
+                        Botble.showError(data.message)
                     }
-                    _self.removeClass('button-loading')
+
                     $('#resend-order-confirmation-email-modal').modal('hide')
-                },
-                error: (res) => {
-                    Botble.handleError(res)
-                    _self.removeClass('button-loading')
-                },
-            })
+                })
         })
 
         $(document).on('click', '.btn-trigger-shipment', (event) => {
             event.preventDefault()
-            let _self = $(event.currentTarget)
-            let $formBody = $('.shipment-create-wrap')
-            $formBody.toggleClass('hidden')
-            if (!$formBody.hasClass('shipment-data-loaded')) {
-                Botble.blockUI({
-                    target: $formBody,
-                    iconOnly: true,
-                    overlayColor: 'none',
-                })
+            const _self = $(event.currentTarget)
 
-                $.ajax({
-                    url: _self.data('target'),
-                    type: 'GET',
-                    success: (res) => {
-                        if (res.error) {
-                            Botble.showError(res.message)
+            const $formBody = $('.shipment-create-wrap')
+            $formBody.slideToggle()
+
+            if (!$formBody.hasClass('shipment-data-loaded')) {
+                Botble.showLoading($formBody)
+
+                $httpClient.make()
+                    .get(_self.data('target'))
+                    .then(({ data }) => {
+                        if (data.error) {
+                            Botble.showError(data.message)
                         } else {
-                            $formBody.html(res.data)
+                            $formBody.html(data.data)
                             $formBody.addClass('shipment-data-loaded')
                             Botble.initResources()
                         }
-                        Botble.unblockUI($formBody)
-                    },
-                    error: (data) => {
-                        Botble.handleError(data)
-                        Botble.unblockUI($formBody)
-                    },
-                })
+
+                        Botble.hideLoading($formBody)
+                    })
             }
         })
 
         $(document).on('change', '#store_id', (event) => {
-            let $formBody = $('.shipment-create-wrap')
-            Botble.blockUI({
-                target: $formBody,
-                iconOnly: true,
-                overlayColor: 'none',
-            })
+            const $formBody = $('.shipment-create-wrap')
+            Botble.showLoading($formBody)
 
             $('#select-shipping-provider').load(
-                $('.btn-trigger-shipment').data('target') +
-                    '?view=true&store_id=' +
-                    $(event.currentTarget).val() +
-                    ' #select-shipping-provider > *',
+                `${$('.btn-trigger-shipment').data('target')}?view=true&store_id=${$(event.currentTarget).val()} #select-shipping-provider > *`,
                 () => {
-                    Botble.unblockUI($formBody)
+                    Botble.hideLoading($formBody)
                     Botble.initResources()
                 }
             )
         })
 
         $(document).on('change', '.shipment-form-weight', (event) => {
-            let $formBody = $('.shipment-create-wrap')
-            Botble.blockUI({
-                target: $formBody,
-                iconOnly: true,
-                overlayColor: 'none',
-            })
+            const $formBody = $('.shipment-create-wrap')
+            Botble.showLoading($formBody)
 
             $('#select-shipping-provider').load(
-                $('.btn-trigger-shipment').data('target') +
-                    '?view=true&store_id=' +
-                    $('#store_id').val() +
-                    '&weight=' +
-                    $(event.currentTarget).val() +
-                    ' #select-shipping-provider > *',
+                `${$('.btn-trigger-shipment').data('target')}?view=true&store_id=${$('#store_id').val()}&weight=${$(event.currentTarget).val()} #select-shipping-provider > *`,
                 () => {
-                    Botble.unblockUI($formBody)
+                    Botble.hideLoading($formBody)
                     Botble.initResources()
                 }
             )
         })
 
         $(document).on('click', '.table-shipping-select-options .clickable-row', (event) => {
-            let _self = $(event.currentTarget)
+            const _self = $(event.currentTarget)
             $('.input-hidden-shipping-method').val(_self.data('key'))
             $('.input-hidden-shipping-option').val(_self.data('option'))
-            $('.input-show-shipping-method').val(_self.find('span.ws-nm').text())
+            $('.input-show-shipping-method').val(_self.find('span.name').text())
         })
 
         $(document).on('click', '.btn-create-shipment', (event) => {
             event.preventDefault()
-            let _self = $(event.currentTarget)
 
-            _self.addClass('button-loading')
+            const _self = $(event.currentTarget)
 
-            $.ajax({
-                type: 'POST',
-                cache: false,
-                url: _self.closest('form').prop('action'),
-                data: _self.closest('form').serialize(),
-                success: (res) => {
-                    if (!res.error) {
-                        Botble.showSuccess(res.message)
-                        $('#main-order-content').load(window.location.href + ' #main-order-content > *')
+            $httpClient.make()
+                .withButtonLoading(_self)
+                .post(_self.closest('form').prop('action'), _self.closest('form').serialize())
+                .then(({ data }) => {
+                    if (!data.error) {
+                        Botble.showSuccess(data.message)
+                        $('#main-order-content').load(`${window.location.href} #main-order-content > *`)
                         $('.btn-trigger-shipment').remove()
                     } else {
-                        Botble.showError(res.message)
+                        Botble.showError(data.message)
                     }
-                    _self.removeClass('button-loading')
-                },
-                error: (res) => {
-                    Botble.handleError(res)
-                    _self.removeClass('button-loading')
-                },
-            })
+                })
         })
 
         $(document).on('click', '.btn-cancel-shipment', (event) => {
@@ -178,38 +131,29 @@ class OrderAdminManagement {
         $(document).on('click', '#confirm-cancel-shipment-button', (event) => {
             event.preventDefault()
 
-            let _self = $(event.currentTarget)
+            const _self = $(event.currentTarget)
 
-            _self.addClass('button-loading')
-
-            $.ajax({
-                type: 'POST',
-                cache: false,
-                url: _self.data('action'),
-                success: (res) => {
-                    if (!res.error) {
-                        Botble.showSuccess(res.message)
+            $httpClient.make()
+                .withButtonLoading(_self)
+                .post(_self.data('action'))
+                .then(({ data }) => {
+                    if (!data.error) {
+                        Botble.showSuccess(data.message)
                         $('.carrier-status')
-                            .addClass('carrier-status-' + res.data.status)
-                            .text(res.data.status_text)
+                            .addClass(`carrier-status-${data.data.status}`)
+                            .text(data.data.status_text)
                         $('#cancel-shipment-modal').modal('hide')
-                        $('#order-history-wrapper').load(window.location.href + ' #order-history-wrapper > *')
+                        $('#order-history-wrapper').load(`${window.location.href} #order-history-wrapper > *`)
                         $('.shipment-actions-wrapper').remove()
                     } else {
-                        Botble.showError(res.message)
+                        Botble.showError(data.message)
                     }
-                    _self.removeClass('button-loading')
-                },
-                error: (res) => {
-                    Botble.handleError(res)
-                    _self.removeClass('button-loading')
-                },
-            })
+                })
         })
 
         $(document).on('click', '.btn-close-shipment-panel', (event) => {
             event.preventDefault()
-            $('.shipment-create-wrap').addClass('hidden')
+            $('.shipment-create-wrap').slideUp()
         })
 
         $(document).on('click', '.btn-trigger-update-shipping-address', (event) => {
@@ -224,105 +168,70 @@ class OrderAdminManagement {
 
         $(document).on('click', '#confirm-update-shipping-address-button', (event) => {
             event.preventDefault()
-            let _self = $(event.currentTarget)
 
-            _self.addClass('button-loading')
+            const _self = $(event.currentTarget)
+            const form = _self.closest('.modal-content').find('form')
 
-            $.ajax({
-                type: 'POST',
-                cache: false,
-                url: _self.closest('.modal-content').find('form').prop('action'),
-                data: _self.closest('.modal-content').find('form').serialize(),
-                success: (res) => {
-                    if (!res.error) {
-                        Botble.showSuccess(res.message)
+            $httpClient.make()
+                .withLoading(form.find('.shipment-create-wrap'))
+                .withButtonLoading(_self)
+                .post(form.prop('action'), form.serialize())
+                .then(({ data }) => {
+                    if (!data.error) {
+                        Botble.showSuccess(data.message)
                         $('#update-shipping-address-modal').modal('hide')
-                        $('.shipment-address-box-1').html(res.data.line)
-                        $('.text-infor-subdued.shipping-address-info').html(res.data.detail)
-                        let $formBody = $('.shipment-create-wrap')
-                        Botble.blockUI({
-                            target: $formBody,
-                            iconOnly: true,
-                            overlayColor: 'none',
-                        })
+                        $('.shipment-address-box-1').html(data.data.line)
+                        $('.shipping-address-info').html(data.data.detail)
 
                         $('#select-shipping-provider').load(
-                            $('.btn-trigger-shipment').data('target') + '?view=true #select-shipping-provider > *',
+                            `${$('.btn-trigger-shipment').data('target')}?view=true #select-shipping-provider > *`,
                             () => {
-                                Botble.unblockUI($formBody)
                                 Botble.initResources()
                             }
                         )
                     } else {
-                        Botble.showError(res.message)
+                        Botble.showError(data.message)
                     }
-                    _self.removeClass('button-loading')
-                },
-                error: (res) => {
-                    Botble.handleError(res)
-                    _self.removeClass('button-loading')
-                },
-            })
+                })
         })
 
         $(document).on('click', '#confirm-update-tax-information-button', (event) => {
             event.preventDefault()
 
-            const button = $(event.currentTarget)
-            const form = button.closest('.modal-content').find('form')
+            const _self = $(event.currentTarget)
+            const form = _self.closest('.modal-content').find('form')
 
-            $.ajax({
-                type: 'POST',
-                cache: false,
-                url: form.prop('action'),
-                data: form.serialize(),
-                beforeSend: () => {
-                    button.addClass('button-loading')
-                },
-                success: ({ error, message, data }) => {
-                    if (error) {
-                        Botble.showError(message)
+            $httpClient.make()
+                .withButtonLoading(_self)
+                .post(form.prop('action'), form.serialize())
+                .then(({ data }) => {
+                    if (data.error) {
+                        Botble.showError(data.message)
                         return
                     }
 
-                    $('.text-infor-subdued.tax-info').html(data)
+                    $('.text-infor-subdued.tax-info').html(data.data)
                     $('#update-tax-information-modal').modal('hide')
 
-                    Botble.showSuccess(message)
-                },
-                error: (res) => {
-                    Botble.handleError(res)
-                },
-                complete: () => {
-                    button.removeClass('button-loading')
-                },
-            })
+                    Botble.showSuccess(data.message)
+                })
         })
 
         $(document).on('click', '.btn-update-order', (event) => {
             event.preventDefault()
-            let _self = $(event.currentTarget)
 
-            _self.addClass('button-loading')
+            const _self = $(event.currentTarget)
 
-            $.ajax({
-                type: 'POST',
-                cache: false,
-                url: _self.closest('form').prop('action'),
-                data: _self.closest('form').serialize(),
-                success: (res) => {
-                    if (!res.error) {
-                        Botble.showSuccess(res.message)
+            $httpClient.make()
+                .withButtonLoading(_self)
+                .post(_self.closest('form').prop('action'), _self.closest('form').serialize())
+                .then(({ data}) => {
+                    if (!data.error) {
+                        Botble.showSuccess(data.message)
                     } else {
-                        Botble.showError(res.message)
+                        Botble.showError(data.message)
                     }
-                    _self.removeClass('button-loading')
-                },
-                error: (res) => {
-                    Botble.handleError(res)
-                    _self.removeClass('button-loading')
-                },
-            })
+                })
         })
 
         $(document).on('click', '.btn-trigger-cancel-order', (event) => {
@@ -333,29 +242,20 @@ class OrderAdminManagement {
 
         $(document).on('click', '#confirm-cancel-order-button', (event) => {
             event.preventDefault()
-            let _self = $(event.currentTarget)
+            const _self = $(event.currentTarget)
 
-            _self.addClass('button-loading')
-
-            $.ajax({
-                type: 'POST',
-                cache: false,
-                url: _self.data('target'),
-                success: (res) => {
-                    if (!res.error) {
-                        Botble.showSuccess(res.message)
-                        $('#main-order-content').load(window.location.href + ' #main-order-content > *')
+            $httpClient.make()
+                .withButtonLoading(_self)
+                .post(_self.data('target'))
+                .then(({ data }) => {
+                    if (!data.error) {
+                        Botble.showSuccess(data.message)
+                        $('#main-order-content').load(`${window.location.href} #main-order-content > *`)
                         $('#cancel-order-modal').modal('hide')
                     } else {
-                        Botble.showError(res.message)
+                        Botble.showError(data.message)
                     }
-                    _self.removeClass('button-loading')
-                },
-                error: (res) => {
-                    Botble.handleError(res)
-                    _self.removeClass('button-loading')
-                },
-            })
+                })
         })
 
         $(document).on('click', '.btn-trigger-confirm-payment', (event) => {
@@ -366,35 +266,25 @@ class OrderAdminManagement {
 
         $(document).on('click', '#confirm-payment-order-button', (event) => {
             event.preventDefault()
-            let _self = $(event.currentTarget)
+            const _self = $(event.currentTarget)
 
-            _self.addClass('button-loading')
-
-            $.ajax({
-                type: 'POST',
-                cache: false,
-                url: _self.data('target'),
-                success: (res) => {
-                    if (!res.error) {
-                        Botble.showSuccess(res.message)
-                        $('#main-order-content').load(window.location.href + ' #main-order-content > *')
+            $httpClient.make()
+                .withButtonLoading(_self)
+                .post(_self.data('target'))
+                .then(({ data }) => {
+                    if (!data.error) {
+                        Botble.showSuccess(data.message)
+                        $('#main-order-content').load(`${window.location.href} #main-order-content > *`)
                         $('#confirm-payment-modal').modal('hide')
                     } else {
-                        Botble.showError(res.message)
+                        Botble.showError(data.message)
                     }
-                    _self.removeClass('button-loading')
-                },
-                error: (res) => {
-                    Botble.handleError(res)
-                    _self.removeClass('button-loading')
-                },
-            })
+                })
         })
 
         $(document).on('click', '.show-timeline-dropdown', (event) => {
             event.preventDefault()
             $($(event.currentTarget).data('target')).slideToggle()
-            $(event.currentTarget).closest('.comment-log-item').toggleClass('bg-white')
         })
 
         $(document).on('keyup', '.input-sync-item', (event) => {
@@ -402,8 +292,9 @@ class OrderAdminManagement {
             if (!number || isNaN(number)) {
                 number = 0
             }
+
             $(event.currentTarget)
-                .closest('.page-content')
+                .closest('body')
                 .find($(event.currentTarget).data('target'))
                 .text(Botble.numberFormat(parseFloat(number), 2))
         })
@@ -428,33 +319,26 @@ class OrderAdminManagement {
 
         $(document).on('click', '#confirm-refund-payment-button', (event) => {
             event.preventDefault()
-            let _self = $(event.currentTarget)
-            _self.addClass('button-loading')
 
-            $.ajax({
-                type: 'POST',
-                cache: false,
-                url: _self.closest('.modal-dialog').find('form').prop('action'),
-                data: _self.closest('.modal-dialog').find('form').serialize(),
-                success: (res) => {
-                    if (!res.error) {
-                        if (res.data && res.data.refund_redirect_url) {
-                            window.location.href = res.data.refund_redirect_url
+            const _self = $(event.currentTarget)
+            const form = _self.closest('.modal-dialog').find('form')
+
+            $httpClient.make()
+                .withButtonLoading(_self)
+                .post(form.prop('action'), form.serialize())
+                .then(({ data }) => {
+                    if (!data.error) {
+                        if (data.data && data.data.refund_redirect_url) {
+                            window.location.href = data.data.refund_redirect_url
                         } else {
-                            $('#main-order-content').load(window.location.href + ' #main-order-content > *')
-                            Botble.showSuccess(res.message)
+                            $('#main-order-content').load(`${window.location.href} #main-order-content > *`)
+                            Botble.showSuccess(data.message)
                             _self.closest('.modal').modal('hide')
                         }
                     } else {
-                        Botble.showError(res.message)
+                        Botble.showError(data.message)
                     }
-                    _self.removeClass('button-loading')
-                },
-                error: (res) => {
-                    Botble.handleError(res)
-                    _self.removeClass('button-loading')
-                },
-            })
+                })
         })
 
         $(document).on('click', '.btn-trigger-update-shipping-status', (event) => {
@@ -464,33 +348,26 @@ class OrderAdminManagement {
 
         $(document).on('click', '#confirm-update-shipping-status-button', (event) => {
             event.preventDefault()
-            let _self = $(event.currentTarget)
-            _self.addClass('button-loading')
 
-            $.ajax({
-                type: 'POST',
-                cache: false,
-                url: _self.closest('.modal-dialog').find('form').prop('action'),
-                data: _self.closest('.modal-dialog').find('form').serialize(),
-                success: (res) => {
-                    if (!res.error) {
-                        $('#main-order-content').load(window.location.href + ' #main-order-content > *')
-                        Botble.showSuccess(res.message)
+            const _self = $(event.currentTarget)
+            const form = _self.closest('.modal-dialog').find('form')
+
+            $httpClient.make()
+                .withButtonLoading(_self)
+                .post(form.prop('action'), form.serialize())
+                .then(({ data }) => {
+                    if (!data.error) {
+                        $('#main-order-content').load(`${window.location.href} #main-order-content > *`)
+                        Botble.showSuccess(data.message)
                         _self.closest('.modal').modal('hide')
                     } else {
-                        Botble.showError(res.message)
+                        Botble.showError(data.message)
                     }
-                    _self.removeClass('button-loading')
-                },
-                error: (res) => {
-                    Botble.handleError(res)
-                    _self.removeClass('button-loading')
-                },
-            })
+                })
         })
     }
 }
 
-$(document).ready(() => {
+$(() => {
     new OrderAdminManagement().init()
 })

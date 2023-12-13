@@ -10,7 +10,7 @@
                 <div class="widget-body">
                     <div class="form-group mb-3 @if ($errors->has('type')) has-error @endif">
                         <label
-                            class="control-label required"
+                            class="form-label required"
                             for="type"
                         >
                             {{ trans('plugins/ecommerce::bulk-import.import_types.name') }}
@@ -29,7 +29,7 @@
                     </div>
                     <div class="form-group mb-3 @if ($errors->has('file')) has-error @endif">
                         <label
-                            class="control-label required"
+                            class="form-label required"
                             for="input-group-file"
                         >
                             {{ trans('plugins/ecommerce::bulk-import.choose_file') }}
@@ -163,11 +163,11 @@
 @stop
 
 @push('footer')
-    <script type="text/x-custom-template" id="failure-template">
+    <x-core::custom-template id="failure-template">
         <tr>
             <td scope="row">__row__</td>
             <td>__attribute__</td>
             <td>__errors__</td>
         </tr>
-    </script>
+    </x-core::custom-template>
 @endpush

@@ -5,10 +5,6 @@ namespace Botble\Ecommerce\Http\Controllers;
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
-use Botble\Base\Facades\PageTitle;
-use Botble\Base\Forms\FormBuilder;
-use Botble\Base\Http\Controllers\BaseController;
-use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Forms\BrandForm;
 use Botble\Ecommerce\Http\Requests\BrandRequest;
 use Botble\Ecommerce\Models\Brand;
@@ -18,21 +14,30 @@ use Illuminate\Http\Request;
 
 class BrandController extends BaseController
 {
+    public function __construct()
+    {
+        parent::__construct();
+
+        $this
+            ->breadcrumb()
+            ->add(trans('plugins/ecommerce::brands.menu'), route('brands.index'));
+    }
+
     public function index(BrandTable $dataTable)
     {
-        PageTitle::setTitle(trans('plugins/ecommerce::brands.menu'));
+        $this->pageTitle(trans('plugins/ecommerce::brands.menu'));
 
         return $dataTable->renderTable();
     }
 
-    public function create(FormBuilder $formBuilder)
+    public function create()
     {
-        PageTitle::setTitle(trans('plugins/ecommerce::brands.create'));
+        $this->pageTitle(trans('plugins/ecommerce::brands.create'));
 
-        return $formBuilder->create(BrandForm::class)->renderForm();
+        return BrandForm::create()->renderForm();
     }
 
-    public function store(BrandRequest $request, BaseHttpResponse $response)
+    public function store(BrandRequest $request)
     {
         $brand = Brand::query()->create($request->input());
 
@@ -42,20 +47,21 @@ class BrandController extends BaseController
 
         event(new CreatedContentEvent(BRAND_MODULE_SCREEN_NAME, $request, $brand));
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setPreviousUrl(route('brands.index'))
             ->setNextUrl(route('brands.edit', $brand->id))
-            ->setMessage(trans('core/base::notices.create_success_message'));
+            ->withCreatedSuccessMessage();
     }
 
-    public function edit(Brand $brand, FormBuilder $formBuilder)
+    public function edit(Brand $brand)
     {
-        PageTitle::setTitle(trans('core/base::forms.edit_item', ['name' => $brand->name]));
+        $this->pageTitle(trans('core/base::forms.edit_item', ['name' => $brand->name]));
 
-        return $formBuilder->create(BrandForm::class, ['model' => $brand])->renderForm();
+        return BrandForm::createFromModel($brand)->renderForm();
     }
 
-    public function update(Brand $brand, BrandRequest $request, BaseHttpResponse $response)
+    public function update(Brand $brand, BrandRequest $request)
     {
         $brand->fill($request->input());
         $brand->save();
@@ -66,21 +72,25 @@ class BrandController extends BaseController
 
         event(new UpdatedContentEvent(BRAND_MODULE_SCREEN_NAME, $request, $brand));
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setPreviousUrl(route('brands.index'))
-            ->setMessage(trans('core/base::notices.update_success_message'));
+            ->withUpdatedSuccessMessage();
     }
 
-    public function destroy(Brand $brand, Request $request, BaseHttpResponse $response)
+    public function destroy(Brand $brand, Request $request)
     {
         try {
             $brand->delete();
 
             event(new DeletedContentEvent(BRAND_MODULE_SCREEN_NAME, $request, $brand));
 
-            return $response->setMessage(trans('core/base::notices.delete_success_message'));
+            return $this
+                ->httpResponse()
+                ->setMessage(trans('core/base::notices.delete_success_message'));
         } catch (Exception $exception) {
-            return $response
+            return $this
+                ->httpResponse()
                 ->setError()
                 ->setMessage($exception->getMessage());
         }

@@ -17,6 +17,8 @@ use Illuminate\Support\Facades\Facade;
  * @method static void remove(string $rowId)
  * @method static void destroy()
  * @method static int|float count()
+ * @method static bool isNotEmpty()
+ * @method static bool isEmpty()
  * @method static int|float countByItems($content)
  * @method static int rawTotal()
  * @method static int rawTotalByItems($content)

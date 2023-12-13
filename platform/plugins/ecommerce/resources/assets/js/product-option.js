@@ -1,5 +1,5 @@
 'use strict'
-$(document).ready(function () {
+$(() => {
     const { productOptionLang, coreBaseLang, currentProductOption, options } = window.productOptions
     let productOptionForm = {
         productOptions: currentProductOption,
@@ -45,10 +45,11 @@ $(document).ready(function () {
             $('.product-option-form-wrap')
                 .on('click', '.add-from-global-option', function () {
                     let selectedOption = $('#global-option').val()
-                    if (selectedOption != -1) {
+
+                    if (selectedOption != 0) {
                         self.addFromGlobalOption(selectedOption)
                     } else {
-                        toastr.error(productOptionLang.please_select_option)
+                        Botble.showError(productOptionLang.please_select_option)
                     }
 
                     return false
@@ -122,6 +123,7 @@ $(document).ready(function () {
         addFromGlobalOption(optionId) {
             let self = this
             axios.get(window.productOptions.routes.ajax_option_info + '?id=' + optionId).then(function (res) {
+
                 const data = res.data.data
 
                 const option = {
@@ -234,7 +236,7 @@ $(document).ready(function () {
                         })
                         html += tmp.replace(/__optionValue__/g, valuesResult)
                     }
-                    html += `<button type="button" class="btn btn-info mt-3 add-new-row" id="add-new-row">${productOptionLang.add_new_row}</button>`
+                    html += `<button type="button" class="btn add-new-row" id="add-new-row">${productOptionLang.add_new_row}</button>`
                 }
             }
 

@@ -26,6 +26,11 @@ class FlashSale extends BaseModel
         'name' => SafeContent::class,
     ];
 
+    protected static function booted(): void
+    {
+        static::deleting(fn (FlashSale $flashSale) => $flashSale->products()->detach());
+    }
+
     public function products(): BelongsToMany
     {
         return $this
@@ -45,17 +50,6 @@ class FlashSale extends BaseModel
 
     protected function expired(): Attribute
     {
-        return Attribute::make(
-            get: function (): bool {
-                return $this->end_date->lessThan(Carbon::now()->startOfDay());
-            },
-        );
-    }
-
-    protected static function booted(): void
-    {
-        static::deleting(function (FlashSale $flashSale) {
-            $flashSale->products()->detach();
-        });
+        return Attribute::get(fn (): bool => $this->end_date->lessThan(Carbon::now()->startOfDay()));
     }
 }

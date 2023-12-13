@@ -9,6 +9,7 @@ use Botble\Ecommerce\Models\ProductAttributeSet;
 use Botble\Ecommerce\Models\ProductVariation;
 use Botble\Table\Abstracts\TableAbstract;
 use Botble\Table\Columns\CheckboxColumn;
+use Botble\Table\Columns\Column;
 use Botble\Table\Columns\IdColumn;
 use Botble\Table\Columns\ImageColumn;
 use Botble\Table\EloquentDataTable;
@@ -79,6 +80,9 @@ class ProductVariationTable extends TableAbstract
 
                 return Html::tag('div', format_price($item->product->front_sale_price)) . $salePrice;
             })
+            ->editColumn('quantity', function (ProductVariation $item) {
+                return $item->product->with_storehouse_management ? $item->product->quantity : '&#8734;';
+            })
             ->editColumn('is_default', function (ProductVariation $item) {
                 return Html::tag(
                     'label',
@@ -86,6 +90,7 @@ class ProductVariationTable extends TableAbstract
                         'data-url' => route('products.set-default-product-variation', $item->getKey()),
                         'data-bs-toggle' => 'tooltip',
                         'title' => trans('plugins/ecommerce::products.set_this_variant_as_default'),
+                        'class' => 'form-check-input',
                     ])
                 );
             })
@@ -160,12 +165,15 @@ class ProductVariationTable extends TableAbstract
                             'start_date',
                             'end_date',
                             'is_variation',
+                            'quantity',
+                            'with_storehouse_management',
+                            'stock_status',
                             'image',
                             'images',
-                        ]);
-                    if ($this->hasDigitalProduct) {
-                        $query->with('productFiles:id,product_id,extras');
-                    }
+                        ])
+                        ->when($this->hasDigitalProduct, function ($query) {
+                            $query->with('productFiles:id,product_id,extras');
+                        });
                 },
                 'configurableProduct' => function (BelongsTo $query) {
                     $query
@@ -263,17 +271,16 @@ class ProductVariationTable extends TableAbstract
         }
 
         return array_merge($columns, [
-            'price' => [
-                'title' => trans('plugins/ecommerce::products.form.price'),
-                'width' => '20px',
-                'searchable' => false,
-                'orderable' => false,
-            ],
-            'is_default' => [
-                'title' => trans('plugins/ecommerce::products.form.is_default'),
-                'width' => '100px',
-                'searchable' => false,
-            ],
+            Column::make('price')
+                ->title(trans('plugins/ecommerce::products.price'))
+                ->alignStart(),
+            Column::make('quantity')
+                ->title(trans('plugins/ecommerce::products.quantity'))
+                ->alignStart(),
+            Column::make('is_default')
+                ->title(trans('plugins/ecommerce::products.form.is_default'))
+                ->width(100)
+                ->alignStart(),
         ]);
     }
 

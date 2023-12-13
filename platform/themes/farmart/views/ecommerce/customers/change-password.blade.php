@@ -6,7 +6,7 @@
     </div>
     <div class="form-content">
         <div class="mb-3">
-            <label for="old_password">{{ __('Current password') }}:</label>
+            <label class="form-label" for="old_password">{{ __('Current password') }}:</label>
             <input
                 class="form-control @if ($errors->has('old_password')) is-invalid @endif"
                 id="old_password"
@@ -22,7 +22,7 @@
             @endif
         </div>
         <div class="mb-3">
-            <label for="password">{{ __('New password') }}:</label>
+            <label class="form-label" for="password">{{ __('New password') }}:</label>
             <input
                 class="form-control @if ($errors->has('password')) is-invalid @endif"
                 id="password"
@@ -38,7 +38,7 @@
             @endif
         </div>
         <div class="mb-3">
-            <label for="password_confirmation">{{ __('Password confirmation') }}:</label>
+            <label class="form-label" for="password_confirmation">{{ __('Password confirmation') }}:</label>
             <input
                 class="form-control @if ($errors->has('password_confirmation')) is-invalid @endif"
                 id="password_confirmation"

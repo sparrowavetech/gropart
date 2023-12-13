@@ -5,13 +5,12 @@ namespace Botble\Marketplace\Http\Controllers;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Facades\EmailHandler;
 use Botble\Base\Http\Controllers\BaseController;
-use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Models\Product;
 use Botble\Marketplace\Facades\MarketplaceHelper;
 
 class ProductController extends BaseController
 {
-    public function approveProduct(int|string $id, BaseHttpResponse $response)
+    public function approveProduct(int|string $id)
     {
         $product = Product::query()->findOrFail($id);
 
@@ -30,6 +29,8 @@ class ProductController extends BaseController
                 ->sendUsingTemplate('product-approved', $store->email);
         }
 
-        return $response->setMessage(trans('plugins/marketplace::store.approve_product_success'));
+        return $this
+            ->httpResponse()
+            ->setMessage(trans('plugins/marketplace::store.approve_product_success'));
     }
 }

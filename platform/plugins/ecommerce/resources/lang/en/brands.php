@@ -28,4 +28,5 @@ return [
         'description' => 'Manage product brands such as Nike, Adidas, Bitis ...',
         'button_text' => 'Create brand',
     ],
+    'edit_this_brand' => 'Edit this brand',
 ];

@@ -2,17 +2,21 @@
 
 namespace Botble\Ecommerce\Forms;
 
-use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\Html;
+use Botble\Base\Forms\FieldOptions\MediaImageFieldOption;
+use Botble\Base\Forms\FieldOptions\SelectFieldOption;
+use Botble\Base\Forms\FieldOptions\StatusFieldOption;
+use Botble\Base\Forms\Fields\MediaImageField;
 use Botble\Base\Forms\Fields\MultiCheckListField;
+use Botble\Base\Forms\Fields\SelectField;
 use Botble\Base\Forms\Fields\TagField;
+use Botble\Base\Forms\Fields\TreeCategoryField;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Ecommerce\Enums\GlobalOptionEnum;
 use Botble\Ecommerce\Enums\ProductTypeEnum;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Facades\ProductCategoryHelper;
-use Botble\Ecommerce\Forms\Fields\CategoryMultiField;
 use Botble\Ecommerce\Http\Requests\ProductRequest;
 use Botble\Ecommerce\Models\Brand;
 use Botble\Ecommerce\Models\GlobalOption;
@@ -26,12 +30,11 @@ use Botble\Ecommerce\Tables\ProductVariationTable;
 
 class ProductForm extends FormAbstract
 {
-    public function buildForm(): void
+    public function setup(): void
     {
         $this->addAssets();
 
         $brands = Brand::query()->pluck('name', 'id')->all();
-        $brands = [0 => trans('plugins/ecommerce::brands.no_brand')] + $brands;
 
         $productCollections = ProductCollection::query()->pluck('name', 'id')->all();
 
@@ -39,8 +42,6 @@ class ProductForm extends FormAbstract
 
         $productId = null;
         $selectedCategories = [];
-        $selectedProductCollections = [];
-        $selectedProductLabels = [];
         $tags = null;
         $totalProductVariations = 0;
 
@@ -48,11 +49,6 @@ class ProductForm extends FormAbstract
             $productId = $this->getModel()->id;
 
             $selectedCategories = $this->getModel()->categories()->pluck('category_id')->all();
-            $selectedProductCollections = $this->getModel()
-                ->productCollections()
-                ->pluck('product_collection_id')
-                ->all();
-            $selectedProductLabels = $this->getModel()->productLabels()->pluck('product_label_id')->all();
 
             $totalProductVariations = ProductVariation::query()->where('configurable_product_id', $productId)->count();
 
@@ -62,14 +58,10 @@ class ProductForm extends FormAbstract
         $this
             ->setupModel(new Product())
             ->setValidatorClass(ProductRequest::class)
-            ->withCustomFields()
-            ->addCustomField('categoryMulti', CategoryMultiField::class)
-            ->addCustomField('multiCheckList', MultiCheckListField::class)
-            ->addCustomField('tags', TagField::class)
             ->setFormOption('files', true)
             ->add('name', 'text', [
                 'label' => trans('plugins/ecommerce::products.form.name'),
-                'label_attr' => ['class' => 'text-title-field required'],
+                'required' => true,
                 'attr' => [
                     'placeholder' => trans('core/base::forms.name_placeholder'),
                     'data-counter' => 150,
@@ -85,7 +77,6 @@ class ProductForm extends FormAbstract
             ])
             ->add('content', 'editor', [
                 'label' => trans('plugins/ecommerce::products.form.content'),
-                'label_attr' => ['class' => 'text-title-field'],
                 'attr' => [
                     'rows' => 4,
                     'with-short-code' => true,
@@ -109,61 +100,90 @@ class ProductForm extends FormAbstract
             ->add('product_type', 'hidden', [
                 'value' => request()->input('product_type') ?: ProductTypeEnum::PHYSICAL,
             ])
-            ->add('status', 'customSelect', [
-                'label' => trans('core/base::tables.status'),
-                'required' => true,
-                'choices' => BaseStatusEnum::labels(),
-            ])
+            ->add('status', SelectField::class, StatusFieldOption::make()->toArray())
             ->add('is_featured', 'onOff', [
                 'label' => trans('core/base::forms.is_featured'),
                 'default_value' => false,
             ])
-            ->add('is_enquiry', 'onOff', [
-                'label'         => trans('plugins/ecommerce::products.form.is_enquiry'),
-                'default_value' => false,
-            ])
-            ->add('categories[]', 'categoryMulti', [
-                'label' => trans('plugins/ecommerce::products.form.categories'),
-                'choices' => ProductCategoryHelper::getActiveTreeCategories(),
-                'value' => old('categories', $selectedCategories),
-            ])
-            ->add('brand_id', 'customSelect', [
-                'label' => trans('plugins/ecommerce::products.form.brand'),
-                'choices' => $brands,
-            ])
-            ->add('image', 'mediaImage', [
-                'label' => trans('plugins/ecommerce::products.form.featured_image'),
-            ])
-            ->add('product_collections[]', 'multiCheckList', [
-                'label' => trans('plugins/ecommerce::products.form.collections'),
-                'choices' => $productCollections,
-                'value' => old('product_collections', $selectedProductCollections),
-            ])
-            ->add('product_labels[]', 'multiCheckList', [
-                'label' => trans('plugins/ecommerce::products.form.labels'),
-                'choices' => $productLabels,
-                'value' => old('product_labels', $selectedProductLabels),
-            ]);
+            ->add(
+                'categories[]',
+                TreeCategoryField::class,
+                SelectFieldOption::make()
+                    ->label(trans('plugins/ecommerce::products.form.categories'))
+                    ->choices(ProductCategoryHelper::getActiveTreeCategories())
+                    ->selected(old('categories', $selectedCategories))
+                    ->addAttribute('card-body-class', 'p-0')
+                    ->toArray()
+            )
+            ->when($brands, function () use ($brands) {
+                $this
+                    ->add(
+                        'brand_id',
+                        SelectField::class,
+                        SelectFieldOption::make()
+                            ->label(trans('plugins/ecommerce::products.form.brand'))
+                            ->choices($brands)
+                            ->emptyValue(trans('plugins/ecommerce::brands.no_brand'))
+                            ->toArray()
+                    );
+            })
+            ->add(
+                'image',
+                MediaImageField::class,
+                MediaImageFieldOption::make()
+                    ->label(trans('plugins/ecommerce::products.form.featured_image'))
+                    ->toArray()
+            )
+            ->when($productCollections, function () use ($productCollections) {
+                $selectedProductCollections = [];
 
-        if (EcommerceHelper::isTaxEnabled()) {
-            $taxes = Tax::query()->get()->pluck('title_with_percentage', 'id')->all();
+                if ($this->getModel() && $this->getModel()->id) {
+                    $selectedProductCollections = $this->getModel()
+                        ->productCollections()
+                        ->pluck('product_collection_id')
+                        ->all();
+                }
 
-            $selectedTaxes = [];
-            if ($this->getModel() && $this->getModel()->id) {
-                $selectedTaxes = $this->getModel()->taxes()->pluck('tax_id')->all();
-            } elseif ($defaultTaxRate = get_ecommerce_setting('default_tax_rate')) {
-                $selectedTaxes = [$defaultTaxRate];
-            }
+                $this
+                    ->add('product_collections[]', MultiCheckListField::class, [
+                    'label' => trans('plugins/ecommerce::products.form.collections'),
+                    'choices' => $productCollections,
+                    'value' => old('product_collections', $selectedProductCollections),
+                ]);
+            })
+            ->when($productLabels, function () use ($productLabels) {
+                $selectedProductLabels = [];
 
-            $this->add('taxes[]', 'multiCheckList', [
-                'label' => trans('plugins/ecommerce::products.form.taxes'),
-                'choices' => $taxes,
-                'value' => old('taxes', $selectedTaxes),
-            ]);
-        }
+                if ($this->getModel() && $this->getModel()->id) {
+                    $selectedProductLabels = $this->getModel()->productLabels()->pluck('product_label_id')->all();
+                }
 
-        $this
-            ->add('tag', 'tags', [
+                $this
+                    ->add('product_labels[]', MultiCheckListField::class, [
+                        'label' => trans('plugins/ecommerce::products.form.labels'),
+                        'choices' => $productLabels,
+                        'value' => old('product_labels', $selectedProductLabels),
+                    ]);
+            })
+            ->when(EcommerceHelper::isTaxEnabled(), function () {
+                $taxes = Tax::query()->get()->pluck('title_with_percentage', 'id')->all();
+
+                if ($taxes) {
+                    $selectedTaxes = [];
+                    if ($this->getModel() && $this->getModel()->id) {
+                        $selectedTaxes = $this->getModel()->taxes()->pluck('tax_id')->all();
+                    } elseif ($defaultTaxRate = get_ecommerce_setting('default_tax_rate')) {
+                        $selectedTaxes = [$defaultTaxRate];
+                    }
+
+                    $this->add('taxes[]', MultiCheckListField::class, [
+                        'label' => trans('plugins/ecommerce::products.form.taxes'),
+                        'choices' => $taxes,
+                        'value' => old('taxes', $selectedTaxes),
+                    ]);
+                }
+            })
+            ->add('tag', TagField::class, [
                 'label' => trans('plugins/ecommerce::products.form.tags'),
                 'value' => $tags,
                 'attr' => [
@@ -225,8 +245,13 @@ class ProductForm extends FormAbstract
                         'content' => view('plugins/ecommerce::products.partials.add-product-attributes', [
                             'product' => $this->getModel(),
                             'productAttributeSets' => $productAttributeSets,
-                            'addAttributeToProductUrl' => $this->getModel()->id ? route('products.add-attribute-to-product', $this->getModel()->id) : null,
+                            'addAttributeToProductUrl' => $this->getModel()->id
+                                ? route('products.add-attribute-to-product', $this->getModel()->id)
+                                : null,
                         ]),
+                        'header_actions' => $productAttributeSets->isNotEmpty()
+                            ? view('plugins/ecommerce::products.partials.product-attribute-actions')
+                            : null,
                         'after_wrapper' => '</div>',
                         'priority' => 3,
                     ],
@@ -250,6 +275,11 @@ class ProductForm extends FormAbstract
                             'productAttributeSets' => $productAttributeSets,
                             'productVariationTable' => $productVariationTable,
                         ]),
+                        'header_actions' => view(
+                            'plugins/ecommerce::products.partials.product-variation-actions',
+                            ['product' => $this->getModel()]
+                        ),
+                        'has_table' => true,
                         'before_wrapper' => '<div id="main-manage-product-type">',
                         'after_wrapper' => '</div>',
                         'priority' => 3,
@@ -271,9 +301,8 @@ class ProductForm extends FormAbstract
             ->addScripts([
                 'moment',
                 'datetimepicker',
-                'jquery-ui',
                 'input-mask',
-                'blockui',
+                'jquery-ui',
             ])
             ->addStylesDirectly(['vendor/core/plugins/ecommerce/css/ecommerce.css'])
             ->addScriptsDirectly([

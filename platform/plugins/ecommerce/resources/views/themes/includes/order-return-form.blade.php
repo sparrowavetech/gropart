@@ -35,19 +35,21 @@
     {!! Form::hidden('order_id', $order->id) !!}
 
     @if (!EcommerceHelper::allowPartialReturn())
-        <div class="col-sm-6 col-md-3 form-group">
-            <label
-                class="col-form-label"
-                for="reason"
-            >
-                <strong>{{ __('Return Reason') }}:</strong>
-            </label>
-            {!! Form::select('reason', Botble\Ecommerce\Enums\OrderReturnReasonEnum::labels(), old('reason'), [
-                'class' => 'form-control form-select',
-                'placeholder' => __('Choose Reason'),
-            ]) !!}
+        <div class="row">
+            <div class="col-sm-6 col-md-3 form-group mb-3">
+                <label
+                    class="form-label"
+                    for="reason"
+                >
+                    <strong>{{ __('Return Reason') }}:</strong>
+                </label>
+                {!! Form::select('reason', Botble\Ecommerce\Enums\OrderReturnReasonEnum::labels(), old('reason'), [
+                    'class' => 'order-return-reason-select form-select',
+                    'placeholder' => __('Choose Reason'),
+                ]) !!}
+            </div>
+            <br />
         </div>
-        <br />
     @endif
 
     <h5>{{ __('Choose products') }}</h5>
@@ -175,7 +177,7 @@
 
         <div class="col-md-12 pt-3">
             @if ($order->canBeReturned())
-                {!! Form::submit(__('Submit Return Request'), ['class' => 'btn btn-lg btn-danger']) !!}
+                {!! Form::submit(__('Submit Return Request'), ['class' => 'btn btn-danger']) !!}
             @endif
         </div>
     </div>

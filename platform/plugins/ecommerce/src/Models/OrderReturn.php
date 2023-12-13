@@ -28,6 +28,17 @@ class OrderReturn extends BaseModel
         'reason' => OrderReturnReasonEnum::class,
     ];
 
+    protected static function booted(): void
+    {
+        self::deleting(function (OrderReturn $orderReturn) {
+            $orderReturn->items()->delete();
+        });
+
+        static::creating(function (OrderReturn $orderReturn) {
+            $orderReturn->code = static::generateUniqueCode();
+        });
+    }
+
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class, 'order_id')->withDefault();
@@ -41,17 +52,6 @@ class OrderReturn extends BaseModel
     public function items(): HasMany
     {
         return $this->hasMany(OrderReturnItem::class, 'order_return_id');
-    }
-
-    protected static function booted(): void
-    {
-        self::deleting(function (OrderReturn $orderReturn) {
-            $orderReturn->items()->delete();
-        });
-
-        static::creating(function (OrderReturn $orderReturn) {
-            $orderReturn->code = static::generateUniqueCode();
-        });
     }
 
     public static function generateUniqueCode(): string

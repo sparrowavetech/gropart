@@ -3,9 +3,6 @@
 namespace Botble\Ecommerce\Http\Controllers;
 
 use Botble\Base\Facades\Assets;
-use Botble\Base\Facades\PageTitle;
-use Botble\Base\Http\Controllers\BaseController;
-use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Base\Widgets\Contracts\AdminWidget;
 use Botble\Ecommerce\Enums\OrderStatusEnum;
 use Botble\Ecommerce\Facades\EcommerceHelper;
@@ -19,12 +16,16 @@ use Illuminate\Http\Request;
 
 class ReportController extends BaseController
 {
-    public function getIndex(
-        Request $request,
-        AdminWidget $widget,
-        BaseHttpResponse $response
-    ) {
-        PageTitle::setTitle(trans('plugins/ecommerce::reports.name'));
+    public function __construct()
+    {
+        parent::__construct();
+
+        $this->breadcrumb();
+    }
+
+    public function getIndex(Request $request, AdminWidget $widget)
+    {
+        $this->pageTitle(trans('plugins/ecommerce::reports.name'));
 
         Assets::addScriptsDirectly([
             'vendor/core/plugins/ecommerce/libraries/daterangepicker/daterangepicker.js',
@@ -40,7 +41,8 @@ class ReportController extends BaseController
         [$startDate, $endDate] = EcommerceHelper::getDateRangeInReport($request);
 
         if ($request->ajax()) {
-            return $response->setData(view('plugins/ecommerce::reports.ajax', compact('widget'))->render());
+            return $this
+                ->httpResponse()->setData(view('plugins/ecommerce::reports.ajax', compact('widget'))->render());
         }
 
         return view(
@@ -64,7 +66,7 @@ class ReportController extends BaseController
         return $trendingProductsTable->renderTable();
     }
 
-    public function getDashboardWidgetGeneral(BaseHttpResponse $response)
+    public function getDashboardWidgetGeneral()
     {
         $startOfMonth = Carbon::now()->startOfMonth();
         $today = Carbon::now();
@@ -94,7 +96,8 @@ class ReportController extends BaseController
             ->where('quantity', '<', 1)
             ->count();
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setData(
                 view(
                     'plugins/ecommerce::reports.widgets.general',

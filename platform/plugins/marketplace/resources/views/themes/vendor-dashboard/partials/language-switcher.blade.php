@@ -15,51 +15,63 @@
     @php
         $languageDisplay = setting('language_display', 'all');
     @endphp
-    @if (setting('language_switcher_display', 'dropdown') == 'dropdown')
-        <li>
-            {!! Arr::get($options, 'before') !!}
-            <div class="ps-dropdown language">
-                <span>
+
+    @if (setting('language_switcher_display', 'dropdown') === 'dropdown')
+        {!! Arr::get($options, 'before') !!}
+
+        <x-core::dropdown class="{{ Arr::get($options, 'class') }}">
+            <x-slot:trigger>
+                <a
+                    class="d-flex align-items-center gap-2 dropdown-toggle text-muted text-decoration-none"
+                    href="#"
+                    data-bs-toggle="dropdown"
+                    aria-haspopup="true"
+                    aria-expanded="false"
+                >
                     @if (Arr::get($options, 'lang_flag', true) && ($languageDisplay == 'all' || $languageDisplay == 'flag'))
                         {!! language_flag(Language::getCurrentLocaleFlag(), Language::getCurrentLocaleName()) !!}
                     @endif
                     @if (Arr::get($options, 'lang_name', true) && ($languageDisplay == 'all' || $languageDisplay == 'name'))
                         {{ Language::getCurrentLocaleName() }}
                     @endif
-                </span>
-                <ul class="ps-dropdown-menu {{ Arr::get($options, 'class') }}">
-                    @foreach ($supportedLocales as $localeCode => $properties)
-                        @if ($localeCode != Language::getCurrentLocale())
-                            <li>
-                                <a href="{{ Language::getSwitcherUrl($localeCode, $properties['lang_code']) }}">
-                                    @if (Arr::get($options, 'lang_flag', true) && ($languageDisplay == 'all' || $languageDisplay == 'flag'))
-                                        {!! language_flag($properties['lang_flag'], $properties['lang_name']) !!}
-                                    @endif
-                                    @if (Arr::get($options, 'lang_name', true) && ($languageDisplay == 'all' || $languageDisplay == 'name'))
-                                        <span>{{ $properties['lang_name'] }}</span>
-                                    @endif
-                                </a>
-                            </li>
-                        @endif
-                    @endforeach
-                </ul>
-            </div>
-            {!! Arr::get($options, 'after') !!}
-        </li>
+                </a>
+            </x-slot:trigger>
+
+            @foreach ($supportedLocales as $localeCode => $properties)
+                @continue($localeCode === Language::getCurrentLocale())
+
+                <x-core::dropdown.item
+                    :href="Language::getSwitcherUrl($localeCode, $properties['lang_code'])"
+                    class="d-flex gap-2 align-items-center"
+                >
+                    @if (Arr::get($options, 'lang_flag', true) && ($languageDisplay == 'all' || $languageDisplay == 'flag'))
+                        {!! language_flag($properties['lang_flag'], $properties['lang_name']) !!}
+                    @endif
+                    @if (Arr::get($options, 'lang_name', true) && ($languageDisplay == 'all' || $languageDisplay == 'name'))
+                        {{ $properties['lang_name'] }}
+                    @endif
+                </x-core::dropdown.item>
+            @endforeach
+        </x-core::dropdown>
+
+        {!! Arr::get($options, 'after') !!}
     @else
-        @foreach ($supportedLocales as $localeCode => $properties)
-            @if ($localeCode != Language::getCurrentLocale())
-                <li class="d-inline-block me-1">
-                    <a href="{{ Language::getSwitcherUrl($localeCode, $properties['lang_code']) }}">
-                        @if (Arr::get($options, 'lang_flag', true) && ($languageDisplay == 'all' || $languageDisplay == 'flag'))
-                            {!! language_flag($properties['lang_flag'], $properties['lang_name']) !!}
-                        @endif
-                        @if (Arr::get($options, 'lang_name', true) && ($languageDisplay == 'all' || $languageDisplay == 'name'))
-                            <span>{{ $properties['lang_name'] }}</span>
-                        @endif
-                    </a>
-                </li>
-            @endif
-        @endforeach
+        <div class="d-flex gap-3 align-items-center">
+            @foreach ($supportedLocales as $localeCode => $properties)
+                @continue($localeCode === Language::getCurrentLocale())
+
+                <a
+                    href="{{ Language::getSwitcherUrl($localeCode, $properties['lang_code']) }}"
+                    class="text-decoration-none small"
+                >
+                    @if (Arr::get($options, 'lang_flag', true) && ($languageDisplay == 'all' || $languageDisplay == 'flag'))
+                        {!! language_flag($properties['lang_flag'], $properties['lang_name']) !!}
+                    @endif
+                    @if (Arr::get($options, 'lang_name', true) && ($languageDisplay == 'all' || $languageDisplay == 'name'))
+                        {{ $properties['lang_name'] }}
+                    @endif
+                </a>
+            @endforeach
+        </div>
     @endif
 @endif

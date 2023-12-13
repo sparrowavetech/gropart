@@ -3,7 +3,7 @@
         <div class="product-stock out-of-stock d-inline-block">
             <label>{{ __('Availability') }}:</label>{{ __('Out of stock') }}
         </div>
-    @elseif  (!$product->with_storehouse_management || $product->quantity < 1)
+    @elseif (!$product->with_storehouse_management || $product->quantity < 1)
         <div class="product-stock in-stock d-inline-block">
             <label>{{ __('Availability') }}:</label> {!! BaseHelper::clean($product->stock_status_html) !!}
         </div>

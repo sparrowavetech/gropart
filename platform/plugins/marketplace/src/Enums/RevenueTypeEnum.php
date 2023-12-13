@@ -2,8 +2,8 @@
 
 namespace Botble\Marketplace\Enums;
 
-use Botble\Base\Facades\Html;
 use Botble\Base\Supports\Enum;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\HtmlString;
 
 /**
@@ -14,24 +14,23 @@ use Illuminate\Support\HtmlString;
 class RevenueTypeEnum extends Enum
 {
     public const ADD_AMOUNT = 'add-amount';
+
     public const SUBTRACT_AMOUNT = 'subtract-amount';
+
     public const ORDER_RETURN = 'order-return';
 
     public static $langPath = 'plugins/marketplace::revenue.types';
 
     public function toHtml(): HtmlString|string
     {
-        return match ($this->value) {
-            self::ADD_AMOUNT => Html::tag('span', self::ADD_AMOUNT()->label(), ['class' => 'label-info status-label'])
-                ->toHtml(),
-            self::SUBTRACT_AMOUNT => Html::tag(
-                'span',
-                self::SUBTRACT_AMOUNT()->label(),
-                ['class' => 'label-primary status-label']
-            ),
-            self::ORDER_RETURN => Html::tag('span', self::ORDER_RETURN()->label(), ['class' => 'label-warning status-label'])->toHtml(),
-            default => parent::toHtml(),
+        $color = match ($this->value) {
+            self::ADD_AMOUNT => 'info',
+            self::SUBTRACT_AMOUNT => 'primary',
+            self::ORDER_RETURN => 'warning',
+            default => null,
         };
+
+        return Blade::render(sprintf('<x-core::badge label="%s" color="%s" />', $this->label(), $color));
     }
 
     public static function adjustValues(): array

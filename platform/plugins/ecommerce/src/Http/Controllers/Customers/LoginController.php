@@ -2,9 +2,9 @@
 
 namespace Botble\Ecommerce\Http\Controllers\Customers;
 
-use App\Http\Controllers\Controller;
 use Botble\ACL\Traits\AuthenticatesUsers;
 use Botble\ACL\Traits\LogoutGuardTrait;
+use Botble\Base\Http\Controllers\BaseController;
 use Botble\Ecommerce\Enums\CustomerStatusEnum;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Http\Requests\LoginRequest;
@@ -15,7 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
-class LoginController extends Controller
+class LoginController extends BaseController
 {
     use AuthenticatesUsers, LogoutGuardTrait {
         AuthenticatesUsers::attemptLogin as baseAttemptLogin;
@@ -32,7 +32,7 @@ class LoginController extends Controller
     {
         SeoHelper::setTitle(__('Login'));
 
-        Theme::breadcrumb()->add(__('Home'), route('public.index'))->add(__('Login'), route('customer.login'));
+        Theme::breadcrumb()->add(__('Login'), route('customer.login'));
 
         if (! session()->has('url.intended') &&
             ! in_array(url()->previous(), [route('customer.login'), route('customer.register')])

@@ -1,26 +1,23 @@
 @extends(BaseHelper::getAdminMasterLayoutTemplate())
+
 @section('content')
-    <div class="flexbox-grid">
-        <div class="flexbox-content">
-            <div class="body">
-                <div class="box-wrap-emptyTmpl text-center col-xs-12">
-                    <h1 class="mt20 mb20 ws-nm font-size-emptyDisplayTmpl">
-                        {{ trans('plugins/ecommerce::order.manage_incomplete_orders') }}</h1>
-                    <p class="text-info-displayTmpl">
-                        {{ trans('plugins/ecommerce::order.incomplete_orders_intro_description') }}</p>
-                    <div class="empty-displayTmpl-pdtop">
-                        <div class="empty-displayTmpl-image">
-                            <svg
-                                id="Layer_1"
-                                xmlns="http://www.w3.org/2000/svg"
-                                xmlns:xlink="http://www.w3.org/1999/xlink"
-                                version="1.1"
-                                x="0px"
-                                y="0px"
-                                viewBox="0 0 468 270"
-                                enable-background="new 0 0 468 270"
-                                xml:space="preserve"
-                            >
+    <x-core::card>
+        <div class="page page-center" style="min-height: calc(100vh - 25rem)">
+            <div class="container container-tight py-4">
+                <div class="empty">
+                    <div class="empty-img">
+                        <svg
+                            id="Layer_1"
+                            xmlns="http://www.w3.org/2000/svg"
+                            xmlns:xlink="http://www.w3.org/1999/xlink"
+                            version="1.1"
+                            x="0px"
+                            y="0px"
+                            viewBox="0 0 468 270"
+                            enable-background="new 0 0 468 270"
+                            xml:space="preserve"
+                            width="500"
+                        >
                                 <g>
                                     <g>
                                         <path
@@ -4557,10 +4554,13 @@
                                     </g>
                                 </g>
                             </svg>
-                        </div>
                     </div>
+                    <p class="empty-title">{{ trans('plugins/ecommerce::order.manage_incomplete_orders') }}</p>
+                    <p class="empty-subtitle text-secondary">
+                        {{ trans('plugins/ecommerce::order.incomplete_orders_intro_description') }}
+                    </p>
                 </div>
             </div>
         </div>
-    </div>
-@stop
+    </x-core::card>
+@endsection

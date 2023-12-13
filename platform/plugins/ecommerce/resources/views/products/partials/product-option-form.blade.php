@@ -48,43 +48,29 @@
         </div>
         <div class="row">
             @if ($isDefaultLanguage)
-                <div class="col-12 col-md-6">
-                    <button
-                        class="btn btn-info add-new-option"
-                        id="add-new-option"
+                <div class="col">
+                    <x-core::button
                         type="button"
-                    >{{ trans('plugins/ecommerce::product-option.add_new_option') }}</button>
+                        class="add-new-option"
+                        id="add-new-option"
+                    >
+                        {{ trans('plugins/ecommerce::product-option.add_new_option') }}
+                    </x-core::button>
                 </div>
                 @if (count($globalOptions))
-                    <div class="col-12 col-md-6 d-flex justify-content-end">
-                        <div
-                            class="ui-select-wrapper d-inline-block"
-                            style="width: 200px;"
-                        >
-                            <select
-                                class="form-control ui-select"
+                    <div class="col ms-auto">
+                        <div class="d-flex gap-2 align-items-start justify-content-end">
+                            <x-core::form.select
                                 id="global-option"
+                                :options="array_merge([0 => trans('plugins/ecommerce::product-option.select_global_option')], $globalOptions)"
+                            />
+                            <x-core::button
+                                type="button"
+                                class="add-from-global-option"
                             >
-                                <option value="-1">
-                                    {{ trans('plugins/ecommerce::product-option.select_global_option') }}</option>
-                                @foreach ($globalOptions as $id => $name)
-                                    <option value="{{ $id }}">{{ $name }}</option>
-                                @endforeach
-                            </select>
-                            <svg class="svg-next-icon svg-next-icon-size-16">
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 20 20"
-                                >
-                                    <path d="M10 16l-4-4h8l-4 4zm0-12L6 8h8l-4-4z"></path>
-                                </svg>
-                            </svg>
+                                {{ trans('plugins/ecommerce::product-option.add_global_option') }}
+                            </x-core::button>
                         </div>
-                        <button
-                            class="btn btn-info add-from-global-option ms-3"
-                            type="button"
-                            role="button"
-                        >{{ trans('plugins/ecommerce::product-option.add_global_option') }}</button>
                     </div>
                 @endif
             @endif
@@ -93,7 +79,7 @@
 </div>
 
 @push('footer')
-    <script id="template-option-values-of-field" type="text/x-custom-template">
+    <x-core::custom-template id="template-option-values-of-field">
         <table class="table table-bordered setting-option mt-3">
             <thead>
             <tr>
@@ -120,8 +106,8 @@
             </tr>
             </tbody>
         </table>
-    </script>
-    <script id="template-option-type-array" type="text/x-custom-template">
+    </x-core::custom-template>
+    <x-core::custom-template id="template-option-type-array">
         <table class="table table-bordered setting-option mt-3">
             <thead>
             <tr class="option-row">
@@ -139,9 +125,9 @@
             __optionValue__
             </tbody>
         </table>
-    </script>
+    </x-core::custom-template>
 
-    <script id="template-option-type-value" type="text/x-custom-template">
+    <x-core::custom-template id="template-option-type-value">
         <tr data-index="__key__">
             @if ($isDefaultLanguage)
                 <td>
@@ -168,9 +154,9 @@
                 </td>
             @endif
         </tr>
-    </script>
+    </x-core::custom-template>
 
-    <script id="template-option" type="text/x-custom-template">
+    <x-core::custom-template id="template-option">
         <div class="accordion-item mb-3" data-index="__index__" data-product-option-index="__index__">
             <input type="hidden" name="options[__index__][id]" value="__id__" />
             <input type="hidden" class="option-order" name="options[__index__][order]" value="__order__" />
@@ -181,27 +167,36 @@
             </h2>
             <div id="collapse-product-option-__index__" class="accordion-collapse collapse-product-option show" aria-labelledby="product-option-__id__" data-bs-parent="#accordion-product-option">
                 <div class="accordion-body">
-                    <div class="row">
+                    <div class="row align-items-end">
                         <div class="col">
-                            <label class="form-label" for="">__nameLabel__</label>
+                            <x-core::form.label>__nameLabel__</x-core::form.label>
                             <input type="text" name="options[__index__][name]" class="form-control option-name" value="__option_name__" placeholder="__namePlaceHolder__">
                         </div>
                         @if ($isDefaultLanguage)
                             <div class="col">
-                                <label class="form-label" for="">__optionTypeLabel__</label>
+                                <x-core::form.label>__optionTypeLabel__</x-core::form.label>
                                 <select name="options[__index__][option_type]" id="" class="form-control option-type">
                                     __optionTypeOption__
                                 </select>
                             </div>
                             <div class="col" style="margin-top: 38px;">
-                                <label for="" class="form-label">&nbsp;</label>
-                                <input class="option-required" name="options[__index__][required]" id="required-__index__" __checked__ type="checkbox">
-                                <label for="required-__index__">__requiredLabel__</label>
+                                <x-core::form.on-off.checkbox
+                                    label="__requiredLabel__"
+                                    id="required-__index__"
+                                    name="options[__index__][required]"
+                                    class="option-required"
+                                    __checked__
+                                />
                             </div>
-                            <div class="col pt-4">
-                                <button type="button" data-index="__index__" role="button" class="remove-option float-end btn btn-default">
-                                    <i class="fa fa-trash"></i>
-                                </button>
+                            <div class="col text-end">
+                                <x-core::button
+                                    type="button"
+                                    color="danger"
+                                    data-index="__index__"
+                                    class="remove-option"
+                                    icon="ti ti-trash"
+                                    :icon-only="true"
+                                />
                             </div>
                         @endif
                     </div>
@@ -211,5 +206,5 @@
                 </div>
             </div>
         </div>
-    </script>
+    </x-core::custom-template>
 @endpush

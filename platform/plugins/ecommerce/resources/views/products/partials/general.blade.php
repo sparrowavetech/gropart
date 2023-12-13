@@ -1,123 +1,111 @@
 {!! apply_filters('ecommerce_product_variation_form_start', null, $product) !!}
+
 <div class="row price-group">
     <input
-        class="detect-schedule hidden"
+        class="detect-schedule d-none"
         name="sale_type"
         type="hidden"
         value="{{ old('sale_type', $product ? $product->sale_type : 0) }}"
     >
 
     <div class="col-md-4">
-        <div class="form-group mb-3 @if ($errors->has('sku')) has-error @endif">
-            <label class="text-title-field">{{ trans('plugins/ecommerce::products.sku') }}</label>
-            {!! Form::text('sku', old('sku', $product ? $product->sku : (new \Botble\Ecommerce\Models\Product())->generateSku()), ['class' => 'next-input', 'id' => 'sku']) !!}
-        </div>
+        <x-core::form.text-input
+            :label="trans('plugins/ecommerce::products.sku')"
+            name="sku"
+            :value="old('sku', $product ? $product->sku : (new Botble\Ecommerce\Models\Product())->generateSku())"
+        />
+
         @if (($isVariation && !$product) || ($product && $product->is_variation && !$product->sku))
-            <div class="form-group mb-3">
-                <label class="text-title-field">
-                    <input
-                        name="auto_generate_sku"
-                        type="hidden"
-                        value="0"
-                    >
-                    <input
-                        name="auto_generate_sku"
-                        type="checkbox"
-                        value="1"
-                    >
-                    &nbsp;{{ trans('plugins/ecommerce::products.form.auto_generate_sku') }}
-                </label>
-            </div>
+            <x-core::form.checkbox
+                :label="trans('plugins/ecommerce::products.form.auto_generate_sku')"
+                name="auto_generate_sku"
+            />
         @endif
     </div>
 
     <div class="col-md-4">
-        <div class="form-group mb-3">
-            <label class="text-title-field">{{ trans('plugins/ecommerce::products.form.price') }}</label>
-            <div class="next-input--stylized">
-                <span
-                    class="next-input-add-on next-input__add-on--before">{{ get_application_currency()->symbol }}</span>
-                <input
-                    class="next-input input-mask-number regular-price next-input--invisible"
-                    name="price"
-                    data-thousands-separator="{{ EcommerceHelper::getThousandSeparatorForInputMask() }}"
-                    data-decimal-separator="{{ EcommerceHelper::getDecimalSeparatorForInputMask() }}"
-                    type="text"
-                    value="{{ old('price', $product ? $product->price : $originalProduct->price ?? 0) }}"
-                    step="any"
-                >
-            </div>
-        </div>
+        <x-core::form.text-input
+            :label="trans('plugins/ecommerce::products.form.price')"
+            name="price"
+            :data-thousands-separator="EcommerceHelper::getThousandSeparatorForInputMask()"
+            :data-decimal-separator="EcommerceHelper::getDecimalSeparatorForInputMask()"
+            :value="old('price', $product ? $product->price : $originalProduct->price ?? 0)"
+            step="any"
+            class="input-mask-number"
+            :group-flat="true"
+        >
+            <x-slot:prepend>
+                <span class="input-group-text">{{ get_application_currency()->symbol }}</span>
+            </x-slot:prepend>
+        </x-core::form.text-input>
     </div>
     <div class="col-md-4">
-        <div class="form-group mb-3">
-            <label class="text-title-field">
-                <span class="d-inline-block me-1">{{ trans('plugins/ecommerce::products.form.price_sale') }}</span>
+        <x-core::form.text-input
+            :label="trans('plugins/ecommerce::products.form.price_sale')"
+            class="input-mask-number"
+            name="sale_price"
+            :data-thousands-separator="EcommerceHelper::getThousandSeparatorForInputMask()"
+            :data-decimal-separator="EcommerceHelper::getDecimalSeparatorForInputMask()"
+            :value="old('sale_price', $product ? $product->sale_price : $originalProduct->sale_price ?? null)"
+            :group-flat="true"
+        >
+            <x-slot:prepend>
+                <span class="input-group-text">{{ get_application_currency()->symbol }}</span>
+            </x-slot:prepend>
+            <x-slot:labelDescription>
                 <a
-                    class="turn-on-schedule @if (old('sale_type', $product ? $product->sale_type : $originalProduct->sale_type ?? 0) == 1) hidden @endif"
-                    href="javascript:;"
-                >{{ trans('plugins/ecommerce::products.form.choose_discount_period') }}</a>
-                <a
-                    class="turn-off-schedule @if (old('sale_type', $product ? $product->sale_type : $originalProduct->sale_type ?? 0) == 0) hidden @endif"
-                    href="javascript:;"
-                >{{ trans('plugins/ecommerce::products.form.cancel') }}</a>
-            </label>
-            <div class="next-input--stylized">
-                <span
-                    class="next-input-add-on next-input__add-on--before">{{ get_application_currency()->symbol }}</span>
-                <input
-                    class="next-input input-mask-number sale-price next-input--invisible"
-                    name="sale_price"
-                    data-thousands-separator="{{ EcommerceHelper::getThousandSeparatorForInputMask() }}"
-                    data-decimal-separator="{{ EcommerceHelper::getDecimalSeparatorForInputMask() }}"
-                    type="text"
-                    value="{{ old('sale_price', $product ? $product->sale_price : $originalProduct->sale_price ?? null) }}"
+                    class="turn-on-schedule"
+                    @style(['display: none' => old('sale_type', $product ? $product->sale_type : $originalProduct->sale_type ?? 0) == 1])
+                    href="javascript:void(0)"
                 >
-            </div>
-        </div>
+                    {{ trans('plugins/ecommerce::products.form.choose_discount_period') }}
+                </a>
+                <a
+                    class="turn-off-schedule"
+                    @style(['display: none' => old('sale_type', $product ? $product->sale_type : $originalProduct->sale_type ?? 0) == 0])
+                    href="javascript:void(0)"
+                >
+                    {{ trans('plugins/ecommerce::products.form.cancel') }}
+                </a>
+            </x-slot:labelDescription>
+        </x-core::form.text-input>
     </div>
-    <div class="col-md-6 scheduled-time @if (old('sale_type', $product ? $product->sale_type : $originalProduct->sale_type ?? 0) == 0) hidden @endif">
-        <div class="form-group mb-3">
-            <label class="text-title-field">{{ trans('plugins/ecommerce::products.form.date.start') }}</label>
-            <input
-                class="next-input form-date-time"
-                name="start_date"
-                type="text"
-                value="{{ old('start_date', $product ? $product->start_date : $originalProduct->start_date ?? null) }}"
-                placeholder="{{ config('core.base.general.date_format.date_time') }}"
-            >
-        </div>
+
+    <div class="col-md-6 scheduled-time" @style(['display: none' => old('sale_type', $product ? $product->sale_type : $originalProduct->sale_type ?? 0) == 0])>
+        <x-core::form.text-input
+            :label="trans('plugins/ecommerce::products.form.date.start')"
+            name="start_date"
+            class="form-date-time"
+            :value="old('start_date', $product ? $product->start_date : $originalProduct->start_date ?? null)"
+            :placeholder="config('core.base.general.date_format.date_time')"
+        />
     </div>
-    <div class="col-md-6 scheduled-time @if (old('sale_type', $product ? $product->sale_type : $originalProduct->sale_type ?? 0) == 0) hidden @endif">
-        <div class="form-group mb-3">
-            <label class="text-title-field">{{ trans('plugins/ecommerce::products.form.date.end') }}</label>
-            <input
-                class="next-input form-date-time"
-                name="end_date"
-                type="text"
-                value="{{ old('end_date', $product ? $product->end_date : $originalProduct->end_date ?? null) }}"
-                placeholder="{{ config('core.base.general.date_format.date_time') }}"
-            >
-        </div>
+    <div class="col-md-6 scheduled-time" @style(['display: none' => old('sale_type', $product ? $product->sale_type : $originalProduct->sale_type ?? 0) == 0])>
+        <x-core::form.text-input
+            :label="trans('plugins/ecommerce::products.form.date.end')"
+            name="end_date"
+            :value="old('end_date', $product ? $product->end_date : $originalProduct->end_date ?? null)"
+            :placeholder="config('core.base.general.date_format.date_time')"
+            class="form-date-time"
+        />
     </div>
+
     <div class="row">
         <div class="col-md-6">
-            <div class="form-group mb-3">
-                <label class="text-title-field">{{ trans('plugins/ecommerce::products.form.cost_per_item') }}</label>
-                <div class="next-input--stylized">
-                    <span
-                        class="next-input-add-on next-input__add-on--before">{{ get_application_currency()->symbol }}</span>
-                    <input
-                        class="next-input input-mask-number regular-price next-input--invisible"
-                        name="cost_per_item"
-                        type="text"
-                        value="{{ old('cost_per_item', $product ? $product->cost_per_item : $originalProduct->cost_per_item ?? 0) }}"
-                        step="any"
-                        placeholder="{{ trans('plugins/ecommerce::products.form.cost_per_item_placeholder') }}"
-                    >
-                </div>
-                {!! Form::helper(trans('plugins/ecommerce::products.form.cost_per_item_helper')) !!}
-            </div>
+            <x-core::form.text-input
+                :label="trans('plugins/ecommerce::products.form.cost_per_item')"
+                name="cost_per_item"
+                :value="old('cost_per_item', $product ? $product->cost_per_item : $originalProduct->cost_per_item ?? 0)"
+                :placeholder="trans('plugins/ecommerce::products.form.cost_per_item_placeholder')"
+                step="any"
+                class="input-mask-number"
+                :group-flat="true"
+                :helper-text="trans('plugins/ecommerce::products.form.cost_per_item_helper')"
+            >
+                <x-slot:prepend>
+                    <span class="input-group-text">{{ get_application_currency()->symbol }}</span>
+                </x-slot:prepend>
+            </x-core::form.text-input>
         </div>
         <input
             name="product_id"
@@ -125,260 +113,205 @@
             value="{{ $product->id ?? null }}"
         >
         <div class="col-md-6">
-            <div class="form-group mb-3">
-                <label class="text-title-field">{{ trans('plugins/ecommerce::products.form.barcode') }}</label>
-                <div class="next-input--stylized">
-                    <input
-                        class="next-input next-input--invisible"
-                        name="barcode"
-                        type="text"
-                        value="{{ old('barcode', $product ? $product->barcode : $originalProduct->barcode ?? null) }}"
-                        step="any"
-                        placeholder="{{ trans('plugins/ecommerce::products.form.barcode_placeholder') }}"
-                    >
-                </div>
-            </div>
+            <x-core::form.text-input
+                :label="trans('plugins/ecommerce::products.form.barcode')"
+                name="barcode"
+                type="text"
+                :value="old('barcode', $product ? $product->barcode : $originalProduct->barcode ?? null)"
+                step="any"
+                :placeholder="trans('plugins/ecommerce::products.form.barcode_placeholder')"
+            />
         </div>
     </div>
 </div>
-
-<hr />
 
 {!! apply_filters('ecommerce_product_variation_form_middle', null, $product) !!}
 
-<div class="form-group mb-3">
-    <div class="storehouse-management">
-        <div class="mt5">
-            <input
-                name="with_storehouse_management"
-                type="hidden"
-                value="0"
-            >
-            <label><input
-                    class="storehouse-management-status"
-                    name="with_storehouse_management"
-                    type="checkbox"
-                    value="1"
-                    @if (old(
-                            'with_storehouse_management',
-                            $product ? $product->with_storehouse_management : $originalProduct->with_storehouse_management ?? 0) == 1) checked @endif
-                > {{ trans('plugins/ecommerce::products.form.storehouse.storehouse') }}</label>
-        </div>
-    </div>
-</div>
-<div class="storehouse-info @if (old(
-        'with_storehouse_management',
-        $product ? $product->with_storehouse_management : $originalProduct->with_storehouse_management ?? 0) == 0) hidden @endif">
-    <div class="form-group mb-3">
-        <label class="text-title-field">{{ trans('plugins/ecommerce::products.form.storehouse.quantity') }}</label>
-        <input
-            class="next-input input-mask-number input-medium"
-            name="quantity"
-            type="text"
-            value="{{ old('quantity', $product ? $product->quantity : $originalProduct->quantity ?? 0) }}"
-        >
-    </div>
-    <div class="form-group mb-3">
-        <label class="text-title-field">
-            <input
-                name="allow_checkout_when_out_of_stock"
-                type="hidden"
-                value="0"
-            >
-            <input
-                name="allow_checkout_when_out_of_stock"
-                type="checkbox"
-                value="1"
-                @if (old(
-                        'allow_checkout_when_out_of_stock',
-                        $product ? $product->allow_checkout_when_out_of_stock : $originalProduct->allow_checkout_when_out_of_stock ?? 0) == 1) checked @endif
-            >
-            &nbsp;{{ trans('plugins/ecommerce::products.form.stock.allow_order_when_out') }}
-        </label>
-    </div>
-</div>
+<x-core::form.on-off.checkbox
+    :label="trans('plugins/ecommerce::products.form.storehouse.storehouse')"
+    name="with_storehouse_management"
+    class="storehouse-management-status"
+    :checked="old('with_storehouse_management', $product ? $product->with_storehouse_management : $originalProduct->with_storehouse_management ?? 0) == 1"
+/>
 
-<div class="form-group stock-status-wrapper @if (old(
-        'with_storehouse_management',
-        $product ? $product->with_storehouse_management : $originalProduct->with_storehouse_management ?? 0) == 1) hidden @endif">
-    <label class="text-title-field">{{ trans('plugins/ecommerce::products.form.stock_status') }}</label>
-    @foreach (\Botble\Ecommerce\Enums\StockStatusEnum::labels() as $status => $label)
-        <label class="me-3">
-            <input
-                name="stock_status"
-                type="radio"
-                value="{{ $status }}"
-                @checked(old('stock_status', $product ? $product->stock_status : null) == $status)
-            />
-            {{ $label }}
-        </label>
+<x-core::form.fieldset class="storehouse-info" @style(['display: none' => old('with_storehouse_management', $product ? $product->with_storehouse_management : $originalProduct->with_storehouse_management ?? 0) == 0])>
+    <x-core::form.text-input
+        :label="trans('plugins/ecommerce::products.form.storehouse.quantity')"
+        name="quantity"
+        :value="old('quantity', $product ? $product->quantity : $originalProduct->quantity ?? 0)"
+        class="input-mask-number"
+    />
+
+    <x-core::form.on-off.checkbox
+        :label="trans('plugins/ecommerce::products.form.stock.allow_order_when_out')"
+        name="allow_checkout_when_out_of_stock"
+        :checked="old('allow_checkout_when_out_of_stock', $product ? $product->allow_checkout_when_out_of_stock : $originalProduct->allow_checkout_when_out_of_stock ?? 0) == 1"
+    />
+</x-core::form.fieldset>
+
+<x-core::form.fieldset class="stock-status-wrapper" @style(['display: none' => old('with_storehouse_management', $product ? $product->with_storehouse_management : $originalProduct->with_storehouse_management ?? 0) == 1])>
+    <x-core::form.label for="stock_status">
+        {{ trans('plugins/ecommerce::products.form.stock_status') }}
+    </x-core::form.label>
+    @foreach (Botble\Ecommerce\Enums\StockStatusEnum::labels() as $status => $label)
+        <x-core::form.checkbox
+            :label="$label"
+            name="stock_status"
+            type="radio"
+            :value="$status"
+            :checked="old('stock_status', $product ? $product->stock_status : 'in_stock') == $status"
+            :inline="true"
+        />
     @endforeach
-</div>
-
-<hr />
+</x-core::form.fieldset>
 
 @if (
-    !EcommerceHelper::isEnabledSupportDigitalProducts() ||
-        (!$product &&
-            !$originalProduct &&
-            request()->input('product_type') != Botble\Ecommerce\Enums\ProductTypeEnum::DIGITAL) ||
-        ($originalProduct && $originalProduct->isTypePhysical()) ||
-        ($product && $product->isTypePhysical()))
-    <div class="shipping-management">
-        <label class="text-title-field">{{ trans('plugins/ecommerce::products.form.shipping.title') }}</label>
+    ! EcommerceHelper::isEnabledSupportDigitalProducts()
+    || (!$product && !$originalProduct &&  request()->input('product_type') != Botble\Ecommerce\Enums\ProductTypeEnum::DIGITAL)
+    || ($originalProduct && $originalProduct->isTypePhysical()) || ($product && $product->isTypePhysical())
+)
+    <x-core::form.fieldset>
+        <legend>
+            <h3>{{ trans('plugins/ecommerce::products.form.shipping.title') }}</h3>
+        </legend>
         <div class="row">
             <div class="col-md-3 col-md-6">
-                <div class="form-group mb-3">
-                    <label>{{ trans('plugins/ecommerce::products.form.shipping.weight') }}
-                        ({{ ecommerce_weight_unit() }})</label>
-                    <div class="next-input--stylized">
-                        <span
-                            class="next-input-add-on next-input__add-on--before">{{ ecommerce_weight_unit() }}</span>
-                        <input
-                            class="next-input input-mask-number next-input--invisible"
-                            name="weight"
-                            type="text"
-                            value="{{ old('weight', $product ? $product->weight : $originalProduct->weight ?? 0) }}"
-                        >
-                    </div>
-                </div>
+                <x-core::form.text-input
+                    label="{{ trans('plugins/ecommerce::products.form.shipping.weight') }} ({{ ecommerce_weight_unit() }})"
+                    name="weight"
+                    :value="old('weight', $product ? $product->weight : $originalProduct->weight ?? 0)"
+                    class="input-mask-number"
+                    :group-flat="true"
+                >
+                    <x-slot:prepend>
+                        <span class="input-group-text">{{ ecommerce_weight_unit() }}</span>
+                    </x-slot:prepend>
+                </x-core::form.text-input>
             </div>
             <div class="col-md-3 col-md-6">
-                <div class="form-group mb-3">
-                    <label>{{ trans('plugins/ecommerce::products.form.shipping.length') }}
-                        ({{ ecommerce_width_height_unit() }})</label>
-                    <div class="next-input--stylized">
-                        <span
-                            class="next-input-add-on next-input__add-on--before">{{ ecommerce_width_height_unit() }}</span>
-                        <input
-                            class="next-input input-mask-number next-input--invisible"
-                            name="length"
-                            type="text"
-                            value="{{ old('length', $product ? $product->length : $originalProduct->length ?? 0) }}"
-                        >
-                    </div>
-                </div>
+                <x-core::form.text-input
+                    label="{{ trans('plugins/ecommerce::products.form.shipping.length') }} ({{ ecommerce_width_height_unit() }})"
+                    name="length"
+                    :value="old('length', $product ? $product->length : $originalProduct->length ?? 0)"
+                    class="input-mask-number"
+                    :group-flat="true"
+                >
+                    <x-slot:prepend>
+                        <span class="input-group-text">{{ ecommerce_width_height_unit() }}</span>
+                    </x-slot:prepend>
+                </x-core::form.text-input>
             </div>
             <div class="col-md-3 col-md-6">
-                <div class="form-group mb-3">
-                    <label>{{ trans('plugins/ecommerce::products.form.shipping.wide') }}
-                        ({{ ecommerce_width_height_unit() }})</label>
-                    <div class="next-input--stylized">
-                        <span
-                            class="next-input-add-on next-input__add-on--before">{{ ecommerce_width_height_unit() }}</span>
-                        <input
-                            class="next-input input-mask-number next-input--invisible"
-                            name="wide"
-                            type="text"
-                            value="{{ old('wide', $product ? $product->wide : $originalProduct->wide ?? 0) }}"
-                        >
-                    </div>
-                </div>
+                <x-core::form.text-input
+                    label="{{ trans('plugins/ecommerce::products.form.shipping.wide') }} ({{ ecommerce_width_height_unit() }})"
+                    name="wide"
+                    :value="old('wide', $product ? $product->wide : $originalProduct->wide ?? 0)"
+                    class="input-mask-number"
+                    :group-flat="true"
+                >
+                    <x-slot:prepend>
+                        <span class="input-group-text">{{ ecommerce_width_height_unit() }}</span>
+                    </x-slot:prepend>
+                </x-core::form.text-input>
             </div>
             <div class="col-md-3 col-md-6">
-                <div class="form-group mb-3">
-                    <label>{{ trans('plugins/ecommerce::products.form.shipping.height') }}
-                        ({{ ecommerce_width_height_unit() }})</label>
-                    <div class="next-input--stylized">
-                        <span
-                            class="next-input-add-on next-input__add-on--before">{{ ecommerce_width_height_unit() }}</span>
-                        <input
-                            class="next-input input-mask-number next-input--invisible"
-                            name="height"
-                            type="text"
-                            value="{{ old('height', $product ? $product->height : $originalProduct->height ?? 0) }}"
-                        />
-                    </div>
-                </div>
+                <x-core::form.text-input
+                    label="{{ trans('plugins/ecommerce::products.form.shipping.height') }} ({{ ecommerce_width_height_unit() }})"
+                    :value="old('height', $product ? $product->height : $originalProduct->height ?? 0)"
+                    name="height"
+                    class="input-mask-number"
+                    :group-flat="true"
+                >
+                    <x-slot:prepend>
+                        <span class="input-group-text">{{ ecommerce_width_height_unit() }}</span>
+                    </x-slot:prepend>
+                </x-core::form.text-input>
             </div>
         </div>
-    </div>
+    </x-core::form.fieldset>
 @endif
 
-@if (EcommerceHelper::isEnabledSupportDigitalProducts() &&
-        ((!$product &&
-            !$originalProduct &&
-            request()->input('product_type') == Botble\Ecommerce\Enums\ProductTypeEnum::DIGITAL) ||
-            ($originalProduct && $originalProduct->isTypeDigital()) ||
-            ($product && $product->isTypeDigital())))
+@if (
+    EcommerceHelper::isEnabledSupportDigitalProducts()
+    && (
+        (!$product &&  !$originalProduct && request()->input('product_type') == Botble\Ecommerce\Enums\ProductTypeEnum::DIGITAL)
+        || ($originalProduct && $originalProduct->isTypeDigital()) || ($product && $product->isTypeDigital())
+    )
+)
+    <x-core::form.on-off.checkbox
+        :label="trans('plugins/ecommerce::products.digital_attachments.generate_license_code_after_purchasing_product')"
+        name="generate_license_code"
+        :checked="old('generate_license_code', $product ? $product->generate_license_code : $originalProduct->generate_license_code ?? 0)"
+    />
 
-    <div class="form-check mb-3">
-        <input
-            name="generate_license_code"
-            type="hidden"
-            value="0"
-        >
-        <input
-            class="form-check-input"
-            id="generate_license_code"
-            name="generate_license_code"
-            type="checkbox"
-            value="1"
-            @checked(old(
-                    'generate_license_code',
-                    $product ? $product->generate_license_code : $originalProduct->generate_license_code ?? 0))
-        >
-        <label
-            class="form-check-label"
-            for="generate_license_code"
-        >
-            {{ trans('plugins/ecommerce::products.digital_attachments.generate_license_code_after_purchasing_product') }}
-        </label>
-    </div>
+    <x-core::form-group class="product-type-digital-management">
+        <x-core::form.label for="product_file">
+            {{ trans('plugins/ecommerce::products.digital_attachments.title') }}
 
-    <div class="mb-3 product-type-digital-management">
-        <label
-            class="mb-2"
-            for="product_file"
-        >{{ trans('plugins/ecommerce::products.digital_attachments.title') }}</label>
-        <table class="table border">
-            <thead>
-                <tr>
-                    <th width="40"></th>
-                    <th>{{ trans('plugins/ecommerce::products.digital_attachments.file_name') }}</th>
-                    <th width="100">{{ trans('plugins/ecommerce::products.digital_attachments.file_size') }}</th>
-                    <th width="100">{{ trans('core/base::tables.created_at') }}</th>
-                    <th
-                        class="text-end"
-                        width="100"
-                    ></th>
-                </tr>
-            </thead>
-            <tbody>
-                @if ($product)
+            <x-slot:description>
+                <div class="btn-list">
+                    <x-core::button type="button" class="digital_attachments_btn" size="sm" icon="ti ti-paperclip">
+                        {{ trans('plugins/ecommerce::products.digital_attachments.add') }}
+                    </x-core::button>
+
+                    <x-core::button type="button" class="digital_attachments_external_btn" size="sm" icon="ti ti-link">
+                        {{ trans('plugins/ecommerce::products.digital_attachments.add_external_link') }}
+                    </x-core::button>
+                </div>
+            </x-slot:description>
+        </x-core::form.label>
+
+        <x-core::table>
+            <x-core::table.header>
+                <x-core::table.header.cell />
+                <x-core::table.header.cell>
+                    {{ trans('plugins/ecommerce::products.digital_attachments.file_name') }}
+                </x-core::table.header.cell>
+                <x-core::table.header.cell>
+                    {{ trans('plugins/ecommerce::products.digital_attachments.file_size') }}
+                </x-core::table.header.cell>
+                <x-core::table.header.cell>
+                    {{ trans('core/base::tables.created_at') }}
+                </x-core::table.header.cell>
+                <x-core::table.header.cell />
+            </x-core::table.header>
+
+            @if($product)
+                <x-core::table.body>
                     @foreach ($product->productFiles as $file)
-                        <tr>
-                            <td>
-                                {!! Form::checkbox('product_files[' . $file->id . ']', 0, true, ['class' => 'd-none']) !!}
-                                {!! Form::checkbox('product_files[' . $file->id . ']', $file->id, true, [
-                                    'class' => 'digital-attachment-checkbox',
-                                ]) !!}
-                            </td>
-                            <td>
-                                <div>
-                                    @if ($file->is_external_link)
-                                        <a
-                                            href="{{ $file->url }}"
-                                            target="_blank"
-                                        >
-                                            <i class="fas fa-link"></i>
-                                            <span
-                                                class="ms-1">{{ $file->basename ? Str::limit($file->basename, 50) : $file->url }}</span>
-                                        </a>
-                                    @else
-                                        <i class="fas fa-paperclip"></i>
-                                        <span class="ms-1">{{ Str::limit($file->basename, 50) }}</span>
-                                    @endif
-                                </div>
-                            </td>
-                            <td>{{ $file->file_size ? BaseHelper::humanFileSize($file->file_size) : '-' }}</td>
-                            <td>{{ BaseHelper::formatDate($file->created_at) }}</td>
-                            <td class="text-end"></td>
-                        </tr>
+                        <x-core::table.body.row>
+                            <x-core::table.body.cell>
+                                <x-core::form.on-off.checkbox
+                                    name="product_files[{{ $file->id }}]"
+                                    class="digital-attachment-checkbox"
+                                    :checked="true"
+                                    :single="true"
+                                />
+                            </x-core::table.body.cell>
+                            <x-core::table.body.cell>
+                                @if ($file->is_external_link)
+                                    <a href="{{ $file->url }}" target="_blank">
+                                        <x-core::icon name="ti ti-link" />
+                                        {{ $file->basename ? Str::limit($file->basename, 50) : $file->url }}
+                                    </a>
+                                @else
+                                    <x-core::icon name="ti ti-paperclip" />
+                                    {{ Str::limit($file->basename, 50) }}
+                                @endif
+                            </x-core::table.body.cell>
+                            <x-core::table.body.cell>
+                                {{ $file->file_size ? BaseHelper::humanFileSize($file->file_size) : '-' }}
+                            </x-core::table.body.cell>
+                            <x-core::table.body.cell>
+                                {{ BaseHelper::formatDate($file->created_at) }}
+                            </x-core::table.body.cell>
+                            <x-core::table.body.cell />
+                        </x-core::table.body.row>
                     @endforeach
-                @endif
-            </tbody>
-        </table>
+                </x-core::table.body>
+            @endif
+        </x-core::table>
+
         <div class="digital_attachments_input">
             <input
                 name="product_files_input[]"
@@ -386,18 +319,8 @@
                 type="file"
             >
         </div>
-        <div class="mt-2">
-            <a
-                class="digital_attachments_btn"
-                href="#"
-            >{{ trans('plugins/ecommerce::products.digital_attachments.add') }}</a>
-            <span class="px-1">|</span>
-            <a
-                class="digital_attachments_external_btn text-warning"
-                href="#"
-            >{{ trans('plugins/ecommerce::products.digital_attachments.add_external_link') }}</a>
-        </div>
-    </div>
+    </x-core::form-group>
+
     @if (request()->ajax())
         @include('plugins/ecommerce::products.partials.digital-product-file-template')
     @else

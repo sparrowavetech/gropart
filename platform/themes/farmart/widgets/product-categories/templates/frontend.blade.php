@@ -1,4 +1,4 @@
-@if (is_plugin_active('ecommerce'))
+@if (is_plugin_active('ecommerce') && ! empty($categories))
     <div>
         <p>
             <strong>{{ $config['name'] }}:</strong>

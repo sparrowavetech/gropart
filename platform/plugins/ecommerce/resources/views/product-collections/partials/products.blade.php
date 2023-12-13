@@ -1,54 +1,49 @@
-<div
-    class="widget meta-boxes"
-    id="product-extras"
+<x-plugins-ecommerce::box-search-advanced
+    type="product"
+    :placeholder="trans('plugins/ecommerce::products.search_products')"
+    :shown="$productCollection->products->isNotEmpty()"
+    :search-target="route('products.get-list-product-for-search')"
 >
-    <div class="widget-title">
-        <h4><span>{{ trans('plugins/ecommerce::products.name') }}</span></h4>
-    </div>
-    <div class="widget-body">
-        <div class="form-group mb-3">
-            <label class="control-label">{{ trans('plugins/ecommerce::products.name') }}</label>
-            <input
-                name="collection_products"
-                type="hidden"
-                value="@if ($productCollection) {{ implode(',', $productCollection->products->pluck('id')->all()) }} @endif"
-            />
-            <div class="box-search-advance product">
-                <div>
-                    <input
-                        class="next-input textbox-advancesearch"
-                        data-target="{{ route('products.get-list-product-for-search') }}"
-                        type="text"
-                        placeholder="{{ trans('plugins/ecommerce::products.search_products') }}"
-                    >
-                </div>
-                <div class="panel panel-default">
+    <input
+        name="collection_products"
+        type="hidden"
+        value="@if ($productCollection) {{ implode(',', $productCollection->products->pluck('id')->all()) }} @endif"
+    />
 
+    <x-slot:items>
+        @include('plugins/ecommerce::products.partials.selected-products-list', [
+            'products' => $productCollection->products ?: collect(),
+            'includeVariation' => false,
+        ])
+    </x-slot:items>
+</x-plugins-ecommerce::box-search-advanced>
+
+<x-core::custom-template id="selected_product_list_template">
+    <div class="list-group-item">
+        <div class="row align-items-center">
+            <div class="col-auto">
+                <span
+                    class="avatar"
+                    style="background-image: url('__image__')"
+                ></span>
+            </div>
+            <div class="col text-truncate">
+                <a href="__url__" class="text-body d-block" target="_blank">__name__</a>
+                <div class="text-secondary text-truncate">
+                    __attributes__
                 </div>
             </div>
-            @include('plugins/ecommerce::products.partials.selected-products-list', [
-                'products' => $productCollection->products ?: collect(),
-                'includeVariation' => false,
-            ])
+            <div class="col-auto">
+                <a
+                    href="javascript:void(0)"
+                    data-bb-toggle="product-delete-item"
+                    data-bb-target="__id__"
+                    class="text-decoration-none list-group-item-actions btn-trigger-remove-selected-product"
+                    title="{{ trans('plugins/ecommerce::products.delete') }}"
+                >
+                    <x-core::icon name="ti ti-x" class="text-secondary" />
+                </a>
+            </div>
         </div>
     </div>
-</div>
-
-<script id="selected_product_list_template" type="text/x-custom-template">
-    <tr>
-        <td class="width-60-px min-width-60-px">
-            <div class="wrap-img vertical-align-m-i">
-                <img class="thumb-image" src="__image__" alt="__name__" title="__name__">
-            </div>
-        </td>
-        <td class="pl5 p-r5 min-width-200-px">
-            <a class="hover-underline pre-line" href="__url__">__name__</a>
-            <p class="type-subdued">__attributes__</p>
-        </td>
-        <td class="pl5 p-r5 text-end width-20-px min-width-20-px">
-            <a href="#" class="btn-trigger-remove-selected-product" title="{{ trans('plugins/ecommerce::products.delete') }}" data-id="__id__">
-                <i class="fa fa-times"></i>
-            </a>
-        </td>
-    </tr>
-</script>
+</x-core::custom-template>

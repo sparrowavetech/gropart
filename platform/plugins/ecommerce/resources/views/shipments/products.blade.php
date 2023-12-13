@@ -1,86 +1,60 @@
-<div class="panel panel-default">
-    <div class="wrapper-content">
-        <div class="clearfix">
-            <div class="table-wrapper p-none">
-                <table class="order-totals-summary">
-                    <tbody>
-                        @foreach ($shipment->order->products as $orderProduct)
-                            @php
-                                $product = $orderProduct->product->original_product;
-                            @endphp
-                            <tr class="border-bottom">
-                                <td class="order-border text-center p-small">
-                                    <i class="fa fa-truck"></i>
-                                </td>
-                                <td class="order-border p-small">
-                                    <div
-                                        class="flexbox-grid-default pl5 p-r5"
-                                        style="align-items: center"
-                                    >
-                                        <div class="flexbox-auto-50">
-                                            <div class="wrap-img">
-                                                <img
-                                                    class="thumb-image thumb-image-cartorderlist"
-                                                    src="{{ RvMedia::getImageUrl($orderProduct->product_image, 'thumb', false, RvMedia::getDefaultImage()) }}"
-                                                    alt="{{ $product->name }}"
-                                                />
-                                            </div>
-                                        </div>
-                                        <div class="flexbox-content">
-                                            <div>
-                                                <a
-                                                    class="wordwrap hide-print"
-                                                    href="{{ $productEditRouteName && $product && $product->id ? route($productEditRouteName, $product->id) : '#' }}"
-                                                    title="{{ $orderProduct->product_name }}"
-                                                >{{ $orderProduct->product_name }}</a>
-                                                <p class="mb-0">
-                                                    <small>{{ Arr::get($orderProduct->options, 'attributes', '') }}</small>
-                                                </p>
-                                                @if ($sku = Arr::get($orderProduct->options, 'sku'))
-                                                    <p>{{ trans('plugins/ecommerce::shipping.sku') }} :
-                                                        <span>{{ $sku }}</span>
-                                                    </p>
-                                                @endif
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="order-border text-end p-small p-sm-r">
-                                    <strong class="item-quantity">{{ $orderProduct->qty }}</strong>
-                                    <span class="item-multiplier mr5">×</span>
-                                    <b class="color-blue-line-through">{{ format_price($orderProduct->price) }}</b>
-                                </td>
-                                <td class="order-border text-end p-small p-sm-r border-none-r">
-                                    <span>{{ format_price($orderProduct->price * $orderProduct->qty) }}</span>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-                <div class="flexbox-grid-default p-t15 p-b15 height-light bg-order">
-                    <div class="flexbox-content">
-                        <table>
-                            <tbody>
-                                <tr>
-                                    <td
-                                        class="text-center p-sm-r border-none"
-                                        colspan="4"
-                                    >
-                                        <a
-                                            class="d-inline-block mt-2"
-                                            href="{{ $orderEditRouteName ? route($orderEditRouteName, $shipment->order_id) : '#' }}"
-                                            target="_blank"
-                                        >
-                                            {{ trans('plugins/ecommerce::shipping.view_order', ['order_id' => $shipment->order->code]) }}
-                                            <i class="fa fa-external-link-alt"></i>
-                                        </a>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+<x-core::card class="mb-3">
+    <x-core::table :striped="false" :hover="false" class="table-bordered">
+        <x-core::table.body>
+            @foreach ($shipment->order->products as $orderProduct)
+                @php
+                    $product = $orderProduct->product->original_product;
+                @endphp
+                <x-core::table.body.row>
+                    <x-core::table.body.cell class="text-center" style="width: 5%">
+                        <x-core::icon name="ti ti-truck-delivery" />
+                    </x-core::table.body.cell>
+                    <x-core::table.body.cell>
+                        <div class="d-flex align-items-start gap-2">
+                            <img
+                                src="{{ RvMedia::getImageUrl($orderProduct->product_image, 'thumb', false, RvMedia::getDefaultImage()) }}"
+                                alt="{{ $product->name }}"
+                                width="60"
+                            />
+                            <div>
+                                <a
+                                    class="d-print-none"
+                                    href="{{ $productEditRouteName && $product && $product->id ? route($productEditRouteName, $product->id) : '#' }}"
+                                    title="{{ $orderProduct->product_name }}"
+                                >
+                                    {{ $orderProduct->product_name }}
+                                </a>
+                                <p class="small my-1">
+                                    {{ Arr::get($orderProduct->options, 'attributes', '') }}
+                                </p>
+                                @if ($sku = Arr::get($orderProduct->options, 'sku'))
+                                    <p class="small mb-0">
+                                        {{ trans('plugins/ecommerce::shipping.sku') }}: <strong>{{ $sku }}</strong>
+                                    </p>
+                                @endif
+                            </div>
+                        </div>
+                    </x-core::table.body.cell>
+                    <x-core::table.body.cell class="text-center">
+                        <strong>{{ $orderProduct->qty }}</strong>
+                        <span>×</span>
+                        <strong>{{ format_price($orderProduct->price) }}</strong>
+                    </x-core::table.body.cell>
+                    <x-core::table.body.cell class="text-center">
+                        <span>{{ format_price($orderProduct->price * $orderProduct->qty) }}</span>
+                    </x-core::table.body.cell>
+                </x-core::table.body.row>
+            @endforeach
+        </x-core::table.body>
+    </x-core::table>
+
+    <x-core::card.footer class="text-center py-2">
+        <a
+            href="{{ $orderEditRouteName ? route($orderEditRouteName, $shipment->order_id) : '#' }}"
+            target="_blank"
+        >
+            {{ trans('plugins/ecommerce::shipping.view_order', ['order_id' => $shipment->order->code]) }}
+            <x-core::icon name="ti ti-external-link" />
+        </a>
+    </x-core::card.footer>
+</x-core::card>

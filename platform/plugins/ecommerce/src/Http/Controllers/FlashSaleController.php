@@ -6,10 +6,6 @@ use Botble\Base\Events\BeforeEditContentEvent;
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
-use Botble\Base\Facades\PageTitle;
-use Botble\Base\Forms\FormBuilder;
-use Botble\Base\Http\Controllers\BaseController;
-use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Forms\FlashSaleForm;
 use Botble\Ecommerce\Http\Requests\FlashSaleRequest;
 use Botble\Ecommerce\Models\FlashSale;
@@ -20,21 +16,30 @@ use Illuminate\Support\Arr;
 
 class FlashSaleController extends BaseController
 {
+    public function __construct()
+    {
+        parent::__construct();
+
+        $this
+            ->breadcrumb()
+            ->add(trans('plugins/ecommerce::flash-sale.name'), route('flash-sale.index'));
+    }
+
     public function index(FlashSaleTable $table)
     {
-        PageTitle::setTitle(trans('plugins/ecommerce::flash-sale.name'));
+        $this->pageTitle(trans('plugins/ecommerce::flash-sale.name'));
 
         return $table->renderTable();
     }
 
-    public function create(FormBuilder $formBuilder)
+    public function create()
     {
-        PageTitle::setTitle(trans('plugins/ecommerce::flash-sale.create'));
+        $this->pageTitle(trans('plugins/ecommerce::flash-sale.create'));
 
-        return $formBuilder->create(FlashSaleForm::class)->renderForm();
+        return FlashSaleForm::create()->renderForm();
     }
 
-    public function store(FlashSaleRequest $request, BaseHttpResponse $response)
+    public function store(FlashSaleRequest $request)
     {
         $flashSale = FlashSale::query()->create($request->input());
 
@@ -42,10 +47,11 @@ class FlashSaleController extends BaseController
 
         $this->storeProducts($request, $flashSale);
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setPreviousUrl(route('flash-sale.index'))
             ->setNextUrl(route('flash-sale.edit', $flashSale->id))
-            ->setMessage(trans('core/base::notices.create_success_message'));
+            ->withCreatedSuccessMessage();
     }
 
     protected function storeProducts(FlashSaleRequest $request, FlashSale $flashSale)
@@ -78,16 +84,16 @@ class FlashSaleController extends BaseController
         return count($products);
     }
 
-    public function edit(FlashSale $flashSale, FormBuilder $formBuilder, Request $request)
+    public function edit(FlashSale $flashSale, Request $request)
     {
         event(new BeforeEditContentEvent($request, $flashSale));
 
-        PageTitle::setTitle(trans('core/base::forms.edit_item', ['name' => $flashSale->name]));
+        $this->pageTitle(trans('core/base::forms.edit_item', ['name' => $flashSale->name]));
 
-        return $formBuilder->create(FlashSaleForm::class, ['model' => $flashSale])->renderForm();
+        return FlashSaleForm::createFromModel($flashSale)->renderForm();
     }
 
-    public function update(FlashSale $flashSale, FlashSaleRequest $request, BaseHttpResponse $response)
+    public function update(FlashSale $flashSale, FlashSaleRequest $request)
     {
         $flashSale->fill($request->input());
         $flashSale->save();
@@ -96,21 +102,25 @@ class FlashSaleController extends BaseController
 
         event(new UpdatedContentEvent(FLASH_SALE_MODULE_SCREEN_NAME, $request, $flashSale));
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setPreviousUrl(route('flash-sale.index'))
-            ->setMessage(trans('core/base::notices.update_success_message'));
+            ->withUpdatedSuccessMessage();
     }
 
-    public function destroy(FlashSale $flashSale, Request $request, BaseHttpResponse $response)
+    public function destroy(FlashSale $flashSale, Request $request)
     {
         try {
             $flashSale->delete();
 
             event(new DeletedContentEvent(FLASH_SALE_MODULE_SCREEN_NAME, $request, $flashSale));
 
-            return $response->setMessage(trans('core/base::notices.delete_success_message'));
+            return $this
+                ->httpResponse()
+                ->setMessage(trans('core/base::notices.delete_success_message'));
         } catch (Exception $exception) {
-            return $response
+            return $this
+                ->httpResponse()
                 ->setError()
                 ->setMessage($exception->getMessage());
         }

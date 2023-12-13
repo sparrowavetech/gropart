@@ -7,9 +7,6 @@ use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\EmailHandler;
-use Botble\Base\Facades\PageTitle;
-use Botble\Base\Http\Controllers\BaseController;
-use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Cart\CartItem;
 use Botble\Ecommerce\Enums\OrderStatusEnum;
 use Botble\Ecommerce\Enums\ShippingCodStatusEnum;
@@ -66,11 +63,16 @@ class OrderController extends BaseController
         protected HandleApplyCouponService $handleApplyCouponService,
         protected HandleApplyPromotionsService $applyPromotionsService
     ) {
+        parent::__construct();
+
+        $this
+            ->breadcrumb()
+            ->add(trans('plugins/ecommerce::order.menu'), route('orders.index'));
     }
 
     public function index(OrderTable $dataTable)
     {
-        PageTitle::setTitle(trans('plugins/ecommerce::order.menu'));
+        $this->pageTitle(trans('plugins/ecommerce::order.menu'));
 
         return $dataTable->renderTable();
     }
@@ -82,7 +84,7 @@ class OrderController extends BaseController
                 'vendor/core/plugins/ecommerce/libraries/jquery.textarea_autosize.js',
                 'vendor/core/plugins/ecommerce/js/order-create.js',
             ])
-            ->addScripts(['blockui', 'input-mask']);
+            ->addScripts(['input-mask']);
 
         Assets::usingVueJS();
 
@@ -90,16 +92,19 @@ class OrderController extends BaseController
             Assets::addScriptsDirectly('vendor/core/plugins/location/js/location.js');
         }
 
-        PageTitle::setTitle(trans('plugins/ecommerce::order.create'));
+        $this->pageTitle(trans('plugins/ecommerce::order.create'));
 
         return view('plugins/ecommerce::orders.create');
     }
 
-    public function store(CreateOrderRequest $request, BaseHttpResponse $response)
+    public function store(CreateOrderRequest $request)
     {
         $data = $this->getDataBeforeCreateOrder($request);
         if (Arr::get($data, 'error')) {
-            return $response->setError()->setMessage(implode('; ', Arr::get($data, 'message', [])));
+            return $this
+                ->httpResponse()
+                ->setError()
+                ->setMessage(implode('; ', Arr::get($data, 'message', [])));
         }
 
         $customerId = Arr::get($data, 'customer_id') ?: 0;
@@ -274,9 +279,10 @@ class OrderController extends BaseController
             OrderHelper::setOrderCompleted($order->getKey(), $request, $userId);
         }
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setData($order)
-            ->setMessage(trans('core/base::notices.create_success_message'));
+            ->withCreatedSuccessMessage();
     }
 
     public function edit(Order $order)
@@ -286,7 +292,7 @@ class OrderController extends BaseController
                 'vendor/core/plugins/ecommerce/libraries/jquery.textarea_autosize.js',
                 'vendor/core/plugins/ecommerce/js/order.js',
             ])
-            ->addScripts(['blockui', 'input-mask']);
+            ->addScripts(['input-mask']);
 
         if (EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation()) {
             Assets::addScriptsDirectly('vendor/core/plugins/location/js/location.js');
@@ -294,7 +300,7 @@ class OrderController extends BaseController
 
         $order->load(['products', 'user', 'shippingAddress', 'taxInformation']);
 
-        PageTitle::setTitle(trans('plugins/ecommerce::order.edit_order', ['code' => $order->code]));
+        $this->pageTitle(trans('plugins/ecommerce::order.edit_order', ['code' => $order->code]));
 
         $weight = number_format(EcommerceHelper::validateOrderWeight($order->products_weight));
 
@@ -303,27 +309,31 @@ class OrderController extends BaseController
         return view('plugins/ecommerce::orders.edit', compact('order', 'weight', 'defaultStore'));
     }
 
-    public function update(Order $order, UpdateOrderRequest $request, BaseHttpResponse $response)
+    public function update(Order $order, UpdateOrderRequest $request)
     {
         $order->fill($request->input());
         $order->save();
 
         event(new UpdatedContentEvent(ORDER_MODULE_SCREEN_NAME, $request, $order));
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setPreviousUrl(route('orders.index'))
-            ->setMessage(trans('core/base::notices.update_success_message'));
+            ->withUpdatedSuccessMessage();
     }
 
-    public function destroy(Order $order, Request $request, BaseHttpResponse $response)
+    public function destroy(Order $order, Request $request)
     {
         try {
             $order->delete();
             event(new DeletedContentEvent(ORDER_MODULE_SCREEN_NAME, $request, $order));
 
-            return $response->setMessage(trans('core/base::notices.delete_success_message'));
+            return $this
+                ->httpResponse()
+                ->setMessage(trans('core/base::notices.delete_success_message'));
         } catch (Exception $exception) {
-            return $response
+            return $this
+                ->httpResponse()
                 ->setError()
                 ->setMessage($exception->getMessage());
         }
@@ -342,7 +352,7 @@ class OrderController extends BaseController
         return InvoiceHelper::downloadInvoice($order->invoice);
     }
 
-    public function postConfirm(Request $request, BaseHttpResponse $response)
+    public function postConfirm(Request $request)
     {
         $order = Order::query()->findOrFail($request->input('order_id'));
         $order->is_confirmed = 1;
@@ -377,27 +387,31 @@ class OrderController extends BaseController
             );
         }
 
-        return $response->setMessage(trans('plugins/ecommerce::order.confirm_order_success'));
+        return $this
+            ->httpResponse()
+            ->setMessage(trans('plugins/ecommerce::order.confirm_order_success'));
     }
 
-    public function postResendOrderConfirmationEmail(Order $order, BaseHttpResponse $response)
+    public function postResendOrderConfirmationEmail(Order $order)
     {
         $result = OrderHelper::sendOrderConfirmationEmail($order);
 
         if (! $result) {
-            return $response
+            return $this
+                ->httpResponse()
                 ->setError()
                 ->setMessage(trans('plugins/ecommerce::order.error_when_sending_email'));
         }
 
-        return $response->setMessage(trans('plugins/ecommerce::order.sent_confirmation_email_success'));
+        return $this
+            ->httpResponse()
+            ->setMessage(trans('plugins/ecommerce::order.sent_confirmation_email_success'));
     }
 
     public function getShipmentForm(
         Order $order,
         HandleShippingFeeService $shippingFeeService,
-        Request $request,
-        BaseHttpResponse $response
+        Request $request
     ) {
         if ($request->has('weight')) {
             $weight = $request->input('weight');
@@ -427,17 +441,18 @@ class OrderController extends BaseController
             );
         }
 
-        return $response->setData(
-            view(
-                'plugins/ecommerce::orders.shipment-form',
-                compact('order', 'weight', 'shipping', 'storeLocators', 'url')
-            )->render()
-        );
+        return $this
+            ->httpResponse()->setData(
+                view(
+                    'plugins/ecommerce::orders.shipment-form',
+                    compact('order', 'weight', 'shipping', 'storeLocators', 'url')
+                )->render()
+            );
     }
 
-    public function postCreateShipment(Order $order, CreateShipmentRequest $request, BaseHttpResponse $response)
+    public function postCreateShipment(Order $order, CreateShipmentRequest $request)
     {
-        $result = $response;
+        $result = $this->httpResponse();
 
         $shipment = [
             'order_id' => $order->getKey(),
@@ -491,7 +506,7 @@ class OrderController extends BaseController
         return $result;
     }
 
-    public function postCancelShipment(Shipment $shipment, BaseHttpResponse $response)
+    public function postCancelShipment(Shipment $shipment)
     {
         $shipment->update(['status' => ShippingStatusEnum::CANCELED]);
 
@@ -502,7 +517,8 @@ class OrderController extends BaseController
             'user_id' => Auth::id(),
         ]);
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setData([
                 'status' => ShippingStatusEnum::CANCELED,
                 'status_text' => ShippingStatusEnum::CANCELED()->label(),
@@ -510,7 +526,7 @@ class OrderController extends BaseController
             ->setMessage(trans('plugins/ecommerce::order.shipping_was_canceled_success'));
     }
 
-    public function postUpdateShippingAddress(OrderAddress $address, AddressRequest $request, BaseHttpResponse $response)
+    public function postUpdateShippingAddress(OrderAddress $address, AddressRequest $request)
     {
         $address->fill($request->input());
         $address->save();
@@ -519,7 +535,8 @@ class OrderController extends BaseController
             abort(401);
         }
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setData([
                 'line' => view('plugins/ecommerce::orders.shipping-address.line', compact('address'))->render(),
                 'detail' => view('plugins/ecommerce::orders.shipping-address.detail', compact('address'))->render(),
@@ -527,7 +544,7 @@ class OrderController extends BaseController
             ->setMessage(trans('plugins/ecommerce::order.update_shipping_address_success'));
     }
 
-    public function postUpdateTaxInformation(OrderTaxInformation $taxInformation, Request $request, BaseHttpResponse $response)
+    public function postUpdateTaxInformation(OrderTaxInformation $taxInformation, Request $request)
     {
         $validated = $request->validate([
             'company_tax_code' => 'required|string|min:3|max:20',
@@ -544,12 +561,13 @@ class OrderController extends BaseController
             abort(401);
         }
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setData(view('plugins/ecommerce::orders.tax-information.detail', ['tax' => $taxInformation])->render())
             ->setMessage(trans('plugins/ecommerce::order.tax_info.update_success'));
     }
 
-    public function postCancelOrder(Order $order, BaseHttpResponse $response)
+    public function postCancelOrder(Order $order)
     {
         if (! $order->canBeCanceledByAdmin()) {
             abort(403);
@@ -564,10 +582,12 @@ class OrderController extends BaseController
             'user_id' => Auth::id(),
         ]);
 
-        return $response->setMessage(trans('plugins/ecommerce::order.cancel_success'));
+        return $this
+            ->httpResponse()
+            ->setMessage(trans('plugins/ecommerce::order.cancel_success'));
     }
 
-    public function postConfirmPayment(Order $order, BaseHttpResponse $response)
+    public function postConfirmPayment(Order $order)
     {
         if ($order->status === OrderStatusEnum::PENDING) {
             $order->status = OrderStatusEnum::PROCESSING;
@@ -579,15 +599,18 @@ class OrderController extends BaseController
 
         OrderHelper::confirmPayment($order);
 
-        return $response->setMessage(trans('plugins/ecommerce::order.confirm_payment_success'));
+        return $this
+            ->httpResponse()
+            ->setMessage(trans('plugins/ecommerce::order.confirm_payment_success'));
     }
 
-    public function postRefund(Order $order, RefundRequest $request, BaseHttpResponse $response)
+    public function postRefund(Order $order, RefundRequest $request)
     {
         if (is_plugin_active('payment') && $request->input(
             'refund_amount'
         ) > ($order->payment->amount - $order->payment->refunded_amount)) {
-            return $response
+            return $this
+                ->httpResponse()
                 ->setError()
                 ->setMessage(
                     trans('plugins/ecommerce::order.refund_amount_invalid', [
@@ -607,7 +630,8 @@ class OrderController extends BaseController
                 ->first();
 
             if ($quantity > ($orderProduct->qty - $orderProduct->restock_quantity)) {
-                $response
+                $this
+                    ->httpResponse()
                     ->setError()
                     ->setMessage(trans('plugins/ecommerce::order.number_of_products_invalid'));
 
@@ -615,15 +639,16 @@ class OrderController extends BaseController
             }
         }
 
-        $response = apply_filters(ACTION_BEFORE_POST_ORDER_REFUND_ECOMMERCE, $response, $order, $request);
+        $response = apply_filters(ACTION_BEFORE_POST_ORDER_REFUND_ECOMMERCE, $this->httpResponse(), $order, $request);
 
         if ($response->isError()) {
-            return $response;
+            return $this->httpResponse();
         }
 
         $payment = $order->payment;
         if (! $payment) {
-            return $response
+            return $this
+                ->httpResponse()
                 ->setError()
                 ->setMessage(trans('plugins/ecommerce::order.cannot_found_payment_for_this_order'));
         }
@@ -644,13 +669,15 @@ class OrderController extends BaseController
             $paymentResponse = $paymentResponse->refundOrder($payment->charge_id, $refundAmount, $optionRefunds);
 
             if (Arr::get($paymentResponse, 'error', true)) {
-                return $response
+                return $this
+                    ->httpResponse()
                     ->setError()
                     ->setMessage(Arr::get($paymentResponse, 'message', ''));
             }
 
             if (Arr::get($paymentResponse, 'data.refund_redirect_url')) {
-                return $response
+                return $this
+                    ->httpResponse()
                     ->setNextUrl($paymentResponse['data']['refund_redirect_url'])
                     ->setData($paymentResponse['data'])
                     ->setMessage(Arr::get($paymentResponse, 'message', ''));
@@ -721,11 +748,8 @@ class OrderController extends BaseController
         return apply_filters(ACTION_AFTER_POST_ORDER_REFUNDED_ECOMMERCE, $response, $order, $request);
     }
 
-    public function getAvailableShippingMethods(
-        Request $request,
-        BaseHttpResponse $response,
-        HandleShippingFeeService $shippingFeeService
-    ) {
+    public function getAvailableShippingMethods(Request $request, HandleShippingFeeService $shippingFeeService)
+    {
         $weight = 0;
         $orderAmount = 0;
 
@@ -760,24 +784,25 @@ class OrderController extends BaseController
             }
         }
 
-        return $response->setData($result);
+        return $this
+            ->httpResponse()
+            ->setData($result);
     }
 
-    public function postApplyCoupon(
-        ApplyCouponRequest $request,
-        HandleApplyCouponService $handleApplyCouponService,
-        BaseHttpResponse $response
-    ) {
+    public function postApplyCoupon(ApplyCouponRequest $request, HandleApplyCouponService $handleApplyCouponService)
+    {
         $result = $handleApplyCouponService->applyCouponWhenCreatingOrderFromAdmin($request);
 
         if ($result['error']) {
-            return $response
+            return $this
+                ->httpResponse()
                 ->setError()
                 ->withInput()
                 ->setMessage($result['message']);
         }
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setData(Arr::get($result, 'data', []))
             ->setMessage(
                 trans(
@@ -787,23 +812,25 @@ class OrderController extends BaseController
             );
     }
 
-    public function getReorder(Request $request, BaseHttpResponse $response)
+    public function getReorder(Request $request)
     {
         if (! $request->input('order_id')) {
-            return $response
+            return $this
+                ->httpResponse()
                 ->setError()
                 ->setNextUrl(route('orders.index'))
                 ->setMessage(trans('plugins/ecommerce::order.order_is_not_existed'));
         }
 
-        PageTitle::setTitle(trans('plugins/ecommerce::order.reorder'));
+        $this->pageTitle(trans('plugins/ecommerce::order.reorder'));
 
         Assets::usingVueJS();
 
         $order = Order::query()->find($request->input('order_id'));
 
         if (! $order) {
-            return $response
+            return $this
+                ->httpResponse()
                 ->setError()
                 ->setNextUrl(route('orders.index'))
                 ->setMessage(trans('plugins/ecommerce::order.order_is_not_existed'));
@@ -855,7 +882,7 @@ class OrderController extends BaseController
                 'vendor/core/plugins/ecommerce/libraries/jquery.textarea_autosize.js',
                 'vendor/core/plugins/ecommerce/js/order-create.js',
             ])
-            ->addScripts(['blockui', 'input-mask']);
+            ->addScripts(['input-mask']);
 
         return view(
             'plugins/ecommerce::orders.reorder',
@@ -873,14 +900,14 @@ class OrderController extends BaseController
 
     public function getIncompleteList(OrderIncompleteTable $dataTable)
     {
-        PageTitle::setTitle(trans('plugins/ecommerce::order.incomplete_order'));
+        $this->pageTitle(trans('plugins/ecommerce::order.incomplete_order'));
 
         return $dataTable->renderTable();
     }
 
     public function getViewIncompleteOrder(Order $order)
     {
-        PageTitle::setTitle(trans('plugins/ecommerce::order.incomplete_order'));
+        $this->pageTitle(trans('plugins/ecommerce::order.incomplete_order'));
 
         Assets::addStylesDirectly(['vendor/core/plugins/ecommerce/css/ecommerce.css'])
             ->addScriptsDirectly([
@@ -895,7 +922,7 @@ class OrderController extends BaseController
         return view('plugins/ecommerce::orders.view-incomplete-order', compact('order', 'weight'));
     }
 
-    public function markIncompleteOrderAsCompleted(Order $order, BaseHttpResponse $response): BaseHttpResponse
+    public function markIncompleteOrderAsCompleted(Order $order)
     {
         DB::transaction(function () use ($order) {
             $order->update(['is_finished' => true]);
@@ -911,19 +938,21 @@ class OrderController extends BaseController
             ]);
         });
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setMessage(trans('plugins/ecommerce::order.mark_as_completed.success'))
             ->setData([
                 'next_url' => route('orders.edit', $order->getKey()),
             ]);
     }
 
-    public function postSendOrderRecoverEmail(Order $order, BaseHttpResponse $response)
+    public function postSendOrderRecoverEmail(Order $order)
     {
         $email = $order->user->email ?: $order->address->email;
 
         if (! $email) {
-            return $response
+            return $this
+                ->httpResponse()
                 ->setError()
                 ->setMessage(trans('plugins/ecommerce::order.error_when_sending_email'));
         }
@@ -936,19 +965,22 @@ class OrderController extends BaseController
 
             $mailer->sendUsingTemplate('order_recover', $email);
 
-            return $response->setMessage(trans('plugins/ecommerce::order.sent_email_incomplete_order_success'));
+            return $this
+                ->httpResponse()->setMessage(trans('plugins/ecommerce::order.sent_email_incomplete_order_success'));
         } catch (Exception $exception) {
-            return $response
+            return $this
+                ->httpResponse()
                 ->setError()
                 ->setMessage($exception->getMessage());
         }
     }
 
-    public function checkDataBeforeCreateOrder(Request $request, BaseHttpResponse $response)
+    public function checkDataBeforeCreateOrder(Request $request)
     {
         $data = $this->getDataBeforeCreateOrder($request);
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setData($data)
             ->setError(Arr::get($data, 'error', false))
             ->setMessage(implode('; ', Arr::get($data, 'message', [])));
@@ -1300,7 +1332,7 @@ class OrderController extends BaseController
         return $data;
     }
 
-    public function generateInvoice(Order $order, BaseHttpResponse $response)
+    public function generateInvoice(Order $order)
     {
         if ($order->isInvoiceAvailable()) {
             abort(404);
@@ -1308,7 +1340,8 @@ class OrderController extends BaseController
 
         InvoiceHelper::store($order);
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setMessage(trans('plugins/ecommerce::order.generated_invoice_successfully'));
     }
 }

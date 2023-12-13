@@ -6,10 +6,6 @@ use Botble\Base\Events\BeforeEditContentEvent;
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
-use Botble\Base\Facades\PageTitle;
-use Botble\Base\Forms\FormBuilder;
-use Botble\Base\Http\Controllers\BaseController;
-use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Enums\GlobalOptionEnum;
 use Botble\Ecommerce\Forms\GlobalOptionForm;
 use Botble\Ecommerce\Http\Requests\GlobalOptionRequest;
@@ -22,21 +18,30 @@ use Illuminate\Support\Arr;
 
 class ProductOptionController extends BaseController
 {
+    public function __construct()
+    {
+        parent::__construct();
+
+        $this
+            ->breadcrumb()
+            ->add(trans('plugins/ecommerce::product-option.name'), route('global-option.index'));
+    }
+
     public function index(GlobalOptionTable $table)
     {
-        PageTitle::setTitle(trans('plugins/ecommerce::product-option.name'));
+        $this->pageTitle(trans('plugins/ecommerce::product-option.name'));
 
         return $table->renderTable();
     }
 
-    public function create(FormBuilder $formBuilder)
+    public function create()
     {
-        PageTitle::setTitle(trans('plugins/ecommerce::product-option.create'));
+        $this->pageTitle(trans('plugins/ecommerce::product-option.create'));
 
-        return $formBuilder->create(GlobalOptionForm::class)->renderForm();
+        return GlobalOptionForm::create()->renderForm();
     }
 
-    public function store(GlobalOptionRequest $request, BaseHttpResponse $response)
+    public function store(GlobalOptionRequest $request)
     {
         $option = GlobalOption::query()->create($request->only(['name', 'option_type', 'required']));
 
@@ -47,24 +52,25 @@ class ProductOptionController extends BaseController
 
         event(new CreatedContentEvent(GLOBAL_OPTION_MODULE_SCREEN_NAME, $request, $option));
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setPreviousUrl(route('global-option.index'))
             ->setNextUrl(route('global-option.edit', $option->id))
-            ->setMessage(trans('core/base::notices.create_success_message'));
+            ->withCreatedSuccessMessage();
     }
 
-    public function edit(int|string $id, FormBuilder $formBuilder, Request $request)
+    public function edit(int|string $id, Request $request)
     {
         $option = GlobalOption::query()->with(['values'])->findOrFail($id);
 
         event(new BeforeEditContentEvent($request, $option));
 
-        PageTitle::setTitle(trans('plugins/ecommerce::product-option.edit', ['name' => $option->name]));
+        $this->pageTitle(trans('plugins/ecommerce::product-option.edit', ['name' => $option->name]));
 
-        return $formBuilder->create(GlobalOptionForm::class, ['model' => $option])->renderForm();
+        return GlobalOptionForm::createFromModel($option)->renderForm();
     }
 
-    public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
+    public function destroy(int|string $id, Request $request)
     {
         try {
             $option = GlobalOption::query()->findOrFail($id);
@@ -73,15 +79,18 @@ class ProductOptionController extends BaseController
 
             event(new DeletedContentEvent(GLOBAL_OPTION_MODULE_SCREEN_NAME, $request, $option));
 
-            return $response->setMessage(trans('core/base::notices.delete_success_message'));
+            return $this
+                ->httpResponse()
+                ->setMessage(trans('core/base::notices.delete_success_message'));
         } catch (Exception $exception) {
-            return $response
+            return $this
+                ->httpResponse()
                 ->setError()
                 ->setMessage($exception->getMessage());
         }
     }
 
-    public function update(int|string $id, GlobalOptionRequest $request, BaseHttpResponse $response)
+    public function update(int|string $id, GlobalOptionRequest $request)
     {
         $option = GlobalOption::query()->findOrFail($id);
 
@@ -95,16 +104,19 @@ class ProductOptionController extends BaseController
 
         event(new UpdatedContentEvent(GLOBAL_OPTION_MODULE_SCREEN_NAME, $request, $option));
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setPreviousUrl(route('global-option.index'))
-            ->setMessage(trans('core/base::notices.update_success_message'));
+            ->withUpdatedSuccessMessage();
     }
 
-    public function ajaxInfo(Request $request, BaseHttpResponse $response): BaseHttpResponse
+    public function ajaxInfo(Request $request)
     {
         $optionsValues = GlobalOption::query()->with(['values'])->findOrFail($request->input('id'));
 
-        return $response->setData($optionsValues);
+        return $this
+            ->httpResponse()
+            ->setData($optionsValues);
     }
 
     protected function formatOptionValue(array $data): array

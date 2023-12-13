@@ -1,66 +1,70 @@
-<div class="panel-body">
+<x-core::card.body class="p-0">
     <div class="list-search-data">
-        <ul class="clearfix">
+        <div class="list-group list-group-flush overflow-auto" style="max-height: 25rem;">
             @if (!$availableProducts->isEmpty())
                 @foreach ($availableProducts as $availableProduct)
-                    <li
-                        class="@if (!$includeVariation) selectable-item @endif"
-                        @if (!$includeVariation) data-name="{{ $availableProduct->name }}"  data-image="{{ RvMedia::getImageUrl($availableProduct->image, 'thumb', false, RvMedia::getDefaultImage()) }}" data-id="{{ $availableProduct->id }}" data-url="{{ route('products.edit', $availableProduct->id) }}" data-price="{{ $availableProduct->price }}" @endif
-                    >
-                        <div class="wrap-img inline_block vertical-align-t float-start"><img
-                                class="thumb-image"
-                                src="{{ RvMedia::getImageUrl($availableProduct->image, 'thumb', false, RvMedia::getDefaultImage()) }}"
-                                alt="{{ $availableProduct->name }}"
-                            ></div>
-                        <label
-                            class="inline_block ml10 mt10 ws-nm"
-                            style="width:calc(100% - 50px);"
-                        >{{ $availableProduct->name }}</label>
-                        @if ($includeVariation)
-                            <div class="clear"></div>
-                            <ul>
-                                @foreach ($availableProduct->variations as $variation)
-                                    <li
-                                        class="clearfix product-variant selectable-item"
-                                        data-name="{{ $availableProduct->name }}"
-                                        data-image="{{ RvMedia::getImageUrl($variation->product->image, 'thumb', false, RvMedia::getDefaultImage()) }}"
-                                        data-id="{{ $variation->product->id }}"
-                                        data-url="{{ route('products.edit', $availableProduct->id) }}"
-                                        data-price="{{ $availableProduct->price }}"
-                                    >
-                                        <a
-                                            class="color_green float-start"
-                                            href="#"
-                                        >
-                                            <span>
-                                                @foreach ($variation->variationItems as $variationItem)
-                                                    {{ $variationItem->attribute->title }}
-                                                    @if (!$loop->last)
-                                                        /
-                                                    @endif
-                                                @endforeach
-                                            </span>
-                                        </a>
-                                    </li>
-                                @endforeach
-                            </ul>
+                    <a
+                        href="javascript:void(0);"
+                        @class(['list-group-item list-group-item-action', 'selectable-item' => !$includeVariation])
+                        @if (!$includeVariation)
+                            data-name="{{ $availableProduct->name }}"
+                            data-image="{{ RvMedia::getImageUrl($availableProduct->image, 'thumb', false, RvMedia::getDefaultImage()) }}"
+                            data-id="{{ $availableProduct->id }}"
+                            data-url="{{ route('products.edit', $availableProduct->id) }}"
+                            data-price="{{ $availableProduct->price }}"
                         @endif
-                    </li>
+                    >
+                        <div class="row align-items-center">
+                            <div class="col-auto">
+                                <span class="avatar" style="background-image: url('{{ RvMedia::getImageUrl($availableProduct->image, 'thumb', false, RvMedia::getDefaultImage()) }}')"></span>
+                            </div>
+                            <div class="col text-truncate">
+                                <h4 class="text-body d-block mb-0">{{ $availableProduct->name }}</h4>
+                            </div>
+                            @if ($includeVariation)
+                                <div class="col-auto">
+                                    <ul>
+                                        @foreach ($availableProduct->variations as $variation)
+                                            <li
+                                                class="product-variant selectable-item"
+                                                data-name="{{ $availableProduct->name }}"
+                                                data-image="{{ RvMedia::getImageUrl($variation->product->image, 'thumb', false, RvMedia::getDefaultImage()) }}"
+                                                data-id="{{ $variation->product->id }}"
+                                                data-url="{{ route('products.edit', $availableProduct->id) }}"
+                                                data-price="{{ $availableProduct->price }}"
+                                            >
+                                                <a
+                                                    class="color_green float-start"
+                                                    href="#"
+                                                >
+                                                <span>
+                                                    @foreach ($variation->variationItems as $variationItem)
+                                                        {{ $variationItem->attribute->title }}
+                                                        @if (!$loop->last)
+                                                            /
+                                                        @endif
+                                                    @endforeach
+                                                </span>
+                                                </a>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @endif
+                        </div>
+                    </a>
                 @endforeach
             @else
-                <li>
-                    <p>{{ trans('plugins/ecommerce::products.form.no_results') }}</p>
-                </li>
+                <div class="p-3">
+                    <p class="text-muted my-0">{{ __('plugins/ecommerce::products.form.no_results') }}</p>
+                </div>
             @endif
-        </ul>
+        </div>
     </div>
-</div>
+</x-core::card.body>
 
 @if ($availableProducts->hasPages())
-    <div class="panel-footer">
-        <div class="btn-group float-end">
-            {!! $availableProducts->links() !!}
-        </div>
-        <div class="clearfix"></div>
-    </div>
+    <x-core::card.footer class="pb-0 d-flex justify-content-end">
+        {{ $availableProducts->links() }}
+    </x-core::card.footer>
 @endif

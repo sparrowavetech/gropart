@@ -2,17 +2,19 @@
 
 namespace Botble\Ecommerce\Forms;
 
-use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Base\Forms\FieldOptions\SelectFieldOption;
+use Botble\Base\Forms\FieldOptions\StatusFieldOption;
+use Botble\Base\Forms\Fields\SelectField;
+use Botble\Base\Forms\Fields\TreeCategoryField;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Ecommerce\Facades\ProductCategoryHelper;
-use Botble\Ecommerce\Forms\Fields\CategoryMultiField;
 use Botble\Ecommerce\Http\Requests\ProductAttributeSetsRequest;
 use Botble\Ecommerce\Models\ProductAttributeSet;
 use Botble\Language\Facades\Language;
 
 class ProductAttributeSetForm extends FormAbstract
 {
-    public function buildForm(): void
+    public function setup(): void
     {
         $displayLayout = [
             'dropdown' => trans('plugins/ecommerce::product-attribute-sets.dropdown_swatch'),
@@ -33,9 +35,7 @@ class ProductAttributeSetForm extends FormAbstract
         $this
             ->setupModel(new ProductAttributeSet())
             ->setValidatorClass(ProductAttributeSetsRequest::class)
-            ->addCustomField('categoryMulti', CategoryMultiField::class)
             ->setFormOption('class', 'update-attribute-set-form')
-            ->withCustomFields()
             ->add('title', 'text', [
                 'label' => trans('core/base::forms.title'),
                 'required' => true,
@@ -54,11 +54,7 @@ class ProductAttributeSetForm extends FormAbstract
                 'label' => trans('plugins/ecommerce::product-attribute-sets.use_image_from_product_variation'),
                 'default_value' => false,
             ])
-            ->add('status', 'customSelect', [
-                'label' => trans('core/base::tables.status'),
-                'required' => true,
-                'choices' => BaseStatusEnum::labels(),
-            ])
+            ->add('status', SelectField::class, StatusFieldOption::make()->toArray())
             ->add('display_layout', 'customSelect', [
                 'label' => trans('plugins/ecommerce::product-attribute-sets.display_layout'),
                 'required' => true,
@@ -83,11 +79,16 @@ class ProductAttributeSetForm extends FormAbstract
                 ],
                 'default_value' => 0,
             ])
-            ->add('categories[]', 'categoryMulti', [
-                'label' => trans('plugins/ecommerce::products.form.categories'),
-                'choices' => ProductCategoryHelper::getActiveTreeCategories(),
-                'value' => $this->getModel()->id ? $this->getModel()->categories->pluck('id')->all() : [],
-            ])
+            ->add(
+                'categories[]',
+                TreeCategoryField::class,
+                SelectFieldOption::make()
+                    ->label(trans('plugins/ecommerce::products.form.categories'))
+                    ->choices(ProductCategoryHelper::getActiveTreeCategories())
+                    ->selected($this->getModel()->id ? $this->getModel()->categories->pluck('id')->all() : [])
+                    ->addAttribute('card-body-class', 'p-0')
+                    ->toArray()
+            )
             ->setBreakFieldPoint('status')
             ->addMetaBoxes([
                 'attributes_list' => [
@@ -96,6 +97,10 @@ class ProductAttributeSetForm extends FormAbstract
                         'plugins/ecommerce::product-attributes.sets.list',
                         compact('attributes', 'isNotDefaultLanguage')
                     )->render(),
+                    'header_actions' => ! $isNotDefaultLanguage
+                        ? view('plugins/ecommerce::product-attributes.sets.actions')->render()
+                        : null,
+                    'has_table' => true,
                 ],
             ]);
     }

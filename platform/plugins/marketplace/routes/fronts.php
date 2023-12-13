@@ -4,13 +4,13 @@ use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Marketplace\Models\Store;
 use Botble\Slug\Facades\SlugHelper;
 use Botble\Table\Http\Controllers\TableController;
+use Botble\Theme\Facades\Theme;
 use Illuminate\Support\Facades\Route;
 
 Route::group([
     'namespace' => 'Botble\Marketplace\Http\Controllers\Fronts',
-    'middleware' => ['web', 'core'],
 ], function () {
-    Route::group(apply_filters(BASE_FILTER_GROUP_PUBLIC_ROUTE, []), function () {
+    Theme::registerRoutes(function () {
         Route::get(SlugHelper::getPrefix(Store::class, 'stores'), [
             'as' => 'public.stores',
             'uses' => 'PublicStoreController@getStores',
@@ -63,6 +63,16 @@ Route::group([
             Route::post('settings', [
                 'as' => 'settings.post',
                 'uses' => 'SettingController@saveSettings',
+            ]);
+
+            Route::post('settings/tax-info', [
+                'as' => 'settings.post.tax-info',
+                'uses' => 'SettingController@updateTaxInformation',
+            ]);
+
+            Route::post('settings/payout', [
+                'as' => 'settings.post.payout',
+                'uses' => 'SettingController@updatePayoutInformation',
             ]);
 
             Route::resource('revenues', 'RevenueController')
@@ -247,10 +257,6 @@ Route::group([
                     'uses' => 'DiscountController@postGenerateCoupon',
                 ]);
             });
-            Route::group(['prefix' => 'enquiries', 'as' => 'enquiries.'], function () {
-                Route::resource('', 'EnquiryController')
-                    ->parameters(['' => 'product']);
-            });
 
             Route::get('ajax/product-options', [
                 'as' => 'ajax-product-option-info',
@@ -290,9 +296,6 @@ Route::group([
             'uses' => 'ProductTagController@getAllTags',
         ]);
 
-        Route::get('bulk-change/data', [TableController::class, 'getDataForBulkChanges'])->name('tables.bulk-change.data');
-        Route::post('bulk-change/save', [TableController::class, 'postSaveBulkChange'])->name('tables.bulk-change.save');
-        Route::post('bulk-actions', [TableController::class, 'postDispatchBulkAction'])->name('tables.bulk-actions.dispatch');
-        Route::get('get-filter-input', [TableController::class, 'getFilterInput'])->name('tables.get-filter-input');
+        require core_path('table/routes/web-actions.php');
     });
 });

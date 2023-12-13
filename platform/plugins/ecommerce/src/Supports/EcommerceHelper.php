@@ -34,7 +34,6 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -73,9 +72,9 @@ class EcommerceHelper
         return (bool)get_ecommerce_setting('order_auto_confirmed', 0);
     }
 
-    public function reviewMaxFileSize(bool $isConvertToKB = false): int
+    public function reviewMaxFileSize(bool $isConvertToKB = false): float
     {
-        $size = (int)get_ecommerce_setting('review_max_file_size', 2);
+        $size = (float)get_ecommerce_setting('review_max_file_size', 2);
 
         if (! $size) {
             $size = 2;
@@ -983,12 +982,12 @@ class EcommerceHelper
     public function getMandatoryFieldsAtCheckout(): array
     {
         return [
-            'phone' => trans('plugins/ecommerce::ecommerce.setting.phone'),
-            'email' => trans('plugins/ecommerce::ecommerce.setting.email_address'),
-            'country' => trans('plugins/ecommerce::ecommerce.setting.country'),
-            'state' => trans('plugins/ecommerce::ecommerce.setting.state'),
-            'city' => trans('plugins/ecommerce::ecommerce.setting.city'),
-            'address' => trans('plugins/ecommerce::ecommerce.setting.address'),
+            'phone' => trans('plugins/ecommerce::ecommerce.phone'),
+            'email' => trans('plugins/ecommerce::ecommerce.email'),
+            'country' => trans('plugins/ecommerce::ecommerce.country'),
+            'state' => trans('plugins/ecommerce::ecommerce.state'),
+            'city' => trans('plugins/ecommerce::ecommerce.city'),
+            'address' => trans('plugins/ecommerce::ecommerce.address'),
         ];
     }
 
@@ -1071,7 +1070,7 @@ class EcommerceHelper
 
     public function brandsForFilter(array $categoryIds = []): Collection
     {
-        if (! $this->isEnabledFilterProductsByBrands() || Route::is('public.brand')) {
+        if (! $this->isEnabledFilterProductsByBrands()) {
             return collect();
         }
 
@@ -1105,7 +1104,7 @@ class EcommerceHelper
 
     public function tagsForFilter(array $categoryIds = []): Collection
     {
-        if (! $this->isEnabledFilterProductsByTags() || Route::is('public.product-tag')) {
+        if (! $this->isEnabledFilterProductsByTags()) {
             return collect();
         }
 
@@ -1115,8 +1114,7 @@ class EcommerceHelper
                 'products' => function ($query) use ($categoryIds) {
                     if ($categoryIds) {
                         $query->whereHas('categories', function ($query) use ($categoryIds) {
-                            $query
-                            ->whereIn('ec_product_categories.id', $categoryIds);
+                            $query->whereIn('ec_product_categories.id', $categoryIds);
                         });
                     }
                 },

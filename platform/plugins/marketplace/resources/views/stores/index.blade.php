@@ -1,130 +1,128 @@
 @extends(BaseHelper::getAdminMasterLayoutTemplate())
+
 @section('content')
-    <div class="row">
-        <div class="col-md-3 right-sidebar">
-            <div class="widget meta-boxes">
-                <div class="widget-title">
-                    <h4><label
-                            class="control-label"
-                            for="status"
-                            aria-required="true"
-                        >{{ trans('plugins/marketplace::revenue.store_information') }}</label></h4>
-                </div>
-                <div class="widget-body">
-                    <div class="form-group mb-3">
-                        <div class="border-bottom py-2">
-                            <div class="text-center">
-                                <div class="text-center">
-                                    <img
-                                        class="mb-2"
-                                        src="{{ RvMedia::getImageUrl($store->logo, 'thumb', false, RvMedia::getDefaultImage()) }}"
-                                        alt="avatar"
-                                        style="border-radius: 50%"
-                                        width="120"
-                                    />
-                                </div>
-                                <div class="text-center">
-                                    @if($store->is_verified)
-                                        <img class="verified-store" style="max-height: 25px;" src="{{ asset('/storage/stores/verified.png')}}"alt="Verified">
-                                    @endif
-                                    <strong>
-                                        <a
-                                            href="{{ $store->url }}"
-                                            target="_blank"
-                                        >{{ $store->name }} <i class="fas fa-external-link-alt"></i></a>
-                                    </strong>
-                                </div>
-                            </div>
+    <div class="row row-cards">
+        <div class="col-md-3">
+            <x-core::card>
+                <x-core::card.header>
+                    <x-core::card.title>
+                        {{ trans('plugins/marketplace::revenue.store_information') }}
+                    </x-core::card.title>
+                </x-core::card.header>
+
+                <x-core::card.body class="p-0">
+                    <div class="text-center p-3">
+                        <div class="mb-2">
+                            <img
+                                src="{{ RvMedia::getImageUrl($store->logo, 'thumb', false, RvMedia::getDefaultImage()) }}"
+                                alt="{{ $store->name }}"
+                                class="avatar avatar-rounded avatar-xl"
+                            />
                         </div>
-                        <div class="py-2">
-                            <span>{{ trans('plugins/marketplace::revenue.vendor_name') }}:</span>
-                            <strong><a
-                                    href="{{ route('customers.edit', $customer->id) }}"
-                                    target="_blank"
-                                >{{ $customer->name }} <i class="fas fa-external-link-alt"></i></a></strong>
-                        </div>
-                        <div class="py-2">
-                            <span>{{ trans('plugins/marketplace::revenue.balance') }}:</span>
-                            <strong class="vendor-balance">{{ format_price($customer->balance) }} <a
+
+                        <a href="{{ $store->url }}" target="_blank">
+                            {{ $store->name }}
+                            <x-core::icon name="ti ti-external-link" />
+                        </a>
+                    </div>
+
+                    <div class="hr my-2"></div>
+
+                    <div class="p-3">
+                        <dl class="row">
+                            <dt class="col">{{ trans('plugins/marketplace::revenue.vendor_name') }}</dt>
+                            <dd class="col-auto">
+                                <a href="{{ route('customers.edit', $customer->id) }}" target="_blank">
+                                    {{ $customer->name }}
+                                    <x-core::icon name="ti ti-external-link" />
+                                </a>
+                            </dd>
+                        </dl>
+                        <dl class="row">
+                            <dt class="col">{{ trans('plugins/marketplace::revenue.balance') }}</dt>
+                            <dd class="col-auto">
+                            <span class="vendor-balance">
+                                {{ format_price($customer->balance) }}
+                                <a
                                     data-bs-toggle="modal"
                                     data-bs-target="#update-balance-modal"
-                                    href="#"
-                                ><i class="fa fa-edit"></i></a> </strong>
-                        </div>
-                        <div>
-                            <span>{{ trans('plugins/marketplace::revenue.products') }}:</span>
-                            <strong>{{ number_format($store->products()->count()) }}</strong>
-                        </div>
+                                    href="javascript:void(0)"
+                                    class="text-decoration-none"
+                                >
+                                    <x-core::icon name="ti ti-edit" />
+                                </a>
+                            </span>
+                            </dd>
+                        </dl>
+
+                        <dl class="row">
+                            <dt class="col">{{ trans('plugins/marketplace::revenue.products') }}</dt>
+                            <dd class="col-auto">{{ number_format($store->products()->count()) }}</dd>
+                        </dl>
                     </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-9">
-            <div class="widget meta-boxes">
-                <div class="widget-title">
-                    <h4><label
-                            class="control-label"
-                            for="status"
-                            aria-required="true"
-                        >{{ trans('plugins/marketplace::revenue.statements') }}</label></h4>
-                    <a
-                        class="me-2 d-inline-block float-end"
-                        data-bs-toggle="modal"
-                        data-bs-target="#update-balance-modal"
-                        href="#"
-                    >
-                        <small><i class="fa fa-edit"></i>
-                            {{ trans('plugins/marketplace::revenue.update_balance') }}</small>
-                    </a>
-                </div>
-                <div class="widget-body">
-                    {!! $table->renderTable() !!}
-                </div>
-            </div>
+                </x-core::card.body>
+            </x-core::card>
         </div>
 
-        <x-core-base::modal
-            id="update-balance-modal"
-            :title="trans('plugins/marketplace::revenue.update_balance_title')"
-            button-id="confirm-update-amount-button"
-            :button-label="trans('core/base::tables.submit')"
-            size="md"
-        >
-            {!! Form::open(['url' => route('marketplace.store.revenue.create', $store->id)]) !!}
-            <div class="form-group mb-3">
-                <label
-                    class="control-label required"
-                    for="amount"
-                >{{ trans('plugins/marketplace::revenue.forms.amount') . ' (' . get_application_currency()->symbol . ')' }}</label>
-                <input
-                    class="form-control"
-                    id="amount"
-                    name="amount"
-                    type="number"
-                    placeholder="{{ trans('plugins/marketplace::revenue.forms.amount_placeholder') }}"
-                >
-            </div>
-            <div class="form-group mb-3">
-                <label
-                    class="control-label required"
-                    for="type"
-                >{{ trans('plugins/marketplace::revenue.forms.type') }}</label>
-                {!! Form::customSelect('type', Botble\Marketplace\Enums\RevenueTypeEnum::adjustLabels()) !!}
-            </div>
-            <div class="form-group mb-3">
-                <label
-                    class="control-label"
-                    for="description"
-                >{{ trans('core/base::forms.description') }}</label>
-                <textarea
-                    class="form-control"
-                    id="description"
-                    name="description"
-                    placeholder="{{ trans('plugins/marketplace::revenue.forms.description_placeholder') }}"
-                    rows="5"
-                ></textarea>
-            </div>
-            {!! Form::close() !!}
-        </x-core-base::modal>
+        <div class="col-md-9">
+            <x-core::card>
+                <x-core::card.header>
+                    <x-core::card.title>
+                        {{ trans('plugins/marketplace::revenue.statements') }}
+                    </x-core::card.title>
+                    <x-core::card.actions>
+                        <a
+                            data-bs-toggle="modal"
+                            data-bs-target="#update-balance-modal"
+                            href="javascript:void(0)"
+                            class="small"
+                        >
+                            <x-core::icon name="ti ti-edit" />
+                            {{ trans('plugins/marketplace::revenue.update_balance') }}
+                        </a>
+                    </x-core::card.actions>
+                </x-core::card.header>
+
+                {!! $table->renderTable() !!}
+            </x-core::card>
+        </div>
     </div>
-@stop
+@endsection
+
+@push('footer')
+    <x-core::modal
+        id="update-balance-modal"
+        :title="trans('plugins/marketplace::revenue.update_balance_title')"
+        button-id="confirm-update-amount-button"
+        :button-label="trans('core/base::tables.submit')"
+        size="md"
+    >
+        <x-core::form :url="route('marketplace.store.revenue.create', $store->id)">
+            <x-core::form.text-input
+                :label="trans('plugins/marketplace::revenue.forms.amount')"
+                name="amount"
+                type="number"
+                :placeholder="trans('plugins/marketplace::revenue.forms.amount_placeholder')"
+                :group-flat="true"
+            >
+                <x-slot:prepend>
+                    <span class="input-group-text">{{ get_application_currency()->symbol }}</span>
+                </x-slot:prepend>
+            </x-core::form.text-input>
+
+            <x-core::form.radio-list
+                :label="trans('plugins/marketplace::revenue.forms.type')"
+                name="type"
+                :options="Botble\Marketplace\Enums\RevenueTypeEnum::adjustLabels()"
+                :value="Botble\Marketplace\Enums\RevenueTypeEnum::ADD_AMOUNT"
+            />
+
+            <x-core::form.textarea
+                :label="trans('core/base::forms.description')"
+                name="description"
+                :placeholder="trans('plugins/marketplace::revenue.forms.description_placeholder')"
+                rows="3"
+            />
+        </x-core::form>
+    </x-core::modal>
+@endpush

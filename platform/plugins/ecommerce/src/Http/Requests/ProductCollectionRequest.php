@@ -9,7 +9,7 @@ class ProductCollectionRequest extends Request
     public function rules(): array
     {
         $rules = [
-            'name' => 'required|string|max:220',
+            'name' => 'required|string|max:250',
             'description' => 'nullable|string|max:400',
             'collection_products' => 'nullable|string',
         ];

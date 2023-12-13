@@ -51,7 +51,13 @@ class RenderProductAttributeSetsOnSearchPageSupport
 
         if (! array_is_list($attributesInput)) {
             foreach ($attributeSets as $attributeSet) {
-                $selectedAttrs[$attributeSet->slug] = Arr::get($attributesInput, $attributeSet->slug, []);
+                $attributeInput = Arr::get($attributesInput, $attributeSet->slug, []);
+
+                if (! is_array($attributeInput)) {
+                    continue;
+                }
+
+                $selectedAttrs[$attributeSet->slug] = $attributeInput;
             }
         } else {
             $selectedAttrs = $attributesInput;

@@ -100,25 +100,20 @@ class StoreProductService
             }
         }
 
-        if ($request->has('frequently_bought_together')) {
-            $product->frequentlyBoughtTogether()->detach();
-            $product->frequentlyBoughtTogether()->attach(array_filter(explode(',', $request->input('frequently_bought_together', ''))));
-        }
-
-        if ($request->has('cross_sale_products')) {
-            $product->crossSales()->detach();
-
-            if ($crossSaleProducts = $request->input('cross_sale_products', '')) {
-                $product->crossSales()->attach(array_filter(explode(',', $crossSaleProducts)));
-            }
-        }
-
         if ($request->has('up_sale_products')) {
             $product->upSales()->detach();
 
             if ($upSaleProducts = $request->input('up_sale_products', '')) {
                 $product->upSales()->attach(array_filter(explode(',', $upSaleProducts)));
             }
+        }
+
+        if ($request->has('cross_sale_products')) {
+            $crossSaleProducts = $request->input('cross_sale_products', []);
+            $crossSaleProducts = array_map(fn ($item) => Arr::except($item, 'id'), $crossSaleProducts);
+            $product->crossSales()->sync($crossSaleProducts);
+        } else {
+            $product->crossSales()->detach();
         }
 
         if (EcommerceHelper::isEnabledSupportDigitalProducts() && $product->isTypeDigital()) {

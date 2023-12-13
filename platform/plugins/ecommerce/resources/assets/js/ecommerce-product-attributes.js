@@ -2,26 +2,10 @@ class EcommerceProductAttribute {
     constructor() {
         this.template = $('#product_attribute_template').html()
         this.totalItem = 0
-
         this.deletedItems = []
 
-        this.handleChooseImage()
         this.handleForm()
         this.initSpectrum()
-    }
-
-    handleChooseImage() {
-        new RvMediaStandAlone('.image-box .btn-images', {
-            filter: 'image',
-            view_in: 'all_media',
-            onSelectFiles: (files, $el) => {
-                let firstItem = _.first(files)
-                if (firstItem) {
-                    $el.closest('.image-box').find('.image-data').val(firstItem.url)
-                    $el.closest('.image-box').find('.preview_image').attr('src', firstItem.thumb).show()
-                }
-            },
-        })
     }
 
     initSpectrum() {
@@ -142,21 +126,24 @@ class EcommerceProductAttribute {
         $('.swatches-container .swatches-list').append(template)
 
         _self.totalItem++
+
+        Botble.initMediaIntegrate()
     }
 
     exportData() {
         let data = []
 
-        $('.swatches-container .swatches-list li').each((index, item) => {
+        $('.swatches-container .swatches-list tr').each((index, item) => {
             let $current = $(item)
+
             data.push({
                 id: $current.data('id'),
                 is_default: $current.find('input[type=radio]').is(':checked') ? 1 : 0,
                 order: $current.index(),
-                title: $current.find('.swatch-title input').val(),
-                slug: $current.find('.swatch-slug input').val(),
-                color: $current.find('.swatch-value input').val(),
-                image: $current.find('.swatch-image input').val(),
+                title: $current.find('input[name="swatch-title"]').val(),
+                slug: $current.find('input[name="swatch-slug"]').val(),
+                color: $current.find('input[name="swatch-value"]').val(),
+                image: $current.find('input[name="swatch-image"]').val(),
             })
         })
 
@@ -183,14 +170,14 @@ class EcommerceProductAttribute {
 
                 _self.initSpectrum()
             })
-            .on('click', '.swatches-container .swatches-list li .remove-item a', (event) => {
+            .on('click', '.swatches-container .swatches-list tr .remove-item', (event) => {
                 event.preventDefault()
 
-                let $item = $(event.currentTarget).closest('li')
+                const $item = $(event.currentTarget).closest('tr')
 
                 _self.deletedItems.push($item.data('id'))
 
-                $item.remove()
+                $item.fadeOut('fast', () => $item.remove())
             })
     }
 }

@@ -4,13 +4,13 @@ namespace Botble\Marketplace\Forms;
 
 use Botble\Base\Forms\FormAbstract;
 use Botble\Marketplace\Facades\MarketplaceHelper;
-use Botble\Marketplace\Http\Requests\VendorEditWithdrawalRequest;
-use Botble\Marketplace\Http\Requests\VendorWithdrawalRequest;
+use Botble\Marketplace\Http\Requests\Fronts\VendorEditWithdrawalRequest;
+use Botble\Marketplace\Http\Requests\Fronts\VendorWithdrawalRequest;
 use Botble\Marketplace\Models\Withdrawal;
 
 class VendorWithdrawalForm extends FormAbstract
 {
-    public function buildForm(): void
+    public function setup(): void
     {
         $fee = MarketplaceHelper::getSetting('fee_withdrawal', 0);
 
@@ -38,8 +38,7 @@ class VendorWithdrawalForm extends FormAbstract
         $this
             ->setupModel(new Withdrawal())
             ->setValidatorClass($exists ? VendorEditWithdrawalRequest::class : VendorWithdrawalRequest::class)
-            ->setFormOption('template', MarketplaceHelper::viewPath('vendor-dashboard.forms.base'))
-            ->withCustomFields()
+            ->template(MarketplaceHelper::viewPath('vendor-dashboard.forms.base'))
             ->add('amount', 'number', [
                 'label' => trans('plugins/marketplace::withdrawal.forms.amount_with_balance', ['balance' => format_price($balance)]),
                 'required' => true,

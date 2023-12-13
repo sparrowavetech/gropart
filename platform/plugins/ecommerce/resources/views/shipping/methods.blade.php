@@ -1,111 +1,114 @@
 @extends(BaseHelper::getAdminMasterLayoutTemplate())
 
 @section('content')
-    <div class="max-width-1200">
-        <div class="group">
-            <div class="row">
-                <div class="col-md-3 col-sm-12">
-                    <h4>{{ trans('plugins/ecommerce::shipping.shipping_rules') }}</h4>
-                    <p>{{ trans('plugins/ecommerce::shipping.shipping_rules_description') }}</p>
-                    <p><a
-                            class="btn btn-secondary btn-select-country"
-                            href="#"
-                        >{{ trans('plugins/ecommerce::shipping.select_country') }}</a></p>
-                </div>
-                <div class="col-md-9 col-sm-12">
-                    <div class="wrapper-content">
-                        <div class="table-wrap">
-                            @foreach ($shipping as $shippingItem)
-                                <div class="wrap-table-shipping-{{ $shippingItem->id }}">
-                                    <div class="pd-all-20 p-none-b">
-                                        <label class="p-none-r">{{ trans('plugins/ecommerce::shipping.country') }}:
-                                            <strong>{{ Arr::get(EcommerceHelper::getAvailableCountries(), $shippingItem->title, $shippingItem->title) }}</strong></label>
-                                        <a
-                                            class="btn-change-link float-end pl20 btn-add-shipping-rule-trigger"
-                                            data-shipping-id="{{ $shippingItem->id }}"
-                                            data-country="{{ $shippingItem->country }}"
-                                            href="#"
-                                        >{{ trans('plugins/ecommerce::shipping.add_shipping_rule') }}</a>
-                                        <a
-                                            class="btn-change-link float-end excerpt btn-confirm-delete-region-item-modal-trigger text-danger"
-                                            data-id="{{ $shippingItem->id }}"
-                                            data-name="{{ Arr::get(EcommerceHelper::getAvailableCountries(), $shippingItem->title, $shippingItem->title) }}"
-                                            href="#"
-                                        >{{ trans('plugins/ecommerce::shipping.delete') }}</a>
-                                    </div>
-                                    <div class="pd-all-20 p-none-t p-b10 border-bottom">
-                                        @foreach ($shippingItem->rules as $rule)
-                                            @include('plugins/ecommerce::shipping.rules.item', compact('rule'))
-                                        @endforeach
-                                    </div>
-                                </div>
-                            @endforeach
+    <x-core-setting::section
+        :title="trans('plugins/ecommerce::shipping.shipping_rules')"
+        :description="trans('plugins/ecommerce::shipping.shipping_rules_description')"
+        :card="false"
+    >
+        <x-slot:extra-description>
+            <x-core::button
+                type="button"
+                class="btn-select-country"
+            >
+                {{ trans('plugins/ecommerce::shipping.select_country') }}
+            </x-core::button>
+        </x-slot:extra-description>
+
+        <x-core::card class="wrapper-content mb-3" @style(['display: none' => $shipping->isEmpty()])>
+            @foreach ($shipping as $shippingItem)
+                <div class="p-3 border-bottom wrap-table-shipping-{{ $shippingItem->id }}">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <x-core::form.label>
+                            {{ trans('plugins/ecommerce::shipping.country') }}
+                            <strong>{{ Arr::get(EcommerceHelper::getAvailableCountries(), $shippingItem->title, $shippingItem->title) }}</strong>
+                        </x-core::form.label>
+
+                        <div class="btn-list">
+                            <a
+                                href="javascript:void(0);"
+                                data-shipping-id="{{ $shippingItem->id }}"
+                                data-country="{{ $shippingItem->country}}"
+                                class="btn-add-shipping-rule-trigger"
+                            >
+                                {{ trans('plugins/ecommerce::shipping.add_shipping_rule') }}
+                            </a>
+                            <a
+                                href="javascript:void(0);"
+                                data-id="{{ $shippingItem->id }}"
+                                data-name="{{ Arr::get(EcommerceHelper::getAvailableCountries(), $shippingItem->title, $shippingItem->title) }}"
+                                class="btn-confirm-delete-region-item-modal-trigger text-danger"
+                            >
+                                {{ trans('plugins/ecommerce::shipping.delete') }}
+                            </a>
                         </div>
                     </div>
-
-                    {!! apply_filters(SHIPPING_METHODS_SETTINGS_PAGE, null) !!}
+                    <div>
+                        @foreach ($shippingItem->rules as $rule)
+                            @include('plugins/ecommerce::shipping.rules.item', compact('rule'))
+                        @endforeach
+                    </div>
                 </div>
-            </div>
-        </div>
-    </div>
-    <br>
-    <x-core-base::modal
+            @endforeach
+        </x-core::card>
+
+        {!! apply_filters(SHIPPING_METHODS_SETTINGS_PAGE, null) !!}
+    </x-core-setting::section>
+@endsection
+
+@push('footer')
+    <x-core::modal.action
         id="confirm-delete-price-item-modal"
+        type="danger"
         :title="trans('plugins/ecommerce::shipping.delete_shipping_rate')"
-        button-id="confirm-delete-price-item-button"
-        :button-label="trans('plugins/ecommerce::shipping.confirm')"
-        size="xs"
-    >
-        {!! trans('plugins/ecommerce::shipping.delete_shipping_rate_confirmation') !!}
-    </x-core-base::modal>
+        :description="trans('plugins/ecommerce::shipping.delete_shipping_rate_confirmation')"
+        :submit-button-attrs="['id' => 'confirm-delete-price-item-button']"
+        :submit-button-label="trans('plugins/ecommerce::shipping.confirm')"
+    />
 
-    <x-core-base::modal
+    <x-core::modal.action
         id="confirm-delete-region-item-modal"
+        type="danger"
         :title="trans('plugins/ecommerce::shipping.delete_shipping_area')"
-        button-id="confirm-delete-region-item-button"
-        :button-label="trans('plugins/ecommerce::shipping.confirm')"
-        size="xs"
-    >
-        {!! trans('plugins/ecommerce::shipping.delete_shipping_area_confirmation') !!}
-    </x-core-base::modal>
+        :description="trans('plugins/ecommerce::shipping.delete_shipping_area_confirmation')"
+        :submit-button-attrs="['id' => 'confirm-delete-region-item-button']"
+        :submit-button-label="trans('plugins/ecommerce::shipping.confirm')"
+    />
 
-    <x-core-base::modal
+    <x-core::modal
         id="add-shipping-rule-item-modal"
         :title="trans('plugins/ecommerce::shipping.add_shipping_fee_for_area')"
         button-id="add-shipping-rule-item-button"
         :button-label="trans('plugins/ecommerce::shipping.save')"
     >
-        {!! view('plugins/ecommerce::shipping.rules.form', ['rule' => null])->render() !!}
-    </x-core-base::modal>
+        @include('plugins/ecommerce::shipping.rules.form', ['rule' => null])
+    </x-core::modal>
 
     <div data-delete-region-item-url="{{ route('shipping_methods.region.destroy') }}"></div>
     <div data-delete-rule-item-url="{{ route('shipping_methods.region.rule.destroy') }}"></div>
 
-    <x-core-base::modal
+    <x-core::modal
         id="select-country-modal"
         :title="trans('plugins/ecommerce::shipping.add_shipping_region')"
         button-id="add-shipping-region-button"
         :button-label="trans('plugins/ecommerce::shipping.save')"
-        size="xs"
     >
-        {!! FormBuilder::create(\Botble\Ecommerce\Forms\AddShippingRegionForm::class)->renderForm() !!}
-    </x-core-base::modal>
+        {!! Botble\Ecommerce\Forms\AddShippingRegionForm::create()->renderForm() !!}
+    </x-core::modal>
 
-    <x-core-base::modal
+    <x-core::modal
         id="form-shipping-rule-item-detail-modal"
         :title="trans('plugins/ecommerce::shipping.add_shipping_region')"
         button-id="save-shipping-rule-item-detail-button"
         :button-label="trans('plugins/ecommerce::shipping.save')"
     >
-    </x-core-base::modal>
+    </x-core::modal>
 
-    <x-core-base::modal
+    <x-core::modal.action
         id="confirm-delete-shipping-rule-item-modal"
         :title="trans('plugins/ecommerce::shipping.rule.item.delete')"
-        button-id="confirm-delete-shipping-rule-item-button"
-        :button-label="trans('plugins/ecommerce::shipping.confirm')"
-        size="xs"
-    >
-        {!! trans('plugins/ecommerce::shipping.rule.item.confirmation') !!}
-    </x-core-base::modal>
-@endsection
+        :description="trans('plugins/ecommerce::shipping.rule.item.confirmation')"
+        :submit-button-attrs="['id' => 'confirm-delete-shipping-rule-item-button']"
+        :submit-button-label="trans('plugins/ecommerce::shipping.confirm')"
+    />
+@endpush

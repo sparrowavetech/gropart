@@ -1,13 +1,22 @@
-<div class="d-flex px-2 pt-3 position-relative">
-    <div class="block-left d-flex me-1">
-        <span class="align-self-center bg-white p-1">
-            <i class="fas fa-hand-holding-usd fa-2x m-2"></i>
-        </span>
-    </div>
-    <div class="block-content mx-3">
-        <p class="mb-1">{{ trans('plugins/ecommerce::reports.revenue') }}</p>
-        <h5>{{ format_price(Arr::get($revenue, 'revenue')) }}</h5>
-    </div>
-</div>
-
-@include('plugins/ecommerce::reports.widgets.card-description')
+<x-core::card class="analytic-card">
+    <x-core::card.body class="p-3">
+        <div class="row align-items-center">
+            <div class="col-auto">
+                <x-core::icon
+                    class="text-white bg-pink rounded p-1"
+                    name="ti ti-currency-dollar"
+                    size="md"
+                />
+            </div>
+            <div class="col mt-0">
+                <p class="text-secondary mb-0 fs-4">
+                    {{ trans('plugins/ecommerce::reports.revenue') }}
+                </p>
+                <h3 class="mb-n1 fs-1">
+                    {{ format_price(Arr::get($revenue, 'revenue')) }}
+                </h3>
+            </div>
+        </div>
+    </x-core::card.body>
+    @include('plugins/ecommerce::reports.widgets.card-description')
+</x-core::card>

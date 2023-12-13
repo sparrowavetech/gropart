@@ -1,38 +1,22 @@
 @if ($shipment->histories->count())
-    <div class="mt20 mb20 timeline-shipment">
-        <div class="comment-log ws-nm">
-            <div class="comment-log-title">
-                <label class="bold-light m-xs-b hide-print">{{ trans('plugins/ecommerce::shipping.history') }}</label>
-            </div>
-            <div class="comment-log-timeline">
-                <div
-                    class="column-left-history ps-relative"
-                    id="order-history-wrapper"
-                >
-                    @foreach ($shipment->histories as $history)
-                        <div class="item-card">
-                            <div class="item-card-body clearfix">
-                                <div class="item comment-log-item comment-log-item-date ui-feed__timeline">
-                                    <div class="ui-feed__item ui-feed__item--message">
-                                        <span
-                                            class="ui-feed__marker @if ($history->user_id) ui-feed__marker--user-action @endif"
-                                        ></span>
-                                        <div class="ui-feed__message">
-                                            <div class="timeline__message-container">
-                                                <div class="timeline__inner-message">
-                                                    <span>{!! BaseHelper::clean(OrderHelper::processHistoryVariables($history)) !!}</span>
-                                                </div>
-                                                <time
-                                                    class="timeline__time"><span>{{ $history->created_at }}</span></time>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+    <x-core::card>
+        <x-core::card.header>
+            <x-core::card.title>
+                {{ trans('plugins/ecommerce::shipping.history') }}
+            </x-core::card.title>
+        </x-core::card.header>
+
+        <x-core::card.body>
+            <ul class="steps steps-vertical" id="order-history-wrapper">
+                @foreach ($shipment->histories->sortByDesc('created_at') as $history)
+                    <li @class(['step-item', 'user-action' => $history->user_id])>
+                        <div class="h4 m-0">
+                            {!! BaseHelper::clean(OrderHelper::processHistoryVariables($history)) !!}
                         </div>
-                    @endforeach
-                </div>
-            </div>
-        </div>
-    </div>
+                        <div class="text-secondary">{{ $history->created_at }}</div>
+                    </li>
+                @endforeach
+            </ul>
+        </x-core::card.body>
+    </x-core::card>
 @endif

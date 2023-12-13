@@ -1,4 +1,4 @@
-<div class="form-group">
+<div class="mb-3">
     <label>{{ trans('core/base::forms.name') }}</label>
     <input
         class="form-control"
@@ -8,7 +8,7 @@
     >
 </div>
 
-<div class="form-group">
+<div class="mb-3">
     <label>{{ trans('core/base::forms.description') }}</label>
     <textarea
         class="form-control"
@@ -17,7 +17,7 @@
     >{{ $config['about'] }}</textarea>
 </div>
 
-<div class="form-group">
+<div class="mb-3">
     <label>{{ __('Address') }}</label>
     <input
         class="form-control"
@@ -27,7 +27,7 @@
     >
 </div>
 
-<div class="form-group">
+<div class="mb-3">
     <label>{{ __('Phone') }}</label>
     <input
         class="form-control"
@@ -37,7 +37,7 @@
     >
 </div>
 
-<div class="form-group">
+<div class="mb-3">
     <label>{{ __('Email') }}</label>
     <input
         class="form-control"
@@ -47,7 +47,7 @@
     >
 </div>
 
-<div class="form-group">
+<div class="mb-3">
     <label>{{ __('Working time') }}</label>
     <input
         class="form-control"

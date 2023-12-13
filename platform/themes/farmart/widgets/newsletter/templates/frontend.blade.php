@@ -1,5 +1,5 @@
-<div class="col-xl-3">
-    @if (is_plugin_active('newsletter'))
+@if (is_plugin_active('newsletter'))
+    <div class="col-xl-3">
         <div class="widget mb-5">
             <p class="h4 fw-bold widget-title mb-4">{{ $config['title'] }}</p>
             <div class="widget-description pb-3 mb-4">{{ $config['subtitle'] }}</div>
@@ -33,8 +33,8 @@
                                 type="submit"
                             >{{ __('Subscribe') }}</button>
                         </div>
-                        @if (setting('enable_captcha') && is_plugin_active('captcha'))
-                            <div class="form-group">
+                        @if (is_plugin_active('captcha') && Captcha::reCaptchaEnabled())
+                            <div class="mb-3">
                                 {!! Captcha::display() !!}
                             </div>
                         @endif
@@ -42,5 +42,5 @@
                 </form>
             </div>
         </div>
-    @endif
-</div>
+    </div>
+@endif

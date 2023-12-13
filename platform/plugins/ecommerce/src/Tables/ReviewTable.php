@@ -16,6 +16,7 @@ use Botble\Table\Columns\CreatedAtColumn;
 use Botble\Table\Columns\IdColumn;
 use Botble\Table\Columns\LinkableColumn;
 use Botble\Table\Columns\StatusColumn;
+use Botble\Table\HeaderActions\CreateHeaderAction;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
@@ -30,12 +31,13 @@ class ReviewTable extends TableAbstract
     {
         $this
             ->model(Review::class)
+            ->addHeaderAction(CreateHeaderAction::make()->route('reviews.create'))
             ->addActions([
                 Action::make('view')
                     ->route('reviews.show')
                     ->permission('reviews.index')
                     ->label(__('View'))
-                    ->icon('fas fa-eye'),
+                    ->icon('ti ti-eye'),
                 DeleteAction::make()->route('reviews.destroy'),
             ]);
     }

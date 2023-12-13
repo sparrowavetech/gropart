@@ -146,7 +146,7 @@ class ProductTable extends TableAbstract
     {
         return [
             DeleteBulkAction::class,
-            ];
+        ];
     }
 
     public function getBulkChanges(): array

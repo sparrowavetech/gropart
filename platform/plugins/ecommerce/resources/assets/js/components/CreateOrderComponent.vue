@@ -1,435 +1,372 @@
 <template>
-    <div class="flexbox-grid no-pd-none">
-        <div class="flexbox-content">
-            <div class="wrapper-content">
-                <div class="pd-all-20">
-                    <label class="title-product-main text-no-bold">{{ __('order.order_information') }}</label>
+    <div class="row row-cards">
+        <div class="col-md-9">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">{{ __('order.order_information') }}</h4>
                 </div>
-                <div class="pd-all-10-20 border-top-title-main">
-                    <div class="clearfix">
+                <div class="card-body">
+                    <div class="mb-3">
                         <div
-                            class="table-wrapper p-none mb20 ps-relative z-index-4"
                             :class="{ 'loading-skeleton': checking }"
                             v-if="child_products.length"
                         >
-                            <table class="table table-bordered">
+                            <table class="table table-bordered table-vcenter">
                                 <thead>
-                                    <tr>
-                                        <th></th>
-                                        <th>{{ __('order.product_name') }}</th>
-                                        <th>{{ __('order.price') }}</th>
-                                        <th width="90">{{ __('order.quantity') }}</th>
-                                        <th>{{ __('order.total') }}</th>
-                                        <th>{{ __('order.action') }}</th>
-                                    </tr>
+                                <tr>
+                                    <th></th>
+                                    <th>{{ __('order.product_name') }}</th>
+                                    <th>{{ __('order.price') }}</th>
+                                    <th width="90">{{ __('order.quantity') }}</th>
+                                    <th>{{ __('order.total') }}</th>
+                                    <th>{{ __('order.action') }}</th>
+                                </tr>
                                 </thead>
                                 <tbody>
-                                    <tr v-for="(variant, vKey) in child_products" v-bind:key="variant.id + '-' + vKey">
-                                        <td>
-                                            <div class="wrap-img vertical-align-m-i">
-                                                <img
-                                                    class="thumb-image"
-                                                    :src="variant.image_url"
-                                                    :alt="variant.name"
-                                                    width="50"
-                                                />
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <a
-                                                class="hover-underline pre-line"
-                                                :href="variant.product_link"
-                                                target="_blank"
-                                                >{{ variant.name }}</a
-                                            >
-                                            <p class="type-subdued" v-if="variant.variation_attributes">
-                                                <span class="small">{{ variant.variation_attributes }}</span>
-                                            </p>
-                                            <ul
-                                                v-if="
-                                                    variant.option_values && Object.keys(variant.option_values).length
-                                                "
-                                                class="small"
-                                            >
-                                                <li>
-                                                    <span>{{ __('order.price') }}:</span>
-                                                    <span>{{ variant.original_price_label }}</span>
-                                                </li>
-                                                <li v-for="option in variant.option_values" v-bind:key="option.id">
-                                                    <span>{{ option.title }}:</span>
-                                                    <span v-for="value in option.values" v-bind:key="value.id">
-                                                        {{ value.value }} <strong>+{{ value.price_label }}</strong>
-                                                    </span>
-                                                </li>
-                                            </ul>
-                                        </td>
-                                        <td>
-                                            <span>{{ variant.price_label }}</span>
-                                        </td>
-                                        <td>
-                                            <input
-                                                class="form-control"
-                                                :value="variant.select_qty"
-                                                type="number"
-                                                min="1"
-                                                @input="handleChangeQuantity($event, variant, vKey)"
-                                            />
-                                        </td>
-                                        <td class="text-center">
-                                            {{ variant.total_price_label }}
-                                        </td>
-                                        <td class="text-center">
-                                            <a href="#" @click="handleRemoveVariant($event, variant, vKey)">
-                                                <svg class="svg-next-icon svg-next-icon-size-12">
-                                                    <svg
-                                                        xmlns="http://www.w3.org/2000/svg"
-                                                        viewBox="0 0 24 24"
-                                                        enable-background="new 0 0 24 24"
-                                                    >
-                                                        <path
-                                                            d="M19.5 22c-.2 0-.5-.1-.7-.3L12 14.9l-6.8 6.8c-.2.2-.4.3-.7.3-.2 0-.5-.1-.7-.3l-1.6-1.6c-.1-.2-.2-.4-.2-.6 0-.2.1-.5.3-.7L9.1 12 2.3 5.2C2.1 5 2 4.8 2 4.5c0-.2.1-.5.3-.7l1.6-1.6c.2-.1.4-.2.6-.2.3 0 .5.1.7.3L12 9.1l6.8-6.8c.2-.2.4-.3.7-.3.2 0 .5.1.7.3l1.6 1.6c.1.2.2.4.2.6 0 .2-.1.5-.3.7L14.9 12l6.8 6.8c.2.2.3.4.3.7 0 .2-.1.5-.3.7l-1.6 1.6c-.2.1-.4.2-.6.2z"
-                                                        ></path>
-                                                    </svg>
-                                                </svg>
-                                            </a>
-                                        </td>
-                                    </tr>
+                                <tr v-for="(variant, vKey) in child_products" v-bind:key="`${variant.id}-${vKey}`">
+                                    <td>
+                                        <img
+                                            :src="variant.image_url"
+                                            :alt="variant.name"
+                                            width="50"
+                                        />
+                                    </td>
+                                    <td>
+                                        <a :href="variant.product_link" target="_blank">{{ variant.name }}</a>
+                                        <p v-if="variant.variation_attributes">
+                                            <small>{{ variant.variation_attributes }}</small>
+                                        </p>
+                                        <ul v-if="variant.option_values && Object.keys(variant.option_values).length">
+                                            <li>
+                                                <span>{{ __('order.price') }}:</span>
+                                                <span>{{ variant.original_price_label }}</span>
+                                            </li>
+                                            <li v-for="option in variant.option_values" v-bind:key="option.id">
+                                                <span>{{ option.title }}:</span>
+                                                <span v-for="value in option.values" v-bind:key="value.id">
+                                                    {{ value.value }} <strong>+{{ value.price_label }}</strong>
+                                                </span>
+                                            </li>
+                                        </ul>
+                                    </td>
+                                    <td>
+                                        <span>{{ variant.price_label }}</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <input
+                                            class="form-control form-control-sm"
+                                            :value="variant.select_qty"
+                                            type="number"
+                                            min="1"
+                                            @input="handleChangeQuantity($event, variant, vKey)"
+                                        />
+                                    </td>
+                                    <td>
+                                        {{ variant.total_price_label }}
+                                    </td>
+                                    <td class="text-center">
+                                        <a
+                                            href="javascript:void(0)"
+                                            @click="handleRemoveVariant($event, variant, vKey)"
+                                            class="text-decoration-none"
+                                        >
+                                            <span class="icon-tabler-wrapper icon-sm icon-left">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M18 6l-12 12" />
+  <path d="M6 6l12 12" />
+</svg>
+    </span>
+                                        </a>
+                                    </td>
+                                </tr>
                                 </tbody>
                             </table>
                         </div>
-                        <div class="box-search-advance product">
-                            <div>
-                                <input
-                                    type="text"
-                                    class="next-input textbox-advancesearch product"
-                                    :placeholder="__('order.search_or_create_new_product')"
-                                    @click="loadListProductsAndVariations()"
-                                    @keyup="handleSearchProduct($event.target.value)"
-                                />
-                            </div>
+
+                        <div class="position-relative box-search-advance product">
+                            <input
+                                type="text"
+                                class="form-control textbox-advancesearch product"
+                                :placeholder="__('order.search_or_create_new_product')"
+                                @click="loadListProductsAndVariations()"
+                                @keyup="handleSearchProduct($event.target.value)"
+                            />
+
                             <div
-                                class="panel panel-default"
+                                class="card position-absolute z-1 w-100"
                                 :class="{ active: list_products, hidden: hidden_product_search_panel }"
+                                :style="[loading ? { minHeight: '10rem' } : {}]"
                             >
-                                <div class="panel-body">
-                                    <div class="box-search-advance-head" v-ec-modal.add-product-item>
+                                <div v-if="loading" class="loading-spinner"></div>
+                                <div v-else class="list-group list-group-flush overflow-auto" style="max-height: 25rem">
+                                    <a
+                                        href="javascript:void(0)"
+                                        class="list-group-item list-group-item-action"
+                                        v-ec-modal.add-product-item
+                                    >
                                         <img
-                                            width="30"
+                                            width="28"
                                             src="/vendor/core/plugins/ecommerce/images/next-create-custom-line-item.svg"
                                             alt="icon"
+                                            class="me-2"
                                         />
-                                        <span class="ml10">{{ __('order.create_a_new_product') }}</span>
-                                    </div>
-                                    <div class="list-search-data">
-                                        <div class="has-loading" v-show="loading">
-                                            <i class="fa fa-spinner fa-spin"></i>
+                                        {{ __('order.create_a_new_product') }}
+                                    </a>
+                                    <a
+                                        v-for="product_item in list_products.data"
+                                        :class="{
+                                            'list-group-item list-group-item-action': true,
+                                            'item-selectable': !product_item.variations.length,
+                                            'item-not-selectable': product_item.variations.length,
+                                        }"
+                                        v-bind:key="product_item.id"
+                                    >
+                                        <div class="row align-items-start">
+                                            <div class="col-auto">
+                                                <span class="avatar" :style="{ backgroundImage: 'url(' + product_item.image_url + ')' }"></span>
+                                            </div>
+                                            <div class="col text-truncate">
+                                                <ProductAction
+                                                    :ref="'product_actions_' + product_item.id"
+                                                    :product="product_item"
+                                                    @select-product="selectProductVariant"
+                                                />
+
+                                                <div v-if="product_item.variations.length" class="list-group list-group-flush">
+                                                    <div
+                                                        class="list-group-item p-2"
+                                                        v-for="variation in product_item.variations"
+                                                        v-bind:key="variation.id"
+                                                    >
+                                                        <ProductAction
+                                                            :product="variation"
+                                                            @select-product="selectProductVariant"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <ul class="clearfix" v-show="!loading">
-                                            <li
-                                                v-for="product_item in list_products.data"
-                                                :class="{
-                                                    'item-selectable': !product_item.variations.length,
-                                                    'item-not-selectable': product_item.variations.length,
-                                                }"
-                                                v-bind:key="product_item.id"
-                                            >
-                                                <div class="wrap-img inline_block vertical-align-t float-start">
-                                                    <img
-                                                        class="thumb-image"
-                                                        :src="product_item.image_url"
-                                                        :alt="product_item.name"
-                                                    />
-                                                </div>
-                                                <div
-                                                    class="inline_block ml10 mt10 ws-nm"
-                                                    style="width: calc(100% - 50px)"
-                                                >
-                                                    <ProductAction
-                                                        :ref="'product_actions_' + product_item.id"
-                                                        :product="product_item"
-                                                        @select-product="selectProductVariant"
-                                                    ></ProductAction>
-                                                </div>
-                                                <div v-if="product_item.variations.length">
-                                                    <ul>
-                                                        <li
-                                                            class="product-variant"
-                                                            v-for="variation in product_item.variations"
-                                                            v-bind:key="variation.id"
-                                                        >
-                                                            <ProductAction
-                                                                :product="variation"
-                                                                @select-product="selectProductVariant"
-                                                            ></ProductAction>
-                                                        </li>
-                                                    </ul>
-                                                </div>
-                                            </li>
-                                            <li v-if="list_products.data && list_products.data.length === 0">
-                                                <span>{{ __('order.no_products_found') }}</span>
-                                            </li>
-                                        </ul>
+                                    </a>
+                                    <div class="p-3" v-if="list_products.data && list_products.data.length === 0">
+                                        <p class="text-muted text-center mb-0">{{ __('order.no_products_found') }}</p>
                                     </div>
                                 </div>
-
                                 <div
-                                    class="panel-footer"
+                                    class="card-footer"
                                     v-if="
-                                        (list_products.links && list_products.links.next) ||
-                                        (list_products.links && list_products.links.prev)
+                                        ((list_products.links && list_products.links.next)
+                                        || (list_products.links && list_products.links.prev))
+                                        && !loading
                                     "
                                 >
-                                    <div class="btn-group float-end">
-                                        <button
-                                            type="button"
-                                            @click="
-                                                loadListProductsAndVariations(
+                                    <ul class="pagination my-0 d-flex justify-content-end">
+                                        <li :class="{'page-item': true, disabled: list_products.meta.current_page === 1}">
+                                            <span v-if="list_products.meta.current_page === 1" class="page-link" :aria-disabled="list_products.meta.current_page === 1">
+                                                <i class="icon ti ti-chevron-left"></i>
+                                            </span>
+                                            <a
+                                                v-else
+                                                href="javascript:void(0)"
+                                                class="page-link"
+                                                @click="loadListProductsAndVariations(
                                                     list_products.links.prev
                                                         ? list_products.meta.current_page - 1
                                                         : list_products.meta.current_page,
                                                     true
-                                                )
-                                            "
-                                            :class="{
-                                                'btn btn-secondary': list_products.meta.current_page !== 1,
-                                                'btn btn-secondary disable': list_products.meta.current_page === 1,
-                                            }"
-                                            :disabled="list_products.meta.current_page === 1"
-                                        >
-                                            <svg
-                                                role="img"
-                                                class="svg-next-icon svg-next-icon-size-16 svg-next-icon-rotate-180"
+                                                )"
                                             >
-                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                                                    <path d="M6 4l9 8-9 8 2 2 11-10L8 2 6 4" fill="currentColor"></path>
-                                                </svg>
-                                            </svg>
-                                        </button>
-                                        <button
-                                            type="button"
-                                            @click="
-                                                loadListProductsAndVariations(
+                                                <i class="icon ti ti-chevron-left"></i>
+                                            </a>
+                                        </li>
+                                        <li :class="{'page-item': true, disabled: !list_products.links.next}">
+                                            <span v-if="!list_products.links.next" class="page-link" :aria-disabled="!list_products.links.next">
+                                                <i class="icon ti ti-chevron-right"></i>
+                                            </span>
+                                            <a
+                                                v-else
+                                                href="javascript:void(0)"
+                                                class="page-link"
+                                                @click="loadListProductsAndVariations(
                                                     list_products.links.next
                                                         ? list_products.meta.current_page + 1
                                                         : list_products.meta.current_page,
                                                     true
-                                                )
-                                            "
-                                            :class="{
-                                                'btn btn-secondary': list_products.links.next,
-                                                'btn btn-secondary disable': !list_products.links.next,
-                                            }"
-                                            :disabled="!list_products.links.next"
-                                        >
-                                            <svg role="img" class="svg-next-icon svg-next-icon-size-16">
-                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                                                    <path d="M6 4l9 8-9 8 2 2 11-10L8 2 6 4" fill="currentColor"></path>
-                                                </svg>
-                                            </svg>
-                                        </button>
-                                    </div>
-                                    <div class="clearfix"></div>
+                                                )"
+                                            >
+                                                <i class="icon ti ti-chevron-right"></i>
+                                            </a>
+                                        </li>
+                                    </ul>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="pd-all-10-20 p-none-t">
+
                     <div class="row">
                         <div class="col-sm-6">
-                            <div class="form-group mb-3">
-                                <label class="text-title-field" for="txt-note">{{ __('order.note') }}</label>
+                            <div class="mb-3 position-relative">
+                                <label class="form-label" for="txt-note">{{ __('order.note') }}</label>
                                 <textarea
-                                    class="ui-text-area textarea-auto-height"
+                                    v-model="note"
+                                    class="form-control textarea-auto-height"
                                     id="txt-note"
                                     rows="2"
                                     :placeholder="__('order.note_for_order')"
-                                    v-model="note"
                                 ></textarea>
                             </div>
                         </div>
                         <div class="col-sm-6">
-                            <div class="table-wrap">
-                                <table class="table-normal table-none-border table-color-gray-text text-end">
-                                    <thead>
-                                        <tr>
-                                            <td></td>
-                                            <td width="120"></td>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td class="color-subtext">{{ __('order.sub_amount') }}</td>
-                                            <td>
-                                                <div>
-                                                    <span
-                                                        v-if="checking"
-                                                        class="spinner-grow spinner-grow-sm"
-                                                        role="status"
-                                                        aria-hidden="true"
-                                                    ></span>
-                                                    <span class="fw-bold fs-6">{{ child_sub_amount_label }}</span>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td class="color-subtext">{{ __('order.tax_amount') }}</td>
-                                            <td>
-                                                <div>
-                                                    <span
-                                                        v-if="checking"
-                                                        class="spinner-grow spinner-grow-sm"
-                                                        role="status"
-                                                        aria-hidden="true"
-                                                    ></span>
-                                                    <span class="fw-bold">{{ child_tax_amount_label }}</span>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td class="color-subtext">{{ __('order.promotion_discount_amount') }}</td>
-                                            <td>
-                                                <div>
-                                                    <span
-                                                        v-show="checking"
-                                                        class="spinner-grow spinner-grow-sm"
-                                                        role="status"
-                                                        aria-hidden="true"
-                                                    ></span>
-                                                    <span
-                                                        class="fw-bold"
-                                                        :class="{ 'text-success': child_promotion_amount }"
-                                                        >{{ child_promotion_amount_label }}</span
-                                                    >
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <button
-                                                    type="button"
-                                                    v-ec-modal.add-discounts
-                                                    class="btn btn text-primary p-0"
-                                                >
-                                                    <span v-if="!has_applied_discount">
-                                                        <i class="fa fa-plus-circle"></i>
-                                                        {{ __('order.add_discount') }}</span
-                                                    >
-                                                    <span v-else>{{ __('order.discount') }}</span>
-                                                </button>
-                                                <span class="d-block small fw-bold" v-if="has_applied_discount">{{
-                                                    child_coupon_code || child_discount_description
-                                                }}</span>
-                                            </td>
-                                            <td>
-                                                <div>
-                                                    <span
-                                                        v-show="checking"
-                                                        class="spinner-grow spinner-grow-sm"
-                                                        role="status"
-                                                        aria-hidden="true"
-                                                    ></span>
-                                                    <span :class="{ 'text-success fw-bold': child_discount_amount }">{{
-                                                        child_discount_amount_label
-                                                    }}</span>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <tr v-if="is_available_shipping">
-                                            <td>
-                                                <button
-                                                    type="button"
-                                                    v-ec-modal.add-shipping
-                                                    class="btn btn text-primary p-0"
-                                                >
-                                                    <span v-if="!child_is_selected_shipping">
-                                                        <i class="fa fa-plus-circle"></i>
-                                                        {{ __('order.add_shipping_fee') }}</span
-                                                    >
-                                                    <span v-else>{{ __('order.shipping') }}</span>
-                                                </button>
-                                                <span class="d-block small fw-bold" v-if="child_shipping_method_name">{{
-                                                    child_shipping_method_name
-                                                }}</span>
-                                            </td>
-                                            <td>
-                                                <div>
-                                                    <span
-                                                        v-show="checking"
-                                                        class="spinner-grow spinner-grow-sm"
-                                                        role="status"
-                                                        aria-hidden="true"
-                                                    ></span>
-                                                    <span :class="{ 'fw-bold': child_shipping_amount }">{{
-                                                        child_shipping_amount_label
-                                                    }}</span>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <tr class="text-no-bold">
-                                            <td>{{ __('order.total_amount') }}</td>
-                                            <td>
-                                                <span>
-                                                    <span
-                                                        v-show="checking"
-                                                        class="spinner-grow spinner-grow-sm"
-                                                        role="status"
-                                                        aria-hidden="true"
-                                                    ></span>
-                                                    <span class="fs-5">{{ child_total_amount_label }}</span>
-                                                </span>
-                                            </td>
-                                        </tr>
-                                        <tr class="text-no-bold" v-if="child_total_amount">
-                                            <td colspan="2">
-                                                <div>{{ __('order.payment_method') }}</div>
-                                                <div class="ui-select-wrapper">
-                                                    <select class="ui-select" v-model="child_payment_method">
-                                                        <option value="cod">
-                                                            {{ __('order.cash_on_delivery_cod') }}
-                                                        </option>
-                                                        <option value="bank_transfer">
-                                                            {{ __('order.bank_transfer') }}
-                                                        </option>
-                                                    </select>
-                                                    <svg class="svg-next-icon svg-next-icon-size-16">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                                            <path d="M10 16l-4-4h8l-4 4zm0-12L6 8h8l-4-4z"></path>
-                                                        </svg>
-                                                    </svg>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
+                            <table class="table table-borderless text-end table-vcenter">
+                                <thead>
+                                <tr>
+                                    <td></td>
+                                    <td width="120"></td>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <td>{{ __('order.sub_amount') }}</td>
+                                    <td>
+                                        <span
+                                            v-if="checking"
+                                            class="spinner-grow spinner-grow-sm"
+                                            role="status"
+                                            aria-hidden="true"
+                                        ></span>
+                                        <span class="fw-bold">{{ child_sub_amount_label }}</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>{{ __('order.tax_amount') }}</td>
+                                    <td>
+                                        <span
+                                            v-if="checking"
+                                            class="spinner-grow spinner-grow-sm"
+                                            role="status"
+                                            aria-hidden="true"
+                                        ></span>
+                                        <span class="fw-bold">{{ child_tax_amount_label }}</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>{{ __('order.promotion_discount_amount') }}</td>
+                                    <td>
+                                        <span
+                                            v-show="checking"
+                                            class="spinner-grow spinner-grow-sm"
+                                            role="status"
+                                            aria-hidden="true"
+                                        ></span>
+                                        <span :class="{ 'fw-bold': true, 'text-success': child_promotion_amount }">
+                                            {{ child_promotion_amount_label }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <button
+                                            type="button"
+                                            v-ec-modal.add-discounts
+                                            class="btn btn-outline-primary btn-sm mb-1"
+                                        >
+                                            <template v-if="!has_applied_discount">
+                                                <i class="icon-sm ti ti-plus"></i>
+                                                {{ __('order.add_discount') }}
+                                            </template>
+                                            <template v-else>{{ __('order.discount') }}</template>
+                                        </button>
+                                        <span class="d-block small fw-bold" v-if="has_applied_discount">
+                                            {{child_coupon_code || child_discount_description }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span
+                                            v-show="checking"
+                                            class="spinner-grow spinner-grow-sm"
+                                            role="status"
+                                            aria-hidden="true"
+                                        ></span>
+                                        <span :class="{ 'text-success fw-bold': child_discount_amount }">
+                                            {{ child_discount_amount_label }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr v-if="is_available_shipping">
+                                    <td>
+                                        <button
+                                            type="button"
+                                            v-ec-modal.add-shipping
+                                            class="btn btn-outline-primary btn-sm mb-1"
+                                        >
+                                            <template v-if="!child_is_selected_shipping">
+                                                <i class="icon-sm ti ti-plus"></i>
+                                                {{ __('order.add_shipping_fee') }}
+                                            </template>
+                                            <template v-else>{{ __('order.shipping') }}</template>
+                                        </button>
+                                        <span class="d-block small fw-bold" v-if="child_shipping_method_name">
+                                            {{ child_shipping_method_name }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span
+                                            v-show="checking"
+                                            class="spinner-grow spinner-grow-sm"
+                                            role="status"
+                                            aria-hidden="true"
+                                        ></span>
+                                        <span :class="{ 'fw-bold': child_shipping_amount }">
+                                            {{child_shipping_amount_label }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>{{ __('order.total_amount') }}</td>
+                                    <td>
+                                        <span
+                                            v-show="checking"
+                                            class="spinner-grow spinner-grow-sm"
+                                            role="status"
+                                            aria-hidden="true"
+                                        ></span>
+                                        <h4 class="d-inline-block">{{ child_total_amount_label }}</h4>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2">
+                                        <label for="payment-method" class="form-label">{{ __('order.payment_method') }}</label>
+                                        <select class="form-select" id="payment-method" v-model="child_payment_method">
+                                            <option value="cod">
+                                                {{ __('order.cash_on_delivery_cod') }}
+                                            </option>
+                                            <option value="bank_transfer">
+                                                {{ __('order.bank_transfer') }}
+                                            </option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
-                <div class="pd-all-10-20 border-top-color">
-                    <div class="row">
-                        <div class="col-12 col-sm-6 col-md-12 col-lg-6">
-                            <div class="flexbox-grid-default mt5 mb5">
-                                <div class="flexbox-auto-left p-r10">
-                                    <i class="fa fa-credit-card fa-1-5 color-blue"></i>
-                                </div>
-                                <div class="flexbox-auto-content">
-                                    <div class="text-upper ws-nm">
-                                        {{ __('order.confirm_payment_and_create_order') }}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-12 col-sm-6 col-md-12 col-lg-6 text-end">
+                <div class="card-footer">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <p class="mb-0 text-uppercase">
+                            <i class="icon ti ti-credit-card text-primary"></i>
+                            {{ __('order.confirm_payment_and_create_order') }}
+                        </p>
+                        <div class="btn-list">
                             <button
                                 class="btn btn-success"
                                 v-ec-modal.make-paid
-                                :disabled="(!child_product_ids.length || child_payment_method == 'cod') && child_total_amount !== 0"
+                                :disabled="(!child_product_ids.length || child_payment_method === 'cod') && child_total_amount !== 0"
                             >
                                 {{ __('order.paid') }}
                             </button>
                             <button
-                                class="btn btn-primary ml15"
+                                class="btn btn-primary"
                                 v-ec-modal.make-pending
                                 :disabled="!child_product_ids.length || child_total_amount === 0"
                             >
@@ -440,294 +377,217 @@
                 </div>
             </div>
         </div>
-        <div class="flexbox-content flexbox-right">
-            <div class="wrapper-content mb20">
+        <div class="col-md-3">
+            <div class="card">
                 <div v-if="!child_customer_id || !child_customer">
-                    <div class="next-card-section">
-                        <div class="flexbox-grid-default mb15">
-                            <div class="flexbox-auto-content">
-                                <label class="title-product-main">{{ __('order.customer_information') }}</label>
-                            </div>
-                        </div>
-                        <div class="findcustomer">
-                            <div class="box-search-advance customer">
-                                <div>
-                                    <input
-                                        type="text"
-                                        class="next-input textbox-advancesearch customer"
-                                        @click="loadListCustomersForSearch()"
-                                        @keyup="handleSearchCustomer($event.target.value)"
-                                        :placeholder="__('order.search_or_create_new_customer')"
-                                    />
-                                </div>
-                                <div
-                                    class="panel panel-default"
-                                    :class="{ active: customers, hidden: hidden_customer_search_panel }"
-                                >
-                                    <div class="panel-body">
-                                        <div class="box-search-advance-head" v-ec-modal.add-customer>
-                                            <div class="flexbox-grid-default flexbox-align-items-center">
-                                                <div class="flexbox-auto-40">
-                                                    <img
-                                                        width="30"
-                                                        src="/vendor/core/plugins/ecommerce/images/next-create-customer.svg"
-                                                        alt="icon"
-                                                    />
-                                                </div>
-                                                <div class="flexbox-auto-content-right">
-                                                    <span>{{ __('order.create_new_customer') }}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="list-search-data">
-                                            <div class="has-loading" v-show="loading">
-                                                <i class="fa fa-spinner fa-spin"></i>
-                                            </div>
-                                            <ul class="clearfix" v-show="!loading">
-                                                <li
-                                                    class="row"
-                                                    v-for="customer in customers.data"
-                                                    v-bind:key="customer.id"
-                                                    @click="selectCustomer(customer)"
-                                                >
-                                                    <div class="flexbox-grid-default flexbox-align-items-center">
-                                                        <div class="flexbox-auto-40">
-                                                            <div
-                                                                class="wrap-img inline_block vertical-align-t radius-cycle"
-                                                            >
-                                                                <img
-                                                                    class="thumb-image radius-cycle"
-                                                                    :src="customer.avatar_url"
-                                                                    :alt="customer.name"
-                                                                />
-                                                            </div>
-                                                        </div>
-                                                        <div class="flexbox-auto-content-right">
-                                                            <div class="overflow-ellipsis">{{ customer.name }}</div>
-                                                            <div class="overflow-ellipsis">
-                                                                <a :href="'mailto:' + customer.email">
-                                                                    <span>{{ customer.email || '-' }}</span>
-                                                                </a>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </li>
-                                                <li v-if="customers.data && customers.data.length === 0">
-                                                    <span>{{ __('order.no_customer_found') }}</span>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </div>
+                    <div class="card-header">
+                        <h4 class="card-title">{{ __('order.customer_information') }}</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="position-relative box-search-advance customer">
+                            <input
+                                type="text"
+                                class="form-control textbox-advancesearch customer"
+                                @click="loadListCustomersForSearch()"
+                                @keyup="handleSearchCustomer($event.target.value)"
+                                :placeholder="__('order.search_or_create_new_customer')"
+                            />
 
-                                    <div class="panel-footer" v-if="customers.next_page_url || customers.prev_page_url">
-                                        <div class="btn-group float-end">
-                                            <button
-                                                type="button"
-                                                @click="
-                                                    loadListCustomersForSearch(
-                                                        customers.prev_page_url
-                                                            ? customers.current_page - 1
-                                                            : customers.current_page,
-                                                        true
-                                                    )
-                                                "
-                                                :class="{
-                                                    'btn btn-secondary': customers.current_page !== 1,
-                                                    'btn btn-secondary disable': customers.current_page === 1,
-                                                }"
-                                                :disabled="customers.current_page === 1"
-                                            >
-                                                <svg
-                                                    role="img"
-                                                    class="svg-next-icon svg-next-icon-size-16 svg-next-icon-rotate-180"
-                                                >
-                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                                                        <path
-                                                            d="M6 4l9 8-9 8 2 2 11-10L8 2 6 4"
-                                                            fill="currentColor"
-                                                        ></path>
-                                                    </svg>
-                                                </svg>
-                                            </button>
-                                            <button
-                                                type="button"
-                                                @click="
-                                                    loadListCustomersForSearch(
-                                                        customers.next_page_url
-                                                            ? customers.current_page + 1
-                                                            : customers.current_page,
-                                                        true
-                                                    )
-                                                "
-                                                :class="{
-                                                    'btn btn-secondary': customers.next_page_url,
-                                                    'btn btn-secondary disable': !customers.next_page_url,
-                                                }"
-                                                :disabled="!customers.next_page_url"
-                                            >
-                                                <svg role="img" class="svg-next-icon svg-next-icon-size-16">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                                                        <path
-                                                            d="M6 4l9 8-9 8 2 2 11-10L8 2 6 4"
-                                                            fill="currentColor"
-                                                        ></path>
-                                                    </svg>
-                                                </svg>
-                                            </button>
+                            <div
+                                class="card position-absolute w-100 z-1"
+                                :class="{ active: customers, hidden: hidden_customer_search_panel }"
+                                :style="[loading ? { minHeight: '10rem' } : {}]"
+                            >
+                                <div v-if="loading" class="loading-spinner"></div>
+                                <div v-else class="list-group list-group-flush overflow-auto" style="max-height: 25rem">
+                                    <div class="list-group-item cursor-pointer" v-ec-modal.add-customer>
+                                        <div class="row align-items-center">
+                                            <div class="col-auto">
+                                                <img
+                                                    width="28"
+                                                    src="/vendor/core/plugins/ecommerce/images/next-create-customer.svg"
+                                                    alt="icon"
+                                                />
+                                            </div>
+                                            <div class="col">
+                                                <span>{{ __('order.create_new_customer') }}</span>
+                                            </div>
                                         </div>
-                                        <div class="clearfix"></div>
                                     </div>
+                                    <a
+                                        class="list-group-item list-group-item-action"
+                                        href="javascript:void(0)"
+                                        v-for="customer in customers.data"
+                                        v-bind:key="customer.id"
+                                        @click="selectCustomer(customer)"
+                                    >
+                                        <div class="flexbox-grid-default flexbox-align-items-center">
+                                            <div class="row align-items-center">
+                                                <div class="col-auto">
+                                                    <span class="avatar" :style="{ backgroundImage: 'url(' + customer.avatar_url + ')' }"></span>
+                                                </div>
+                                                <div class="col text-truncate">
+                                                    <div class="text-body d-block">{{ customer.name }}</div>
+                                                    <a :href="'mailto:' + customer.email" class="text-secondary text-truncate mt-n1">{{ customer.email || '-' }}</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </a>
+                                    <div class="list-group-item" v-if="customers.data && customers.data.length === 0">
+                                        {{ __('order.no_customer_found') }}
+                                    </div>
+                                </div>
+                                <div class="card-footer" v-if="(customers.next_page_url || customers.prev_page_url) && !loading">
+                                    <ul class="pagination my-0 d-flex justify-content-end">
+                                        <li :class="{'page-item': true, disabled: customers.current_page === 1}">
+                                            <span v-if="customers.current_page === 1" class="page-link" :aria-disabled="customers.current_page === 1">
+                                                <i class="icon ti ti-chevron-left"></i>
+                                            </span>
+                                            <a
+                                                v-else
+                                                href="javascript:void(0)"
+                                                class="page-link"
+                                                @click="loadListCustomersForSearch(
+                                                    customers.prev_page_url
+                                                        ? customers.current_page - 1
+                                                        : customers.current_page,
+                                                    true
+                                                )"
+                                            >
+                                                <i class="icon ti ti-chevron-left"></i>
+                                            </a>
+                                        </li>
+                                        <li :class="{'page-item': true, disabled: !customers.next_page_url}">
+                                            <span v-if="!customers.next_page_url" class="page-link" :aria-disabled="!customers.next_page_url">
+                                                <i class="icon ti ti-chevron-right"></i>
+                                            </span>
+                                            <a
+                                                v-else
+                                                href="javascript:void(0)"
+                                                class="page-link"
+                                                @click="loadListCustomersForSearch(
+                                                    customers.next_page_url
+                                                        ? customers.current_page + 1
+                                                        : customers.current_page,
+                                                    true
+                                                )"
+                                            >
+                                                <i class="icon ti ti-chevron-right"></i>
+                                            </a>
+                                        </li>
+                                    </ul>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div v-if="child_customer_id && child_customer">
-                    <div class="next-card-section p-none-b">
-                        <div class="flexbox-grid-default">
-                            <div class="flexbox-auto-content-left">
-                                <label class="title-product-main">{{ __('order.customer') }}</label>
+                    <div class="card-header">
+                        <h4 class="card-title">{{ __('order.customer') }}</h4>
+                        <div class="card-actions">
+                            <button
+                                type="button"
+                                data-bs-toggle="tooltip"
+                                data-placement="top"
+                                title="Delete customer"
+                                @click="removeCustomer()"
+                                class="btn-action"
+                            >
+                                <span class="icon-tabler-wrapper icon-sm icon-left">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M18 6l-12 12" />
+  <path d="M6 6l12 12" />
+</svg>
+    </span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="p-3">
+                            <div class="mb-3">
+                                <span class="avatar avatar-lg avatar-rounded" :style="[child_customer.avatar_url ? { backgroundImage: 'url(' + child_customer.avatar_url + ')' } : {}]"></span>
                             </div>
-                            <div class="flexbox-auto-left">
+
+                            <div class="mb-1">
+                                <i class="icon ti ti-inbox"></i>
+                                {{ child_customer_order_numbers }}
+                                {{ __('order.orders') }}
+                            </div>
+
+                            <div class="mb-n1">{{ child_customer.name }}</div>
+
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a :href="'mailto:' + child_customer.email">
+                                    {{ child_customer.email || '-' }}
+                                </a>
+
                                 <a
-                                    href="#"
-                                    data-bs-toggle="tooltip"
+                                    href="javascript:void(0)"
+                                    v-ec-modal.edit-email
                                     data-placement="top"
-                                    title="Delete customer"
-                                    @click="removeCustomer()"
+                                    data-bs-toggle="tooltip"
+                                    data-bs-original-title="Edit email"
+                                    class="btn-action text-decoration-none"
                                 >
-                                    <svg class="svg-next-icon svg-next-icon-size-12">
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            viewBox="0 0 24 24"
-                                            enable-background="new 0 0 24 24"
-                                        >
-                                            <path
-                                                d="M19.5 22c-.2 0-.5-.1-.7-.3L12 14.9l-6.8 6.8c-.2.2-.4.3-.7.3-.2 0-.5-.1-.7-.3l-1.6-1.6c-.1-.2-.2-.4-.2-.6 0-.2.1-.5.3-.7L9.1 12 2.3 5.2C2.1 5 2 4.8 2 4.5c0-.2.1-.5.3-.7l1.6-1.6c.2-.1.4-.2.6-.2.3 0 .5.1.7.3L12 9.1l6.8-6.8c.2-.2.4-.3.7-.3.2 0 .5.1.7.3l1.6 1.6c.1.2.2.4.2.6 0 .2-.1.5-.3.7L14.9 12l6.8 6.8c.2.2.3.4.3.7 0 .2-.1.5-.3.7l-1.6 1.6c-.2.1-.4.2-.6.2z"
-                                            ></path>
-                                        </svg>
-                                    </svg>
+                                    <i class="icon ti ti-pencil" />
                                 </a>
                             </div>
                         </div>
-                    </div>
-                    <div class="next-card-section border-none-t">
-                        <ul class="ws-nm">
-                            <li>
-                                <img
-                                    v-if="child_customer.avatar_url"
-                                    class="width-60-px radius-cycle"
-                                    :alt="child_customer.name"
-                                    :src="child_customer.avatar_url"
-                                />
-                                <div class="pull-right color_darkblue mt20">
-                                    <i class="fas fa-inbox"></i>
-                                    <span>
-                                        {{ child_customer_order_numbers }}
-                                    </span>
-                                    {{ __('order.orders') }}
-                                </div>
-                            </li>
-                            <li class="mt10">
-                                <a class="hover-underline text-capitalize" href="#">{{ child_customer.name }}</a>
-                            </li>
-                            <li>
-                                <div class="flexbox-grid-default">
-                                    <div class="flexbox-auto-content-left overflow-ellipsis">
-                                        <a :href="'mailto:' + child_customer.email">
-                                            <span>{{ child_customer.email || '-' }}</span>
-                                        </a>
-                                    </div>
-                                    <div class="flexbox-auto-left">
-                                        <a v-ec-modal.edit-email>
-                                            <span
-                                                data-placement="top"
-                                                data-bs-toggle="tooltip"
-                                                data-bs-original-title="Edit email"
-                                            >
-                                                <svg class="svg-next-icon svg-next-icon-size-12">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 55.25 55.25">
-                                                        <path
-                                                            d="M52.618,2.631c-3.51-3.508-9.219-3.508-12.729,0L3.827,38.693C3.81,38.71,3.8,38.731,3.785,38.749  c-0.021,0.024-0.039,0.05-0.058,0.076c-0.053,0.074-0.094,0.153-0.125,0.239c-0.009,0.026-0.022,0.049-0.029,0.075  c-0.003,0.01-0.009,0.02-0.012,0.03l-3.535,14.85c-0.016,0.067-0.02,0.135-0.022,0.202C0.004,54.234,0,54.246,0,54.259  c0.001,0.114,0.026,0.225,0.065,0.332c0.009,0.025,0.019,0.047,0.03,0.071c0.049,0.107,0.11,0.21,0.196,0.296  c0.095,0.095,0.207,0.168,0.328,0.218c0.121,0.05,0.25,0.075,0.379,0.075c0.077,0,0.155-0.009,0.231-0.027l14.85-3.535  c0.027-0.006,0.051-0.021,0.077-0.03c0.034-0.011,0.066-0.024,0.099-0.039c0.072-0.033,0.139-0.074,0.201-0.123  c0.024-0.019,0.049-0.033,0.072-0.054c0.008-0.008,0.018-0.012,0.026-0.02l36.063-36.063C56.127,11.85,56.127,6.14,52.618,2.631z   M51.204,4.045c2.488,2.489,2.7,6.397,0.65,9.137l-9.787-9.787C44.808,1.345,48.716,1.557,51.204,4.045z M46.254,18.895l-9.9-9.9  l1.414-1.414l9.9,9.9L46.254,18.895z M4.961,50.288c-0.391-0.391-1.023-0.391-1.414,0L2.79,51.045l2.554-10.728l4.422-0.491  l-0.569,5.122c-0.004,0.038,0.01,0.073,0.01,0.11c0,0.038-0.014,0.072-0.01,0.11c0.004,0.033,0.021,0.06,0.028,0.092  c0.012,0.058,0.029,0.111,0.05,0.165c0.026,0.065,0.057,0.124,0.095,0.181c0.031,0.046,0.062,0.087,0.1,0.127  c0.048,0.051,0.1,0.094,0.157,0.134c0.045,0.031,0.088,0.06,0.138,0.084C9.831,45.982,9.9,46,9.972,46.017  c0.038,0.009,0.069,0.03,0.108,0.035c0.036,0.004,0.072,0.006,0.109,0.006c0,0,0.001,0,0.001,0c0,0,0.001,0,0.001,0h0.001  c0,0,0.001,0,0.001,0c0.036,0,0.073-0.002,0.109-0.006l5.122-0.569l-0.491,4.422L4.204,52.459l0.757-0.757  C5.351,51.312,5.351,50.679,4.961,50.288z M17.511,44.809L39.889,22.43c0.391-0.391,0.391-1.023,0-1.414s-1.023-0.391-1.414,0  L16.097,43.395l-4.773,0.53l0.53-4.773l22.38-22.378c0.391-0.391,0.391-1.023,0-1.414s-1.023-0.391-1.414,0L10.44,37.738  l-3.183,0.354L34.94,10.409l9.9,9.9L17.157,47.992L17.511,44.809z M49.082,16.067l-9.9-9.9l1.415-1.415l9.9,9.9L49.082,16.067z"
-                                                        />
-                                                    </svg>
-                                                </svg>
-                                            </span>
-                                        </a>
-                                    </div>
-                                </div>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="next-card-section" v-if="is_available_shipping">
-                        <ul class="ws-nm">
-                            <li class="clearfix">
-                                <div class="flexbox-grid-default">
-                                    <div class="flexbox-auto-content-left">
-                                        <label class="title-text-second">{{ __('order.shipping_address') }}</label>
-                                    </div>
-                                    <div class="flexbox-auto-left">
-                                        <a v-ec-modal.edit-address>
-                                            <span data-placement="top" title="Update address" data-bs-toggle="tooltip">
-                                                <svg class="svg-next-icon svg-next-icon-size-12">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 55.25 55.25">
-                                                        <path
-                                                            d="M52.618,2.631c-3.51-3.508-9.219-3.508-12.729,0L3.827,38.693C3.81,38.71,3.8,38.731,3.785,38.749  c-0.021,0.024-0.039,0.05-0.058,0.076c-0.053,0.074-0.094,0.153-0.125,0.239c-0.009,0.026-0.022,0.049-0.029,0.075  c-0.003,0.01-0.009,0.02-0.012,0.03l-3.535,14.85c-0.016,0.067-0.02,0.135-0.022,0.202C0.004,54.234,0,54.246,0,54.259  c0.001,0.114,0.026,0.225,0.065,0.332c0.009,0.025,0.019,0.047,0.03,0.071c0.049,0.107,0.11,0.21,0.196,0.296  c0.095,0.095,0.207,0.168,0.328,0.218c0.121,0.05,0.25,0.075,0.379,0.075c0.077,0,0.155-0.009,0.231-0.027l14.85-3.535  c0.027-0.006,0.051-0.021,0.077-0.03c0.034-0.011,0.066-0.024,0.099-0.039c0.072-0.033,0.139-0.074,0.201-0.123  c0.024-0.019,0.049-0.033,0.072-0.054c0.008-0.008,0.018-0.012,0.026-0.02l36.063-36.063C56.127,11.85,56.127,6.14,52.618,2.631z   M51.204,4.045c2.488,2.489,2.7,6.397,0.65,9.137l-9.787-9.787C44.808,1.345,48.716,1.557,51.204,4.045z M46.254,18.895l-9.9-9.9  l1.414-1.414l9.9,9.9L46.254,18.895z M4.961,50.288c-0.391-0.391-1.023-0.391-1.414,0L2.79,51.045l2.554-10.728l4.422-0.491  l-0.569,5.122c-0.004,0.038,0.01,0.073,0.01,0.11c0,0.038-0.014,0.072-0.01,0.11c0.004,0.033,0.021,0.06,0.028,0.092  c0.012,0.058,0.029,0.111,0.05,0.165c0.026,0.065,0.057,0.124,0.095,0.181c0.031,0.046,0.062,0.087,0.1,0.127  c0.048,0.051,0.1,0.094,0.157,0.134c0.045,0.031,0.088,0.06,0.138,0.084C9.831,45.982,9.9,46,9.972,46.017  c0.038,0.009,0.069,0.03,0.108,0.035c0.036,0.004,0.072,0.006,0.109,0.006c0,0,0.001,0,0.001,0c0,0,0.001,0,0.001,0h0.001  c0,0,0.001,0,0.001,0c0.036,0,0.073-0.002,0.109-0.006l5.122-0.569l-0.491,4.422L4.204,52.459l0.757-0.757  C5.351,51.312,5.351,50.679,4.961,50.288z M17.511,44.809L39.889,22.43c0.391-0.391,0.391-1.023,0-1.414s-1.023-0.391-1.414,0  L16.097,43.395l-4.773,0.53l0.53-4.773l22.38-22.378c0.391-0.391,0.391-1.023,0-1.414s-1.023-0.391-1.414,0L10.44,37.738  l-3.183,0.354L34.94,10.409l9.9,9.9L17.157,47.992L17.511,44.809z M49.082,16.067l-9.9-9.9l1.415-1.415l9.9,9.9L49.082,16.067z"
-                                                        />
-                                                    </svg>
-                                                </svg>
-                                            </span>
-                                        </a>
-                                    </div>
-                                </div>
-                            </li>
-                            <li class="text-infor-subdued mt15">
-                                <div v-if="child_customer_addresses.length > 1">
-                                    <div class="ui-select-wrapper">
-                                        <select class="ui-select" @change="selectCustomerAddress($event)">
-                                            <option
-                                                v-for="address_item in child_customer_addresses"
-                                                :value="address_item.id"
-                                                :selected="
-                                                    parseInt(address_item.id) === parseInt(customer_address.email)
-                                                "
-                                                v-bind:key="address_item.id"
-                                            >
-                                                {{ address_item.full_address }}
-                                            </option>
-                                        </select>
-                                        <svg class="svg-next-icon svg-next-icon-size-16">
-                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                                <path d="M10 16l-4-4h8l-4 4zm0-12L6 8h8l-4-4z"></path>
-                                            </svg>
-                                        </svg>
-                                    </div>
-                                    <br />
-                                </div>
-                                <div>{{ child_customer_address.name }}</div>
-                                <div>{{ child_customer_address.phone }}</div>
-                                <div>
-                                    <a :href="'mailto:' + child_customer_address.email">{{
-                                        child_customer_address.email
-                                    }}</a>
-                                </div>
-                                <div>{{ child_customer_address.address }}</div>
-                                <div>{{ child_customer_address.city_name }}</div>
-                                <div>{{ child_customer_address.state_name }}</div>
-                                <div>{{ child_customer_address.country_name }}</div>
-                                <div v-if="zip_code_enabled">{{ child_customer_address.zip_code }}</div>
-                                <div v-if="child_customer_address.full_address">
+
+                        <div class="hr my-1"></div>
+
+                        <div class="p-3" v-if="is_available_shipping">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h4 class="mb-0">{{ __('order.shipping_address') }}</h4>
+                                <button
+                                    v-ec-modal.edit-address
+                                    type="button"
+                                    class="btn-action"
+                                    data-bs-toggle="tooltip"
+                                    data-bs-title="Update address"
+                                >
+                                    <i class="icon ti ti-pencil" />
+                                </button>
+                            </div>
+
+                            <div v-if="child_customer_addresses.length > 1" class="mb-3">
+                                <select class="form-select" @change="selectCustomerAddress($event)">
+                                    <option
+                                        v-for="address_item in child_customer_addresses"
+                                        :value="address_item.id"
+                                        :selected="parseInt(address_item.id) === parseInt(customer_address.email)"
+                                        v-bind:key="address_item.id"
+                                    >
+                                        {{ address_item.full_address }}
+                                    </option>
+                                </select>
+                            </div>
+
+                            <dl class="row">
+                                <dd>{{ child_customer_address.name }}</dd>
+                                <dd>{{ child_customer_address.phone }}</dd>
+                                <dd>
+                                    <a :href="'mailto:' + child_customer_address.email">
+                                        {{child_customer_address.email }}
+                                    </a>
+                                </dd>
+                                <dd>{{ child_customer_address.address }}</dd>
+                                <dd>{{ child_customer_address.city_name }}</dd>
+                                <dd>{{ child_customer_address.state_name }}</dd>
+                                <dd>{{ child_customer_address.country_name }}</dd>
+                                <dd v-if="zip_code_enabled">{{ child_customer_address.zip_code }}</dd>
+                                <dd v-if="child_customer_address.full_address">
                                     <a
                                         target="_blank"
                                         class="hover-underline"
                                         :href="'https://maps.google.com/?q=' + child_customer_address.full_address"
-                                        >{{ __('order.see_on_maps') }}</a
+                                    >{{ __('order.see_on_maps') }}</a
                                     >
-                                </div>
-                            </li>
-                        </ul>
+                                </dd>
+                            </dl>
+                        </div>
                     </div>
-                    <!--/ko-->
                 </div>
             </div>
         </div>
@@ -743,57 +603,46 @@
         >
             <div class="next-form-section">
                 <div class="next-form-grid">
-                    <div class="next-form-grid-cell">
-                        <label class="text-title-field">{{ __('order.discount_based_on') }}</label>
-                        <div class="flexbox-grid-default">
-                            <div class="flexbox-auto-left">
-                                <div class="flexbox-input-group">
-                                    <button
-                                        value="amount"
-                                        class="item-group btn btn-secondary btn-active"
-                                        :class="{ active: discount_type === 'amount' }"
-                                        @click="changeDiscountType($event)"
-                                    >
-                                        {{ currency || '$' }}</button
-                                    >&nbsp;
-                                    <button
-                                        value="percentage"
-                                        class="item-group border-radius-right-none btn btn-secondary btn-active"
-                                        :class="{ active: discount_type === 'percentage' }"
-                                        @click="changeDiscountType($event)"
-                                    >
-                                        %</button
-                                    >&nbsp;
-                                </div>
+                    <div class="mb-3 position-relative">
+                        <label class="form-label">{{ __('order.discount_based_on') }}</label>
+                        <div class="row">
+                            <div class="col-auto">
+                                <button
+                                    value="amount"
+                                    class="btn btn-active"
+                                    :class="{ active: discount_type === 'amount' }"
+                                    @click="changeDiscountType($event)"
+                                >
+                                    {{ currency || '$' }}</button
+                                >&nbsp;
+                                <button
+                                    value="percentage"
+                                    class="btn btn-active"
+                                    :class="{ active: discount_type === 'percentage' }"
+                                    @click="changeDiscountType($event)"
+                                >
+                                    %</button
+                                >
                             </div>
-                            <div class="flexbox-auto-content">
-                                <div class="next-input--stylized border-radius-left-none">
-                                    <input class="next-input next-input--invisible" v-model="discount_custom_value" />
-                                    <span class="next-input-add-on next-input__add-on--after">{{
-                                        discount_type_unit
-                                    }}</span>
+                            <div class="col">
+                                <div class="input-group input-group-flat">
+                                    <input class="form-control" v-model="discount_custom_value" />
+                                    <span class="input-group-text">{{ discount_type_unit }}</span>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="next-form-grid">
-                    <div class="next-form-grid-cell">
-                        <label class="text-title-field">{{ __('order.or_coupon_code') }}</label>
-                        <div class="next-input--stylized" :class="{ 'field-has-error': has_invalid_coupon }">
-                            <input
-                                class="next-input next-input--invisible coupon-code-input"
-                                :value="child_coupon_code"
-                            />
-                        </div>
+                    <div class="mb-3 position-relative">
+                        <label class="form-label">{{ __('order.or_coupon_code') }}</label>
+                        <input class="form-control coupon-code-input" :value="child_coupon_code" />
                     </div>
-                </div>
-                <div class="next-form-grid">
-                    <div class="next-form-grid-cell">
-                        <label class="text-title-field">{{ __('order.description') }}</label>
+                    <div class="position-relative">
+                        <label class="form-label">{{ __('order.description') }}</label>
                         <input
                             :placeholder="__('order.discount_description')"
-                            class="next-input"
+                            class="form-control"
                             v-model="child_discount_description"
                         />
                     </div>
@@ -808,93 +657,66 @@
             :cancel-title="__('order.close')"
             @ok="selectShippingMethod($event)"
         >
-            <div class="next-form-section">
-                <div
-                    class="ui-layout__item mb15 p-none-important"
-                    v-if="!child_products.length || !child_customer_address.phone"
-                >
-                    <div class="ui-banner ui-banner--status-info">
-                        <div class="ui-banner__ribbon">
-                            <svg class="svg-next-icon svg-next-icon-size-20">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                    <title>Circle-Alert</title>
-                                    <path
-                                        fill="currentColor"
-                                        d="M19 10c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z"
-                                    ></path>
-                                    <path
-                                        d="M10 0C4.486 0 0 4.486 0 10s4.486 10 10 10 10-4.486 10-10S15.514 0 10 0zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-13c-.552 0-1 .447-1 1v4c0 .553.448 1 1 1s1-.447 1-1V6c0-.553-.448-1-1-1zm0 8c-.552 0-1 .447-1 1s.448 1 1 1 1-.447 1-1-.448-1-1-1z"
-                                    ></path>
-                                </svg>
-                            </svg>
+            <div v-if="!child_products.length || !child_customer_address.phone">
+                <div class="alert alert-success" role="alert">
+                    <div class="d-flex">
+                        <div>
+                            <i class="icon alert-icon ti ti-alert-circle" />
                         </div>
-                        <div class="ui-banner__content">
-                            <h2 class="ui-banner__title">{{ __('order.how_to_select_configured_shipping') }}</h2>
-                            <div class="ws-nm">
-                                <p>{{ __('order.please_products_and_customer_address_to_see_the_shipping_rates') }}.</p>
-                            </div>
+                        <div>
+                            <h4 class="alert-title">{{ __('order.how_to_select_configured_shipping') }}</h4>
+                            <div class="text-muted">{{ __('order.please_products_and_customer_address_to_see_the_shipping_rates') }}.</div>
                         </div>
                     </div>
                 </div>
-                <div class="next-form-grid">
-                    <div class="next-form-grid-cell">
-                        <label class="next-label">
-                            <input
-                                type="radio"
-                                class="hrv-radio"
-                                value="free-shipping"
-                                name="shipping_type"
-                                v-model="shipping_type"
-                            />
-                            {{ __('order.free_shipping') }}
-                        </label>
-                    </div>
+            </div>
+
+            <div class="position-relative">
+                <label class="form-check form-check-inline">
+                    <input
+                        type="radio"
+                        class="form-check-input"
+                        value="free-shipping"
+                        name="shipping_type"
+                        v-model="shipping_type"
+                    />
+                    {{ __('order.free_shipping') }}
+                </label>
+            </div>
+
+            <div v-if="child_products.length && child_customer_address.phone">
+                <div class="mb-3 position-relative">
+                    <label class="form-check form-check-inline">
+                        <input
+                            type="radio"
+                            class="form-check-input"
+                            value="custom"
+                            name="shipping_type"
+                            v-model="shipping_type"
+                            :disabled="shipping_methods && !Object.keys(shipping_methods).length"
+                        />
+                        <span class="form-check-label">{{ __('order.custom') }}</span>
+                        <small
+                            class="text-warning"
+                            v-if="shipping_methods && !Object.keys(shipping_methods).length"
+                        >
+                            {{ __('order.shipping_method_not_found') }}
+                        </small>
+                    </label>
                 </div>
-                <div v-if="child_products.length && child_customer_address.phone">
-                    <div class="next-form-grid">
-                        <div class="next-form-grid-cell">
-                            <label class="next-label">
-                                <input
-                                    type="radio"
-                                    class="hrv-radio"
-                                    value="custom"
-                                    name="shipping_type"
-                                    v-model="shipping_type"
-                                    :disabled="shipping_methods && !Object.keys(shipping_methods).length"
-                                />
-                                <span>{{ __('order.custom') }}</span>
-                                <span
-                                    class="small text-warning"
-                                    v-if="shipping_methods && !Object.keys(shipping_methods).length"
-                                    >{{ __('order.shipping_method_not_found') }}</span
-                                >
-                            </label>
-                        </div>
-                    </div>
-                    <div class="next-form-grid" v-show="shipping_type == 'custom'">
-                        <div class="next-form-grid-cell">
-                            <div class="ui-select-wrapper">
-                                <select class="ui-select">
-                                    <option
-                                        v-for="(shipping, shipping_key) in shipping_methods"
-                                        :value="shipping_key"
-                                        :selected="shipping_key === child_shipping_method + ';' + child_shipping_option"
-                                        v-bind:key="shipping_key"
-                                        :data-shipping-method="shipping.method"
-                                        :data-shipping-option="shipping.option"
-                                    >
-                                        {{ shipping.title }}
-                                    </option>
-                                </select>
-                                <svg class="svg-next-icon svg-next-icon-size-16">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                        <path d="M10 16l-4-4h8l-4 4zm0-12L6 8h8l-4-4z"></path>
-                                    </svg>
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+
+                <select class="form-select" v-show="shipping_type === 'custom'">
+                    <option
+                        v-for="(shipping, shipping_key) in shipping_methods"
+                        :value="shipping_key"
+                        :selected="shipping_key === `${child_shipping_method};${child_shipping_option}`"
+                        v-bind:key="shipping_key"
+                        :data-shipping-method="shipping.method"
+                        :data-shipping-option="shipping.option"
+                    >
+                        {{ shipping.title }}
+                    </option>
+                </select>
             </div>
         </ec-modal>
 
@@ -905,18 +727,18 @@
             :cancel-title="__('order.close')"
             @ok="createOrder($event, true)"
         >
-            <div class="note note-warning">
+            <div class="alert alert-warning" role="alert">
                 {{
                     __(
                         'order.payment_status_of_the_order_is_paid_once_the_order_has_been_created_you_cannot_change_the_payment_method_or_status'
                     )
                 }}.
             </div>
-            <br />
-            <p>
+
+            <div>
                 <span>{{ __('order.paid_amount') }}:</span>
-                <span class="fs-5">{{ child_total_amount_label }}</span>
-            </p>
+                <h3 class="d-inline-block ms-2 mb-0">{{ child_total_amount_label }}</h3>
+            </div>
         </ec-modal>
 
         <ec-modal
@@ -926,18 +748,18 @@
             :cancel-title="__('order.close')"
             @ok="createOrder($event)"
         >
-            <div class="note note-warning">
+            <div class="alert alert-warning" role="alert">
                 {{
                     __(
                         'order.payment_status_of_the_order_is_pending_once_the_order_has_been_created_you_cannot_change_the_payment_method_or_status'
                     )
                 }}.
             </div>
-            <br />
-            <p>
-                <span class="me-1">{{ __('order.pending_amount') }}:</span>
-                <span class="fs-5">{{ child_total_amount_label }}</span>
-            </p>
+
+            <div>
+                <span>{{ __('order.pending_amount') }}:</span>
+                <h3 class="d-inline-block ms-2 mb-0">{{ child_total_amount_label }}</h3>
+            </div>
         </ec-modal>
 
         <OrderCustomerAddress

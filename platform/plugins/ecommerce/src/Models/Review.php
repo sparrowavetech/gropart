@@ -26,43 +26,6 @@ class Review extends BaseModel
         'order_created_at' => 'datetime',
     ];
 
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(Customer::class, 'customer_id', 'id')->withDefault();
-    }
-
-    public function product(): BelongsTo
-    {
-        return $this->belongsTo(Product::class)->withDefault();
-    }
-
-    protected function productName(): Attribute
-    {
-        return Attribute::make(
-            get: function () {
-                return $this->product->name;
-            }
-        );
-    }
-
-    protected function userName(): Attribute
-    {
-        return Attribute::make(
-            get: function () {
-                return $this->user->name;
-            }
-        );
-    }
-
-    protected function orderCreatedAt(): Attribute
-    {
-        return Attribute::make(
-            get: function () {
-                return $this->user->orders()->first()?->created_at;
-            }
-        );
-    }
-
     protected static function booted(): void
     {
         self::creating(function (Review $review) {
@@ -76,5 +39,30 @@ class Review extends BaseModel
                 $review->images = null;
             }
         });
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(Customer::class, 'customer_id', 'id')->withDefault();
+    }
+
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(Product::class)->withDefault();
+    }
+
+    protected function productName(): Attribute
+    {
+        return Attribute::get(fn () => $this->product->name);
+    }
+
+    protected function userName(): Attribute
+    {
+        return Attribute::get(fn () => $this->user->name);
+    }
+
+    protected function orderCreatedAt(): Attribute
+    {
+        return Attribute::get(fn () => $this->user->orders()->first()?->created_at);
     }
 }

@@ -1,12 +1,4 @@
-$(document).ready(() => {
-    $(document).on('click', '#is_change_password', (event) => {
-        if ($(event.currentTarget).is(':checked')) {
-            $('input[type=password]').closest('.form-group').removeClass('hidden').fadeIn()
-        } else {
-            $('input[type=password]').closest('.form-group').addClass('hidden').fadeOut()
-        }
-    })
-
+$(() => {
     $(document).on('click', '.verify-customer-email-button', (event) => {
         event.preventDefault()
         $('#confirm-verify-customer-email-button').data('action', $(event.currentTarget).prop('href'))

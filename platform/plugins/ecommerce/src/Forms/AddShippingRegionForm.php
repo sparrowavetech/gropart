@@ -9,7 +9,7 @@ use Botble\Ecommerce\Models\Shipping;
 
 class AddShippingRegionForm extends FormAbstract
 {
-    public function buildForm(): void
+    public function setup(): void
     {
         $existedCountries = Shipping::query()->pluck('country')->all();
 
@@ -29,13 +29,13 @@ class AddShippingRegionForm extends FormAbstract
             ->setFormOptions([
                 'url' => route('shipping_methods.region.create'),
             ])
+            ->contentOnly()
             ->setTitle(trans('plugins/ecommerce::shipping.add_shipping_region'))
             ->setValidatorClass(AddShippingRegionRequest::class)
-            ->withCustomFields()
             ->add('region', 'customSelect', [
                 'label' => trans('plugins/ecommerce::shipping.country'),
                 'label_attr' => [
-                    'class' => 'control-label required',
+                    'class' => 'form-label required',
                 ],
                 'attr' => [
                     'class' => 'select-country-search',

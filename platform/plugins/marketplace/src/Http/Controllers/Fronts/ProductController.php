@@ -4,10 +4,7 @@ namespace Botble\Marketplace\Http\Controllers\Fronts;
 
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Facades\EmailHandler;
-use Botble\Base\Facades\PageTitle;
-use Botble\Base\Forms\FormBuilder;
 use Botble\Base\Http\Controllers\BaseController;
-use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Enums\ProductTypeEnum;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Http\Requests\DeleteProductVariationsRequest;
@@ -42,30 +39,29 @@ class ProductController extends BaseController
 
     public function index(ProductTable $table)
     {
-        PageTitle::setTitle(__('Products'));
+        $this->pageTitle(__('Products'));
 
         return $table->renderTable();
     }
 
-    public function create(FormBuilder $formBuilder, Request $request)
+    public function create(Request $request)
     {
         if (EcommerceHelper::isEnabledSupportDigitalProducts()) {
             if ($request->input('product_type') == ProductTypeEnum::DIGITAL) {
-                PageTitle::setTitle(trans('plugins/ecommerce::products.create_product_type.digital'));
+                $this->pageTitle(trans('plugins/ecommerce::products.create_product_type.digital'));
             } else {
-                PageTitle::setTitle(trans('plugins/ecommerce::products.create_product_type.physical'));
+                $this->pageTitle(trans('plugins/ecommerce::products.create_product_type.physical'));
             }
         } else {
-            PageTitle::setTitle(trans('plugins/ecommerce::products.create'));
+            $this->pageTitle(trans('plugins/ecommerce::products.create'));
         }
 
-        return $formBuilder->create(ProductForm::class)->renderForm();
+        return ProductForm::create()->renderForm();
     }
 
     public function store(
         ProductRequest $request,
         StoreProductService $service,
-        BaseHttpResponse $response,
         StoreAttributesOfProductService $storeAttributesOfProductService,
         StoreProductTagService $storeProductTagService
     ) {
@@ -119,7 +115,7 @@ class ProductController extends BaseController
                 }
             }
 
-            $this->postSaveAllVersions([$variation['id'] => $variation], $product->getKey(), $response);
+            $this->postSaveAllVersions([$variation['id'] => $variation], $product->getKey(), $this->httpResponse());
         }
 
         if ($request->has('grouped_products')) {
@@ -141,13 +137,15 @@ class ProductController extends BaseController
                 ->sendUsingTemplate('pending-product-approval');
         }
 
-        return $response
+        return $this
+            ->httpResponse()
+
             ->setPreviousUrl(route('marketplace.vendor.products.index'))
             ->setNextUrl(route('marketplace.vendor.products.edit', $product->getKey()))
-            ->setMessage(trans('core/base::notices.create_success_message'));
+            ->withCreatedSuccessMessage();
     }
 
-    public function edit(int|string $id, FormBuilder $formBuilder)
+    public function edit(int|string $id)
     {
         $product = Product::query()->findOrFail($id);
 
@@ -155,18 +153,15 @@ class ProductController extends BaseController
             abort(404);
         }
 
-        PageTitle::setTitle(trans('plugins/ecommerce::products.edit', ['name' => $product->name]));
+        $this->pageTitle(trans('plugins/ecommerce::products.edit', ['name' => $product->name]));
 
-        return $formBuilder
-            ->create(ProductForm::class, ['model' => $product])
-            ->renderForm();
+        return ProductForm::createFromModel($product)->renderForm();
     }
 
     public function update(
         int|string $id,
         ProductRequest $request,
         StoreProductService $service,
-        BaseHttpResponse $response,
         StoreProductTagService $storeProductTagService
     ) {
         $product = Product::query()->findOrFail($id);
@@ -224,7 +219,7 @@ class ProductController extends BaseController
                 }
             }
 
-            $this->postSaveAllVersions([$variation['id'] => $variation], $product->getKey(), $response);
+            $this->postSaveAllVersions([$variation['id'] => $variation], $product->getKey(), $this->httpResponse());
         } elseif ($product->variations()->count() === 0) {
             $product->productAttributeSets()->detach();
         }
@@ -238,9 +233,10 @@ class ProductController extends BaseController
             }, array_filter(explode(',', $request->input('grouped_products', '')))));
         }
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setPreviousUrl(route('marketplace.vendor.products.index'))
-            ->setMessage(trans('core/base::notices.update_success_message'));
+            ->withUpdatedSuccessMessage();
     }
 
     protected function processRequestData(Request $request): Request
@@ -264,7 +260,7 @@ class ProductController extends BaseController
         return $request;
     }
 
-    public function getRelationBoxes($id, BaseHttpResponse $response)
+    public function getRelationBoxes($id)
     {
         $product = null;
         if ($id) {
@@ -276,37 +272,37 @@ class ProductController extends BaseController
             ['product_id' => $product ? $product->id : 0]
         );
 
-        return $response->setData(view(
-            'plugins/ecommerce::products.partials.extras',
-            compact('product', 'dataUrl')
-        )->render());
+        return $this
+            ->httpResponse()
+            ->setData(view(
+                'plugins/ecommerce::products.partials.extras',
+                compact('product', 'dataUrl')
+            )->render());
     }
 
     public function postAddVersion(
         ProductVersionRequest $request,
-        int|string $id,
-        BaseHttpResponse $response
+        int|string $id
     ) {
         $request->merge([
             'images' => array_filter((array)$request->input('images', [])),
         ]);
 
-        return $this->basePostAddVersion($request, $id, $response);
+        return $this->basePostAddVersion($request, $id, $this->httpResponse());
     }
 
     public function postUpdateVersion(
         ProductVersionRequest $request,
-        $id,
-        BaseHttpResponse $response
+        $id
     ) {
         $request->merge([
             'images' => array_filter((array)$request->input('images', [])),
         ]);
 
-        return $this->basePostUpdateVersion($request, $id, $response);
+        return $this->basePostUpdateVersion($request, $id, $this->httpResponse());
     }
 
-    public function getVersionForm(int|string|null $id, Request $request, BaseHttpResponse $response)
+    public function getVersionForm(int|string|null $id, Request $request)
     {
         $product = null;
         $variation = null;
@@ -328,7 +324,8 @@ class ProductController extends BaseController
 
         $originalProduct = $product;
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setData(
                 MarketplaceHelper::view('vendor-dashboard.products.product-variation-form', compact(
                     'productAttributeSets',
@@ -353,13 +350,13 @@ class ProductController extends BaseController
     }
 
     public function deleteVersions(
-        DeleteProductVariationsRequest $request,
-        BaseHttpResponse $response
+        DeleteProductVariationsRequest $request
     ) {
         $ids = (array)$request->input('ids');
 
         if (empty($ids)) {
-            return $response
+            return $this
+                ->httpResponse()
                 ->setError()
                 ->setMessage(trans('core/base::notices.no_select'));
         }
@@ -367,7 +364,9 @@ class ProductController extends BaseController
         $variations = ProductVariation::query()->whereIn('id', $ids)->with('product')->get();
 
         if ($variations->isEmpty() || $variations->count() != count($ids)) {
-            return $response
+            return $this
+                ->httpResponse()
+
                 ->setError()
                 ->setMessage(trans('core/base::notices.no_select'));
         }
@@ -380,10 +379,10 @@ class ProductController extends BaseController
             }
         }
 
-        return $this->baseDeleteVersions($request, $response);
+        return $this->baseDeleteVersions($request, $this->httpResponse());
     }
 
-    public function getListProductForSearch(Request $request, BaseHttpResponse $response)
+    public function getListProductForSearch(Request $request)
     {
         $availableProducts = Product::query()
             ->where('status', BaseStatusEnum::PUBLISHED)
@@ -402,21 +401,23 @@ class ProductController extends BaseController
 
         $includeVariation = $request->input('include_variation', 0);
 
-        return $response->setData(
-            view('plugins/ecommerce::products.partials.panel-search-data', compact(
-                'availableProducts',
-                'includeVariation'
-            ))->render()
-        );
+        return $this
+            ->httpResponse()
+            ->setData(
+                view('plugins/ecommerce::products.partials.panel-search-data', compact(
+                    'availableProducts',
+                    'includeVariation'
+                ))->render()
+            );
     }
 
-    public function ajaxProductOptionInfo(
-        Request $request,
-        BaseHttpResponse $response,
-    ): BaseHttpResponse {
+    public function ajaxProductOptionInfo(Request $request)
+    {
         $optionsValues = GlobalOption::query()->with(['values'])->findOrFail($request->input('id'));
 
-        return $response->setData($optionsValues);
+        return $this
+            ->httpResponse()
+            ->setData($optionsValues);
     }
 
     public function getProductVariations(int|string $id, ProductVariationTable $dataTable)
@@ -437,7 +438,7 @@ class ProductController extends BaseController
         return $dataTable->renderTable();
     }
 
-    public function setDefaultProductVariation(int|string $id, BaseHttpResponse $response)
+    public function setDefaultProductVariation(int|string $id)
     {
         $variation = ProductVariation::query()->findOrFail($id);
 
@@ -454,6 +455,8 @@ class ProductController extends BaseController
             $variation->save();
         }
 
-        return $response->setMessage(trans('core/base::notices.update_success_message'));
+        return $this
+            ->httpResponse()
+            ->withUpdatedSuccessMessage();
     }
 }

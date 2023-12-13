@@ -14,12 +14,15 @@ use Closure;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Database\DatabaseManager;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
+use Illuminate\Events\NullDispatcher;
 use Illuminate\Session\SessionManager;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 
 class Cart
 {
+    protected static Dispatcher $dispatcher;
+
     public const DEFAULT_INSTANCE = 'default';
 
     protected string $instance;
@@ -28,8 +31,10 @@ class Cart
 
     protected float $weight = 0;
 
-    public function __construct(protected SessionManager $session, protected Dispatcher $events)
+    public function __construct(protected SessionManager $session, Dispatcher $events)
     {
+        static::$dispatcher = $events;
+
         $this->instance(self::DEFAULT_INSTANCE);
     }
 
@@ -75,11 +80,18 @@ class Cart
 
         $content->put($cartItem->rowId, $cartItem);
 
-        $this->events->dispatch('cart.added', $cartItem);
-
         $this->putToSession($content);
 
+        static::dispatchEvent('cart.added', $cartItem);
+
         return $cartItem;
+    }
+
+    public function addQuietly($id, $name = null, $qty = null, $price = null, array $options = [])
+    {
+        return static::withoutEvents(
+            fn () => $this->add($id, $name, $qty, $price, $options)
+        );
     }
 
     /**
@@ -184,6 +196,7 @@ class Cart
     public function putToSession($content)
     {
         $this->setLastUpdatedAt();
+
         $this->session->put($this->instance, $content);
 
         return $this;
@@ -234,11 +247,16 @@ class Cart
 
         $cartItem->updated_at = Carbon::now();
 
-        $this->events->dispatch('cart.updated', $cartItem);
+        static::dispatchEvent('cart.updated', $cartItem);
 
         $this->putToSession($content);
 
         return $cartItem;
+    }
+
+    public function updateQuietly($rowId, $qty)
+    {
+        return static::withoutEvents(fn () => $this->update($rowId, $qty));
     }
 
     /**
@@ -272,9 +290,14 @@ class Cart
 
         $content->pull($cartItem->rowId);
 
-        $this->events->dispatch('cart.removed', $cartItem);
+        static::dispatchEvent('cart.removed', $cartItem);
 
         $this->putToSession($content);
+    }
+
+    public function removeQuietly($rowId)
+    {
+        return static::withoutEvents(fn () => $this->remove($rowId));
     }
 
     /**
@@ -295,6 +318,16 @@ class Cart
         $content = $this->getContent();
 
         return $content->sum('qty');
+    }
+
+    public function isNotEmpty(): bool
+    {
+        return $this->getContent()->isNotEmpty();
+    }
+
+    public function isEmpty(): bool
+    {
+        return $this->getContent()->isEmpty();
     }
 
     /**
@@ -369,12 +402,7 @@ class Cart
         $content = $this->getContent();
 
         return $content->reduce(function ($subTotal, CartItem $cartItem) {
-            //  return $subTotal + ($cartItem->qty * $cartItem->price);
-            if(setting('ecommerce_display_product_price_including_taxes') == 1){
-                return $subTotal + ($cartItem->qty * ($cartItem->price-$cartItem->tax));
-            } else {
-                return $subTotal + ($cartItem->qty * ($cartItem->price));
-            }
+            return $subTotal + ($cartItem->qty * $cartItem->price);
         }, 0);
     }
 
@@ -384,12 +412,7 @@ class Cart
     public function rawSubTotalByItems($content)
     {
         return $content->reduce(function ($subTotal, CartItem $cartItem) {
-            //  return $subTotal + ($cartItem->qty * $cartItem->price);
-            if(setting('ecommerce_display_product_price_including_taxes') == 1){
-                return $subTotal + ($cartItem->qty * ($cartItem->price-$cartItem->tax));
-            } else {
-                return $subTotal + ($cartItem->qty * ($cartItem->price));
-            }
+            return $subTotal + ($cartItem->qty * $cartItem->price);
         }, 0);
     }
 
@@ -472,7 +495,12 @@ class Cart
             'content' => serialize($content),
         ]);
 
-        $this->events->dispatch('cart.stored');
+        static::dispatchEvent('cart.stored');
+    }
+
+    public function storeQuietly($identifier)
+    {
+        return static::withoutEvents(fn () => $this->store($identifier));
     }
 
     protected function storedCartWithIdentifierExists(string $identifier): bool
@@ -551,7 +579,7 @@ class Cart
             $content->put($cartItem->rowId, $cartItem);
         }
 
-        $this->events->dispatch('cart.restored');
+        static::dispatchEvent('cart.restored');
 
         $this->putToSession($content);
 
@@ -559,6 +587,11 @@ class Cart
 
         $this->getConnection()->table($this->getTableName())
             ->where('identifier', $identifier)->delete();
+    }
+
+    public function restoreQuietly($identifier)
+    {
+        return static::withoutEvents(fn () => $this->restore($identifier));
     }
 
     /**
@@ -646,12 +679,7 @@ class Cart
         $content = $this->getContent();
 
         $subTotal = $content->reduce(function ($subTotal, CartItem $cartItem) {
-            //  return $subTotal + ($cartItem->qty * $cartItem->price);
-            if(setting('ecommerce_display_product_price_including_taxes') == 1){
-                return $subTotal + ($cartItem->qty * ($cartItem->price-$cartItem->tax));
-            } else {
-                return $subTotal + ($cartItem->qty * ($cartItem->price));
-            }
+            return $subTotal + ($cartItem->qty * $cartItem->price);
         }, 0);
 
         return format_price($subTotal);
@@ -745,5 +773,39 @@ class Cart
     public function weight()
     {
         return EcommerceHelper::validateOrderWeight($this->weight);
+    }
+
+    public static function getEventDispatcher(): Dispatcher
+    {
+        return static::$dispatcher;
+    }
+
+    public static function setEventDispatcher(Dispatcher $dispatcher): void
+    {
+        static::$dispatcher = $dispatcher;
+    }
+
+    public static function withoutEvents(callable $callback)
+    {
+        $dispatcher = static::getEventDispatcher();
+
+        if ($dispatcher) {
+            static::setEventDispatcher(new NullDispatcher($dispatcher));
+        }
+
+        try {
+            return $callback();
+        } finally {
+            if ($dispatcher) {
+                static::setEventDispatcher($dispatcher);
+            }
+        }
+    }
+
+    protected static function dispatchEvent(string $event, $parameters = []): void
+    {
+        if (isset(static::$dispatcher)) {
+            static::$dispatcher->dispatch($event, $parameters);
+        }
     }
 }

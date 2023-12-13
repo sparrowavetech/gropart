@@ -3,13 +3,12 @@
 namespace Botble\DevTool\Commands\Make;
 
 use Botble\DevTool\Commands\Abstracts\BaseMakeCommand;
-use Illuminate\Contracts\Console\PromptsForMissingInput;
 use Illuminate\Support\Str;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
 
 #[AsCommand('cms:make:route', 'Make a route')]
-class RouteMakeCommand extends BaseMakeCommand implements PromptsForMissingInput
+class RouteMakeCommand extends BaseMakeCommand
 {
     public function handle(): int
     {

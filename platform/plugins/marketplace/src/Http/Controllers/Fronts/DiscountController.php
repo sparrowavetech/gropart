@@ -5,13 +5,11 @@ namespace Botble\Marketplace\Http\Controllers\Fronts;
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Facades\Assets;
-use Botble\Base\Facades\PageTitle;
 use Botble\Base\Http\Controllers\BaseController;
-use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Models\Discount;
 use Botble\JsValidation\Facades\JsValidator;
 use Botble\Marketplace\Facades\MarketplaceHelper;
-use Botble\Marketplace\Http\Requests\DiscountRequest;
+use Botble\Marketplace\Http\Requests\Fronts\DiscountRequest;
 use Botble\Marketplace\Tables\DiscountTable;
 use Exception;
 use Illuminate\Http\Request;
@@ -21,20 +19,20 @@ class DiscountController extends BaseController
 {
     public function index(DiscountTable $table)
     {
-        PageTitle::setTitle(__('Coupons'));
+        $this->pageTitle(__('Coupons'));
 
         return $table->renderTable();
     }
 
     public function create()
     {
-        PageTitle::setTitle(__('Create coupon'));
+        $this->pageTitle(__('Create coupon'));
 
         Assets::addStylesDirectly(['vendor/core/plugins/ecommerce/css/ecommerce.css'])
             ->addScriptsDirectly([
                 'vendor/core/plugins/marketplace/js/discount.js',
             ])
-            ->addScripts(['timepicker', 'input-mask', 'blockui'])
+            ->addScripts(['timepicker', 'input-mask'])
             ->addStyles(['timepicker']);
 
         Assets::usingVueJS();
@@ -51,7 +49,7 @@ class DiscountController extends BaseController
         return auth('customer')->user()->store;
     }
 
-    public function store(DiscountRequest $request, BaseHttpResponse $response)
+    public function store(DiscountRequest $request)
     {
         $request->merge([
             'can_use_with_promotion' => 0,
@@ -70,12 +68,13 @@ class DiscountController extends BaseController
 
         event(new CreatedContentEvent(DISCOUNT_MODULE_SCREEN_NAME, $request, $discount));
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setNextUrl(route('marketplace.vendor.discounts.index'))
-            ->setMessage(trans('core/base::notices.create_success_message'));
+            ->withCreatedSuccessMessage();
     }
 
-    public function destroy(Discount $discount, Request $request, BaseHttpResponse $response)
+    public function destroy(Discount $discount, Request $request)
     {
         if ($discount->store_id !== $this->getStore()->id) {
             abort(403);
@@ -86,20 +85,25 @@ class DiscountController extends BaseController
 
             event(new DeletedContentEvent(DISCOUNT_MODULE_SCREEN_NAME, $request, $discount));
 
-            return $response->setMessage(trans('core/base::notices.delete_success_message'));
+            return $this
+                ->httpResponse()
+                ->setMessage(trans('core/base::notices.delete_success_message'));
         } catch (Exception $exception) {
-            return $response
+            return $this
+                ->httpResponse()
                 ->setError()
                 ->setMessage($exception->getMessage());
         }
     }
 
-    public function postGenerateCoupon(BaseHttpResponse $response)
+    public function postGenerateCoupon()
     {
         do {
             $code = strtoupper(Str::random(12));
         } while (Discount::query()->where('code', $code)->exists());
 
-        return $response->setData($code);
+        return $this
+            ->httpResponse()
+            ->setData($code);
     }
 }

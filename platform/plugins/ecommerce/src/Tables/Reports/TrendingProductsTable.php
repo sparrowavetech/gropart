@@ -31,12 +31,10 @@ class TrendingProductsTable extends TableAbstract
                 return Html::link($product->url, $product->name, ['target' => '_blank']);
             })
             ->editColumn('views', function (Product $product) {
-                return Html::tag('i', '', ['class' => 'fa fa-eye'])->toHtml() . ' ' . number_format(
-                    (float)$product->views_count
-                );
+                return number_format((float)$product->views_count);
             });
 
-        return $data->escapeColumns([])->make();
+        return $this->toJson($data);
     }
 
     public function query(): Relation|Builder|QueryBuilder
@@ -80,6 +78,7 @@ class TrendingProductsTable extends TableAbstract
                 ->searchable(false),
             Column::make('views')
                 ->title(trans('plugins/ecommerce::reports.views'))
+                ->alignEnd()
                 ->orderable(false)
                 ->searchable(false),
         ];

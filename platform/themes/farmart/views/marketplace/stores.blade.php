@@ -1,6 +1,8 @@
 @php
     Theme::layout('full-width');
+    
     $layout = request()->input('layout') ?: theme_option('store_list_layout');
+    
     $layout = $layout && in_array($layout, array_keys(get_store_list_layouts())) ? $layout : 'grid';
 @endphp
 

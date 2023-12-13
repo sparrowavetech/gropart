@@ -8,10 +8,7 @@ use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
-use Botble\Base\Facades\PageTitle;
-use Botble\Base\Forms\FormBuilder;
 use Botble\Base\Http\Controllers\BaseController;
-use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Exports\TemplateShippingRuleItemExport;
 use Botble\Ecommerce\Forms\ShippingRuleItemForm;
 use Botble\Ecommerce\Http\Requests\ShippingRuleItemImportRequest;
@@ -36,32 +33,32 @@ class ShippingRuleItemController extends BaseController
 
     public function index(ShippingRuleItemTable $dataTable)
     {
-        PageTitle::setTitle(trans('plugins/ecommerce::shipping.rule.item.name'));
+        $this->pageTitle(trans('plugins/ecommerce::shipping.rule.item.name'));
 
         return $dataTable->renderTable();
     }
 
-    public function create(Request $request, FormBuilder $formBuilder, BaseHttpResponse $response)
+    public function create(Request $request)
     {
         if ($request->ajax() && ($shippingRuleId = $request->input('shipping_rule_id'))) {
             ShippingRule::query()->findOrFail($shippingRuleId);
 
-            $html = $formBuilder
-                ->create(ShippingRuleItemForm::class)
+            $html = ShippingRuleItemForm::create()
                 ->contentOnly()
                 ->renderForm();
 
-            return $response
+            return $this
+                ->httpResponse()
                 ->setData(['html' => $html])
                 ->setMessage(trans('plugins/ecommerce::shipping.rule.item.create'));
         }
 
-        PageTitle::setTitle(trans('plugins/ecommerce::shipping.rule.item.create'));
+        $this->pageTitle(trans('plugins/ecommerce::shipping.rule.item.create'));
 
-        return $formBuilder->create(ShippingRuleItemForm::class)->renderForm();
+        return ShippingRuleItemForm::create()->renderForm();
     }
 
-    public function store(ShippingRuleItemRequest $request, BaseHttpResponse $response)
+    public function store(ShippingRuleItemRequest $request)
     {
         $ruleId = $request->input('shipping_rule_id');
         $rule = ShippingRule::query()->findOrFail($ruleId);
@@ -75,7 +72,8 @@ class ShippingRuleItemController extends BaseController
 
         $hasOperations = Auth::user()->hasAnyPermission(['ecommerce.shipping-rule-items.edit', 'ecommerce.shipping-rule-items.destroy']);
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setPreviousUrl(route('ecommerce.shipping-rule-items.index'))
             ->setNextUrl(route('ecommerce.shipping-rule-items.edit', $item->id))
             ->setData([
@@ -83,10 +81,10 @@ class ShippingRuleItemController extends BaseController
                 'shipping_rule_id' => $rule->getKey(),
                 'html' => view('plugins/ecommerce::shipping.items.table-item', compact('item', 'hasOperations'))->render(),
             ])
-            ->setMessage(trans('core/base::notices.create_success_message'));
+            ->withCreatedSuccessMessage();
     }
 
-    public function edit(int|string $id, FormBuilder $formBuilder, Request $request, BaseHttpResponse $response)
+    public function edit(int|string $id, Request $request)
     {
         $item = ShippingRuleItem::query()->findOrFail($id);
 
@@ -95,20 +93,21 @@ class ShippingRuleItemController extends BaseController
         $title = trans('core/base::forms.edit_item', ['name' => $item->name_item]);
 
         if ($request->ajax()) {
-            $html = $formBuilder
-                ->create(ShippingRuleItemForm::class, ['model' => $item])
+            $html = ShippingRuleItemForm::createFromModel($item)
                 ->contentOnly()
                 ->renderForm();
 
-            return $response->setData(compact('html'))->setMessage($title);
+            return $this
+                ->httpResponse()
+                ->setData(compact('html'))->setMessage($title);
         }
 
-        PageTitle::setTitle($title);
+        $this->pageTitle($title);
 
-        return $formBuilder->create(ShippingRuleItemForm::class, ['model' => $item])->renderForm();
+        return ShippingRuleItemForm::createFromModel($item)->renderForm();
     }
 
-    public function update(int|string $id, ShippingRuleItemRequest $request, BaseHttpResponse $response)
+    public function update(int|string $id, ShippingRuleItemRequest $request)
     {
         $item = ShippingRuleItem::query()->findOrFail($id);
 
@@ -123,17 +122,18 @@ class ShippingRuleItemController extends BaseController
 
         $hasOperations = Auth::user()->hasAnyPermission(['ecommerce.shipping-rule-items.edit', 'ecommerce.shipping-rule-items.destroy']);
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setPreviousUrl(route('ecommerce.shipping-rule-items.index'))
             ->setData([
                 'id' => $item->id,
                 'shipping_rule_id' => $item->shipping_rule_id,
                 'html' => view('plugins/ecommerce::shipping.items.table-item', compact('item', 'hasOperations'))->render(),
             ])
-            ->setMessage(trans('core/base::notices.update_success_message'));
+            ->withUpdatedSuccessMessage();
     }
 
-    public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
+    public function destroy(int|string $id, Request $request)
     {
         try {
             $item = ShippingRuleItem::query()->findOrFail($id);
@@ -142,13 +142,16 @@ class ShippingRuleItemController extends BaseController
 
             event(new DeletedContentEvent(SHIPPING_RULE_ITEM_MODULE_SCREEN_NAME, $request, $item));
 
-            return $response->setData([
+            return $this
+                ->httpResponse()
+                ->setData([
                     'id' => $item->id,
                     'shipping_rule_id' => $item->shipping_rule_id,
                 ])
                 ->setMessage(trans('core/base::notices.delete_success_message'));
         } catch (Exception $exception) {
-            return $response
+            return $this
+                ->httpResponse()
                 ->setError()
                 ->setMessage($exception->getMessage());
         }
@@ -156,7 +159,7 @@ class ShippingRuleItemController extends BaseController
 
     public function import()
     {
-        PageTitle::setTitle(trans('plugins/ecommerce::shipping.rule.item.bulk-import.menu'));
+        $this->pageTitle(trans('plugins/ecommerce::shipping.rule.item.bulk-import.menu'));
 
         Assets::addScriptsDirectly(['vendor/core/plugins/ecommerce/js/bulk-import.js']);
 
@@ -168,7 +171,7 @@ class ShippingRuleItemController extends BaseController
         return view('plugins/ecommerce::shipping.bulk-import.index', compact('data', 'headings', 'rules'));
     }
 
-    public function postImport(ShippingRuleItemImportRequest $request, BaseHttpResponse $response)
+    public function postImport(ShippingRuleItemImportRequest $request)
     {
         BaseHelper::maximumExecutionTimeAndMemoryLimit();
 
@@ -187,7 +190,8 @@ class ShippingRuleItemController extends BaseController
 
             $message = trans('plugins/ecommerce::bulk-import.import_failed_description');
 
-            return $response
+            return $this
+                ->httpResponse()
                 ->setError()
                 ->setData($data)
                 ->setMessage($message);
@@ -213,7 +217,9 @@ class ShippingRuleItemController extends BaseController
             'failed' => $data['total_failed'],
         ]);
 
-        return $response->setData($data)->setMessage($message . ' ' . $result);
+        return $this
+            ->httpResponse()
+            ->setData($data)->setMessage($message . ' ' . $result);
     }
 
     public function downloadTemplate(Request $request)
@@ -227,7 +233,7 @@ class ShippingRuleItemController extends BaseController
         return (new TemplateShippingRuleItemExport($extension))->download($fileName, $writeType, $contentType);
     }
 
-    public function items($ruleId, Request $request, BaseHttpResponse $response)
+    public function items($ruleId, Request $request)
     {
         $rule = ShippingRule::query()->findOrFail($ruleId);
 
@@ -260,6 +266,8 @@ class ShippingRuleItemController extends BaseController
 
         $html = view('plugins/ecommerce::shipping.items.table', compact('items', 'rule') + ['total' => $items->total()])->render();
 
-        return $response->setData(compact('html'));
+        return $this
+            ->httpResponse()
+            ->setData(compact('html'));
     }
 }

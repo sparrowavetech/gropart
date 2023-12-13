@@ -7,8 +7,6 @@ use Botble\Base\Supports\EmailHandler as BaseEmailHandler;
 use Botble\Ecommerce\Enums\DiscountTypeOptionEnum;
 use Botble\Ecommerce\Facades\OrderHelper;
 use Botble\Ecommerce\Models\Order as OrderModel;
-use Botble\Ecommerce\Models\Enquiry;
-use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Botble\Theme\Facades\Theme;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
@@ -102,34 +100,6 @@ class MarketplaceHelper
     public function isCommissionCategoryFeeBasedEnabled(): bool
     {
         return (bool)$this->getSetting('enable_commission_fee_for_each_category');
-    }
-
-    public static function sendEnquiryMail($enquiry)
-    {
-        $mailer = EmailHandler::setModule(MARKETPLACE_MODULE_SCREEN_NAME);
-
-        if ($mailer->templateEnabled('store_new_enquiry')) {
-            if ($enquiry->product->store->email) {
-                self::setEmailVendorVariablesForEnquiry($enquiry);
-                $mailer->sendUsingTemplate('store_new_enquiry', $enquiry->product->store->email);
-            }
-        }
-        return $enquiry;
-    }
-    public static function setEmailVendorVariablesForEnquiry(Enquiry $enquiry): \Botble\Base\Supports\EmailHandler
-    {
-        return EmailHandler::setModule(MARKETPLACE_MODULE_SCREEN_NAME)
-            ->setVariableValues([
-                'enquiry_id'    => $enquiry->code,
-                'customer_name'    => $enquiry->name,
-                'customer_email'   => $enquiry->email,
-                'customer_phone'   => $enquiry->phone,
-                'customer_address' => $enquiry->address.', '.$enquiry->cityName->name.', '.$enquiry->stateName->name.', '.$enquiry->zip_code,
-                'product_list'     => view('plugins/ecommerce::emails.partials.enquiry-detail', compact('enquiry'))
-                    ->render(),
-                'enquiry_description'      => $enquiry->description,
-                'store_name'       => $enquiry->product->store->name,
-            ]);
     }
 
     public function maxFilesizeUploadByVendor(): float

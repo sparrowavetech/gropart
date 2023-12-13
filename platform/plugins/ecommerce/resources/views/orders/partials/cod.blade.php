@@ -5,19 +5,21 @@
         name="payment_method"
         type="radio"
         value="cod"
-        @if (PaymentMethods::getSelectingMethod() == \Botble\Payment\Enums\PaymentMethodEnum::COD) checked @endif
+        @if (PaymentMethods::getSelectingMethod() == Botble\Payment\Enums\PaymentMethodEnum::COD) checked @endif
     >
-    <label
-        class="text-start"
-        for="payment_cod"
-    >{{ setting('payment_cod_name', trans('plugins/payment::payment.payment_via_cod')) }}</label>
+    <label class="text-start" for="payment_cod">
+        {{ get_payment_setting('name', 'cod', trans('plugins/payment::payment.payment_via_cod')) }}
+    </label>
     <div
-        class="payment_cod_wrap payment_collapse_wrap collapse @if (PaymentMethods::getSelectingMethod() == \Botble\Payment\Enums\PaymentMethodEnum::COD) show @endif"
+        class="payment_cod_wrap payment_collapse_wrap collapse @if (PaymentMethods::getSelectingMethod() == Botble\Payment\Enums\PaymentMethodEnum::COD) show @endif"
         style="padding: 15px 0;"
     >
-        {!! BaseHelper::clean(setting('payment_cod_description')) !!}
+        {!! BaseHelper::clean(get_payment_setting('description', 'cod')) !!}
 
-        @php $minimumOrderAmount = setting('payment_cod_minimum_amount', 0); @endphp
+        @php
+            $minimumOrderAmount = get_payment_setting('minimum_amount', 'cod', 0);
+        @endphp
+
         @if ($minimumOrderAmount > Cart::instance('cart')->rawSubTotal())
             <div
                 class="alert alert-warning"

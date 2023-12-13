@@ -3,13 +3,12 @@
 namespace Botble\DevTool\Commands;
 
 use Botble\DevTool\Commands\Abstracts\BaseMakeCommand;
-use Illuminate\Contracts\Console\PromptsForMissingInput;
 use Illuminate\Support\Str;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
 
 #[AsCommand('cms:package:create', 'Create a package in the /platform/packages directory.')]
-class PackageCreateCommand extends BaseMakeCommand implements PromptsForMissingInput
+class PackageCreateCommand extends BaseMakeCommand
 {
     public function handle(): int
     {

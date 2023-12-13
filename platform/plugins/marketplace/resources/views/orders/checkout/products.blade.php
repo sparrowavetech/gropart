@@ -1,10 +1,8 @@
 <div class="bg-light p-2">
     <p class="font-weight-bold mb-0">{{ __('Product(s)') }}:</p>
 </div>
-<div
-    class="checkout-products-marketplace"
-    id="shipping-method-wrapper"
->
+
+<div class="checkout-products-marketplace" id="shipping-method-wrapper">
     @foreach ($groupedProducts as $grouped)
         @php
             $cartItems = $grouped['products']->pluck('cartItem');
@@ -26,15 +24,12 @@
             $rawTotal = Cart::rawTotalByItems($cartItems);
             $shippingCurrent = Arr::get($shipping, $defaultShippingMethod . '.' . $defaultShippingOption, []);
             $isAvailableShipping = Arr::get($sessionData, 'is_available_shipping', true);
-            
+
             $orderAmount = max($rawTotal - $promotionDiscountAmount - $couponDiscountAmount, 0);
             $orderAmount += (float) $shippingAmount;
         @endphp
         <div class="mt-3 bg-light mb-3">
-            <div
-                class="p-2"
-                style="background: antiquewhite;"
-            >
+            <div class="p-2" style="background: antiquewhite;">
                 <img
                     class="img-fluid rounded"
                     src="{{ RvMedia::getImageUrl($store->logo, 'small', false, RvMedia::getDefaultImage()) }}"
@@ -45,10 +40,7 @@
                 @if (EcommerceHelper::isReviewEnabled())
                     <div class="rating_wrap">
                         <div class="rating">
-                            <div
-                                class="product_rate"
-                                style="width: {{ 4 * 20 }}%"
-                            ></div>
+                            <div class="product_rate" style="width: {{ 4 * 20 }}%"></div>
                         </div>
                     </div>
                 @endif
@@ -125,29 +117,6 @@
                                 {{ format_price(Cart::rawSubTotalByItems($cartItems)) }} </p>
                         </div>
                     </div>
-
-                    @if ($isAvailableShipping)
-                        <div class="row">
-                            <div class="col-6">
-                                <p>{{ __('Shipping fee') }}:</p>
-                            </div>
-                            <div class="col-6 text-end">
-                                <p class="price-text">
-                                    @if (Arr::get($shippingCurrent, 'price') && $isFreeShipping)
-                                        <span
-                                            class="font-italic"
-                                            style="text-decoration-line: line-through;"
-                                        >{{ format_price(Arr::get($shippingCurrent, 'price')) }}</span>
-                                        <span class="font-weight-bold">{{ __('Free shipping') }}</span>
-                                    @else
-                                        <span
-                                            class="font-weight-bold">{{ format_price(Arr::get($shippingCurrent, 'price')) }}</span>
-                                    @endif
-                                </p>
-                            </div>
-                        </div>
-                    @endif
-                    
                     @if (EcommerceHelper::isTaxEnabled())
                         <div class="row">
                             <div class="col-6">
@@ -171,15 +140,33 @@
                         </div>
                     @endif
 
+                    @if ($isAvailableShipping)
+                        <div class="row">
+                            <div class="col-6">
+                                <p>{{ __('Shipping fee') }}:</p>
+                            </div>
+                            <div class="col-6 text-end">
+                                <p class="price-text">
+                                    @if (Arr::get($shippingCurrent, 'price') && $isFreeShipping)
+                                        <span class="font-italic" style="text-decoration-line: line-through;">
+                                            {{ format_price(Arr::get($shippingCurrent, 'price')) }}
+                                        </span>
+                                        <span class="font-weight-bold">{{ __('Free shipping') }}</span>
+                                    @else
+                                        <span class="font-weight-bold">
+                                            {{ format_price(Arr::get($shippingCurrent, 'price')) }}
+                                        </span>
+                                    @endif
+                                </p>
+                            </div>
+                        </div>
+                    @endif
                     <div class="row">
                         <div class="col-6">
                             <p>{{ __('Total') }}:</p>
                         </div>
                         <div class="col-6 float-end">
-                            <p
-                                class="total-text raw-total-text mb-0"
-                                data-price="{{ $rawTotal }}"
-                            >
+                            <p class="total-text raw-total-text mb-0" data-price="{{ $rawTotal }}">
                                 {{ format_price($orderAmount) }}
                             </p>
                         </div>

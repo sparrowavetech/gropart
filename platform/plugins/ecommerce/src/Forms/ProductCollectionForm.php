@@ -2,37 +2,40 @@
 
 namespace Botble\Ecommerce\Forms;
 
-use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\Html;
+use Botble\Base\Forms\FieldOptions\StatusFieldOption;
+use Botble\Base\Forms\Fields\SelectField;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Ecommerce\Http\Requests\ProductCollectionRequest;
 use Botble\Ecommerce\Models\ProductCollection;
 
 class ProductCollectionForm extends FormAbstract
 {
-    public function buildForm(): void
+    public function setup(): void
     {
         Assets::addStylesDirectly('vendor/core/plugins/ecommerce/css/ecommerce.css')
-            ->addScripts(['blockui'])
             ->addScriptsDirectly('vendor/core/plugins/ecommerce/js/edit-product-collection.js');
 
         $this
             ->setupModel(new ProductCollection())
             ->setValidatorClass(ProductCollectionRequest::class)
-            ->withCustomFields()
             ->add('name', 'text', [
                 'label' => trans('core/base::forms.name'),
                 'required' => true,
                 'attr' => [
                     'placeholder' => trans('core/base::forms.name_placeholder'),
-                    'data-counter' => 120,
+                    'data-counter' => 250,
                 ],
                 'help_block' => [
                     'text' => $this->getModel()->id ? trans(
                         'plugins/ecommerce::product-collections.slug_help_block',
                         ['slug' => $this->getModel()->slug]
                     ) : null,
+                    'tag' => 'small',
+                    'attr' => [
+                        'class' => 'form-hint',
+                    ],
                 ],
             ])
             ->add('slug', 'text', [
@@ -50,11 +53,7 @@ class ProductCollectionForm extends FormAbstract
                     'data-counter' => 400,
                 ],
             ])
-            ->add('status', 'customSelect', [
-                'label' => trans('core/base::tables.status'),
-                'required' => true,
-                'choices' => BaseStatusEnum::labels(),
-            ])
+            ->add('status', SelectField::class, StatusFieldOption::make()->toArray())
             ->add('is_featured', 'onOff', [
                 'label' => trans('core/base::forms.is_featured'),
                 'default_value' => false,
@@ -66,13 +65,12 @@ class ProductCollectionForm extends FormAbstract
             $this
                 ->addMetaBoxes([
                     'collection-products' => [
-                        'title' => null,
+                        'title' => trans('plugins/ecommerce::products.name'),
                         'content' =>
                             Html::tag('div', '', [
                                 'class' => 'wrap-collection-products',
                                 'data-target' => route('product-collections.get-product-collection', $productCollectionId),
                             ]),
-                        'wrap' => false,
                         'priority' => 9999,
                     ],
             ]);

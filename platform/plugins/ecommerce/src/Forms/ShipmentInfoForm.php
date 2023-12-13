@@ -5,15 +5,15 @@ namespace Botble\Ecommerce\Forms;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Ecommerce\Http\Requests\ShipmentRequest;
 use Botble\Ecommerce\Models\Shipment;
+use Illuminate\Support\Facades\Blade;
 
 class ShipmentInfoForm extends FormAbstract
 {
-    public function buildForm(): void
+    public function setup(): void
     {
         $this
             ->setupModel(new Shipment())
             ->setValidatorClass(ShipmentRequest::class)
-            ->withCustomFields()
             ->contentOnly()
             ->add('shipping_company_name', 'text', [
                 'label' => trans('plugins/ecommerce::shipping.shipping_company_name'),
@@ -43,14 +43,12 @@ class ShipmentInfoForm extends FormAbstract
                     'placeholder' => trans('plugins/ecommerce::shipping.add_note'),
                 ],
             ])
-            ->add('submitter', 'button', [
-                'label' => '<i class="fa fa-check-circle me-2"></i>' . trans('core/base::forms.save'),
-                'attr' => [
-                    'class' => 'btn btn-success',
-                    'value' => 'save',
-                    'type' => 'submit',
-                    'name' => 'submitter',
-                ],
+            ->add('submit', 'html', [
+                'html' => Blade::render(sprintf(
+                    '<x-core::button type="submit" name="submit" value="apply" color="primary" icon="%s">%s</x-core::button>',
+                    'ti ti-circle-check',
+                    trans('core/base::forms.save_and_continue')
+                )),
             ]);
     }
 }

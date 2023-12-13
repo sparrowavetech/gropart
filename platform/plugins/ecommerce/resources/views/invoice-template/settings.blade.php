@@ -46,7 +46,7 @@
                 <x-core::button
                     target="_blank"
                     tag="a"
-                    href="{{ route('ecommerce.settings.invoice-template.preview') }}"
+                    href="{{ route('invoice-template.preview') }}"
                     icon="ti ti-eye"
                 >
                     {{ trans('plugins/ecommerce::invoice-template.preview') }}
@@ -60,7 +60,7 @@
         id="reset-template-to-default-modal"
         :title="trans('core/setting::setting.email.confirm_reset')"
         :submit-button-label="trans('core/setting::setting.email.continue')"
-        :submit-button-attrs="['id' => 'reset-template-to-default-button', 'data-target' => route('ecommerce.settings.invoice-template.reset')]"
+        :submit-button-attrs="['id' => 'reset-template-to-default-button', 'data-target' => route('invoice-template.reset')]"
     >
         {!! trans('core/setting::setting.email.confirm_message') !!}
     </x-core::modal.action>

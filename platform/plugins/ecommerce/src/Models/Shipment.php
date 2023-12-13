@@ -66,8 +66,6 @@ class Shipment extends BaseModel
 
     protected function isCanceled(): Attribute
     {
-        return Attribute::make(
-            get: fn () => $this->status == ShippingStatusEnum::CANCELED,
-        );
+        return Attribute::get(fn () => $this->status == ShippingStatusEnum::CANCELED);
     }
 }

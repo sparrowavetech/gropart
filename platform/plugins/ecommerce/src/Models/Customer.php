@@ -73,23 +73,6 @@ class Customer extends BaseModel implements
         $this->notify(new ConfirmEmailNotification());
     }
 
-    protected function avatarUrl(): Attribute
-    {
-        return Attribute::make(
-            get: function () {
-                if ($this->avatar) {
-                    return RvMedia::getImageUrl($this->avatar, 'thumb');
-                }
-
-                try {
-                    return (new Avatar())->create(Str::ucfirst($this->name))->toBase64();
-                } catch (Exception) {
-                    return RvMedia::getDefaultImage();
-                }
-            }
-        );
-    }
-
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class, 'user_id', 'id');
@@ -181,14 +164,27 @@ class Customer extends BaseModel implements
         return $this->belongsToMany(Discount::class, 'ec_customer_used_coupons');
     }
 
+    protected function avatarUrl(): Attribute
+    {
+        return Attribute::get(function () {
+            if ($this->avatar) {
+                return RvMedia::getImageUrl($this->avatar, 'thumb');
+            }
+
+            try {
+                return (new Avatar())->create(Str::ucfirst($this->name))->toBase64();
+            } catch (Exception) {
+                return RvMedia::getDefaultImage();
+            }
+        });
+    }
+
     protected function uploadFolder(): Attribute
     {
-        return Attribute::make(
-            get: function () {
-                $folder = $this->id ? 'customers/' . $this->id : 'customers';
+        return Attribute::get(function () {
+            $folder = $this->id ? 'customers/' . $this->id : 'customers';
 
-                return apply_filters('ecommerce_customer_upload_folder', $folder, $this);
-            }
-        );
+            return apply_filters('ec;ommerce_customer_upload_folder', $folder, $this);
+        });
     }
 }

@@ -27,19 +27,20 @@ class TaxRuleTable extends TableAbstract
 
     public function setup(): void
     {
-        $this->setOption('id', 'ecommerce-tax-rule-table');
-
-        add_filter('core_layout_after_content', function ($html) {
-            return $html . view('plugins/ecommerce::taxes.rules.form-modal')->render();
-        });
-
         Assets::addScriptsDirectly('vendor/core/plugins/ecommerce/js/tax.js');
 
-        $tax = Route::current()->parameter('tax');
+        add_filter(
+            'core_layout_after_content',
+            fn ($html) => $html . view('plugins/ecommerce::taxes.rules.form-modal')->render()
+        );
+
+        /** @var Tax $tax  */
+        $tax = Route::current()->parameter('tax', new Tax());
 
         $this
             ->model(TaxRule::class)
-            ->setTax($tax ?: new Tax())
+            ->setOption('id', 'ecommerce-tax-rule-table')
+            ->setTax($tax)
             ->addActions([
                 EditAction::make()->route('tax.rule.edit')->attributes(['class' => 'btn btn-sm btn-icon btn-primary btn-edit-item']),
                 DeleteAction::make()->route('tax.rule.destroy'),

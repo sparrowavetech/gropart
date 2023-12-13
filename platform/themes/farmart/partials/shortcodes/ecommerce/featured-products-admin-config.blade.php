@@ -1,5 +1,5 @@
-<div class="form-group">
-    <label class="control-label">{{ __('Title') }}</label>
+<div class="mb-3">
+    <label class="form-label">{{ __('Title') }}</label>
     <input
         class="form-control"
         name="title"
@@ -9,8 +9,8 @@
     >
 </div>
 
-<div class="form-group">
-    <label class="control-label">{{ __('Limit') }}</label>
+<div class="mb-3">
+    <label class="form-label">{{ __('Limit') }}</label>
     <input
         class="form-control"
         name="limit"

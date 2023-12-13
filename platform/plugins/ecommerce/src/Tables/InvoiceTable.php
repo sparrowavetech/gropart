@@ -3,6 +3,7 @@
 namespace Botble\Ecommerce\Tables;
 
 use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\Html;
 use Botble\Ecommerce\Models\Invoice;
 use Botble\Ecommerce\Tables\Formatters\PriceFormatter;
@@ -19,11 +20,13 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Blade;
 
 class InvoiceTable extends TableAbstract
 {
     public function setup(): void
     {
+        Assets::addScriptsDirectly('vendor/core/plugins/ecommerce/js/invoice.js');
         $this
             ->model(Invoice::class)
             ->addActions([
@@ -96,9 +99,11 @@ class InvoiceTable extends TableAbstract
 
         if ($this->hasPermission('ecommerce.invoice.edit')) {
             $buttons['generate-invoices'] = [
-                'link' => route('ecommerce.invoice.generate-invoices'),
-                'text' => '<i class="fas fa-file-export"></i> ' . trans('plugins/ecommerce::invoice.generate_invoices'),
-                'class' => 'btn-info',
+                'text' => Blade::render('<x-core::icon name="ti ti-file-export"/> {{ $title }} <span hidden data-url="{{ $route }}"></span>', [
+                        'title' => trans('plugins/ecommerce::invoice.generate_invoices'),
+                        'route' => route('ecommerce.invoice.generate-invoices'),
+                    ]),
+                'class' => 'btn-primary invoice-generate',
             ];
         }
 

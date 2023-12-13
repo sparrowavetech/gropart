@@ -29,6 +29,7 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\Relations\Relation as EloquentRelation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Blade;
 use Symfony\Component\HttpFoundation\Response;
 
 class ProductTable extends TableAbstract
@@ -67,7 +68,29 @@ class ProductTable extends TableAbstract
                 return $item->price_in_table;
             })
             ->editColumn('quantity', function (Product $item) {
-                return $item->with_storehouse_management ? $item->quantity : '&#8734;';
+                if (! $item->with_storehouse_management) {
+                    return '&#8734;';
+                }
+
+                if ($item->variations->isEmpty()) {
+                    return $item->quantity;
+                }
+
+                $withStoreHouseManagement = $item->with_storehouse_management;
+
+                $quantity = 0;
+
+                foreach ($item->variations as $variation) {
+                    if (! $variation->product->with_storehouse_management) {
+                        $withStoreHouseManagement = false;
+
+                        break;
+                    }
+
+                    $quantity += $variation->product->quantity;
+                }
+
+                return $withStoreHouseManagement ? $quantity : '&#8734;';
             })
             ->editColumn('sku', function (Product $item) {
                 return BaseHelper::clean($item->sku ?: '&mdash;');
@@ -93,6 +116,7 @@ class ProductTable extends TableAbstract
                 'created_at',
                 'status',
                 'sku',
+                'image',
                 'images',
                 'price',
                 'sale_price',
@@ -104,7 +128,8 @@ class ProductTable extends TableAbstract
                 'stock_status',
                 'product_type',
             ])
-            ->where('is_variation', 0);
+            ->where('is_variation', 0)
+            ->with('variations.product');
 
         return $this->applyScopes($query);
     }
@@ -148,6 +173,7 @@ class ProductTable extends TableAbstract
             $buttons['create'] = [
                 'extend' => 'collection',
                 'text' => view('core/table::partials.create')->render(),
+                'class' => 'btn-primary',
                 'buttons' => [
                     [
                         'className' => 'action-item',
@@ -155,10 +181,10 @@ class ProductTable extends TableAbstract
                             'span',
                             ProductTypeEnum::PHYSICAL()->label(),
                             [
-                                'data-action' => 'physical-product',
-                                'data-href' => route('products.create'),
-                                'class' => 'ms-1',
-                            ]
+                                    'data-action' => 'physical-product',
+                                    'data-href' => route('products.create'),
+                                    'class' => 'ms-1',
+                                ]
                         )->toHtml(),
                     ],
                     [
@@ -167,10 +193,10 @@ class ProductTable extends TableAbstract
                             'span',
                             ProductTypeEnum::DIGITAL()->label(),
                             [
-                                'data-action' => 'digital-product',
-                                'data-href' => route('products.create', ['product_type' => 'digital']),
-                                'class' => 'ms-1',
-                            ]
+                                    'data-action' => 'digital-product',
+                                    'data-href' => route('products.create', ['product_type' => 'digital']),
+                                    'class' => 'ms-1',
+                                ]
                         )->toHtml(),
                     ],
                 ],
@@ -182,20 +208,29 @@ class ProductTable extends TableAbstract
         if ($this->hasPermission('ecommerce.import.products.index')) {
             $buttons['import'] = [
                 'link' => route('ecommerce.import.products.index'),
-                'text' => '<i class="fas fa-cloud-upload-alt"></i> ' . trans(
-                    'plugins/ecommerce::bulk-import.import_products'
+                'text' => Blade::render(
+                    sprintf(
+                        '<x-core::icon name="ti ti-file-import" /> %s',
+                        trans(
+                            'plugins/ecommerce::bulk-import.import_products'
+                        )
+                    )
                 ),
-                'class' => 'btn-warning',
             ];
         }
 
         if ($this->hasPermission('ecommerce.export.products.index')) {
             $buttons['export'] = [
                 'link' => route('ecommerce.export.products.index'),
-                'text' => '<i class="fas fa-cloud-download-alt"></i> ' . trans(
-                    'plugins/ecommerce::export.products.name'
-                ),
-                'class' => 'btn-warning',
+                'text' =>
+                    Blade::render(
+                        sprintf(
+                            '<x-core::icon name="ti ti-file-export" /> %s',
+                            trans(
+                                'plugins/ecommerce::export.products.name'
+                            )
+                        )
+                    ),
             ];
         }
 
@@ -224,7 +259,6 @@ class ProductTable extends TableAbstract
 
         $data['category'] = array_merge($data['category'], [
             'type' => 'select-ajax',
-            'class' => 'select-search-ajax',
         ]);
 
         $data['stock_status'] = [

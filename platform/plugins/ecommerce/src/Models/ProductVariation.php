@@ -22,6 +22,25 @@ class ProductVariation extends BaseModel
 
     public $timestamps = false;
 
+    protected static function booted(): void
+    {
+        self::deleted(function (ProductVariation $variation) {
+            $variation->productAttributes()->detach();
+            $variation->variationItems()->delete();
+
+            if ($variation->product && $variation->product->is_variation) {
+                $variation->product->delete();
+                event(new DeletedContentEvent(PRODUCT_MODULE_SCREEN_NAME, request(), $variation->product));
+            }
+        });
+
+        self::updated(function (ProductVariation $variation) {
+            if ($variation->is_default) {
+                app(UpdateDefaultProductService::class)->execute($variation->product);
+            }
+        });
+    }
+
     public function variationItems(): HasMany
     {
         return $this->hasMany(ProductVariationItem::class, 'variation_id');
@@ -47,36 +66,9 @@ class ProductVariation extends BaseModel
         );
     }
 
-    protected function image(): Attribute
+    public function productVariationItems(): HasMany
     {
-        return Attribute::make(
-            get: fn () => $this->product->image ?: $this->configurableProduct->image,
-        );
-    }
-
-    protected function name(): Attribute
-    {
-        return Attribute::make(
-            get: fn () => $this->product->name,
-        );
-    }
-
-    protected static function booted(): void
-    {
-        self::deleted(function (ProductVariation $variation) {
-            $variation->productAttributes()->detach();
-
-            if ($variation->product) {
-                $variation->product->delete();
-                event(new DeletedContentEvent(PRODUCT_MODULE_SCREEN_NAME, request(), $variation->product));
-            }
-        });
-
-        self::updated(function (ProductVariation $variation) {
-            if ($variation->is_default) {
-                app(UpdateDefaultProductService::class)->execute($variation->product);
-            }
-        });
+        return $this->hasMany(ProductVariationItem::class, 'variation_id');
     }
 
     public static function getVariationByAttributes(int|string $configurableProductId, array $attributes)
@@ -102,7 +94,7 @@ class ProductVariation extends BaseModel
             foreach ($attributes as $attribute) {
                 ProductVariationItem::query()->create([
                     'attribute_id' => $attribute,
-                    'variation_id' => $variation->id,
+                    'variation_id' => $variation->getKey(),
                 ]);
             }
 
@@ -179,5 +171,15 @@ class ProductVariation extends BaseModel
             ->get()
             ->pluck('attribute_id')
             ->toArray();
+    }
+
+    protected function image(): Attribute
+    {
+        return Attribute::get(fn () => $this->product->image ?: $this->configurableProduct->image);
+    }
+
+    protected function name(): Attribute
+    {
+        return Attribute::get(fn () => $this->product->name);
     }
 }

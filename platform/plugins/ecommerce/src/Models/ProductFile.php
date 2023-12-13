@@ -26,45 +26,33 @@ class ProductFile extends BaseModel
         return $this->belongsTo(Product::class)->withDefault();
     }
 
-    public function fileName(): Attribute
+    protected function fileName(): Attribute
     {
-        return Attribute::make(
-            get: fn () => Arr::get($this->extras, 'name', '')
-        );
+        return Attribute::get(fn () => Arr::get($this->extras, 'name', ''));
     }
 
-    public function fileSize(): Attribute
+    protected function fileSize(): Attribute
     {
-        return Attribute::make(
-            get: fn () => Arr::get($this->extras, 'size', '')
-        );
+        return Attribute::get(fn () => Arr::get($this->extras, 'size', ''));
     }
 
-    public function mimeType(): Attribute
+    protected function mimeType(): Attribute
     {
-        return Attribute::make(
-            get: fn () => Arr::get($this->extras, 'mime_type', '')
-        );
+        return Attribute::get(fn () => Arr::get($this->extras, 'mime_type', ''));
     }
 
-    public function fileExtension(): Attribute
+    protected function fileExtension(): Attribute
     {
-        return Attribute::make(
-            get: fn () => Arr::get($this->extras, 'extension', '')
-        );
+        return Attribute::get(fn () => Arr::get($this->extras, 'extension', ''));
     }
 
-    public function basename(): Attribute
+    protected function basename(): Attribute
     {
-        return Attribute::make(
-            get: fn () => $this->file_name . ($this->file_extension ? '.' . $this->file_extension : '')
-        );
+        return Attribute::get(fn () => $this->file_name . ($this->file_extension ? '.' . $this->file_extension : ''));
     }
 
-    public function isExternalLink(): Attribute
+    protected function isExternalLink(): Attribute
     {
-        return Attribute::make(
-            get: fn () => Arr::get($this->extras, 'is_external', false)
-        );
+        return Attribute::get(fn () => Arr::get($this->extras, 'is_external', false));
     }
 }

@@ -1,5 +1,5 @@
 'use strict'
-$(document).ready(function () {
+$(() => {
     let jsOption = {
         currentType: 'N/A',
         init() {

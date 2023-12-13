@@ -9,12 +9,11 @@ class Currencies {
         this.handleForm()
         this.updateCurrency()
         this.clearCacheRates()
-        this.switchApiProvider()
         this.changeOptionUsingExchangeRateCurrencyFormAPI()
     }
 
     initData() {
-        let _self = this
+        const _self = this
         let data = $.parseJSON($('#currencies').html())
 
         $.each(data, (index, item) => {
@@ -36,7 +35,7 @@ class Currencies {
     }
 
     addNewAttribute() {
-        let _self = this
+        const _self = this
 
         let template = _self.template
             .replace(/__id__/gi, 0)
@@ -75,12 +74,12 @@ class Currencies {
     }
 
     handleForm() {
-        let _self = this
+        const _self = this
 
         $('.swatches-container .swatches-list').sortable()
 
         $('body')
-            .on('submit', '.main-setting-form', () => {
+            .on('submit', '.currency-setting-form', () => {
                 let data = _self.exportData()
 
                 $('#currencies').val(JSON.stringify(data))
@@ -106,34 +105,28 @@ class Currencies {
     updateCurrency() {
         $(document).on('click', '#btn-update-currencies', (event) => {
             event.preventDefault()
-            let _self = $(event.currentTarget)
 
-            const form = $('.main-setting-form')
+            const _self = $(event.currentTarget)
+            const form = $('.currency-setting-form')
 
-            $.ajax({
-                type: 'POST',
-                url: form.prop('url'),
-                data: form.serialize(),
-                success: (res) => {
-                    if (res.error) {
-                        Botble.showNotice('error', res.message)
+            $httpClient.make()
+                .post(form.prop('action'), form.serialize())
+                .then(({ data }) => {
+                    if (data.error) {
+                        Botble.showError(data.message)
                     }
-                },
-            })
+                })
 
-            $.ajax({
-                type: 'POST',
-                url: _self.data('url'),
-                beforeSend: () => {
-                    _self.addClass('button-loading')
-                },
-                success: (res) => {
-                    if (!res.error) {
-                        Botble.showNotice('success', res.message)
-                        const data = res.data
+            $httpClient.make()
+                .withButtonLoading(_self)
+                .withLoading(form.find('.swatches-container'))
+                .post(_self.data('url'))
+                .then(({ data }) => {
+                    if (!data.error) {
+                        Botble.showNotice('success', data.message)
+                        const data = data.data
                         const template = $('#currency_template').html()
                         let html = ''
-                        $('#loading-update-currencies').show()
                         $.each(data, (index, item) => {
                             html += template
                                 .replace(/__id__/gi, item.id)
@@ -150,17 +143,9 @@ class Currencies {
                             $('.swatches-container .swatches-list').html(html)
                         }, 1000)
                     } else {
-                        Botble.showNotice('error', res.message)
+                        Botble.showNotice('error', data.message)
                     }
-                },
-                error: (res) => {
-                    Botble.handleError(res)
-                    _self.removeClass('button-loading')
-                },
-                complete: () => {
-                    _self.removeClass('button-loading')
-                },
-            })
+                })
         })
     }
 
@@ -168,62 +153,33 @@ class Currencies {
         $(document).on('click', '#btn-clear-cache-rates', (event) => {
             event.preventDefault()
 
-            let _self = $(event.currentTarget)
+            const _self = $(event.currentTarget)
 
-            $.ajax({
-                type: 'POST',
-                url: _self.data('url'),
-                beforeSend: () => {
-                    _self.addClass('button-loading')
-                },
-                success: (res) => {
-                    if (!res.error) {
-                        Botble.showNotice('success', res.message)
+            $httpClient.make()
+                .withButtonLoading(_self)
+                .post(_self.data('url'))
+                .then(({ data }) => {
+                    if (!data.error) {
+                        Botble.showSuccess(data.message)
                     } else {
-                        Botble.showNotice('error', res.message)
+                        Botble.showError(data.message)
                     }
-                },
-                error: (res) => {
-                    Botble.handleError(res)
-                    _self.removeClass('button-loading')
-                },
-                complete: () => {
-                    _self.removeClass('button-loading')
-                },
-            })
+                })
         })
     }
-
-    switchApiProvider() {
-        $(document).on('change', '.switch_api_provider', (event) => {
-            event.preventDefault()
-            const apiLayer = $('.api-layer-api-key')
-            const openExchange = $('.open-exchange-api-key')
-            if (event.target.value === 'api_layer') {
-                apiLayer.show()
-                openExchange.hide()
-            } else if (event.target.value === 'open_exchange_rate') {
-                openExchange.show()
-                apiLayer.hide()
-            }
-        })
-    }
-
     changeOptionUsingExchangeRateCurrencyFormAPI() {
         $(document).on('change', 'input[name="use_exchange_rate_from_api"]', (event) => {
             event.preventDefault()
 
             const inputExchangeRate = $('.swatch-exchange-rate').find('.input-exchange-rate')
 
-            if (event.target.value === '1') {
-                inputExchangeRate.attr('disabled', 'disabled')
+            if (event.target.checked) {
+                inputExchangeRate.prop('disabled', true)
             } else {
-                inputExchangeRate.removeAttr('disabled')
+                inputExchangeRate.prop('disabled', false)
             }
         })
     }
 }
 
-$(window).on('load', () => {
-    new Currencies()
-})
+$(() => new Currencies())

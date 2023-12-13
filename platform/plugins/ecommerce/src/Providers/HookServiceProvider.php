@@ -9,7 +9,11 @@ use Botble\Base\Facades\EmailHandler;
 use Botble\Base\Facades\Form;
 use Botble\Base\Facades\Html;
 use Botble\Base\Facades\MetaBox;
+use Botble\Base\Http\Responses\BaseHttpResponse;
+use Botble\Base\Rules\OnOffRule;
 use Botble\Base\Supports\TwigCompiler;
+use Botble\Captcha\Forms\CaptchaSettingForm;
+use Botble\Dashboard\Events\RenderingDashboardWidgets;
 use Botble\Dashboard\Supports\DashboardWidgetInstance;
 use Botble\Ecommerce\Enums\OrderReturnStatusEnum;
 use Botble\Ecommerce\Facades\Cart;
@@ -25,28 +29,36 @@ use Botble\Ecommerce\Models\Order;
 use Botble\Ecommerce\Models\OrderReturn;
 use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Models\ProductCategory;
-use Botble\Ecommerce\Repositories\Interfaces\EnquiryInterface;
 use Botble\Ecommerce\Models\Review;
 use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
+use Botble\Ecommerce\Services\HandleFrontPages;
 use Botble\Ecommerce\Supports\InvoiceHelper;
 use Botble\Ecommerce\Supports\TwigExtension;
 use Botble\Media\Facades\RvMedia;
+use Botble\Menu\Events\RenderingMenuOptions;
 use Botble\Menu\Facades\Menu;
 use Botble\Payment\Enums\PaymentMethodEnum;
 use Botble\Payment\Services\Gateways\BankTransferPaymentService;
 use Botble\Payment\Services\Gateways\CodPaymentService;
 use Botble\Payment\Supports\PaymentHelper;
 use Botble\Shortcode\Compilers\Shortcode;
+use Botble\Shortcode\Forms\ShortcodeForm;
+use Botble\Slug\Facades\SlugHelper;
+use Botble\Slug\Models\Slug;
+use Botble\Theme\Events\RenderingThemeOptionSettings;
 use Botble\Theme\Facades\Theme;
 use Botble\Theme\Supports\ThemeSupport;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
@@ -57,17 +69,19 @@ class HookServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
-        if (defined('MENU_ACTION_SIDEBAR_OPTIONS')) {
+        $this->app['events']->listen(RenderingMenuOptions::class, function () {
             Menu::addMenuOptionModel(Brand::class);
             Menu::addMenuOptionModel(ProductCategory::class);
             add_action(MENU_ACTION_SIDEBAR_OPTIONS, [$this, 'registerMenuOptions'], 12);
-        }
+        });
 
-        add_filter(DASHBOARD_FILTER_ADMIN_LIST, [$this, 'registerDashboardWidgets'], 208, 2);
+        $this->app['events']->listen(RenderingDashboardWidgets::class, function () {
+            add_filter(DASHBOARD_FILTER_ADMIN_LIST, [$this, 'registerDashboardWidgets'], 208, 2);
+        });
 
-        if (function_exists('theme_option')) {
+        $this->app['events']->listen(RenderingThemeOptionSettings::class, function () {
             add_action(RENDERING_THEME_OPTIONS_PAGE, [$this, 'addThemeOptions'], 35);
-        }
+        });
 
         add_filter('cms_twig_compiler', function (TwigCompiler $twigCompiler) {
             if (! array_key_exists(TwigExtension::class, $twigCompiler->getExtensions())) {
@@ -77,12 +91,22 @@ class HookServiceProvider extends ServiceProvider
             return $twigCompiler;
         }, 123);
 
-        add_filter(BASE_FILTER_TOP_HEADER_LAYOUT, [$this, 'registerTopHeaderNotification'], 121);
-        add_filter(BASE_FILTER_APPEND_MENU_NAME, [$this, 'getPendingOrders'], 130, 2);
-        add_filter(BASE_FILTER_MENU_ITEMS_COUNT, [$this, 'getMenuItemCount'], 120);
-        add_filter(RENDER_PRODUCTS_IN_CHECKOUT_PAGE, [$this, 'renderProductsInCheckoutPage'], 1000);
+        add_filter('cms_unauthenticated_response', function ($defaultException) {
+            if (is_in_admin(true)) {
+                return $defaultException;
+            }
 
-        $this->app->booted(function () {
+            return redirect()->guest(route('customer.login'));
+        });
+
+        $this->app['events']->listen(RouteMatched::class, function () {
+            add_filter(BASE_FILTER_TOP_HEADER_LAYOUT, [$this, 'registerTopHeaderNotification'], 121);
+            add_filter(BASE_FILTER_APPEND_MENU_NAME, [$this, 'getPendingOrders'], 130, 2);
+            add_filter(BASE_FILTER_MENU_ITEMS_COUNT, [$this, 'getMenuItemCount'], 120);
+            add_filter(RENDER_PRODUCTS_IN_CHECKOUT_PAGE, [$this, 'renderProductsInCheckoutPage'], 1000);
+        });
+
+        $this->app['events']->listen(RenderingDashboardWidgets::class, function () {
             add_filter(DASHBOARD_FILTER_ADMIN_LIST, function ($widgets) {
                 foreach ($widgets as $key => $widget) {
                     if (in_array($key, [
@@ -124,7 +148,7 @@ class HookServiceProvider extends ServiceProvider
                     ->setPermission('products.index')
                     ->setTitle(trans('plugins/ecommerce::products.name'))
                     ->setKey('widget_total_2')
-                    ->setIcon('far fa-file-alt')
+                    ->setIcon('ti ti-shopping-cart')
                     ->setColor('#1280f5')
                     ->setStatsTotal($items)
                     ->setRoute(route('products.index'))
@@ -139,7 +163,7 @@ class HookServiceProvider extends ServiceProvider
                     ->setPermission('customers.index')
                     ->setTitle(trans('plugins/ecommerce::customer.name'))
                     ->setKey('widget_total_3')
-                    ->setIcon('fas fa-users')
+                    ->setIcon('ti ti-user')
                     ->setColor('#75b6f9')
                     ->setStatsTotal($items)
                     ->setRoute(route('customers.index'))
@@ -154,13 +178,15 @@ class HookServiceProvider extends ServiceProvider
                     ->setPermission('reviews.index')
                     ->setTitle(trans('plugins/ecommerce::review.name'))
                     ->setKey('widget_total_4')
-                    ->setIcon('far fa-file-alt')
+                    ->setIcon('ti ti-messages')
                     ->setColor('#074f9d')
                     ->setStatsTotal($items)
                     ->setRoute(route('reviews.index'))
                     ->init($widgets, $widgetSettings);
             }, 5, 2);
+        });
 
+        $this->app['events']->listen(RouteMatched::class, function () {
             if (defined('PAYMENT_FILTER_PAYMENT_PARAMETERS')) {
                 add_filter(PAYMENT_FILTER_PAYMENT_PARAMETERS, function ($html) {
                     if (! auth('customer')->check()) {
@@ -168,7 +194,7 @@ class HookServiceProvider extends ServiceProvider
                     }
 
                     return $html . Form::hidden('customer_id', auth('customer')->id())
-                            ->toHtml() . Form::hidden('customer_type', Customer::class)->toHtml();
+                        ->toHtml() . Form::hidden('customer_type', Customer::class)->toHtml();
                 }, 123);
             }
 
@@ -305,7 +331,8 @@ class HookServiceProvider extends ServiceProvider
 
             add_action(BASE_ACTION_PUBLIC_RENDER_SINGLE, function ($screen, $object) {
                 add_filter(THEME_FRONT_HEADER, function ($html) use ($object) {
-                    if (! defined('FAQ_MODULE_SCREEN_NAME') ||
+                    if (
+                        ! defined('FAQ_MODULE_SCREEN_NAME') ||
                         get_class($object) != Product::class ||
                         ! config('plugins.ecommerce.general.enable_faq_in_product_details', false)
                     ) {
@@ -471,6 +498,145 @@ class HookServiceProvider extends ServiceProvider
             }
         }, 45, 2);
 
+        add_filter(FILTER_ECOMMERCE_PROCESS_PAYMENT, function (array $data, Request $request) {
+            session()->put('selected_payment_method', $data['type']);
+
+            $orderIds = (array)$request->input('order_id', []);
+
+            $request->merge([
+                'name' => trans('plugins/payment::payment.payment_description', [
+                    'order_id' => implode(', #', $orderIds),
+                    'site_url' => $request->getHost(),
+                ]),
+                'amount' => $data['amount'],
+            ]);
+
+            $paymentData = apply_filters(PAYMENT_FILTER_PAYMENT_DATA, [], $request);
+
+            switch ($request->input('payment_method')) {
+                case PaymentMethodEnum::COD:
+
+                    $minimumOrderAmount = setting('payment_cod_minimum_amount', 0);
+
+                    if ($minimumOrderAmount > Cart::instance('cart')->rawSubTotal()) {
+                        $data['error'] = true;
+                        $data['message'] = __('Minimum order amount to use COD (Cash On Delivery) payment method is :amount, you need to buy more :more to place an order!', ['amount' => format_price($minimumOrderAmount), 'more' => format_price($minimumOrderAmount - Cart::instance('cart')->rawSubTotal())]);
+
+                        break;
+                    }
+
+                    $data['charge_id'] = $this->app->make(CodPaymentService::class)->execute($paymentData);
+
+                    break;
+
+                case PaymentMethodEnum::BANK_TRANSFER:
+
+                    $data['charge_id'] = $this->app->make(BankTransferPaymentService::class)->execute($paymentData);
+
+                    break;
+                default:
+                    $data = apply_filters(PAYMENT_FILTER_AFTER_POST_CHECKOUT, $data, $request);
+
+                    break;
+            }
+
+            return $data;
+        }, 120, 2);
+
+        add_filter('payment-transaction-card-actions', function ($data, $payment) {
+            $invoice = Invoice::query()->where('payment_id', $payment->id)->first();
+
+            if (! $invoice) {
+                return $data;
+            }
+
+            $button = view('plugins/ecommerce::invoices.invoice-buttons', compact('invoice'))->render();
+
+            return $data . $button;
+        }, 3, 2);
+
+        if (defined('PAYMENT_FILTER_PAYMENT_DATA')) {
+            add_filter(PAYMENT_FILTER_PAYMENT_DATA, function (array $data, Request $request) {
+                $orderIds = (array)$request->input('order_id', []);
+
+                $orders = Order::query()
+                    ->whereIn('id', $orderIds)
+                    ->with(['address', 'products'])
+                    ->get();
+
+                $products = [];
+
+                foreach ($orders as $order) {
+                    foreach ($order->products as $product) {
+                        $products[] = [
+                            'id' => $product->product_id,
+                            'name' => $product->product_name,
+                            'price' => $this->convertOrderAmount($product->price),
+                            'price_per_order' => $this->convertOrderAmount(
+                                ($product->price * $product->qty)
+                                + ($order->tax_amount / $order->products->count())
+                                - ($order->discount_amount / $order->products->count())
+                            ),
+                            'qty' => $product->qty,
+                        ];
+                    }
+                }
+
+                $firstOrder = $orders->sortByDesc('created_at')->first();
+
+                $address = $firstOrder->address;
+
+                return [
+                    'amount' => $this->convertOrderAmount((float)$orders->sum('amount')),
+                    'shipping_amount' => $this->convertOrderAmount((float)$orders->sum('shipping_amount')),
+                    'shipping_method' => $firstOrder->shipping_method->label(),
+                    'tax_amount' => $this->convertOrderAmount((float)$orders->sum('tax_amount')),
+                    'discount_amount' => $this->convertOrderAmount((float)$orders->sum('discount_amount')),
+                    'currency' => strtoupper(get_application_currency()->title),
+                    'order_id' => $orderIds,
+                    'description' => trans('plugins/payment::payment.payment_description', [
+                        'order_id' => implode(', #', $orderIds),
+                        'site_url' => $request->getHost(),
+                    ]),
+                    'customer_id' => auth('customer')->check() ? auth('customer')->id() : null,
+                    'customer_type' => Customer::class,
+                    'return_url' => PaymentHelper::getCancelURL(),
+                    'callback_url' => PaymentHelper::getRedirectURL(),
+                    'products' => $products,
+                    'orders' => $orders,
+                    'address' => [
+                        'name' => $address->name ?: $firstOrder->user->name,
+                        'email' => $address->email ?: $firstOrder->user->email,
+                        'phone' => $address->phone ?: $firstOrder->user->phone,
+                        'country' => $address->country_name,
+                        'state' => $address->state_name,
+                        'city' => $address->city_name,
+                        'address' => $address->address,
+                        'zip_code' => $address->zip_code,
+                    ],
+                    'checkout_token' => OrderHelper::getOrderSessionToken(),
+                ];
+            }, 120, 2);
+        }
+
+        if (is_plugin_active('captcha') && class_exists(CaptchaSettingForm::class)) {
+            CaptchaSettingForm::beforeRendering(function (CaptchaSettingForm $form) {
+                $prefix = EcommerceHelper::getSettingPrefix();
+
+                $form
+                    ->addAfter('captcha_secret', $prefix . 'enable_recaptcha_in_register_page', 'onOffCheckbox', [
+                        'label' => trans('plugins/ecommerce::setting.customer.form.enable_recaptcha_in_register_page'),
+                        'value' => get_ecommerce_setting('enable_recaptcha_in_register_page', false),
+                    ])
+                    ->addAfter('open_fieldset_math_captcha_setting', $prefix . 'enable_math_captcha_in_register_page', 'onOffCheckbox', [
+                        'label' => trans('plugins/ecommerce::setting.customer.form.enable_math_captcha_in_register_page'),
+                        'value' => get_ecommerce_setting('enable_math_captcha_in_register_page', false),
+                    ]);
+            }, 9999);
+
+            add_filter('captcha_settings_validation_rules', [$this, 'addCustomerSettingRules'], 99);
+        }
+
         if (function_exists('add_shortcode')) {
             add_shortcode('recently-viewed-products', __('Customer Recently Viewed Products'), __('Customer Recently Viewed Products'), function (Shortcode $shortcode) {
                 if (! EcommerceHelper::isEnabledCustomerRecentlyViewedProducts()) {
@@ -519,156 +685,48 @@ class HookServiceProvider extends ServiceProvider
 
             if (EcommerceHelper::isEnabledCustomerRecentlyViewedProducts()) {
                 shortcode()->setAdminConfig('recently-viewed-products', function (array $attributes) {
-                    return view('plugins/ecommerce::themes.shortcodes.recently-viewed-products-admin-config', compact('attributes'))->render();
+                    return ShortcodeForm::createFromArray($attributes)
+                        ->add('title', 'text', [
+                            'label' => trans('core/base::forms.title'),
+                        ]);
                 });
             }
-
-            add_filter(FILTER_ECOMMERCE_PROCESS_PAYMENT, function (array $data, Request $request) {
-                session()->put('selected_payment_method', $data['type']);
-
-                $orderIds = (array)$request->input('order_id', []);
-
-                $request->merge([
-                    'name' => trans('plugins/payment::payment.payment_description', [
-                        'order_id' => implode(', #', $orderIds),
-                        'site_url' => $request->getHost(),
-                    ]),
-                    'amount' => $data['amount'],
-                ]);
-
-                $paymentData = apply_filters(PAYMENT_FILTER_PAYMENT_DATA, [], $request);
-
-                switch ($request->input('payment_method')) {
-                    case PaymentMethodEnum::COD:
-
-                        $minimumOrderAmount = setting('payment_cod_minimum_amount', 0);
-
-                        if ($minimumOrderAmount > Cart::instance('cart')->rawSubTotal()) {
-                            $data['error'] = true;
-                            $data['message'] = __('Minimum order amount to use COD (Cash On Delivery) payment method is :amount, you need to buy more :more to place an order!', ['amount' => format_price($minimumOrderAmount), 'more' => format_price($minimumOrderAmount - Cart::instance('cart')->rawSubTotal())]);
-
-                            break;
-                        }
-
-                        $data['charge_id'] = $this->app->make(CodPaymentService::class)->execute($paymentData);
-
-                        break;
-
-                    case PaymentMethodEnum::BANK_TRANSFER:
-
-                        $data['charge_id'] = $this->app->make(BankTransferPaymentService::class)->execute($paymentData);
-
-                        break;
-                    default:
-                        $data = apply_filters(PAYMENT_FILTER_AFTER_POST_CHECKOUT, $data, $request);
-
-                        break;
-                }
-
-                return $data;
-            }, 120, 2);
         }
 
-        if (defined('PAYMENT_FILTER_PAYMENT_DATA')) {
-            add_filter(PAYMENT_FILTER_PAYMENT_DATA, function (array $data, Request $request) {
-                $orderIds = (array)$request->input('order_id', []);
+        add_action(INVOICE_PAYMENT_CREATED, function (Invoice $invoice) {
+            try {
+                $customer = $invoice->payment->customer;
+                $localDisk = Storage::disk('local');
+                $invoiceName = 'invoice-' . $invoice->code . '.pdf';
+                $localDisk->put($invoiceName, (new InvoiceHelper())->makeInvoicePDF($invoice)->output());
 
-                $orders = Order::query()
-                    ->whereIn('id', $orderIds)
-                    ->with(['address', 'products'])
-                    ->get();
+                EmailHandler::setModule(ECOMMERCE_MODULE_SCREEN_NAME)
+                    ->setVariableValues([
+                        'customer_name' => $customer->name,
+                        'invoice_code' => $invoice->code,
+                        'invoice_link' => route('customer.invoices.show', $invoice->getKey()),
+                    ])
+                    ->sendUsingTemplate('invoice-payment-created', $customer->email, [
+                        'attachments' => [$localDisk->path($invoiceName)],
+                    ]);
 
-                $products = [];
-
-                foreach ($orders as $order) {
-                    foreach ($order->products as $product) {
-                        $products[] = [
-                            'id' => $product->product_id,
-                            'name' => $product->product_name,
-                            'price' => $this->convertOrderAmount($product->price),
-                            'price_per_order' => $this->convertOrderAmount(($product->price * $product->qty)
-                                + ($order->tax_amount / $order->products->count())
-                                - ($order->discount_amount / $order->products->count())),
-                            'qty' => $product->qty,
-                        ];
-                    }
-                }
-
-                $firstOrder = $orders->sortByDesc('created_at')->first();
-
-                $address = $firstOrder->address;
-
-                return [
-                    'amount' => $this->convertOrderAmount((float)$orders->sum('amount')),
-                    'shipping_amount' => $this->convertOrderAmount((float)$orders->sum('shipping_amount')),
-                    'shipping_method' => $firstOrder->shipping_method->label(),
-                    'tax_amount' => $this->convertOrderAmount((float)$orders->sum('tax_amount')),
-                    'discount_amount' => $this->convertOrderAmount((float)$orders->sum('discount_amount')),
-                    'currency' => strtoupper(get_application_currency()->title),
-                    'order_id' => $orderIds,
-                    'description' => trans('plugins/payment::payment.payment_description', [
-                        'order_id' => implode(', #', $orderIds),
-                        'site_url' => $request->getHost(),
-                    ]),
-                    'customer_id' => auth('customer')->check() ? auth('customer')->id() : null,
-                    'customer_type' => Customer::class,
-                    'return_url' => PaymentHelper::getCancelURL(),
-                    'callback_url' => PaymentHelper::getRedirectURL(),
-                    'products' => $products,
-                    'orders' => $orders,
-                    'address' => [
-                        'name' => $address->name ?: $firstOrder->user->name,
-                        'email' => $address->email ?: $firstOrder->user->email,
-                        'phone' => $address->phone ?: $firstOrder->user->phone,
-                        'country' => $address->country_name,
-                        'state' => $address->state_name,
-                        'city' => $address->city_name,
-                        'address' => $address->address,
-                        'zip_code' => $address->zip_code,
-                    ],
-                    'checkout_token' => OrderHelper::getOrderSessionToken(),
-                ];
-            }, 120, 2);
-
-            if (! $this->app->runningInConsole()) {
-                add_action(INVOICE_PAYMENT_CREATED, function (Invoice $invoice) {
-                    try {
-                        $customer = $invoice->payment->customer;
-                        $localDisk = Storage::disk('local');
-                        $invoiceName = 'invoice-' . $invoice->code . '.pdf';
-                        $localDisk->put($invoiceName, (new InvoiceHelper())->makeInvoicePDF($invoice)->output());
-
-                        EmailHandler::setModule(ECOMMERCE_MODULE_SCREEN_NAME)
-                            ->setVariableValues([
-                                'customer_name' => $customer->name,
-                                'invoice_code' => $invoice->code,
-                                'invoice_link' => route('customer.invoices.show', $invoice->id),
-                            ])
-                            ->sendUsingTemplate('invoice-payment-created', $customer->email, [
-                                'attachments' => [$localDisk->path($invoiceName)],
-                            ]);
-
-                        $localDisk->delete($invoiceName);
-                    } catch (Exception $exception) {
-                        info($exception->getMessage());
-                    }
-                });
+                $localDisk->delete($invoiceName);
+            } catch (Exception $exception) {
+                info($exception->getMessage());
             }
+        });
 
-            if (is_plugin_active('payment')) {
-                add_filter(PAYMENT_FILTER_PAYMENT_INFO_DETAIL, function ($data, $payment) {
-                    $invoice = Invoice::query()->where('payment_id', $payment->id)->first();
+        add_filter(BASE_FILTER_PUBLIC_SINGLE_DATA, [$this, 'handleSingleView'], 30);
+    }
 
-                    if (! $invoice) {
-                        return $data;
-                    }
+    public function addCustomerSettingRules(array $rules): array
+    {
+        $prefix = EcommerceHelper::getSettingPrefix();
 
-                    $button = view('plugins/ecommerce::invoices.invoice-buttons', compact('invoice'))->render();
-
-                    return $data . $button;
-                }, 3, 2);
-            }
-        }
+        return array_merge($rules, [
+            $prefix . 'enable_recaptcha_in_register_page' => $onOffRule =  new OnOffRule(),
+            $prefix . 'enable_math_captcha_in_register_page' => $onOffRule,
+        ]);
     }
 
     protected function convertOrderAmount(float $amount): float
@@ -690,8 +748,21 @@ class HookServiceProvider extends ServiceProvider
                 'desc' => trans('plugins/ecommerce::ecommerce.theme_options.description'),
                 'id' => 'opt-text-subsection-ecommerce',
                 'subsection' => true,
-                'icon' => 'fa fa-shopping-cart',
+                'icon' => 'ti ti-shopping-bag',
                 'fields' => [
+                    [
+                        'id' => 'ecommerce_product_listing_page_slug',
+                        'type' => 'text',
+                        'label' => trans('plugins/ecommerce::ecommerce.theme_options.product_listing_page_slug'),
+                        'attributes' => [
+                            'name' => 'ecommerce_product_listing_page_slug',
+                            'value' => SlugHelper::getPrefix(Product::class) ?: 'products',
+                            'options' => [
+                                'class' => 'form-control',
+                            ],
+                        ],
+                        'helper' => trans('plugins/ecommerce::ecommerce.theme_options.product_listing_page_slug_instruction'),
+                    ],
                     [
                         'id' => 'number_of_products_per_page',
                         'type' => 'number',
@@ -816,12 +887,7 @@ class HookServiceProvider extends ServiceProvider
                     return $number;
                 }
 
-                $attributes = [
-                    'class' => 'badge badge-success menu-item-count ecommerce-count',
-                    'style' => 'display: none;',
-                ];
-
-                return Html::tag('span', '', $attributes)->toHtml();
+                return Blade::render('<x-core::navbar.badge-count class="ecommerce-count" />');
 
             case 'cms-plugins-ecommerce-order':
 
@@ -829,12 +895,7 @@ class HookServiceProvider extends ServiceProvider
                     return $number;
                 }
 
-                $attributes = [
-                    'class' => 'badge badge-success menu-item-count pending-orders',
-                    'style' => 'display: none;',
-                ];
-
-                return Html::tag('span', '', $attributes)->toHtml();
+                return Blade::render('<x-core::navbar.badge-count class="pending-orders" />');
 
             case 'cms-plugins-ecommerce-order-return':
 
@@ -842,12 +903,7 @@ class HookServiceProvider extends ServiceProvider
                     return $number;
                 }
 
-                $attributes = [
-                    'class' => 'badge badge-success menu-item-count pending-order-returns',
-                    'style' => 'display: none;',
-                ];
-
-                return Html::tag('span', '', $attributes)->toHtml();
+                return Blade::render('<x-core::navbar.badge-count class="pending-order-returns" />');
         }
 
         return $number;
@@ -893,5 +949,10 @@ class HookServiceProvider extends ServiceProvider
         }
 
         return $products;
+    }
+
+    public function handleSingleView(Slug|array $slug): BaseHttpResponse|array|Slug|RedirectResponse
+    {
+        return app(HandleFrontPages::class)->handle($slug);
     }
 }

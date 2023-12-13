@@ -1,4 +1,4 @@
-<div class="discount @if ($item->isExpired()) is-discount-disabled @endif">
+<div @class(['discount', 'is-discount-disabled' => $item->isExpired()])>
     @if ($item->isExpired())
         <span class="discount-expired show">{{ trans('plugins/ecommerce::discount.expired') }}</span>
     @endif
@@ -16,14 +16,17 @@
             {!! BaseHelper::clean(get_discount_description($item)) !!}
         </p>
         @if ($isCoupon)
-            <p class="@if (!$item->isExpired()) discount-text-color @else discount-desc @endif">
-                ({{ trans('plugins/ecommerce::discount.coupon_code') }} <b>
+            <p @class(['discount-desc' => $item->isExpired(), 'discount-text-color' => ! $item->isExpired()])>
+                ({{ trans('plugins/ecommerce::discount.coupon_code') }}
+                <strong>
                     @if ($item->can_use_with_promotion)
                         {{ trans('plugins/ecommerce::discount.can') }}
                     @else
                         {{ trans('plugins/ecommerce::discount.cannot') }}
                     @endif
-                </b> {{ trans('plugins/ecommerce::discount.use_with_promotion') }}).</p>
+                </strong>
+                {{ trans('plugins/ecommerce::discount.use_with_promotion') }}).
+            </p>
         @endif
     </div>
 </div>

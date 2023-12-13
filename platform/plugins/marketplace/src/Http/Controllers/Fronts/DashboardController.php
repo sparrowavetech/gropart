@@ -3,15 +3,14 @@
 namespace Botble\Marketplace\Http\Controllers\Fronts;
 
 use Botble\Base\Facades\Assets;
-use Botble\Base\Facades\PageTitle;
-use Botble\Base\Http\Responses\BaseHttpResponse;
+use Botble\Base\Http\Controllers\BaseController;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Models\Order;
 use Botble\Ecommerce\Models\Product;
 use Botble\Marketplace\Enums\RevenueTypeEnum;
 use Botble\Marketplace\Enums\WithdrawalStatusEnum;
 use Botble\Marketplace\Facades\MarketplaceHelper;
-use Botble\Marketplace\Http\Requests\BecomeVendorRequest;
+use Botble\Marketplace\Http\Requests\Fronts\BecomeVendorRequest;
 use Botble\Marketplace\Models\Revenue;
 use Botble\Marketplace\Models\Store;
 use Botble\Marketplace\Models\Withdrawal;
@@ -29,7 +28,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
-class DashboardController
+class DashboardController extends BaseController
 {
     public function __construct()
     {
@@ -43,9 +42,9 @@ class DashboardController
             ->add('avatar-js', 'vendor/core/plugins/ecommerce/js/avatar.js', ['jquery']);
     }
 
-    public function index(Request $request, BaseHttpResponse $response)
+    public function index(Request $request)
     {
-        PageTitle::setTitle(__('Dashboard'));
+        $this->pageTitle(__('Dashboard'));
 
         Assets::addScriptsDirectly([
                 'vendor/core/plugins/ecommerce/libraries/daterangepicker/daterangepicker.js',
@@ -163,7 +162,8 @@ class DashboardController
         $compact = compact('user', 'store', 'data', 'totalProducts', 'totalOrders');
 
         if ($request->ajax()) {
-            return $response
+            return $this
+                ->httpResponse()
                 ->setData([
                     'html' => MarketplaceHelper::view('vendor-dashboard.partials.dashboard-content', $compact)->render(),
                 ]);
@@ -172,7 +172,7 @@ class DashboardController
         return MarketplaceHelper::view('vendor-dashboard.index', $compact);
     }
 
-    public function postUpload(Request $request, BaseHttpResponse $response)
+    public function postUpload(Request $request)
     {
         $customer = auth('customer')->user();
 
@@ -184,16 +184,24 @@ class DashboardController
             ]);
 
             if ($validator->fails()) {
-                return $response->setError()->setMessage($validator->getMessageBag()->first());
+                return $this
+                    ->httpResponse()
+                    ->setError()
+                    ->setMessage($validator->getMessageBag()->first());
             }
 
             $result = RvMedia::handleUpload(Arr::first($request->file('file')), 0, $uploadFolder);
 
             if ($result['error']) {
-                return $response->setError()->setMessage($result['message']);
+                return $this
+                    ->httpResponse()
+                    ->setError()
+                    ->setMessage($result['message']);
             }
 
-            return $response->setData($result['data']);
+            return $this
+                ->httpResponse()
+                ->setData($result['data']);
         }
 
         try {
@@ -210,10 +218,15 @@ class DashboardController
                 $result = RvMedia::handleUpload($save->getFile(), 0, $uploadFolder);
 
                 if (! $result['error']) {
-                    return $response->setData($result['data']);
+                    return $this
+                        ->httpResponse()
+                        ->setData($result['data']);
                 }
 
-                return $response->setError()->setMessage($result['message']);
+                return $this
+                    ->httpResponse()
+                    ->setError()
+                    ->setMessage($result['message']);
             }
             // We are in chunk mode, lets send the current progress
             $handler = $save->handler();
@@ -223,7 +236,10 @@ class DashboardController
                 'status' => true,
             ]);
         } catch (Exception $exception) {
-            return $response->setError()->setMessage($exception->getMessage());
+            return $this
+                ->httpResponse()
+                ->setError()
+                ->setMessage($exception->getMessage());
         }
     }
 
@@ -244,7 +260,6 @@ class DashboardController
                 SeoHelper::setTitle(__('Become Vendor'));
 
                 Theme::breadcrumb()
-                    ->add(__('Home'), route('public.index'))
                     ->add(__('Approving'));
 
                 return Theme::scope('marketplace.approving-vendor', [], MarketplaceHelper::viewPath('approving-vendor', false))
@@ -257,14 +272,13 @@ class DashboardController
         SeoHelper::setTitle(__('Become Vendor'));
 
         Theme::breadcrumb()
-            ->add(__('Home'), route('public.index'))
             ->add(__('Become Vendor'), route('marketplace.vendor.become-vendor'));
 
         return Theme::scope('marketplace.become-vendor', [], MarketplaceHelper::viewPath('become-vendor', false))
             ->render();
     }
 
-    public function postBecomeVendor(BecomeVendorRequest $request, BaseHttpResponse $response)
+    public function postBecomeVendor(BecomeVendorRequest $request)
     {
         $customer = auth('customer')->user();
         if ($customer->is_vendor) {
@@ -274,12 +288,16 @@ class DashboardController
         $existing = SlugHelper::getSlug($request->input('shop_url'), SlugHelper::getPrefix(Store::class));
 
         if ($existing) {
-            return $response->setError()->setMessage(__('Shop URL is existing. Please choose another one!'));
+            return $this
+                ->httpResponse()
+                ->setError()
+                ->setMessage(__('Shop URL is existing. Please choose another one!'));
         }
 
         event(new Registered($customer));
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setNextUrl(route('marketplace.vendor.dashboard'))
             ->setMessage(__('Registered successfully!'));
     }

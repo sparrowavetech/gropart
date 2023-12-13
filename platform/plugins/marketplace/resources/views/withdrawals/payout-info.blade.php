@@ -1,33 +1,47 @@
-<div
-    class="note note-info"
-    role="alert"
->
-    <p class="mb-2 uppercase">
-        <strong>{{ $title ?? __('You will receive money through the information below') }}</strong>:
-    </p>
-    @foreach (\Botble\Marketplace\Enums\PayoutPaymentMethodsEnum::getFields($paymentChannel) as $key => $field)
-        @if (Arr::get($bankInfo, $key))
-            <p>{{ Arr::get($field, 'title') }}: <strong>{{ Arr::get($bankInfo, $key) }}</strong></p>
-        @endif
-    @endforeach
+<x-core::form.fieldset class="mb-3">
+    <h4>{{ $title ?? __('You will receive money through the information below') }}</h4>
 
-    @isset($link)
-        <p>{!! BaseHelper::clean(__('You can change it <a href=":link">here</a>', ['link' => $link])) !!}.</p>
-    @endisset
+    <x-core::datagrid>
+        @foreach (Botble\Marketplace\Enums\PayoutPaymentMethodsEnum::getFields($paymentChannel) as $key => $field)
+            @if (Arr::get($bankInfo, $key))
+                <x-core::datagrid.item>
+                    <x-slot:title>{{ Arr::get($field, 'title') }}</x-slot:title>
+                    {{ Arr::get($bankInfo, $key) }}
+                </x-core::datagrid.item>
+            @endif
+        @endforeach
+    </x-core::datagrid>
+</x-core::form.fieldset>
 
-    @if ($taxInfo && (Arr::get($taxInfo, 'business_name') || Arr::get($taxInfo, 'tax_id') || Arr::get($taxInfo, 'address')))
-        <br>
-        <p class="mb-2 uppercase"><strong>{{ __('Tax info') }}</strong>:</p>
-        @if (Arr::get($taxInfo, 'business_name'))
-            <p>{{ __('Business Name') }}: <strong>{{ Arr::get($taxInfo, 'business_name') }}</strong></p>
-        @endif
+@isset($link)
+    <p class="mb-3">{!! BaseHelper::clean(__('You can change it <a href=":link">here</a>', ['link' => $link])) !!}.</p>
+@endisset
 
-        @if (Arr::get($taxInfo, 'tax_id'))
-            <p>{{ __('Tax ID') }}: <strong>{{ Arr::get($taxInfo, 'tax_id') }}</strong></p>
-        @endif
+@if ($taxInfo && (Arr::get($taxInfo, 'business_name') || Arr::get($taxInfo, 'tax_id') || Arr::get($taxInfo, 'address')))
+    <x-core::form.fieldset class="mb-3">
+        <h4>{{ __('Tax info') }}</h4>
 
-        @if (Arr::get($taxInfo, 'address'))
-            <p>{{ __('Address') }}: <strong>{{ Arr::get($taxInfo, 'address') }}</strong></p>
-        @endif
-    @endif
-</div>
+        <x-core::datagrid>
+            @if (Arr::get($taxInfo, 'business_name'))
+                <x-core::datagrid.item>
+                    <x-slot:title>{{ __('Business Name') }}</x-slot:title>
+                    {{ Arr::get($taxInfo, 'business_name') }}
+                </x-core::datagrid.item>
+            @endif
+
+            @if ($taxId = Arr::get($taxInfo, 'tax_id'))
+                <x-core::datagrid.item>
+                    <x-slot:title>{{ __('Tax ID') }}</x-slot:title>
+                    {{ $taxId }}
+                </x-core::datagrid.item>
+            @endif
+
+            @if ($address = Arr::get($taxInfo, 'address'))
+                <x-core::datagrid.item>
+                    <x-slot:title>{{ __('Address') }}</x-slot:title>
+                    {{ $address }}
+                </x-core::datagrid.item>
+            @endif
+        </x-core::datagrid>
+    </x-core::form.fieldset>
+@endif

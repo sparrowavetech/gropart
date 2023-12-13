@@ -1,16 +1,14 @@
 @foreach ($productAttributeSets as $attributeSet)
-    <label>
-        <input
-            class="attribute-set-item"
-            name="attribute_sets[]"
-            type="checkbox"
-            value="{{ $attributeSet->id }}"
-            @checked($attributeSet->is_selected)
-        >
-        {{ $attributeSet->title }}
-    </label> &nbsp;
+    <x-core::form.checkbox
+        :label="$attributeSet->title"
+        class="attribute-set-item"
+        name="attribute_sets[]"
+        :value="$attributeSet->id"
+        :checked="$attributeSet->is_selected"
+        :inline="true"
+    />
 @endforeach
 
-<div class="alert alert-warning mt-3">
-    <span>{{ trans('plugins/ecommerce::products.this_action_will_reload_page') }}</span>
-</div>
+<x-core::alert type="warning" class="mt-3 mb-0">
+    {{ trans('plugins/ecommerce::products.this_action_will_reload_page') }}
+</x-core::alert>

@@ -370,7 +370,7 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
 
         $this->model = $this->model
             ->distinct()
-            ->wherePublished()
+            ->when(! isset($params['condition']['ec_products.status']), fn ($query) => $query->wherePublished())
             ->join(DB::raw('
                 (
                     SELECT DISTINCT
@@ -609,6 +609,10 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
 
             if (! $attributesIsList) {
                 foreach ($attributes as $attributeSet => $attributeIds) {
+                    if (! is_array($attributeIds)) {
+                        continue;
+                    }
+
                     $this
                         ->model
                         ->whereExists(function (Builder $query) use ($attributeSet, $attributeIds) {

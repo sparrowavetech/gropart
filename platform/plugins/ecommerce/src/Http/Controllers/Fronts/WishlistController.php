@@ -2,7 +2,7 @@
 
 namespace Botble\Ecommerce\Http\Controllers\Fronts;
 
-use Botble\Base\Http\Responses\BaseHttpResponse;
+use Botble\Base\Http\Controllers\BaseController;
 use Botble\Ecommerce\Facades\Cart;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Models\Product;
@@ -12,9 +12,8 @@ use Botble\SeoHelper\Facades\SeoHelper;
 use Botble\Theme\Facades\Theme;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Routing\Controller;
 
-class WishlistController extends Controller
+class WishlistController extends BaseController
 {
     public function index(Request $request, ProductInterface $productRepository)
     {
@@ -47,12 +46,12 @@ class WishlistController extends Controller
             }
         }
 
-        Theme::breadcrumb()->add(__('Home'), route('public.index'))->add(__('Wishlist'), route('public.wishlist'));
+        Theme::breadcrumb()->add(__('Wishlist'), route('public.wishlist'));
 
         return Theme::scope('ecommerce.wishlist', compact('products'), 'plugins/ecommerce::themes.wishlist')->render();
     }
 
-    public function store(int|string $productId, BaseHttpResponse $response)
+    public function store(int|string $productId)
     {
         if (! EcommerceHelper::isWishlistEnabled()) {
             abort(404);
@@ -70,7 +69,8 @@ class WishlistController extends Controller
         });
 
         if (! $duplicates->isEmpty()) {
-            return $response
+            return $this
+                ->httpResponse()
                 ->setMessage(__(':product is already in your wishlist!', ['product' => $product->name]))
                 ->setError();
         }
@@ -79,13 +79,15 @@ class WishlistController extends Controller
             Cart::instance('wishlist')->add($productId, $product->name, 1, $product->front_sale_price)
                 ->associate(Product::class);
 
-            return $response
+            return $this
+                ->httpResponse()
                 ->setMessage(__('Added product :product successfully!', ['product' => $product->name]))
                 ->setData(['count' => Cart::instance('wishlist')->count()]);
         }
 
         if (is_added_to_wishlist($productId)) {
-            return $response
+            return $this
+                ->httpResponse()
                 ->setMessage(__(':product is already in your wishlist!', ['product' => $product->name]))
                 ->setError();
         }
@@ -95,12 +97,13 @@ class WishlistController extends Controller
             'customer_id' => auth('customer')->id(),
         ]);
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setMessage(__('Added product :product successfully!', ['product' => $product->name]))
             ->setData(['count' => auth('customer')->user()->wishlist()->count()]);
     }
 
-    public function destroy(int|string $productId, BaseHttpResponse $response)
+    public function destroy(int|string $productId)
     {
         if (! EcommerceHelper::isWishlistEnabled()) {
             abort(404);
@@ -119,7 +122,8 @@ class WishlistController extends Controller
                 return false;
             });
 
-            return $response
+            return $this
+                ->httpResponse()
                 ->setMessage(__('Removed product :product from wishlist successfully!', ['product' => $product->name]))
                 ->setData(['count' => Cart::instance('wishlist')->count()]);
         }
@@ -131,7 +135,8 @@ class WishlistController extends Controller
             ])
             ->delete();
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setMessage(__('Removed product :product from wishlist successfully!', ['product' => $product->name]))
             ->setData(['count' => auth('customer')->user()->wishlist()->count()]);
     }

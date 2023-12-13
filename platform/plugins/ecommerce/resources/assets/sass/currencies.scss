@@ -1,14 +1,11 @@
-.max-width-1200 {
-    max-width: 1300px;
-}
-
 .swatches-container {
     .header {
         display: flex;
         flex-direction: row;
         font-weight: 700;
-        background-color: #36c6d3;
-        color: #ffffff;
+        background-color: var(--bb-body-bg);
+        color: var(--bb-body-color);
+        border-bottom: var(--bb-border-width) var(--bb-border-style) var(--bb-border-color);
 
         > * {
             float: left;
@@ -36,7 +33,7 @@
             }
 
             &:nth-child(odd) {
-                background-color: #f0f0f0;
+                background-color: var(--bb-body-bg);
             }
 
             > * {
@@ -89,17 +86,17 @@
     }
 
     .swatch-is-default {
-        width: 90px;
+        width: 120px;
     }
 
     .remove-item {
-        width: 50px;
+        width: 80px;
     }
 
     .swatch-exchange-rate,
     .swatch-is-prefix-symbol,
     .swatch-decimals {
-        max-width: 145px;
+        max-width: 180px;
     }
 }
 
@@ -110,9 +107,4 @@
     100% {
         transform: rotate(360deg);
     }
-}
-
-#btn-update-currencies,
-#btn-clear-cache-rates {
-    margin-top: 18px;
 }

@@ -7,13 +7,18 @@ use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Facades\EmailHandler;
 use Botble\Base\Facades\Form;
 use Botble\Base\Facades\MacroableModels;
+use Botble\Base\Facades\PanelSectionManager;
 use Botble\Base\Models\BaseModel;
+use Botble\Base\PanelSections\PanelSectionItem;
+use Botble\Base\Supports\DashboardMenu as DashboardMenuSupport;
 use Botble\Base\Supports\Helper;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
+use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Models\Customer;
 use Botble\Ecommerce\Models\Discount;
 use Botble\Ecommerce\Models\Order;
 use Botble\Ecommerce\Models\Product;
+use Botble\Ecommerce\PanelSections\SettingEcommercePanelSection;
 use Botble\LanguageAdvanced\Supports\LanguageAdvancedManager;
 use Botble\Marketplace\Facades\MarketplaceHelper;
 use Botble\Marketplace\Http\Middleware\RedirectIfNotVendor;
@@ -29,14 +34,12 @@ use Botble\Marketplace\Repositories\Interfaces\RevenueInterface;
 use Botble\Marketplace\Repositories\Interfaces\StoreInterface;
 use Botble\Marketplace\Repositories\Interfaces\VendorInfoInterface;
 use Botble\Marketplace\Repositories\Interfaces\WithdrawalInterface;
-use Botble\Optimize\Facades\OptimizerHelper;
 use Botble\SeoHelper\Facades\SeoHelper;
 use Botble\Slug\Facades\SlugHelper;
 use Botble\Theme\Facades\SiteMapManager;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
 class MarketplaceServiceProvider extends ServiceProvider
@@ -69,8 +72,7 @@ class MarketplaceServiceProvider extends ServiceProvider
 
         $this->app['router']->aliasMiddleware('vendor', RedirectIfNotVendor::class);
 
-        $loader = AliasLoader::getInstance();
-        $loader->alias('MarketplaceHelper', MarketplaceHelper::class);
+        AliasLoader::getInstance()->alias('MarketplaceHelper', MarketplaceHelper::class);
     }
 
     public function boot(): void
@@ -79,7 +81,10 @@ class MarketplaceServiceProvider extends ServiceProvider
             return;
         }
 
-        $this->setNamespace('plugins/marketplace')
+        add_filter(IS_IN_ADMIN_FILTER, [$this, 'setInAdmin'], 128);
+
+        $this
+            ->setNamespace('plugins/marketplace')
             ->loadAndPublishConfigurations(['permissions', 'email', 'general'])
             ->loadMigrations()
             ->loadAndPublishTranslations()
@@ -97,23 +102,14 @@ class MarketplaceServiceProvider extends ServiceProvider
             ]);
         }
 
-        $this->app['events']->listen(RouteMatched::class, function () {
+        DashboardMenu::beforeRetrieving(function () {
             DashboardMenu::make()
                 ->registerItem([
-                    'id' => 'cms-plugins-marketplace-settings',
-                    'priority' => 999,
-                    'parent_id' => 'cms-plugins-marketplace',
-                    'name' => 'plugins/marketplace::marketplace.settings.name',
-                    'icon' => null,
-                    'url' => route('marketplace.settings'),
-                    'permissions' => ['marketplace.settings'],
-                ])
-                ->registerItem([
                     'id' => 'cms-plugins-marketplace',
-                    'priority' => 9,
+                    'priority' => 0,
                     'parent_id' => null,
                     'name' => 'plugins/marketplace::marketplace.name',
-                    'icon' => 'fas fa-project-diagram',
+                    'icon' => 'ti ti-building-store',
                     'url' => '#',
                     'permissions' => ['marketplace.index'],
                 ])
@@ -123,7 +119,7 @@ class MarketplaceServiceProvider extends ServiceProvider
                     'parent_id' => 'cms-plugins-marketplace',
                     'name' => 'plugins/marketplace::store.name',
                     'icon' => null,
-                    'url' => route('marketplace.store.index'),
+                    'url' => fn () => route('marketplace.store.index'),
                     'permissions' => ['marketplace.store.index'],
                 ])
                 ->registerItem([
@@ -132,7 +128,7 @@ class MarketplaceServiceProvider extends ServiceProvider
                     'parent_id' => 'cms-plugins-marketplace',
                     'name' => 'plugins/marketplace::withdrawal.name',
                     'icon' => null,
-                    'url' => route('marketplace.withdrawal.index'),
+                    'url' => fn () => route('marketplace.withdrawal.index'),
                     'permissions' => ['marketplace.withdrawal.index'],
                 ])
                 ->registerItem([
@@ -141,30 +137,126 @@ class MarketplaceServiceProvider extends ServiceProvider
                     'parent_id' => 'cms-plugins-marketplace',
                     'name' => 'plugins/marketplace::marketplace.vendors',
                     'icon' => null,
-                    'url' => route('marketplace.vendors.index'),
+                    'url' => fn () => route('marketplace.vendors.index'),
                     'permissions' => ['marketplace.vendors.index'],
                 ])
+                ->when(
+                    MarketplaceHelper::getSetting('verify_vendor', 1),
+                    function (DashboardMenuSupport $dashboardMenu) {
+                        $dashboardMenu
+                            ->registerItem([
+                                'id' => 'cms-plugins-marketplace-unverified-vendor',
+                                'priority' => 5,
+                                'parent_id' => 'cms-plugins-marketplace',
+                                'name' => 'plugins/marketplace::unverified-vendor.name',
+                                'icon' => null,
+                                'url' => fn () => route('marketplace.unverified-vendors.index'),
+                                'permissions' => ['marketplace.unverified-vendors.index'],
+                            ]);
+                    }
+                )
                 ->registerItem([
                     'id' => 'cms-plugins-marketplace-reports',
                     'priority' => 0,
                     'parent_id' => 'cms-plugins-marketplace',
                     'name' => 'plugins/marketplace::marketplace.reports.name',
                     'icon' => null,
-                    'url' => route('marketplace.reports.index'),
+                    'url' => fn () => route('marketplace.reports.index'),
                     'permissions' => ['marketplace.reports'],
                 ]);
+        });
 
-            if (MarketplaceHelper::getSetting('verify_vendor', 1)) {
-                DashboardMenu::registerItem([
-                    'id' => 'cms-plugins-marketplace-unverified-vendor',
+        DashboardMenu::for('vendor')->beforeRetrieving(function () {
+            DashboardMenu::make()
+                ->registerItem([
+                    'id' => 'marketplace.vendor.dashboard',
+                    'priority' => 1,
+                    'name' => 'Dashboard',
+                    'url' => fn () => route('marketplace.vendor.dashboard'),
+                    'icon' => 'ti ti-home',
+                ])
+                ->registerItem([
+                    'id' => 'marketplace.vendor.products',
+                    'priority' => 2,
+                    'name' => 'Products',
+                    'url' => fn () => route('marketplace.vendor.products.index'),
+                    'icon' => 'ti ti-package',
+                ])
+                ->registerItem([
+                    'id' => 'marketplace.vendor.orders',
+                    'priority' => 3,
+                    'name' => 'Orders',
+                    'url' => fn () => route('marketplace.vendor.orders.index'),
+                    'icon' => 'ti ti-shopping-cart',
+                ])
+                ->registerItem([
+                    'id' => 'marketplace.vendor.discounts',
+                    'priority' => 4,
+                    'name' => 'Coupons',
+                    'url' => fn () => route('marketplace.vendor.discounts.index'),
+                    'icon' => 'ti ti-tag',
+                ])
+                ->registerItem([
+                    'id' => 'marketplace.vendor.withdrawals',
                     'priority' => 5,
-                    'parent_id' => 'cms-plugins-marketplace',
-                    'name' => 'plugins/marketplace::unverified-vendor.name',
-                    'icon' => null,
-                    'url' => route('marketplace.unverified-vendors.index'),
-                    'permissions' => ['marketplace.unverified-vendors.index'],
-                ]);
-            } else {
+                    'name' => 'Withdrawals',
+                    'url' => fn () => route('marketplace.vendor.withdrawals.index'),
+                    'icon' => 'ti ti-cash',
+                ])
+                ->registerItem([
+                    'id' => 'marketplace.vendor.revenues',
+                    'priority' => 6,
+                    'name' => 'Revenues',
+                    'url' => fn () => route('marketplace.vendor.revenues.index'),
+                    'icon' => 'ti ti-wallet',
+                ])
+                ->registerItem([
+                    'id' => 'marketplace.vendor.settings',
+                    'priority' => 7,
+                    'name' => 'Settings',
+                    'url' => fn () => route('marketplace.vendor.settings'),
+                    'icon' => 'ti ti-settings',
+                ])
+                ->registerItem([
+                    'id' => 'customer.overview',
+                    'priority' => 8,
+                    'name' => 'Customer dashboard',
+                    'url' => fn () => route('customer.overview'),
+                    'icon' => 'ti ti-user',
+                ])
+                ->when(EcommerceHelper::isReviewEnabled(), function (DashboardMenuSupport $dashboardMenu) {
+                    return $dashboardMenu->registerItem([
+                        'id' => 'marketplace.vendor.reviews',
+                        'priority' => 5,
+                        'name' => 'Reviews',
+                        'url' => fn () => route('marketplace.vendor.reviews.index'),
+                        'icon' => 'ti ti-star',
+                    ]);
+                })
+                ->when(EcommerceHelper::isOrderReturnEnabled(), function (DashboardMenuSupport $dashboardMenu) {
+                    return $dashboardMenu->registerItem([
+                        'id' => 'marketplace.vendor.order-returns',
+                        'priority' => 3,
+                        'name' => 'Order Returns',
+                        'url' => fn () => route('marketplace.vendor.order-returns.index'),
+                        'icon' => 'ti ti-reload',
+                    ]);
+                })
+                ->when(MarketplaceHelper::allowVendorManageShipping(), function (DashboardMenuSupport $dashboardMenu) {
+                    return $dashboardMenu->registerItem([
+                        'id' => 'marketplace.vendor.shipments',
+                        'priority' => 3,
+                        'name' => 'Shipments',
+                        'url' => fn () => route('marketplace.vendor.shipments.index'),
+                        'icon' => 'ti ti-truck',
+                    ]);
+                });
+        });
+
+        DashboardMenu::default();
+
+        $this->app['events']->listen(RouteMatched::class, function () {
+            if (! MarketplaceHelper::getSetting('verify_vendor', 1)) {
                 config([
                     'plugins.marketplace.email.templates' => Arr::except(
                         config('plugins.marketplace.email.templates'),
@@ -177,8 +269,18 @@ class MarketplaceServiceProvider extends ServiceProvider
                 MARKETPLACE_MODULE_SCREEN_NAME,
                 config('plugins.marketplace.email', [])
             );
+        });
 
-            add_filter(IS_IN_ADMIN_FILTER, [$this, 'setInAdmin'], 128);
+        PanelSectionManager::beforeRendering(function () {
+            PanelSectionManager::default()->registerItem(
+                SettingEcommercePanelSection::class,
+                fn () => PanelSectionItem::make('settings.ecommerce.marketplace')
+                    ->setTitle(trans('plugins/ecommerce::setting.marketplace.name'))
+                    ->withIcon('ti ti-building-store')
+                    ->withDescription(trans('plugins/ecommerce::setting.marketplace.description'))
+                    ->withPriority(150)
+                    ->withRoute('marketplace.settings'),
+            );
         });
 
         SlugHelper::registerModule(Store::class, 'Stores');
@@ -317,12 +419,6 @@ class MarketplaceServiceProvider extends ServiceProvider
 
     public function setInAdmin(bool $isInAdmin): bool
     {
-        $isInAdmin = in_array('vendor', Route::current()->middleware()) || $isInAdmin;
-
-        if ($isInAdmin) {
-            OptimizerHelper::disable();
-        }
-
-        return $isInAdmin;
+        return request()->segment(1) === 'vendor' || $isInAdmin;
     }
 }

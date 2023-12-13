@@ -6,10 +6,6 @@ use Botble\Base\Events\BeforeEditContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Base\Facades\EmailHandler;
-use Botble\Base\Facades\PageTitle;
-use Botble\Base\Forms\FormBuilder;
-use Botble\Base\Http\Controllers\BaseController;
-use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Marketplace\Enums\WithdrawalStatusEnum;
 use Botble\Marketplace\Forms\WithdrawalForm;
 use Botble\Marketplace\Http\Requests\WithdrawalRequest;
@@ -21,25 +17,34 @@ use Illuminate\Support\Facades\Auth;
 
 class WithdrawalController extends BaseController
 {
+    public function __construct()
+    {
+        parent::__construct();
+
+        $this
+            ->breadcrumb()
+            ->add(trans('plugins/marketplace::withdrawal.name'), route('marketplace.withdrawal.index'));
+    }
+
     public function index(WithdrawalTable $table)
     {
-        PageTitle::setTitle(trans('plugins/marketplace::withdrawal.name'));
+        $this->pageTitle(trans('plugins/marketplace::withdrawal.name'));
 
         return $table->renderTable();
     }
 
-    public function edit(int|string $id, FormBuilder $formBuilder, Request $request)
+    public function edit(int|string $id, Request $request)
     {
         $withdrawal = Withdrawal::query()->findOrFail($id);
 
         event(new BeforeEditContentEvent($request, $withdrawal));
 
-        PageTitle::setTitle(trans('core/base::forms.edit_item', ['name' => $withdrawal->name]));
+        $this->pageTitle(trans('core/base::forms.edit_item', ['name' => $withdrawal->customer->name]));
 
-        return $formBuilder->create(WithdrawalForm::class, ['model' => $withdrawal])->renderForm();
+        return WithdrawalForm::createFromModel($withdrawal)->renderForm();
     }
 
-    public function update(int|string $id, WithdrawalRequest $request, BaseHttpResponse $response)
+    public function update(int|string $id, WithdrawalRequest $request)
     {
         $withdrawal = Withdrawal::query()->findOrFail($id);
 
@@ -73,12 +78,13 @@ class WithdrawalController extends BaseController
 
         event(new UpdatedContentEvent(WITHDRAWAL_MODULE_SCREEN_NAME, $request, $withdrawal));
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setPreviousUrl(route('marketplace.withdrawal.index'))
-            ->setMessage(trans('core/base::notices.update_success_message'));
+            ->withUpdatedSuccessMessage();
     }
 
-    public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
+    public function destroy(int|string $id, Request $request)
     {
         try {
             $withdrawal = Withdrawal::query()->findOrFail($id);
@@ -87,9 +93,12 @@ class WithdrawalController extends BaseController
 
             event(new DeletedContentEvent(WITHDRAWAL_MODULE_SCREEN_NAME, $request, $withdrawal));
 
-            return $response->setMessage(trans('core/base::notices.delete_success_message'));
+            return $this
+                ->httpResponse()
+                ->setMessage(trans('core/base::notices.delete_success_message'));
         } catch (Exception $exception) {
-            return $response
+            return $this
+                ->httpResponse()
                 ->setError()
                 ->setMessage($exception->getMessage());
         }

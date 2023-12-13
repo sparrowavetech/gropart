@@ -9,7 +9,7 @@
 @endif
 
 @if ($showField)
-    {!! Form::customImage($name, $option['value'], $options['attr']) !!}
+    {!! Form::mediaImage($name, $options['value'] ?? null) !!}
     @include('core/base::forms.partials.help-block')
 @endif
 

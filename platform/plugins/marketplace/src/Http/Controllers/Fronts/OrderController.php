@@ -6,9 +6,7 @@ use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\EmailHandler;
-use Botble\Base\Facades\PageTitle;
 use Botble\Base\Http\Controllers\BaseController;
-use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Enums\OrderStatusEnum;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Facades\InvoiceHelper;
@@ -29,7 +27,7 @@ class OrderController extends BaseController
 {
     public function index(OrderTable $table)
     {
-        PageTitle::setTitle(__('Orders'));
+        $this->pageTitle(__('Orders'));
 
         return $table->renderTable();
     }
@@ -41,7 +39,7 @@ class OrderController extends BaseController
                 'vendor/core/plugins/ecommerce/libraries/jquery.textarea_autosize.js',
                 'vendor/core/plugins/ecommerce/js/order.js',
             ])
-            ->addScripts(['blockui', 'input-mask']);
+            ->addScripts(['input-mask']);
 
         if (EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation()) {
             Assets::addScriptsDirectly('vendor/core/plugins/location/js/location.js');
@@ -51,7 +49,7 @@ class OrderController extends BaseController
 
         $order->load(['products', 'user']);
 
-        PageTitle::setTitle(trans('plugins/ecommerce::order.edit_order', ['code' => $order->code]));
+        $this->pageTitle(trans('plugins/ecommerce::order.edit_order', ['code' => $order->code]));
 
         $weight = $order->products_weight;
 
@@ -60,7 +58,7 @@ class OrderController extends BaseController
         return MarketplaceHelper::view('vendor-dashboard.orders.edit', compact('order', 'weight', 'defaultStore'));
     }
 
-    public function update(int|string $id, UpdateOrderRequest $request, BaseHttpResponse $response)
+    public function update(int|string $id, UpdateOrderRequest $request)
     {
         $order = $this->findOrFail($id);
         $order->fill($request->input());
@@ -68,12 +66,13 @@ class OrderController extends BaseController
 
         event(new UpdatedContentEvent(ORDER_MODULE_SCREEN_NAME, $request, $order));
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setPreviousUrl(route('orders.index'))
-            ->setMessage(trans('core/base::notices.update_success_message'));
+            ->withUpdatedSuccessMessage();
     }
 
-    public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
+    public function destroy(int|string $id, Request $request)
     {
         $order = $this->findOrFail($id);
 
@@ -81,9 +80,12 @@ class OrderController extends BaseController
             $order->delete();
             event(new DeletedContentEvent(ORDER_MODULE_SCREEN_NAME, $request, $order));
 
-            return $response->setMessage(trans('core/base::notices.delete_success_message'));
+            return $this
+                ->httpResponse()
+                ->setMessage(trans('core/base::notices.delete_success_message'));
         } catch (Exception $exception) {
-            return $response
+            return $this
+                ->httpResponse()
                 ->setError()
                 ->setMessage($exception->getMessage());
         }
@@ -96,7 +98,7 @@ class OrderController extends BaseController
         return InvoiceHelper::downloadInvoice($order->invoice);
     }
 
-    public function postConfirm(Request $request, BaseHttpResponse $response)
+    public function postConfirm(Request $request)
     {
         $order = $this->findOrFail($request->input('order_id'));
 
@@ -131,25 +133,30 @@ class OrderController extends BaseController
             );
         }
 
-        return $response->setMessage(trans('plugins/ecommerce::order.confirm_order_success'));
+        return $this
+            ->httpResponse()
+            ->setMessage(trans('plugins/ecommerce::order.confirm_order_success'));
     }
 
-    public function postResendOrderConfirmationEmail(int|string $id, BaseHttpResponse $response)
+    public function postResendOrderConfirmationEmail(int|string $id)
     {
         $order = $this->findOrFail($id);
 
         $result = OrderHelper::sendOrderConfirmationEmail($order);
 
         if (! $result) {
-            return $response
+            return $this
+                ->httpResponse()
                 ->setError()
                 ->setMessage(trans('plugins/ecommerce::order.error_when_sending_email'));
         }
 
-        return $response->setMessage(trans('plugins/ecommerce::order.sent_confirmation_email_success'));
+        return $this
+            ->httpResponse()
+            ->setMessage(trans('plugins/ecommerce::order.sent_confirmation_email_success'));
     }
 
-    public function postUpdateShippingAddress(int|string $id, AddressRequest $request, BaseHttpResponse $response)
+    public function postUpdateShippingAddress(int|string $id, AddressRequest $request)
     {
         $address = OrderAddress::query()
             ->where('id', $id)
@@ -182,7 +189,8 @@ class OrderController extends BaseController
         $address->fill($request->validated());
         $address->save();
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setData([
                 'line' => view('plugins/ecommerce::orders.shipping-address.line', compact('address'))->render(),
                 'detail' => view('plugins/ecommerce::orders.shipping-address.detail', compact('address'))->render(),
@@ -190,7 +198,7 @@ class OrderController extends BaseController
             ->setMessage(trans('plugins/ecommerce::order.update_shipping_address_success'));
     }
 
-    public function postCancelOrder(int|string $id, BaseHttpResponse $response)
+    public function postCancelOrder(int|string $id)
     {
         $order = $this->findOrFail($id);
 
@@ -207,7 +215,9 @@ class OrderController extends BaseController
             'user_id' => 0,
         ]);
 
-        return $response->setMessage(trans('plugins/ecommerce::order.customer.messages.cancel_success'));
+        return $this
+            ->httpResponse()
+            ->setMessage(trans('plugins/ecommerce::order.customer.messages.cancel_success'));
     }
 
     protected function findOrFail(int|string $id): Order|Model|null

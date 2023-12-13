@@ -1,9 +1,10 @@
 <?php
 
+use Botble\Theme\Facades\Theme;
 use Illuminate\Support\Facades\Route;
 
-Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers\Fronts', 'middleware' => ['web', 'core']], function () {
-    Route::group(apply_filters(BASE_FILTER_GROUP_PUBLIC_ROUTE, []), function () {
+Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers\Fronts'], function () {
+    Theme::registerRoutes(function () {
         Route::get('wishlist', [
             'as' => 'public.wishlist',
             'uses' => 'WishlistController@index',

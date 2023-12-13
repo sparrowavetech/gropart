@@ -6,10 +6,6 @@ use Botble\Base\Events\BeforeEditContentEvent;
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
-use Botble\Base\Facades\PageTitle;
-use Botble\Base\Forms\FormBuilder;
-use Botble\Base\Http\Controllers\BaseController;
-use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Forms\ProductCollectionForm;
 use Botble\Ecommerce\Http\Requests\ProductCollectionRequest;
 use Botble\Ecommerce\Models\ProductCollection;
@@ -19,21 +15,30 @@ use Illuminate\Http\Request;
 
 class ProductCollectionController extends BaseController
 {
+    public function __construct()
+    {
+        parent::__construct();
+
+        $this
+            ->breadcrumb()
+            ->add(trans('plugins/ecommerce::product-collections.name'), route('product-collections.index'));
+    }
+
     public function index(ProductCollectionTable $dataTable)
     {
-        PageTitle::setTitle(trans('plugins/ecommerce::product-collections.name'));
+        $this->pageTitle(trans('plugins/ecommerce::product-collections.name'));
 
         return $dataTable->renderTable();
     }
 
-    public function create(FormBuilder $formBuilder)
+    public function create()
     {
-        PageTitle::setTitle(trans('plugins/ecommerce::product-collections.create'));
+        $this->pageTitle(trans('plugins/ecommerce::product-collections.create'));
 
-        return $formBuilder->create(ProductCollectionForm::class)->renderForm();
+        return ProductCollectionForm::create()->renderForm();
     }
 
-    public function store(ProductCollectionRequest $request, BaseHttpResponse $response)
+    public function store(ProductCollectionRequest $request)
     {
         $productCollection = new ProductCollection();
         $productCollection->fill($request->input());
@@ -43,25 +48,25 @@ class ProductCollectionController extends BaseController
 
         event(new CreatedContentEvent(PRODUCT_COLLECTION_MODULE_SCREEN_NAME, $request, $productCollection));
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setPreviousUrl(route('product-collections.index'))
             ->setNextUrl(route('product-collections.edit', $productCollection->id))
-            ->setMessage(trans('core/base::notices.create_success_message'));
+            ->withCreatedSuccessMessage();
     }
 
-    public function edit(ProductCollection $productCollection, FormBuilder $formBuilder, Request $request)
+    public function edit(ProductCollection $productCollection, Request $request)
     {
         event(new BeforeEditContentEvent($request, $productCollection));
 
-        PageTitle::setTitle(trans('core/base::forms.edit_item', ['name' => $productCollection->name]));
+        $this->pageTitle(trans('core/base::forms.edit_item', ['name' => $productCollection->name]));
 
-        return $formBuilder
-            ->create(ProductCollectionForm::class, ['model' => $productCollection])
+        return ProductCollectionForm::createFromModel($productCollection)
             ->remove('slug')
             ->renderForm();
     }
 
-    public function update(ProductCollection $productCollection, ProductCollectionRequest $request, BaseHttpResponse $response)
+    public function update(ProductCollection $productCollection, ProductCollectionRequest $request)
     {
         $productCollection->fill($request->input());
         $productCollection->save();
@@ -74,43 +79,51 @@ class ProductCollectionController extends BaseController
 
         event(new UpdatedContentEvent(PRODUCT_COLLECTION_MODULE_SCREEN_NAME, $request, $productCollection));
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setPreviousUrl(route('product-collections.index'))
-            ->setMessage(trans('core/base::notices.update_success_message'));
+            ->withUpdatedSuccessMessage();
     }
 
-    public function destroy(ProductCollection $productCollection, BaseHttpResponse $response, Request $request)
+    public function destroy(ProductCollection $productCollection, Request $request)
     {
         try {
             $productCollection->delete();
 
             event(new DeletedContentEvent(PRODUCT_COLLECTION_MODULE_SCREEN_NAME, $request, $productCollection));
 
-            return $response->setMessage(trans('core/base::notices.delete_success_message'));
+            return $this
+                ->httpResponse()
+                ->setMessage(trans('core/base::notices.delete_success_message'));
         } catch (Exception $exception) {
-            return $response
+            return $this
+                ->httpResponse()
                 ->setError()
                 ->setMessage($exception->getMessage());
         }
     }
 
-    public function getListForSelect(BaseHttpResponse $response)
+    public function getListForSelect()
     {
         $productCollections = ProductCollection::query()
             ->select(['id', 'name'])
             ->get()
             ->toArray();
 
-        return $response->setData($productCollections);
+        return $this
+            ->httpResponse()
+            ->setData($productCollections);
     }
 
-    public function getProductCollection(ProductCollection|null $productCollection, BaseHttpResponse $response)
+    public function getProductCollection(ProductCollection|null $productCollection)
     {
         $productCollection->load(['products']);
 
-        return $response->setData(view(
-            'plugins/ecommerce::product-collections.partials.products',
-            compact('productCollection')
-        )->render());
+        return $this
+            ->httpResponse()
+            ->setData(view(
+                'plugins/ecommerce::product-collections.partials.products',
+                compact('productCollection')
+            )->render());
     }
 }

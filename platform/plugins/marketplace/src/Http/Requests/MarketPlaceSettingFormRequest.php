@@ -4,15 +4,14 @@ namespace Botble\Marketplace\Http\Requests;
 
 use Botble\Ecommerce\Http\Requests\ProductRequest as BaseProductRequest;
 use Botble\Marketplace\Enums\PayoutPaymentMethodsEnum;
-use Botble\Marketplace\Facades\MarketplaceHelper;
 
 class MarketPlaceSettingFormRequest extends BaseProductRequest
 {
     protected function prepareForValidation(): void
     {
-        if (! array_filter($this->input(MarketplaceHelper::getSettingKey('payout_methods')))) {
+        if (! array_filter($this->input('payout_methods'))) {
             $this->merge([
-                MarketplaceHelper::getSettingKey('payout_methods') => [],
+                'payout_methods' => [],
             ]);
         }
     }
@@ -20,22 +19,22 @@ class MarketPlaceSettingFormRequest extends BaseProductRequest
     public function rules(): array
     {
         $rules = [
-            MarketplaceHelper::getSettingKey('payout_methods') => 'required|array:' . implode(',', PayoutPaymentMethodsEnum::values()),
-            MarketplaceHelper::getSettingKey('payout_methods') . '.*' => 'in:0,1',
-            'marketplace_enable_commission_fee_for_each_category' => 'required|in:0,1',
-            'marketplace_check_valid_signature' => 'required|in:0,1',
-            'marketplace_verify_vendor' => 'required|in:0,1',
-            'marketplace_enable_product_approval' => 'required|in:0,1',
-            'marketplace_hide_store_phone_number' => 'required|in:0,1',
-            'marketplace_hide_store_email' => 'required|in:0,1',
-            'marketplace_allow_vendor_manage_shipping' => 'required|in:0,1',
-            'marketplace_fee_per_order' => 'required|min:0|max:100|numeric',
-            'marketplace_fee_withdrawal' => 'required|min:0|numeric',
-            'marketplace_max_filesize_upload_by_vendor' => 'required|min:1|numeric',
-            'marketplace_max_product_images_upload_by_vendor' => 'required|min:1|numeric',
+            'payout_methods' => 'required|array:' . implode(',', PayoutPaymentMethodsEnum::values()),
+            'payout_methods.*' => 'sometimes|in:0,1',
+            'enable_commission_fee_for_each_category' => 'sometimes|in:0,1',
+            'check_valid_signature' => 'sometimes|in:0,1',
+            'verify_vendor' => 'sometimes|in:0,1',
+            'enable_product_approval' => 'sometimes|in:0,1',
+            'hide_store_phone_number' => 'sometimes|in:0,1',
+            'hide_store_email' => 'sometimes|in:0,1',
+            'allow_vendor_manage_shipping' => 'sometimes|in:0,1',
+            'fee_per_order' => 'sometimes|min:0|max:100|numeric',
+            'fee_withdrawal' => 'sometimes|min:0|numeric',
+            'max_filesize_upload_by_vendor' => 'sometimes|min:1|numeric',
+            'max_product_images_upload_by_vendor' => 'sometimes|min:1|numeric',
         ];
 
-        if ($this->input('marketplace_enable_commission_fee_for_each_category')) {
+        if ($this->input('enable_commission_fee_for_each_category')) {
             // validate request setting category commission
             $commissionByCategory = $this->input('commission_by_category');
             foreach ($commissionByCategory as $key => $item) {
@@ -53,7 +52,7 @@ class MarketPlaceSettingFormRequest extends BaseProductRequest
     {
         $attributes = [];
 
-        if ($this->input('marketplace_enable_commission_fee_for_each_category') == 1) {
+        if ($this->input('enable_commission_fee_for_each_category') == 1) {
             // validate request setting category commission
             $commissionByCategory = $this->input('commission_by_category');
             foreach ($commissionByCategory as $key => $item) {

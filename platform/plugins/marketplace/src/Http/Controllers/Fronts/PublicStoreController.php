@@ -4,11 +4,11 @@ namespace Botble\Marketplace\Http\Controllers\Fronts;
 
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Facades\BaseHelper;
-use Botble\Base\Http\Responses\BaseHttpResponse;
+use Botble\Base\Http\Controllers\BaseController;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Services\Products\GetProductService;
 use Botble\Marketplace\Facades\MarketplaceHelper;
-use Botble\Marketplace\Http\Requests\CheckStoreUrlRequest;
+use Botble\Marketplace\Http\Requests\Fronts\CheckStoreUrlRequest;
 use Botble\Marketplace\Models\Store;
 use Botble\Media\Facades\RvMedia;
 use Botble\SeoHelper\Facades\SeoHelper;
@@ -20,11 +20,11 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
-class PublicStoreController
+class PublicStoreController extends BaseController
 {
     public function getStores(Request $request)
     {
-        Theme::breadcrumb()->add(__('Home'), route('public.index'))
+        Theme::breadcrumb()
             ->add(__('Stores'), route('public.stores'));
 
         SeoHelper::setTitle(__('Stores'))->setDescription(__('Stores'));
@@ -64,8 +64,7 @@ class PublicStoreController
     public function getStore(
         string $key,
         Request $request,
-        GetProductService $productService,
-        BaseHttpResponse $response
+        GetProductService $productService
     ) {
         $slug = SlugHelper::getSlug($key, SlugHelper::getPrefix(Store::class));
 
@@ -82,7 +81,11 @@ class PublicStoreController
             Arr::forget($condition, 'status');
         }
 
-        $store = Store::query()->with(['slugable', 'metadata'])->where($condition)->firstOrFail();
+        $store = Store::query()
+            ->wherePublished()
+            ->with(['slugable', 'metadata'])
+            ->where($condition)
+            ->firstOrFail();
 
         if ($store->slugable->key !== $slug->key) {
             return redirect()->to($store->url);
@@ -101,7 +104,6 @@ class PublicStoreController
         SeoHelper::setSeoOpenGraph($meta);
 
         Theme::breadcrumb()
-            ->add(__('Home'), route('public.index'))
             ->add(__('Stores'), route('public.stores'))
             ->add($store->name, $store->url);
 
@@ -122,7 +124,8 @@ class PublicStoreController
                 $view = MarketplaceHelper::viewPath('stores.items', false);
             }
 
-            return $response
+            return $this
+                ->httpResponse()
                 ->setData(view($view, compact('products', 'store'))->render())
                 ->setMessage($message);
         }
@@ -130,7 +133,7 @@ class PublicStoreController
         return Theme::scope('marketplace.store', compact('store', 'products'), MarketplaceHelper::viewPath('store', false))->render();
     }
 
-    public function checkStoreUrl(CheckStoreUrlRequest $request, BaseHttpResponse $response)
+    public function checkStoreUrl(CheckStoreUrlRequest $request)
     {
         if (! $request->ajax()) {
             abort(404);
@@ -141,14 +144,14 @@ class PublicStoreController
 
         $existing = SlugHelper::getSlug($slug, SlugHelper::getPrefix(Store::class));
 
-        $response->setData(['slug' => $slug]);
+        $this->httpResponse()->setData(['slug' => $slug]);
 
         if ($existing && $existing->reference_id != $request->input('reference_id')) {
-            return $response
+            return $this->httpResponse()
                 ->setError()
                 ->setMessage(__('Not Available'));
         }
 
-        return $response->setMessage(__('Available'));
+        return $this->httpResponse()->setMessage(__('Available'));
     }
 }

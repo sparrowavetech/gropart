@@ -18,6 +18,13 @@ class Option extends BaseModel
         'order',
     ];
 
+    protected static function booted(): void
+    {
+        self::deleting(function (Option $option) {
+            $option->values()->delete();
+        });
+    }
+
     public function values(): HasMany
     {
         return $this
@@ -28,12 +35,5 @@ class Option extends BaseModel
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
-    }
-
-    protected static function booted(): void
-    {
-        self::deleting(function (Option $option) {
-            $option->values()->delete();
-        });
     }
 }

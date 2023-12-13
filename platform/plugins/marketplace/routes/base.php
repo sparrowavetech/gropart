@@ -1,13 +1,23 @@
 <?php
 
-use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\AdminHelper;
 use Illuminate\Support\Facades\Route;
 
-Route::group(['namespace' => 'Botble\Marketplace\Http\Controllers', 'middleware' => ['web', 'core']], function () {
-    Route::group(['prefix' => BaseHelper::getAdminPrefix(), 'middleware' => 'auth'], function () {
+AdminHelper::registerRoutes(function () {
+    Route::group(['namespace' => 'Botble\Marketplace\Http\Controllers'], function () {
         Route::group(['prefix' => 'marketplaces', 'as' => 'marketplace.'], function () {
             Route::group(['prefix' => 'stores', 'as' => 'store.'], function () {
                 Route::resource('', 'StoreController')->parameters(['' => 'store']);
+                Route::post('update-tax-info/{store}', [
+                    'as' => 'update-tax-info',
+                    'uses' => 'StoreController@updateTaxInformation',
+                    'permission' => 'marketplace.store.edit',
+                ]);
+                Route::post('update-payout-info/{store}', [
+                    'as' => 'update-payout-info',
+                    'uses' => 'StoreController@updatePayoutInformation',
+                    'permission' => 'marketplace.store.edit',
+                ]);
 
                 Route::get('view/{id}', [
                     'as' => 'view',
@@ -39,12 +49,12 @@ Route::group(['namespace' => 'Botble\Marketplace\Http\Controllers', 'middleware'
 
             Route::get('settings', [
                 'as' => 'settings',
-                'uses' => 'MarketplaceController@getSettings',
+                'uses' => 'Settings\MarketplaceSettingController@edit',
             ]);
 
-            Route::post('settings', [
-                'as' => 'settings.post',
-                'uses' => 'MarketplaceController@postSettings',
+            Route::put('settings', [
+                'as' => 'settings.update',
+                'uses' => 'Settings\MarketplaceSettingController@update',
                 'permission' => 'marketplace.settings',
             ]);
 

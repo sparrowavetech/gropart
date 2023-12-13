@@ -29,7 +29,7 @@ class EcommerceProduct {
 
             CustomData.prototype.query = function (params, callback) {
                 let $this = this
-                results = []
+                let results
                 if (params.term && params.term !== '') {
                     results = _.filter($this.options.options.data, function (e) {
                         return e.text.toUpperCase().indexOf(params.term.toUpperCase()) >= 0
@@ -60,7 +60,7 @@ class EcommerceProduct {
             $.ajax({
                 url,
                 success: (res) => {
-                    if (res.error == false) {
+                    if (res.error === false) {
                         window.productAttributeSets = res.data
                         window.loadedProductAttributeSets = true
                     } else {
@@ -192,6 +192,8 @@ class EcommerceProduct {
 
                             $('.btn-trigger-delete-selected-variations').hide()
                             $current.closest('.modal').modal('hide')
+
+                            $table.find('.table-check-all').prop('checked', false).prop('indeterminate', false)
                         }
                     },
                     error: (data) => {
@@ -248,20 +250,20 @@ class EcommerceProduct {
             event.preventDefault()
             let $current = $(event.currentTarget)
             let $group = $current.closest('.price-group')
-            $current.addClass('hidden')
-            $group.find('.turn-off-schedule').removeClass('hidden')
+            $current.hide()
+            $group.find('.turn-off-schedule').show()
             $group.find('.detect-schedule').val(1)
-            $group.find('.scheduled-time').removeClass('hidden')
+            $group.find('.scheduled-time').show()
         })
 
         _self.$body.on('click', '.turn-off-schedule', (event) => {
             event.preventDefault()
             let $current = $(event.currentTarget)
             let $group = $current.closest('.price-group')
-            $current.addClass('hidden')
-            $group.find('.turn-on-schedule').removeClass('hidden')
+            $current.hide()
+            $group.find('.turn-on-schedule').show()
             $group.find('.detect-schedule').val(0)
-            $group.find('.scheduled-time').addClass('hidden')
+            $group.find('.scheduled-time').hide()
         })
     }
 
@@ -271,11 +273,11 @@ class EcommerceProduct {
         _self.$body.on('click', 'input.storehouse-management-status', (event) => {
             let $storehouseInfo = $('.storehouse-info')
             if ($(event.currentTarget).prop('checked') === true) {
-                $storehouseInfo.removeClass('hidden')
-                $('.stock-status-wrapper').addClass('hidden')
+                $storehouseInfo.show()
+                $('.stock-status-wrapper').hide()
             } else {
-                $storehouseInfo.addClass('hidden')
-                $('.stock-status-wrapper').removeClass('hidden')
+                $storehouseInfo.hide()
+                $('.stock-status-wrapper').show()
             }
         })
     }
@@ -457,15 +459,15 @@ class EcommerceProduct {
                         $('#add-new-product-variation-modal .modal-body .loading-spinner').hide()
                         $('#add-new-product-variation-modal .modal-body').append(res.data)
 
-                        $('#add-new-product-variation-modal .select2-attributes').map((index, el) => {
-                            const $el = $(el)
-                            let data = productAttributeSets.find((item) => item.id == $el.data('id'))
+                        $('#add-new-product-variation-modal .select-attributes').map((index, el) => {
+                            let data = productAttributeSets.find((item) => item.id === $(el).data('id'))
 
                             if (data) {
-                                data = data.attributes.map((item, index) => {
+                                data = data.attributes.map((item) => {
                                     return { id: item.id, text: item.title }
                                 })
-                                $el.select2({
+
+                                Botble.select(el, {
                                     data,
                                     ajax: {},
                                     dataAdapter: CustomDataApdapterSelect2,
@@ -495,9 +497,10 @@ class EcommerceProduct {
 
         $(document).on('click', '.btn-trigger-edit-product-version', (event) => {
             event.preventDefault()
-            $('#update-product-variation-button').data('target', $(event.currentTarget).data('target'))
-            let $current = $(event.currentTarget)
 
+            const $current = $(event.currentTarget)
+
+            $('#update-product-variation-button').data('target', $(event.currentTarget).data('target'))
             $('#edit-product-variation-modal .modal-body .loading-spinner').show()
             $('#edit-product-variation-modal .modal-body .variation-form-wrapper').remove()
             $('#edit-product-variation-modal').modal('show')
@@ -512,15 +515,15 @@ class EcommerceProduct {
                         $('#edit-product-variation-modal .modal-body .loading-spinner').hide()
                         $('#edit-product-variation-modal .modal-body').append(res.data)
 
-                        $('#edit-product-variation-modal .select2-attributes').map((index, el) => {
-                            const $el = $(el)
-                            let data = productAttributeSets.find((item) => item.id == $el.data('id'))
+                        $('#edit-product-variation-modal .select-attributes').map((index, el) => {
+                            let data = productAttributeSets.find((item) => item.id == $(el).data('id'))
 
                             if (data) {
                                 data = data.attributes.map((item, index) => {
                                     return { id: item.id, text: item.title }
                                 })
-                                $el.select2({
+
+                                Botble.select(el, {
                                     data,
                                     ajax: {},
                                     dataAdapter: CustomDataApdapterSelect2,
@@ -726,7 +729,7 @@ class EcommerceProduct {
                         )
                     }
 
-                    select.select2({
+                    Botble.select(select, {
                         data,
                         width: '100%',
                         dropdownAutoWidth: true,
@@ -791,10 +794,10 @@ $(() => {
     $(document).on('click', '.btn-trigger-add-attribute', (event) => {
         event.preventDefault()
 
-        $('.list-product-attribute-wrap').toggleClass('hidden')
-        $('.list-product-attribute-values-wrap').toggleClass('hidden')
+        $('.list-product-attribute-wrap').toggle()
+        $('.list-product-attribute-values-wrap').toggle()
 
-        let $this = $(event.currentTarget)
+        const $this = $(event.currentTarget)
         $this.toggleClass('adding_attribute_enable text-warning')
 
         if ($this.hasClass('adding_attribute_enable')) {
@@ -806,26 +809,22 @@ $(() => {
             $('#is_added_attributes').val(0)
         }
 
-        let toggleText = $this.data('toggle-text')
+        const toggleText = $this.data('toggle-text')
         $this.data('toggle-text', $this.text())
         $this.text(toggleText)
     })
 
     let handleChangeAttributeSet = () => {
-        let $options = $(
-            '.list-product-attribute-items-wrap .product-attribute-set-item .product-select-attribute-item option'
+        const $options = $(
+            '.list-product-attribute-items-wrap .product-attribute-set-item select.product-select-attribute-item option'
         )
         $.each($options, (index, el) => {
             let $el = $(el)
             let value = $el.prop('value')
             if (value !== $el.closest('select').val()) {
-                if (
-                    $(
-                        '.list-product-attribute-items-wrap .product-attribute-set-item .product-select-attribute-item[data-set-id=' +
-                            value +
-                            ']'
-                    ).length === 0
-                ) {
+                if ($(
+                    `.list-product-attribute-items-wrap .product-attribute-set-item select.product-select-attribute-item[data-set-id=${value}]`
+                ).length === 0) {
                     $el.prop('disabled', false)
                 } else {
                     $el.prop('disabled', true)
@@ -834,42 +833,43 @@ $(() => {
         })
 
         let selectedItems = []
-        $.each($('.product-select-attribute-item'), (index, el) => {
+        $.each($('select.product-select-attribute-item'), (index, el) => {
             if ($(el).val() !== '') {
                 selectedItems.push(index)
             }
         })
 
         if (selectedItems.length) {
-            $('.btn-trigger-add-attribute-to-simple-product').removeClass('hidden')
+            $('.btn-trigger-add-attribute-to-simple-product').show()
         } else {
-            $('.btn-trigger-add-attribute-to-simple-product').addClass('hidden')
+            $('.btn-trigger-add-attribute-to-simple-product').hide()
         }
     }
 
     $(document).on('change', '.product-select-attribute-item', (event) => {
-        let $this = $(event.currentTarget)
+        const $this = $(event.currentTarget)
         let $attrSetItem = $this.closest('.product-attribute-set-item')
         let selectedValue = $this.val()
 
         let $setSelect = $attrSetItem.find('.product-select-attribute-item')
         $setSelect.attr('data-set-id', $this.val())
 
-        $attributeValue = $attrSetItem.find('.product-select-attribute-item-value')
+        let $attributeValue = $attrSetItem.find('.product-select-attribute-item-value')
 
         $attributeValue.prop('name', 'added_attributes[' + selectedValue + ']')
-        let data = productAttributeSets
-            .find((item) => item.id == selectedValue)
-            .attributes.map((item) => {
-                return { id: item.id, text: item.title }
-            })
-        $attributeValue.empty().select2({
-            data,
-            ajax: {},
-            dataAdapter: CustomDataApdapterSelect2,
-        })
+        let data = productAttributeSets.find((item) => item.id == selectedValue)
 
-        handleChangeAttributeSet()
+        if (data?.attributes) {
+            $attributeValue.empty().select2({
+                data: data.attributes.map((item) => {
+                    return { id: item.id, text: item.title }
+                }),
+                ajax: {},
+                dataAdapter: CustomDataApdapterSelect2,
+            })
+
+            handleChangeAttributeSet()
+        }
     })
 
     let addAttributeSet = () => {
@@ -907,7 +907,7 @@ $(() => {
         }
 
         if ($listDetailWrap.find('.product-attribute-set-item').length == productAttributeSets.length) {
-            $('.btn-trigger-add-attribute-item').addClass('hidden')
+            $('.btn-trigger-add-attribute-item').hide()
         }
     }
 
@@ -916,20 +916,21 @@ $(() => {
 
         addAttributeSet()
 
-        $('.product-set-item-delete-action').removeClass('hidden')
+        $('.product-set-item-delete-action').show()
 
         handleChangeAttributeSet()
     })
 
-    $(document).on('click', '.product-set-item-delete-action a', (event) => {
+    $(document).on('click', '.product-set-item-delete-action button', (event) => {
         event.preventDefault()
+
         $(event.currentTarget).closest('.product-attribute-set-item').remove()
         let totalAttributeSets = $('.list-product-attribute-items-wrap .product-attribute-set-item').length
 
         if (totalAttributeSets < 2) {
-            $('.product-set-item-delete-action').addClass('hidden')
+            $('.product-set-item-delete-action').hide()
         } else if (totalAttributeSets < productAttributeSets.length) {
-            $('.btn-trigger-add-attribute-item').removeClass('hidden')
+            $('.btn-trigger-add-attribute-item').show()
         }
 
         handleChangeAttributeSet()
@@ -971,84 +972,87 @@ $(() => {
         event.preventDefault()
         $(event.currentTarget).closest('.product-image-item-handler').remove()
         if ($('.list-gallery-media-images').find('.product-image-item-handler').length === 0) {
-            $('.default-placeholder-product-image').removeClass('hidden')
+            $('.default-placeholder-product-image').show()
         }
     })
 
     $(document).on('click', '.list-search-data .selectable-item', (event) => {
         event.preventDefault()
-        let _self = $(event.currentTarget)
-        let $input = _self.closest('.form-group').find('input[type=hidden]')
 
-        let existedValues = $input.val().split(',')
-        $.each(existedValues, (index, el) => {
-            existedValues[index] = parseInt(el)
-        })
+        const _self = $(event.currentTarget)
+        const $input = _self.closest('.box-search-advance').find('input[type=hidden]')
 
-        if ($.inArray(_self.data('id'), existedValues) < 0) {
-            if ($input.val()) {
-                $input.val($input.val() + ',' + _self.data('id'))
-            } else {
-                $input.val(_self.data('id'))
-            }
-
-            let template = $(document).find('#selected_product_list_template').html()
-
-            let productItem = template
-                .replace(/__name__/gi, _self.data('name'))
-                .replace(/__id__/gi, _self.data('id'))
-                .replace(/__url__/gi, _self.data('url'))
-                .replace(/__image__/gi, _self.data('image'))
-                .replace(/__attributes__/gi, _self.find('a span').text())
-            _self.closest('.form-group').find('.list-selected-products').removeClass('hidden')
-            _self.closest('.form-group').find('.list-selected-products table tbody').append(productItem)
-        }
-        _self.closest('.panel').addClass('hidden')
-    })
-
-    $(document).on('click', '.textbox-advancesearch', (event) => {
-        let _self = $(event.currentTarget)
-        let $formBody = _self.closest('.box-search-advance').find('.panel')
-        $formBody.removeClass('hidden')
-        $formBody.addClass('active')
-        if ($formBody.find('.panel-body').length === 0) {
-            Botble.blockUI({
-                target: $formBody,
-                iconOnly: true,
-                overlayColor: 'none',
+        if ($input.length) {
+            const existedValues = $input.val().split(',')
+            $.each(existedValues, (index, el) => {
+                existedValues[index] = parseInt(el)
             })
 
+            if ($.inArray(_self.data('id'), existedValues) < 0) {
+                if ($input.val()) {
+                    $input.val(`${$input.val()},${_self.data('id')}`)
+                } else {
+                    $input.val(_self.data('id'))
+                }
+            }
+        }
+
+        const template = $(document)
+            .find(`#${_self.closest('.box-search-advance').data('template')}`)
+            .html()
+
+        const productItem = template
+            .replace(/__name__/gi, _self.data('name'))
+            .replace(/__id__/gi, _self.data('id'))
+            .replace(/__url__/gi, _self.data('url'))
+            .replace(/__image__/gi, _self.data('image'))
+            .replace(/__attributes__/gi, _self.find('a span').text())
+
+        _self.closest('.box-search-advance').find('.list-selected-products').show()
+        _self.closest('.box-search-advance').find('.list-selected-products').append(productItem)
+        _self.closest('.card').hide()
+    })
+
+    $(document).on('click', '[data-bb-toggle="product-search-advanced"]', (event) => {
+        const _self = $(event.currentTarget)
+        const $formBody = _self.closest('.box-search-advance').find('.card')
+
+        $formBody.show()
+        $formBody.addClass('active')
+
+        if ($formBody.find('.card-body').length === 0) {
+            Botble.showLoading($formBody)
+
             $.ajax({
-                url: _self.data('target'),
+                url: _self.data('bb-target'),
                 type: 'GET',
                 success: (res) => {
                     if (res.error) {
                         Botble.showError(res.message)
                     } else {
                         $formBody.html(res.data)
-                        Botble.unblockUI($formBody)
                     }
                 },
                 error: (data) => {
                     Botble.handleError(data)
-                    Botble.unblockUI($formBody)
                 },
+                complete: () => {
+                    Botble.hideLoading($formBody)
+                }
             })
         }
     })
 
     let ajaxRequest
     let hasAjaxSearchRequested = false
-    $(document).on('keyup', '.textbox-advancesearch', (event) => {
+    $(document).on('keyup', '[data-bb-toggle="product-search-advanced"]', (event) => {
         event.preventDefault()
-        let _self = $(event.currentTarget)
-        let $formBody = _self.closest('.box-search-advance').find('.panel')
+
+        const _self = $(event.currentTarget)
+        const $formBody = _self.closest('.box-search-advance').find('.card')
+
         setTimeout(() => {
-            Botble.blockUI({
-                target: $formBody,
-                iconOnly: true,
-                overlayColor: 'none',
-            })
+            Botble.showLoading($formBody)
 
             if (hasAjaxSearchRequested) {
                 ajaxRequest.abort()
@@ -1057,7 +1061,7 @@ $(() => {
             hasAjaxSearchRequested = true
 
             ajaxRequest = $.ajax({
-                url: _self.data('target'),
+                url: _self.data('bb-target'),
                 data: { keyword: _self.val() },
                 type: 'GET',
                 success: (res) => {
@@ -1065,15 +1069,16 @@ $(() => {
                         Botble.showError(res.message)
                     } else {
                         $formBody.html(res.data)
-                        Botble.unblockUI($formBody)
                     }
                     hasAjaxSearchRequested = false
                 },
                 error: (data) => {
                     if (data.statusText !== 'abort') {
                         Botble.handleError(data)
-                        Botble.unblockUI($formBody)
                     }
+                },
+                complete: () => {
+                    Botble.hideLoading($formBody)
                 },
             })
         }, 500)
@@ -1081,14 +1086,14 @@ $(() => {
 
     $(document).on('click', '.box-search-advance .page-link', (event) => {
         event.preventDefault()
-        let $searchBox = $(event.currentTarget).closest('.box-search-advance').find('.textbox-advancesearch')
-        if (!$searchBox.closest('.page-item').hasClass('disabled') && $searchBox.data('target')) {
-            let $formBody = $searchBox.closest('.box-search-advance').find('.panel')
-            Botble.blockUI({
-                target: $formBody,
-                iconOnly: true,
-                overlayColor: 'none',
-            })
+        let $searchBox = $(event.currentTarget)
+            .closest('.box-search-advance')
+            .find('[data-bb-toggle="product-search-advanced"]')
+
+        if (!$searchBox.closest('.page-item').hasClass('disabled') && $searchBox.data('bb-target')) {
+            let $formBody = $searchBox.closest('.box-search-advance').find('.card')
+
+            Botble.showLoading($formBody)
 
             $.ajax({
                 url: $(event.currentTarget).prop('href'),
@@ -1099,12 +1104,13 @@ $(() => {
                         Botble.showError(res.message)
                     } else {
                         $formBody.html(res.data)
-                        Botble.unblockUI($formBody)
                     }
                 },
                 error: (data) => {
                     Botble.handleError(data)
-                    Botble.unblockUI($formBody)
+                },
+                complete: () => {
+                    Botble.hideLoading($formBody)
                 },
             })
         }
@@ -1114,13 +1120,13 @@ $(() => {
         let container = $('.box-search-advance')
 
         if (!container.is(e.target) && container.has(e.target).length === 0) {
-            container.find('.panel').addClass('hidden')
+            container.find('.card').hide()
         }
     })
 
-    $(document).on('click', '.btn-trigger-remove-selected-product', (event) => {
+    $(document).on('click', '[data-bb-toggle="product-delete-item"]', (event) => {
         event.preventDefault()
-        let $input = $(event.currentTarget).closest('.form-group').find('input[type=hidden]')
+        let $input = $(event.currentTarget).closest('.box-search-advance').find('input[type=hidden]')
 
         let existedValues = $input.val().split(',')
         $.each(existedValues, (index, el) => {
@@ -1129,27 +1135,24 @@ $(() => {
                 existedValues[index] = parseInt(el)
             }
         })
-        let index = existedValues.indexOf($(event.currentTarget).data('id'))
+        let index = existedValues.indexOf($(event.currentTarget).data('bb-target'))
         if (index > -1) {
             existedValues.splice(index, 1)
         }
 
         $input.val(existedValues.join(','))
 
-        if ($(event.currentTarget).closest('tbody').find('tr').length < 2) {
-            $(event.currentTarget).closest('.list-selected-products').addClass('hidden')
+        if ($(event.currentTarget).closest('.list-selected-products').find('.list-group-item').length < 2) {
+            $(event.currentTarget).closest('.list-selected-products').hide()
         }
-        $(event.currentTarget).closest('tr').remove()
+        $(event.currentTarget).closest('.list-group-item').remove()
     })
 
     let loadRelationBoxes = () => {
         let $wrapBody = $('.wrap-relation-product')
+
         if ($wrapBody.length) {
-            Botble.blockUI({
-                target: $wrapBody,
-                iconOnly: true,
-                overlayColor: 'none',
-            })
+            Botble.showLoading($wrapBody)
 
             $.ajax({
                 url: $wrapBody.data('target'),
@@ -1159,13 +1162,14 @@ $(() => {
                         Botble.showError(res.message)
                     } else {
                         $wrapBody.html(res.data)
-                        Botble.unblockUI($wrapBody)
                     }
                 },
                 error: (data) => {
                     Botble.handleError(data)
-                    Botble.unblockUI($wrapBody)
                 },
+                complete: () => {
+                    Botble.hideLoading($wrapBody)
+                }
             })
         }
     }

@@ -4,7 +4,7 @@
 </div>
 <div class="form-content">
     <div class="mb-3">
-        <label for="name">{{ __('Full Name') }}:</label>
+        <label class="form-label" for="name">{{ __('Full Name') }}:</label>
         <input
             class="form-control @if ($errors->has('name')) is-invalid @endif"
             id="name"
@@ -24,7 +24,7 @@
     </div>
 
     <div class="mb-3">
-        <label for="email">{{ __('Email') }}:</label>
+        <label class="form-label" for="email">{{ __('Email') }}:</label>
         <input
             class="form-control @if ($errors->has('email')) is-invalid @endif"
             id="email"
@@ -42,7 +42,7 @@
     </div>
 
     <div class="mb-3">
-        <label for="phone">{{ __('Phone:') }}</label>
+        <label class="form-label" for="phone">{{ __('Phone:') }}</label>
         <input
             class="form-control @if ($errors->has('email')) is-invalid @endif"
             id="phone"
@@ -61,7 +61,7 @@
 
     <div class="mb-3">
         @if (EcommerceHelper::isUsingInMultipleCountries())
-            <label for="country">{{ __('Country') }}:</label>
+            <label class="form-label" for="country">{{ __('Country') }}:</label>
             <select
                 class="form-select @if ($errors->has('state')) is-invalid @endif"
                 id="country"
@@ -91,7 +91,7 @@
     </div>
 
     <div class="mb-3">
-        <label for="state">{{ __('State') }}:</label>
+        <label class="form-label" for="state">{{ __('State') }}:</label>
         @if (EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation())
             <select
                 class="form-select @if ($errors->has('state')) is-invalid @endif"
@@ -130,7 +130,7 @@
     </div>
 
     <div class="mb-3">
-        <label for="city">{{ __('City') }}:</label>
+        <label class="form-label" for="city">{{ __('City') }}:</label>
         @if (EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation())
             <select
                 class="form-select @if ($errors->has('city')) is-invalid @endif"
@@ -168,7 +168,7 @@
     </div>
 
     <div class="mb-3">
-        <label for="address">{{ __('Address') }}:</label>
+        <label class="form-label" for="address">{{ __('Address') }}:</label>
         <input
             class="form-control @if ($errors->has('address')) is-invalid @endif"
             id="address"

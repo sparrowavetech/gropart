@@ -3,96 +3,142 @@
 namespace Botble\Marketplace\Http\Controllers;
 
 use Botble\Base\Events\BeforeEditContentEvent;
-use Botble\Base\Events\CreatedContentEvent;
-use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
-use Botble\Base\Facades\PageTitle;
-use Botble\Base\Forms\FormBuilder;
-use Botble\Base\Http\Controllers\BaseController;
-use Botble\Base\Http\Responses\BaseHttpResponse;
+use Botble\Base\Http\Actions\DeleteResourceAction;
+use Botble\Marketplace\Forms\PayoutInformationForm;
 use Botble\Marketplace\Forms\StoreForm;
+use Botble\Marketplace\Forms\TaxInformationForm;
+use Botble\Marketplace\Http\Requests\PayoutInformationSettingRequest;
 use Botble\Marketplace\Http\Requests\StoreRequest;
+use Botble\Marketplace\Http\Requests\TaxInformationSettingRequest;
 use Botble\Marketplace\Models\Store;
 use Botble\Marketplace\Tables\StoreTable;
-use Exception;
 use Illuminate\Http\Request;
 
 class StoreController extends BaseController
 {
+    public function __construct()
+    {
+        parent::__construct();
+
+        $this
+            ->breadcrumb()
+            ->add(trans('plugins/marketplace::store.name'), route('marketplace.store.index'));
+    }
+
     public function index(StoreTable $table)
     {
-        PageTitle::setTitle(trans('plugins/marketplace::store.name'));
+        $this->pageTitle(trans('plugins/marketplace::store.name'));
 
         return $table->renderTable();
     }
 
-    public function create(FormBuilder $formBuilder)
+    public function create()
     {
-        PageTitle::setTitle(trans('plugins/marketplace::store.create'));
+        $this->pageTitle(trans('plugins/marketplace::store.create'));
 
-        return $formBuilder->create(StoreForm::class)->renderForm();
+        return view('plugins/marketplace::stores.form', [
+            'store' => new Store(),
+            'form' => StoreForm::create()
+                ->setUrl(route('marketplace.store.create'))
+                ->renderForm(),
+        ]);
     }
 
-    public function store(StoreRequest $request, BaseHttpResponse $response)
+    public function store(StoreRequest $request)
     {
-        $store = Store::query()->create($request->input());
+        $form = StoreForm::create()
+            ->setRequest($request);
 
-        event(new CreatedContentEvent(STORE_MODULE_SCREEN_NAME, $request, $store));
+        $form->save();
 
-        return $response
+        $store = $form->getModel();
+
+        return $this
+            ->httpResponse()
             ->setPreviousUrl(route('marketplace.store.index'))
             ->setNextUrl(route('marketplace.store.edit', $store->id))
-            ->setMessage(trans('core/base::notices.create_success_message'));
+            ->withCreatedSuccessMessage();
     }
 
-    public function edit(int|string $id, FormBuilder $formBuilder, Request $request)
+    public function edit(Store $store, Request $request)
     {
-        $store = Store::query()->findOrFail($id);
+        $form = StoreForm::createFromModel($store)
+            ->setUrl(route('marketplace.store.edit.update', $store->getKey()))
+            ->renderForm();
+
+        $taxInformationForm = null;
+        $payoutInformationForm = null;
+
+        if ($store->customer->is_vendor) {
+            $taxInformationForm = TaxInformationForm::createFromModel($store)
+                ->setUrl(route('marketplace.store.update-tax-info', $store))
+                ->renderForm();
+
+            $payoutInformationForm = PayoutInformationForm::createFromModel($store)
+                ->setUrl(route('marketplace.store.update-payout-info', $store))
+                ->renderForm();
+        }
 
         event(new BeforeEditContentEvent($request, $store));
 
-        PageTitle::setTitle(trans('core/base::forms.edit_item', ['name' => $store->name]));
+        $this->pageTitle(trans('core/base::forms.edit_item', ['name' => $store->name]));
 
-        return $formBuilder->create(StoreForm::class, ['model' => $store])->renderForm();
+        return view(
+            'plugins/marketplace::stores.form',
+            compact('store', 'form', 'taxInformationForm', 'payoutInformationForm')
+        );
     }
 
-    public function update(int|string $id, StoreRequest $request, BaseHttpResponse $response)
+    public function update(Store $store, StoreRequest $request)
     {
-        $store = Store::query()->findOrFail($id);
+        StoreForm::createFromModel($store)
+            ->setRequest($request)
+            ->save();
 
-        $store->fill($request->input());
-        $store->save();
+        return $this
+            ->httpResponse()
+            ->setPreviousUrl(route('marketplace.store.index'))
+            ->withUpdatedSuccessMessage();
+    }
 
+    public function updateTaxInformation(Store $store, TaxInformationSettingRequest $request)
+    {
         $customer = $store->customer;
+
+        if ($customer && $customer->id) {
+            $customer->vendorInfo->update($request->validated());
+        }
+
+        event(new UpdatedContentEvent(STORE_MODULE_SCREEN_NAME, $request, $store));
+
+        return $this
+            ->httpResponse()
+            ->setPreviousUrl(route('marketplace.store.index'))
+            ->withUpdatedSuccessMessage();
+    }
+
+    public function updatePayoutInformation(Store $store, PayoutInformationSettingRequest $request)
+    {
+        $customer = $store->customer;
+
         if ($customer && $customer->id) {
             $vendorInfo = $customer->vendorInfo;
             $vendorInfo->payout_payment_method = $request->input('payout_payment_method');
             $vendorInfo->bank_info = $request->input('bank_info', []);
-            $vendorInfo->tax_info = $request->input('tax_info', []);
             $vendorInfo->save();
         }
 
         event(new UpdatedContentEvent(STORE_MODULE_SCREEN_NAME, $request, $store));
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setPreviousUrl(route('marketplace.store.index'))
-            ->setMessage(trans('core/base::notices.update_success_message'));
+            ->withUpdatedSuccessMessage();
     }
 
-    public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
+    public function destroy(Store $store)
     {
-        try {
-            $store = Store::query()->findOrFail($id);
-
-            $store->delete();
-
-            event(new DeletedContentEvent(STORE_MODULE_SCREEN_NAME, $request, $store));
-
-            return $response->setMessage(trans('core/base::notices.delete_success_message'));
-        } catch (Exception $exception) {
-            return $response
-                ->setError()
-                ->setMessage($exception->getMessage());
-        }
+        return DeleteResourceAction::make($store);
     }
 }

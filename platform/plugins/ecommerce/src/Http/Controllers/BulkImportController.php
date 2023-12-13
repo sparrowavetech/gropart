@@ -4,9 +4,6 @@ namespace Botble\Ecommerce\Http\Controllers;
 
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
-use Botble\Base\Facades\PageTitle;
-use Botble\Base\Http\Controllers\BaseController;
-use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Exports\TemplateProductExport;
 use Botble\Ecommerce\Http\Requests\BulkImportRequest;
 use Botble\Ecommerce\Http\Requests\ProductRequest;
@@ -19,11 +16,17 @@ class BulkImportController extends BaseController
 {
     public function __construct(protected ProductImport $productImport, protected ValidateProductImport $validateProductImport)
     {
+        parent::__construct();
+
+        $this
+            ->breadcrumb()
+            ->add(trans('plugins/ecommerce::products.name'), route('products.index'))
+            ->add(trans('plugins/ecommerce::bulk-import.name'), route('ecommerce.import.products.index'));
     }
 
     public function index()
     {
-        PageTitle::setTitle(trans('plugins/ecommerce::bulk-import.name'));
+        $this->pageTitle(trans('plugins/ecommerce::bulk-import.name'));
 
         Assets::addScriptsDirectly(['vendor/core/plugins/ecommerce/js/bulk-import.js']);
 
@@ -35,7 +38,7 @@ class BulkImportController extends BaseController
         return view('plugins/ecommerce::bulk-import.index', compact('data', 'headings', 'rules'));
     }
 
-    public function postImport(BulkImportRequest $request, BaseHttpResponse $response)
+    public function postImport(BulkImportRequest $request)
     {
         BaseHelper::maximumExecutionTimeAndMemoryLimit();
 
@@ -54,7 +57,8 @@ class BulkImportController extends BaseController
 
             $message = trans('plugins/ecommerce::bulk-import.import_failed_description');
 
-            return $response
+            return $this
+                ->httpResponse()
                 ->setError()
                 ->setData($data)
                 ->setMessage($message);
@@ -80,7 +84,9 @@ class BulkImportController extends BaseController
             'failed' => $data['total_failed'],
         ]);
 
-        return $response->setData($data)->setMessage($message . ' ' . $result);
+        return $this
+            ->httpResponse()
+            ->setData($data)->setMessage($message . ' ' . $result);
     }
 
     public function downloadTemplate(Request $request)

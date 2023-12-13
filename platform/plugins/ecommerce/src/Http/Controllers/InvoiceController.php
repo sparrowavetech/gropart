@@ -4,9 +4,6 @@ namespace Botble\Ecommerce\Http\Controllers;
 
 use Botble\Base\Events\BeforeEditContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
-use Botble\Base\Facades\PageTitle;
-use Botble\Base\Http\Controllers\BaseController;
-use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Facades\InvoiceHelper;
 use Botble\Ecommerce\Models\Invoice;
 use Botble\Ecommerce\Models\Order;
@@ -16,9 +13,18 @@ use Illuminate\Http\Request;
 
 class InvoiceController extends BaseController
 {
+    public function __construct()
+    {
+        parent::__construct();
+
+        $this
+            ->breadcrumb()
+            ->add(trans('plugins/ecommerce::invoice.name'), route('ecommerce.invoice.index'));
+    }
+
     public function index(InvoiceTable $table)
     {
-        PageTitle::setTitle(trans('plugins/ecommerce::invoice.name'));
+        $this->pageTitle(trans('plugins/ecommerce::invoice.name'));
 
         return $table->renderTable();
     }
@@ -27,21 +33,24 @@ class InvoiceController extends BaseController
     {
         event(new BeforeEditContentEvent($request, $invoice));
 
-        PageTitle::setTitle(trans('core/base::forms.edit_item', ['name' => $invoice->code]));
+        $this->pageTitle(trans('core/base::forms.edit_item', ['name' => $invoice->code]));
 
         return view('plugins/ecommerce::invoices.edit', compact('invoice'));
     }
 
-    public function destroy(Invoice $invoice, Request $request, BaseHttpResponse $response)
+    public function destroy(Invoice $invoice, Request $request)
     {
         try {
             $invoice->delete();
 
             event(new DeletedContentEvent(INVOICE_MODULE_SCREEN_NAME, $request, $invoice));
 
-            return $response->setMessage(trans('core/base::notices.delete_success_message'));
+            return $this
+                ->httpResponse()
+                ->setMessage(trans('core/base::notices.delete_success_message'));
         } catch (Exception $exception) {
-            return $response
+            return $this
+                ->httpResponse()
                 ->setError()
                 ->setMessage($exception->getMessage());
         }
@@ -56,7 +65,7 @@ class InvoiceController extends BaseController
         return InvoiceHelper::downloadInvoice($invoice);
     }
 
-    public function generateInvoices(BaseHttpResponse $response)
+    public function generateInvoices()
     {
         $orders = Order::query()
             ->where('is_finished', true)
@@ -67,7 +76,8 @@ class InvoiceController extends BaseController
             InvoiceHelper::store($order);
         }
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setNextUrl(route('ecommerce.invoice.index'))
             ->setMessage(trans('plugins/ecommerce::invoice.generate_success_message', ['count' => $orders->count()]));
     }

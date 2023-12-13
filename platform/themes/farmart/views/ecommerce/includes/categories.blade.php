@@ -1,7 +1,6 @@
 @php
     $categoriesRequest ??= [];
     $activeCategoryId ??= 0;
-    $categories = $categories->where('is_enquiry','=' , $condition['is_enquiry']);
 @endphp
 
 <ul @class(['loading-skeleton'])>
@@ -15,41 +14,50 @@
 
     @if($currentCategories)
         @foreach ($currentCategories as $category)
-            @php
-                $hasChildren = $groupedCategories->has($category->id);
-            @endphp
-            @if ($loop->first && !$category->parent_id)
-                @if($condition['is_enquiry'] ==1)
-                    <li class="category-filter show-all-product-categories mb-2">
-                        <a class="nav-list__item-link" data-id="" href="{{ route('public.product.enquiry') }}?iseq=1">
-                            <span class="cat-menu-close svg-icon">
-                                <svg>
-                                    <use href="#svg-icon-chevron-left" xlink:href="#svg-icon-close"></use>
-                                </svg>
-                            </span>
-                            <span>{{ __('All categories') }}</span>
-                        </a>
-                    </li>
-                @else
-                    <li class="category-filter show-all-product-categories mb-2">
-                        <a class="nav-list__item-link" data-id="" href="{{ route('public.products') }}">
-                            <span class="cat-menu-close svg-icon">
-                                <svg>
-                                    <use href="#svg-icon-chevron-left" xlink:href="#svg-icon-close"></use>
-                                </svg>
-                            </span>
-                            <span>{{ __('All categories') }}</span>
-                        </a>
-                    </li>
-                @endif
+            @if (!empty($categoriesRequest) && $loop->first && !$category->parent_id)
+                <li class="category-filter show-all-product-categories mb-2">
+                    <a
+                        class="nav-list__item-link"
+                        data-id=""
+                        href="{{ route('public.products') }}"
+                    >
+                        <span class="cat-menu-close svg-icon">
+                            <svg>
+                                <use
+                                    href="#svg-icon-chevron-left"
+                                    xlink:href="#svg-icon-close"
+                                ></use>
+                            </svg>
+                        </span>
+                        <span>{{ __('All categories') }}</span>
+                    </a>
+                </li>
             @endif
-            <li @class(['category-filter', 'opened' => ($activeCategoryId == $category->id || $urlCurrent != route('public.single', $category->url)),])>
+            <li @class([
+                'category-filter',
+                'opened' =>
+                    in_array($category->id, $categoriesRequest) &&
+                    ($activeCategoryId == $category->id || $urlCurrent != route('public.single', $category->url)),
+            ])>
                 <div class="widget-layered-nav-list__item">
                     <div class="nav-list__item-title">
-                        <a data-id="{{ $category->id }}" data-is_enquiry="{{ $category->is_enquiry }}" href="{{ route('public.single', $category->url) }}?iseq={{$condition['is_enquiry']}}" @class(['nav-list__item-link', 'active' => $activeCategoryId == $category->id || $urlCurrent == route('public.single', $category->url),])>
+                        <a
+                            data-id="{{ $category->id }}"
+                            href="{{ route('public.single', $category->url) }}"
+                            @class([
+                                'nav-list__item-link',
+                                'active' =>
+                                    $activeCategoryId == $category->id || $urlCurrent == route('public.single', $category->url),
+                            ])
+                        >
                             @if (!$category->parent_id)
                                 @if ($category->icon_image)
-                                    <img src="{{ RvMedia::getImageUrl($category->icon_image) }}" alt="{{ $category->name }}" width="18" height="18">
+                                    <img
+                                        src="{{ RvMedia::getImageUrl($category->icon_image) }}"
+                                        alt="{{ $category->name }}"
+                                        width="18"
+                                        height="18"
+                                    >
                                 @elseif ($category->icon)
                                     <i class="{{ $category->icon }}"></i>
                                 @endif
@@ -60,13 +68,27 @@
                         </a>
                     </div>
 
+                    @php
+                        $hasChildren = $groupedCategories->has($category->id);
+                    @endphp
+
                     @if ($hasChildren)
                         <span class="cat-menu-close svg-icon closed-icon">
-                            <svg><use href="#svg-icon-increase" xlink:href="#svg-icon-increase"></use></svg>
+                            <svg>
+                                <use
+                                    href="#svg-icon-increase"
+                                    xlink:href="#svg-icon-increase"
+                                ></use>
+                            </svg>
                         </span>
 
                         <span class="cat-menu-close svg-icon opened-icon">
-                            <svg><use href="#svg-icon-decrease" xlink:href="#svg-icon-decrease"></use></svg>
+                            <svg>
+                                <use
+                                    href="#svg-icon-decrease"
+                                    xlink:href="#svg-icon-decrease"
+                                ></use>
+                            </svg>
                         </span>
                     @endif
                 </div>

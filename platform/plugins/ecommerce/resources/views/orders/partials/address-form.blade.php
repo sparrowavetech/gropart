@@ -11,7 +11,7 @@
         <div class="mb-3 form-group">
             @if ($isAvailableAddress)
                 <label
-                    class="mb-2 control-label"
+                    class="mb-2 form-label"
                     for="address_id"
                 >{{ __('Select available addresses') }}:</label>
             @endif
@@ -24,6 +24,7 @@
                         class="form-control"
                         id="address_id"
                         name="address[address_id]"
+                        @required($isAvailableAddress)
                     >
                         <option
                             value="new"
@@ -311,7 +312,7 @@
                 @if (old('create_account') == 1) checked @endif
             >
             <label
-                class="control-label"
+                class="form-label"
                 for="create_account"
             >{{ __('Register an account with above information?') }}</label>
         </div>

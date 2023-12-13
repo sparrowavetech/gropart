@@ -150,12 +150,12 @@ return [
                 'state_placeholder' => 'State',
                 'city' => 'City',
                 'city_placeholder' => 'City',
+                'shipping_rule' => 'Shipping rule',
                 'zip_code' => 'Zip code',
                 'zip_code_placeholder' => 'Zip code',
                 'adjustment_price' => 'Adjustment price',
                 'adjustment_price_placeholder' => 'Adjustment price',
                 'is_enabled' => 'Is enabled?',
-                'shipping_rule' => 'Shipping rule',
                 'no_shipping_rule' => 'No shipping rule',
             ],
             'bulk-import' => [

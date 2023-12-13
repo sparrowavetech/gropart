@@ -101,6 +101,6 @@ class OrderIncompleteManagement {
     }
 }
 
-$(document).ready(() => {
+$(() => {
     new OrderIncompleteManagement().init()
 })

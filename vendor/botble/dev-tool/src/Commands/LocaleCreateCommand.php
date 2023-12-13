@@ -3,12 +3,11 @@
 namespace Botble\DevTool\Commands;
 
 use Illuminate\Console\Command;
-use Illuminate\Contracts\Console\PromptsForMissingInput;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
 
 #[AsCommand('cms:locale:create', 'Create a new locale')]
-class LocaleCreateCommand extends Command implements PromptsForMissingInput
+class LocaleCreateCommand extends Command
 {
     public function handle(): int
     {

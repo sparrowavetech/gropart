@@ -155,40 +155,34 @@ class Order extends BaseModel
 
     public function canBeCanceled(): bool
     {
-        if ($this->shipment && in_array(
-            $this->shipment->status,
-            [ShippingStatusEnum::PICKED, ShippingStatusEnum::DELIVERED, ShippingStatusEnum::AUDITED]
-        )) {
-            return false;
+        if ($this->shipment) {
+            $pendingShippingStatuses = [
+                ShippingStatusEnum::ARRANGE_SHIPMENT,
+                ShippingStatusEnum::PENDING,
+                ShippingStatusEnum::NOT_APPROVED,
+            ];
+
+            return in_array($this->shipment->status, $pendingShippingStatuses);
         }
 
-        return in_array($this->status, [OrderStatusEnum::PENDING, OrderStatusEnum::PROCESSING]);
+        return $this->status == OrderStatusEnum::PENDING;
     }
 
     public function canBeCanceledByAdmin(): bool
     {
-        if ($this->shipment && in_array(
-            $this->shipment->status,
-            [ShippingStatusEnum::DELIVERED, ShippingStatusEnum::AUDITED]
-        )) {
-            return false;
-        }
-
-        if (in_array($this->status, [OrderStatusEnum::COMPLETED, OrderStatusEnum::CANCELED])) {
-            return false;
-        }
-
-        if ($this->shipment && in_array($this->shipment->status, [
-                ShippingStatusEnum::PENDING,
+        if ($this->shipment) {
+            $pendingShippingStatuses = [
                 ShippingStatusEnum::APPROVED,
-                ShippingStatusEnum::NOT_APPROVED,
                 ShippingStatusEnum::ARRANGE_SHIPMENT,
+                ShippingStatusEnum::PENDING,
+                ShippingStatusEnum::NOT_APPROVED,
                 ShippingStatusEnum::READY_TO_BE_SHIPPED_OUT,
-            ])) {
-            return true;
+            ];
+
+            return in_array($this->shipment->status, $pendingShippingStatuses);
         }
 
-        return true;
+        return in_array($this->status, [OrderStatusEnum::PENDING, OrderStatusEnum::PROCESSING]);
     }
 
     public function getIsFreeShippingAttribute(): bool

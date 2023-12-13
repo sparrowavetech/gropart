@@ -1,4 +1,4 @@
-$(document).ready(() => {
+$(() => {
     $(document).on('keyup', '#store_order_prefix', (event) => {
         if ($(event.currentTarget).val()) {
             $('.sample-order-code-prefix').text($(event.currentTarget).val() + '-')

@@ -260,6 +260,11 @@ class FarmartController extends PublicController
                 'contact_message' => $request->input('content'),
                 'customer_name' => $request->input('name'),
                 'customer_email' => $request->input('email'),
+                'store_name' => $store->name,
+                'store_phone' => $store->phone,
+                'store_address' => $store->full_address,
+                'store_link' => $store->url,
+                'store' => $store->toArray(),
             ])
             ->sendUsingTemplate('contact-seller', $store->email, [], false, 'themes');
 
@@ -331,9 +336,5 @@ class FarmartController extends PublicController
         }
 
         return $response->setData($data);
-    }
-    public function ajaxGetComboPrice($amt)
-    {
-        return format_price($amt);
     }
 }

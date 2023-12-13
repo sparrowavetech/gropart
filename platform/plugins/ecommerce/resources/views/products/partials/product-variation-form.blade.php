@@ -16,7 +16,7 @@
     </form>
 
     @once
-        <script id="gallery_select_image_template" type="text/x-custom-template">
+        <x-core::custom-template id="gallery_select_image_template">
             <div class="list-photo-hover-overlay">
                 <ul class="photo-overlay-actions">
                     <li>
@@ -45,7 +45,6 @@
                     </a>
                 </div>
             </div>
-        </script>
+        </x-core::custom-template>
     @endonce
-
 </div>

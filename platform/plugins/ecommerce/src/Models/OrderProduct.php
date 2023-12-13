@@ -45,33 +45,29 @@ class OrderProduct extends BaseModel
         return $this->belongsTo(Order::class)->withDefault();
     }
 
-    public function getAmountFormatAttribute(): string
-    {
-        return format_price($this->price);
-    }
-
-    public function getTotalFormatAttribute(): string
-    {
-        return format_price($this->price * $this->qty);
-    }
-
     public function productFiles(): HasMany
     {
         return $this->hasMany(ProductFile::class, 'product_id', 'product_id');
     }
 
-    public function productFileExternalCount(): Attribute
+    public function totalFormat(): Attribute
     {
-        return Attribute::make(
-            get: fn () => $this->productFiles->filter(fn (ProductFile $file) => $file->is_external_link)->count(),
-        );
+        return Attribute::get(fn () => format_price($this->price * $this->qty));
     }
 
-    public function productFileInternalCount(): Attribute
+    protected function amountFormat(): Attribute
     {
-        return Attribute::make(
-            get: fn () => $this->productFiles->filter(fn (ProductFile $file) => ! $file->is_external_link)->count(),
-        );
+        return Attribute::get(fn () => format_price($this->price));
+    }
+
+    protected function productFileExternalCount(): Attribute
+    {
+        return Attribute::get(fn () => $this->productFiles->filter(fn (ProductFile $file) => $file->is_external_link)->count());
+    }
+
+    protected function productFileInternalCount(): Attribute
+    {
+        return Attribute::get(fn () => $this->productFiles->filter(fn (ProductFile $file) => ! $file->is_external_link)->count());
     }
 
     public function isTypeDigital(): bool
@@ -81,69 +77,56 @@ class OrderProduct extends BaseModel
 
     protected function downloadToken(): Attribute
     {
-        return Attribute::make(
-            get: fn () => $this->isTypeDigital() ? ($this->order->id . '-' . $this->order->token . '-' . $this->id) : null
-        );
+        return Attribute::get(fn () => $this->isTypeDigital() ? ($this->order->id . '-' . $this->order->token . '-' . $this->id) : null);
     }
 
     protected function downloadHash(): Attribute
     {
-        return Attribute::make(
-            get: fn () => $this->download_token ? Hash::make($this->download_token) : null
-        );
+        return Attribute::get(fn () => $this->download_token ? Hash::make($this->download_token) : null);
     }
 
     protected function downloadHashUrl(): Attribute
     {
-        return Attribute::make(
-            get: fn () => $this->download_hash ? route('public.digital-products.download', [
-                'id' => $this->id,
-                'hash' => $this->download_hash,
-            ]) : null
-        );
+        return Attribute::get(fn () => $this->download_hash ? route('public.digital-products.download', [
+            'id' => $this->id,
+            'hash' => $this->download_hash,
+        ]) : null);
     }
 
     protected function downloadExternalUrl(): Attribute
     {
-        return Attribute::make(
-            get: fn () => $this->download_hash ? route('public.digital-products.download', [
-                'id' => $this->id,
-                'hash' => $this->download_hash,
-                'external' => true,
-            ]) : null
-        );
+        return Attribute::get(fn () => $this->download_hash ? route('public.digital-products.download', [
+            'id' => $this->id,
+            'hash' => $this->download_hash,
+            'external' => true,
+        ]) : null);
     }
 
     protected function priceWithTax(): Attribute
     {
-        return Attribute::make(
-            get: fn () => $this->price + $this->tax_amount
-        );
+        return Attribute::get(fn () => $this->price + $this->tax_amount);
     }
 
     protected function totalPriceWithTax(): Attribute
     {
-        return Attribute::make(
-            get: fn () => $this->price_with_tax * $this->qty
-        );
+        return Attribute::get(fn () => $this->price_with_tax * $this->qty);
     }
 
     public function productOptionsImplode(): Attribute
     {
-        return Attribute::make(
-            get: function () {
-                if (! $this->product_options) {
-                    return '';
-                }
-                $options = $this->product_options;
-
-                return '(' . implode(', ', Arr::map(Arr::get($options, 'optionInfo'), function ($item, $key) use ($options) {
-                    return implode(': ', [
-                        $item,
-                        Arr::get($options, 'optionCartValue.' . $key . '.0.option_value'),
-                    ]);
-                })) . ')';
+        return Attribute::get(function () {
+            if (! $this->product_options) {
+                return '';
             }
-        );
+
+            $options = $this->product_options;
+
+            return '(' . implode(', ', Arr::map(Arr::get($options, 'optionInfo'), function ($item, $key) use ($options) {
+                return implode(': ', [
+                    $item,
+                    Arr::get($options, "optionCartValue.$key.0.option_value"),
+                ]);
+            })) . ')';
+        });
     }
 }

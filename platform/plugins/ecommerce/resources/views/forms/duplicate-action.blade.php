@@ -1,20 +1,20 @@
-&nbsp;
-<button
-    class="btn btn-warning btn-trigger-duplicate-product"
-    data-url="{{ route('products.duplicate', $product->getKey()) }}"
+<x-core::button
     type="button"
+    icon="ti ti-copy"
+    class="btn-trigger-duplicate-product"
+    data-url="{{ route('products.duplicate', $product->getKey()) }}"
 >
-    <i class="fa fa-copy"></i> {{ trans('plugins/ecommerce::ecommerce.forms.duplicate') }}
-</button>
+    {{ trans('plugins/ecommerce::ecommerce.forms.duplicate') }}
+</x-core::button>
 
 @push('footer')
-    <x-core-base::modal
+    <x-core::modal.action
         id="duplicate-product-modal"
         type="info"
         :title="trans('plugins/ecommerce::ecommerce.duplicate_modal')"
-        button-id="confirm-duplicate-product-button"
-        :button-label="trans('plugins/ecommerce::ecommerce.forms.duplicate')"
+        :submit-button-attrs="['id' => 'confirm-duplicate-product-button']"
+        :submit-button-label="trans('plugins/ecommerce::ecommerce.forms.duplicate')"
     >
         {{ trans('plugins/ecommerce::ecommerce.duplicate_modal_description') }}
-    </x-core-base::modal>
+    </x-core::modal.action>
 @endpush

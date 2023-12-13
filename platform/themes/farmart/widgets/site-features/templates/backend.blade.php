@@ -1,5 +1,5 @@
-<div class="form-group">
-    <label for="widget-name">{{ __('Name') }}</label>
+<div class="mb-3">
+    <label class="form-label" for="widget-name">{{ __('Name') }}</label>
     <input
         class="form-control"
         id="widget-name"

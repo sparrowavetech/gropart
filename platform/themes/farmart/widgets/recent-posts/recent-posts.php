@@ -1,15 +1,7 @@
 <?php
 
-use Botble\Widget\AbstractWidget;
+use Botble\Blog\Widgets\Fronts\RecentPosts;
 
-class RecentPostsWidget extends AbstractWidget
+class RecentPostsWidget extends RecentPosts
 {
-    public function __construct()
-    {
-        parent::__construct([
-            'name' => __('Recent posts'),
-            'description' => __('Recent posts widget.'),
-            'number_display' => 5,
-        ]);
-    }
 }

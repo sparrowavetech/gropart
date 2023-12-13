@@ -1,73 +1,55 @@
-<div class="form-group product-categories-select">
-    <div class="multi-choices-widget list-item-checkbox">
-        <ul>
-            @foreach (ProductCategoryHelper::getActiveTreeCategories() as $category)
-                <li>
-                    <label>
-                        <input
-                            name="categories[]"
-                            type="checkbox"
-                            value="{{ $category->id }}"
-                            @if (in_array($category->id, $config['categories'])) checked="checked" @endif
-                        >
-                        {{ $category->name }}
-                    </label>
-                    @if ($category->activeChildren->isNotEmpty())
-                        <ul style="padding-left: 20px">
-                            @foreach ($category->activeChildren as $child)
-                                <li>
-                                    <label>
-                                        <input
-                                            name="categories[]"
-                                            type="checkbox"
-                                            value="{{ $child->id }}"
-                                            @if (in_array($child->id, $config['categories'])) checked="checked" @endif
-                                        >
-                                        {{ $child->name }}
-                                    </label>
-                                    @if ($child->activeChildren->isNotEmpty())
-                                        <ul style="padding-left: 20px">
-                                            @foreach ($child->activeChildren as $item)
-                                                <li>
-                                                    <label>
-                                                        <input
-                                                            name="categories[]"
-                                                            type="checkbox"
-                                                            value="{{ $item->id }}"
-                                                            @if (in_array($item->id, $config['categories'])) checked="checked" @endif
-                                                        >
-                                                        {{ $item->name }}
-                                                    </label>
-                                                </li>
-                                            @endforeach
-                                        </ul>
-                                    @endif
-                                </li>
-                            @endforeach
-                        </ul>
-                    @endif
-                </li>
-            @endforeach
-        </ul>
-    </div>
+<div data-bb-toggle="tree-checkboxes">
+    <ul class="list-unstyled">
+        @foreach (ProductCategoryHelper::getActiveTreeCategories() as $category)
+            <li>
+                <label class="form-check">
+                    <input
+                        name="categories[]"
+                        type="checkbox"
+                        class="form-check-input"
+                        value="{{ $category->id }}"
+                        @if (in_array($category->id, $config['categories'])) checked="checked" @endif
+                    >
+                    <span class="form-check-label">{{ $category->name }}</span>
+                </label>
+                @if ($category->activeChildren->isNotEmpty())
+                    <ul style="padding-left: 20px">
+                        @foreach ($category->activeChildren as $child)
+                            <li>
+                                <label class="form-check">
+                                    <input
+                                        name="categories[]"
+                                        type="checkbox"
+                                        class="form-check-input"
+                                        value="{{ $child->id }}"
+                                        @if (in_array($child->id, $config['categories'])) checked="checked" @endif
+                                    >
+                                    <span class="form-check-label">{{ $child->name }}</span>
+                                </label>
+                                @if ($child->activeChildren->isNotEmpty())
+                                    <ul style="padding-left: 20px">
+                                        @foreach ($child->activeChildren as $item)
+                                            <li>
+                                                <label class="form-check">
+                                                    <input
+                                                        name="categories[]"
+                                                        type="checkbox"
+                                                        class="form-check-input"
+                                                        value="{{ $item->id }}"
+                                                        @if (in_array($item->id, $config['categories'])) checked="checked" @endif
+                                                    >
+                                                    <span class="form-check-label">{{ $item->name }}</span>
+                                                </label>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                @endif
+                            </li>
+                        @endforeach
+                    </ul>
+                @endif
+            </li>
+        @endforeach
+    </ul>
 </div>
 
-<style>
-    .product-categories-select .list-item-checkbox {
-        background: #f1f1f1;
-        margin-bottom: 20px;
-        padding-left: 15px !important;
-    }
-
-    .product-categories-select .list-item-checkbox ul {
-        min-height: 0 !important;
-    }
-
-    .product-categories-select .list-item-checkbox li:last-child {
-        margin-bottom: 0 !important;
-    }
-
-    .product-categories-select .list-item-checkbox input[type=checkbox] {
-        margin-left: 2px;
-    }
-</style>

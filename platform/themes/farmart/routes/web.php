@@ -5,8 +5,8 @@ use Botble\Theme\Facades\Theme;
 use Illuminate\Support\Facades\Route;
 use Theme\Farmart\Http\Controllers\FarmartController;
 
-Route::group(['controller' => FarmartController::class, 'middleware' => ['web', 'core']], function () {
-    Route::group(apply_filters(BASE_FILTER_GROUP_PUBLIC_ROUTE, []), function () {
+Theme::registerRoutes(function () {
+    Route::group(['controller' => FarmartController::class], function () {
         Route::middleware(RequiresJsonRequestMiddleware::class)
             ->prefix('ajax')
             ->name('public.ajax.')
@@ -43,15 +43,6 @@ Route::group(['controller' => FarmartController::class, 'middleware' => ['web', 
 
                 Route::post('ajax/contact-seller', 'ajaxContactSeller')
                     ->name('contact-seller');
-                
-                Route::get('get-combo-price/{amt?}', [
-                    'uses' => 'ajaxGetComboPrice',
-                    'as'   => 'get-combo-price',
-                ]);
-                Route::get('check-pincode/{from?}/{to?}', [
-                    'uses' => 'ajaxCheckPincode',
-                    'as'   => 'check-pincode',
-                ]);
 
                 Route::get('products-by-collection/{id}', 'ajaxGetProductsByCollection')
                     ->name('products-by-collection')

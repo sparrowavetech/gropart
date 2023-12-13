@@ -73,7 +73,7 @@ trait ProductActionsTrait
                         foreach ($version['attribute_sets'] as $attributeId) {
                             $attribute = ProductAttribute::query()->find($attributeId);
                             if ($attribute) {
-                                $productRelatedToVariation->sku = ($productRelatedToVariation->sku ?: $product->id) . '-' . Str::upper(
+                                $productRelatedToVariation->sku = ($productRelatedToVariation->sku ?: $product->getKey()) . '-' . Str::upper(
                                     $attribute->slug
                                 );
                             }
@@ -146,7 +146,7 @@ trait ProductActionsTrait
             }
         }
 
-        return $response->setMessage(trans('core/base::notices.update_success_message'));
+        return $response->withUpdatedSuccessMessage();
     }
 
     public function postAddAttributeToProduct(
@@ -172,7 +172,7 @@ trait ProductActionsTrait
             $this->postSaveAllVersions([$variation['id'] => $variation], $id, $response);
         }
 
-        return $response->setMessage(trans('core/base::notices.update_success_message'));
+        return $response->withUpdatedSuccessMessage();
     }
 
     public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
@@ -255,19 +255,9 @@ trait ProductActionsTrait
             return true;
         }
 
-        ProductVariationItem::query()->where('variation_id', $variationId)->delete();
-
-        $productRelatedToVariation = Product::query()->find($variation->product_id);
-
-        if ($productRelatedToVariation) {
-            $productRelatedToVariation->delete();
-
-            event(new DeletedContentEvent(PRODUCT_MODULE_SCREEN_NAME, request(), $productRelatedToVariation));
-        }
-
         $result = $variation->delete();
 
-        $originProduct = Product::query()->find($variation->configurable_product_id);
+        $originProduct = $variation->configurableProduct;
 
         if ($variation->is_default) {
             $latestVariation = ProductVariation::query()
@@ -494,11 +484,12 @@ trait ProductActionsTrait
     public function getRelationBoxes(int|string|null $id, BaseHttpResponse $response): BaseHttpResponse
     {
         $product = null;
+
         if ($id) {
-            $product = Product::query()->find($id);
+            $product = Product::query()->with(['products', 'crossSales'])->find($id);
         }
 
-        $dataUrl = route('products.get-list-product-for-search', ['product_id' => $product ? $product->getKey() : 0]);
+        $dataUrl = route('products.get-list-product-for-search', ['product_id' => $product ? $product->getKey() : null]);
 
         return $response->setData(
             view(
@@ -566,7 +557,7 @@ trait ProductActionsTrait
 
         return $response
             ->setData(new AvailableProductResource($product))
-            ->setMessage(trans('core/base::notices.create_success_message'));
+            ->withCreatedSuccessMessage();
     }
 
     public function getAllProductAndVariations(
@@ -626,7 +617,7 @@ trait ProductActionsTrait
         $product->order = $request->input('value', 0);
         $product->save();
 
-        return $response->setMessage(trans('core/base::notices.update_success_message'));
+        return $response->withUpdatedSuccessMessage();
     }
 
     public function getProductAttributeSets(BaseHttpResponse $response, int|string|null $id = null): BaseHttpResponse

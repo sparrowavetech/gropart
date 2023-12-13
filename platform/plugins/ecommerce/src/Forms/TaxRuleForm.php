@@ -2,38 +2,51 @@
 
 namespace Botble\Ecommerce\Forms;
 
-use Botble\Base\Facades\Html;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Http\Requests\TaxRuleRequest;
 use Botble\Ecommerce\Models\Tax;
 use Botble\Ecommerce\Models\TaxRule;
+use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Request;
 
 class TaxRuleForm extends FormAbstract
 {
-    public function buildForm(): void
+    public function __construct()
+    {
+        parent::__construct();
+        $this->setFormOption('id', 'ecommerce-tax-rule-form');
+
+        if (Request::ajax()) {
+            $this->contentOnly();
+        }
+    }
+
+    public function setup(): void
     {
         $this
             ->setupModel(new TaxRule())
-            ->setValidatorClass(TaxRuleRequest::class)
-            ->setFormOption('id', 'ecommerce-tax-rule-form')
-            ->withCustomFields()
-            ->when($this->request->ajax(), fn () => $this->contentOnly());
+            ->setValidatorClass(TaxRuleRequest::class);
 
         if (! $this->getModel()->getKey()) {
-            if ($taxId = $this->request->input('tax_id')) {
-                $this
-                    ->add('tax_id', 'hidden', [
+            $this
+                ->when(
+                    $taxId = request()->input('tax_id'),
+                    fn (FormAbstract $form) => $form->add('tax_id', 'hidden', [
                         'value' => $taxId,
-                    ]);
-            } else {
-                $taxes = Tax::query()->pluck('title', 'id')->toArray();
-                $this
-                    ->add('tax_id', 'customSelect', [
-                        'label' => trans('plugins/ecommerce::tax.tax'),
-                        'choices' => $taxes,
-                    ]);
-            }
+                    ])
+                )
+                ->when(
+                    ! $taxId,
+                    function (FormAbstract $form) {
+                        $taxes = Tax::query()->pluck('title', 'id')->toArray();
+                        $form
+                            ->add('tax_id', 'customSelect', [
+                                'label' => trans('plugins/ecommerce::tax.tax'),
+                                'choices' => $taxes,
+                            ]);
+                    }
+                );
         }
 
         if (EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation()) {
@@ -75,10 +88,8 @@ class TaxRuleForm extends FormAbstract
                 ]);
         }
         $this
-            ->add('submitter', 'html', [
-                'html' => Html::tag('button', '<i class="fa fa-save me-2"></i>' . trans('core/base::forms.save'), [
-                    'class' => 'btn btn-success btn-block',
-                ]),
+            ->add('submit', 'html', [
+                'html' => Blade::render('<x-core::button type="submit" icon="ti ti-device-floppy" color="primary">' . trans('core/base::forms.save') . '</x-core::button>'),
                 'wrapper' => [
                     'class' => 'd-grid gap-2',
                 ],

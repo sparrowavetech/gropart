@@ -9,7 +9,7 @@
 @endif
 
 @if ($showField)
-    {!! Form::customEditor($name, $options['value'], $options['attr']) !!}
+    {!! Form::textarea($name, $options['value'], $options['attr']) !!}
     @include('core/base::forms.partials.help-block')
 @endif
 

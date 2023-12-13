@@ -27,7 +27,7 @@
                 let container = $('.box-search-advance');
 
                 if (!container.is(e.target) && container.has(e.target).length === 0) {
-                    container.find('.panel').addClass('hidden');
+                    container.find('.card').hide();
                 }
             });
         });
@@ -35,5 +35,5 @@
     @php
         Assets::addScripts(['form-validation']);
     @endphp
-    {!! JsValidator::formRequest(\Botble\Ecommerce\Http\Requests\DiscountRequest::class) !!}
+    {!! JsValidator::formRequest(Botble\Ecommerce\Http\Requests\DiscountRequest::class) !!}
 @endpush

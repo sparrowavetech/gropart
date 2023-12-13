@@ -1,129 +1,131 @@
 @if (!$isNotDefaultLanguage)
-    <script id="product_attribute_template" type="text/x-custom-template">
-        <li data-id="__id__" class="clearfix">
-            <div class="swatch-is-default">
-                <input type="radio" name="related_attribute_is_default" value="__position__" __checked__>
-            </div>
-            <div class="swatch-title">
-                <input type="text" class="form-control" value="__title__">
-            </div>
-            <div class="swatch-slug">
-                <input type="text" class="form-control" value="__slug__">
-            </div>
-            <div class="swatch-value">
-                <input type="text" class="form-control input-color-picker" value="__color__">
-            </div>
-            <div class="swatch-image">
-                <div class="image-box-container">
-                    @include('plugins/ecommerce::components.form.image', [
-                        'name' => '',
-                        'value' => '__image__',
-                        'thumb' => RvMedia::getDefaultImage(),
-                    ])
-                </div>
-            </div>
-            <div class="remove-item"><a href="#" class="font-red"><i class="fa fa-trash"></i></a></div>
-        </li>
-    </script>
+    <x-core::custom-template id="product_attribute_template">
+        <x-core::table.body.row data-id="__id__">
+            <x-core::table.body.cell>
+                <x-core::form.radio
+                    name="related_attribute_is_default"
+                    value="__position__"
+                    __checked__
+                    :single="true"
+                />
+            </x-core::table.body.cell>
+
+            <x-core::table.body.cell>
+                <input type="text" name="swatch-title" class="form-control" value="__title__">
+            </x-core::table.body.cell>
+
+            <x-core::table.body.cell>
+                <input type="text" name="swatch-slug" class="form-control" value="__slug__">
+            </x-core::table.body.cell>
+
+            <x-core::table.body.cell>
+                <input type="text" name="swatch-value" class="form-control input-color-picker" value="__color__">
+            </x-core::table.body.cell>
+
+            <x-core::table.body.cell>
+                <x-core::form.image
+                    :allow-thumb="true"
+                    name="swatch-image"
+                    value="__image__"
+                    action="select-image"
+                />
+            </x-core::table.body.cell>
+
+            <x-core::table.body.cell class="text-end">
+                <a href="javascript:(0)" class="remove-item text-decoration-none text-danger">
+                    <x-core::icon name="ti ti-trash" />
+                </a>
+            </x-core::table.body.cell>
+        </x-core::table.body.row>
+    </x-core::custom-template>
     <textarea
-        class="hidden"
+        class="d-none"
         id="deleted_attributes"
         name="deleted_attributes"
     ></textarea>
 @endif
 
 <textarea
-    class="hidden"
+    class="d-none"
     id="attributes"
     name="attributes"
 >{!! json_encode($attributes) !!}</textarea>
-<div class="swatches-container">
-    <div class="header clearfix">
-        @if (!$isNotDefaultLanguage)
-            <div class="swatch-is-default">
+
+<x-core::table class="swatches-container text-center">
+    <x-core::table.header class="header">
+        @if (! $isNotDefaultLanguage)
+            <x-core::table.header.cell>
                 {{ trans('plugins/ecommerce::product-attribute-sets.is_default') }}
-            </div>
+            </x-core::table.header.cell>
         @endif
-        <div class="swatch-title text-start">
+
+        <x-core::table.header.cell>
             {{ trans('plugins/ecommerce::product-attribute-sets.title') }}
-        </div>
-        @if (!$isNotDefaultLanguage)
-            <div class="swatch-slug">
+        </x-core::table.header.cell>
+
+        @if(! $isNotDefaultLanguage)
+            <x-core::table.header.cell>
                 {{ trans('plugins/ecommerce::product-attribute-sets.slug') }}
-            </div>
-            <div class="swatch-value">
+            </x-core::table.header.cell>
+
+            <x-core::table.header.cell>
                 {{ trans('plugins/ecommerce::product-attribute-sets.color') }}
-            </div>
-            <div class="swatch-image">
+            </x-core::table.header.cell>
+
+            <x-core::table.header.cell>
                 {{ trans('plugins/ecommerce::product-attribute-sets.image') }}
-            </div>
-            <div class="remove-item">{{ trans('plugins/ecommerce::product-attribute-sets.remove') }}</div>
+            </x-core::table.header.cell>
+
+            <x-core::table.header.cell>
+                {{ trans('plugins/ecommerce::product-attribute-sets.remove') }}
+            </x-core::table.header.cell>
         @endif
-    </div>
-    <ul class="swatches-list">
-        @if (count($attributes) > 0)
-            @foreach ($attributes as $attribute)
-                <li
-                    class="clearfix"
-                    data-id="{{ $attribute->id }}"
-                >
-                    @if (!$isNotDefaultLanguage)
-                        <div class="swatch-is-default">
-                            <input
-                                name="related_attribute_is_default"
-                                type="radio"
-                                value="{{ $attribute->order }}"
-                                @if ($attribute->is_default) checked @endif
-                            >
-                        </div>
-                    @endif
-                    <div class="swatch-title">
-                        <input
-                            class="form-control"
-                            type="text"
-                            value="{{ $attribute->title }}"
-                        >
-                    </div>
-                    @if (!$isNotDefaultLanguage)
-                        <div class="swatch-slug">
-                            <input
-                                class="form-control"
-                                type="text"
-                                value="{{ $attribute->slug }}"
-                            >
-                        </div>
-                        <div class="swatch-value">
-                            <input
-                                class="form-control input-color-picker"
-                                type="text"
-                                value="{{ $attribute->color }}"
-                            >
-                        </div>
-                        <div class="swatch-image">
-                            <div class="image-box-container">
-                                @include('plugins/ecommerce::components.form.image', [
-                                    'name' => '',
-                                    'value' => $attribute->image,
-                                    'thumb' => $attribute->image
-                                        ? RvMedia::getImageUrl($attribute->image, 'thumb')
-                                        : RvMedia::getDefaultImage(),
-                                ])
-                            </div>
-                        </div>
-                        <div class="remove-item"><a
-                                class="font-red"
-                                href="#"
-                            ><i class="fa fa-trash"></i></a></div>
-                    @endif
-                </li>
-            @endforeach
-        @endif
-    </ul>
-    @if (!$isNotDefaultLanguage)
-        <button
-            class="btn purple js-add-new-attribute"
-            type="button"
-        >{{ trans('plugins/ecommerce::product-attribute-sets.add_new_attribute') }}</button>
-    @endif
-    <div class="clearfix"></div>
-</div>
+    </x-core::table.header>
+
+    <x-core::table.body class="swatches-list">
+        @foreach ($attributes as $attribute)
+            <x-core::table.body.row data-id="{{ $attribute->id }}">
+                @if (! $isNotDefaultLanguage)
+                    <x-core::table.body.cell>
+                        <x-core::form.radio
+                            name="related_attribute_is_default"
+                            :value="$attribute->order"
+                            :checked="$attribute->is_default"
+                            :single="true"
+                        />
+                    </x-core::table.body.cell>
+                @endif
+
+                <x-core::table.body.cell>
+                    <input class="form-control" name="swatch-title" type="text" value="{{ $attribute->title }}" />
+                </x-core::table.body.cell>
+
+                @if (!$isNotDefaultLanguage)
+                    <x-core::table.body.cell>
+                        <input class="form-control" name="swatch-slug" type="text" value="{{ $attribute->slug }}" />
+                    </x-core::table.body.cell>
+
+                    <x-core::table.body.cell>
+                        <input class="form-control input-color-picker" name="swatch-value" type="text" value="{{ $attribute->color }}" />
+                    </x-core::table.body.cell>
+
+                    <x-core::table.body.cell>
+                        <x-core::form.image
+                            :allow-thumb="true"
+                            name="swatch-image"
+                            :value="$attribute->image"
+                            action="select-image"
+                            :allow-add-from-url="false"
+                        />
+                    </x-core::table.body.cell>
+
+                    <x-core::table.body.cell class="text-end">
+                        <a href="javascript:(0)" class="remove-item text-decoration-none text-danger">
+                            <x-core::icon name="ti ti-trash" />
+                        </a>
+                    </x-core::table.body.cell>
+                @endif
+            </x-core::table.body.row>
+        @endforeach
+    </x-core::table.body>
+</x-core::table>

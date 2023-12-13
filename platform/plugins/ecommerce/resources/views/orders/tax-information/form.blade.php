@@ -1,59 +1,37 @@
-{!! Form::open(['url' => route('orders.update-tax-information', $tax->getKey())]) !!}
-<input
-    name="order_id"
-    type="hidden"
-    value="{{ $orderId }}"
->
+<x-core::form :url="route('orders.update-tax-information', $tax->getKey())">
+    <input
+        name="order_id"
+        type="hidden"
+        value="{{ $orderId }}"
+    >
 
-<div class="next-form-section">
-    <div class="next-form-grid">
-        <div class="next-form-grid-cell">
-            <label
-                class="text-title-field required">{{ trans('plugins/ecommerce::order.tax_info.company_name') }}</label>
-            <input
-                class="next-input"
-                name="company_name"
-                type="text"
-                value="{{ $tax->company_name }}"
-                placeholder="{{ trans('plugins/ecommerce::order.tax_info.company_name') }}"
-            >
-        </div>
-        <div class="next-form-grid-cell">
-            <label class="text-title-field">{{ trans('plugins/ecommerce::order.tax_info.company_email') }}</label>
-            <input
-                class="next-input"
-                name="company_email"
-                type="email"
-                value="{{ $tax->company_email }}"
-                placeholder="{{ trans('plugins/ecommerce::order.tax_info.company_email') }}"
-            >
-        </div>
-    </div>
-    <div class="next-form-grid">
-        <div class="next-form-grid-cell">
-            <label class="text-title-field">{{ trans('plugins/ecommerce::order.tax_info.company_tax_code') }}</label>
-            <input
-                class="next-input"
-                name="company_tax_code"
-                type="text"
-                value="{{ $tax->company_tax_code }}"
-                placeholder="{{ trans('plugins/ecommerce::order.tax_info.company_tax_code') }}"
-            >
-        </div>
-    </div>
+    <x-core::form.text-input
+        :required="true"
+        :label="trans('plugins/ecommerce::order.tax_info.company_name')"
+        name="company_name"
+        :value="$tax->company_name"
+        :placeholder="trans('plugins/ecommerce::order.tax_info.company_name')"
+    />
 
-    <div class="next-form-grid">
-        <div class="next-form-grid-cell">
-            <label
-                class="text-title-field required">{{ trans('plugins/ecommerce::order.tax_info.company_address') }}</label>
-            <input
-                class="next-input"
-                name="company_address"
-                type="text"
-                value="{{ $tax->company_address }}"
-                placeholder="{{ trans('plugins/ecommerce::order.tax_info.company_address') }}"
-            >
-        </div>
-    </div>
-</div>
-{!! Form::close() !!}
+    <x-core::form.text-input
+        :label="trans('plugins/ecommerce::order.tax_info.company_email')"
+        type="email"
+        name="company_email"
+        :value="$tax->company_email"
+        :placeholder="trans('plugins/ecommerce::order.tax_info.company_email')"
+    />
+
+    <x-core::form.text-input
+        :label="trans('plugins/ecommerce::order.tax_info.company_tax_code')"
+        name="company_tax_code"
+        :value="$tax->company_tax_code"
+        :placeholder="trans('plugins/ecommerce::order.tax_info.company_tax_code')"
+    />
+
+    <x-core::form.text-input
+        :label="trans('plugins/ecommerce::order.tax_info.company_address')"
+        name="company_address"
+        :value="$tax->company_address"
+        :placeholder="trans('plugins/ecommerce::order.tax_info.company_address')"
+    />
+</x-core::form>

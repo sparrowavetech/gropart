@@ -2,8 +2,6 @@
 
 namespace Botble\Ecommerce\Supports;
 
-use Botble\Ecommerce\Cart\CartItem;
-use Botble\Ecommerce\Models\Enquiry;
 use Barryvdh\DomPDF\PDF as PDFHelper;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\EmailHandler;
@@ -303,8 +301,11 @@ class OrderHelper
         do_action(ACTION_AFTER_ORDER_STATUS_COMPLETED_ECOMMERCE, $order, $request);
 
         OrderHistory::query()->create([
-            'action' => 'update_status',
-            'description' => trans('plugins/ecommerce::shipping.order_confirmed_by'),
+            'action' => 'mark_order_as_completed',
+            'description' => trans('plugins/ecommerce::order.mark_as_completed.history', [
+                'admin' => Auth::user()->name,
+                'time' => Carbon::now(),
+            ]),
             'order_id' => $orderId,
             'user_id' => $userId,
         ]);
@@ -651,10 +652,10 @@ class OrderHelper
         return $sessionData;
     }
 
-    protected function storeOrderBillingAddress(array $data, array $sessionData = [])
+    protected function storeOrderBillingAddress(array $data, array $sessionData = []): void
     {
         if (! EcommerceHelperFacade::isBillingAddressEnabled()) {
-            return false;
+            return;
         }
 
         $orderId = Arr::get($data, 'order_id', Arr::get($data, 'created_order_id'));
@@ -664,11 +665,11 @@ class OrderHelper
                 'billing_address_same_as_shipping_address',
                 '1'
             );
-            if (! $billingAddressSameAsShippingAddress || ! Arr::get(
-                $sessionData,
-                'is_save_order_shipping_address',
-                true
-            )) {
+
+            if (
+                ! $billingAddressSameAsShippingAddress ||
+                ! Arr::get($sessionData, 'is_save_order_shipping_address', true)
+            ) {
                 $addressData = Arr::only(
                     $sessionData,
                     ['name', 'phone', 'email', 'country', 'state', 'city', 'address', 'zip_code']
@@ -683,18 +684,21 @@ class OrderHelper
                 $rules = EcommerceHelperFacade::getCustomerAddressValidationRules();
                 $validator = Validator::make($billingAddressData, $rules);
                 if ($validator->fails()) {
-                    return false;
+                    return;
                 }
 
                 $billingAddressData['order_id'] = $orderId;
                 $billingAddressData['type'] = OrderAddressTypeEnum::BILLING;
 
-                OrderAddress::query()
-                    ->where([
+                $orderBillingAddress = OrderAddress::query()
+                    ->firstOrNew([
                         'order_id' => $orderId,
                         'type' => OrderAddressTypeEnum::BILLING,
-                    ])
-                    ->update($billingAddressData);
+                    ]);
+
+                $orderBillingAddress->fill($billingAddressData);
+                $orderBillingAddress->save();
+
             } else {
                 OrderAddress::query()
                     ->where([
@@ -770,11 +774,7 @@ class OrderHelper
             $productIds = [];
             foreach ($cartItems as $cartItem) {
                 $productByCartItem = $products['products']->firstWhere('id', $cartItem->id);
-                if(setting('ecommerce_display_product_price_including_taxes') == 1){
-                    $price =  $cartItem->price - $cartItem->tax;
-                }else{
-                    $price = $cartItem->price;
-                }
+
                 $data = [
                     'order_id' => $sessionData['created_order_id'],
                     'product_id' => $cartItem->id,
@@ -782,7 +782,7 @@ class OrderHelper
                     'product_image' => $productByCartItem->original_product->image,
                     'qty' => $cartItem->qty,
                     'weight' => $productByCartItem->weight * $cartItem->qty,
-                    'price' => $price,
+                    'price' => $cartItem->price,
                     'tax_amount' => $cartItem->tax,
                     'options' => [],
                     'product_type' => $productByCartItem->product_type,
@@ -982,37 +982,6 @@ class OrderHelper
     public function shippingStatusDelivered(Shipment $shipment, Request $request, int|string $userId = 0): Order
     {
         return $this->setOrderCompleted($shipment->order_id, $request, $userId);
-    }
-    public static function sendEnquiryMail(Enquiry $enquiry): Enquiry
-    {
-        $mailer = EmailHandler::setModule(ECOMMERCE_MODULE_SCREEN_NAME);
-        if ($mailer->templateEnabled('customer_new_enquiry')) {
-            self::setEmailVendorVariablesForEnquiry($enquiry);
-            $mailer->sendUsingTemplate(
-                'customer_new_enquiry',
-                $enquiry->email
-            );
-        }
-        if ($mailer->templateEnabled('admin_new_enquiry')) {
-            self::setEmailVendorVariablesForEnquiry($enquiry);
-            $mailer->sendUsingTemplate('admin_new_enquiry', get_admin_email()->toArray());
-        }
-        return $enquiry;
-    }
-    public static function setEmailVendorVariablesForEnquiry(Enquiry $enquiry): EmailHandlerSupport
-    {
-        return EmailHandler::setModule(ECOMMERCE_MODULE_SCREEN_NAME)
-            ->setVariableValues([
-                'customer_name'    => $enquiry->name,
-                'customer_email'   => $enquiry->email,
-                'customer_phone'   => $enquiry->phone,
-                'customer_address' => $enquiry->address.', '.$enquiry->cityName->name.', '.$enquiry->stateName->name.', '.$enquiry->zip_code,
-                'product_list'     => view('plugins/ecommerce::emails.partials.enquiry-detail', compact('enquiry'))
-                    ->render(),
-                'enquiry_id'    => $enquiry->code,
-                'enquiry_description'      => $enquiry->description,
-                'store_name'       => $enquiry->product->store->name,
-            ]);
     }
 
     public function getOrderBankInfo(Order|EloquentCollection $orders): string|null

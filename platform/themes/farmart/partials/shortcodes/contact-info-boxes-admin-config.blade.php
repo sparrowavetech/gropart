@@ -1,5 +1,5 @@
-<div class="form-group">
-    <label class="control-label">{{ __('Title') }}</label>
+<div class="mb-3">
+    <label class="form-label">{{ __('Title') }}</label>
     <input
         class="form-control"
         name="title"
@@ -9,8 +9,8 @@
     >
 </div>
 
-<div class="form-group">
-    <label class="control-label">{{ __('Subtitle') }}</label>
+<div class="mb-3">
+    <label class="form-label">{{ __('Subtitle') }}</label>
     <input
         class="form-control"
         name="subtitle"
@@ -23,8 +23,8 @@
 <div class="p-2 border">
     @for ($i = 1; $i <= 3; $i++)
         <div class="p-2 border mb-2">
-            <div class="form-group">
-                <label class="control-label">{{ __('Name :number', ['number' => $i]) }}</label>
+            <div class="mb-3">
+                <label class="form-label">{{ __('Name :number', ['number' => $i]) }}</label>
                 <input
                     class="form-control"
                     name="name_{{ $i }}"
@@ -33,8 +33,8 @@
                     placeholder="{{ __('Name :number', ['number' => $i]) }}"
                 >
             </div>
-            <div class="form-group">
-                <label class="control-label">{{ __('Address :number', ['number' => $i]) }}</label>
+            <div class="mb-3">
+                <label class="form-label">{{ __('Address :number', ['number' => $i]) }}</label>
                 <input
                     class="form-control"
                     name="address_{{ $i }}"
@@ -43,8 +43,8 @@
                     placeholder="{{ __('Address :number', ['number' => $i]) }}"
                 >
             </div>
-            <div class="form-group">
-                <label class="control-label">{{ __('Phone :number', ['number' => $i]) }}</label>
+            <div class="mb-3">
+                <label class="form-label">{{ __('Phone :number', ['number' => $i]) }}</label>
                 <input
                     class="form-control"
                     name="phone_{{ $i }}"
@@ -53,8 +53,8 @@
                     placeholder="{{ __('Phone :number', ['number' => $i]) }}"
                 >
             </div>
-            <div class="form-group">
-                <label class="control-label">{{ __('Email :number', ['number' => $i]) }}</label>
+            <div class="mb-3">
+                <label class="form-label">{{ __('Email :number', ['number' => $i]) }}</label>
                 <input
                     class="form-control"
                     name="email_{{ $i }}"
@@ -71,11 +71,10 @@
 </div>
 
 @if (is_plugin_active('contact'))
-    <div class="form-group">
-        <label class="control-label">{{ __('Show Contact form') }}</label>
-        <div class="ui-select-wrapper form-group">
+    <div class="mb-3">
+        <label class="form-label">{{ __('Show Contact form') }}</label>
             <select
-                class="ui-select"
+                class="form-select"
                 name="show_contact_form"
             >
                 <option
@@ -87,12 +86,5 @@
                     @if (1 == Arr::get($attributes, 'show_contact_form')) selected @endif
                 >{{ __('Yes') }}</option>
             </select>
-            <svg class="svg-next-icon svg-next-icon-size-16">
-                <use
-                    xmlns:xlink="http://www.w3.org/1999/xlink"
-                    xlink:href="#select-chevron"
-                ></use>
-            </svg>
         </div>
-    </div>
 @endif

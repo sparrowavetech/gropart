@@ -2,9 +2,11 @@
 
 namespace Botble\Ecommerce\Models;
 
+use Botble\Base\Contracts\HasTreeCategory as HasTreeCategoryContract;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Facades\Html;
 use Botble\Base\Models\BaseModel;
+use Botble\Base\Traits\HasTreeCategory;
 use Botble\Ecommerce\Tables\ProductTable;
 use Botble\Media\Facades\RvMedia;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -16,8 +18,10 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 
-class ProductCategory extends BaseModel
+class ProductCategory extends BaseModel implements HasTreeCategoryContract
 {
+    use HasTreeCategory;
+
     protected $table = 'ec_product_categories';
 
     protected $fillable = [
@@ -30,12 +34,23 @@ class ProductCategory extends BaseModel
         'is_featured',
         'icon',
         'icon_image',
-        'is_enquiry',
     ];
 
     protected $casts = [
         'status' => BaseStatusEnum::class,
     ];
+
+    protected static function booted(): void
+    {
+        self::deleting(function (ProductCategory $category) {
+            $category->products()->detach();
+
+            $category->children()->each(fn (ProductCategory $child) => $child->delete());
+
+            $category->brands()->detach();
+            $category->productAttributeSets()->detach();
+        });
+    }
 
     public function products(): BelongsToMany
     {
@@ -52,51 +67,6 @@ class ProductCategory extends BaseModel
     public function parent(): BelongsTo
     {
         return $this->belongsTo(ProductCategory::class, 'parent_id')->withDefault();
-    }
-
-    protected function parents(): Attribute
-    {
-        return Attribute::make(
-            get: function (): Collection {
-                $parents = collect();
-
-                $parent = $this->parent;
-
-                while ($parent->id) {
-                    $parents->push($parent);
-                    $parent = $parent->parent;
-                }
-
-                return $parents;
-            },
-        );
-    }
-
-    protected function badgeWithCount(): Attribute
-    {
-        return Attribute::make(
-            get: function (): HtmlString {
-                $badge = match ($this->status->getValue()) {
-                    BaseStatusEnum::DRAFT => 'bg-secondary',
-                    BaseStatusEnum::PENDING => 'bg-warning',
-                    default => 'bg-success',
-                };
-
-                $link = route('products.index', [
-                    'filter_table_id' => strtolower(Str::slug(Str::snake(ProductTable::class))),
-                    'class' => Product::class,
-                    'filter_columns' => ['category'],
-                    'filter_operators' => ['='],
-                    'filter_values' => [$this->id],
-                ]);
-
-                return Html::link($link, (string)$this->products_count, [
-                    'class' => 'badge font-weight-bold ' . $badge,
-                    'data-bs-toggle' => 'tooltip',
-                    'data-bs-original-title' => trans('plugins/ecommerce::product-categories.total_products', ['total' => $this->products_count]),
-                ]);
-            },
-        );
     }
 
     public function children(): HasMany
@@ -123,34 +93,52 @@ class ProductCategory extends BaseModel
         return $this->morphedByMany(ProductAttributeSet::class, 'reference', 'ec_product_categorizables', 'category_id');
     }
 
-    protected function iconHtml(): Attribute
+    protected function parents(): Attribute
     {
-        return Attribute::make(
-            get: function (mixed $value, array $attributes): HtmlString|null {
-                if ($attributes['icon_image']) {
-                    return RvMedia::image($attributes['icon_image'], attributes: [
-                        'alt' => $attributes['name'],
-                    ]);
-                }
+        return Attribute::get(function (): Collection {
+            $parents = collect();
 
-                if ($attributes['icon']) {
-                    return Html::tag('i', '', $attributes['icon']);
-                }
+            $parent = $this->parent;
 
-                return null;
+            while ($parent->id) {
+                $parents->push($parent);
+                $parent = $parent->parent;
             }
-        );
+
+            return $parents;
+        });
     }
 
-    protected static function booted(): void
+    protected function badgeWithCount(): Attribute
     {
-        self::deleting(function (ProductCategory $category) {
-            $category->products()->detach();
+        return Attribute::get(function (): HtmlString {
+            $link = route('products.index', [
+                'filter_table_id' => strtolower(Str::slug(Str::snake(ProductTable::class))),
+                'class' => Product::class,
+                'filter_columns' => ['category'],
+                'filter_operators' => ['='],
+                'filter_values' => [$this->id],
+            ]);
 
-            $category->children()->each(fn (ProductCategory $child) => $child->delete());
+            return Html::link($link, sprintf('(%s)', $this->products_count), [
+                'data-bs-toggle' => 'tooltip',
+                'data-bs-original-title' => trans('plugins/ecommerce::product-categories.total_products', ['total' => $this->products_count]),
+            ]);
+        });
+    }
 
-            $category->brands()->detach();
-            $category->productAttributeSets()->detach();
+    protected function iconHtml(): Attribute
+    {
+        return Attribute::get(function (): HtmlString|null {
+            if ($this->icon_image) {
+                return RvMedia::image($this->icon_image, attributes: ['alt' => $this->name]);
+            }
+
+            if ($this->icon) {
+                return Html::tag('i', '', $this->icon);
+            }
+
+            return null;
         });
     }
 }

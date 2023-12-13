@@ -6,7 +6,6 @@ use Botble\Base\Forms\FieldOptions\DatePickerFieldOption;
 use Botble\Base\Forms\FieldOptions\SelectFieldOption;
 use Botble\Base\Forms\FieldOptions\TextareaFieldOption;
 use Botble\Base\Forms\Fields\DatetimeField;
-use Botble\Base\Forms\Fields\MediaImagesField;
 use Botble\Base\Forms\Fields\SelectField;
 use Botble\Base\Forms\Fields\TextareaField;
 use Botble\Base\Forms\FormAbstract;
@@ -62,10 +61,6 @@ class ReviewForm extends FormAbstract
                 TextareaFieldOption::make()
                     ->label(trans('plugins/ecommerce::review.comment'))
                     ->toArray()
-            )
-            ->add('images[]', MediaImagesField::class, [
-                'label' => trans('plugins/ecommerce::review.images'),
-                'values' => $this->model->images,
-            ]);
+            );
     }
 }

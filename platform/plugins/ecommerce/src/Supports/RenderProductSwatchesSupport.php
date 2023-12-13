@@ -6,6 +6,7 @@ use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Models\ProductVariation;
 use Botble\Ecommerce\Models\ProductVariationItem;
 use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
+use Illuminate\Support\Arr;
 
 class RenderProductSwatchesSupport
 {
@@ -52,13 +53,19 @@ class RenderProductSwatchesSupport
 
         $selected = $params['selected'];
 
-        return view($params['view'], compact(
-            'attributeSets',
-            'attributes',
-            'product',
-            'selected',
-            'productVariationsInfo',
-            'productVariations'
-        ))->render();
+        return view(
+            $params['view'],
+            [
+                ...compact(
+                    'attributeSets',
+                    'attributes',
+                    'product',
+                    'selected',
+                    'productVariationsInfo',
+                    'productVariations'
+                ),
+                ...Arr::except($params, ['view', 'selected']),
+            ]
+        )->render();
     }
 }

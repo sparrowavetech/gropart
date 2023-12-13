@@ -3,13 +3,12 @@
 namespace Botble\Ecommerce\Http\Controllers\Customers;
 
 use Botble\Base\Http\Controllers\BaseController;
-use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Http\Requests\CreateAddressFromAdminRequest;
 use Botble\Ecommerce\Models\Address;
 
 class AddressController extends BaseController
 {
-    public function store(CreateAddressFromAdminRequest $request, BaseHttpResponse $response)
+    public function store(CreateAddressFromAdminRequest $request)
     {
         if ($request->boolean('is_default')) {
             Address::query()
@@ -29,12 +28,13 @@ class AddressController extends BaseController
 
         Address::query()->create($request->input());
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setNextUrl(route('customer.address'))
-            ->setMessage(trans('core/base::notices.create_success_message'));
+            ->withCreatedSuccessMessage();
     }
 
-    public function update(int|string $id, CreateAddressFromAdminRequest $request, BaseHttpResponse $response)
+    public function update(int|string $id, CreateAddressFromAdminRequest $request)
     {
         $address = Address::query()->findOrFail($id);
 
@@ -58,18 +58,20 @@ class AddressController extends BaseController
 
         $address->save();
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setNextUrl(route('customer.address'))
-            ->setMessage(trans('core/base::notices.update_success_message'));
+            ->withUpdatedSuccessMessage();
     }
 
-    public function destroy(int|string $id, BaseHttpResponse $response)
+    public function destroy(int|string $id)
     {
         $address = Address::query()->findOrFail($id);
 
         $address->delete();
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setNextUrl(route('customer.address'))
             ->setMessage(trans('core/base::notices.delete_success_message'));
     }

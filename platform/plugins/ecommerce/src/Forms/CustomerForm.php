@@ -4,6 +4,8 @@ namespace Botble\Ecommerce\Forms;
 
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Forms\FieldOptions\StatusFieldOption;
+use Botble\Base\Forms\Fields\SelectField;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Ecommerce\Enums\CustomerStatusEnum;
 use Botble\Ecommerce\Http\Requests\CustomerCreateRequest;
@@ -12,7 +14,7 @@ use Carbon\Carbon;
 
 class CustomerForm extends FormAbstract
 {
-    public function buildForm(): void
+    public function setup(): void
     {
         Assets::addScriptsDirectly('vendor/core/plugins/ecommerce/js/address.js')
             ->addScriptsDirectly('vendor/core/plugins/location/js/location.js')
@@ -22,7 +24,6 @@ class CustomerForm extends FormAbstract
         $this
             ->setupModel(new Customer())
             ->setValidatorClass(CustomerCreateRequest::class)
-            ->withCustomFields()
             ->template('plugins/ecommerce::customers.form')
             ->add('name', 'text', [
                 'label' => trans('core/base::forms.name'),
@@ -51,9 +52,16 @@ class CustomerForm extends FormAbstract
                 'label' => trans('plugins/ecommerce::customer.dob'),
                 'default_value' => BaseHelper::formatDate(Carbon::now()),
             ])
-            ->add('is_change_password', 'checkbox', [
+            ->add('is_change_password', 'onOff', [
                 'label' => trans('plugins/ecommerce::customer.change_password'),
-                'value' => 1,
+                'value' => 0,
+                'attr' => [
+                    'data-bb-toggle' => 'collapse',
+                    'data-bb-target' => '#password-collapse',
+                ],
+            ])
+            ->add('openRow1', 'html', [
+                'html' => '<div class="row" id="password-collapse" data-bb-value="1"' . ($this->getModel()->id ? ' style="display: none"' : '') . '>',
             ])
             ->add('password', 'password', [
                 'label' => trans('plugins/ecommerce::customer.password'),
@@ -62,8 +70,7 @@ class CustomerForm extends FormAbstract
                     'data-counter' => 60,
                 ],
                 'wrapper' => [
-                    'class' => $this->formHelper->getConfig('defaults.wrapper_class') . ($this->getModel(
-                    )->id ? ' hidden' : null),
+                    'class' => $this->formHelper->getConfig('defaults.wrapper_class') . ' col-md-6',
                 ],
             ])
             ->add('password_confirmation', 'password', [
@@ -73,15 +80,13 @@ class CustomerForm extends FormAbstract
                     'data-counter' => 60,
                 ],
                 'wrapper' => [
-                    'class' => $this->formHelper->getConfig('defaults.wrapper_class') . ($this->getModel(
-                    )->id ? ' hidden' : null),
+                    'class' => $this->formHelper->getConfig('defaults.wrapper_class') . ' col-md-6',
                 ],
             ])
-            ->add('status', 'customSelect', [
-                'label' => trans('core/base::tables.status'),
-                'required' => true,
-                'choices' => CustomerStatusEnum::labels(),
+            ->add('closeRow1', 'html', [
+                'html' => '</div>',
             ])
+            ->add('status', SelectField::class, StatusFieldOption::make()->choices(CustomerStatusEnum::labels())->toArray())
             ->add('avatar', 'mediaImage')
             ->setBreakFieldPoint('status');
 
@@ -93,20 +98,21 @@ class CustomerForm extends FormAbstract
                         'content' => view('plugins/ecommerce::customers.addresses.addresses', [
                             'addresses' => $this->model->addresses()->get(),
                         ])->render(),
+                        'header_actions' => view('plugins/ecommerce::customers.addresses.address-actions')->render(),
                         'wrap' => true,
+                        'has_table' => true,
                     ],
                 ])
-                ->when(is_plugin_active('payment'), function () {
-                    $this->addMetaBoxes([
-                        'payments' => [
-                            'title' => trans('plugins/ecommerce::payment.name'),
-                            'content' => view('plugins/ecommerce::customers.payments.payments', [
-                                'payments' => $this->model->payments()->get(),
-                            ])->render(),
-                            'wrap' => true,
-                        ],
-                    ]);
-                });
+                ->addMetaBoxes([
+                    'payments' => [
+                        'title' => trans('plugins/ecommerce::payment.name'),
+                        'content' => view('plugins/ecommerce::customers.payments.payments', [
+                            'payments' => $this->model->payments()->get(),
+                        ])->render(),
+                        'wrap' => true,
+                        'has_table' => true,
+                    ],
+                ]);
         }
     }
 }

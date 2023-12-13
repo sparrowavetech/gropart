@@ -1,16 +1,7 @@
 <?php
 
-use Botble\Widget\AbstractWidget;
+use Botble\Menu\Widgets\Fronts\CustomMenu;
 
-class CustomMenuWidget extends AbstractWidget
+class CustomMenuWidget extends CustomMenu
 {
-    public function __construct()
-    {
-        parent::__construct([
-            'name' => __('Custom Menu'),
-            'description' => __('Add a custom menu to your widget area.'),
-            'menu_id' => null,
-            'parent_class_name' => 'row-cols-md-3 row-cols-sm-2 row-cols-1',
-        ]);
-    }
 }

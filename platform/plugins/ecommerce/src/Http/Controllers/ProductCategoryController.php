@@ -6,11 +6,8 @@ use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Base\Facades\Assets;
-use Botble\Base\Facades\PageTitle;
 use Botble\Base\Forms\FormAbstract;
-use Botble\Base\Forms\FormBuilder;
-use Botble\Base\Http\Controllers\BaseController;
-use Botble\Base\Http\Responses\BaseHttpResponse;
+use Botble\Base\Http\Requests\UpdateTreeCategoryRequest;
 use Botble\Ecommerce\Forms\ProductCategoryForm;
 use Botble\Ecommerce\Http\Requests\ProductCategoryRequest;
 use Botble\Ecommerce\Http\Resources\ProductCategoryResource;
@@ -22,12 +19,16 @@ use Illuminate\Support\Facades\Auth;
 
 class ProductCategoryController extends BaseController
 {
-    public function index(
-        FormBuilder $formBuilder,
-        Request $request,
-        BaseHttpResponse $response
-    ) {
-        PageTitle::setTitle(trans('plugins/ecommerce::product-categories.name'));
+    public function __construct()
+    {
+        parent::__construct();
+
+        $this->breadcrumb();
+    }
+
+    public function index(Request $request)
+    {
+        $this->pageTitle(trans('plugins/ecommerce::product-categories.name'));
 
         $categories = ProductCategory::query()
             ->orderBy('order')
@@ -40,36 +41,42 @@ class ProductCategoryController extends BaseController
             $data = view('core/base::forms.partials.tree-categories', $this->getOptions(compact('categories')))
                 ->render();
 
-            return $response->setData($data);
+            return $this
+                ->httpResponse()
+                ->setData($data);
         }
 
         Assets::addStylesDirectly(['vendor/core/core/base/css/tree-category.css'])
             ->addScriptsDirectly(['vendor/core/core/base/js/tree-category.js']);
 
-        $form = $formBuilder->create(ProductCategoryForm::class, ['template' => 'core/base::forms.form-tree-category']);
+        $form = ProductCategoryForm::create(['template' => 'core/base::forms.form-tree-category']);
         $form = $this->setFormOptions($form, null, compact('categories'));
 
         return $form->renderForm();
     }
 
-    public function create(FormBuilder $formBuilder, Request $request, BaseHttpResponse $response)
+    public function create(Request $request)
     {
-        PageTitle::setTitle(trans('plugins/ecommerce::product-categories.create'));
+        $this->pageTitle(trans('plugins/ecommerce::product-categories.create'));
 
         if ($request->ajax()) {
-            return $response->setData($this->getForm());
+            return $this
+                ->httpResponse()
+                ->setData($this->getForm());
         }
 
-        return $formBuilder->create(ProductCategoryForm::class)->renderForm();
+        return ProductCategoryForm::create()->renderForm();
     }
 
-    public function store(ProductCategoryRequest $request, BaseHttpResponse $response)
+    public function store(ProductCategoryRequest $request)
     {
         $productCategory = ProductCategory::query()->create($request->input());
 
         event(new CreatedContentEvent(PRODUCT_CATEGORY_MODULE_SCREEN_NAME, $request, $productCategory));
 
         if ($request->ajax()) {
+            $response = $this->httpResponse();
+
             $productCategory = ProductCategory::query()->findOrFail($productCategory->id);
 
             if ($response->isSaving()) {
@@ -84,38 +91,36 @@ class ProductCategoryController extends BaseController
             ]);
         }
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setPreviousUrl(route('product-categories.index'))
             ->setNextUrl(route('product-categories.edit', $productCategory->id))
-            ->setMessage(trans('core/base::notices.create_success_message'));
+            ->withCreatedSuccessMessage();
     }
 
-    public function edit(
-        ProductCategory $productCategory,
-        FormBuilder $formBuilder,
-        Request $request,
-        BaseHttpResponse $response
-    ) {
+    public function edit(ProductCategory $productCategory, Request $request)
+    {
         if ($request->ajax()) {
-            return $response->setData($this->getForm($productCategory));
+            return $this
+                ->httpResponse()
+                ->setData($this->getForm($productCategory));
         }
 
-        PageTitle::setTitle(trans('core/base::forms.edit_item', ['name' => $productCategory->name]));
+        $this->pageTitle(trans('core/base::forms.edit_item', ['name' => $productCategory->name]));
 
-        return $formBuilder->create(ProductCategoryForm::class, ['model' => $productCategory])->renderForm();
+        return ProductCategoryForm::createFromModel($productCategory)->renderForm();
     }
 
-    public function update(
-        ProductCategory $productCategory,
-        ProductCategoryRequest $request,
-        BaseHttpResponse $response
-    ) {
+    public function update(ProductCategory $productCategory, ProductCategoryRequest $request)
+    {
         $productCategory->fill($request->input());
         $productCategory->save();
 
         event(new UpdatedContentEvent(PRODUCT_CATEGORY_MODULE_SCREEN_NAME, $request, $productCategory));
 
         if ($request->ajax()) {
+            $response = $this->httpResponse();
+
             if ($response->isSaving()) {
                 $form = $this->getForm();
             } else {
@@ -128,23 +133,37 @@ class ProductCategoryController extends BaseController
             ]);
         }
 
-        return $response
+        return $this
+            ->httpResponse()
+
             ->setPreviousUrl(route('product-categories.index'))
-            ->setMessage(trans('core/base::notices.update_success_message'));
+            ->withUpdatedSuccessMessage();
     }
 
-    public function destroy(ProductCategory $productCategory, Request $request, BaseHttpResponse $response)
+    public function destroy(ProductCategory $productCategory, Request $request)
     {
         try {
             $productCategory->delete();
             event(new DeletedContentEvent(PRODUCT_CATEGORY_MODULE_SCREEN_NAME, $request, $productCategory));
 
-            return $response->setMessage(trans('core/base::notices.delete_success_message'));
+            return $this
+                ->httpResponse()
+                ->setMessage(trans('core/base::notices.delete_success_message'));
         } catch (Exception $exception) {
-            return $response
+            return $this
+                ->httpResponse()
                 ->setError()
                 ->setMessage($exception->getMessage());
         }
+    }
+
+    public function updateTree(UpdateTreeCategoryRequest $request)
+    {
+        ProductCategory::updateTree($request->validated('data'));
+
+        return $this
+            ->httpResponse()
+            ->withUpdatedSuccessMessage();
     }
 
     protected function getForm(?ProductCategory $model = null): string
@@ -154,7 +173,7 @@ class ProductCategoryController extends BaseController
             $options['model'] = $model;
         }
 
-        $form = app(FormBuilder::class)->create(ProductCategoryForm::class, $options);
+        $form = ProductCategoryForm::create($options);
 
         $form = $this->setFormOptions($form, $model);
 
@@ -186,10 +205,11 @@ class ProductCategoryController extends BaseController
             'createRoute' => 'product-categories.create',
             'editRoute' => 'product-categories.edit',
             'deleteRoute' => 'product-categories.destroy',
+            'updateTreeRoute' => 'product-categories.update-tree',
         ], $options);
     }
 
-    public function getSearch(Request $request, BaseHttpResponse $response)
+    public function getSearch(Request $request)
     {
         $term = $request->input('search');
 
@@ -200,10 +220,12 @@ class ProductCategoryController extends BaseController
 
         $data = ProductCategoryResource::collection($categories);
 
-        return $response->setData($data)->toApiResponse();
+        return $this
+            ->httpResponse()
+            ->setData($data)->toApiResponse();
     }
 
-    public function getListForSelect(BaseHttpResponse $response)
+    public function getListForSelect()
     {
         $categories = ProductCategory::query()
             ->toBase()
@@ -216,7 +238,9 @@ class ProductCategoryController extends BaseController
             ->orderBy('order')
             ->get();
 
-        return $response->setData($this->buildTree($categories->groupBy('parent_id')));
+        return $this
+            ->httpResponse()
+            ->setData($this->buildTree($categories->groupBy('parent_id')));
     }
 
     protected function buildTree(

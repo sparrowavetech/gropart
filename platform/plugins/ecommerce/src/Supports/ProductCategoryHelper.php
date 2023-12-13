@@ -51,7 +51,6 @@ class ProductCategoryHelper
                 'name',
                 'status',
                 'is_featured',
-                'is_enquiry',
                 'image',
             ])) {
                 $query = $query->select($select);
@@ -170,7 +169,6 @@ class ProductCategoryHelper
                 DB::raw('CONCAT(slugs.prefix, "/", slugs.key) as url'),
                 'icon',
                 'icon_image',
-                'is_enquiry'
             ])
             ->leftJoin('slugs', function (JoinClause $join) {
                 $join

@@ -1,17 +1,8 @@
-{!! Form::open(['url' => route('ecommerce.store-locators.update-primary-store')]) !!}
-<div class="next-form-section">
-    <div class="next-form-grid">
-        <div class="next-form-grid-cell">
-            <label class="text-title-field">{{ trans('plugins/ecommerce::store-locator.primary_store_is') }}</label>
-            {!! Form::customSelect(
-                'primary_store_id',
-                $storeLocators->pluck('name', 'id')->all(),
-                $storeLocators->where('is_primary', true)->first() ? $storeLocators->where('is_primary', true)->first()->id : null,
-                [
-                    'class' => 'form-control',
-                ],
-            ) !!}
-        </div>
-    </div>
-</div>
-{!! Form::close() !!}
+<x-core::form :url="route('ecommerce.store-locators.update-primary-store')" method="post">
+    <x-core::form.select
+        name="primary_store_id"
+        :options="$storeLocators->pluck('name', 'id')->all()"
+        :value="($defaultStoreLocator = $storeLocators->where('is_primary', true)->first()) ? $defaultStoreLocator->id : null"
+        :label="trans('plugins/ecommerce::store-locator.primary_store_is')"
+    />
+</x-core::form>

@@ -66,14 +66,12 @@
                         @endif
                     </td>
                     <td>
-                        <label>
-                            <input
-                                name="variation_default_id"
-                                type="radio"
-                                value="{{ $variation->id }}"
-                                @checked($variation->is_default)
-                            >
-                        </label>
+                        <x-core::form.checkbox
+                            name="variation_default_id"
+                            :value="$variation->id"
+                            :checked="$variation->is_default"
+                            :single="true"
+                        />
                     </td>
                     @if (EcommerceHelper::isEnabledSupportDigitalProducts() && $product && $product->isTypeDigital())
                         <td>

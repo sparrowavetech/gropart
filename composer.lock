@@ -11359,16 +11359,16 @@
         },
         {
             "name": "yajra/laravel-datatables-oracle",
-            "version": "v10.11.1",
+            "version": "v10.11.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/yajra/laravel-datatables.git",
-                "reference": "6fb8571f9da39b8f256298e98bbcf6dd86900888"
+                "reference": "22e6ddad629a22b5e7959b27828c28cbb21ca763"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/yajra/laravel-datatables/zipball/6fb8571f9da39b8f256298e98bbcf6dd86900888",
-                "reference": "6fb8571f9da39b8f256298e98bbcf6dd86900888",
+                "url": "https://api.github.com/repos/yajra/laravel-datatables/zipball/22e6ddad629a22b5e7959b27828c28cbb21ca763",
+                "reference": "22e6ddad629a22b5e7959b27828c28cbb21ca763",
                 "shasum": ""
             },
             "require": {
@@ -11434,7 +11434,7 @@
             ],
             "support": {
                 "issues": "https://github.com/yajra/laravel-datatables/issues",
-                "source": "https://github.com/yajra/laravel-datatables/tree/v10.11.1"
+                "source": "https://github.com/yajra/laravel-datatables/tree/v10.11.2"
             },
             "funding": [
                 {
@@ -11442,7 +11442,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2023-11-25T13:00:21+00:00"
+            "time": "2023-12-12T13:39:55+00:00"
         }
     ],
     "packages-dev": [
@@ -11532,21 +11532,14 @@
         },
         {
             "name": "botble/dev-tool",
-            "version": "1.0.1",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/botble/dev-tool.git",
-                "reference": "eeb17a9dae52faf3f247536f95faf5f2f67d51c2"
-            },
+            "version": "dev-dev",
             "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/botble/dev-tool/zipball/eeb17a9dae52faf3f247536f95faf5f2f67d51c2",
-                "reference": "eeb17a9dae52faf3f247536f95faf5f2f67d51c2",
-                "shasum": ""
+                "type": "path",
+                "url": "./platform/packages/dev-tool",
+                "reference": "ef3559e55139e765cc973405a5ff90cc7c7f220e"
             },
-            "require-dev": {
-                "laravel/pint": "^1.4.0",
-                "phpunit/phpunit": "^9.0|^10.0"
+            "require": {
+                "botble/platform": "*@dev"
             },
             "type": "package",
             "extra": {
@@ -11561,29 +11554,10 @@
                     "Botble\\DevTool\\": "src"
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Botble Technologies",
-                    "email": "contact@botble.com"
-                }
-            ],
-            "description": "Dev tool commands for Botble CMS",
-            "homepage": "https://botble.com",
-            "keywords": [
-                "botble",
-                "botble cms",
-                "botble dev tools",
-                "botble platform"
-            ],
-            "support": {
-                "issues": "https://github.com/botble/dev-tool/issues",
-                "source": "https://github.com/botble/dev-tool/tree/1.0.1"
-            },
-            "time": "2023-10-30T06:38:33+00:00"
+            "description": "Dev tools package",
+            "transport-options": {
+                "relative": true
+            }
         },
         {
             "name": "botble/git-commit-checker",

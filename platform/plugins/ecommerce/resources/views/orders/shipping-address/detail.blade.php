@@ -1,38 +1,35 @@
-<li>{{ $address->name }}</li>
+<dd>{{ $address->name }}</dd>
 @if ($address->phone)
-    <li>
+    <dd>
         <a href="tel:{{ $address->phone }}">
-            <span><i class="fa fa-phone-square cursor-pointer mr5"></i></span>
+            <x-core::icon name="ti ti-phone" />
             <span dir="ltr">{{ $address->phone }}</span>
         </a>
-    </li>
+    </dd>
 @endif
-<li>
-    @if ($address->email)
-        <div><a href="mailto:{{ $address->email }}">{{ $address->email }}</a></div>
-    @endif
-    @if ($address->address)
-        <div>{!! BaseHelper::clean($address->address) !!}</div>
-    @endif
-    @if ($address->city)
-        <div>{{ $address->city_name }}</div>
-    @endif
-    @if ($address->state)
-        <div>{{ $address->state_name }}</div>
-    @endif
-    @if ($address->country_name)
-        <div>{{ $address->country_name }}</div>
-    @endif
-    @if (EcommerceHelper::isZipCodeEnabled() && $address->zip_code)
-        <div>{{ $address->zip_code }}</div>
-    @endif
-    @if ($address->country || $address->state || $address->city || $address->address)
-        <div>
-            <a
-                class="hover-underline"
-                href="https://maps.google.com/?q={{ $address->address }}, {{ $address->city_name }}, {{ $address->state_name }}, {{ $address->country_name }}@if (EcommerceHelper::isZipCodeEnabled()) , {{ $address->zip_code }} @endif"
-                target="_blank"
-            >{{ trans('plugins/ecommerce::order.see_on_maps') }}</a>
-        </div>
-    @endif
-</li>
+
+@if ($address->email)
+    <dd><a href="mailto:{{ $address->email }}">{{ $address->email }}</a></dd>
+@endif
+@if ($address->address)
+    <dd>{!! BaseHelper::clean($address->address) !!}</dd>
+@endif
+@if ($address->city)
+    <dd>{{ $address->city_name }}</dd>
+@endif
+@if ($address->state)
+    <dd>{{ $address->state_name }}</dd>
+@endif
+@if ($address->country_name)
+    <dd>{{ $address->country_name }}</dd>
+@endif
+@if (EcommerceHelper::isZipCodeEnabled() && $address->zip_code)
+    <dd>{{ $address->zip_code }}</dd>
+@endif
+@if ($address->country || $address->state || $address->city || $address->address)
+    <dd>
+        <a href="https://maps.google.com/?q={{ $address->full_address }}" target="_blank">
+            {{ trans('plugins/ecommerce::order.see_on_maps') }}
+        </a>
+    </dd>
+@endif

@@ -8,7 +8,7 @@
             @checked (old('with_tax_information', Arr::get($sessionCheckoutData, 'with_tax_information', false)))
         >
         <label
-            class="control-label"
+            class="form-label"
             for="with_tax_information"
         >{{ __('Requires company invoice (Please fill in your company information to receive the invoice)?') }}</label>
     </div>

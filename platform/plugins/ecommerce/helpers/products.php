@@ -22,7 +22,7 @@ if (! function_exists('get_product_by_id')) {
 if (! function_exists('get_products')) {
     function get_products(array $params = []): Collection|LengthAwarePaginator|Product|null
     {
-        $params = array_merge([
+        $params = [
             'condition' => [
                 'ec_products.is_variation' => 0,
             ],
@@ -41,7 +41,8 @@ if (! function_exists('get_products')) {
             'with' => ['slugable'],
             'withCount' => [],
             'withAvg' => [],
-        ], $params);
+            ...$params,
+        ];
 
         return app(ProductInterface::class)->getProducts($params);
     }
@@ -245,7 +246,6 @@ if (! function_exists('get_related_products')) {
         $params = [
             'condition' => [
                 'ec_products.is_variation' => 0,
-                'ec_products.is_enquiry' => 0,
             ],
             'order_by' => [
                 'ec_products.order' => 'ASC',
@@ -287,32 +287,6 @@ if (! function_exists('get_cross_sale_products')) {
             ->notOutOfStock()
             ->withCount($reviewParams['withCount'])
             ->withAvg($reviewParams['withAvg'][0], $reviewParams['withAvg'][1])
-            ->get();
-    }
-}
-
-if (!function_exists('get_frequently_bought_together')) {
-    /**
-     * @param Product $product
-     * @param int $limit
-     * @param array $with
-     * @return Collection|\Illuminate\Database\Eloquent\Collection
-     */
-    function get_frequently_bought_together(Product $product, int $limit = 4, array $with = []): EloquentCollection
-    {
-        $with = array_merge([
-            'slugable',
-            'variations',
-            'productCollections',
-            'variationAttributeSwatchesForProductList',
-        ], $with);
-
-        return $product
-            ->frequentlyBoughtTogether()
-            ->limit($limit)
-            ->with($with)
-            ->notOutOfStock()
-            ->withCount(EcommerceHelper::withReviewsCount())
             ->get();
     }
 }

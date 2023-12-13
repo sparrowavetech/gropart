@@ -4,8 +4,6 @@ namespace Botble\Ecommerce\Http\Controllers;
 
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
-use Botble\Base\Facades\PageTitle;
-use Botble\Base\Http\Controllers\BaseController;
 use Botble\Ecommerce\Exports\CsvProductExport;
 use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Models\ProductVariation;
@@ -13,9 +11,19 @@ use Maatwebsite\Excel\Excel;
 
 class ExportController extends BaseController
 {
+    public function __construct()
+    {
+        parent::__construct();
+
+        $this
+            ->breadcrumb()
+            ->add(trans('plugins/ecommerce::products.name'), route('products.index'))
+            ->add(trans('plugins/ecommerce::export.products.name'), route('ecommerce.export.products.index'));
+    }
+
     public function products()
     {
-        PageTitle::setTitle(trans('plugins/ecommerce::export.products.name'));
+        $this->pageTitle(trans('plugins/ecommerce::export.products.name'));
 
         Assets::addScriptsDirectly(['vendor/core/plugins/ecommerce/js/export.js']);
 

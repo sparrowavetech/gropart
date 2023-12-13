@@ -1,7 +1,4 @@
-<li class="nav-item">
-    <a
-        class="nav-link"
-        data-bs-toggle="tab"
-        href="#tab_tax_info"
-    >{{ __('Tax info') }} </a>
-</li>
+<x-core::tab.item
+    id="tab_tax_info"
+    :label="__('Tax info')"
+/>

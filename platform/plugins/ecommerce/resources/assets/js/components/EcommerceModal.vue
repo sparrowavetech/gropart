@@ -39,8 +39,8 @@ export default defineComponent({
 </script>
 
 <template>
-    <div class="modal fade" :id="id" tabindex="-1" :aria-labelledby="`${id}Label`" aria-hidden="true">
-        <div class="modal-dialog">
+    <div class="modal modal-blur fade" :id="id" tabindex="-1" :aria-labelledby="`${id}Label`" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <header class="modal-header">
                     <h5 class="modal-title" :id="`${id}Label`" v-text="title" />
@@ -50,8 +50,8 @@ export default defineComponent({
                     <slot />
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" v-text="cancelTitle" />
-                    <button type="button" class="btn btn-primary" @click="$emit('ok', $event)" v-text="okTitle" />
+                    <button type="button" class="btn" data-bs-dismiss="modal" v-text="cancelTitle" />
+                    <button type="button" class="btn btn-primary ms-auto" @click="$emit('ok', $event)" v-text="okTitle" />
                 </div>
             </div>
         </div>

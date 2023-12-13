@@ -209,7 +209,7 @@
                     </div>
                     <div class="pd-all-10-20">
                         <form action="{{ route('orders.edit', $order->id) }}">
-                            <label class="text-title-field">{{ trans('plugins/ecommerce::order.order_note') }}</label>
+                            <label class="form-label">{{ trans('plugins/ecommerce::order.order_note') }}</label>
                             <textarea
                                 class="ui-text-area textarea-auto-height"
                                 name="description"
@@ -346,7 +346,7 @@
         </div>
     </div>
 
-    <x-core-base::modal
+    <x-core::modal
         id="send-order-recover-email-modal"
         type="info"
         :title="trans('plugins/ecommerce::order.notice_about_incomplete_order')"
@@ -356,9 +356,9 @@
         {!! trans('plugins/ecommerce::order.notice_about_incomplete_order_description', [
             'email' => $order->user->id ? $order->user->email : $order->address->email,
         ]) !!}
-    </x-core-base::modal>
+    </x-core::modal>
 
-    <x-core-base::modal
+    <x-core::modal
         id="mark-order-as-completed-modal"
         type="info"
         :title="trans('plugins/ecommerce::order.mark_as_completed.modal_title')"
@@ -366,5 +366,5 @@
         :button-label="trans('plugins/ecommerce::order.mark_as_completed.name')"
     >
         {{ trans('plugins/ecommerce::order.mark_as_completed.modal_description') }}
-    </x-core-base::modal>
+    </x-core::modal>
 @endsection

@@ -1,24 +1,28 @@
-@if ($update)
-    <a
-        class="btn btn-info btn-trigger-edit-product-version"
-        data-target="{{ $update }}"
-        data-load-form="{{ $loadForm }}"
-        data-bs-toggle="tooltip"
-        href="#"
-        title="{{ trans('plugins/ecommerce::products.edit_variation_item') }}"
-    >
-        <i class="fa fa-edit"></i>
-    </a>
-@endif
-@if ($delete)
-    <a
-        class="btn-trigger-delete-version btn btn-danger"
-        data-target="{{ $delete }}"
-        data-id="{{ $item->id }}"
-        data-bs-toggle="tooltip"
-        href="#"
-        title="{{ trans('plugins/ecommerce::products.delete') }}"
-    >
-        <i class="fa fa-trash"></i>
-    </a>
-@endif
+<div class="btn-list">
+    @if ($update)
+        <x-core::button
+            type="button"
+            color="primary"
+            class="btn-trigger-edit-product-version"
+            :data-target="$update"
+            :data-load-form="$loadForm"
+            icon="ti ti-edit"
+            :icon-only="true"
+            :tooltip="trans('plugins/ecommerce::products.edit_variation_item')"
+            size="sm"
+        />
+    @endif
+    @if ($delete)
+        <x-core::button
+            type="button"
+            color="danger"
+            class="btn-trigger-delete-version"
+            :data-target="$delete"
+            :data-id="$item->id"
+            :tooltip="trans('plugins/ecommerce::products.delete')"
+            icon="ti ti-trash"
+            :icon-only="true"
+            size="sm"
+        />
+    @endif
+</div>

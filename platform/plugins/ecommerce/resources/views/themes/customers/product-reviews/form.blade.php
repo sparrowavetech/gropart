@@ -68,18 +68,18 @@
         ></textarea>
     </div>
     <div class="col-12 mb-3 form-group">
-        <script type="text/x-custom-template" id="ecommerce-review-image-template">
-                <span class="ecommerce-image-viewer__item" data-id="__id__">
-                    <img src="{{ RvMedia::getDefaultImage() }}" alt="Preview" class="img-responsive d-block">
-                    <span class="image-viewer__icon-remove">
-                        <span class="ecommerce-icon">
-                            <svg>
-                                <use href="#ecommerce-icon-cross" xlink:href="#ecommerce-icon-cross"></use>
-                            </svg>
-                        </span>
+        <x-core::custom-template id="ecommerce-review-image-template">
+            <span class="ecommerce-image-viewer__item" data-id="__id__">
+                <img src="{{ RvMedia::getDefaultImage() }}" alt="Preview" class="img-responsive d-block">
+                <span class="image-viewer__icon-remove">
+                    <span class="ecommerce-icon">
+                        <svg>
+                            <use href="#ecommerce-icon-cross" xlink:href="#ecommerce-icon-cross"></use>
+                        </svg>
                     </span>
                 </span>
-            </script>
+            </span>
+        </x-core::custom-template>
         <div class="ecommerce-image-upload__viewer d-flex">
             <div class="ecommerce-image-viewer__list position-relative">
                 <div class="ecommerce-image-upload__uploader-container">

@@ -12,7 +12,7 @@
         <div class="row">
 
             @foreach ($addresses as $address)
-                <div class="col-md-12 col-sm-12">
+                <div class="col-sm-12">
                     <div
                         class="panel panel-default dashboard-address-item @if ($address->is_default) is-address-default @endif">
                         <div class="panel-body">
@@ -23,10 +23,7 @@
                             <p class="address"><i
                                     class="fa fa-address-book"
                                     aria-hidden="true"
-                                ></i> {{ $address->address }}, {{ $address->city_name }}
-                                , {{ $address->state_name }}, {{ $address->country_name }}@if (EcommerceHelper::isZipCodeEnabled())
-                                    , {{ $address->zip_code }}
-                                @endif
+                                ></i> {{ $address->full_address }}
                             </p>
                             <p class="phone"><i
                                     class="fa fa-phone"

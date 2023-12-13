@@ -161,7 +161,7 @@
             ])
             <div class="row justify-content-center my-5 mb-2">
                 <div class="col-12">
-                    <div class="form-group">
+                    <div class="mb-3">
                         <form
                             class="products-filter-form-vendor"
                             action="{{ URL::current() }}"

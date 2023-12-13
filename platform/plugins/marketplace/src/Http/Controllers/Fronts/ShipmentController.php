@@ -3,9 +3,7 @@
 namespace Botble\Marketplace\Http\Controllers\Fronts;
 
 use Botble\Base\Facades\Assets;
-use Botble\Base\Facades\PageTitle;
 use Botble\Base\Http\Controllers\BaseController;
-use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Enums\ShippingCodStatusEnum;
 use Botble\Ecommerce\Enums\ShippingStatusEnum;
 use Botble\Ecommerce\Events\ShippingStatusChanged;
@@ -17,7 +15,7 @@ use Botble\Ecommerce\Models\OrderHistory;
 use Botble\Ecommerce\Models\Shipment;
 use Botble\Ecommerce\Models\ShipmentHistory;
 use Botble\Marketplace\Facades\MarketplaceHelper;
-use Botble\Marketplace\Http\Requests\UpdateShippingStatusRequest;
+use Botble\Marketplace\Http\Requests\Fronts\UpdateShippingStatusRequest;
 use Botble\Marketplace\Tables\ShipmentTable;
 use Carbon\Carbon;
 use Exception;
@@ -27,7 +25,7 @@ class ShipmentController extends BaseController
 {
     public function index(ShipmentTable $dataTable)
     {
-        PageTitle::setTitle(trans('plugins/ecommerce::shipping.shipments'));
+        $this->pageTitle(trans('plugins/ecommerce::shipping.shipments'));
 
         return $dataTable->renderTable();
     }
@@ -46,12 +44,12 @@ class ShipmentController extends BaseController
             'histories.user',
         ]);
 
-        PageTitle::setTitle(trans('plugins/ecommerce::shipping.edit_shipping', ['code' => get_shipment_code($id)]));
+        $this->pageTitle(trans('plugins/ecommerce::shipping.edit_shipping', ['code' => get_shipment_code($id)]));
 
         return MarketplaceHelper::view('vendor-dashboard.shipments.edit', compact('shipment'));
     }
 
-    public function postUpdateStatus(int|string $id, UpdateShippingStatusRequest $request, BaseHttpResponse $response)
+    public function postUpdateStatus(int|string $id, UpdateShippingStatusRequest $request)
     {
         $status = $request->input('status');
 
@@ -103,10 +101,12 @@ class ShipmentController extends BaseController
 
         event(new ShippingStatusChanged($shipment, $previousShipment));
 
-        return $response->setMessage(trans('plugins/ecommerce::shipping.update_shipping_status_success'));
+        return $this
+            ->httpResponse()
+            ->setMessage(trans('plugins/ecommerce::shipping.update_shipping_status_success'));
     }
 
-    public function postUpdateCodStatus(int|string $id, UpdateShipmentCodStatusRequest $request, BaseHttpResponse $response)
+    public function postUpdateCodStatus(int|string $id, UpdateShipmentCodStatusRequest $request)
     {
         $shipment = $this->findOrFail($id);
         $shipment->cod_status = $request->input('status');
@@ -127,31 +127,35 @@ class ShipmentController extends BaseController
             'user_type' => Customer::class,
         ]);
 
-        return $response->setMessage(trans('plugins/ecommerce::shipping.update_cod_status_success'));
+        return $this
+            ->httpResponse()
+            ->setMessage(trans('plugins/ecommerce::shipping.update_cod_status_success'));
     }
 
-    public function update(int|string $id, ShipmentRequest $request, BaseHttpResponse $response)
+    public function update(int|string $id, ShipmentRequest $request)
     {
         $shipment = $this->findOrFail($id);
 
         $shipment->fill($request->validated());
         $shipment->save();
 
-        return $response
+        return $this->httpResponse()
             ->setPreviousUrl(route('marketplace.vendor.shipments.index'))
-            ->setMessage(trans('core/base::notices.update_success_message'));
+            ->withUpdatedSuccessMessage();
     }
 
-    public function destroy(int|string $id, BaseHttpResponse $response)
+    public function destroy(int|string $id)
     {
         $shipment = $this->findOrFail($id);
 
         try {
             $shipment->delete();
 
-            return $response->setMessage(trans('core/base::notices.delete_success_message'));
+            return $this
+                ->httpResponse()
+                ->setMessage(trans('core/base::notices.delete_success_message'));
         } catch (Exception $exception) {
-            return $response
+            return $this->httpResponse()
                 ->setError()
                 ->setMessage($exception->getMessage());
         }

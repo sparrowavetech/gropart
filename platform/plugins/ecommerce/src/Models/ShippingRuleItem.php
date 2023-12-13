@@ -4,6 +4,7 @@ namespace Botble\Ecommerce\Models;
 
 use Botble\Base\Models\BaseModel;
 use Botble\Ecommerce\Traits\LocationTrait;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ShippingRuleItem extends BaseModel
@@ -22,18 +23,18 @@ class ShippingRuleItem extends BaseModel
         'zip_code',
     ];
 
-    public function setAdjustmentPriceAttribute(string|null $value): void
-    {
-        $this->attributes['adjustment_price'] = (float)str_replace(',', '', $value);
-    }
-
     public function shippingRule(): BelongsTo
     {
         return $this->belongsTo(ShippingRule::class)->withDefault();
     }
 
-    public function getNameItemAttribute(): string
+    protected function adjustmentPrice(): Attribute
     {
-        return trim(implode(', ', array_filter([$this->state_name, $this->city_name, $this->zip_code])));
+        return Attribute::set(fn (string $value) => (float)str_replace(',', '', $value));
+    }
+
+    protected function nameItem(): Attribute
+    {
+        return Attribute::get(fn () => trim(implode(', ', array_filter([$this->state_name, $this->city_name, $this->zip_code]))));
     }
 }

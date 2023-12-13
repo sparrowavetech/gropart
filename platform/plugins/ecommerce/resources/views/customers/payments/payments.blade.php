@@ -1,80 +1,87 @@
-<div
-    class="widget-body p-0"
-    id="payment-histories"
->
-    <div class="comment-log-timeline">
-        <div
-            class="column-left-history ps-relative"
-            id="order-history-wrapper"
-        >
-            <div class="item-card">
-                <div class="item-card-body">
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th scope="col">#</th>
-                                <th scope="col">{{ trans('plugins/ecommerce::payment.order') }}</th>
-                                <th scope="col">{{ trans('plugins/ecommerce::payment.charge_id') }}</th>
-                                <th scope="col">{{ trans('plugins/ecommerce::payment.amount') }}</th>
-                                <th scope="col">{{ trans('plugins/ecommerce::payment.payment_method') }}</th>
-                                <th scope="col">{{ trans('plugins/ecommerce::payment.status') }}</th>
-                                <th scope="col">{{ trans('plugins/ecommerce::payment.action') }}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse ($payments as $payment)
-                                <tr>
-                                    <td>{{ $loop->iteration }}</td>
-                                    <td class="text-start">
-                                        @if ($payment->order->id)
-                                            <a
-                                                href="{{ route('orders.edit', $payment->order->id) }}"
-                                                target="_blank"
-                                            >{{ $payment->order->code }} <i class="fa fa-external-link"></i></a>
-                                        @else
-                                            &mdash;
-                                        @endif
-                                    </td>
-                                    <td>{{ $payment->charge_id }}</td>
-                                    <td>{{ $payment->amount }} {{ $payment->currency }}</td>
-                                    <td>{{ $payment->payment_channel->label() }}</td>
-                                    <td>{!! BaseHelper::clean($payment->status->toHtml()) !!}</td>
-                                    <td
-                                        class="text-center"
-                                        style="width: 120px;"
-                                    >
-                                        <a
-                                            class="btn btn-icon btn-sm btn-info me-1 btn-trigger-edit-payment"
-                                            data-bs-toggle="tooltip"
-                                            data-bs-original-title="{{ trans('core/base::forms.view_new_tab') }}"
-                                            href="{{ route('payment.show', $payment->id) }}"
-                                            role="button"
-                                            target="_blank"
-                                        >
-                                            <i class="fa fa-external-link"></i>
-                                        </a>
-                                    </td>
-                                </tr>
-                            @empty
-                                <td
-                                    class="text-center"
-                                    colspan="7"
-                                >{{ trans('plugins/ecommerce::payment.no_data') }}</td>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+<x-core::table>
+    <x-core::table.header>
+        <x-core::table.header.cell>
+            #
+        </x-core::table.header.cell>
+        <x-core::table.header.cell>
+            {{ trans('plugins/ecommerce::payment.order') }}
+        </x-core::table.header.cell>
+        <x-core::table.header.cell>
+            {{ trans('plugins/ecommerce::payment.charge_id') }}
+        </x-core::table.header.cell>
+        <x-core::table.header.cell>
+            {{ trans('plugins/ecommerce::payment.amount') }}
+        </x-core::table.header.cell>
+        <x-core::table.header.cell>
+            {{ trans('plugins/ecommerce::payment.payment_method') }}
+        </x-core::table.header.cell>
+        <x-core::table.header.cell>
+            {{ trans('plugins/ecommerce::payment.status') }}
+        </x-core::table.header.cell>
+        <x-core::table.header.cell>
+            {{ trans('plugins/ecommerce::payment.action') }}
+        </x-core::table.header.cell>
+    </x-core::table.header>
 
-<x-core-base::modal
-    id="edit-payment-modal"
-    :title="trans('plugins/ecommerce::payment.edit_payment')"
-    button-id="confirm-edit-payment-button"
-    :button-label="trans('plugins/ecommerce::payment.save')"
-    size="md"
->
-    {!! BaseHelper::clean(trans('plugins/ecommerce::customer.verify_email.confirm_description')) !!}
-</x-core-base::modal>
+    <x-core::table.body>
+        @forelse ($payments as $payment)
+            <x-core::table.body.row>
+                <x-core::table.body.cell>
+                    {{ $loop->iteration }}
+                </x-core::table.body.cell>
+                <x-core::table.body.cell class="text-start">
+                    @if ($payment->order->id)
+                        <a href="{{ route('orders.edit', $payment->order->id) }}" target="_blank">
+                            {{ $payment->order->code }} <i class="fa fa-external-link"></i>
+                        </a>
+                    @else
+                        &mdash;
+                    @endif
+                </x-core::table.body.cell>
+                <x-core::table.body.cell>
+                    {{ $payment->charge_id }}
+                </x-core::table.body.cell>
+                <x-core::table.body.cell>
+                    {{ $payment->amount }} {{ $payment->currency }}
+                </x-core::table.body.cell>
+                <x-core::table.body.cell>
+                    {{ $payment->payment_channel->label() }}
+                </x-core::table.body.cell>
+                <x-core::table.body.cell>
+                    {!! BaseHelper::clean($payment->status->toHtml()) !!}
+                </x-core::table.body.cell>
+                <x-core::table.body.cell>
+                    <x-core::button
+                        tag="a"
+                        :href="route('payment.show', $payment->id)"
+                        target="_blank"
+                        size="sm"
+                        :tooltip="trans('core/base::forms.view_new_tab')"
+                        icon="ti ti-external-link"
+                        :icon-only="true"
+                    />
+                </x-core::table.body.cell>
+            </x-core::table.body.row>
+        @empty
+            <x-core::table.body.row class="text-center text-muted">
+                <x-core::table.body.cell colspan="7">
+                    {{ trans('plugins/ecommerce::payment.no_data') }}
+                </x-core::table.body.cell>
+            </x-core::table.body.row>
+        @endforelse
+    </x-core::table.body>
+</x-core::table>
+
+@push('footer')
+    <x-core::modal.action
+        id="edit-payment-modal"
+        type="info"
+        :title="trans('plugins/ecommerce::payment.edit_payment')"
+        :submit-button-attrs="['id' => 'confirm-edit-payment-button']"
+        :submit-button-label="trans('plugins/ecommerce::payment.save')"
+    >
+        <x-slot:description>
+            {!! BaseHelper::clean(trans('plugins/ecommerce::customer.verify_email.confirm_description')) !!}
+        </x-slot:description>
+    </x-core::modal.action>
+@endpush

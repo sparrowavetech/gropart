@@ -5,10 +5,7 @@ namespace Botble\Ecommerce\Http\Controllers;
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
-use Botble\Base\Facades\PageTitle;
-use Botble\Base\Forms\FormBuilder;
 use Botble\Base\Http\Controllers\BaseController;
-use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Forms\TaxForm;
 use Botble\Ecommerce\Http\Requests\TaxRequest;
 use Botble\Ecommerce\Models\Tax;
@@ -20,58 +17,62 @@ class TaxController extends BaseController
 {
     public function index(TaxTable $dataTable)
     {
-        PageTitle::setTitle(trans('plugins/ecommerce::tax.name'));
+        $this->pageTitle(trans('plugins/ecommerce::tax.name'));
 
         return $dataTable->renderTable();
     }
 
-    public function create(FormBuilder $formBuilder)
+    public function create()
     {
-        PageTitle::setTitle(trans('plugins/ecommerce::tax.create'));
+        $this->pageTitle(trans('plugins/ecommerce::tax.create'));
 
-        return $formBuilder->create(TaxForm::class)->renderForm();
+        return TaxForm::create()->renderForm();
     }
 
-    public function store(TaxRequest $request, BaseHttpResponse $response)
+    public function store(TaxRequest $request)
     {
         $tax = Tax::query()->create($request->input());
 
         event(new CreatedContentEvent(TAX_MODULE_SCREEN_NAME, $request, $tax));
 
-        return $response
-            ->setPreviousUrl(route('tax.index'))
+        return $this
+            ->httpResponse()
+            ->setPreviousUrl(route('ecommerce.settings.taxes'))
             ->setNextUrl(route('tax.edit', $tax->id))
-            ->setMessage(trans('core/base::notices.create_success_message'));
+            ->withCreatedSuccessMessage();
     }
 
-    public function edit(Tax $tax, FormBuilder $formBuilder)
+    public function edit(Tax $tax)
     {
-        PageTitle::setTitle(trans('plugins/ecommerce::tax.edit', ['title' => $tax->title]));
+        $this->pageTitle(trans('plugins/ecommerce::tax.edit', ['title' => $tax->title]));
 
-        return $formBuilder->create(TaxForm::class, ['model' => $tax])->renderForm();
+        return TaxForm::createFromModel($tax)->renderForm();
     }
 
-    public function update(Tax $tax, TaxRequest $request, BaseHttpResponse $response)
+    public function update(Tax $tax, TaxRequest $request)
     {
         $tax->fill($request->input());
         $tax->save();
 
         event(new UpdatedContentEvent(TAX_MODULE_SCREEN_NAME, $request, $tax));
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setPreviousUrl(route('tax.index'))
-            ->setMessage(trans('core/base::notices.update_success_message'));
+            ->withUpdatedSuccessMessage();
     }
 
-    public function destroy(Tax $tax, Request $request, BaseHttpResponse $response)
+    public function destroy(Tax $tax, Request $request)
     {
         try {
             $tax->delete();
             event(new DeletedContentEvent(TAX_MODULE_SCREEN_NAME, $request, $tax));
 
-            return $response->setMessage(trans('core/base::notices.delete_success_message'));
+            return $this
+                ->httpResponse()->setMessage(trans('core/base::notices.delete_success_message'));
         } catch (Exception $exception) {
-            return $response
+            return $this
+                ->httpResponse()
                 ->setError()
                 ->setMessage($exception->getMessage());
         }

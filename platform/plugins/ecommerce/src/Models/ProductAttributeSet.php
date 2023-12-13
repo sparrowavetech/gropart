@@ -31,16 +31,6 @@ class ProductAttributeSet extends BaseModel
         'status' => BaseStatusEnum::class,
     ];
 
-    public function attributes(): HasMany
-    {
-        return $this->hasMany(ProductAttribute::class, 'attribute_set_id')->orderBy('order');
-    }
-
-    public function categories(): MorphToMany
-    {
-        return $this->morphToMany(ProductCategory::class, 'reference', 'ec_product_categorizables', 'reference_id', 'category_id');
-    }
-
     protected static function booted(): void
     {
         self::saving(function (self $model) {
@@ -52,6 +42,16 @@ class ProductAttributeSet extends BaseModel
 
             $productAttributeSet->categories()->detach();
         });
+    }
+
+    public function attributes(): HasMany
+    {
+        return $this->hasMany(ProductAttribute::class, 'attribute_set_id')->orderBy('order');
+    }
+
+    public function categories(): MorphToMany
+    {
+        return $this->morphToMany(ProductCategory::class, 'reference', 'ec_product_categorizables', 'reference_id', 'category_id');
     }
 
     public static function getByProductId(int|array|string|null $productId): Collection

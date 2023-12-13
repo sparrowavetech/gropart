@@ -1,47 +1,12 @@
 <template>
-    <div class="flexbox-grid no-pd-none">
-        <div class="flexbox-content">
-            <div class="wrapper-content">
-                <div class="pd-all-20 ws-nm">
-                    <label class="title-product-main text-no-bold">
-                        <span v-if="!is_promotion">{{ __('discount.create_coupon_code') }}</span>
-                        <span v-if="is_promotion">{{ __('discount.create_discount_promotion') }}</span>
-                    </label>
-                    <a
-                        href="#"
-                        class="btn-change-link float-end"
-                        v-on:click="generateCouponCode($event)"
-                        v-show="!is_promotion"
-                        >{{ __('discount.generate_coupon_code') }}</a
-                    >
-                    <div class="form-group mt15 mb0">
-                        <input
-                            type="text"
-                            class="next-input coupon-code-input"
-                            name="code"
-                            v-model="code"
-                            v-show="!is_promotion"
-                        />
-                        <input
-                            type="text"
-                            class="next-input"
-                            name="title"
-                            v-model="title"
-                            v-show="is_promotion"
-                            :placeholder="__('discount.enter_promotion_name')"
-                        />
-                        <p class="type-subdued mt5 mb0" v-show="!is_promotion">
-                            {{ __('discount.customers_will_enter_this_coupon_code_when_they_checkout') }}.
-                        </p>
-                    </div>
-                </div>
-                <div class="pd-all-20 border-top-color">
-                    <label class="title-product-main text-no-bold block-display">{{
-                        __('discount.select_type_of_discount')
-                    }}</label>
-                    <div class="ui-select-wrapper width-200-px-rsp-768 mt15">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <div class="mb-3 position-relative">
+                        <label class="form-label">{{ __('discount.select_type_of_discount') }}</label>
                         <select
-                            class="ui-select"
+                            class="form-select"
                             id="select-promotion"
                             name="type"
                             v-model="type"
@@ -50,877 +15,588 @@
                             <option value="coupon">{{ __('discount.coupon_code') }}</option>
                             <option value="promotion">{{ __('discount.promotion') }}</option>
                         </select>
-                        <svg class="svg-next-icon svg-next-icon-size-16">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                <path d="M10 16l-4-4h8l-4 4zm0-12L6 8h8l-4-4z"></path>
-                            </svg>
-                        </svg>
                     </div>
+
+                    <div class="mb-3 position-relative">
+                        <label class="form-label">
+                            <template v-if="is_promotion">{{ __('discount.create_discount_promotion') }}</template>
+                            <template v-else>{{ __('discount.create_coupon_code') }}</template>
+                        </label>
+
+                        <div v-show="!is_promotion" class="input-group input-group-flat">
+                            <input
+                                type="text"
+                                class="form-control coupon-code-input"
+                                name="code"
+                                v-model="code"
+                            />
+
+                            <span class="input-group-text">
+                                <a href="javascript:void(0)" @click="generateCouponCode($event)" class="input-group-link">{{ __('discount.generate_coupon_code') }}</a>
+                            </span>
+                        </div>
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            name="title"
+                            v-model="title"
+                            v-show="is_promotion"
+                            :placeholder="__('discount.enter_promotion_name')"
+                        />
+                        <small class="form-hint" v-show="!is_promotion">
+                            {{ __('discount.customers_will_enter_this_coupon_code_when_they_checkout') }}.
+                        </small>
+                    </div>
+
                     <template v-if="!is_promotion">
-                        <div class="form-group mt15 mb0">
-                            <label class="next-label">
-                                <input
-                                    type="checkbox"
-                                    value="1"
-                                    name="can_use_with_promotion"
-                                    v-model="can_use_with_promotion"
-                                />
-                                <span class="pre-line">{{ __('discount.can_be_used_with_promotion') }}</span>
+                        <div class="mb-3 position-relative">
+                            <label class="form-check">
+                                <input class="form-check-input" type="checkbox" name="can_use_with_promotion" v-model="can_use_with_promotion" value="1">
+                                <span class="form-check-label">
+                                    {{ __('discount.can_be_used_with_promotion') }}
+                                </span>
                             </label>
                         </div>
-                        <div class="form-group mb0 mt15">
-                            <label>
-                                <input type="checkbox" name="is_unlimited" value="1" v-model="is_unlimited" />{{
-                                    __('discount.unlimited_coupon')
-                                }}
+
+                        <div class="mb-3 position-relative">
+                            <label class="form-check">
+                                <input class="form-check-input" type="checkbox" name="is_unlimited" v-model="is_unlimited" value="1">
+                                <span class="form-check-label">
+                                    {{ __('discount.unlimited_coupon') }}
+                                </span>
                             </label>
                         </div>
-                        <div class="form-group mb0 mt15" v-show="!is_unlimited">
-                            <label class="text-title-field">{{ __('discount.enter_number') }}</label>
-                            <div class="limit-input-group">
-                                <input
-                                    type="text"
-                                    class="form-control pl5 p-r5"
-                                    name="quantity"
-                                    v-model="quantity"
-                                    autocomplete="off"
-                                    :disabled="is_unlimited"
-                                />
-                            </div>
+
+                        <div class="mb-3 position-relative" v-show="!is_unlimited">
+                            <label class="form-label">{{ __('discount.enter_number') }}</label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                name="quantity"
+                                v-model="quantity"
+                                autocomplete="off"
+                                :disabled="is_unlimited"
+                            />
                         </div>
-                        <div class="form-group mb0 mt15">
-                            <label class="mb-1">
-                                <input type="checkbox" name="apply_via_url" value="1" v-model="apply_via_url" />{{
-                                    __('discount.apply_via_url')
-                                }}
+                        <div class="mb-3 position-relative">
+                            <label class="form-check">
+                                <input class="form-check-input" type="checkbox" name="apply_via_url" v-model="apply_via_url" value="1">
+                                <span class="form-check-label">
+                                    {{ __('discount.apply_via_url') }}
+                                </span>
+                                <span class="form-check-description">
+                                    {{ __('discount.apply_via_url_description') }}
+                                </span>
                             </label>
-                            <small class="type-subdued block-display">{{
-                                __('discount.apply_via_url_description')
-                            }}</small>
+                        </div>
+                        <div class="mb-3 position-relative">
+                            <label class="form-check">
+                                <input class="form-check-input" type="checkbox" name="display_at_checkout" v-model="display_at_checkout" value="1">
+                                <span class="form-check-label">
+                                    {{ __('discount.display_at_checkout') }}
+                                </span>
+                                <span class="form-check-description">
+                                    {{ __('discount.display_at_checkout_description') }}
+                                </span>
+                            </label>
+                        </div>
+
+                        <div class="mb-3 position-relative" v-show="!is_promotion && display_at_checkout">
+                            <label for="description" class="form-label">{{ __('discount.description') }}</label>
+                            <textarea name="description" id="description" class="form-control" v-model="description" :placeholder="__('discount.description_placeholder')"></textarea>
                         </div>
                     </template>
-                </div>
-                <div class="pd-all-20 border-top-color">
-                    <label class="title-product-main text-no-bold block-display">{{
-                        __('discount.coupon_type')
-                    }}</label>
-                    <div class="form-inline form-group discount-input mt15 mb0 ws-nm">
-                        <div class="ui-select-wrapper inline_block mb5" style="min-width: 200px">
-                            <select
-                                id="discount-type-option"
-                                name="type_option"
-                                class="ui-select"
-                                v-model="type_option"
-                                @change="handleChangeTypeOption()"
-                            >
-                                <option value="amount">{{ currency }}</option>
-                                <option value="percentage">{{ __('discount.percentage_discount') }}</option>
-                                <option value="shipping" v-if="!is_promotion">
-                                    {{ __('discount.free_shipping') }}
-                                </option>
-                                <option value="same-price">{{ __('discount.same_price') }}</option>
-                            </select>
-                            <svg class="svg-next-icon svg-next-icon-size-16">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                    <path d="M10 16l-4-4h8l-4 4zm0-12L6 8h8l-4-4z"></path>
-                                </svg>
-                            </svg>
-                        </div>
-                        <span class="lb-dis">{{ value_label }}</span>
-                        <div class="inline mb5">
-                            <div class="next-input--stylized">
-                                <input
-                                    type="text"
-                                    class="next-input next-input--invisible"
-                                    name="value"
-                                    v-model="discount_value"
-                                    autocomplete="off"
-                                    placeholder="0"
-                                />
-                                <span class="next-input-add-on next-input__add-on--after">{{ discountUnit }}</span>
+
+                    <div class="border-top">
+                        <h4 class="mt-3 mb-2">{{ __('discount.coupon_type') }}</h4>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <select
+                                    id="discount-type-option"
+                                    name="type_option"
+                                    class="form-select"
+                                    v-model="type_option"
+                                    @change="handleChangeTypeOption()"
+                                >
+                                    <option value="amount">{{ currency }}</option>
+                                    <option value="percentage">{{ __('discount.percentage_discount') }}</option>
+                                    <option value="shipping" v-if="!is_promotion">
+                                        {{ __('discount.free_shipping') }}
+                                    </option>
+                                    <option value="same-price">{{ __('discount.same_price') }}</option>
+                                </select>
                             </div>
-                        </div>
-                        <span class="lb-dis" v-show="type_option !== 'shipping' && type_option">{{
-                            __('discount.apply_for')
-                        }}</span>
-                        <div v-show="type_option !== 'shipping' && type_option">
-                            <div
-                                class="ui-select-wrapper inline_block mb5 min-width-150-px"
-                                style="margin-right: 10px"
-                                @change="handleChangeTarget()"
-                            >
-                                <select id="select-offers" class="ui-select" name="target" v-model="target">
-                                    <option value="all-orders" v-if="type_option !== 'same-price'">
-                                        {{ __('discount.all_orders') }}
-                                    </option>
-                                    <option value="amount-minimum-order" v-if="type_option !== 'same-price'">
-                                        {{ __('discount.order_amount_from') }}
-                                    </option>
-                                    <option value="group-products">{{ __('discount.product_collection') }}</option>
-                                    <option value="products-by-category">{{ __('discount.product_category') }}</option>
-                                    <option value="specific-product">{{ __('discount.product') }}</option>
-                                    <option value="customer" v-if="type_option !== 'same-price'">
-                                        {{ __('discount.customer') }}
-                                    </option>
-                                    <option value="product-variant">{{ __('discount.variant') }}</option>
+
+                            <div class="col-md-4 mb-3">
+                                <div class="input-group input-group-flat">
+                                    <span class="input-group-text">{{ value_label }}</span>
+                                    <input
+                                        type="number"
+                                        class="form-control"
+                                        name="value"
+                                        v-model="discount_value"
+                                        autocomplete="off"
+                                        placeholder="0"
+                                    />
+                                    <span class="input-group-text">
+                                        {{ discountUnit }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4 mb-3" v-show="type_option !== 'shipping' && type_option">
+                                <div class="input-group input-group-flat" @change="handleChangeTarget()">
+                                    <span class="input-group-text" v-show="type_option !== 'shipping' && type_option">
+                                        {{ __('discount.apply_for') }}
+                                    </span>
+
+                                    <select id="select-offers" class="form-control form-select" name="target" v-model="target">
+                                        <option value="all-orders" v-if="type_option !== 'same-price'">
+                                            {{ __('discount.all_orders') }}
+                                        </option>
+                                        <option value="amount-minimum-order" v-if="type_option !== 'same-price'">
+                                            {{ __('discount.order_amount_from') }}
+                                        </option>
+                                        <option value="group-products">{{ __('discount.product_collection') }}</option>
+                                        <option value="products-by-category">{{ __('discount.product_category') }}</option>
+                                        <option value="specific-product">{{ __('discount.product') }}</option>
+                                        <option value="customer" v-if="type_option !== 'same-price'">
+                                            {{ __('discount.customer') }}
+                                        </option>
+                                        <option value="product-variant">{{ __('discount.variant') }}</option>
+                                        <option
+                                            value="once-per-customer"
+                                            v-if="type_option !== 'same-price' && type === 'coupon'"
+                                        >
+                                            {{ __('discount.once_per_customer') }}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4 mb-3" v-if="target === 'group-products' && type_option !== 'shipping'">
+                                <select
+                                    name="product_collections"
+                                    class="form-select"
+                                    v-model="product_collection_id"
+                                >
                                     <option
-                                        value="once-per-customer"
-                                        v-if="type_option !== 'same-price' && type === 'coupon'"
+                                        v-for="product_collection in product_collections"
+                                        :value="product_collection.id"
                                     >
-                                        {{ __('discount.once_per_customer') }}
+                                        {{ product_collection.name }}
                                     </option>
                                 </select>
-                                <svg class="svg-next-icon svg-next-icon-size-16">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                        <path d="M10 16l-4-4h8l-4 4zm0-12L6 8h8l-4-4z"></path>
-                                    </svg>
-                                </svg>
                             </div>
-                            <div
-                                class="inline mb5"
-                                id="div-select-collection"
-                                v-if="target === 'group-products' && type_option !== 'shipping'"
-                                style="margin-right: 10px"
-                            >
-                                <div class="ui-select-wrapper" style="min-width: 200px">
-                                    <select
-                                        name="product_collections"
-                                        class="ui-select"
-                                        v-model="product_collection_id"
+
+                            <div class="col-md-4 mb-3" v-if="target === 'products-by-category' && type_option !== 'shipping'">
+                                <select name="product_categories" class="form-select" v-model="product_category_id">
+                                    <option
+                                        v-for="productCategory in product_categories"
+                                        :value="productCategory.id"
+                                        v-html="productCategory.name"
                                     >
-                                        <option
-                                            v-for="product_collection in product_collections"
-                                            :value="product_collection.id"
-                                        >
-                                            {{ product_collection.name }}
-                                        </option>
-                                    </select>
-                                    <svg class="svg-next-icon svg-next-icon-size-16">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                            <path d="M10 16l-4-4h8l-4 4zm0-12L6 8h8l-4-4z"></path>
-                                        </svg>
-                                    </svg>
-                                </div>
+                                    </option>
+                                </select>
                             </div>
-                            <div
-                                class="inline mb5"
-                                id="div-select-collection"
-                                v-if="target === 'products-by-category' && type_option !== 'shipping'"
-                                style="margin-right: 10px"
-                            >
-                                <div class="ui-select-wrapper" style="min-width: 200px">
-                                    <select name="product_categories" class="ui-select" v-model="product_category_id">
-                                        <option
-                                            v-for="productCategory in product_categories"
-                                            :value="productCategory.id"
-                                            v-html="productCategory.name"
-                                        >
-                                        </option>
-                                    </select>
-                                    <svg class="svg-next-icon svg-next-icon-size-16">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                            <path d="M10 16l-4-4h8l-4 4zm0-12L6 8h8l-4-4z"></path>
-                                        </svg>
-                                    </svg>
-                                </div>
-                            </div>
-                            <div
-                                class="inline mb5"
-                                id="div-select-product"
-                                v-if="target === 'specific-product' && type_option !== 'shipping'"
-                                style="margin-right: 10px"
-                            >
-                                <div class="box-search-advance product" style="min-width: 310px">
+
+                            <div class="col-md-4 mb-3" v-if="target === 'specific-product' && type_option !== 'shipping'">
+                                <div class="position-relative box-search-advance product">
                                     <input
                                         type="text"
-                                        class="next-input textbox-advancesearch"
+                                        class="form-control textbox-advancesearch"
                                         @click="loadListProductsForSearch(0)"
                                         @keyup="handleSearchProduct(0, $event.target.value)"
                                         :placeholder="__('discount.search_product')"
                                     />
+
                                     <div
-                                        class="panel panel-default"
+                                        class="card position-absolute w-100 z-1"
                                         :class="{ active: products, hidden: hidden_product_search_panel }"
+                                        :style="[loading ? { minHeight: '10rem' } : {}]"
                                     >
-                                        <div class="panel-body">
-                                            <div class="list-search-data">
-                                                <div class="has-loading" v-show="loading">
-                                                    <i class="fa fa-spinner fa-spin"></i>
+                                        <div v-if="loading" class="loading-spinner"></div>
+                                        <div v-else class="list-group list-group-flush overflow-auto" style="max-height: 25rem">
+                                            <a
+                                                class="list-group-item list-group-item-action"
+                                                v-for="product in products.data"
+                                                @click="handleSelectProducts(product)"
+                                                href="javascript:void(0)"
+                                            >
+                                                <div class="row align-items-center">
+                                                    <div class="col-auto">
+                                                        <span class="avatar" :style="{ backgroundImage: 'url(' + product.image_url + ')' }"></span>
+                                                    </div>
+                                                    <div class="col text-truncate">
+                                                        <div class="text-body d-block">{{ product.name }}</div>
+                                                    </div>
                                                 </div>
-                                                <ul class="clearfix" v-show="!loading">
-                                                    <li
-                                                        v-for="product in products.data"
-                                                        @click="handleSelectProducts(product)"
-                                                    >
-                                                        <div class="wrap-img inline_block vertical-align-t">
-                                                            <img
-                                                                class="thumb-image"
-                                                                :src="product.image_url"
-                                                                :title="product.name"
-                                                                :alt="product.name"
-                                                            />
-                                                        </div>
-                                                        <label
-                                                            class="inline_block ml10 mt10 ws-nm"
-                                                            style="width: calc(100% - 50px); cursor: pointer"
-                                                        >
-                                                            {{ product.name }}</label
-                                                        >
-                                                    </li>
-                                                    <li v-if="products.data.length === 0">
-                                                        <span>{{ __('discount.no_products_found') }}</span>
-                                                    </li>
-                                                </ul>
+                                            </a>
+                                            <div class="p-3" v-if="products.data.length === 0">
+                                                <p class="text-muted text-center mb-0">{{ __('discount.no_products_found') }}</p>
                                             </div>
                                         </div>
                                         <div
-                                            class="panel-footer"
-                                            v-if="products.next_page_url || products.prev_page_url"
+                                            class="card-footer"
+                                            v-if="(products.next_page_url || products.prev_page_url) && !loading"
                                         >
-                                            <div class="btn-group float-end">
-                                                <button
-                                                    type="button"
-                                                    @click="
-                                                        loadListProductsForSearch(
-                                                            0,
-                                                            products.prev_page_url
-                                                                ? products.current_page - 1
-                                                                : products.current_page,
-                                                            true
-                                                        )
-                                                    "
-                                                    :class="{
-                                                        'btn btn-secondary': products.current_page !== 1,
-                                                        'btn btn-secondary disable': products.current_page === 1,
-                                                    }"
-                                                    :disabled="products.current_page === 1"
-                                                >
-                                                    <svg
-                                                        role="img"
-                                                        class="svg-next-icon svg-next-icon-size-16 svg-next-icon-rotate-180"
-                                                    >
-                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                                                            <path
-                                                                d="M6 4l9 8-9 8 2 2 11-10L8 2 6 4"
-                                                                fill="currentColor"
-                                                            ></path>
-                                                        </svg>
-                                                    </svg>
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    @click="
-                                                        loadListProductsForSearch(
-                                                            0,
-                                                            products.next_page_url
-                                                                ? products.current_page + 1
-                                                                : products.current_page,
-                                                            true
-                                                        )
-                                                    "
-                                                    :class="{
-                                                        'btn btn-secondary': products.next_page_url,
-                                                        'btn btn-secondary disable': !products.next_page_url,
-                                                    }"
-                                                    :disabled="!products.next_page_url"
-                                                >
-                                                    <svg role="img" class="svg-next-icon svg-next-icon-size-16">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                                                            <path
-                                                                d="M6 4l9 8-9 8 2 2 11-10L8 2 6 4"
-                                                                fill="currentColor"
-                                                            ></path>
-                                                        </svg>
-                                                    </svg>
-                                                </button>
-                                            </div>
-                                            <div class="clearfix"></div>
+                                            <discount-search-box-pagination
+                                                :resource="products"
+                                                @on-prev="loadListProductsForSearch(
+                                                    0,
+                                                    products.prev_page_url ? products.current_page - 1 : products.current_page,
+                                                    true
+                                                )"
+                                                @on-next="loadListProductsForSearch(
+                                                    0,
+                                                    products.next_page_url ? products.current_page + 1 : products.current_page,
+                                                    true
+                                                )"
+                                            />
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div
-                                class="inline mb5"
-                                id="div-select-customer"
-                                v-if="target === 'customer' && type_option !== 'shipping'"
-                            >
-                                <div class="box-search-advance customer" style="min-width: 310px">
-                                    <div>
-                                        <input
-                                            type="text"
-                                            class="next-input textbox-advancesearch customer"
-                                            @click="loadListCustomersForSearch()"
-                                            @keyup="handleSearchCustomer($event.target.value)"
-                                            :placeholder="__('discount.search_customer')"
-                                        />
-                                    </div>
-                                    <div
-                                        class="panel panel-default"
-                                        v-bind:class="{ active: customers, hidden: hidden_customer_search_panel }"
-                                    >
-                                        <div class="panel-body">
-                                            <div class="list-search-data">
-                                                <div class="has-loading" v-show="loading">
-                                                    <i class="fa fa-spinner fa-spin"></i>
-                                                </div>
-                                                <ul class="clearfix" v-show="!loading">
-                                                    <li
-                                                        class="row"
-                                                        v-for="customer in customers.data"
-                                                        @click="handleSelectCustomers(customer)"
-                                                    >
-                                                        <div class="flexbox-grid-default flexbox-align-items-center">
-                                                            <div class="flexbox-auto-40">
-                                                                <div
-                                                                    class="wrap-img inline_block vertical-align-t radius-cycle"
-                                                                >
-                                                                    <img
-                                                                        class="thumb-image radius-cycle"
-                                                                        :src="customer.avatar_url"
-                                                                        :alt="customer.name"
-                                                                    />
-                                                                </div>
-                                                            </div>
-                                                            <div class="flexbox-auto-content-right">
-                                                                <div class="overflow-ellipsis">{{ customer.name }}</div>
-                                                                <div class="overflow-ellipsis">
-                                                                    <a :href="'mailto:' + customer.email">
-                                                                        <span>{{
-                                                                            customer.email ? customer.email : '-'
-                                                                        }}</span>
-                                                                    </a>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </li>
-                                                    <li v-if="customers.data.length === 0">
-                                                        <span>{{ __('discount.no_customer_found') }}</span>
-                                                    </li>
-                                                </ul>
-                                            </div>
-                                        </div>
-
-                                        <div
-                                            class="panel-footer"
-                                            v-if="customers.next_page_url || customers.prev_page_url"
-                                        >
-                                            <div class="btn-group float-end">
-                                                <button
-                                                    type="button"
-                                                    @click="
-                                                        loadListCustomersForSearch(
-                                                            customers.prev_page_url
-                                                                ? customers.current_page - 1
-                                                                : customers.current_page,
-                                                            true
-                                                        )
-                                                    "
-                                                    v-bind:class="{
-                                                        'btn btn-secondary': customers.current_page !== 1,
-                                                        'btn btn-secondary disable': customers.current_page === 1,
-                                                    }"
-                                                    :disabled="customers.current_page === 1"
-                                                >
-                                                    <svg
-                                                        role="img"
-                                                        class="svg-next-icon svg-next-icon-size-16 svg-next-icon-rotate-180"
-                                                    >
-                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                                                            <path
-                                                                d="M6 4l9 8-9 8 2 2 11-10L8 2 6 4"
-                                                                fill="currentColor"
-                                                            ></path>
-                                                        </svg>
-                                                    </svg>
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    @click="
-                                                        loadListCustomersForSearch(
-                                                            customers.next_page_url
-                                                                ? customers.current_page + 1
-                                                                : customers.current_page,
-                                                            true
-                                                        )
-                                                    "
-                                                    v-bind:class="{
-                                                        'btn btn-secondary': customers.next_page_url,
-                                                        'btn btn-secondary disable': !customers.next_page_url,
-                                                    }"
-                                                    :disabled="!customers.next_page_url"
-                                                >
-                                                    <svg role="img" class="svg-next-icon svg-next-icon-size-16">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                                                            <path
-                                                                d="M6 4l9 8-9 8 2 2 11-10L8 2 6 4"
-                                                                fill="currentColor"
-                                                            ></path>
-                                                        </svg>
-                                                    </svg>
-                                                </button>
-                                            </div>
-                                            <div class="clearfix"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div
-                                class="inline mb5"
-                                id="div-select-product-variant"
-                                v-if="target === 'product-variant' && type_option !== 'shipping'"
-                                style="margin-right: 10px"
-                            >
-                                <div class="box-search-advance product" style="min-width: 310px">
+                            <div class="col-md-4 mb-3" v-if="target === 'customer' && type_option !== 'shipping'">
+                                <div class="position-relative box-search-advance customer">
                                     <input
                                         type="text"
-                                        class="next-input textbox-advancesearch"
+                                        class="form-control textbox-advancesearch customer"
+                                        @click="loadListCustomersForSearch()"
+                                        @keyup="handleSearchCustomer($event.target.value)"
+                                        :placeholder="__('discount.search_customer')"
+                                    />
+
+                                    <div
+                                        class="card position-absolute w-100 z-1"
+                                        v-bind:class="{ active: customers, hidden: hidden_customer_search_panel }"
+                                        :style="[loading ? { minHeight: '10rem' } : {}]"
+                                    >
+                                        <div v-if="loading" class="loading-spinner"></div>
+                                        <div v-else class="list-group list-group-flush overflow-auto" style="max-height: 25rem">
+                                            <a
+                                                class="list-group-item list-group-item-action"
+                                                v-for="customer in customers.data"
+                                                @click="handleSelectCustomers(customer)"
+                                                href="javascript:void(0)"
+                                            >
+                                                <div class="row align-items-center">
+                                                    <div class="col-auto">
+                                                        <span class="avatar" :style="{ backgroundImage: 'url(' + customer.avatar_url + ')' }"></span>
+                                                    </div>
+                                                    <div class="col text-truncate">
+                                                        <div class="text-body d-block">{{ customer.name }}</div>
+                                                        <a :href="`mailto:${customer.email}`" class="text-secondary text-truncate mt-n1">{{ customer.email }}</a>
+                                                    </div>
+                                                </div>
+                                            </a>
+                                            <div class="p-3" v-if="customers.data.length === 0">
+                                                <p class="text-muted text-center mb-0">{{ __('discount.no_customer_found') }}</p>
+                                            </div>
+                                        </div>
+
+                                        <div
+                                            class="card-footer"
+                                            v-if="(customers.next_page_url || customers.prev_page_url) && !loading"
+                                        >
+                                            <discount-search-box-pagination
+                                                :resource="customers"
+                                                @on-prev="loadListCustomersForSearch(
+                                                    customers.prev_page_url ? customers.current_page - 1 : customers.current_page,
+                                                    true
+                                                )"
+                                                @on-next="loadListCustomersForSearch(
+                                                    customers.next_page_url ? customers.current_page + 1 : customers.current_page,
+                                                    true
+                                                )"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4 mb-3" v-if="target === 'product-variant' && type_option !== 'shipping'">
+                                <div class="position-relative box-search-advance product">
+                                    <input
+                                        type="text"
+                                        class="form-control textbox-advancesearch"
                                         @click="loadListProductsForSearch()"
                                         @keyup="handleSearchProduct(1, $event.target.value)"
                                         placeholder="Search product"
                                     />
+
                                     <div
-                                        class="panel panel-default"
+                                        class="card position-absolute w-100 z-1"
                                         :class="{ active: variants, hidden: hidden_product_search_panel }"
+                                        :style="[loading ? { minHeight: '10rem' } : {}]"
                                     >
-                                        <div class="panel-body">
-                                            <div class="list-search-data">
-                                                <div class="has-loading" v-show="loading">
-                                                    <i class="fa fa-spinner fa-spin"></i>
-                                                </div>
-                                                <ul class="clearfix" v-show="!loading">
-                                                    <li v-for="product_variant in variants.data">
-                                                        <template v-if="product_variant.variations.length">
-                                                            <div class="wrap-img inline_block vertical-align-t">
-                                                                <img
-                                                                    class="thumb-image"
-                                                                    :src="product_variant.image_url"
-                                                                    :title="product_variant.name"
-                                                                    :alt="product_variant.name"
-                                                                />
-                                                            </div>
-                                                            <label
-                                                                class="inline_block ml10 mt10 ws-nm"
-                                                                style="width: calc(100% - 50px); cursor: pointer"
-                                                                >{{ product_variant.name }}</label
-                                                            >
-                                                            <div class="clear"></div>
-                                                            <ul>
-                                                                <li
-                                                                    class="clearfix product-variant"
+                                        <div v-if="loading" class="loading-spinner"></div>
+                                        <div v-else class="list-group list-group-flush overflow-auto" style="max-height: 25rem">
+                                            <a
+                                                v-for="product_variant in variants.data"
+                                                class="list-group-item list-group-item-action"
+                                                href="javascript:void(0)"
+                                            >
+                                                <template v-if="product_variant.variations.length">
+                                                    <div class="row align-items-start">
+                                                        <div class="col-auto">
+                                                            <span class="avatar" :style="{ backgroundImage: 'url(' + product_variant.image_url + ')' }"></span>
+                                                        </div>
+                                                        <div class="col text-truncate">
+                                                            <div class="text-body d-block">{{ product_variant.name }}</div>
+                                                            <div class="list-group list-group-flush">
+                                                                <a
                                                                     v-for="variation in product_variant.variations"
-                                                                    @click="
-                                                                        handleSelectVariants(product_variant, variation)
-                                                                    "
+                                                                    @click="handleSelectVariants(product_variant, variation)"
+                                                                    class="list-group-item list-group-item-action small p-2 border-0"
                                                                 >
-                                                                    <a class="color_green float-start">
-                                                                        <span
-                                                                            v-for="(
-                                                                                variantItem, index
-                                                                            ) in variation.variation_items"
-                                                                        >
-                                                                            {{ variantItem.attribute_title }}
-                                                                            <span
-                                                                                v-if="
-                                                                                    index !==
-                                                                                    variation.variation_items.length - 1
-                                                                                "
-                                                                                >/</span
-                                                                            >
-                                                                        </span>
-                                                                    </a>
-                                                                </li>
-                                                            </ul>
-                                                        </template>
-                                                    </li>
-                                                    <li v-if="variants.data.length === 0">
-                                                        <span>{{ __('discount.no_products_found') }}</span>
-                                                    </li>
-                                                </ul>
+                                                                    <span v-for="(variantItem, index) in variation.variation_items"  class="text-primary">
+                                                                        {{ variantItem.attribute_title }}
+                                                                        <span v-if="index !== variation.variation_items.length - 1"> / </span>
+                                                                    </span>
+                                                                </a>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </template>
+                                            </a>
+                                            <div v-if="variants.data.length === 0">
+                                                <span>{{ __('discount.no_products_found') }}</span>
                                             </div>
                                         </div>
+
                                         <div
-                                            class="panel-footer"
-                                            v-if="variants.next_page_url || variants.prev_page_url"
+                                            class="card-footer"
+                                            v-if="(variants.next_page_url || variants.prev_page_url) && !loading"
                                         >
-                                            <div class="btn-group float-end">
-                                                <button
-                                                    type="button"
-                                                    @click="
-                                                        loadListProductsForSearch(
-                                                            1,
-                                                            variants.prev_page_url
-                                                                ? variants.current_page - 1
-                                                                : variants.current_page,
-                                                            true
-                                                        )
-                                                    "
-                                                    :class="{
-                                                        'btn btn-secondary': variants.current_page !== 1,
-                                                        'btn btn-secondary disable': variants.current_page === 1,
-                                                    }"
-                                                    :disabled="variants.current_page === 1"
-                                                >
-                                                    <svg
-                                                        role="img"
-                                                        class="svg-next-icon svg-next-icon-size-16 svg-next-icon-rotate-180"
-                                                    >
-                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                                                            <path
-                                                                d="M6 4l9 8-9 8 2 2 11-10L8 2 6 4"
-                                                                fill="currentColor"
-                                                            ></path>
-                                                        </svg>
-                                                    </svg>
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    @click="
-                                                        loadListProductsForSearch(
-                                                            1,
-                                                            variants.next_page_url
-                                                                ? variants.current_page + 1
-                                                                : variants.current_page,
-                                                            true
-                                                        )
-                                                    "
-                                                    :class="{
-                                                        'btn btn-secondary': variants.next_page_url,
-                                                        'btn btn-secondary disable': !variants.next_page_url,
-                                                    }"
-                                                    :disabled="!variants.next_page_url"
-                                                >
-                                                    <svg role="img" class="svg-next-icon svg-next-icon-size-16">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                                                            <path
-                                                                d="M6 4l9 8-9 8 2 2 11-10L8 2 6 4"
-                                                                fill="currentColor"
-                                                            ></path>
-                                                        </svg>
-                                                    </svg>
-                                                </button>
-                                            </div>
-                                            <div class="clearfix"></div>
+                                            <discount-search-box-pagination
+                                                :resource="variants"
+                                                @on-prev="loadListProductsForSearch(
+                                                    1,
+                                                    variants.prev_page_url
+                                                        ? variants.current_page - 1
+                                                        : variants.current_page,
+                                                    true
+                                                )"
+                                                @on-next="loadListProductsForSearch(
+                                                    1,
+                                                    variants.next_page_url
+                                                        ? variants.current_page + 1
+                                                        : variants.current_page,
+                                                    true
+                                                )"
+                                            />
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div
-                                class="inline mb5"
-                                v-if="
-                                    !is_promotion &&
-                                    (target === 'group-products' ||
-                                        target === 'products-by-category' ||
-                                        target === 'specific-product' ||
-                                        target === 'product-variant') &&
-                                    type_option === 'amount'
-                                "
-                            >
-                                <div class="ui-select-wrapper">
-                                    <select class="ui-select" name="discount_on" v-model="discount_on">
-                                        <option value="per-order">{{ __('discount.one_time_per_order') }}</option>
-                                        <option value="per-every-item">
-                                            {{ __('discount.one_time_per_product_in_cart') }}
-                                        </option>
-                                    </select>
-                                    <svg class="svg-next-icon svg-next-icon-size-16">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                            <path d="M10 16l-4-4h8l-4 4zm0-12L6 8h8l-4-4z"></path>
-                                        </svg>
-                                    </svg>
-                                </div>
+                            <div class="col-md-4 mb-3" v-if="!is_promotion && (target === 'group-products' || target === 'products-by-category' ||  target === 'specific-product' || target === 'product-variant') && type_option === 'amount'">
+                                <select class="form-select" name="discount_on" v-model="discount_on">
+                                    <option value="per-order">{{ __('discount.one_time_per_order') }}</option>
+                                    <option value="per-every-item">
+                                        {{ __('discount.one_time_per_product_in_cart') }}
+                                    </option>
+                                </select>
                             </div>
-                            <div
-                                class="inline width-150-px mb5"
-                                v-if="target === 'amount-minimum-order' && type_option !== 'shipping'"
-                            >
-                                <div class="next-input--stylized">
+
+                            <div class="col-md-4 mb-3" v-if="target === 'amount-minimum-order' && type_option !== 'shipping'">
+                                <div class="input-group input-group-flat">
                                     <input
-                                        type="text"
-                                        class="next-input next-input--invisible"
+                                        type="number"
+                                        class="form-control form-control--invisible"
                                         v-model="min_order_price"
                                         name="min_order_price"
                                     />
-                                    <span class="next-input-add-on next-input__add-on--after">{{ currency }}</span>
+                                    <span class="input-group-text">{{ currency }}</span>
                                 </div>
                             </div>
                         </div>
-                        <div style="margin: 10px 0" v-show="is_promotion">
-                            <span>{{ __('discount.number_of_products') }}:</span>
+
+                        <div v-show="is_promotion" class="mb-3 position-relative">
+                            <label class="form-label" for="product-quantity">
+                                {{ __('discount.number_of_products') }}
+                            </label>
                             <input
                                 type="text"
-                                class="form-control width-100-px p-none-r"
+                                class="form-control"
                                 name="product_quantity"
                                 id="product-quantity"
                                 v-model="product_quantity"
                             />
                         </div>
-                    </div>
 
-                    <div class="clearfix" v-if="selected_variants.length && target === 'product-variant'">
-                        <input type="hidden" v-model="selected_variant_ids" name="variants" />
-                        <div class="mt20">
-                            <label class="text-title-field">{{ __('discount.selected_products') }}:</label>
-                        </div>
-                        <div class="table-wrapper p-none mt10 mb20 ps-relative">
-                            <table class="table-normal">
-                                <tbody>
-                                    <tr v-for="variant in selected_variants">
-                                        <td class="width-60-px min-width-60-px">
-                                            <div class="wrap-img vertical-align-m-i">
-                                                <img
-                                                    class="thumb-image"
-                                                    :src="variant.image_url"
-                                                    :title="variant.product_name"
-                                                    :alt="variant.product_name"
-                                                />
-                                            </div>
-                                        </td>
-                                        <td class="pl5 p-r5 min-width-200-px">
-                                            <a
-                                                class="hover-underline pre-line"
-                                                :href="variant.product_link"
-                                                target="_blank"
-                                                >{{ variant.product_name }}</a
-                                            >
-                                            <p class="type-subdued">
-                                                <span v-for="(variantItem, index) in variant.variation_items">
-                                                    {{ variantItem.attribute_title }}
-                                                    <span v-if="index !== variant.variation_items.length - 1">/</span>
-                                                </span>
-                                            </p>
-                                        </td>
-                                        <td class="pl5 p-r5 text-end width-20-px min-width-20-px">
-                                            <a href="#" @click="handleRemoveVariant($event, variant)">
-                                                <svg class="svg-next-icon svg-next-icon-size-12">
-                                                    <svg
-                                                        xmlns="http://www.w3.org/2000/svg"
-                                                        viewBox="0 0 24 24"
-                                                        enable-background="new 0 0 24 24"
-                                                    >
-                                                        <path
-                                                            d="M19.5 22c-.2 0-.5-.1-.7-.3L12 14.9l-6.8 6.8c-.2.2-.4.3-.7.3-.2 0-.5-.1-.7-.3l-1.6-1.6c-.1-.2-.2-.4-.2-.6 0-.2.1-.5.3-.7L9.1 12 2.3 5.2C2.1 5 2 4.8 2 4.5c0-.2.1-.5.3-.7l1.6-1.6c.2-.1.4-.2.6-.2.3 0 .5.1.7.3L12 9.1l6.8-6.8c.2-.2.4-.3.7-.3.2 0 .5.1.7.3l1.6 1.6c.1.2.2.4.2.6 0 .2-.1.5-.3.7L14.9 12l6.8 6.8c.2.2.3.4.3.7 0 .2-.1.5-.3.7l-1.6 1.6c-.2.1-.4.2-.6.2z"
-                                                        ></path>
-                                                    </svg>
-                                                </svg>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                        <div
+                            v-if="selected_variants.length && target === 'product-variant'"
+                            class="list-group list-group-flush list-group-hoverable"
+                        >
+                            <input type="hidden" v-model="selected_variant_ids" name="variants" />
 
-                    <div class="clearfix" v-if="selected_products.length && target === 'specific-product'">
-                        <input type="hidden" v-model="selected_product_ids" name="products" />
-                        <div class="mt20">
-                            <label class="text-title-field">{{ __('discount.selected_products') }}:</label>
-                        </div>
-                        <div class="table-wrapper p-none mt10 mb20 ps-relative">
-                            <table class="table-normal">
-                                <tbody>
-                                    <tr v-for="product in selected_products">
-                                        <td class="width-60-px min-width-60-px">
-                                            <div class="wrap-img vertical-align-m-i">
-                                                <img
-                                                    class="thumb-image"
-                                                    :src="product.image_url"
-                                                    :title="product.name"
-                                                    :alt="product.name"
-                                                />
-                                            </div>
-                                        </td>
-                                        <td class="pl5 p-r5 min-width-200-px">
-                                            <a
-                                                class="hover-underline pre-line"
-                                                :href="product.product_link"
-                                                target="_blank"
-                                                >{{ product.name }}</a
-                                            >
-                                        </td>
-                                        <td class="pl5 p-r5 text-end width-20-px min-width-20-px">
-                                            <a href="#" @click="handleRemoveProduct($event, product)">
-                                                <svg class="svg-next-icon svg-next-icon-size-12">
-                                                    <svg
-                                                        xmlns="http://www.w3.org/2000/svg"
-                                                        viewBox="0 0 24 24"
-                                                        enable-background="new 0 0 24 24"
-                                                    >
-                                                        <path
-                                                            d="M19.5 22c-.2 0-.5-.1-.7-.3L12 14.9l-6.8 6.8c-.2.2-.4.3-.7.3-.2 0-.5-.1-.7-.3l-1.6-1.6c-.1-.2-.2-.4-.2-.6 0-.2.1-.5.3-.7L9.1 12 2.3 5.2C2.1 5 2 4.8 2 4.5c0-.2.1-.5.3-.7l1.6-1.6c.2-.1.4-.2.6-.2.3 0 .5.1.7.3L12 9.1l6.8-6.8c.2-.2.4-.3.7-.3.2 0 .5.1.7.3l1.6 1.6c.1.2.2.4.2.6 0 .2-.1.5-.3.7L14.9 12l6.8 6.8c.2.2.3.4.3.7 0 .2-.1.5-.3.7l-1.6 1.6c-.2.1-.4.2-.6.2z"
-                                                        ></path>
-                                                    </svg>
-                                                </svg>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        <!--/ko-->
-                    </div>
+                            <h4>{{ __('discount.selected_products') }}</h4>
 
-                    <div class="clearfix" v-if="selected_customers.length && target === 'customer'">
-                        <input type="hidden" v-model="selected_customer_ids" name="customers" />
-                        <div class="mt20">
-                            <label class="text-title-field">{{ __('discount.selected_customers') }}:</label>
+                            <div
+                                v-for="variant in selected_variants"
+                                class="list-group-item"
+                            >
+                                <div class="row align-items-center">
+                                    <div class="col-auto">
+                                        <span class="avatar" :style="{ backgroundImage: 'url(' + variant.image_url + ')' }"></span>
+                                    </div>
+                                    <div class="col text-truncate">
+                                        <a :href="variant.product_link" target="_blank" class="text-body d-block">
+                                            {{ variant.product_name }}
+                                        </a>
+
+                                        <div class="text-secondary text-truncate">
+                                            <span v-for="(variantItem, index) in variant.variation_items">
+                                                {{ variantItem.attribute_title }}
+                                                <span v-if="index !== variant.variation_items.length - 1"> / </span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <discount-list-item-remove-icon-button @click="handleRemoveVariant($event, variant)" />
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="table-wrapper p-none mt10 mb20 ps-relative">
-                            <table class="table-normal">
-                                <tbody>
-                                    <tr v-for="customer in selected_customers">
-                                        <td class="width-60-px min-width-60-px">
-                                            <div class="wrap-img vertical-align-m-i">
-                                                <img
-                                                    class="thumb-image"
-                                                    :src="customer.avatar_url"
-                                                    :title="customer.name"
-                                                    :alt="customer.name"
-                                                />
-                                            </div>
-                                        </td>
-                                        <td class="pl5 p-r5 min-width-200-px">
-                                            <a
-                                                class="hover-underline pre-line"
-                                                :href="customer.customer_link"
-                                                target="_blank"
-                                                >{{ customer.name }}</a
-                                            >
-                                        </td>
-                                        <td class="pl5 p-r5 text-end width-20-px min-width-20-px">
-                                            <a href="#" @click="handleRemoveCustomer($event, customer)">
-                                                <svg class="svg-next-icon svg-next-icon-size-12">
-                                                    <svg
-                                                        xmlns="http://www.w3.org/2000/svg"
-                                                        viewBox="0 0 24 24"
-                                                        enable-background="new 0 0 24 24"
-                                                    >
-                                                        <path
-                                                            d="M19.5 22c-.2 0-.5-.1-.7-.3L12 14.9l-6.8 6.8c-.2.2-.4.3-.7.3-.2 0-.5-.1-.7-.3l-1.6-1.6c-.1-.2-.2-.4-.2-.6 0-.2.1-.5.3-.7L9.1 12 2.3 5.2C2.1 5 2 4.8 2 4.5c0-.2.1-.5.3-.7l1.6-1.6c.2-.1.4-.2.6-.2.3 0 .5.1.7.3L12 9.1l6.8-6.8c.2-.2.4-.3.7-.3.2 0 .5.1.7.3l1.6 1.6c.1.2.2.4.2.6 0 .2-.1.5-.3.7L14.9 12l6.8 6.8c.2.2.3.4.3.7 0 .2-.1.5-.3.7l-1.6 1.6c-.2.1-.4.2-.6.2z"
-                                                        ></path>
-                                                    </svg>
-                                                </svg>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+
+                        <div
+                            v-if="selected_products.length && target === 'specific-product'"
+                            class="list-group list-group-flush list-group-hoverable"
+                        >
+                            <input type="hidden" v-model="selected_product_ids" name="products" />
+
+                            <h4>{{ __('discount.selected_products') }}</h4>
+
+                            <div class="list-group-item" v-for="product in selected_products">
+                                <div class="row align-items-center">
+                                    <div class="col-auto">
+                                        <span class="avatar" :style="{ backgroundImage: 'url(' + product.image_url + ')' }"></span>
+                                    </div>
+                                    <div class="col text-truncate">
+                                        <a :href="product.product_link" class="text-body d-block" target="_blank">{{ product.name }}</a>
+                                    </div>
+                                    <div class="col-auto">
+                                        <discount-list-item-remove-icon-button @click="handleRemoveProduct($event, product)" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div
+                            v-if="selected_customers.length && target === 'customer'"
+                            class="list-group list-group-flush list-group-hoverable"
+                        >
+                            <input type="hidden" v-model="selected_customer_ids" name="customers" />
+
+                            <h4>{{ __('discount.selected_customers') }}</h4>
+
+                            <div class="list-group-item" v-for="customer in selected_customers">
+                                <div class="row align-items-center">
+                                    <div class="col-auto">
+                                        <span class="avatar" :style="{ backgroundImage: 'url(' + customer.avatar_url + ')' }"></span>
+                                    </div>
+                                    <div class="col text-truncate">
+                                        <a :href="customer.customer_link" class="text-body d-block" target="_blank">{{ customer.name }}</a>
+                                        <div class="text-secondary text-truncate">{{ customer.email }}</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <discount-list-item-remove-icon-button @click="handleRemoveCustomer($event, customer)" />
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="flexbox-content flexbox-right">
-            <div class="wrapper-content">
-                <div class="pd-all-20">
-                    <label class="title-product-main text-no-bold">{{ __('discount.time') }}</label>
+        <div class="col-md-4">
+            <div class="meta-boxes card mb-3">
+                <div class="card-header">
+                    <h4 class="card-title">{{ __('discount.time') }}</h4>
                 </div>
-                <div class="pd-all-10-20 form-group date-time-group">
-                    <label class="text-title-field">{{ __('discount.start_date') }}</label>
-                    <div class="next-field__connected-wrapper z-index-9">
-                        <div class="input-group datepicker">
-                            <input
-                                type="text"
-                                :placeholder="dateFormat"
-                                :data-date-format="dateFormat"
-                                name="start_date"
-                                v-model="start_date"
-                                class="next-field--connected next-input"
-                                readonly
-                                data-input
-                                style="min-width: 0"
-                            />
-                            <a class="input-button" title="toggle" data-toggle>
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    xmlns:xlink="http://www.w3.org/1999/xlink"
-                                    viewBox="0 0 17 17"
-                                >
-                                    <g></g>
-                                    <path
-                                        d="M14 2V1h-3v1H6V1H3v1H0v15h17V2h-3zM12 2h1v2h-1V2zM4 2h1v2H4V2zM16 16H1v-8.921h15V16zM1 6.079v-3.079h2v2h3V3h5v2h3V3h2v3.079H1z"
-                                    ></path>
-                                </svg>
-                            </a>
-                        </div>
-                        <div class="input-group">
-                            <input
-                                type="text"
-                                placeholder="hh:mm"
-                                name="start_time"
-                                v-model="start_time"
-                                class="next-field--connected next-input z-index-9 time-picker timepicker timepicker-24"
-                                style="min-width: 0"
-                            />
-                            <span class="input-group-prepend">
-                                <button class="btn default" type="button">
-                                    <i class="fa fa-clock"></i>
-                                </button>
-                            </span>
+                <div class="card-body">
+                    <div class="mb-3 position-relative">
+                        <label class="form-label">{{ __('discount.start_date') }}</label>
+                        <div class="d-flex">
+                            <div class="input-icon datepicker">
+                                <input
+                                    type="text"
+                                    :placeholder="dateFormat"
+                                    :data-date-format="dateFormat"
+                                    name="start_date"
+                                    v-model="start_date"
+                                    class="form-control rounded-end-0"
+                                    readonly
+                                    data-input
+                                />
+                                <span class="input-icon-addon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12z" /><path d="M16 3v4" /><path d="M8 3v4" /><path d="M4 11h16" /><path d="M11 15h1" /><path d="M12 15v3" /></svg>
+                                </span>
+                            </div>
+                            <div class="input-icon">
+                                <input
+                                    type="text"
+                                    placeholder="hh:mm"
+                                    name="start_time"
+                                    v-model="start_time"
+                                    class="form-control rounded-start-0 timepicker timepicker-24"
+                                />
+                                <span class="input-icon-addon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" /><path d="M12 7v5l3 3" /></svg>
+                                </span>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="pd-all-10-20 form-group date-time-group">
-                    <label class="text-title-field">{{ __('discount.end_date') }}</label>
-                    <div class="next-field__connected-wrapper z-index-9">
-                        <div class="input-group datepicker">
-                            <input
-                                type="text"
-                                :placeholder="dateFormat"
-                                :data-date-format="dateFormat"
-                                name="end_date"
-                                v-model="end_date"
-                                class="next-field--connected next-input"
-                                :disabled="unlimited_time"
-                                readonly
-                                data-input
-                                style="min-width: 0"
-                            />
-                            <a class="input-button" title="toggle" data-toggle>
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    xmlns:xlink="http://www.w3.org/1999/xlink"
-                                    viewBox="0 0 17 17"
-                                >
-                                    <g></g>
-                                    <path
-                                        d="M14 2V1h-3v1H6V1H3v1H0v15h17V2h-3zM12 2h1v2h-1V2zM4 2h1v2H4V2zM16 16H1v-8.921h15V16zM1 6.079v-3.079h2v2h3V3h5v2h3V3h2v3.079H1z"
-                                    ></path>
-                                </svg>
-                            </a>
-                        </div>
-                        <div class="input-group">
-                            <input
-                                type="text"
-                                placeholder="hh:mm"
-                                name="end_time"
-                                v-model="end_time"
-                                class="next-field--connected next-input z-index-9 time-picker timepicker timepicker-24"
-                                :disabled="unlimited_time"
-                                style="min-width: 0"
-                            />
-                            <span class="input-group-prepend">
-                                <button class="btn default" type="button">
-                                    <i class="fa fa-clock"></i>
-                                </button>
-                            </span>
+                    <div class="mb-3 position-relative">
+                        <label class="form-label">{{ __('discount.end_date') }}</label>
+                        <div class="d-flex">
+                            <div class="input-icon datepicker">
+                                <input
+                                    type="text"
+                                    :placeholder="dateFormat"
+                                    :data-date-format="dateFormat"
+                                    name="end_date"
+                                    v-model="end_date"
+                                    class="form-control rounded-end-0"
+                                    :disabled="unlimited_time"
+                                    readonly
+                                    data-input
+                                />
+                                <span class="input-icon-addon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12z" /><path d="M16 3v4" /><path d="M8 3v4" /><path d="M4 11h16" /><path d="M11 15h1" /><path d="M12 15v3" /></svg>
+                                </span>
+                            </div>
+                            <div class="input-icon">
+                                <input
+                                    type="text"
+                                    placeholder="hh:mm"
+                                    name="end_time"
+                                    v-model="end_time"
+                                    class="form-control rounded-start-0 timepicker timepicker-24"
+                                    :disabled="unlimited_time"
+                                />
+                                <span class="input-icon-addon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" /><path d="M12 7v5l3 3" /></svg>
+                                </span>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="pd-all-10-20">
-                    <label class="next-label disable-input-date-discount">
-                        <input type="checkbox" name="unlimited_time" value="1" v-model="unlimited_time" />{{
-                            __('discount.never_expired')
-                        }}
-                    </label>
+                    <div class="position-relative">
+                        <label class="form-check">
+                            <input class="form-check-input" type="checkbox" name="unlimited_time" v-model="unlimited_time" value="1">
+                            <span class="form-check-label">{{ __('discount.never_expired') }}</span>
+                        </label>
+                    </div>
                 </div>
             </div>
 
-            <br />
-            <div class="wrapper-content">
-                <div class="pd-all-20">
+            <div class="card">
+                <div class="card-body">
                     <button type="submit" class="btn btn-primary">{{ __('discount.save') }}</button>
                 </div>
             </div>
@@ -938,9 +614,13 @@
 </style>
 
 <script>
-let moment = require('moment')
+import DiscountSearchBoxPagination from "./partials/DiscountSearchBoxPagination.vue";
+import DiscountListItemRemoveIconButton from "./partials/DiscountListItemRemoveIconButton.vue";
+
+const moment = require('moment')
 
 export default {
+    components: { DiscountListItemRemoveIconButton, DiscountSearchBoxPagination },
     data: () => {
         return {
             title: null,
@@ -949,6 +629,8 @@ export default {
             type: 'coupon',
             is_unlimited: true,
             apply_via_url: false,
+            display_at_checkout: false,
+            description: null,
             quantity: 0,
             unlimited_time: true,
             start_date: moment().format('Y-MM-DD'),
@@ -1035,6 +717,8 @@ export default {
             this.unlimited_time = !this.discount.end_date
             this.is_unlimited = !this.discount.quantity
             this.apply_via_url = this.discount.apply_via_url
+            this.display_at_checkout = this.discount.display_at_checkout
+            this.description = this.discount.description
             this.type_option = this.discount.type_option
             this.target = this.discount.target
             this.product_quantity = this.discount.product_quantity

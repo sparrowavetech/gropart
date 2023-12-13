@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Builder;
 
 class ShippingRuleItemForm extends FormAbstract
 {
-    public function buildForm(): void
+    public function setup(): void
     {
         if (EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation()) {
             Assets::addScriptsDirectly('vendor/core/plugins/location/js/location.js');
@@ -69,7 +69,6 @@ class ShippingRuleItemForm extends FormAbstract
         $this
             ->setupModel(new ShippingRuleItem())
             ->setValidatorClass(ShippingRuleItemRequest::class)
-            ->withCustomFields()
             ->add('shipping_rule_id', 'customSelect', [
                 'label' => trans('plugins/ecommerce::shipping.rule.item.forms.shipping_rule'),
                 'required' => true,
@@ -108,7 +107,7 @@ class ShippingRuleItemForm extends FormAbstract
                 ->when(count($states) > 1, function () use ($states, $isRequiredState) {
                     $this->add('state', 'customSelect', [
                         'label' => trans('plugins/ecommerce::shipping.rule.item.forms.state'),
-                        'label_attr' => ['class' => 'control-label ' . ($isRequiredState ? 'required' : '')],
+                        'required' => $isRequiredState,
                         'attr' => [
                             'class' => 'form-control select-search-full',
                             'data-type' => 'state',
@@ -141,7 +140,7 @@ class ShippingRuleItemForm extends FormAbstract
                 ])
                 ->add('state', 'text', [
                     'label' => trans('plugins/ecommerce::shipping.rule.item.forms.state'),
-                    'label_attr' => ['class' => 'control-label ' . ($isRequiredState ? 'required' : '')],
+                    'required' => $isRequiredState,
                     'attr' => [
                         'placeholder' => trans('plugins/ecommerce::shipping.rule.item.forms.state_placeholder'),
                     ],

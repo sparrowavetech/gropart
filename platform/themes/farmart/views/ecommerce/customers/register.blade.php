@@ -2,7 +2,7 @@
 
 {!! Theme::partial('page-header', ['withTitle' => false, 'size' => 'xl']) !!}
 <div class="container">
-    <div class="row customer-auth-page py-md-5 mt-md-5 justify-content-center">
+    <div class="row customer-auth-page py-5 mt-5 justify-content-center">
         <div class="col-sm-9 col-md-6 col-lg-5 col-xl-4">
             <div class="customer-auth-form bg-light pt-1 py-3 px-4">
                 <nav>
@@ -133,7 +133,7 @@
                                 </div>
                             @endif
 
-                            <div class="form-group">
+                            <div class="mb-3">
                                 <p>{{ __('Your personal data will be used to support your experience throughout this website, to manage access to your account, and for other purposes described in our privacy policy.') }}
                                 </p>
                             </div>
@@ -174,7 +174,7 @@
                                     value="1"
                                     @if (old('agree_terms_and_policy') == 1) checked @endif
                                 >
-                                <label for="agree-terms-and-policy">{!! BaseHelper::clean(__('I agree to terms & Policy.')) !!}</label>
+                                <label class="form-label" for="agree-terms-and-policy">{!! BaseHelper::clean(__('I agree to terms & Policy.')) !!}</label>
                                 @if ($errors->has('agree_terms_and_policy'))
                                     <div class="mt-1">
                                         <span

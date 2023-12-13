@@ -293,7 +293,7 @@ class MainCheckout {
             return validated
         }
 
-        $(document).on('change', customerShippingAddressForm + ' .form-control', (event) => {
+        let onChangeShippingForm = (event) => {
             setTimeout(function () {
                 let _self = $(event.currentTarget)
                 _self.closest('.form-group').find('.text-danger').remove()
@@ -333,6 +333,14 @@ class MainCheckout {
                     })
                 }
             }, 1000)
+        }
+
+        $(document).on('change', customerShippingAddressForm + ' .form-control', (event) => {
+            onChangeShippingForm(event)
+        })
+
+        $(document).on('change', '.list-customer-address .form-control', (event) => {
+            onChangeShippingForm(event)
         })
 
         $(document).on('change', customerBillingAddressForm + ' #billing_address_same_as_shipping_address', (event) => {
@@ -353,7 +361,7 @@ class MainCheckout {
     }
 }
 
-$(document).ready(() => {
+$(() => {
     new MainCheckout().init()
 
     window.MainCheckout = MainCheckout

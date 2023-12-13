@@ -5,13 +5,12 @@ namespace Botble\DevTool\Commands;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Supports\Helper;
 use Illuminate\Console\Command;
-use Illuminate\Contracts\Console\PromptsForMissingInput;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
 
 #[AsCommand('cms:package:remove', 'Remove a package in the /platform/packages directory.')]
-class PackageRemoveCommand extends Command implements PromptsForMissingInput
+class PackageRemoveCommand extends Command
 {
     public function handle(): int
     {

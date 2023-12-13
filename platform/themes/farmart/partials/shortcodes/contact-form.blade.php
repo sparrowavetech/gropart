@@ -104,7 +104,7 @@
                 @if (setting('enable_math_captcha_for_contact_form', 0))
                     <div class="col-12">
                         <div class="mb-3">
-                            <label for="math-group">{{ app('math-captcha')->label() }}</label>
+                            <label class="form-label" for="math-group">{{ app('math-captcha')->label() }}</label>
                             {!! app('math-captcha')->input([
                                 'class' => 'form-control',
                                 'id' => 'math-group',
@@ -120,7 +120,7 @@
             <div class="col-12">
                 <div class="mt-4">
                     <button
-                        class="btn btn-primary btn-submit"
+                        class="btn btn-primary"
                         type="submit"
                     >{{ __('Send Message') }}</button>
                 </div>

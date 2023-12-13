@@ -1,72 +1,55 @@
-<div class="row my-2 box-table-shipping input-shipping-sync-wrapper box-table-shipping-item-{{ $rule ? $rule->id : 0 }}">
-    <div class="col-12">
-        <div
-            class="accordion"
-            id="accordion-rule-{{ $rule->id }}"
-        >
-            <div class="accordion-item">
-                <h2
-                    class="accordion-header"
-                    id="heading-rule-{{ $rule->id }}"
+<div class="box-table-shipping input-shipping-sync-wrapper box-table-shipping-item-{{ $rule ? $rule->id : 0 }} mb-2">
+    <div class="accordion" id="accordion-rule-{{ $rule->id }}">
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="heading-rule-{{ $rule->id }}">
+                <button
+                    class="accordion-button collapsed px-3 py-2"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#collapse-rule-{{ $rule->id }}"
+                    type="button"
+                    aria-expanded="false"
+                    aria-controls="collapse-rule-{{ $rule->id }}"
                 >
-                    <button
-                        class="accordion-button collapsed px-3 py-2"
-                        data-bs-toggle="collapse"
-                        data-bs-target="#collapse-rule-{{ $rule->id }}"
-                        type="button"
-                        aria-expanded="false"
-                        aria-controls="collapse-rule-{{ $rule->id }}"
-                    >
-                        <div class="row w-100">
-                            <div class="col">
-                                <span class="fw-bold label-rule-item-name">{{ $rule->name }}</span>
-                                <div class="small mt-1">
-                                    @if ($rule->type->allowRuleItems())
-                                        <span>{{ $rule->type->label() }}</span>
-                                    @else
-                                        <span
-                                            class="rule-to-value-missing @if ($rule->to) hidden @endif"
-                                        >{{ trans('plugins/ecommerce::shipping.greater_than') }}</span>
-                                        <span>
-                                            <span
-                                                class="from-value-label">{{ $rule->type->toUnitText($rule->from) }}</span>
-                                        </span>
-                                        <span
-                                            class="rule-to-value-wrap @if (!$rule->to) hidden @endif">
-                                            <span class="m-1">-</span>
-                                            <span>
-                                                <span
-                                                    class="to-value-label">{{ $rule->type->toUnitText($rule->to) }}</span>
-                                            </span>
-                                        </span>
-                                    @endif
-                                </div>
-                            </div>
-                            <div class="col-auto d-flex align-items-center">
-                                <label class="py-1 px-2">
-                                    <span>
-                                        <span class="rule-price-item">{{ format_price($rule->price ?? 0) }}</span>
+                    <div class="w-100 d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="fw-bold label-rule-item-name">{{ $rule->name }}</span>
+                            <div class="small">
+                                @if ($rule->type->allowRuleItems())
+                                    <span>{{ $rule->type->label() }}</span>
+                                @else
+                                    <span @class(['rule-to-value-missing', 'hidden' => $rule->to])>
+                                        {{ trans('plugins/ecommerce::shipping.greater_than') }}
                                     </span>
-                                </label>
+                                    <span class="from-value-label">{{ $rule->type->toUnitText($rule->from) }}</span>
+                                    <span @class(['rule-to-value-wrap', 'hidden' => !$rule->to])>
+                                        <span class="m-1">-</span>
+                                        <span class="to-value-label">{{ $rule->type->toUnitText($rule->to) }}</span>
+                                    </span>
+                                @endif
                             </div>
                         </div>
-                    </button>
-                </h2>
-                <div
-                    class="accordion-collapse collapse"
-                    id="collapse-rule-{{ $rule->id }}"
-                    data-bs-parent="#accordion-rule-{{ $rule->id }}"
-                    aria-labelledby="heading-rule-{{ $rule->id }}"
-                >
-                    <div class="accordion-body shipping-detail-information">
-                        @include('plugins/ecommerce::shipping.rules.form')
-
-                        @if ($rule && $rule->type->allowRuleItems() && Auth::user()->hasPermission('ecommerce.shipping-rule-items.index'))
-                            @include('plugins/ecommerce::shipping.items.index', [
-                                'total' => $rule->items_count,
-                            ])
-                        @endif
+                        <div class="me-3">
+                            <span class="rule-price-item">{{ format_price($rule->price ?? 0) }}</span>
+                        </div>
                     </div>
+                </button>
+            </h2>
+            <div
+                class="accordion-collapse collapse"
+                id="collapse-rule-{{ $rule->id }}"
+                data-bs-parent="#accordion-rule-{{ $rule->id }}"
+                aria-labelledby="heading-rule-{{ $rule->id }}"
+            >
+                <div class="accordion-body shipping-detail-information">
+                    <x-core::form.fieldset>
+                        @include('plugins/ecommerce::shipping.rules.form')
+                    </x-core::form.fieldset>
+
+                    @if ($rule && $rule->type->allowRuleItems() && Auth::user()->hasPermission('ecommerce.shipping-rule-items.index'))
+                        @include('plugins/ecommerce::shipping.items.index', [
+                            'total' => $rule->items_count,
+                        ])
+                    @endif
                 </div>
             </div>
         </div>

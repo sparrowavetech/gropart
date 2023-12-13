@@ -7,7 +7,7 @@
                 data-placement="bottom"
                 data-bs-original-title="{{ trans('core/base::base.change_image') }}"
             >
-                <i class="fa fa-edit"></i>
+                <x-core::icon name="ti ti-edit" />
             </a>
         </li>
         <li>
@@ -17,7 +17,7 @@
                 data-placement="bottom"
                 data-bs-original-title="{{ trans('core/base::base.delete_image') }}"
             >
-                <i class="fa fa-trash"></i>
+                <x-core::icon name="ti ti-trash" />
             </a>
         </li>
     </ul>

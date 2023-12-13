@@ -4,12 +4,11 @@ namespace Botble\DevTool\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Console\ConfirmableTrait;
-use Illuminate\Contracts\Console\PromptsForMissingInput;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
 
 #[AsCommand('cms:locale:remove', 'Remove a locale')]
-class LocaleRemoveCommand extends Command implements PromptsForMissingInput
+class LocaleRemoveCommand extends Command
 {
     use ConfirmableTrait;
 

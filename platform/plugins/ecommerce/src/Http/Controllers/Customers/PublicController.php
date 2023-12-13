@@ -2,7 +2,7 @@
 
 namespace Botble\Ecommerce\Http\Controllers\Customers;
 
-use Botble\Base\Http\Responses\BaseHttpResponse;
+use Botble\Base\Http\Controllers\BaseController;
 use Botble\Ecommerce\Enums\OrderStatusEnum;
 use Botble\Ecommerce\Enums\ProductTypeEnum;
 use Botble\Ecommerce\Facades\EcommerceHelper;
@@ -32,14 +32,13 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
-use Illuminate\Routing\Controller;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
-class PublicController extends Controller
+class PublicController extends BaseController
 {
     public function __construct()
     {
@@ -64,7 +63,6 @@ class PublicController extends Controller
         SeoHelper::setTitle(__('Account information'));
 
         Theme::breadcrumb()
-            ->add(__('Home'), route('public.index'))
             ->add(__('Account information'), route('customer.overview'));
 
         $customer = auth('customer')->user();
@@ -92,14 +90,13 @@ class PublicController extends Controller
             );
 
         Theme::breadcrumb()
-            ->add(__('Home'), route('public.index'))
             ->add(__('Profile'), route('customer.edit-account'));
 
         return Theme::scope('ecommerce.customers.edit-account', [], 'plugins/ecommerce::themes.customers.edit-account')
             ->render();
     }
 
-    public function postEditAccount(EditAccountRequest $request, BaseHttpResponse $response)
+    public function postEditAccount(EditAccountRequest $request)
     {
         /**
          * @var Customer $customer
@@ -111,7 +108,8 @@ class PublicController extends Controller
 
         do_action(HANDLE_CUSTOMER_UPDATED_ECOMMERCE, $customer, $request);
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setNextUrl(route('customer.edit-account'))
             ->setMessage(__('Update profile successfully!'));
     }
@@ -120,7 +118,7 @@ class PublicController extends Controller
     {
         SeoHelper::setTitle(__('Change Password'));
 
-        Theme::breadcrumb()->add(__('Home'), route('public.index'))
+        Theme::breadcrumb()
             ->add(__('Change Password'), route('customer.change-password'));
 
         return Theme::scope(
@@ -130,7 +128,7 @@ class PublicController extends Controller
         )->render();
     }
 
-    public function postChangePassword(UpdatePasswordRequest $request, BaseHttpResponse $response)
+    public function postChangePassword(UpdatePasswordRequest $request)
     {
         $user = Auth::guard('customer')->user();
 
@@ -138,7 +136,9 @@ class PublicController extends Controller
             'password' => Hash::make($request->input('password')),
         ]);
 
-        return $response->setMessage(trans('acl::users.password_update_success'));
+        return $this
+            ->httpResponse()
+            ->setMessage(trans('acl::users.password_update_success'));
     }
 
     public function getListOrders()
@@ -155,7 +155,6 @@ class PublicController extends Controller
             ->paginate(10);
 
         Theme::breadcrumb()
-            ->add(__('Home'), route('public.index'))
             ->add(__('Orders'), route('customer.orders'));
 
         return Theme::scope(
@@ -177,7 +176,7 @@ class PublicController extends Controller
 
         SeoHelper::setTitle(__('Order detail :id', ['id' => $order->code]));
 
-        Theme::breadcrumb()->add(__('Home'), route('public.index'))
+        Theme::breadcrumb()
             ->add(
                 __('Order detail :id', ['id' => $order->code]),
                 route('customer.orders.view', $id)
@@ -190,7 +189,7 @@ class PublicController extends Controller
         )->render();
     }
 
-    public function getCancelOrder(int|string $id, BaseHttpResponse $response)
+    public function getCancelOrder(int|string $id)
     {
         $order = Order::query()
             ->where([
@@ -201,7 +200,9 @@ class PublicController extends Controller
             ->firstOrFail();
 
         if (! $order->canBeCanceled()) {
-            return $response->setError()
+            return $this
+                ->httpResponse()
+                ->setError()
                 ->setMessage(trans('plugins/ecommerce::order.cancel_error'));
         }
 
@@ -213,7 +214,9 @@ class PublicController extends Controller
             'order_id' => $order->id,
         ]);
 
-        return $response->setMessage(trans('plugins/ecommerce::order.cancel_success'));
+        return $this
+            ->httpResponse()
+            ->setMessage(trans('plugins/ecommerce::order.cancel_success'));
     }
 
     public function getListAddresses()
@@ -227,7 +230,6 @@ class PublicController extends Controller
             ->paginate(10);
 
         Theme::breadcrumb()
-            ->add(__('Home'), route('public.index'))
             ->add(__('Address books'), route('customer.address'));
 
         return Theme::scope(
@@ -242,7 +244,6 @@ class PublicController extends Controller
         SeoHelper::setTitle(__('Create Address'));
 
         Theme::breadcrumb()
-            ->add(__('Home'), route('public.index'))
             ->add(__('Address books'), route('customer.address'))
             ->add(__('Create Address'), route('customer.address.create'));
 
@@ -253,7 +254,7 @@ class PublicController extends Controller
         )->render();
     }
 
-    public function postCreateAddress(AddressRequest $request, BaseHttpResponse $response)
+    public function postCreateAddress(AddressRequest $request)
     {
         if ($request->input('is_default') == 1) {
             Address::query()
@@ -271,7 +272,8 @@ class PublicController extends Controller
 
         $address = Address::query()->create($request->input());
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setData([
                 'id' => $address->id,
                 'html' => view(
@@ -280,7 +282,7 @@ class PublicController extends Controller
                 )->render(),
             ])
             ->setNextUrl(route('customer.address'))
-            ->setMessage(trans('core/base::notices.create_success_message'));
+            ->withCreatedSuccessMessage();
     }
 
     public function getEditAddress(int|string $id)
@@ -294,7 +296,7 @@ class PublicController extends Controller
         ])
         ->firstOrFail();
 
-        Theme::breadcrumb()->add(__('Home'), route('public.index'))
+        Theme::breadcrumb()
             ->add(__('Edit Address #:id', ['id' => $id]), route('customer.address.edit', $id));
 
         return Theme::scope(
@@ -304,7 +306,7 @@ class PublicController extends Controller
         )->render();
     }
 
-    public function getDeleteAddress(int|string $id, BaseHttpResponse $response)
+    public function getDeleteAddress(int|string $id)
     {
         Address::query()
             ->where([
@@ -313,11 +315,13 @@ class PublicController extends Controller
             ])
             ->delete();
 
-        return $response->setNextUrl(route('customer.address'))
+        return $this
+            ->httpResponse()
+            ->setNextUrl(route('customer.address'))
             ->setMessage(trans('core/base::notices.delete_success_message'));
     }
 
-    public function postEditAddress(int|string $id, AddressRequest $request, BaseHttpResponse $response)
+    public function postEditAddress(int|string $id, AddressRequest $request)
     {
         $address = Address::query()
             ->where([
@@ -333,13 +337,14 @@ class PublicController extends Controller
         $address->fill($request->input());
         $address->save();
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setData([
                 'id' => $address->getKey(),
                 'html' => view('plugins/ecommerce::orders.partials.address-item', compact('address'))
                     ->render(),
             ])
-            ->setMessage(trans('core/base::notices.update_success_message'));
+            ->withUpdatedSuccessMessage();
     }
 
     public function getPrintOrder(int|string $id, Request $request)
@@ -355,7 +360,6 @@ class PublicController extends Controller
             abort(404);
         }
 
-        return InvoiceHelper::streamInvoice($order->invoice);
         if ($request->input('type') == 'print') {
             return InvoiceHelper::streamInvoice($order->invoice);
         }
@@ -363,7 +367,7 @@ class PublicController extends Controller
         return InvoiceHelper::downloadInvoice($order->invoice);
     }
 
-    public function postAvatar(AvatarRequest $request, ThumbnailService $thumbnailService, BaseHttpResponse $response)
+    public function postAvatar(AvatarRequest $request, ThumbnailService $thumbnailService)
     {
         try {
             $account = auth('customer')->user();
@@ -371,7 +375,10 @@ class PublicController extends Controller
             $result = RvMedia::handleUpload($request->file('avatar_file'), 0, $account->upload_folder);
 
             if ($result['error']) {
-                return $response->setError()->setMessage($result['message']);
+                return $this
+                    ->httpResponse()
+                    ->setError()
+                    ->setMessage($result['message']);
             }
 
             $avatarData = json_decode($request->input('avatar_data'));
@@ -389,11 +396,13 @@ class PublicController extends Controller
             $account->avatar = $file->url;
             $account->save();
 
-            return $response
+            return $this
+                ->httpResponse()
                 ->setMessage(trans('plugins/customer::dashboard.update_avatar_success'))
                 ->setData(['url' => RvMedia::url($file->url)]);
         } catch (Exception $exception) {
-            return $response
+            return $this
+                ->httpResponse()
                 ->setError()
                 ->setMessage($exception->getMessage());
         }
@@ -420,7 +429,7 @@ class PublicController extends Controller
 
         SeoHelper::setTitle(__('Request Return Product(s) In Order :id', ['id' => $order->code]));
 
-        Theme::breadcrumb()->add(__('Home'), route('public.index'))
+        Theme::breadcrumb()
             ->add(
                 __('Request Return Product(s) In Order :id', ['id' => $order->code]),
                 route('customer.order_returns.request_view', $orderId)
@@ -440,7 +449,7 @@ class PublicController extends Controller
         )->render();
     }
 
-    public function postReturnOrder(OrderReturnRequest $request, BaseHttpResponse $response)
+    public function postReturnOrder(OrderReturnRequest $request)
     {
         if (! EcommerceHelper::isOrderReturnEnabled()) {
             abort(404);
@@ -454,7 +463,8 @@ class PublicController extends Controller
             ->firstOrFail();
 
         if (! $order->canBeReturned()) {
-            return $response
+            return $this
+                ->httpResponse()
                 ->setError()
                 ->withInput()
                 ->setMessage(trans('plugins/ecommerce::order.return_error'));
@@ -467,7 +477,8 @@ class PublicController extends Controller
         });
 
         if (empty($orderReturnData['items'])) {
-            return $response
+            return $this
+                ->httpResponse()
                 ->setError()
                 ->withInput()
                 ->setMessage(__('Please select at least 1 product to return!'));
@@ -482,7 +493,8 @@ class PublicController extends Controller
         foreach ($orderReturnData['items'] as &$item) {
             $orderProductId = Arr::get($item, 'order_item_id');
             if (! $orderProduct = $order->products->firstWhere('id', $orderProductId)) {
-                return $response
+                return $this
+                    ->httpResponse()
                     ->setError()
                     ->withInput()
                     ->setMessage(__('Oops! Something Went Wrong.'));
@@ -499,7 +511,8 @@ class PublicController extends Controller
         [$status, $data, $message] = OrderReturnHelper::returnOrder($order, $orderReturnData);
 
         if (! $status) {
-            return $response
+            return $this
+                ->httpResponse()
                 ->setError()
                 ->withInput()
                 ->setMessage($message ?: trans('plugins/ecommerce::order.return_error'));
@@ -511,7 +524,8 @@ class PublicController extends Controller
             'order_id' => $order->id,
         ]);
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setMessage(trans('plugins/ecommerce::order.return_success'))
             ->setNextUrl(route('customer.order_returns.detail', ['id' => $data->id]));
     }
@@ -531,7 +545,6 @@ class PublicController extends Controller
             ->paginate(10);
 
         Theme::breadcrumb()
-            ->add(__('Home'), route('public.index'))
             ->add(__('Order Return Requests'), route('customer.order_returns'));
 
         return Theme::scope(
@@ -557,7 +570,6 @@ class PublicController extends Controller
         ->firstOrFail();
 
         Theme::breadcrumb()
-            ->add(__('Home'), route('public.index'))
             ->add(__('Order Return Requests'), route('customer.order_returns'))
             ->add(
                 __('Order Return Requests :id', ['id' => $orderReturn->id]),
@@ -598,7 +610,6 @@ class PublicController extends Controller
             ->paginate(10);
 
         Theme::breadcrumb()
-            ->add(__('Home'), route('public.index'))
             ->add(__('Downloads'), route('customer.downloads'));
 
         return Theme::scope(
@@ -608,7 +619,7 @@ class PublicController extends Controller
         )->render();
     }
 
-    public function getDownload(int|string $id, Request $request, BaseHttpResponse $response)
+    public function getDownload(int|string $id, Request $request)
     {
         if (! EcommerceHelper::isEnabledSupportDigitalProducts()) {
             abort(404);
@@ -643,7 +654,9 @@ class PublicController extends Controller
                 abort(404);
             }
         } elseif ($hash = $request->input('hash')) {
-            $response->setNextUrl(route('public.index'));
+            $this
+                ->httpResponse()
+                ->setNextUrl(route('public.index'));
             if (! $orderProduct->download_token || ! Hash::check($orderProduct->download_token, $hash)) {
                 abort(404);
             }
@@ -655,7 +668,10 @@ class PublicController extends Controller
         $productFiles = $product->id ? $product->productFiles : $orderProduct->productFiles;
 
         if (! $productFiles->count()) {
-            return $response->setError()->setMessage(__('Cannot found files'));
+            return $this
+                ->httpResponse()
+                ->setError()
+                ->setMessage(__('Cannot found files'));
         }
 
         $externalProductFiles = $productFiles->filter(fn ($productFile) => $productFile->is_external_link);
@@ -677,12 +693,17 @@ class PublicController extends Controller
                     ->render();
             }
 
-            return $response->setError()->setMessage(__('Cannot download files'));
+            return $this
+                ->httpResponse()
+                ->setError()->setMessage(__('Cannot download files'));
         }
 
         $internalProductFiles = $productFiles->filter(fn ($productFile) => ! $productFile->is_external_link);
         if (! $internalProductFiles->count()) {
-            return $response->setError()->setMessage(__('Cannot download files'));
+            return $this
+                ->httpResponse()
+                ->setError()
+                ->setMessage(__('Cannot download files'));
         }
 
         $zipName = Str::slug($orderProduct->product_name) . Str::random(5) . '-' . Carbon::now()->format(
@@ -718,7 +739,10 @@ class PublicController extends Controller
             return response()->download($fileName)->deleteFileAfterSend();
         }
 
-        return $response->setError()->setMessage(__('Cannot download files'));
+        return $this
+            ->httpResponse()
+            ->setError()
+            ->setMessage(__('Cannot download files'));
     }
 
     public function getProductReviews(ProductInterface $productRepository)
@@ -748,7 +772,6 @@ class PublicController extends Controller
         $products = $productRepository->productsNeedToReviewByCustomer($customerId);
 
         Theme::breadcrumb()
-            ->add(__('Home'), route('public.index'))
             ->add(__('Product Reviews'), route('customer.product-reviews'));
 
         return Theme::scope(

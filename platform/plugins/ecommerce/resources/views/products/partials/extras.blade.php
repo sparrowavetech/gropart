@@ -1,138 +1,144 @@
-<div
-    class="widget meta-boxes"
-    id="product-extras"
->
-    <div class="widget-title">
-        <h4><span>{{ trans('plugins/ecommerce::products.related_products') }}</span></h4>
-    </div>
-    <div class="widget-body">
-        <div class="form-group mb-3">
-            <label class="control-label">{{ trans('plugins/ecommerce::products.related_products') }}</label>
-            <input type="hidden" name="related_products" value="@if ($product) {{ implode(',', $product->products()->allRelatedIds()->toArray()) }} @endif" />
-            <div class="box-search-advance product">
-                <div>
-                    <input type="text" class="next-input textbox-advancesearch" placeholder="{{ trans('plugins/ecommerce::products.search_products') }}" data-target="{{ $dataUrl }}">
-                </div>
-                <div class="panel panel-default">
+<x-core::card class="mb-3">
+    <x-core::card.header>
+        <x-core::card.title>
+            {{ trans('plugins/ecommerce::products.related_products') }}
+        </x-core::card.title>
+    </x-core::card.header>
 
-                </div>
-            </div>
-            @include('plugins/ecommerce::products.partials.selected-products-list', ['products' => $product ? $product->products : collect(), 'includeVariation' => false, ])
-        </div>
-        <hr>
-        <div class="form-group mb-3">
-            <label class="control-label">{{ trans('plugins/ecommerce::products.frequently_bought_together') }}</label>
-            <input type="hidden" name="frequently_bought_together" value="@if ($product) {{ implode(',', $product->frequentlyBoughtTogether()->allRelatedIds()->toArray()) }} @endif" />
-            <div class="box-search-advance product">
-                <div>
-                    <input type="text" class="next-input textbox-advancesearch" placeholder="{{ trans('plugins/ecommerce::products.search_products') }}" data-target="{{ $dataUrl }}">
-                </div>
-                <div class="panel panel-default">
-
-                </div>
-            </div>
-            @include('plugins/ecommerce::products.partials.selected-products-list', ['products' => $product ? $product->frequentlyBoughtTogether : collect([]), 'includeVariation' => false, ])
-        </div>
-        <hr>
-        <div class="form-group mb-3">
-            <label class="control-label">{{ trans('plugins/ecommerce::products.cross_selling_products') }}</label>
+    <x-core::card.body>
+        @php
+            $products = $product ? $product->products : collect();
+        @endphp
+        <x-plugins-ecommerce::box-search-advanced
+            type="product"
+            :search-target="$dataUrl"
+            :shown="$products->isNotEmpty()"
+        >
             <input
-                name="cross_sale_products"
+                name="related_products"
                 type="hidden"
-                value="@if ($product) {{ implode(',',$product->crossSales()->allRelatedIds()->toArray()) }} @endif"
+                value="@if ($products->isNotEmpty()) {{ implode(',', $product->products()->allRelatedIds()->all()) }} @endif"
             />
-            <div class="box-search-advance product">
-                <div>
-                    <input
-                        class="next-input textbox-advancesearch"
-                        data-target="{{ $dataUrl }}"
-                        type="text"
-                        placeholder="{{ trans('plugins/ecommerce::products.search_products') }}"
-                    >
-                </div>
-                <div class="panel panel-default">
 
+            <x-slot:items>
+                @include('plugins/ecommerce::products.partials.selected-products-list', [
+                    'products' => $products,
+                    'includeVariation' => false,
+                ])
+            </x-slot:items>
+        </x-plugins-ecommerce::box-search-advanced>
+    </x-core::card.body>
+</x-core::card>
+
+<x-core::card class="mb-3">
+    <x-core::card.header>
+        <x-core::card.title>
+            {{ trans('plugins/ecommerce::products.cross_selling_products') }}
+        </x-core::card.title>
+    </x-core::card.header>
+
+    <x-core::card.body>
+        @php
+            $crossSaleProducts = $product ? $product->crossSales : collect();
+            $products = $product ? $product->crossSaleProducts : collect();
+        @endphp
+
+        <x-plugins-ecommerce::box-search-advanced
+            type="product"
+            :search-target="$dataUrl"
+            :shown="$products->isNotEmpty()"
+            template="selected-cross-sell-product-list-template"
+        >
+            <x-slot:items>
+                @include('plugins/ecommerce::products.partials.selected-cross-sell-products', [
+                    'products' => $products,
+                    'includeVariation' => false,
+                ])
+            </x-slot:items>
+        </x-plugins-ecommerce::box-search-advanced>
+    </x-core::card.body>
+</x-core::card>
+
+<x-core::custom-template id="selected_product_list_template">
+    <div class="list-group-item">
+        <input
+            type="hidden"
+            name="cross_sale_products[__id__][is_variant]"
+            value="0"
+        />
+
+        <div class="row align-items-center">
+            <div class="col-auto">
+                <span
+                    class="avatar"
+                    style="background-image: url('__image__')"
+                ></span>
+            </div>
+            <div class="col text-truncate">
+                <a href="__url__" class="text-body d-block" target="_blank">__name__</a>
+                <div class="text-secondary text-truncate">
+                    __attributes__
                 </div>
             </div>
-            @include('plugins/ecommerce::products.partials.selected-products-list', [
-                'products' => $product ? $product->crossSales : collect(),
-                'includeVariation' => false,
-            ])
+            <div class="col-auto">
+                <a
+                    href="javascript:void(0)"
+                    data-bb-toggle="product-delete-item"
+                    data-bb-target="__id__"
+                    class="text-decoration-none list-group-item-actions btn-trigger-remove-selected-product"
+                    title="{{ trans('plugins/ecommerce::products.delete') }}"
+                >
+                    <x-core::icon name="ti ti-x" class="text-secondary" />
+                </a>
+            </div>
         </div>
-
-        @if (false)
-            <hr>
-            <div class="form-group mb-3">
-                <label class="control-label">{{ trans('plugins/ecommerce::products.up_selling_products') }}</label>
-                <input
-                    name="up_sale_products"
-                    type="hidden"
-                    value="@if ($product) {{ implode(',',$product->upSales()->allRelatedIds()->toArray()) }} @endif"
-                />
-                <div class="box-search-advance product">
-                    <div>
-                        <input
-                            class="next-input textbox-advancesearch"
-                            data-target="{{ $dataUrl }}"
-                            type="text"
-                            placeholder="{{ trans('plugins/ecommerce::products.search_products') }}"
-                        >
-                    </div>
-                    <div class="panel panel-default">
-
-                    </div>
-                </div>
-                @include('plugins/ecommerce::products.partials.selected-products-list', [
-                    'products' => $product ? $product->upSales : collect(),
-                    'includeVariation' => false,
-                ])
-            </div>
-
-            <hr>
-            <div class="form-group mb-3">
-                <label class="control-label">{{ trans('plugins/ecommerce::products.grouped_products') }}</label>
-                <input
-                    name="grouped_products"
-                    type="hidden"
-                    value="@if ($product) {{ implode(',',$product->groupedItems()->pluck('product_id')->all()) }} @endif"
-                />
-                <div class="box-search-advance product">
-                    <div>
-                        <input
-                            class="next-input textbox-advancesearch"
-                            data-target="{{ $dataUrl }}"
-                            type="text"
-                            placeholder="{{ trans('plugins/ecommerce::products.search_products') }}"
-                        >
-                    </div>
-                    <div class="panel panel-default">
-
-                    </div>
-                </div>
-                @include('plugins/ecommerce::products.partials.selected-products-list', [
-                    'products' => $product ? $product->groupedProduct : collect(),
-                    'includeVariation' => false,
-                ])
-            </div>
-        @endif
     </div>
-</div>
+</x-core::custom-template>
 
-<script id="selected_product_list_template" type="text/x-custom-template">
-    <tr>
-        <td class="width-60-px min-width-60-px">
-            <div class="wrap-img vertical-align-m-i">
-                <img class="thumb-image" src="__image__" alt="__name__" title="__name__">
+<x-core::custom-template id="selected-cross-sell-product-list-template">
+    <div class="list-group-item">
+        <input
+            type="hidden"
+            name="cross_sale_products[__id__][id]"
+            value="__id__"
+        />
+        <div class="row align-items-center">
+            <div class="col-auto">
+                <span
+                    class="avatar"
+                    style="background-image: url('__image__')"
+                ></span>
             </div>
-        </td>
-        <td class="pl5 p-r5 min-width-200-px">
-            <a class="hover-underline pre-line" href="__url__">__name__</a>
-            <p class="type-subdued">__attributes__</p>
-        </td>
-        <td class="pl5 p-r5 text-end width-20-px min-width-20-px">
-            <a href="#" class="btn-trigger-remove-selected-product" title="{{ trans('plugins/ecommerce::products.delete') }}" data-id="__id__">
-                <i class="fa fa-times"></i>
-            </a>
-        </td>
-    </tr>
-</script>
+            <div class="col text-truncate">
+                <a href="__url__" class="text-body d-block" target="_blank">__name__</a>
+                <div class="text-secondary text-truncate">
+                    __attributes__
+                </div>
+            </div>
+            <div class="col">
+                <x-core::form.text-input
+                    :label="trans('plugins/ecommerce::products.price')"
+                    name="cross_sale_products[__id__][price]"
+                />
+            </div>
+            <div class="col">
+                <x-core::form.select
+                    :label="trans('plugins/ecommerce::products.cross_sell_price_type.title')"
+                    :options="\Botble\Ecommerce\Enums\CrossSellPriceType::labels()"
+                    name="cross_sale_products[__id__][price_type]"
+                />
+            </div>
+            <div class="col-auto">
+                <a
+                    href="javascript:void(0)"
+                    data-bb-toggle="product-delete-item"
+                    data-bb-target="__id__"
+                    class="text-decoration-none list-group-item-actions btn-trigger-remove-selected-product"
+                    title="{{ trans('plugins/ecommerce::products.delete') }}"
+                >
+                    <x-core::icon name="ti ti-x" class="text-secondary" />
+                </a>
+            </div>
+        </div>
+    </div>
+</x-core::custom-template>

@@ -30,7 +30,7 @@
                                     </div>
                                 @endif
 
-                                @if (Cart::instance('cart')->count() > 0)
+                                @if (Cart::instance('cart')->isNotEmpty())
                                     <form
                                         class="cart-form"
                                         method="post"

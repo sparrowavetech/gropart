@@ -18,7 +18,7 @@
                 @checked ($billingAddressSameAsShippingAddress)
             >
             <label
-                class="control-label"
+                class="form-label"
                 for="billing_address_same_as_shipping_address"
             >{{ __('Same as shipping information') }}</label>
         @elseif (auth('customer')->check() && $isAvailableAddress)

@@ -13,7 +13,7 @@
 
                     <div class="form-group{{ $errors->has('name') ? ' has-error' : '' }}">
                         <label
-                            class="col-md-4 control-label"
+                            class="col-md-4 form-label"
                             for="name"
                         >{{ __('Name') }}</label>
 
@@ -39,7 +39,7 @@
 
                     <div class="form-group{{ $errors->has('email') ? ' has-error' : '' }}">
                         <label
-                            class="col-md-4 control-label"
+                            class="col-md-4 form-label"
                             for="email"
                         >{{ __('E-Mail Address') }}</label>
 
@@ -62,7 +62,7 @@
 
                     <div class="form-group{{ $errors->has('password') ? ' has-error' : '' }}">
                         <label
-                            class="col-md-4 control-label"
+                            class="col-md-4 form-label"
                             for="password"
                         >{{ __('Password') }}</label>
 
@@ -84,7 +84,7 @@
 
                     <div class="form-group{{ $errors->has('password_confirmation') ? ' has-error' : '' }}">
                         <label
-                            class="col-md-4 control-label"
+                            class="col-md-4 form-label"
                             for="password-confirm"
                         >{{ __('Password confirmation') }}</label>
 
@@ -153,7 +153,7 @@
                         </div>
                     </div>
                     <div class="text-center">
-                        {!! apply_filters(BASE_FILTER_AFTER_LOGIN_OR_REGISTER_FORM, null, \Botble\Ecommerce\Models\Customer::class) !!}
+                        {!! apply_filters(BASE_FILTER_AFTER_LOGIN_OR_REGISTER_FORM, null, Botble\Ecommerce\Models\Customer::class) !!}
                     </div>
                 </form>
             </div>

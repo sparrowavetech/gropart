@@ -18,7 +18,7 @@
         >
             <div class="form-content">
                 <div class="mb-3">
-                    <label for="name">{{ __('Full Name') }}:</label>
+                    <label class="form-label" for="name">{{ __('Full Name') }}:</label>
                     <input
                         class="form-control @if ($errors->has('name')) is-invalid @endif"
                         id="name"
@@ -30,7 +30,7 @@
                 </div>
 
                 <div class="mb-3">
-                    <label for="date_of_birth">{{ __('Date of birth') }}:</label>
+                    <label class="form-label" for="date_of_birth">{{ __('Date of birth') }}:</label>
                     <input
                         class="form-control @if ($errors->has('dob')) is-invalid @endif"
                         id="date_of_birth"
@@ -42,7 +42,7 @@
                 </div>
 
                 <div class="mb-3">
-                    <label for="email">{{ __('Email') }}:</label>
+                    <label class="form-label" for="email">{{ __('Email') }}:</label>
                     <input
                         class="form-control"
                         id="email"
@@ -54,7 +54,7 @@
                 </div>
 
                 <div class="mb-3">
-                    <label for="phone">{{ __('Phone') }}</label>
+                    <label class="form-label" for="phone">{{ __('Phone') }}</label>
                     <input
                         class="form-control @if ($errors->has('phone')) is-invalid @endif"
                         id="phone"

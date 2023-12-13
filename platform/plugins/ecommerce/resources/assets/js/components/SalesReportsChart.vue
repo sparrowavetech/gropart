@@ -15,11 +15,12 @@
             </ul>
         </div>
         <div class="sales-reports-chart"></div>
-        <div class="row" v-if="earningSales.length">
+        <div class="row px-3" v-if="earningSales.length">
             <div class="col-12">
-                <ul>
+                <ul class="list-unstyled">
                     <li v-for="earningSale in earningSales" :key="earningSale.text">
-                        <i class="fas fa-circle" :style="{ color: earningSale.color }"></i> {{ earningSale.text }}
+                        <i class="icon ti ti-circle-filled" :style="{ color: earningSale.color }"></i>
+                        {{ earningSale.text }}
                     </li>
                 </ul>
             </div>

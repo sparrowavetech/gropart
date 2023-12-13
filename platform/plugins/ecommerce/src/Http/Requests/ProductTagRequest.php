@@ -11,7 +11,7 @@ class ProductTagRequest extends Request
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:220',
+            'name' => 'required|string|max:250',
             'description' => 'nullable|string|max:400',
             'status' => Rule::in(BaseStatusEnum::values()),
         ];

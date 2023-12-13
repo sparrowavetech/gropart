@@ -2,8 +2,8 @@
 
 namespace Botble\Ecommerce\Enums;
 
-use Botble\Base\Facades\Html;
 use Botble\Base\Supports\Enum;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\HtmlString;
 
 /**
@@ -13,18 +13,19 @@ use Illuminate\Support\HtmlString;
 class DiscountTypeEnum extends Enum
 {
     public const COUPON = 'coupon';
+
     public const PROMOTION = 'promotion';
 
     public static $langPath = 'plugins/ecommerce::discount.enums.types';
 
     public function toHtml(): HtmlString|string
     {
-        return match ($this->value) {
-            self::COUPON => Html::tag('span', self::COUPON()->label(), ['class' => 'label-info status-label'])
-                ->toHtml(),
-            self::PROMOTION => Html::tag('span', self::PROMOTION()->label(), ['class' => 'label-success status-label'])
-                ->toHtml(),
-            default => parent::toHtml(),
+        $color = match ($this->value) {
+            self::COUPON => 'info',
+            self::PROMOTION => 'success',
+            default => null,
         };
+
+        return Blade::render(sprintf('<x-core::badge label="%s" color="%s" />', $this->label(), $color));
     }
 }

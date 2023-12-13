@@ -5,9 +5,6 @@ namespace Botble\Marketplace\Http\Controllers;
 use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\EmailHandler;
-use Botble\Base\Facades\PageTitle;
-use Botble\Base\Http\Controllers\BaseController;
-use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Models\Customer;
 use Botble\Marketplace\Facades\MarketplaceHelper;
 use Botble\Marketplace\Tables\UnverifiedVendorTable;
@@ -16,9 +13,18 @@ use Illuminate\Http\Request;
 
 class UnverifiedVendorController extends BaseController
 {
+    public function __construct()
+    {
+        parent::__construct();
+
+        $this
+            ->breadcrumb()
+            ->add(trans('plugins/marketplace::unverified-vendor.name'), route('marketplace.unverified-vendors.index'));
+    }
+
     public function index(UnverifiedVendorTable $table)
     {
-        PageTitle::setTitle(trans('plugins/marketplace::unverified-vendor.name'));
+        $this->pageTitle(trans('plugins/marketplace::unverified-vendor.name'));
 
         return $table->renderTable();
     }
@@ -36,14 +42,14 @@ class UnverifiedVendorController extends BaseController
             return route('customers.edit', $vendor->id);
         }
 
-        PageTitle::setTitle(trans('plugins/marketplace::unverified-vendor.verify', ['name' => $vendor->name]));
+        $this->pageTitle(trans('plugins/marketplace::unverified-vendor.verify', ['name' => $vendor->name]));
 
         Assets::addScriptsDirectly(['vendor/core/plugins/marketplace/js/marketplace-vendor.js']);
 
         return view('plugins/marketplace::customers.verify-vendor', compact('vendor'));
     }
 
-    public function approveVendor(int|string $id, Request $request, BaseHttpResponse $response)
+    public function approveVendor(int|string $id, Request $request)
     {
         $vendor = Customer::query()
             ->where([
@@ -66,8 +72,9 @@ class UnverifiedVendorController extends BaseController
                 ->sendUsingTemplate('vendor-account-approved', $vendor->store->email ?: $vendor->email);
         }
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setPreviousUrl(route('marketplace.unverified-vendors.index'))
-            ->setMessage(trans('core/base::notices.update_success_message'));
+            ->withUpdatedSuccessMessage();
     }
 }

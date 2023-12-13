@@ -73,7 +73,7 @@
                                         href="{{ route('customer.orders') }}"
                                     >{{ __('Orders') }}</a>
                                     <i
-                                        class="fa fa-first-order"
+                                        class="fa fa-shopping-cart"
                                         aria-hidden="true"
                                     ></i>
                                 </li>
@@ -93,7 +93,7 @@
                                             href="{{ route('customer.downloads') }}"
                                         >{{ __('Downloads') }}</a>
                                         <i
-                                            class="fa-solid fa-download"
+                                            class="fa fa-download"
                                             aria-hidden="true"
                                         ></i>
                                     </li>

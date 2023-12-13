@@ -1,4 +1,4 @@
-<div class="container mt-5 mb-3">
+<div class="container">
     <div class="row justify-content-center">
         <div class="col">
             <div class="row faqs-nav-tab">
@@ -31,34 +31,21 @@
                         class="tab-content"
                         id="faq-tab-content"
                     >
-                        @foreach($categories as $category)
-                            <div class="tab-pane fade @if ($loop->first) show active @endif" role="tabpanel"
-                                aria-labelledby="home-tab" id="faq-content-{{ $loop->index }}">
+                        @foreach ($categories as $category)
+                            <div
+                                class="tab-pane fade @if ($loop->first) show active @endif"
+                                id="faq-content-{{ $loop->index }}"
+                                role="tabpanel"
+                                aria-labelledby="home-tab"
+                            >
                                 <div class="row row-cols-sm-2 row-cols-1">
-                                    @php $prvIndex=0; @endphp
-                                    @foreach($category->faqs->chunk(round($category->count() / 2)) as $faqs)
-                                        @php $prvIndex = $prvIndex+1 @endphp
+                                    @foreach ($category->faqs->chunk(round($category->count() / 2)) as $faqs)
                                         <div class="col">
-                                            @foreach($faqs as $faq)
-                                            <div class="faq-tab-wrapper">
-                                                <div class="accordion" id="faq-accordion">
-                                                    <div class="card">
-                                                        <div class="card-header" id="heading-faq-{{ $prvIndex }}">
-                                                            <h2 class="faq-title m-0">
-                                                                <button class="btn btn-link btn-block text-start @if ($prvIndex ==1) collapsed @endif" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-faq-{{ $prvIndex }}" aria-expanded="true" aria-controls="collapse-faq-{{ $prvIndex }}">
-                                                                    {{ $faq->question }}
-                                                                </button>
-                                                            </h2>
-                                                        </div>
-                                                        <div id="collapse-faq-{{ $prvIndex }}" class="collapse @if ($prvIndex ==1) show @endif" aria-labelledby="heading-faq-{{ $prvIndex }}" data-bs-parent="#faq-accordion">
-                                                            <div class="faq-desc card-body">
-                                                                {!! BaseHelper::clean($faq->answer) !!}
-                                                            </div>
-                                                        </div>
-                                                    </div>
+                                            @foreach ($faqs as $faq)
+                                                <div class="faq-tab-wrapper mb-4 pb-4">
+                                                    <h4 class="faq-title">{{ $faq->question }}</h4>
+                                                    <div class="faq-desc">{!! BaseHelper::clean($faq->answer) !!}</div>
                                                 </div>
-                                            </div>
-                                            @php $prvIndex = $prvIndex+1 @endphp
                                             @endforeach
                                         </div>
                                     @endforeach

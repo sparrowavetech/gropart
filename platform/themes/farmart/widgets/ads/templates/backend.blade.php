@@ -1,6 +1,6 @@
 @if (is_plugin_active('ads'))
-    <div class="form-group">
-        <label for="widget-name">{{ __('Name') }}</label>
+    <div class="mb-3">
+        <label class="form-label" for="widget-name">{{ __('Name') }}</label>
         <input
             class="form-control"
             id="widget-name"
@@ -10,8 +10,8 @@
         >
     </div>
 
-    <div class="form-group">
-        <label for="widget_ads">{{ __('Select Ads') }}</label>
+    <div class="mb-3">
+        <label class="form-label" for="widget_ads">{{ __('Select Ads') }}</label>
         {!! Form::customSelect(
             'ads_key',
             ['' => __('-- Select --')] +
@@ -21,13 +21,13 @@
         ) !!}
     </div>
 
-    <div class="form-group">
+    <div class="mb-3">
         <label>{{ __('Background') }}</label>
         {!! Form::mediaImage('background', $config['background']) !!}
     </div>
 
-    <div class="form-group">
-        <label for="widget_ads">{{ __('Size') }}</label>
+    <div class="mb-3">
+        <label class="form-label" for="widget_ads">{{ __('Size') }}</label>
         {!! Form::customSelect(
             'size',
             [

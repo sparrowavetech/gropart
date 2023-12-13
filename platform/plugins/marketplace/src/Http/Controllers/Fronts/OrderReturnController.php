@@ -4,9 +4,7 @@ namespace Botble\Marketplace\Http\Controllers\Fronts;
 
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Facades\Assets;
-use Botble\Base\Facades\PageTitle;
 use Botble\Base\Http\Controllers\BaseController;
-use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Enums\OrderReturnStatusEnum;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Facades\OrderReturnHelper;
@@ -29,7 +27,7 @@ class OrderReturnController extends BaseController
 
     public function index(OrderReturnTable $orderReturnTable)
     {
-        PageTitle::setTitle(trans('plugins/ecommerce::order.order_return'));
+        $this->pageTitle(trans('plugins/ecommerce::order.order_return'));
 
         return $orderReturnTable->renderTable();
     }
@@ -50,20 +48,20 @@ class OrderReturnController extends BaseController
                 'vendor/core/plugins/ecommerce/libraries/jquery.textarea_autosize.js',
                 'vendor/core/plugins/ecommerce/js/order.js',
             ])
-            ->addScripts(['blockui', 'input-mask']);
+            ->addScripts(['input-mask']);
 
         if (EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation()) {
             Assets::addScriptsDirectly('vendor/core/plugins/location/js/location.js');
         }
 
-        PageTitle::setTitle(trans('plugins/ecommerce::order.edit_order_return', ['code' => get_order_code($id)]));
+        $this->pageTitle(trans('plugins/ecommerce::order.edit_order_return', ['code' => get_order_code($id)]));
 
         $defaultStore = get_primary_store_locator();
 
         return MarketplaceHelper::view('vendor-dashboard.order-returns.edit', compact('returnRequest', 'defaultStore'));
     }
 
-    public function update(int|string $id, UpdateOrderReturnRequest $request, BaseHttpResponse $response)
+    public function update(int|string $id, UpdateOrderReturnRequest $request)
     {
         $returnRequest = $this->findOrFail($id);
 
@@ -74,7 +72,8 @@ class OrderReturnController extends BaseController
         if ($returnRequest->return_status == $data['return_status'] ||
             $returnRequest->return_status == OrderReturnStatusEnum::CANCELED ||
             $returnRequest->return_status == OrderReturnStatusEnum::COMPLETED) {
-            return $response
+            return $this
+                ->httpResponse()
                 ->setError()
                 ->setMessage(trans('plugins/ecommerce::order.notices.update_return_order_status_error'));
         }
@@ -82,17 +81,19 @@ class OrderReturnController extends BaseController
         [$status, $returnRequest] = OrderReturnHelper::updateReturnOrder($returnRequest, $data);
 
         if (! $status) {
-            return $response
+            return $this
+                ->httpResponse()
                 ->setError()
                 ->setMessage(trans('plugins/ecommerce::order.notices.update_return_order_status_error'));
         }
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setNextUrl(route('order_returns.edit', $returnRequest->id))
-            ->setMessage(trans('core/base::notices.update_success_message'));
+            ->withUpdatedSuccessMessage();
     }
 
-    public function destroy(int|string $id, Request $request, BaseHttpResponse $response)
+    public function destroy(int|string $id, Request $request)
     {
         $orderReturn = $this->findOrFail($id);
 
@@ -100,9 +101,12 @@ class OrderReturnController extends BaseController
             $orderReturn->delete();
             event(new DeletedContentEvent(ORDER_RETURN_MODULE_SCREEN_NAME, $request, $orderReturn));
 
-            return $response->setMessage(trans('core/base::notices.delete_success_message'));
+            return $this
+                ->httpResponse()
+                ->setMessage(trans('core/base::notices.delete_success_message'));
         } catch (Exception $exception) {
-            return $response
+            return $this
+                ->httpResponse()
                 ->setError()
                 ->setMessage($exception->getMessage());
         }

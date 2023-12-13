@@ -14,6 +14,7 @@ use Botble\Ecommerce\Enums\StockStatusEnum;
 use Botble\Ecommerce\Facades\Discount as DiscountFacade;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Facades\FlashSale as FlashSaleFacade;
+use Botble\Ecommerce\Services\Products\ProductPriceService;
 use Botble\Ecommerce\Services\Products\UpdateDefaultProductService;
 use Carbon\Carbon;
 use Exception;
@@ -61,7 +62,6 @@ class Product extends BaseModel
         'tax_id',
         'views',
         'stock_status',
-        'is_enquiry',
         'barcode',
         'cost_per_item',
         'generate_license_code',
@@ -81,16 +81,23 @@ class Product extends BaseModel
         'name' => SafeContent::class,
         'description' => SafeContent::class,
         'content' => SafeContent::class,
+        'sale_type' => 'int',
+        'start_date' => 'datetime',
+        'end_date' => 'datetime',
     ];
+
+    protected float $originalPrice;
+
+    protected float $finalPrice;
 
     protected static function booted(): void
     {
-        self::creating(function (self $product) {
+        static::creating(function (Product $product) {
             $product->created_by_id = Auth::check() ? Auth::id() : 0;
             $product->created_by_type = User::class;
         });
 
-        self::deleting(function (self $product) {
+        static::deleting(function (Product $product) {
             $product->variations()->each(fn (ProductVariation $item) => $item->delete());
             $product->variationInfo()->delete();
             $product->categories()->detach();
@@ -109,7 +116,7 @@ class Product extends BaseModel
             $product->tags()->detach();
         });
 
-        self::updated(function (self $product) {
+        static::updated(function (Product $product) {
             if ($product->is_variation && $product->original_product->defaultVariation->product_id == $product->id) {
                 app(UpdateDefaultProductService::class)->execute($product);
             }
@@ -167,17 +174,7 @@ class Product extends BaseModel
             'ec_product_cross_sale_relations',
             'from_product_id',
             'to_product_id'
-        );
-    }
-
-    public function frequentlyBoughtTogether(): BelongsToMany
-    {
-        return $this->belongsToMany(
-            Product::class,
-            'ec_product_frequently_bought_together',
-            'from_product_id',
-            'to_product_id'
-        );
+        )->withPivot(['price', 'price_type', 'apply_to_all_variations', 'is_variant']);
     }
 
     public function upSales(): BelongsToMany
@@ -288,6 +285,17 @@ class Product extends BaseModel
         return $this->hasMany(GroupedProduct::class, 'parent_product_id');
     }
 
+    protected function crossSaleProducts(): Attribute
+    {
+        return Attribute::get(function () {
+            $this->loadMissing('crossSales');
+
+            return $this->crossSales->filter(
+                fn (Product $product) => ! $product->pivot->is_variant
+            );
+        });
+    }
+
     protected function images(): Attribute
     {
         return Attribute::make(
@@ -328,31 +336,15 @@ class Product extends BaseModel
 
     protected function frontSalePrice(): Attribute
     {
-        return Attribute::make(
-            get: function (): float|false|null {
-                $price = $this->getDiscountPrice();
-
-                if ($price != $this->price) {
-                    $price = $this->getComparePrice($price, $this->sale_price ?: $this->price);
-                }
-
-                return $this->getComparePrice($price, $this->original_price);
-            }
+        return Attribute::get(
+            fn () => app(ProductPriceService::class)->getPrice($this)
         );
     }
 
     protected function originalPrice(): Attribute
     {
-        return Attribute::make(
-            get: function (): float|null {
-                $price = $this->getFlashSalePrice();
-
-                if ($price != $this->price) {
-                    return $this->getComparePrice($price, $this->sale_price ?: $this->price);
-                }
-
-                return $this->getComparePrice($this->price, $this->sale_price);
-            }
+        return Attribute::get(
+            fn () => app(ProductPriceService::class)->getOriginalPrice($this)
         );
     }
 
@@ -446,24 +438,6 @@ class Product extends BaseModel
         return $price;
     }
 
-    protected function getComparePrice(?float $price, ?float $salePrice): ?float
-    {
-        if ($salePrice && $price > $salePrice) {
-            if ($this->sale_type == 0) {
-                return $salePrice;
-            }
-
-            if ((! empty($this->start_date) && $this->start_date > Carbon::now()) ||
-                (! empty($this->end_date && $this->end_date < Carbon::now()))) {
-                return $price;
-            }
-
-            return $salePrice;
-        }
-
-        return $price;
-    }
-
     public function isOutOfStock(): bool
     {
         if (! $this->with_storehouse_management) {
@@ -530,32 +504,34 @@ class Product extends BaseModel
             ->latest();
     }
 
-    public function getFrontSalePriceWithTaxesAttribute(): ?float
+    protected function frontSalePriceWithTaxes(): Attribute
     {
-        if (! EcommerceHelper::isDisplayProductIncludingTaxes()) {
-            return $this->front_sale_price;
-        }
+        return Attribute::get(function (): float|null {
+            if (! EcommerceHelper::isDisplayProductIncludingTaxes()) {
+                return $this->front_sale_price;
+            }
 
-        //return $this->front_sale_price + $this->front_sale_price * ($this->total_taxes_percentage / 100);
-        return $this->front_sale_price;
+            return $this->front_sale_price + $this->front_sale_price * ($this->total_taxes_percentage / 100);
+        });
     }
 
-    public function getPriceWithTaxesAttribute(): ?float
+    protected function priceWithTaxes(): Attribute
     {
-        if (! EcommerceHelper::isDisplayProductIncludingTaxes()) {
-            return $this->price;
-        }
+        return Attribute::get(function (): float|null {
+            if (! EcommerceHelper::isDisplayProductIncludingTaxes()) {
+                return $this->price;
+            }
 
-        //return $this->price + $this->price * ($this->total_taxes_percentage / 100);
-        return $this->price;
+            return $this->price + $this->price * ($this->total_taxes_percentage / 100);
+        });
     }
 
-    public function getTotalTaxesPercentageAttribute()
+    protected function totalTaxesPercentage(): Attribute
     {
-        return $this->taxes
+        return Attribute::get(fn () => $this->taxes
             ->where(fn ($item) => ! $item->rules || $item->rules->isEmpty())
             ->where('status', BaseStatusEnum::PUBLISHED)
-            ->sum('percentage');
+            ->sum('percentage'));
     }
 
     public function variationProductAttributes(): HasMany
@@ -586,26 +562,30 @@ class Product extends BaseModel
             ->orderBy('order');
     }
 
-    public function getVariationAttributesAttribute(): string
+    protected function variationAttributes(): Attribute
     {
-        if (! $this->variationProductAttributes->count()) {
-            return '';
-        }
+        return Attribute::get(function () {
+            if (! $this->variationProductAttributes->count()) {
+                return '';
+            }
 
-        $attributes = $this->variationProductAttributes->pluck('title', 'attribute_set_title')->toArray();
+            $attributes = $this->variationProductAttributes->pluck('title', 'attribute_set_title')->toArray();
 
-        return '(' . mapped_implode(', ', $attributes, ': ') . ')';
+            return '(' . mapped_implode(', ', $attributes, ': ') . ')';
+        });
     }
 
-    public function getPriceInTableAttribute(): string
+    protected function priceInTable(): Attribute
     {
-        $price = format_price($this->front_sale_price);
+        return Attribute::get(function () {
+            $price = format_price($this->front_sale_price);
 
-        if ($this->front_sale_price != $this->price) {
-            $price .= ' <del class="text-danger">' . format_price($this->price) . '</del>';
-        }
+            if ($this->front_sale_price != $this->price) {
+                $price .= sprintf(' <del class="text-danger">%s</del>', format_price($this->price));
+            }
 
-        return $price;
+            return $price;
+        });
     }
 
     public function createdBy(): MorphTo
@@ -613,27 +593,33 @@ class Product extends BaseModel
         return $this->morphTo()->withDefault();
     }
 
-    public function getFaqItemsAttribute(): array
+    protected function faqItems(): Attribute
     {
-        $this->loadMissing('metadata');
-        $faqs = (array)$this->getMetaData('faq_schema_config', true);
-        $faqs = array_filter($faqs);
-        if (! empty($faqs)) {
+        return Attribute::get(function () {
+            $this->loadMissing('metadata');
+
+            $faqs = (array)$this->getMetaData('faq_schema_config', true);
+            $faqs = array_filter($faqs);
+
+            if (empty($faqs)) {
+                return [];
+            }
+
             foreach ($faqs as $key => $item) {
-                if (! is_array($item) || count($item) < 2 || ! $item[0]['value'] || ! $item[1]['value']) {
+                if (! $item[0]['value'] && ! $item[1]['value']) {
                     Arr::forget($faqs, $key);
                 }
             }
-        }
 
-        return $faqs;
+            return $faqs;
+        });
     }
 
-    public function getReviewImagesAttribute(): array
+    protected function reviewImages(): Attribute
     {
-        return $this->reviews->sortByDesc('created_at')->reduce(function ($carry, $item) {
+        return Attribute::get(fn () => $this->reviews->sortByDesc('created_at')->reduce(function ($carry, $item) {
             return array_merge($carry, (array)$item->images);
-        }, []);
+        }, []));
     }
 
     public function isTypePhysical(): bool
@@ -651,18 +637,25 @@ class Product extends BaseModel
         return $this->hasMany(ProductFile::class, 'product_id');
     }
 
-    public function productFileExternalCount(): Attribute
+    protected function productFileExternalCount(): Attribute
     {
-        return Attribute::make(
-            get: fn () => $this->productFiles->filter(fn (ProductFile $file) => $file->is_external_link)->count(),
-        );
+        return Attribute::get(fn () => $this->productFiles->filter(fn (ProductFile $file) => $file->is_external_link)->count());
     }
 
-    public function productFileInternalCount(): Attribute
+    protected function productFileInternalCount(): Attribute
     {
-        return Attribute::make(
-            get: fn () => $this->productFiles->filter(fn (ProductFile $file) => ! $file->is_external_link)->count(),
-        );
+        return Attribute::get(fn () => $this->productFiles->filter(fn (ProductFile $file) => ! $file->is_external_link)->count());
+    }
+
+    protected function salePercent(): Attribute
+    {
+        return Attribute::get(function (): int {
+            if (! $this->front_sale_price || ! $this->price) {
+                return 0;
+            }
+
+            return (int) round(($this->price - $this->front_sale_price) / $this->price * 100);
+        });
     }
 
     public function scopeNotOutOfStock(Builder $query): Builder
@@ -738,5 +731,29 @@ class Product extends BaseModel
 
             return $sku;
         }
+    }
+
+    public function getOriginalPrice(): float
+    {
+        return $this->originalPrice ??= (float) $this->price;
+    }
+
+    public function setOriginalPrice(float|null $price): static
+    {
+        $this->originalPrice = (float) $price;
+
+        return $this;
+    }
+
+    public function getFinalPrice(): float
+    {
+        return $this->finalPrice ??= (float) $this->price;
+    }
+
+    public function setFinalPrice(float|null $price): static
+    {
+        $this->finalPrice = (float) $price;
+
+        return $this;
     }
 }

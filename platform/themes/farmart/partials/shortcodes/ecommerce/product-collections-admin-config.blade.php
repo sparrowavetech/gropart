@@ -1,5 +1,5 @@
-<div class="form-group">
-    <label class="control-label">{{ __('Title') }}</label>
+<div class="mb-3">
+    <label class="form-label">{{ __('Title') }}</label>
     <input
         class="form-control"
         name="title"
@@ -9,8 +9,8 @@
     >
 </div>
 
-<div class="form-group">
-    <label class="control-label">{{ __('Limit') }}</label>
+<div class="mb-3">
+    <label class="form-label">{{ __('Limit') }}</label>
     <input
         class="form-control"
         name="limit"
@@ -20,28 +20,20 @@
     >
 </div>
 
-<div class="form-group">
-    <label class="control-label">{{ __('Select a product collection') }}</label>
-    <div class="ui-select-wrapper form-group">
-        <select
-            class="ui-select"
-            name="collection_id"
-        >
-            <option value="">{{ __('All') }}</option>
-            @foreach ($productCollections as $collection)
-                <option
-                    value="{{ $collection->id }}"
-                    @if ($collection->id == Arr::get($attributes, 'collection_id')) selected @endif
-                >{!! BaseHelper::clean($collection->indent_text) !!} {{ $collection->name }}</option>
-            @endforeach
-        </select>
-        <svg class="svg-next-icon svg-next-icon-size-16">
-            <use
-                xmlns:xlink="http://www.w3.org/1999/xlink"
-                xlink:href="#select-chevron"
-            ></use>
-        </svg>
-    </div>
+<div class="mb-3">
+    <label class="form-label">{{ __('Select a product collection') }}</label>
+    <select
+        class="form-select"
+        name="collection_id"
+    >
+        <option value="">{{ __('All') }}</option>
+        @foreach ($productCollections as $collection)
+            <option
+                value="{{ $collection->id }}"
+                @if ($collection->id == Arr::get($attributes, 'collection_id')) selected @endif
+            >{!! BaseHelper::clean($collection->indent_text) !!} {{ $collection->name }}</option>
+        @endforeach
+    </select>
 </div>
 
 {!! Theme::partial('shortcodes.includes.autoplay-settings', compact('attributes')) !!}

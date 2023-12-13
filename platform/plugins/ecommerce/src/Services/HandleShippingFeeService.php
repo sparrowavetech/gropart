@@ -201,7 +201,7 @@ class HandleShippingFeeService
                 $rules = ShippingRule::query()
                     ->where(function (Builder $query) use ($orderTotal, $shipping) {
                         $query
-                            ->where('shipping_id', $shipping->id)
+                            ->where('shipping_id', $shipping->getKey())
                             ->where('type', ShippingRuleTypeEnum::BASED_ON_PRICE)
                             ->where('from', '<=', $orderTotal)
                             ->where(function (Builder $sub) use ($orderTotal) {
@@ -212,7 +212,7 @@ class HandleShippingFeeService
                     })
                     ->orWhere(function (Builder $query) use ($weight, $shipping) {
                         $query
-                            ->where('shipping_id', $shipping->id)
+                            ->where('shipping_id', $shipping->getKey())
                             ->where('type', ShippingRuleTypeEnum::BASED_ON_WEIGHT)
                             ->where('from', '<=', $weight)
                             ->where(function (Builder $sub) use ($weight) {
@@ -226,7 +226,7 @@ class HandleShippingFeeService
                     $rules = $rules
                         ->orWhere(function (Builder $query) use ($shipping) {
                             $query
-                                ->where('shipping_id', $shipping->id)
+                                ->where('shipping_id', $shipping->getKey())
                                 ->where('type', ShippingRuleTypeEnum::BASED_ON_LOCATION);
                         });
                 }
@@ -235,7 +235,7 @@ class HandleShippingFeeService
                     $rules = $rules
                         ->orWhere(function (Builder $query) use ($zipCode, $shipping) {
                             $query
-                                ->where('shipping_id', $shipping->id)
+                                ->where('shipping_id', $shipping->getKey())
                                 ->where('type', ShippingRuleTypeEnum::BASED_ON_ZIPCODE)
                                 ->whereHas('items', function (Builder $sub) use ($zipCode) {
                                     $sub->where(['zip_code' => $zipCode]);
@@ -247,7 +247,7 @@ class HandleShippingFeeService
                     ->with([
                         'items' => function ($query) {
                             $query
-                                ->where(['is_enabled' => 1])
+                                ->where('is_enabled', 1)
                                 ->orderBy('adjustment_price');
                         },
                     ])

@@ -2,9 +2,9 @@
 
 namespace Botble\Ecommerce\Enums;
 
-use Botble\Base\Facades\Html;
 use Botble\Base\Supports\Enum;
 use Botble\Ecommerce\Facades\EcommerceHelper;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\HtmlString;
 
 /**
@@ -14,19 +14,20 @@ use Illuminate\Support\HtmlString;
 class ProductTypeEnum extends Enum
 {
     public const PHYSICAL = 'physical';
+
     public const DIGITAL = 'digital';
 
     public static $langPath = 'plugins/ecommerce::products.types';
 
     public function toHtml(): HtmlString|string
     {
-        return match ($this->value) {
-            self::PHYSICAL => Html::tag('span', self::PHYSICAL()->label(), ['class' => 'label-info status-label'])
-                ->toHtml(),
-            self::DIGITAL => Html::tag('span', self::DIGITAL()->label(), ['class' => 'label-primary status-label'])
-                ->toHtml(),
-            default => parent::toHtml(),
+        $color = match ($this->value) {
+            self::PHYSICAL => 'info',
+            self::DIGITAL => 'primary',
+            default => null,
         };
+
+        return Blade::render(sprintf('<x-core::badge label="%s" color="%s" />', $this->label(), $color));
     }
 
     public function toIcon(): string
@@ -35,16 +36,12 @@ class ProductTypeEnum extends Enum
             return '';
         }
 
-        return match ($this->value) {
-            self::PHYSICAL => Html::tag('i', '', [
-                'class' => 'fa-solid fa-suitcase-rolling text-primary',
-                'title' => self::PHYSICAL()->label(),
-            ])->toHtml(),
-            self::DIGITAL => Html::tag('i', '', [
-                'class' => 'fa-solid fa-microchip text-info',
-                'title' => self::DIGITAL()->label(),
-            ])->toHtml(),
-            default => Html::tag('i', '', ['class' => 'fa fa-camera'])->toHtml(),
+        $icon = match ($this->value) {
+            self::PHYSICAL => 'ti ti-package',
+            self::DIGITAL => 'ti ti-book-download',
+            default => 'ti ti-camera',
         };
+
+        return Blade::render(sprintf('<x-core::icon name="%s" />', $icon));
     }
 }

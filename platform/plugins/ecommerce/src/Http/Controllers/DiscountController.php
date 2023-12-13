@@ -6,9 +6,6 @@ use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Base\Facades\Assets;
-use Botble\Base\Facades\PageTitle;
-use Botble\Base\Http\Controllers\BaseController;
-use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Http\Requests\DiscountRequest;
 use Botble\Ecommerce\Models\Discount;
 use Botble\Ecommerce\Models\Product;
@@ -23,9 +20,18 @@ use Illuminate\Support\Str;
 
 class DiscountController extends BaseController
 {
+    public function __construct()
+    {
+        parent::__construct();
+
+        $this
+            ->breadcrumb()
+            ->add(trans('plugins/ecommerce::discount.name'), route('discounts.index'));
+    }
+
     public function index(DiscountTable $dataTable)
     {
-        PageTitle::setTitle(trans('plugins/ecommerce::discount.name'));
+        $this->pageTitle(trans('plugins/ecommerce::discount.name'));
 
         Assets::addStylesDirectly(['vendor/core/plugins/ecommerce/css/ecommerce.css']);
 
@@ -34,13 +40,13 @@ class DiscountController extends BaseController
 
     public function create()
     {
-        PageTitle::setTitle(trans('plugins/ecommerce::discount.create'));
+        $this->pageTitle(trans('plugins/ecommerce::discount.create'));
 
         Assets::addStylesDirectly(['vendor/core/plugins/ecommerce/css/ecommerce.css'])
             ->addScriptsDirectly([
                 'vendor/core/plugins/ecommerce/js/discount.js',
             ])
-            ->addScripts(['timepicker', 'input-mask', 'blockui'])
+            ->addScripts(['timepicker', 'input-mask'])
             ->addStyles(['timepicker']);
 
         Assets::usingVueJS();
@@ -51,7 +57,7 @@ class DiscountController extends BaseController
         return view('plugins/ecommerce::discounts.create', compact('jsValidation'));
     }
 
-    public function store(DiscountRequest $request, BaseHttpResponse $response)
+    public function store(DiscountRequest $request)
     {
         $discount = Discount::query()->create($request->validated());
 
@@ -127,9 +133,10 @@ class DiscountController extends BaseController
 
         event(new CreatedContentEvent(DISCOUNT_MODULE_SCREEN_NAME, $request, $discount));
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setNextUrl(route('discounts.index'))
-            ->setMessage(trans('core/base::notices.create_success_message'));
+            ->withCreatedSuccessMessage();
     }
 
     public function edit(Discount $discount)
@@ -160,13 +167,13 @@ class DiscountController extends BaseController
             $customer->avatar_url = RvMedia::getImageUrl($customer->avatar, 'thumb', false, RvMedia::getDefaultImage());
         });
 
-        PageTitle::setTitle(trans('plugins/ecommerce::discount.edit'));
+        $this->pageTitle(trans('plugins/ecommerce::discount.edit'));
 
         Assets::addStylesDirectly(['vendor/core/plugins/ecommerce/css/ecommerce.css'])
             ->addScriptsDirectly([
                 'vendor/core/plugins/ecommerce/js/discount.js',
             ])
-            ->addScripts(['timepicker', 'input-mask', 'blockui'])
+            ->addScripts(['timepicker', 'input-mask'])
             ->addStyles(['timepicker']);
 
         Assets::usingVueJS();
@@ -174,7 +181,7 @@ class DiscountController extends BaseController
         return view('plugins/ecommerce::discounts.edit', compact('discount'));
     }
 
-    public function update(Discount $discount, DiscountRequest $request, BaseHttpResponse $response)
+    public function update(Discount $discount, DiscountRequest $request)
     {
         $discount->update($request->validated());
 
@@ -252,32 +259,38 @@ class DiscountController extends BaseController
 
         event(new UpdatedContentEvent(DISCOUNT_MODULE_SCREEN_NAME, $request, $discount));
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setNextUrl(route('discounts.edit', $discount))
-            ->setMessage(trans('core/base::notices.update_success_message'));
+            ->withUpdatedSuccessMessage();
     }
 
-    public function destroy(Discount $discount, Request $request, BaseHttpResponse $response)
+    public function destroy(Discount $discount, Request $request)
     {
         try {
             $discount->delete();
 
             event(new DeletedContentEvent(DISCOUNT_MODULE_SCREEN_NAME, $request, $discount));
 
-            return $response->setMessage(trans('core/base::notices.delete_success_message'));
+            return $this
+                ->httpResponse()
+                ->setMessage(trans('core/base::notices.delete_success_message'));
         } catch (Exception $exception) {
-            return $response
+            return $this
+                ->httpResponse()
                 ->setError()
                 ->setMessage($exception->getMessage());
         }
     }
 
-    public function postGenerateCoupon(BaseHttpResponse $response)
+    public function postGenerateCoupon()
     {
         do {
             $code = strtoupper(Str::random(12));
         } while (Discount::query()->where(['code' => $code])->exists());
 
-        return $response->setData($code);
+        return $this
+            ->httpResponse()
+            ->setData($code);
     }
 }

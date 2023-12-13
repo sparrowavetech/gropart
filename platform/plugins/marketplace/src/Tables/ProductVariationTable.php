@@ -6,7 +6,6 @@ use Botble\Base\Facades\Form;
 use Botble\Base\Facades\Html;
 use Botble\Ecommerce\Models\ProductVariation;
 use Botble\Ecommerce\Tables\ProductVariationTable as EcommerceProductVariationTable;
-use Botble\Marketplace\Exports\ProductExport;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
@@ -14,21 +13,20 @@ use Illuminate\Http\JsonResponse;
 
 class ProductVariationTable extends EcommerceProductVariationTable
 {
-    public function setup(): void
-    {
-        parent::setup();
-
-        $this->exportClass = ProductExport::class;
-    }
-
     public function ajax(): JsonResponse
     {
         $data = $this->loadDataTable();
         $data
             ->editColumn('is_default', function (ProductVariation $item) {
-                return Html::tag('label', Form::radio('variation_default_id', $item->getKey(), $item->is_default, [
-                    'data-url' => route('marketplace.vendor.products.set-default-product-variation', $item->getKey()),
-                ]));
+                return Html::tag(
+                    'label',
+                    Form::radio('variation_default_id', $item->getKey(), $item->is_default, [
+                        'data-url' => route('products.set-default-product-variation', $item->getKey()),
+                        'data-bs-toggle' => 'tooltip',
+                        'title' => trans('plugins/ecommerce::products.set_this_variant_as_default'),
+                        'class' => 'form-check-input',
+                    ])
+                );
             })
             ->editColumn('operations', function (ProductVariation $item) {
                 $update = route('marketplace.vendor.products.update-version', $item->getKey());
@@ -50,7 +48,7 @@ class ProductVariationTable extends EcommerceProductVariationTable
                 $query
                     ->where([
                         'configurable_product_id' => $this->productId,
-                        'store_id' => auth('customer')->user()->store->id,
+                        'store_id' => auth('customer')->user()->store->getKey(),
                     ]);
             });
     }

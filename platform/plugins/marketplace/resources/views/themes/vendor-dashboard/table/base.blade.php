@@ -1,9 +1,9 @@
-@extends(MarketplaceHelper::viewPath('vendor-dashboard.layouts.master'))
+@php
+    $layout = MarketplaceHelper::viewPath('vendor-dashboard.layouts.master');
+@endphp
+
+@extends('core/table::table')
+
 @section('content')
-    <div
-        class="container page-content"
-        style="background: none; max-width: none"
-    >
-        @include('core/table::base-table')
-    </div>
+    @parent
 @stop

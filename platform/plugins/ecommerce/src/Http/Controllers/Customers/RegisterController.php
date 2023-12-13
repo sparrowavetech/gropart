@@ -2,10 +2,9 @@
 
 namespace Botble\Ecommerce\Http\Controllers\Customers;
 
-use App\Http\Controllers\Controller;
 use Botble\ACL\Traits\RegistersUsers;
 use Botble\Base\Facades\BaseHelper;
-use Botble\Base\Http\Responses\BaseHttpResponse;
+use Botble\Base\Http\Controllers\BaseController;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Http\Requests\RegisterRequest;
 use Botble\Ecommerce\Models\Customer;
@@ -19,7 +18,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Validator;
 
-class RegisterController extends Controller
+class RegisterController extends BaseController
 {
     use RegistersUsers;
 
@@ -34,7 +33,7 @@ class RegisterController extends Controller
     {
         SeoHelper::setTitle(__('Register'));
 
-        Theme::breadcrumb()->add(__('Home'), route('public.index'))->add(__('Register'), route('customer.register'));
+        Theme::breadcrumb()->add(__('Register'), route('customer.register'));
 
         if (! session()->has('url.intended') &&
             ! in_array(url()->previous(), [route('customer.login'), route('customer.register')])
@@ -55,7 +54,7 @@ class RegisterController extends Controller
             ->render();
     }
 
-    public function register(Request $request, BaseHttpResponse $response)
+    public function register(Request $request)
     {
         $this->validator($request->input())->validate();
 
@@ -68,9 +67,10 @@ class RegisterController extends Controller
         if (EcommerceHelper::isEnableEmailVerification()) {
             $this->registered($request, $customer);
 
-            return $response
-                    ->setNextUrl(route('customer.login'))
-                    ->setMessage(__('We have sent you an email to verify your email. Please check and confirm your email address!'));
+            return $this
+                ->httpResponse()
+                ->setNextUrl(route('customer.login'))
+                ->setMessage(__('We have sent you an email to verify your email. Please check and confirm your email address!'));
         }
 
         $customer->confirmed_at = Carbon::now();
@@ -78,7 +78,10 @@ class RegisterController extends Controller
 
         $this->guard()->login($customer);
 
-        return $response->setNextUrl($this->redirectPath())->setMessage(__('Registered successfully!'));
+        return $this
+            ->httpResponse()
+            ->setNextUrl($this->redirectPath())
+            ->setMessage(__('Registered successfully!'));
     }
 
     protected function validator(array $data)
@@ -100,7 +103,7 @@ class RegisterController extends Controller
         return auth('customer');
     }
 
-    public function confirm(int|string $id, Request $request, BaseHttpResponse $response)
+    public function confirm(int|string $id, Request $request)
     {
         if (! URL::hasValidSignature($request)) {
             abort(404);
@@ -113,26 +116,28 @@ class RegisterController extends Controller
 
         $this->guard()->login($customer);
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setNextUrl(route('customer.overview'))
             ->setMessage(__('You successfully confirmed your email address.'));
     }
 
     public function resendConfirmation(
         Request $request,
-        BaseHttpResponse $response
     ) {
         $customer =Customer::query()->where('email', $request->input('email'))->first();
 
         if (! $customer) {
-            return $response
+            return $this
+                ->httpResponse()
                 ->setError()
                 ->setMessage(__('Cannot find this customer!'));
         }
 
         $customer->sendEmailVerificationNotification();
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setMessage(__('We sent you another confirmation email. You should receive it shortly.'));
     }
 }

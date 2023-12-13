@@ -21,6 +21,13 @@ class ShippingRule extends BaseModel
         'shipping_id',
     ];
 
+    protected static function booted(): void
+    {
+        self::deleting(function (ShippingRule $shippingRule) {
+            $shippingRule->items()->delete();
+        });
+    }
+
     protected $casts = [
         'type' => ShippingRuleTypeEnum::class,
         'name' => SafeContent::class,
@@ -34,12 +41,5 @@ class ShippingRule extends BaseModel
     public function items(): HasMany
     {
         return $this->hasMany(ShippingRuleItem::class);
-    }
-
-    protected static function booted(): void
-    {
-        self::deleting(function (ShippingRule $shippingRule) {
-            $shippingRule->items()->delete();
-        });
     }
 }

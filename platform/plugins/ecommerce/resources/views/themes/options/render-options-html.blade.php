@@ -16,7 +16,7 @@
             {{ $productOptions['optionInfo'][$key] }}:
             @foreach ($optionValue as $value)
                 @php
-                    if (Arr::get($value, 'option_type') != 'field') {
+                    if ($value['affect_price']) {
                         if ($value['affect_type'] == 1) {
                             $price += ($basePrice * $value['affect_price']) / 100;
                         } else {

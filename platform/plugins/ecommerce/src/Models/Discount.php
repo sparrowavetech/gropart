@@ -4,6 +4,7 @@ namespace Botble\Ecommerce\Models;
 
 use Botble\Base\Models\BaseModel;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Discount extends BaseModel
@@ -26,6 +27,8 @@ class Discount extends BaseModel
         'discount_on',
         'product_quantity',
         'apply_via_url',
+        'display_at_checkout',
+        'description',
     ];
 
     protected $casts = [
@@ -33,7 +36,19 @@ class Discount extends BaseModel
         'end_date' => 'datetime',
         'can_use_with_promotion' => 'bool',
         'apply_via_url' => 'bool',
+        'display_at_checkout' => 'bool',
     ];
+
+    protected static function booted(): void
+    {
+        static::deleting(function (Discount $discount) {
+            $discount->productCollections()->detach();
+            $discount->productCategories()->detach();
+            $discount->customers()->detach();
+            $discount->products()->detach();
+            $discount->usedByCustomers()->detach();
+        });
+    }
 
     public function isExpired(): bool
     {
@@ -86,14 +101,8 @@ class Discount extends BaseModel
         return $this->belongsToMany(Customer::class, 'ec_customer_used_coupons');
     }
 
-    protected static function booted(): void
+    protected function leftQuantity(): Attribute
     {
-        static::deleting(function (Discount $discount) {
-            $discount->productCollections()->detach();
-            $discount->productCategories()->detach();
-            $discount->customers()->detach();
-            $discount->products()->detach();
-            $discount->usedByCustomers()->detach();
-        });
+        return Attribute::get(fn () => $this->quantity - $this->total_used);
     }
 }

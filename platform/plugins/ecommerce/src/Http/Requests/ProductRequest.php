@@ -3,6 +3,7 @@
 namespace Botble\Ecommerce\Http\Requests;
 
 use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Ecommerce\Enums\CrossSellPriceType;
 use Botble\Ecommerce\Enums\GlobalOptionEnum;
 use Botble\Ecommerce\Enums\ProductTypeEnum;
 use Botble\Ecommerce\Facades\EcommerceHelper;
@@ -39,7 +40,6 @@ class ProductRequest extends Request
             'cost_per_item' => 'numeric|nullable|min:0|max:100000000000',
             'barcode' => [
                 'nullable',
-                'string',
                 'max:50',
                 Rule::unique('ec_products')->ignore($this->route('product')),
             ],
@@ -48,6 +48,10 @@ class ProductRequest extends Request
             'categories.*' => 'nullable|exists:ec_product_categories,id',
             'product_collections' => 'nullable|array',
             'product_collections.*' => 'nullable|exists:ec_product_collections,id',
+            'cross_sale_products' => ['nullable', 'array'],
+            'cross_sale_products.*.id' => ['nullable', 'string', 'exists:ec_products,id'],
+            'cross_sale_products.*.price' => ['nullable', 'numeric', 'min:0', 'max:100000000000'],
+            'cross_sale_products.*.price_type' => ['nullable', 'string', Rule::in(CrossSellPriceType::values())],
         ];
 
         if (EcommerceHelper::isEnabledProductOptions()) {
@@ -80,6 +84,7 @@ class ProductRequest extends Request
         $attrs = [
             'product_files_external.*.link' => trans('plugins/ecommerce::products.digital_attachments.external_link_download'),
         ];
+
         if (! empty($options)) {
             foreach ($options as $key => $option) {
                 $name = sprintf('options.%s.name', $key);

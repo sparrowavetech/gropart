@@ -2,7 +2,7 @@
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             @foreach ($crumbs as $i => $crumb)
-                @if ($i != count($crumbs) - 1)
+                @if (! $loop->last)
                     <li class="breadcrumb-item">
                         <a href="{{ $crumb['url'] }}">{{ $crumb['label'] }}</a>
                         <span class="extra-breadcrumb-name"></span>

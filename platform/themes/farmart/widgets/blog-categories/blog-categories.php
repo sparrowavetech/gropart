@@ -1,15 +1,7 @@
 <?php
 
-use Botble\Widget\AbstractWidget;
+use Botble\Blog\Widgets\Fronts\Categories;
 
-class BlogCategoriesWidget extends AbstractWidget
+class BlogCategoriesWidget extends Categories
 {
-    public function __construct()
-    {
-        parent::__construct([
-            'name' => __('Blog Categories'),
-            'description' => __('Widget display blog categories'),
-            'number_display' => 10,
-        ]);
-    }
 }

@@ -85,7 +85,7 @@ class OrderSupportServiceProvider extends ServiceProvider
 
     protected function cartGroupByStore(EloquentCollection $products): array|Collection
     {
-        if (! $products->count()) {
+        if ($products->isEmpty()) {
             return $products;
         }
 
@@ -586,6 +586,8 @@ class OrderSupportServiceProvider extends ServiceProvider
 
         return EmailHandler::setModule(ECOMMERCE_MODULE_SCREEN_NAME)
             ->setVariableValues([
+                'store_address' => get_ecommerce_setting('store_address'),
+                'store_phone' => get_ecommerce_setting('store_phone'),
                 'order_id' => $theFirst->code,
                 'order_token' => $theFirst->token,
                 'customer_name' => $theFirst->user->name ?: $theFirst->address->name,
@@ -596,12 +598,6 @@ class OrderSupportServiceProvider extends ServiceProvider
                     ->render(),
                 'shipping_method' => $theFirst->shipping_method_name,
                 'payment_method' => $theFirst->payment->payment_channel->label(),
-                'store' => $theFirst->store->toArray(),
-                'store_name' => $theFirst->store->name,
-                'store_phone' => $theFirst->store->phone,
-                'store_email' => $theFirst->store->email,
-                'store_address' => $theFirst->store->full_address,
-                'store_url' => $theFirst->store->url,
             ]);
     }
 
@@ -1335,6 +1331,9 @@ class OrderSupportServiceProvider extends ServiceProvider
     public function addMoreOrderEmailVariables(array $variables, Order $order): array
     {
         $variables['store_name'] = $order->store->name;
+        $variables['store_phone'] = $order->store->phone;
+        $variables['store_address'] = $order->store->full_address;
+        $variables['store_link'] = $order->store->url;
         $variables['store'] = $order->store->toArray();
 
         return $variables;

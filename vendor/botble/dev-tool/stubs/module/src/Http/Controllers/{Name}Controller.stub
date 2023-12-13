@@ -78,4 +78,22 @@ class {Name}Controller extends BaseController
                 ->setMessage($exception->getMessage());
         }
     }
+
+    public function deletes(Request $request, BaseHttpResponse $response)
+    {
+        $ids = $request->input('ids');
+        if (empty($ids)) {
+            return $response
+                ->setError()
+                ->setMessage(trans('core/base::notices.no_select'));
+        }
+
+        foreach ($ids as $id) {
+            ${+name} = {Name}::query()->findOrFail($id);
+            ${+name}->delete();
+            event(new DeletedContentEvent({NAME}_MODULE_SCREEN_NAME, $request, ${+name}));
+        }
+
+        return $response->setMessage(trans('core/base::notices.delete_success_message'));
+    }
 }

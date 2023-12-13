@@ -2,48 +2,47 @@
 
 namespace Botble\Marketplace\Http\Controllers\Fronts;
 
-use Botble\Base\Facades\PageTitle;
-use Botble\Base\Forms\FormBuilder;
-use Botble\Base\Http\Responses\BaseHttpResponse;
+use Botble\Base\Http\Controllers\BaseController;
 use Botble\Marketplace\Enums\WithdrawalStatusEnum;
 use Botble\Marketplace\Events\WithdrawalRequested;
 use Botble\Marketplace\Facades\MarketplaceHelper;
 use Botble\Marketplace\Forms\VendorWithdrawalForm;
-use Botble\Marketplace\Http\Requests\VendorEditWithdrawalRequest;
-use Botble\Marketplace\Http\Requests\VendorWithdrawalRequest;
+use Botble\Marketplace\Http\Requests\Fronts\VendorEditWithdrawalRequest;
+use Botble\Marketplace\Http\Requests\Fronts\VendorWithdrawalRequest;
 use Botble\Marketplace\Models\Withdrawal;
 use Botble\Marketplace\Tables\VendorWithdrawalTable;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 
-class WithdrawalController
+class WithdrawalController extends BaseController
 {
     public function index(VendorWithdrawalTable $table)
     {
-        PageTitle::setTitle(__('Withdrawals'));
+        $this->pageTitle(__('Withdrawals'));
 
         return $table->renderTable();
     }
 
-    public function create(FormBuilder $formBuilder, BaseHttpResponse $response)
+    public function create()
     {
         $user = auth('customer')->user();
         $fee = MarketplaceHelper::getSetting('fee_withdrawal', 0);
 
         if ($user->balance <= $fee || ! $user->bank_info) {
-            return $response
+            return $this
+                ->httpResponse()
                 ->setError()
                 ->setNextUrl(route('marketplace.vendor.withdrawals.index'))
                 ->setMessage(__('Insufficient balance or no bank information'));
         }
 
-        PageTitle::setTitle(__('Withdrawal request'));
+        $this->pageTitle(__('Withdrawal request'));
 
-        return $formBuilder->create(VendorWithdrawalForm::class)->renderForm();
+        return VendorWithdrawalForm::create()->renderForm();
     }
 
-    public function store(VendorWithdrawalRequest $request, BaseHttpResponse $response)
+    public function store(VendorWithdrawalRequest $request)
     {
         $fee = MarketplaceHelper::getSetting('fee_withdrawal', 0);
         $vendor = auth('customer')->user();
@@ -72,17 +71,19 @@ class WithdrawalController
         } catch (Throwable | Exception $th) {
             DB::rollBack();
 
-            return $response
+            return $this
+                ->httpResponse()
                 ->setError()
                 ->setMessage($th->getMessage());
         }
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setPreviousUrl(route('marketplace.vendor.withdrawals.index'))
-            ->setMessage(trans('core/base::notices.create_success_message'));
+            ->withCreatedSuccessMessage();
     }
 
-    public function edit(int|string $id, FormBuilder $formBuilder)
+    public function edit(int|string $id)
     {
         $withdrawal = Withdrawal::query()
             ->where([
@@ -92,12 +93,12 @@ class WithdrawalController
             ])
             ->firstOrFail();
 
-        PageTitle::setTitle(__('Update withdrawal request #' . $id));
+        $this->pageTitle(__('Update withdrawal request #' . $id));
 
-        return $formBuilder->create(VendorWithdrawalForm::class, ['model' => $withdrawal])->renderForm();
+        return VendorWithdrawalForm::createFromModel($withdrawal)->renderForm();
     }
 
-    public function update(int|string $id, VendorEditWithdrawalRequest $request, BaseHttpResponse $response)
+    public function update(int|string $id, VendorEditWithdrawalRequest $request)
     {
         $withdrawal = Withdrawal::query()
             ->where([
@@ -110,7 +111,9 @@ class WithdrawalController
         $status = WithdrawalStatusEnum::PENDING;
         if ($request->input('cancel')) {
             $status = WithdrawalStatusEnum::CANCELED;
-            $response->setNextUrl(route('marketplace.vendor.withdrawals.show', $withdrawal->id));
+            $this
+                ->httpResponse()
+                ->setNextUrl(route('marketplace.vendor.withdrawals.show', $withdrawal->id));
         }
 
         $withdrawal->fill([
@@ -120,12 +123,13 @@ class WithdrawalController
 
         $withdrawal->save();
 
-        return $response
+        return $this
+            ->httpResponse()
             ->setPreviousUrl(route('marketplace.vendor.withdrawals.index'))
-            ->setMessage(trans('core/base::notices.update_success_message'));
+            ->withUpdatedSuccessMessage();
     }
 
-    public function show(int|string $id, FormBuilder $formBuilder)
+    public function show(int|string $id)
     {
         $withdrawal = Withdrawal::query()
             ->where('id', $id)
@@ -133,8 +137,8 @@ class WithdrawalController
             ->where('status', '!=', WithdrawalStatusEnum::PENDING)
             ->firstOrFail();
 
-        PageTitle::setTitle(__('View withdrawal request #' . $id));
+        $this->pageTitle(__('View withdrawal request #' . $id));
 
-        return $formBuilder->create(VendorWithdrawalForm::class, ['model' => $withdrawal])->renderForm();
+        return VendorWithdrawalForm::createFromModel($withdrawal)->renderForm();
     }
 }

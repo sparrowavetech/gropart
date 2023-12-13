@@ -10,7 +10,7 @@ use Botble\Ecommerce\Models\GlobalOption;
 
 class GlobalOptionForm extends FormAbstract
 {
-    public function buildForm(): void
+    public function setup(): void
     {
         Assets::addScripts(['jquery-ui'])->addScriptsDirectly([
             'vendor/core/plugins/ecommerce/js/global-option.js',
@@ -19,13 +19,12 @@ class GlobalOptionForm extends FormAbstract
         $this
             ->setupModel(new GlobalOption())
             ->setValidatorClass(GlobalOptionRequest::class)
-            ->withCustomFields()
             ->add('name', 'text', [
                 'label' => trans('core/base::forms.name'),
                 'required' => true,
                 'attr' => [
                     'placeholder' => trans('core/base::forms.name_placeholder'),
-                    'data-counter' => 120,
+                    'data-counter' => 250,
                 ],
             ])
             ->add('option_type', 'customSelect', [

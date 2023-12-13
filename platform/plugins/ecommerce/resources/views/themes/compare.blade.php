@@ -90,7 +90,7 @@
 
                                             @foreach ($products as $product)
                                                 @php
-                                                    $attributes = app(\Botble\Ecommerce\Repositories\Interfaces\ProductInterface::class)
+                                                    $attributes = app(Botble\Ecommerce\Repositories\Interfaces\ProductInterface::class)
                                                         ->getRelatedProductAttributes($product)
                                                         ->where('attribute_set_id', $attributeSet->id)
                                                         ->sortBy('order');

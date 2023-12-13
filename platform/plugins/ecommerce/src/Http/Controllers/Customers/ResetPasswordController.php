@@ -2,8 +2,8 @@
 
 namespace Botble\Ecommerce\Http\Controllers\Customers;
 
-use App\Http\Controllers\Controller;
 use Botble\ACL\Traits\ResetsPasswords;
+use Botble\Base\Http\Controllers\BaseController;
 use Botble\SeoHelper\Facades\SeoHelper;
 use Botble\Theme\Facades\Theme;
 use Illuminate\Contracts\Auth\PasswordBroker;
@@ -11,7 +11,7 @@ use Illuminate\Contracts\Auth\StatefulGuard;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
 
-class ResetPasswordController extends Controller
+class ResetPasswordController extends BaseController
 {
     use ResetsPasswords;
 
@@ -26,7 +26,7 @@ class ResetPasswordController extends Controller
     {
         SeoHelper::setTitle(__('Reset Password'));
 
-        Theme::breadcrumb()->add(__('Home'), route('public.index'))
+        Theme::breadcrumb()
             ->add(__('Reset Password'), route('customer.password.reset'));
 
         return Theme::scope(

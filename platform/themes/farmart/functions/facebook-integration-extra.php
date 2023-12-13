@@ -1,6 +1,8 @@
 <?php
 
-app()->booted(function () {
+use Botble\Theme\Events\RenderingThemeOptionSettings;
+
+app('events')->listen(RenderingThemeOptionSettings::class, function () {
     theme_option()
         ->setField([
             'id' => 'facebook_comment_enabled_in_product',

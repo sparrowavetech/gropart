@@ -23,13 +23,4 @@
             ])
         </div>
     </div>
-
-    <x-core-base::modal
-        id="confirm-change-status-modal"
-        :title="trans('plugins/ecommerce::shipping.change_status_confirm_title')"
-        button-id="confirm-change-shipment-status-button"
-        :button-label="trans('plugins/ecommerce::shipping.accept')"
-    >
-        {!! trans('plugins/ecommerce::shipping.change_status_confirm_description') !!}
-    </x-core-base::modal>
 @stop

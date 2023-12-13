@@ -2,22 +2,20 @@
 
 namespace Botble\Ecommerce\Http\Controllers\Customers;
 
-use App\Http\Controllers\Controller;
-use Botble\Base\Facades\PageTitle;
+use Botble\Base\Http\Controllers\BaseController;
 use Botble\Ecommerce\Facades\InvoiceHelper;
 use Botble\Ecommerce\Models\Invoice;
 use Botble\SeoHelper\Facades\SeoHelper;
 use Botble\Theme\Facades\Theme;
 use Illuminate\Http\Request;
 
-class InvoiceController extends Controller
+class InvoiceController extends BaseController
 {
     public function index()
     {
         SeoHelper::setTitle(__('Invoices'));
 
         Theme::breadcrumb()
-            ->add(__('Home'), route('public.index'))
             ->add(__('My Profile'), route('public.account.dashboard'))
             ->add(__('Manage Invoices'));
 
@@ -32,7 +30,7 @@ class InvoiceController extends Controller
 
         $title = __('Invoice detail :code', ['code' => $invoice->code]);
 
-        PageTitle::setTitle($title);
+        $this->pageTitle($title);
 
         SeoHelper::setTitle($title);
 

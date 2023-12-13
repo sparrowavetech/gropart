@@ -15,6 +15,7 @@ use Botble\Ecommerce\Events\OrderReturnedEvent;
 use Botble\Ecommerce\Events\ProductQuantityUpdatedEvent;
 use Botble\Ecommerce\Events\ProductViewed;
 use Botble\Ecommerce\Events\ShippingStatusChanged;
+use Botble\Ecommerce\Facades\Cart;
 use Botble\Ecommerce\Listeners\AddLanguageForVariantsListener;
 use Botble\Ecommerce\Listeners\ClearShippingRuleCache;
 use Botble\Ecommerce\Listeners\GenerateInvoiceListener;
@@ -32,10 +33,15 @@ use Botble\Ecommerce\Listeners\SendShippingStatusChangedNotification;
 use Botble\Ecommerce\Listeners\SendWebhookWhenOrderPlaced;
 use Botble\Ecommerce\Listeners\UpdateProductStockStatus;
 use Botble\Ecommerce\Listeners\UpdateProductView;
+use Botble\Ecommerce\Services\HandleApplyCouponService;
+use Botble\Ecommerce\Services\HandleApplyProductCrossSaleService;
+use Botble\Ecommerce\Services\HandleRemoveCouponService;
 use Botble\Payment\Events\RenderingPaymentMethods;
 use Botble\Theme\Events\RenderingSiteMapEvent;
+use Illuminate\Auth\Events\Logout;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
+use Illuminate\Session\SessionManager;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -95,4 +101,33 @@ class EventServiceProvider extends ServiceProvider
             RegisterCodPaymentMethod::class,
         ],
     ];
+
+    public function boot(): void
+    {
+        $events = $this->app['events'];
+
+        $events->listen(
+            ['cart.removed', 'cart.added', 'cart.updated'],
+            fn () => $this->app->make(HandleApplyProductCrossSaleService::class)->handle()
+        );
+
+        $events->listen(
+            ['cart.removed', 'cart.stored', 'cart.restored', 'cart.updated'],
+            function ($cart) {
+                $coupon = session('applied_coupon_code');
+                if ($coupon) {
+                    $this->app->make(HandleRemoveCouponService::class)->execute();
+                    if (Cart::count() || ($cart instanceof \Botble\Ecommerce\Cart\Cart && $cart->count())) {
+                        $this->app->make(HandleApplyCouponService::class)->execute($coupon);
+                    }
+                }
+            }
+        );
+
+        $this->app['events']->listen(Logout::class, function () {
+            if (get_ecommerce_setting('cart_destroy_on_logout', false)) {
+                $this->app->make(SessionManager::class)->forget('cart');
+            }
+        });
+    }
 }
