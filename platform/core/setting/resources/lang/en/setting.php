@@ -59,6 +59,10 @@ return [
         'horizontal' => 'Horizontal',
         'vertical' => 'Vertical',
         'show_menu_item_icon' => 'Show menu item icon?',
+        'language' => 'Language in admin panel',
+        'theme_mode' => 'Theme mode',
+        'dark' => 'Dark',
+        'light' => 'Light',
         'container_width' => [
             'title' => 'Container width',
             'default' => 'Default',
@@ -217,7 +221,7 @@ return [
         'watermark_position_bottom_left' => 'Bottom left',
         'watermark_position_bottom_right' => 'Bottom right',
         'watermark_position_center' => 'Center',
-        'turn_off_automatic_url_translation_into_latin' => 'Turn off automatic URL translation into Latin?',
+        'turn_off_automatic_url_translation_into_latin' => 'Turn off automatic URL translation into Latin',
         'bunnycdn_hostname' => 'Hostname',
         'bunnycdn_zone' => 'Zone Name (The name of your storage zone)',
         'bunnycdn_key' => 'FTP & API Access Password (The storage zone API Access Password)',
@@ -234,6 +238,7 @@ return [
         'max_upload_filesize_placeholder' => 'Default: :size, must less than :size.',
         'max_upload_filesize_helper' => 'Your server allows to upload files maximum :size, you can change this value to limit upload filesize.',
         'image_processing_library' => 'Image processing library',
+        'use_original_name_for_file_path' => 'Use original name for file path',
     ],
     'license' => [
         'purchase_code' => 'Purchase code',

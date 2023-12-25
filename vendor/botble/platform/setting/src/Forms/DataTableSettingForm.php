@@ -21,6 +21,9 @@ class DataTableSettingForm extends SettingForm
             ->add('datatables_default_show_export_button', 'onOffCheckbox', [
                 'label' => trans('core/setting::setting.datatable.form.show_export_button'),
                 'value' => setting('datatables_default_show_export_button', false),
+                'wrapper' => [
+                    'class' => 'mb-0',
+                ],
             ]);
     }
 }

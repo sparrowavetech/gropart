@@ -187,5 +187,16 @@ class FormServiceProvider extends ServiceProvider
             'choices' => [],
             'attributes' => [],
         ]);
+
+        Form::component('multiChecklist', 'core/base::forms.partials.multi-checklist', [
+            'name',
+            'value' => null,
+            'choices' => [],
+            'attributes' => [],
+            'emptyValue' => null,
+            'inline' => false,
+            'asDropdown' => false,
+            'ajaxUrl' => null,
+        ]);
     }
 }

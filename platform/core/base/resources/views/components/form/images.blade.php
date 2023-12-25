@@ -1,4 +1,4 @@
-@props(['name', 'allowThumb' => false, 'images' => [], 'addImagesLabel' => trans('core/base::forms.add_images'), 'resetLabel' => trans('core/base::forms.reset')])
+@props(['name', 'allowThumb' => true, 'images' => [], 'addImagesLabel' => trans('core/base::forms.add_images'), 'resetLabel' => trans('core/base::forms.reset')])
 
 <div {{ $attributes->merge(['class' => 'gallery-images-wrapper list-images form-fieldset']) }}>
     <div class="images-wrapper mb-2">
@@ -52,7 +52,8 @@
                                     <div class="preview-image-inner">
                                         <x-core::image
                                             class="preview-image"
-                                            src="{{ RvMedia::getImageUrl($image) ?? RvMedia::getImageUrl($image, $allowThumb ? 'thumb' : null, false) }}"
+                                            data-default="{{ $defaultImage = RvMedia::getDefaultImage() }}"
+                                            src="{{ RvMedia::getImageUrl($image, $allowThumb ? 'thumb' : null, false, $defaultImage) }}"
                                         />
                                         <div class="image-picker-backdrop"></div>
 

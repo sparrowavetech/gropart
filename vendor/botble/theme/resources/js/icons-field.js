@@ -18,7 +18,9 @@ $(() => {
 
                 let value = $this.children('option:selected').val()
 
-                let options = '<option value="">' + $this.data('empty-value') + '</option>'
+                value = value ? value : 0
+
+                let options = '<option value="0">' + $this.data('empty-value') + '</option>'
 
                 icons.forEach(function (value) {
                     options += '<option value="' + value + '">' + value + '</option>'
@@ -38,6 +40,7 @@ $(() => {
                 Botble.select(element, {
                     templateResult: (state) => templateCallback(state),
                     templateSelection: (state) => templateCallback(state),
+                    placeholder: $this.data('empty-value'),
                 })
             })
     }

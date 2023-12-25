@@ -69,24 +69,17 @@ class LanguageSettingForm extends FormAbstract
             }
 
             if ($choices) {
-                $this->add('hide_languages', HtmlField::class, [
-                    'html' => Blade::render(
-                        sprintf(
-                            '<x-core::form.label for="language_hide_languages"> %s
-                            </x-core::form>',
-                            trans('plugins/language::language.hide_languages')
-                        )
-                    ),
-                ])
-                ->add(
-                    'language_hide_languages[]',
-                    MultiCheckListField::class,
-                    MultiChecklistFieldOption::make()
-                    ->label(false)
-                    ->choices($choices)
-                    ->selected(json_decode(setting('language_hide_languages', '[]'), true))
-                    ->toArray()
-                );
+                $this
+                    ->add(
+                        'language_hide_languages[]',
+                        MultiCheckListField::class,
+                        MultiChecklistFieldOption::make()
+                            ->label(trans('plugins/language::language.hide_languages'))
+                            ->choices($choices)
+                            ->selected(json_decode(setting('language_hide_languages', '[]'), true))
+                            ->emptyValue('')
+                            ->toArray()
+                    );
             }
         }
 
@@ -94,7 +87,7 @@ class LanguageSettingForm extends FormAbstract
             'html' => Blade::render(
                 sprintf(
                     '<x-core::alert type="info"> %s </x-core::alert>',
-                    trans_choice('plugins/language::language.hide_languages_helper_display_hidden', count(json_decode(setting('language_hide_languages', '[]'), true)), ['language' => Language::getHiddenLanguageText()])
+                    trans_choice('plugins/language::language.hide_languages_helper_display_hidden', ! empty(json_decode(setting('language_hide_languages', '[]'), true)), ['language' => Language::getHiddenLanguageText()])
                 )
             ),
         ])
@@ -111,7 +104,7 @@ class LanguageSettingForm extends FormAbstract
             OnOffCheckboxField::class,
             OnOffFieldOption::make()
                 ->label(trans('plugins/language::language.language_auto_detect_user_language'))
-                ->value(setting('language_auto_detect_user_language', true))
+                ->value(setting('language_auto_detect_user_language', false))
                 ->toArray()
         )
         ->add('button_action', HtmlField::class, [

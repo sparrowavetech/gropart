@@ -130,7 +130,7 @@
 {!! apply_filters('after_contact_form', null) !!}
 
 <div class="contact-form-group">
-    <p>{!! BaseHelper::clean(__('The field with (<span style="color:#FF0000;">*</span>) is required.')) !!}</p>
+    <p>{!! BaseHelper::clean(__('The field with (:asterisk) is required.', ['asterisk' => '<span style="color:#FF0000;">*</span>'])) !!}</p>
 </div>
 
 <div class="contact-form-group">

@@ -8,3 +8,67 @@ div[data-bb-toggle="tree-checkboxes"] {
     max-height: 400px;
     overflow-y: auto;
 }
+
+.multi-check-list-wrapper {
+    overflow: auto;
+    max-height: 25rem;
+}
+
+div[data-bb-toggle="tree-checkboxes"] ul li, .multi-check-list-wrapper {
+    label {
+        margin-bottom: 0.75rem !important;
+    }
+}
+
+div[data-bb-toggle="tree-checkboxes"] {
+    > ul {
+       > li {
+            &:last-child {
+                > label {
+                    margin-bottom: 0 !important;
+                }
+            }
+        }
+    }
+}
+
+.form-fieldset {
+    > .mb-3.position-relative {
+        &:last-child {
+            margin-bottom: 0 !important;
+        }
+    }
+
+    .form-check {
+        &:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-check-input:focus {
+            box-shadow: none;
+        }
+    }
+}
+
+form {
+    .card {
+        .card-body {
+            label {
+                &.form-check {
+                    margin-bottom: 0;
+                }
+            }
+        }
+
+        &.meta-boxes {
+            .card-body {
+                .form-fieldset.fieldset-for-multi-check-list {
+                    background: transparent;
+                    border: none;
+                    padding: 0;
+                    border-radius: 0;
+                }
+            }
+        }
+    }
+}

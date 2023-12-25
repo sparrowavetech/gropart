@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Facade;
 /**
  * @method static \Illuminate\Routing\RouteRegistrar registerRoutes(\Closure|callable $closure, array $middleware = ['web','core','auth'])
  * @method static bool isInAdmin(bool $force = false)
+ * @method static string themeMode()
  *
  * @see \Botble\Base\Helpers\AdminHelper
  */

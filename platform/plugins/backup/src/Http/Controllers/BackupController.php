@@ -19,8 +19,6 @@ class BackupController extends BaseSystemController
 
     public function __construct(protected Backup $backup)
     {
-        parent::__construct();
-
         $this->databaseDriver = DB::getConfig('driver');
     }
 

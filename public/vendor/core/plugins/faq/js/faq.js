@@ -1,1 +1,1 @@
-(()=>{"use strict";$((function(){$(document).on("click",".add-faq-schema-items",(function(e){e.preventDefault(),$(".faq-schema-items").toggleClass("d-none"),$(e.currentTarget).toggleClass("d-none")}))}))})();
+(()=>{"use strict";$((function(){$(document).on("click",'[data-bb-toggle="select-from-existing"]',(function(t){t.preventDefault(),$(".existing-faq-schema-items").show()}))}))})();

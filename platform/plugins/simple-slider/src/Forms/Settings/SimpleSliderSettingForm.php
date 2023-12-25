@@ -18,9 +18,8 @@ class SimpleSliderSettingForm extends SettingForm
             ->add('simple_slider_using_assets', 'onOffCheckbox', [
                 'label' => trans('plugins/simple-slider::simple-slider.settings.using_assets'),
                 'value' => setting('simple_slider_using_assets', true),
-                'attr' => [
-                    'data-bb-toggle' => 'collapse',
-                    'data-bb-target' => '.simple-slider-assets',
+                'wrapper' => [
+                    'class' => 'mb-0',
                 ],
             ])
             ->add('simple_slider_assets', 'html', [

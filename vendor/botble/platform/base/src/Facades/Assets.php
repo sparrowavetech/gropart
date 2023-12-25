@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static string renderFooter()
  * @method static \Botble\Base\Supports\Assets usingVueJS()
  * @method static \Botble\Base\Supports\Assets disableVueJS()
+ * @method static bool hasVueJs()
  * @method static \Botble\Assets\Assets addScripts(string|array $assets)
  * @method static \Botble\Assets\Assets addStyles(string|array $assets)
  * @method static \Botble\Assets\Assets addStylesDirectly(array|string $assets)

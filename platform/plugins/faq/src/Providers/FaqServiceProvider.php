@@ -52,9 +52,18 @@ class FaqServiceProvider extends ServiceProvider
                 'question',
                 'answer',
             ]);
+
             LanguageAdvancedManager::registerModule(FaqCategory::class, [
                 'name',
             ]);
+
+            LanguageAdvancedManager::addTranslatableMetaBox('faq_schema_config_wrapper');
+
+            foreach (config('plugins.faq.general.schema_supported', []) as $item) {
+                $translatableColumns = array_merge(LanguageAdvancedManager::getTranslatableColumns($item), ['faq_schema_config', 'faq_ids']);
+
+                LanguageAdvancedManager::registerModule($item, $translatableColumns);
+            }
         }
 
         DashboardMenu::default()->beforeRetrieving(function () {

@@ -147,7 +147,12 @@ class MediaFile extends BaseModel
 
     public static function createSlug(string $name, string $extension, string|null $folderPath): string
     {
-        $slug = Str::slug($name, '-', ! RvMedia::turnOffAutomaticUrlTranslationIntoLatin() ? 'en' : false);
+        if (setting('media_use_original_name_for_file_path')) {
+            $slug = $name;
+        } else {
+            $slug = Str::slug($name, '-', ! RvMedia::turnOffAutomaticUrlTranslationIntoLatin() ? 'en' : false);
+        }
+
         $index = 1;
         $baseSlug = $slug;
         while (File::exists(RvMedia::getRealPath(rtrim($folderPath, '/') . '/' . $slug . '.' . $extension))) {
@@ -158,6 +163,6 @@ class MediaFile extends BaseModel
             $slug = $slug . '-' . time();
         }
 
-        return $slug . '.' . $extension;
+        return Str::limit($slug, end: null) . '.' . $extension;
     }
 }

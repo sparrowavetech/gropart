@@ -1004,7 +1004,9 @@ class LanguageManager
             // if we reached this point and hideDefaultLocaleInURL is true
             // we have to assume we are routing to a defaultLocale route.
             if ($this->hideDefaultLocaleInURL()) {
-                $this->currentLocale = $this->getDefaultLocale();
+                $this->currentLocale = $this->useAcceptLanguageHeader()
+                    ? $this->getCurrentLocale()
+                    : $this->getDefaultLocale();
             } else {
                 // but if hideDefaultLocaleInURL is false, we have
                 // to retrieve it from the browser...
@@ -1061,6 +1063,10 @@ class LanguageManager
 
         if (setting('language_show_default_item_if_current_version_not_existed', true)) {
             $url = $this->getLocalizedURL($localeCode);
+
+            if (Facades\Language::getCurrentLocaleCode() == Facades\Language::getDefaultLocaleCode()) {
+                return $url;
+            }
 
             $query = Arr::get(parse_url($url), 'query');
 

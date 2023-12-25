@@ -24,6 +24,7 @@
 }
 </script>
 
+{!! Theme::asset()->container('before_header')->styles() !!}
 {!! Theme::asset()->styles() !!}
 {!! Theme::asset()->container('after_header')->styles() !!}
 {!! Theme::asset()->container('header')->scripts() !!}

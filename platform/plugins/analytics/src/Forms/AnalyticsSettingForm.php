@@ -23,7 +23,6 @@ class AnalyticsSettingForm extends SettingForm
             ->setSectionTitle(trans('plugins/analytics::analytics.settings.title'))
             ->setSectionDescription(trans('plugins/analytics::analytics.settings.description'))
             ->setFormOption('id', 'google-analytics-settings')
-            ->addCustomField('codeEditor', CodeEditorField::class)
             ->setValidatorClass(AnalyticsSettingRequest::class)
             ->setActionButtons(view('core/setting::forms.partials.action', ['form' => $this->getFormOption('id')])->render())
             ->add('google_analytics', TextField::class, [
@@ -57,7 +56,7 @@ class AnalyticsSettingForm extends SettingForm
 
         if (! BaseHelper::hasDemoModeEnabled()) {
             $this
-                ->add('analytics_service_account_credentials', 'codeEditor', [
+                ->add('analytics_service_account_credentials', CodeEditorField::class, [
                     'label' => trans('plugins/analytics::analytics.settings.json_credential'),
                     'value' => old('analytics_service_account_credentials', setting('analytics_service_account_credentials')),
                     'attr' => [

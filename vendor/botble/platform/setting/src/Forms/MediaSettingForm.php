@@ -25,12 +25,19 @@ class MediaSettingForm extends SettingForm
 
         $this
             ->setUrl(route('settings.media.update'))
-            ->setActionButtons(view('core/setting::partials.media.action-buttons', ['form' => $this->getFormOption('id')])->render())
+            ->setActionButtons(
+                view('core/setting::partials.media.action-buttons', ['form' => $this->getFormOption('id')])->render()
+            )
             ->setValidatorClass(MediaSettingRequest::class)
             ->contentOnly()
             ->columns(6)
             ->add('media_driver', 'html', [
                 'html' => view('core/setting::partials.media.media-driver-field')->render(),
+                'colspan' => 6,
+            ])
+            ->add('media_use_original_name_for_file_path', 'onOffCheckbox', [
+                'label' => trans('core/setting::setting.media.use_original_name_for_file_path'),
+                'value' => setting('media_use_original_name_for_file_path'),
                 'colspan' => 6,
             ])
             ->add('media_turn_off_automatic_url_translation_into_latin', 'onOffCheckbox', [
@@ -62,7 +69,12 @@ class MediaSettingForm extends SettingForm
                 'colspan' => 6,
             ])
             ->add('media_watermark_warning', 'html', [
-                'html' => Blade::render(sprintf('<x-core::alert type="warning">%s</x-core::alert>', trans('core/setting::setting.watermark_description'))),
+                'html' => Blade::render(
+                    sprintf(
+                        '<x-core::alert type="warning">%s</x-core::alert>',
+                        trans('core/setting::setting.watermark_description')
+                    )
+                ),
                 'colspan' => 6,
             ])
             ->add('media_watermark_enabled', 'onOffCheckbox', [
@@ -76,12 +88,18 @@ class MediaSettingForm extends SettingForm
             ])
             ->add('open_media_watermark_settings', 'html', [
                 'html' => sprintf(
-                    '<fieldset class="col-lg-12 row form-fieldset media-watermark-settings" style="display: %s;" data-bb-value="1">',
-                    setting('media_watermark_enabled', true) ? 'flex' : 'none'
+                    '<div class="col-lg-12"><fieldset class="form-fieldset media-watermark-settings" style="display: %s;" data-bb-value="1">',
+                    setting('media_watermark_enabled', true) ? 'block' : 'none'
                 ),
             ])
             ->add('media_folders_can_add_watermark_field', 'html', [
-                'html' => view('core/setting::partials.media.media-folders-can-add-watermark-field', compact('folders', 'folderIds'))->render(),
+                'html' => view(
+                    'core/setting::partials.media.media-folders-can-add-watermark-field',
+                    compact('folders', 'folderIds')
+                )->render(),
+            ])
+            ->add('row_1', 'html', [
+                'html' => '<div class="row">',
             ])
             ->add('media_watermark_source', MediaImageField::class, [
                 'label' => trans('core/setting::setting.media.watermark_source'),
@@ -132,8 +150,11 @@ class MediaSettingForm extends SettingForm
                 ],
                 'colspan' => 2,
             ])
+            ->add('row_1_close', 'html', [
+                'html' => '</div>',
+            ])
             ->add('close_media_watermark_settings', 'html', [
-                'html' => '</fieldset>',
+                'html' => '</div></fieldset>',
             ])
             ->add('media_image_processing_library', 'customRadio', [
                 'label' => trans('core/setting::setting.admin_appearance.form.rich_editor'),
@@ -158,41 +179,50 @@ class MediaSettingForm extends SettingForm
                 sprintf('media_size_%s_label', $name),
                 'html',
                 [
-                'html' => Blade::render(
-                    sprintf(
-                        '<x-core::form.label>%s</x-core::form.label>',
-                        str_replace('-', ' ', Str::title(Str::slug($name))) . sprintf(
-                            '<small> %s </small>',
-                            trans('core/setting::setting.media.default_size_value', ['size' => RvMedia::getConfig('sizes.' . $name)])
+                    'html' => Blade::render(
+                        sprintf(
+                            '<x-core::form.label>%s</x-core::form.label>',
+                            str_replace('-', ' ', Str::title(Str::slug($name))) . sprintf(
+                                '<small> %s </small>',
+                                trans(
+                                    'core/setting::setting.media.default_size_value',
+                                    ['size' => RvMedia::getConfig('sizes.' . $name)]
+                                )
+                            )
                         )
-                    )
-                ),
+                    ),
                     'colspan' => 6,
                 ],
             );
 
-            if (count($sizeExploded)) {
-                $this->add($nameWidth = sprintf('media_sizes_%s_width', $name), 'number', [
-                    'label' => false,
-                    'value' => setting($nameWidth, $sizeExploded[0]),
-                    'attr' => [
-                        'placeholder' => 0,
-                    ],
-                    'colspan' => 3,
-                ])
-                ->add($nameHeight = sprintf('media_sizes_%s_height', $name), 'number', [
-                    'label' => false,
-                    'value' => setting($nameHeight, $sizeExploded[1]),
-                    'attr' => [
-                        'placeholder' => 0,
-                    ],
-                    'colspan' => 3,
-                ]);
+            if (count($sizeExploded) === 2) {
+                $this
+                    ->add($nameWidth = sprintf('media_sizes_%s_width', $name), 'number', [
+                        'label' => false,
+                        'value' => setting($nameWidth, $sizeExploded[0]),
+                        'attr' => [
+                            'placeholder' => 0,
+                        ],
+                        'colspan' => 3,
+                    ])
+                    ->add($nameHeight = sprintf('media_sizes_%s_height', $name), 'number', [
+                        'label' => false,
+                        'value' => setting($nameHeight, $sizeExploded[1]),
+                        'attr' => [
+                            'placeholder' => 0,
+                        ],
+                        'colspan' => 3,
+                    ]);
             }
         }
 
         $this->add('media_sizes_helper', 'html', [
-            'html' => Blade::render(sprintf("<x-core::alert title='%s' />", trans('core/setting::setting.media.media_sizes_helper'))),
+            'html' => Blade::render(
+                sprintf(
+                    '<x-core::alert class="mb-0" title="%s" />',
+                    trans('core/setting::setting.media.media_sizes_helper')
+                )
+            ),
             'colspan' => 6,
         ]);
     }

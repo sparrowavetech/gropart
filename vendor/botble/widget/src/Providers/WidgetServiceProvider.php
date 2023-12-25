@@ -21,7 +21,6 @@ use Botble\Widget\WidgetGroupCollection;
 use Botble\Widget\Widgets\CoreSimpleMenu;
 use Botble\Widget\Widgets\Text;
 use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\Facades\Auth;
 
 class WidgetServiceProvider extends ServiceProvider
@@ -58,50 +57,48 @@ class WidgetServiceProvider extends ServiceProvider
             ->publishAssets();
 
         $this->app->booted(function () {
-            $this->app['events']->listen(RouteMatched::class, function () {
-                WidgetGroup::setGroup([
-                    'id' => 'primary_sidebar',
-                    'name' => trans('packages/widget::widget.primary_sidebar_name'),
-                    'description' => trans('packages/widget::widget.primary_sidebar_description'),
-                ]);
+            WidgetGroup::setGroup([
+                'id' => 'primary_sidebar',
+                'name' => trans('packages/widget::widget.primary_sidebar_name'),
+                'description' => trans('packages/widget::widget.primary_sidebar_description'),
+            ]);
 
-                register_widget(CoreSimpleMenu::class);
-                register_widget(Text::class);
+            register_widget(CoreSimpleMenu::class);
+            register_widget(Text::class);
 
-                $widgetPath = theme_path(Theme::getThemeName() . '/widgets');
-                $widgets = BaseHelper::scanFolder($widgetPath);
-                if (! empty($widgets) && is_array($widgets)) {
-                    foreach ($widgets as $widget) {
-                        $registration = $widgetPath . '/' . $widget . '/registration.php';
-                        if ($this->app['files']->exists($registration)) {
-                            $this->app['files']->requireOnce($registration);
-                        }
+            $widgetPath = theme_path(Theme::getThemeName() . '/widgets');
+            $widgets = BaseHelper::scanFolder($widgetPath);
+            if (! empty($widgets) && is_array($widgets)) {
+                foreach ($widgets as $widget) {
+                    $registration = $widgetPath . '/' . $widget . '/registration.php';
+                    if ($this->app['files']->exists($registration)) {
+                        $this->app['files']->requireOnce($registration);
                     }
                 }
+            }
 
-                add_filter('widget_rendered', function (string|null $html, AbstractWidget $widget) {
-                    if (! setting('show_theme_guideline_link', false) || ! Auth::guard()->check() || ! Auth::guard()->user()->hasPermission('widgets.index')) {
-                        return $html;
-                    }
+            add_filter('widget_rendered', function (string|null $html, AbstractWidget $widget) {
+                if (! setting('show_theme_guideline_link', false) || ! Auth::guard()->check() || ! Auth::guard()->user()->hasPermission('widgets.index')) {
+                    return $html;
+                }
 
-                    $editLink = route('widgets.index') . '?widget=' . $widget->getId();
-                    $link = view('packages/theme::guideline-link', [
-                        'html' => $html,
-                        'editLink' => $editLink,
-                        'editLabel' => __('Edit this widget'),
-                    ])->render();
+                $editLink = route('widgets.index') . '?widget=' . $widget->getId();
+                $link = view('packages/theme::guideline-link', [
+                    'html' => $html,
+                    'editLink' => $editLink,
+                    'editLabel' => __('Edit this widget'),
+                ])->render();
 
-                    return ThemeSupport::insertBlockAfterTopHtmlTags($link, $html);
-                }, 9999, 2);
+                return ThemeSupport::insertBlockAfterTopHtmlTags($link, $html);
+            }, 9999, 2);
 
-                add_filter(THEME_FRONT_HEADER, function ($html) {
-                    if (! setting('show_theme_guideline_link', false) || ! Auth::guard()->check() || ! Auth::guard()->user()->hasPermission('widgets.index')) {
-                        return $html;
-                    }
+            add_filter(THEME_FRONT_HEADER, function ($html) {
+                if (! setting('show_theme_guideline_link', false) || ! Auth::guard()->check() || ! Auth::guard()->user()->hasPermission('widgets.index')) {
+                    return $html;
+                }
 
-                    return $html . Html::style('vendor/core/packages/theme/css/guideline.css');
-                }, 16);
-            });
+                return $html . Html::style('vendor/core/packages/theme/css/guideline.css');
+            }, 16);
         });
 
         DashboardMenu::default()->beforeRetrieving(function () {

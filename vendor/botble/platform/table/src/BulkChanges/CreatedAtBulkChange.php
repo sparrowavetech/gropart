@@ -8,6 +8,7 @@ class CreatedAtBulkChange extends DateBulkChange
     {
         return parent::make()
             ->name('created_at')
+            ->type('datePicker')
             ->title(trans('core/base::tables.created_at'));
     }
 }

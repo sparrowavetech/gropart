@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static array getSizes()
  * @method static string|null getImageUrl(string|null $url, $size = null, bool $relativePath = false, $default = null)
  * @method static string url(string|null $path)
- * @method static string getDefaultImage(bool $relative = false)
+ * @method static string getDefaultImage(bool $relative = false, string|null $size = null)
  * @method static string|null getSize(string $name)
  * @method static bool deleteFile(\Botble\Media\Models\MediaFile $file)
  * @method static bool deleteThumbnails(\Botble\Media\Models\MediaFile $file)

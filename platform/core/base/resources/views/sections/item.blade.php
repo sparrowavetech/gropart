@@ -3,7 +3,7 @@
     data-priority="{{ $priority }}"
     data-id="{{ $id }}"
     data-group-id="{{ $sectionId }}"
-    class="col-6 col-md-4 panel-section-item panel-section-item-{{ $id }} panel-section-item-priority-{{ $priority }}"
+    class="col-12 col-sm-6 col-md-4 panel-section-item panel-section-item-{{ $id }} panel-section-item-priority-{{ $priority }}"
 >
     <div @class(['row g-3', 'align-items-start' => $description, 'align-items-center' => ! $description])>
         <div class="col-auto">

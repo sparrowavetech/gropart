@@ -16,6 +16,7 @@
                                 collect($locales)
                                     ->map(fn($item, $key) => $item . ' - ' . $key)
                                     ->all()"
+                            :searchable="true"
                         />
                         <x-core::button
                             type="submit"

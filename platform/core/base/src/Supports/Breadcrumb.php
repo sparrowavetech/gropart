@@ -3,8 +3,12 @@
 namespace Botble\Base\Supports;
 
 use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\DashboardMenu as DashboardMenuFacade;
+use Botble\Base\Facades\PageTitle as PageTitleFacade;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Str;
 
 class Breadcrumb implements Htmlable
 {
@@ -51,6 +55,10 @@ class Breadcrumb implements Htmlable
     public function getItems(): Collection
     {
         if (empty($this->items[$this->currentGroup])) {
+            $this->fallbackGenerateBreadcrumbs();
+        }
+
+        if (empty($this->items[$this->currentGroup])) {
             return collect();
         }
 
@@ -69,5 +77,60 @@ class Breadcrumb implements Htmlable
     public function toHtml(): string
     {
         return $this->render();
+    }
+
+    protected function fallbackGenerateBreadcrumbs(): void
+    {
+        if ($this->currentGroup === 'admin') {
+            $this->add(trans('core/dashboard::dashboard.title'), route('dashboard.index'));
+        }
+
+        $prefix = '/' . ltrim(request()->route()->getPrefix(), '/');
+        $url = URL::current();
+        $arMenu = DashboardMenuFacade::getAll();
+
+        $found = false;
+        foreach ($arMenu as $menuCategory) {
+            if ((
+                $url == $menuCategory['url']
+                    || (Str::contains((string)$menuCategory['url'], $prefix) && $prefix != '//')
+            )
+                && ! empty($menuCategory['name'])
+            ) {
+                $found = true;
+                $this->add(trans($menuCategory['name']), $menuCategory['url']);
+
+                break;
+            }
+        }
+
+        if (! $found) {
+            foreach ($arMenu as $menuCategory) {
+                if (empty($menuCategory['children'])) {
+                    continue;
+                }
+
+                foreach ($menuCategory['children'] as $menuItem) {
+                    if (
+                        (
+                            $url == $menuItem['url']
+                            || (Str::contains((string)$menuItem['url'], $prefix) && $prefix != '//')
+                        )
+                        && ! empty($menuItem['name'])
+                    ) {
+                        $this->add(trans($menuCategory['name']), $menuCategory['url']);
+                        $this->add(trans($menuItem['name']), $menuItem['url']);
+
+                        break;
+                    }
+                }
+            }
+        }
+
+        $currentTitle = PageTitleFacade::getTitle(false);
+
+        if (! isset($this->items[$this->currentGroup][$currentTitle])) {
+            $this->add($currentTitle, $url);
+        }
     }
 }

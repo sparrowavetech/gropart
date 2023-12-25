@@ -30,7 +30,7 @@
 .dataTable {
     .language-header {
         img {
-            margin-inline-end: 0.5rem;
+            margin-inline-end: 0.75rem;
 
             &:last-child {
                 margin-inline-end: 0;
@@ -48,6 +48,12 @@
                 &:hover {
                     text-decoration: none !important;
                 }
+            }
+        }
+
+        span {
+            &.dtr-title {
+                margin-bottom: 0.5rem;
             }
         }
     }

@@ -26,6 +26,10 @@ class ContactController extends BaseController
 
     public function edit(Contact $contact)
     {
+        $this
+            ->breadcrumb()
+            ->add(trans('plugins/contact::contact.menu'), route('contacts.index'));
+
         $this->pageTitle(trans('plugins/contact::contact.edit'));
 
         return ContactForm::createFromModel($contact)->renderForm();

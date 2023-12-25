@@ -2,6 +2,7 @@
 
 namespace Botble\Table\BulkActions;
 
+use Botble\Base\Contracts\BaseModel as BaseModelContract;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Exceptions\DisabledInDemoModeException;
 use Botble\Base\Facades\BaseHelper;
@@ -26,7 +27,7 @@ class DeleteBulkAction extends TableBulkActionAbstract
 
     public function dispatch(BaseModel|Model $model, array $ids): BaseHttpResponse
     {
-        $model->newQuery()->whereKey($ids)->each(function (BaseModel $item) {
+        $model->newQuery()->whereKey($ids)->each(function (BaseModelContract $item) {
             $item->delete();
 
             DeletedContentEvent::dispatch($item::class, request(), $item);

@@ -144,22 +144,12 @@ class MiscTags implements MiscTagsContract
         return $this->render();
     }
 
-    /**
-     * Check if has the current URL.
-     *
-     * @return bool
-     */
-    protected function hasUrl()
+    protected function hasUrl(): bool
     {
         return ! empty($this->getUrl());
     }
 
-    /**
-     * Add the canonical link.
-     *
-     * @return MiscTags
-     */
-    protected function addCanonical()
+    protected function addCanonical(): static
     {
         if ($this->hasUrl()) {
             $this->add('canonical', $this->currentUrl);

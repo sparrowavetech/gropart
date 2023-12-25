@@ -17,7 +17,6 @@ class ProfileForm extends FormAbstract
             ->model(User::class)
             ->template('core/base::forms.form-no-wrap')
             ->setFormOption('id', 'profile-form')
-            ->setFormOption('class', 'row')
             ->setValidatorClass(UpdateProfileRequest::class)
             ->setMethod('PUT')
             ->columns()

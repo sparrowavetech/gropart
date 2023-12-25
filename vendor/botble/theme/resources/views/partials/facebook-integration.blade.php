@@ -4,7 +4,7 @@
         window.fbAsyncInit = function() {
             FB.init({
                 xfbml: true,
-                version: 'v12.0'
+                version: 'v18.0'
             });
         };
 
@@ -17,10 +17,12 @@
         }(document, 'script', 'facebook-jssdk'));</script>
 
     @if (theme_option('facebook_chat_enabled', 'yes') == 'yes' && theme_option('facebook_page_id'))
-        <div class="fb-customerchat"
-             attribution="install_email"
-             page_id="{{ theme_option('facebook_page_id') }}"
-             theme_color="{{ theme_option('primary_color', '#AF0F26') }}">
-        </div>
+        <div id="fb-customer-chat" class="fb-customerchat"></div>
+
+        <script>
+            var chatbox = document.getElementById('fb-customer-chat');
+            chatbox.setAttribute("page_id", "{{ theme_option('facebook_page_id') }}");
+            chatbox.setAttribute("attribution", "biz_inbox");
+        </script>
     @endif
 @endif

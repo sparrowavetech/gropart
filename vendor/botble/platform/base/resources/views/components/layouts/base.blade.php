@@ -59,6 +59,9 @@
     style="@yield('body-style', $bodyStyle ?? null)"
     @if (BaseHelper::adminLanguageDirection() === 'rtl') dir="rtl" @endif
     {!! Html::attributes($bodyAttributes ?? []) !!}
+    @if(AdminHelper::themeMode() === 'dark')
+        data-bs-theme="dark"
+    @endif
 >
     {{ $headerLayout ?? null }}
 

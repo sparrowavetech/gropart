@@ -3,32 +3,31 @@
 namespace Botble\Translation\Http\Controllers;
 
 use Botble\Base\Facades\Assets;
+use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Supports\Breadcrumb;
 use Botble\Base\Supports\Language;
-use Botble\Language\Facades\Language as LanguageFacade;
 use Botble\Setting\Http\Controllers\SettingController;
 use Botble\Translation\Http\Requests\TranslationRequest;
 use Botble\Translation\Manager;
-use Botble\Translation\Models\Translation;
 use Botble\Translation\Tables\TranslationTable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\File;
 
 class TranslationController extends SettingController
 {
     public function __construct(protected Manager $manager)
     {
-        $this
-            ->breadcrumb()
+    }
+
+    protected function breadcrumb(): Breadcrumb
+    {
+        return parent::breadcrumb()
             ->add(trans('plugins/translation::translation.translations'), route('translations.locales'));
     }
 
     public function index(Request $request, TranslationTable $translationTable)
     {
-        Validator::validate($request->input(), [
-            'group' => ['nullable', 'string'],
-        ]);
-
         $this->pageTitle(trans('plugins/translation::translation.admin-translations'));
 
         Assets::addScripts(['bootstrap-editable'])
@@ -45,7 +44,7 @@ class TranslationController extends SettingController
             ];
         }
 
-        $currentLocale = is_plugin_active('language') ? LanguageFacade::getRefLang() : app()->getLocale();
+        $currentLocale = $request->has('ref_lang') ? $request->input('ref_lang') : app()->getLocale();
 
         $locale = Arr::first($locales, fn ($item) => $item['locale'] == $currentLocale);
 
@@ -59,20 +58,11 @@ class TranslationController extends SettingController
             return $translationTable->renderTable();
         }
 
-        $groups = Translation::query()
-            ->groupBy('group')
-            ->pluck('group', 'group')
-            ->all();
-
-        $groups = ['' => trans('plugins/translation::translation.all')] + $groups;
-
-        $count = Translation::query()
-            ->where('locale', $locale['locale'])
-            ->count();
+        $exists = File::isDirectory(lang_path($locale['locale'])) && File::exists(lang_path('vendor'));
 
         return view(
             'plugins/translation::index',
-            compact('locales', 'locale', 'defaultLanguage', 'translationTable', 'groups', 'count')
+            compact('locales', 'locale', 'defaultLanguage', 'translationTable', 'exists')
         );
     }
 
@@ -80,36 +70,24 @@ class TranslationController extends SettingController
     {
         $group = $request->input('group');
 
-        if (in_array($group, $this->manager->getConfig('exclude_groups'))) {
-            return $this->httpResponse();
-        }
-
         $name = $request->input('name');
         $value = $request->input('value');
 
         [$locale, $key] = explode('|', $name, 2);
-        $translation = Translation::query()->firstOrNew([
-            'locale' => $locale,
-            'group' => $group,
-            'key' => $key,
-        ]);
 
-        $translation->update([
-            'value' => (string)$value ?: null,
-            'status' => Translation::STATUS_CHANGED,
-        ]);
-
-        $this->manager->exportTranslations($group);
+        $this->manager->updateTranslation($locale, $group, $key, $value);
 
         return $this->httpResponse();
     }
 
-    public function import(Request $request)
+    public function import()
     {
-        $counter = $this->manager->importTranslations($request->boolean('replace'));
+        BaseHelper::maximumExecutionTimeAndMemoryLimit();
+
+        $this->manager->publishLocales();
 
         return $this
             ->httpResponse()
-            ->setMessage(trans('plugins/translation::translation.import_done', compact('counter')));
+            ->setMessage(trans('plugins/translation::translation.import_success_message'));
     }
 }

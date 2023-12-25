@@ -21,6 +21,7 @@ class UserWidgetHook
             ->setColor('info')
             ->setStatsTotal($users)
             ->setRoute(route('users.index'))
+            ->setColumn('col-12 col-md-6 col-lg-3')
             ->init($widgets, $widgetSettings);
     }
 }

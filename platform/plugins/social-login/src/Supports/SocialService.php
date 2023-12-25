@@ -87,6 +87,7 @@ class SocialService
             'google' => $this->getDataProviderDefault(),
             'github' => $this->getDataProviderDefault(),
             'linkedin' => $this->getDataProviderDefault(),
+            'linkedin-openid' => $this->getDataProviderDefault(),
         ];
     }
 

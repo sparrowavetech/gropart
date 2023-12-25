@@ -71,10 +71,10 @@
                             >
                                 @foreach (ThemeOption::constructFields($section['id']) as $field)
                                     <x-core::form-group
-                                        class="{{ $errors->has($field['attributes']['name']) ? 'has-error' : null }}"
+                                        class="{{ $errors->has($field['attributes']['name'] ?? $field['id']) ? 'has-error' : null }}"
                                     >
                                         <x-core::form.label
-                                            :for="$field['attributes']['name']"
+                                            :for="$field['id']"
                                             :label="$field['label']"
                                         />
                                         {!! ThemeOption::renderField($field) !!}

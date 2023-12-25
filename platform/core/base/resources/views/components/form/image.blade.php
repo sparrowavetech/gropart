@@ -1,6 +1,6 @@
 @props([
     'name',
-    'allowThumb' => false,
+    'allowThumb' => true,
     'value',
     'defaultImage' => RvMedia::getDefaultImage(),
     'allowAddFromUrl' => $isInAdmin = is_in_admin(true) && auth()->guard()->check(),

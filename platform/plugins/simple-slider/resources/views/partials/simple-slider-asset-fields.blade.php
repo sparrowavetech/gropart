@@ -1,8 +1,4 @@
-<div
-    class="simple-slider-assets"
-    data-bb-value="1"
-    @style(['display: none;' => !setting('simple_slider_using_assets', true)])
->
+<div class="simple-slider-assets mt-3">
         <pre class="mb-2">
 /vendor/core/plugins/simple-slider/libraries/owl-carousel/owl.carousel.css
 /vendor/core/plugins/simple-slider/css/simple-slider.css

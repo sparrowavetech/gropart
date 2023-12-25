@@ -15,8 +15,6 @@ class DashboardController extends BaseController
 {
     public function getDashboard(Request $request)
     {
-        $this->breadcrumb();
-
         $this->pageTitle(trans('core/dashboard::dashboard.title'));
 
         Assets::addScripts(['sortable', 'equal-height', 'counterup'])

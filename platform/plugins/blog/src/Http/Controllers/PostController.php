@@ -6,6 +6,7 @@ use Botble\ACL\Models\User;
 use Botble\Base\Http\Actions\DeleteResourceAction;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
+use Botble\Base\Supports\Breadcrumb;
 use Botble\Blog\Forms\PostForm;
 use Botble\Blog\Http\Requests\PostRequest;
 use Botble\Blog\Models\Post;
@@ -17,10 +18,9 @@ use Illuminate\Support\Facades\Auth;
 
 class PostController extends BaseController
 {
-    public function __construct()
+    protected function breadcrumb(): Breadcrumb
     {
-        $this
-            ->breadcrumb()
+        return parent::breadcrumb()
             ->add(trans('plugins/blog::base.menu_name'))
             ->add(trans('plugins/blog::posts.menu_name'), route('posts.index'));
     }

@@ -5,6 +5,7 @@ namespace Botble\Location\Http\Controllers;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Http\Actions\DeleteResourceAction;
 use Botble\Base\Http\Controllers\BaseController;
+use Botble\Base\Supports\Breadcrumb;
 use Botble\Location\Forms\CountryForm;
 use Botble\Location\Http\Requests\CountryRequest;
 use Botble\Location\Http\Resources\CountryResource;
@@ -14,11 +15,11 @@ use Illuminate\Http\Request;
 
 class CountryController extends BaseController
 {
-    public function __construct()
+    protected function breadcrumb(): Breadcrumb
     {
-        $this
-            ->breadcrumb()
-            ->add(trans('plugins/location::location.name'));
+        return parent::breadcrumb()
+            ->add(trans('plugins/location::location.name'))
+            ->add(trans('plugins/location::country.name'), route('country.index'));
     }
 
     public function index(CountryTable $table)

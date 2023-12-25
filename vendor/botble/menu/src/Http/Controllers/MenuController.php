@@ -5,6 +5,7 @@ namespace Botble\Menu\Http\Controllers;
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Http\Actions\DeleteResourceAction;
 use Botble\Base\Http\Controllers\BaseController;
+use Botble\Base\Supports\Breadcrumb;
 use Botble\Menu\Events\RenderingMenuOptions;
 use Botble\Menu\Facades\Menu;
 use Botble\Menu\Forms\MenuForm;
@@ -27,9 +28,11 @@ class MenuController extends BaseController
     public function __construct(CacheManager $cache)
     {
         $this->cache = new Cache($cache, MenuRepository::class);
+    }
 
-        $this
-            ->breadcrumb()
+    protected function breadcrumb(): Breadcrumb
+    {
+        return parent::breadcrumb()
             ->add(trans('packages/theme::theme.appearance'))
             ->add(trans('packages/menu::menu.name'), route('menus.index'));
     }

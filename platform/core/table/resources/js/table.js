@@ -754,6 +754,14 @@
                         Botble.hideButtonLoading(_self)
                     })
             })
+
+            $(document).on('keyup', '.table-search-input input[type=search]', (event) => {
+                const $searchInput = $(event.currentTarget);
+
+                setTimeout(() => {
+                    $searchInput.closest('.table-wrapper').find('table').DataTable().search($searchInput.val()).draw()
+                }, 200)
+            })
         }
 
         loadBulkChangeData($element) {
@@ -815,6 +823,7 @@
         }
     }
 
+    $.fn.dataTable.Buttons.defaults.dom.container.className = 'dt-buttons btn-group w-100 w-sm-auto'
     $.fn.dataTable.Buttons.defaults.dom.button.className = 'btn'
 
     $(() => {

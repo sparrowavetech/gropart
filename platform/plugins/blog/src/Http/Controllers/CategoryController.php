@@ -9,6 +9,7 @@ use Botble\Base\Http\Actions\DeleteResourceAction;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Requests\UpdateTreeCategoryRequest;
 use Botble\Base\Http\Responses\BaseHttpResponse;
+use Botble\Base\Supports\Breadcrumb;
 use Botble\Base\Supports\RepositoryHelper;
 use Botble\Blog\Forms\CategoryForm;
 use Botble\Blog\Http\Requests\CategoryRequest;
@@ -18,10 +19,9 @@ use Illuminate\Support\Facades\Auth;
 
 class CategoryController extends BaseController
 {
-    public function __construct()
+    protected function breadcrumb(): Breadcrumb
     {
-        $this
-            ->breadcrumb()
+        return parent::breadcrumb()
             ->add(trans('plugins/blog::base.menu_name'))
             ->add(trans('plugins/blog::categories.menu'), route('categories.index'));
     }

@@ -270,8 +270,8 @@
 
     <x-slot:footer>
         <div class="w-100">
-            <div class="row">
-                <div class="col">
+            <div class="row gap-2 gap-md-0">
+                <div class="col-12 col-md-6">
                     <x-core::button
                         type="button"
                         color="primary"
@@ -280,7 +280,7 @@
                         {{ trans('packages/get-started::get-started.exit_wizard_confirm') }}
                     </x-core::button>
                 </div>
-                <div class="col">
+                <div class="col-12 col-md-6">
                     <x-core::button
                         type="button"
                         class="w-100 text-primary js-back-to-wizard"

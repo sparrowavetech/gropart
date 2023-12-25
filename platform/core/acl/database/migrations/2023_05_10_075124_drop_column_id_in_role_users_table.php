@@ -8,27 +8,30 @@ use Illuminate\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        if (Schema::hasColumn('role_users', 'id')) {
+        try {
+            if (Schema::hasColumn('role_users', 'id')) {
+                Schema::table('role_users', function (Blueprint $table) {
+                    $table->dropColumn('id');
+                });
+            }
+
+            Schema::dropIfExists('role_users_tmp');
+
+            DB::statement('CREATE TABLE role_users_tmp AS SELECT * FROM role_users');
+
+            DB::statement('TRUNCATE TABLE role_users');
+
             Schema::table('role_users', function (Blueprint $table) {
-                $table->dropColumn('id');
+                $table->primary(['user_id', 'role_id']);
             });
+
+            DB::table('role_users_tmp')->oldest()->chunk(1000, function ($chunked) {
+                DB::table('role_users')->insertOrIgnore(array_map(fn($item) => (array)$item, $chunked->toArray()));
+            });
+
+            Schema::dropIfExists('role_users_tmp');
+        } catch (Throwable) {
         }
-
-        Schema::dropIfExists('role_users_tmp');
-
-        DB::statement('CREATE TABLE role_users_tmp AS SELECT * FROM role_users');
-
-        DB::statement('TRUNCATE TABLE role_users');
-
-        Schema::table('role_users', function (Blueprint $table) {
-            $table->primary(['user_id', 'role_id']);
-        });
-
-        DB::table('role_users_tmp')->oldest()->chunk(1000, function ($chunked) {
-            DB::table('role_users')->insertOrIgnore(array_map(fn ($item) => (array)$item, $chunked->toArray()));
-        });
-
-        Schema::dropIfExists('role_users_tmp');
     }
 
     public function down(): void

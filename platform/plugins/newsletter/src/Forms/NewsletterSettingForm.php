@@ -53,6 +53,9 @@ class NewsletterSettingForm extends SettingForm
             ->setValidatorClass(NewsletterSettingRequest::class)
             ->add('newsletter_contacts_list_api_fields', 'html', [
                 'html' => view('plugins/newsletter::partials.newsletter-contacts-list-api-fields', compact('mailchimpContactList', 'sendGridContactList')),
+                'wrapper' => [
+                    'class' => 'mb-0',
+                ],
             ]);
     }
 }

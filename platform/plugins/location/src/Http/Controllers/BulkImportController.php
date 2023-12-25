@@ -5,6 +5,7 @@ namespace Botble\Location\Http\Controllers;
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Http\Controllers\BaseController;
+use Botble\Base\Supports\Breadcrumb;
 use Botble\Base\Supports\Helper;
 use Botble\Location\Exports\TemplateLocationExport;
 use Botble\Location\Location;
@@ -14,10 +15,9 @@ use Maatwebsite\Excel\Excel;
 
 class BulkImportController extends BaseController
 {
-    public function __construct()
+    protected function breadcrumb(): Breadcrumb
     {
-        $this
-            ->breadcrumb()
+        return parent::breadcrumb()
             ->add(trans('plugins/location::location.name'))
             ->add(trans('plugins/location::bulk-import.name'), route('location.bulk-import.index'));
     }

@@ -22,6 +22,8 @@
     $classes = Arr::toCssClasses(['modal', 'fade', 'modal-blur' => $blur]);
 
     $hasForm = $hasForm || $formAction;
+
+    $modalContentAttributes = ['class' => rtrim('modal-content ' . Arr::get($formAttrs, 'class'))];
 @endphp
 
 <div
@@ -40,60 +42,59 @@
         ])
         role="document"
     >
-        <div class="modal-content">
-            @if ($title || $closeButton)
-                <div class="modal-header">
-                    <h5 class="modal-title">{{ $title }}</h5>
-                    @if ($closeButton)
-                        <x-core::modal.close-button />
-                    @endif
-                </div>
-            @endif
-            @if ($hasForm)
-                <form
-                    action="{{ $formAction }}"
-                    method="{{ $formMethod }}"
-                    {!! Html::attributes($formAttrs) !!}
+        <{{ $hasForm ? 'form' : 'div' }}
+            {!! Html::attributes($modalContentAttributes) !!}
+        @if ($hasForm)
+            action="{{ $formAction }}"
+            method="{{ $formMethod }}"
+            {!! Html::attributes($formAttrs) !!}
+        @endif
+        >
+        @if ($hasForm)
+            @csrf
+        @endif
+
+        @if ($title || $closeButton)
+            <div class="modal-header">
+                <h5 class="modal-title">{{ $title }}</h5>
+                @if ($closeButton)
+                    <x-core::modal.close-button />
+                @endif
+            </div>
+        @endif
+
+        @if($type)
+            <div class="modal-status bg-{{ $type }}"></div>
+        @endif
+
+        @if ($slot->isNotEmpty())
+            <div {!! Html::attributes(array_merge($bodyAttrs, ['class' => rtrim('modal-body ' . Arr::get($bodyAttrs, 'class'))])) !!}>
+                {{ $slot }}
+            </div>
+        @else
+            {{ $slot }}
+        @endif
+
+        @if (!empty($footer) && $footer->isNotEmpty())
+            <div class="modal-footer">
+                {{ $footer }}
+            </div>
+        @endif
+
+        @if($buttonId && $buttonLabel)
+            <div class="modal-footer">
+                <x-core::button type="button" data-bs-dismiss="modal">
+                    {{ trans('core/base::tables.cancel') }}
+                </x-core::button>
+                <x-core::button
+                    :id="$buttonId"
+                    @class(['ms-auto', $buttonClass => $buttonClass])
+                    :color="$type ?? 'primary'"
                 >
-                    @csrf
-                    @endif
-
-                    @if($type)
-                        <div class="modal-status bg-{{ $type }}"></div>
-                    @endif
-
-                    @if ($slot->isNotEmpty())
-                        <div {!! Html::attributes(array_merge($bodyAttrs, ['class' => rtrim('modal-body ' . Arr::get($bodyAttrs, 'class'))])) !!}>
-                            {{ $slot }}
-                        </div>
-                    @else
-                        {{ $slot }}
-                    @endif
-
-                    @if (!empty($footer) && $footer->isNotEmpty())
-                        <div class="modal-footer">
-                            {{ $footer }}
-                        </div>
-                    @endif
-
-                    @if($buttonId && $buttonLabel)
-                        <div class="modal-footer">
-                            <x-core::button type="button" data-bs-dismiss="modal">
-                                {{ trans('core/base::tables.cancel') }}
-                            </x-core::button>
-                            <x-core::button
-                                :id="$buttonId"
-                                @class(['ms-auto', $buttonClass => $buttonClass])
-                                :color="$type ?? 'primary'"
-                            >
-                                {{ $buttonLabel }}
-                            </x-core::button>
-                        </div>
-                    @endif
-
-                    @if ($hasForm)
-                </form>
-            @endif
-        </div>
-    </div>
+                    {{ $buttonLabel }}
+                </x-core::button>
+            </div>
+        @endif
+    </{{ $hasForm ? 'form' : 'div' }}>
+</div>
 </div>

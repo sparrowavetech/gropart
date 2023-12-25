@@ -12,6 +12,7 @@ use Botble\Menu\Events\RenderingMenuOptions;
 use Botble\Menu\Facades\Menu;
 use Botble\Page\Models\Page;
 use Botble\Page\Services\PageService;
+use Botble\SeoHelper\Facades\SeoHelper;
 use Botble\Slug\Models\Slug;
 use Botble\Table\Columns\Column;
 use Botble\Table\Columns\NameColumn;
@@ -83,7 +84,7 @@ class HookServiceProvider extends ServiceProvider
                         $schema = [
                             '@context' => 'https://schema.org',
                             '@type' => 'Organization',
-                            'name' => theme_option('site_title'),
+                            'name' => rescue(fn () => SeoHelper::openGraph()->getProperty('site_name')),
                             'url' => $page->url,
                             'logo' => [
                                 '@type' => 'ImageObject',
@@ -132,6 +133,7 @@ class HookServiceProvider extends ServiceProvider
             ->setColor('yellow')
             ->setStatsTotal($pages)
             ->setRoute(route('pages.index'))
+            ->setColumn('col-12 col-md-6 col-lg-3')
             ->init($widgets, $widgetSettings);
     }
 

@@ -3,7 +3,7 @@
         @if (!is_in_admin() || (Auth::guard()->check() && Auth::guard()->user()->hasPermission($route['edit'])))
             @if ($language->lang_code == Language::getDefaultLocaleCode())
                 <a href="{{ Route::has($route['edit']) ? route($route['edit'], $item->id) : '#' }}">
-                    <i class="fa fa-check text-success"></i>
+                    <x-core::icon name="ti ti-check" class="text-success" />
                 </a>
             @else
                 <a
@@ -11,11 +11,11 @@
                     href="{{ Route::has($route['edit']) ? route($route['edit'], $item->id) . '?ref_lang=' . $language->lang_code : '#' }}"
                     title="{{ trans('plugins/language::language.edit_related') }}"
                 >
-                    <i class="fa fa-edit"></i>
+                    <x-core::icon name="ti ti-edit" />
                 </a>
             @endif
         @else
-            <i class="fa fa-check text-success"></i>
+            <x-core::icon name="ti ti-check" class="text-success" />
         @endif
     @endforeach
 </div>

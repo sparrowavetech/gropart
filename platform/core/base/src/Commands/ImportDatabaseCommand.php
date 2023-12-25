@@ -14,7 +14,13 @@ class ImportDatabaseCommand extends Command
 {
     public function handle(): int
     {
-        $filePath = base_path($this->argument('file'));
+        $fileName = $this->argument('file');
+
+        if (str_contains($fileName, DIRECTORY_SEPARATOR)) {
+            $filePath = $fileName;
+        } else {
+            $filePath = base_path($fileName);
+        }
 
         if (! File::exists($filePath)) {
             $this->components->error('The SQL file does not exist.');
@@ -24,16 +30,15 @@ class ImportDatabaseCommand extends Command
 
         $config = DB::getConfig();
 
-        switch ($driver = $config['driver']) {
-            case 'mysql':
-                $this->components->task(
-                    'Importing database from SQL file',
-                    fn () => Database::restoreFromPath($filePath)
-                );
+        if (($driver = $config['driver']) == 'mysql') {
+            $this->components->task(
+                'Importing database from SQL file',
+                fn () => Database::restoreFromPath($filePath)
+            );
 
-                $this->components->info('Imported successfully.');
+            $this->components->info('Imported successfully.');
 
-                return self::SUCCESS;
+            return self::SUCCESS;
         }
 
         $this->components->error(sprintf('The driver [%s] does not support.', $driver));

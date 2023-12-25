@@ -12,12 +12,21 @@
 @php
     $labelClasses = Arr::toCssClasses([
         'form-check',
-        'form-check-inline' => $inline,
+        'form-check-inline mb-3' => $inline,
         'form-check-single' => $single,
     ]);
+
+    if (isset($attributes['label_attr'])) {
+        $labelAttr = $attributes['label_attr'];
+        $labelAttr['class'] .= ' ' . $labelClasses;
+        $labelAttr['class'] = trim(str_replace('form-label', '', $labelAttr['class']));
+        unset($attributes['label_attr']);
+    } else {
+        $labelAttr = ['class' => $labelClasses];
+    }
 @endphp
 
-<label class="{{ $labelClasses }}">
+<label {!! Html::attributes($labelAttr) !!}>
     <input
         {{ $attributes->merge(['type' => 'checkbox', 'id' => $id, 'name' => $name, 'class' => 'form-check-input', 'value' => $value]) }}
         @checked(old($name, $checked))

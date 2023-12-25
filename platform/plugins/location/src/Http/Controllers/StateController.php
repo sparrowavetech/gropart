@@ -5,6 +5,7 @@ namespace Botble\Location\Http\Controllers;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Http\Actions\DeleteResourceAction;
 use Botble\Base\Http\Controllers\BaseController;
+use Botble\Base\Supports\Breadcrumb;
 use Botble\Location\Forms\StateForm;
 use Botble\Location\Http\Requests\StateRequest;
 use Botble\Location\Http\Resources\StateResource;
@@ -14,10 +15,9 @@ use Illuminate\Http\Request;
 
 class StateController extends BaseController
 {
-    public function __construct()
+    protected function breadcrumb(): Breadcrumb
     {
-        $this
-            ->breadcrumb()
+        return parent::breadcrumb()
             ->add(trans('plugins/location::location.name'))
             ->add(trans('plugins/location::state.name'), route('state.index'));
     }

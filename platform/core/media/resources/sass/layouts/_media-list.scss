@@ -27,7 +27,6 @@
             text-overflow: ellipsis;
             white-space: nowrap;
             padding-right: 15px;
-            padding-top: 3px;
 
             i {
                 margin-right: 5px;
@@ -205,7 +204,6 @@
         height: auto;
         border-radius: 0;
         border: 0 none;
-        position: absolute;
         @include center-all();
         display: flex;
         flex-direction: column;
@@ -217,11 +215,13 @@
         text-align: center;
 
         .icon {
-            --bb-icon-size: 8rem;
+            --bb-icon-size: 4rem;
+            margin-bottom: 1rem;
         }
 
         h3 {
-            font-size: 17px;
+            font-size: 14px;
+            margin-bottom: 0.25rem;
         }
 
         .on-loading & {
@@ -240,17 +240,44 @@
         }
     }
 
+    li.up-one-level {
+        display: none;
+
+        @media (min-width: 768px) {
+            display: block;
+        }
+    }
+
     .rv-media-container:not([data-view-in='all_media']) & li.no-items {
         @include lib-css(pointer-events, none);
     }
 
     .rv-media-container[data-view-in='all_media'] & li.no-items {
-        width: 400px;
-        height: 400px;
+        width: 200px;
+        height: 200px;
         border-radius: 50% !important;
         border: 1px solid #dce6f1;
         background-color: #ffffff;
         cursor: pointer;
+
+        @media (min-width: 992px) {
+            width: 400px;
+            height: 400px;
+        }
+    }
+}
+
+@media (min-width: 768px) {
+    .rv-media-items {
+        li.no-items {
+            .icon {
+                --bb-icon-size: 8rem;
+            }
+
+            h3 {
+                font-size: 17px;
+            }
+        }
     }
 }
 
@@ -262,7 +289,7 @@
 
 @media (max-width: $screen-sm-max) {
     .rv-media-grid li {
-        width: percentage(math.div(1px, 5px));
+        width: percentage(math.div(1px, 3px));
     }
 }
 

@@ -7,18 +7,14 @@ use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Supports\Zipper;
 use Botble\Theme\Facades\Theme;
-use Botble\Translation\Models\QueryBuilders\TranslationQueryBuilder;
-use Botble\Translation\Models\Translation;
-use Exception;
 use GuzzleHttp\Psr7\Utils;
 use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Database\Query\Builder;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Lang;
+use Illuminate\Support\Str;
 use Symfony\Component\VarExporter\VarExporter;
 use Throwable;
 
@@ -29,56 +25,6 @@ class Manager
     public function __construct(protected Application $app, protected Filesystem $files)
     {
         $this->config = $app['config']['plugins.translation.general'];
-    }
-
-    public function importTranslations(bool $replace = false): int
-    {
-        try {
-            $this->publishLocales();
-        } catch (Exception $exception) {
-            BaseHelper::logError($exception);
-        }
-
-        $counter = 0;
-
-        $langLoader = Lang::getLoader();
-
-        foreach ($this->files->directories(lang_path()) as $langPath) {
-            $locale = basename($langPath);
-            foreach ($this->files->allFiles($langPath) as $file) {
-                $info = pathinfo($file);
-                $group = $info['filename'];
-
-                if (in_array($group, $this->config['exclude_groups'])) {
-                    continue;
-                }
-
-                $subLangPath = str_replace($langPath . DIRECTORY_SEPARATOR, '', $info['dirname']);
-                $subLangPath = str_replace(DIRECTORY_SEPARATOR, '/', $subLangPath);
-                $langDirectory = $group;
-
-                if ($subLangPath != $langPath) {
-                    $langDirectory = $subLangPath . '/' . $group;
-                    $group = substr($subLangPath, 0, -3) . '/' . $group;
-                }
-
-                $translations = $langLoader->load($locale, $langDirectory);
-                if ($translations && is_array($translations)) {
-                    foreach (Arr::dot($translations) as $key => $value) {
-                        $importedTranslation = $this->importTranslation(
-                            $key,
-                            $value,
-                            ($locale != 'vendor' ? $locale : substr($subLangPath, -2)),
-                            $group,
-                            $replace
-                        );
-                        $counter += $importedTranslation ? 1 : 0;
-                    }
-                }
-            }
-        }
-
-        return $counter;
     }
 
     public function publishLocales(): void
@@ -95,141 +41,54 @@ class Manager
         }
     }
 
-    public function importTranslation(
-        string $key,
-        string|null|array $value,
-        string|null $locale,
-        string|null $group,
-        bool $replace = false
-    ): bool {
-        if (is_array($value)) {
-            return false;
-        }
-
-        $value = (string)$value;
-        $translation = Translation::query()->firstOrNew([
-            'locale' => $locale,
-            'group' => $group,
-            'key' => $key,
-        ]);
-
-        // Check if the database is different from files
-        $newStatus = $translation->value === $value ? Translation::STATUS_SAVED : Translation::STATUS_CHANGED;
-        if ($newStatus !== (int)$translation->status) {
-            $translation->status = $newStatus;
-        }
-
-        // Only replace when empty, or explicitly told so
-        if ($replace || ! $translation->value) {
-            $translation->value = $value;
-        }
-
-        $translation->save();
-
-        return true;
-    }
-
-    public function exportTranslations(string|null $group = null): void
+    public function updateTranslation(string $locale, string $group, string $key, string|null $value): void
     {
-        if (! empty($group)) {
-            if (! in_array($group, $this->config['exclude_groups'])) {
-                if ($group == '*') {
-                    $this->exportAllTranslations();
+        $loader = Lang::getLoader();
 
-                    return;
-                }
+        if (str_contains($group, '/')) {
+            $englishTranslations = $loader->load('en', Str::afterLast($group, '/'), Str::beforeLast($group, '/'));
+            $translations = $loader->load($locale, Str::afterLast($group, '/'), Str::beforeLast($group, '/'));
+        } else {
+            $englishTranslations = $loader->load('en', $group);
+            $translations = $loader->load($locale, $group);
+        }
 
-                /**
-                 * @var TranslationQueryBuilder $query
-                 */
-                $query = Translation::query();
+        Arr::set($translations, $key, $value);
 
-                $tree = $this->makeTree(
-                    $query->ofTranslatedGroup($group)->orderByGroupKeys(
-                        Arr::get(
-                            $this->config,
-                            'sort_keys',
-                            false
-                        )
-                    )->get()
-                );
+        $translations = array_merge($englishTranslations, $translations);
 
-                foreach ($tree as $locale => $groups) {
-                    if (isset($groups[$group])) {
-                        $translations = $groups[$group];
+        if (
+            $locale != 'en' &&
+            isset($tree['en'][$group]) &&
+            is_array($tree['en'][$group]) &&
+            count($tree['en'][$group]) !== count($translations)
+        ) {
+            $translations = array_merge($tree['en'][$group], $translations);
+        }
 
-                        if (
-                            $locale != 'en' &&
-                            isset($tree['en'][$group]) &&
-                            is_array($tree['en'][$group]) &&
-                            count($tree['en'][$group]) !== count($translations)
-                        ) {
-                            $translations = array_merge($tree['en'][$group], $translations);
-                        }
+        $file = $locale . '/' . $group;
 
-                        $file = $locale . '/' . $group;
+        if (! File::isDirectory(lang_path($locale))) {
+            File::makeDirectory(lang_path($locale), 755, true);
+        }
 
-                        if (! $this->files->isDirectory(lang_path($locale))) {
-                            $this->files->makeDirectory(lang_path($locale), 755, true);
-                        }
+        $groups = explode('/', $group);
+        if (count($groups) > 1) {
+            $folderName = Arr::last($groups);
+            Arr::forget($groups, count($groups) - 1);
 
-                        $groups = explode('/', $group);
-                        if (count($groups) > 1) {
-                            $folderName = Arr::last($groups);
-                            Arr::forget($groups, count($groups) - 1);
-
-                            $dir = 'vendor/' . implode('/', $groups) . '/' . $locale;
-                            if (! $this->files->isDirectory(lang_path($dir))) {
-                                $this->files->makeDirectory(lang_path($dir), 755, true);
-                            }
-
-                            $file = $dir . '/' . $folderName;
-                        }
-                        $path = lang_path($file . '.php');
-                        $output = "<?php\n\nreturn " . VarExporter::export($translations) . ";\n";
-                        $this->files->put($path, $output);
-                    }
-                }
-
-                Translation::ofTranslatedGroup($group)->update(['status' => Translation::STATUS_SAVED]);
+            $dir = 'vendor/' . implode('/', $groups) . '/' . $locale;
+            if (! File::isDirectory(lang_path($dir))) {
+                File::makeDirectory(lang_path($dir), 755, true);
             }
-        }
-    }
 
-    public function exportAllTranslations(): bool
-    {
-        /**
-         * @var Builder $query
-         */
-        $query = Translation::selectDistinctGroup();
-
-        $groups = $query->whereNotNull('value')->get('group');
-
-        foreach ($groups as $group) {
-            $this->exportTranslations($group->group);
+            $file = $dir . '/' . $folderName;
         }
 
-        return true;
-    }
+        $path = lang_path($file . '.php');
+        $output = "<?php\n\nreturn " . VarExporter::export($translations) . ";\n";
 
-    protected function makeTree(array|Collection $translations): array
-    {
-        $array = [];
-        foreach ($translations as $translation) {
-            Arr::set($array, "$translation->locale.$translation->group.$translation->key", $translation->value);
-        }
-
-        return $array;
-    }
-
-    public function cleanTranslations(): void
-    {
-        Translation::query()->whereNull('value')->delete();
-    }
-
-    public function truncateTranslations(): void
-    {
-        Translation::query()->truncate();
+        File::put($path, $output);
     }
 
     public function getConfig(string|null $key = null): string|array|null
@@ -387,7 +246,9 @@ class Manager
         } else {
             $jsonFile = $localePath . '/' . $locale . '.json';
 
-            File::copy($jsonFile, $themeVendorLangPath . "/$locale.json");
+            if (File::exists($jsonFile)) {
+                File::copy($jsonFile, $themeVendorLangPath . "/$locale.json");
+            }
 
             $this->removeUnusedThemeTranslations();
         }

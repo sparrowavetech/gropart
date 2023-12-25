@@ -2,9 +2,11 @@
 
 namespace Botble\Base\Helpers;
 
+use Botble\ACL\Models\UserMeta;
 use Botble\Base\Facades\BaseHelper;
 use Closure;
 use Illuminate\Routing\RouteRegistrar;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 class AdminHelper
@@ -29,5 +31,16 @@ class AdminHelper
         $isInAdmin = implode('/', $segments) === $prefix;
 
         return $force ? $isInAdmin : apply_filters(IS_IN_ADMIN_FILTER, $isInAdmin);
+    }
+
+    public function themeMode(): string
+    {
+        $default = 'light';
+
+        if (! Auth::check()) {
+            return $default;
+        }
+
+        return UserMeta::getMeta('theme_mode', $default);
     }
 }

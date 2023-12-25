@@ -8,6 +8,7 @@ use Botble\Language\Models\LanguageMeta;
 use Botble\LanguageAdvanced\Supports\LanguageAdvancedManager;
 use Botble\Setting\Facades\Setting;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class LanguageSeeder extends BaseSeeder
 {
@@ -18,7 +19,13 @@ class LanguageSeeder extends BaseSeeder
 
         if (is_plugin_active('language-advanced')) {
             foreach (LanguageAdvancedManager::supportedModels() as $model) {
-                DB::table((new $model())->getModel()->getTable() . '_translations')->truncate();
+                $table = (new $model())->getModel()->getTable() . '_translations';
+
+                if (! Schema::hasTable($table)) {
+                    continue;
+                }
+
+                DB::table($table)->truncate();
             }
         }
 

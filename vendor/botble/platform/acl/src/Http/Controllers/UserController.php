@@ -3,19 +3,23 @@
 namespace Botble\ACL\Http\Controllers;
 
 use Botble\ACL\Forms\PasswordForm;
+use Botble\ACL\Forms\PreferenceForm;
 use Botble\ACL\Forms\ProfileForm;
 use Botble\ACL\Forms\UserForm;
 use Botble\ACL\Http\Requests\AvatarRequest;
 use Botble\ACL\Http\Requests\CreateUserRequest;
+use Botble\ACL\Http\Requests\PreferenceRequest;
 use Botble\ACL\Http\Requests\UpdatePasswordRequest;
 use Botble\ACL\Http\Requests\UpdateProfileRequest;
 use Botble\ACL\Models\User;
+use Botble\ACL\Models\UserMeta;
 use Botble\ACL\Services\ChangePasswordService;
 use Botble\ACL\Services\CreateUserService;
 use Botble\ACL\Tables\UserTable;
 use Botble\Base\Facades\Assets;
 use Botble\Base\Http\Actions\DeleteResourceAction;
 use Botble\Base\Http\Controllers\BaseSystemController;
+use Botble\Base\Supports\Breadcrumb;
 use Botble\Media\Facades\RvMedia;
 use Botble\Media\Models\MediaFile;
 use Exception;
@@ -24,14 +28,13 @@ use Throwable;
 
 class UserController extends BaseSystemController
 {
-    public function __construct()
+    protected function breadcrumb(): Breadcrumb
     {
-        parent::__construct();
-
-        $this->breadcrumb()->add(
-            trans('core/acl::users.users'),
-            route('users.index')
-        );
+        return parent::breadcrumb()
+            ->add(
+                trans('core/acl::users.users'),
+                route('users.index')
+            );
     }
 
     public function index(UserTable $dataTable)
@@ -101,6 +104,10 @@ class UserController extends BaseSystemController
         $passwordForm = PasswordForm::createFromModel($user)
             ->setUrl(route('users.change-password', $user->getKey()));
 
+        $preferenceForm = PreferenceForm::create()
+            ->setUrl(route('users.update-preferences', $user->getKey()))
+            ->renderForm();
+
         $currentUser = $request->user();
 
         $canChangeProfile = $currentUser->hasPermission('users.edit') || $currentUser->getKey() == $user->getKey() || $currentUser->isSuperUser();
@@ -117,25 +124,14 @@ class UserController extends BaseSystemController
         $form = $form->renderForm();
         $passwordForm = $passwordForm->renderForm();
 
-        return view('core/acl::users.profile.base', compact('user', 'form', 'passwordForm', 'canChangeProfile'));
+        return view(
+            'core/acl::users.profile.base',
+            compact('user', 'form', 'passwordForm', 'canChangeProfile', 'preferenceForm')
+        );
     }
 
     public function postUpdateProfile(User $user, UpdateProfileRequest $request)
     {
-        $currentUser = $request->user();
-
-        $hasRightToUpdate = $currentUser->hasPermission('users.edit') ||
-            $currentUser->getKey() === $user->getKey() ||
-            $currentUser->isSuperUser();
-
-        if (! $hasRightToUpdate) {
-            return $this
-                ->httpResponse()
-                ->setNextUrl($user->url)
-                ->setError()
-                ->setMessage(trans('core/acl::permissions.access_denied_message'));
-        }
-
         if ($user->email !== $request->input('email')) {
             $users = User::query()
                 ->where('email', $request->input('email'))
@@ -179,20 +175,6 @@ class UserController extends BaseSystemController
 
     public function postChangePassword(User $user, UpdatePasswordRequest $request, ChangePasswordService $service)
     {
-        $currentUser = $request->user();
-
-        $hasRightToUpdate = $currentUser->hasPermission('users.edit') ||
-            $currentUser->getKey() === $user->getKey() ||
-            $currentUser->isSuperUser();
-
-        if (! $hasRightToUpdate) {
-            return $this
-                ->httpResponse()
-                ->setNextUrl($user->url)
-                ->setError()
-                ->setMessage(trans('core/acl::permissions.access_denied_message'));
-        }
-
         $request->merge(['id' => $user->getKey()]);
 
         try {
@@ -207,6 +189,18 @@ class UserController extends BaseSystemController
         return $this
             ->httpResponse()
             ->setMessage(trans('core/acl::users.password_update_success'));
+    }
+
+    public function updatePreferences(User $user, PreferenceRequest $request)
+    {
+        PreferenceForm::create()->saving(function () use ($request) {
+            UserMeta::setMeta('locale', $request->input('locale'));
+            UserMeta::setMeta('theme_mode', $request->input('theme_mode'));
+        });
+
+        return $this
+            ->httpResponse()
+            ->setMessage(trans('core/acl::users.update_preferences_success'));
     }
 
     public function postAvatar(User $user, AvatarRequest $request)

@@ -3,13 +3,14 @@
 return [
     'translations' => 'Translations',
     'export_warning' => 'Warning, translations are not visible until they are exported back to lang folder. Please use "Publish translations" button to apply changes.',
-    'import_done' => 'Done importing, processed :counter items! Reload this page to refresh the groups!',
+    'import_success_message' => 'New translations have been imported successfully!',
     'translation_manager' => 'Translations Manager',
     'done_publishing' => 'Done publishing the translations for group',
     'append_translation' => 'Append new translations',
     'replace_translation' => 'Replace existing translations',
     'import_group' => 'Import group',
-    'confirm_publish_group' => 'Are you sure you want to publish the translations group ":group"? This will overwrite existing language files.',
+    'group' => 'Group',
+    'confirm_publish_translations' => 'Are you sure you want to publish the translations for :locale? This will overwrite existing language files.',
     'publish_translations' => 'Publish translations',
     'back' => 'Back',
     'edit_title' => 'Enter translation',
@@ -41,6 +42,8 @@ return [
     'add_new_locale' => 'Add new locale',
     'is_default' => 'Is default?',
     'localization' => 'Localization',
+    'here' => 'here',
+    're_import_alert' => 'If there are any missing translations, you can click :here to re-import the latest translations.',
     'panel' => [
         'locales' => [
             'title' => 'Locales',

@@ -8,6 +8,7 @@ use Botble\Table\Abstracts\TableAbstract;
 use Botble\Table\Columns\Concerns\Copyable;
 use Botble\Table\Columns\Concerns\HasEmptyState;
 use Botble\Table\Columns\Concerns\HasIcon;
+use Botble\Table\Columns\Concerns\Maskable;
 use Botble\Table\Contracts\FormattedColumn as FormattedColumnContract;
 use Closure;
 use Illuminate\Support\Str;
@@ -18,12 +19,13 @@ class FormattedColumn extends Column implements FormattedColumnContract
     use HasEmptyState;
     use HasIcon;
     use Renderable;
+    use Maskable;
 
     protected TableAbstract $table;
 
     protected int $limit;
 
-    protected Closure $getValueUsingCallback;
+    protected array $getValueUsingCallbacks = [];
 
     protected object $item;
 
@@ -34,7 +36,8 @@ class FormattedColumn extends Column implements FormattedColumnContract
     public static function make(array|string $data = [], string $name = ''): static
     {
         return parent::make($data, $name)
-            ->renderUsing(fn (FormattedColumn $column, $value) => $column->formattedValue($value));
+            ->renderUsing(fn (FormattedColumn $column, $value) => $column->formattedValue($value))
+            ->getValueUsing(fn (FormattedColumn $column) => $column->applyLimitIfAvailable($column->getOriginalValue()));
     }
 
     public function limit(int $length = 5): static
@@ -44,9 +47,9 @@ class FormattedColumn extends Column implements FormattedColumnContract
         return $this;
     }
 
-    public function applyLimitIfAvailable(string|null $text): string
+    public function applyLimitIfAvailable(mixed $text): mixed
     {
-        if (isset($this->limit) && $this->limit > 0) {
+        if (isset($this->limit) && $this->limit > 0 && is_string($text)) {
             return Str::limit($text, $this->limit);
         }
 
@@ -80,13 +83,6 @@ class FormattedColumn extends Column implements FormattedColumnContract
     public function getItem(): object
     {
         return $this->item;
-    }
-
-    public function getValueUsing(Closure $callback): static
-    {
-        $this->getValueUsingCallback = $callback;
-
-        return $this;
     }
 
     public function append(Closure $callback): static
@@ -125,12 +121,28 @@ class FormattedColumn extends Column implements FormattedColumnContract
         return $rendered;
     }
 
+    public function getValueUsing(Closure $callback): static
+    {
+        $this->getValueUsingCallbacks[] = $callback;
+
+        return $this;
+    }
+
     public function getValue(): mixed
     {
-        if (isset($this->getValueUsingCallback)) {
-            return call_user_func($this->getValueUsingCallback, $this);
+        $value = $this->getOriginalValue();
+
+        if (isset($this->getValueUsingCallbacks)) {
+            foreach ($this->getValueUsingCallbacks as $callback) {
+                $value = call_user_func($callback, $this, $value);
+            }
         }
 
+        return $value;
+    }
+
+    public function getOriginalValue(): mixed
+    {
         return $this->getItem()->{$this->name};
     }
 

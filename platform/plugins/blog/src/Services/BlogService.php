@@ -122,13 +122,13 @@ class BlogService
                 if (function_exists('admin_bar')) {
                     AdminBar::registerLink(
                         trans('plugins/blog::categories.edit_this_category'),
-                        route('categories.edit', $category->id),
+                        route('categories.edit', $category->getKey()),
                         null,
                         'categories.edit'
                     );
                 }
 
-                $allRelatedCategoryIds = array_merge([$category->id], $category->activeChildren->pluck('id')->all());
+                $allRelatedCategoryIds = array_merge([$category->getKey()], $category->activeChildren->pluck('id')->all());
 
                 $posts = app(PostInterface::class)
                     ->getByCategory($allRelatedCategoryIds, (int)theme_option('number_of_posts_in_a_category', 12));
@@ -171,13 +171,13 @@ class BlogService
                 if (function_exists('admin_bar')) {
                     AdminBar::registerLink(
                         trans('plugins/blog::tags.edit_this_tag'),
-                        route('tags.edit', $tag->id),
+                        route('tags.edit', $tag->getKey()),
                         null,
                         'tags.edit'
                     );
                 }
 
-                $posts = get_posts_by_tag($tag->id, (int)theme_option('number_of_posts_in_a_tag', 12));
+                $posts = get_posts_by_tag($tag->getKey(), (int)theme_option('number_of_posts_in_a_tag', 12));
 
                 Theme::breadcrumb()->add($tag->name, $tag->url);
 

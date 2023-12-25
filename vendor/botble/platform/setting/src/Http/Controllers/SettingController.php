@@ -10,9 +10,9 @@ abstract class SettingController extends BaseController
 {
     use InteractsWithSettings;
 
-    protected function breadcrumb(string $group = 'admin'): Breadcrumb
+    protected function breadcrumb(): Breadcrumb
     {
-        return parent::breadcrumb($group)
+        return parent::breadcrumb()
             ->add(trans('core/setting::setting.title'), route('settings.index'));
     }
 }

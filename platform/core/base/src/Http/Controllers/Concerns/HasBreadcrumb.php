@@ -7,14 +7,13 @@ use Botble\Base\Supports\Breadcrumb;
 
 trait HasBreadcrumb
 {
-    protected function breadcrumb(string $group = 'admin'): Breadcrumb
-    {
-        /**
-         * @var Breadcrumb $breadcrumb
-         */
-        $breadcrumb = BreadcrumbFacade::for($group);
+    protected string $breadcrumbGroup = 'admin';
 
-        if ($group === 'admin') {
+    protected function breadcrumb(): Breadcrumb
+    {
+        $breadcrumb = BreadcrumbFacade::for($this->breadcrumbGroup);
+
+        if ($this->breadcrumbGroup === 'admin') {
             $breadcrumb->add(trans('core/dashboard::dashboard.title'), route('dashboard.index'));
         }
 

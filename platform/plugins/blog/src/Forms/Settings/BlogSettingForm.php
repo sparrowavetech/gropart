@@ -17,6 +17,9 @@ class BlogSettingForm extends SettingForm
             ->setValidatorClass(BlogSettingRequest::class)
             ->add('blog_setting', 'html', [
                 'html' => view('plugins/blog::partials.blog-post-schema-fields'),
+                'wrapper' => [
+                    'class' => 'mb-0',
+                ],
             ]);
     }
 }

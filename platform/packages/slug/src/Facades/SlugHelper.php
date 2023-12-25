@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static string|null getPrefix(string $model, string $default = '', bool $translate = true)
  * @method static string getHelperTextForPrefix(string $model, string $default = '/', bool $translate = true)
  * @method static string getHelperText(string $prefix, string|null $postfix = '', string|null $separation = '')
- * @method static string|null getColumnNameToGenerateSlug(object|string|null $model)
+ * @method static string|null getColumnNameToGenerateSlug(object|array|string|null $model)
  * @method static string getPermalinkSettingKey(string $model)
  * @method static bool turnOffAutomaticUrlTranslationIntoLatin()
  * @method static string|null getPublicSingleEndingURL()

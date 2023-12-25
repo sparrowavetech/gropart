@@ -424,17 +424,7 @@ class Menu
                     $menuNodes = json_decode($menuNodes, true);
 
                     if ($menuNodes) {
-                        foreach ($menuNodes as $node) {
-                            if ($node['menuItem']['id'] == $model->getKey() && isset($node['menuItem']['icon_image'])) {
-                                if ($iconImage = $node['menuItem']['icon_image']) {
-                                    MetaBox::saveMetaBoxData($model, 'icon_image', $iconImage);
-                                } else {
-                                    MetaBox::deleteMetaData($model, 'icon_image');
-                                }
-
-                                break;
-                            }
-                        }
+                        $this->saveMenuNodeImages($menuNodes, $model);
                     }
                 }
             }
@@ -449,5 +439,22 @@ class Menu
         add_filter('cms_menu_load_with_relations', function (array $relations): array {
             return array_merge($relations, ['menuNodes.metadata', 'menuNodes.child.metadata']);
         }, 170);
+    }
+
+    public function saveMenuNodeImages(array $nodes, MenuNode $model): void
+    {
+        foreach ($nodes as $node) {
+            if ($node['menuItem']['id'] == $model->getKey() && isset($node['menuItem']['icon_image'])) {
+                if ($iconImage = $node['menuItem']['icon_image']) {
+                    MetaBox::saveMetaBoxData($model, 'icon_image', $iconImage);
+                } else {
+                    MetaBox::deleteMetaData($model, 'icon_image');
+                }
+            }
+
+            if (! empty($node['children'])) {
+                $this->saveMenuNodeImages($node['children'], $model);
+            }
+        }
     }
 }

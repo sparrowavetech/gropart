@@ -60,9 +60,4 @@
 </x-core::modal>
 
 @include('core/media::config')
-<link
-    href="{{ asset('vendor/core/core/media/css/media.css?v=' . time()) }}"
-    rel="stylesheet"
-    type="text/css"
-/>
 <script src="{{ asset('vendor/core/core/media/js/integrate.js?v=' . time()) }}"></script>

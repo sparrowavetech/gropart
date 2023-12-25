@@ -2,12 +2,16 @@
 
 namespace Botble\Base\Http\Controllers;
 
+use Botble\Base\Supports\Breadcrumb;
+
 class BaseSystemController extends BaseController
 {
-    public function __construct()
+    protected function breadcrumb(): Breadcrumb
     {
-        $this
-            ->breadcrumb()
-            ->add(trans('core/base::base.panel.system'), route('system.index'));
+        return parent::breadcrumb()
+            ->add(
+                trans('core/base::base.panel.system'),
+                route('system.index')
+            );
     }
 }

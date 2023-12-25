@@ -29,6 +29,8 @@ use Illuminate\Support\Facades\Facade;
  * @method static string|null getCurrentLocaleCode()
  * @method static string|null getLocaleByLocaleCode(string $localeCode)
  * @method static void setCurrentAdminLocale(string|null $code)
+ * @method static void setCurrentLocale(string|null $locale)
+ * @method static void setCurrentLocaleCode(string|null $code)
  * @method static array getCurrentAdminLanguage()
  * @method static string|null getCurrentAdminLocale()
  * @method static string|null getCurrentAdminLocaleCode()

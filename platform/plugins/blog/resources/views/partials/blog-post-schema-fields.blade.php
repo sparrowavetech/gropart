@@ -5,10 +5,12 @@
     :description="trans('plugins/blog::base.settings.enable_blog_post_schema_description')"
     data-bb-toggle="collapse"
     data-bb-target=".blog_post_schema_type"
+    class="mb-0"
+    :wrapper="false"
 />
 
 <x-core::form.fieldset
-    class="blog_post_schema_type"
+    class="blog_post_schema_type mt-3"
     data-bb-value="1"
     @style(['display: none' => !setting('blog_post_schema_enabled', true)])
 >

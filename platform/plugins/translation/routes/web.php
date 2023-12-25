@@ -45,7 +45,6 @@ Route::group(['namespace' => 'Botble\Translation\Http\Controllers'], function ()
                 Route::post('import', [
                     'as' => 'translations.import',
                     'uses' => 'TranslationController@import',
-
                 ]);
             });
 

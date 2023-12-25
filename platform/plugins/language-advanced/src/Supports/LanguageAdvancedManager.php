@@ -185,12 +185,24 @@ class LanguageAdvancedManager
                     $modelTable . '_id',
                 ], self::getTranslatableColumns($model::class)));
 
-                return (new HasMany(
+                $relation = new HasMany(
                     $instance->newQuery(),
                     $model,
                     $modelTable . '_translations.' . $modelTable . '_id',
                     $model->getKeyName()
-                ))->where('lang_code', request()->input('from_lang') ?: $locale);
+                );
+
+                $langFromRequest = request()->input('from_lang');
+
+                return $relation
+                    ->when($langFromRequest, function ($query) use ($langFromRequest, $locale) {
+                        $query->where(function ($query) use ($langFromRequest, $locale) {
+                            $query->where('lang_code', $locale)->orWhere('lang_code', $langFromRequest);
+                        });
+                    })
+                    ->when(! $langFromRequest, function ($query) use ($locale) {
+                        $query->where('lang_code', $locale);
+                    });
             });
 
             foreach ($columns as $column) {

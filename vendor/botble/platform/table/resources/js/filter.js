@@ -69,7 +69,14 @@ class TableFilter {
 
                 const url = new URL(window.location.href)
 
-                window.history.pushState({}, '', `${url.pathname}?${form.serialize()}`)
+                const params = new URLSearchParams(url.search)
+                const data = form.serializeArray()
+
+                $.each(data, (index, item) => {
+                    params.set(item.name, item.value)
+                })
+
+                window.history.pushState({}, '', `${url.pathname}?${params.toString()}`)
 
                 this.reloadDatatable(this.$table.DataTable())
             })

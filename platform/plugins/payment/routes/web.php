@@ -11,7 +11,7 @@ AdminHelper::registerRoutes(function () {
                 'uses' => 'PaymentController@methods',
             ]);
 
-            Route::post('settings', [
+            Route::put('settings', [
                 'as' => 'payments.settings',
                 'uses' => 'PaymentController@updateSettings',
                 'middleware' => 'preventDemo',

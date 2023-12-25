@@ -4,6 +4,7 @@ namespace Botble\Faq\Http\Controllers;
 
 use Botble\Base\Http\Actions\DeleteResourceAction;
 use Botble\Base\Http\Controllers\BaseController;
+use Botble\Base\Supports\Breadcrumb;
 use Botble\Faq\Forms\FaqForm;
 use Botble\Faq\Http\Requests\FaqRequest;
 use Botble\Faq\Models\Faq;
@@ -11,10 +12,9 @@ use Botble\Faq\Tables\FaqTable;
 
 class FaqController extends BaseController
 {
-    public function __construct()
+    protected function breadcrumb(): Breadcrumb
     {
-        $this
-            ->breadcrumb()
+        return parent::breadcrumb()
             ->add(trans('plugins/faq::faq.name'), route('faq.index'));
     }
 

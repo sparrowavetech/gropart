@@ -32,7 +32,7 @@ trait Copyable
     {
         $this->copyable = true;
         $this->copyableMessage(trans('core/table::table.copied'));
-        $this->copyableState(fn (FormattedColumn $column) => $column->getValue());
+        $this->copyableState(fn (FormattedColumn $column) => $column->getOriginalValue());
         $this->copyablePositionEnd();
         $this->copyableActionCopy();
 

@@ -15,22 +15,21 @@ class EmailRulesSettingForm extends SettingForm
             ->setSectionTitle(trans('core/setting::setting.email.email_rules'))
             ->setSectionDescription(trans('core/setting::setting.email.email_rules_description'))
             ->setValidatorClass(EmailRulesSettingRequest::class)
-            ->addCustomField('tags', TagField::class)
-            ->add('email_rules_blacklist_email_domains', 'tags', [
+            ->add('email_rules_blacklist_email_domains', TagField::class, [
                 'label' => trans('core/setting::setting.email.blacklist_email_domains'),
                 'value' => setting('email_rules_blacklist_email_domains'),
                 'help_block' => [
                     'text' => trans('core/setting::setting.email.blacklist_email_domains_helper'),
                 ],
             ])
-            ->add('email_rules_blacklist_specified_emails', 'tags', [
+            ->add('email_rules_blacklist_specified_emails', TagField::class, [
                 'label' => trans('core/setting::setting.email.blacklist_specified_emails'),
                 'value' => setting('email_rules_blacklist_specified_emails'),
                 'help_block' => [
                     'text' => trans('core/setting::setting.email.blacklist_specified_emails_helper'),
                 ],
             ])
-            ->add('email_rules_exception_emails', 'tags', [
+            ->add('email_rules_exception_emails', TagField::class, [
                 'label' => trans('core/setting::setting.email.exception_emails'),
                 'value' => setting('email_rules_exception_emails'),
                 'help_block' => [
@@ -56,6 +55,9 @@ class EmailRulesSettingForm extends SettingForm
                 'value' => setting('email_rules_spoof', false),
                 'help_block' => [
                     'text' => trans('core/setting::setting.email.email_rules_spoof_helper'),
+                ],
+                'wrapper' => [
+                    'class' => 'mb-0',
                 ],
             ]);
     }

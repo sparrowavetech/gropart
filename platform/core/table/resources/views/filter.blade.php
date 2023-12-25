@@ -68,7 +68,7 @@
                     'row filter-item form-filter',
                     'filter-item-default' => $loop->first,
                 ])>
-                    <div class="col-auto">
+                    <div class="col-auto w-50 w-sm-auto">
                         <x-core::form.select
                             name="filter_columns[]"
                             :options="['' => trans('core/table::table.select_field')] + array_combine(array_keys($columns), array_column($columns, 'title'))"
@@ -77,7 +77,7 @@
                         />
                     </div>
 
-                    <div class="col-auto">
+                    <div class="col-auto w-50 w-sm-auto">
                         <x-core::form.select
                             name="filter_operators[]"
                             :options="[
@@ -91,8 +91,8 @@
                         />
                     </div>
 
-                    <div class="col">
-                        <div class="filter-column-value-wrap">
+                    <div class="col-auto w-100 w-sm-25">
+                        <div class="filter-column-value-wrap mb-3">
                             <input
                                 class="form-control filter-column-value"
                                 type="text"

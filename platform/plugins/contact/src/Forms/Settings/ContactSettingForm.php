@@ -32,6 +32,9 @@ class ContactSettingForm extends SettingForm
                     'rows' => 3,
                     'data-counter' => '250',
                 ],
+                'wrapper' => [
+                    'class' => 'mb-0',
+                ],
                 'help_block' => [
                     'text' => trans('plugins/contact::contact.settings.blacklist_keywords_helper'),
                 ],

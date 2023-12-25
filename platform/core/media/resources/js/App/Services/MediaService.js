@@ -1,6 +1,5 @@
 import { RecentItems } from '../Config/MediaConfig'
 import { Helpers } from '../Helpers/Helpers'
-import { MessageService } from './MessageService'
 import { ActionsService } from './ActionsService'
 import { ContextMenuService } from './ContextMenuService'
 import { MediaList } from '../Views/MediaList'
@@ -127,23 +126,26 @@ export class MediaService {
     }
 
     static refreshFilter() {
-        let $rvMediaContainer = $('.rv-media-container')
-        let viewIn = Helpers.getRequestParams().view_in
+        const $rvMediaContainer = $('.rv-media-container')
+        const viewIn = Helpers.getRequestParams().view_in
+        const $actionsTarget = $('.rv-media-actions .btn:not([data-type="refresh"]):not([data-bs-toggle="offcanvas"])')
+
         if (viewIn !== 'all_media' && !Helpers.getRequestParams().folder_id) {
-            $('.rv-media-actions .btn:not([data-type="refresh"]):not(label)').addClass('disabled')
+            $actionsTarget.addClass('disabled')
             $rvMediaContainer.attr('data-allow-upload', 'false')
         } else {
-            $('.rv-media-actions .btn:not([data-type="refresh"]):not(label)').removeClass('disabled')
+            $actionsTarget.removeClass('disabled')
             $rvMediaContainer.attr('data-allow-upload', 'true')
         }
 
         $('.rv-media-actions .btn.js-rv-media-change-filter-group').removeClass('disabled')
 
-        let $empty_trash_btn = $('.rv-media-actions .btn[data-action="empty_trash"]')
-        $empty_trash_btn.addClass('d-none')
+        const $emptyTrashBtn = $('.rv-media-actions .btn[data-action="empty_trash"]')
+
+        $emptyTrashBtn.hide()
 
         if (viewIn === 'trash' && Helpers.size(Helpers.getItems()) > 0) {
-            $empty_trash_btn.removeClass('d-none').removeClass('disabled')
+            $emptyTrashBtn.removeClass('d-none disabled').show()
         }
 
         ContextMenuService.destroyContext()

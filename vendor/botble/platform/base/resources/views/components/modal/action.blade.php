@@ -32,7 +32,7 @@
     :has-form="$hasForm"
 >
     @if (!empty($description))
-        <div class="text-muted">
+        <div class="text-muted text-break">
             {!! $description !!}
         </div>
     @else

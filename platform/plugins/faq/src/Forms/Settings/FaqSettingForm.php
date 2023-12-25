@@ -18,6 +18,9 @@ class FaqSettingForm extends SettingForm
             ->add('enable_faq_schema', 'onOffCheckbox', [
                 'label' => trans('plugins/faq::faq.settings.enable_faq_schema'),
                 'value' => setting('enable_faq_schema', false),
+                'wrapper' => [
+                    'class' => 'mb-0',
+                ],
                 'help_block' => [
                     'text' => trans('plugins/faq::faq.settings.enable_faq_schema_description', [
                         'url' => sprintf('<a href="%s">%s</a>', $url = 'https://developers.google.com/search/docs/data-types/faqpage', $url),

@@ -5,6 +5,7 @@ namespace Botble\Language\Listeners;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Language\Facades\Language;
 use Botble\Language\Models\LanguageMeta;
+use Botble\LanguageAdvanced\Supports\LanguageAdvancedManager;
 use Botble\Page\Models\Page;
 use Botble\Slug\Models\Slug;
 use Botble\Theme\Events\RenderingSingleEvent;
@@ -20,7 +21,10 @@ class AddHrefLangListener
             }
 
             add_filter(THEME_FRONT_HEADER, function ($header) use ($event) {
-                if (! in_array($event->slug->reference_type, Language::supportedModels())) {
+                if (
+                    ! in_array($event->slug->reference_type, Language::supportedModels()) &&
+                    (! is_plugin_active('language-advanced') || ! in_array($event->slug->reference_type, LanguageAdvancedManager::supportedModels()))
+                ) {
                     return $header;
                 }
 

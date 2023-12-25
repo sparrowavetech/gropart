@@ -4,12 +4,13 @@
     :checked="setting('optimize_page_speed_enable', false)"
     data-bb-toggle="collapse"
     data-bb-target=".optimize-settings"
+    :wrapper="false"
 />
 
 <x-core::form.fieldset
     data-bb-value="1"
-    class="optimize-settings"
-    @style(['display: none;' => !setting('optimize_page_speed_enable', false)])
+    class="optimize-settings mt-3"
+    @style(['display: none;' => ! setting('optimize_page_speed_enable', false)])
 >
     <x-core::form.on-off.checkbox
         name="optimize_collapse_white_space"

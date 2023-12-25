@@ -75,26 +75,6 @@ class PaymentMethodManagement {
                         Botble.showSuccess(data.message)
                     })
             })
-
-        $('.button-save-payment-settings')
-            .off('click')
-            .on('click', (event) => {
-                event.preventDefault()
-
-                const _self = $(event.currentTarget)
-                const form = _self.closest('form')
-
-                $httpClient.make()
-                    .withButtonLoading(_self)
-                    .post(form.prop('action'), form.serialize())
-                    .then(({ data }) => {
-                        if (!data.error) {
-                            Botble.showSuccess(data.message)
-                        } else {
-                            Botble.showError(data.message)
-                        }
-                    })
-            })
     }
 }
 

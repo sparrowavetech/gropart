@@ -1,10 +1,10 @@
 'use strict'
 
 $(() => {
-    $(document).on('click', '.add-faq-schema-items', (event) => {
-        event.preventDefault()
+    $(document)
+        .on('click', '[data-bb-toggle="select-from-existing"]', (e) => {
+            e.preventDefault()
 
-        $('.faq-schema-items').toggleClass('d-none')
-        $(event.currentTarget).toggleClass('d-none');
-    })
+            $('.existing-faq-schema-items').show()
+        })
 })

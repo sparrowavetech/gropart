@@ -43,6 +43,7 @@ return [
         'max_upload_filesize' => 'Max upload filesize (MB)',
         'max_upload_filesize_placeholder' => 'Default: 10',
         'max_product_images_upload_by_vendor' => 'Max number of images for each product',
+        'enable_vendor_registration' => 'Enable vendor registration',
     ],
     'theme_options' => [
         'name' => 'Marketplace',

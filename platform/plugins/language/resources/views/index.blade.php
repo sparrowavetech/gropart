@@ -9,14 +9,16 @@
                         href="#tabs-detail"
                         class="nav-link active"
                         data-bs-toggle="tab"
-                    >{{ trans('core/base::tabs.detail') }}</a>
+                    >{{ trans('core/base::tabs.detail') }}
+                    </a>
                 </li>
                 <li class="nav-item">
                     <a
                         href="#tabs-settings"
                         class="nav-link"
                         data-bs-toggle="tab"
-                    >{{ trans('plugins/language::language.settings') }}</a>
+                    >{{ trans('plugins/language::language.settings') }}
+                    </a>
                 </li>
                 {!! apply_filters(BASE_FILTER_REGISTER_CONTENT_TABS, null, new Botble\Language\Models\Language()) !!}
             </ul>
@@ -50,12 +52,14 @@
                                 :helper-text="trans('plugins/language::language.choose_language_helper')"
                                 searchable
                             >
-                                <option>{{ trans('plugins/language::language.select_language') }}</option>
+                                <option>{{ trans('plugins/language::language.select_language') }}
+                                </option>
                                 @foreach ($languages as $key => $language)
                                     <option
                                         value="{{ $key }}"
                                         data-language="{{ json_encode($language) }}"
-                                    > {{ $language[2] }} - {{ $language[1] }}</option>
+                                    > {{ $language[2] }} - {{ $language[1] }}
+                                    </option>
                                 @endforeach
                             </x-core::form.select>
 
@@ -118,30 +122,37 @@
                         </div>
                         <div class="col-md-7">
                             <div class="table-responsive">
-                                <table class="table table-hover table-language">
-                                    <thead>
-                                        <tr>
-                                            <th class="text-start">{{ trans('plugins/language::language.language_name') }}
-                                            </th>
-                                            <th>{{ trans('plugins/language::language.locale') }}</th>
-                                            <th>{{ trans('plugins/language::language.code') }}</th>
-                                            <th>{{ trans('plugins/language::language.default_language') }}</th>
-                                            <th>{{ trans('plugins/language::language.order') }}</th>
-                                            <th>{{ trans('plugins/language::language.actions') }}</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
+                                <x-core::table class="table-language">
+                                    <x-core::table.header>
+                                        <x-core::table.header.cell>
+                                            {{ trans('plugins/language::language.language_name') }}
+                                        </x-core::table.header.cell>
+                                        <x-core::table.header.cell>
+                                            {{ trans('plugins/language::language.locale') }}
+                                        </x-core::table.header.cell>
+                                        <x-core::table.header.cell>
+                                            {{ trans('plugins/language::language.code') }}
+                                        </x-core::table.header.cell>
+                                        <x-core::table.header.cell>
+                                            {{ trans('plugins/language::language.default_language') }}
+                                        </x-core::table.header.cell>
+                                        <x-core::table.header.cell>
+                                            {{ trans('plugins/language::language.order') }}
+                                        </x-core::table.header.cell>
+                                        <x-core::table.header.cell>
+                                            {{ trans('plugins/language::language.actions') }}
+                                        </x-core::table.header.cell>
+                                    </x-core::table.header>
+                                    <x-core::table.body>
                                         @each('plugins/language::partials.language-item', $activeLanguages, 'item')
-                                    </tbody>
-                                </table>
+                                    </x-core::table.body>
+                                </x-core::table>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div
-                    class="tab-pane"
-                    id="tabs-settings"
-                >
+
+                <div class="tab-pane" id="tabs-settings">
                     {!! $languageSettingForm->renderForm() !!}
                 </div>
             </div>

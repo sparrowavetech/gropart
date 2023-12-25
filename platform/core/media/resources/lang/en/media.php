@@ -182,4 +182,5 @@ return [
         'name' => 'Properties',
         'color_label' => 'Choose a color for this folder',
     ],
+    'update_properties_success' => 'Update properties successfully!',
 ];

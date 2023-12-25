@@ -83,9 +83,9 @@ final class Core
     private int $verificationPeriod = 1;
 
     public function __construct(
-        private CacheRepository $cache,
-        private Filesystem $files,
-        private Session $session
+        private readonly CacheRepository $cache,
+        private readonly Filesystem $files,
+        private readonly Session $session
     ) {
         $this->basePath = base_path();
         $this->licenseFilePath = storage_path('.license');
@@ -331,7 +331,7 @@ final class Core
         return (float)$sizeUpdateResponse->header('Content-Length') ?: 1;
     }
 
-    public function downloadUpdate(string $updateId, string $version): bool
+    public function downloadUpdate(string $updateId, string $version): void
     {
         SystemUpdateDownloading::dispatch();
 
@@ -354,20 +354,15 @@ final class Core
             }
         }
 
-        if ($this->validateUpdateFile($filePath)) {
-            SystemUpdateDownloaded::dispatch($filePath);
+        $this->validateUpdateFile($filePath);
 
-            return true;
-        }
-
-        $this->files->delete($filePath);
-
-        return false;
+        SystemUpdateDownloaded::dispatch($filePath);
     }
 
-    public function updateFilesAndDatabase(string $version): bool
+    public function updateFilesAndDatabase(string $version): void
     {
-        return $this->updateFiles($version) && $this->updateDatabase();
+        $this->updateFiles($version);
+        $this->updateDatabase();
     }
 
     public function updateFiles(string $version): bool
@@ -412,11 +407,21 @@ final class Core
         }
     }
 
-    public function updateDatabase(): bool
+    public function updateDatabase(): void
     {
-        $this->runMigrationFiles();
+        try {
+            $wrongFile = database_path('migrations/media_folders_table.php');
 
-        return true;
+            if ($this->files->exists($wrongFile)) {
+                $this->files->delete($wrongFile);
+            }
+
+            $this->runMigrationFiles();
+        } catch (Throwable $exception) {
+            $this->logError($exception);
+
+            throw $exception;
+        }
     }
 
     public function publishUpdateAssets(): void
@@ -425,22 +430,18 @@ final class Core
         $this->publishPackagesAssets();
     }
 
-    public function publishCoreAssets(): bool
+    public function publishCoreAssets(): void
     {
         SystemUpdatePublishing::dispatch();
 
         $this->publishAssets(core_path());
-
-        return true;
     }
 
-    public function publishPackagesAssets(): bool
+    public function publishPackagesAssets(): void
     {
         $this->publishAssets(package_path());
 
         SystemUpdatePublished::dispatch();
-
-        return true;
     }
 
     public function cleanCaches(): void
@@ -456,11 +457,9 @@ final class Core
         }
     }
 
-    public function cleanUp(): bool
+    public function cleanUp(): void
     {
         $this->cleanCaches();
-
-        return true;
     }
 
     public function logError(Exception|Throwable $exception): void
@@ -487,7 +486,7 @@ final class Core
                 $this->files->ensureDirectoryExists(dirname($to));
                 $this->files->copyDirectory($from, $to);
             } catch (Throwable $exception) {
-                BaseHelper::logError($exception);
+                $this->logError($exception);
             }
         }
     }
@@ -498,7 +497,7 @@ final class Core
 
         $migrator = app('migrator');
 
-        $migrator->run(database_path('migrations'));
+        rescue(fn () => $migrator->run(database_path('migrations')));
 
         $paths = [
             core_path(),
@@ -507,13 +506,15 @@ final class Core
 
         foreach ($paths as $path) {
             foreach (BaseHelper::scanFolder($path) as $module) {
-                $modulePath = $path . '/' . $module;
+                $modulePath = BaseHelper::joinPaths([$path, $module]);
 
                 if (! $this->files->isDirectory($modulePath)) {
                     continue;
                 }
 
-                if ($this->files->isDirectory($moduleMigrationPath = $modulePath . '/database/migrations')) {
+                $moduleMigrationPath = BaseHelper::joinPaths([$modulePath, 'database', 'migrations']);
+
+                if ($this->files->isDirectory($moduleMigrationPath)) {
                     $migrator->run($moduleMigrationPath);
                 }
             }
@@ -522,7 +523,7 @@ final class Core
         SystemUpdateDBMigrated::dispatch();
     }
 
-    private function validateUpdateFile(string $filePath): bool
+    private function validateUpdateFile(string $filePath): void
     {
         if (! class_exists('ZipArchive', false)) {
             throw new MissingZipExtensionException();
@@ -606,8 +607,6 @@ final class Core
         }
 
         $zip->close();
-
-        return true;
     }
 
     public function getLicenseFile(): string|null
@@ -742,9 +741,7 @@ final class Core
 
     private function getUpdatedFilePath(string $version): string
     {
-        $version = str_replace('.', '_', $version);
-
-        return base_path('update_main_' . $version . '.zip');
+        return $this->basePath . DIRECTORY_SEPARATOR . 'update_main_' . str_replace('.', '_', $version) . '.zip';
     }
 
     protected function isLicenseFileExists(): bool

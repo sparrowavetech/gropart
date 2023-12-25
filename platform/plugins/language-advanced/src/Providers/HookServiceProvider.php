@@ -14,11 +14,9 @@ use Botble\Table\EloquentDataTable;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
-use Illuminate\Database\Query\JoinClause;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Throwable;
 
@@ -54,7 +52,7 @@ class HookServiceProvider extends ServiceProvider
         FormAbstract::beforeRendering([$this, 'changeFormDataBeforeRendering'], 1134);
     }
 
-    public function addLanguageBox(string $priority, Model|string|null $object = null): void
+    public function addLanguageBox(string $priority, array|Model|string|null $object = null): void
     {
         if (
             $priority == 'top' &&
@@ -139,7 +137,7 @@ class HookServiceProvider extends ServiceProvider
         ]);
     }
 
-    public function addCurrentLanguageEditingAlert(Request $request, Model|string|null $data = null): void
+    public function addCurrentLanguageEditingAlert(Request $request, array|Model|string|null $data = null): void
     {
         $model = $data;
         if (is_object($data)) {
@@ -309,7 +307,7 @@ class HookServiceProvider extends ServiceProvider
             ->add('model', 'hidden', ['value' => get_class($model)]);
     }
 
-    public function customizeMetaBoxes(string $context, string|Model|null $object = null): void
+    public function customizeMetaBoxes(string $context, array|string|Model|null $object = null): void
     {
         if (
             is_in_admin() &&

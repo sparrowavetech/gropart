@@ -17,6 +17,9 @@ class SocialLoginSettingForm extends SettingForm
             ->setValidatorClass(SocialLoginSettingRequest::class)
             ->add('social_login', 'html', [
                 'html' => view('plugins/social-login::partials.social-login-fields'),
+                'wrapper' => [
+                    'class' => 'mb-0',
+                ],
             ]);
     }
 }

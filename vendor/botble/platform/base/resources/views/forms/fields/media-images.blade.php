@@ -9,7 +9,7 @@
 @endif
 
 @if ($showField)
-    @include('core/base::forms.partials.images', ['name' => $name, 'values' => $options['values']])
+    @include('core/base::forms.partials.images', ['name' => $name, 'values' => Arr::get($options, 'values')])
     @include('core/base::forms.partials.help-block')
 @endif
 

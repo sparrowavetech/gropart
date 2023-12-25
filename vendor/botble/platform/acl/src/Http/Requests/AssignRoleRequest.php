@@ -9,8 +9,8 @@ class AssignRoleRequest extends Request
     public function rules(): array
     {
         return [
-            'pk' => 'required|integer|min:1',
-            'value' => 'required|integer|min:1',
+            'pk' => 'required|exists:users,id|min:1',
+            'value' => 'required|exists:roles,id|min:1',
         ];
     }
 }

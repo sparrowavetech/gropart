@@ -11,7 +11,6 @@ globalThis.bootstrap = bootstrap
 globalThis.tabler = tabler
 
 import setupProgress from './base/progress'
-import './base/theme-switcher'
 
 setupProgress({
     showSpinner: true,

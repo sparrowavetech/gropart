@@ -302,7 +302,7 @@ $(() => {
     window.EDITOR = new EditorManagement().init()
     window.EditorManagement = window.EditorManagement || EditorManagement
 
-    $(document).on('shown.bs.modal', function () {
+    $(document).on('shown.bs.modal', function() {
         window.EDITOR.init()
     })
 })

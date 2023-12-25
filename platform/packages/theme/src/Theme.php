@@ -759,11 +759,10 @@ class Theme implements ThemeContract
 
         $schema = json_encode($schema);
 
-        $this->asset()->container('header')->writeScript(
-            'breadcrumb-schema',
-            $schema,
-            attributes: ['type' => 'application/ld+json']
-        );
+        $this
+            ->asset()
+            ->container('header')
+            ->writeScript('breadcrumb-schema', $schema, attributes: ['type' => 'application/ld+json']);
 
         return $this->view->make('packages/theme::partials.header')->render();
     }
@@ -886,114 +885,110 @@ class Theme implements ThemeContract
                     'id' => 'opt-text-subsection-facebook-integration',
                     'subsection' => true,
                     'icon' => 'ti ti-brand-facebook',
-                ])
-                ->setField([
-                    'id' => 'facebook_chat_enabled',
-                    'section_id' => 'opt-text-subsection-facebook-integration',
-                    'type' => 'customSelect',
-                    'label' => __('Enable Facebook chat?'),
-                    'attributes' => [
-                        'name' => 'facebook_chat_enabled',
-                        'list' => [
-                            'no' => trans('core/base::base.no'),
-                            'yes' => trans('core/base::base.yes'),
-                        ],
-                        'value' => 'no',
-                        'options' => [
-                            'class' => 'form-control',
-                        ],
-                    ],
-                    'helper' => __(
-                        'To show chat box on that website, please go to :link and add :domain to whitelist domains!',
+                    'fields' => [
                         [
-                            'domain' => Html::link(url('')),
-                            'link' => Html::link(
-                                'https://www.facebook.com/' . theme_option(
-                                    'facebook_page_id'
-                                ) . '/settings/?tab=messenger_platform'
+                            'id' => 'facebook_chat_enabled',
+                            'type' => 'customSelect',
+                            'label' => __('Enable Facebook chat?'),
+                            'attributes' => [
+                                'name' => 'facebook_chat_enabled',
+                                'list' => [
+                                    'no' => trans('core/base::base.no'),
+                                    'yes' => trans('core/base::base.yes'),
+                                ],
+                                'value' => 'no',
+                                'options' => [
+                                    'class' => 'form-control',
+                                ],
+                            ],
+                            'helper' => __(
+                                'To show chat box on that website, please go to :link and add :domain to whitelist domains!',
+                                [
+                                    'domain' => Html::link(url('')),
+                                    'link' => Html::link(
+                                        'https://www.facebook.com/' . theme_option('facebook_page_id', '[PAGE_ID]') .
+                                        '/settings/?tab=messenger_platform'
+                                    ),
+                                ]
                             ),
-                        ]
-                    ),
-                ])
-                ->setField([
-                    'id' => 'facebook_page_id',
-                    'section_id' => 'opt-text-subsection-facebook-integration',
-                    'type' => 'text',
-                    'label' => __('Facebook page ID'),
-                    'attributes' => [
-                        'name' => 'facebook_page_id',
-                        'value' => null,
-                        'options' => [
-                            'class' => 'form-control',
                         ],
-                    ],
-                    'helper' => __(
-                        'You can get fan page ID using this site :link',
-                        ['link' => Html::link('https://findidfb.com')]
-                    ),
-                ])
-                ->setField([
-                    'id' => 'facebook_comment_enabled_in_post',
-                    'section_id' => 'opt-text-subsection-facebook-integration',
-                    'type' => 'customSelect',
-                    'label' => __('Enable Facebook comment in post detail page?'),
-                    'attributes' => [
-                        'name' => 'facebook_comment_enabled_in_post',
-                        'list' => [
-                            'yes' => trans('core/base::base.yes'),
-                            'no' => trans('core/base::base.no'),
-                        ],
-                        'value' => 'no',
-                        'options' => [
-                            'class' => 'form-control',
-                        ],
-                    ],
-                ])
-                ->setField([
-                    'id' => 'facebook_app_id',
-                    'section_id' => 'opt-text-subsection-facebook-integration',
-                    'type' => 'text',
-                    'label' => __('Facebook App ID'),
-                    'attributes' => [
-                        'name' => 'facebook_app_id',
-                        'value' => null,
-                        'options' => [
-                            'class' => 'form-control',
-                        ],
-                        'placeholder' => 'Ex: 2061237023872679',
-                    ],
-                    'helper' => __(
-                        'You can create your app in :link',
-                        ['link' => Html::link('https://developers.facebook.com/apps')]
-                    ),
-                ])
-                ->setField([
-                    'id' => 'facebook_admins',
-                    'section_id' => 'opt-text-subsection-facebook-integration',
-                    'type' => 'repeater',
-                    'label' => __('Facebook Admins'),
-                    'attributes' => [
-                        'name' => 'facebook_admins',
-                        'value' => null,
-                        'fields' => [
-                            [
-                                'type' => 'text',
-                                'label' => __('Facebook Admin ID'),
-                                'attributes' => [
-                                    'name' => 'text',
-                                    'value' => null,
-                                    'options' => [
-                                        'class' => 'form-control',
-                                        'data-counter' => 40,
-                                    ],
+                        [
+                            'id' => 'facebook_page_id',
+                            'type' => 'text',
+                            'label' => __('Facebook page ID'),
+                            'helper' => __(
+                                'You can get fan page ID using this site :link',
+                                ['link' => Html::link('https://findidfb.com')]
+                            ),
+                            'attributes' => [
+                                'name' => 'facebook_page_id',
+                                'value' => null,
+                                'options' => [
+                                    'class' => 'form-control',
                                 ],
                             ],
                         ],
+                        [
+                            'id' => 'facebook_comment_enabled_in_post',
+                            'type' => 'customSelect',
+                            'label' => __('Enable Facebook comment in post detail page?'),
+                            'attributes' => [
+                                'name' => 'facebook_comment_enabled_in_post',
+                                'list' => [
+                                    'yes' => trans('core/base::base.yes'),
+                                    'no' => trans('core/base::base.no'),
+                                ],
+                                'value' => 'no',
+                                'options' => [
+                                    'class' => 'form-control',
+                                ],
+                            ],
+                        ],
+                        [
+                            'id' => 'facebook_app_id',
+                            'type' => 'text',
+                            'label' => __('Facebook App ID'),
+                            'attributes' => [
+                                'name' => 'facebook_app_id',
+                                'value' => null,
+                                'options' => [
+                                    'class' => 'form-control',
+                                ],
+                                'placeholder' => 'Ex: 2061237023872679',
+                            ],
+                            'helper' => __(
+                                'You can create your app in :link',
+                                ['link' => Html::link('https://developers.facebook.com/apps')]
+                            ),
+                        ],
+                        [
+                            'id' => 'facebook_admins',
+                            'type' => 'repeater',
+                            'label' => __('Facebook Admins'),
+                            'attributes' => [
+                                'name' => 'facebook_admins',
+                                'value' => null,
+                                'fields' => [
+                                    [
+                                        'type' => 'text',
+                                        'label' => __('Facebook Admin ID'),
+                                        'attributes' => [
+                                            'name' => 'text',
+                                            'value' => null,
+                                            'options' => [
+                                                'class' => 'form-control',
+                                                'data-counter' => 40,
+                                            ],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                            'helper' => __(
+                                'Facebook admins to manage comments :link',
+                                ['link' => Html::link('https://developers.facebook.com/docs/plugins/comments')]
+                            ),
+                        ],
                     ],
-                    'helper' => __(
-                        'Facebook admins to manage comments :link',
-                        ['link' => Html::link('https://developers.facebook.com/docs/plugins/comments')]
-                    ),
                 ]);
         });
 

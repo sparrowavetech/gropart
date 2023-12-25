@@ -5,6 +5,7 @@ namespace Botble\Stripe\Providers;
 use Botble\Base\Facades\Html;
 use Botble\Payment\Enums\PaymentMethodEnum;
 use Botble\Payment\Facades\PaymentMethods;
+use Botble\Stripe\Forms\StripePaymentMethodForm;
 use Botble\Stripe\Services\Gateways\StripePaymentService;
 use Illuminate\Http\Request;
 use Illuminate\Support\ServiceProvider;
@@ -81,7 +82,7 @@ class HookServiceProvider extends ServiceProvider
 
     public function addPaymentSettings(?string $settings): string
     {
-        return $settings . view('plugins/stripe::settings')->render();
+        return $settings . StripePaymentMethodForm::create()->renderForm();
     }
 
     public function registerStripeMethod(?string $html, array $data): string

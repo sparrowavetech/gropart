@@ -4,6 +4,7 @@ namespace Botble\Base\Forms;
 
 use Botble\Base\Supports\Builders\HasAttributes;
 use Botble\Base\Supports\Builders\HasLabel;
+use Closure;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Support\Traits\Conditionable;
 use Illuminate\Support\Traits\Tappable;
@@ -26,6 +27,8 @@ class FormFieldOptions implements Arrayable
     protected array $wrapperAttributes = [];
 
     protected bool $metadata = false;
+
+    protected Closure|bool $disabled = false;
 
     public static function make(): static
     {
@@ -110,6 +113,18 @@ class FormFieldOptions implements Arrayable
         return $this;
     }
 
+    public function disabled(Closure|bool $disabled = true): static
+    {
+        $this->disabled = $disabled;
+
+        return $this;
+    }
+
+    public function isDisabled(): bool
+    {
+        return is_callable($this->disabled) ? call_user_func($this->disabled) : $this->disabled;
+    }
+
     public function toArray(): array
     {
         $data = [
@@ -136,6 +151,10 @@ class FormFieldOptions implements Arrayable
 
         if ($this->isMetadata()) {
             $data['metadata'] = true;
+        }
+
+        if ($this->isDisabled()) {
+            $data['attr']['disabled'] = true;
         }
 
         return $data;

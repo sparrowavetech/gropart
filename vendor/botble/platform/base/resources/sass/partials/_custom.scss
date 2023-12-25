@@ -249,6 +249,12 @@ small {
             height: 100%;
         }
     }
+
+    .empty-img {
+        svg {
+            --bb-icon-size: 10rem;
+        }
+    }
 }
 
 // CodeMirror
@@ -366,4 +372,8 @@ small {
     .dz-preview.dz-image-preview {
         background: transparent;
     }
+}
+
+.dropdown-item-indicator {
+    margin-left: unset;
 }

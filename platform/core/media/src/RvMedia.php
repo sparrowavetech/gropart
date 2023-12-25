@@ -193,11 +193,12 @@ class RvMedia
             return $this->url($url);
         }
 
-        if ($url == $this->getDefaultImage()) {
+        if ($url == $this->getDefaultImage(false, $size)) {
             return url($url);
         }
 
-        if (array_key_exists($size, $this->getSizes()) &&
+        if (
+            array_key_exists($size, $this->getSizes()) &&
             $this->canGenerateThumbnails($this->getMimeType($url))
         ) {
             $fileName = File::name($url);
@@ -242,12 +243,18 @@ class RvMedia
         return Storage::url($path);
     }
 
-    public function getDefaultImage(bool $relative = false): string
+    public function getDefaultImage(bool $relative = false, string|null $size = null): string
     {
         $default = $this->getConfig('default_image');
 
         if ($placeholder = setting('media_default_placeholder_image')) {
-            $default = $this->url($placeholder);
+            $filename = pathinfo($placeholder, PATHINFO_FILENAME);
+
+            if ($size && $size = $this->getSize($size)) {
+                $placeholder = str_replace($filename, $filename . '-' . $size, $placeholder);
+            }
+
+            return Storage::url($placeholder);
         }
 
         if ($relative) {
@@ -718,7 +725,7 @@ class RvMedia
         $path = '/tmp';
         File::ensureDirectoryExists($path);
 
-        $path = $path . '/' . $info['basename'];
+        $path = $path . '/' . Str::limit($info['basename'], 50, null);
         file_put_contents($path, $contents);
 
         $fileUpload = $this->newUploadedFile($path, $defaultMimetype);
@@ -1046,7 +1053,7 @@ class RvMedia
             $attributes['loading'] = 'lazy';
         }
 
-        $defaultImageUrl = $this->getDefaultImage();
+        $defaultImageUrl = $this->getDefaultImage(false, $size);
 
         if (! $url) {
             $url = $defaultImageUrl;

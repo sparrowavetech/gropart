@@ -1,23 +1,11 @@
 .rv-media-header {
-    .rv-media-top-header,
-    .rv-media-bottom-header {
-        display: flex;
-        width: 100%;
-        padding: 10px;
-        @include lib-css(flex-direction, row);
-        border-bottom: var(--bb-border-width) var(--bb-border-style) var(--bb-border-color);
-        justify-content: space-between;
-    }
-
     .rv-media-top-header {
-        background-color: var(--bb-bg-surface-tertiary);
-    }
+        .rv-media-search {
+            width: 100%;
 
-    .rv-media-bottom-header {
-        .rv-media-breadcrumb,
-        .rv-media-tools {
-            display: flex;
-            @include lib-css(align-items, center);
+            @media (min-width: 768px) {
+                width: initial;
+            }
         }
     }
 }

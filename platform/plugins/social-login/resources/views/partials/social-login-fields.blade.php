@@ -4,10 +4,11 @@
     :checked="old('social_login_enable', setting('social_login_enable'))"
     data-bb-toggle="collapse"
     data-bb-target=".social-login-settings"
+    :wrapper="false"
 />
 
 <x-core::form.fieldset
-    class="social-login-settings"
+    class="social-login-settings mt-3"
     @style(['display: none;' => !old('social_login_enable', setting('social_login_enable'))])
 >
     @foreach (SocialService::getProviders() as $provider => $item)

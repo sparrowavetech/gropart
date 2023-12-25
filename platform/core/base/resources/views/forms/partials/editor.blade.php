@@ -26,13 +26,13 @@
         {!! apply_filters(BASE_FILTER_FORM_EDITOR_BUTTONS, null, $attributes, $id) !!}
     </div>
 
-    @pushOnce('header')
+    @push('header')
         {!! apply_filters(BASE_FILTER_FORM_EDITOR_BUTTONS_HEADER, null, $attributes, $id) !!}
-    @endPushOnce
+    @endpush
 
-    @pushOnce('footer')
+    @push('footer')
         {!! apply_filters(BASE_FILTER_FORM_EDITOR_BUTTONS_FOOTER, null, $attributes, $id) !!}
-    @endPushOnce
+    @endpush
 @else
     @php Arr::forget($attributes, 'with-short-code'); @endphp
 @endif

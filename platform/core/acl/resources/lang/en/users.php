@@ -52,6 +52,7 @@ return [
         'deactivated' => 'Deactivated',
     ],
     'avatar' => 'Avatar',
+    'preferences' => 'Preferences',
     'make_super' => 'Make super',
     'remove_super' => 'Remove super',
     'is_super' => 'Is super?',
@@ -63,4 +64,5 @@ return [
     'assigned_role' => 'Assigned Role',
     'no_role_assigned' => 'No role assigned',
     'view_user_profile' => 'View user\'s profile',
+    'update_preferences_success' => 'Update preferences successfully!',
 ];

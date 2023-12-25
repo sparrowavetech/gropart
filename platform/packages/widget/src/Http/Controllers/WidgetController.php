@@ -4,6 +4,7 @@ namespace Botble\Widget\Http\Controllers;
 
 use Botble\Base\Facades\Assets;
 use Botble\Base\Http\Controllers\BaseController;
+use Botble\Base\Supports\Breadcrumb;
 use Botble\Widget\Events\RenderingWidgetSettings;
 use Botble\Widget\Facades\WidgetGroup;
 use Botble\Widget\Models\Widget;
@@ -13,10 +14,9 @@ use Illuminate\Support\Arr;
 
 class WidgetController extends BaseController
 {
-    public function __construct()
+    protected function breadcrumb(): Breadcrumb
     {
-        $this
-            ->breadcrumb()
+        return parent::breadcrumb()
             ->add(trans('packages/theme::theme.appearance'))
             ->add(trans('packages/widget::widget.name'), route('widgets.index'));
     }

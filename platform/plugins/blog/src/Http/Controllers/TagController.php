@@ -5,6 +5,7 @@ namespace Botble\Blog\Http\Controllers;
 use Botble\ACL\Models\User;
 use Botble\Base\Http\Actions\DeleteResourceAction;
 use Botble\Base\Http\Controllers\BaseController;
+use Botble\Base\Supports\Breadcrumb;
 use Botble\Blog\Forms\TagForm;
 use Botble\Blog\Http\Requests\TagRequest;
 use Botble\Blog\Models\Tag;
@@ -13,10 +14,9 @@ use Illuminate\Support\Facades\Auth;
 
 class TagController extends BaseController
 {
-    public function __construct()
+    protected function breadcrumb(): Breadcrumb
     {
-        $this
-            ->breadcrumb()
+        return parent::breadcrumb()
             ->add(trans('plugins/blog::base.menu_name'))
             ->add(trans('plugins/blog::tags.menu'), route('tags.index'));
     }

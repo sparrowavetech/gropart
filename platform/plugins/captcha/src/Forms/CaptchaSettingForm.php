@@ -119,10 +119,13 @@ class CaptchaSettingForm extends SettingForm
                     'data-bb-toggle' => 'collapse',
                     'data-bb-target' => '.math-captcha-settings',
                 ],
+                'wrapper' => [
+                    'class' => 'mb-0',
+                ],
             ])
             ->add('open_fieldset_math_captcha_setting', 'html', [
                 'html' => Blade::render(sprintf(
-                    '<fieldset class="math-captcha-settings form-fieldset"
+                    '<fieldset class="math-captcha-settings form-fieldset mt-3"
                     data-bb-value="1"
                     style="display: %s"/>',
                     old('enable_math_captcha', Captcha::mathCaptchaEnabled()) ? 'block' : 'none',

@@ -2,9 +2,8 @@
 
 namespace Botble\Translation\Services;
 
-use Botble\Theme\Facades\Theme;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Translation\Exceptions\FileNotWritableException;
-use Botble\Translation\Models\Translation;
 use Illuminate\Support\Facades\File;
 
 class DeleteLocaleService
@@ -15,42 +14,27 @@ class DeleteLocaleService
             return;
         }
 
-        if (! File::isWritable(lang_path()) || ! File::isWritable(lang_path('vendor'))) {
-            throw new FileNotWritableException();
-        }
+        $langPaths = [
+            lang_path($locale),
+            lang_path(sprintf('%s.json', $locale)),
+        ];
 
-        $defaultLocale = lang_path($locale);
-        if (File::exists($defaultLocale)) {
-            File::deleteDirectory($defaultLocale);
-        }
+        $langPaths = array_merge($langPaths, File::glob(lang_path(BaseHelper::joinPaths(['vendor', '*', '*', $locale]))));
+        $langPaths = array_merge($langPaths, File::glob(lang_path(BaseHelper::joinPaths(['vendor', '*', '*', $locale . '.json']))));
 
-        if (File::exists(lang_path($locale . '.json'))) {
-            File::delete(lang_path($locale . '.json'));
-        }
-
-        if (File::isDirectory($themeLangPath = lang_path('vendor/themes/' . Theme::getThemeName()))) {
-            File::deleteDirectory($themeLangPath);
-            if (File::isEmptyDirectory(dirname($themeLangPath))) {
-                File::deleteDirectory(dirname($themeLangPath));
+        foreach ($langPaths as $path) {
+            if (! File::exists($path)) {
+                continue;
             }
-        }
 
-        $this->deleteLocalFile(lang_path('vendor/core'), $locale);
-        $this->deleteLocalFile(lang_path('vendor/packages'), $locale);
-        $this->deleteLocalFile(lang_path('vendor/plugins'), $locale);
+            if (! File::isWritable($path)) {
+                throw new FileNotWritableException(sprintf('Could not delete %s', $path));
+            }
 
-        Translation::query()->where('locale', $locale)->delete();
-    }
-
-    protected function deleteLocalFile(string $path, string $locale): void
-    {
-        $folders = File::directories($path);
-
-        foreach ($folders as $module) {
-            foreach (File::directories($module) as $item) {
-                if (File::name($item) == $locale) {
-                    File::deleteDirectory($item);
-                }
+            if (File::isDirectory($path)) {
+                File::deleteDirectory($path);
+            } else {
+                File::delete($path);
             }
         }
     }

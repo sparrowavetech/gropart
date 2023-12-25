@@ -6,6 +6,7 @@ use Botble\Base\Facades\Html;
 use Botble\Ecommerce\Repositories\Interfaces\OrderAddressInterface;
 use Botble\Payment\Enums\PaymentMethodEnum;
 use Botble\Payment\Facades\PaymentMethods;
+use Botble\Paystack\Forms\PaystackPaymentMethodForm;
 use Botble\Paystack\Services\Gateways\PaystackPaymentService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -101,7 +102,7 @@ class HookServiceProvider extends ServiceProvider
 
     public function addPaymentSettings(?string $settings): string
     {
-        return $settings . view('plugins/paystack::settings')->render();
+        return $settings . PaystackPaymentMethodForm::create()->renderForm();
     }
 
     public function registerPaystackMethod(?string $html, array $data): string

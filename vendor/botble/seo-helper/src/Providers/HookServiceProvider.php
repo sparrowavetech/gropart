@@ -23,7 +23,7 @@ class HookServiceProvider extends ServiceProvider
         });
     }
 
-    public function addMetaBox(string $priority, string|BaseModel|null $data = null): void
+    public function addMetaBox(string $priority, array|string|BaseModel|null $data = null): void
     {
         if ($priority == 'advanced' && ! empty($data) && in_array($data::class, config('packages.seo-helper.general.supported', []))) {
             if ($data instanceof Page && BaseHelper::isHomepage($data->getKey())) {

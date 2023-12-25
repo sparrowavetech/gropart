@@ -4,6 +4,7 @@ namespace Botble\Base\Supports;
 
 use Botble\Assets\Assets as BaseAssets;
 use Botble\Assets\HtmlBuilder;
+use Botble\Base\Facades\AdminHelper;
 use Botble\Base\Facades\BaseHelper;
 use Illuminate\Config\Repository;
 
@@ -12,6 +13,8 @@ use Illuminate\Config\Repository;
  */
 class Assets extends BaseAssets
 {
+    protected bool $hasVueJs = false;
+
     public function __construct(Repository $config, HtmlBuilder $htmlBuilder)
     {
         parent::__construct($config, $htmlBuilder);
@@ -40,7 +43,7 @@ class Assets extends BaseAssets
     {
         do_action(BASE_ACTION_ENQUEUE_SCRIPTS);
 
-        if (BaseHelper::adminLanguageDirection() === 'rtl' || BaseHelper::isRtlEnabled()) {
+        if (AdminHelper::isInAdmin(true) && BaseHelper::adminLanguageDirection() === 'rtl') {
             $this->config['resources']['styles']['core']['src']['local'] = '/vendor/core/core/base/css/core.rtl.css';
         }
 
@@ -58,6 +61,8 @@ class Assets extends BaseAssets
     {
         $this->addScripts(['vue', 'vue-app']);
 
+        $this->hasVueJs = true;
+
         return $this;
     }
 
@@ -65,7 +70,14 @@ class Assets extends BaseAssets
     {
         $this->removeScripts(['vue', 'vue-app']);
 
+        $this->hasVueJs = false;
+
         return $this;
+    }
+
+    public function hasVueJs(): bool
+    {
+        return $this->hasVueJs;
     }
 
     /**

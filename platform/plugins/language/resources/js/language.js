@@ -74,15 +74,15 @@ class LanguageManagement {
 
         languageTable.on('click', '.set-language-default', (event) => {
             event.preventDefault()
-            let _self = $(event.currentTarget)
+            const _self = $(event.currentTarget)
 
             $httpClient
                 .make()
                 .get(_self.data('section'))
                 .then(({ data }) => {
-                    const icon = languageTable.find('td > i')
+                    const icon = languageTable.find('td > span.icon-tabler-wrapper')
 
-                    icon.closest('td i').removeClass('text-yellow')
+                    icon.closest('td span.icon-tabler-wrapper').removeClass('text-yellow')
 
                     icon.replaceWith(
                         `<a href="javascript:void(0);" data-section="${route(
@@ -93,7 +93,7 @@ class LanguageManagement {
                             'name'
                         )} as default language">${icon.closest('td').html()}</a>`
                     )
-                    _self.find('i').unwrap().addClass('text-yellow')
+                    _self.find('span.icon-tabler-wrapper').unwrap().addClass('text-yellow')
 
                     $('.tooltip').remove()
 

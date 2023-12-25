@@ -4,8 +4,10 @@ namespace Botble\Setting\Forms;
 
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Forms\FieldOptions\SelectFieldOption;
 use Botble\Base\Forms\Fields\HtmlField;
 use Botble\Base\Forms\Fields\SelectField;
+use Botble\Base\Forms\FormAbstract;
 use Botble\Base\Supports\Language;
 use Botble\Setting\Http\Requests\GeneralSettingRequest;
 use DateTimeZone;
@@ -27,8 +29,11 @@ class GeneralSettingForm extends SettingForm
         $availableLocales = Language::getAvailableLocales();
         $defaultLocale = setting('locale', App::getLocale());
 
-        if (BaseHelper::hasDemoModeEnabled()
-            && session('site-locale') && array_key_exists(session('site-locale'), $availableLocales)) {
+        if (
+            BaseHelper::hasDemoModeEnabled()
+            && session('site-locale')
+            && array_key_exists(session('site-locale'), $availableLocales)
+        ) {
             $defaultLocale = session('site-locale');
         }
 
@@ -45,16 +50,28 @@ class GeneralSettingForm extends SettingForm
             ->add('admin_email', 'html', [
                 'html' => view('core/setting::partials.admin-email-field')->render(),
             ])
-            ->add('time_zone', SelectField::class, [
-                'label' => trans('core/setting::setting.general.time_zone'),
-                'selected' => setting('time_zone', 'UTC'),
-                'choices' => array_combine(DateTimeZone::listIdentifiers(), DateTimeZone::listIdentifiers()),
-            ])
-            ->add('locale', SelectField::class, [
-                'label' => trans('core/setting::setting.general.locale'),
-                'selected' => $defaultLocale,
-                'choices' => $locales,
-            ])
+            ->add(
+                'time_zone',
+                SelectField::class,
+                SelectFieldOption::make()
+                    ->label(trans('core/setting::setting.general.time_zone'))
+                    ->choices(array_combine(DateTimeZone::listIdentifiers(), DateTimeZone::listIdentifiers()))
+                    ->selected(setting('time_zone', 'UTC'))
+                    ->searchable()
+                    ->toArray()
+            )
+            ->when(count($locales) > 1, function (FormAbstract $form) use ($locales, $defaultLocale) {
+                $form->add(
+                    'locale',
+                    SelectField::class,
+                    SelectFieldOption::make()
+                        ->label(trans('core/setting::setting.general.locale'))
+                        ->choices($locales)
+                        ->selected($defaultLocale)
+                        ->searchable()
+                        ->toArray()
+                );
+            })
             ->add('locale_direction', 'customRadio', [
                 'label' => trans('core/setting::setting.general.locale_direction'),
                 'value' => setting('locale_direction', 'ltr'),
@@ -70,12 +87,18 @@ class GeneralSettingForm extends SettingForm
             ->add('redirect_404_to_homepage', 'onOffCheckbox', [
                 'label' => trans('core/setting::setting.general.redirect_404_to_homepage'),
                 'value' => setting('redirect_404_to_homepage', false),
+                'wrapper' => [
+                    'class' => 'mb-0',
+                ],
             ])
-            ->when(apply_filters(BASE_FILTER_AFTER_SETTING_CONTENT, null), function (GeneralSettingForm $form, $settingContent) {
-                $form
-                    ->add('html', HtmlField::class, [
-                        'html' => '</div></div><div class="card mt-3 overflow-hidden"><div class="card-body">' . $settingContent,
-                    ]);
-            });
+            ->when(
+                apply_filters(BASE_FILTER_AFTER_SETTING_CONTENT, null),
+                function (GeneralSettingForm $form, $settingContent) {
+                    $form
+                        ->add('html', HtmlField::class, [
+                            'html' => '</div></div><div class="card mt-3 overflow-hidden"><div class="card-body">' . $settingContent,
+                        ]);
+                }
+            );
     }
 }

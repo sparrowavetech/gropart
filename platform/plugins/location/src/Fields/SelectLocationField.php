@@ -239,7 +239,7 @@ class SelectLocationField extends FormField
         return Html::tag(
             'div',
             $html,
-            ['class' => ($this->getOption('wrapperClassName') ?: 'row g-1') . ' select-location-fields']
+            ['class' => ($this->getOption('wrapperClassName') ?: 'mb-3 row') . ' select-location-fields']
         );
     }
 

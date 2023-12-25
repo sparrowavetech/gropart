@@ -6,6 +6,7 @@ use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
+use Botble\Base\Supports\Breadcrumb;
 use Botble\PluginManagement\Events\RenderingPluginListingPage;
 use Botble\PluginManagement\Services\MarketplaceService;
 use Botble\PluginManagement\Services\PluginService;
@@ -18,14 +19,13 @@ class PluginManagementController extends BaseController
 {
     public function __construct(protected PluginService $pluginService)
     {
-        $this
-            ->breadcrumb()
+    }
+
+    protected function breadcrumb(): Breadcrumb
+    {
+        return parent::breadcrumb()
             ->add(trans('packages/plugin-management::plugin.plugins'), route('plugins.index'))
             ->add(trans('packages/plugin-management::plugin.installed_plugins'), route('plugins.index'));
-
-        if (! config('packages.plugin-management.general.enable_plugin_manager', true)) {
-            abort(404);
-        }
     }
 
     public function index(): View

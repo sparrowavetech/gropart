@@ -1,28 +1,4 @@
-.table-responsive {
-    .dataTables_filter {
-        inset-inline-start: 20px;
-
-        input {
-            margin-inline-start: unset;
-        }
-    }
-
-    .dataTables_filter,
-    .dt-buttons {
-        top: 10.5rem !important;
-    }
-}
-
-@media (max-width: 768px) {
-    .dataTables_filter {
-        position: unset !important;
-        margin-bottom: 1rem;
-    }
-}
-
 .box-translation {
-    margin-bottom: 2.5rem;
-
     a.status-1 {
         font-weight: bold;
     }
@@ -38,29 +14,6 @@
     }
 }
 
-.theme-translation {
-    .dataTables_filter,
-    .dt-buttons {
-        top: 7rem !important;
-    }
-}
-
 .input-large {
     width: 320px !important;
-}
-
-
-#confirm-publish-modal {
-    .btn-warning {
-        &.float-start {
-            background: #4d97c1;
-            border-color: #2d8ec5;
-            color: #fff !important;
-
-            &:hover {
-                background: #3995ca;
-                border-color: #3995ca;
-            }
-        }
-    }
 }

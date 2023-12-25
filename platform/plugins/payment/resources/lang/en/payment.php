@@ -55,6 +55,7 @@ return [
     'stripe_enter_client_id_and_secret' => 'Enter Public, Secret keys into the box in right hand',
     'pay_online_via' => 'Pay online via :name',
     'sandbox_mode' => 'Sandbox mode',
+    'live_mode' => 'Live mode',
     'deactivate_payment_method' => 'Deactivate payment method',
     'deactivate_payment_method_description' => 'Do you really want to deactivate this payment method?',
     'agree' => 'Agree',

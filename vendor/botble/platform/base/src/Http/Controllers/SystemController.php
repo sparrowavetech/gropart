@@ -293,11 +293,7 @@ class SystemController extends BaseSystemController
                 case 1:
                     event(new UpdatingEvent());
 
-                    if ($core->downloadUpdate($updateId, $version)) {
-                        return $this
-                            ->httpResponse()
-                            ->setMessage(__('The update files have been downloaded successfully.'));
-                    }
+                    $core->downloadUpdate($updateId, $version);
 
                     return $this
                         ->httpResponse()
@@ -308,11 +304,7 @@ class SystemController extends BaseSystemController
                         ->setCode(422);
 
                 case 2:
-                    if ($core->updateFilesAndDatabase($version)) {
-                        return $this
-                            ->httpResponse()
-                            ->setMessage(__('Your files and database have been updated successfully.'));
-                    }
+                    $core->updateFilesAndDatabase($version);
 
                     return $this
                         ->httpResponse()
@@ -363,7 +355,7 @@ class SystemController extends BaseSystemController
         }
 
         try {
-            $success = match ($step->getValue()) {
+            match ($step->getValue()) {
                 SystemUpdaterStepEnum::DOWNLOAD => $core->downloadUpdate($updateId, $version),
                 SystemUpdaterStepEnum::UPDATE_FILES => $core->updateFiles($version),
                 SystemUpdaterStepEnum::UPDATE_DATABASE => $core->updateDatabase(),
@@ -372,13 +364,6 @@ class SystemController extends BaseSystemController
                 SystemUpdaterStepEnum::CLEAN_UP => $core->cleanUp(),
                 default => throw new Exception(__('Invalid step.')),
             };
-
-            if (! $success) {
-                return $this
-                    ->httpResponse()
-                    ->setError()
-                    ->setMessage($step->failedMessage());
-            }
 
             return $this
                 ->httpResponse()

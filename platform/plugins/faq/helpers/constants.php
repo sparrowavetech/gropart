@@ -14,8 +14,6 @@ if (! function_exists('get_faq_category')) {
      * @param array $with
      * @param array $withCount
      * @return Collection
-     */
-    function get_faq_category(array $conditions = [], array $with = [''], array $withCount = [])
     {
         return app(FaqCategoryInterface::class)->advancedGet([
             'condition' => $conditions,

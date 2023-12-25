@@ -2,8 +2,8 @@
 
 namespace Botble\Table\Columns;
 
+use Botble\Base\Contracts\BaseModel;
 use Botble\Base\Facades\Form;
-use Botble\Base\Models\BaseModel;
 use Botble\Table\Contracts\FormattedColumn as FormattedColumnContract;
 
 class CheckboxColumn extends FormattedColumn implements FormattedColumnContract

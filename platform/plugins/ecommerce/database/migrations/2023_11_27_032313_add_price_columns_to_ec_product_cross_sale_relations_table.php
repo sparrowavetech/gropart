@@ -1,6 +1,5 @@
 <?php
 
-use Botble\Ecommerce\Enums\CrossSellPriceType;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -15,7 +14,7 @@ return new class () extends Migration {
         Schema::table('ec_product_cross_sale_relations', function (Blueprint $table) {
             $table->boolean('is_variant')->default(false);
             $table->decimal('price', 15)->default(0)->nullable();
-            $table->string('price_type')->default(CrossSellPriceType::FIXED);
+            $table->string('price_type')->default('fixed');
             $table->boolean('apply_to_all_variations')->default(true);
         });
     }

@@ -12,18 +12,18 @@ use Botble\ACL\Models\User;
 use Botble\ACL\Tables\RoleTable;
 use Botble\Base\Http\Controllers\BaseSystemController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
+use Botble\Base\Supports\Breadcrumb;
 use Botble\Base\Supports\Helper;
 
 class RoleController extends BaseSystemController
 {
-    public function __construct()
+    protected function breadcrumb(): Breadcrumb
     {
-        parent::__construct();
-
-        $this->breadcrumb()->add(
-            trans('core/acl::permissions.role_permission'),
-            route('roles.index')
-        );
+        return parent::breadcrumb()
+            ->add(
+                trans('core/acl::permissions.role_permission'),
+                route('roles.index')
+            );
     }
 
     public function index(RoleTable $dataTable)

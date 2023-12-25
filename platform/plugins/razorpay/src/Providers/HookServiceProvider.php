@@ -6,6 +6,7 @@ use Botble\Base\Facades\Html;
 use Botble\Payment\Enums\PaymentMethodEnum;
 use Botble\Payment\Enums\PaymentStatusEnum;
 use Botble\Payment\Facades\PaymentMethods;
+use Botble\Razorpay\Forms\RazorpayPaymentMethodForm;
 use Botble\Razorpay\Services\Gateways\RazorpayPaymentService;
 use Exception;
 use Illuminate\Http\Request;
@@ -96,7 +97,7 @@ class HookServiceProvider extends ServiceProvider
 
     public function addPaymentSettings(?string $settings): string
     {
-        return $settings . view('plugins/razorpay::settings')->render();
+        return $settings . RazorpayPaymentMethodForm::create()->renderForm();
     }
 
     public function registerRazorpayMethod(?string $html, array $data): string

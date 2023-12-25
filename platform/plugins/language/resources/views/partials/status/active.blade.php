@@ -3,7 +3,7 @@
         data-bs-toggle="tooltip"
         data-bs-original-title="{{ trans('plugins/language::language.current_language') }}"
         href="{{ Route::has($route['edit']) ? route($route['edit'], $item->id) : '#' }}"
-    ><i class="fa fa-check text-success"></i></a>
+    ><x-core::icon name="ti ti-check" class="text-success" /></a>
 @else
-    <i class="fa fa-check text-success"></i>
+    <x-core::icon name="ti ti-check" class="text-success" />
 @endif

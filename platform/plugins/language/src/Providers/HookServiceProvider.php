@@ -4,6 +4,7 @@ namespace Botble\Language\Providers;
 
 use Botble\Base\Facades\Html;
 use Botble\Base\Facades\MetaBox;
+use Botble\Base\Forms\Fields\HtmlField;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Base\Models\BaseModel;
 use Botble\Base\Supports\ServiceProvider;
@@ -11,6 +12,7 @@ use Botble\Language\Facades\Language;
 use Botble\Language\Models\Language as LanguageModel;
 use Botble\Language\Models\LanguageMeta;
 use Botble\Menu\Models\Menu;
+use Botble\Setting\Forms\GeneralSettingForm;
 use Botble\Table\CollectionDataTable;
 use Botble\Table\EloquentDataTable;
 use Botble\Theme\Events\RenderingThemeOptionSettings;
@@ -59,6 +61,20 @@ class HookServiceProvider extends ServiceProvider
         add_filter('payment_setting_key', [$this, 'paymentSettingKey'], 55);
 
         FormAbstract::beforeRendering([$this, 'changeDataBeforeRenderingForm'], 1134);
+
+        GeneralSettingForm::extend(function (GeneralSettingForm $form) {
+            $form
+                ->remove('locale_direction')
+                ->modify('locale', HtmlField::class, [
+                    'html' => Blade::render(sprintf(
+                        '<x-core::form.helper-text>%s</x-core::form.helper-text>',
+                        trans(
+                            'plugins/language::language.setup_site_language',
+                            ['link' => Html::link(route('languages.index'), trans('plugins/language::language.name'))]
+                        )
+                    )),
+            ]);
+        });
     }
 
     public function settingEmailTemplateMetaBoxes(string|null $data, array $params = []): string
@@ -114,7 +130,7 @@ class HookServiceProvider extends ServiceProvider
         return $key;
     }
 
-    public function addLanguageBox(string $priority, string|Model|null $object = null): void
+    public function addLanguageBox(string $priority, array|string|Model|null $object = null): void
     {
         if ($object instanceof BaseModel && in_array($object::class, Language::supportedModels())) {
             MetaBox::addMetaBox(

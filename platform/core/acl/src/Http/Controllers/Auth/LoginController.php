@@ -2,12 +2,11 @@
 
 namespace Botble\ACL\Http\Controllers\Auth;
 
-use Botble\ACL\Http\Requests\LoginRequest;
+use Botble\ACL\Forms\Auth\LoginForm;
 use Botble\ACL\Models\User;
 use Botble\ACL\Traits\AuthenticatesUsers;
 use Botble\Base\Facades\Assets;
 use Botble\Base\Http\Controllers\BaseController;
-use Botble\JsValidation\Facades\JsValidator;
 use Carbon\Carbon;
 use Closure;
 use Illuminate\Http\Request;
@@ -54,11 +53,7 @@ class LoginController extends BaseController
                 'ie8-fix',
             ]);
 
-        $jsValidator = JsValidator::formRequest(LoginRequest::class);
-
-        $model = User::class;
-
-        return view('core/acl::auth.login', compact('jsValidator', 'model'));
+        return LoginForm::create()->renderForm();
     }
 
     public function login(Request $request)

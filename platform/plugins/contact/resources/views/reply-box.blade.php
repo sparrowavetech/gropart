@@ -1,12 +1,9 @@
 @if ($contact)
-    <div
-        id="reply-wrapper"
-        class="mb-3"
-    >
-        @if (count($contact->replies) > 0)
+    <div id="reply-wrapper" class="mb-3">
+        @if ($contact->replies->isNotEmpty())
             @foreach ($contact->replies as $reply)
                 <x-core::form.fieldset>
-                    <p>{{ trans('plugins/contact::contact.tables.time') }}: <i>{{ $reply->created_at }}</i></p>
+                    <p>{{ trans('plugins/contact::contact.tables.time') }}: <i>{{ BaseHelper::formatDateTime($reply->created_at) }}</i></p>
                     <p>{{ trans('plugins/contact::contact.tables.content') }}:</p>
                     {!! BaseHelper::clean($reply->message) !!}
                 </x-core::form.fieldset>
@@ -16,11 +13,7 @@
         @endif
     </div>
 
-    <x-core::button
-        type="button"
-        color="info"
-        class="answer-trigger-button"
-    >
+    <x-core::button type="button" class="answer-trigger-button">
         {{ trans('plugins/contact::contact.reply') }}
     </x-core::button>
 
@@ -38,7 +31,7 @@
         <x-core::button
             type="button"
             color="primary"
-            icon="ti ti-message-circle-2"
+            icon="ti ti-send"
             class="answer-send-button"
         >
             {{ trans('plugins/contact::contact.send') }}

@@ -31,7 +31,6 @@
         height: 100%;
         overflow: hidden;
         position: relative;
-        min-width: 750px;
         flex-grow: 1;
 
         .rv-media-aside,
@@ -131,7 +130,7 @@
     }
 
     #media_details_collapse:checked ~ .rv-media-main-wrapper .rv-media-tools .collapse-panel {
-        i {
+        svg {
             @include lib-css(transform, rotate(-180deg));
         }
     }
@@ -153,15 +152,9 @@
         .rv-media-wrapper .rv-media-main-wrapper {
             width: 100%;
         }
-        .rv-media-details {
-            width: 200px;
-            min-width: 200px;
 
-            .rv-media-thumbnail,
-            .rv-media-description {
-                width: 200px;
-                min-width: 200px;
-            }
+        .rv-media-details {
+            display: none !important;
         }
     }
 }
@@ -170,5 +163,4 @@
     position: absolute;
     bottom: 0;
     right: 24px;
-    display: none;
 }

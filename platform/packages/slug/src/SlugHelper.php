@@ -197,7 +197,7 @@ class SlugHelper
         ]);
     }
 
-    public function getColumnNameToGenerateSlug(string|object|null $model): string|null
+    public function getColumnNameToGenerateSlug(array|string|object|null $model): string|null
     {
         if (! $model) {
             return null;

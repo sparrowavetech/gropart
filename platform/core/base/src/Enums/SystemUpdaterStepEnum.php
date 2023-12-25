@@ -50,17 +50,6 @@ class SystemUpdaterStepEnum extends Enum
         return Lang::has($key) ? trans($key) : $value;
     }
 
-    public function failedMessage(): string
-    {
-        $key = sprintf(
-            '%s.failed_messages.%s',
-            static::$langPath,
-            $value = $this->value
-        );
-
-        return Lang::has($key) ? trans($key) : $value;
-    }
-
     public function successMessage(): string
     {
         $key = sprintf(

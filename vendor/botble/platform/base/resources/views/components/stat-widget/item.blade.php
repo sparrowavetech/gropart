@@ -14,6 +14,8 @@
         'text-white d-block rounded position-relative overflow-hidden text-decoration-none',
         "bg-$color" => !str_contains($color, '#'),
     ]);
+
+    Assets::addScripts(['counterup']);
 @endphp
 
 <div @class(['col dashboard-widget-item', $column])>

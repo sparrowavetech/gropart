@@ -5,7 +5,7 @@
 
     $added = [];
 
-    if (count($values) > 0) {
+    if (! empty($values)) {
         for ($i = 0; $i < count($values); $i++) {
             $group = '';
             foreach ($fields as $key => $field) {
@@ -15,7 +15,7 @@
                 $field['attributes']['options']['id'] = $id = 'repeater_field_' . md5($field['attributes']['name']);
                 Arr::set($field, 'attributes.id', $id);
                 Arr::set($field, 'label_attr.for', $id);
-                $item .= Blade::render(sprintf('<x-core::form.label %s>%s</x-core::form.label>', Html::attributes(Arr::get($field, 'label_attr')), $field['label']));
+                $item .= Blade::render(sprintf('<x-core::form.label %s>%s</x-core::form.label>', Html::attributes(Arr::get($field, 'label_attr', [])), $field['label']));
                 $item .= call_user_func_array([Form::class, $field['type']], array_values($field['attributes']));
 
                 $group .= Blade::render(sprintf("<x-core::form-group>%s</x-core::form-group>", $item));
@@ -32,7 +32,7 @@
         $field['attributes']['name'] = $name . '[__key__][' . $key . '][value]';
         $field['attributes']['options']['id'] = 'repeater_field_' . md5($field['attributes']['name']) . '__key__';
         Arr::set($field, 'label_attr.for', $field['attributes']['options']['id']);
-        $item .= Blade::render(sprintf('<x-core::form.label %s>%s</x-core::form.label>', Html::attributes(Arr::get($field, 'label_attr')), $field['label']));
+        $item .= Blade::render(sprintf('<x-core::form.label %s>%s</x-core::form.label>', Html::attributes(Arr::get($field, 'label_attr', [])), $field['label']));
         $item .= call_user_func_array([Form::class, $field['type']], array_values($field['attributes']));
 
         $group .= Blade::render(sprintf('<x-core::form-group>%s</x-core::form-group>', $item));
@@ -76,7 +76,7 @@
     @endforeach
 </div>
 
-<div>
+<div class="mb-3">
     <x-core::button
         data-target="repeater-add"
         data-id="{{ $repeaterId }}"

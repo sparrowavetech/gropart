@@ -8,6 +8,7 @@ class Botble {
         this.handleWayPoint()
         this.handleTurnOffDebugMode()
         Botble.initResources()
+        Botble.initGlobalResources()
         Botble.handleCounterUp()
         Botble.initMediaIntegrate()
 
@@ -652,6 +653,14 @@ class Botble {
             $('textarea.textarea-auto-height').textareaAutoSize()
         }
 
+        Botble.initCodeEditorComponent()
+        Botble.initColorPicker()
+        Botble.initTreeCategoriesSelect()
+
+        document.dispatchEvent(new CustomEvent('core-init-resources'))
+    }
+
+    static initGlobalResources() {
         $(document).on('submit', '.js-base-form', (event) => {
             $(event.currentTarget).find('button[type=submit]').addClass('disabled')
         })
@@ -677,13 +686,8 @@ class Botble {
 
         Botble.initFieldCollapse()
         Botble.initTreeCheckboxes()
-        Botble.initCodeEditorComponent()
-        Botble.initColorPicker()
         Botble.initClipboard()
-        Botble.initTreeCategoriesSelect()
         Botble.initDropdownCheckboxes()
-
-        document.dispatchEvent(new CustomEvent('core-init-resources'))
     }
 
     static numberFormat(number, decimals, dec_point, thousands_sep) {
@@ -810,7 +814,12 @@ class Botble {
                         <div class='image-picker-backdrop'></div>
                         <span class='image-picker-remove-button'>
                             <button data-bb-toggle='image-picker-remove' class='btn btn-sm btn-icon'>
-                                <i class='ti ti-x'></i>
+                                <span class="icon-tabler-wrapper icon-sm icon-left">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                                  <path d="M18 6l-12 12" />
+                                  <path d="M6 6l12 12" />
+                                </svg>
                             </button>
                         </span>
                         <div data-bb-toggle='image-picker-edit' class='image-box-actions cursor-pointer'></div>
@@ -1037,7 +1046,6 @@ class Botble {
                 })
                 .then(({ data }) => {
                     form[0].reset()
-                    Botble.showSuccess(data.data.message)
                     modal.modal('hide')
 
                     const $imageBox = $(form.find('input[name="image-box-target"]').val())
@@ -1086,26 +1094,28 @@ class Botble {
             }
         })
 
-        $(document).on('click', '[data-bb-toggle="gallery-reset"]', (e) => {
-            e.preventDefault()
+        const $listImages = $('.list-images')
 
-            const $listImage = $('.list-images')
-            const $list = $('.list-gallery-media-images').find('.gallery-image-item-handler')
-            $list.remove()
+        if ($listImages.length) {
+            $(document).on('click', '[data-bb-toggle="gallery-reset"]', (e) => {
+                e.preventDefault()
 
-            $listImage.find('.default-placeholder-gallery-image').removeClass('hidden')
-            $listImage.find('.footer-action').hide()
-        })
+                $listImages.find('.list-gallery-media-images .gallery-image-item-handler').remove()
+                $listImages.find('.default-placeholder-gallery-image').removeClass('hidden')
+                $listImages.find('.footer-action').hide()
+            })
 
-        $('.list-gallery-media-images').each((index, item) => {
-            if (jQuery().sortable) {
-                let $current = $(item)
-                if ($current.data('ui-sortable')) {
-                    $current.sortable('destroy')
+            $listImages.find('.list-gallery-media-images').each((index, item) => {
+                if (jQuery().sortable) {
+                    let $current = $(item)
+                    if ($current.data('ui-sortable')) {
+                        $current.sortable('destroy')
+                    }
+
+                    $current.sortable()
                 }
-                $current.sortable()
-            }
-        })
+            })
+        }
     }
 
     static getViewPort() {
@@ -1191,8 +1201,7 @@ class Botble {
 
     static initFieldCollapse() {
         $(document)
-            .find('[data-bb-toggle="collapse"]')
-            .on('change', function (e) {
+            .on('change', '[data-bb-toggle="collapse"]', function (e) {
                 const target = $(this).data('bb-target')
 
                 let targetElement = null
@@ -1465,23 +1474,23 @@ class Botble {
                 return
             }
 
-            const $checked = $wrapper.find('input[type="checkbox"]:checked')
-            const $text = $wrapper.find('> span')
+            const $checkedCheckboxes = $wrapper.find('input[type="checkbox"]:checked')
+            const $textElement = $wrapper.find('> span')
 
-            if ($checked.length) {
-                if ($checked.length > 3) {
-                    $text.text($checked.length + ' ' + $wrapper.data('selected-text'))
+            if ($checkedCheckboxes.length) {
+                if ($checkedCheckboxes.length > 3) {
+                    $textElement.text($checkedCheckboxes.length + ' ' + $wrapper.data('selected-text'))
                 } else {
                     const values = []
 
-                    $checked.each(function () {
+                    $checkedCheckboxes.each(function () {
                         values.push($(this).siblings('.form-check-label').text().trim())
                     })
 
-                    $text.text(values.join(', '))
+                    $textElement.text(values.join(', '))
                 }
             } else {
-                $text.text($wrapper.data('placeholder') || ' ')
+                $textElement.text($wrapper.data('placeholder') || ' ')
             }
         }
 
@@ -1489,18 +1498,71 @@ class Botble {
 
         $(document).on('click', '[data-bb-toggle="dropdown-checkboxes"] input[type="checkbox"]', (e) => {
             countCheckedDropdownCheckboxes(e)
+
+            const $wrapper = $(e.currentTarget).closest('[data-bb-toggle="dropdown-checkboxes"]')
+
+            const $selected = $wrapper.find('.multi-checklist-selected')
+
+            if ($(e.currentTarget).is(':checked')) {
+                const $input = `<input type="hidden" name="${$wrapper.data('name')}" value="${$(e.currentTarget).val()}">`
+                $selected.append($input)
+            } else {
+                const $input = $selected.find(`input[value="${$(e.currentTarget).val()}"]`)
+                $input.remove()
+            }
         })
 
-        $('[data-bb-toggle="dropdown-checkboxes"] > span').on('click', function (event) {
+        $(document).on('click', '[data-bb-toggle="dropdown-checkboxes"] > span', function (event) {
             event.stopPropagation()
 
             const $this = $(this)
             const $input = $this.siblings('input[type="text"]')
             const $dropdown = $this.siblings('.dropdown-menu')
+            const $wrapper = $this.closest('[data-bb-toggle="dropdown-checkboxes"]')
 
             $dropdown.addClass('show')
             $this.hide()
             $input.show().trigger('focus')
+
+
+            if ($wrapper.data('ajax-url')) {
+                const template =
+                    `<li>
+                    <label class="form-check">
+                        <input type="checkbox" id="__id__" class="form-check-input" value="__value__">
+                        <span class="form-check-label">
+                            __label__
+                        </span>
+                    </label>
+                </li>`
+
+                const name = $wrapper.data('name')
+
+                $httpClient.make()
+                    .withLoading($dropdown)
+                    .get($wrapper.data('ajax-url'))
+                    .then(({ data }) => {
+                        let html = ''
+
+                        Object.keys(data).map((item) => {
+                            html += template
+                                .replace(/__id__/g, `${name}-${item}`)
+                                .replace(/__value__/g, item)
+                                .replace(/__label__/g, data[item])
+                        })
+
+                        $dropdown.find('ul').html(html)
+
+                        const $selected = $wrapper.find('.multi-checklist-selected')
+                        const $inputs = $selected.find('input[type="hidden"]')
+
+                        $inputs.each(function () {
+                            const $input = $(this)
+                            const $checkbox = $dropdown.find(`input[value="${$input.val()}"]`)
+                            $checkbox.prop('checked', true)
+                        })
+                    })
+            }
         })
 
         $(document).on('click', function (event) {
@@ -1511,6 +1573,10 @@ class Botble {
                 $wrapper.find('> .dropdown-menu').removeClass('show')
                 $wrapper.find('> span').show()
                 $wrapper.find('> input[type="text"]').val('').hide()
+
+                if ($wrapper.data('ajax-url')) {
+                    $wrapper.find('> .dropdown-menu ul').html('<div class="py-5"></div>')
+                }
             }
         })
 

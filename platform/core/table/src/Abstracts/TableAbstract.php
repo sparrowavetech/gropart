@@ -36,6 +36,7 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Conditionable;
@@ -109,7 +110,7 @@ abstract class TableAbstract extends DataTable implements ExtensibleContract
      */
     protected Closure $modifyQueryUsingCallback;
 
-    protected string $dom = "f<'d-none d-md-block'B>rt<'card-footer d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2'<'d-flex justify-content-between align-items-center gap-3'l<'m-0 text-muted'i>><'d-flex justify-content-center'p>>";
+    protected string $dom = "Brt<'card-footer d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2'<'d-flex justify-content-between align-items-center gap-3'l<'m-0 text-muted'i>><'d-flex justify-content-center'p>>";
 
     public function __construct(protected DataTables $table, UrlGenerator $urlGenerator)
     {
@@ -214,6 +215,7 @@ abstract class TableAbstract extends DataTable implements ExtensibleContract
                 'info' => true,
                 'searchDelay' => 350,
                 'bStateSave' => $this->bStateSave,
+                'stateSaveParams' => 'function (settings, data) { data.search.search = "";}',
                 'lengthMenu' => [
                     array_values(
                         array_unique(array_merge(Arr::sortRecursive([10, 30, 50, 100, 500, $this->pageLength]), [-1]))
@@ -536,7 +538,7 @@ abstract class TableAbstract extends DataTable implements ExtensibleContract
         if ($this->hasColumnVisibility) {
             $buttons[] = [
                 'extend' => 'colvis',
-                'text' => '<i class="fas fa-list"></i>',
+                'text' => Blade::render('<x-core::icon name="ti ti-list" />'),
                 'align' => 'button-right',
                 'columns' => ':not(.no-column-visibility)',
             ];

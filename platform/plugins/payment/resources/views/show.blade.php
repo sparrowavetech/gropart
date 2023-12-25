@@ -57,7 +57,7 @@
 
                             <x-core::datagrid.item>
                                 <x-slot:title>{{ trans('plugins/payment::payment.created_at') }}</x-slot:title>
-                                {{ $payment->created_at }}
+                                {{ BaseHelper::formatDateTime($payment->created_at) }}
                             </x-core::datagrid.item>
 
                             <x-core::datagrid.item>

@@ -10,7 +10,7 @@
 
         <div class="list-group list-group-flush">
             <div class="list-group-item">
-                <div class="row align-items-center justify-content-between">
+                <div class="row align-items-center gap-3 justify-content-between">
                     <div class="col-auto">
                         {{ trans('core/base::cache.commands.clear_cms_cache.description') }}
                     </div>
@@ -29,7 +29,7 @@
             </div>
 
             <div class="list-group-item">
-                <div class="row align-items-center justify-content-between">
+                <div class="row align-items-center gap-3 justify-content-between">
                     <div class="col-auto">
                         {{ trans('core/base::cache.commands.refresh_compiled_views.description') }}
                     </div>
@@ -48,7 +48,7 @@
             </div>
 
             <div class="list-group-item">
-                <div class="row align-items-center justify-content-between">
+                <div class="row align-items-center gap-3 justify-content-between">
                     <div class="col-auto">
                         {{ trans('core/base::cache.commands.clear_config_cache.description') }}
                     </div>
@@ -66,7 +66,7 @@
             </div>
 
             <div class="list-group-item">
-                <div class="row align-items-center justify-content-between">
+                <div class="row align-items-center gap-3 justify-content-between">
                     <div class="col-auto">
                         {{ trans('core/base::cache.commands.clear_route_cache.description') }}
                     </div>
@@ -84,7 +84,7 @@
             </div>
 
             <div class="list-group-item">
-                <div class="row align-items-center justify-content-between">
+                <div class="row align-items-center gap-3 justify-content-between">
                     <div class="col-auto">
                         {{ trans('core/base::cache.commands.clear_log.description') }}
                     </div>

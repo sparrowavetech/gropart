@@ -8,17 +8,16 @@ export class FolderService {
         this.MediaService = new MediaService()
 
         $(document).on('shown.bs.modal', '#modal_add_folder', (event) => {
-            $(event.currentTarget).find('.form-add-folder input[type=text]').focus()
+            $(event.currentTarget).find('form input[type=text]').focus()
         })
     }
 
     create(folderName) {
         let _self = this
 
-        Helpers.showAjaxLoading()
-
         $httpClient
             .make()
+            .withButtonLoading($(document).find('#modal_add_folder button[type=submit]'))
             .post(RV_MEDIA_URL.create_folder, {
                 parent_id: Helpers.getRequestParams().folder_id,
                 name: folderName,
@@ -29,7 +28,6 @@ export class FolderService {
                 _self.MediaService.getMedia(true)
                 FolderService.closeModal()
             })
-            .finally(() => Helpers.hideAjaxLoading())
     }
 
     changeFolder(folderId) {

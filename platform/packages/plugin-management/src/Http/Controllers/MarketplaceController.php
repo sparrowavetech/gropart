@@ -5,6 +5,7 @@ namespace Botble\PluginManagement\Http\Controllers;
 use Botble\Base\Facades\Assets;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
+use Botble\Base\Supports\Breadcrumb;
 use Botble\PluginManagement\Services\MarketplaceService;
 use Botble\PluginManagement\Services\PluginService;
 use Carbon\Carbon;
@@ -20,8 +21,11 @@ class MarketplaceController extends BaseController
         protected MarketplaceService $marketplaceService,
         protected PluginService $pluginService,
     ) {
-        $this
-            ->breadcrumb()
+    }
+
+    protected function breadcrumb(): Breadcrumb
+    {
+        return parent::breadcrumb()
             ->add(trans('packages/plugin-management::plugin.plugins'), route('plugins.index'))
             ->add(trans('packages/plugin-management::plugin.plugins_add_new'), route('plugins.new'));
     }

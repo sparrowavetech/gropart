@@ -5,6 +5,7 @@ namespace Botble\SslCommerz\Providers;
 use Botble\Base\Facades\Html;
 use Botble\Payment\Enums\PaymentMethodEnum;
 use Botble\Payment\Facades\PaymentMethods;
+use Botble\SslCommerz\Forms\SslCommerzPaymentMethodForm;
 use Botble\SslCommerz\Library\SslCommerz\SslCommerzNotification;
 use Botble\SslCommerz\Services\Gateways\SslCommerzPaymentService;
 use Illuminate\Http\Request;
@@ -100,7 +101,7 @@ class HookServiceProvider extends ServiceProvider
 
     public function addPaymentSettings(string|null $settings): string
     {
-        return $settings . view('plugins/sslcommerz::settings')->render();
+        return $settings . SslCommerzPaymentMethodForm::create()->renderForm();
     }
 
     public function registerSslCommerzMethod(string|null $html, array $data): string|null

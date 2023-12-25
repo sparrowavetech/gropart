@@ -43,6 +43,10 @@ class HookServiceProvider extends ServiceProvider
         });
 
         $this->app['events']->listen(RenderingDashboardWidgets::class, function () {
+            if (! config('packages.theme.general.display_theme_manager_in_admin_panel', true)) {
+                return;
+            }
+
             add_filter(DASHBOARD_FILTER_ADMIN_LIST, [$this,  'addStatsWidgets'], 4, 2);
         });
 
@@ -387,6 +391,7 @@ class HookServiceProvider extends ServiceProvider
             ->setColor('pink')
             ->setStatsTotal($themes)
             ->setRoute(route('theme.index'))
+            ->setColumn('col-12 col-md-6 col-lg-3')
             ->init($widgets, $widgetSettings);
     }
 }

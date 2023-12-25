@@ -10,6 +10,7 @@ use Botble\Base\Supports\ServiceProvider;
 use Botble\Faq\Contracts\Faq as FaqContract;
 use Botble\Faq\FaqCollection;
 use Botble\Faq\FaqItem;
+use Botble\Faq\Models\Faq;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 
@@ -17,12 +18,12 @@ class HookServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
-        add_action(BASE_ACTION_META_BOXES, function (string $context, string|Model|null $object = null): void {
+        add_action(BASE_ACTION_META_BOXES, function (string $context, array|string|Model|null $object = null): void {
             if (! $object || $context != 'advanced') {
                 return;
             }
 
-            if (! in_array(get_class($object), config('plugins.faq.general.schema_supported', []))) {
+            if (! in_array($object::class, config('plugins.faq.general.schema_supported', []))) {
                 return;
             }
 
@@ -44,10 +45,12 @@ class HookServiceProvider extends ServiceProvider
                 ]),
                 function () {
                     $value = [];
+                    $selectedFaqs = [];
 
                     $args = func_get_args();
                     if ($args[0] && $args[0]->id) {
                         $value = MetaBox::getMetaData($args[0], 'faq_schema_config', true);
+                        $selectedFaqs = MetaBox::getMetaData($args[0], 'faq_ids', true) ?: [];
                     }
 
                     $hasValue = ! empty($value);
@@ -68,7 +71,12 @@ class HookServiceProvider extends ServiceProvider
 
                     $value = json_encode($value);
 
-                    return view('plugins/faq::schema-config-box', compact('value', 'hasValue'))->render();
+                    $faqs = Faq::query()->wherePublished()->pluck('question', 'id')->all();
+
+                    return view(
+                        'plugins/faq::schema-config-box',
+                        compact('value', 'hasValue', 'faqs', 'selectedFaqs')
+                    )->render();
                 },
                 get_class($object),
                 $context
@@ -76,39 +84,65 @@ class HookServiceProvider extends ServiceProvider
         }, 39, 2);
 
         add_action(BASE_ACTION_PUBLIC_RENDER_SINGLE, function ($screen, $object): void {
-            add_filter(THEME_FRONT_HEADER, function ($html) use ($object): string|null {
-                if (! in_array(get_class($object), config('plugins.faq.general.schema_supported', []))) {
-                    return $html;
-                }
+            if (
+                ! in_array($object::class, config('plugins.faq.general.schema_supported', []))
+                || ! setting('enable_faq_schema', 0)
+            ) {
+                return;
+            }
 
-                if (! setting('enable_faq_schema', 0)) {
-                    return $html;
-                }
+            $faqs = (array)$object->getMetaData('faq_schema_config', true);
 
-                $value = MetaBox::getMetaData($object, 'faq_schema_config', true);
+            if (is_plugin_active('faq')) {
+                $selectedExistingFaqs = $object->getMetaData('faq_ids', true);
 
-                if (! $value || ! is_array($value)) {
-                    return $html;
-                }
+                if ($selectedExistingFaqs && is_array($selectedExistingFaqs)) {
+                    $selectedExistingFaqs = array_filter($selectedExistingFaqs);
 
-                foreach ($value as $key => $item) {
-                    if (! $item[0]['value'] && ! $item[1]['value']) {
-                        Arr::forget($value, $key);
+                    if ($selectedExistingFaqs) {
+                        $selectedFaqs = Faq::query()
+                            ->wherePublished()
+                            ->whereIn('id', $selectedExistingFaqs)
+                            ->pluck('answer', 'question')
+                            ->all();
+
+                        foreach ($selectedFaqs as $question => $answer) {
+                            $faqs[] = [
+                                [
+                                    'key' => 'question',
+                                    'value' => $question,
+                                ],
+                                [
+                                    'key' => 'answer',
+                                    'value' => $answer,
+                                ],
+                            ];
+                        }
                     }
                 }
+            }
 
-                $schemaItems = new FaqCollection();
+            $faqs = array_filter($faqs);
 
-                foreach ($value as $item) {
-                    $schemaItems->push(
-                        new FaqItem(BaseHelper::clean($item[0]['value']), BaseHelper::clean($item[1]['value']))
-                    );
+            if (empty($faqs)) {
+                return;
+            }
+
+            foreach ($faqs as $key => $item) {
+                if (! $item[0]['value'] && ! $item[1]['value']) {
+                    Arr::forget($value, $key);
                 }
+            }
 
-                app(FaqContract::class)->registerSchema($schemaItems);
+            $schemaItems = new FaqCollection();
 
-                return $html;
-            }, 39);
+            foreach ($faqs as $item) {
+                $schemaItems->push(
+                    new FaqItem(BaseHelper::clean($item[0]['value']), BaseHelper::clean($item[1]['value']))
+                );
+            }
+
+            app(FaqContract::class)->registerSchema($schemaItems);
         }, 39, 2);
     }
 }

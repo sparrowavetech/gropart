@@ -1,3 +1,10 @@
+:root {
+    --dt-row-selected: var(--primary-color-rgb);
+    --dt-row-selected-text: 255, 255, 255;
+    --dt-row-selected-link: 255, 255, 255;
+    --dt-row-stripe: 255, 255, 255;
+}
+
 .table-wrapper {
     .table-configuration-wrap {
         .btn-show-table-options {
@@ -26,6 +33,16 @@ table {
         margin-top: 0 !important;
         margin-bottom: 0 !important;
 
+        &.table-striped {
+            > tbody {
+                > tr.selected {
+                    > * {
+                        border-bottom-width: 0;
+                    }
+                }
+            }
+        }
+
         > thead {
             .sorting,
             .sorting_asc,
@@ -48,22 +65,17 @@ table {
         }
 
         > tbody {
-            tr {
-                &.selected {
-                    & > * {
-                        --bb-table-bg-state: var(--bb-azure-lt);
+            > tr.child {
+                ul.dtr-details {
+                    width: 100%;
+
+                    .text-center {
+                        text-align: start !important;
                     }
 
-                    &:nth-of-type(even) {
-                        & > * {
-                            --bb-table-bg-state: var(--bb-blue-lt);
-                        }
-                    }
-
-                    &:hover {
-                        & > * {
-                            --bb-table-bg-state: var(--bb-gray-200);
-                        }
+                    > li {
+                        border-bottom: 1px solid var(--bb-border-color);
+                        padding: 0.5rem 0;
                     }
                 }
             }
@@ -71,7 +83,9 @@ table {
     }
 }
 
-.dataTables_wrapper {
+div.dataTables_wrapper {
+    position: initial;
+
     .dataTables_info {
         padding-top: 0 !important;
     }
@@ -88,6 +102,10 @@ table {
         height: 100% !important;
         background-color: rgba($color: #fff, $alpha: 0.5);
         z-index: 1;
+
+        > div {
+            display: none;
+        }
 
         &:after {
             position: absolute;
@@ -110,10 +128,17 @@ table {
     inset-inline-start: 0;
 }
 
-.dt-buttons {
-    position: absolute;
-    top: 1rem;
-    inset-inline-end: 20px;
+div.dt-buttons {
+    padding: 1rem 1.25rem;
+    overflow-x: auto;
+
+    @media (min-width: 768px) {
+        overflow: unset;
+        padding: 0;
+        position: absolute;
+        top: 1rem;
+        inset-inline-end: 20px;
+    }
 
     button {
         &.btn {
@@ -126,13 +151,13 @@ table {
     }
 }
 
-.dataTables_filter {
-    position: absolute;
-    inset-inline-start: 1.25rem;
-    top: calc(1.4rem - 6px);
+.table-search-input {
+    width: 100%;
 
     label {
         position: relative;
+        font-size: 0;
+        width: 100%;
 
         &::after {
             position: absolute;
@@ -143,13 +168,15 @@ table {
             transform: scale(0.75);
         }
 
-        font-size: 0;
-
         input {
             margin-left: unset !important;
             margin-inline-start: 0.5em;
             padding-inline-end: 2rem;
         }
+    }
+
+    @media (min-width: 768px) {
+        width: initial;
     }
 }
 
@@ -179,6 +206,7 @@ table {
 
 .paginate_button {
     text-align: center;
+
     a {
         min-width: 1.75rem;
         border-radius: var(--bb-border-radius);
@@ -190,11 +218,10 @@ table {
         color: var(--bb-pagination-color);
         background-color: var(--bb-pagination-bg);
         border: var(--bb-pagination-border-width) solid var(--bb-pagination-border-color);
-        transition:
-            color 0.15s ease-in-out,
-            background-color 0.15s ease-in-out,
-            border-color 0.15s ease-in-out,
-            box-shadow 0.15s ease-in-out;
+        transition: color 0.15s ease-in-out,
+        background-color 0.15s ease-in-out,
+        border-color 0.15s ease-in-out,
+        box-shadow 0.15s ease-in-out;
 
         &:hover {
             z-index: 2;

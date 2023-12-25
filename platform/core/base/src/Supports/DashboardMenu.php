@@ -348,6 +348,11 @@ class DashboardMenu
     protected function getMappedItems(Collection $items, Collection $groupedItems): Collection
     {
         return $items
+            ->reject(function ($item) use ($groupedItems): bool {
+                return (
+                    empty($item['url']) || $item['url'] === '#' || Str::startsWith($item['url'], 'javascript:void(0)')
+                ) && ! $groupedItems->get($item['id']);
+            })
             ->mapWithKeys(function ($item) use ($groupedItems) {
                 $groupedItem = $groupedItems->get($item['id']);
 

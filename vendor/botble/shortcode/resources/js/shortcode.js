@@ -75,7 +75,7 @@ $(() => {
         $(this).closest('.modal').modal('hide')
     })
 
-    $('[data-bb-toggle="shortcode-list-modal"]').on('click', () => {
+    $(document).on('click', '[data-bb-toggle="shortcode-list-modal"]', () => {
         $shortcodeListModal.modal('show')
     })
 

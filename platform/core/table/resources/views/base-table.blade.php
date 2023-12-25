@@ -47,6 +47,10 @@
                         {{ trans('core/table::table.filters') }}
                     </x-core::button>
                 @endif
+
+                <div class="table-search-input">
+                    <label><input type="search" class="form-control input-sm" placeholder="{{ trans('core/table::table.search') }}"></label>
+                </div>
             </div>
         </x-core::card.header>
 

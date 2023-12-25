@@ -6,6 +6,7 @@ return [
     'save' => 'Save & Exit',
     'save_and_continue' => 'Save',
     'image' => 'Image',
+    'images' => 'Images',
     'image_placeholder' => 'Insert path of image or click upload button',
     'create' => 'Create',
     'edit' => 'Edit',
@@ -55,4 +56,5 @@ return [
     'status' => 'Status',
     'select_placeholder' => 'Select an option',
     'selected' => 'selected',
+    'count_selected' => ':count selected',
 ];

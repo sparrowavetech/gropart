@@ -39,6 +39,9 @@ class EmailSettingForm extends SettingForm
                     'placeholder' => 'admin@example.com',
                     'data-counter' => 60,
                 ],
+                'wrapper' => [
+                    'class' => 'mb-0',
+                ],
             ]);
     }
 }

@@ -8,6 +8,7 @@ use Botble\Base\Events\BeforeCreateContentEvent;
 use Botble\Base\Events\BeforeEditContentEvent;
 use Botble\Base\Events\BeforeUpdateContentEvent;
 use Botble\Base\Events\CreatedContentEvent;
+use Botble\Base\Events\FormRendering;
 use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Base\Facades\Assets;
 use Botble\Base\Forms\Fields\AutocompleteField;
@@ -68,11 +69,13 @@ abstract class FormAbstract extends Form implements ExtensibleContract
 
     protected bool $onlyValidatedData = false;
 
+    protected bool $withoutActionButtons = false;
+
     public function __construct()
     {
         $this->setMethod('POST');
         $this->template('core/base::forms.form');
-        $this->setFormOption('id', strtolower(Str::slug(Str::snake(self::class))));
+        $this->setFormOption('id', strtolower(Str::slug(Str::snake(static::class))));
         $this->setFormOption('class', 'js-base-form');
     }
 
@@ -197,6 +200,18 @@ abstract class FormAbstract extends Form implements ExtensibleContract
     public function getBreakFieldPoint(): string
     {
         return $this->breakFieldPoint;
+    }
+
+    public function withoutActionButtons(bool $withoutActionButtons = true): static
+    {
+        $this->withoutActionButtons = $withoutActionButtons;
+
+        return $this;
+    }
+
+    public function isWithoutActionButtons(): bool
+    {
+        return $this->withoutActionButtons;
     }
 
     public function setBreakFieldPoint(string $breakFieldPoint): static
@@ -333,6 +348,8 @@ abstract class FormAbstract extends Form implements ExtensibleContract
 
         $this->dispatchBeforeRendering();
 
+        FormRendering::dispatch($this);
+
         if ($this->getModel() instanceof BaseModel) {
             apply_filters(BASE_FILTER_BEFORE_RENDER_FORM, $this, $this->getModel());
         }
@@ -407,7 +424,7 @@ abstract class FormAbstract extends Form implements ExtensibleContract
         parent::setFormOptions($formOptions);
 
         if (isset($formOptions['template'])) {
-            $this->template = $formOptions['template'];
+            $this->template($formOptions['template']);
         }
 
         return $this;
@@ -415,7 +432,9 @@ abstract class FormAbstract extends Form implements ExtensibleContract
 
     public function add($name, $type = 'text', array $options = [], $modify = false): static
     {
-        $options['attr']['v-pre'] = 1;
+        if (Assets::hasVueJs()) {
+            $options['attr']['v-pre'] = 1;
+        }
 
         parent::add($name, $type, $options, $modify);
 

@@ -6,7 +6,7 @@
                 @foreach ($groups as $language)
                     @continue($language['locale'] === $group['locale'])
                     <a
-                        href="{{ route($route, $language['locale'] == 'en' ? [] : ['ref_lang' => $language['locale']]) }}"
+                        href="{{ route($route, $language['locale'] == app()->getLocale() ? [] : ['ref_lang' => $language['locale']]) }}"
                         class="text-decoration-none small"
                     >
                         {!! language_flag($language['flag'], $language['name']) !!}
@@ -33,7 +33,7 @@
                     @continue($language['locale'] === $group['locale'])
 
                     <x-core::dropdown.item
-                        href="{{ route($route, $language['locale'] == 'en' ? [] : ['ref_lang' => $language['locale']]) }}"
+                        href="{{ route($route, $language['locale'] == app()->getLocale() ? [] : ['ref_lang' => $language['locale']]) }}"
                         class="d-flex gap-2 align-items-center"
                     >
                         @if ($language['flag'])

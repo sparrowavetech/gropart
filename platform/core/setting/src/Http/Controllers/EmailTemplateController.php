@@ -3,14 +3,15 @@
 namespace Botble\Setting\Http\Controllers;
 
 use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Supports\Breadcrumb;
 use Botble\Setting\Http\Requests\EmailTemplateRequest;
 use Illuminate\Contracts\View\View;
 
 class EmailTemplateController extends SettingController
 {
-    public function __construct()
+    protected function breadcrumb(): Breadcrumb
     {
-        $this->breadcrumb()->add(
+        return parent::breadcrumb()->add(
             trans('core/setting::setting.email.email_templates'),
             route('settings.email.template')
         );

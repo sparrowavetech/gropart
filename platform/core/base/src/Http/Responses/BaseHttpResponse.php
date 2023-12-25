@@ -197,4 +197,19 @@ class BaseHttpResponse extends Response implements Responsable
     {
         return (string)request()->input('submitter');
     }
+
+    public function toArray(): array
+    {
+        $data = [
+            'error' => $this->error,
+            'data' => $this->data,
+            'message' => $this->message,
+        ];
+
+        if ($this->additional) {
+            $data = array_merge($data, ['additional' => $this->additional]);
+        }
+
+        return $data;
+    }
 }

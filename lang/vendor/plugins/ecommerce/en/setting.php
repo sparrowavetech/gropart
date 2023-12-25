@@ -119,6 +119,7 @@ return [
             'load_countries_states_cities_from_location_plugin' => 'Load countries, states, cities from plugin location',
             'load_countries_states_cities_from_location_plugin_placeholder' => 'After changing this option, you need to update all addresses again. You should set it once.',
             'minimum_order_amount' => 'Minimum order amount to place an order (:currency).',
+            'zip_code_enabled' => 'Enable zipcode',
             'billing_address_enabled' => 'Enable billing address',
             'display_tax_fields_at_checkout_page' => 'Display tax information fields at the checkout page',
             'use_city_field_as_field_text' => 'Use city field as a free text field',

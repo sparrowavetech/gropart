@@ -2,6 +2,7 @@
 
 namespace Botble\Shortcode\Providers;
 
+use Botble\Base\Facades\Assets;
 use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Shortcode\Compilers\ShortcodeCompiler;
@@ -49,6 +50,8 @@ class ShortcodeServiceProvider extends ServiceProvider
             ->loadAndPublishTranslations()
             ->loadAndPublishViews()
             ->publishAssets();
+
+        $this->app->instance('shortcode.modal.rendered', false);
     }
 
     public function boot(): void
@@ -83,12 +86,7 @@ class ShortcodeServiceProvider extends ServiceProvider
                 return $header;
             }
 
-            $header = (string)$header;
-
-            $header .= sprintf(
-                '<link rel="stylesheet" href="%s" />',
-                asset('vendor/core/packages/shortcode/css/shortcode.css')
-            );
+            Assets::addStylesDirectly('vendor/core/packages/shortcode/css/shortcode.css');
 
             return $header;
         }, 120, 2);
@@ -98,9 +96,15 @@ class ShortcodeServiceProvider extends ServiceProvider
                 return $footer;
             }
 
-            $footer = (string)$footer;
+            Assets::addScriptsDirectly('vendor/core/packages/shortcode/js/shortcode.js');
 
-            $footer .= view('packages/shortcode::partials.shortcode-modal')->render();
+            $footer = (string) $footer;
+
+            if (! $this->isShortcodeModalRendered()) {
+                $footer .= view('packages/shortcode::partials.shortcode-modal')->render();
+
+                $this->shortcodeModalRendered();
+            }
 
             return $footer;
         }, 120, 2);
@@ -108,6 +112,16 @@ class ShortcodeServiceProvider extends ServiceProvider
 
     protected function hasWithShortcode(array $attributes): bool
     {
-        return (bool)Arr::get($attributes, 'with-short-code', false);
+        return (bool) Arr::get($attributes, 'with-short-code', false);
+    }
+
+    protected function isShortcodeModalRendered(): bool
+    {
+        return $this->app['shortcode.modal.rendered'] === true;
+    }
+
+    protected function shortcodeModalRendered(): void
+    {
+        $this->app->instance('shortcode.modal.rendered', true);
     }
 }

@@ -10,9 +10,13 @@ use Illuminate\Support\Facades\File;
 
 class CreateLocaleService
 {
-    public function handle(string $locale)
+    public function handle(string $locale): void
     {
-        $result = app(Manager::class)->downloadRemoteLocale($locale);
+        $manager = app(Manager::class);
+
+        $result = $manager->downloadRemoteLocale($locale);
+
+        $manager->publishLocales();
 
         if ($result['error']) {
             $defaultLocale = lang_path('en');

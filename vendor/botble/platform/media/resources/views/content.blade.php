@@ -2,295 +2,287 @@
     <x-core::card class="rv-media-wrapper">
         <input
             type="checkbox"
-            id="media_aside_collapse"
-            class="d-none fake-click-event"
-        >
-        <input
-            type="checkbox"
             id="media_details_collapse"
             class="d-none fake-click-event"
         >
 
-        <aside @class([
-            'rv-media-aside',
-            'rv-media-aside-hide-desktop' =>
-                RvMedia::getConfig('sidebar_display') !== 'vertical',
-        ])>
-            <label
-                for="media_aside_collapse"
-                class="collapse-sidebar"
-            >
-                <x-core::icon name="ti ti-x" />
-            </label>
-            <div class="rv-media-block rv-media-filters">
-                <div class="rv-media-block-title">
-                    {{ trans('core/media::media.filter') }}
-                </div>
-                <div class="rv-media-block-content">
-                    <ul class="rv-media-aside-list">
-                        <li>
-                            <a
-                                href="#"
-                                class="js-rv-media-change-filter"
-                                data-type="filter"
-                                data-value="everything"
-                            >
-                                <x-core::icon name="ti ti-trash" class="me-0" /> {{ trans('core/media::media.everything') }}
-                            </a>
-                        </li>
-                        @if (array_key_exists('image', RvMedia::getConfig('mime_types', [])))
-                            <li>
-                                <a
-                                    href="#"
-                                    class="js-rv-media-change-filter"
-                                    data-type="filter"
-                                    data-value="image"
-                                >
-                                    <x-core::icon name="ti ti-photo" class="me-0" /> {{ trans('core/media::media.image') }}
-                                </a>
-                            </li>
-                        @endif
-                        @if (array_key_exists('video', RvMedia::getConfig('mime_types', [])))
-                            <li>
-                                <a
-                                    href="#"
-                                    class="js-rv-media-change-filter"
-                                    data-type="filter"
-                                    data-value="video"
-                                >
-                                    <x-core::icon name="ti ti-video" class="me-0" /> {{ trans('core/media::media.video') }}
-                                </a>
-                            </li>
-                        @endif
-                        <li>
-                            <a
-                                href="#"
-                                class="js-rv-media-change-filter"
-                                data-type="filter"
-                                data-value="document"
-                            >
-                                <x-core::icon name="ti ti-file" class="me-0" /> {{ trans('core/media::media.document') }}
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-            <div class="rv-media-block rv-media-view-in">
-                <div class="rv-media-block-title">
-                    {{ trans('core/media::media.view_in') }}
-                </div>
-                <div class="rv-media-block-content">
-                    <ul class="rv-media-aside-list">
-                        <li>
-                            <a
-                                href="#"
-                                class="js-rv-media-change-filter"
-                                data-type="view_in"
-                                data-value="all_media"
-                            >
-                                <x-core::icon name="ti ti-world" /> {{ trans('core/media::media.all_media') }}
-                            </a>
-                        </li>
-                        @if (RvMedia::hasAnyPermission(['folders.destroy', 'files.destroy']))
-                            <li>
-                                <a
-                                    href="#"
-                                    class="js-rv-media-change-filter"
-                                    data-type="view_in"
-                                    data-value="trash"
-                                >
-                                    <x-core::icon name="ti ti-trash" /> {{ trans('core/media::media.trash') }}
-                                </a>
-                            </li>
-                        @endif
-                        <li>
-                            <a
-                                href="#"
-                                class="js-rv-media-change-filter"
-                                data-type="view_in"
-                                data-value="recent"
-                            >
-                                <x-core::icon name="ti ti-clock" /> {{ trans('core/media::media.recent') }}
-                            </a>
-                        </li>
-                        <li>
-                            <a
-                                href="#"
-                                class="js-rv-media-change-filter"
-                                data-type="view_in"
-                                data-value="favorites"
-                            >
-                                <x-core::icon name="ti ti-star" /> {{ trans('core/media::media.favorites') }}
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </aside>
+        <x-core::offcanvas
+            id="rv-media-aside"
+            @class(['d-md-none' => RvMedia::getConfig('sidebar_display') !== 'vertical'])
+            style="--bb-offcanvas-width: 85%"
+        >
+            <x-core::offcanvas.header>
+                <x-core::offcanvas.title>
+                    {{ trans('core/media::media.menu_name') }}
+                </x-core::offcanvas.title>
+                <x-core::offcanvas.close-button />
+            </x-core::offcanvas.header>
+
+            <x-core::offcanvas.body class="p-0">
+                <x-core::list-group :flush="true">
+                    <x-core::list-group.header>
+                        {{ trans('core/media::media.filter') }}
+                    </x-core::list-group.header>
+                    <x-core::list-group.item
+                        :action="true"
+                        class="js-rv-media-change-filter"
+                        data-type="filter"
+                        data-value="everything"
+                    >
+                        <x-core::icon name="ti ti-recycle" />
+                        {{ trans('core/media::media.everything') }}
+                    </x-core::list-group.item>
+
+                    @if (array_key_exists('image', RvMedia::getConfig('mime_types', [])))
+                        <x-core::list-group.item
+                            :action="true"
+                            class="js-rv-media-change-filter"
+                            data-type="filter"
+                            data-value="video"
+                        >
+                            <x-core::icon name="ti ti-photo" />
+                            {{ trans('core/media::media.image') }}
+                        </x-core::list-group.item>
+                    @endif
+
+                    @if (array_key_exists('video', RvMedia::getConfig('mime_types', [])))
+                        <x-core::list-group.item
+                            :action="true"
+                            class="js-rv-media-change-filter"
+                            data-type="filter"
+                            data-value="document"
+                        >
+                            <x-core::icon name="ti ti-video" />
+                            {{ trans('core/media::media.video') }}
+                        </x-core::list-group.item>
+                    @endif
+
+                    <x-core::list-group.item
+                        :action="true"
+                        class="js-rv-media-change-filter"
+                        data-type="filter"
+                        data-value="image"
+                    >
+                        <x-core::icon name="ti ti-file" />
+                        {{ trans('core/media::media.document') }}
+                    </x-core::list-group.item>
+                </x-core::list-group>
+
+                <x-core::list-group :flush="true">
+                    <x-core::list-group.header>
+                        {{ trans('core/media::media.view_in') }}
+                    </x-core::list-group.header>
+                    <x-core::list-group.item
+                        :action="true"
+                        class="js-rv-media-change-filter"
+                        data-type="view_in"
+                        data-value="all_media"
+                    >
+                        <x-core::icon name="ti ti-world" />
+                        {{ trans('core/media::media.all_media') }}
+                    </x-core::list-group.item>
+
+                    @if (RvMedia::hasAnyPermission(['folders.destroy', 'files.destroy']))
+                        <x-core::list-group.item
+                            :action="true"
+                            class="js-rv-media-change-filter"
+                            data-type="view_in"
+                            data-value="trash"
+                        >
+                            <x-core::icon name="ti ti-trash" />
+                            {{ trans('core/media::media.trash') }}
+                        </x-core::list-group.item>
+                    @endif
+
+                    <x-core::list-group.item
+                        :action="true"
+                        class="js-rv-media-change-filter"
+                        data-type="view_in"
+                        data-value="recent"
+                    >
+                        <x-core::icon name="ti ti-clock" />
+                        {{ trans('core/media::media.recent') }}
+                    </x-core::list-group.item>
+
+                    <x-core::list-group.item
+                        :action="true"
+                        class="js-rv-media-change-filter"
+                        data-type="view_in"
+                        data-value="favorites"
+                    >
+                        <x-core::icon name="ti ti-star" />
+                        {{ trans('core/media::media.favorites') }}
+                    </x-core::list-group.item>
+                </x-core::list-group>
+            </x-core::offcanvas.body>
+        </x-core::offcanvas>
+
         <div class="rv-media-main-wrapper">
             <x-core::card.header class="flex-column rv-media-header p-0">
-                <div class="rv-media-top-header flex-wrap gap-3 d-flex justify-content-between align-items-start">
-                    <div class="btn-list rv-media-actions">
+                <div class="w-100 p-2 rv-media-top-header flex-wrap gap-3 d-flex justify-content-between align-items-start border-bottom bg-body">
+                    <div class="d-flex gap-2 justify-content-between w-100 w-md-auto rv-media-actions">
                         <x:core::button
-                            tag="label"
-                            for="media_aside_collapse"
                             class="d-block d-md-none"
                             icon="ti ti-menu-2"
                             :icon-only="true"
+                            data-bs-toggle="offcanvas"
+                            href="#rv-media-aside"
                         />
 
-                        @if (RvMedia::hasPermission('files.create'))
-                            <x-core::dropdown
-                                :label="trans('core/media::media.upload')"
-                                icon="ti ti-upload"
-                                color="primary"
-                            >
-                                <x-core::dropdown.item
-                                    :label="trans('core/media::media.upload_from_local')"
-                                    class="js-dropzone-upload dropdown-item"
+                        <div class="btn-list">
+                            @if (RvMedia::hasPermission('files.create'))
+                                <x-core::dropdown
+                                    :label="trans('core/media::media.upload')"
                                     icon="ti ti-upload"
-                                />
+                                    color="primary"
+                                >
+                                    <x-core::dropdown.item
+                                        :label="trans('core/media::media.upload_from_local')"
+                                        class="js-dropzone-upload dropdown-item"
+                                        icon="ti ti-upload"
+                                    />
 
-                                <x-core::dropdown.item
-                                    :label="trans('core/media::media.upload_from_url')"
-                                    class="js-download-action dropdown-item"
-                                    icon="ti ti-link"
-                                />
-                            </x-core::dropdown>
-                        @endif
+                                    <x-core::dropdown.item
+                                        :label="trans('core/media::media.upload_from_url')"
+                                        class="js-download-action dropdown-item"
+                                        icon="ti ti-link"
+                                    />
+                                </x-core::dropdown>
+                            @endif
 
-                        @if (RvMedia::hasPermission('folders.create'))
+                            @if (RvMedia::hasPermission('folders.create'))
+                                <x-core::button
+                                    type="button"
+                                    color="primary"
+                                    :tooltip="trans('core/media::media.create_folder')"
+                                    class="js-create-folder-action"
+                                    icon="ti ti-folder-plus"
+                                    :icon-only="true"
+                                />
+                            @endif
+
                             <x-core::button
                                 type="button"
                                 color="primary"
-                                :tooltip="trans('core/media::media.create_folder')"
-                                class="js-create-folder-action"
-                                icon="ti ti-folder-plus"
+                                :tooltip="trans('core/media::media.refresh')"
+                                class="js-change-action"
+                                icon="ti ti-refresh"
                                 :icon-only="true"
+                                data-type="refresh"
                             />
-                        @endif
 
-                        <x-core::button
-                            type="button"
-                            color="primary"
-                            :tooltip="trans('core/media::media.refresh')"
-                            class="js-change-action"
-                            icon="ti ti-refresh"
-                            :icon-only="true"
-                            data-type="refresh"
-                        />
+                            @if (RvMedia::getConfig('sidebar_display') !== 'vertical')
+                                <x-core::dropdown wrapper-class="d-none d-md-block">
+                                    <x-slot:trigger>
+                                        <x-core::button
+                                            type="button"
+                                            color="primary"
+                                            icon="ti ti-filter"
+                                            class="dropdown-toggle js-rv-media-change-filter-group js-filter-by-type"
+                                            data-bs-toggle="dropdown"
+                                            :tooltip="trans('core/media::media.filter')"
+                                        >
+                                            <span class="js-rv-media-filter-current"></span>
+                                        </x-core::button>
+                                    </x-slot:trigger>
 
-                        @if (RvMedia::getConfig('sidebar_display') !== 'vertical')
-                            <x-core::dropdown>
-                                <x-slot:trigger>
-                                    <x-core::button
-                                        type="button"
-                                        color="primary"
-                                        icon="ti ti-filter"
-                                        class="dropdown-toggle js-rv-media-change-filter-group js-filter-by-type"
-                                        data-bs-toggle="dropdown"
-                                        :tooltip="trans('core/media::media.filter')"
-                                    >
-                                        <span class="js-rv-media-filter-current"></span>
-                                    </x-core::button>
-                                </x-slot:trigger>
-
-                                <x-core::dropdown.item
-                                    :label="trans('core/media::media.everything')"
-                                    icon="ti ti-recycle"
-                                    class="js-rv-media-change-filter"
-                                    data-type="filter"
-                                    data-value="everything"
-                                />
-
-                                @if (array_key_exists('image', RvMedia::getConfig('mime_types', [])))
                                     <x-core::dropdown.item
-                                        :label="trans('core/media::media.image')"
-                                        icon="ti ti-photo"
+                                        :label="trans('core/media::media.everything')"
+                                        icon="ti ti-recycle"
                                         class="js-rv-media-change-filter"
                                         data-type="filter"
-                                        data-value="image"
+                                        data-value="everything"
                                     />
-                                @endif
 
-                                @if (array_key_exists('video', RvMedia::getConfig('mime_types', [])))
+                                    @if (array_key_exists('image', RvMedia::getConfig('mime_types', [])))
+                                        <x-core::dropdown.item
+                                            :label="trans('core/media::media.image')"
+                                            icon="ti ti-photo"
+                                            class="js-rv-media-change-filter"
+                                            data-type="filter"
+                                            data-value="image"
+                                        />
+                                    @endif
+
+                                    @if (array_key_exists('video', RvMedia::getConfig('mime_types', [])))
+                                        <x-core::dropdown.item
+                                            :label="trans('core/media::media.video')"
+                                            icon="ti ti-video"
+                                            class="js-rv-media-change-filter"
+                                            data-type="filter"
+                                            data-value="video"
+                                        />
+                                    @endif
+
                                     <x-core::dropdown.item
-                                        :label="trans('core/media::media.video')"
-                                        icon="ti ti-video"
+                                        :label="trans('core/media::media.document')"
+                                        icon="ti ti-file"
                                         class="js-rv-media-change-filter"
                                         data-type="filter"
-                                        data-value="video"
+                                        data-value="document"
                                     />
-                                @endif
+                                </x-core::dropdown>
 
-                                <x-core::dropdown.item
-                                    :label="trans('core/media::media.document')"
-                                    icon="ti ti-file"
-                                    class="js-rv-media-change-filter"
-                                    data-type="filter"
-                                    data-value="document"
-                                />
-                            </x-core::dropdown>
+                                <x-core::dropdown wrapper-class="d-none d-md-block">
+                                    <x-slot:trigger>
+                                        <x-core::button
+                                            type="button"
+                                            color="primary"
+                                            icon="ti ti-eye"
+                                            class="dropdown-toggle js-rv-media-change-filter-group js-filter-by-view-in"
+                                            data-bs-toggle="dropdown"
+                                            :tooltip="trans('core/media::media.view_in')"
+                                        >
+                                            <span class="js-rv-media-filter-current"></span>
+                                        </x-core::button>
+                                    </x-slot:trigger>
 
-                            <x-core::dropdown>
-                                <x-slot:trigger>
-                                    <x-core::button
-                                        type="button"
-                                        color="primary"
-                                        icon="ti ti-eye"
-                                        class="dropdown-toggle js-rv-media-change-filter-group js-filter-by-view-in"
-                                        data-bs-toggle="dropdown"
-                                        :tooltip="trans('core/media::media.view_in')"
-                                    >
-                                        <span class="js-rv-media-filter-current"></span>
-                                    </x-core::button>
-                                </x-slot:trigger>
+                                    <x-core::dropdown.item
+                                        :label="trans('core/media::media.all_media')"
+                                        icon="ti ti-world"
+                                        class="js-rv-media-change-filter"
+                                        data-type="view_in"
+                                        data-value="all_media"
+                                    />
 
-                                <x-core::dropdown.item
-                                    :label="trans('core/media::media.all_media')"
-                                    icon="ti ti-world"
-                                    class="js-rv-media-change-filter"
-                                    data-type="view_in"
-                                    data-value="all_media"
-                                />
+                                    <x-core::dropdown.item
+                                        :label="trans('core/media::media.trash')"
+                                        icon="ti ti-trash"
+                                        class="js-rv-media-change-filter"
+                                        data-type="view_in"
+                                        data-value="trash"
+                                    />
 
-                                <x-core::dropdown.item
-                                    :label="trans('core/media::media.trash')"
+                                    <x-core::dropdown.item
+                                        :label="trans('core/media::media.recent')"
+                                        icon="ti ti-clock"
+                                        class="js-rv-media-change-filter"
+                                        data-type="view_in"
+                                        data-value="recent"
+                                    />
+
+                                    <x-core::dropdown.item
+                                        :label="trans('core/media::media.favorites')"
+                                        icon="ti ti-star"
+                                        class="js-rv-media-change-filter"
+                                        data-type="view_in"
+                                        data-value="favorites"
+                                    />
+                                </x-core::dropdown>
+                            @endif
+
+                            @if (RvMedia::hasAnyPermission(['folders.destroy', 'files.destroy']))
+                                <x-core::button
+                                    type="button"
+                                    color="danger"
+                                    class="d-none js-files-action"
+                                    data-action="empty_trash"
                                     icon="ti ti-trash"
-                                    class="js-rv-media-change-filter"
-                                    data-type="view_in"
-                                    data-value="trash"
-                                />
-
-                                <x-core::dropdown.item
-                                    :label="trans('core/media::media.recent')"
-                                    icon="ti ti-clock"
-                                    class="js-rv-media-change-filter"
-                                    data-type="view_in"
-                                    data-value="recent"
-                                />
-
-                                <x-core::dropdown.item
-                                    :label="trans('core/media::media.favorites')"
-                                    icon="ti ti-star"
-                                    class="js-rv-media-change-filter"
-                                    data-type="view_in"
-                                    data-value="favorites"
-                                />
-                            </x-core::dropdown>
-                        @endif
-
-                        @if (RvMedia::hasAnyPermission(['folders.destroy', 'files.destroy']))
-                            <x-core::button
-                                type="button"
-                                color="danger"
-                                class="d-none js-files-action"
-                                data-action="empty_trash"
-                                icon="ti ti-trash"
-                            >
-                                {{ trans('core/media::media.empty_trash') }}
-                            </x-core::button>
-                        @endif
+                                >
+                                    {{ trans('core/media::media.empty_trash') }}
+                                </x-core::button>
+                            @endif
+                        </div>
                     </div>
                     <div class="rv-media-search">
                         <form
@@ -314,11 +306,11 @@
                         </form>
                     </div>
                 </div>
-                <div class="rv-media-bottom-header">
-                    <div class="rv-media-breadcrumb">
+                <div class="w-100 d-flex flex-wrap gap-3 p-2">
+                    <div class="d-flex w-100 w-md-auto align-items-center rv-media-breadcrumb">
                         <ul class="breadcrumb"></ul>
                     </div>
-                    <div class="rv-media-tools">
+                    <div class="d-flex justify-content-between justify-content-md-end align-items-center rv-media-tools w-100 w-md-auto">
                         <div
                             class="btn-list"
                             role="group"
@@ -340,13 +332,13 @@
 
                             <x-core::dropdown
                                 :label="trans('core/media::media.actions')"
-                                icon="ti ti-dots-vertical"
+                                icon="ti ti-hand-finger"
                                 wrapper-class="rv-dropdown-actions"
                                 :disabled="true"
                             />
                         </div>
                         <div
-                            class="ms-2 btn-group js-rv-media-change-view-type"
+                            class="btn-group js-rv-media-change-view-type ms-2"
                             role="group"
                         >
                             <x-core::button
@@ -365,7 +357,7 @@
                         <x-core::button
                             tag="label"
                             for="media_details_collapse"
-                            class="collapse-panel ms-2"
+                            class="collapse-panel ms-2 d-none d-sm-block"
                             icon="ti ti-arrow-bar-right"
                             :icon-only="true"
                         />
@@ -375,7 +367,7 @@
 
             <main class="rv-media-main">
                 <div class="rv-media-items"></div>
-                <div class="d-none rv-media-details">
+                <div class="rv-media-details" style="display: none">
                     <div class="rv-media-thumbnail">
                         <x-core::icon name="ti ti-photo" />
                     </div>
@@ -816,9 +808,7 @@
 <x-core::custom-template id="rv_media_rename_item">
     <div class="mb-3">
         <div class="input-group">
-            <div class="input-group-text">
-                __icon__
-            </div>
+            <div class="input-group-text">__icon__</div>
             <input class="form-control" placeholder="__placeholder__" value="__value__">
         </div>
     </div>
@@ -852,9 +842,6 @@
     <img src="__src__" style="display: block;max-width: 100%">
 </x-core::custom-template>
 
-<div class="media-download-popup">
-    <div class="alert alert-success">
-        <i class="fas fa-circle-notch fa-spin me-2"></i>
-        {{ trans('core/media::media.prepare_file_to_download') }}
-    </div>
+<div class="media-download-popup" style="display: none">
+    <x-core::alert type="success">{{ trans('core/media::media.prepare_file_to_download') }}</x-core::alert>
 </div>

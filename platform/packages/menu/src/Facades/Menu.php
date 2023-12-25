@@ -23,6 +23,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static \Botble\Menu\Menu setMenuOptionModels(array $models)
  * @method static \Botble\Menu\Menu clearCacheMenuItems()
  * @method static void useMenuItemIconImage()
+ * @method static void saveMenuNodeImages(array $nodes, \Botble\Menu\Models\MenuNode $model)
  *
  * @see \Botble\Menu\Menu
  */

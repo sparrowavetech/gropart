@@ -4,6 +4,7 @@ namespace Botble\Page\Http\Controllers;
 
 use Botble\Base\Http\Actions\DeleteResourceAction;
 use Botble\Base\Http\Controllers\BaseController;
+use Botble\Base\Supports\Breadcrumb;
 use Botble\Page\Forms\PageForm;
 use Botble\Page\Http\Requests\PageRequest;
 use Botble\Page\Models\Page;
@@ -12,10 +13,9 @@ use Illuminate\Support\Facades\Auth;
 
 class PageController extends BaseController
 {
-    public function __construct()
+    protected function breadcrumb(): Breadcrumb
     {
-        $this
-            ->breadcrumb()
+        return parent::breadcrumb()
             ->add(trans('packages/page::pages.menu_name'), route('pages.index'));
     }
 

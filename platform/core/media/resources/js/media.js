@@ -1,3 +1,4 @@
+import './jquery.doubletap'
 import { MediaConfig } from './App/Config/MediaConfig'
 import { Helpers } from './App/Helpers/Helpers'
 import { MediaService } from './App/Services/MediaService'
@@ -77,7 +78,7 @@ class MediaManagement {
         $mediaDetailsCheckbox.prop('checked', MediaConfig.hide_details_pane || false)
 
         setTimeout(() => {
-            $('.rv-media-details').removeClass('d-none')
+            $('.rv-media-details').show()
         }, 300)
 
         $mediaDetailsCheckbox.on('change', (event) => {
@@ -145,7 +146,7 @@ class MediaManagement {
 
                 _self.MediaService.getFileDetails($current.data())
             })
-            .on('dblclick', '.js-media-list-title', (event) => {
+            .on('dblclick doubletap', '.js-media-list-title', (event) => {
                 event.preventDefault()
 
                 let data = $(event.currentTarget).data()
@@ -162,8 +163,10 @@ class MediaManagement {
                         }
                     }
                 }
+
+                return false
             })
-            .on('dblclick', '.js-up-one-level', (event) => {
+            .on('dblclick doubletap', '.js-up-one-level', (event) => {
                 event.preventDefault()
                 let count = $('.rv-media-breadcrumb .breadcrumb li').length
                 $(`.rv-media-breadcrumb .breadcrumb li:nth-child(${count - 1}) a`).trigger('click')
@@ -237,9 +240,9 @@ class MediaManagement {
         let _self = this
         _self.$body.off('click', '.js-rv-media-change-filter').on('click', '.js-rv-media-change-filter', (event) => {
             event.preventDefault()
+
             if (!Helpers.isOnAjaxLoading()) {
                 let $current = $(event.currentTarget)
-                let $parent = $current.closest('.dropdown-menu')
                 let data = $current.data()
 
                 MediaConfig.request_params[data.type] = data.value
@@ -265,8 +268,8 @@ class MediaManagement {
                 Helpers.resetPagination()
                 _self.MediaService.getMedia(true)
 
-                $parent.find('> button.dropdown-item').removeClass('active')
-                $current.closest('button.dropdown-item').addClass('active')
+                $current.addClass('active')
+                $current.siblings().removeClass('active')
             }
         })
     }
@@ -443,15 +446,18 @@ class MediaManagement {
 
                 const $modal = $(event.currentTarget).closest('.modal')
 
-                ActionsService.processAction({
-                    action: 'properties',
-                    color: $modal.find('input[name="color"]:checked').val(),
-                    selected: Helpers.getSelectedItems().map((item) => item.id.toString()),
-                }, () => {
-                    $modal.modal('hide')
+                ActionsService.processAction(
+                    {
+                        action: 'properties',
+                        color: $modal.find('input[name="color"]:checked').val(),
+                        selected: Helpers.getSelectedItems().map((item) => item.id.toString()),
+                    },
+                    () => {
+                        $modal.modal('hide')
 
-                    _self.MediaService.getMedia(true)
-                })
+                        _self.MediaService.getMedia(true)
+                    }
+                )
             })
 
         _self.$body
@@ -645,20 +651,22 @@ class MediaManagement {
             }
         })
 
-        $mainModal.off('dblclick', '.js-media-list-title').on('dblclick', '.js-media-list-title', (event) => {
-            event.preventDefault()
-            if (Helpers.getConfigs().request_params.view_in !== 'trash') {
-                let selectedFiles = Helpers.getSelectedFiles()
-                if (Helpers.size(selectedFiles) > 0) {
-                    window.rvMedia.options.onSelectFiles(selectedFiles, window.rvMedia.$el)
-                    if (_self.checkFileTypeSelect(selectedFiles)) {
-                        $mainModal.find('.btn-close').trigger('click')
+        $mainModal
+            .off('dblclick doubletap', '.js-media-list-title')
+            .on('dblclick doubletap', '.js-media-list-title', (event) => {
+                event.preventDefault()
+                if (Helpers.getConfigs().request_params.view_in !== 'trash') {
+                    let selectedFiles = Helpers.getSelectedFiles()
+                    if (Helpers.size(selectedFiles) > 0) {
+                        window.rvMedia.options.onSelectFiles(selectedFiles, window.rvMedia.$el)
+                        if (_self.checkFileTypeSelect(selectedFiles)) {
+                            $mainModal.find('.btn-close').trigger('click')
+                        }
                     }
+                } else {
+                    ActionsService.handlePreview()
                 }
-            } else {
-                ActionsService.handlePreview()
-            }
-        })
+            })
     }
 
     // Scroll get more media

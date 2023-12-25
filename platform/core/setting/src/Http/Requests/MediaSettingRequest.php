@@ -43,6 +43,7 @@ class MediaSettingRequest extends Request
             'media_bunnycdn_region' => ['nullable', 'string', 'max:200', 'required_if:media_driver,bunnycdn'],
 
             'media_turn_off_automatic_url_translation_into_latin' => $onOffRule = new OnOffRule(),
+            'media_use_original_name_for_file_path' => $onOffRule,
             'media_default_placeholder_image' => ['nullable', 'string'],
             'max_upload_filesize' => ['nullable', 'numeric', 'min:0'],
 

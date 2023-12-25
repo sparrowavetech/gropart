@@ -5,18 +5,22 @@ namespace Botble\Payment\Http\Controllers;
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\PageTitle;
 use Botble\Base\Http\Actions\DeleteResourceAction;
-use Botble\Base\Http\Controllers\BaseController;
 use Botble\Payment\Enums\PaymentStatusEnum;
+use Botble\Payment\Forms\BankTransferPaymentMethodForm;
+use Botble\Payment\Forms\CODPaymentMethodForm;
+use Botble\Payment\Forms\Settings\PaymentMethodSettingForm;
 use Botble\Payment\Http\Requests\PaymentMethodRequest;
+use Botble\Payment\Http\Requests\Settings\PaymentMethodSettingRequest;
 use Botble\Payment\Http\Requests\UpdatePaymentRequest;
 use Botble\Payment\Models\Payment;
 use Botble\Payment\Repositories\Interfaces\PaymentInterface;
 use Botble\Payment\Tables\PaymentTable;
+use Botble\Setting\Http\Controllers\SettingController;
 use Botble\Setting\Supports\SettingStore;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 
-class PaymentController extends BaseController
+class PaymentController extends SettingController
 {
     public function __construct(protected PaymentInterface $paymentRepository)
     {
@@ -57,21 +61,16 @@ class PaymentController extends BaseController
 
         Assets::addScriptsDirectly('vendor/core/plugins/payment/js/payment-methods.js');
 
-        return view('plugins/payment::settings.index');
+        $form = PaymentMethodSettingForm::create()->renderForm();
+        $codForm = CODPaymentMethodForm::create()->renderForm();
+        $bankTransferForm = BankTransferPaymentMethodForm::create()->renderForm();
+
+        return view('plugins/payment::settings.index', compact('form', 'codForm', 'bankTransferForm'));
     }
 
-    public function updateSettings(Request $request, SettingStore $settingStore)
+    public function updateSettings(PaymentMethodSettingRequest $request)
     {
-        $data = $request->except(['_token']);
-        foreach ($data as $settingKey => $settingValue) {
-            $settingStore->set($settingKey, $settingValue);
-        }
-
-        $settingStore->save();
-
-        return $this
-            ->httpResponse()
-            ->setMessage(trans('plugins/payment::payment.saved_payment_settings_success'));
+        return $this->performUpdate($request->validated());
     }
 
     public function updateMethods(PaymentMethodRequest $request, SettingStore $settingStore)

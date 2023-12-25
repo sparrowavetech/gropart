@@ -11,7 +11,7 @@ trait HasMetadata
 {
     protected array $metadataFields;
 
-    protected function isMetadataField(FormField $field): bool
+    public function isMetadataField(FormField $field): bool
     {
         $options = $field->getOptions();
 
@@ -22,19 +22,19 @@ trait HasMetadata
         return (bool) Arr::get($options, 'metadata', false);
     }
 
-    protected function getMetadataFields(): array
+    public function getMetadataFields(): array
     {
         return $this->metadataFields ??= collect($this->fields)
             ->filter(fn (FormField $field) => $this->isMetadataField($field))
             ->all();
     }
 
-    protected function hasMetadataFields(): bool
+    public function hasMetadataFields(): bool
     {
         return count($this->getMetadataFields()) > 0;
     }
 
-    protected function setupMetadataFields(): void
+    public function setupMetadataFields(): void
     {
         $model = $this->model;
 
@@ -55,7 +55,7 @@ trait HasMetadata
         }
     }
 
-    protected function saveMetadataFields(): void
+    public function saveMetadataFields(): void
     {
         if (! $this->model instanceof  BaseModel) {
             return;

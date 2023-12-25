@@ -3,6 +3,7 @@
 use Botble\ACL\Http\Controllers\Auth\ForgotPasswordController;
 use Botble\ACL\Http\Controllers\Auth\LoginController;
 use Botble\ACL\Http\Controllers\Auth\ResetPasswordController;
+use Botble\ACL\Http\Middleware\CheckUserUpdatePermission;
 use Botble\Base\Facades\AdminHelper;
 use Illuminate\Support\Facades\Route;
 
@@ -47,25 +48,34 @@ Route::group(['namespace' => 'Botble\ACL\Http\Controllers'], function () {
                     'permission' => false,
                 ])->wherePrimaryKey();
 
-                Route::put('password/{user}', [
-                    'as' => 'change-password',
-                    'uses' => 'UserController@postChangePassword',
-                    'permission' => false,
-                    'middleware' => 'preventDemo',
-                ])->wherePrimaryKey('user');
+                Route::middleware(CheckUserUpdatePermission::class)->group(function () {
+                    Route::put('password/{user}', [
+                        'as' => 'change-password',
+                        'uses' => 'UserController@postChangePassword',
+                        'permission' => false,
+                        'middleware' => 'preventDemo',
+                    ])->wherePrimaryKey('user');
 
-                Route::get('profile/{user}', [
-                    'as' => 'profile.view',
-                    'uses' => 'UserController@getUserProfile',
-                    'permission' => false,
-                ])->wherePrimaryKey('user');
+                    Route::get('profile/{user}', [
+                        'as' => 'profile.view',
+                        'uses' => 'UserController@getUserProfile',
+                        'permission' => false,
+                    ])->wherePrimaryKey('user');
 
-                Route::put('profile/{user}', [
-                    'as' => 'update-profile',
-                    'uses' => 'UserController@postUpdateProfile',
-                    'permission' => false,
-                    'middleware' => 'preventDemo',
-                ])->wherePrimaryKey('user');
+                    Route::put('profile/{user}', [
+                        'as' => 'update-profile',
+                        'uses' => 'UserController@postUpdateProfile',
+                        'permission' => false,
+                        'middleware' => 'preventDemo',
+                    ])->wherePrimaryKey('user');
+
+                    Route::put('profile/{user}/preferences', [
+                        'as' => 'update-preferences',
+                        'uses' => 'UserController@updatePreferences',
+                        'permission' => false,
+                        'middleware' => 'preventDemo',
+                    ])->wherePrimaryKey('user');
+                });
 
                 Route::get('make-super/{user}', [
                     'as' => 'make-super',

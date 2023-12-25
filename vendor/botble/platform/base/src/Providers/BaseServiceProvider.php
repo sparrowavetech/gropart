@@ -21,6 +21,7 @@ use Botble\Base\Forms\FormBuilder;
 use Botble\Base\Forms\FormHelper;
 use Botble\Base\GlobalSearch\GlobalSearchableManager;
 use Botble\Base\Hooks\EmailSettingHooks;
+use Botble\Base\Http\Middleware\AdminLocaleMiddleware;
 use Botble\Base\Http\Middleware\CoreMiddleware;
 use Botble\Base\Http\Middleware\DisableInDemoModeMiddleware;
 use Botble\Base\Http\Middleware\EnsureLicenseHasBeenActivated;
@@ -303,6 +304,7 @@ class BaseServiceProvider extends ServiceProvider
             $router = $this->app['router'];
 
             $router->pushMiddlewareToGroup('web', LocaleMiddleware::class);
+            $router->pushMiddlewareToGroup('web', AdminLocaleMiddleware::class);
             $router->pushMiddlewareToGroup('web', HttpsProtocolMiddleware::class);
             $router->aliasMiddleware('preventDemo', DisableInDemoModeMiddleware::class);
             $router->middlewareGroup('core', [CoreMiddleware::class]);

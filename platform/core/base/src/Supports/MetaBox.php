@@ -85,7 +85,7 @@ class MetaBox
         ];
     }
 
-    public function doMetaBoxes(string $context, Model|string|null $object = null): void
+    public function doMetaBoxes(string $context, array|Model|string|null $object = null): void
     {
         if (! $object) {
             return;

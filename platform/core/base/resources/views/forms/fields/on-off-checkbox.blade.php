@@ -6,9 +6,10 @@
 
 @php
     $options['attr']['label'] = $options['label'];
+    $options['attr']['label_attr'] = Arr::get($options, 'label_attr');
     $isShowLabel = $showLabel && $options['label'] && $options['label_show'];
 
-    if (!$isShowLabel) {
+    if (! $isShowLabel) {
         unset($options['attr']['label']);
     }
 @endphp

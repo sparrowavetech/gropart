@@ -132,6 +132,12 @@ Route::group(['namespace' => 'Botble\Base\Http\Controllers'], function () {
             ]);
         });
 
+        Route::get('toggle-theme-mode', [
+            'as' => 'toggle-theme-mode',
+            'uses' => 'ToggleThemeModeController@__invoke',
+            'permission' => false,
+        ]);
+
         Route::get('search', [SearchController::class, '__invoke'])->name('core.global-search');
     });
 });

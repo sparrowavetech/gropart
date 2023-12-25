@@ -2,14 +2,17 @@
 
 namespace Botble\Translation\Tables;
 
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\Html;
 use Botble\Base\Supports\Language;
 use Botble\Table\Abstracts\TableAbstract;
+use Botble\Table\BulkChanges\SelectBulkChange;
 use Botble\Table\Columns\FormattedColumn;
-use Botble\Translation\Models\Translation;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Str;
+use Throwable;
 
 class TranslationTable extends TableAbstract
 {
@@ -20,84 +23,172 @@ class TranslationTable extends TableAbstract
         parent::setup();
 
         $this->hasOperations = false;
-        $this->setView($this->simpleTableView());
+        $this->setView('plugins/translation::table');
         $this->pageLength = 100;
 
+        $this->useDefaultSorting = false;
+
         $this
-            ->model(Translation::class)
-            ->queryUsing(function (Builder $query) {
-                $query
-                    ->where('locale', $this->locale)
-                    ->when(
-                        $this->request()->input('group'),
-                        fn (Builder $query, $group) => $query->where('group', $group)
-                    )
-                    ->orderBy('value');
-            })
-            ->addColumns([
-                FormattedColumn::make('group')
-                    ->title('Group')
-                    ->alignStart()
-                    ->nowrap()
-                    ->getValueUsing(function (FormattedColumn $column) {
-                        $group = $column->getItem()->group;
+            ->onAjax(function () {
+                $translations = [];
 
-                        $groupDisplay = $group;
+                $langLoader = Lang::getLoader();
 
-                        if (Str::startsWith($group, 'core/') || Str::startsWith($group, 'packages/')) {
-                            $name = Str::headline(Str::slug(Str::afterLast($group, '/')));
+                foreach ($this->getGroups() as $group) {
+                    if (! str_contains($group, DIRECTORY_SEPARATOR)) {
+                        $trans = $langLoader->load('en', $group);
+                    } else {
+                        $trans = $langLoader->load('en', Str::afterLast($group, DIRECTORY_SEPARATOR), Str::beforeLast($group, DIRECTORY_SEPARATOR));
+                    }
 
-                            $groupDisplay = $name . ' (core)';
-                        } elseif (Str::startsWith($group, 'plugins/')) {
-                            $plugin = Str::beforeLast(Str::after($group, 'plugins/'), '/');
+                    if ($trans && is_array($trans)) {
+                        foreach (Arr::dot($trans) as $key => $value) {
+                            if (empty($value)) {
+                                continue;
+                            }
 
-                            $name = Str::afterLast($group, '/');
+                            $translations[$group][$key] = $value;
+                        }
+                    }
+                }
 
-                            if ($plugin !== $name) {
-                                $name = Str::headline(Str::slug($name));
+                $translationsCollection = collect();
 
-                                $groupDisplay = $name . ' (' . Str::beforeLast(Str::after($group, 'plugins/'), '/') . ')';
-                            } else {
-                                $groupDisplay = Str::headline(Str::slug($name));
+                foreach ($translations as $group => $items) {
+                    foreach (Arr::dot($items) as $key => $value) {
+                        $translationsCollection->push([
+                            'group' => $group,
+                            'key' => $key,
+                            'value' => $value,
+                        ]);
+                    }
+                }
+
+                if ($this->isFiltering()) {
+                    $translationsCollection = $translationsCollection->filter(function ($item) {
+                        $filterColumns = $this->request()->query('filter_columns');
+                        $filterOperator = $this->request()->query('filter_operators');
+                        $filterValues = $this->request()->query('filter_values');
+
+                        if (empty($filterColumns) || empty($filterOperator) || empty($filterValues)) {
+                            return true;
+                        }
+
+                        foreach ($filterColumns as $index => $filterColumn) {
+                            $filterOperator = $filterOperator[$index];
+                            $filterValue = $filterValues[$index];
+
+                            if ($filterOperator === '=') {
+                                if (empty($filterValue) || empty($filterColumn)) {
+                                    return true;
+                                }
+
+                                if ($filterValue === $item['group']) {
+                                    return true;
+                                }
+
+                                return false;
                             }
                         }
 
-                        return Html::tag(
-                            'code',
-                            $groupDisplay,
-                            [
-                                'data-bs-toggle' => 'tooltip',
-                                'data-bs-original-title' => $group,
-                            ]
-                        );
-                    }),
-                FormattedColumn::make('key')
-                    ->title(Arr::get(Language::getAvailableLocales(), 'en.name', 'en'))
-                    ->alignStart()
-                    ->getValueUsing(function (FormattedColumn $column) {
-                        $item = $column->getItem();
+                        return false;
+                    });
+                }
 
-                        return $this->formatKeyAndValue(
-                            trans(str($item->group)->replaceLast('/', '::')->append(".$item->key")->toString())
-                        );
-                    }),
-                FormattedColumn::make('value')
-                    ->title(Arr::get(Language::getAvailableLocales(), "{$this->locale}.name", $this->locale))
-                    ->alignStart()
-                    ->getValueUsing(function (FormattedColumn $column) {
-                        $item = $column->getItem();
+                if ($this->request()->filled('group')) {
+                    $translationsCollection = $translationsCollection->filter(function ($item) {
+                        return $item['group'] === $this->request()->query('group');
+                    });
+                }
 
-                        return Html::link('#edit', $this->formatKeyAndValue($item->value), [
-                            'class' => sprintf('editable status-%s locale-%s', $item->status, $this->locale),
-                            'data-locale' => $this->locale,
-                            'data-name' => sprintf('%s|%s', $this->locale, $item->key),
-                            'data-type' => 'textarea',
-                            'data-pk' => $item ? $item->id : 0,
-                            'data-title' => trans('plugins/translation::translation.edit_title'),
-                            'data-url' => route('translations.group.edit', ['group' => $item->group]),
-                        ]);
-                    }),
-            ]);
+                return $this->toJson(
+                    $this->table->of($translationsCollection)
+                );
+            });
+    }
+
+    public function getFilters(): array
+    {
+        return [
+            'group' => SelectBulkChange::make()
+                ->name('group')
+                ->title(trans('plugins/translation::translation.group'))
+                ->choices($this->getGroups())
+                ->validate(['required', 'string'])->toArray(),
+        ];
+    }
+
+    public function columns(): array
+    {
+        return [
+            FormattedColumn::make('group')
+                ->title(trans('plugins/translation::translation.group'))
+                ->alignStart()
+                ->nowrap()
+                ->getValueUsing(function (FormattedColumn $column) {
+                    $item = $column->getItem();
+
+                    $group = $item->group;
+                    $groupDisplay = $group;
+
+                    if (Str::startsWith($group, 'core/') || Str::startsWith($group, 'packages/')) {
+                        $name = Str::headline(Str::slug(Str::afterLast($group, '/')));
+
+                        $groupDisplay = $name . ' (core)';
+                    } elseif (Str::startsWith($group, 'plugins/')) {
+                        $plugin = Str::beforeLast(Str::after($group, 'plugins/'), '/');
+
+                        $name = Str::afterLast($group, '/');
+
+                        if ($plugin !== $name) {
+                            $name = Str::headline(Str::slug($name));
+
+                            $groupDisplay = $name . ' (' . Str::beforeLast(Str::after($group, 'plugins/'), '/') . ')';
+                        } else {
+                            $groupDisplay = Str::headline(Str::slug($name));
+                        }
+                    }
+
+                    return Html::tag(
+                        'code',
+                        $groupDisplay,
+                        [
+                            'data-bs-toggle' => 'tooltip',
+                            'data-bs-original-title' => $group,
+                        ]
+                    );
+                }),
+            FormattedColumn::make('key')
+                ->title(Arr::get(Language::getAvailableLocales(), 'en.name', 'en'))
+                ->alignStart()
+                ->getValueUsing(function (FormattedColumn $column) {
+                    $item = $column->getItem();
+
+                    $trans = trans(Str::of($item->group)->replaceLast('/', '::')->append(".$item->key")->toString(), [], 'en');
+
+                    return $this->formatKeyAndValue(is_array($trans) ? $item->key : $trans);
+                }),
+            FormattedColumn::make('value')
+                ->title(Arr::get(Language::getAvailableLocales(), "{$this->locale}.name", $this->locale))
+                ->alignStart()
+                ->getValueUsing(function (FormattedColumn $column) {
+                    $item = $column->getItem();
+
+                    $trans = trans(Str::of($item->group)->replaceLast('/', '::')->append(".$item->key")->toString(), [], $this->locale);
+
+                    $value = $this->formatKeyAndValue(is_array($trans) ? $item->value : $trans);
+
+                    return Html::link('#edit', $value, [
+                        'class' => sprintf('editable locale-%s', $this->locale),
+                        'data-locale' => $this->locale,
+                        'data-name' => sprintf('%s|%s', $this->locale, $item->key),
+                        'data-type' => 'textarea',
+                        'data-pk' => $item->key,
+                        'data-title' => trans('plugins/translation::translation.edit_title'),
+                        'data-url' => route('translations.group.edit', ['group' => $item->group]),
+                    ]);
+                }),
+        ];
     }
 
     public function setLocale(string $locale): self
@@ -112,8 +203,56 @@ class TranslationTable extends TableAbstract
         return htmlentities($value, ENT_QUOTES, 'UTF-8', false);
     }
 
-    public function isSimpleTable(): bool
+    protected function getGroups(): array
     {
-        return false;
+        $groups = [];
+
+        $langPaths = File::glob(lang_path(BaseHelper::joinPaths(['vendor', '*', '*', 'en'])));
+        $langPaths[] = lang_path('en');
+
+        foreach ($langPaths as $langPath) {
+            if (! File::isWritable($langPath)) {
+                continue;
+            }
+
+            try {
+                foreach (File::allFiles($langPath) as $file) {
+                    $group = str_replace(lang_path(), '', dirname($file));
+
+                    if ($group) {
+                        $group = str_replace('vendor' . DIRECTORY_SEPARATOR, '', $group);
+                    }
+
+                    $group = str_replace(DIRECTORY_SEPARATOR . 'en', '', $group);
+
+                    if (! $group) {
+                        $group = null;
+                    } else {
+                        $group = ltrim($group, DIRECTORY_SEPARATOR);
+                    }
+
+                    $fileName = File::name($file);
+
+                    if ($group) {
+                        $group .= DIRECTORY_SEPARATOR . $fileName;
+                    } else {
+                        $group = $fileName;
+                    }
+
+                    $groups[$group] = $group;
+                }
+            } catch (Throwable $exception) {
+                BaseHelper::logError($exception);
+
+                continue;
+            }
+        }
+
+        return $groups;
+    }
+
+    public function htmlDrawCallbackFunction(): string|null
+    {
+        return parent::htmlDrawCallbackFunction() . '$(".editable").editable({mode: "inline"});';
     }
 }

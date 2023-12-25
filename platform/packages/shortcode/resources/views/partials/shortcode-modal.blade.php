@@ -1,4 +1,3 @@
-<script src="{{ asset('vendor/core/packages/shortcode/js/shortcode.js') }}?v={{ get_cms_version() }}"></script>
 <x-core::modal
     :title="trans('packages/shortcode::shortcode.ui-blocks')"
     id="shortcode-list-modal"

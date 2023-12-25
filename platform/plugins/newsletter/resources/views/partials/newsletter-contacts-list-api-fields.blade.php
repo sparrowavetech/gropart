@@ -4,10 +4,13 @@
     :checked="setting('enable_newsletter_contacts_list_api', false)"
     data-bb-toggle="collapse"
     data-bb-target="#newsletter-settings"
+    class="mb-0"
+    :wrapper="false"
 />
 
 <x-core::form.fieldset
     data-bb-value="1"
+    class="mt-3"
     id="newsletter-settings"
     @style(['display: none;' => !setting('enable_newsletter_contacts_list_api', false)])
 >

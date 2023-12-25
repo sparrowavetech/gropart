@@ -85,7 +85,11 @@ class PublicController extends BaseController
         event(new RenderingSingleEvent($slug));
 
         if (! empty($result) && is_array($result)) {
-            return Theme::scope($result['view'], $result['data'], Arr::get($result, 'default_view'))->render();
+            if (isset($result['view'])) {
+                return Theme::scope($result['view'], $result['data'], Arr::get($result, 'default_view'))->render();
+            }
+
+            return $result;
         }
 
         abort(404);

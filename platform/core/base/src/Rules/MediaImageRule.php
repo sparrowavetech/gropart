@@ -21,6 +21,10 @@ class MediaImageRule implements ValidationRule
 
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
+        if (RvMedia::isUsingCloud()) {
+            return;
+        }
+
         try {
             $file = $value instanceof UploadedFile ? $value : new UploadedFile(RvMedia::getRealPath($value), $value);
         } catch (FileNotFoundException) {

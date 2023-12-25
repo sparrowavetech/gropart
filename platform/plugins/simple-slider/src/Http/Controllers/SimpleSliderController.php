@@ -5,6 +5,7 @@ namespace Botble\SimpleSlider\Http\Controllers;
 use Botble\Base\Facades\Assets;
 use Botble\Base\Http\Actions\DeleteResourceAction;
 use Botble\Base\Http\Controllers\BaseController;
+use Botble\Base\Supports\Breadcrumb;
 use Botble\SimpleSlider\Forms\SimpleSliderForm;
 use Botble\SimpleSlider\Http\Requests\SimpleSliderRequest;
 use Botble\SimpleSlider\Models\SimpleSlider;
@@ -14,10 +15,9 @@ use Illuminate\Http\Request;
 
 class SimpleSliderController extends BaseController
 {
-    public function __construct()
+    protected function breadcrumb(): Breadcrumb
     {
-        $this
-            ->breadcrumb()
+        return parent::breadcrumb()
             ->add(trans('plugins/simple-slider::simple-slider.menu'), route('simple-slider.index'));
     }
 

@@ -20,6 +20,7 @@
             'vendor/core/core/base/libraries/codemirror/lib/codemirror.js',
             'vendor/core/core/base/libraries/codemirror/addon/hint/show-hint.js',
             'vendor/core/core/base/libraries/codemirror/addon/hint/anyword-hint.js',
+            'vendor/core/core/base/libraries/codemirror/addon/display/autorefresh.js',
         ]);
 
     switch ($mode) {
