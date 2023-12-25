@@ -306,7 +306,7 @@ class PublicProductController extends BaseController
         $order = null;
 
         $validator = Validator::make($request->only(['order_id', 'email']), [
-            'order_id' => 'nullable|integer|min:1',
+            'order_id' => 'nullable|min:1',
             'email' => 'nullable|email',
         ]);
 

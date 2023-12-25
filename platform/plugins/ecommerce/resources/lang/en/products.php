@@ -176,6 +176,7 @@ return [
         'external_link_download' => 'External link download',
         'generate_license_code_after_purchasing_product' => 'Generate license code after purchasing this product?',
     ],
+    'frequently_bought_together'=>'Frequently Bought Together',
     'this_action_will_reload_page' => 'This action will reload the page to update the data!',
     'select' => 'Select',
     'set_this_variant_as_default' => 'Set this variant as default',

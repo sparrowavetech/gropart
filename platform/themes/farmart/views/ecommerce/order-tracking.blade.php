@@ -5,7 +5,7 @@
             <form
                 class="mt-3"
                 method="GET"
-                action="{{ route('public.orders.tracking') }}"
+                action="{{ route('public.orders.tracking') }}#ordtal"
             >
                 <div class="mb-3">
                     <input
@@ -17,6 +17,7 @@
                         placeholder="{{ __('Order ID') }} (*)"
                     >
                 </div>
+                <div id="ordtal"></div>
                 <div class="mb-3">
                     <input
                         class="form-control"
@@ -35,9 +36,9 @@
                     >{{ __('Find') }}</button>
                 </div>
             </form>
-            <div class="mt-5">
-                @include('plugins/ecommerce::themes.includes.order-tracking-detail')
-            </div>
         </div>
+    </div>
+    <div class="col-sm-12 mt-5">
+        @include('plugins/ecommerce::themes.includes.order-tracking-detail')
     </div>
 </div>

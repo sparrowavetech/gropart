@@ -1,9 +1,9 @@
-<div class="widget-products-with-category py-5 bg-light">
+<div class="widget-products-with-category py-5 pt-3 bg-light">
     <div class="container-xxxl">
         <div class="row">
             <div class="col-12">
                 <div class="row align-items-center mb-2 widget-header">
-                    <h2 class="col-auto mb-0 py-2">{{ $shortcode->title ?: $category->name }}</h2>
+                    <h2 class="col-auto mt-3 mb-3 py-2">{{ $shortcode->title ?: $category->name }}</h2>
                 </div>
                 <div class="product-deals-day__body arrows-top-right">
                     <div
@@ -26,19 +26,22 @@
                                 [
                                     'breakpoint' => 1400,
                                     'settings' => [
-                                        'slidesToShow' => 5,
+                                        'slidesToShow' => 6,
                                     ],
                                 ],
                                 [
                                     'breakpoint' => 1199,
                                     'settings' => [
-                                        'slidesToShow' => 4,
+                                        'slidesToShow' => 6,
                                     ],
                                 ],
                                 [
                                     'breakpoint' => 1024,
                                     'settings' => [
-                                        'slidesToShow' => 3,
+                                        'arrows' => true,
+                                        'dots' => false,
+                                        'slidesToShow' => 4,
+                                        'slidesToScroll' => 4,
                                     ],
                                 ],
                                 [

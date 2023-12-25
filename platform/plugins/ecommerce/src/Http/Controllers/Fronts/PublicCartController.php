@@ -9,6 +9,7 @@ use Botble\Ecommerce\Facades\OrderHelper;
 use Botble\Ecommerce\Http\Requests\CartRequest;
 use Botble\Ecommerce\Http\Requests\UpdateCartRequest;
 use Botble\Ecommerce\Models\Product;
+use Botble\Ecommerce\Models\Discount;
 use Botble\Ecommerce\Services\HandleApplyCouponService;
 use Botble\Ecommerce\Services\HandleApplyPromotionsService;
 use Botble\SeoHelper\Facades\SeoHelper;
@@ -39,6 +40,8 @@ class PublicCartController extends BaseController
         $products = collect();
         $crossSellProducts = collect();
 
+        $allDiscounts = Discount::where('apply_via_url', 1)->get();
+
         if (Cart::instance('cart')->isNotEmpty()) {
             [$products, $promotionDiscountAmount, $couponDiscountAmount] = $this->getCartData();
 
@@ -54,7 +57,7 @@ class PublicCartController extends BaseController
 
         return Theme::scope(
             'ecommerce.cart',
-            compact('promotionDiscountAmount', 'couponDiscountAmount', 'products', 'crossSellProducts'),
+            compact('promotionDiscountAmount', 'couponDiscountAmount', 'products', 'crossSellProducts',  'allDiscounts'),
             'plugins/ecommerce::themes.cart'
         )->render();
     }

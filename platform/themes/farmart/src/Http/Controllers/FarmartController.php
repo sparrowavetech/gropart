@@ -337,4 +337,9 @@ class FarmartController extends PublicController
 
         return $response->setData($data);
     }
+
+    public function ajaxGetComboPrice($amt)
+    {
+        return format_price($amt);
+    }
 }

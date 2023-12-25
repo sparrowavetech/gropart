@@ -44,6 +44,11 @@ Theme::registerRoutes(function () {
                 Route::post('ajax/contact-seller', 'ajaxContactSeller')
                     ->name('contact-seller');
 
+                Route::get('get-combo-price/{amt?}', [
+                    'uses' => 'ajaxGetComboPrice',
+                    'as'   => 'get-combo-price',
+                ]);
+
                 Route::get('products-by-collection/{id}', 'ajaxGetProductsByCollection')
                     ->name('products-by-collection')
                     ->wherePrimaryKey();

@@ -123,6 +123,19 @@ return [
                     ],
                     'container' => 'footer',
                 ],
+                'swiper-css' => [
+                    'local' => [
+                        'source' => 'plugins/swiper-bundle.min.css',
+                        'version' => $version,
+                    ],
+                ],
+                'swiper-js' => [
+                    'local' => [
+                        'source' => 'js/swiper-bundle.min.js',
+                        'dependencies' => ['jquery'],
+                    ],
+                    'container' => 'footer',
+                ],
                 'popper-js' => [
                     'cdn' => [
                         'source' => '//cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js',

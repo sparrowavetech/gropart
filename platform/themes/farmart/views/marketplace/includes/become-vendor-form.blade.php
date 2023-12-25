@@ -39,6 +39,23 @@
     @endif
     <span class="position-absolute top-0 end-0 shop-url-status"></span>
 </div>
+
+<div class="mb-3">
+    <label class="form-label required" for="shop-phone-register">{{ __('Are You A ?') }}</label>
+    @php
+     $shoptype = \Botble\Marketplace\Enums\ShopTypeEnum::labels();
+    @endphp
+    <select class="form-control form-select @if ($errors->has('shop_category')) is-invalid @endif" id="shop_category" name="shop_category">
+        <option value="">Select Your Type</option>
+        @foreach($shoptype as $index => $type)
+            <option value="{{ $index }}">{{ $type }}</option>
+        @endforeach
+    </select>
+    @if ($errors->has('shop_category'))
+        <div class="invalid-feedback">{{ $errors->first('shop_category') }}</div>
+    @endif
+</div>
+
 <div class="mb-3">
     <label
         class="form-label required"

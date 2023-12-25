@@ -1,8 +1,8 @@
-<form
-    class="cart-form"
-    action="{{ route('public.cart.add-to-cart') }}"
-    method="POST"
->
+@if (isset($FormId))
+<form class="cart-form" action="{{ route('public.cart.add-to-cart') }}" method="POST" id="combo_{{ $FormId }}">
+@else
+<form class="cart-form" action="{{ route('public.cart.add-to-cart') }}" method="POST">
+@endif
     @csrf
     @if (!empty($withVariations) && $product->variations()->count() > 0)
         <div class="pr_switch_wrap">

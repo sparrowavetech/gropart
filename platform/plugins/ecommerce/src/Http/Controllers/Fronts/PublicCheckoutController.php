@@ -11,6 +11,7 @@ use Botble\Ecommerce\Enums\ShippingMethodEnum;
 use Botble\Ecommerce\Enums\ShippingStatusEnum;
 use Botble\Ecommerce\Facades\Cart;
 use Botble\Ecommerce\Facades\Discount;
+use Botble\Ecommerce\Models\Discount as EcommerceDiscount;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Facades\OrderHelper;
 use Botble\Ecommerce\Http\Requests\ApplyCouponRequest;
@@ -123,6 +124,8 @@ class PublicCheckoutController extends BaseController
         $sessionCheckoutData = $this->processOrderData($token, $sessionCheckoutData, $request);
 
         $paymentMethod = null;
+
+        $allDiscounts = EcommerceDiscount::where('apply_via_url', 1)->get();
 
         if (is_plugin_active('payment')) {
             $paymentMethod = $request->input(
@@ -259,6 +262,7 @@ class PublicCheckoutController extends BaseController
             'sessionCheckoutData',
             'products',
             'isShowAddressForm',
+            'allDiscounts',
         );
 
         if (auth('customer')->check()) {

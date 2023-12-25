@@ -3,7 +3,7 @@
 @endphp
 
 @if ($logo)
-    <div class="checkout-logo">
+    <div class="checkout-logo m-0">
         <a
             href="{{ route('public.index') }}"
             title="{{ theme_option('site_title') }}"
@@ -14,5 +14,4 @@
             />
         </a>
     </div>
-    <hr>
 @endif

@@ -76,7 +76,189 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
 
             $panel.removeClass('active')
             _scrollBar.reset()
-        })
+        });
+
+        /* --- SwiperJS --- */
+        $('.swiper-group-6').each(function () {
+            const $this = $(this);
+            const $box = $(this).closest('.box-swiper');
+
+            new Swiper($this[0], {
+                spaceBetween: 30,
+                slidesPerView: 6,
+                slidesPerGroup: 2,
+                loop: true,
+                navigation: {
+                    nextEl: $box.find('.swiper-button-next')[0],
+                    prevEl: $box.find('.swiper-button-prev')[0],
+                },
+                autoplay: {
+                    delay: 10000,
+                },
+                breakpoints: {
+                    1199: {
+                        slidesPerView: 6,
+                    },
+                    800: {
+                        slidesPerView: 4,
+                    },
+                    400: {
+                        slidesPerView: 2,
+                    },
+                    350: {
+                        slidesPerView: 2,
+                        slidesPerGroup: 1,
+                        spaceBetween: 15,
+                    },
+                },
+            });
+        });
+        $('.swiper-group-4').each(function () {
+            const $this = $(this);
+            const $box = $(this).closest('.box-swiper');
+
+            new Swiper($this[0], {
+                spaceBetween: 20,
+                slidesPerView: 4,
+                slidesPerGroup: 1,
+                loop: true,
+                navigation: {
+                    nextEl: $box.find('.swiper-button-next')[0],
+                    prevEl: $box.find('.swiper-button-prev')[0],
+                },
+                autoplay: {
+                    delay: 10000,
+                },
+                breakpoints: {
+                    1299: {
+                        slidesPerView: 4,
+                    },
+                    1150: {
+                        slidesPerView: 4,
+                    },
+                    750: {
+                        slidesPerView: 2,
+                    },
+                    600: {
+                        slidesPerView: 1,
+                    },
+                    550: {
+                        slidesPerView: 1,
+                    },
+                    300: {
+                        slidesPerView: 1,
+                    },
+                    200: {
+                        slidesPerView: 1,
+                    },
+                },
+            });
+        });
+        $('.swiper-group-3').each(function () {
+            const $this = $(this);
+            const $box = $(this).closest('.box-swiper');
+
+            new Swiper($this[0], {
+                spaceBetween: 30,
+                slidesPerView: 3,
+                slidesPerGroup: 1,
+                loop: true,
+                navigation: {
+                    nextEl: $box.find('.swiper-button-next')[0],
+                    prevEl: $box.find('.swiper-button-prev')[0],
+                },
+                pagination: {
+                    el: '.swiper-pagination',
+                    type: 'bullets',
+                    bulletActiveClass: 'swiper-pagination-customs-active',
+                    bulletClass: 'swiper-pagination-customs',
+                    clickable: true,
+                },
+                autoplay: {
+                    delay: 10000,
+                },
+                breakpoints: {
+                    1199: {
+                        slidesPerView: 3,
+                    },
+                    800: {
+                        slidesPerView: 2,
+                    },
+                    600: {
+                        slidesPerView: 1,
+                    },
+                    350: {
+                        slidesPerView: 1,
+                    },
+                    310: {
+                        slidesPerView: 1,
+                    },
+                    200: {
+                        slidesPerView: 1,
+                    },
+                },
+            });
+        });
+        $('.swiper-group-2').each(function () {
+            const $this = $(this);
+            const $box = $(this).closest('.box-swiper');
+
+            new Swiper($this[0], {
+                spaceBetween: 30,
+                slidesPerView: 2,
+                slidesPerGroup: 1,
+                loop: true,
+                navigation: {
+                    nextEl: $box.find('.swiper-button-next')[0],
+                    prevEl: $box.find('.swiper-button-prev')[0],
+                },
+                pagination: {
+                    el: '.swiper-pagination',
+                    type: 'bullets',
+                    bulletActiveClass: 'swiper-pagination-customs-active',
+                    bulletClass: 'swiper-pagination-customs',
+                    clickable: true,
+                },
+                autoplay: {
+                    delay: 10000,
+                },
+                breakpoints: {
+                    1199: {
+                        slidesPerView: 2,
+                    },
+                    800: {
+                        slidesPerView: 1,
+                    },
+                    600: {
+                        slidesPerView: 1,
+                    },
+                    400: {
+                        slidesPerView: 1,
+                    },
+                    350: {
+                        slidesPerView: 1,
+                    },
+                },
+            });
+        });
+        $('.swiper-group-1').each(function () {
+            const $this = $(this);
+            const $box = $(this).closest('.box-swiper');
+
+            new Swiper($this[0], {
+                spaceBetween: 0,
+                slidesPerView: 1,
+                slidesPerGroup: 1,
+                loop: true,
+                navigation: {
+                    nextEl: $box.find('.swiper-button-next')[0],
+                    prevEl: $box.find('.swiper-button-prev')[0],
+                },
+                autoplay: {
+                    delay: 10000,
+                },
+            });
+        });
 
         $('body').on('click', function (e) {
             if ($(e.target).siblings('.panel--sidebar').hasClass('active')) {
@@ -504,11 +686,17 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
             e.preventDefault()
             let _self = $(e.currentTarget)
 
+            let cpncode = _self.closest('.form-coupon-wrapper').find('.coupon-code').val();
+
+            if(!cpncode || cpncode == ""){
+                cpncode = _self.data('coupon-code');
+            }
+
             $.ajax({
                 url: _self.data('url'),
                 type: 'POST',
                 data: {
-                    coupon_code: _self.closest('.form-coupon-wrapper').find('.coupon-code').val(),
+                    coupon_code: cpncode,
                 },
                 beforeSend: () => {
                     _self.prop('disabled', true).addClass('loading')
@@ -2056,7 +2244,7 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
                 },
                 0
             )
-        })
+        });
 
         $(document).on('click', '#sticky-add-to-cart .add-to-cart-button', (e) => {
             e.preventDefault()

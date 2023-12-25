@@ -14,6 +14,7 @@ return [
         'amount' => 'Amount',
     ],
     'detail' => [
+        'sku' => 'SKU (Stock Keeping Unit)',
         'invoice_for' => 'Invoice For',
         'invoice_to' => 'Invoice To',
         'tax_id' => 'Tax ID',

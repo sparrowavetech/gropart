@@ -1,6 +1,6 @@
 <div class="pt-3 mb-4">
-    <div class="align-items-center">
-        <h6 class="d-inline-block">{{ __('Order number') }}: {{ $order->code }}</h6>
+    <div class="align-items-center order-number-data">
+        <h6 class="d-block od-no">{{ __('Order number') }}: {{ $order->code }}</h6>
     </div>
 
     <div class="checkout-success-products">
@@ -28,7 +28,7 @@
         >
             @foreach ($order->products as $orderProduct)
                 <div class="row cart-item">
-                    <div class="col-lg-3 col-md-3">
+                    <div class="col-lg-2 col-md-3 col-12">
                         <div class="checkout-product-img-wrapper">
                             <img
                                 class="item-thumb img-thumbnail img-rounded"
@@ -38,10 +38,10 @@
                             <span class="checkout-quantity">{{ $orderProduct->qty }}</span>
                         </div>
                     </div>
-                    <div class="col-lg-5 col-md-5">
-                        <p class="mb-0">{!! BaseHelper::clean($orderProduct->product_name) !!}</p>
+                    <div class="col-lg-7 col-md-6 col-8">
+                        <p class="mb-0 fw-bold">{!! BaseHelper::clean($orderProduct->product_name) !!}</p>
                         <p class="mb-0">
-                            <small>{{ Arr::get($orderProduct->options, 'attributes', '') }}</small>
+                            <small><em>{{ Arr::get($orderProduct->options, 'attributes', '') }}</em></small>
                         </p>
                         @if (!empty($orderProduct->product_options) && is_array($orderProduct->product_options))
                             {!! render_product_options_html($orderProduct->product_options, $orderProduct->price) !!}
@@ -51,7 +51,7 @@
                             'options' => $orderProduct->options,
                         ])
                     </div>
-                    <div class="col-lg-4 col-md-4 col-4 float-end text-end">
+                    <div class="col-lg-3 col-md-3 col-4 float-end text-end">
                         <p>{{ format_price($orderProduct->price) }}</p>
                     </div>
                 </div>

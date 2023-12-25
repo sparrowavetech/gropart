@@ -176,7 +176,11 @@ class InvoiceHelper
 
     public function downloadInvoice(Invoice $invoice): Response
     {
-        return $this->makeInvoicePDF($invoice)->download(sprintf('invoice-%s.pdf', $invoice->code));
+        $pdf = $this->makeInvoicePDF($invoice);
+
+        return response($pdf->output())
+        ->header('Content-Type', 'application/pdf')
+        ->header('Content-Disposition', sprintf('inline; filename="invoice-%s.pdf"', $invoice->code));
     }
 
     public function streamInvoice(Invoice $invoice): Response
@@ -200,9 +204,7 @@ class InvoiceHelper
 
     protected function getDataForInvoiceTemplate(Invoice $invoice): array
     {
-        $logo = get_ecommerce_setting('company_logo_for_invoicing') ?: (theme_option(
-            'logo_in_invoices'
-        ) ?: theme_option('logo'));
+        $logo = get_ecommerce_setting('company_logo_for_invoicing') ? get_ecommerce_setting('company_logo_for_invoicing') : (theme_option('logo_in_invoices') ? theme_option('logo_in_invoices') : theme_option('logo'));
 
         $paymentDescription = null;
 
@@ -216,7 +218,7 @@ class InvoiceHelper
             );
         }
 
-        $companyName = get_ecommerce_setting('company_name_for_invoicing') ?: get_ecommerce_setting('store_name');
+        $companyName = get_ecommerce_setting('company_name_for_invoicing') ? get_ecommerce_setting('company_name_for_invoicing') : get_ecommerce_setting('store_name');
 
         $companyAddress = get_ecommerce_setting('company_address_for_invoicing');
 
@@ -236,18 +238,8 @@ class InvoiceHelper
 
         $invoice->loadMissing(['items', 'reference']);
 
-        if($invoice->reference->store_id){
-            $storeStateId =  $invoice->reference->store->state;
-         }else{
-             $storeStateId =  setting('ecommerce_store_state', 0);
-         }
-
         $data = [
             'invoice' => $invoice->toArray(),
-            'toState' => $invoice->reference->address->state,
-            'fromState'=> $storeStateId ,
-            'colspan'=> $invoice->reference->address->state !== $storeStateId ?7:8 ,
-            'isIgst'=> $invoice->reference->address->state !== $storeStateId ?true:false,
             'logo' => $logo,
             'logo_full_path' => RvMedia::getRealPath($logo),
             'site_title' => theme_option('site_title'),
@@ -257,7 +249,9 @@ class InvoiceHelper
             'company_phone' => $companyPhone,
             'company_email' => $companyEmail,
             'company_tax_id' => $companyTaxId,
+            'product_has_options' => $invoice->items->count('options'),
             'total_quantity' => $invoice->items->sum('qty'),
+            'total_price' => $invoice->items->sum('price'),
             'payment_description' => $paymentDescription,
             'is_tax_enabled' => EcommerceHelperFacade::isTaxEnabled(),
             'settings' => [

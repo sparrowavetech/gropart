@@ -137,7 +137,23 @@
 
                 @if (is_plugin_active('ecommerce'))
                     @if (EcommerceHelper::isCompareEnabled())
-                        <li><a href="{{ route('public.compare') }}"><span>{{ __('Compare') }}</span></a></li>
+                    <li><a href="{{ route('public.compare') }}"><i class="icon-repeat"></i> <span>{{ __('Compare') }}</span></a></li>
+                    @endif
+
+                    @if (is_plugin_active('marketplace'))
+                        @if (auth('customer')->check())
+                            @if (auth('customer')->user()->is_vendor)
+                                <li>
+                                    <a class="become-vendor-link" href="{{ route('marketplace.vendor.dashboard') }}"><i class="icon-user"></i> <sapn>{{ __('Vendor dashboard') }}</span></a>
+                                </li>
+                            @else
+                                <li>
+                                    <a class="become-vendor-link" href="{{ route('marketplace.vendor.become-vendor') }}"><i class="icon-user"></i> <span>{{ __('Become Vendor') }}</span></a>
+                                </li>
+                            @endif
+                        @else
+                            <li><a class="become-vendor-link" href="{{ route('customer.register') }}"><i class="icon-user"></i> <span>{{ __('Become Vendor') }}</span></a></li>
+                        @endif
                     @endif
 
                     @if (count($currencies) > 1)
@@ -324,6 +340,45 @@
             @endif
         </ul>
     </div>
+
+    @php
+        $supportedLocales = Language::getSupportedLocales();
+    @endphp
+
+    <div id="rightFloatingBar" class="rightFloatingBar">
+        <div class="dockerTab"><i class="fa fa-chevron-circle-up"></i></div>
+        @if ($supportedLocales && count($supportedLocales) > 1)
+            <a href="#" data-bs-toggle="modal" data-bs-target="#languageModel" class="langChange" style="margin-right:-6px;">
+                <i class="fa fa-language"></i>
+            </a>
+        @endif
+        @if (theme_option('hotline'))
+            <a href="http://api.whatsapp.com/send?phone={{ theme_option('hotline') }}" class="supportWhatsApp">
+                <i class="fa fa-whatsapp"></i>
+            </a>
+        @endif
+        <a class="orderTrack" href="{{ route('public.orders.tracking') }}"><i class="fa fa-truck"></i></a>
+    </div>
+
+    <!-- Modal Language-->
+    <div class="modal fade" id="languageModel" tabindex="-1" role="dialog" aria-labelledby="languageModel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="languageModel">{{ __('Choose a language') }}</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true"><i class="icon-cross2"></i></span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    @if (is_plugin_active('language'))
+                        {!! Theme::partial('language-switcher-full') !!}
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+
     @if (is_plugin_active('ecommerce'))
         {!! Theme::partial('ecommerce.quick-view-modal') !!}
     @endif
@@ -394,6 +449,53 @@
             };
         </script>
     @endif
+    <script type="text/javascript">
+    $('.fqtcheckbox').change(function(){
+        calculate();
+    });
+    function calculate(){
+        var amt = 0;
+        $('.comboamount').html(`<img class="mx-auto" style="height:100px" src="{{ image_placeholder('images/placeholder.png') }}" />`);
+
+        $('.fqtcheckbox:checked').each(function() {
+            var cuamt = $(this).attr('data-price');
+                amt = amt + parseFloat(cuamt);
+
+        });
+        $.ajax({
+            url: "{{ route('public.ajax.get-combo-price')}}/"+amt,
+            type:"GET",
+            success:function(res){
+                $('.comboamount').html(res);
+            }
+        })
+    }
+    function addToCartAll(){
+        $("#preloader").show();
+        var checkboxArr=[];
+        $('.fqtcheckbox:checked').each(function() {
+            checkboxArr.push($(this).val());
+        });
+        console.log(checkboxArr);
+        $.ajax({
+                type: "POST",
+                url: "{{ route('public.cart.multiple')}}",
+                data: {id:checkboxArr},
+                success: function(data) {
+                    if(data.error == false){
+                        MartApp.showSuccess(data.message);
+                    }else{
+                        MartApp.showSuccess(data.message);
+                    }
+                    $("#preloader").hide();
+                    MartApp.loadAjaxCart();
+                },
+                error: function(data) {
+                }
+            });
+
+    }
+    </script>
     </body>
 
     </html>

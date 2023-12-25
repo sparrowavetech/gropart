@@ -190,13 +190,13 @@ class HookServiceProvider extends ServiceProvider
                 }
 
                 if ($store->logo) {
-                    $variables['logo_full_path'] = RvMedia::getRealPath($store->logo);
+                    //$variables['logo_full_path'] = RvMedia::getRealPath($store->logo);
                     $variables['company_logo_full_path'] = RvMedia::getRealPath($store->logo);
                 }
 
-                if ($store->name) {
+                /*if ($store->name) {
                     $variables['site_title'] = $store->name;
-                }
+                }*/
 
                 return array_merge($variables, [
                     'company_name' => $store->name,

@@ -1,4 +1,4 @@
-<div class="widget-products-with-category py-5 bg-light">
+<div class="widget-products-with-category py-5 pt-3 bg-light">
     <div class="container-xxxl">
         <div class="row">
             <div class="col-12">
@@ -26,19 +26,22 @@
                                 [
                                     'breakpoint' => 1400,
                                     'settings' => [
-                                        'slidesToShow' => 5,
+                                        'slidesToShow' => 6,
                                     ],
                                 ],
                                 [
                                     'breakpoint' => 1199,
                                     'settings' => [
-                                        'slidesToShow' => 4,
+                                        'slidesToShow' => 6,
                                     ],
                                 ],
                                 [
                                     'breakpoint' => 1024,
                                     'settings' => [
-                                        'slidesToShow' => 3,
+                                        'arrows' => true,
+                                        'dots' => false,
+                                        'slidesToShow' => 4,
+                                        'slidesToScroll' => 4,
                                     ],
                                 ],
                                 [
