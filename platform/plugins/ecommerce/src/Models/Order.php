@@ -51,7 +51,7 @@ class Order extends BaseModel
 
     protected static function booted(): void
     {
-        self::deleting(function (Order $order) {
+        self::deleted(function (Order $order) {
             $order->shipment()->each(fn (Shipment $item) => $item->delete());
             $order->histories()->delete();
             $order->products()->delete();

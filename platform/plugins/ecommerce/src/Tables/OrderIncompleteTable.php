@@ -28,7 +28,7 @@ class OrderIncompleteTable extends OrderTable
             ->model(Order::class)
             ->addActions([
                 Action::make('view')
-                    ->icon('fa fa-eye')
+                    ->icon('ti ti-eye')
                     ->label(trans('core/base::tables.edit'))
                     ->route('orders.view-incomplete-order')->permission('orders.edit'),
                 DeleteAction::make()->route('orders.destroy'),

@@ -41,7 +41,7 @@ class Discount extends BaseModel
 
     protected static function booted(): void
     {
-        static::deleting(function (Discount $discount) {
+        static::deleted(function (Discount $discount) {
             $discount->productCollections()->detach();
             $discount->productCategories()->detach();
             $discount->customers()->detach();
@@ -52,11 +52,7 @@ class Discount extends BaseModel
 
     public function isExpired(): bool
     {
-        if ($this->end_date && strtotime($this->end_date) < strtotime(Carbon::now()->toDateTimeString())) {
-            return true;
-        }
-
-        return false;
+        return $this->end_date && strtotime($this->end_date) < strtotime(Carbon::now()->toDateTimeString());
     }
 
     public function productCollections(): BelongsToMany

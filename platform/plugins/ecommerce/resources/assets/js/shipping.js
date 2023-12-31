@@ -307,12 +307,8 @@ class ShippingManagement {
                 .withButtonLoading(_self)
                 .post($form.prop('action'), $form.serialize())
                 .then(({ data }) => {
-                    if (!data.error) {
-                        Botble.showSuccess(data.message)
-                        $('.wrapper-content').load(`${window.location.href} .wrapper-content > *`)
-                    } else {
-                        Botble.showError(data.message)
-                    }
+                    Botble.showSuccess(data.message)
+                    $('.wrapper-content').load(`${window.location.href} .wrapper-content > *`)
                     $('#select-country-modal').modal('hide')
                     $('.wrapper-content').show()
                 })

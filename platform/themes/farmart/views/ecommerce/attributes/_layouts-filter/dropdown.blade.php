@@ -16,7 +16,7 @@
             <div class="dropdown-swatch">
                 <label>
                     <select
-                        class="form-control product-filter-item"
+                        class="form-select product-filter-item"
                         name="attributes[{{ $set->slug }}][]"
                     >
                         <option value="">{{ __('-- Select --') }}</option>

@@ -71,11 +71,11 @@ class StoreController extends BaseController
         $payoutInformationForm = null;
 
         if ($store->customer->is_vendor) {
-            $taxInformationForm = TaxInformationForm::createFromModel($store)
+            $taxInformationForm = TaxInformationForm::createFromModel($store->customer)
                 ->setUrl(route('marketplace.store.update-tax-info', $store))
                 ->renderForm();
 
-            $payoutInformationForm = PayoutInformationForm::createFromModel($store)
+            $payoutInformationForm = PayoutInformationForm::createFromModel($store->customer)
                 ->setUrl(route('marketplace.store.update-payout-info', $store))
                 ->renderForm();
         }

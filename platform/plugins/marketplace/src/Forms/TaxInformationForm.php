@@ -12,7 +12,7 @@ class TaxInformationForm extends FormAbstract
 {
     public function setup(): void
     {
-        $customer = $this->getModel()->customer;
+        $customer = $this->getModel();
 
         $this
             ->setupModel(new BaseModel())

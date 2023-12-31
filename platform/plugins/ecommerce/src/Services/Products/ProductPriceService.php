@@ -24,6 +24,8 @@ class ProductPriceService
     {
         $this->product = $product;
 
+        $this->product->setFinalPrice($product->price);
+
         $this->applyPriceHandlers();
 
         return $this->product->getFinalPrice();
@@ -32,6 +34,8 @@ class ProductPriceService
     public function getOriginalPrice(Product $product): float
     {
         $this->product = $product;
+
+        $this->product->setOriginalPrice($product->price);
 
         $this->applyPriceHandlers();
 

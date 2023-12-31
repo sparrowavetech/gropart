@@ -2,6 +2,7 @@
 
 namespace Botble\Marketplace\Http\Requests;
 
+use Botble\Base\Rules\OnOffRule;
 use Botble\Ecommerce\Http\Requests\ProductRequest as BaseProductRequest;
 use Botble\Marketplace\Enums\PayoutPaymentMethodsEnum;
 
@@ -28,10 +29,12 @@ class MarketPlaceSettingFormRequest extends BaseProductRequest
             'hide_store_phone_number' => 'sometimes|in:0,1',
             'hide_store_email' => 'sometimes|in:0,1',
             'allow_vendor_manage_shipping' => 'sometimes|in:0,1',
+            'hide_store_social_links' => 'sometimes|in:0,1',
             'fee_per_order' => 'sometimes|min:0|max:100|numeric',
             'fee_withdrawal' => 'sometimes|min:0|numeric',
             'max_filesize_upload_by_vendor' => 'sometimes|min:1|numeric',
             'max_product_images_upload_by_vendor' => 'sometimes|min:1|numeric',
+            'enabled_vendor_registration' => [new OnOffRule()],
         ];
 
         if ($this->input('enable_commission_fee_for_each_category')) {

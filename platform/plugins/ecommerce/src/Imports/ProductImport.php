@@ -235,7 +235,7 @@ class ProductImport implements
         $images = array_values(array_filter($images));
 
         foreach ($images as $key => $image) {
-            $images[$key] = str_replace(RvMedia::getUploadURL() . '/', '', trim($image));
+            $images[$key] = str_replace(RvMedia::getUploadURL() . '/', '', trim(strtolower($image)));
 
             if (Str::startsWith($images[$key], ['http://', 'https://'])) {
                 $images[$key] = $this->uploadImageFromURL($images[$key]);
@@ -377,7 +377,7 @@ class ProductImport implements
 
         event(new CreatedContentEvent(PRODUCT_MODULE_SCREEN_NAME, $this->request, $productRelatedToVariation));
 
-        $variation->product_id = $productRelatedToVariation->id;
+        $variation->product_id = $productRelatedToVariation->getKey();
 
         $variation->is_default = Arr::get($version, 'variation_default_id', 0) == $variation->id;
 
@@ -607,6 +607,8 @@ class ProductImport implements
 
         $row['name'] = Arr::get($row, 'product_name');
         $row['is_slug_editable'] = true;
+
+        $row['barcode'] = (string)Arr::get($row, 'barcode');
 
         $this->setValues($row, [
             ['key' => 'slug', 'type' => 'string', 'default' => 'name'],

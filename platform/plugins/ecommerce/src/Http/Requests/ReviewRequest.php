@@ -2,10 +2,18 @@
 
 namespace Botble\Ecommerce\Http\Requests;
 
+use Botble\Base\Rules\MediaImageRule;
 use Botble\Support\Http\Requests\Request;
 
 class ReviewRequest extends Request
 {
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'images' => array_filter($this->input('images', []) ?? []),
+        ]);
+    }
+
     public function rules(): array
     {
         return [
@@ -14,6 +22,8 @@ class ReviewRequest extends Request
             'customer_id' => ['required', 'exists:ec_customers,id'],
             'star' => ['required', 'integer', 'min:1', 'max:5'],
             'comment' => ['required', 'string', 'max:5000'],
+            'images' => ['nullable', 'array'],
+            'images.*' => ['nullable', new MediaImageRule()],
         ];
     }
 }

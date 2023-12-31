@@ -103,7 +103,7 @@
                                             href="{{ route('customer.downloads.product', $orderProduct->id) }}"
                                             style="white-space: nowrap"
                                         >
-                                            <i class="icon icon-download mr-1"></i>&nbsp;
+                                            <x-core::icon name="ti ti-download" class="me-1" />
                                             <span>{{ __('Download all files') }}</span>
                                         </a>
                                     @endif
@@ -113,7 +113,7 @@
                                             href="{{ route('customer.downloads.product', [$orderProduct->id, 'external' => true]) }}"
                                             style="white-space: nowrap"
                                         >
-                                            <i class="icon icon-link2"></i>&nbsp;
+                                            <x-core::icon name="ti ti-link" class="me-1" />
                                             <span>{{ __('External link downloads') }}</span>
                                         </a>
                                     @endif

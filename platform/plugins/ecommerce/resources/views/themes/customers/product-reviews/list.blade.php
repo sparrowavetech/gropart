@@ -53,7 +53,7 @@
                 aria-labelledby="waiting-tab"
                 tabindex="0"
             >
-                @if ($products->count())
+                @if ($products->isNotEmpty())
                     <div class="row row-cols-md-2 row-cols-1 gx-2">
                         @foreach ($products as $product)
                             <div

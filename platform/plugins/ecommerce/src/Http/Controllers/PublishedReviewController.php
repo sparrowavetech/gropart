@@ -11,7 +11,7 @@ class PublishedReviewController extends BaseController
     public function store(string|int $id)
     {
         $review = Review::query()
-            ->where('status', BaseStatusEnum::DRAFT)
+            ->whereIn('status', [BaseStatusEnum::DRAFT, BaseStatusEnum::PENDING])
             ->findOrFail($id);
 
         $review->update(['status' => BaseStatusEnum::PUBLISHED]);

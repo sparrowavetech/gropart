@@ -6,7 +6,7 @@ use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Ecommerce\Exports\TemplateProductExport;
 use Botble\Ecommerce\Http\Requests\BulkImportRequest;
-use Botble\Ecommerce\Http\Requests\ProductRequest;
+use Botble\Ecommerce\Http\Requests\ProductImportRequest;
 use Botble\Ecommerce\Imports\ProductImport;
 use Botble\Ecommerce\Imports\ValidateProductImport;
 use Illuminate\Http\Request;
@@ -45,7 +45,7 @@ class BulkImportController extends BaseController
         $file = $request->file('file');
 
         $this->validateProductImport
-            ->setValidatorClass(new ProductRequest())
+            ->setValidatorClass(new ProductImportRequest())
             ->import($file);
 
         if ($this->validateProductImport->failures()->count()) {
@@ -65,7 +65,7 @@ class BulkImportController extends BaseController
         }
 
         $this->productImport
-            ->setValidatorClass(new ProductRequest())
+            ->setValidatorClass(new ProductImportRequest())
             ->setImportType($request->input('type'))
             ->import($file);
 

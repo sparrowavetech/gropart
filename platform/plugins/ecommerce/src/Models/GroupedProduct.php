@@ -26,24 +26,20 @@ class GroupedProduct extends BaseModel
             ->get();
     }
 
-    public static function createGroupedProducts(int|string $groupedProductId, array $childItems)
+    public static function createGroupedProducts(int|string $groupedProductId, array $childItems): void
     {
-        DB::beginTransaction();
+        DB::transaction(function () use ($childItems, $groupedProductId) {
+            self::query()
+                ->where('parent_product_id', $groupedProductId)
+                ->delete();
 
-        self::query()
-            ->where('parent_product_id', $groupedProductId)
-            ->delete();
-
-        foreach ($childItems as $item) {
-            self::query()->create([
-                'parent_product_id' => $groupedProductId,
-                'product_id' => $item['id'],
-                'fixed_qty' => isset($item['qty']) & $item['qty'] ?: 1,
-            ]);
-        }
-
-        DB::commit();
-
-        return true;
+            foreach ($childItems as $item) {
+                self::query()->create([
+                    'parent_product_id' => $groupedProductId,
+                    'product_id' => $item['id'],
+                    'fixed_qty' => isset($item['qty']) & $item['qty'] ?: 1,
+                ]);
+            }
+        });
     }
 }

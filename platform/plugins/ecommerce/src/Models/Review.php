@@ -65,4 +65,9 @@ class Review extends BaseModel
     {
         return Attribute::get(fn () => $this->user->orders()->first()?->created_at);
     }
+
+    protected function isApproved(): Attribute
+    {
+        return Attribute::get(fn () => $this->status == BaseStatusEnum::PUBLISHED);
+    }
 }

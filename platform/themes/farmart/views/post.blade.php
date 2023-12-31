@@ -10,7 +10,7 @@
                         <span>{{ __('By :name', ['name' => $post->author->name]) }}</span>
                     </div>
                 @endif
-                @if ($post->categories->count())
+                @if ($post->categories->isNotEmpty())
                     <div class="entry-meta-categories">
                         <span>{{ __('in') }}</span>
                         @foreach ($post->categories as $category)
@@ -30,7 +30,7 @@
         <div class="mt-5 pt-3 post-detail__content">
             <div class="ck-content">{!! BaseHelper::clean($post->content) !!}</div>
 
-            @if ($post->tags->count())
+            @if ($post->tags->isNotEmpty())
                 <div class="entry-meta-tags">
                     <strong>{{ __('Tags') }}:</strong>
                     @foreach ($post->tags as $tag)
@@ -49,7 +49,7 @@
         </div>
         @php $relatedPosts = get_related_posts($post->id, 4); @endphp
 
-        @if ($relatedPosts->count())
+        @if ($relatedPosts->isNotEmpty())
             <div class="related-posts mt-5 pt-3">
                 <div class="heading">
                     <h3>{{ __('Related Posts') }}</h3>

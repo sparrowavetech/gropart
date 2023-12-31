@@ -117,4 +117,9 @@ class MarketplaceHelper
     {
         return (int)$this->getSetting('max_product_images_upload_by_vendor', 20);
     }
+
+    public function isVendorRegistrationEnabled(): bool
+    {
+        return (bool) $this->getSetting('enabled_vendor_registration', true);
+    }
 }

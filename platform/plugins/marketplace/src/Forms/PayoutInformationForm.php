@@ -13,7 +13,7 @@ class PayoutInformationForm extends FormAbstract
 {
     public function setup(): void
     {
-        $customer = $this->getModel()->customer;
+        $customer = $this->getModel();
         $payoutMethodsEnabled = PayoutPaymentMethodsEnum::payoutMethodsEnabled();
 
         $this

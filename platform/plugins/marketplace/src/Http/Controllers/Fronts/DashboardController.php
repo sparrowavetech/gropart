@@ -254,6 +254,10 @@ class DashboardController extends BaseController
 
     public function getBecomeVendor()
     {
+        if (! MarketplaceHelper::isVendorRegistrationEnabled()) {
+            abort(404);
+        }
+
         $customer = auth('customer')->user();
         if ($customer->is_vendor) {
             if (MarketplaceHelper::getSetting('verify_vendor', 1) && ! $customer->vendor_verified_at) {
@@ -280,7 +284,12 @@ class DashboardController extends BaseController
 
     public function postBecomeVendor(BecomeVendorRequest $request)
     {
+        if (! MarketplaceHelper::isVendorRegistrationEnabled()) {
+            abort(404);
+        }
+
         $customer = auth('customer')->user();
+
         if ($customer->is_vendor) {
             abort(404);
         }

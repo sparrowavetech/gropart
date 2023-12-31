@@ -20,6 +20,7 @@ class DiscountRequest extends Request
             'start_date' => Carbon::parse("{$this->input('start_date')} {$this->input('start_time')}")->format($dateFormat),
             'end_date' => $this->has('end_date') && ! $this->has('unlimited_time') ? Carbon::parse("{$this->input('end_date')} {$this->input('end_time')}")->format($dateFormat) : null,
             'apply_via_url' => $this->boolean('apply_via_url'),
+            'display_at_checkout' => $this->boolean('display_at_checkout'),
         ]);
     }
 

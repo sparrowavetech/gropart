@@ -609,7 +609,7 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
 
             if (! $attributesIsList) {
                 foreach ($attributes as $attributeSet => $attributeIds) {
-                    if (! is_array($attributeIds)) {
+                    if (! is_array($attributeIds) || ! array_filter($attributeIds)) {
                         continue;
                     }
 

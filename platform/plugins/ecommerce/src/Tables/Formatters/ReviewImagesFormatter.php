@@ -22,6 +22,8 @@ class ReviewImagesFormatter implements Formatter
 
         $galleryID = 'images-group-' . $row->getKey();
 
+        $value = array_values($value);
+
         $html = Html::image(
             RvMedia::getImageUrl($value[0], 'thumb'),
             RvMedia::getImageUrl($value[0]),

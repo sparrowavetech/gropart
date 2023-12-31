@@ -1,5 +1,17 @@
 {
     "Botble\\EditLock\\Supports\\EditLock": [
         "8dec79f4f9a41c4523197a63aa465e31@48e519550e02c1e16d52a7887a3ec142"
+    ],
+    "Botble\\Ecommerce\\Services\\HandleShippingFeeService": [
+        "66d6c800acf0bbfe034c13e9e2145ba3@32d06bf12d15fccf93827b28197680bd",
+        "66d6c800acf0bbfe034c13e9e2145ba3@60b453c5197bdf4ac4aee6eb8c54810a",
+        "66d6c800acf0bbfe034c13e9e2145ba3@c40fd5a63eef74418206f946f1a35d2f",
+        "66d6c800acf0bbfe034c13e9e2145ba3@fc8d193b22dcc9745c6d02c14ad66cb2",
+        "66d6c800acf0bbfe034c13e9e2145ba3@6b695e36416a68411d7d7befc9c4c0f2",
+        "66d6c800acf0bbfe034c13e9e2145ba3@57da219552174e33125e3e28996fd844",
+        "66d6c800acf0bbfe034c13e9e2145ba3@3a59d46efd487791619197b280c6351c",
+        "66d6c800acf0bbfe034c13e9e2145ba3@3fb72a04130b9ad45f52c4192d1917ce",
+        "66d6c800acf0bbfe034c13e9e2145ba3@d20ea00a8d59e89f6b1f21a5456214d5",
+        "66d6c800acf0bbfe034c13e9e2145ba3@d5059e72b7b2785257de56f215a7f23b"
     ]
 }

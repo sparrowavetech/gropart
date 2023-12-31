@@ -170,7 +170,7 @@
                                                     data-url="{{ route('public.cart.add-to-cart') }}"
                                                     href="#"
                                                 >
-                                                    <i class="far fa-shopping-bag me-5"></i>{{ __('Add To Cart') }}
+                                                    <x-core::icon name="ti ti-shopping-cart" class="me-1" /> {{ __('Add To Cart') }}
                                                 </a>
                                             </td>
                                         @endforeach
@@ -186,7 +186,7 @@
                                                 data-url="{{ route('public.compare.remove', $product->id) }}"
                                                 href="#"
                                             >
-                                                <i class="fa fa-trash-alt me-5"></i>
+                                                <x-core::icon name="ti ti-trash" class="me-1" />
                                                 <span>{{ __('Remove') }}</span>
                                             </a>
                                         </td>

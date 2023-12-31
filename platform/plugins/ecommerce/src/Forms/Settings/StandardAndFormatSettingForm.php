@@ -2,6 +2,7 @@
 
 namespace Botble\Ecommerce\Forms\Settings;
 
+use Botble\Base\Facades\Assets;
 use Botble\Ecommerce\Http\Requests\Settings\StandardAndFormatSettingRequest;
 use Botble\Setting\Forms\SettingForm;
 use Illuminate\Support\Facades\Blade;
@@ -11,6 +12,8 @@ class StandardAndFormatSettingForm extends SettingForm
     public function setup(): void
     {
         parent::setup();
+
+        Assets::addScriptsDirectly('vendor/core/plugins/ecommerce/js/setting.js');
 
         $this
             ->setSectionTitle(trans('plugins/ecommerce::setting.standard_and_format.name'))
@@ -39,8 +42,8 @@ class StandardAndFormatSettingForm extends SettingForm
                 'help_block' => [
                     'text' => trans('plugins/ecommerce::setting.standard_and_format.form.order_will_be_shown')
                         . sprintf(
-                            '<span class="sample-order-code">#</span>' .
-                            '<span class="sample-order-code-prefix"> %s </span>%s' .
+                            '<span class="sample-order-code ms-1">#</span>' .
+                            '<span class="sample-order-code-prefix">%s</span>%s' .
                             '<span class="sample-order-code-suffix">%s</span>',
                             get_ecommerce_setting('store_order_prefix') ? get_ecommerce_setting('store_order_prefix') . '-' : '',
                             config('plugins.ecommerce.order.default_order_start_number'),

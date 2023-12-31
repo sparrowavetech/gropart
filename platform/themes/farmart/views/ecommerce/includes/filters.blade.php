@@ -23,6 +23,8 @@
     value="{{ BaseHelper::stringify(request()->input('layout')) }}"
 >
 
+<input type="hidden" name="q" class="product-filter-item" value="{{ BaseHelper::clean(request()->input('q')) }}">
+
 <aside
     class="catalog-primary-sidebar catalog-sidebar"
     data-toggle-target="product-categories-primary-sidebar"
@@ -70,7 +72,7 @@
                                     @class([
                                         'd-none' =>
                                             $categoryId &&
-                                            $brand->categories->count() &&
+                                            $brand->categories->isNotEmpty() &&
                                             !$brand->categories->contains('id', $categoryId),
                                     ])
                                 >

@@ -35,7 +35,7 @@
                                 >{{ trans('plugins/ecommerce::review.unpublish') }}</x-core::button>
                             @else
                                 <x-core::button
-                                    color="warning"
+                                    color="primary"
                                     data-id="{{ $review->getKey() }}"
                                     data-bb-toggle="review-publish"
                                 >{{ trans('plugins/ecommerce::review.publish') }}</x-core::button>

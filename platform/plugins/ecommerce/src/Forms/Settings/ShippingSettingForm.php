@@ -19,6 +19,9 @@ class ShippingSettingForm extends SettingForm
             ->add('hide_other_shipping_options_if_it_has_free_shipping', 'onOffCheckbox', [
                 'label' => trans('plugins/ecommerce::setting.shipping.form.hide_other_shipping_options_if_it_has_free_shipping'),
                 'value' => get_ecommerce_setting('hide_other_shipping_options_if_it_has_free_shipping', false),
+                'wrapper' => [
+                    'class' => 'mb-0',
+                ],
             ]);
     }
 }

@@ -22,6 +22,7 @@ use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Auth\Access\Authorizable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\File;
@@ -80,12 +81,11 @@ class Customer extends BaseModel implements
 
     public function addresses(): HasMany
     {
-        $with = [];
-        if (is_plugin_active('location')) {
-            $with = ['locationCountry', 'locationState', 'locationCity'];
-        }
-
-        return $this->hasMany(Address::class, 'customer_id', 'id')->with($with);
+        return $this
+            ->hasMany(Address::class, 'customer_id', 'id')
+            ->when(is_plugin_active('location'), function (Builder $query) {
+                return $query->with(['locationCountry', 'locationState', 'locationCity']);
+            });
     }
 
     public function payments(): HasMany
@@ -105,7 +105,7 @@ class Customer extends BaseModel implements
 
     protected static function booted(): void
     {
-        self::deleting(function (Customer $customer) {
+        self::deleted(function (Customer $customer) {
             $customer->discounts()->detach();
             $customer->usedCoupons()->detach();
             $customer->orders()->update(['user_id' => 0]);
@@ -184,7 +184,7 @@ class Customer extends BaseModel implements
         return Attribute::get(function () {
             $folder = $this->id ? 'customers/' . $this->id : 'customers';
 
-            return apply_filters('ec;ommerce_customer_upload_folder', $folder, $this);
+            return apply_filters('ecommerce_customer_upload_folder', $folder, $this);
         });
     }
 }

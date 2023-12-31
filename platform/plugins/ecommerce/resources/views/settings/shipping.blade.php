@@ -4,6 +4,7 @@
     <x-core-setting::section
         :title="trans('plugins/ecommerce::setting.shipping.shipping_rule')"
         :description="trans('plugins/ecommerce::setting.shipping.shipping_rule_description')"
+        class="wrapper-content"
     >
         <x-slot:extra-description>
             <x-core::button
@@ -51,9 +52,20 @@
             @endforeach
         @endif
 
-        <div class="p-3">
-            {!! apply_filters(SHIPPING_METHODS_SETTINGS_PAGE, null) !!}
-        </div>
+        @php
+            $extraShippingOptions = apply_filters(SHIPPING_METHODS_SETTINGS_PAGE, null);
+        @endphp
+
+        @if ($extraShippingOptions)
+            <div class="p-3">
+                {!! apply_filters(SHIPPING_METHODS_SETTINGS_PAGE, null) !!}
+            </div>
+        @else
+            <x-core::empty-state
+                :title="trans('plugins/ecommerce::shipping.empty_shipping_options.title')"
+                :subtitle="trans('plugins/ecommerce::shipping.empty_shipping_options.subtitle')"
+            />
+        @endif
 
     </x-core-setting::section>
 

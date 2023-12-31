@@ -537,3 +537,11 @@ Product option
         @extend %loading-skeleton;
     }
 }
+
+.product-variations-wrapper {
+    .table-wrapper {
+        .card {
+            border: none;
+        }
+    }
+}

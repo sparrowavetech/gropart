@@ -27,7 +27,7 @@ class UnverifiedVendorTable extends TableAbstract
                     ->route('marketplace.unverified-vendors.view')
                     ->permission('marketplace.unverified-vendors.index')
                     ->label(__('View'))
-                    ->icon('fas fa-eye'),
+                    ->icon('ti ti-eye'),
             ]);
     }
 

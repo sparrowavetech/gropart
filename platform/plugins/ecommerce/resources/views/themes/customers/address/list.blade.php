@@ -4,50 +4,44 @@
     <h2 class="customer-page-title">
         {{ __('Address books') }}</h2>
     <div class="dashboard-address">
-        <a
-            class="add-address"
-            href="{{ route('customer.address.create') }}"
-        ><i class="fa fa-plus"></i>
-            <span>{{ __('Add a new address') }}</span></a>
-        <div class="row">
-
-            @foreach ($addresses as $address)
-                <div class="col-sm-12">
-                    <div
-                        class="panel panel-default dashboard-address-item @if ($address->is_default) is-address-default @endif">
-                        <div class="panel-body">
-                            <p class="name">{{ $address->name }} @if ($address->is_default)
-                                    <span class="address-default">{{ __('Default') }}</span>
+        @if ($addresses->isNotEmpty())
+            <div class="row row-cols-md-2 row-cols-1 gx-2 mb-3">
+                @foreach ($addresses as $address)
+                    <div class="col mt-3">
+                        <div class="card mb-3 p-3">
+                            <p>
+                                {{ $address->name }}
+                                @if ($address->is_default)
+                                    <x-core::badge color="info">{{ __('Default') }}</x-core::badge>
                                 @endif
                             </p>
-                            <p class="address"><i
-                                    class="fa fa-address-book"
-                                    aria-hidden="true"
-                                ></i> {{ $address->full_address }}
+                            <p><x-core::icon name="ti ti-book" class="me-1" /> {{ $address->full_address }}
                             </p>
-                            <p class="phone"><i
-                                    class="fa fa-phone"
-                                    aria-hidden="true"
-                                ></i> {{ $address->phone }}</p>
-                            <div class="action">
-                                <div class="edit-customer-address">
-                                    <a
-                                        class="text-info"
-                                        href="{{ route('customer.address.edit', $address->id) }}"
-                                    >{{ __('Edit') }}</a> |
-                                    <a
-                                        class="text-danger btn-trigger-delete-address"
-                                        data-url="{{ route('customer.address.destroy', $address->id) }}"
-                                        href="#"
-                                    >{{ __('Remove') }}</a>
-                                </div>
-                            </div>
+                            <p><x-core::icon name="ti ti-phone" class="me-1" />{{ $address->phone }}</p>
+                            <p class="mt-3 text-end mb-0">
+                                <a
+                                    class="text-info"
+                                    href="{{ route('customer.address.edit', $address->id) }}"
+                                >{{ __('Edit') }}</a> |
+                                <a
+                                    class="text-danger btn-trigger-delete-address"
+                                    data-url="{{ route('customer.address.destroy', $address->id) }}"
+                                    href="#"
+                                >{{ __('Remove') }}</a>
+                            </p>
                         </div>
                     </div>
-                </div>
-            @endforeach
+                @endforeach
+            </div>
+        @endif
 
-        </div>
+        <a
+            class="btn btn-primary"
+            href="{{ route('customer.address.create') }}"
+        >
+            <x-core::icon name="ti ti-plus" class="me-1" />
+            <span>{{ __('Add a new address') }}</span>
+        </a>
     </div>
 
     <div
@@ -72,12 +66,12 @@
                 </div>
                 <div class="modal-footer">
                     <button
-                        class="btn--custom btn--rounded btn--outline btn--sm"
+                        class="btn btn-secondary"
                         data-bs-dismiss="modal"
                         type="button"
                     >{{ __('Cancel') }}</button>
                     <button
-                        class="btn--custom btn--rounded btn--outline btn--sm btn-confirm-delete btn-outline-danger"
+                        class="btn btn-danger btn-confirm-delete"
                         type="submit"
                     >{{ __('Delete') }}</button>
                 </div>

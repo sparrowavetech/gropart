@@ -1,6 +1,6 @@
 <div class="row compare-page-content py-5 mt-3">
     <div class="col-12">
-        @if ($products->count())
+        @if ($products->isNotEmpty())
             <div class="table-responsive">
                 <table
                     class="table table-bordered table-striped"
@@ -122,7 +122,7 @@
                                                 ->sortBy('order');
                                         @endphp
 
-                                        @if ($attributes->count())
+                                        @if ($attributes->isNotEmpty())
                                             @if ($attributeSet->display_layout == 'dropdown')
                                                 <td>
                                                     {{ $attributes->pluck('title')->implode(', ') }}

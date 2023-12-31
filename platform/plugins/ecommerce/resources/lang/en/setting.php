@@ -86,6 +86,7 @@ return [
                 'max_file_number' => 'Review max file number',
             ],
             'only_allow_customers_purchased_to_review' => 'Only customers who have purchased the product can review the product',
+            'review_need_to_be_approved' => 'Review need to be approved before showing on the product page',
         ],
     ],
     'shopping' => [
@@ -118,6 +119,7 @@ return [
             'load_countries_states_cities_from_location_plugin' => 'Load countries, states, cities from plugin location',
             'load_countries_states_cities_from_location_plugin_placeholder' => 'After changing this option, you need to update all addresses again. You should set it once.',
             'minimum_order_amount' => 'Minimum order amount to place an order (:currency).',
+            'zip_code_enabled' => 'Enable zipcode',
             'billing_address_enabled' => 'Enable billing address',
             'display_tax_fields_at_checkout_page' => 'Display tax information fields at the checkout page',
             'use_city_field_as_field_text' => 'Use city field as a free text field',

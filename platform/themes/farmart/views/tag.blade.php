@@ -2,6 +2,6 @@
     Theme::layout('full-width');
 @endphp
 
-@if ($posts->count() > 0)
+@if ($posts->isNotEmpty())
     @include(Theme::getThemeNamespace() . '::views.loop', compact('posts'))
 @endif

@@ -6,7 +6,7 @@
             data-bs-original-title="{{ trans('core/base::tables.edit') }}"
             href="{{ route('marketplace.vendor.withdrawals.edit', $item->id) }}"
         >
-            <i class="fa fa-edit"></i>
+            <x-core::icon name="ti ti-edit" />
         </a>
     @else
         <a
@@ -14,8 +14,8 @@
             data-bs-toggle="tooltip"
             data-bs-original-title="{{ __('Show') }}"
             href="{{ route('marketplace.vendor.withdrawals.show', $item->id) }}"
-        >
-            <i class="fa fa-eye"></i>
+        >>
+            <x-core::icon name="ti ti-eye"></x-core::icon>
         </a>
     @endif
 </div>

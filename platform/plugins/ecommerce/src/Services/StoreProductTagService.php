@@ -11,6 +11,10 @@ class StoreProductTagService
 {
     public function execute(Request $request, Product $product): void
     {
+        if (! $request->has('tag')) {
+            return;
+        }
+
         $tags = $product->tags->pluck('name')->all();
 
         $tagsInput = collect(json_decode((string)$request->input('tag'), true))->pluck('value')->all();

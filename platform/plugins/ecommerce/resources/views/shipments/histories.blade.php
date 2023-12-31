@@ -1,4 +1,4 @@
-@if ($shipment->histories->count())
+@if ($shipment->histories->isNotEmpty())
     <x-core::card>
         <x-core::card.header>
             <x-core::card.title>
@@ -13,7 +13,7 @@
                         <div class="h4 m-0">
                             {!! BaseHelper::clean(OrderHelper::processHistoryVariables($history)) !!}
                         </div>
-                        <div class="text-secondary">{{ $history->created_at }}</div>
+                        <div class="text-secondary">{{ BaseHelper::formatDateTime($history->created_at) }}</div>
                     </li>
                 @endforeach
             </ul>

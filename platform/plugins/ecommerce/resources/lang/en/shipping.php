@@ -171,4 +171,8 @@ return [
         'select_type' => 'Select type',
         'cannot_create_rule_type_for_this_location' => 'Cannot create rule type ":type" on this location!',
     ],
+    'empty_shipping_options' => [
+        'title' => 'No shipping options',
+        'subtitle' => 'Click on add country from the left side to add new shipping options.',
+    ],
 ];

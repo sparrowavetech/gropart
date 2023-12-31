@@ -6,7 +6,7 @@
                 <th>{{ __('Product Name') }}</th>
                 <th>{{ __('Date') }}</th>
                 <th>{{ __('Star') }}</th>
-                <th width="200">{{ __('Comment') }}</th>
+                <th>{{ __('Comment') }}</th>
                 <th>{{ __('Actions') }}</th>
             </tr>
         </thead>
@@ -23,21 +23,27 @@
                             >
                         </th>
                         <th scope="row">
-                            <a href="{{ $item->product->url }}">{{ $item->product->name }}</a>
+                            <a href="{{ $item->product->url }}">{!! BaseHelper::clean($item->product->name) !!}</a>
+
+                            @if ($sku = $item->product->sku)
+                                <p><small>({{ $sku }})</small></p>
+                            @endif
+
+                            @if (is_plugin_active('marketplace') && $item->product->store->id)
+                                <p class="d-block mb-0 sold-by">
+                                    <small>{{ __('Sold by') }}: <a href="{{ $item->product->original_product->store->url }}" class="text-primary">{{ $item->product->store->name }}</a>
+                                    </small>
+                                </p>
+                            @endif
                         </th>
                         <td>{{ $item->created_at->translatedFormat('M d, Y h:m') }}</td>
                         <td>
                             <span>{{ $item->star }}</span>
                             <span class="ecommerce-icon text-primary">
-                                <svg>
-                                    <use
-                                        href="#ecommerce-icon-star-o"
-                                        xlink:href="#ecommerce-icon-star-o"
-                                    ></use>
-                                </svg>
+                                <x-core::icon name="ti ti-star" />
                             </span>
                         </td>
-                        <td>{{ Str::limit($item->comment, 120) }}</td>
+                        <td><span title="{{ $item->comment }}">{{ Str::limit($item->comment, 120) }}</span></td>
                         <td>
                             {!! Form::open([
                                 'url' => route('public.reviews.destroy', $item->id),

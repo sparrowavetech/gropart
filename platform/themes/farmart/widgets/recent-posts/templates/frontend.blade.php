@@ -2,7 +2,7 @@
     @php
         $posts = get_recent_posts($config['number_display']);
     @endphp
-    @if ($posts->count())
+    @if ($posts->isNotEmpty())
         <div class="widget-sidebar widget-blog-latest-post">
             <h2 class="widget-title">{{ $config['name'] ?: __('Recent Post') }}</h2>
             <div class="widget__inner">

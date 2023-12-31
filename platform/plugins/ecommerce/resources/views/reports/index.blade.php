@@ -14,8 +14,8 @@
         icon="ti ti-calendar"
     >
         {{ trans('plugins/ecommerce::reports.date_range_format_value', [
-            'from' => $startDate->format('Y-m-d'),
-            'to' => $endDate->format('Y-m-d'),
+            'from' => BaseHelper::formatDate($startDate),
+            'to' => BaseHelper::formatDate($endDate),
         ]) }}
     </x-core::button>
 @endpush

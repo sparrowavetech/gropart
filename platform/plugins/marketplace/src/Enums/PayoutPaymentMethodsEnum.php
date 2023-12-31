@@ -61,6 +61,10 @@ class PayoutPaymentMethodsEnum extends Enum
                         'title' => __('Account Number'),
                         'rules' => 'max:50',
                     ],
+                    'paypal_id' => [
+                        'title' => 'PayPal ID',
+                        'rules' => 'max:120',
+                    ],
                     'upi_id' => [
                         'title' => __('UPI ID'),
                         'rules' => 'max:120',
@@ -77,7 +81,7 @@ class PayoutPaymentMethodsEnum extends Enum
                 'label' => self::PAYPAL()->label(),
                 'fields' => [
                     'paypal_id' => [
-                        'title' => __('PayPal ID'),
+                        'title' => 'PayPal ID',
                         'rules' => 'max:120',
                     ],
                 ],

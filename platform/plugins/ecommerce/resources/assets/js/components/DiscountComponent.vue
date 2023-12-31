@@ -85,9 +85,7 @@
                                 <span class="form-check-label">
                                     {{ __('discount.apply_via_url') }}
                                 </span>
-                                <span class="form-check-description">
-                                    {{ __('discount.apply_via_url_description') }}
-                                </span>
+                                <span class="form-check-description" v-html="__('discount.apply_via_url_description')"></span>
                             </label>
                         </div>
                         <div class="mb-3 position-relative">
@@ -325,7 +323,7 @@
                                         class="form-control textbox-advancesearch"
                                         @click="loadListProductsForSearch()"
                                         @keyup="handleSearchProduct(1, $event.target.value)"
-                                        placeholder="Search product"
+                                        :placeholder="__('discount.search_product')"
                                     />
 
                                     <div

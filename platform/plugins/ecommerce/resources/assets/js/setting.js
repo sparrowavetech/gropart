@@ -18,7 +18,7 @@ $(() => {
     $(document).on('change', '.check-all', (event) => {
         let _self = $(event.currentTarget)
         let set = _self.attr('data-set')
-        let checked = _self.prop('checked')
+        let checked = _self.find('input').prop('checked')
         $(set).each((index, el) => {
             if (checked) {
                 $(el).prop('checked', true)

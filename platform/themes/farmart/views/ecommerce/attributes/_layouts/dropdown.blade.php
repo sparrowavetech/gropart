@@ -7,7 +7,7 @@
     <div class="attribute-values">
         <div class="dropdown-swatch">
             <label>
-                <select class="form-control product-filter-item attribute-swatch">
+                <select class="form-select product-filter-item attribute-swatch">
                     <option value="">{{ __('Select :name', ['name' => strtolower($set->title)]) }}</option>
                     @foreach ($attributes->where('attribute_set_id', $set->id) as $attribute)
                         <option

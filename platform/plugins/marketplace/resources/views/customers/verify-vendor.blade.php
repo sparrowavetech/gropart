@@ -88,7 +88,7 @@
                             <x-slot:title>
                                 {{ trans('plugins/marketplace::unverified-vendor.forms.registered_at') }}
                             </x-slot:title>
-                            {{ $vendor->created_at }}
+                            {{ BaseHelper::formatDateTime($vendor->created_at) }}
                         </x-core::datagrid.item>
                     </x-core::datagrid>
                 </x-core::card.body>

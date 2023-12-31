@@ -1,6 +1,6 @@
 'use strict'
 $(() => {
-    let jsOption = {
+    const jsOption = {
         currentType: 'N/A',
         init() {
             this.initFormFields($('.option-type').val())
@@ -17,7 +17,7 @@ $(() => {
             })
         },
         addNewRow() {
-            $('.add-new-row').click(function () {
+            $(document).on('click', '.add-new-row', function (e) {
                 let table = $(this).parent().find('table tbody')
                 let tr = table.find('tr').last().clone()
                 let labelName = 'options[' + table.find('tr').length + '][option_value]',
@@ -68,5 +68,6 @@ $(() => {
             }
         },
     }
+
     jsOption.init()
 })

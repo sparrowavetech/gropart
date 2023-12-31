@@ -21,6 +21,9 @@ class WebhookSettingForm extends SettingForm
                 'attr' => [
                     'placeholder' => trans('plugins/ecommerce::setting.webhook.form.order_placed_webhook_url_placeholder'),
                 ],
+                'wrapper' => [
+                    'class' => 'mb-0',
+                ],
             ]);
     }
 }

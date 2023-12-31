@@ -18,7 +18,7 @@ class GlobalOption extends BaseModel
 
     protected static function booted(): void
     {
-        self::deleting(function (GlobalOption $option) {
+        self::deleted(function (GlobalOption $option) {
             $option->values()->delete();
         });
     }

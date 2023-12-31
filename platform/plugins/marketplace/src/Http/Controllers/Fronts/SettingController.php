@@ -30,11 +30,11 @@ class SettingController extends BaseController
         $form = VendorStoreForm::createFromModel($store)
             ->renderForm();
 
-        $taxInformationForm = TaxInformationForm::createFromModel($store)
+        $taxInformationForm = TaxInformationForm::createFromModel($store->customer)
             ->setUrl(route('marketplace.vendor.settings.post.tax-info'))
             ->renderForm();
 
-        $payoutInformationForm = PayoutInformationForm::createFromModel($store)
+        $payoutInformationForm = PayoutInformationForm::createFromModel($store->customer)
             ->setUrl(route('marketplace.vendor.settings.post.payout'))
             ->renderForm();
 

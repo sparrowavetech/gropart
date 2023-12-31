@@ -18,12 +18,12 @@ class CheckoutSettingForm extends SettingForm
     {
         parent::setup();
 
-        Assets::addScriptsDirectly('vendor/core/core/setting/js/setting.js');
+        Assets::addScriptsDirectly('vendor/core/core/setting/js/setting.js')
+            ->addScriptsDirectly('vendor/core/plugins/ecommerce/js/setting.js');
 
         $this
             ->setSectionTitle(trans('plugins/ecommerce::setting.checkout.name'))
             ->setSectionDescription(trans('plugins/ecommerce::setting.checkout.description'))
-            ->addCustomField('multiCheckList', MultiCheckListField::class)
             ->setValidatorClass(CheckoutSettingRequest::class)
             ->add('enable_guest_checkout', 'onOffCheckbox', [
                 'label' => trans('plugins/ecommerce::setting.checkout.form.enable_guest_checkout'),
@@ -38,17 +38,21 @@ class CheckoutSettingForm extends SettingForm
                     'group-flat' => true,
                 ],
             ])
-            ->add('mandatory_form_fields_at_checkout[]', 'multiCheckList', [
+            ->add('mandatory_form_fields_at_checkout[]', MultiCheckListField::class, [
                 'label' => trans('plugins/ecommerce::setting.checkout.form.mandatory_form_fields_at_checkout'),
                 'choices' => EcommerceHelper::getMandatoryFieldsAtCheckout(),
                 'value' => old('mandatory_form_fields_at_checkout', EcommerceHelper::getEnabledMandatoryFieldsAtCheckout()),
                 'inline' => true,
             ])
-            ->add('hide_form_fields_at_checkout[]', 'multiCheckList', [
+            ->add('hide_form_fields_at_checkout[]', MultiCheckListField::class, [
                 'label' => trans('plugins/ecommerce::setting.checkout.form.hide_form_fields_at_checkout'),
                 'choices' => EcommerceHelper::getMandatoryFieldsAtCheckout(),
                 'value' => old('hide_form_fields_at_checkout', EcommerceHelper::getHiddenFieldsAtCheckout()),
                 'inline' => true,
+            ])
+            ->add('zip_code_enabled', 'onOffCheckbox', [
+                'label' => trans('plugins/ecommerce::setting.checkout.form.zip_code_enabled'),
+                'value' => EcommerceHelper::isZipCodeEnabled(),
             ])
             ->add('billing_address_enabled', 'onOffCheckbox', [
                 'label' => trans('plugins/ecommerce::setting.checkout.form.billing_address_enabled'),
@@ -104,24 +108,18 @@ class CheckoutSettingForm extends SettingForm
             ])
             ->add('available_countries_all', 'onOffCheckbox', [
                 'label' => trans('plugins/ecommerce::setting.checkout.form.all'),
-                'attr' => [
+                'label_attr' => [
                     'class' => 'check-all',
                     'data-set' => '.available-countries',
                 ],
             ])
-            ->add('open_wrapper_available_countries', 'html', [
-                'html' => '<div class="overflow-auto" style="max-height: 25rem"/>',
-            ])
-            ->add('available_countries[]', 'multiCheckList', [
+            ->add('available_countries[]', MultiCheckListField::class, [
                 'label' => false,
                 'choices' => Helper::countries(),
                 'value' => array_keys(EcommerceHelper::getAvailableCountries()),
                 'attr' => [
                     'class' => 'available-countries',
                 ],
-            ])
-            ->add('close_wrapper_available_countries', 'html', [
-                'html' => '</div>',
             ])
             ->add('close_location_settings', 'html', [
                 'html' => '</div>',

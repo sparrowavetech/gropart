@@ -123,7 +123,6 @@ $(() => {
         addFromGlobalOption(optionId) {
             let self = this
             axios.get(window.productOptions.routes.ajax_option_info + '?id=' + optionId).then(function (res) {
-
                 const data = res.data.data
 
                 const option = {
@@ -159,7 +158,7 @@ $(() => {
                 .replace(/__namePlaceHolder__/g, coreBaseLang.name_placeholder)
                 .replace(/__optionTypeLabel__/g, productOptionLang.option_type)
                 .replace(/__optionTypeOption__/g, options)
-                .replace(/__checked__/g, checked)
+                .replace(/__checked__=""/g, checked)
                 .replace(/__requiredLabel__/g, productOptionLang.required)
                 .replace(/__optionValueSortable__/g, values)
         },
@@ -207,37 +206,46 @@ $(() => {
                         .replace(/__selectedPercent__/g, selectedPercent)
                         .replace(/__percentLang__/g, productOptionLang.percent)
                 } else {
-                    if (values.length > 0) {
-                        const template = $('#template-option-type-array').html()
-                        let valuesResult = ''
-                        const tmp = template
-                            .replace(/__priceLabel__/g, price)
-                            .replace(/__priceTypeLabel__/g, priceType)
-                            .replace(/__index__/g, index)
-                            .replace(/__label__/g, label)
-                        $.each(values, function (key, value) {
-                            const valueTemplate = $('#template-option-type-value').html()
-                            const order = typeof value.order === 'undefined' ? value.order : key
-                            const selectedFixed = value.affect_type === 0 ? 'selected' : ''
-                            const selectedPercent = value.affect_type === 1 ? 'selected' : ''
-                            valuesResult += valueTemplate
-                                .replace(/__key__/g, key)
-                                .replace(/__id__/g, value.id)
-                                .replace(/__order__/g, order)
-                                .replace(/__index__/g, index)
-                                .replace(/__labelPlaceholder__/g, productOptionLang.label_placeholder)
-                                .replace(/__affectPriceLabel__/g, productOptionLang.affect_price_label)
-                                .replace(/__selectedFixed__/g, selectedFixed)
-                                .replace(/__fixedLang__/g, productOptionLang.fixed)
-                                .replace(/__selectedPercent__/g, selectedPercent)
-                                .replace(/__option_value_input__/g, value.option_value ? value.option_value : '')
-                                .replace(/__affectPrice__/g, value.affect_price)
-                                .replace(/__percentLang__/g, productOptionLang.percent)
-                        })
-                        html += tmp.replace(/__optionValue__/g, valuesResult)
+                    if (!values.length) {
+                        values = [
+                            {
+                                affect_price: 0,
+                                affect_type: 0,
+                                option_value: '',
+                                id: 0,
+                                order: 0,
+                            },
+                        ]
                     }
-                    html += `<button type="button" class="btn add-new-row" id="add-new-row">${productOptionLang.add_new_row}</button>`
+                    const template = $('#template-option-type-array').html()
+                    let valuesResult = ''
+                    const tmp = template
+                        .replace(/__priceLabel__/g, price)
+                        .replace(/__priceTypeLabel__/g, priceType)
+                        .replace(/__index__/g, index)
+                        .replace(/__label__/g, label)
+                    $.each(values, function (key, value) {
+                        const valueTemplate = $('#template-option-type-value').html()
+                        const order = typeof value.order === 'undefined' ? value.order : key
+                        const selectedFixed = value.affect_type === 0 ? 'selected' : ''
+                        const selectedPercent = value.affect_type === 1 ? 'selected' : ''
+                        valuesResult += valueTemplate
+                            .replace(/__key__/g, key)
+                            .replace(/__id__/g, value.id)
+                            .replace(/__order__/g, order)
+                            .replace(/__index__/g, index)
+                            .replace(/__labelPlaceholder__/g, productOptionLang.label_placeholder)
+                            .replace(/__affectPriceLabel__/g, productOptionLang.affect_price_label)
+                            .replace(/__selectedFixed__/g, selectedFixed)
+                            .replace(/__fixedLang__/g, productOptionLang.fixed)
+                            .replace(/__selectedPercent__/g, selectedPercent)
+                            .replace(/__option_value_input__/g, value.option_value ? value.option_value : '')
+                            .replace(/__affectPrice__/g, value.affect_price)
+                            .replace(/__percentLang__/g, productOptionLang.percent)
+                    })
+                    html += tmp.replace(/__optionValue__/g, valuesResult)
                 }
+                html += `<button type="button" class="btn add-new-row mt-3" id="add-new-row">${productOptionLang.add_new_row}</button>`
             }
 
             return html

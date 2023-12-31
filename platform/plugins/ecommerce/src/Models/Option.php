@@ -20,7 +20,7 @@ class Option extends BaseModel
 
     protected static function booted(): void
     {
-        self::deleting(function (Option $option) {
+        self::deleted(function (Option $option) {
             $option->values()->delete();
         });
     }

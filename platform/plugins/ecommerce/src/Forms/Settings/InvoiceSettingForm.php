@@ -17,7 +17,6 @@ class InvoiceSettingForm extends SettingForm
             ->setSectionTitle(trans('plugins/ecommerce::setting.invoice.company_settings'))
             ->setSectionDescription(trans('plugins/ecommerce::setting.invoice.company_settings_description'))
             ->setValidatorClass(InvoiceSettingRequest::class)
-            ->addCustomField('googleFonts', GoogleFontsField::class)
             ->add('company_name_for_invoicing', 'text', [
                 'label' => trans('plugins/ecommerce::setting.invoice.form.company_name'),
                 'value' => get_ecommerce_setting('company_name_for_invoicing') ?: get_ecommerce_setting('store_name'),
@@ -73,7 +72,7 @@ class InvoiceSettingForm extends SettingForm
                 get_ecommerce_setting('using_custom_font_for_invoice', false) ? 'block' : 'none'
             ),
         ])
-        ->add('invoice_font_family', 'googleFonts', [
+        ->add('invoice_font_family', GoogleFontsField::class, [
             'label' => trans('plugins/ecommerce::setting.invoice.form.invoice_font_family'),
             'selected' => get_ecommerce_setting('invoice_font_family'),
         ])

@@ -21,7 +21,7 @@
         ),
     ) !!}</p>
 
-    @if (!$customer->orders()->count())
+    @if ($customer->orders()->count())
         <div
             class="alert alert-info d-flex align-items-center justify-content-between border-0"
             role="alert"

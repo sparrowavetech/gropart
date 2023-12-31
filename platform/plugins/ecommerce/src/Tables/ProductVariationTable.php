@@ -273,9 +273,13 @@ class ProductVariationTable extends TableAbstract
         return array_merge($columns, [
             Column::make('price')
                 ->title(trans('plugins/ecommerce::products.price'))
+                ->searchable(false)
+                ->orderable(false)
                 ->alignStart(),
             Column::make('quantity')
                 ->title(trans('plugins/ecommerce::products.quantity'))
+                ->searchable(false)
+                ->orderable(false)
                 ->alignStart(),
             Column::make('is_default')
                 ->title(trans('plugins/ecommerce::products.form.is_default'))

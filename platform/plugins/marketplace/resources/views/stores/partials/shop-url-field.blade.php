@@ -5,6 +5,8 @@
             type="hidden"
             value="{{ $store->id }}"
         >
+        <input type="hidden" name="is_slug_editable" value="1">
+
         <x-core::form.text-input
             wrapper-class="shop-url-wrapper"
             :label="__('Shop URL')"

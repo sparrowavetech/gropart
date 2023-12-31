@@ -14,12 +14,12 @@
 
                         @if ($order->shipment->id)
                             <x-core::badge color="info" class="d-flex align-items-center gap-1">
-                                <i class="icon ti ti-shopping-cart-check"></i>
+                                <x-core::icon name="ti ti-shopping-cart-check"></x-core::icon>
                                 {{ trans('plugins/ecommerce::order.completed') }}
                             </x-core::badge>
                         @else
                             <x-core::badge color="warning" class="d-flex align-items-center gap-1">
-                                <i class="icon ti ti-shopping-cart"></i>
+                                <x-core::icon name="ti ti-shopping-cart"></x-core::icon>
                                 {{ trans('plugins/ecommerce::order.uncompleted') }}
                             </x-core::badge>
                         @endif
@@ -312,7 +312,7 @@
                                             {{ OrderHelper::processHistoryVariables($history) }}
                                         @endif
                                     </div>
-                                    <div class="text-secondary">{{ $history->created_at }}</div>
+                                    <div class="text-secondary">{{ BaseHelper::formatDateTime($history->created_at) }}</div>
 
                                     @if ($history->action == 'refund' && Arr::get($history->extras, 'amount', 0) > 0)
                                         <div
@@ -386,7 +386,7 @@
                                                             {{ trans('plugins/ecommerce::order.refund_date') }}
                                                         </x-core::table.body.cell>
                                                         <x-core::table.body.cell>
-                                                            {{ $history->created_at }}
+                                                            {{ BaseHelper::formatDateTime($history->created_at) }}
                                                         </x-core::table.body.cell>
                                                     </x-core::table.body.row>
                                                 </x-core::table.body>
@@ -471,7 +471,7 @@
                                                         {{ trans('plugins/ecommerce::order.payment_date') }}
                                                     </x-core::table.body.cell>
                                                     <x-core::table.body.cell>
-                                                        {{ $history->created_at }}
+                                                        {{ BaseHelper::formatDateTime($history->created_at) }}
                                                     </x-core::table.body.cell>
                                                 </x-core::table.body.row>
                                                 </tbody>

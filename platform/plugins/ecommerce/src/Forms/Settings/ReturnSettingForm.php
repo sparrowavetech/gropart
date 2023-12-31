@@ -19,6 +19,9 @@ class ReturnSettingForm extends SettingForm
             ->add('is_enabled_order_return', 'onOffCheckbox', [
                 'label' => trans('plugins/ecommerce::setting.return.form.is_enabled_order_return'),
                 'value' => EcommerceHelper::isOrderReturnEnabled(),
+                'wrapper' => [
+                    'class' => 'mb-0',
+                ],
                 'attr' => [
                     'data-bb-toggle' => 'collapse',
                     'data-bb-target' => '.order-returns-settings',
@@ -26,7 +29,7 @@ class ReturnSettingForm extends SettingForm
             ])
             ->add('open_fieldset_order_returns_settings', 'html', [
                 'html' => sprintf(
-                    '<fieldset class="form-fieldset order-returns-settings" style="display: %s;" data-bb-value="1">',
+                    '<fieldset class="form-fieldset mt-3 order-returns-settings" style="display: %s;" data-bb-value="1">',
                     EcommerceHelper::isOrderReturnEnabled() ? 'block' : 'none'
                 ),
             ])

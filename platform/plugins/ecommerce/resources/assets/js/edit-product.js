@@ -12,6 +12,7 @@ class EcommerceProduct {
         this.handleAddVariations()
         this.handleDeleteVariations()
         this.setProductVariationDefault()
+        this.handleCalculateDiscountPercents()
 
         window.productAttributeSets = []
         window.loadedProductAttributeSets = false
@@ -768,6 +769,31 @@ class EcommerceProduct {
             }
         }
     }
+
+    handleCalculateDiscountPercents() {
+        $(document).on('keyup', 'input[name="price"], input[name="sale_price"]', function() {
+            const $salePriceInput = $('input[name="sale_price"]')
+
+            let price = $('input[name="price"]').val()
+            let salePrice = $salePriceInput.val()
+            let discountPercent = 0
+
+            if (price && price !== '0' && salePrice >= 0) {
+                price = parseInt(price.replace(/,/g, ''))
+                salePrice = parseInt(salePrice.replace(/,/g, ''))
+                if (salePrice < price) {
+                    discountPercent = 100 - Math.round((salePrice * 100) / price)
+                }
+            }
+
+            const transText = $salePriceInput.data('sale-percent-text')
+
+            $salePriceInput
+                .closest('.input-group')
+                .siblings('small.form-hint')
+                .html(transText.replace(':percent', `<strong>${discountPercent}%</strong>`))
+        })
+    }
 }
 
 $(() => {
@@ -1162,6 +1188,8 @@ $(() => {
                         Botble.showError(res.message)
                     } else {
                         $wrapBody.html(res.data)
+
+                        Botble.initResources()
                     }
                 },
                 error: (data) => {

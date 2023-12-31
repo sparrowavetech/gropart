@@ -27,7 +27,7 @@ class Brand extends BaseModel
 
     protected static function booted(): void
     {
-        self::deleting(function (Brand $brand) {
+        self::deleted(function (Brand $brand) {
             $brand->categories()->detach();
         });
     }

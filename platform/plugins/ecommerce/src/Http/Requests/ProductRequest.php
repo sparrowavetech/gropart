@@ -13,6 +13,29 @@ use Illuminate\Validation\Rule;
 
 class ProductRequest extends Request
 {
+    protected function prepareForValidation(): void
+    {
+        $options = $this->input('options');
+
+        if (! empty($options)) {
+            foreach ($options as $key => $option) {
+                if (! empty($option['values'])) {
+                    foreach ($option['values'] as $valueKey => $value) {
+                        if (isset($value['order']) && $value['order'] === 'undefined') {
+                            $options[$key]['values'][$valueKey]['order'] = 0;
+                        }
+
+                        if (isset($value['id']) && $value['id'] === 'undefined') {
+                            $options[$key]['values'][$valueKey]['id'] = 0;
+                        }
+                    }
+                }
+            }
+        }
+
+        $this->merge(['options' => $options]);
+    }
+
     public function rules(): array
     {
         $rules = [
@@ -40,6 +63,7 @@ class ProductRequest extends Request
             'cost_per_item' => 'numeric|nullable|min:0|max:100000000000',
             'barcode' => [
                 'nullable',
+                'string',
                 'max:50',
                 Rule::unique('ec_products')->ignore($this->route('product')),
             ],

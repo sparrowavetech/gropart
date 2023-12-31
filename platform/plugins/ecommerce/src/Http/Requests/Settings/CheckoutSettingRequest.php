@@ -19,6 +19,7 @@ class CheckoutSettingRequest extends Request
             'mandatory_form_fields_at_checkout.*' => ['nullable', 'string', Rule::in(array_keys(EcommerceHelper::getMandatoryFieldsAtCheckout()))],
             'hide_form_fields_at_checkout' => ['sometimes', 'array'],
             'hide_form_fields_at_checkout.*' => ['nullable', 'string', Rule::in(array_keys(EcommerceHelper::getMandatoryFieldsAtCheckout()))],
+            'zip_code_enabled' => $onOffRule,
             'billing_address_enabled' => $onOffRule,
             'display_tax_fields_at_checkout_page' => $onOffRule,
             'load_countries_states_cities_from_location_plugin' => $onOffRule,

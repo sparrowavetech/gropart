@@ -16,7 +16,6 @@ class TrackingSettingForm extends SettingForm
         $this
             ->setSectionTitle(trans('plugins/ecommerce::setting.tracking.manage_tracking'))
             ->setSectionDescription(trans('plugins/ecommerce::setting.tracking.manage_tracking_description'))
-            ->addCustomField('codeEditor', CodeEditorField::class)
             ->setValidatorClass(TrackingSettingRequest::class)
             ->add('facebook_pixel_enabled', 'onOffCheckbox', [
                 'label' => trans('plugins/ecommerce::setting.tracking.form.enable_facebook_pixel'),
@@ -45,6 +44,9 @@ class TrackingSettingForm extends SettingForm
             ->add('google_tag_manager_enabled', 'onOffCheckbox', [
                 'label' => trans('plugins/ecommerce::setting.tracking.form.enable_google_tag_manager'),
                 'value' => EcommerceHelper::isGoogleTagManagerEnabled(),
+                'wrapper' => [
+                    'class' => 'mb-0',
+                ],
                 'attr' => [
                     'data-setting-container' => '.google-tag-manager-settings-container',
                     'data-bb-toggle' => 'collapse',
@@ -56,11 +58,11 @@ class TrackingSettingForm extends SettingForm
             ])
             ->add('open_fieldset_google_tag_manager_settings', 'html', [
                 'html' => sprintf(
-                    '<fieldset class="form-fieldset google-tag-manager-settings" style="display: %s;" data-bb-value="1">',
+                    '<fieldset class="form-fieldset mt-3 google-tag-manager-settings" style="display: %s;" data-bb-value="1">',
                     old('google_tag_manager_enabled', EcommerceHelper::isGoogleTagManagerEnabled()) ? 'block' : 'none'
                 ),
             ])
-            ->add('google_tag_manager_code', 'codeEditor', [
+            ->add('google_tag_manager_code', CodeEditorField::class, [
                 'label' => trans('plugins/ecommerce::setting.tracking.form.google_tag_manager_code'),
                 'value' => old('google_tag_manager_code', get_ecommerce_setting('google_tag_manager_code')),
                 'attr' => [

@@ -21,7 +21,7 @@
         <h2
             class="modal-title fs-5 ecommerce-product-name"
             id="product-review-modal-label"
-        >{{ $product ? $product->name : '' }}</h2>
+        >{!! BaseHelper::clean($product ? $product->name : '') !!}</h2>
         <div class="col-12 mb-3 d-flex mt-2">
             <div class="ecommerce-form-rating-stars ms-1">
                 @for ($i = 5; $i >= 1; $i--)
@@ -71,7 +71,7 @@
         <x-core::custom-template id="ecommerce-review-image-template">
             <span class="ecommerce-image-viewer__item" data-id="__id__">
                 <img src="{{ RvMedia::getDefaultImage() }}" alt="Preview" class="img-responsive d-block">
-                <span class="image-viewer__icon-remove">
+                <span class="ecommerce-image-viewer__icon-remove image-viewer__icon-remove">
                     <span class="ecommerce-icon">
                         <svg>
                             <use href="#ecommerce-icon-cross" xlink:href="#ecommerce-icon-cross"></use>

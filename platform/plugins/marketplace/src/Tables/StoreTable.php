@@ -32,7 +32,7 @@ class StoreTable extends TableAbstract
                     ->route('marketplace.store.view')
                     ->permission('marketplace.store.view')
                     ->label(trans('plugins/marketplace::store.view'))
-                    ->icon('fas fa-eye'),
+                    ->icon('ti ti-eye'),
                 EditAction::make()->route('marketplace.store.edit'),
                 DeleteAction::make()->route('marketplace.store.destroy'),
             ]);

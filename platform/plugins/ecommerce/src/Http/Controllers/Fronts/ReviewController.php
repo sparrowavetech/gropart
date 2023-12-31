@@ -2,6 +2,7 @@
 
 namespace Botble\Ecommerce\Http\Controllers\Fronts;
 
+use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Ecommerce\Enums\OrderStatusEnum;
 use Botble\Ecommerce\Facades\EcommerceHelper;
@@ -23,10 +24,9 @@ class ReviewController extends BaseController
             abort(404);
         }
 
-        $customerId = auth('customer')->id();
         $productId = $request->input('product_id');
-
         $check = $this->check($productId);
+
         if (Arr::get($check, 'error')) {
             return $this
                 ->httpResponse()
@@ -50,13 +50,12 @@ class ReviewController extends BaseController
             }
         }
 
-        $data = $request->validated();
-        $data = array_merge($data, [
-            'customer_id' => $customerId,
-            'images' => $results ? collect($results)->pluck('data.url')->values()->toArray() : null,
+        Review::query()->create([
+            ...$request->validated(),
+            'customer_id' => auth('customer')->id(),
+            'images' => $results ? collect($results)->pluck('data.url')->values()->all() : null,
+            'status' => get_ecommerce_setting('review_need_to_be_approved', false) ? BaseStatusEnum::PENDING : BaseStatusEnum::PUBLISHED,
         ]);
-
-        Review::query()->create($data);
 
         return $this
             ->httpResponse()

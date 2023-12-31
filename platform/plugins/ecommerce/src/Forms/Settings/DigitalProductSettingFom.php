@@ -19,6 +19,9 @@ class DigitalProductSettingFom extends SettingForm
             ->add('is_enabled_support_digital_products', 'onOffCheckbox', [
                 'label' => trans('plugins/ecommerce::setting.digital_product.form.enable_support_digital_product'),
                 'value' => EcommerceHelper::isEnabledSupportDigitalProducts(),
+                'wrapper' => [
+                    'class' => 'mb-0',
+                ],
                 'attr' => [
                     'data-bb-toggle' => 'collapse',
                     'data-bb-target' => '.digital-products-settings',
@@ -26,7 +29,7 @@ class DigitalProductSettingFom extends SettingForm
             ])
             ->add('open_allow_guest_checkout_for_digital_products', 'html', [
                 'html' => sprintf(
-                    '<fieldset class="form-fieldset digital-products-settings" style="display: %s;" data-bb-value="1">',
+                    '<fieldset class="form-fieldset mt-3 digital-products-settings" style="display: %s;" data-bb-value="1">',
                     EcommerceHelper::isEnabledSupportDigitalProducts() ? 'block' : 'none'
                 ),
             ])
