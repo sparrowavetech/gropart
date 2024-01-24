@@ -4,6 +4,7 @@ namespace Botble\Base\Supports;
 
 use Botble\Base\Events\SendMailEvent;
 use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\Html;
 use Botble\Media\Facades\RvMedia;
 use Carbon\Carbon;
 use Illuminate\Contracts\Support\Arrayable;
@@ -264,8 +265,9 @@ class EmailHandler
             ),
             'site_title' => setting('admin_title') ?: config('app.name'),
             'site_url' => url(''),
-            'site_logo' => setting('admin_logo') ? RvMedia::getImageUrl(setting('admin_logo')) : url(
-                config('core.base.general.logo')
+            'site_logo' => apply_filters(
+                'core_email_template_site_logo',
+                ($adminLogo = setting('admin_logo')) ? RvMedia::getImageUrl($adminLogo) : url(config('core.base.general.logo'))
             ),
             'date_time' => BaseHelper::formatDateTime($now),
             'date_year' => $now->year,
@@ -280,21 +282,51 @@ class EmailHandler
 
         $data = [];
 
-        $twigCompiler = apply_filters('cms_twig_compiler', $this->twigCompiler);
-
         foreach ($variables as $variable) {
             $data[$variable] = $this->getVariableValue($variable, $module);
         }
 
+        $twigCompiler = apply_filters('cms_twig_compiler', $this->twigCompiler);
+
         foreach ($data as $key => $value) {
-            $data[$key] = $value && is_string($value) ? $twigCompiler->compile($value, $data) : $value;
+            try {
+                $data[$key] = $value && is_string($value) ? $twigCompiler->compile($value, $data) : $value;
+            } catch (Throwable) {
+                $data[$key] = $value;
+            }
         }
 
         if (empty($data) || empty($content)) {
             return $content;
         }
 
-        return $twigCompiler->compile($content, $data);
+        try {
+            return $twigCompiler->compile($content, $data);
+        } catch (Throwable $throwable) {
+            BaseHelper::logError($throwable);
+
+            foreach ($variables as $variable) {
+                $keys = [
+                    '{{ ' . $variable . ' }}',
+                    '{{' . $variable . '}}',
+                    '{{ ' . $variable . '}}',
+                    '{{' . $variable . ' }}',
+                    '<?php echo e(' . $variable . '); ?>',
+                ];
+
+                foreach ($keys as $key) {
+                    $value = $this->getVariableValue($variable, $module);
+
+                    if (is_string($value)) {
+                        $content = str_replace($key, $value, $content);
+                    }
+                }
+            }
+
+            $content .= Html::tag('p', 'Complied error: ' . $throwable->getMessage(), ['style' => 'color: red; font-weight: bold']);
+
+            return $content;
+        }
     }
 
     public function getVariableValue(string $variable, string $module, string $default = ''): string|array|null

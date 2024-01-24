@@ -3,9 +3,10 @@
 namespace Botble\Ecommerce\Forms\Settings;
 
 use Botble\Base\Facades\Assets;
+use Botble\Base\Forms\FieldOptions\LabelFieldOption;
+use Botble\Base\Forms\Fields\LabelField;
 use Botble\Ecommerce\Http\Requests\Settings\StandardAndFormatSettingRequest;
 use Botble\Setting\Forms\SettingForm;
-use Illuminate\Support\Facades\Blade;
 
 class StandardAndFormatSettingForm extends SettingForm
 {
@@ -20,14 +21,14 @@ class StandardAndFormatSettingForm extends SettingForm
             ->setSectionDescription(trans('plugins/ecommerce::setting.standard_and_format.description'))
             ->setValidatorClass(StandardAndFormatSettingRequest::class)
             ->columns()
-            ->add('section_title', 'html', [
-                'html' => Blade::render(
-                    "<x-core::form.label>
-                        {{ trans('plugins/ecommerce::setting.standard_and_format.form.change_order_format') }}
-                     </x-core::form.label>"
-                ),
-                'colspan' => 2,
-            ])
+            ->add(
+                'section_title',
+                LabelField::class,
+                LabelFieldOption::make()
+                    ->label(trans('plugins/ecommerce::setting.standard_and_format.form.change_order_format'))
+                    ->colspan(2)
+                    ->toArray()
+            )
             ->add('section_subtitle', 'html', [
                 'html' => sprintf(
                     '<p class="text-muted small">%s</p>',

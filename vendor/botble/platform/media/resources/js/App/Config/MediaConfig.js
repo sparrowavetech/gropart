@@ -168,7 +168,7 @@ let defaultConfig = {
                 action: 'properties',
                 order: 4,
                 class: 'rv-action-properties',
-            }
+            },
         ],
     },
 }

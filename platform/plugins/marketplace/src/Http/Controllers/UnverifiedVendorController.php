@@ -5,6 +5,7 @@ namespace Botble\Marketplace\Http\Controllers;
 use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\EmailHandler;
+use Botble\Base\Supports\Breadcrumb;
 use Botble\Ecommerce\Models\Customer;
 use Botble\Marketplace\Facades\MarketplaceHelper;
 use Botble\Marketplace\Tables\UnverifiedVendorTable;
@@ -13,12 +14,9 @@ use Illuminate\Http\Request;
 
 class UnverifiedVendorController extends BaseController
 {
-    public function __construct()
+    protected function breadcrumb(): Breadcrumb
     {
-        parent::__construct();
-
-        $this
-            ->breadcrumb()
+        return parent::breadcrumb()
             ->add(trans('plugins/marketplace::unverified-vendor.name'), route('marketplace.unverified-vendors.index'));
     }
 
@@ -39,7 +37,7 @@ class UnverifiedVendorController extends BaseController
             ->findOrFail($id);
 
         if ($vendor->vendor_verified_at) {
-            return route('customers.edit', $vendor->id);
+            return redirect()->route('customers.edit', $vendor->getKey());
         }
 
         $this->pageTitle(trans('plugins/marketplace::unverified-vendor.verify', ['name' => $vendor->name]));

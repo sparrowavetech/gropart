@@ -40,6 +40,7 @@ Route::group(['namespace' => 'Botble\Translation\Http\Controllers'], function ()
                 Route::post('edit', [
                     'as' => 'translations.group.edit',
                     'uses' => 'TranslationController@update',
+                    'middleware' => 'preventDemo',
                 ]);
 
                 Route::post('import', [

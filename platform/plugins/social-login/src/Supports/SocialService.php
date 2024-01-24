@@ -3,6 +3,7 @@
 namespace Botble\SocialLogin\Supports;
 
 use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 
 class SocialService
 {
@@ -52,11 +53,11 @@ class SocialService
     {
         $setting = $this->setting($key);
 
-        if (! $setting) {
-            return '';
+        if (! $setting || mb_strlen($setting) <= 6) {
+            return '******';
         }
 
-        return substr($setting, 0, 3) . '***' . substr($setting, -3, 3);
+        return Str::mask($setting, '*', 3, -3);
     }
 
     public function setting(string $key, bool $default = false): string
@@ -82,13 +83,13 @@ class SocialService
 
     public function getProviders(): array
     {
-        return [
+        return apply_filters('social_login_providers', [
             'facebook' => $this->getDataProviderDefault(),
             'google' => $this->getDataProviderDefault(),
             'github' => $this->getDataProviderDefault(),
             'linkedin' => $this->getDataProviderDefault(),
             'linkedin-openid' => $this->getDataProviderDefault(),
-        ];
+        ]);
     }
 
     public function getDataProviderDefault(): array

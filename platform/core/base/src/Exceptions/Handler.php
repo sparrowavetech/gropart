@@ -219,7 +219,7 @@ class Handler extends ExceptionHandler
                 ->toResponse($request);
         }
 
-        if ($exception->guards()) {
+        if (array_filter($exception->guards())) {
             $defaultException = redirect()
                 ->guest($exception->redirectTo() ?? (Route::has('login') ? route('login') : url('login')));
 

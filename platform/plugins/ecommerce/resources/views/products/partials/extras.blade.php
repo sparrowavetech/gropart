@@ -56,17 +56,20 @@
                 ])
             </x-slot:items>
         </x-plugins-ecommerce::box-search-advanced>
+
+        <p class="small text-muted mt-2 mb-2">
+            <strong>{{ trans('plugins/ecommerce::products.cross_sell_help.price') }}</strong>:
+            {{ trans('plugins/ecommerce::products.cross_sell_help.price_description') }}
+        </p>
+        <p class="small text-muted mb-0">
+            <strong>{{ trans('plugins/ecommerce::products.cross_sell_help.type') }}</strong>:
+            {{ trans('plugins/ecommerce::products.cross_sell_help.type_description') }}
+        </p>
     </x-core::card.body>
 </x-core::card>
 
 <x-core::custom-template id="selected_product_list_template">
     <div class="list-group-item">
-        <input
-            type="hidden"
-            name="cross_sale_products[__id__][is_variant]"
-            value="0"
-        />
-
         <div class="row align-items-center">
             <div class="col-auto">
                 <span

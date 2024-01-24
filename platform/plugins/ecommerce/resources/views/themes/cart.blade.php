@@ -196,11 +196,8 @@
                                                         {{ __('Cross-selling products') }}</h3>
                                                     @if (count($crossSellProducts) > 0)
                                                         <div class="container product-carousel mt-3">
-                                                            <div
-                                                                class="product-item-4 owl-carousel owl-theme nf-carousel-theme">
-                                                                @foreach ($crossSellProducts as $crossSellProduct)
-                                                                    @include('plugins/ecommerce::themes.includes.default-product', ['product' => $crossSellProduct])
-                                                                @endforeach
+                                                            <div class="product-item-4 owl-carousel owl-theme nf-carousel-theme">
+                                                                @include('plugins/ecommerce::themes.includes.product-items', ['products' => $crossSellProducts])
                                                             </div>
                                                         </div>
                                                     @endif

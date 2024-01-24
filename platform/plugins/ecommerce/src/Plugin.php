@@ -46,6 +46,7 @@ class Plugin extends PluginOperationAbstract
         Schema::dropIfExists('ec_product_attribute_sets');
         Schema::dropIfExists('ec_taxes');
         Schema::dropIfExists('ec_reviews');
+        Schema::dropIfExists('ec_review_replies');
         Schema::dropIfExists('ec_shipping');
         Schema::dropIfExists('ec_orders');
         Schema::dropIfExists('ec_order_product');

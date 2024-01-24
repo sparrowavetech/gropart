@@ -5,7 +5,6 @@ namespace Botble\Media\Services;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Media\Facades\RvMedia;
 use Exception;
-use Intervention\Image\ImageManager;
 
 class ThumbnailService
 {
@@ -27,7 +26,7 @@ class ThumbnailService
 
     protected string $fileName;
 
-    public function __construct(protected UploadsManager $uploadManager, protected ImageManager $imageManager)
+    public function __construct(protected UploadsManager $uploadManager)
     {
         $this->thumbRate = 0.75;
         $this->xCoordinate = null;
@@ -106,10 +105,6 @@ class ThumbnailService
 
     public function save(string $type = 'fit'): bool|string
     {
-        $this->imageManager = $this->imageManager->configure([
-            'driver' => RvMedia::getImageProcessingLibrary(),
-        ]);
-
         $fileName = pathinfo($this->imagePath, PATHINFO_BASENAME);
 
         if ($this->fileName) {
@@ -118,7 +113,7 @@ class ThumbnailService
 
         $destinationPath = sprintf('%s/%s', trim($this->destinationPath, '/'), $fileName);
 
-        $thumbImage = $this->imageManager->make($this->imagePath);
+        $thumbImage = RvMedia::imageManager()->make($this->imagePath);
 
         if ($this->thumbWidth && ! $this->thumbHeight) {
             $type = 'width';

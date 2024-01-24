@@ -4,9 +4,13 @@ namespace Botble\Setting\Forms;
 
 use Botble\Base\Facades\AdminAppearance;
 use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Forms\FieldOptions\SelectFieldOption;
 use Botble\Base\Forms\Fields\GoogleFontsField;
 use Botble\Base\Forms\Fields\MediaImageField;
+use Botble\Base\Forms\Fields\SelectField;
 use Botble\Base\Forms\Fields\TextField;
+use Botble\Base\Forms\FormAbstract;
+use Botble\Base\Supports\Language;
 use Botble\Setting\Http\Requests\AdminAppearanceRequest;
 
 class AdminAppearanceSettingForm extends SettingForm
@@ -14,6 +18,11 @@ class AdminAppearanceSettingForm extends SettingForm
     public function setup(): void
     {
         parent::setup();
+
+        $locales = collect(Language::getAvailableLocales())
+            ->pluck('name', 'locale')
+            ->map(fn ($item, $key) => $item . ' - ' . $key)
+            ->all();
 
         $this
             ->setSectionTitle(trans('core/setting::setting.admin_appearance.title'))
@@ -69,9 +78,21 @@ class AdminAppearanceSettingForm extends SettingForm
                 'label' => trans('core/setting::setting.admin_appearance.form.link_hover_color'),
                 'value' => setting('admin_link_hover_color', '#1a569d'),
             ])
-            ->add('admin_locale_direction', 'customRadio', [
+            ->when(count($locales) > 1, function (FormAbstract $form) use ($locales) {
+                $form->add(
+                    AdminAppearance::getSettingKey('locale'),
+                    SelectField::class,
+                    SelectFieldOption::make()
+                        ->label(trans('core/setting::setting.general.locale'))
+                        ->choices($locales)
+                        ->selected(AdminAppearance::getSetting('locale', config('core.base.general.locale', config('app.locale'))))
+                        ->searchable()
+                        ->toArray()
+                );
+            })
+            ->add(AdminAppearance::getSettingKey('locale_direction'), 'customRadio', [
                 'label' => trans('core/setting::setting.admin_appearance.form.admin_locale_direction'),
-                'value' => setting('admin_locale_direction', 'ltr'),
+                'value' => AdminAppearance::getSetting('locale_direction', setting('admin_locale_direction', 'ltr')),
                 'values' => [
                     'ltr' => trans('core/setting::setting.locale_direction_ltr'),
                     'rtl' => trans('core/setting::setting.locale_direction_rtl'),

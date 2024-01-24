@@ -6,7 +6,7 @@
             <div class="container container-tight py-4">
                 <div class="empty">
                     <div class="empty-img">
-                        <x-core::icon name="ti ti-basket-discount" style="--bb-icon-size: 10rem" />
+                        <x-core::icon name="ti ti-basket-discount" />
                     </div>
                     <p class="empty-title">{{ trans('plugins/ecommerce::discount.intro.title') }}</p>
                     <p class="empty-subtitle text-secondary">

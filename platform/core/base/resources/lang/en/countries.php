@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'af' => 'Ap ga nistan',
+    'af' => 'Afghanistan',
     'ax' => 'Åland Islands',
     'al' => 'Albania',
     'dz' => 'Algeria',

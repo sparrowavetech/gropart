@@ -9,6 +9,7 @@ use Botble\Base\Forms\Fields\TextField;
 use Botble\Base\Supports\ServiceProvider;
 use Botble\Dashboard\Events\RenderingDashboardWidgets;
 use Botble\Dashboard\Supports\DashboardWidgetInstance;
+use Botble\Media\Facades\RvMedia;
 use Botble\Page\Models\Page;
 use Botble\Page\Tables\PageTable;
 use Botble\Shortcode\Compilers\Shortcode;
@@ -58,11 +59,18 @@ class HookServiceProvider extends ServiceProvider
             return $defaultView;
         }, 10, 2);
 
+        add_filter('core_email_template_site_logo', function (string $defaultLogo): string {
+            if ($logo = theme_option('logo')) {
+                $defaultLogo = RvMedia::getImageUrl($logo);
+            }
+
+            return $defaultLogo;
+        });
+
         $this->app['events']->listen(RenderingThemeOptionSettings::class, function () {
             theme_option()
                 ->setSection([
                     'title' => trans('packages/theme::theme.theme_option_general'),
-                    'desc' => trans('packages/theme::theme.theme_option_general_description'),
                     'priority' => 0,
                     'id' => 'opt-text-subsection-general',
                     'subsection' => true,
@@ -150,7 +158,6 @@ class HookServiceProvider extends ServiceProvider
                 ])
                 ->setSection([
                     'title' => trans('packages/theme::theme.theme_option_logo'),
-                    'desc' => trans('packages/theme::theme.theme_option_logo'),
                     'priority' => 0,
                     'id' => 'opt-text-subsection-logo',
                     'subsection' => true,

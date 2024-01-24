@@ -3,12 +3,13 @@
 namespace Botble\DevTool\Commands\Make;
 
 use Botble\DevTool\Commands\Abstracts\BaseMakeCommand;
+use Illuminate\Contracts\Console\PromptsForMissingInput;
 use Illuminate\Support\Str;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
 
 #[AsCommand('cms:make:form', 'Make a form')]
-class FormMakeCommand extends BaseMakeCommand
+class FormMakeCommand extends BaseMakeCommand implements PromptsForMissingInput
 {
     public function handle(): int
     {

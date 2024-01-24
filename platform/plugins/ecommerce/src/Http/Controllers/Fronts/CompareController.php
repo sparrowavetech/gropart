@@ -19,10 +19,6 @@ class CompareController extends BaseController
 
     public function index()
     {
-        if (! EcommerceHelper::isCompareEnabled()) {
-            abort(404);
-        }
-
         SeoHelper::setTitle(__('Compare'));
 
         Theme::breadcrumb()
@@ -53,10 +49,6 @@ class CompareController extends BaseController
 
     public function store(int|string $productId)
     {
-        if (! EcommerceHelper::isCompareEnabled()) {
-            abort(404);
-        }
-
         $product = Product::query()->findOrFail($productId);
 
         if ($product->is_variation) {
@@ -75,7 +67,8 @@ class CompareController extends BaseController
                 ->setError();
         }
 
-        Cart::instance('compare')->add($productId, $product->name, 1, $product->front_sale_price)
+        Cart::instance('compare')
+            ->add($productId, $product->name, 1, $product->front_sale_price)
             ->associate(Product::class);
 
         return $this
@@ -86,10 +79,6 @@ class CompareController extends BaseController
 
     public function destroy(int|string $productId)
     {
-        if (! EcommerceHelper::isCompareEnabled()) {
-            abort(404);
-        }
-
         $product = Product::query()->findOrFail($productId);
 
         Cart::instance('compare')->search(function ($cartItem, $rowId) use ($productId) {

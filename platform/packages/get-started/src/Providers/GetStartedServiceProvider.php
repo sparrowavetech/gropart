@@ -26,8 +26,7 @@ class GetStartedServiceProvider extends ServiceProvider
                 if ($this->shouldShowGetStartedPopup()) {
                     Assets::addScriptsDirectly('vendor/core/packages/get-started/js/get-started.js')
                         ->addStylesDirectly('vendor/core/packages/get-started/css/get-started.css')
-                        ->addScripts(['coloris', 'jquery-ui'])
-                        ->addStyles(['coloris']);
+                        ->addScripts('jquery-ui');
 
                     add_filter(BASE_FILTER_FOOTER_LAYOUT_TEMPLATE, function ($html) {
                         return $html . view('packages/get-started::index')->render();

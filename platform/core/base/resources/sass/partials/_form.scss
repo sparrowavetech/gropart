@@ -71,4 +71,18 @@ form {
             }
         }
     }
+
+    .form-check + .form-hint {
+        margin-top: 0.5rem;
+    }
+}
+
+.repeater-group {
+    .form-fieldset {
+        .repeater-item-group:first-child {
+            small.charcounter {
+                right: 2rem;
+            }
+        }
+    }
 }

@@ -59,6 +59,10 @@ export default defineComponent({
         checkActivated() {
             this.isActivated = window.marketplace.activated.includes(this.packageName)
         },
+        install() {
+            bootstrap.Modal.getInstance(this.$refs.modal).hide()
+            this.$emit('install', $event, this.plugin.id)
+        },
     },
 
     computed: {
@@ -232,7 +236,7 @@ export default defineComponent({
                     <button
                         type="button"
                         class="btn btn-primary"
-                        @click="$emit('install', $event, this.plugin.id)"
+                        @click="install"
                         v-if="!isInstalled"
                     >
                         <svg

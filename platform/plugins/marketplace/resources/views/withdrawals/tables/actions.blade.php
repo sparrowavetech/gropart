@@ -14,7 +14,7 @@
             data-bs-toggle="tooltip"
             data-bs-original-title="{{ __('Show') }}"
             href="{{ route('marketplace.vendor.withdrawals.show', $item->id) }}"
-        >>
+        >
             <x-core::icon name="ti ti-eye"></x-core::icon>
         </a>
     @endif

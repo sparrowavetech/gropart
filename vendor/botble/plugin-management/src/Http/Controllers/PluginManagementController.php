@@ -32,44 +32,42 @@ class PluginManagementController extends BaseController
     {
         $this->pageTitle(trans('packages/plugin-management::plugin.installed_plugins'));
 
-        Assets::addScriptsDirectly('vendor/core/packages/plugin-management/js/plugin.js')
-            ->addStylesDirectly('vendor/core/packages/plugin-management/css/plugin.css');
+        Assets::addScriptsDirectly('vendor/core/packages/plugin-management/js/plugin.js');
 
         RenderingPluginListingPage::dispatch();
 
-        $list = [];
+        $plugins = [];
 
         if (File::exists(plugin_path('.DS_Store'))) {
             File::delete(plugin_path('.DS_Store'));
         }
 
-        $plugins = BaseHelper::scanFolder(plugin_path());
+        $paths = BaseHelper::scanFolder(plugin_path());
 
-        if (! empty($plugins)) {
+        if (! empty($paths)) {
             $installed = get_active_plugins();
-            foreach ($plugins as $plugin) {
-                if (File::exists(plugin_path($plugin . '/.DS_Store'))) {
-                    File::delete(plugin_path($plugin . '/.DS_Store'));
-                }
+            foreach ($paths as $path) {
+                $pluginPath = plugin_path($path);
 
-                $pluginPath = plugin_path($plugin);
+                if (File::exists($pluginPath . '/.DS_Store')) {
+                    File::delete($pluginPath . '/.DS_Store');
+                }
 
                 if (! File::isDirectory($pluginPath) || ! File::exists($pluginPath . '/plugin.json')) {
                     continue;
                 }
 
                 $content = BaseHelper::getFileData($pluginPath . '/plugin.json');
+
                 if (! empty($content)) {
-                    if (! in_array($plugin, $installed)) {
-                        $content['status'] = 0;
-                    } else {
-                        $content['status'] = 1;
-                    }
+                    $content = [
+                        ...$content,
+                        'status' => in_array($path, $installed),
+                        'path' => $path,
+                        'image' => null,
+                    ];
 
-                    $content['path'] = $plugin;
-                    $content['image'] = null;
-
-                    $screenshot = 'vendor/core/plugins/' . $plugin . '/screenshot.png';
+                    $screenshot = 'vendor/core/plugins/' . $path . '/screenshot.png';
 
                     if (File::exists(public_path($screenshot))) {
                         $content['image'] = asset($screenshot);
@@ -77,12 +75,12 @@ class PluginManagementController extends BaseController
                         $content['image'] = 'data:image/png;base64,' . base64_encode(File::get($pluginPath . '/screenshot.png'));
                     }
 
-                    $list[] = (object) $content;
+                    $plugins[] = (object) $content;
                 }
             }
         }
 
-        return view('packages/plugin-management::index', compact('list'));
+        return view('packages/plugin-management::index', compact('plugins'));
     }
 
     public function update(Request $request): BaseHttpResponse
@@ -128,13 +126,6 @@ class PluginManagementController extends BaseController
     {
         $plugin = strtolower($plugin);
 
-        if (! $this->pluginService->validatePlugin($plugin)) {
-            return $this
-                ->httpResponse()
-                ->setError()
-                ->setMessage(trans('packages/plugin-management::plugin.invalid_plugin'));
-        }
-
         try {
             $result = $this->pluginService->remove($plugin);
 
@@ -146,7 +137,8 @@ class PluginManagementController extends BaseController
             }
 
             return $this
-                ->httpResponse()->setMessage(trans('packages/plugin-management::plugin.remove_plugin_success'));
+                ->httpResponse()
+                ->setMessage(trans('packages/plugin-management::plugin.remove_plugin_success'));
         } catch (Exception $exception) {
             return $this
                 ->httpResponse()

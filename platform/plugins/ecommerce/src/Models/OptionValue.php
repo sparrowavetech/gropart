@@ -39,9 +39,8 @@ class OptionValue extends BaseModel
             }
 
             $product = $option->product;
-            $price = $this->affect_type == 0 ? $this->affect_price : (floatval($this->affect_price) * $product->original_price) / 100;
 
-            return $price;
+            return $this->affect_type == 0 ? $this->affect_price : (floatval($this->affect_price) * $product->original_price) / 100;
         });
     }
 }

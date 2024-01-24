@@ -2,10 +2,10 @@
 
 namespace Botble\ACL\Forms\Auth;
 
+use Botble\Base\Forms\FieldOptions\HtmlFieldOption;
 use Botble\Base\Forms\Fields\HtmlField;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Base\Models\BaseModel;
-use Illuminate\Support\Facades\Blade;
 
 class AuthForm extends FormAbstract
 {
@@ -18,12 +18,16 @@ class AuthForm extends FormAbstract
 
     public function heading(string $heading): self
     {
-        $this->add('heading', HtmlField::class, [
-            'html' => sprintf(
-                '<h2 class="h3 text-center mb-3">%s</h2>',
-                $heading
-            ),
-        ]);
+        $this->add(
+            'heading',
+            HtmlField::class,
+            HtmlFieldOption::make()
+                ->content(sprintf(
+                    '<h2 class="h3 text-center mb-3">%s</h2>',
+                    $heading
+                ))
+                ->toArray()
+        );
 
         return $this;
     }
@@ -31,19 +35,21 @@ class AuthForm extends FormAbstract
     public function submitButton(string $label, string|null $icon = null): self
     {
         $this
-            ->add('open_wrap_button', HtmlField::class, [
-                'html' => '<div class="form-footer">',
-            ])
-            ->add('button_submit', HtmlField::class, [
-                'html' => Blade::render(sprintf(
-                    '<x-core::button type="submit" color="primary" class="w-full" icon="%s">%s</x-core::button>',
-                    $icon ?? '',
-                    $label
-                )),
-            ])
-            ->add('close_wrap_button', HtmlField::class, [
-                'html' => '</div>',
-            ]);
+            ->add(
+                'open_wrap_button',
+                HtmlField::class,
+                HtmlFieldOption::make()->content('<div class="form-footer">')->toArray()
+            )
+            ->add(
+                'button_submit',
+                HtmlField::class,
+                HtmlFieldOption::make()->view('core/acl::auth.includes.submit', compact('label', 'icon'))->toArray()
+            )
+            ->add(
+                'close_wrap_button',
+                HtmlField::class,
+                HtmlFieldOption::make()->content('</div>')->toArray()
+            );
 
         return $this;
     }

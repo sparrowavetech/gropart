@@ -8,6 +8,7 @@
                 data-bs-toggle="collapse"
                 data-parent="#accordion"
                 href="#{{ $id }}"
+                aria-expanded="{{ Str::slug($name) === 'pages' ? 'true' : false }}"
             >
                 <x-core::card.title>
                     {{ $name }}

@@ -1,20 +1,12 @@
 @php
     $attributes['class'] = Arr::get($attributes, 'class', '') . str_replace(Arr::get($attributes, 'class'), '', ' form-control');
-    $attributes['data-date-format'] = $attributes['data-date-format'] ?? BaseHelper::getDateFormat();
-    $attributes['placeholder'] = $attributes['data-date-format'];
+    $attributes['placeholder'] = BaseHelper::getDateFormat();
     $attributes['data-input'] = '';
     $attributes['readonly'] = $attributes['readonly'] ?? 'readonly';
 
     if (App::getLocale() != 'en') {
         Assets::addScriptsDirectly('https://npmcdn.com/flatpickr@4.6.13/dist/l10n/index.js');
     }
-
-    if ($value) {
-        try {
-            $value = Carbon\Carbon::parse($value)->format($attributes['data-date-format']);
-        } catch (Throwable) {}
-    }
-
 @endphp
 
 <div class="input-group datepicker">

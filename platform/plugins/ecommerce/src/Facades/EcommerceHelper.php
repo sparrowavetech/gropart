@@ -84,7 +84,11 @@ use Illuminate\Support\Facades\Facade;
  * @method static \Illuminate\Support\Collection brandsForFilter(array $categoryIds = [])
  * @method static \Illuminate\Support\Collection tagsForFilter(array $categoryIds = [])
  * @method static array dataForFilter(\Botble\Ecommerce\Models\ProductCategory|null $category)
+ * @method static array dataPriceRangesForFilter()
+ * @method static bool isPriceRangesChecked(float $fromPrice, float $toPrice)
+ * @method static array dataPriceRanges(int $stepPrice = 1000, int $stepCount = 10)
  * @method static bool useCityFieldAsTextField()
+ * @method static bool isLoginUsingPhone()
  *
  * @see \Botble\Ecommerce\Supports\EcommerceHelper
  */

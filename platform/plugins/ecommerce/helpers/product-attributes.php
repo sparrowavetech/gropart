@@ -1,5 +1,9 @@
 <?php
 
+use Botble\Ecommerce\Models\Product;
+use Botble\Ecommerce\Models\ProductAttributeSet;
+use Botble\Ecommerce\Supports\RenderProductAttributesViewOnlySupport;
+use Illuminate\Contracts\View\View;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
 
@@ -29,5 +33,20 @@ if (! function_exists('get_product_attribute_groups_for_product_list')) {
         }
 
         return $groups;
+    }
+}
+
+if (! function_exists('render_product_attributes_view_only')) {
+    function render_product_attributes_view_only(
+        Product $product,
+        ProductAttributeSet $attributeSet,
+        array $options = [],
+    ): View {
+        return app()
+            ->makeWith(RenderProductAttributesViewOnlySupport::class, [
+                'product' => $product,
+                'productAttributeSet' => $attributeSet,
+            ])
+            ->render($options);
     }
 }

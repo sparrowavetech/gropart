@@ -36,7 +36,7 @@ class BuilderHelper
     public const MODEL_RETRIEVAL_METHODS = ['first', 'find', 'findMany', 'findOrFail', 'firstOrFail', 'sole'];
 
     /** @var string[] */
-    public const MODEL_CREATION_METHODS = ['make', 'create', 'forceCreate', 'findOrNew', 'firstOrNew', 'updateOrCreate', 'firstOrCreate'];
+    public const MODEL_CREATION_METHODS = ['make', 'create', 'forceCreate', 'findOrNew', 'firstOrNew', 'updateOrCreate', 'firstOrCreate', 'createOrFirst'];
 
     /**
      * The methods that should be returned from query builder.
@@ -190,6 +190,11 @@ class BuilderHelper
 
         if ($queryBuilderReflection->hasNativeMethod($methodName)) {
             return $queryBuilderReflection->getNativeMethod($methodName);
+        }
+
+        // Check for query builder macros
+        if ($this->macroMethodsClassReflectionExtension->hasMethod($queryBuilderReflection, $methodName)) {
+            return $this->macroMethodsClassReflectionExtension->getMethod($queryBuilderReflection, $methodName);
         }
 
         return $this->dynamicWhere($methodName, new GenericObjectType($eloquentBuilder->getName(), [new ObjectType($model->getName())]));

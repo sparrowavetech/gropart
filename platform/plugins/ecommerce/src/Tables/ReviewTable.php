@@ -139,21 +139,6 @@ class ReviewTable extends TableAbstract
         ];
     }
 
-    public function getOperationsHeading(): array
-    {
-        return [
-            'operations' => [
-                'title' => trans('core/base::tables.operations'),
-                'width' => '50px',
-                'class' => 'text-end',
-                'orderable' => false,
-                'searchable' => false,
-                'exportable' => false,
-                'printable' => false,
-            ],
-        ];
-    }
-
     public function bulkActions(): array
     {
         return [
@@ -175,21 +160,6 @@ class ReviewTable extends TableAbstract
                 'type' => 'datePicker',
             ],
         ];
-    }
-
-    public function htmlDrawCallbackFunction(): string|null
-    {
-        return parent::htmlDrawCallbackFunction() . 'if (jQuery().fancybox) {
-            $(".dataTables_wrapper .fancybox").fancybox({
-                openEffect: "none",
-                closeEffect: "none",
-                overlayShow: true,
-                overlayOpacity: 0.7,
-                helpers: {
-                    media: {}
-                },
-            });
-        }';
     }
 
     public function renderTable($data = [], $mergeData = []): View|Factory|Response

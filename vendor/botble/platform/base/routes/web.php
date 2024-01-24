@@ -1,7 +1,9 @@
 <?php
 
 use Botble\Base\Facades\AdminHelper;
+use Botble\Base\Http\Controllers\CoreIconController;
 use Botble\Base\Http\Controllers\SearchController;
+use Botble\Base\Http\Middleware\RequiresJsonRequestMiddleware;
 use Illuminate\Support\Facades\Route;
 
 Route::group(['namespace' => 'Botble\Base\Http\Controllers'], function () {
@@ -139,5 +141,9 @@ Route::group(['namespace' => 'Botble\Base\Http\Controllers'], function () {
         ]);
 
         Route::get('search', [SearchController::class, '__invoke'])->name('core.global-search');
+
+        Route::get('core-icons', [CoreIconController::class, 'index'])
+            ->name('core-icons')
+            ->middleware(RequiresJsonRequestMiddleware::class);
     });
 });

@@ -16,6 +16,7 @@ use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Facades\FlashSale as FlashSaleFacade;
 use Botble\Ecommerce\Services\Products\ProductPriceService;
 use Botble\Ecommerce\Services\Products\UpdateDefaultProductService;
+use Botble\Faq\Models\Faq;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
@@ -86,9 +87,9 @@ class Product extends BaseModel
         'end_date' => 'datetime',
     ];
 
-    protected float $originalPrice;
+    protected float $originalPrice = 0;
 
-    protected float $finalPrice;
+    protected float $finalPrice = 0;
 
     protected static function booted(): void
     {
@@ -97,7 +98,7 @@ class Product extends BaseModel
             $product->created_by_type = User::class;
         });
 
-        static::deleting(function (Product $product) {
+        static::deleted(function (Product $product) {
             $product->variations()->each(fn (ProductVariation $item) => $item->delete());
             $product->variationInfo()->delete();
             $product->categories()->detach();
@@ -169,12 +170,14 @@ class Product extends BaseModel
 
     public function crossSales(): BelongsToMany
     {
-        return $this->belongsToMany(
-            Product::class,
-            'ec_product_cross_sale_relations',
-            'from_product_id',
-            'to_product_id'
-        )->withPivot(['price', 'price_type', 'apply_to_all_variations', 'is_variant']);
+        return $this
+            ->belongsToMany(
+                Product::class,
+                'ec_product_cross_sale_relations',
+                'from_product_id',
+                'to_product_id'
+            )
+            ->withPivot(['price', 'price_type', 'apply_to_all_variations', 'is_variant']);
     }
 
     public function upSales(): BelongsToMany
@@ -391,6 +394,10 @@ class Product extends BaseModel
 
     public function getFlashSalePrice(): float|false|null
     {
+        if (! FlashSaleFacade::isEnabled()) {
+            return 0;
+        }
+
         $flashSale = FlashSaleFacade::getFacadeRoot()->flashSaleForProduct($this);
 
         if ($flashSale && $flashSale->pivot->quantity > $flashSale->pivot->sold) {
@@ -403,11 +410,7 @@ class Product extends BaseModel
     public function getDiscountPrice(): float|int|null
     {
         $promotion = DiscountFacade::getFacadeRoot()
-            ->promotionForProduct(
-                [$this->id],
-                $this->original_product->productCollections->pluck('id')->all(),
-                $this->original_product->categories->pluck('id')->all()
-            );
+            ->promotionForProduct([$this->id]);
 
         if (! $promotion) {
             return $this->price;
@@ -599,6 +602,36 @@ class Product extends BaseModel
             $this->loadMissing('metadata');
 
             $faqs = (array)$this->getMetaData('faq_schema_config', true);
+
+            if (is_plugin_active('faq')) {
+                $selectedExistingFaqs = $this->getMetaData('faq_ids', true);
+
+                if ($selectedExistingFaqs && is_array($selectedExistingFaqs)) {
+                    $selectedExistingFaqs = array_filter($selectedExistingFaqs);
+
+                    if ($selectedExistingFaqs) {
+                        $selectedFaqs = Faq::query()
+                            ->wherePublished()
+                            ->whereIn('id', $selectedExistingFaqs)
+                            ->pluck('answer', 'question')
+                            ->all();
+
+                        foreach ($selectedFaqs as $question => $answer) {
+                            $faqs[] = [
+                                [
+                                    'key' => 'question',
+                                    'value' => $question,
+                                ],
+                                [
+                                    'key' => 'answer',
+                                    'value' => $answer,
+                                ],
+                            ];
+                        }
+                    }
+                }
+            }
+
             $faqs = array_filter($faqs);
 
             if (empty($faqs)) {
@@ -612,7 +645,7 @@ class Product extends BaseModel
             }
 
             return $faqs;
-        });
+        })->shouldCache();
     }
 
     protected function reviewImages(): Attribute
@@ -650,6 +683,10 @@ class Product extends BaseModel
     protected function salePercent(): Attribute
     {
         return Attribute::get(function (): int {
+            if ($this->front_sale_price == 0 && $this->price !== 0) {
+                return 100;
+            }
+
             if (! $this->front_sale_price || ! $this->price) {
                 return 0;
             }
@@ -704,38 +741,40 @@ class Product extends BaseModel
             return null;
         }
 
-        while (true) {
-            $sku = str_replace(
-                ['[%s]', '[%S]'],
-                strtoupper(Str::random(5)),
-                $setting
-            );
-
-            $sku = str_replace(
-                ['[%d]', '[%D]'],
-                mt_rand(10000, 99999),
-                $sku
-            );
-
-            foreach (explode('%s', $sku) as $ignored) {
-                $sku = preg_replace('/%s/i', strtoupper(Str::random(1)), $sku, 1);
-            }
-
-            foreach (explode('%d', $sku) as $ignored) {
-                $sku = preg_replace('/%d/i', mt_rand(0, 9), $sku, 1);
-            }
-
-            if (Product::query()->where('sku', $sku)->exists()) {
-                continue;
-            }
-
-            return $sku;
+        if (! Str::contains($setting, ['[%s]', '[%d]', '[%S]', '[%D]'])) {
+            return $setting . mt_rand(10000, 99999) + time();
         }
+
+        $sku = str_replace(
+            ['[%s]', '[%S]'],
+            strtoupper(Str::random(5)),
+            $setting
+        );
+
+        $sku = str_replace(
+            ['[%d]', '[%D]'],
+            mt_rand(10000, 99999),
+            $sku
+        );
+
+        foreach (explode('%s', $sku) as $ignored) {
+            $sku = preg_replace('/%s/i', strtoupper(Str::random(1)), $sku, 1);
+        }
+
+        foreach (explode('%d', $sku) as $ignored) {
+            $sku = preg_replace('/%d/i', mt_rand(0, 9), $sku, 1);
+        }
+
+        if (Product::query()->where('sku', $sku)->exists()) {
+            return $sku . mt_rand(10000, 99999) + time();
+        }
+
+        return $sku;
     }
 
     public function getOriginalPrice(): float
     {
-        return $this->originalPrice ??= (float) $this->price;
+        return $this->originalPrice;
     }
 
     public function setOriginalPrice(float|null $price): static
@@ -747,7 +786,7 @@ class Product extends BaseModel
 
     public function getFinalPrice(): float
     {
-        return $this->finalPrice ??= (float) $this->price;
+        return $this->finalPrice;
     }
 
     public function setFinalPrice(float|null $price): static

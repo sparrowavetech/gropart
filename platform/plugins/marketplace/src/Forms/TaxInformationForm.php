@@ -4,12 +4,14 @@ namespace Botble\Marketplace\Forms;
 
 use Botble\Base\Forms\FormAbstract;
 use Botble\Base\Models\BaseModel;
+use Botble\Marketplace\Forms\Concerns\HasSubmitButton;
 use Botble\Marketplace\Http\Requests\TaxInformationSettingRequest;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Blade;
 
 class TaxInformationForm extends FormAbstract
 {
+    use HasSubmitButton;
+
     public function setup(): void
     {
         $customer = $this->getModel();
@@ -39,11 +41,6 @@ class TaxInformationForm extends FormAbstract
                     ['placeholder' => __('Address'),
                 ],
             ])
-            ->add('submit', 'html', [
-                'html' => Blade::render(sprintf(
-                    '<x-core::button type="submit" color="primary">%s</x-core::button>',
-                    __('Save settings')
-                )),
-            ]);
+            ->addSubmitButton(__('Save settings'));
     }
 }

@@ -2,7 +2,7 @@
 
 @php
     $labelClasses = Arr::toCssClasses([
-        'form-check form-check-inline mb-3',
+        'form-check form-check-inline',
         'form-check-single' => $single,
     ]);
 @endphp

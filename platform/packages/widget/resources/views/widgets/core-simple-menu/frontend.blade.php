@@ -4,7 +4,7 @@
     @foreach ($items as $item)
         <li>
             <a
-                href="{{ url($item->url) }}"
+                href="{{ url((string) $item->url) }}"
                 title="{{ $item->label }}"
                 {!! $item->attributes ? BaseHelper::clean($item->attributes) : null !!}
             >{{ $item->label }}</a>

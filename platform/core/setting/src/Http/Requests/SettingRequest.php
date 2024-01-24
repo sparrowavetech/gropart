@@ -14,7 +14,7 @@ class SettingRequest extends Request
             'admin_logo' => ['nullable', 'string', 'max:255'],
             'admin_favicon' => ['nullable', 'string', 'max:255'],
             'login_screen_backgrounds' => ['nullable', 'array'],
-            'login_screen_backgrounds.*' => ['sometimes', 'string', 'max:255'],
+            'login_screen_backgrounds.*' => ['nullable', 'string', 'max:255'],
             'admin_title' => ['nullable', 'string', 'max:255'],
             'rich_editor' => ['required', Rule::in(array_keys(BaseHelper::availableRichEditors()))],
         ]);

@@ -33,6 +33,8 @@ class EmailRule implements ValidationRule
     {
         if (! is_string($value) && ! (is_object($value) && method_exists($value, '__toString'))) {
             $fail(trans('validation.string'));
+
+            return;
         }
 
         $exceptionEmails = $this->getSettingsFromJson('email_rules_exception_emails');

@@ -9,6 +9,7 @@ use Botble\Base\Facades\MetaBox;
 use Botble\Base\Supports\ServiceProvider;
 use Botble\Page\Models\Page;
 use Botble\SeoHelper\Facades\SeoHelper;
+use Botble\SeoHelper\Forms\SeoForm;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Routing\Events\RouteMatched;
 
@@ -37,7 +38,7 @@ class HookServiceProvider extends ServiceProvider
                 'seo_wrap',
                 trans('packages/seo-helper::seo-helper.meta_box_header'),
                 [$this, 'seoMetaBox'],
-                get_class($data),
+                $data::class,
                 'advanced',
                 'low'
             );
@@ -49,6 +50,7 @@ class HookServiceProvider extends ServiceProvider
         $meta = [
             'seo_title' => null,
             'seo_description' => null,
+            'index' => 'index',
         ];
 
         $args = func_get_args();
@@ -62,17 +64,20 @@ class HookServiceProvider extends ServiceProvider
 
         $object = $args[0];
 
-        return view('packages/seo-helper::meta-box', compact('meta', 'object'));
+        $form = SeoForm::createFromArray($meta)->renderForm(showStart: false, showEnd: false);
+
+        return view('packages/seo-helper::meta-box', compact('meta', 'object', 'form'));
     }
 
     public function setSeoMeta(string $screen, BaseModel|Model|null $object): bool
     {
+        SeoHelper::meta()->addMeta('robots', 'index, follow');
+
         if ($object instanceof Page && BaseHelper::isHomepage($object->getKey())) {
             return false;
         }
 
         $object->loadMissing('metadata');
-
         $meta = $object->getMetaData('seo_meta', true);
 
         if (! empty($meta)) {
@@ -82,6 +87,10 @@ class HookServiceProvider extends ServiceProvider
 
             if (! empty($meta['seo_description'])) {
                 SeoHelper::setDescription($meta['seo_description']);
+            }
+
+            if (! empty($meta['index']) && $meta['index'] === 'noindex') {
+                SeoHelper::meta()->addMeta('robots', 'noindex, nofollow');
             }
         }
 

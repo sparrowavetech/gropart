@@ -14,7 +14,6 @@ use Botble\Base\Facades\Breadcrumb as BreadcrumbFacade;
 use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Facades\MetaBox;
 use Botble\Base\Facades\PageTitle;
-use Botble\Base\Facades\PanelSectionManager;
 use Botble\Base\Facades\PanelSectionManager as PanelSectionManagerFacade;
 use Botble\Base\Forms\Form;
 use Botble\Base\Forms\FormBuilder;
@@ -244,7 +243,11 @@ class BaseServiceProvider extends ServiceProvider
 
         Schema::defaultStringLength(191);
 
-        if (BaseHelper::hasDemoModeEnabled() || $config->get('core.base.general.disable_verify_csrf_token', false)) {
+        if (
+            BaseHelper::hasDemoModeEnabled()
+            || $config->get('core.base.general.disable_verify_csrf_token', false)
+            || ($this->app->environment('production') && AdminHelper::isInAdmin())
+        ) {
             $this->app->instance(VerifyCsrfToken::class, new BaseMiddleware());
         }
 
@@ -296,8 +299,6 @@ class BaseServiceProvider extends ServiceProvider
         $events = $this->app['events'];
 
         $events->listen(RouteMatched::class, function () {
-            $this->registerPanelSections();
-
             /**
              * @var Router $router
              */
@@ -315,6 +316,8 @@ class BaseServiceProvider extends ServiceProvider
                 ]);
             });
         });
+
+        $this->registerPanelSections();
 
         Paginator::useBootstrap();
 
@@ -394,9 +397,10 @@ class BaseServiceProvider extends ServiceProvider
 
     protected function registerPanelSections(): void
     {
-        PanelSectionManager::group('system')
-            ->setGroupName(trans('core/base::layouts.platform_admin'))
-            ->register(SystemPanelSection::class);
+        PanelSectionManagerFacade::group('system')->beforeRendering(function () {
+            PanelSectionManagerFacade::setGroupName(trans('core/base::layouts.platform_admin'))
+                ->register(SystemPanelSection::class);
+        });
     }
 
     protected function configureIni(): void

@@ -61,22 +61,9 @@ class ShortcodeServiceProvider extends ServiceProvider
                 return $buttons;
             }
 
-            $buttons = (string)$buttons;
+            $buttons = (string) $buttons;
 
-            $buttons .= Blade::render(
-                sprintf(
-                    '
-                <x-core::button
-                    icon="ti ti-box"
-                    data-bb-toggle="shortcode-list-modal"
-                    class="add_shortcode_btn_trigger"
-                    data-result="%s"
-                > %s </x-core::button>
-            ',
-                    $id,
-                    trans('packages/shortcode::shortcode.ui-blocks')
-                )
-            );
+            $buttons .= view('packages/shortcode::partials.shortcode-button', compact('id'))->render();
 
             return $buttons;
         }, 120, 3);

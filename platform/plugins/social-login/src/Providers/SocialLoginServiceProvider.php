@@ -41,4 +41,9 @@ class SocialLoginServiceProvider extends ServiceProvider
 
         $this->app->register(HookServiceProvider::class);
     }
+
+    public function register(): void
+    {
+        $this->app->bind(SocialService::class);
+    }
 }

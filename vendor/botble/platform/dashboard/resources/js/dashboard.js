@@ -43,9 +43,9 @@ class BDashboard {
                 BDashboard.initSortable()
             })
             .catch(({ response, message }) => {
-                let content = response?.data?.data ? response.data.data : message
+                let content = response?.data?.data
 
-                if (!content) {
+                if (! content && message) {
                     content = `<div class="empty"><p class="empty-subtitle text-muted">${message}</p></div>`
                 }
 
@@ -130,24 +130,25 @@ $(() => {
 
     $(document)
         .on('submit', '[data-bb-toggle="widgets-management-modal"] form', function (event) {
-        event.preventDefault()
-        const form = $(event.currentTarget)
-        const modal = $(this).closest('.modal')
+            event.preventDefault()
+            const form = $(event.currentTarget)
+            const modal = $(this).closest('.modal')
 
-        $httpClient
-            .make()
-            .postForm(form.prop('action'), new FormData(form[0]))
-            .then(({ data }) => {
-                Botble.showSuccess(data.message)
+            $httpClient
+                .make()
+                .withButtonLoading(form.find('button[type="submit"]'))
+                .postForm(form.prop('action'), new FormData(form[0]))
+                .then(({ data }) => {
+                    Botble.showSuccess(data.message)
 
-                setTimeout(() => {
-                    window.location.reload()
-                }, 1000)
-            })
-            .finally(() => {
-                modal.modal('hide')
-            })
-    })
+                    setTimeout(() => {
+                        window.location.reload()
+                    }, 1000)
+                })
+                .finally(() => {
+                    modal.modal('hide')
+                })
+        })
         .on('change', '[data-bb-toggle="widgets-management-item"]', function (event) {
             const $this = $(event.currentTarget)
 

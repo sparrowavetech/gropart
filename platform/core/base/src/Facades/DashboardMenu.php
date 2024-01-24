@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static static registerItem(array $options)
  * @method static static removeItem(array|string $id)
  * @method static bool hasItem(string $id)
- * @method static \Illuminate\Support\Collection getAll(string $id = 'admin')
+ * @method static \Illuminate\Support\Collection getAll(string|null $id = null)
  * @method static array|null getItemById(string $itemId)
  * @method static \Illuminate\Support\Collection|null getItemsByParentId(string $parentId)
  * @method static static beforeRetrieving(\Closure $callback)

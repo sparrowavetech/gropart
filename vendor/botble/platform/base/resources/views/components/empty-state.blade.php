@@ -4,7 +4,7 @@
     'icon' => 'ti ti-ghost',
 ])
 
-<div class="empty">
+<div {{ $attributes->class('empty') }}>
     @if ($icon)
         <div class="empty-icon">
             <x-core-base::icon :name="$icon" />

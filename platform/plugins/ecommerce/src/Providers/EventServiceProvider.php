@@ -27,6 +27,7 @@ use Botble\Ecommerce\Listeners\OrderReturnedNotification;
 use Botble\Ecommerce\Listeners\RegisterCodPaymentMethod;
 use Botble\Ecommerce\Listeners\RegisterEcommerceWidget;
 use Botble\Ecommerce\Listeners\RenderingSiteMapListener;
+use Botble\Ecommerce\Listeners\SaveProductFaqListener;
 use Botble\Ecommerce\Listeners\SendMailsAfterCustomerRegistered;
 use Botble\Ecommerce\Listeners\SendProductReviewsMailAfterOrderCompleted;
 use Botble\Ecommerce\Listeners\SendShippingStatusChangedNotification;
@@ -52,10 +53,12 @@ class EventServiceProvider extends ServiceProvider
         CreatedContentEvent::class => [
             AddLanguageForVariantsListener::class,
             ClearShippingRuleCache::class,
+            SaveProductFaqListener::class,
         ],
         UpdatedContentEvent::class => [
             AddLanguageForVariantsListener::class,
             ClearShippingRuleCache::class,
+            SaveProductFaqListener::class,
         ],
         DeletedContentEvent::class => [
             ClearShippingRuleCache::class,
@@ -106,8 +109,9 @@ class EventServiceProvider extends ServiceProvider
     {
         $events = $this->app['events'];
 
+        // Something wrong here, need to remove cart.removed event for now.
         $events->listen(
-            ['cart.removed', 'cart.added', 'cart.updated'],
+            ['cart.added', 'cart.updated'],
             fn () => $this->app->make(HandleApplyProductCrossSaleService::class)->handle()
         );
 

@@ -2,8 +2,8 @@
 
 namespace Botble\Ecommerce\Enums;
 
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Supports\Enum;
-use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\HtmlString;
 
 /**
@@ -28,9 +28,9 @@ class DiscountTypeOptionEnum extends Enum
     {
         $color = match ($this->value) {
             self::AMOUNT, self::PERCENTAGE, self::SHIPPING, self::SAME_PRICE => 'info',
-            default => null,
+            default => 'primary',
         };
 
-        return Blade::render(sprintf('<x-core::badge label="%s" color="%s" />', $this->label(), $color));
+        return BaseHelper::renderBadge($this->label(), $color);
     }
 }

@@ -12,7 +12,6 @@ use Botble\ACL\Http\Requests\PreferenceRequest;
 use Botble\ACL\Http\Requests\UpdatePasswordRequest;
 use Botble\ACL\Http\Requests\UpdateProfileRequest;
 use Botble\ACL\Models\User;
-use Botble\ACL\Models\UserMeta;
 use Botble\ACL\Services\ChangePasswordService;
 use Botble\ACL\Services\CreateUserService;
 use Botble\ACL\Tables\UserTable;
@@ -41,9 +40,6 @@ class UserController extends BaseSystemController
     {
         $this->pageTitle(trans('core/acl::users.users'));
 
-        Assets::addScripts(['bootstrap-editable', 'jquery-ui'])
-            ->addStyles(['bootstrap-editable']);
-
         return $dataTable->renderTable();
     }
 
@@ -59,8 +55,10 @@ class UserController extends BaseSystemController
         $form = UserForm::create();
         $user = null;
 
-        $form->saving(function () use ($service, $request, &$user) {
+        $form->saving(function (UserForm $form) use ($service, $request, &$user) {
             $user = $service->execute($request);
+
+            $form->setupModel($user);
         });
 
         return $this
@@ -104,7 +102,7 @@ class UserController extends BaseSystemController
         $passwordForm = PasswordForm::createFromModel($user)
             ->setUrl(route('users.change-password', $user->getKey()));
 
-        $preferenceForm = PreferenceForm::create()
+        $preferenceForm = PreferenceForm::createFromModel($user)
             ->setUrl(route('users.update-preferences', $user->getKey()))
             ->renderForm();
 
@@ -178,7 +176,10 @@ class UserController extends BaseSystemController
         $request->merge(['id' => $user->getKey()]);
 
         try {
-            PasswordForm::createFromModel($user)->saving(fn () => $service->execute($request));
+            PasswordForm::createFromModel($user)
+                ->saving(function (PasswordForm $form) use ($service, $request) {
+                    return tap($service->execute($request), fn ($user) => $form->setupModel($user));
+                });
         } catch (Throwable $exception) {
             return $this
                 ->httpResponse()
@@ -193,10 +194,13 @@ class UserController extends BaseSystemController
 
     public function updatePreferences(User $user, PreferenceRequest $request)
     {
-        PreferenceForm::create()->saving(function () use ($request) {
-            UserMeta::setMeta('locale', $request->input('locale'));
-            UserMeta::setMeta('theme_mode', $request->input('theme_mode'));
-        });
+        PreferenceForm::createFromModel($user)
+            ->saving(function (PreferenceForm $form) use ($request) {
+                $model = $form->getModel();
+                $model->setMeta('locale', $request->input('locale'));
+                $model->setMeta('locale_direction', $request->input('locale_direction'));
+                $model->setMeta('theme_mode', $request->input('theme_mode'));
+            });
 
         return $this
             ->httpResponse()

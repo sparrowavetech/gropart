@@ -258,4 +258,37 @@ class SlugHelper
 
         return array_values(array_filter($prefixes));
     }
+
+    public function getAllPrefixes(): array
+    {
+        $allSettingPrefixes = collect(setting()->all())
+            ->filter(function ($value, $key) {
+                return $value && Str::startsWith($key, 'permalink-');
+            })
+            ->all();
+
+        $prefixes = [];
+
+        foreach ($this->supportedModels() as $class => $model) {
+            $normalizeModel = Str::slug(str_replace('\\', '_', $class));
+            $foundModelPrefix = false;
+
+            foreach ($allSettingPrefixes as $key => $value) {
+                if (! Str::startsWith($key, 'permalink-' . $normalizeModel)) {
+                    continue;
+                }
+
+                $prefixes[] = $value;
+                $foundModelPrefix = true;
+
+                unset($allSettingPrefixes[$key]);
+            }
+
+            if (! $foundModelPrefix) {
+                $prefixes[] =  Arr::get(config('packages.slug.general.prefixes', []), $class);
+            }
+        }
+
+        return array_unique(array_filter($prefixes ?: []));
+    }
 }

@@ -140,7 +140,12 @@ class ThemeService
             }
 
             $this->files->copyDirectory($resourcePath, $publishPath);
-            $this->files->copy($this->getPath($theme, 'screenshot.png'), $publishPath . '/screenshot.png');
+
+            $screenshot = $this->getPath($theme, 'screenshot.png');
+
+            if ($this->files->exists($screenshot)) {
+                $this->files->copy($screenshot, $publishPath . '/screenshot.png');
+            }
         }
 
         if (! count($themes)) {

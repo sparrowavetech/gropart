@@ -89,71 +89,9 @@
                                             </td>
 
                                             @foreach ($products as $product)
-                                                @php
-                                                    $attributes = app(Botble\Ecommerce\Repositories\Interfaces\ProductInterface::class)
-                                                        ->getRelatedProductAttributes($product)
-                                                        ->where('attribute_set_id', $attributeSet->id)
-                                                        ->sortBy('order');
-                                                @endphp
-
-                                                @if ($attributes->count())
-                                                    @if ($attributeSet->display_layout == 'dropdown')
-                                                        <td>
-                                                            {{ $attributes->pluck('title')->implode(', ') }}
-                                                        </td>
-                                                    @elseif ($attributeSet->display_layout == 'text')
-                                                        <td>
-                                                            <div class="attribute-values">
-                                                                <ul class="text-swatch attribute-swatch color-swatch">
-                                                                    @foreach ($attributes as $attribute)
-                                                                        <li
-                                                                            class="attribute-swatch-item"
-                                                                            style="display: inline-block"
-                                                                        >
-                                                                            <label>
-                                                                                <input
-                                                                                    class="form-control product-filter-item"
-                                                                                    type="radio"
-                                                                                    disabled
-                                                                                >
-                                                                                <span
-                                                                                    style="cursor: default">{{ $attribute->title }}</span>
-                                                                            </label>
-                                                                        </li>
-                                                                    @endforeach
-                                                                </ul>
-                                                            </div>
-                                                        </td>
-                                                    @else
-                                                        <td>
-                                                            <div class="attribute-values">
-                                                                <ul class="visual-swatch color-swatch attribute-swatch">
-                                                                    @foreach ($attributes as $attribute)
-                                                                        <li
-                                                                            class="attribute-swatch-item"
-                                                                            style="display: inline-block"
-                                                                        >
-                                                                            <div class="custom-radio">
-                                                                                <label>
-                                                                                    <input
-                                                                                        class="form-control product-filter-item"
-                                                                                        type="radio"
-                                                                                        disabled
-                                                                                    >
-                                                                                    <span
-                                                                                        style="{{ $attribute->image ? 'background-image: url(' . RvMedia::getImageUrl($attribute->image) . ');' : 'background-color: ' . $attribute->color . ';' }}; cursor: default;"
-                                                                                    ></span>
-                                                                                </label>
-                                                                            </div>
-                                                                        </li>
-                                                                    @endforeach
-                                                                </ul>
-                                                            </div>
-                                                        </td>
-                                                    @endif
-                                                @else
-                                                    <td>&mdash;</td>
-                                                @endif
+                                                <td>
+                                                    {{ render_product_attributes_view_only($product, $attributeSet) }}
+                                                </td>
                                             @endforeach
                                         </tr>
                                     @endif

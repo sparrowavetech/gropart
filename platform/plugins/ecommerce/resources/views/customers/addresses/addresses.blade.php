@@ -53,6 +53,7 @@
                         class="me-1 btn-trigger-edit-address"
                         color="primary"
                         size="sm"
+                        :icon-only="true"
                     />
 
                     <x-core::button
@@ -62,6 +63,7 @@
                         class="deleteDialog"
                         size="sm"
                         color="danger"
+                        :icon-only="true"
                     />
                 </x-core::table.body.cell>
             </x-core::table.body.row>

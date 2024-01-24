@@ -77,6 +77,7 @@ class StripePaymentService extends StripePaymentAbstract
                             'pro_id' => $product['id'],
                         ],
                         'description' => $product['name'],
+                        'images' => array_filter([Arr::get($product, 'image')]),
                     ],
                     'unit_amount' => $this->convertAmount($product['price_per_order'] / $product['qty']),
                     'currency' => $this->currency,

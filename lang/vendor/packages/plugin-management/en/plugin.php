@@ -9,8 +9,6 @@ return [
     'author' => 'By',
     'update_plugin_status_success' => 'Update plugin successfully',
     'plugins' => 'Plugins',
-    'installed_plugins' => 'Installed Plugins',
-    'add_new_plugin' => 'Add New Plugin',
     'missing_required_plugins' => 'Please activate plugin(s): :plugins before activate this plugin!',
     'remove' => 'Remove',
     'remove_plugin_success' => 'Remove plugin successfully!',

@@ -1,7 +1,3 @@
-@php
-    Assets::addScripts('coloris')->addStyles('coloris');
-@endphp
-
 <x-core::form.color-picker
     :name="$name"
     :value="$value ?? '#000'"

@@ -17,9 +17,7 @@ use Exception;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\HtmlString;
 use Illuminate\Validation\Rule;
 use Throwable;
 
@@ -54,12 +52,6 @@ class SystemController extends BaseSystemController
 
         $matchPHPRequirement = version_compare(phpversion(), $requiredPhpVersion, '>=') > 0;
 
-        $statusIcon = function (bool $status): HtmlString {
-            return new HtmlString(Blade::render($status
-                ? '<x-core::icon name="ti ti-check" class="text-success" />'
-                : '<x-core::icon name="ti ti-x" class="text-danger" />'));
-        };
-
         return view(
             'core/base::system.info',
             compact(
@@ -69,7 +61,6 @@ class SystemController extends BaseSystemController
                 'serverEnv',
                 'matchPHPRequirement',
                 'requiredPhpVersion',
-                'statusIcon',
             )
         );
     }

@@ -27,13 +27,13 @@ class Menu extends BaseModel
 
     protected static function booted(): void
     {
-        static::deleting(function (self $model) {
+        static::deleted(function (self $model) {
             $model->menuNodes()->delete();
             $model->locations()->delete();
         });
 
         self::saving(function (self $model) {
-            $model->slug = self::createSlug($model->slug, $model->getKey());
+            $model->slug = self::createSlug($model->name, $model->getKey());
         });
     }
 

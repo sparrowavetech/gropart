@@ -2,10 +2,10 @@
 
 namespace Botble\Marketplace\Enums;
 
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Supports\Enum;
 use Botble\Marketplace\Facades\MarketplaceHelper;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\HtmlString;
 use Illuminate\Validation\Rule;
 
@@ -25,11 +25,10 @@ class PayoutPaymentMethodsEnum extends Enum
     {
         $color = match ($this->value) {
             self::BANK_TRANSFER => 'info',
-            self::PAYPAL => 'primary',
-            default => null,
+            default => 'primary',
         };
 
-        return Blade::render(sprintf('<x-core::badge label="%s" color="%s" />', $this->label(), $color));
+        return BaseHelper::renderBadge($this->label(), $color);
     }
 
     public static function payoutMethodsEnabled(): array

@@ -3,7 +3,6 @@
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Marketplace\Models\Store;
 use Botble\Slug\Facades\SlugHelper;
-use Botble\Table\Http\Controllers\TableController;
 use Botble\Theme\Facades\Theme;
 use Illuminate\Support\Facades\Route;
 

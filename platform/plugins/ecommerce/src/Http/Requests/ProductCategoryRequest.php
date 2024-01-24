@@ -12,7 +12,7 @@ class ProductCategoryRequest extends Request
     {
         return [
             'name' => 'required|string|max:250',
-            'description' => 'nullable|string|max:400',
+            'description' => 'nullable|string|max:100000',
             'image' => ['nullable', 'string', 'max:255'],
             'icon' => ['nullable', 'string', 'max:50'],
             'icon_image' => ['nullable', 'string', 'max:255'],

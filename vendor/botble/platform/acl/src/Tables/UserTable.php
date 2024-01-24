@@ -7,6 +7,7 @@ use Botble\ACL\Models\User;
 use Botble\ACL\Services\ActivateUserService;
 use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Base\Exceptions\DisabledInDemoModeException;
+use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Models\BaseQueryBuilder;
 use Botble\Table\Abstracts\TableAbstract;
@@ -36,8 +37,12 @@ class UserTable extends TableAbstract
 {
     public function setup(): void
     {
+        Assets::addScripts(['bootstrap-editable', 'jquery-ui'])
+            ->addStyles(['bootstrap-editable']);
+
         $this
             ->model(User::class)
+            ->displayActionsAsDropdown(false)
             ->addColumns([
                 LinkableColumn::make('username')
                     ->urlUsing(fn (LinkableColumn $column) => $column->getItem()->url)
@@ -92,6 +97,9 @@ class UserTable extends TableAbstract
                 ]);
             })
             ->addActions([
+                Action::make('extra')->renderUsing(function (Action $action) {
+                    return apply_filters(ACL_FILTER_USER_TABLE_ACTIONS, '', $action->getItem());
+                }),
                 EditAction::make()
                     ->url(fn (Action $action) => $action->getItem()->url)
                     ->permission('users.edit'),
@@ -142,7 +150,7 @@ class UserTable extends TableAbstract
 
     public function htmlDrawCallbackFunction(): string|null
     {
-        return parent::htmlDrawCallbackFunction() . '$(".editable").editable({mode: "inline"});';
+        return parent::htmlDrawCallbackFunction() . 'Botble.initEditable()';
     }
 
     public function saveBulkChanges(array $ids, string $inputKey, string|null $inputValue): bool

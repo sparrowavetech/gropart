@@ -2,9 +2,13 @@
 
 namespace Botble\Ecommerce\Forms;
 
+use Botble\Base\Forms\FieldOptions\NameFieldOption;
+use Botble\Base\Forms\FieldOptions\OnOffFieldOption;
 use Botble\Base\Forms\FieldOptions\SelectFieldOption;
 use Botble\Base\Forms\FieldOptions\StatusFieldOption;
+use Botble\Base\Forms\Fields\OnOffField;
 use Botble\Base\Forms\Fields\SelectField;
+use Botble\Base\Forms\Fields\TextField;
 use Botble\Base\Forms\Fields\TreeCategoryField;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Ecommerce\Facades\ProductCategoryHelper;
@@ -18,14 +22,7 @@ class BrandForm extends FormAbstract
         $this
             ->setupModel(new Brand())
             ->setValidatorClass(BrandRequest::class)
-            ->add('name', 'text', [
-                'label' => trans('core/base::forms.name'),
-                'required' => true,
-                'attr' => [
-                    'placeholder' => trans('core/base::forms.name_placeholder'),
-                    'data-counter' => 250,
-                ],
-            ])
+            ->add('name', TextField::class, NameFieldOption::make()->toArray())
             ->add('description', 'editor', [
                 'label' => trans('core/base::forms.description'),
                 'attr' => [
@@ -52,10 +49,14 @@ class BrandForm extends FormAbstract
             ->add('logo', 'mediaImage', [
                 'label' => trans('plugins/ecommerce::brands.logo'),
             ])
-            ->add('is_featured', 'onOff', [
-                'label' => trans('plugins/ecommerce::brands.form.is_featured'),
-                'default_value' => false,
-            ])
+            ->add(
+                'is_featured',
+                OnOffField::class,
+                OnOffFieldOption::make()
+                    ->label(trans('core/base::forms.is_featured'))
+                    ->defaultValue(false)
+                    ->toArray()
+            )
             ->add(
                 'categories[]',
                 TreeCategoryField::class,

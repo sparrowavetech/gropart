@@ -3,19 +3,20 @@
 namespace Botble\Ecommerce\Http\Controllers\Fronts;
 
 use Botble\Base\Http\Controllers\BaseController;
+use Botble\Ecommerce\Enums\DiscountTypeEnum;
 use Botble\Ecommerce\Facades\Cart;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Facades\OrderHelper;
 use Botble\Ecommerce\Http\Requests\CartRequest;
 use Botble\Ecommerce\Http\Requests\UpdateCartRequest;
-use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Models\Discount;
+use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Services\HandleApplyCouponService;
 use Botble\Ecommerce\Services\HandleApplyPromotionsService;
 use Botble\SeoHelper\Facades\SeoHelper;
 use Botble\Theme\Facades\Theme;
-use Exception;
 use Illuminate\Support\Arr;
+use Throwable;
 
 class PublicCartController extends BaseController
 {
@@ -24,23 +25,14 @@ class PublicCartController extends BaseController
         protected HandleApplyCouponService $handleApplyCouponService
     ) {
     }
+
     public function index()
     {
-        if (! EcommerceHelper::isCartEnabled()) {
-            abort(404);
-        }
-
-        Theme::asset()
-            ->container('footer')
-            ->add('ecommerce-checkout-js', 'vendor/core/plugins/ecommerce/js/checkout.js', ['jquery']);
-
         $promotionDiscountAmount = 0;
         $couponDiscountAmount = 0;
 
         $products = collect();
         $crossSellProducts = collect();
-
-        $allDiscounts = Discount::where('apply_via_url', 1)->get();
 
         if (Cart::instance('cart')->isNotEmpty()) {
             [$products, $promotionDiscountAmount, $couponDiscountAmount] = $this->getCartData();
@@ -57,42 +49,13 @@ class PublicCartController extends BaseController
 
         return Theme::scope(
             'ecommerce.cart',
-            compact('promotionDiscountAmount', 'couponDiscountAmount', 'products', 'crossSellProducts',  'allDiscounts'),
+            compact('promotionDiscountAmount', 'couponDiscountAmount', 'products', 'crossSellProducts'),
             'plugins/ecommerce::themes.cart'
         )->render();
     }
 
-    protected function getCartData(): array
-    {
-        $products = Cart::instance('cart')->products();
-
-        $promotionDiscountAmount = $this->applyPromotionsService->execute();
-
-        $couponDiscountAmount = 0;
-
-        if ($couponCode = session('auto_apply_coupon_code')) {
-            $couponData = $this->handleApplyCouponService->execute($couponCode);
-
-            if (! Arr::get($couponData, 'error')) {
-                $couponDiscountAmount = Arr::get($couponData, 'data.discount_amount');
-            }
-        }
-
-        $sessionData = OrderHelper::getOrderSessionData();
-
-        if (session()->has('applied_coupon_code')) {
-            $couponDiscountAmount = Arr::get($sessionData, 'coupon_discount_amount', 0);
-        }
-
-        return [$products, $promotionDiscountAmount, $couponDiscountAmount];
-    }
-
     public function store(CartRequest $request)
     {
-        if (! EcommerceHelper::isCartEnabled()) {
-            abort(404);
-        }
-
         $response = $this->httpResponse();
 
         $product = Product::query()->find($request->input('id'));
@@ -215,25 +178,19 @@ class PublicCartController extends BaseController
                 return $response;
             }
 
-            return $response
-                ->setNextUrl($nextUrl);
+            return $response->setNextUrl($nextUrl);
         }
 
         return $response
             ->setData([
+                ...$this->getDataForResponse(),
                 'status' => true,
-                'count' => Cart::instance('cart')->count(),
-                'total_price' => format_price(Cart::instance('cart')->rawSubTotal()),
                 'content' => $cartItems,
             ]);
     }
 
     public function update(UpdateCartRequest $request)
     {
-        if (! EcommerceHelper::isCartEnabled()) {
-            abort(404);
-        }
-
         if ($request->has('checkout')) {
             $token = OrderHelper::getOrderSessionToken();
 
@@ -276,33 +233,21 @@ class PublicCartController extends BaseController
             return $this
                 ->httpResponse()
                 ->setError()
-                ->setData([
-                    'count' => Cart::instance('cart')->count(),
-                    'total_price' => format_price(Cart::instance('cart')->rawSubTotal()),
-                    'content' => Cart::instance('cart')->content(),
-                ])
+                ->setData($this->getDataForResponse())
                 ->setMessage(__('One or all products are not enough quantity so cannot update!'));
         }
 
         return $this
             ->httpResponse()
-            ->setData([
-                'count' => Cart::instance('cart')->count(),
-                'total_price' => format_price(Cart::instance('cart')->rawSubTotal()),
-                'content' => Cart::instance('cart')->content(),
-            ])
+            ->setData($this->getDataForResponse())
             ->setMessage(__('Update cart successfully!'));
     }
 
     public function destroy(string $id)
     {
-        if (! EcommerceHelper::isCartEnabled()) {
-            abort(404);
-        }
-
         try {
             Cart::instance('cart')->remove($id);
-        } catch (Exception) {
+        } catch (Throwable) {
             return $this
                 ->httpResponse()
                 ->setError()
@@ -311,25 +256,59 @@ class PublicCartController extends BaseController
 
         return $this
             ->httpResponse()
-            ->setData([
-                'count' => Cart::instance('cart')->count(),
-                'total_price' => format_price(Cart::instance('cart')->rawSubTotal()),
-                'content' => Cart::instance('cart')->content(),
-            ])
+            ->setData($this->getDataForResponse())
             ->setMessage(__('Removed item from cart successfully!'));
     }
 
     public function empty()
     {
-        if (! EcommerceHelper::isCartEnabled()) {
-            abort(404);
-        }
-
         Cart::instance('cart')->destroy();
 
         return $this
             ->httpResponse()
             ->setData(Cart::instance('cart')->content())
             ->setMessage(__('Empty cart successfully!'));
+    }
+
+    protected function getCartData(): array
+    {
+        $products = Cart::instance('cart')->products();
+
+        $promotionDiscountAmount = $this->applyPromotionsService->execute();
+
+        $couponDiscountAmount = 0;
+
+        if ($couponCode = session('auto_apply_coupon_code')) {
+            $coupon = Discount::query()
+                ->where('code', $couponCode)
+                ->where('apply_via_url', true)
+                ->where('type', DiscountTypeEnum::COUPON)
+                ->exists();
+
+            if ($coupon) {
+                $couponData = $this->handleApplyCouponService->execute($couponCode);
+
+                if (! Arr::get($couponData, 'error')) {
+                    $couponDiscountAmount = Arr::get($couponData, 'data.discount_amount');
+                }
+            }
+        }
+
+        $sessionData = OrderHelper::getOrderSessionData();
+
+        if (session()->has('applied_coupon_code')) {
+            $couponDiscountAmount = Arr::get($sessionData, 'coupon_discount_amount', 0);
+        }
+
+        return [$products, $promotionDiscountAmount, $couponDiscountAmount];
+    }
+
+    protected function getDataForResponse(): array
+    {
+        return apply_filters('ecommerce_cart_data_for_response', [
+            'count' => Cart::instance('cart')->count(),
+            'total_price' => format_price(Cart::instance('cart')->rawSubTotal()),
+            'content' => Cart::instance('cart')->content(),
+        ], $this->getCartData());
     }
 }

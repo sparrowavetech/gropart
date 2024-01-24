@@ -23,7 +23,12 @@ class MediaSettingController extends SettingController
 
     public function update(MediaSettingRequest $request): BaseHttpResponse
     {
-        return $this->performUpdate($request->validated());
+        return $this->performUpdate([
+            ...$request->validated(),
+            'media_folders_can_add_watermark' => $request->boolean('media_folders_can_add_watermark_all')
+                ? []
+                : $request->input('media_folders_can_add_watermark', []),
+        ]);
     }
 
     public function generateThumbnails(): BaseHttpResponse

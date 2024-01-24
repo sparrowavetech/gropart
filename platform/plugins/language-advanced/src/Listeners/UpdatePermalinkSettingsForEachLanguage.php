@@ -14,6 +14,21 @@ class UpdatePermalinkSettingsForEachLanguage
             return;
         }
 
+        $missingSlugTranslations = Slug::query()
+            ->where('reference_type', $event->reference)
+            ->whereNotIn('id', DB::table('slugs_translations')->pluck('slugs_id')->all())
+            ->get();
+
+        foreach ($missingSlugTranslations as $missingSlugTranslation) {
+            DB::table('slugs_translations')
+                ->insert([
+                    'slugs_id' => $missingSlugTranslation->id,
+                    'lang_code' => $event->request->input('ref_lang'),
+                    'key' => $missingSlugTranslation->key,
+                    'prefix' => $missingSlugTranslation->prefix,
+                ]);
+        }
+
         $slugIds = Slug::query()
             ->where('reference_type', $event->reference)
             ->pluck('id')

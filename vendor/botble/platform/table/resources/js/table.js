@@ -132,7 +132,10 @@
                 <path d="M7 11l5 5l5 -5"></path>
                 <path d="M12 4l0 12"></path>
             </svg>
-            ${dt.i18n('buttons.export', BotbleVariables.languages.tables.export ? BotbleVariables.languages.tables.export : 'Export')}`
+            ${dt.i18n(
+                'buttons.export',
+                BotbleVariables.languages.tables.export ? BotbleVariables.languages.tables.export : 'Export'
+            )}`
         },
 
         buttons: ['csv', 'excel'],
@@ -150,7 +153,10 @@
                 <path d="M10 20.25c0 .414 .336 .75 .75 .75h1.25a1 1 0 0 0 1 -1v-1a1 1 0 0 0 -1 -1h-1a1 1 0 0 1 -1 -1v-1a1 1 0 0 1 1 -1h1.25a.75 .75 0 0 1 .75 .75"></path>
                 <path d="M16 15l2 6l2 -6"></path>
             </svg>
-            ${dt.i18n('buttons.csv', BotbleVariables.languages.tables.csv ? BotbleVariables.languages.tables.csv : 'CSV')}`
+            ${dt.i18n(
+                'buttons.csv',
+                BotbleVariables.languages.tables.csv ? BotbleVariables.languages.tables.csv : 'CSV'
+            )}`
         },
 
         action: (e, dt) => {
@@ -170,7 +176,10 @@
                 <path d="M10 20.25c0 .414 .336 .75 .75 .75h1.25a1 1 0 0 0 1 -1v-1a1 1 0 0 0 -1 -1h-1a1 1 0 0 1 -1 -1v-1a1 1 0 0 1 1 -1h1.25a.75 .75 0 0 1 .75 .75"></path>
                 <path d="M16 15l2 6l2 -6"></path>
             </svg>
-            ${dt.i18n('buttons.csv', BotbleVariables.languages.tables.csv ? BotbleVariables.languages.tables.csv : 'CSV')}`
+            ${dt.i18n(
+                'buttons.csv',
+                BotbleVariables.languages.tables.csv ? BotbleVariables.languages.tables.csv : 'CSV'
+            )}`
         },
 
         action: (e, dt) => {
@@ -230,8 +239,7 @@
         className: 'buttons-print',
 
         text: (dt) => {
-            return (
-                `<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            return `<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                     <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                     <path d="M17 17h2a2 2 0 0 0 2 -2v-4a2 2 0 0 0 -2 -2h-14a2 2 0 0 0 -2 2v4a2 2 0 0 0 2 2h2"></path>
                     <path d="M17 9v-4a2 2 0 0 0 -2 -2h-6a2 2 0 0 0 -2 2v4"></path>
@@ -241,7 +249,6 @@
                     'buttons.print',
                     BotbleVariables.languages.tables.print ? BotbleVariables.languages.tables.print : 'Print'
                 )}`
-            )
         },
 
         action: (e, dt) => {
@@ -253,8 +260,7 @@
         className: 'buttons-reset',
 
         text: (dt) => {
-            return (
-                `<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            return `<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                     <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                     <path d="M9 11l-4 4l4 4m-4 -4h11a4 4 0 0 0 0 -8h-1"></path>
                 </svg>
@@ -262,7 +268,6 @@
                     'buttons.reset',
                     BotbleVariables.languages.tables.reset ? BotbleVariables.languages.tables.reset : 'Reset'
                 )}`
-            )
         },
 
         action: () => {
@@ -275,7 +280,7 @@
         className: 'buttons-reload',
 
         text: (dt) => {
-            return (`
+            return `
                 <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                     <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                     <path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4" />
@@ -285,7 +290,6 @@
                     'buttons.reload',
                     BotbleVariables.languages.tables.reload ? BotbleVariables.languages.tables.reload : 'Reload'
                 )}`
-            )
         },
 
         action: (e, dt) => {
@@ -756,7 +760,7 @@
             })
 
             $(document).on('keyup', '.table-search-input input[type=search]', (event) => {
-                const $searchInput = $(event.currentTarget);
+                const $searchInput = $(event.currentTarget)
 
                 setTimeout(() => {
                     $searchInput.closest('.table-wrapper').find('table').DataTable().search($searchInput.val()).draw()

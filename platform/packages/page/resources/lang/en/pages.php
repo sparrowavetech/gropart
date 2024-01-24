@@ -19,9 +19,9 @@ return [
     'menu_name' => 'Pages',
     'edit_this_page' => 'Edit this page',
     'total_pages' => 'Total pages',
-    'settings' => [
-        'show_on_front' => 'Your homepage displays',
-        'select' => '— Select —',
-    ],
     'front_page' => 'Front Page',
+    'theme_options' => [
+        'title' => 'Page',
+        'your_home_page_display' => 'Your homepage displays',
+    ],
 ];

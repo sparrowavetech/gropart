@@ -52,7 +52,7 @@ class MediaSettingRequest extends Request
             'media_max_file_size' => ['required', 'numeric', 'min:0'],
 
             'media_folders_can_add_watermark' => ['nullable', 'array'],
-            'media_folders_can_add_watermark.*' => ['required', 'string'],
+            'media_folders_can_add_watermark.*' => ['nullable', 'string'],
 
             'media_watermark_enabled' => $onOffRule,
             'media_image_processing_library' => ['nullable', 'in:gd,imagick'],

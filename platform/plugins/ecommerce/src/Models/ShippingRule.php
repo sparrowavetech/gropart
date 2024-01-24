@@ -23,7 +23,7 @@ class ShippingRule extends BaseModel
 
     protected static function booted(): void
     {
-        self::deleting(function (ShippingRule $shippingRule) {
+        static::deleted(function (ShippingRule $shippingRule) {
             $shippingRule->items()->delete();
         });
     }

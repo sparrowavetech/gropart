@@ -154,7 +154,7 @@ $(() => {
                         $this.find('textarea').val('')
 
                         const $item = $('.ecommerce-product-item[data-id=' + productId + ']')
-                        $item.find('.ecommerce-product-star').addClass('text-primary h5').html(res.message)
+                        $item.find('.ecommerce-product-star').removeClass().addClass('text-success mt-2').html(res.message)
                         if ($('#product-review-modal').length) {
                             $('#product-review-modal').modal('hide')
                         } else {

@@ -10,7 +10,6 @@ use Botble\Contact\Models\Contact;
 use Botble\Shortcode\Compilers\Shortcode;
 use Botble\Theme\Facades\Theme;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Blade;
 
 class HookServiceProvider extends ServiceProvider
 {
@@ -69,7 +68,7 @@ class HookServiceProvider extends ServiceProvider
             return $number;
         }
 
-        return Blade::render('<x-core::navbar.badge-count class="unread-contacts" />');
+        return view('core/base::partials.navbar.badge-count', ['class' => 'unread-contacts'])->render();
     }
 
     public function getMenuItemCount(array $data = []): array

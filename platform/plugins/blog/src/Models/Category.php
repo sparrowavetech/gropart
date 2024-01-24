@@ -44,7 +44,7 @@ class Category extends BaseModel implements HasTreeCategoryContract
 
     protected static function booted(): void
     {
-        self::deleting(function (Category $category) {
+        static::deleted(function (Category $category) {
             $category->children()->each(fn (Category $child) => $child->delete());
 
             $category->posts()->detach();

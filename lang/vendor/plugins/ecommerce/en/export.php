@@ -8,5 +8,6 @@ return [
         'total_variations' => 'Total variations',
     ],
     'start_export' => 'Start export',
+    'exporting' => 'Exporting...',
     'export' => 'Export',
 ];

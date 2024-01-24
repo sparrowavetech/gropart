@@ -21,14 +21,12 @@ class GetProductBySlugService
             'ec_products.status' => BaseStatusEnum::PUBLISHED,
         ];
 
-        $product = get_products(
+        return get_products(
             [
                 'condition' => $condition,
                 'take' => 1,
                 ...$params,
             ]
         );
-
-        return $product;
     }
 }

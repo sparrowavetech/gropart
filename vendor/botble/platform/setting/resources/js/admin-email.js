@@ -27,8 +27,8 @@ $(function () {
     const addEmail = (value = '') => {
         return $wrapper.find('label').after(`<div class="d-flex mt-2 more-email align-items-center">
                 <input type="email" class="form-control" placeholder="${$addBtn.data(
-            'placeholder'
-        )}" name="admin_email[]" value="${value ? value : ''}" />
+                    'placeholder'
+                )}" name="admin_email[]" value="${value ? value : ''}" />
                 <a class="btn btn-link text-danger"><i class="fas fa-minus"></i></a>
             </div>`)
     }

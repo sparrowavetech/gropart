@@ -2,6 +2,7 @@
 
 namespace Botble\Ecommerce\Forms;
 
+use Botble\Base\Facades\Assets;
 use Botble\Base\Forms\FieldOptions\SelectFieldOption;
 use Botble\Base\Forms\FieldOptions\StatusFieldOption;
 use Botble\Base\Forms\Fields\SelectField;
@@ -16,6 +17,10 @@ class ProductAttributeSetForm extends FormAbstract
 {
     public function setup(): void
     {
+        Assets::addScripts('jquery-ui')
+            ->addStylesDirectly('vendor/core/plugins/ecommerce/css/ecommerce-product-attributes.css')
+            ->addScriptsDirectly('vendor/core/plugins/ecommerce/js/ecommerce-product-attributes.js');
+
         $displayLayout = [
             'dropdown' => trans('plugins/ecommerce::product-attribute-sets.dropdown_swatch'),
             'visual' => trans('plugins/ecommerce::product-attribute-sets.visual_swatch'),
@@ -38,13 +43,6 @@ class ProductAttributeSetForm extends FormAbstract
             ->setFormOption('class', 'update-attribute-set-form')
             ->add('title', 'text', [
                 'label' => trans('core/base::forms.title'),
-                'required' => true,
-                'attr' => [
-                    'data-counter' => 120,
-                ],
-            ])
-            ->add('slug', 'text', [
-                'label' => trans('core/base::forms.slug'),
                 'required' => true,
                 'attr' => [
                     'data-counter' => 120,

@@ -2,6 +2,7 @@
 
 namespace Botble\Setting\Http\Controllers;
 
+use Botble\Base\Facades\AdminAppearance;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Setting\Forms\AdminAppearanceSettingForm;
@@ -19,19 +20,20 @@ class AdminAppearanceSettingController extends SettingController
 
     public function update(AdminAppearanceRequest $request): BaseHttpResponse
     {
-        $data = Arr::except($request->validated(), [
-            'admin_locale_direction',
-        ]);
+        $localeDirectionKey = AdminAppearance::getSettingKey('locale_direction');
+
+        $data = Arr::except($request->validated(), [$localeDirectionKey]);
 
         $isDemoModeEnabled = BaseHelper::hasDemoModeEnabled();
 
-        $adminLocalDirection = $request->input('admin_locale_direction');
-        if ($adminLocalDirection != setting('admin_locale_direction')) {
+        $adminLocalDirection = $request->input($localeDirectionKey);
+
+        if ($adminLocalDirection != setting($localeDirectionKey)) {
             session()->put('admin_locale_direction', $adminLocalDirection);
         }
 
         if (! $isDemoModeEnabled) {
-            $data['admin_locale_direction'] = $adminLocalDirection;
+            $data[$localeDirectionKey] = $adminLocalDirection;
         }
 
         return $this->performUpdate($data);

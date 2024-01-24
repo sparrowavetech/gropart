@@ -5,6 +5,7 @@ namespace Botble\Base\Supports;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Supports\PclZip as Zip;
 use Illuminate\Support\Facades\File;
+use Throwable;
 use ZipArchive;
 
 class Zipper
@@ -85,6 +86,9 @@ class Zipper
 
     protected function ensureDirectoryExists(string $path): void
     {
-        File::ensureDirectoryExists(File::isFile($path) || File::extension($path) ? File::dirname($path) : $path);
+        try {
+            File::ensureDirectoryExists(File::isFile($path) || File::extension($path) ? File::dirname($path) : $path);
+        } catch (Throwable) {
+        }
     }
 }

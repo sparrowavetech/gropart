@@ -38,7 +38,6 @@ return [
     'created' => 'Created',
     'invoice' => 'Invoice',
     'return' => 'Order Return Request',
-    'restock_products' => 'Restock :count product(s)?',
     'is_return' => 'Return checkbox',
     'total_refund_amount' => 'Total refund amount',
     'total_amount_can_be_refunded' => 'Total amount can be refunded',
@@ -313,4 +312,6 @@ return [
     ],
     'generate_invoice' => 'Generate invoice',
     'generated_invoice_successfully' => 'Generated invoice successfully!',
+    'required_customer' => 'Please select or create a customer first!',
+    'customer_not_exists' => 'This customer is not existing!',
 ];

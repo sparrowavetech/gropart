@@ -20,7 +20,7 @@
             <x-slot:title>
                 {{ trans('plugins/ecommerce::shipping.status') }}
             </x-slot:title>
-            {!! $shipment->status->toHtml() !!}
+            {!! BaseHelper::clean($shipment->status->toHtml()) !!}
         </x-core::datagrid.item>
 
         <x-core::datagrid.item>

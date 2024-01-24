@@ -4,20 +4,22 @@ namespace Botble\Ecommerce\Http\Controllers\Fronts;
 
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Http\Controllers\BaseController;
-use Botble\Ecommerce\Enums\OrderStatusEnum;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Http\Requests\Fronts\ReviewRequest;
-use Botble\Ecommerce\Models\Order;
 use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Models\Review;
+use Botble\Ecommerce\Traits\CheckReviewConditionTrait;
 use Botble\Media\Facades\RvMedia;
 use Botble\SeoHelper\Facades\SeoHelper;
 use Botble\Slug\Facades\SlugHelper;
 use Botble\Theme\Facades\Theme;
+use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 
 class ReviewController extends BaseController
 {
+    use CheckReviewConditionTrait;
+
     public function store(ReviewRequest $request)
     {
         if (! EcommerceHelper::isReviewEnabled()) {
@@ -25,7 +27,7 @@ class ReviewController extends BaseController
         }
 
         $productId = $request->input('product_id');
-        $check = $this->check($productId);
+        $check = $this->checkReviewCondition($productId);
 
         if (Arr::get($check, 'error')) {
             return $this
@@ -106,7 +108,7 @@ class ReviewController extends BaseController
             abort(404);
         }
 
-        $check = $this->check($product->id);
+        $check = $this->checkReviewCondition($product->id);
         if (Arr::get($check, 'error')) {
             return $this
                 ->httpResponse()
@@ -129,55 +131,49 @@ class ReviewController extends BaseController
 
         do_action(BASE_ACTION_PUBLIC_RENDER_SINGLE, PRODUCT_MODULE_SCREEN_NAME, $product);
 
-        return Theme::scope('ecommerce.product-review', compact('product'), 'plugins/ecommerce::themes.product-review')
+        return Theme::scope('ecommerce.product-review', compact('product'), 'plugins/ecommerce::themes.includes.reviews')
             ->render();
     }
 
-    protected function check(int|string $productId)
+    public function ajaxReviews(int|string $id, Request $request)
     {
-        $customerId = auth('customer')->id();
-
-        $exists = Review::query()
+        $product = Product::query()
+            ->wherePublished()
             ->where([
-                'customer_id' => $customerId,
-                'product_id' => $productId,
+                'id' => $id,
+                'is_variation' => false,
             ])
-        ->count();
+            ->with(['variations'])
+            ->firstOrFail();
 
-        if ($exists > 0) {
-            return [
-                'error' => true,
-                'message' => __('You have reviewed this product already!'),
-            ];
+        $star = $request->integer('star');
+        $perPage = $request->integer('per_page', 10);
+
+        $reviews = EcommerceHelper::getProductReviews($product, $star, $perPage);
+
+        if ($star) {
+            $message = __(':total review(s) ":star star" for ":product"', [
+                'total' => $reviews->total(),
+                'product' => $product->name,
+                'star' => $star,
+            ]);
+        } else {
+            $message = __(':total review(s) for ":product"', [
+                'total' => $reviews->total(),
+                'product' => $product->name,
+            ]);
         }
 
-        if (EcommerceHelper::onlyAllowCustomersPurchasedToReview()) {
-            $order = Order::query()
-                ->where([
-                    'user_id' => $customerId,
-                    'status' => OrderStatusEnum::COMPLETED,
-                ])
-                ->join('ec_order_product', function ($query) use ($productId) {
-                    $query
-                        ->on('ec_order_product.order_id', 'ec_orders.id')
-                        ->leftJoin('ec_product_variations', 'ec_product_variations.product_id', 'ec_order_product.product_id')
-                        ->where(function ($query) use ($productId) {
-                            $query->where('ec_product_variations.configurable_product_id', $productId)
-                            ->orWhere('ec_order_product.product_id', $productId);
-                        });
-                })
-                ->count();
-
-            if (! $order) {
-                return [
-                    'error' => true,
-                    'message' => __('Please purchase the product for a review!'),
-                ];
-            }
-        }
-
-        return [
-            'error' => false,
-        ];
+        return $this
+            ->httpResponse()
+            ->setData(
+                Theme::scope(
+                    'ecommerce.includes.review-list',
+                    compact('reviews'),
+                    'plugins/ecommerce::themes.includes.review-list'
+                )->getContent()
+            )
+            ->setMessage($message)
+            ->toApiResponse();
     }
 }

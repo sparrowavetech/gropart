@@ -132,6 +132,7 @@ return [
             ],
         ],
     ],
+    'default_upload_folder' => env('RV_MEDIA_DEFAULT_UPLOAD_FOLDER'),
     'default_upload_url' => env('RV_MEDIA_DEFAULT_UPLOAD_URL', url('storage')),
     'generate_thumbnails_enabled' => env('RV_MEDIA_GENERATE_THUMBNAILS_ENABLED', true),
     'folder_colors' => [

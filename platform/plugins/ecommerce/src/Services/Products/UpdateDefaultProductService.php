@@ -14,21 +14,16 @@ class UpdateDefaultProductService
             return null;
         }
 
-        $this->updateColumns($parent, $product, []);
+        $this->updateColumns($parent, $product);
 
         $parent->save();
 
         return $parent;
     }
 
-    public function updateColumns(Product $parent, Product $product, array $exceptColumns = [
-        'sale_type',
-        'sale_price',
-        'start_date',
-        'end_date',
-    ]): Product
+    public function updateColumns(Product $parent, Product $product): Product
     {
-        $data = array_diff([
+        $data = [
             'barcode',
             'sku',
             'price',
@@ -40,9 +35,7 @@ class UpdateDefaultProductService
             'wide',
             'height',
             'weight',
-        ], $exceptColumns);
-
-        $data = array_values($data);
+        ];
 
         foreach ($data as $item) {
             $parent->{$item} = $product->{$item};

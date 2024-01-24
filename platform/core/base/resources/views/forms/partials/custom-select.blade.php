@@ -2,6 +2,10 @@
     Arr::set($selectAttributes, 'class', Arr::get($selectAttributes, 'class') . ' form-select');
     $choices = $list ?? $choices;
     $selectAttributes = [...$selectAttributes, 'data-placeholder' => trans('core/base::forms.select_placeholder')];
+
+    if ($optionsAttributes && ! is_array($optionsAttributes)) {
+        $optionsAttributes = [];
+    }
 @endphp
 
 {!! Form::select(

@@ -8,6 +8,7 @@ use Botble\Base\Facades\Html;
 use Botble\Ecommerce\Enums\ProductTypeEnum;
 use Botble\Ecommerce\Enums\StockStatusEnum;
 use Botble\Ecommerce\Facades\EcommerceHelper;
+use Botble\Ecommerce\Models\Brand;
 use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Models\ProductCategory;
 use Botble\Table\Abstracts\TableAbstract;
@@ -19,7 +20,6 @@ use Botble\Table\Columns\CreatedAtColumn;
 use Botble\Table\Columns\IdColumn;
 use Botble\Table\Columns\ImageColumn;
 use Botble\Table\Columns\StatusColumn;
-use Carbon\Carbon;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
@@ -29,7 +29,6 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\Relations\Relation as EloquentRelation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Blade;
 use Symfony\Component\HttpFoundation\Response;
 
 class ProductTable extends TableAbstract
@@ -208,14 +207,11 @@ class ProductTable extends TableAbstract
         if ($this->hasPermission('ecommerce.import.products.index')) {
             $buttons['import'] = [
                 'link' => route('ecommerce.import.products.index'),
-                'text' => Blade::render(
-                    sprintf(
-                        '<x-core::icon name="ti ti-file-import" /> %s',
-                        trans(
-                            'plugins/ecommerce::bulk-import.import_products'
-                        )
-                    )
-                ),
+                'text' =>
+                    BaseHelper::renderIcon('ti ti-file-import')
+                    . trans(
+                        'plugins/ecommerce::bulk-import.import_products'
+                    ),
             ];
         }
 
@@ -223,13 +219,9 @@ class ProductTable extends TableAbstract
             $buttons['export'] = [
                 'link' => route('ecommerce.export.products.index'),
                 'text' =>
-                    Blade::render(
-                        sprintf(
-                            '<x-core::icon name="ti ti-file-export" /> %s',
-                            trans(
-                                'plugins/ecommerce::export.products.name'
-                            )
-                        )
+                    BaseHelper::renderIcon('ti ti-file-export')
+                    . trans(
+                        'plugins/ecommerce::export.products.name'
                     ),
             ];
         }
@@ -258,6 +250,10 @@ class ProductTable extends TableAbstract
         $data = parent::getFilters();
 
         $data['category'] = array_merge($data['category'], [
+            'type' => 'select-ajax',
+        ]);
+
+        $data['brand_id'] = array_merge($data['brand_id'], [
             'type' => 'select-ajax',
         ]);
 
@@ -314,6 +310,23 @@ class ProductTable extends TableAbstract
                     ];
                 },
             ],
+            'brand_id' => [
+                'title' => trans('plugins/ecommerce::products.brand'),
+                'type' => 'select-ajax',
+                'validate' => 'required',
+                'callback' => function (int|string|null $value = null): array {
+                    $brandSelected = [];
+                    if ($value && $brand = Brand::query()->find($value)) {
+                        $brandSelected = [$brand->getKey() => $brand->name];
+                    }
+
+                    return [
+                        'url' => route('brands.search'),
+                        'selected' => $brandSelected,
+                        'minimum-input' => 1,
+                    ];
+                },
+            ],
             'created_at' => [
                 'title' => trans('core/base::tables.created_at'),
                 'type' => 'datePicker',
@@ -333,7 +346,7 @@ class ProductTable extends TableAbstract
                     break;
                 }
 
-                $value = Carbon::createFromFormat(config('core.base.general.date_format.date'), $value);
+                $value = BaseHelper::formatDate($value);
 
                 return $query->whereDate('ec_products.' . $key, $operator, $value);
             case 'category':
@@ -359,6 +372,13 @@ class ProductTable extends TableAbstract
                 }
 
                 return $query->where('ec_product_category_product.category_id', $value);
+
+            case 'brand':
+                if (! $value) {
+                    break;
+                }
+
+                return $query->where('ec_products.brand_id', $operator, $value);
 
             case 'stock_status':
                 if (! $value) {

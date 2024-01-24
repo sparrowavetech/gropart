@@ -61,7 +61,8 @@
         .card-header {
             border-bottom: unset;
 
-            .card-title, .card-subtitle {
+            .card-title,
+            .card-subtitle {
                 display: -webkit-box;
                 -webkit-box-orient: vertical;
                 overflow: hidden;
@@ -76,9 +77,9 @@
         }
 
         .use-button {
-            --bb-btn-padding-y: .25rem !important;
-            --bb-btn-padding-x: .5rem !important;
-            --bb-btn-font-size: .75rem !important;
+            --bb-btn-padding-y: 0.25rem !important;
+            --bb-btn-padding-x: 0.5rem !important;
+            --bb-btn-font-size: 0.75rem !important;
         }
     }
 }

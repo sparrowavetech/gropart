@@ -1,14 +1,13 @@
-@if (isset($FormId))
-<form class="cart-form" action="{{ route('public.cart.add-to-cart') }}" method="POST" id="combo_{{ $FormId }}">
-@else
-<form class="cart-form" action="{{ route('public.cart.add-to-cart') }}" method="POST">
-@endif
+<form
+    class="cart-form"
+    action="{{ route('public.cart.add-to-cart') }}"
+    method="POST"
+>
     @csrf
-    @if (!empty($withVariations) && $product->variations()->count() > 0)
+    @if (!empty($withVariations) && $product->variations()->count())
         <div class="pr_switch_wrap">
             {!! render_product_swatches($product, [
                 'selected' => $selectedAttrs,
-                'view' => Theme::getThemeNamespace() . '::views.ecommerce.attributes.swatches-renderer',
             ]) !!}
         </div>
         <div

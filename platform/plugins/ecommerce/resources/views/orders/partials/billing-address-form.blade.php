@@ -44,7 +44,7 @@
                         >{{ $address->full_address }}</option>
                     @endforeach
                 </select>
-                <i class="fas fa-angle-down"></i>
+                <x-core::icon name="ti ti-chevron-down" />
             </div>
             <br>
         @endif
@@ -121,7 +121,7 @@
                             >{{ $countryName }}</option>
                         @endforeach
                     </select>
-                    <i class="fas fa-angle-down"></i>
+                    <x-core::icon name="ti ti-chevron-down" />
                     <label for='billing-address-country'>{{ __('Country') }}</label>
                 </div>
             @else
@@ -159,7 +159,7 @@
                                     @endforeach
                                 @endif
                             </select>
-                            <i class="fas fa-angle-down"></i>
+                            <x-core::icon name="ti ti-chevron-down" />
                             <label for='billing-address-state'>{{ __('State') }}</label>
                         </div>
                     @else
@@ -211,7 +211,7 @@
                                     @endforeach
                                 @endif
                             </select>
-                            <i class="fas fa-angle-down"></i>
+                            <x-core::icon name="ti ti-chevron-down" />
                             <label for='billing-address-city'>{{ __('City') }}</label>
                         </div>
                     @endif

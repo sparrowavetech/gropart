@@ -20,6 +20,7 @@ class DiscountRequest extends BaseDiscountRequest
             'quantity' => $rules['quantity'],
             'start_date' => $rules['start_date'],
             'end_date' => $rules['end_date'],
+            'display_at_checkout' => ['nullable', 'boolean'],
         ];
     }
 }

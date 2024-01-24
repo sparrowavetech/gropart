@@ -15,7 +15,7 @@ class CityRepository extends RepositoriesAbstract implements CityInterface
     public function filters(string|null $keyword, int|null $limit = 10, array $with = [], array $select = ['cities.*']): Collection
     {
         $data = $this->model
-            ->where('cities.status', BaseStatusEnum::PUBLISHED)
+            ->wherePublished('cities.status')
             ->leftJoin('states', function (JoinClause $query) {
                 $query
                     ->on('states.id', '=', 'cities.state_id')
@@ -25,31 +25,38 @@ class CityRepository extends RepositoriesAbstract implements CityInterface
                 $query
                     ->on('countries.id', '=', 'cities.country_id')
                     ->where('countries.status', BaseStatusEnum::PUBLISHED);
-            });
+            })
+            ->when($keyword, function (Builder $query) use ($keyword) {
+                $keyword = '%' . $keyword . '%';
 
-        if (
-            is_plugin_active('language') &&
-            is_plugin_active('language-advanced') &&
-            Language::getCurrentLocale() != Language::getDefaultLocale()
-        ) {
-            $data = $data
-                ->where(function (Builder $query) use ($keyword) {
-                    return $query
-                        ->whereHas('translations', function ($query) use ($keyword) {
-                            $query->where('name', 'LIKE', '%' . $keyword . '%');
+                $query->where(function (Builder $query) use ($keyword) {
+                    $query
+                        ->where(function (Builder $query) use ($keyword) {
+                            return $query
+                                ->where('cities.name', 'LIKE', $keyword)
+                                ->orWhere('states.name', 'LIKE', $keyword);
                         })
-                        ->orWhereHas('state.translations', function ($query) use ($keyword) {
-                            $query->where('name', 'LIKE', '%' . $keyword . '%');
-                        });
+                        ->when(
+                            is_plugin_active('language')
+                            && is_plugin_active('language-advanced')
+                            && Language::getCurrentLocale() != Language::getDefaultLocale(),
+                            function (Builder $query) use (
+                                $keyword
+                            ) {
+                                $query
+                                    ->orWhere(function (Builder $query) use ($keyword) {
+                                        return $query
+                                            ->whereHas('translations', function ($query) use ($keyword) {
+                                                $query->where('name', 'LIKE', $keyword);
+                                            })
+                                            ->orWhereHas('state.translations', function ($query) use ($keyword) {
+                                                $query->where('name', 'LIKE', $keyword);
+                                            });
+                                    });
+                            }
+                        );
                 });
-        } else {
-            $data = $data
-                ->where(function (Builder $query) use ($keyword) {
-                    return $query
-                        ->where('cities.name', 'LIKE', '%' . $keyword . '%')
-                        ->orWhere('states.name', 'LIKE', '%' . $keyword . '%');
-                });
-        }
+            });
 
         if ($limit) {
             $data = $data->limit($limit);

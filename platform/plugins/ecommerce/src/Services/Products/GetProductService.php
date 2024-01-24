@@ -39,6 +39,7 @@ class GetProductService
             'attributes' => (array)$request->input('attributes', []),
             'max_price' => $request->input('max_price'),
             'min_price' => $request->input('min_price'),
+            'price_ranges' => (array)$request->input('price_ranges', []),
             'sort_by' => $request->input('sort-by'),
             'num' => $num,
         ];
@@ -132,6 +133,7 @@ class GetProductService
             'keyword' => $queryVar['keyword'],
             'min_price' => $queryVar['min_price'],
             'max_price' => $queryVar['max_price'],
+            'price_ranges' => array_values($queryVar['price_ranges']),
             'categories' => $queryVar['categories'],
             'tags' => $queryVar['tags'],
             'collections' => $queryVar['collections'],

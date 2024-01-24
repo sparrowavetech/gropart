@@ -44,6 +44,10 @@ class ShortcodeTabsFieldOption extends FormFieldOptions
             }
         }
 
+        if (! Arr::has($data['shortcode_attributes'], 'quantity')) {
+            $data['shortcode_attributes']['quantity'] = min(Arr::get($data, 'max'), 6);
+        }
+
         return $data;
     }
 }

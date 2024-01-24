@@ -24,10 +24,14 @@
                                 >
                                     {{ $orderProduct->product_name }}
                                 </a>
-                                <p class="small my-1">
-                                    {{ Arr::get($orderProduct->options, 'attributes', '') }}
-                                </p>
-                                @if ($sku = Arr::get($orderProduct->options, 'sku'))
+
+                                @if ($attributes = Arr::get($orderProduct->options, 'attributes'))
+                                    <div class="small my-1">
+                                        <small>{{ $attributes }}</small>
+                                    </div>
+                                @endif
+
+                                @if ($sku = Arr::get($orderProduct->options, 'sku') ?: ($product && $product->sku ? $product->sku : null))
                                     <p class="small mb-0">
                                         {{ trans('plugins/ecommerce::shipping.sku') }}: <strong>{{ $sku }}</strong>
                                     </p>

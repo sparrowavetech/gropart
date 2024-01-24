@@ -3,6 +3,8 @@
 namespace Botble\Ecommerce\Forms;
 
 use Botble\Base\Facades\Assets;
+use Botble\Base\Forms\FieldOptions\NameFieldOption;
+use Botble\Base\Forms\Fields\TextField;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Ecommerce\Enums\GlobalOptionEnum;
 use Botble\Ecommerce\Http\Requests\GlobalOptionRequest;
@@ -19,14 +21,7 @@ class GlobalOptionForm extends FormAbstract
         $this
             ->setupModel(new GlobalOption())
             ->setValidatorClass(GlobalOptionRequest::class)
-            ->add('name', 'text', [
-                'label' => trans('core/base::forms.name'),
-                'required' => true,
-                'attr' => [
-                    'placeholder' => trans('core/base::forms.name_placeholder'),
-                    'data-counter' => 250,
-                ],
-            ])
+            ->add('name', TextField::class, NameFieldOption::make()->toArray())
             ->add('option_type', 'customSelect', [
                 'label' => trans('plugins/ecommerce::product-option.option_type'),
                 'required' => true,

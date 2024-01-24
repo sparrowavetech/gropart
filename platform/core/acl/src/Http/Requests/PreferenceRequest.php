@@ -12,6 +12,7 @@ class PreferenceRequest extends Request
     {
         return [
             'locale' => ['sometimes', Rule::in(array_keys(Language::getAvailableLocales()))],
+            'locale_direction' => ['required', 'string', 'in:ltr,rtl'],
             'theme_mode' => ['required', 'string', 'in:light,dark'],
         ];
     }

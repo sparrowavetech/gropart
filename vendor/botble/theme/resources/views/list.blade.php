@@ -25,12 +25,16 @@
                                     >
                                         <div style="word-break: break-all">
                                             <h4>{{ $theme['name'] }}</h4>
-                                            <p>{{ trans('packages/theme::theme.author') }}: {{ Arr::get($theme, 'author') }}
-                                            </p>
+                                            @if ($author = Arr::get($theme, 'author'))
+                                                <p class="text-truncate" title="{{ $author }}">{{ trans('packages/theme::theme.author') }}: {{ $author }}
+                                                </p>
+                                            @endif
                                             <p>{{ trans('packages/theme::theme.version') }}:
                                                 {{ Arr::get($theme, 'version', get_cms_version()) }}</p>
-                                            <p>{{ trans('packages/theme::theme.description') }}:
-                                                {{ Arr::get($theme, 'description') }}</p>
+                                            @if ($description = Arr::get($theme, 'description'))
+                                                <p class="text-truncate" title="{{ $description }}">{{ trans('packages/theme::theme.description') }}:
+                                                    {{ $description }}</p>
+                                            @endif
                                         </div>
                                         <div class="clearfix"></div>
                                         <div>
@@ -59,7 +63,7 @@
                                                     <x-core::button
                                                         type="button"
                                                         color="danger"
-                                                        icon="ti ti-check"
+                                                        icon="ti ti-trash"
                                                         class="btn-trigger-remove-theme"
                                                         data-theme="{{ $key }}"
                                                     >

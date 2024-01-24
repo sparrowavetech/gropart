@@ -2,17 +2,20 @@
     <div class="login-options">
         <br>
         <p style="font-size: 14px">{{ __('Login with social networks') }}</p>
+
         <ul class="social-icons">
             @foreach (SocialService::getProviderKeys() as $item)
                 @if (SocialService::getProviderEnabled($item))
-                    <li>
-                        <a
-                            class="{{ $item }}"
-                            data-bs-toggle="tooltip"
-                            data-bs-original-title="{{ $item }}"
-                            href="{{ route('auth.social', isset($params) ? array_merge([$item], $params) : $item) }}"
-                        ></a>
-                    </li>
+                    {!! apply_filters('social_login_' . $item . '_render', sprintf('
+                            <li>
+                                <a
+                                    class="%s"
+                                    data-bs-toggle="tooltip"
+                                    data-bs-original-title="%s"
+                                    href="%s"
+                                ></a>
+                            </li>
+                    ', $item, $item, route('auth.social', isset($params) ? array_merge([$item], $params) : $item)), $item) !!}
                 @endif
             @endforeach
         </ul>

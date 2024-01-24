@@ -22,6 +22,13 @@ export class EditorService {
 
 class rvMedia {
     constructor(selector, options) {
+        let customHandler = window.RvMediaCustomCallback || null
+
+        if (typeof customHandler === 'function') {
+            customHandler(selector, options)
+            return
+        }
+
         window.rvMedia = window.rvMedia || {}
 
         let $body = $('body')
@@ -112,5 +119,14 @@ $.fn.rvMedia = function (options) {
         .prop('disabled', MediaConfig.request_params.view_in === 'trash')
     Helpers.storeConfig()
 
+    let customHandler = window.RvMediaCustomCallback || null
+
+    if (typeof customHandler === 'function') {
+        customHandler($selector, options)
+        return
+    }
+
     new rvMedia($selector, options)
 }
+
+document.dispatchEvent(new CustomEvent('core-media-loaded'))

@@ -51,6 +51,13 @@ class AdminBar
         return $this->noGroupLinks;
     }
 
+    public function setLinksNoGroup(array $links): self
+    {
+        $this->noGroupLinks = $links;
+
+        return $this;
+    }
+
     public function registerGroup(string $slug, string $title, string $link = 'javascript:;'): self
     {
         if (isset($this->groups[$slug])) {

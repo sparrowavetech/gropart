@@ -95,6 +95,9 @@ return [
         'form' => [
             'show_column_visibility' => 'Default show column visibility?',
             'show_export_button' => 'Default show export button?',
+            'pagination_type' => 'Pagination type',
+            'default' => 'Default',
+            'dropdown' => 'Dropdown',
         ],
     ],
     'email' => [
@@ -233,6 +236,7 @@ return [
         'height' => 'Height',
         'default_size_value' => 'Default: :size',
         'all' => 'All',
+        'all_helper_text' => 'If you uncheck all folders, it will apply for all folders.',
         'media_folders_can_add_watermark' => 'Add watermark for images in folders:',
         'max_upload_filesize' => 'Max upload filesize (MB)',
         'max_upload_filesize_placeholder' => 'Default: :size, must less than :size.',

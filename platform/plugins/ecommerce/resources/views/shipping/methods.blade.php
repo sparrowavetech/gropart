@@ -102,6 +102,7 @@
         button-id="save-shipping-rule-item-detail-button"
         :button-label="trans('plugins/ecommerce::shipping.save')"
     >
+        Loading...
     </x-core::modal>
 
     <x-core::modal.action

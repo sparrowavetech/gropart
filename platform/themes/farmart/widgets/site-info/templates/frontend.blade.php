@@ -1,11 +1,11 @@
 @if ($sidebar == 'footer_sidebar')
-    <div class="col-xl-3 col-sm-6">
-        <div class="widget mb-2 mb-md-0">
-            <p class="h5 fw-bold widget-title mb-2">{{ $config['name'] }}</p>
-            <div class="widget-description">{!! BaseHelper::clean($config['about']) !!}</div>
+    <div class="col-xl-3">
+        <div class="widget mb-5 mb-md-0">
+            <p class="h5 fw-bold widget-title mb-4">{{ $config['name'] }}</p>
+            <div class="widget-description mb-4">{!! BaseHelper::clean($config['about']) !!}</div>
             <ul class="ps-0 mt-3 mb-0">
                 @if ($config['phone'])
-                    <li class="d-flex">
+                    <li class="py-2">
                         <span class="svg-icon me-2">
                             <svg>
                                 <use
@@ -15,12 +15,12 @@
                             </svg>
                         </span>
                         <span>{{ __('Hotline 24/7:') }}
-                            <p class="h4 m-0"><a href="tel:{{ $config['phone'] }}">{{ $config['phone'] }}</a></p>
+                            <p class="h4 ms-4 mt-2"><a href="tel:{{ $config['phone'] }}">{{ $config['phone'] }}</a></p>
                         </span>
                     </li>
                 @endif
                 @if ($config['address'])
-                    <li class="py-1 d-flex">
+                    <li class="py-2">
                         <span class="svg-icon me-2">
                             <svg>
                                 <use
@@ -33,7 +33,7 @@
                     </li>
                 @endif
                 @if ($config['email'])
-                    <li class="py-1 d-flex">
+                    <li class="py-2">
                         <span class="svg-icon me-2">
                             <svg>
                                 <use
@@ -47,7 +47,7 @@
                 @endif
 
                 @if ($config['working_time'])
-                    <li class="py-1 d-flex">
+                    <li class="py-2">
                         <span class="me-2">
                             <i class="icon-clock3"></i>
                         </span>

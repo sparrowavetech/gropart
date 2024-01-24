@@ -12,7 +12,7 @@ class UpdateMenuNodeUrlListener
 {
     public function handle(UpdatedSlugEvent $event): void
     {
-        if (! in_array(get_class($event->data), Menu::getMenuOptionModels())) {
+        if (! in_array($event->data::class, Menu::getMenuOptionModels())) {
             return;
         }
 
@@ -20,7 +20,7 @@ class UpdateMenuNodeUrlListener
             $nodes = MenuNode::query()
                 ->where([
                     'reference_id' => $event->data->getKey(),
-                    'reference_type' => get_class($event->data),
+                    'reference_type' => $event->data::class,
                 ])
                 ->get();
 

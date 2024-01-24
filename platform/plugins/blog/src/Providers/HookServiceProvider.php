@@ -94,7 +94,9 @@ class HookServiceProvider extends ServiceProvider
                                 SelectFieldOption::make()
                                     ->label(__('Select categories'))
                                     ->choices($categories)
-                                    ->selected(explode(',', Arr::get($attributes, 'category_ids')))
+                                    ->when(Arr::get($attributes, 'category_ids'), function (SelectFieldOption $option, $categoriesIds) {
+                                        $option->selected(explode(',', $categoriesIds));
+                                    })
                                     ->multiple()
                                     ->searchable()
                                     ->helperText(__('Leave categories empty if you want to show posts from all categories.'))
@@ -167,8 +169,7 @@ class HookServiceProvider extends ServiceProvider
 
         theme_option()
             ->setSection([
-                'title' => 'Blog',
-                'desc' => 'Theme options for Blog',
+                'title' => trans('plugins/blog::base.settings.title'),
                 'id' => 'opt-text-subsection-blog',
                 'subsection' => true,
                 'icon' => 'ti ti-edit',

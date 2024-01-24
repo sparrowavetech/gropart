@@ -76,15 +76,17 @@ class SettingServiceProvider extends ServiceProvider
         $events = $this->app['events'];
 
         $events->listen(RouteMatched::class, function () {
-            PanelSectionManager::default()
-                ->setGroupName(trans('core/setting::setting.title'))
-                ->register([
-                    SettingCommonPanelSection::class,
-                    SettingOthersPanelSection::class,
-                ]);
-
             EmailHandler::addTemplateSettings('base', config('core.setting.email', []), 'core');
         });
+
+        PanelSectionManager::default()
+            ->beforeRendering(function () {
+                PanelSectionManager::setGroupName(trans('core/setting::setting.title'))
+                    ->register([
+                        SettingCommonPanelSection::class,
+                        SettingOthersPanelSection::class,
+                    ]);
+            });
 
         PanelSectionManager::group('system')->beforeRendering(function () {
             PanelSectionManager::registerItem(

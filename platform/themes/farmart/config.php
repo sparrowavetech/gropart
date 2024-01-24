@@ -59,9 +59,9 @@ return [
             $assets = [
                 'bootstrap-css' => [
                     'cdn' => [
-                        'source' => '//cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css',
+                        'source' => '//cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css',
                         'attributes' => [
-                            'integrity' => 'sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3',
+                            'integrity' => 'sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN',
                             'crossorigin' => 'anonymous',
                         ],
                     ],
@@ -123,19 +123,6 @@ return [
                     ],
                     'container' => 'footer',
                 ],
-                'swiper-css' => [
-                    'local' => [
-                        'source' => 'plugins/swiper-bundle.min.css',
-                        'version' => $version,
-                    ],
-                ],
-                'swiper-js' => [
-                    'local' => [
-                        'source' => 'js/swiper-bundle.min.js',
-                        'dependencies' => ['jquery'],
-                    ],
-                    'container' => 'footer',
-                ],
                 'popper-js' => [
                     'cdn' => [
                         'source' => '//cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js',
@@ -151,9 +138,9 @@ return [
                 ],
                 'bootstrap-js' => [
                     'cdn' => [
-                        'source' => '//cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js',
+                        'source' => '//cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js',
                         'attributes' => [
-                            'integrity' => 'sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13',
+                            'integrity' => 'sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+',
                             'crossorigin' => 'anonymous',
                         ],
                     ],
@@ -239,9 +226,9 @@ return [
             if (BaseHelper::isRtlEnabled()) {
                 $assets['bootstrap-css'] = [
                     'cdn' => [
-                        'source' => '//cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.rtl.min.css',
+                        'source' => '//cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css',
                         'attributes' => [
-                            'integrity' => 'sha384-+qdLaIRZfNu4cVPK/PxJJEy0B0f3Ugv8i482AKY7gwXwhaCroABd086ybrVKTa0q',
+                            'integrity' => 'sha384-nU14brUcp6StFntEOOEBvcJm4huWjB0OcIeQ3fltAfSmuZFrkAif0T+UtNGlKKQv',
                             'crossorigin' => 'anonymous',
                         ],
                     ],

@@ -27,6 +27,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static array getCanEmptyPrefixes()
  * @method static \Botble\Slug\SlugCompiler getTranslator()
  * @method static array getSlugPrefixes()
+ * @method static array getAllPrefixes()
  *
  * @see \Botble\Slug\SlugHelper
  */

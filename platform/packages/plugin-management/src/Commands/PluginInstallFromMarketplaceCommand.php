@@ -19,9 +19,13 @@ class PluginInstallFromMarketplaceCommand extends Command implements PromptsForM
 
     public function handle(MarketplaceService $marketplaceService): int
     {
-        $this->validatePluginName($this->argument('name'));
+        $name = $this->argument('name');
 
-        $plugin = strtolower($this->argument('name'));
+        $name = rtrim($name, '/');
+
+        $this->validatePluginName($name);
+
+        $plugin = strtolower($name);
 
         $response = $marketplaceService->callApi('post', '/products/check-update', [
             'products' => [$plugin => '0.0.0'],

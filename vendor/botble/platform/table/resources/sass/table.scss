@@ -181,20 +181,8 @@ div.dt-buttons {
 }
 
 .card-table {
-    .table-has-filter, .table-has-actions {
-        .dataTables_filter {
-            inset-inline-start: 9.75rem;
-
-            @media (max-width: 576px) {
-                display: none;
-            }
-        }
-    }
-
-    .table-has-filter.table-has-actions {
-        .dataTables_filter {
-            inset-inline-start: 15rem;
-        }
+    .dataTables_filter {
+        display: none !important;
     }
 }
 
@@ -218,10 +206,11 @@ div.dt-buttons {
         color: var(--bb-pagination-color);
         background-color: var(--bb-pagination-bg);
         border: var(--bb-pagination-border-width) solid var(--bb-pagination-border-color);
-        transition: color 0.15s ease-in-out,
-        background-color 0.15s ease-in-out,
-        border-color 0.15s ease-in-out,
-        box-shadow 0.15s ease-in-out;
+        transition:
+            color 0.15s ease-in-out,
+            background-color 0.15s ease-in-out,
+            border-color 0.15s ease-in-out,
+            box-shadow 0.15s ease-in-out;
 
         &:hover {
             z-index: 2;

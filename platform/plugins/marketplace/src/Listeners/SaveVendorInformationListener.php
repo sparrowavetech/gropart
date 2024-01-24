@@ -63,6 +63,7 @@ class SaveVendorInformationListener
                             'customer_phone' => $customer->phone,
                             'store_name' => $store->name,
                             'store_phone' => $store->phone,
+                            'store_address' => $store->address,
                             'store_link' => route('marketplace.unverified-vendors.view', $customer->getKey()),
                         ]);
                     $mailer->sendUsingTemplate('verify_vendor', get_admin_email()->first());

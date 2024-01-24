@@ -1,22 +1,7 @@
-<input
-    name="page"
-    data-value="{{ $products->currentPage() }}"
-    type="hidden"
->
-
-<div class="row">
-    @forelse ($products as $product)
-        <div class="col-xl-2 col-lg-4 col-md-4 col-sm-6 col-6">
-            @include('plugins/ecommerce::themes.includes.default-product', compact('product'))
-        </div>
-    @empty
-        <div
-            class="alert alert-warning"
-            role="alert"
-        >
-            {{ __(':total Products found', ['total' => 0]) }}
-        </div>
-    @endforelse
-</div>
-
-{!! $products->withQueryString()->links() !!}
+@foreach ($products as $product)
+    @if (view()->exists(Theme::getThemeNamespace('views.ecommerce.includes.product-item')))
+        @include(Theme::getThemeNamespace('views.ecommerce.includes.product-item'))
+    @else
+        @include('plugins/ecommerce::themes.includes.product-item')
+    @endif
+@endforeach

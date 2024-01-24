@@ -192,17 +192,23 @@ class LanguageAdvancedManager
                     $model->getKeyName()
                 );
 
-                $langFromRequest = request()->input('from_lang');
+                $langFromRequest = session()->get('previous_language');
 
                 return $relation
-                    ->when($langFromRequest, function ($query) use ($langFromRequest, $locale) {
-                        $query->where(function ($query) use ($langFromRequest, $locale) {
-                            $query->where('lang_code', $locale)->orWhere('lang_code', $langFromRequest);
-                        });
-                    })
-                    ->when(! $langFromRequest, function ($query) use ($locale) {
-                        $query->where('lang_code', $locale);
-                    });
+                    ->when(
+                        $langFromRequest && $langFromRequest !== $locale,
+                        function ($query) use ($langFromRequest, $locale) {
+                            $query->where(function ($query) use ($langFromRequest, $locale) {
+                                $query->where('lang_code', $locale)->orWhere('lang_code', $langFromRequest);
+                            });
+                        },
+                        function ($query) use ($locale) {
+                            $query->when(
+                                Language::getDefaultLocaleCode() !== $locale,
+                                fn ($query) => $query->where('lang_code', $locale)
+                            );
+                        }
+                    );
             });
 
             foreach ($columns as $column) {

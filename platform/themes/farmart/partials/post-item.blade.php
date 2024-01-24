@@ -30,7 +30,7 @@
                                 >{{ $post->author->name }}</span>
                             </div>
                         @endif
-                        @if ($post->categories->count())
+                        @if ($post->categories->isNotEmpty())
                             <div class="entry-meta-categories">
                                 <span class="d-inline-block">{{ __('in') }}</span>
                                 @foreach ($post->categories as $category)
@@ -47,7 +47,7 @@
                         </div>
                     </div>
                     <div class="entry-description">
-                        <p>{{ Str::limit($post->description, 280) }}</p>
+                        <p>{{ Str::limit($post->description, 120) }}</p>
                     </div>
                 </div>
             </div>

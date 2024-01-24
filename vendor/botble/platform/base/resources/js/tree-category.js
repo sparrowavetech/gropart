@@ -6,22 +6,22 @@ $(() => {
         const $dd = $(document).find('.dd')
 
         if (typeof $dd.nestable === 'function') {
-            $dd
-                .nestable({
-                    group: 1,
-                    maxDepth: $dd.data('depth') || 5,
-                    listClass: 'list-group dd-list',
-                    emptyClass: `dd-empty">${$dd.data('empty-text')}</div><div class="`,
-                    callback: function (l, e) {
-                        $httpClient.make()
-                            .put($treeWrapper.data('update-url'), {
-                                data: $dd.nestable('serialize'),
-                            })
-                            .then(({ data }) => {
-                                Botble.showSuccess(data.message)
-                            })
-                    }
-                })
+            $dd.nestable({
+                group: 1,
+                maxDepth: $dd.data('depth') || 5,
+                listClass: 'list-group dd-list',
+                emptyClass: `dd-empty">${$dd.data('empty-text')}</div><div class="`,
+                callback: function (l, e) {
+                    $httpClient
+                        .make()
+                        .put($treeWrapper.data('update-url'), {
+                            data: $dd.nestable('serialize'),
+                        })
+                        .then(({ data }) => {
+                            Botble.showSuccess(data.message)
+                        })
+                },
+            })
         }
     }
 
@@ -170,7 +170,8 @@ $(() => {
 
             const button = $(event.currentTarget)
 
-            $httpClient.make()
+            $httpClient
+                .make()
                 .withButtonLoading(button)
                 .delete($(button).get(0).dataset.url)
                 .then(({ data }) => {

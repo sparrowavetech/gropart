@@ -3,12 +3,13 @@
 namespace Botble\DevTool\Commands;
 
 use Botble\DevTool\Commands\Abstracts\BaseMakeCommand;
+use Illuminate\Contracts\Console\PromptsForMissingInput;
 use Illuminate\Support\Str;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
 
 #[AsCommand('cms:package:make:crud', 'Create a CRUD inside a package')]
-class PackageMakeCrudCommand extends BaseMakeCommand
+class PackageMakeCrudCommand extends BaseMakeCommand implements PromptsForMissingInput
 {
     public function handle(): int
     {

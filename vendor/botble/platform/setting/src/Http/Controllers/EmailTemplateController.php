@@ -2,6 +2,7 @@
 
 namespace Botble\Setting\Http\Controllers;
 
+use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Supports\Breadcrumb;
 use Botble\Setting\Http\Requests\EmailTemplateRequest;
@@ -19,6 +20,8 @@ class EmailTemplateController extends SettingController
 
     public function index(string $type, string $module, string $template): View
     {
+        Assets::addScriptsDirectly('vendor/core/core/setting/js/email-template.js');
+
         $this->pageTitle(trans(config(sprintf('%s.%s.email.templates.%s.title', $type, $module, $template), '')));
 
         $emailContent = get_setting_email_template_content($type, $module, $template);

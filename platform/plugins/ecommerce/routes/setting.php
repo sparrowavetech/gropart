@@ -215,6 +215,17 @@ AdminHelper::registerRoutes(function () {
                     'uses' => 'StandardAndFormatSettingController@update',
                     'permission' => 'ecommerce.settings.standard-and-format',
                 ]);
+
+                Route::get('flash-sale', [
+                    'as' => 'ecommerce.settings.flash-sale',
+                    'uses' => 'FlashSaleSettingController@edit',
+                ]);
+
+                Route::put('flash-sale', [
+                    'as' => 'ecommerce.settings.flash-sale.update',
+                    'uses' => 'FlashSaleSettingController@update',
+                    'permission' => 'ecommerce.settings.flash-sale',
+                ]);
             });
         });
     });

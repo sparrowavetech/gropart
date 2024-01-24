@@ -4,7 +4,7 @@
         delegateType: 'touchend',
 
         handle: function (event) {
-            var handleObj = event.handleObj,
+            let handleObj = event.handleObj,
                 targetData = jQuery.data(event.target),
                 now = new Date().getTime(),
                 delta = targetData.lastTouch ? now - targetData.lastTouch : 0,

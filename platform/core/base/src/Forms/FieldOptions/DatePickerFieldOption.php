@@ -5,7 +5,7 @@ namespace Botble\Base\Forms\FieldOptions;
 use Botble\Base\Facades\BaseHelper;
 use Carbon\Carbon;
 
-class DatePickerFieldOption extends TextareaFieldOption
+class DatePickerFieldOption extends InputFieldOption
 {
     public static function make(): static
     {

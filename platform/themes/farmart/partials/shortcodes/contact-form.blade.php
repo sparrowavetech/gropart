@@ -120,7 +120,7 @@
             <div class="col-12">
                 <div class="mt-4">
                     <button
-                        class="btn btn-primary btn-submit"
+                        class="btn btn-primary"
                         type="submit"
                     >{{ __('Send Message') }}</button>
                 </div>

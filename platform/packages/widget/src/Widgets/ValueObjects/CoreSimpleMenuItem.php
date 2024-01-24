@@ -9,6 +9,10 @@ class CoreSimpleMenuItem
     public function __construct(array $data)
     {
         foreach ($data as $item) {
+            if (! isset($item['key']) || ! isset($item['value'])) {
+                continue;
+            }
+
             $this->items[$item['key']] = $item['value'];
         }
     }

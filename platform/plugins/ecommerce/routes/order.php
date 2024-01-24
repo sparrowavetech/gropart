@@ -110,6 +110,12 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers'], function () {
                 'uses' => 'OrderController@generateInvoice',
                 'permission' => 'orders.edit',
             ])->wherePrimaryKey('order');
+
+            Route::get('orders/{order}/download-proof', [
+                'as' => 'download-proof',
+                'uses' => 'OrderController@downloadProof',
+                'permission' => 'orders.edit',
+            ])->wherePrimaryKey('order');
         });
 
         Route::group(['prefix' => 'incomplete-orders', 'as' => 'orders.'], function () {

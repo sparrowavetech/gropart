@@ -1,13 +1,16 @@
 <?php
 
 use Botble\Base\Facades\AdminHelper;
+use Botble\Base\Http\Middleware\RequiresJsonRequestMiddleware;
+use Botble\Ecommerce\Http\Controllers\Fronts\QuickViewController;
 use Botble\Ecommerce\Models\Product;
 use Botble\Slug\Facades\SlugHelper;
+use Botble\Theme\Events\ThemeRoutingBeforeEvent;
 use Botble\Theme\Facades\Theme;
 use Illuminate\Support\Facades\Route;
 
-Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers'], function () {
-    AdminHelper::registerRoutes(function () {
+AdminHelper::registerRoutes(function () {
+    Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers'], function () {
         Route::group(['prefix' => 'ecommerce'], function () {
             Route::post('update-currencies-from-exchange-api', [
                 'as' => 'ecommerce.setting.update-currencies-from-exchange-api',
@@ -104,6 +107,12 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers'], function () {
             Route::group(['prefix' => 'brands', 'as' => 'brands.'], function () {
                 Route::resource('', 'BrandController')
                     ->parameters(['' => 'brand']);
+
+                Route::get('search', [
+                    'as' => 'search',
+                    'uses' => 'BrandController@getSearch',
+                    'permission' => 'brands.index',
+                ]);
             });
 
             Route::group(['prefix' => 'product-collections', 'as' => 'product-collections.'], function () {
@@ -206,32 +215,39 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers'], function () {
     });
 });
 
-Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers\Fronts'], function () {
-    Theme::registerRoutes(function () {
-        Route::get(
-            (theme_option('ecommerce_product_listing_page_slug') ?: (SlugHelper::getPrefix(
-                Product::class,
-                'products'
-            ) ?: 'products')),
-            [
-                'uses' => 'PublicProductController@getProducts',
-                'as' => 'public.products',
-            ]
-        );
+Theme::registerRoutes(function () {
+    app('events')->listen(ThemeRoutingBeforeEvent::class, function () {
+        Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers\Fronts'], function () {
+            Route::get(
+                (theme_option('ecommerce_product_listing_page_slug') ?: (SlugHelper::getPrefix(
+                    Product::class,
+                    'products'
+                ) ?: 'products')),
+                [
+                    'uses' => 'PublicProductController@getProducts',
+                    'as' => 'public.products',
+                ]
+            );
 
-        Route::get('currency/switch/{code?}', [
-            'as' => 'public.change-currency',
-            'uses' => 'PublicEcommerceController@changeCurrency',
-        ]);
+            Route::get('currency/switch/{code?}', [
+                'as' => 'public.change-currency',
+                'uses' => 'PublicEcommerceController@changeCurrency',
+            ]);
 
-        Route::get('product-variation/{id}', [
-            'as' => 'public.web.get-variation-by-attributes',
-            'uses' => 'PublicProductController@getProductVariation',
-        ])->wherePrimaryKey();
+            Route::get('product-variation/{id}', [
+                'as' => 'public.web.get-variation-by-attributes',
+                'uses' => 'PublicProductController@getProductVariation',
+            ])->wherePrimaryKey();
 
-        Route::get('orders/tracking', [
-            'as' => 'public.orders.tracking',
-            'uses' => 'PublicProductController@getOrderTracking',
-        ])->wherePrimaryKey();
+            Route::get('orders/tracking', [
+                'as' => 'public.orders.tracking',
+                'uses' => 'PublicProductController@getOrderTracking',
+            ])->wherePrimaryKey();
+
+            Route::get('ajax/quick-view/{id?}', [QuickViewController::class, 'show'])
+                ->middleware(RequiresJsonRequestMiddleware::class)
+                ->name('public.ajax.quick-view')
+                ->wherePrimaryKey();
+        });
     });
 });

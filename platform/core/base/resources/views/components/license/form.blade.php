@@ -27,7 +27,7 @@
     name="purchase_code"
     id="purchase_code"
     :disabled="!$manageLicense"
-    placeholder="Ex: 10101010-10aa-0101-a1b1010a01b10"
+    placeholder="Ex: 10101000-0101-0100-0010-001101000010"
 >
     <x-slot:helper-text>
         <a

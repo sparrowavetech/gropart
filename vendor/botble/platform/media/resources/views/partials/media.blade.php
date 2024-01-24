@@ -60,4 +60,7 @@
 </x-core::modal>
 
 @include('core/media::config')
+
 <script src="{{ asset('vendor/core/core/media/js/integrate.js?v=' . time()) }}"></script>
+
+{!! apply_filters('core_base_media_after_assets', null) !!}

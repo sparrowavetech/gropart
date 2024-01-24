@@ -70,13 +70,15 @@
                     <div class="ps-copyright">
                         @php $logo = theme_option('logo_vendor_dashboard', theme_option('logo')); @endphp
                         @if ($logo)
-                            <img
-                                src="{{ RvMedia::getImageUrl($logo) }}"
-                                alt="{{ theme_option('site_title') }}"
-                                height="40"
-                            >
+                            <a href="{{ route('public.index') }}" title="{{ $siteTitle = theme_option('site_title') }}">
+                                <img
+                                    src="{{ RvMedia::getImageUrl($logo) }}"
+                                    alt="{{ $siteTitle }}"
+                                    height="40"
+                                >
+                            </a>
                         @endif
-                        <p>{{ theme_option('copyright') }}</p>
+                        <p>{!! BaseHelper::clean(str_replace('%Y', date('Y'), theme_option('copyright'))) !!}</p>
                     </div>
                 </div>
             </div>
@@ -88,18 +90,25 @@
     >
         <header class="d-flex justify-content-between align-items-center mb-3">
             <h3 class="fs-1">{{ page_title()->getTitle(false) }}</h3>
+            <div class="d-flex align-items-center gap-4">
+                @if (is_plugin_active('language'))
+                    @include(MarketplaceHelper::viewPath('vendor-dashboard.partials.language-switcher'))
+                @endif
 
-            @if (auth('customer')->user()->store && auth('customer')->user()->store->id)
-                <div class="d-flex align-items-center gap-4">
-                    @if (is_plugin_active('language'))
-                        @include(MarketplaceHelper::viewPath('vendor-dashboard.partials.language-switcher'))
-                    @endif
-                    <a href="{{ auth('customer')->user()->store->url }}" target="_blank" class="text-uppercase">
+                @php($customer = auth('customer')->user())
+
+                @if ($customer?->store)
+                    <a href="{{ $customer->store->url }}" target="_blank" class="text-uppercase">
                         <x-core::icon name="ti ti-building-store" />
                         {{ __('View your store') }}
                     </a>
-                </div>
-            @endif
+                @endif
+
+                <a href="{{ route('public.index') }}" target="_blank" class="text-uppercase">
+                    {{ __('Go to homepage') }}
+                    <x-core::icon name="ti ti-arrow-right" />
+                </a>
+            </div>
         </header>
 
         <div id="app">

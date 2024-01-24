@@ -15,36 +15,36 @@
 
             @foreach ($fields as $key => $field)
                 @if ($field->getName() == $form->getBreakFieldPoint())
-                    @break
+                @break
 
-                @else
-                    @unset($fields[$key])
-                @endif
+            @else
+                @unset($fields[$key])
+            @endif
 
-                @continue(in_array($field->getName(), $exclude))
+            @continue(in_array($field->getName(), $exclude))
 
-                {!! $field->render() !!}
-            @endforeach
+            {!! $field->render() !!}
+        @endforeach
 
-            {{ $form->getCloseWrapperFormColumns() }}
-        </div>
-    @endif
+        {{ $form->getCloseWrapperFormColumns() }}
+    </div>
+@endif
 
-    @if ($showEnd)
-        {!! Form::close() !!}
-    @endif
+@if ($showEnd)
+    {!! Form::close() !!}
+@endif
 
-    @yield('form_end')
+@yield('form_end')
 @endsection
 
 @if ($form->getValidatorClass())
-    @if ($form->isUseInlineJs())
-        {!! Assets::scriptToHtml('jquery') !!}
-        {!! Assets::scriptToHtml('form-validation') !!}
+@if ($form->isUseInlineJs())
+    {!! Assets::scriptToHtml('jquery') !!}
+    {!! Assets::scriptToHtml('form-validation') !!}
+    {!! $form->renderValidatorJs() !!}
+@else
+    @push('footer')
         {!! $form->renderValidatorJs() !!}
-    @else
-        @push('footer')
-            {!! $form->renderValidatorJs() !!}
-        @endpush
-    @endif
+    @endpush
+@endif
 @endif

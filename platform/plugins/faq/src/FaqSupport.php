@@ -2,10 +2,12 @@
 
 namespace Botble\Faq;
 
+use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\MetaBox;
 use Botble\Base\Models\BaseModel;
 use Botble\Faq\Contracts\Faq as FaqContract;
+use Botble\Faq\Models\Faq;
 use Botble\Theme\Facades\Theme;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
@@ -65,5 +67,40 @@ class FaqSupport implements FaqContract
         } catch (Throwable $exception) {
             BaseHelper::logError($exception);
         }
+    }
+
+    public function renderMetaBox(Model|null $model = null): string
+    {
+        Assets::addStylesDirectly(['vendor/core/plugins/faq/css/faq.css'])
+            ->addScriptsDirectly(['vendor/core/plugins/faq/js/faq.js']);
+        $value = [];
+        $selectedFaqs = [];
+
+        if ($model && $model->getKey()) {
+            $value = MetaBox::getMetaData($model, 'faq_schema_config', true);
+            $selectedFaqs = MetaBox::getMetaData($model, 'faq_ids', true) ?: [];
+        }
+
+        $hasValue = ! empty($value);
+
+        $value = (array)$value;
+
+        foreach ($value as $key => $item) {
+            if (! is_array($item)) {
+                continue;
+            }
+
+            foreach ($item as $subItem) {
+                if (is_array($subItem['value'])) {
+                    Arr::forget($value, $key);
+                }
+            }
+        }
+
+        $value = json_encode($value);
+
+        $faqs = Faq::query()->wherePublished()->pluck('question', 'id')->all();
+
+        return view('plugins/faq::schema-config-box', compact('value', 'hasValue', 'faqs', 'selectedFaqs'))->render();
     }
 }

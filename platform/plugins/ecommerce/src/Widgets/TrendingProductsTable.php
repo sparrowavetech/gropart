@@ -3,10 +3,11 @@
 namespace Botble\Ecommerce\Widgets;
 
 use Botble\Base\Widgets\Table;
+use Botble\Ecommerce\Tables\Reports\TrendingProductsTable as BaseTrendingProductsTable;
 
 class TrendingProductsTable extends Table
 {
-    protected string $table = \Botble\Ecommerce\Tables\Reports\TrendingProductsTable::class;
+    protected string $table = BaseTrendingProductsTable::class;
 
     protected string $route = 'ecommerce.report.trending-products';
 

@@ -20,6 +20,7 @@ use Botble\Base\Forms\Fields\HtmlField;
 use Botble\Base\Forms\Fields\MediaFileField;
 use Botble\Base\Forms\Fields\MediaImageField;
 use Botble\Base\Forms\Fields\MediaImagesField;
+use Botble\Base\Forms\Fields\MultiCheckListField;
 use Botble\Base\Forms\Fields\OnOffCheckboxField;
 use Botble\Base\Forms\Fields\OnOffField;
 use Botble\Base\Forms\Fields\RadioField;
@@ -30,6 +31,7 @@ use Botble\Base\Forms\Fields\TimeField;
 use Botble\Base\Models\BaseModel as BaseModelInstance;
 use Botble\Base\Supports\Builders\Extensible;
 use Botble\Base\Supports\Builders\RenderingExtensible;
+use Botble\Base\Traits\Forms\HasCollapsible;
 use Botble\Base\Traits\Forms\HasColumns;
 use Botble\Base\Traits\Forms\HasMetadata;
 use Botble\JsValidation\Facades\JsValidator;
@@ -41,15 +43,18 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Conditionable;
+use Illuminate\Support\Traits\Tappable;
 use Kris\LaravelFormBuilder\Fields\FormField;
 
 abstract class FormAbstract extends Form implements ExtensibleContract
 {
     use Conditionable;
+    use Tappable;
     use Extensible;
     use HasColumns;
     use HasMetadata;
     use RenderingExtensible;
+    use HasCollapsible;
 
     protected array $options = [];
 
@@ -143,7 +148,7 @@ abstract class FormAbstract extends Form implements ExtensibleContract
 
         $metaBox = $this->metaBoxes[$name];
 
-        if ($metaBox['content'] instanceof Closure) {
+        if (isset($metaBox['content']) && $metaBox['content'] instanceof Closure) {
             $metaBox['content'] = call_user_func($metaBox['content'], $this->getModel());
         }
 
@@ -264,6 +269,7 @@ abstract class FormAbstract extends Form implements ExtensibleContract
             'html' => HtmlField::class,
             'repeater' => RepeaterField::class,
             'tags' => TagField::class,
+            'multiCheckList' => MultiCheckListField::class,
         ];
 
         foreach ($customFields as $key => $field) {
@@ -441,13 +447,6 @@ abstract class FormAbstract extends Form implements ExtensibleContract
         return $this;
     }
 
-    public function tap(callable $callback = null): static
-    {
-        $callback($this);
-
-        return $this;
-    }
-
     public function template(string $template): static
     {
         $this->setFormOption('template', $template);
@@ -545,12 +544,19 @@ abstract class FormAbstract extends Form implements ExtensibleContract
 
         $this->dispatchAfterSaving();
 
-        if ($model instanceof Model) {
-            if ($model->wasRecentlyCreated) {
-                CreatedContentEvent::dispatch('form', $request, $model);
-            } else {
-                UpdatedContentEvent::dispatch('form', $request, $model);
-            }
+        $model = $this->getModel();
+
+        if ($model instanceof Model && $model->exists) {
+            $this->fireModelEvents($model);
+        }
+    }
+
+    public function fireModelEvents(Model $model)
+    {
+        if ($model->wasRecentlyCreated) {
+            CreatedContentEvent::dispatch('form', $this->request, $model);
+        } else {
+            UpdatedContentEvent::dispatch('form', $this->request, $model);
         }
     }
 
@@ -619,9 +625,22 @@ abstract class FormAbstract extends Form implements ExtensibleContract
         return static::create([...$options, 'model' => $model], $data);
     }
 
-    protected function hasFiles(): static
+    public function hasFiles(): static
     {
         $this->setFormOption('files', true);
+
+        return $this;
+    }
+
+    public function formClass(string $class, bool $override = false): static
+    {
+        if ($override) {
+            $this->setFormOption('class', $class);
+
+            return $this;
+        }
+
+        $this->setFormOption('class', $this->getFormOption('class') . ' ' . $class);
 
         return $this;
     }

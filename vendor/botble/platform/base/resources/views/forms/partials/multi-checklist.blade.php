@@ -1,7 +1,3 @@
-@if ($emptyValue || $emptyValue === '')
-    <input type="hidden" name="{{ $name }}" value="{{ $emptyValue }}">
-@endif
-
 @if (! $asDropdown && $choices)
     <x-core::form.fieldset class="fieldset-for-multi-check-list">
         <div class="multi-check-list-wrapper">
@@ -11,7 +7,7 @@
 
             @foreach ($choices as $key => $item)
                 <x-core::form.checkbox
-                    :id="sprintf('%s-item-%s', $name, $key)"
+                    :id="sprintf('%s-item-%s', Str::slug($name), $key)"
                     :name="$name"
                     :value="$key"
                     :label="$item"
@@ -61,7 +57,7 @@
                         @foreach ($choices as $key => $item)
                             <li>
                                 <x-core::form.checkbox
-                                    :id="sprintf('%s-item-%s', $name, $key)"
+                                    :id="sprintf('%s-item-%s', Str::slug($name), $key)"
                                     :name="$name"
                                     :value="$key"
                                     :label="$item"

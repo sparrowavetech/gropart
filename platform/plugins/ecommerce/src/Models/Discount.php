@@ -4,6 +4,7 @@ namespace Botble\Ecommerce\Models;
 
 use Botble\Base\Models\BaseModel;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
@@ -100,5 +101,25 @@ class Discount extends BaseModel
     protected function leftQuantity(): Attribute
     {
         return Attribute::get(fn () => $this->quantity - $this->total_used);
+    }
+
+    public function scopeActive(Builder $query): void
+    {
+        $query
+            ->where('start_date', '<=', Carbon::now())
+            ->where(
+                fn (Builder $query) => $query
+                    ->whereNull('end_date')
+                    ->orWhere('end_date', '>=', Carbon::now()->toDateTimeString())
+            );
+    }
+
+    public function scopeAvailable(Builder $query): void
+    {
+        $query->where(
+            fn (Builder $query) => $query
+                ->whereNull('quantity')
+                ->orWhereColumn('quantity', '>', 'total_used')
+        );
     }
 }

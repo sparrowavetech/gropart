@@ -14,13 +14,24 @@
     <p class="text-secondary">
         {{ trans('packages/installer::installer.welcome.message') }}
     </p>
+
+    <form method="POST" action="{{ route('installers.welcome.next') }}" id="welcome-form">
+        @csrf
+
+        <x-core::form.select
+            :label="trans('packages/installer::installer.welcome.language')"
+            name="language"
+            :options="$languages"
+            :value="old('language', app()->getLocale())"
+        />
+    </form>
 @endsection
 
 @section('footer')
     <x-core::button
-        tag="a"
+        type="submit"
         color="primary"
-        :href="URL::signedRoute('installers.requirements.index', [], \Carbon\Carbon::now()->addMinutes(30))"
+        form="welcome-form"
     >
         {{ trans('packages/installer::installer.welcome.next') }}
     </x-core::button>

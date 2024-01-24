@@ -2,6 +2,7 @@
 
 namespace Botble\Translation\Tables;
 
+use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\Html;
 use Botble\Base\Supports\Language;
 use Botble\Table\Abstracts\TableAbstract;
@@ -21,6 +22,9 @@ class ThemeTranslationTable extends TableAbstract
         $this->setView($this->simpleTableView());
         $this->pageLength = 100;
         $this->hasOperations = false;
+
+        Assets::addScripts(['bootstrap-editable'])
+            ->addStyles(['bootstrap-editable']);
     }
 
     public function ajax(): JsonResponse
@@ -72,7 +76,7 @@ class ThemeTranslationTable extends TableAbstract
 
     public function htmlDrawCallbackFunction(): string|null
     {
-        return parent::htmlDrawCallbackFunction() . '$(".editable").editable({mode: "inline"});';
+        return parent::htmlDrawCallbackFunction() . 'Botble.initEditable()';
     }
 
     public function isSimpleTable(): bool

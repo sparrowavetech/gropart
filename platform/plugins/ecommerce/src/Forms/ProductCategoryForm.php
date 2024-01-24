@@ -2,8 +2,14 @@
 
 namespace Botble\Ecommerce\Forms;
 
+use Botble\Base\Forms\FieldOptions\ContentFieldOption;
+use Botble\Base\Forms\FieldOptions\NameFieldOption;
+use Botble\Base\Forms\FieldOptions\OnOffFieldOption;
 use Botble\Base\Forms\FieldOptions\StatusFieldOption;
+use Botble\Base\Forms\Fields\EditorField;
+use Botble\Base\Forms\Fields\OnOffField;
 use Botble\Base\Forms\Fields\SelectField;
+use Botble\Base\Forms\Fields\TextField;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Ecommerce\Http\Requests\ProductCategoryRequest;
 use Botble\Ecommerce\Models\ProductCategory;
@@ -15,22 +21,12 @@ class ProductCategoryForm extends FormAbstract
         $this
             ->setupModel(new ProductCategory())
             ->setValidatorClass(ProductCategoryRequest::class)
-            ->add('name', 'text', [
-                'label' => trans('core/base::forms.name'),
-                'required' => true,
-                'attr' => [
-                    'placeholder' => trans('core/base::forms.name_placeholder'),
-                    'data-counter' => 250,
-                ],
-            ])
-            ->add('description', 'editor', [
-                'label' => trans('core/base::forms.description'),
-                'attr' => [
-                    'rows' => 4,
-                    'placeholder' => trans('core/base::forms.description_placeholder'),
-                    'data-counter' => 500,
-                ],
-            ])
+            ->add('name', TextField::class, NameFieldOption::make()->toArray())
+            ->add(
+                'description',
+                EditorField::class,
+                ContentFieldOption::make()->label(trans('core/base::forms.description'))->toArray()
+            )
             ->add('status', SelectField::class, StatusFieldOption::make()->toArray())
             ->add('image', 'mediaImage')
             ->add(
@@ -53,10 +49,14 @@ class ProductCategoryForm extends FormAbstract
                     'style' => 'display: block;',
                 ],
             ])
-            ->add('is_featured', 'onOff', [
-                'label' => trans('core/base::forms.is_featured'),
-                'default_value' => false,
-            ])
+            ->add(
+                'is_featured',
+                OnOffField::class,
+                OnOffFieldOption::make()
+                    ->label(trans('core/base::forms.is_featured'))
+                    ->defaultValue(false)
+                    ->toArray()
+            )
             ->setBreakFieldPoint('status');
     }
 }

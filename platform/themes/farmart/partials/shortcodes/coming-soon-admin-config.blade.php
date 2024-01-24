@@ -25,7 +25,7 @@
     <input
         class="form-control"
         name="time"
-        type="text"
+        type="datetime-local"
         value="{{ Arr::get($attributes, 'time') }}"
         placeholder="Time"
     >

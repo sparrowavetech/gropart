@@ -2,8 +2,8 @@
 
 namespace Botble\Newsletter\Enums;
 
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Supports\Enum;
-use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\HtmlString;
 
 /**
@@ -23,9 +23,9 @@ class NewsletterStatusEnum extends Enum
         $color = match ($this->value) {
             self::SUBSCRIBED => 'success',
             self::UNSUBSCRIBED => 'warning',
-            default => null,
+            default => 'primary',
         };
 
-        return Blade::render(sprintf('<x-core::badge label="%s" color="%s" />', $this->label(), $color));
+        return BaseHelper::renderBadge($this->label(), $color);
     }
 }

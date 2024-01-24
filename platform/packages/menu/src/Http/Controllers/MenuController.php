@@ -46,6 +46,8 @@ class MenuController extends BaseController
 
     public function create()
     {
+        RenderingMenuOptions::dispatch();
+
         $this->pageTitle(trans('packages/menu::menu.create'));
 
         return MenuForm::create()->renderForm();

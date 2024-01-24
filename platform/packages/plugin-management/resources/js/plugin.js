@@ -2,27 +2,25 @@ class PluginManagement {
     init() {
         $(document).on('click', '.btn-trigger-remove-plugin', (event) => {
             event.preventDefault()
+
             $('#confirm-remove-plugin-button').data('plugin', $(event.currentTarget).data('plugin'))
             $('#remove-plugin-modal').modal('show')
         })
 
         $(document).on('click', '#confirm-remove-plugin-button', (event) => {
             event.preventDefault()
+
             const _self = $(event.currentTarget)
-            Botble.showButtonLoading(_self)
-            const $modal = $('#remove-plugin-modal')
 
             $httpClient
                 .make()
+                .withButtonLoading(_self)
                 .delete(route('plugins.remove', { plugin: _self.data('plugin') }))
                 .then(({ data }) => {
                     Botble.showSuccess(data.message)
                     window.location.reload()
                 })
-                .finally(() => {
-                    Botble.hideButtonLoading(_self)
-                    $modal.modal('hide')
-                })
+                .finally(() => $('#remove-plugin-modal').modal('hide'))
         })
 
         $(document).on('click', '.btn-trigger-update-plugin', (event) => {
@@ -32,28 +30,24 @@ class PluginManagement {
             const uuid = _self.data('uuid')
             const name = _self.data('name')
 
-            Botble.showButtonLoading(_self)
-            _self.attr('disabled', true)
+            _self.prop('disabled', true)
 
             $httpClient
                 .make()
+                .withButtonLoading(_self)
                 .post(route('plugins.marketplace.ajax.update', { id: uuid, name: name }))
                 .then(({ data }) => {
                     Botble.showSuccess(data.message)
-                    setTimeout(() => {
-                        window.location.reload()
-                    }, 2000)
+
+                    setTimeout(() => window.location.reload(), 2000)
                 })
-                .finally(() => {
-                    Botble.hideButtonLoading(_self)
-                    _self.removeAttr('disabled', true)
-                })
+                .finally(() => _self.prop('disabled', false))
         })
 
         $(document).on('click', '.btn-trigger-change-status', async (event) => {
             event.preventDefault()
+
             const _self = $(event.currentTarget)
-            Botble.showButtonLoading(_self)
 
             const pluginName = _self.data('plugin')
 
@@ -64,10 +58,9 @@ class PluginManagement {
 
             $httpClient
                 .makeWithoutErrorHandler()
+                .withButtonLoading(_self)
                 .post(route('plugins.check-requirement', { name: pluginName }))
-                .then(async ({ data }) => {
-                    await this.activateOrDeactivatePlugin(pluginName)
-                })
+                .then(() => this.activateOrDeactivatePlugin(pluginName))
                 .catch((e) => {
                     const { data, message } = e.response.data
 
@@ -77,20 +70,17 @@ class PluginManagement {
                         $modal.find('input[name="plugin_name"]').val(pluginName)
                         $modal.find('input[name="ids"]').val(data.existing_plugins_on_marketplace)
                         $modal.modal('show')
-                        Botble.hideButtonLoading(_self)
 
                         return
                     }
 
                     Botble.showError(message)
                 })
-                .finally(() => {
-                    Botble.hideButtonLoading(_self)
-                })
         })
 
         $(document).on('click', '#confirm-install-plugin-button', async (event) => {
             const _self = $(event.currentTarget)
+
             Botble.showButtonLoading(_self)
 
             const $body = _self.parent().parent()
@@ -117,6 +107,32 @@ class PluginManagement {
             _self.text(_self.data('text'))
         })
 
+        $(document).on('keyup', 'input[type="search"][name="search"]', (event) => {
+            event.preventDefault()
+
+            const search = $(event.currentTarget).val().toLowerCase()
+
+            $('.plugin-item').each((index, element) => {
+                const $element = $(element)
+                const plugin = $element.data('plugin')
+
+                const name = plugin.name.toLowerCase()
+                const description = plugin.description.toLowerCase()
+
+                if (name.includes(search) || description.includes(search)) {
+                    $element.show()
+                } else {
+                    $element.hide()
+                }
+            })
+
+            if ($('.plugin-item:visible').length === 0) {
+                $('.empty').show()
+            } else {
+                $('.empty').hide()
+            }
+        })
+
         this.checkUpdate()
     }
 
@@ -132,7 +148,7 @@ class PluginManagement {
                 Object.keys(data.data).forEach((key) => {
                     const plugin = data.data[key]
 
-                    $('button[data-check-update="' + plugin.name + '"]')
+                    $(`button[data-check-update="${plugin.name}"]`)
                         .data('uuid', plugin.id)
                         .show()
                 })
@@ -147,9 +163,6 @@ class PluginManagement {
                 Botble.showSuccess(data.message)
 
                 if (reload) {
-                    $('#plugin-list #app-' + pluginName).load(
-                        window.location.href + ' #plugin-list #app-' + pluginName + ' > *'
-                    )
                     window.location.reload()
                 }
             })

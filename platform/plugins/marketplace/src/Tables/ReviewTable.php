@@ -21,6 +21,8 @@ class ReviewTable extends TableAbstract
 {
     use ForVendor;
 
+    protected $hasOperations = false;
+
     public function setup(): void
     {
         $this
@@ -103,20 +105,5 @@ class ReviewTable extends TableAbstract
                 ->alignStart(),
             CreatedAtColumn::make(),
         ];
-    }
-
-    public function htmlDrawCallbackFunction(): ?string
-    {
-        return parent::htmlDrawCallbackFunction() . 'if (jQuery().fancybox) {
-            $(".dataTables_wrapper .fancybox").fancybox({
-                openEffect: "none",
-                closeEffect: "none",
-                overlayShow: true,
-                overlayOpacity: 0.7,
-                helpers: {
-                    media: {}
-                },
-            });
-        }';
     }
 }

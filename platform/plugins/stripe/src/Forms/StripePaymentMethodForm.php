@@ -8,7 +8,6 @@ use Botble\Base\Forms\FieldOptions\TextFieldOption;
 use Botble\Base\Forms\Fields\SelectField;
 use Botble\Base\Forms\Fields\TextField;
 use Botble\Payment\Forms\PaymentMethodForm;
-use Illuminate\Support\Facades\Blade;
 
 class StripePaymentMethodForm extends PaymentMethodForm
 {
@@ -22,23 +21,7 @@ class StripePaymentMethodForm extends PaymentMethodForm
             ->paymentDescription(trans('plugins/payment::payment.stripe_description'))
             ->paymentLogo(url('vendor/core/plugins/stripe/images/stripe.svg'))
             ->paymentUrl('https://stripe.com')
-            ->paymentInstructions(Blade::render(<<<BLADE
-                <ol>
-                    <li>
-                        <p>
-                            <a href="https://dashboard.stripe.com/register" target="_blank">
-                                {{ trans('plugins/payment::payment.service_registration', ['name' => 'Stripe']) }}
-                            </a>
-                        </p>
-                    </li>
-                    <li>
-                        <p>{{ trans('plugins/payment::payment.stripe_after_service_registration_msg', ['name' => 'Stripe']) }}</p>
-                    </li>
-                    <li>
-                        <p>{{ trans('plugins/payment::payment.stripe_enter_client_id_and_secret') }}</p>
-                    </li>
-                </ol>
-            BLADE))
+            ->paymentInstructions(view('plugins/stripe::instructions')->render())
             ->add(
                 'payment_stripe_client_id',
                 TextField::class,
@@ -72,6 +55,15 @@ class StripePaymentMethodForm extends PaymentMethodForm
                         STRIPE_PAYMENT_METHOD_NAME,
                         'stripe_api_charge',
                     ))
+                    ->toArray()
+            )
+            ->add(
+                'payment_stripe_webhook_secret',
+                'password',
+                TextFieldOption::make()
+                    ->label(trans('plugins/stripe::stripe.webhook_secret'))
+                    ->value(BaseHelper::hasDemoModeEnabled() ? '*******************************' : get_payment_setting('webhook_secret', 'stripe'))
+                    ->placeholder('whsec_*************')
                     ->toArray()
             );
     }

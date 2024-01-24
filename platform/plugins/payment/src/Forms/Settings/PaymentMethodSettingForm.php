@@ -2,6 +2,7 @@
 
 namespace Botble\Payment\Forms\Settings;
 
+use Botble\Base\Facades\Assets;
 use Botble\Base\Forms\FieldOptions\SelectFieldOption;
 use Botble\Base\Forms\Fields\SelectField;
 use Botble\Payment\Enums\PaymentMethodEnum;
@@ -14,6 +15,8 @@ class PaymentMethodSettingForm extends SettingForm
     public function setup(): void
     {
         parent::setup();
+
+        Assets::addStylesDirectly('vendor/core/plugins/payment/css/payment-setting.css');
 
         $this
             ->contentOnly()

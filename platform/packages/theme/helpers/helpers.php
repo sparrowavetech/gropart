@@ -78,7 +78,7 @@ if (! function_exists('theme_option')) {
 if (! function_exists('theme_path')) {
     function theme_path(string|null $path = null): string
     {
-        return platform_path('themes' . DIRECTORY_SEPARATOR . $path);
+        return platform_path('themes' . DIRECTORY_SEPARATOR . ltrim((string)$path, DIRECTORY_SEPARATOR));
     }
 }
 

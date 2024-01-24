@@ -3,7 +3,9 @@
     data-bs-toggle="tooltip"
     data-bs-original-title="{{ trans('core/base::tables.edit') }}"
     href="{{ route('product-categories.edit', $item->id) }}"
-><i class="fa fa-edit"></i></a>
+>
+    <x-core::icon name="ti ti-edit" />
+</a>
 @if (!$item->is_default)
     <a
         class="btn btn-icon btn-danger deleteDialog"

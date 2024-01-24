@@ -14,6 +14,6 @@ class ClearDashboardMenuCachesForLoggedUser
             return;
         }
 
-        DashboardMenu::clearCachesForCurrentUser();
+        DashboardMenu::default()->clearCachesForCurrentUser();
     }
 }

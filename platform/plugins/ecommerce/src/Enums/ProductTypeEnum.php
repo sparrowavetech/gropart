@@ -2,9 +2,9 @@
 
 namespace Botble\Ecommerce\Enums;
 
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Supports\Enum;
 use Botble\Ecommerce\Facades\EcommerceHelper;
-use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\HtmlString;
 
 /**
@@ -24,10 +24,10 @@ class ProductTypeEnum extends Enum
         $color = match ($this->value) {
             self::PHYSICAL => 'info',
             self::DIGITAL => 'primary',
-            default => null,
+            default => 'primary',
         };
 
-        return Blade::render(sprintf('<x-core::badge label="%s" color="%s" />', $this->label(), $color));
+        return BaseHelper::renderBadge($this->label(), $color);
     }
 
     public function toIcon(): string
@@ -42,6 +42,6 @@ class ProductTypeEnum extends Enum
             default => 'ti ti-camera',
         };
 
-        return Blade::render(sprintf('<x-core::icon name="%s" />', $icon));
+        return BaseHelper::renderIcon($icon);
     }
 }

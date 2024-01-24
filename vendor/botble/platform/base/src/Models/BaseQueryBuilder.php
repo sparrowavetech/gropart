@@ -10,8 +10,11 @@ class BaseQueryBuilder extends Builder
 {
     public function addSearch(string $column, string|null $term, bool $isPartial = true, bool $or = true): static
     {
+        $term = trim($term);
+        $term = str_replace('&', '&amp;', $term);
+
         if (! $isPartial) {
-            $this->{$or ? 'orWhere' : 'where'}($column, 'LIKE', '%' . trim($term) . '%');
+            $this->{$or ? 'orWhere' : 'where'}($column, 'LIKE', '%' . $term . '%');
 
             return $this;
         }

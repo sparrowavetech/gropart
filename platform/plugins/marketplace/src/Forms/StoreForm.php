@@ -4,18 +4,22 @@ namespace Botble\Marketplace\Forms;
 
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Facades\Assets;
-use Botble\Base\Facades\MetaBox;
+use Botble\Base\Forms\FieldOptions\MediaImageFieldOption;
+use Botble\Base\Forms\FieldOptions\NameFieldOption;
 use Botble\Base\Forms\Fields\MediaImageField;
+use Botble\Base\Forms\Fields\TextField;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Ecommerce\Enums\CustomerStatusEnum;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Models\Customer;
+use Botble\Marketplace\Forms\Concerns\HasSubmitButton;
 use Botble\Marketplace\Http\Requests\StoreRequest;
 use Botble\Marketplace\Models\Store;
-use Illuminate\Support\Facades\Blade;
 
 class StoreForm extends FormAbstract
 {
+    use HasSubmitButton;
+
     public function setup(): void
     {
         Assets::addScriptsDirectly([
@@ -29,15 +33,7 @@ class StoreForm extends FormAbstract
             ->columns(6)
             ->contentOnly()
             ->hasFiles()
-            ->add('name', 'text', [
-                'label' => trans('core/base::forms.name'),
-                'required' => true,
-                'attr' => [
-                    'placeholder' => trans('core/base::forms.name_placeholder'),
-                    'data-counter' => 250,
-                ],
-                'colspan' => 3,
-            ])
+            ->add('name', TextField::class, NameFieldOption::make()->required()->colspan(6)->toArray())
             ->add('slug', 'html', [
                 'html' => view('plugins/marketplace::stores.partials.shop-url-field', ['store' => $this->getModel()])->render(),
                 'colspan' => 3,
@@ -58,7 +54,7 @@ class StoreForm extends FormAbstract
                     'placeholder' => trans('plugins/marketplace::store.forms.phone_placeholder'),
                     'data-counter' => 15,
                 ],
-                'colspan' => 3,
+                'colspan' => 6,
             ])
             ->add('description', 'textarea', [
                 'label' => trans('core/base::forms.description'),
@@ -159,18 +155,18 @@ class StoreForm extends FormAbstract
                 'label' => trans('plugins/marketplace::store.forms.logo'),
                 'colspan' => 3,
             ])
-            ->add('cover_image', MediaImageField::class, [
-                'label' => __('Cover Image'),
-                'value' => old('cover_image', MetaBox::getMetaData($this->getModel(), 'cover_image', true)),
-                'colspan' => 3,
-                'metadata' => true,
-            ])
+            ->add(
+                'cover_image',
+                MediaImageField::class,
+                MediaImageFieldOption::make()
+                    ->label(__('Cover Image'))
+                    ->colspan(6)
+                    ->value($this->getModel()->id ? $this->getModel()->getMetaData('cover_image', true) : null)
+                    ->toArray()
+            )
             ->add('status', 'customSelect', [
                 'label' => trans('core/base::tables.status'),
                 'required' => true,
-                'attr' => [
-                    'class' => 'form-control',
-                ],
                 'choices' => BaseStatusEnum::labels(),
                 'help_block' => [
                     'text' => trans('plugins/marketplace::marketplace.helpers.store_status', [
@@ -183,21 +179,12 @@ class StoreForm extends FormAbstract
             ->add('customer_id', 'customSelect', [
                 'label' => trans('plugins/marketplace::store.forms.store_owner'),
                 'required' => true,
-                'attr' => [
-                    'class' => 'form-control',
-                ],
                 'choices' => [0 => trans('plugins/marketplace::store.forms.select_store_owner')] + Customer::query()
                     ->where('is_vendor', true)
                     ->pluck('name', 'id')
                     ->all(),
                 'colspan' => 3,
             ])
-            ->add('submit', 'html', [
-                'html' => Blade::render(sprintf(
-                    '<x-core::button type="submit" color="primary">%s</x-core::button>',
-                    trans('core/base::forms.save_and_continue')
-                )),
-                'colspan' => 6,
-            ]);
+            ->addSubmitButton(trans('core/base::forms.save_and_continue'), attributes: ['colspan' => 6]);
     }
 }

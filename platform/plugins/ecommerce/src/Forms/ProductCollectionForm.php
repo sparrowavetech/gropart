@@ -4,8 +4,14 @@ namespace Botble\Ecommerce\Forms;
 
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\Html;
+use Botble\Base\Forms\FieldOptions\DescriptionFieldOption;
+use Botble\Base\Forms\FieldOptions\NameFieldOption;
+use Botble\Base\Forms\FieldOptions\OnOffFieldOption;
 use Botble\Base\Forms\FieldOptions\StatusFieldOption;
+use Botble\Base\Forms\Fields\OnOffField;
 use Botble\Base\Forms\Fields\SelectField;
+use Botble\Base\Forms\Fields\TextareaField;
+use Botble\Base\Forms\Fields\TextField;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Ecommerce\Http\Requests\ProductCollectionRequest;
 use Botble\Ecommerce\Models\ProductCollection;
@@ -20,24 +26,16 @@ class ProductCollectionForm extends FormAbstract
         $this
             ->setupModel(new ProductCollection())
             ->setValidatorClass(ProductCollectionRequest::class)
-            ->add('name', 'text', [
-                'label' => trans('core/base::forms.name'),
-                'required' => true,
-                'attr' => [
-                    'placeholder' => trans('core/base::forms.name_placeholder'),
-                    'data-counter' => 250,
-                ],
-                'help_block' => [
-                    'text' => $this->getModel()->id ? trans(
-                        'plugins/ecommerce::product-collections.slug_help_block',
-                        ['slug' => $this->getModel()->slug]
-                    ) : null,
-                    'tag' => 'small',
-                    'attr' => [
-                        'class' => 'form-hint',
-                    ],
-                ],
-            ])
+            ->add(
+                'name',
+                TextField::class,
+                NameFieldOption::make()
+                    ->when($this->getModel()->slug, function (NameFieldOption $option, string $slug) {
+                        $option
+                            ->helperText(trans('plugins/ecommerce::product-collections.slug_help_block', compact('slug')));
+                    })
+                    ->toArray()
+            )
             ->add('slug', 'text', [
                 'label' => trans('core/base::forms.slug'),
                 'required' => true,
@@ -45,19 +43,16 @@ class ProductCollectionForm extends FormAbstract
                     'data-counter' => 120,
                 ],
             ])
-            ->add('description', 'textarea', [
-                'label' => trans('core/base::forms.description'),
-                'attr' => [
-                    'rows' => 4,
-                    'placeholder' => trans('plugins/ecommerce::products.form.description'),
-                    'data-counter' => 400,
-                ],
-            ])
+            ->add('description', TextareaField::class, DescriptionFieldOption::make()->toArray())
             ->add('status', SelectField::class, StatusFieldOption::make()->toArray())
-            ->add('is_featured', 'onOff', [
-                'label' => trans('core/base::forms.is_featured'),
-                'default_value' => false,
-            ])
+            ->add(
+                'is_featured',
+                OnOffField::class,
+                OnOffFieldOption::make()
+                    ->label(trans('core/base::forms.is_featured'))
+                    ->defaultValue(false)
+                    ->toArray()
+            )
             ->add('image', 'mediaImage')
             ->setBreakFieldPoint('status');
 

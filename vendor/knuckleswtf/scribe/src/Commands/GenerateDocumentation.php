@@ -7,14 +7,14 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Knuckles\Camel\Camel;
-use Knuckles\Scribe\Configuration\PathConfig;
 use Knuckles\Scribe\GroupedEndpoints\GroupedEndpointsFactory;
 use Knuckles\Scribe\Matching\RouteMatcherInterface;
+use Knuckles\Scribe\Scribe;
 use Knuckles\Scribe\Tools\ConsoleOutputUtils as c;
 use Knuckles\Scribe\Tools\DocumentationConfig;
 use Knuckles\Scribe\Tools\ErrorHandlingUtils as e;
 use Knuckles\Scribe\Tools\Globals;
-use Knuckles\Scribe\Scribe;
+use Knuckles\Scribe\Tools\PathConfig;
 use Knuckles\Scribe\Writing\Writer;
 use Shalvah\Upgrader\Upgrader;
 
@@ -105,10 +105,10 @@ class GenerateDocumentation extends Command
             throw new \InvalidArgumentException("The specified config (config/{$configName}.php) doesn't exist.");
         }
 
-        $this->paths = new PathConfig(configName: $configName);
+        $this->paths = new PathConfig($configName);
         if ($this->hasOption('scribe-dir') && !empty($this->option('scribe-dir'))) {
             $this->paths = new PathConfig(
-                configName: $configName, scribeDir: $this->option('scribe-dir')
+                $configName, scribeDir: $this->option('scribe-dir')
             );
         }
 
@@ -212,7 +212,7 @@ class GenerateDocumentation extends Command
     protected function sayGoodbye(bool $errored = false): void
     {
         $message = 'All done. ';
-        if ($this->docConfig->get('type') == 'laravel') {
+        if ($this->docConfig->outputRoutedThroughLaravel()) {
             if ($this->docConfig->get('laravel.add_routes')) {
                 $message .= 'Visit your docs at ' . url($this->docConfig->get('laravel.docs_url'));
             }

@@ -60,14 +60,14 @@
                 </span>
             </div>
         @endif
-        <div class="mini-cart__buttons row g-0">
-            <div class="col me-2">
+        <div class="mini-cart__buttons row g-2">
+            <div class="col">
                 <a
                     class="btn btn-light"
                     href="{{ route('public.cart') }}"
                 >{{ __('View Cart') }}</a>
             </div>
-            <div class="col ms-2">
+            <div class="col">
                 @if (session('tracked_start_checkout'))
                     <a
                         class="btn btn-primary checkout"

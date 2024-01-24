@@ -2,10 +2,10 @@
 
 <div id="main-content">
     {!! Theme::partial('page-header', [
-        'size' => Theme::get('containerSize', 'xxxl'),
+        'size' => Theme::get('containerSize', 'xl'),
         'withTitle' => Theme::get('withTitle', true),
     ]) !!}
-    <div class="container-{{ Theme::get('containerSize', 'xxxl') }}">
+    <div class="container-{{ Theme::get('containerSize', 'xl') }}">
         <div class="mb-5">
             {!! Theme::content() !!}
         </div>

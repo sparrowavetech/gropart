@@ -1,4 +1,6 @@
 @php
+    Assets::addScriptsDirectly('vendor/core/plugins/ecommerce/js/product-option.js');
+
     $product = $product->loadMissing([
         'options' => function ($query) {
             return $query->with(['values']);
@@ -175,18 +177,20 @@
                         @if ($isDefaultLanguage)
                             <div class="col">
                                 <x-core::form.label>__optionTypeLabel__</x-core::form.label>
-                                <select name="options[__index__][option_type]" id="" class="form-control option-type">
+                                <select name="options[__index__][option_type]" id="" class="form-select option-type">
                                     __optionTypeOption__
                                 </select>
                             </div>
                             <div class="col" style="margin-top: 38px;">
-                                <x-core::form.on-off.checkbox
-                                    label="__requiredLabel__"
-                                    id="required-__index__"
-                                    name="options[__index__][required]"
-                                    class="option-required"
-                                    __checked__
-                                />
+                                <div class="mb-3">
+                                    <x-core::form.checkbox
+                                        label="__requiredLabel__"
+                                        id="required-__index__"
+                                        name="options[__index__][required]"
+                                        class="option-required"
+                                        __checked__=""
+                                    />
+                                </div>
                             </div>
                             <div class="col text-end">
                                 <x-core::button

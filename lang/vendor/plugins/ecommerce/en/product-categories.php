@@ -13,5 +13,4 @@ return [
         'button_text' => 'Create product category',
     ],
     'total_products' => 'Total products: :total',
-    'edit_this_category' => 'Edit this category',
 ];

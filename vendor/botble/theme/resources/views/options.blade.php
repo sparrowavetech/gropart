@@ -31,14 +31,14 @@
             <x-core::card.body class="p-0">
                 <div class="d-block d-md-flex">
                     <div
-                        class="nav mb-md-0 flex-column nav-pills p-3"
+                        class="nav mb-md-0 flex-column nav-pills overflow-hidden p-3"
                         id="themeOptionTab"
                         role="tablist"
                         aria-orientation="vertical"
                     >
                         @foreach ($sections = ThemeOption::constructSections() as $section)
                             <button
-                                @class(['nav-link', 'active' => $loop->first])
+                                @class(['nav-link w-100', 'active' => $loop->first])
                                 id="{{ $section['id'] }}-tab"
                                 data-bs-toggle="pill"
                                 data-bs-target="#{{ $section['id'] }}"
@@ -46,6 +46,7 @@
                                 role="tab"
                                 aria-controls="{{ $section['id'] }}"
                                 aria-selected="true"
+                                title="{{ $section['title'] }}"
                             >
                                 @if ($section['icon'])
                                     <x-core::icon
@@ -53,7 +54,7 @@
                                         class="me-2"
                                     />
                                 @endif
-                                {{ $section['title'] }}
+                                <span class="text-truncate">{{ $section['title'] }}</span>
                             </button>
                         @endforeach
                     </div>

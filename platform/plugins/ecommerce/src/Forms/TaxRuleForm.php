@@ -4,14 +4,16 @@ namespace Botble\Ecommerce\Forms;
 
 use Botble\Base\Forms\FormAbstract;
 use Botble\Ecommerce\Facades\EcommerceHelper;
+use Botble\Ecommerce\Forms\Concerns\HasSubmitButton;
 use Botble\Ecommerce\Http\Requests\TaxRuleRequest;
 use Botble\Ecommerce\Models\Tax;
 use Botble\Ecommerce\Models\TaxRule;
-use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Request;
 
 class TaxRuleForm extends FormAbstract
 {
+    use HasSubmitButton;
+
     public function __construct()
     {
         parent::__construct();
@@ -87,12 +89,11 @@ class TaxRuleForm extends FormAbstract
                     'label' => trans('plugins/ecommerce::tax.zip_code'),
                 ]);
         }
-        $this
-            ->add('submit', 'html', [
-                'html' => Blade::render('<x-core::button type="submit" icon="ti ti-device-floppy" color="primary">' . trans('core/base::forms.save') . '</x-core::button>'),
-                'wrapper' => [
-                    'class' => 'd-grid gap-2',
-                ],
-            ]);
+
+        $this->addSubmitButton(trans('core/base::forms.save'), 'ti ti-device-floppy', [
+            'wrapper' => [
+                'class' => 'd-grid gap-2',
+            ],
+        ]);
     }
 }

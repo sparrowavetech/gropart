@@ -14,7 +14,9 @@ use Botble\Analytics\Traits\OrderByDimensionTrait;
 use Botble\Analytics\Traits\OrderByMetricTrait;
 use Botble\Analytics\Traits\ResponseTrait;
 use Botble\Analytics\Traits\RowOperationTrait;
+use Google\Analytics\Data\V1beta\BetaAnalyticsDataClient;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Storage;
 
 class Analytics extends AnalyticsAbstract implements AnalyticsContract
 {
@@ -44,8 +46,16 @@ class Analytics extends AnalyticsAbstract implements AnalyticsContract
 
     public function getClient(): BetaAnalyticsDataClient
     {
+        $storage = Storage::disk('local');
+
+        $filePath = $storage->path('analytics-credentials.json');
+
+        if (! $storage->exists($filePath) || md5_file($filePath) !== md5($this->getCredentials())) {
+            $storage->put('analytics-credentials.json', $this->getCredentials());
+        }
+
         return new BetaAnalyticsDataClient([
-            'credentials' => $this->getCredentials(),
+            'credentials' => $filePath,
         ]);
     }
 

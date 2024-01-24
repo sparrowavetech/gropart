@@ -13,6 +13,7 @@ use Botble\Table\BulkActions\DeleteBulkAction;
 use Botble\Table\Columns\Column;
 use Botble\Table\Columns\CreatedAtColumn;
 use Botble\Table\Columns\EnumColumn;
+use Botble\Table\Columns\FormattedColumn;
 use Botble\Table\Columns\IdColumn;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -100,8 +101,23 @@ class OrderReturnTable extends TableAbstract
                 ->title(trans('plugins/ecommerce::order.order_return_items_count'))
                 ->orderable(false)
                 ->searchable(false),
-            EnumColumn::make('reason')
-                ->title(trans('plugins/ecommerce::order.return_reason')),
+            FormattedColumn::make('reason')
+                ->title(trans('plugins/ecommerce::order.return_reason'))
+                ->renderUsing(function (FormattedColumn $column) {
+                    $item = $column->getItem();
+
+                    if ($item->reason->label()) {
+                        return $item->reason->toHtml();
+                    }
+
+                    $reasons = [];
+
+                    foreach ($item->items as $returnItem) {
+                        $reasons[] = $returnItem->reason->toHtml();
+                    }
+
+                    return implode(', ', $reasons);
+                }),
             EnumColumn::make('return_status')
                 ->title(trans('core/base::tables.status')),
             CreatedAtColumn::make(),

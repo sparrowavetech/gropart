@@ -1,40 +1,35 @@
-@extends('core/acl::layouts.guest')
+@extends('core/acl::auth.master')
 
 @section('content')
-    <h2 class="h3 text-center mb-3">
-        {{ trans('core/acl::auth.forgot_password.title') }}
-    </h2>
-
-    <x-core::form
-        :url="route('access.password.email')"
-        method="post"
+    <p>{{ trans('core/acl::auth.forgot_password.title') }}:</p>
+    {!! Form::open(['route' => 'access.password.email', 'class' => 'forget-form']) !!}
+    <p>{!! BaseHelper::clean(trans('core/acl::auth.forgot_password.message')) !!}</p>
+    <br>
+    <div
+        class="form-group mb-3"
+        id="emailGroup"
     >
-
-        <p class="text-muted mb-4">{!! BaseHelper::clean(trans('core/acl::auth.forgot_password.message')) !!}</p>
-        <x-core::form.text-input
-            :label="trans('core/acl::auth.login.email')"
-            type="email"
-            name="email"
-            :placeholder="trans('core/acl::auth.login.placeholder.email')"
-            :required="true"
-        />
-
-        <div class="form-footer">
-            <x-core::button
-                type="submit"
-                color="primary"
-                icon="ti ti-mail"
-                class="w-100"
-            >
-                {{ trans('core/acl::auth.forgot_password.submit') }}
-            </x-core::button>
-        </div>
-    </x-core::form>
-
-    <div class="text-center text-muted mt-3">
-        <a href="{{ route('access.login') }}">{{ trans('core/acl::auth.back_to_login') }}</a>
+        <label>{{ trans('core/acl::auth.login.email') }}</label>
+        {!! Form::text('email', old('email'), [
+            'class' => 'form-control',
+            'placeholder' => trans('core/acl::auth.login.email'),
+        ]) !!}
     </div>
-@endsection
+    <button
+        class="btn btn-block login-button"
+        type="submit"
+    >
+        <span class="signin">{{ trans('core/acl::auth.forgot_password.submit') }}</span>
+    </button>
+    <div class="clearfix"></div>
+
+    <br>
+    <p><a
+            class="lost-pass-link"
+            href="{{ route('access.login') }}"
+        >{{ trans('core/acl::auth.back_to_login') }}</a></p>
+    {!! Form::close() !!}
+@stop
 
 @push('footer')
     {!! $jsValidator !!}

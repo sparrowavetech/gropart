@@ -17,4 +17,5 @@ return [
     'current_year' => 'Current year',
     'current_month' => 'Current month',
     'current_day' => 'Current day',
+    'generate_url' => 'Generate URL',
 ];

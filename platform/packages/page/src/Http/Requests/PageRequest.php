@@ -13,7 +13,7 @@ class PageRequest extends Request
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:250'],
+            'name' => ['required', 'string', 'max:120'],
             'description' => ['nullable', 'string', 'max:400'],
             'content' => ['nullable', 'string'],
             'template' => [Rule::in(array_keys(Template::getPageTemplates()))],

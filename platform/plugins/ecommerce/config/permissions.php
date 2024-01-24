@@ -224,6 +224,11 @@ return [
         'flag' => 'reviews.publish',
         'parent_flag' => 'reviews.index',
     ],
+    [
+        'name' => 'Reply Review',
+        'flag' => 'reviews.reply',
+        'parent_flag' => 'reviews.index',
+    ],
 
     [
         'name' => 'Shipping',
@@ -532,6 +537,12 @@ return [
     [
         'name' => 'Return Settings',
         'flag' => 'ecommerce.settings.return',
+        'parent_flag' => 'ecommerce.settings',
+    ],
+
+    [
+        'name' => 'Flash Sale Settings',
+        'flag' => 'ecommerce.settings.flash-sale',
         'parent_flag' => 'ecommerce.settings',
     ],
 ];

@@ -2,8 +2,8 @@
 
 namespace Botble\Marketplace\Enums;
 
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Supports\Enum;
-use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\HtmlString;
 
 /**
@@ -35,9 +35,9 @@ class WithdrawalStatusEnum extends Enum
             self::COMPLETED => 'success',
             self::CANCELED => 'danger',
             self::REFUSED => 'secondary',
-            default => null,
+            default => 'primary',
         };
 
-        return Blade::render(sprintf('<x-core::badge label="%s" color="%s" />', $this->label(), $color));
+        return BaseHelper::renderBadge($this->label(), $color);
     }
 }

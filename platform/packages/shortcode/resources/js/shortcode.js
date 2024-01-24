@@ -106,21 +106,21 @@ $(() => {
         shortcodeCallback({
             href: el.attr('href'),
             key: el.data('key'),
+            name: el.data('name'),
             description: el.data('description'),
         })
     }
 
     function shortcodeCallback(params = {}) {
-        const { href, key, description = null, data = {}, update = false, previewImage = null } = params
+        const { href, key, name, description = null, data = {}, update = false, previewImage = null } = params
+
         $('.shortcode-admin-config').html('')
 
-        let $addShortcodeButton = $('.shortcode-modal .add-shortcode-btn')
+        let $addShortcodeButton = $('.shortcode-modal button[data-bb-toggle="shortcode-add-single"]')
 
         $addShortcodeButton.text($addShortcodeButton.data(update ? 'update-text' : 'add-text'))
 
-        if (description != null) {
-            $('.shortcode-modal .modal-title').text(description)
-        }
+        $('.shortcode-modal .modal-title').text(name)
 
         if (previewImage != null && previewImage !== '') {
             $('.shortcode-modal .shortcode-preview-image-link').attr('href', previewImage).show()
@@ -177,6 +177,7 @@ $(() => {
                 key: name,
                 code: shortcode,
             },
+            name: $shortcodeItem.data('name'),
             description: description,
             previewImage: '',
             update: true,

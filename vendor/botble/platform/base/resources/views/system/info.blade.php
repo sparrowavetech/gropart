@@ -103,12 +103,12 @@
                         {{ trans('core/base::system.timezone') }}: {{ $systemEnv['timezone'] }}
                     </li>
                     <li class="list-group-item">
-                        {{ trans('core/base::system.debug_mode_off') }}: {{ $statusIcon(!$systemEnv['debug_mode']) }}
+                        {{ trans('core/base::system.debug_mode_off') }}: @include('core/base::system.partials.status-icon', ['status' => !$systemEnv['debug_mode']])
                     </li>
                     <li class="list-group-item">
-                        {{ trans('core/base::system.storage_dir_writable') }}: {{ $statusIcon($systemEnv['storage_dir_writable']) }}
+                        {{ trans('core/base::system.storage_dir_writable') }}: @include('core/base::system.partials.status-icon', ['status' => $systemEnv['storage_dir_writable']])
                     <li class="list-group-item">
-                        {{ trans('core/base::system.cache_dir_writable') }}: {{ $statusIcon($systemEnv['cache_dir_writable']) }}
+                        {{ trans('core/base::system.cache_dir_writable') }}: @include('core/base::system.partials.status-icon', ['status' => $systemEnv['cache_dir_writable']])
                     </li>
                     <li class="list-group-item">
                         {{ trans('core/base::system.app_size') }}: {{ $systemEnv['app_size'] }}
@@ -124,7 +124,7 @@
                 <ul class="list-group list-group-flush">
                     <li class="list-group-item">
                         {{ trans('core/base::system.php_version') }}: {{ $serverEnv['version'] }}
-                        {{ $statusIcon($matchPHPRequirement) }}
+                        @include('core/base::system.partials.status-icon', ['status' => $matchPHPRequirement])
                         @if (!$matchPHPRequirement)
                             ({{ trans('core/base::system.php_version_error', ['version' => $requiredPhpVersion]) }})
                         @endif
@@ -147,7 +147,7 @@
                         {{ $serverEnv['database_connection_name'] }}
                     </li>
                     <li class="list-group-item">
-                        {{ trans('core/base::system.ssl_installed') }}: {{ $statusIcon($serverEnv['ssl_installed']) }}
+                        {{ trans('core/base::system.ssl_installed') }}: @include('core/base::system.partials.status-icon', ['status' => $serverEnv['ssl_installed']])
                     </li>
                     <li class="list-group-item">
                         {{ trans('core/base::system.cache_driver') }}:
@@ -162,34 +162,34 @@
                         {{ $serverEnv['queue_connection'] }}
                     </li>
                     <li class="list-group-item">
-                        {{ trans('core/base::system.allow_url_fopen_enabled') }}: {{ $statusIcon($serverEnv['allow_url_fopen_enabled']) }}
+                        {{ trans('core/base::system.allow_url_fopen_enabled') }}: @include('core/base::system.partials.status-icon', ['status' => $serverEnv['allow_url_fopen_enabled']])
                     </li>
                     <li class="list-group-item">
-                        {{ trans('core/base::system.openssl_ext') }}: {{ $statusIcon($serverEnv['openssl']) }}
+                        {{ trans('core/base::system.openssl_ext') }}: @include('core/base::system.partials.status-icon', ['status' => $serverEnv['openssl']])
                     </li>
                     <li class="list-group-item">
-                        {{ trans('core/base::system.mbstring_ext') }}: {{ $statusIcon($serverEnv['mbstring']) }}
+                        {{ trans('core/base::system.mbstring_ext') }}: @include('core/base::system.partials.status-icon', ['status' => $serverEnv['mbstring']])
                     </li>
                     <li class="list-group-item">
-                        {{ trans('core/base::system.pdo_ext') }}: {{ $statusIcon($serverEnv['pdo']) }}
+                        {{ trans('core/base::system.pdo_ext') }}: @include('core/base::system.partials.status-icon', ['status' => $serverEnv['pdo']])
                     </li>
                     <li class="list-group-item">
-                        {{ trans('core/base::system.curl_ext') }}: {{ $statusIcon($serverEnv['curl']) }}
+                        {{ trans('core/base::system.curl_ext') }}: @include('core/base::system.partials.status-icon', ['status' => $serverEnv['curl']])
                     <li class="list-group-item">
-                        {{ trans('core/base::system.exif_ext') }}: {{ $statusIcon($serverEnv['exif']) }}
+                        {{ trans('core/base::system.exif_ext') }}: @include('core/base::system.partials.status-icon', ['status' => $serverEnv['exif']])
                     <li class="list-group-item">
-                        {{ trans('core/base::system.file_info_ext') }}: {{ $statusIcon($serverEnv['fileinfo']) }}
+                        {{ trans('core/base::system.file_info_ext') }}: @include('core/base::system.partials.status-icon', ['status' => $serverEnv['fileinfo']])
                     </li>
                     <li class="list-group-item">
-                        {{ trans('core/base::system.tokenizer_ext') }}: {{ $statusIcon($serverEnv['tokenizer']) }}
+                        {{ trans('core/base::system.tokenizer_ext') }}: @include('core/base::system.partials.status-icon', ['status' => $serverEnv['tokenizer']])
                     </li>
                     <li class="list-group-item">
-                        {{ trans('core/base::system.imagick_or_gd_ext') }}: {{ $statusIcon($serverEnv['imagick_or_gd']) }}
+                        {{ trans('core/base::system.imagick_or_gd_ext') }}: @include('core/base::system.partials.status-icon', ['status' => $serverEnv['imagick_or_gd']])
                     </li>
                     <li class="list-group-item">
-                        {{ trans('core/base::system.zip') }}: {{ $statusIcon($serverEnv['zip']) }}
+                        {{ trans('core/base::system.zip') }}: @include('core/base::system.partials.status-icon', ['status' => $serverEnv['zip']])
                     <li class="list-group-item">
-                        {{ trans('core/base::system.iconv') }}: {{ $statusIcon($serverEnv['iconv']) }}
+                        {{ trans('core/base::system.iconv') }}: @include('core/base::system.partials.status-icon', ['status' => $serverEnv['iconv']])
                     </li>
                 </ul>
             </x-core::card>

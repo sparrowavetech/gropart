@@ -25,7 +25,7 @@ class ThemeServiceProvider extends ServiceProvider
         $this->setNamespace('packages/theme')
             ->loadHelpers();
 
-        $this->app->bind(ThemeContract::class, Theme::class);
+        $this->app->singleton(ThemeContract::class, Theme::class);
     }
 
     public function boot(): void

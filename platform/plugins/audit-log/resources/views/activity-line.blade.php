@@ -1,13 +1,19 @@
 <div class="row">
-    @if ($history->user->id)
-        <div class="col-auto">
+    <div class="col-auto">
+        @if ($history->user->id)
             <img
                 src="{{ $history->user->avatar_url }}"
                 class="avatar"
                 alt="{{ $history->user->name }}"
             />
-        </div>
-    @endif
+        @else
+            <img
+                src="{{ asset(RvMedia::getDefaultImage()) }}"
+                class="avatar"
+                alt="{{ trans('plugins/audit-log::history.system') }}"
+            />
+        @endif
+    </div>
     <div class="col">
         <div class="text-truncate">
             <strong>

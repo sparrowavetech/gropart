@@ -24,7 +24,11 @@ abstract class TableActionAbstract implements Htmlable, Stringable
 
     protected string $view = 'core/table::actions.action';
 
+    protected string $dropdownItemView = 'core/table::actions.action-dropdown-item';
+
     protected array $mergeData = [];
+
+    protected bool $displayAsDropdown = false;
 
     public function __construct(protected string $name)
     {
@@ -64,6 +68,27 @@ abstract class TableActionAbstract implements Htmlable, Stringable
         return $this->view;
     }
 
+    public function displayAsDropdownItem(bool $enabled = true): static
+    {
+        $this->displayAsDropdown = $enabled;
+
+        return $this;
+    }
+
+    public function dropdownItemView(string $view): static
+    {
+        $this->displayAsDropdownItem();
+
+        $this->dropdownItemView = $view;
+
+        return $this;
+    }
+
+    public function getDropdownItemView()
+    {
+        return $this->dropdownItemView;
+    }
+
     public function dataForView(array $mergeData): static
     {
         $this->mergeData = $mergeData;
@@ -81,7 +106,10 @@ abstract class TableActionAbstract implements Htmlable, Stringable
     public function render(): string
     {
         return $this->rendering(
-            fn () => view($this->getView(), $this->getDataForView())->render()
+            fn () => view(
+                $this->displayAsDropdown ? $this->getDropdownItemView() : $this->getView(),
+                $this->getDataForView()
+            )->render()
         );
     }
 

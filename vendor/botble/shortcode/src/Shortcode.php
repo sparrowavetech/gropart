@@ -62,6 +62,11 @@ class Shortcode
         $this->compiler->setAdminConfig($key, $html);
     }
 
+    public function modifyAdminConfig(string $key, callable $callback): void
+    {
+        $this->compiler->modifyAdminConfig($key, $callback);
+    }
+
     public function generateShortcode(string $name, array $attributes = []): string
     {
         $parsedAttributes = '';

@@ -25,6 +25,8 @@ class DashboardMenu
 
     protected array $links = [];
 
+    protected array $removedItems = [];
+
     protected string $groupId = 'admin';
 
     protected array $beforeRetrieving = [];
@@ -110,7 +112,7 @@ class DashboardMenu
         if (! $options['url'] && $options['route']) {
             $options['url'] = fn () => route($options['route']);
 
-            if (! $options['permissions']) {
+            if (! $options['permissions'] && $options['permissions'] !== false) {
                 $options['permissions'] = [$options['route']];
             }
         }
@@ -144,11 +146,11 @@ class DashboardMenu
             return $this;
         }
 
-        if (! $this->hasItem($id)) {
-            return $this;
+        if (($args = func_get_args()) && count($args) > 1) {
+            return $this->removeItem($args);
         }
 
-        unset($this->links[$this->groupId][$id]);
+        $this->removedItems[$this->groupId][] = $id;
 
         return $this;
     }
@@ -158,9 +160,11 @@ class DashboardMenu
         return isset($this->links[$this->groupId][$id]);
     }
 
-    public function getAll(string $id = 'admin'): Collection
+    public function getAll(string $id = null): Collection
     {
-        $this->setGroupId($id);
+        if ($id !== null) {
+            $this->setGroupId($id);
+        }
 
         DashboardMenuRetrieving::dispatch($this);
 
@@ -189,6 +193,8 @@ class DashboardMenu
             DashboardMenuRetrieved::dispatch($this, $items);
 
             do_action('rendered_dashboard_menu', $this, $items);
+
+            $this->default();
         });
     }
 
@@ -198,18 +204,24 @@ class DashboardMenu
             return null;
         }
 
-        return tap($this->links[$this->groupId][$itemId], fn () => $this->default());
+        return tap(
+            $this->links[$this->groupId][$itemId],
+            fn () => $this->default()
+        );
     }
 
     public function getItemsByParentId(string $parentId): Collection|null
     {
         return collect($this->links[$this->groupId] ?? [])
-            ->filter(fn ($item) => $item['parent_id'] === $parentId);
+            ->filter(fn ($item) => $item['parent_id'] === $parentId)
+            ->tap(fn () => $this->default());
     }
 
     public function beforeRetrieving(Closure $callback): static
     {
         $this->beforeRetrieving[$this->groupId][] = $callback;
+
+        $this->default();
 
         return $this;
     }
@@ -229,12 +241,16 @@ class DashboardMenu
     {
         $this->afterRetrieved[$this->groupId][] = $callback;
 
+        $this->default();
+
         return $this;
     }
 
     public function clearCachesForCurrentUser(): void
     {
         $this->cache->forget($this->cacheKey());
+
+        $this->default();
     }
 
     public function clearCaches(): void
@@ -282,13 +298,14 @@ class DashboardMenu
     {
         $userType = 'undefined';
         $userKey = 'guest';
+        $locale = $this->app->getLocale();
 
         if ($user = $this->request->user()) {
             $userType = $user::class;
             $userKey = $user->getKey();
         }
 
-        return sprintf('dashboard_menu:%s:%s:%s', $this->groupId, $userType, $userKey);
+        return sprintf('dashboard_menu:%s:%s:%s:%s', $this->groupId, $userType, $userKey, $locale);
     }
 
     public function hasCache(): bool
@@ -309,8 +326,18 @@ class DashboardMenu
 
     protected function getGroupedItemsByGroup(): Collection
     {
+        $removedItems = $this->removedItems[$this->groupId] ?? [];
+
         $items = collect($this->links[$this->groupId] ?? [])
             ->values()
+            ->reject(
+                fn ($link) =>
+                    isset($link['id'])
+                    && (
+                        in_array($link['id'], $removedItems)
+                        || in_array($link['parent_id'], $removedItems)
+                    )
+            )
             ->filter(function ($link) {
                 $user = $this->request->user();
 
@@ -371,9 +398,15 @@ class DashboardMenu
 
     protected function applyActive(Collection $menu): Collection
     {
-        return $menu->mapWithKeys(function ($item, $key): array {
-            return [$key => $this->applyActiveRecursive($item)];
-        });
+        foreach ($menu as $key => $item) {
+            $menu[$key] = $this->applyActiveRecursive($item);
+
+            if ($menu[$key]['active']) {
+                break;
+            }
+        }
+
+        return $menu;
     }
 
     protected function applyActiveRecursive(array $item): array

@@ -40,7 +40,7 @@ class SlugController extends SettingController
                 continue;
             }
 
-            if ($settingKey == 'public_single_ending_url') {
+            if (Str::startsWith($settingKey, 'public_single_ending_url')) {
                 if ($settingValue) {
                     $settingValue = ltrim($settingValue, '.');
                 }

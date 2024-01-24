@@ -13,7 +13,7 @@ return [
     'number_posts_per_page_in_tag' => 'Number of posts per page in a tag',
     'settings' => [
         'title' => 'Blog',
-        'description' => 'View and update blog settings',
+        'description' => 'Settings for Blog',
         'enable_blog_post_schema' => 'Enable Blog Post Schema?',
         'enable_blog_post_schema_description' => 'Learn more: https://schema.org/Article',
         'schema_type' => 'Schema type',

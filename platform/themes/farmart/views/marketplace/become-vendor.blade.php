@@ -11,11 +11,11 @@
             type="hidden"
             value="1"
         >
-        @include(Theme::getThemeNamespace() . '::views.marketplace.includes.become-vendor-form', [
+        @include('plugins/marketplace::themes.includes.become-vendor-form', [
             'isRegister' => true,
         ])
 
-        <div class="form-group text-center">
+        <div class="form-group">
             <button class="btn btn-primary">{{ __('Register') }}</button>
         </div>
     </div>

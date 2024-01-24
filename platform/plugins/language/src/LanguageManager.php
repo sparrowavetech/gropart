@@ -6,6 +6,7 @@ use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Models\BaseModel;
 use Botble\Language\Models\Language;
 use Botble\Language\Models\LanguageMeta;
+use Botble\Table\Columns\Column;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Contracts\Routing\UrlRoutable;
@@ -785,6 +786,10 @@ class LanguageManager
             return $refLang;
         }
 
+        if (in_array($this->request->segment(1), $this->getSupportedLanguagesKeys())) {
+            return $this->request->segment(1);
+        }
+
         return Arr::get($supportedLocales, $this->getDefaultLocale() . '.lang_code');
     }
 
@@ -1061,29 +1066,9 @@ class LanguageManager
             }
         }
 
-        if (setting('language_show_default_item_if_current_version_not_existed', true)) {
-            $url = $this->getLocalizedURL($localeCode);
+        $showRelated = setting('language_show_default_item_if_current_version_not_existed', true);
 
-            if (Facades\Language::getCurrentLocaleCode() == Facades\Language::getDefaultLocaleCode()) {
-                return $url;
-            }
-
-            $query = Arr::get(parse_url($url), 'query');
-
-            $params = [];
-
-            if ($query) {
-                $url = str_replace($query, '', $url);
-
-                parse_str($query, $params);
-            }
-
-            $params['from_lang'] = $this->getCurrentLocaleCode();
-
-            return rtrim($url, '?') . '?' . http_build_query($params);
-        }
-
-        return url($localeCode);
+        return $showRelated ? $this->getLocalizedURL($localeCode) : url($localeCode);
     }
 
     /**
@@ -1185,15 +1170,18 @@ class LanguageManager
         }
 
         return [
-            'language' => [
-                'name' => 'language_meta.lang_meta_id',
-                'title' => $heading,
-                'class' => 'text-center language-header no-sort',
-                'width' => (count($languages) * 40) . 'px',
-                'orderable' => false,
-                'searchable' => false,
-                'titleAttr' => trans('plugins/language::language.name'),
-            ],
+            Column::make('language')
+                ->name('language_meta.lang_meta_id')
+                ->title($heading)
+                ->nowrap()
+                ->addClass('language-header')
+                ->alignCenter()
+                ->orderable(false)
+                ->searchable(false)
+                ->exportable(false)
+                ->printable(false)
+                ->titleAttr(trans('plugins/language::language.name'))
+                ->responsivePriority(99),
         ];
     }
 }

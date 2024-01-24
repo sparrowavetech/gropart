@@ -63,7 +63,7 @@ if (! function_exists('human_price_text')) {
     {
         $numberAfterDot = ($currency instanceof Currency) ? $currency->decimals : 0;
 
-        if (config('plugins.ecommerce.general.display_big_money_in_million_billion')) {
+        if ($convertNumberToText = config('plugins.ecommerce.general.display_big_money_in_million_billion')) {
             if ($price >= 1000000 && $price < 1000000000) {
                 $price = round($price / 1000000, 2) + 0;
                 $priceUnit = __('million') . ' ' . $priceUnit;
@@ -98,7 +98,7 @@ if (! function_exists('human_price_text')) {
             $thousandSeparator
         );
 
-        $space = (int)get_ecommerce_setting('add_space_between_price_and_currency', 0) == 1 ? ' ' : null;
+        $space = (int)get_ecommerce_setting('add_space_between_price_and_currency', 0) == 1 || $convertNumberToText ? ' ' : null;
 
         return $price . $space . ($priceUnit ?: '');
     }

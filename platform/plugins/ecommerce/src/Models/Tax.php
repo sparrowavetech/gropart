@@ -25,7 +25,7 @@ class Tax extends BaseModel
 
     protected static function booted(): void
     {
-        self::deleting(function (Tax $tax) {
+        static::deleted(function (Tax $tax) {
             $tax->products()->detach();
             $tax->rules()->delete();
         });

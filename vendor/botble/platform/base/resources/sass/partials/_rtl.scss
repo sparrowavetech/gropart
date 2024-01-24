@@ -12,4 +12,8 @@ body[dir="rtl"] {
             }
         }
     }
+
+    span.select2-selection.select2-selection--single {
+        background-position: left 0.75rem center;
+    }
 }

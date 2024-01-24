@@ -3,7 +3,6 @@
 namespace Botble\Paystack\Providers;
 
 use Botble\Base\Facades\Html;
-use Botble\Ecommerce\Repositories\Interfaces\OrderAddressInterface;
 use Botble\Payment\Enums\PaymentMethodEnum;
 use Botble\Payment\Facades\PaymentMethods;
 use Botble\Paystack\Forms\PaystackPaymentMethodForm;
@@ -23,7 +22,7 @@ class HookServiceProvider extends ServiceProvider
             add_filter(PAYMENT_FILTER_AFTER_POST_CHECKOUT, [$this, 'checkoutWithPaystack'], 16, 2);
         });
 
-        add_filter(PAYMENT_METHODS_SETTINGS_PAGE, [$this, 'addPaymentSettings'], 97, 1);
+        add_filter(PAYMENT_METHODS_SETTINGS_PAGE, [$this, 'addPaymentSettings'], 97);
 
         add_filter(BASE_FILTER_ENUM_ARRAY, function ($values, $class) {
             if ($class == PaymentMethodEnum::class) {
@@ -138,20 +137,16 @@ class HookServiceProvider extends ServiceProvider
             return $data;
         }
 
-        $orderIds = $paymentData['order_id'];
-        $orderId = Arr::first($orderIds);
-        $orderAddress = $this->app->make(OrderAddressInterface::class)->getFirstBy(['order_id' => $orderId]);
-
         try {
             $response = Paystack::getAuthorizationResponse([
                 'reference' => Paystack::genTranxRef(),
                 'quantity' => 1,
                 'currency' => $paymentData['currency'],
                 'amount' => (int)$paymentData['amount'] * 100,
-                'email' => $orderAddress ? $orderAddress->email : 'no-email@domain.com',
+                'email' => $paymentData['address']['email'],
                 'callback_url' => route('paystack.payment.callback'),
                 'metadata' => json_encode([
-                    'order_id' => $orderIds,
+                    'order_id' => $paymentData['order_id'],
                     'customer_id' => $paymentData['customer_id'],
                     'customer_type' => $paymentData['customer_type'],
                 ]),

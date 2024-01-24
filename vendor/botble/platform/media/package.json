@@ -1,5 +1,6 @@
 {
     "name": "@botble/media",
+    "version": "1.0.0",
     "devDependencies": {
         "clipboard": "^2.0.11"
     }

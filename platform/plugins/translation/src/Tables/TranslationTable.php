@@ -2,11 +2,13 @@
 
 namespace Botble\Translation\Tables;
 
+use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\Html;
 use Botble\Base\Supports\Language;
 use Botble\Table\Abstracts\TableAbstract;
 use Botble\Table\BulkChanges\SelectBulkChange;
+use Botble\Table\CollectionDataTable;
 use Botble\Table\Columns\FormattedColumn;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
@@ -25,6 +27,9 @@ class TranslationTable extends TableAbstract
         $this->hasOperations = false;
         $this->setView('plugins/translation::table');
         $this->pageLength = 100;
+
+        Assets::addScripts(['bootstrap-editable'])
+            ->addStyles(['bootstrap-editable']);
 
         $this->useDefaultSorting = false;
 
@@ -102,7 +107,18 @@ class TranslationTable extends TableAbstract
                 }
 
                 return $this->toJson(
-                    $this->table->of($translationsCollection)
+                    $this
+                        ->table
+                        ->of($translationsCollection)
+                        ->filter(function (CollectionDataTable $query) {
+                            if ($keyword = $this->request->input('search.value')) {
+                                $query->collection = $query->collection->filter(function ($item) use ($keyword) {
+                                    return str_contains($item['value'], $keyword);
+                                });
+                            }
+
+                            return $query;
+                        })
                 );
             });
     }
@@ -125,6 +141,7 @@ class TranslationTable extends TableAbstract
                 ->title(trans('plugins/translation::translation.group'))
                 ->alignStart()
                 ->nowrap()
+                ->searchable(false)
                 ->getValueUsing(function (FormattedColumn $column) {
                     $item = $column->getItem();
 
@@ -161,6 +178,7 @@ class TranslationTable extends TableAbstract
             FormattedColumn::make('key')
                 ->title(Arr::get(Language::getAvailableLocales(), 'en.name', 'en'))
                 ->alignStart()
+                ->searchable(false)
                 ->getValueUsing(function (FormattedColumn $column) {
                     $item = $column->getItem();
 
@@ -253,6 +271,6 @@ class TranslationTable extends TableAbstract
 
     public function htmlDrawCallbackFunction(): string|null
     {
-        return parent::htmlDrawCallbackFunction() . '$(".editable").editable({mode: "inline"});';
+        return parent::htmlDrawCallbackFunction() . 'Botble.initEditable()';
     }
 }

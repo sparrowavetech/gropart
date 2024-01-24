@@ -20,9 +20,12 @@
                     <div class="d-flex align-items-center gap-1" style="width: 90%;">
                         <x-core::icon :name="$hasChildren ? 'ti ti-folder' : 'ti ti-file'" />
                         <span
-                            class="fetch-data text-truncate cursor-pointer"
+                            class="fetch-data text-truncate"
+                            role="button"
                             data-href="{{ $canEdit && $editRoute ? route($editRoute, $category->id) : '' }}"
-                        >{{ $category->name }}</span>
+                        >
+                            {{ $category->name }}
+                        </span>
 
                         @if($category->badge_with_count)
                             {{ $category->badge_with_count }}

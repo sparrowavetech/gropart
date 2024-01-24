@@ -235,11 +235,11 @@ class ShippingManagement {
             }
 
             $httpClient.make()
+                .withButtonLoading(_self)
                 [method](
                     $form.prop('action'),
                     new FormData($form[0])
                 )
-                .withButtonLoading(_self)
                 .then(({ data }) => {
                     if (!data.error) {
                         const $table = $(`.table-shipping-rule-${data.data.shipping_rule_id}`)

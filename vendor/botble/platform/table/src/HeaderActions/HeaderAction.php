@@ -9,7 +9,6 @@ use Botble\Base\Supports\Builders\HasLabel;
 use Botble\Base\Supports\Builders\HasPermissions;
 use Botble\Base\Supports\Builders\HasUrl;
 use Illuminate\Contracts\Support\Arrayable;
-use Illuminate\Support\Facades\Blade;
 
 class HeaderAction implements Arrayable
 {
@@ -36,26 +35,9 @@ class HeaderAction implements Arrayable
 
     public function toArray(): array
     {
-        $content = '';
-
-        if ($this->getIcon()) {
-            $content .= sprintf('<x-core::icon name="%s" />', $this->getIcon());
-        }
-
-        if ($this->getLabel()) {
-            $content .= $this->getLabel();
-        }
-
-        $html = sprintf(
-            '<span data-action="%s" data-href="%s">%s</span>',
-            $this->getName(),
-            $this->getUrl(),
-            Blade::render($content)
-        );
-
         return [
             'className' => sprintf('action-item %s %s', $this->getColor(), $this->getAttribute('class')),
-            'text' => $html,
+            'text' => view('core/table::includes.header-action', ['action' => $this])->render(),
         ];
     }
 

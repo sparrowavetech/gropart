@@ -25,6 +25,7 @@ return [
         'pageTitle' => 'Installation - Step 1: Welcome',
         'title' => 'Welcome',
         'message' => 'Before getting started, we need some information on the database. You will need to know the following items before proceeding.',
+        'language' => 'Language',
         'next' => 'Let\'s go',
     ],
 

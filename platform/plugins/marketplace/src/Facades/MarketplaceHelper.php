@@ -22,6 +22,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static float maxFilesizeUploadByVendor()
  * @method static int maxProductImagesUploadByVendor()
  * @method static bool isVendorRegistrationEnabled()
+ * @method static float getMinimumWithdrawalAmount()
  *
  * @see \Botble\Marketplace\Supports\MarketplaceHelper
  */

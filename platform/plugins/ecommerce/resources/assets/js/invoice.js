@@ -3,7 +3,7 @@ $(() => {
         event.preventDefault()
 
         const _self = $(event.currentTarget)
-        const url = $(_self.find('span[hidden]')).data('url')
+        const url = $(_self.find('span[data-trigger]')).data('url')
 
         $httpClient
             .make()

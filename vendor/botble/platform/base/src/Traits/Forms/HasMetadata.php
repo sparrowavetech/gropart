@@ -5,6 +5,7 @@ namespace Botble\Base\Traits\Forms;
 use Botble\Base\Facades\MetaBox;
 use Botble\Base\Models\BaseModel;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 use Kris\LaravelFormBuilder\Fields\FormField;
 
 trait HasMetadata
@@ -50,7 +51,7 @@ trait HasMetadata
 
         foreach ($this->getMetadataFields() as $field) {
             $field->setValue(
-                $model->getMetaData($field->getName(), true)
+                $model->getMetaData($this->getMetadataFieldName($field), true)
             );
         }
     }
@@ -66,11 +67,18 @@ trait HasMetadata
         }
 
         foreach ($this->getMetadataFields() as $field) {
+            $name = $this->getMetadataFieldName($field);
+
             MetaBox::saveMetaBoxData(
                 $this->model,
-                $field->getName(),
-                $this->getRequest()->input($field->getName())
+                $name,
+                $this->getRequest()->input($name)
             );
         }
+    }
+
+    protected function getMetadataFieldName(FormField $field): string
+    {
+        return Str::before($field->getName(), '[');
     }
 }

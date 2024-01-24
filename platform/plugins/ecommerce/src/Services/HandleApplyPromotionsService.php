@@ -51,7 +51,7 @@ class HandleApplyPromotionsService
                 $productCollections = $product->original_product->productCollections;
             }
 
-            $promotion = Discount::promotionForProduct([$product->id], $productCollections->pluck('id')->all());
+            $promotion = Discount::promotionForProduct([$product->id]);
 
             if ($promotion && $availablePromotions->doesntContain($promotion)) {
                 $availablePromotions = $availablePromotions->push($promotion);

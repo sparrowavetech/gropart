@@ -147,11 +147,7 @@ class HandleApplyCouponService
                             ->whereIn('target', [DiscountTargetEnum::PRODUCT_COLLECTIONS, DiscountTargetEnum::PRODUCT_CATEGORIES, DiscountTargetEnum::SPECIFIC_PRODUCT, DiscountTargetEnum::PRODUCT_VARIANT]);
                     });
             })
-            ->where(function (Builder $query) {
-                return $query
-                    ->whereNull('quantity')
-                    ->orWhereColumn('quantity', '>', 'total_used');
-            })
+            ->available()
             ->first();
     }
 

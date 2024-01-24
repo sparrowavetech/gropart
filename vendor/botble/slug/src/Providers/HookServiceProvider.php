@@ -25,6 +25,10 @@ class HookServiceProvider extends ServiceProvider
             return $form;
         }
 
+        if (array_key_exists('slug', $form->getFields())) {
+            return $form;
+        }
+
         return $form
             ->addAfter(SlugHelper::getColumnNameToGenerateSlug($model), 'slug', PermalinkField::class, [
                 'model' => $model,

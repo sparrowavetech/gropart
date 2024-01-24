@@ -49,8 +49,7 @@ class HookServiceProvider extends ServiceProvider
                 ->when($pages, function () use ($pages) {
                     theme_option()
                         ->setSection([
-                            'title' => 'Page',
-                            'desc' => 'Theme options for Page',
+                            'title' => trans('packages/page::pages.theme_options.title'),
                             'id' => 'opt-text-subsection-page',
                             'subsection' => true,
                             'icon' => 'ti ti-book',
@@ -58,10 +57,10 @@ class HookServiceProvider extends ServiceProvider
                                 [
                                     'id' => 'homepage_id',
                                     'type' => 'customSelect',
-                                    'label' => trans('packages/page::pages.settings.show_on_front'),
+                                    'label' => trans('packages/page::pages.theme_options.your_home_page_display'),
                                     'attributes' => [
                                         'name' => 'homepage_id',
-                                        'list' => [0 => trans('packages/page::pages.settings.select')] + $pages,
+                                        'list' => [0 => trans('core/base::forms.select_placeholder')] + $pages,
                                         'value' => '',
                                         'options' => [
                                             'class' => 'form-control',

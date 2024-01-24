@@ -37,7 +37,7 @@ class ProductCollection extends BaseModel
             $model->slug = self::createSlug($model->slug ?: $model->name, $model->getKey());
         });
 
-        self::deleting(function (ProductCollection $collection) {
+        static::deleted(function (ProductCollection $collection) {
             $collection->discounts()->detach();
         });
     }

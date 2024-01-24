@@ -1,6 +1,9 @@
 import Toastify from './base/toast'
 
 class Botble {
+    static noticesTimeout = {}
+    static noticesTimeoutCount = 500
+
     constructor() {
         this.initGlobalModal()
         this.countCharacter()
@@ -19,6 +22,44 @@ class Botble {
         this.countMenuItemNotifications()
     }
 
+    static initCoreIcon() {
+        const $coreIcon = $(document).find('[data-bb-core-icon]')
+
+        const formatTemplate = ({ id, text }) => {
+            return $(`<span><span class="dropdown-item-indicator">${text}</span> ${id}</span>`)
+        }
+
+        Botble.select($coreIcon, {
+            ajax: {
+                url: $coreIcon.data('url'),
+                delay: 250,
+                cache: true,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page || 1,
+                    }
+                },
+                processResults: function (data) {
+                    return {
+                        results: $.map(data.data, function (icon, name) {
+                            return {
+                                text: icon,
+                                id: name,
+                            }
+                        }),
+                        pagination: {
+                            more: data.next_page_url && Object.keys(data.data).length > 0,
+                        },
+                    }
+                },
+            },
+            placeholder: $coreIcon.data('placeholder'),
+            templateResult: formatTemplate,
+            templateSelection: formatTemplate,
+        })
+    }
+
     static blockUI(options) {
         options = options || {}
 
@@ -30,40 +71,53 @@ class Botble {
     }
 
     static showNotice(messageType, message, messageHeader = '') {
+        let key = `notices_msg.${messageType}.${message}`
         let color = ''
+        let icon = ''
 
-        if (!messageHeader) {
+        if (Botble.noticesTimeout[key]) {
+            clearTimeout(Botble.noticesTimeout[key])
+        }
+
+        Botble.noticesTimeout[key] = setTimeout(() => {
+            if (!messageHeader) {
+                switch (messageType) {
+                    case 'error':
+                        messageHeader = BotbleVariables.languages.notices_msg.error
+                        break
+                    case 'success':
+                        messageHeader = BotbleVariables.languages.notices_msg.success
+                        break
+                }
+            }
+
             switch (messageType) {
                 case 'error':
-                    messageHeader = BotbleVariables.languages.notices_msg.error
+                    color = '#f44336'
+                    icon =
+                        '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /><path d="M12 9v4" /><path d="M12 16v.01" /></svg>'
                     break
                 case 'success':
-                    messageHeader = BotbleVariables.languages.notices_msg.success
+                    color = '#4caf50'
+                    icon =
+                        '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l5 5l10 -10" /></svg>'
                     break
             }
-        }
 
-        switch (messageType) {
-            case 'error':
-                color = '#f44336'
-                break
-            case 'success':
-                color = '#4caf50'
-                break
-        }
-
-        Toastify({
-            text: message,
-            duration: 5000,
-            close: true,
-            gravity: 'bottom',
-            position: 'right',
-            stopOnFocus: true,
-            escapeMarkup: false,
-            style: {
-                background: color,
-            },
-        }).showToast()
+            Toastify({
+                text: message,
+                duration: 5000,
+                close: true,
+                gravity: 'bottom',
+                position: 'right',
+                stopOnFocus: true,
+                escapeMarkup: false,
+                icon: icon,
+                style: {
+                    background: color,
+                },
+            }).showToast()
+        }, Botble.noticesTimeoutCount)
     }
 
     static showError(message, messageHeader = '') {
@@ -101,22 +155,7 @@ class Botble {
     static handleValidationError(errors) {
         let message = ''
         $.each(errors, (index, item) => {
-            message += item + '<br />'
-
-            let $input = $(`*[name="${index}"]`)
-            if ($input.closest('.next-input--stylized').length) {
-                $input.closest('.next-input--stylized').addClass('field-has-error')
-            } else {
-                $input.addClass('field-has-error')
-            }
-
-            let $inputArray = $(`*[name$="[${index}]"]`)
-
-            if ($inputArray.closest('.next-input--stylized').length) {
-                $inputArray.closest('.next-input--stylized').addClass('field-has-error')
-            } else {
-                $inputArray.addClass('field-has-error')
-            }
+            message += item + '\n'
         })
         Botble.showError(message)
     }
@@ -232,9 +271,10 @@ class Botble {
                 {
                     container: '<span></span>',
                     classname: 'charcounter',
-                    format: `(%1 ${BotbleVariables.languages.system.character_remain})`,
+                    format: `(%1/%2)`,
                     pulse: true,
                     delay: 0,
+                    allowOverLimit: false,
                 },
                 settings
             )
@@ -242,21 +282,26 @@ class Botble {
 
             let count = (el, container) => {
                 el = $(el)
-                if (el.val().length > max) {
+                let current = el.val().length
+                let remaining = max - el.val().length
+                container.html(settings.format.replace(/%1/, current).replace(/%2/, max))
+
+                container.toggleClass('text-danger', el.val().length > max)
+
+                if (!settings.allowOverLimit && el.val().length > max) {
                     el.val(el.val().substring(0, max))
                     if (settings.pulse && !p) {
                         pulse(container, true)
                     }
                 }
+
                 if (settings.delay > 0) {
                     if (timeout) {
                         window.clearTimeout(timeout)
                     }
                     timeout = window.setTimeout(() => {
-                        container.html(settings.format.replace(/%1/, max - el.val().length))
+                        container.html(settings.format.replace(/%1/, remaining).replace(/%2/, max))
                     }, settings.delay)
-                } else {
-                    container.html(settings.format.replace(/%1/, max - el.val().length))
                 }
             }
 
@@ -266,35 +311,20 @@ class Botble {
                     p = null
                 }
 
-                el.animate(
-                    {
-                        opacity: 0.1,
-                    },
-                    100,
-                    () => {
-                        $(el).animate(
-                            {
-                                opacity: 1.0,
-                            },
-                            100
-                        )
-                    }
-                )
+                el.animate({ opacity: 0.1 }, 100, () => {
+                    $(el).animate({ opacity: 1.0 }, 100)
+                })
 
                 if (again) {
-                    p = window.setTimeout(() => {
-                        pulse(el)
-                    }, 200)
+                    p = window.setTimeout(() => pulse(el), 200)
                 }
             }
 
             return this.each((index, el) => {
                 let container
                 if (!settings.container.match(/^<.+>$/)) {
-                    // use existing element to hold counter message
                     container = $(settings.container)
                 } else {
-                    // append element to hold counter message (clean up old element first)
                     $(el)
                         .nextAll('.' + settings.classname)
                         .remove()
@@ -341,8 +371,11 @@ class Botble {
         }
 
         $(document).on('click', 'input[data-counter], textarea[data-counter]', (event) => {
-            $(event.currentTarget).charCounter($(event.currentTarget).data('counter'), {
+            const $this = $(event.currentTarget)
+
+            $(event.currentTarget).charCounter($this.data('counter'), {
                 container: '<small></small>',
+                allowOverLimit: $this.data('allow-over-limit') == '' ? true : false,
             })
         })
     }
@@ -655,7 +688,9 @@ class Botble {
 
         Botble.initCodeEditorComponent()
         Botble.initColorPicker()
+        Botble.initLightbox()
         Botble.initTreeCategoriesSelect()
+        Botble.initCoreIcon()
 
         document.dispatchEvent(new CustomEvent('core-init-resources'))
     }
@@ -803,6 +838,10 @@ class Botble {
         })
     }
 
+    static openMediaUsing(callback) {}
+
+    static handleOpenMedia(item) {}
+
     static initMediaIntegrate() {
         if (jQuery().rvMedia) {
             Botble.gallerySelectImageTemplate = `
@@ -827,96 +866,96 @@ class Botble {
                 </div>
             </div>`
 
-            $('[data-type="rv-media-standard-alone-button"]').rvMedia({
-                multiple: false,
-                onSelectFiles: (files, $el) => {
-                    $($el.data('target')).val(files[0].url)
-                },
-            })
+            const $btnGalleries = $('.btn_gallery')
 
-            $.each($(document).find('.btn_gallery'), function (index, item) {
-                $(item).rvMedia({
-                    multiple: false,
-                    filter: $(item).data('action') === 'select-image' ? 'image' : 'everything',
-                    view_in: 'all_media',
-                    onSelectFiles: (files, $el) => {
-                        switch ($el.data('action')) {
-                            case 'media-insert-ckeditor':
-                                let content = ''
-                                $.each(files, (index, file) => {
-                                    let link = file.full_url
-                                    if (file.type === 'youtube') {
-                                        link = link.replace('watch?v=', 'embed/')
-                                        content +=
-                                            '<iframe width="420" height="315" src="' +
-                                            link +
-                                            '" frameborder="0" allowfullscreen loading="lazy"></iframe><br />'
-                                    } else if (file.type === 'image') {
-                                        const alt = file.alt ? file.alt : file.name
-                                        content += '<img src="' + link + '" alt="' + alt + '" loading="lazy"/><br />'
-                                    } else {
-                                        content += '<a href="' + link + '">' + file.name + '</a><br />'
-                                    }
-                                })
+            if ($btnGalleries.length > 0) {
+                $btnGalleries.each(function () {
+                    const item = $(this)
 
-                                window.EDITOR.CKEDITOR[$el.data('result')].insertHtml(content)
+                    $(item).rvMedia({
+                        multiple: false,
+                        filter: $(item).data('action') === 'select-image' ? 'image' : 'everything',
+                        view_in: 'all_media',
+                        onSelectFiles: (files, $el) => {
+                            switch ($el.data('action')) {
+                                case 'media-insert-ckeditor':
+                                    let content = ''
+                                    $.each(files, (index, file) => {
+                                        let link = file.full_url
+                                        if (file.type === 'youtube') {
+                                            link = link.replace('watch?v=', 'embed/')
+                                            content +=
+                                                '<iframe width="420" height="315" src="' +
+                                                link +
+                                                '" frameborder="0" allowfullscreen loading="lazy"></iframe><br />'
+                                        } else if (file.type === 'image') {
+                                            const alt = file.alt ? file.alt : file.name
+                                            content +=
+                                                '<img src="' + link + '" alt="' + alt + '" loading="lazy"/><br />'
+                                        } else {
+                                            content += '<a href="' + link + '">' + file.name + '</a><br />'
+                                        }
+                                    })
 
-                                break
-                            case 'media-insert-tinymce':
-                                let html = ''
-                                $.each(files, (index, file) => {
-                                    let link = file.full_url
-                                    if (file.type === 'youtube') {
-                                        link = link.replace('watch?v=', 'embed/')
-                                        html += `<iframe width='420' height='315' src='${link}' allowfullscreen loading='lazy'></iframe><br />`
-                                    } else if (file.type === 'image') {
-                                        const alt = file.alt ? file.alt : file.name
-                                        html += `<img src='${link}' alt='${alt}' loading='lazy'/><br />`
-                                    } else {
-                                        html += `<a href='${link}'>${file.name}</a><br />`
-                                    }
-                                })
-                                tinymce.activeEditor.execCommand('mceInsertContent', false, html)
-                                break
-                            case 'select-image':
-                                let firstImage = _.first(files)
-                                const $imageBox = $el.closest('.image-box')
-                                const allowThumb = $el.data('allow-thumb')
-                                $imageBox.find('.image-data').val(firstImage.url).trigger('change')
-                                $imageBox
-                                    .find('.preview-image')
-                                    .attr(
-                                        'src',
-                                        allowThumb && firstImage.thumb ? firstImage.thumb : firstImage.full_url
-                                    )
-                                $imageBox.find('[data-bb-toggle="image-picker-remove"]').show()
-                                $imageBox.find('.preview-image').removeClass('default-image')
-                                $imageBox.find('.preview-image-wrapper').show()
-                                break
-                            case 'attachment':
-                                const attachment = _.first(files)
-                                const wrapper = $el.closest('.attachment-wrapper')
-                                wrapper.find('.attachment-url').val(attachment.url)
-                                wrapper.find('.attachment-info').html(`
-                                    <a href="${attachment.full_url}" target="_blank" title="${attachment.name}">${attachment.url}</a>
-                                    <small class="d-block">${attachment.size}</small>
-                                `)
+                                    window.EDITOR.CKEDITOR[$el.data('result')].insertHtml(content)
 
-                                wrapper.find('[data-bb-toggle="media-file-remove"]').show()
-                                wrapper.find('.attachment-details').removeClass('hidden')
-                                break
-                            default:
-                                const coreInsertMediaEvent = new CustomEvent('core-insert-media', {
-                                    detail: {
-                                        files: files,
-                                        element: $el,
-                                    },
-                                })
-                                document.dispatchEvent(coreInsertMediaEvent)
-                        }
-                    },
+                                    break
+                                case 'media-insert-tinymce':
+                                    let html = ''
+                                    $.each(files, (index, file) => {
+                                        let link = file.full_url
+                                        if (file.type === 'youtube') {
+                                            link = link.replace('watch?v=', 'embed/')
+                                            html += `<iframe width='420' height='315' src='${link}' allowfullscreen loading='lazy'></iframe><br />`
+                                        } else if (file.type === 'image') {
+                                            const alt = file.alt ? file.alt : file.name
+                                            html += `<img src='${link}' alt='${alt}' loading='lazy'/><br />`
+                                        } else {
+                                            html += `<a href='${link}'>${file.name}</a><br />`
+                                        }
+                                    })
+                                    tinymce.activeEditor.execCommand('mceInsertContent', false, html)
+                                    break
+                                case 'select-image':
+                                    let firstImage = _.first(files)
+                                    const $imageBox = $el.closest('.image-box')
+                                    const allowThumb = $el.data('allow-thumb')
+                                    $imageBox.find('.image-data').val(firstImage.url).trigger('change')
+                                    $imageBox
+                                        .find('.preview-image')
+                                        .attr(
+                                            'src',
+                                            allowThumb && firstImage.thumb ? firstImage.thumb : firstImage.full_url
+                                        )
+                                    $imageBox.find('[data-bb-toggle="image-picker-remove"]').show()
+                                    $imageBox.find('.preview-image').removeClass('default-image')
+                                    $imageBox.find('.preview-image-wrapper').show()
+                                    break
+                                case 'attachment':
+                                    const attachment = _.first(files)
+                                    const wrapper = $el.closest('.attachment-wrapper')
+                                    wrapper.find('.attachment-url').val(attachment.url)
+                                    wrapper.find('.attachment-info').html(`
+                                        <a href="${attachment.full_url}" target="_blank" title="${attachment.name}">${attachment.url}</a>
+                                        <small class="d-block">${attachment.size}</small>
+                                    `)
+
+                                    wrapper.find('[data-bb-toggle="media-file-remove"]').show()
+                                    wrapper.find('.attachment-details').removeClass('hidden')
+                                    break
+                                default:
+                                    const coreInsertMediaEvent = new CustomEvent('core-insert-media', {
+                                        detail: {
+                                            files: files,
+                                            element: $el,
+                                        },
+                                    })
+                                    document.dispatchEvent(coreInsertMediaEvent)
+                            }
+                        },
+                    })
                 })
-            })
+            }
 
             const gallerySelectImages = function (files, $currentBoxList, excludeIndexes = []) {
                 let template = Botble.gallerySelectImageTemplate
@@ -1200,13 +1239,13 @@ class Botble {
     }
 
     static initFieldCollapse() {
-        $(document)
-            .on('change', '[data-bb-toggle="collapse"]', function (e) {
-                const target = $(this).data('bb-target')
+        $(document).on('click, change', '[data-bb-toggle="collapse"]', function (e) {
+            const target = $(this).data('bb-target')
 
-                let targetElement = null
+            let targetElement = null
 
-                if (e.currentTarget.type === 'checkbox') {
+            switch (e.currentTarget.type) {
+                case 'checkbox':
                     targetElement = $(document).find(target)
                     const isReverse = $(this).data('bb-reverse')
                     const isChecked = $(this).prop('checked')
@@ -1216,7 +1255,10 @@ class Botble {
                     } else {
                         isChecked ? targetElement.slideDown() : targetElement.slideUp()
                     }
-                } else {
+                    break
+
+                case 'radio':
+                case 'select-one':
                     targetElement = $(document).find(`${target}[data-bb-value="${$(this).val()}"]`)
 
                     const targets = $(document).find(`${target}[data-bb-value]`)
@@ -1227,8 +1269,22 @@ class Botble {
                     } else {
                         targets.slideUp()
                     }
-                }
-            })
+                    break
+
+                case 'button':
+                    targetElement = $(document).find(target)
+
+                    if (targetElement.length) {
+                        targetElement.slideToggle()
+                    }
+                    break
+
+                default:
+                    console.warn(`[Botble] Unknown type ${e.currentTarget.type} of collapse`)
+
+                    break
+            }
+        })
     }
 
     static initTreeCheckboxes() {
@@ -1388,30 +1444,151 @@ class Botble {
         return lightbox
     }
 
+    static initLightbox() {
+        let instance = window.lightboxInstance || {}
+
+        const a = document.querySelectorAll('a[data-bb-lightbox]')
+
+        if (!a.length) {
+            return
+        }
+
+        a.forEach((element) => {
+            const instanceName = element.dataset.bbLightbox
+
+            if (!instance[instanceName]) {
+                instance[instanceName] = Botble.lightbox()
+            }
+
+            const source = element.href
+
+            instance[instanceName].props.sources.push(source)
+            instance[instanceName].elements.a.push(element)
+
+            const currentIndex = instance[instanceName].props.sources.length - 1
+
+            element.addEventListener('click', (e) => {
+                e.preventDefault()
+
+                instance[instanceName].open(currentIndex)
+            })
+        })
+
+        window.lightboxInstance = instance
+    }
+
     static initColorPicker() {
         if (!document.querySelector('[data-bb-color-picker]')) {
             return
         }
 
-        const settings = {
-            selectInput: false,
-            alpha: false,
-            format: 'hex',
-        }
+        $('[data-bb-color-picker]').each((index, item) => {
+            let $current = $(item)
 
-        Coloris({
-            el: '[data-bb-color-picker]',
-            ...settings,
-        })
+            let options = {
+                allowEmpty: true,
+                color: $current.val() || 'rgb(51, 51, 51)',
+                showInput: true,
+                containerClassName: 'full-spectrum',
+                showInitial: true,
+                showSelectionPalette: false,
+                showPalette: true,
+                showAlpha: true,
+                preferredFormat: 'hex',
+                showButtons: false,
+                palette: [
+                    [
+                        'rgb(0, 0, 0)',
+                        'rgb(102, 102, 102)',
+                        'rgb(183, 183, 183)',
+                        'rgb(217, 217, 217)',
+                        'rgb(239, 239, 239)',
+                        'rgb(243, 243, 243)',
+                        'rgb(255, 255, 255)',
+                        'rgb(230, 184, 175)',
+                        'rgb(244, 204, 204)',
+                        'rgb(252, 229, 205)',
+                        'rgb(255, 242, 204)',
+                        'rgb(217, 234, 211)',
+                        'rgb(208, 224, 227)',
+                        'rgb(201, 218, 248)',
+                        'rgb(207, 226, 243)',
+                        'rgb(217, 210, 233)',
+                        'rgb(234, 209, 220)',
+                        'rgb(221, 126, 107)',
+                        'rgb(234, 153, 153)',
+                        'rgb(249, 203, 156)',
+                        'rgb(255, 229, 153)',
+                        'rgb(182, 215, 168)',
+                        'rgb(162, 196, 201)',
+                        'rgb(164, 194, 244)',
+                        'rgb(159, 197, 232)',
+                        'rgb(180, 167, 214)',
+                        'rgb(213, 166, 189)',
+                        'rgb(204, 65, 37)',
+                        'rgb(224, 102, 102)',
+                        'rgb(246, 178, 107)',
+                        'rgb(255, 217, 102)',
+                        'rgb(147, 196, 125)',
+                        'rgb(118, 165, 175)',
+                        'rgb(109, 158, 235)',
+                        'rgb(111, 168, 220)',
+                        'rgb(142, 124, 195)',
+                        'rgb(194, 123, 160)',
+                        'rgb(166, 28, 0)',
+                        'rgb(204, 0, 0)',
+                        'rgb(230, 145, 56)',
+                        'rgb(241, 194, 50)',
+                        'rgb(106, 168, 79)',
+                        'rgb(69, 129, 142)',
+                        'rgb(60, 120, 216)',
+                        'rgb(61, 133, 198)',
+                        'rgb(103, 78, 167)',
+                        'rgb(166, 77, 121)',
+                        'rgb(133, 32, 12)',
+                        'rgb(153, 0, 0)',
+                        'rgb(180, 95, 6)',
+                        'rgb(191, 144, 0)',
+                        'rgb(56, 118, 29)',
+                        'rgb(19, 79, 92)',
+                        'rgb(17, 85, 204)',
+                        'rgb(11, 83, 148)',
+                        'rgb(53, 28, 117)',
+                        'rgb(116, 27, 71)',
+                        'rgb(91, 15, 0)',
+                        'rgb(102, 0, 0)',
+                        'rgb(120, 63, 4)',
+                        'rgb(127, 96, 0)',
+                        'rgb(39, 78, 19)',
+                        'rgb(12, 52, 61)',
+                        'rgb(28, 69, 135)',
+                        'rgb(7, 55, 99)',
+                        'rgb(32, 18, 77)',
+                        'rgb(76, 17, 48)',
+                        'rgb(152, 0, 0)',
+                        'rgb(255, 0, 0)',
+                        'rgb(255, 153, 0)',
+                        'rgb(255, 255, 0)',
+                        'rgb(0, 255, 0)',
+                        'rgb(0, 255, 255)',
+                        'rgb(74, 134, 232)',
+                        'rgb(0, 0, 255)',
+                        'rgb(153, 0, 255)',
+                        'rgb(255, 0, 255)',
+                    ],
+                ],
+                change: (color) => {
+                    $current.val(color.toRgbString())
+                },
+            }
 
-        document.querySelector('[data-bb-color-picker]').addEventListener('click', (e) => {
-            const currentTarget = e.target.closest('[data-bb-color-picker]')
-            const swatches = currentTarget.dataset.swatches?.split(',')
+            let parent = $current.closest('.modal')
 
-            Coloris({
-                swatches,
-                ...settings,
-            })
+            if (parent.length) {
+                options.appendTo = parent
+            }
+
+            $current.spectrum(options)
         })
     }
 
@@ -1464,7 +1641,9 @@ class Botble {
 
     static initDropdownCheckboxes() {
         const countCheckedDropdownCheckboxes = (e) => {
-            const $wrapper = e ? $(e.currentTarget).closest('[data-bb-toggle="dropdown-checkboxes"]') : $('[data-bb-toggle="dropdown-checkboxes"]')
+            const $wrapper = e
+                ? $(e.currentTarget).closest('[data-bb-toggle="dropdown-checkboxes"]')
+                : $('[data-bb-toggle="dropdown-checkboxes"]')
 
             if (Array.isArray($wrapper)) {
                 $wrapper.forEach((wrapper) => {
@@ -1504,7 +1683,9 @@ class Botble {
             const $selected = $wrapper.find('.multi-checklist-selected')
 
             if ($(e.currentTarget).is(':checked')) {
-                const $input = `<input type="hidden" name="${$wrapper.data('name')}" value="${$(e.currentTarget).val()}">`
+                const $input = `<input type="hidden" name="${$wrapper.data('name')}" value="${$(
+                    e.currentTarget
+                ).val()}">`
                 $selected.append($input)
             } else {
                 const $input = $selected.find(`input[value="${$(e.currentTarget).val()}"]`)
@@ -1524,10 +1705,8 @@ class Botble {
             $this.hide()
             $input.show().trigger('focus')
 
-
             if ($wrapper.data('ajax-url')) {
-                const template =
-                    `<li>
+                const template = `<li>
                     <label class="form-check">
                         <input type="checkbox" id="__id__" class="form-check-input" value="__value__">
                         <span class="form-check-label">
@@ -1538,7 +1717,8 @@ class Botble {
 
                 const name = $wrapper.data('name')
 
-                $httpClient.make()
+                $httpClient
+                    .make()
                     .withLoading($dropdown)
                     .get($wrapper.data('ajax-url'))
                     .then(({ data }) => {
@@ -1601,6 +1781,26 @@ class Botble {
                 $items.show()
             }
         })
+    }
+
+    static initEditable() {
+        const $element = $('.editable');
+
+        if (! $element.length) {
+            return
+        }
+
+        $element.editable({
+            mode: 'inline',
+            success: function(response) {
+                if (response.error && response.message) {
+                    Botble.showError(response.message)
+                }
+            },
+            error: function(response) {
+                Botble.handleError(response)
+            }
+        });
     }
 }
 

@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\File;
 if (! function_exists('plugin_path')) {
     function plugin_path(string|null $path = null): string
     {
-        return platform_path('plugins' . DIRECTORY_SEPARATOR . $path);
+        return platform_path('plugins' . ($path ? DIRECTORY_SEPARATOR . ltrim($path, DIRECTORY_SEPARATOR) : ''));
     }
 }
 
@@ -37,7 +37,9 @@ if (! function_exists('get_active_plugins')) {
 
         $existingPlugins = BaseHelper::scanFolder(plugin_path());
 
-        return array_diff($plugins, array_diff($plugins, $existingPlugins));
+        $activatedPlugins = array_diff($plugins, array_diff($plugins, $existingPlugins));
+
+        return array_values($activatedPlugins);
     }
 }
 

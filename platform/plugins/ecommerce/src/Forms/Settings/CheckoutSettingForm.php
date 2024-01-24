@@ -3,6 +3,8 @@
 namespace Botble\Ecommerce\Forms\Settings;
 
 use Botble\Base\Facades\Assets;
+use Botble\Base\Forms\FieldOptions\LabelFieldOption;
+use Botble\Base\Forms\Fields\LabelField;
 use Botble\Base\Forms\Fields\MultiCheckListField;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Base\Supports\Helper;
@@ -10,7 +12,6 @@ use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Http\Requests\Settings\CheckoutSettingRequest;
 use Botble\Language\Forms\Fields\LanguageSwitcherField;
 use Botble\Setting\Forms\SettingForm;
-use Illuminate\Support\Facades\Blade;
 
 class CheckoutSettingForm extends SettingForm
 {
@@ -20,6 +21,9 @@ class CheckoutSettingForm extends SettingForm
 
         Assets::addScriptsDirectly('vendor/core/core/setting/js/setting.js')
             ->addScriptsDirectly('vendor/core/plugins/ecommerce/js/setting.js');
+
+        $countries = Helper::countries();
+        $selectedCountries = array_keys(EcommerceHelper::getAvailableCountries());
 
         $this
             ->setSectionTitle(trans('plugins/ecommerce::setting.checkout.name'))
@@ -61,75 +65,108 @@ class CheckoutSettingForm extends SettingForm
             ->add('display_tax_fields_at_checkout_page', 'onOffCheckbox', [
                 'label' => trans('plugins/ecommerce::setting.checkout.form.display_tax_fields_at_checkout_page'),
                 'value' => EcommerceHelper::isDisplayTaxFieldsAtCheckoutPage(),
-            ]);
-
-        if (is_plugin_active('location')) {
-            $this->add('load_countries_states_cities_from_location_plugin', 'customRadio', [
-                'label' => trans('plugins/ecommerce::setting.checkout.form.load_countries_states_cities_from_location_plugin'),
-                'value' => $loadLocationFromPlugin = EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation(),
-                'values' => [
-                    0 => trans('core/base::base.no'),
-                    1 => trans('core/base::base.yes'),
-                ],
-                'help_block' => [
-                    'text' => trans(
-                        'plugins/ecommerce::setting.checkout.form.load_countries_states_cities_from_location_plugin_placeholder',
-                    ),
-                ],
-                'attr' => [
-                    'data-bb-toggle' => 'collapse',
-                    'data-bb-target' => '.location-settings',
-                ],
             ])
-            ->add('open_fieldset_location_settings', 'html', [
-                'html' => '<fieldset class="form-fieldset"/>',
-            ])
-            ->add('open_wrapper_use_city_field', 'html', [
-                'html' => sprintf('<div class="location-settings" data-bb-value="1" style="display: %s">', $loadLocationFromPlugin ? 'block' : 'none'),
-            ])
-            ->add('use_city_field_as_field_text', 'onOffCheckbox', [
-                'label' => trans('plugins/ecommerce::setting.checkout.form.use_city_field_as_field_text'),
-                'value' => get_ecommerce_setting('use_city_field_as_field_text', false),
-            ])
-            ->add('close_wrapper_use_city_field', 'html', [
-            'html' => '</div>',
-            ])
-            ->add('open_location_settings', 'html', [
-                'html' => sprintf(
-                    '<div class="form-group location-settings" style="display: %s;" data-bb-value="0">',
-                    ! $loadLocationFromPlugin ? 'block' : 'none',
-                ),
-            ])
-            ->add('location_settings_label', 'html', [
-                'html' => Blade::render(sprintf(
-                    '<x-core::form.label for="available_countries">%s</x-core::form.label>',
-                    trans('plugins/ecommerce::setting.checkout.form.available_countries')
-                )),
-            ])
-            ->add('available_countries_all', 'onOffCheckbox', [
-                'label' => trans('plugins/ecommerce::setting.checkout.form.all'),
-                'label_attr' => [
-                    'class' => 'check-all',
-                    'data-set' => '.available-countries',
-                ],
-            ])
-            ->add('available_countries[]', MultiCheckListField::class, [
-                'label' => false,
-                'choices' => Helper::countries(),
-                'value' => array_keys(EcommerceHelper::getAvailableCountries()),
-                'attr' => [
-                    'class' => 'available-countries',
-                ],
-            ])
-            ->add('close_location_settings', 'html', [
-                'html' => '</div>',
-            ])
-            ->add('close_fieldset_location_settings', 'html', [
-                'html' => '</fieldset>',
-            ]);
-        }
-
-        $this
+            ->when(is_plugin_active('location'), function () use ($countries, $selectedCountries) {
+                $this
+                    ->add('load_countries_states_cities_from_location_plugin', 'customRadio', [
+                        'label' => trans('plugins/ecommerce::setting.checkout.form.load_countries_states_cities_from_location_plugin'),
+                        'value' => $loadLocationFromPlugin = EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation(),
+                        'values' => [
+                            0 => trans('core/base::base.no'),
+                            1 => trans('core/base::base.yes'),
+                        ],
+                        'help_block' => [
+                            'text' => trans(
+                                'plugins/ecommerce::setting.checkout.form.load_countries_states_cities_from_location_plugin_placeholder',
+                            ),
+                        ],
+                        'attr' => [
+                            'data-bb-toggle' => 'collapse',
+                            'data-bb-target' => '.location-settings',
+                        ],
+                    ])
+                    ->add('open_fieldset_location_settings', 'html', [
+                        'html' => '<fieldset class="form-fieldset"/>',
+                    ])
+                    ->add('open_wrapper_use_city_field', 'html', [
+                        'html' => sprintf('<div class="location-settings" data-bb-value="1" style="display: %s">', $loadLocationFromPlugin ? 'block' : 'none'),
+                    ])
+                    ->add('use_city_field_as_field_text', 'onOffCheckbox', [
+                        'label' => trans('plugins/ecommerce::setting.checkout.form.use_city_field_as_field_text'),
+                        'value' => get_ecommerce_setting('use_city_field_as_field_text', false),
+                    ])
+                    ->add('close_wrapper_use_city_field', 'html', [
+                        'html' => '</div>',
+                    ])
+                    ->add('open_location_settings', 'html', [
+                        'html' => sprintf(
+                            '<div class="form-group location-settings" style="display: %s;" data-bb-value="0">',
+                            ! $loadLocationFromPlugin ? 'block' : 'none',
+                        ),
+                    ])
+                    ->add(
+                        'location_settings_label',
+                        LabelField::class,
+                        LabelFieldOption::make()->label(trans('plugins/ecommerce::setting.checkout.form.available_countries'))->toArray()
+                    )
+                    ->add('available_countries_all', 'onOffCheckbox', [
+                        'label' => trans('plugins/ecommerce::setting.checkout.form.all'),
+                        'label_attr' => [
+                            'class' => 'check-all',
+                            'data-set' => '.available-countries',
+                        ],
+                        'help_block' => [
+                            'text' => trans('plugins/ecommerce::setting.checkout.form.all_helper_text'),
+                        ],
+                        'value' => (count($selectedCountries) - 1) == count($countries) ? '1' : '',
+                    ])
+                    ->add('available_countries[]', MultiCheckListField::class, [
+                        'label' => false,
+                        'choices' => $countries,
+                        'value' => $selectedCountries,
+                        'attr' => [
+                            'class' => 'available-countries',
+                        ],
+                    ])
+                    ->add('close_location_settings', 'html', [
+                        'html' => '</div>',
+                    ])
+                    ->add('close_fieldset_location_settings', 'html', [
+                        'html' => '</fieldset>',
+                    ]);
+            }, function () use ($countries, $selectedCountries) {
+                $this
+                    ->add(
+                        'location_settings_label',
+                        LabelField::class,
+                        LabelFieldOption::make()->label(trans('plugins/ecommerce::setting.checkout.form.available_countries'))->toArray()
+                    )
+                    ->add('open_fieldset_location_settings', 'html', [
+                        'html' => '<fieldset class="form-fieldset"/>',
+                    ])
+                    ->add('available_countries_all', 'onOffCheckbox', [
+                        'label' => trans('plugins/ecommerce::setting.checkout.form.all'),
+                        'label_attr' => [
+                            'class' => 'check-all',
+                            'data-set' => '.available-countries',
+                        ],
+                        'help_block' => [
+                            'text' => trans('plugins/ecommerce::setting.checkout.form.all_helper_text'),
+                        ],
+                        'value' => (count($selectedCountries) - 1) == count($countries) ? '1' : '',
+                    ])
+                    ->add('available_countries[]', MultiCheckListField::class, [
+                        'label' => false,
+                        'choices' => $countries,
+                        'value' => $selectedCountries,
+                        'attr' => [
+                            'class' => 'available-countries',
+                        ],
+                    ])
+                    ->add('close_fieldset_location_settings', 'html', [
+                        'html' => '</fieldset>',
+                    ]);
+            })
             ->add('enable_customer_recently_viewed_products', 'onOffCheckbox', [
                 'label' => trans('plugins/ecommerce::setting.checkout.form.recently_viewed.enable'),
                 'value' => EcommerceHelper::isEnabledCustomerRecentlyViewedProducts(),

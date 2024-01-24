@@ -10,8 +10,31 @@
 
 @if ($showField)
     @php
-        Arr::set($options['attr'], 'class', Arr::get($options['attr'], 'class', '') . ' tags');
+        $classAppend = ['tags'];
+
+        if (Arr::has($options['attr'], 'data-url')) {
+            $classAppend[] = 'list-tagify';
+        }
+
+        $options['attr']['class'] = (rtrim(Arr::get($options, 'attr.class'), ' ') ?: '') . ' ' . implode(' ', $classAppend);
+
+        if (Arr::has($options, 'choices')) {
+            $choices = $options['choices'];
+
+            if ($choices instanceof \Illuminate\Support\Collection) {
+                $choices = $choices->toArray();
+            }
+
+            if ($choices) {
+                $options['attr']['data-list'] = json_encode($choices);
+            }
+        }
+
+        if (Arr::has($options, 'selected')) {
+            $options['value'] = $options['selected'];
+        }
     @endphp
+
     {!! Form::text($name, $options['value'], $options['attr']) !!}
     @include('core/base::forms.partials.help-block')
 @endif

@@ -6,10 +6,11 @@ use Botble\Analytics\Http\Requests\Settings\AnalyticsSettingRequest;
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\Html;
+use Botble\Base\Forms\FieldOptions\HtmlFieldOption;
 use Botble\Base\Forms\Fields\CodeEditorField;
+use Botble\Base\Forms\Fields\HtmlField;
 use Botble\Base\Forms\Fields\TextField;
 use Botble\Setting\Forms\SettingForm;
-use Illuminate\Support\Facades\Blade;
 
 class AnalyticsSettingForm extends SettingForm
 {
@@ -65,20 +66,7 @@ class AnalyticsSettingForm extends SettingForm
                     ],
                     'help_text' => Html::link('https://github.com/akki-io/laravel-google-analytics/wiki/2.-Configure-Google-Service-Account-&-Google-Analytics', attributes: ['target' => '_blank']),
                 ])
-                ->add('upload_account_json_file', 'html', [
-                    'html' => Blade::render(sprintf(
-                        '
-                        <x-core::button
-                            size="md"
-                            data-bb-toggle="analytics-trigger-upload-json"
-                            data-url="%s"
-                        >
-                            <x-core::icon name="ti ti-upload" /> %s
-                        </x-core::button>',
-                        route('analytics.settings.json'),
-                        __('Upload Service Account JSON File')
-                    )),
-                ]);
+                ->add('upload_account_json_file', HtmlField::class, HtmlFieldOption::make()->view('plugins/analytics::upload-button')->toArray());
         }
 
     }

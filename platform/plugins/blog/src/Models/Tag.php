@@ -27,7 +27,7 @@ class Tag extends BaseModel
 
     protected static function booted(): void
     {
-        self::deleting(function (Tag $tag) {
+        static::deleted(function (Tag $tag) {
             $tag->posts()->detach();
         });
     }

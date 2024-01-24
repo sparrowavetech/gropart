@@ -24,11 +24,11 @@ Route::group(['namespace' => 'Botble\SocialLogin\Http\Controllers'], function ()
         Route::get('auth/{provider}', [
             'as' => 'auth.social',
             'uses' => 'SocialLoginController@redirectToProvider',
-        ])->whereIn('provider', SocialService::getProviderKeys());
+        ]);
 
         Route::get('auth/callback/{provider}', [
             'as' => 'auth.social.callback',
             'uses' => 'SocialLoginController@handleProviderCallback',
-        ])->whereIn('provider', SocialService::getProviderKeys());
+        ]);
     });
 });

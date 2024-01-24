@@ -23,7 +23,7 @@ class Cart
 {
     protected static Dispatcher $dispatcher;
 
-    public const DEFAULT_INSTANCE = 'default';
+    public const DEFAULT_INSTANCE = 'cart';
 
     protected string $instance;
 
@@ -154,9 +154,6 @@ class Cart
         foreach (Arr::get($options, 'optionCartValue', []) as $value) {
             if (is_array($value)) {
                 foreach ($value as $valueItem) {
-                    if (Arr::get($valueItem, 'option_type') == 'field') {
-                        continue;
-                    }
                     if ($valueItem['affect_type'] == 1) {
                         $valueItem['affect_price'] = ($basePrice * $valueItem['affect_price']) / 100;
                     }
@@ -166,9 +163,11 @@ class Cart
                 if (Arr::get($value, 'option_type') == 'field') {
                     continue;
                 }
+
                 if ($value['affect_type'] == 1) {
                     $value['affect_price'] = ($basePrice * $value['affect_price']) / 100;
                 }
+
                 $price += $value['affect_price'];
             }
         }
@@ -725,7 +724,7 @@ class Cart
 
         $productsInCart = new EloquentCollection();
 
-        if ($products->count()) {
+        if ($products->isNotEmpty()) {
             foreach ($cartContent as $cartItem) {
                 $product = $products->firstWhere('id', $cartItem->id);
                 if (! $product || $product->original_product->status != BaseStatusEnum::PUBLISHED) {
@@ -744,7 +743,7 @@ class Cart
         $this->products = $productsInCart;
         $this->weight = $weight;
 
-        if ($this->products->count() == 0) {
+        if ($this->products->isEmpty()) {
             $this->instance('cart')->destroy();
         }
 
@@ -765,12 +764,7 @@ class Cart
         return $this->session->get($this->instance);
     }
 
-    /**
-     * Get weight
-     *
-     * @return int|float
-     */
-    public function weight()
+    public function weight(): float
     {
         return EcommerceHelper::validateOrderWeight($this->weight);
     }
@@ -789,9 +783,7 @@ class Cart
     {
         $dispatcher = static::getEventDispatcher();
 
-        if ($dispatcher) {
-            static::setEventDispatcher(new NullDispatcher($dispatcher));
-        }
+        static::setEventDispatcher(new NullDispatcher($dispatcher));
 
         try {
             return $callback();
@@ -806,6 +798,51 @@ class Cart
     {
         if (isset(static::$dispatcher)) {
             static::$dispatcher->dispatch($event, $parameters);
+        }
+    }
+
+    public function refresh(): void
+    {
+        $cart = $this->instance('cart');
+
+        if ($cart->isEmpty()) {
+            return;
+        }
+
+        $ids = $cart->content()->pluck('id')->toArray();
+
+        $products = get_products([
+            'condition' => [
+                ['ec_products.id', 'IN', $ids],
+            ],
+        ]);
+
+        if ($products->isEmpty()) {
+            return;
+        }
+
+        foreach ($cart->content() as $rowId => $cartItem) {
+            $product = $products->firstWhere('id', $cartItem->id);
+            if (! $product || $product->original_product->status != BaseStatusEnum::PUBLISHED) {
+                $this->remove($cartItem->rowId);
+            } else {
+                $cart->removeQuietly($rowId);
+
+                $parentProduct = $product->original_product;
+
+                $options = $cartItem->options->toArray();
+                $options['image'] = $product->image ?: $parentProduct->image;
+
+                $options['taxRate'] = $cartItem->getTaxRate();
+
+                $cart->addQuietly(
+                    $cartItem->id,
+                    $cartItem->name,
+                    $cartItem->qty,
+                    $product->front_sale_price,
+                    $options
+                );
+            }
         }
     }
 }

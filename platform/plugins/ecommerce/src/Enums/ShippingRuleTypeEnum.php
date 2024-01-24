@@ -72,7 +72,7 @@ class ShippingRuleTypeEnum extends Enum
         return self::getLabel($this->getValue());
     }
 
-    public function toUnit(): string
+    public function toUnit(): string|null
     {
         return match ($this->value) {
             self::BASED_ON_PRICE => get_application_currency()->symbol,

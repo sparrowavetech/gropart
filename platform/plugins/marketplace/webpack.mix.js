@@ -13,6 +13,7 @@ mix
     .js(`${source}/resources/js/vendor-dashboard/marketplace.js`, `${dist}/js`)
     .js(`${source}/resources/js/vendor-dashboard/marketplace-vendor.js`, `${dist}/js`)
     .js(`${source}/resources/js/vendor-dashboard/discount.js`, `${dist}/js`)
+    .js(`${source}/resources/js/customer-register.js`, `${dist}/js`)
     .vue()
 
     .sass(`${source}/resources/sass/vendor-dashboard/marketplace.scss`, `${dist}/css`)
@@ -26,6 +27,7 @@ if (mix.inProduction()) {
         .copy(`${dist}/js/discount.js`, `${source}/public/js`)
         .copy(`${dist}/js/store-revenue.js`, `${source}/public/js`)
         .copy(`${dist}/js/store.js`, `${source}/public/js`)
+        .copy(`${dist}/js/customer-register.js`, `${source}/public/js`)
         .copy(`${dist}/css/marketplace.css`, `${source}/public/css`)
         .copy(`${dist}/css/marketplace-rtl.css`, `${source}/public/css`)
 }

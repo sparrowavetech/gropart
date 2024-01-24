@@ -119,7 +119,7 @@ class MediaServiceProvider extends ServiceProvider
         $mediaDriver = RvMedia::getMediaDriver();
 
         $config->set([
-            'filesystems.default' => RvMedia::getMediaDriver(),
+            'filesystems.default' => $mediaDriver,
             'filesystems.disks.public.throw' => true,
             'core.media.media.chunk.enabled' => (bool)$setting->get(
                 'media_chunk_enabled',

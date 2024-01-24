@@ -48,6 +48,15 @@ class WithdrawalController extends BaseController
         $vendor = auth('customer')->user();
         $vendorInfo = $vendor->vendorInfo;
 
+        if ($request->input('amount') < MarketplaceHelper::getMinimumWithdrawalAmount()) {
+            return $this
+                ->httpResponse()
+                ->setError()
+                ->setMessage(__('The minimum withdrawal amount is :amount', [
+                    'amount' => format_price(MarketplaceHelper::getMinimumWithdrawalAmount()),
+                ]));
+        }
+
         try {
             DB::beginTransaction();
 

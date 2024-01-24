@@ -25,7 +25,7 @@ class PageForm extends FormAbstract
             ->model(Page::class)
             ->setValidatorClass(PageRequest::class)
             ->hasTabs()
-            ->add('name', TextField::class, NameFieldOption::make()->required()->toArray())
+            ->add('name', TextField::class, NameFieldOption::make()->maxLength(120)->required()->toArray())
             ->add('description', TextareaField::class, DescriptionFieldOption::make()->toArray())
             ->add('content', EditorField::class, ContentFieldOption::make()->allowedShortcodes()->toArray())
             ->add('status', SelectField::class, StatusFieldOption::make()->toArray())

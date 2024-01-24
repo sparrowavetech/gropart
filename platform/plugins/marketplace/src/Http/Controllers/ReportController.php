@@ -10,13 +10,6 @@ use Illuminate\Http\Request;
 
 class ReportController extends BaseController
 {
-    public function __construct()
-    {
-        parent::__construct();
-
-        $this->breadcrumb();
-    }
-
     public function index(
         Request $request,
         AdminWidget $widget

@@ -22,19 +22,12 @@ class ReviewForm extends FormAbstract
             ->setupModel(new Review())
             ->setValidatorClass(ReviewRequest::class)
             ->add(
-                'created_at',
-                DatetimeField::class,
-                DatePickerFieldOption::make()
-                    ->label(trans('core/base::tables.created_at'))
-                    ->value(Carbon::now())
-                    ->toArray()
-            )
-            ->add(
                 'product_id',
                 SelectField::class,
                 SelectFieldOption::make()
                     ->label(trans('plugins/ecommerce::review.product'))
                     ->ajaxSearch()
+                    ->required()
                     ->ajaxUrl(route('reviews.ajax-search-products'))
                     ->toArray()
             )
@@ -44,6 +37,7 @@ class ReviewForm extends FormAbstract
                 SelectFieldOption::make()
                     ->label(trans('plugins/ecommerce::review.customer'))
                     ->ajaxSearch()
+                    ->required()
                     ->ajaxUrl(route('reviews.ajax-search-customers'))
                     ->toArray()
             )
@@ -61,11 +55,21 @@ class ReviewForm extends FormAbstract
                 TextareaField::class,
                 TextareaFieldOption::make()
                     ->label(trans('plugins/ecommerce::review.comment'))
+                    ->required()
                     ->toArray()
             )
             ->add('images[]', MediaImagesField::class, [
                 'label' => trans('plugins/ecommerce::review.images'),
                 'values' => $this->model->images,
-            ]);
+            ])
+            ->add(
+                'created_at',
+                DatetimeField::class,
+                DatePickerFieldOption::make()
+                    ->label(trans('core/base::tables.created_at'))
+                    ->value(Carbon::now())
+                    ->toArray()
+            )
+            ->setBreakFieldPoint('created_at');
     }
 }

@@ -81,6 +81,7 @@
                 name="name"
                 :placeholder="trans('core/base::forms.name')"
                 data-counter="120"
+                :required="true"
             />
 
             <x-core::form.textarea

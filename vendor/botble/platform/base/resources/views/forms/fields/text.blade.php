@@ -5,11 +5,24 @@
 @endif
 
 @if ($showLabel && $options['label'] !== false && $options['label_show'])
-    {!! Form::customLabel($name, $options['label'], $options['label_attr']) !!}
+    <x-core::form.label
+        :for="$name"
+        :label="$options['label']"
+        :attributes="new Illuminate\View\ComponentAttributeBag($options['label_attr'])"
+    />
 @endif
 
 @if ($showField)
+    @if ($prepend = Arr::get($options, 'prepend'))
+        {!! $prepend !!}
+    @endif
+
     {!! Form::text($name, $options['value'], $options['attr']) !!}
+
+    @if ($append = Arr::get($options, 'append'))
+        {!! $append !!}
+    @endif
+
     @include('core/base::forms.partials.help-block')
 @endif
 

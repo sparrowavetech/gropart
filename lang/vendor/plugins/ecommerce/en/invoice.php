@@ -2,7 +2,6 @@
 
 return [
     'name' => 'Invoices',
-    'description' => 'View and update your invoices settings',
     'create' => 'New invoice',
     'edit' => 'Edit invoice',
     'print' => 'Print Invoice',

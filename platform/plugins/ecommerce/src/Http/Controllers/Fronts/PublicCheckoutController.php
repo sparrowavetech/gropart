@@ -11,7 +11,6 @@ use Botble\Ecommerce\Enums\ShippingMethodEnum;
 use Botble\Ecommerce\Enums\ShippingStatusEnum;
 use Botble\Ecommerce\Facades\Cart;
 use Botble\Ecommerce\Facades\Discount;
-use Botble\Ecommerce\Models\Discount as EcommerceDiscount;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Facades\OrderHelper;
 use Botble\Ecommerce\Http\Requests\ApplyCouponRequest;
@@ -35,9 +34,7 @@ use Botble\Optimize\Facades\OptimizerHelper;
 use Botble\Payment\Enums\PaymentStatusEnum;
 use Botble\Payment\Supports\PaymentHelper;
 use Botble\Theme\Facades\Theme;
-use Carbon\Carbon;
 use Illuminate\Auth\Events\Registered;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Hash;
@@ -124,8 +121,6 @@ class PublicCheckoutController extends BaseController
         $sessionCheckoutData = $this->processOrderData($token, $sessionCheckoutData, $request);
 
         $paymentMethod = null;
-
-        $allDiscounts = EcommerceDiscount::where('apply_via_url', 1)->get();
 
         if (is_plugin_active('payment')) {
             $paymentMethod = $request->input(
@@ -262,7 +257,6 @@ class PublicCheckoutController extends BaseController
             'sessionCheckoutData',
             'products',
             'isShowAddressForm',
-            'allDiscounts',
         );
 
         if (auth('customer')->check()) {
@@ -286,16 +280,13 @@ class PublicCheckoutController extends BaseController
             $data = array_merge($data, compact('addresses', 'isAvailableAddress', 'sessionAddressId'));
         }
 
-        $discounts = DiscountModel::query()
+        $discountsQuery = DiscountModel::query()
             ->where('type', DiscountTypeEnum::COUPON)
-            ->where('start_date', '<=', Carbon::now())
             ->where('display_at_checkout', true)
-            ->where(
-                fn (Builder $query) => $query
-                    ->whereNull('quantity')
-                    ->orWhereColumn('quantity', '>', 'total_used')
-            )
-            ->get();
+            ->active()
+            ->available();
+
+        $discounts = apply_filters('ecommerce_checkout_discounts_query', $discountsQuery, $products)->get();
 
         $data = [...$data, 'discounts' => $discounts];
 
@@ -431,7 +422,10 @@ class PublicCheckoutController extends BaseController
 
         $sessionData = array_merge($sessionData, $addressData);
 
+        Cart::instance('cart')->refresh();
+
         $products = Cart::instance('cart')->products();
+
         if (is_plugin_active('marketplace')) {
             $sessionData = apply_filters(
                 HANDLE_PROCESS_ORDER_DATA_ECOMMERCE,
@@ -489,15 +483,7 @@ class PublicCheckoutController extends BaseController
         $sessionData = OrderHelper::checkAndCreateOrderAddress($addressData, $sessionData);
 
         if (! isset($sessionData['created_order_product'])) {
-            $weight = 0;
-            foreach (Cart::instance('cart')->content() as $cartItem) {
-                $product = Product::query()->find($cartItem->id);
-                if ($product && $product->weight) {
-                    $weight += $product->weight * $cartItem->qty;
-                }
-            }
-
-            $weight = EcommerceHelper::validateOrderWeight($weight);
+            $weight = Cart::instance('cart')->weight();
 
             OrderProduct::query()->where(['order_id' => $sessionData['created_order_id']])->delete();
 
@@ -521,7 +507,7 @@ class PublicCheckoutController extends BaseController
                     'product_type' => $product?->product_type,
                 ];
 
-                if ($cartItem->options['options']) {
+                if (isset($cartItem->options['options'])) {
                     $data['product_options'] = $cartItem->options['options'];
                 }
 
@@ -810,7 +796,7 @@ class PublicCheckoutController extends BaseController
                 'product_type' => $product?->product_type,
             ];
 
-            if ($cartItem->options['options']) {
+            if (isset($cartItem->options['options'])) {
                 $data['product_options'] = $cartItem->options['options'];
             }
 

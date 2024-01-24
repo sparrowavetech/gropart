@@ -2,7 +2,6 @@
 
 namespace Botble\Faq\Providers;
 
-use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\Html;
 use Botble\Base\Facades\MetaBox;
@@ -10,6 +9,7 @@ use Botble\Base\Supports\ServiceProvider;
 use Botble\Faq\Contracts\Faq as FaqContract;
 use Botble\Faq\FaqCollection;
 use Botble\Faq\FaqItem;
+use Botble\Faq\FaqSupport;
 use Botble\Faq\Models\Faq;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
@@ -19,20 +19,14 @@ class HookServiceProvider extends ServiceProvider
     public function boot(): void
     {
         add_action(BASE_ACTION_META_BOXES, function (string $context, array|string|Model|null $object = null): void {
-            if (! $object || $context != 'advanced') {
+            if (
+                ! $object
+                || $context != 'advanced'
+                || ! in_array($object::class, config('plugins.faq.general.schema_supported', []))
+                || ! setting('enable_faq_schema', 0)
+            ) {
                 return;
             }
-
-            if (! in_array($object::class, config('plugins.faq.general.schema_supported', []))) {
-                return;
-            }
-
-            if (! setting('enable_faq_schema', 0)) {
-                return;
-            }
-
-            Assets::addStylesDirectly(['vendor/core/plugins/faq/css/faq.css'])
-                ->addScriptsDirectly(['vendor/core/plugins/faq/js/faq.js']);
 
             MetaBox::addMetaBox(
                 'faq_schema_config_wrapper',
@@ -44,41 +38,9 @@ class HookServiceProvider extends ServiceProvider
                     ),
                 ]),
                 function () {
-                    $value = [];
-                    $selectedFaqs = [];
-
-                    $args = func_get_args();
-                    if ($args[0] && $args[0]->id) {
-                        $value = MetaBox::getMetaData($args[0], 'faq_schema_config', true);
-                        $selectedFaqs = MetaBox::getMetaData($args[0], 'faq_ids', true) ?: [];
-                    }
-
-                    $hasValue = ! empty($value);
-
-                    $value = (array)$value;
-
-                    foreach ($value as $key => $item) {
-                        if (! is_array($item)) {
-                            continue;
-                        }
-
-                        foreach ($item as $subItem) {
-                            if (is_array($subItem['value'])) {
-                                Arr::forget($value, $key);
-                            }
-                        }
-                    }
-
-                    $value = json_encode($value);
-
-                    $faqs = Faq::query()->wherePublished()->pluck('question', 'id')->all();
-
-                    return view(
-                        'plugins/faq::schema-config-box',
-                        compact('value', 'hasValue', 'faqs', 'selectedFaqs')
-                    )->render();
+                    return (new FaqSupport())->renderMetaBox(func_get_args()[0] ?? null);
                 },
-                get_class($object),
+                $object::class,
                 $context
             );
         }, 39, 2);

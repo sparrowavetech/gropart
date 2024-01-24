@@ -2,17 +2,25 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
-    <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=5, user-scalable=1" name="viewport"/>
-    <meta name="csrf-token" content="{{ csrf_token() }}" />
+    <meta charset="utf-8">
+    <meta
+        http-equiv="X-UA-Compatible"
+        content="IE=edge"
+    >
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=5, user-scalable=1"
+    />
+    <meta
+        name="csrf-token"
+        content="{{ csrf_token() }}"
+    >
 
     {!! BaseHelper::googleFonts(
         'https://fonts.googleapis.com/css2?family=' .
             urlencode(theme_option('primary_font', 'Muli')) .
             ':wght@400;600;700&display=swap',
     ) !!}
-    <link rel="stylesheet" href="{{ url('/') }}/themes/gropart/plugins/font-awesome/css/font-awesome.min.css" />
 
     <style>
         :root {
@@ -31,23 +39,6 @@
             --footer-heading-color: {{ theme_option('footer_heading_color', '#555') }};
             --footer-hover-color: {{ theme_option('footer_hover_color', '#fab528') }};
             --footer-border-color: {{ theme_option('footer_border_color', '#dee2e6') }};
-        }
-        nav.navigation .navigation__right .d-sticky-header.header-middle {
-            display: none;
-        }
-        .header.header--sticky nav.navigation .navigation__right .d-sticky-header.header-middle {
-            display: block;
-            border-bottom: 0;
-            margin-top: 7px;
-        }
-        .header.header--sticky nav.navigation .navigation__right .header-recently-viewed {
-            display: none;
-        }
-        .header.header--sticky nav.navigation .navigation__right {
-            min-width:20%;
-        }
-        .header.header--sticky nav.navigation .navigation__right .header-middle.d-sticky-header .header__right {
-            width:100%;
         }
     </style>
 
@@ -104,22 +95,6 @@
                         <div class="col-6">
                             <div class="header-info header-info-right">
                                 <ul>
-                                    @if (is_plugin_active('marketplace'))
-                                         @if (auth('customer')->check())
-                                            @if (auth('customer')->user()->is_vendor)
-                                                <li>
-                                                    <a class="become-vendor-link" href="{{ route('marketplace.vendor.dashboard') }}">{{ __('Vendor dashboard') }}</a>
-                                                </li>
-                                            @else
-                                                <li>
-                                                    <a class="become-vendor-link" href="{{ route('marketplace.vendor.become-vendor') }}"><i class="icon-user"></i> {{ __('Become a vendor') }}</a>
-                                                </li>
-                                            @endif
-                                        @else
-                                            <li><a class="become-vendor-link" href="{{ route('customer.register') }}"><i class="icon-user"></i> {{ __('Become Vendor') }}</a></li>
-                                        @endif
-                                    @endif
-
                                     @if (is_plugin_active('language'))
                                         {!! Theme::partial('language-switcher') !!}
                                     @endif
@@ -165,7 +140,8 @@
                                             </li>
                                         @else
                                             <li><a href="{{ route('customer.login') }}">{{ __('Login') }}</a></li>
-                                            <li><a href="{{ route('customer.register') }}">{{ __('Register') }}</a></li>
+                                            <li><a href="{{ route('customer.register') }}">{{ __('Register') }}</a>
+                                            </li>
                                         @endif
                                     @endif
                                 </ul>
@@ -252,14 +228,14 @@
                         @endif
                     </div>
                     <div class="header-items header__right">
-                        <!--@if (theme_option('hotline'))
+                        @if (theme_option('hotline'))
                             <div class="header__extra header-support">
                                 <div class="header-box-content">
                                     <span>{{ theme_option('hotline') }}</span>
                                     <p>{{ __('Support 24/7') }}</p>
                                 </div>
                             </div>
-                        @endif-->
+                        @endif
 
                         @if (is_plugin_active('ecommerce'))
                             @if (EcommerceHelper::isCompareEnabled())
@@ -409,66 +385,6 @@
                                             </div>
                                             <div class="recently-viewed-products"></div>
                                         </div>
-                                    </div>
-                                </div>
-                            @endif
-                            @if (is_plugin_active('ecommerce'))
-                                <div class="header-middle d-sticky-header">
-                                    <div class="header-items header__right">
-                                        @if (EcommerceHelper::isCompareEnabled())
-                                            <div class="header__extra header-compare">
-                                                <a class="btn-compare" href="{{ route('public.compare') }}">
-                                                    <i class="icon-repeat"></i>
-                                                    <span class="header-item-counter">{{ Cart::instance('compare')->count() }}</span>
-                                                </a>
-                                            </div>
-                                        @endif
-                                        @if (EcommerceHelper::isWishlistEnabled())
-                                            <div class="header__extra header-wishlist">
-                                                <a class="btn-wishlist" href="{{ route('public.wishlist') }}">
-                                                    <span class="svg-icon">
-                                                        <svg>
-                                                            <use href="#svg-icon-wishlist" xlink:href="#svg-icon-wishlist"></use>
-                                                        </svg>
-                                                    </span>
-                                                    <span class="header-item-counter">
-                                                        {{ auth('customer')->check() ? auth('customer')->user()->wishlist()->count() : Cart::instance('wishlist')->count() }}
-                                                    </span>
-                                                </a>
-                                            </div>
-                                        @endif
-                                        @if (EcommerceHelper::isCartEnabled())
-                                            <div class="header__extra cart--mini" tabindex="0" role="button">
-                                                <div class="header__extra">
-                                                    <a class="btn-shopping-cart" href="{{ route('public.cart') }}">
-                                                        <span class="svg-icon">
-                                                            <svg>
-                                                                <use href="#svg-icon-cart" xlink:href="#svg-icon-cart"></use>
-                                                            </svg>
-                                                        </span>
-                                                        <span class="header-item-counter">{{ Cart::instance('cart')->count() }}</span>
-                                                    </a>
-                                                    <span class="cart-text">
-                                                        <span class="cart-title">{{ __('Your Cart') }}</span>
-                                                        <span class="cart-price-total">
-                                                            <span class="cart-amount">
-                                                                <bdi>
-                                                                    <span>{{ format_price(Cart::instance('cart')->rawSubTotal() + Cart::instance('cart')->rawTax()) }}</span>
-                                                                </bdi>
-                                                            </span>
-                                                        </span>
-                                                    </span>
-                                                </div>
-                                                <div class="cart__content" id="cart-mobile">
-                                                    <div class="backdrop"></div>
-                                                    <div class="mini-cart-content">
-                                                        <div class="widget-shopping-cart-content">
-                                                            {!! Theme::partial('cart-mini.list') !!}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        @endif
                                     </div>
                                 </div>
                             @endif

@@ -13,6 +13,7 @@ class Manager implements ManagerContract
 {
     public function __construct(
         protected string $groupId,
+        protected array $groups = [],
         protected array $groupNames = [],
         protected array $sections = [],
         protected array $sectionItems = [],
@@ -29,6 +30,7 @@ class Manager implements ManagerContract
     public function setGroupId(string $groupId): static
     {
         $this->groupId = $groupId;
+        $this->groups[$groupId] = true;
 
         return $this;
     }
@@ -66,19 +68,21 @@ class Manager implements ManagerContract
 
     public function getAllSections(): array
     {
-        $groups = array_keys($this->sections);
+        $groups = array_keys($this->groups);
         $sections = [];
 
         foreach ($groups as $group) {
             $this->group($group);
+
             $this->dispatchBeforeRendering();
-            $this->group($group);
 
             $currentSections = $sections[$group] ?? [];
             $sections[$group] = [...$currentSections, ...$this->getSections()];
 
             $this->dispatchAfterRendering();
         }
+
+        $this->default();
 
         return $sections;
     }
@@ -102,6 +106,7 @@ class Manager implements ManagerContract
                     );
             })
             ->each(fn (PanelSectionContract $panelSection) => $panelSection->afterSetup())
+            ->tap(fn () => $this->default())
             ->all();
     }
 
@@ -167,12 +172,16 @@ class Manager implements ManagerContract
     {
         add_action($this->filterPrefix() . '_rendering', $callback, $priority);
 
+        $this->default();
+
         return $this;
     }
 
     public function afterRendering(Closure|callable $callback, int $priority = 100): static
     {
         add_action($this->filterPrefix() . '_rendered', $callback, $priority);
+
+        $this->default();
 
         return $this;
     }

@@ -13,7 +13,6 @@ return [
     'permalink' => 'Permalink',
     'ok' => 'OK',
     'cancel' => 'Cancel',
-    'character_remain' => 'character(s) remain',
     'template' => 'Template',
     'choose_file' => 'Choose file',
     'file' => 'File',

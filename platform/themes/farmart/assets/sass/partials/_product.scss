@@ -831,36 +831,13 @@
             overflow: hidden;
 
             .svg-icon {
-                color: $color-primary;
+                color: #fab528;
             }
         }
     }
 
     .star-count {
         line-height: 12px;
-    }
-}
-
-.product-panel-reviews {
-    .bar-rating {
-        .star-item {
-            align-items: center;
-            display: flex;
-            flex-flow: row nowrap;
-            justify-content: space-between;
-            margin-bottom: 6px;
-            width: 100%;
-
-            .slabel, .svalue {
-                flex: 0 0 auto;
-                width: 60px;
-                text-align: center;
-            }
-
-            .progress {
-                width: 100%;
-            }
-        }
     }
 }
 
@@ -1242,7 +1219,6 @@
     }
 }
 
-
 .text-swatch {
     li {
         display: inline-block;
@@ -1601,223 +1577,6 @@ html:not([dir="rtl"]) .noUi-horizontal .noUi-handle {
             .product-thumbnail {
                 flex-basis: 43%;
                 width: 43%;
-            }
-        }
-    }
-}
-
-/****** Style Star Rating *****/
-.form-rating-stars {
-    float: left;
-
-    > label {
-        float: right;
-        color: #999;
-        cursor: pointer;
-        font-size: 1.05em;
-    }
-
-    > input:checked ~ label, /* show gold star when clicked */
-    &:not(:checked) > label:hover, /* hover current star */
-    &:not(:checked) > label:hover ~ label { /* hover previous stars in list */
-        color: $color-primary;
-    }
-
-    > input:checked + label:hover, /* hover current star when changing rating */
-    > input:checked ~ label:hover,
-    > label:hover ~ input:checked ~ label, /* lighten current selection */
-    > input:checked ~ label:hover ~ label {
-        color: #fab528;
-    }
-}
-
-
-.review-images {
-    &:not(.review-images-total) {
-        a {
-            width: 100px;
-        }
-    }
-
-    a {
-        display: inline-block;
-        height: 100px;
-        margin-bottom: 5px;
-        margin-right: 5px;
-        border: 1px solid #dee2e6;
-        border-radius: 0.25rem !important;
-        line-height: 0;
-
-        img {
-            object-fit: cover;
-            border: none;
-        }
-    }
-
-    .more-review-images {
-        span {
-            background: rgba(0, 0, 0, .5);
-            bottom: 0;
-            color: #ffffff;
-            font-size: 22px;
-            left: 0;
-            position: absolute;
-            right: 0;
-            top: 0;
-            z-index: 1;
-            align-self: center;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-    }
-
-    &.review-images-total {
-        a {
-            padding: 1.5px;
-            height: fit-content;
-            margin: 0;
-            border: 0;
-        }
-    }
-}
-
-.image-viewer__item {
-    position: relative;
-    -webkit-transition: all .3s cubic-bezier(.46, .03, .52, .96);
-    transition: all .3s cubic-bezier(.46, .03, .52, .96);
-    text-align: initial;
-    margin-right: 2px;
-    background-color: #eee;
-    width: 70px;
-    height: 70px;
-    border: 1px solid #c4c6cf;
-    margin-top: 5px;
-
-    img {
-        height: 100%;
-        width: 100%;
-        object-fit: contain;
-    }
-}
-
-.image-upload__uploader-container {
-    display: inline-block;
-
-    &:hover {
-        cursor: pointer;
-    }
-
-    .image-upload__uploader {
-        width: 70px;
-        height: 70px;
-        border: 1px dashed #c4c6cf;
-        -webkit-box-orient: vertical;
-        -webkit-box-direction: normal;
-        -ms-flex-direction: column;
-        flex-direction: column;
-        -webkit-box-pack: center;
-        -ms-flex-pack: center;
-        justify-content: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        position: relative;
-        display: -webkit-box;
-        display: -ms-flexbox;
-        display: flex;
-
-        &:hover {
-            background: #d9edf7;
-
-            .image-upload__file-input {
-                cursor: pointer;
-            }
-        }
-    }
-}
-
-.image-upload__icon {
-    color: #333;
-    font-size: 20px;
-    margin-bottom: 8px;
-}
-
-.image-upload__text {
-    color: #333;
-    font-size: 10px;
-    padding: 0 3px;
-    text-align: center;
-}
-
-.image-upload__file-input {
-    position: absolute;
-    left: 0;
-    top: 0;
-    opacity: 0;
-    width: 100%;
-    height: 100%;
-}
-
-.image-viewer__item {
-    display: inline-block;
-}
-
-.image-viewer__list {
-    display: block;
-    width: 100%;
-}
-
-.image-viewer__icon-remove {
-    position: absolute;
-    top: -1px;
-    right: 2px;
-    z-index: 1;
-    cursor: pointer;
-
-    i {
-        color: #ffffff;
-        background: #848484;
-        border-radius: 50%;
-        display: inline-block;
-        width: 20px;
-        height: 20px;
-        text-align: center;
-        line-height: 20px;
-        font-size: 10px;
-    }
-}
-
-.image-viewer__list.is-loading {
-    .loading {
-        display: block !important;
-    }
-}
-
-.help-block {
-    display: block;
-    margin-top: 5px;
-    margin-bottom: 10px;
-    background-color: #d9edf7;
-    border: 1px solid #bce8f1;
-    padding: 5px;
-    font-size: 0.9em;
-    cursor: help;
-}
-
-.image-upload__viewer {
-    .image-viewer__list {
-        .loading {
-            position: absolute;
-            width: 100%;
-            background-color: rgba(146, 162, 177, 52%);
-            top: 0;
-            bottom: 0;
-            display: none;
-
-            .half-circle-spinner {
-                width: 30px;
-                height: 30px;
             }
         }
     }

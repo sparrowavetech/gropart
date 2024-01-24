@@ -15,6 +15,7 @@ Route::group([
 ], function () {
     Route::group(['middleware' => 'install'], function () {
         Route::get('welcome', [InstallController::class, 'index'])->name('welcome');
+        Route::post('welcome/next', [InstallController::class, 'next'])->name('welcome.next');
         Route::resource('requirements', RequirementController::class)->only(['index']);
         Route::resource('environments', EnvironmentController::class)->only(['index', 'store']);
     });

@@ -32,6 +32,7 @@ use Botble\Payment\Enums\PaymentStatusEnum;
 use Botble\Payment\Supports\PaymentHelper;
 use Botble\PayPal\Services\Gateways\PayPalPaymentService;
 use Exception;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -64,7 +65,23 @@ class OrderSupportServiceProvider extends ServiceProvider
             add_action(ACTION_AFTER_ORDER_STATUS_COMPLETED_ECOMMERCE, [$this, 'afterOrderStatusCompleted'], 12);
             add_filter(ACTION_AFTER_ORDER_RETURN_STATUS_COMPLETED, [$this, 'afterReturnOrderCompleted'], 12);
             add_filter('ecommerce_order_email_variables', [$this, 'addMoreOrderEmailVariables'], 12, 2);
+            add_filter('ecommerce_checkout_discounts_query', [$this, 'modifyCheckoutDiscountsQuery'], 1, 2);
         });
+    }
+
+    public function modifyCheckoutDiscountsQuery(Builder $query, Collection $products): Builder
+    {
+        $storeIds = $products->pluck('original_product.store_id')->filter()->unique();
+
+        if ($storeIds->isEmpty()) {
+            return $query;
+        }
+
+        return $query->where(
+            fn (Builder $query) => $query
+            ->whereNull('store_id')
+            ->orWhereIn('store_id', $storeIds)
+        );
     }
 
     public function renderProductsInCheckoutPage(array|string|EloquentCollection $products): string|array|Collection
@@ -446,6 +463,13 @@ class OrderSupportServiceProvider extends ServiceProvider
             ]);
         }
 
+        if (
+            EcommerceHelper::isDisplayTaxFieldsAtCheckoutPage() &&
+            $request->boolean('with_tax_information')
+        ) {
+            $order->taxInformation()->create($request->input('tax_information'));
+        }
+
         // Address Order in here
         $addressKeys = [
             'name',
@@ -586,8 +610,11 @@ class OrderSupportServiceProvider extends ServiceProvider
 
         return EmailHandler::setModule(ECOMMERCE_MODULE_SCREEN_NAME)
             ->setVariableValues([
-                'store_address' => get_ecommerce_setting('store_address'),
-                'store_phone' => get_ecommerce_setting('store_phone'),
+                'store_address' => $theFirst->store->full_address ?: get_ecommerce_setting('store_address'),
+                'store_name' => $theFirst->store->name ?: get_ecommerce_setting('store_name'),
+                'store_phone' => $theFirst->store->phone ?: get_ecommerce_setting('store_phone'),
+                'store_link' => $theFirst->store->url,
+                'store' => $theFirst->store->toArray(),
                 'order_id' => $theFirst->code,
                 'order_token' => $theFirst->token,
                 'customer_name' => $theFirst->user->name ?: $theFirst->address->name,

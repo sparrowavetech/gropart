@@ -1,42 +1,56 @@
 @extends(EcommerceHelper::viewPath('customers.master'))
 
 @section('content')
-    <h2 class="customer-page-title">{{ __('Orders') }}</h2>
+    <h2 class="customer-page-title mb-4">{{ __('Orders') }}</h2>
 
-    <div class="customer-list-order">
-        <table class="table  table-hover">
+    <div class="table-responsive customer-list-order">
+        <table class="table table-bordered table-striped">
             <thead>
-                <tr class="success">
+                <tr>
                     <th>{{ __('Order number') }}</th>
                     <th>{{ __('Created at') }}</th>
+                    <th>{{ __('Total') }}</th>
                     <th>{{ __('Payment method') }}</th>
                     <th>{{ __('Status') }}</th>
-                    <th></th>
+                    <th>{{ __('Actions') }}</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach ($orders as $order)
+                @if ($orders->isNotEmpty())
+                    @foreach ($orders as $order)
+                        <tr>
+                            <td>{{ $order->code }}</td>
+                            <td>{{ $order->created_at->format('d M Y H:i:s') }}</td>
+                            <td>{{ __(':price for :total item(s)', ['price' => $order->amount_format, 'total' => $order->products_count]) }}</td>
+                            <td>
+                                @if(is_plugin_active('payment') && $order->payment->id && $order->payment->payment_channel->label())
+                                    {{ $order->payment->payment_channel->label() }}
+                                @else
+                                    &mdash;
+                                @endif
+                            </td>
+
+                            <td>{!! BaseHelper::clean($order->status->toHtml()) !!}</td>
+
+                            <td>
+                                <a
+                                    class="btn btn-primary btn-sm"
+                                    href="{{ route('customer.orders.view', $order->id) }}"
+                                >{{ __('View') }}</a>
+                            </td>
+                        </tr>
+                    @endforeach
+                @else
                     <tr>
-
-                        <td>#{{ config('plugins.ecommerce.order.order_code_prefix') }}{{ $order->id }}</td>
-                        <td>{{ $order->created_at->format('d M Y H:i:s') }}</td>
-                        <td>{{ is_plugin_active('payment') && $order->payment->id ? $order->payment->payment_channel->label() : '-' }}</td>
-                        <td>{!! $order->status->toHtml() !!}</td>
-
-                        <td>
-                            <a
-                                class="btn btn-info btn-order-detail"
-                                href="{{ route('customer.orders.view', $order->id) }}"
-                            >{{ __('View') }}</a>
-                        </td>
+                        <td
+                            class="text-center"
+                            colspan="6"
+                        >{{ __('No orders yet!') }}</td>
                     </tr>
-                @endforeach
+                @endif
             </tbody>
         </table>
 
-        <div class="text-center">
-            {!! $orders->links() !!}
-        </div>
-
+        {!! $orders->links() !!}
     </div>
 @endsection

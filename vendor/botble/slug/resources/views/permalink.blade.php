@@ -29,7 +29,6 @@
             :group-flat="true"
             class="ps-0"
             :value="$value"
-            :readonly="!!$value"
         >
             <x-slot:prepend>
                 <span class="input-group-text">
@@ -37,18 +36,22 @@
                 </span>
             </x-slot:prepend>
 
-            <x-slot:append>
-                <span class="input-group-text">
-                    @if($id)
-                        <a href="javascript:void(0)" class="input-group-addon" data-bb-toggle="slug-edit">
-                            {{ trans('core/base::forms.edit') }}
+            @if($id)
+                <x-slot:append>
+                    <span class="input-group-text slug-actions">
+                        <a
+                            href="#"
+                            class="link-secondary"
+                            data-bs-toggle="tooltip"
+                            aria-label="{{ trans('packages/slug::slug.generate_url') }}"
+                            data-bs-original-title="{{ trans('packages/slug::slug.generate_url') }}"
+                            data-bb-toggle="generate-slug"
+                        >
+                            <x-core::icon name="ti ti-wand" />
                         </a>
-                            <a href="javascript:void(0)" class="input-group-addon" data-bb-toggle="slug-ok" style="display: none">
-                            {{ trans('core/base::forms.ok') }}
-                        </a>
-                    @endif
-                </span>
-            </x-slot:append>
+                    </span>
+                </x-slot:append>
+            @endif
         </x-core::form.text-input>
         @if (Auth::user() && $id && is_in_admin(true))
             <x-core::form.helper-text class="mt-n2 text-truncate">

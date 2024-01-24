@@ -28,7 +28,7 @@ class FlashSale extends BaseModel
 
     protected static function booted(): void
     {
-        static::deleting(fn (FlashSale $flashSale) => $flashSale->products()->detach());
+        static::deleted(fn (FlashSale $flashSale) => $flashSale->products()->detach());
     }
 
     public function products(): BelongsToMany
@@ -51,5 +51,27 @@ class FlashSale extends BaseModel
     protected function expired(): Attribute
     {
         return Attribute::get(fn (): bool => $this->end_date->lessThan(Carbon::now()->startOfDay()));
+    }
+
+    protected function saleCountLeftLabel(): Attribute
+    {
+        return Attribute::get(function (): string|null {
+            if (! $this->pivot) {
+                return null;
+            }
+
+            return $this->pivot->sold . '/' . $this->pivot->quantity;
+        })->shouldCache();
+    }
+
+    protected function saleCountLeftPercent(): Attribute
+    {
+        return Attribute::get(function (): float {
+            if (! $this->pivot) {
+                return 0;
+            }
+
+            return $this->pivot->quantity > 0 ? ($this->pivot->sold / $this->pivot->quantity) * 100 : 0;
+        })->shouldCache();
     }
 }

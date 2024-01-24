@@ -19,6 +19,10 @@ class CustomerSettingForm extends SettingForm
             ->add('verify_customer_email', 'onOffCheckbox', [
                 'label' => trans('plugins/ecommerce::setting.customer.form.verify_customer_email'),
                 'value' => EcommerceHelper::isEnableEmailVerification(),
+            ])
+            ->add('login_using_phone', 'onOffCheckbox', [
+                'label' => trans('plugins/ecommerce::setting.customer.form.login_using_phone'),
+                'value' => EcommerceHelper::isLoginUsingPhone(),
                 'wrapper' => [
                     'class' => 'mb-0',
                 ],

@@ -52,7 +52,7 @@ class SystemManagement
             'debug_mode' => $app->hasDebugModeEnabled(),
             'storage_dir_writable' => File::isWritable($app->storagePath()),
             'cache_dir_writable' => File::isReadable($app->bootstrapPath('cache')),
-            'app_size' => BaseHelper::humanFilesize(self::calculateAppSize($app->bootstrapPath())),
+            'app_size' => BaseHelper::humanFilesize(self::calculateAppSize($app->basePath())),
         ];
     }
 

@@ -2,7 +2,6 @@
 
 namespace Botble\Blog\Repositories\Eloquent;
 
-use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Models\BaseQueryBuilder;
 use Botble\Blog\Models\Post;
 use Botble\Blog\Repositories\Interfaces\PostInterface;
@@ -19,10 +18,8 @@ class PostRepository extends RepositoriesAbstract implements PostInterface
     public function getFeatured(int $limit = 5, array $with = []): Collection
     {
         $data = $this->model
-            ->where([
-                'status' => BaseStatusEnum::PUBLISHED,
-                'is_featured' => 1,
-            ])
+            ->wherePublished()
+            ->where('is_featured', true)
             ->limit($limit)
             ->with(array_merge(['slugable'], $with))
             ->orderByDesc('created_at');
@@ -102,10 +99,8 @@ class PostRepository extends RepositoriesAbstract implements PostInterface
     public function getByUserId(int|string $authorId, int $paginate = 6): Collection|LengthAwarePaginator
     {
         $data = $this->model
-            ->where([
-                'status' => BaseStatusEnum::PUBLISHED,
-                'author_id' => $authorId,
-            ])
+            ->wherePublished()
+            ->where('author_id', $authorId)
             ->with('slugable')
             ->orderByDesc('created_at');
 
@@ -115,8 +110,8 @@ class PostRepository extends RepositoriesAbstract implements PostInterface
     public function getDataSiteMap(): Collection|LengthAwarePaginator
     {
         $data = $this->model
-            ->with('slugable')
             ->wherePublished()
+            ->with('slugable')
             ->orderByDesc('created_at');
 
         return $this->applyBeforeExecuteQuery($data)->get();
@@ -137,7 +132,7 @@ class PostRepository extends RepositoriesAbstract implements PostInterface
 
     public function getRecentPosts(int $limit = 5, int|string $categoryId = 0): Collection
     {
-        $data = $this->model->where(['status' => BaseStatusEnum::PUBLISHED]);
+        $data = $this->model->wherePublished();
 
         if ($categoryId != 0) {
             $data = $data

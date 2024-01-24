@@ -15,7 +15,7 @@
     {!! Form::customSelect(
         $name,
         (array) $emptyVal + $options['choices'],
-        $options['selected'],
+        $options['selected'] ?: $options['default_value'],
         $options['attr'],
         Arr::get($options, 'optionAttrs', []),
         Arr::get($options, 'optgroupsAttributes', []),

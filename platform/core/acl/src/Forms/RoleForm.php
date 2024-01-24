@@ -13,7 +13,6 @@ use Botble\Base\Forms\Fields\TextareaField;
 use Botble\Base\Forms\Fields\TextField;
 use Botble\Base\Forms\FormAbstract;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Blade;
 
 class RoleForm extends FormAbstract
 {
@@ -35,13 +34,7 @@ class RoleForm extends FormAbstract
             $active = array_keys($role->permissions);
 
             add_filter('base_action_form_actions_extra', function () use ($role) {
-                return Blade::render(
-                    sprintf(
-                        '<x-core::button tag="a" href="%s" icon="ti ti-copy">%s</x-core::button>',
-                        route('roles.duplicate', $role->getKey()),
-                        trans('core/acl::permissions.duplicate')
-                    )
-                );
+                return view('core/acl::roles.includes.extra-actions', compact('role'))->render();
             });
         }
 

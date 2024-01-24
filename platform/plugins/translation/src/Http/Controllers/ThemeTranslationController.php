@@ -3,24 +3,21 @@
 namespace Botble\Translation\Http\Controllers;
 
 use Botble\Base\Facades\Assets;
-use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Supports\Language;
+use Botble\Setting\Http\Controllers\SettingController;
 use Botble\Translation\Manager;
 use Botble\Translation\Tables\ThemeTranslationTable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
 
-class ThemeTranslationController extends BaseController
+class ThemeTranslationController extends SettingController
 {
     public function index(Request $request, ThemeTranslationTable $translationTable)
     {
         $this->pageTitle(trans('plugins/translation::translation.theme-translations'));
 
-        Assets::addScripts(['bootstrap-editable'])
-            ->addStyles(['bootstrap-editable'])
-            ->addScriptsDirectly('vendor/core/plugins/translation/js/theme-translations.js')
-            ->addStylesDirectly('vendor/core/plugins/translation/css/translation.css');
+        Assets::addStylesDirectly('vendor/core/plugins/translation/css/translation.css');
 
         $groups = Language::getAvailableLocales();
 

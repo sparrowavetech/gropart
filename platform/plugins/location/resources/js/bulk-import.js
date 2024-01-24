@@ -9,46 +9,48 @@ $(() => {
             container.find('.bulk-import-message').text($button.data('validating-text'))
         }
 
-        $httpClient.make()
+        $httpClient
+            .make()
             .post($form.data('validate-url'), {
                 file,
                 offset,
                 limit,
-            }).then(({ data: response }) => {
-            const { data, message } = response
+            })
+            .then(({ data: response }) => {
+                const { data, message } = response
 
-            if (data && data.count > 0) {
-                container.find('.bulk-import-message').text(message)
-                validateData(file, data.offset)
-                failedRows = [...failedRows, ...data.failed]
-            } else {
-                if (failedRows.length > 0) {
-                    const $listing = container.find('#imported-listing')
-                    const $show = container.find('.show-errors')
-                    const failureTemplate = $(document).find('#failure-template').html()
-
-                    let result = ''
-                    failedRows.forEach((val) => {
-                        result += failureTemplate
-                            .replace('__row__', val.row)
-                            .replace('__errors__', val.errors.join(', '))
-                    })
-
-                    $show.show()
-
-                    container.find('.main-form-message').show()
-                    $listing.show().html(result)
-
-                    failedRows = []
-                    Botble.hideLoading($form)
-                    Botble.hideButtonLoading($button)
-                    dropzone.removeAllFiles()
-                    container.find('.bulk-import-message').hide()
+                if (data && data.count > 0) {
+                    container.find('.bulk-import-message').text(message)
+                    validateData(file, data.offset)
+                    failedRows = [...failedRows, ...data.failed]
                 } else {
-                    importData(file)
+                    if (failedRows.length > 0) {
+                        const $listing = container.find('#imported-listing')
+                        const $show = container.find('.show-errors')
+                        const failureTemplate = $(document).find('#failure-template').html()
+
+                        let result = ''
+                        failedRows.forEach((val) => {
+                            result += failureTemplate
+                                .replace('__row__', val.row)
+                                .replace('__errors__', val.errors.join(', '))
+                        })
+
+                        $show.show()
+
+                        container.find('.main-form-message').show()
+                        $listing.show().html(result)
+
+                        failedRows = []
+                        Botble.hideLoading($form)
+                        Botble.hideButtonLoading($button)
+                        dropzone.removeAllFiles()
+                        container.find('.bulk-import-message').hide()
+                    } else {
+                        importData(file)
+                    }
                 }
-            }
-        })
+            })
     }
 
     const importData = (file, offset = 0, limit) => {
@@ -59,7 +61,8 @@ $(() => {
             Botble.showLoading($form)
         }
 
-        $httpClient.make()
+        $httpClient
+            .make()
             .post($form.data('import-url'), {
                 file,
                 offset,
@@ -75,7 +78,8 @@ $(() => {
 
                     if (data.total_message) {
                         container.find('.main-form-message').show()
-                        container.find('.bulk-import-message')
+                        container
+                            .find('.bulk-import-message')
                             .removeClass('alert-info')
                             .addClass('alert-success')
                             .text(data.total_message)
@@ -109,7 +113,7 @@ $(() => {
             if (data && data.file_path) {
                 validateData(data.file_path)
             }
-        }
+        },
     })
 
     $(document).on('submit', $form, function (event) {
@@ -128,9 +132,7 @@ $(() => {
         }
 
         dropzone.on('sending', function () {
-            container.find('.bulk-import-message')
-                .show()
-                .text($button.data('uploading-text'))
+            container.find('.bulk-import-message').show().text($button.data('uploading-text'))
         })
 
         dropzone.on('error', function (file, message) {
@@ -153,10 +155,11 @@ $(() => {
         $this.addClass('text-secondary')
         isDownloadingTemplate = true
 
-        $httpClient.make()
+        $httpClient
+            .make()
             .withResponseType('blob')
-            .post($this.data('url'), {extension})
-            .then(({data}) => {
+            .post($this.data('url'), { extension })
+            .then(({ data }) => {
                 let a = document.createElement('a')
                 let url = window.URL.createObjectURL(data)
                 a.href = url
@@ -196,22 +199,24 @@ $(() => {
             $(document).find('.modal-confirm-import').modal('show')
         })
 
-        $(document).find('.button-confirm-import').on('click', (event) => {
-            event.preventDefault()
-            let _self = $(event.currentTarget)
+        $(document)
+            .find('.button-confirm-import')
+            .on('click', (event) => {
+                event.preventDefault()
+                let _self = $(event.currentTarget)
 
-            Botble.showButtonLoading(_self)
+                Botble.showButtonLoading(_self)
 
-            $httpClient.make()
-                .post(_self.data('url'))
-                .then(({ data }) => {
-                    _self.closest('.modal').modal('hide')
-                    return Botble.showSuccess(data.message)
-                })
-                .finally(() => {
-                    Botble.hideButtonLoading(_self)
-                })
-
-        })
+                $httpClient
+                    .make()
+                    .post(_self.data('url'))
+                    .then(({ data }) => {
+                        _self.closest('.modal').modal('hide')
+                        return Botble.showSuccess(data.message)
+                    })
+                    .finally(() => {
+                        Botble.hideButtonLoading(_self)
+                    })
+            })
     }
 })

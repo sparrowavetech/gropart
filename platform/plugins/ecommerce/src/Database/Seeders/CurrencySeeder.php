@@ -39,6 +39,15 @@ class CurrencySeeder extends BaseSeeder
                 'is_default' => 0,
                 'exchange_rate' => 23203,
             ],
+            [
+                'title' => 'NGN',
+                'symbol' => '₦',
+                'is_prefix_symbol' => true,
+                'order' => 2,
+                'decimals' => 2,
+                'is_default' => 0,
+                'exchange_rate' => 895.52,
+            ],
         ];
 
         foreach ($currencies as $currency) {

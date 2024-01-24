@@ -7,6 +7,7 @@ use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\EmailHandler;
+use Botble\Base\Supports\Breadcrumb;
 use Botble\Ecommerce\Cart\CartItem;
 use Botble\Ecommerce\Enums\OrderStatusEnum;
 use Botble\Ecommerce\Enums\ShippingCodStatusEnum;
@@ -54,6 +55,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class OrderController extends BaseController
@@ -63,10 +65,11 @@ class OrderController extends BaseController
         protected HandleApplyCouponService $handleApplyCouponService,
         protected HandleApplyPromotionsService $applyPromotionsService
     ) {
-        parent::__construct();
+    }
 
-        $this
-            ->breadcrumb()
+    protected function breadcrumb(): Breadcrumb
+    {
+        return parent::breadcrumb()
             ->add(trans('plugins/ecommerce::order.menu'), route('orders.index'));
     }
 
@@ -274,8 +277,10 @@ class OrderController extends BaseController
             Discount::getFacadeRoot()->afterOrderPlaced($couponCode, $customerId);
         }
 
-        if (! Arr::get($data, 'is_available_shipping')
-            && $paymentStatus === (is_plugin_active('payment') ? PaymentStatusEnum::COMPLETED : 'completed')) {
+        if (
+            ! Arr::get($data, 'is_available_shipping')
+            && $paymentStatus === (is_plugin_active('payment') ? PaymentStatusEnum::COMPLETED : 'completed')
+        ) {
             OrderHelper::setOrderCompleted($order->getKey(), $request, $userId);
         }
 
@@ -1343,5 +1348,20 @@ class OrderController extends BaseController
         return $this
             ->httpResponse()
             ->setMessage(trans('plugins/ecommerce::order.generated_invoice_successfully'));
+    }
+
+    public function downloadProof(Order $order)
+    {
+        if (! $order->proof_file) {
+            abort(404);
+        }
+
+        $storage = Storage::disk('local');
+
+        if (! $storage->exists($order->proof_file)) {
+            abort(404);
+        }
+
+        return $storage->download($order->proof_file);
     }
 }

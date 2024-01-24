@@ -22,10 +22,6 @@
                     </div>
                 </div>
 
-                <div class="thank-you-links mb-4">
-                    <span class="link-text"><a href="{{ route('customer.overview') }}">{{ __('Customer dashboard') }}</a></span>
-                </div>
-
                 @include('plugins/ecommerce::orders.thank-you.customer-info', compact('order'))
 
                 <a

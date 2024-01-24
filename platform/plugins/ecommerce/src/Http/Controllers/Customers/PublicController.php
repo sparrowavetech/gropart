@@ -43,7 +43,7 @@ class PublicController extends BaseController
     public function __construct()
     {
         Theme::asset()
-            ->add('customer-style', 'vendor/core/plugins/ecommerce/css/customer.css');
+            ->add('customer-style', 'vendor/core/plugins/ecommerce/css/customer.css', ['bootstrap-css']);
 
         Theme::asset()
             ->container('footer')
@@ -67,7 +67,11 @@ class PublicController extends BaseController
 
         $customer = auth('customer')->user();
 
-        return Theme::scope('ecommerce.customers.overview', compact('customer'), 'plugins/ecommerce::themes.customers.overview')
+        return Theme::scope(
+            'ecommerce.customers.overview',
+            compact('customer'),
+            'plugins/ecommerce::themes.customers.overview'
+        )
             ->render();
     }
 
@@ -211,7 +215,7 @@ class PublicController extends BaseController
         OrderHistory::query()->create([
             'action' => 'cancel_order',
             'description' => __('Order was cancelled by custom :customer', ['customer' => $order->address->name]),
-            'order_id' => $order->id,
+            'order_id' => $order->getKey(),
         ]);
 
         return $this
@@ -291,10 +295,10 @@ class PublicController extends BaseController
 
         $address = Address::query()
             ->where([
-            'id' => $id,
-            'customer_id' => auth('customer')->id(),
-        ])
-        ->firstOrFail();
+                'id' => $id,
+                'customer_id' => auth('customer')->id(),
+            ])
+            ->firstOrFail();
 
         Theme::breadcrumb()
             ->add(__('Edit Address #:id', ['id' => $id]), route('customer.address.edit', $id));
@@ -381,24 +385,14 @@ class PublicController extends BaseController
                     ->setMessage($result['message']);
             }
 
-            $avatarData = json_decode($request->input('avatar_data'));
-
             $file = $result['data'];
-
-            $thumbnailService
-                ->setImage(RvMedia::getRealPath($file->url))
-                ->setSize((int)$avatarData->width, (int)$avatarData->height)
-                ->setCoordinates((int)$avatarData->x, (int)$avatarData->y)
-                ->setDestinationPath(File::dirname($file->url))
-                ->setFileName(File::name($file->url) . '.' . File::extension($file->url))
-                ->save('crop');
 
             $account->avatar = $file->url;
             $account->save();
 
             return $this
                 ->httpResponse()
-                ->setMessage(trans('plugins/customer::dashboard.update_avatar_success'))
+                ->setMessage(__('Updated avatar successfully!'))
                 ->setData(['url' => RvMedia::url($file->url)]);
         } catch (Exception $exception) {
             return $this
@@ -470,7 +464,9 @@ class PublicController extends BaseController
                 ->setMessage(trans('plugins/ecommerce::order.return_error'));
         }
 
-        $orderReturnData['reason'] = $request->input('reason');
+        if ($reason = $request->input('reason')) {
+            $orderReturnData['reason'] = $reason;
+        }
 
         $orderReturnData['items'] = Arr::where($request->input('return_items'), function ($value) {
             return isset($value['is_return']);
@@ -521,7 +517,7 @@ class PublicController extends BaseController
         OrderHistory::query()->create([
             'action' => 'return_order',
             'description' => __(':customer has requested return product(s)', ['customer' => $order->address->name]),
-            'order_id' => $order->id,
+            'order_id' => $order->getKey(),
         ]);
 
         return $this
@@ -564,10 +560,10 @@ class PublicController extends BaseController
 
         $orderReturn = OrderReturn::query()
             ->where([
-            'id' => $id,
-            'user_id' => auth('customer')->id(),
-        ])
-        ->firstOrFail();
+                'id' => $id,
+                'user_id' => auth('customer')->id(),
+            ])
+            ->firstOrFail();
 
         Theme::breadcrumb()
             ->add(__('Order Return Requests'), route('customer.order_returns'))
@@ -593,15 +589,18 @@ class PublicController extends BaseController
 
         $orderProducts = OrderProduct::query()
             ->whereHas('order', function (Builder $query) {
-                $query->where([
-                    'user_id' => auth('customer')->id(),
-                    'is_finished' => 1,
-                ]);
-            })
-            ->when(is_plugin_active('payment'), function (Builder $query) {
                 $query
-                    ->whereHas('order.payment', function (Builder $query) {
-                        $query->where('status', PaymentStatusEnum::COMPLETED);
+                    ->where('user_id', auth('customer')->id())
+                    ->where('is_finished', 1)
+                    ->when(is_plugin_active('payment'), function (Builder $query) {
+                        $query
+                            ->where(function (Builder $query) {
+                                $query
+                                    ->where('amount', 0)
+                                    ->orWhereHas('payment', function ($query) {
+                                        $query->where('status', PaymentStatusEnum::COMPLETED);
+                                    });
+                            });
                     });
             })
             ->where('product_type', ProductTypeEnum::DIGITAL)
@@ -632,11 +631,16 @@ class PublicController extends BaseController
             ])
             ->whereHas('order', function (Builder $query) {
                 $query
+                    ->where('user_id', auth('customer')->id())
                     ->where('is_finished', 1)
                     ->when(is_plugin_active('payment'), function (Builder $query) {
                         $query
-                            ->whereHas('payment', function ($query) {
-                                $query->where('status', PaymentStatusEnum::COMPLETED);
+                            ->where(function (Builder $query) {
+                                $query
+                                    ->where('amount', 0)
+                                    ->orWhereHas('payment', function ($query) {
+                                        $query->where('status', PaymentStatusEnum::COMPLETED);
+                                    });
                             });
                     });
             })

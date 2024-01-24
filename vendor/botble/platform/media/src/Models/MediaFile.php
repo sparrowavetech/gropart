@@ -10,7 +10,6 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Str;
@@ -83,7 +82,7 @@ class MediaFile extends BaseModel
                 default => 'ti ti-file',
             };
 
-            return Blade::render(sprintf('<x-core::icon name="%s" />', $icon));
+            return BaseHelper::renderIcon($icon);
         });
     }
 

@@ -2,8 +2,10 @@
 
 namespace Botble\Language\Providers;
 
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\Html;
 use Botble\Base\Facades\MetaBox;
+use Botble\Base\Forms\FieldOptions\HtmlFieldOption;
 use Botble\Base\Forms\Fields\HtmlField;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Base\Models\BaseModel;
@@ -22,7 +24,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 
@@ -65,15 +66,7 @@ class HookServiceProvider extends ServiceProvider
         GeneralSettingForm::extend(function (GeneralSettingForm $form) {
             $form
                 ->remove('locale_direction')
-                ->modify('locale', HtmlField::class, [
-                    'html' => Blade::render(sprintf(
-                        '<x-core::form.helper-text>%s</x-core::form.helper-text>',
-                        trans(
-                            'plugins/language::language.setup_site_language',
-                            ['link' => Html::link(route('languages.index'), trans('plugins/language::language.name'))]
-                        )
-                    )),
-            ]);
+                ->modify('locale', HtmlField::class, HtmlFieldOption::make()->view('plugins/language::forms.general-setting-form-label')->toArray());
         });
     }
 
@@ -512,7 +505,11 @@ class HookServiceProvider extends ServiceProvider
 
     public function addLanguageSwitcherToTable(array $buttons, string $model): array
     {
-        if (in_array($model, Language::supportedModels())) {
+        if (
+            in_array($model, Language::supportedModels())
+            && ($countLanguage = count(Language::getActiveLanguage()))
+            && $countLanguage > 1
+        ) {
             $activeLanguages = Language::getActiveLanguage(['lang_code', 'lang_name', 'lang_flag']);
             $languageButtons = [];
             $currentLanguage = Language::getCurrentAdminLocaleCode();
@@ -538,10 +535,11 @@ class HookServiceProvider extends ServiceProvider
             ];
 
             $flag = $activeLanguages->where('lang_code', $currentLanguage)->first();
+
             if (! empty($flag)) {
                 $flag = language_flag($flag->lang_flag, $flag->lang_name);
             } else {
-                $flag = Blade::render('<x-core::icon name="ti ti-flag" />');
+                $flag = BaseHelper::renderIcon('ti ti-flag');
             }
 
             $language = [
@@ -563,10 +561,12 @@ class HookServiceProvider extends ServiceProvider
         $model = $query->getModel();
 
         if (
-            $model instanceof BaseModel &&
-            in_array($model::class, Language::supportedModels()) &&
-            ($languageCode = Language::getCurrentAdminLocaleCode()) &&
-            $languageCode !== 'all'
+            $model instanceof BaseModel
+            && in_array($model::class, Language::supportedModels())
+            && ($countLanguage = count(Language::getActiveLanguage()))
+            && $countLanguage > 1
+            && ($languageCode = Language::getCurrentAdminLocaleCode())
+            && $languageCode !== 'all'
         ) {
             Language::initModelRelations();
 

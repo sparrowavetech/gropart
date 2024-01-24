@@ -55,6 +55,10 @@
                             @if ($customerAddress = $invoice->customer_address)
                                 <li>{{ $customerAddress }}</li>
                             @endif
+
+                            @if ($customerTaxID = $invoice->customer_tax_id)
+                                <li>{{ __('Tax ID:') }} {{ $customerTaxID }}</li>
+                            @endif
                         </ul>
                     </div>
                 </div>

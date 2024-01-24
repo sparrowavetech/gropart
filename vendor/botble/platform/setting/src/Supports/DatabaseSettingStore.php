@@ -42,17 +42,12 @@ class DatabaseSettingStore extends SettingStore
 
     protected function write(array $data): void
     {
-        $keys = $this->newQuery()->pluck('key');
+        $keys = $this->newQuery()->pluck('key')->all();
 
-        $insertData = Arr::dot($data);
-        $updateData = [];
+        $data = Arr::dot($data);
 
-        foreach ($keys as $key) {
-            if (isset($insertData[$key])) {
-                $updateData[$key] = $insertData[$key];
-            }
-            unset($insertData[$key]);
-        }
+        $updateData = Arr::only($data, $keys);
+        $insertData = Arr::except($data, $keys);
 
         foreach ($updateData as $key => $value) {
             $this->newQuery()

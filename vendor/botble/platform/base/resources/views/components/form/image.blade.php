@@ -83,7 +83,7 @@
     </a>
 
     @if($allowAddFromUrl)
-        <div>
+        <div data-bb-toggle="upload-from-url">
             <span class="text-muted">{{ trans('core/media::media.or') }}</span>
             <a
                 href="javascript:void(0)"

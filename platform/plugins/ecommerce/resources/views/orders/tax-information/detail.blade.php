@@ -1,15 +1,18 @@
-<li>{{ $tax->company_name }}</li>
+<dd>{{ $tax->company_name }}</dd>
 
-<li>{{ $tax->company_tax_code }}</li>
+<dd>{{ $tax->company_tax_code }}</dd>
 
-<li>
+<dd>
     <a href="mailto:{{ $tax->company_email }}">
-        <span><i class="fa fa-envelope cursor-pointer mr5"></i></span>
+        <span>
+            <i class="cursor-pointer mr5"></i>
+            <x-core::icon name="ti ti-mail" class="cursor-pointer mr5" />
+        </span>
         <span dir="ltr">{{ $tax->company_email }}</span>
     </a>
-</li>
+</dd>
 
-<li>
+<dd>
     <div>{{ $tax->company_address }}</div>
 
     <div>
@@ -19,4 +22,5 @@
             target="_blank"
         >{{ trans('plugins/ecommerce::order.see_on_maps') }}</a>
     </div>
-</li>
+</dd>
+

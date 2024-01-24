@@ -6,9 +6,6 @@
             tables: {{ Js::from(trans('core/base::tables')) }},
             notices_msg: {{ Js::from(trans('core/base::notices')) }},
             pagination: {{ Js::from(trans('pagination')) }},
-            system: {
-                'character_remain': '{{ trans('core/base::forms.character_remain') }}'
-            },
         };
         BotbleVariables.authorized =
             "{{ setting('membership_authorization_at') && Carbon\Carbon::now()->diffInDays(Carbon\Carbon::createFromFormat('Y-m-d H:i:s', setting('membership_authorization_at'))) <= 7 ? 1 : 0 }}";

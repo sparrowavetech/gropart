@@ -10,9 +10,7 @@
 
         <div class="card-table">
             <div class="table-responsive">
-                @section('main-table')
-                    {!! $dataTable->table(compact('id', 'class'), false) !!}
-                @show
+                {!! $dataTable->table(compact('id', 'class'), false) !!}
             </div>
         </div>
     </x-core::card>

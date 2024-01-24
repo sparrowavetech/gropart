@@ -57,15 +57,9 @@ class CaptchaV3 extends CaptchaContract
 
         CaptchaRendering::dispatch($attributes, $options, $headContent, $footerContent);
 
-        if (defined('THEME_FRONT_HEADER')) {
-            add_filter(THEME_FRONT_HEADER, function ($html) use ($headContent) {
-                return $html . $headContent;
-            }, 299);
-        }
-
         if (defined('THEME_FRONT_FOOTER')) {
-            add_filter(THEME_FRONT_FOOTER, function (string|null $html) use ($footerContent): string {
-                return $html . $footerContent;
+            add_filter(THEME_FRONT_FOOTER, function (string|null $html) use ($headContent, $footerContent): string {
+                return $html . $headContent . $footerContent;
             }, 99);
         }
 

@@ -4,6 +4,7 @@ namespace Botble\Ecommerce\Http\Controllers;
 
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Facades\Assets;
+use Botble\Base\Supports\Breadcrumb;
 use Botble\Ecommerce\Enums\OrderReturnStatusEnum;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Facades\OrderReturnHelper;
@@ -15,12 +16,9 @@ use Illuminate\Http\Request;
 
 class OrderReturnController extends BaseController
 {
-    public function __construct()
+    protected function breadcrumb(): Breadcrumb
     {
-        parent::__construct();
-
-        $this
-            ->breadcrumb()
+        return parent::breadcrumb()
             ->add(trans('plugins/ecommerce::order.order_return'), route('order_returns.index'));
     }
 

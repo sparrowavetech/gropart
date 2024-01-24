@@ -7,18 +7,20 @@
         }
 
         .page-title-seo {
-            min-height: 21px;
-            display: block;
             font-size: 18px;
             color: #1a0dab;
-            line-height: 21px;
             margin-bottom: 2px;
-            text-overflow: ellipsis;
-            overflow: hidden;
+            font-weight: 400;
 
             p {
                 margin-bottom: 0;
             }
+        }
+
+        .page-index-status {
+            display: inline-block;
+            font-size: 14px;
+            color: var(--bb-warning);
         }
 
         .page-description-seo {
@@ -38,6 +40,17 @@
                 font-size: 13px;
                 line-height: 16px;
                 margin-bottom: 2px;
+            }
+        }
+
+        &.noindex {
+            text-decoration-line: line-through;
+            color: var(--bb-secondary-color) !important;
+
+            .page-title-seo,
+            .page-url-seo p {
+                text-decoration-line: line-through;
+                color: var(--bb-secondary-color) !important;
             }
         }
     }

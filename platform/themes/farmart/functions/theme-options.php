@@ -166,7 +166,6 @@ app('events')->listen(RenderingThemeOptionSettings::class, function () {
         ])
         ->setSection([
             'title' => __('Style'),
-            'desc' => __('Style of theme'),
             'id' => 'opt-text-subsection-style',
             'subsection' => true,
             'icon' => 'ti ti-brush',
@@ -313,7 +312,6 @@ app('events')->listen(RenderingThemeOptionSettings::class, function () {
         ])
         ->setSection([
             'title' => __('Social links'),
-            'desc' => __('Social links'),
             'id' => 'opt-text-subsection-social-links',
             'subsection' => true,
             'icon' => 'ti ti-share',

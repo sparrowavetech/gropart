@@ -123,7 +123,7 @@
                                 </td>
                                 @if (EcommerceHelper::allowPartialReturn())
                                     <td
-                                        class="product-quantity product-md d-md-table-cell d-block"
+                                        class="text-center"
                                         data-title="Quantity"
                                     >
                                         @php
@@ -135,17 +135,16 @@
                                                 ];
                                             }
                                         @endphp
-                                        <div class="form-group">
-                                            {!! Form::select(
-                                                'return_items[' . $key . '][qty]',
-                                                collect($qtyChooses)->pluck('data-qty', 'data-qty'),
-                                                old('return_items.' . $key . '.qty', $orderProduct->qty),
-                                                [
-                                                    'class' => 'form-select select-return-item-qty',
-                                                ],
-                                                $qtyChooses,
-                                            ) !!}
-                                        </div>
+
+                                        {!! Form::select(
+                                            'return_items[' . $key . '][qty]',
+                                            collect($qtyChooses)->pluck('data-qty', 'data-qty'),
+                                            old('return_items.' . $key . '.qty', $orderProduct->qty),
+                                            [
+                                                'class' => 'form-control form-select select-return-item-qty',
+                                            ],
+                                            $qtyChooses,
+                                        ) !!}
                                     </td>
                                     <td class="text-center">
                                         {!! Form::select(
@@ -177,7 +176,7 @@
 
         <div class="col-md-12 pt-3">
             @if ($order->canBeReturned())
-                {!! Form::submit(__('Submit Return Request'), ['class' => 'btn btn-danger']) !!}
+                <button type="submit" class="btn btn-danger">{{ __('Submit Return Request') }}</button>
             @endif
         </div>
     </div>

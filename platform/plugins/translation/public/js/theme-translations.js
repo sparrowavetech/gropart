@@ -1,1 +1,1 @@
-$((function(){$(".editable").editable({mode:"inline"})}));
+$(document).ready((function(){$(".editable").editable({mode:"inline"})}));

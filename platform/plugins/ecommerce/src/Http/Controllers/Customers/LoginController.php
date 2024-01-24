@@ -7,6 +7,7 @@ use Botble\ACL\Traits\LogoutGuardTrait;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Ecommerce\Enums\CustomerStatusEnum;
 use Botble\Ecommerce\Facades\EcommerceHelper;
+use Botble\Ecommerce\Forms\Fronts\Auth\LoginForm;
 use Botble\Ecommerce\Http\Requests\LoginRequest;
 use Botble\JsValidation\Facades\JsValidator;
 use Botble\SeoHelper\Facades\SeoHelper;
@@ -49,7 +50,11 @@ class LoginController extends BaseController
             return $html . JsValidator::formRequest(LoginRequest::class)->render();
         });
 
-        return Theme::scope('ecommerce.customers.login', [], 'plugins/ecommerce::themes.customers.login')->render();
+        return Theme::scope(
+            'ecommerce.customers.login',
+            ['form' => LoginForm::create()],
+            'plugins/ecommerce::themes.customers.login'
+        )->render();
     }
 
     protected function guard()
@@ -126,5 +131,10 @@ class LoginController extends BaseController
         }
 
         return false;
+    }
+
+    public function username(): string
+    {
+        return EcommerceHelper::isLoginUsingPhone() ? 'phone' : 'email';
     }
 }

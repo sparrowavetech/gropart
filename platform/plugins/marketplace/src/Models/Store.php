@@ -5,7 +5,6 @@ namespace Botble\Marketplace\Models;
 use Botble\Base\Casts\SafeContent;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Models\BaseModel;
-use Botble\Base\Models\BaseQueryBuilder;
 use Botble\Base\Supports\Avatar;
 use Botble\Ecommerce\Models\Customer;
 use Botble\Ecommerce\Models\Discount;
@@ -55,16 +54,22 @@ class Store extends BaseModel
 
     protected static function booted(): void
     {
-        self::deleting(function (Store $store) {
-            $store->products()->delete();
+        static::deleted(function (Store $store) {
+            $store->products()->each(fn (Product $product) => $product->delete());
             $store->discounts()->delete();
             $store->orders()->update(['store_id' => null]);
-        });
 
-        static::deleted(function (Store $store) {
             $folder = Storage::path($store->upload_folder);
             if (File::isDirectory($folder) && Str::endsWith($store->upload_folder, '/' . ($store->slug ?: $store->id))) {
                 File::deleteDirectory($folder);
+            }
+        });
+
+        static::updating(function (Store $store) {
+            if ($store->getOriginal('status') != $store->status) {
+                $status = $store->status;
+
+                $store->products()->update(['status' => $status]);
             }
         });
     }

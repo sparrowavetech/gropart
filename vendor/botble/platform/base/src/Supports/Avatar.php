@@ -2,13 +2,14 @@
 
 namespace Botble\Base\Supports;
 
+use Botble\Media\Facades\RvMedia;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Intervention\Image\AbstractFont;
 use Intervention\Image\AbstractShape;
 use Intervention\Image\Image;
-use Intervention\Image\ImageManager;
 use InvalidArgumentException;
+use Throwable;
 
 class Avatar
 {
@@ -160,13 +161,7 @@ class Avatar
 
     public function buildAvatar(): self
     {
-        $driver = 'gd';
-        if (extension_loaded('imagick')) {
-            $driver = 'imagick';
-        }
-
-        $manager = new ImageManager(['driver' => $driver]);
-        $this->image = $manager->canvas($this->width, $this->height);
+        $this->image = RvMedia::imageManager()->canvas($this->width, $this->height);
 
         $this->createShape();
 
@@ -306,5 +301,14 @@ class Avatar
                 $draw->border($this->borderSize, $this->getBorderColor());
             }
         );
+    }
+
+    public static function createBase64Image(string|null $name): string
+    {
+        try {
+            return (new static())->create($name)->toBase64();
+        } catch (Throwable) {
+            return RvMedia::getDefaultImage();
+        }
     }
 }

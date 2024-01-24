@@ -12,6 +12,57 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Removed
 
+# 4.29.0 (29 December 2023)
+## Added
+- **More external UIs**: [Stoplight Elements](https://github.com/stoplightio/elements) [#780](https://github.com/knuckleswtf/scribe/pull/780)
+- Support `try_it_out` and `logo` config options in rapi-doc external UI [#780](https://github.com/knuckleswtf/scribe/pull/780)
+- Allow passing of custom HTML attributes to external UIs [#780](https://github.com/knuckleswtf/scribe/pull/780)
+
+## Fixed
+- Fix `config:diff` command for tuple configs
+
+# 4.28.0 (25 December 2023 🎄)
+See [the announcement post](https://scribe.knuckles.wtf/blog/laravel-v4-28) for more details.
+
+## Added
+- **Support for external UIs**: You can now use an external client-side UI such as [Scalar](https://github.com/scalar/scalar). Details in [the config reference](https://scribe.knuckles.wtf/laravel/reference/config#theme).
+- **Configurable strategies**: You can now configure strategies individually, by using the _tuple_ format. A tuple is an array with two elements; the first is the strategy class, and the second is the settings array. For instance, you can configure response calls to only be used on certain endpoints:
+  ```php
+  'responses' => [
+      Strategies\Responses\UseResponseAttributes::class,
+      [
+        Strategies\Responses\ResponseCalls::class,
+        ['only' => ['GET *']],
+      ]
+  ],
+  ```
+- **Disable strategies per endpoint**: All strategies (including custom strategies) now support the `only` and `except` settings, allowing you to specify the routes you want them to be applied to, or the opposite.
+    ```php
+  'bodyParameters' => [
+      [
+        Strategies\BodyParameters\GetFromInlineValidator::class,
+        ['except' => ['POST /special-endpoint']],
+      ],
+      [
+        App\Docs\Strategies\SomeCoolStuff::class,
+        ['only' => ['POST /cool-endpoint']],
+      ],
+  ],
+  ```
+- **Easily override returned values**: The new `override` strategy (also a tuple) is a simple way to say "merge these values into the result of other strategies", without having to write a whole strategy. A common use case is for adding headers:
+  ```php
+  'headers' => [
+      Strategies\Responses\UseHeaderAttribute::class,
+      [
+        'override',
+        [
+          'Content-Type' => 'application/json'],
+          'Accept' => 'application/json'],
+      ]
+  ],
+  ```
+- **Better route matching**: Route matching now works with both method and URL. Previously, in you could only specify route name or URL. Now you can also specify "GET /path", "GET path", or "GET pa*".
+
 # 4.27.0 (21 December 2023)
 ## Modified
 - Allow Symfony v7

@@ -24,8 +24,7 @@ export class MediaDetails {
 
     renderData(data) {
         const _self = this
-        const thumb =
-            data.type === 'image' ? `<img src="${data.full_url}" alt="${data.name}">` : data.icon
+        const thumb = data.type === 'image' ? `<img src="${data.full_url}" alt="${data.name}">` : data.icon
         let description = ''
         let useClipboard = false
         Helpers.forEach(data, (val, index) => {

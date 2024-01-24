@@ -24,14 +24,19 @@ class ReviewImagesFormatter implements Formatter
 
         $value = array_values($value);
 
-        $html = Html::image(
-            RvMedia::getImageUrl($value[0], 'thumb'),
-            RvMedia::getImageUrl($value[0]),
+        $html = Html::tag(
+            'a',
+            Html::image(
+                RvMedia::getImageUrl($value[0], 'thumb'),
+                RvMedia::getImageUrl($value[0]),
+                [
+                    'width' => 60,
+                    'class' => 'm-1 img-thumbnail',
+                ]
+            )->toHtml(),
             [
-                'width' => 60,
-                'class' => 'fancybox m-1 rounded-top rounded-end rounded-bottom rounded-start border d-inline-block',
                 'href' => RvMedia::getImageUrl($value[0]),
-                'data-fancybox' => $galleryID,
+                'data-bb-lightbox',
             ]
         );
 
@@ -42,9 +47,9 @@ class ReviewImagesFormatter implements Formatter
                     RvMedia::getImageUrl($value[1]),
                     [
                         'width' => 60,
-                        'class' => 'fancybox m-1 rounded-top rounded-end rounded-bottom rounded-start border d-inline-block',
+                        'class' => 'm-1 img-thumbnail',
                         'href' => RvMedia::getImageUrl($value[1]),
-                        'data-fancybox' => $galleryID,
+                        'data-bb-lightbox' => $galleryID,
                     ]
                 );
             } elseif ($count > 2) {
@@ -55,14 +60,14 @@ class ReviewImagesFormatter implements Formatter
                         RvMedia::getImageUrl($value[1]),
                         [
                             'width' => 60,
-                            'class' => 'm-1 rounded-top rounded-end rounded-bottom rounded-start border',
+                            'class' => 'm-1 img-thumbnail',
                             'src' => RvMedia::getImageUrl($value[1]),
                         ]
                     )->toHtml() . Html::tag('span', '+' . ($count - 2))->toHtml(),
                     [
-                        'class' => 'fancybox more-review-images',
+                        'class' => 'more-review-images',
                         'href' => RvMedia::getImageUrl($value[1]),
-                        'data-fancybox' => $galleryID,
+                        'data-bb-lightbox' => $galleryID,
                     ]
                 );
             }
@@ -72,13 +77,13 @@ class ReviewImagesFormatter implements Formatter
             foreach ($value as $index => $image) {
                 if ($index > 1) {
                     $html .= Html::image(
-                        RvMedia::getImageUrl($value[$index], 'thumb'),
-                        RvMedia::getImageUrl($value[$index]),
+                        RvMedia::getImageUrl($image, 'thumb'),
+                        RvMedia::getImageUrl($image),
                         [
                             'width' => 60,
-                            'class' => 'fancybox d-none',
-                            'href' => RvMedia::getImageUrl($value[$index]),
-                            'data-fancybox' => $galleryID,
+                            'class' => 'd-none',
+                            'href' => RvMedia::getImageUrl($image),
+                            'data-bb-lightbox' => $galleryID,
                         ]
                     );
                 }

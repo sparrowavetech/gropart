@@ -2,9 +2,7 @@
     :label="trans('core/acl::auth.login.password')"
     type="password"
     name="password"
-    :value="BaseHelper::hasDemoModeEnabled()
-                ? config('core.base.general.demo.account.password')
-                : null"
+    :value="BaseHelper::hasDemoModeEnabled() ? config('core.base.general.demo.account.password') : null"
     :placeholder="trans('core/acl::auth.login.placeholder.password')"
     :required="true"
     tabindex="2"

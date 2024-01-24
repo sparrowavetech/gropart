@@ -5,6 +5,7 @@ namespace Botble\Marketplace\Http\Controllers;
 use Botble\Base\Events\BeforeEditContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Base\Http\Actions\DeleteResourceAction;
+use Botble\Base\Supports\Breadcrumb;
 use Botble\Marketplace\Forms\PayoutInformationForm;
 use Botble\Marketplace\Forms\StoreForm;
 use Botble\Marketplace\Forms\TaxInformationForm;
@@ -17,12 +18,9 @@ use Illuminate\Http\Request;
 
 class StoreController extends BaseController
 {
-    public function __construct()
+    protected function breadcrumb(): Breadcrumb
     {
-        parent::__construct();
-
-        $this
-            ->breadcrumb()
+        return parent::breadcrumb()
             ->add(trans('plugins/marketplace::store.name'), route('marketplace.store.index'));
     }
 

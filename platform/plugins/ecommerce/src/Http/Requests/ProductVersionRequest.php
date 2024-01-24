@@ -11,7 +11,14 @@ class ProductVersionRequest extends Request
     public function rules(): array
     {
         return [
-            'price' => 'numeric|nullable|min:0',
+            'price' => [
+                'numeric',
+                'nullable',
+                'min:0',
+                Rule::when($this->input('sale_price'), function () {
+                    return 'gt:sale_price';
+                }),
+            ],
             'sale_price' => 'numeric|nullable|min:0',
             'start_date' => 'date|nullable|required_if:sale_type,1',
             'end_date' => 'date|nullable|after:' . ($this->input('start_date') ?? Carbon::now()->toDateTimeString()),

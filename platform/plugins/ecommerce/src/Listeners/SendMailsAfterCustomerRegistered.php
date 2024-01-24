@@ -13,16 +13,18 @@ class SendMailsAfterCustomerRegistered
     {
         $customer = $event->user;
 
-        if (get_class($customer) == Customer::class) {
-            EmailHandler::setModule(ECOMMERCE_MODULE_SCREEN_NAME)
-                ->setVariableValues([
-                    'customer_name' => $customer->name,
-                ])
-                ->sendUsingTemplate('welcome', $customer->email);
+        if (! $customer instanceof Customer) {
+            return;
+        }
 
-            if (EcommerceHelper::isEnableEmailVerification()) {
-                $customer->sendEmailVerificationNotification();
-            }
+        EmailHandler::setModule(ECOMMERCE_MODULE_SCREEN_NAME)
+            ->setVariableValues([
+                'customer_name' => $customer->name,
+            ])
+            ->sendUsingTemplate('welcome', $customer->email);
+
+        if (EcommerceHelper::isEnableEmailVerification()) {
+            $customer->sendEmailVerificationNotification();
         }
     }
 }

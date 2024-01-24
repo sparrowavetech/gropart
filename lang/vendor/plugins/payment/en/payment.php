@@ -64,7 +64,6 @@ return [
     'information' => 'Information',
     'methods' => [
         'paypal' => 'PayPal',
-        'stripe' => 'Stripe',
         'cod' => 'Cash on delivery (COD)',
         'bank_transfer' => 'Bank transfer',
     ],
@@ -90,8 +89,6 @@ return [
     'saved_payment_method_success' => 'Saved payment method successfully!',
     'saved_payment_settings_success' => 'Saved payment settings successfully!',
     'payment_name' => 'Name',
-    'callback_url' => 'Callback URL',
-    'return_url' => 'Return URL',
     'payment_not_found' => 'Payment not found!',
     'refunds' => [
         'title' => 'Refunds',

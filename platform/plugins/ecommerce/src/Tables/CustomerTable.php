@@ -11,11 +11,15 @@ use Botble\Table\Abstracts\TableAbstract;
 use Botble\Table\Actions\DeleteAction;
 use Botble\Table\Actions\EditAction;
 use Botble\Table\BulkActions\DeleteBulkAction;
+use Botble\Table\BulkChanges\EmailBulkChange;
+use Botble\Table\BulkChanges\NameBulkChange;
+use Botble\Table\BulkChanges\StatusBulkChange;
 use Botble\Table\Columns\Column;
 use Botble\Table\Columns\CreatedAtColumn;
 use Botble\Table\Columns\EmailColumn;
 use Botble\Table\Columns\IdColumn;
 use Botble\Table\Columns\NameColumn;
+use Botble\Table\Columns\PhoneColumn;
 use Botble\Table\Columns\StatusColumn;
 use Botble\Table\Columns\YesNoColumn;
 use Illuminate\Contracts\View\Factory;
@@ -66,6 +70,7 @@ class CustomerTable extends TableAbstract
                 'id',
                 'name',
                 'email',
+                'phone',
                 'avatar',
                 'created_at',
                 'status',
@@ -82,19 +87,25 @@ class CustomerTable extends TableAbstract
             Column::make('avatar')
                 ->title(trans('plugins/ecommerce::customer.avatar')),
             NameColumn::make()->route('customers.edit'),
-            EmailColumn::make(),
-            CreatedAtColumn::make(),
-            StatusColumn::make(),
         ];
 
-        if (EcommerceHelper::isEnableEmailVerification()) {
-            $columns = array_merge($columns, [
-                YesNoColumn::make('confirmed_at')
-                    ->title(trans('plugins/ecommerce::customer.email_verified')),
-            ]);
+        if (EcommerceHelper::isLoginUsingPhone()) {
+            $columns[] = PhoneColumn::make();
+        } else {
+            $columns[] = EmailColumn::make();
+
+            if (EcommerceHelper::isEnableEmailVerification()) {
+                $columns = array_merge($columns, [
+                    YesNoColumn::make('confirmed_at')
+                        ->title(trans('plugins/ecommerce::customer.email_verified')),
+                ]);
+            }
         }
 
-        return $columns;
+        return array_merge($columns, [
+            CreatedAtColumn::make(),
+            StatusColumn::make(),
+        ]);
     }
 
     public function buttons(): array
@@ -112,26 +123,10 @@ class CustomerTable extends TableAbstract
     public function getBulkChanges(): array
     {
         return [
-            'name' => [
-                'title' => trans('core/base::tables.name'),
-                'type' => 'text',
-                'validate' => 'required|max:120',
-            ],
-            'email' => [
-                'title' => trans('core/base::tables.email'),
-                'type' => 'text',
-                'validate' => 'required|max:120',
-            ],
-            'status' => [
-                'title' => trans('core/base::tables.status'),
-                'type' => 'select',
-                'choices' => CustomerStatusEnum::labels(),
-                'validate' => 'required|in:' . implode(',', CustomerStatusEnum::values()),
-            ],
-            'created_at' => [
-                'title' => trans('core/base::tables.created_at'),
-                'type' => 'datePicker',
-            ],
+            NameBulkChange::make(),
+            EmailBulkChange::make(),
+            StatusBulkChange::make()->choices(CustomerStatusEnum::labels()),
+            CreatedAtColumn::make(),
         ];
     }
 

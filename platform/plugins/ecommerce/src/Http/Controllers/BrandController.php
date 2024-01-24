@@ -5,8 +5,10 @@ namespace Botble\Ecommerce\Http\Controllers;
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
+use Botble\Base\Supports\Breadcrumb;
 use Botble\Ecommerce\Forms\BrandForm;
 use Botble\Ecommerce\Http\Requests\BrandRequest;
+use Botble\Ecommerce\Http\Resources\BrandResource;
 use Botble\Ecommerce\Models\Brand;
 use Botble\Ecommerce\Tables\BrandTable;
 use Exception;
@@ -14,12 +16,9 @@ use Illuminate\Http\Request;
 
 class BrandController extends BaseController
 {
-    public function __construct()
+    protected function breadcrumb(): Breadcrumb
     {
-        parent::__construct();
-
-        $this
-            ->breadcrumb()
+        return parent::breadcrumb()
             ->add(trans('plugins/ecommerce::brands.menu'), route('brands.index'));
     }
 
@@ -94,5 +93,21 @@ class BrandController extends BaseController
                 ->setError()
                 ->setMessage($exception->getMessage());
         }
+    }
+
+    public function getSearch(Request $request)
+    {
+        $term = $request->input('search');
+
+        $categories = Brand::query()
+            ->select(['id', 'name'])
+            ->where('name', 'LIKE', '%' . $term . '%')
+            ->paginate(10);
+
+        $data = BrandResource::collection($categories);
+
+        return $this
+            ->httpResponse()
+            ->setData($data)->toApiResponse();
     }
 }

@@ -4,13 +4,20 @@ namespace Botble\Ecommerce\Forms;
 
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\Html;
+use Botble\Base\Forms\FieldOptions\ContentFieldOption;
+use Botble\Base\Forms\FieldOptions\EditorFieldOption;
 use Botble\Base\Forms\FieldOptions\MediaImageFieldOption;
+use Botble\Base\Forms\FieldOptions\NameFieldOption;
+use Botble\Base\Forms\FieldOptions\OnOffFieldOption;
 use Botble\Base\Forms\FieldOptions\SelectFieldOption;
 use Botble\Base\Forms\FieldOptions\StatusFieldOption;
+use Botble\Base\Forms\Fields\EditorField;
 use Botble\Base\Forms\Fields\MediaImageField;
 use Botble\Base\Forms\Fields\MultiCheckListField;
+use Botble\Base\Forms\Fields\OnOffField;
 use Botble\Base\Forms\Fields\SelectField;
 use Botble\Base\Forms\Fields\TagField;
+use Botble\Base\Forms\Fields\TextField;
 use Botble\Base\Forms\Fields\TreeCategoryField;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Ecommerce\Enums\GlobalOptionEnum;
@@ -59,29 +66,9 @@ class ProductForm extends FormAbstract
             ->setupModel(new Product())
             ->setValidatorClass(ProductRequest::class)
             ->setFormOption('files', true)
-            ->add('name', 'text', [
-                'label' => trans('plugins/ecommerce::products.form.name'),
-                'required' => true,
-                'attr' => [
-                    'placeholder' => trans('core/base::forms.name_placeholder'),
-                    'data-counter' => 150,
-                ],
-            ])
-            ->add('description', 'editor', [
-                'label' => trans('core/base::forms.description'),
-                'attr' => [
-                    'rows' => 2,
-                    'placeholder' => trans('core/base::forms.description_placeholder'),
-                    'data-counter' => 1000,
-                ],
-            ])
-            ->add('content', 'editor', [
-                'label' => trans('plugins/ecommerce::products.form.content'),
-                'attr' => [
-                    'rows' => 4,
-                    'with-short-code' => true,
-                ],
-            ])
+            ->add('name', TextField::class, NameFieldOption::make()->required()->toArray())
+            ->add('description', EditorField::class, EditorFieldOption::make()->placeholder(trans('core/base::forms.description_placeholder'))->toArray())
+            ->add('content', EditorField::class, ContentFieldOption::make()->allowedShortcodes()->toArray())
             ->add('images[]', 'mediaImages', [
                 'label' => trans('plugins/ecommerce::products.form.image'),
                 'values' => $productId ? $this->getModel()->images : [],
@@ -101,10 +88,14 @@ class ProductForm extends FormAbstract
                 'value' => request()->input('product_type') ?: ProductTypeEnum::PHYSICAL,
             ])
             ->add('status', SelectField::class, StatusFieldOption::make()->toArray())
-            ->add('is_featured', 'onOff', [
-                'label' => trans('core/base::forms.is_featured'),
-                'default_value' => false,
-            ])
+            ->add(
+                'is_featured',
+                OnOffField::class,
+                OnOffFieldOption::make()
+                    ->label(trans('core/base::forms.is_featured'))
+                    ->defaultValue(false)
+                    ->toArray()
+            )
             ->add(
                 'categories[]',
                 TreeCategoryField::class,
@@ -123,6 +114,7 @@ class ProductForm extends FormAbstract
                         SelectFieldOption::make()
                             ->label(trans('plugins/ecommerce::products.form.brand'))
                             ->choices($brands)
+                            ->searchable()
                             ->emptyValue(trans('plugins/ecommerce::brands.no_brand'))
                             ->toArray()
                     );
@@ -166,7 +158,7 @@ class ProductForm extends FormAbstract
                     ]);
             })
             ->when(EcommerceHelper::isTaxEnabled(), function () {
-                $taxes = Tax::query()->get()->pluck('title_with_percentage', 'id')->all();
+                $taxes = Tax::query()->orderBy('percentage')->get()->pluck('title_with_percentage', 'id')->all();
 
                 if ($taxes) {
                     $selectedTaxes = [];
@@ -297,17 +289,14 @@ class ProductForm extends FormAbstract
 
     public function addAssets(): void
     {
-        Assets::addStyles(['datetimepicker'])
+        Assets::addStyles('datetimepicker')
             ->addScripts([
                 'moment',
                 'datetimepicker',
                 'input-mask',
                 'jquery-ui',
             ])
-            ->addStylesDirectly(['vendor/core/plugins/ecommerce/css/ecommerce.css'])
-            ->addScriptsDirectly([
-                'vendor/core/plugins/ecommerce/js/edit-product.js',
-                'vendor/core/plugins/ecommerce/js/product-option.js',
-            ]);
+            ->addStylesDirectly('vendor/core/plugins/ecommerce/css/ecommerce.css')
+            ->addScriptsDirectly('vendor/core/plugins/ecommerce/js/edit-product.js');
     }
 }

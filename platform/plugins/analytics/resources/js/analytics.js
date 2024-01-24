@@ -62,24 +62,19 @@ class PluginAnalytics {
 $(() => {
     const $analyticsGeneral = $('#widget_analytics_general')
 
-    BDashboard.loadWidget(
-        $analyticsGeneral.find('.widget-content'),
-        route('analytics.general'),
-        null,
-        () => {
-            PluginAnalytics.initCharts()
+    BDashboard.loadWidget($analyticsGeneral.find('.widget-content'), route('analytics.general'), null, () => {
+        PluginAnalytics.initCharts()
 
-            let stats = window.analyticsStats.stats || []
+        let stats = window.analyticsStats.stats || []
 
-            if (!stats[1]?.visitors) {
-                $analyticsGeneral.find('.stats-warning').addClass('d-block')
-                $analyticsGeneral.find('.stats-warning').removeClass('d-none')
-            } else {
-                $analyticsGeneral.find('.stats-warning').addClass('d-none')
-                $analyticsGeneral.find('.stats-warning').removeClass('d-block')
-            }
+        if (!stats[1]?.visitors) {
+            $analyticsGeneral.find('.stats-warning').addClass('d-block')
+            $analyticsGeneral.find('.stats-warning').removeClass('d-none')
+        } else {
+            $analyticsGeneral.find('.stats-warning').addClass('d-none')
+            $analyticsGeneral.find('.stats-warning').removeClass('d-block')
         }
-    )
+    })
     BDashboard.loadWidget($('#widget_analytics_page').find('.widget-content'), route('analytics.page'))
     BDashboard.loadWidget($('#widget_analytics_browser').find('.widget-content'), route('analytics.browser'))
     BDashboard.loadWidget($('#widget_analytics_referrer').find('.widget-content'), route('analytics.referrer'))

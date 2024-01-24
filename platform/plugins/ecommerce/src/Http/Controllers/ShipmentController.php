@@ -4,6 +4,7 @@ namespace Botble\Ecommerce\Http\Controllers;
 
 use Botble\Base\Facades\Assets;
 use Botble\Base\Http\Actions\DeleteResourceAction;
+use Botble\Base\Supports\Breadcrumb;
 use Botble\Ecommerce\Enums\ShippingCodStatusEnum;
 use Botble\Ecommerce\Enums\ShippingStatusEnum;
 use Botble\Ecommerce\Events\ShippingStatusChanged;
@@ -20,12 +21,9 @@ use Illuminate\Support\Facades\Auth;
 
 class ShipmentController extends BaseController
 {
-    public function __construct()
+    protected function breadcrumb(): Breadcrumb
     {
-        parent::__construct();
-
-        $this
-            ->breadcrumb()
+        return parent::breadcrumb()
             ->add(trans('plugins/ecommerce::shipping.shipments'), route('ecommerce.shipments.index'));
     }
 

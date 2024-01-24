@@ -1,4 +1,4 @@
-$( document ).ready(function () {
+$(document).ready(function () {
     $('[data-bb-toggle="test-email-send"]').on('click', (event) => {
         event.preventDefault()
         let _self = $(event.currentTarget)

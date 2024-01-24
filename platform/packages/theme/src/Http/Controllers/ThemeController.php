@@ -4,8 +4,9 @@ namespace Botble\Theme\Http\Controllers;
 
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Supports\Breadcrumb;
-use Botble\Setting\Http\Controllers\SettingController;
+use Botble\Setting\Http\Controllers\Concerns\InteractsWithSettings;
 use Botble\Theme\Events\RenderingThemeOptionSettings;
 use Botble\Theme\Facades\Theme;
 use Botble\Theme\Facades\ThemeOption;
@@ -21,8 +22,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
 
-class ThemeController extends SettingController
+class ThemeController extends BaseController
 {
+    use InteractsWithSettings;
+
     protected function breadcrumb(): Breadcrumb
     {
         return parent::breadcrumb()
@@ -46,8 +49,7 @@ class ThemeController extends SettingController
     {
         $this->pageTitle(trans('packages/theme::theme.theme_options'));
 
-        Assets::addScripts(['are-you-sure', 'coloris', 'jquery-ui'])
-            ->addStyles(['coloris'])
+        Assets::addScripts(['are-you-sure', 'jquery-ui'])
             ->addStylesDirectly([
                 'vendor/core/packages/theme/css/theme-options.css',
             ])

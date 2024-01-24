@@ -2,6 +2,7 @@
 
 namespace Botble\Ecommerce\Tables;
 
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\Html;
 use Botble\Ecommerce\Models\ShippingRule;
 use Botble\Table\Abstracts\TableAbstract;
@@ -116,7 +117,9 @@ class ShippingRuleItemTable extends TableAbstract
         if ($this->hasPermission('ecommerce.shipping-rule-items.bulk-import')) {
             $buttons['import'] = [
                 'link' => route('ecommerce.shipping-rule-items.bulk-import.index'),
-                'text' => '<i class="fas fa-file-import"></i> ' . trans('plugins/ecommerce::bulk-import.tables.import'),
+                'text' =>
+                    BaseHelper::renderIcon('ti ti-file-import')
+                    . trans('plugins/ecommerce::bulk-import.tables.import'),
             ];
         }
 

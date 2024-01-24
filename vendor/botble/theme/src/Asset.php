@@ -10,6 +10,8 @@ class Asset
 
     public static array $containers = [];
 
+    public static bool $isInheritTheme = false;
+
     protected array $stacks = [
         'cooks' => [],
         'serves' => [],
@@ -18,6 +20,11 @@ class Asset
     public function addPath(string $path): void
     {
         static::$path = rtrim($path, '/') . '/';
+    }
+
+    public function isInheritTheme(bool $isInheritTheme = true): void
+    {
+        static::$isInheritTheme = $isInheritTheme;
     }
 
     public function cook(string $name, Closure $callbacks): void

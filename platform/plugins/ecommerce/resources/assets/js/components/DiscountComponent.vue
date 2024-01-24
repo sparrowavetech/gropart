@@ -705,11 +705,11 @@ export default {
             this.code = this.discount.code
             this.is_promotion = this.type !== 'coupon'
             this.start_date = moment(this.discount.start_date).format('Y-MM-DD')
-            this.start_time = moment(this.discount.start_date).format('HH:mm')
+            this.start_time = moment(this.discount.start_date).utc(false).format('HH:mm')
 
             if (this.discount.end_date) {
                 this.end_date = moment(this.discount.end_date).format('Y-MM-DD')
-                this.end_time = moment(this.discount.end_date).format('HH:mm')
+                this.end_time = moment(this.discount.end_date).utc(false).format('HH:mm')
             }
 
             this.unlimited_time = !this.discount.end_date

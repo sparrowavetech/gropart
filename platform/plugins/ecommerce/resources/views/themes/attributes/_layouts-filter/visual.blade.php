@@ -1,34 +1,21 @@
-<li
-    class="visual-swatches-wrapper"
-    data-type="visual"
->
-    <h6
-        class="widget-title"
-        data-title="{{ $set->title }}"
-    >{{ $set->title }}</h6>
-    <div class="attribute-values">
-        <ul class="visual-swatch">
+<div class="bb-product-filter">
+    <h4 class="bb-product-filter-title">{{ $set->title }}</h4>
+
+    <div class="bb-product-filter-content">
+        <ul class="bb-product-filter-items filter-visual">
             @foreach ($attributes->where('attribute_set_id', $set->id) as $attribute)
-                <li
-                    data-slug="{{ $attribute->slug }}"
-                    data-bs-toggle="tooltip"
-                    data-placement="top"
-                    title="{{ $attribute->title }}"
-                >
-                    <div class="custom-checkbox">
-                        <label>
-                            <input
-                                class="product-filter-item"
-                                name="attributes[{{ $set->slug }}][]"
-                                type="checkbox"
-                                value="{{ $attribute->id }}"
-                                @checked(in_array($attribute->id, $selected))
-                            >
-                            <span style="{{ $attribute->getAttributeStyle() }}"></span>
-                        </label>
-                    </div>
+                <li class="bb-product-filter-item">
+                    <input
+                        id="attribute-{{ $attribute->id }}"
+                        name="attributes[{{ $set->slug }}][]"
+                        type="checkbox"
+                        value="{{ $attribute->id }}"
+                        @checked(in_array($attribute->id, $selected))
+                    >
+                    <label for="attribute-{{ $attribute->id }}">{{ $attribute->title }}</label>
+                    <span style="{{ $attribute->getAttributeStyle() }}"></span>
                 </li>
             @endforeach
         </ul>
     </div>
-</li>
+</div>

@@ -8,13 +8,11 @@ return [
     'print' => 'Print Invoice',
     'download' => 'Download Invoice',
     'heading' => 'Invoice',
-    'invoice_for_job' => '',
     'table' => [
         'code' => 'Code',
         'amount' => 'Amount',
     ],
     'detail' => [
-        'sku' => 'SKU (Stock Keeping Unit)',
         'invoice_for' => 'Invoice For',
         'invoice_to' => 'Invoice To',
         'tax_id' => 'Tax ID',
@@ -42,4 +40,5 @@ return [
     'generate_success_message' => 'Generated :count invoices successfully',
     'generate_invoice' => 'Generate invoice',
     'order' => 'Order',
+    'all_invoices_have_already_generated' => 'All invoices have already generated.',
 ];

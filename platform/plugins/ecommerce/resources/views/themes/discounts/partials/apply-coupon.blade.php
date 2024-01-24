@@ -1,22 +1,20 @@
-<div class="row promo coupon coupon-section">
-    <div class="col-lg-8 col-md-8 col-8">
-        <input
-            class="form-control coupon-code input-md"
-            name="coupon_code"
-            type="text"
-            value="{{ old('coupon_code') }}"
-            placeholder="{{ __('Enter coupon code...') }}"
-        >
-        <div class="coupon-error-msg">
-            <span class="text-danger"></span>
-        </div>
-    </div>
-    <div class="col-lg-4 col-md-4 col-4 text-end">
-        <button
-            class="btn btn-md btn-gray btn-info apply-coupon-code float-end"
-            data-url="{{ route('public.coupon.apply') }}"
-            type="button"
-            style="margin-top: 0;padding: 10px 20px;><i class="
-        ><i class="fa fa-gift"></i> {{ __('Apply') }}</button>
-    </div>
+<div class="btn-group w-100">
+    <input
+        class="form-control coupon-code"
+        name="coupon_code"
+        type="text"
+        value="{{ old('coupon_code') }}"
+        placeholder="{{ __('Enter coupon code...') }}"
+    >
+    <button
+        class="apply-coupon-code d-flex align-items-center gap-2"
+        data-url="{{ route('public.coupon.apply') }}"
+        type="button"
+    >
+        {{ __('Apply') }}
+    </button>
+</div>
+
+<div class="coupon-error-msg mt-1">
+    <span class="text-danger"></span>
 </div>

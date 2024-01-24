@@ -4,15 +4,14 @@ namespace Botble\Translation;
 
 use ArrayAccess;
 use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Services\DeleteUnusedTranslationFilesService;
+use Botble\Base\Services\DownloadLocaleService;
 use Botble\Base\Supports\ServiceProvider;
-use Botble\Base\Supports\Zipper;
 use Botble\Theme\Facades\Theme;
-use GuzzleHttp\Psr7\Utils;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Str;
 use Symfony\Component\VarExporter\VarExporter;
@@ -22,13 +21,24 @@ class Manager
 {
     protected array|ArrayAccess $config;
 
+    protected DownloadLocaleService $downloadLocaleService;
+
+    protected DeleteUnusedTranslationFilesService $deleteUnusedTranslationFilesService;
+
     public function __construct(protected Application $app, protected Filesystem $files)
     {
         $this->config = $app['config']['plugins.translation.general'];
+
+        $this->downloadLocaleService = new DownloadLocaleService();
+        $this->deleteUnusedTranslationFilesService = new DeleteUnusedTranslationFilesService();
     }
 
     public function publishLocales(): void
     {
+        if (! $this->files->isDirectory(lang_path('vendor/themes'))) {
+            $this->files->makeDirectory(lang_path('vendor/themes'));
+        }
+
         $paths = ServiceProvider::pathsToPublish(null, 'cms-lang');
 
         foreach ($paths as $from => $to) {
@@ -36,7 +46,7 @@ class Manager
             $this->files->copyDirectory($from, $to);
         }
 
-        if (! File::isDirectory(lang_path('en'))) {
+        if (! $this->files->isDirectory(lang_path('en'))) {
             $this->downloadRemoteLocale('en');
         }
     }
@@ -102,20 +112,6 @@ class Manager
 
     public function removeUnusedThemeTranslations(): bool
     {
-        if (! defined('THEME_MODULE_SCREEN_NAME')) {
-            File::deleteDirectory(lang_path('vendor/themes'));
-
-            return false;
-        }
-
-        $existingThemes = BaseHelper::scanFolder(theme_path());
-
-        foreach (BaseHelper::scanFolder(lang_path('vendor/themes')) as $theme) {
-            if (! in_array($theme, $existingThemes)) {
-                File::deleteDirectory(lang_path("vendor/themes/$theme"));
-            }
-        }
-
         $theme = Theme::getThemeName();
 
         foreach ($this->files->allFiles(lang_path("vendor/themes/$theme")) as $file) {
@@ -157,115 +153,25 @@ class Manager
 
     public function getRemoteAvailableLocales(): array
     {
-        try {
-            $info = Http::withoutVerifying()
-                ->asJson()
-                ->acceptJson()
-                ->get('https://api.github.com/repos/botble/translations/git/trees/master');
-
-            if (! $info->ok()) {
-                return ['ar', 'es', 'vi'];
-            }
-
-            $info = $info->json();
-
-            $availableLocales = [];
-
-            foreach ($info['tree'] as $tree) {
-                if (in_array($tree['path'], ['.gitignore', 'README.md'])) {
-                    continue;
-                }
-
-                $availableLocales[] = $tree['path'];
-            }
-        } catch (Throwable) {
-            $availableLocales = ['ar', 'es', 'vi'];
-        }
-
-        return $availableLocales;
+        return $this->downloadLocaleService->getAvailableLocales();
     }
 
     public function downloadRemoteLocale(string $locale): array
     {
         $this->ensureAllDirectoriesAreCreated();
 
-        $repository = 'https://github.com/botble/translations';
-
-        $destination = storage_path('app/translation-files.zip');
-
-        $availableLocales = $this->getRemoteAvailableLocales();
-
-        if (! in_array($locale, $availableLocales)) {
-            return [
-                'error' => true,
-                'message' => sprintf('This locale is not available on %s', $repository),
-            ];
-        }
-
         try {
-            $response = Http::withoutVerifying()
-                ->sink(Utils::tryFopen($destination, 'w'))
-                ->get($repository . '/archive/refs/heads/master.zip');
-
-            if (! $response->ok()) {
-                return [
-                    'error' => true,
-                    'message' => $response->reason(),
-                ];
-            }
-        } catch (Throwable $exception) {
+            $this->downloadLocaleService->handle($locale);
+        } catch (Throwable $e) {
             return [
                 'error' => true,
-                'message' => $exception->getMessage(),
+                'message' => $e->getMessage(),
             ];
         }
 
-        $zip = new Zipper();
+        $this->deleteUnusedTranslationFilesService->handle();
 
-        $zip->extract($destination, storage_path('app'));
-
-        if (File::exists($destination)) {
-            unlink($destination);
-        }
-
-        $localePath = storage_path('app/translations-master/' . $locale);
-
-        File::copyDirectory($localePath . '/' . $locale, lang_path($locale));
-        File::copyDirectory($localePath . '/vendor/core', lang_path('vendor/core'));
-        File::copyDirectory($localePath . '/vendor/packages', lang_path('vendor/packages'));
-        File::copyDirectory($localePath . '/vendor/plugins', lang_path('vendor/plugins'));
-
-        $theme = Theme::getThemeName();
-
-        $themeVendorLangPath = lang_path("vendor/themes/$theme");
-
-        File::ensureDirectoryExists($themeVendorLangPath);
-
-        if (File::exists($themeJsonPath = "$localePath/vendor/themes/$theme/$locale.json")) {
-            File::copy($themeJsonPath, $themeVendorLangPath . "/$locale.json");
-        } else {
-            $jsonFile = $localePath . '/' . $locale . '.json';
-
-            if (File::exists($jsonFile)) {
-                File::copy($jsonFile, $themeVendorLangPath . "/$locale.json");
-            }
-
-            $this->removeUnusedThemeTranslations();
-        }
-
-        File::deleteDirectory(storage_path('app/translations-master'));
-
-        foreach (File::directories(lang_path('vendor/packages')) as $package) {
-            if (! File::isDirectory(package_path(File::basename($package)))) {
-                File::deleteDirectory($package);
-            }
-        }
-
-        foreach (File::directories(lang_path('vendor/plugins')) as $plugin) {
-            if (! File::isDirectory(plugin_path(File::basename($plugin)))) {
-                File::deleteDirectory($plugin);
-            }
-        }
+        $this->removeUnusedThemeTranslations();
 
         return [
             'error' => false,

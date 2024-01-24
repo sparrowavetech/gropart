@@ -29,6 +29,7 @@ class CustomMenu extends AbstractWidget
                 'menu_id',
                 SelectField::class,
                 SelectFieldOption::make()
+                    ->label(__('Menu'))
                     ->choices(Menu::query()->pluck('name', 'slug')->all())
                     ->searchable()
                     ->toArray()

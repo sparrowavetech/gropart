@@ -38,7 +38,7 @@
 
             <x-core::card.body>
                 <x-core::tab.content>
-                    @if($canChangeProfile)
+                    @if ($canChangeProfile)
                         <x-core::tab.pane
                             id="profile"
                             :is-active="true"

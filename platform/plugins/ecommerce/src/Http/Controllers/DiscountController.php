@@ -6,6 +6,7 @@ use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Base\Facades\Assets;
+use Botble\Base\Supports\Breadcrumb;
 use Botble\Ecommerce\Http\Requests\DiscountRequest;
 use Botble\Ecommerce\Models\Discount;
 use Botble\Ecommerce\Models\Product;
@@ -20,12 +21,9 @@ use Illuminate\Support\Str;
 
 class DiscountController extends BaseController
 {
-    public function __construct()
+    protected function breadcrumb(): Breadcrumb
     {
-        parent::__construct();
-
-        $this
-            ->breadcrumb()
+        return parent::breadcrumb()
             ->add(trans('plugins/ecommerce::discount.name'), route('discounts.index'));
     }
 
@@ -42,15 +40,11 @@ class DiscountController extends BaseController
     {
         $this->pageTitle(trans('plugins/ecommerce::discount.create'));
 
-        Assets::addStylesDirectly(['vendor/core/plugins/ecommerce/css/ecommerce.css'])
-            ->addScriptsDirectly([
-                'vendor/core/plugins/ecommerce/js/discount.js',
-            ])
-            ->addScripts(['timepicker', 'input-mask'])
-            ->addStyles(['timepicker']);
-
-        Assets::usingVueJS();
-        Assets::addScripts(['form-validation']);
+        Assets::usingVueJS()
+            ->addStylesDirectly('vendor/core/plugins/ecommerce/css/ecommerce.css')
+            ->addScriptsDirectly('vendor/core/plugins/ecommerce/js/discount.js')
+            ->addScripts(['timepicker', 'input-mask', 'form-validation'])
+            ->addStyles('timepicker');
 
         $jsValidation = JsValidator::formRequest(DiscountRequest::class);
 
@@ -169,14 +163,11 @@ class DiscountController extends BaseController
 
         $this->pageTitle(trans('plugins/ecommerce::discount.edit'));
 
-        Assets::addStylesDirectly(['vendor/core/plugins/ecommerce/css/ecommerce.css'])
-            ->addScriptsDirectly([
-                'vendor/core/plugins/ecommerce/js/discount.js',
-            ])
-            ->addScripts(['timepicker', 'input-mask'])
-            ->addStyles(['timepicker']);
-
-        Assets::usingVueJS();
+        Assets::usingVueJS()
+            ->addStylesDirectly('vendor/core/plugins/ecommerce/css/ecommerce.css')
+            ->addScriptsDirectly('vendor/core/plugins/ecommerce/js/discount.js')
+            ->addScripts(['timepicker', 'input-mask', 'form-validation'])
+            ->addStyles('timepicker');
 
         return view('plugins/ecommerce::discounts.edit', compact('discount'));
     }

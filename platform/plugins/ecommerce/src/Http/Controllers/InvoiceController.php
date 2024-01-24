@@ -4,6 +4,7 @@ namespace Botble\Ecommerce\Http\Controllers;
 
 use Botble\Base\Events\BeforeEditContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
+use Botble\Base\Supports\Breadcrumb;
 use Botble\Ecommerce\Facades\InvoiceHelper;
 use Botble\Ecommerce\Models\Invoice;
 use Botble\Ecommerce\Models\Order;
@@ -13,12 +14,9 @@ use Illuminate\Http\Request;
 
 class InvoiceController extends BaseController
 {
-    public function __construct()
+    protected function breadcrumb(): Breadcrumb
     {
-        parent::__construct();
-
-        $this
-            ->breadcrumb()
+        return parent::breadcrumb()
             ->add(trans('plugins/ecommerce::invoice.name'), route('ecommerce.invoice.index'));
     }
 
@@ -76,9 +74,15 @@ class InvoiceController extends BaseController
             InvoiceHelper::store($order);
         }
 
+        $message = trans('plugins/ecommerce::invoice.generate_success_message', ['count' => $orders->count()]);
+
+        if ($orders->isEmpty()) {
+            $message = trans('plugins/ecommerce::invoice.all_invoices_have_already_generated');
+        }
+
         return $this
             ->httpResponse()
             ->setNextUrl(route('ecommerce.invoice.index'))
-            ->setMessage(trans('plugins/ecommerce::invoice.generate_success_message', ['count' => $orders->count()]));
+            ->setMessage($message);
     }
 }

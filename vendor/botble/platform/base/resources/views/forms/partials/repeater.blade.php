@@ -6,39 +6,30 @@
     $added = [];
 
     if (! empty($values)) {
-        for ($i = 0; $i < count($values); $i++) {
+        for ($index = 0; $index < count($values); $index++) {
             $group = '';
-            foreach ($fields as $key => $field) {
-                $item = Form::hidden($name . '[' . $i . '][' . $key . '][key]', $field['attributes']['name']);
-                $field['attributes']['name'] = $name . '[' . $i . '][' . $key . '][value]';
-                $field['attributes']['value'] = Arr::get($values, $i . '.' . $key . '.value');
-                $field['attributes']['options']['id'] = $id = 'repeater_field_' . md5($field['attributes']['name']);
-                Arr::set($field, 'attributes.id', $id);
-                Arr::set($field, 'label_attr.for', $id);
-                $item .= Blade::render(sprintf('<x-core::form.label %s>%s</x-core::form.label>', Html::attributes(Arr::get($field, 'label_attr', [])), $field['label']));
-                $item .= call_user_func_array([Form::class, $field['type']], array_values($field['attributes']));
 
-                $group .= Blade::render(sprintf("<x-core::form-group>%s</x-core::form-group>", $item));
+            foreach ($fields as $key => $field) {
+                $group .= view('core/base::forms.partials.repeater-item', compact('name', 'index', 'key', 'field', 'values'));
             }
 
-            $added[] = Blade::render(sprintf('<div class="repeater-item-group">%s</div>', $group));
+            $added[] = view('core/base::forms.partials.repeater-group', compact('group'));
         }
     }
 
     $group = '';
 
     foreach ($fields as $key => $field) {
-        $item = Form::hidden($name . '[__key__][' . $key . '][key]', $field['attributes']['name']);
-        $field['attributes']['name'] = $name . '[__key__][' . $key . '][value]';
-        $field['attributes']['options']['id'] = 'repeater_field_' . md5($field['attributes']['name']) . '__key__';
-        Arr::set($field, 'label_attr.for', $field['attributes']['options']['id']);
-        $item .= Blade::render(sprintf('<x-core::form.label %s>%s</x-core::form.label>', Html::attributes(Arr::get($field, 'label_attr', [])), $field['label']));
-        $item .= call_user_func_array([Form::class, $field['type']], array_values($field['attributes']));
-
-        $group .= Blade::render(sprintf('<x-core::form-group>%s</x-core::form-group>', $item));
+        $group .= view('core/base::forms.partials.repeater-item', [
+            'name' => $name,
+            'index' => '__key__',
+            'key' => $key,
+            'field' => $field,
+            'values' => [],
+        ]);
     }
 
-    $defaultFields = [Blade::render(sprintf('<div class="repeater-item-group">%s</div>', $group))];
+    $defaultFields = [view('core/base::forms.partials.repeater-group', compact('group'))];
 
     $repeaterId = 'repeater_field_' . md5($name) . '_' . uniqid();
 @endphp

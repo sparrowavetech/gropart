@@ -4,6 +4,7 @@ namespace Botble\Widget\Widgets;
 
 use Botble\Widget\AbstractWidget;
 use Botble\Widget\Widgets\ValueObjects\CoreSimpleMenuItem;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 
 class CoreSimpleMenu extends AbstractWidget
@@ -90,9 +91,13 @@ class CoreSimpleMenu extends AbstractWidget
         }
 
         return array_merge($this->data, [
-            'items' => collect($items)->map(function ($item) {
-                return new CoreSimpleMenuItem($item);
-            }),
+            'items' => collect($items)
+                ->reject(function ($item) {
+                    return ! Arr::has($item, '0.key');
+                })
+                ->map(function ($item) {
+                    return new CoreSimpleMenuItem($item);
+                }),
         ]);
     }
 

@@ -41,6 +41,8 @@ class HookServiceProvider extends ServiceProvider
                         [],
                         '1.1.0'
                     );
+
+                do_action('social_login_assets_register');
             }
 
             $view = Arr::get($data, 'view', 'plugins/social-login::login-options');

@@ -19,16 +19,13 @@
     @if (!MarketplaceHelper::hideStoreEmail() && $store->email)
         <p><a href="mailto:{{ $store->email }}">{{ $store->email }}</a></p>
     @endif
-    <h3>Products</h3>
+
+    <h3>{{ __('Products') }}</h3>
+
     @if ($products->isNotEmpty())
         <div class="row">
             @foreach ($products as $product)
-                <div class="col-xl-3 col-lg-4 col-md-4 col-sm-6 col-6">
-                    <a href="{{ $product->url }}">
-                        {!! RvMedia::image($product->image, $product->name) !!}
-                        <p>{{ $product->name }} - {{ format_price($product->front_sale_price_with_taxes) }}</p>
-                    </a>
-                </div>
+                @include(Theme::getThemeNamespace('views.ecommerce.includes.product-item'))
             @endforeach
         </div>
     @endif

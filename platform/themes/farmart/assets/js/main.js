@@ -76,189 +76,7 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
 
             $panel.removeClass('active')
             _scrollBar.reset()
-        });
-
-        /* --- SwiperJS --- */
-        $('.swiper-group-6').each(function () {
-            const $this = $(this);
-            const $box = $(this).closest('.box-swiper');
-
-            new Swiper($this[0], {
-                spaceBetween: 30,
-                slidesPerView: 6,
-                slidesPerGroup: 2,
-                loop: true,
-                navigation: {
-                    nextEl: $box.find('.swiper-button-next')[0],
-                    prevEl: $box.find('.swiper-button-prev')[0],
-                },
-                autoplay: {
-                    delay: 10000,
-                },
-                breakpoints: {
-                    1199: {
-                        slidesPerView: 6,
-                    },
-                    800: {
-                        slidesPerView: 4,
-                    },
-                    400: {
-                        slidesPerView: 2,
-                    },
-                    350: {
-                        slidesPerView: 2,
-                        slidesPerGroup: 1,
-                        spaceBetween: 15,
-                    },
-                },
-            });
-        });
-        $('.swiper-group-4').each(function () {
-            const $this = $(this);
-            const $box = $(this).closest('.box-swiper');
-
-            new Swiper($this[0], {
-                spaceBetween: 20,
-                slidesPerView: 4,
-                slidesPerGroup: 1,
-                loop: true,
-                navigation: {
-                    nextEl: $box.find('.swiper-button-next')[0],
-                    prevEl: $box.find('.swiper-button-prev')[0],
-                },
-                autoplay: {
-                    delay: 10000,
-                },
-                breakpoints: {
-                    1299: {
-                        slidesPerView: 4,
-                    },
-                    1150: {
-                        slidesPerView: 4,
-                    },
-                    750: {
-                        slidesPerView: 2,
-                    },
-                    600: {
-                        slidesPerView: 1,
-                    },
-                    550: {
-                        slidesPerView: 1,
-                    },
-                    300: {
-                        slidesPerView: 1,
-                    },
-                    200: {
-                        slidesPerView: 1,
-                    },
-                },
-            });
-        });
-        $('.swiper-group-3').each(function () {
-            const $this = $(this);
-            const $box = $(this).closest('.box-swiper');
-
-            new Swiper($this[0], {
-                spaceBetween: 30,
-                slidesPerView: 3,
-                slidesPerGroup: 1,
-                loop: true,
-                navigation: {
-                    nextEl: $box.find('.swiper-button-next')[0],
-                    prevEl: $box.find('.swiper-button-prev')[0],
-                },
-                pagination: {
-                    el: '.swiper-pagination',
-                    type: 'bullets',
-                    bulletActiveClass: 'swiper-pagination-customs-active',
-                    bulletClass: 'swiper-pagination-customs',
-                    clickable: true,
-                },
-                autoplay: {
-                    delay: 10000,
-                },
-                breakpoints: {
-                    1199: {
-                        slidesPerView: 3,
-                    },
-                    800: {
-                        slidesPerView: 2,
-                    },
-                    600: {
-                        slidesPerView: 1,
-                    },
-                    350: {
-                        slidesPerView: 1,
-                    },
-                    310: {
-                        slidesPerView: 1,
-                    },
-                    200: {
-                        slidesPerView: 1,
-                    },
-                },
-            });
-        });
-        $('.swiper-group-2').each(function () {
-            const $this = $(this);
-            const $box = $(this).closest('.box-swiper');
-
-            new Swiper($this[0], {
-                spaceBetween: 30,
-                slidesPerView: 2,
-                slidesPerGroup: 1,
-                loop: true,
-                navigation: {
-                    nextEl: $box.find('.swiper-button-next')[0],
-                    prevEl: $box.find('.swiper-button-prev')[0],
-                },
-                pagination: {
-                    el: '.swiper-pagination',
-                    type: 'bullets',
-                    bulletActiveClass: 'swiper-pagination-customs-active',
-                    bulletClass: 'swiper-pagination-customs',
-                    clickable: true,
-                },
-                autoplay: {
-                    delay: 10000,
-                },
-                breakpoints: {
-                    1199: {
-                        slidesPerView: 2,
-                    },
-                    800: {
-                        slidesPerView: 1,
-                    },
-                    600: {
-                        slidesPerView: 1,
-                    },
-                    400: {
-                        slidesPerView: 1,
-                    },
-                    350: {
-                        slidesPerView: 1,
-                    },
-                },
-            });
-        });
-        $('.swiper-group-1').each(function () {
-            const $this = $(this);
-            const $box = $(this).closest('.box-swiper');
-
-            new Swiper($this[0], {
-                spaceBetween: 0,
-                slidesPerView: 1,
-                slidesPerGroup: 1,
-                loop: true,
-                navigation: {
-                    nextEl: $box.find('.swiper-button-next')[0],
-                    prevEl: $box.find('.swiper-button-prev')[0],
-                },
-                autoplay: {
-                    delay: 10000,
-                },
-            });
-        });
+        })
 
         $('body').on('click', function (e) {
             if ($(e.target).siblings('.panel--sidebar').hasClass('active')) {
@@ -302,8 +120,6 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
         this.removeCartItem()
         this.removeWishlistItem()
         this.removeCompareItem()
-        this.submitReviewProduct()
-        this.vendorRegisterForm()
         this.customerDashboard()
         this.newsletterForm()
         this.contactSellerForm()
@@ -311,7 +127,6 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
         this.backToTop()
         this.stickyHeader()
         this.recentlyViewedProducts()
-        this.reviewList()
 
         MartApp.$body.on('click', '.catalog-sidebar .backdrop, #cart-mobile .backdrop', function (e) {
             e.preventDefault()
@@ -437,7 +252,12 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
     }
 
     MartApp.lightBox = function () {
-        $('.product-gallery--with-images').lightGallery({
+        let $productGallery = $('.product-gallery--with-images')
+        if ($productGallery.data('lightGallery')) {
+            $productGallery.data('lightGallery').destroy(true)
+        }
+
+        $productGallery.lightGallery({
             selector: '.item a',
             thumbnail: true,
             share: false,
@@ -686,25 +506,22 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
             e.preventDefault()
             let _self = $(e.currentTarget)
 
-            let cpncode = _self.closest('.form-coupon-wrapper').find('.coupon-code').val();
-
-            if(!cpncode || cpncode == ""){
-                cpncode = _self.data('coupon-code');
-            }
-
             $.ajax({
                 url: _self.data('url'),
                 type: 'POST',
                 data: {
-                    coupon_code: cpncode,
+                    coupon_code: _self.closest('.form-coupon-wrapper').find('.coupon-code').val(),
                 },
                 beforeSend: () => {
                     _self.prop('disabled', true).addClass('loading')
                 },
                 success: (res) => {
                     if (!res.error) {
+                        let url = window.location.href
+                        url = url.substring(0, url.indexOf('?'))
+
                         $('.cart-page-content').load(
-                            window.location.href + '?applied_coupon=1 .cart-page-content > *',
+                            url + '?applied_coupon=1 .cart-page-content > *',
                             function () {
                                 _self.prop('disabled', false).removeClass('loading')
                                 MartApp.showSuccess(res.message)
@@ -736,7 +553,10 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
                 type: 'POST',
                 success: (res) => {
                     if (!res.error) {
-                        $('.cart-page-content').load(window.location.href + ' .cart-page-content > *', function () {
+                        let url = window.location.href
+                        url = url.substring(0, url.indexOf('?'))
+
+                        $('.cart-page-content').load(url + ' .cart-page-content > *', function () {
                             _self.text(buttonText)
                         })
                     } else {
@@ -1380,194 +1200,6 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
         return s.join(dec)
     }
 
-    MartApp.submitReviewProduct = function () {
-        let imagesReviewBuffer = []
-        let setImagesFormReview = function (input) {
-            const dT =
-                new ClipboardEvent('').clipboardData || // Firefox < 62 workaround exploiting https://bugzilla.mozilla.org/show_bug.cgi?id=1422655
-                new DataTransfer() // specs compliant (as of March 2018 only Chrome)
-            for (let file of imagesReviewBuffer) {
-                dT.items.add(file)
-            }
-            input.files = dT.files
-            loadPreviewImage(input)
-        }
-
-        let loadPreviewImage = function (input) {
-            let $uploadText = $('.image-upload__text')
-            const maxFiles = $(input).data('max-files')
-            let filesAmount = input.files.length
-
-            if (maxFiles) {
-                if (filesAmount >= maxFiles) {
-                    $uploadText.closest('.image-upload__uploader-container').addClass('d-none')
-                } else {
-                    $uploadText.closest('.image-upload__uploader-container').removeClass('d-none')
-                }
-                $uploadText.text(filesAmount + '/' + maxFiles)
-            } else {
-                $uploadText.text(filesAmount)
-            }
-            const viewerList = $('.image-viewer__list')
-            const $template = $('#review-image-template').html()
-
-            viewerList.addClass('is-loading')
-            viewerList.find('.image-viewer__item').remove()
-
-            if (filesAmount) {
-                for (let i = filesAmount - 1; i >= 0; i--) {
-                    viewerList.prepend($template.replace('__id__', i))
-                }
-                for (let j = filesAmount - 1; j >= 0; j--) {
-                    let reader = new FileReader()
-                    reader.onload = function (event) {
-                        viewerList
-                            .find('.image-viewer__item[data-id=' + j + ']')
-                            .find('img')
-                            .attr('src', event.target.result)
-                    }
-                    reader.readAsDataURL(input.files[j])
-                }
-            }
-            viewerList.removeClass('is-loading')
-        }
-
-        $(document).on('change', '.form-review-product input[type=file]', function (event) {
-            event.preventDefault()
-            let input = this
-            let $input = $(input)
-            let maxSize = $input.data('max-size')
-            Object.keys(input.files).map(function (i) {
-                if (maxSize && input.files[i].size / 1024 > maxSize) {
-                    let message = $input
-                        .data('max-size-message')
-                        .replace('__attribute__', input.files[i].name)
-                        .replace('__max__', maxSize)
-                    MartApp.showError(message)
-                } else {
-                    imagesReviewBuffer.push(input.files[i])
-                }
-            })
-
-            let filesAmount = imagesReviewBuffer.length
-            const maxFiles = $input.data('max-files')
-            if (maxFiles && filesAmount > maxFiles) {
-                imagesReviewBuffer.splice(filesAmount - maxFiles - 1, filesAmount - maxFiles)
-            }
-
-            setImagesFormReview(input)
-        })
-
-        $(document).on('click', '.form-review-product .image-viewer__icon-remove', function (event) {
-            event.preventDefault()
-            const $this = $(event.currentTarget)
-            let id = $this.closest('.image-viewer__item').data('id')
-            imagesReviewBuffer.splice(id, 1)
-
-            let input = $('.form-review-product input[type=file]')[0]
-            setImagesFormReview(input)
-        })
-
-        if (sessionStorage.reloadReviewsTab) {
-            if ($('#product-detail-tabs a[href="#product-reviews"]').length) {
-                new bootstrap.Tab($('#product-detail-tabs a[href="#product-reviews"]')[0]).show()
-            }
-            sessionStorage.reloadReviewsTab = false
-        }
-
-        $(document).on('click', '.form-review-product button[type=submit]', function (e) {
-            e.preventDefault()
-            e.stopPropagation()
-            const $this = $(e.currentTarget)
-
-            const $form = $(this).closest('form')
-            $.ajax({
-                type: 'POST',
-                cache: false,
-                url: $form.prop('action'),
-                data: new FormData($form[0]),
-                contentType: false,
-                processData: false,
-                beforeSend: () => {
-                    $this.prop('disabled', true).addClass('loading')
-                },
-                success: (res) => {
-                    if (!res.error) {
-                        $form.find('select').val(0)
-                        $form.find('textarea').val('')
-
-                        MartApp.showSuccess(res.message)
-
-                        setTimeout(function () {
-                            sessionStorage.reloadReviewsTab = true
-                            window.location.reload()
-                        }, 1500)
-                    } else {
-                        MartApp.showError(res.message)
-                    }
-                },
-                error: (res) => {
-                    MartApp.handleError(res, $form)
-                },
-                complete: () => {
-                    $this.prop('disabled', false).removeClass('loading')
-                },
-            })
-        })
-    }
-
-    MartApp.vendorRegisterForm = function () {
-        $(document).on('click', 'input[name=is_vendor]', function () {
-            if ($(this).val() == 1) {
-                $('.show-if-vendor').slideDown().show()
-            } else {
-                $('.show-if-vendor').slideUp(500)
-                $(this).closest('form').find('button[type=submit]').prop('disabled', false)
-            }
-        })
-
-        $('#shop-url-register')
-            .on('keyup', function () {
-                let displayURL = $(this).closest('.form-group').find('span small')
-                displayURL.html(displayURL.data('base-url') + '/<strong>' + $(this).val().toLowerCase() + '</strong>')
-            })
-            .on('change', function () {
-                const $this = $(this)
-                const url = $this.val()
-                if (!url) {
-                    return
-                }
-                let displayURL = $this.closest('.form-group').find('span small')
-
-                $.ajax({
-                    url: $this.data('url'),
-                    type: 'POST',
-                    data: { url },
-                    beforeSend: () => {
-                        $this.prop('disabled', true)
-                        $this.closest('form').find('button[type=submit]').prop('disabled', true)
-                    },
-                    success: (res) => {
-                        if (res.error) {
-                            $this.addClass('is-invalid').removeClass('is-valid')
-                            $('.shop-url-status').removeClass('text-success').addClass('text-danger').text(res.message)
-                        } else {
-                            $this.addClass('is-valid').removeClass('is-invalid')
-                            $('.shop-url-status').removeClass('text-danger').addClass('text-success').text(res.message)
-                            $this.closest('form').find('button[type=submit]').prop('disabled', false)
-                        }
-                        if (res.data?.slug) {
-                            displayURL.html(displayURL.data('base-url') + '/<strong>' + res.data?.slug + '</strong>')
-                        }
-                    },
-                    error: () => {},
-                    complete: () => {
-                        $this.prop('disabled', false)
-                    },
-                })
-            })
-    }
-
     MartApp.customerDashboard = function () {
         if ($.fn.datepicker) {
             $('#date_of_birth').datepicker({
@@ -1754,54 +1386,23 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
     }
 
     MartApp.showNotice = function (messageType, message) {
-        MartApp.$toastLive = $('#toast-notifications')
-        if (MartApp.$toastLive.length) {
-            MartApp.toast = new bootstrap.Toast(MartApp.$toastLive)
-        }
-
-        MartApp.$toastLive.removeClass(function (index, className) {
-            return (className.match(/(^|\s)toast--\S+/g) || []).join(' ')
-        })
-        MartApp.$toastLive.addClass('toast--' + messageType)
-        MartApp.$toastLive.find('.toast-body .toast-message').html(message)
-        MartApp.toast.show()
+        Theme.showNotice(messageType, message)
     }
 
     MartApp.showError = function (message) {
-        this.showNotice('error', message)
+        Theme.showError( message)
     }
 
     MartApp.showSuccess = function (message) {
-        this.showNotice('success', message)
+        Theme.showSuccess(message)
     }
 
     MartApp.handleError = (data) => {
-        if (typeof data.errors !== 'undefined' && data.errors.length) {
-            MartApp.handleValidationError(data.errors)
-        } else if (typeof data.responseJSON !== 'undefined') {
-            if (typeof data.responseJSON.errors !== 'undefined') {
-                if (data.status === 422) {
-                    MartApp.handleValidationError(data.responseJSON.errors)
-                }
-            } else if (typeof data.responseJSON.message !== 'undefined') {
-                MartApp.showError(data.responseJSON.message)
-            } else {
-                MartApp.showError(data.responseJSON.join(', ').join(', '))
-            }
-        } else {
-            MartApp.showError(data.statusText)
-        }
+        Theme.handleError(data)
     }
 
     MartApp.handleValidationError = (errors) => {
-        let message = ''
-        $.each(errors, (index, item) => {
-            if (message !== '') {
-                message += '<br />'
-            }
-            message += item
-        })
-        MartApp.showError(message)
+        Theme.handleValidationError(errors)
     }
 
     MartApp.toggleViewProducts = function () {
@@ -1968,74 +1569,6 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
         }
     }
 
-    MartApp.reviewList = function () {
-        let $reviewListWrapper = MartApp.$body.find('.comment-list')
-        const $loadingSpinner = MartApp.$body.find('.loading-spinner')
-
-        $loadingSpinner.addClass('d-none')
-
-        const fetchData = (url, hasAnimation = false) => {
-            $.ajax({
-                url: url,
-                type: 'GET',
-                beforeSend: function () {
-                    $loadingSpinner.removeClass('d-none')
-
-                    if (hasAnimation) {
-                        $('html, body').animate(
-                            {
-                                scrollTop: `${$('.product-reviews-container').offset().top}px`,
-                            },
-                            1500
-                        )
-                    }
-                },
-                success: function (res) {
-                    $reviewListWrapper.html(res.data)
-                    $('.product-reviews-container .product-reviews-header').html(res.message)
-
-                    let $galleries = $('.product-reviews-container .review-images')
-                    if ($galleries.length) {
-                        $galleries.map((index, value) => {
-                            if (!$(value).data('lightGallery')) {
-                                $(value).lightGallery({
-                                    selector: 'a',
-                                    thumbnail: true,
-                                    share: false,
-                                    fullScreen: false,
-                                    autoplay: false,
-                                    autoplayControls: false,
-                                    actualSize: false,
-                                })
-                            }
-                        })
-                    }
-                },
-                complete: function () {
-                    $loadingSpinner.addClass('d-none')
-                },
-            })
-        }
-
-        if ($reviewListWrapper.length < 1) {
-            return
-        }
-
-        fetchData($reviewListWrapper.data('url'))
-
-        $reviewListWrapper.on('click', '.pagination ul li.page-item a', function (e) {
-            e.preventDefault()
-
-            const href = $(this).attr('href')
-
-            if (href === '#') {
-                return
-            }
-
-            fetchData(href, true)
-        })
-    }
-
     $(function () {
         MartApp.init()
 
@@ -2114,13 +1647,13 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
                     }
 
                     const unavailableAttributeIds = data.unavailable_attribute_ids || []
-                    $product.find('.attribute-swatch-item').removeClass('pe-none')
+                    $product.find('.attribute-swatch-item').removeClass('disabled')
                     $product.find('.product-filter-item option').prop('disabled', false)
                     if (unavailableAttributeIds && unavailableAttributeIds.length) {
                         unavailableAttributeIds.map(function (id) {
                             let $item = $product.find('.attribute-swatch-item[data-id="' + id + '"]')
                             if ($item.length) {
-                                $item.addClass('pe-none')
+                                $item.addClass('disabled')
                                 $item.find('input').prop('checked', false)
                             } else {
                                 $item = $product.find('.product-filter-item option[data-id="' + id + '"]')
@@ -2244,7 +1777,7 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
                 },
                 0
             )
-        });
+        })
 
         $(document).on('click', '#sticky-add-to-cart .add-to-cart-button', (e) => {
             e.preventDefault()

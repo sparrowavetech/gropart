@@ -4,24 +4,25 @@ namespace Theme\Farmart\Http\Controllers;
 
 use Botble\Base\Facades\EmailHandler;
 use Botble\Base\Http\Responses\BaseHttpResponse;
+use Botble\Ecommerce\Concerns\Http\Ajax\HasSearchProducts;
 use Botble\Ecommerce\Facades\Cart;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Models\ProductCategory;
 use Botble\Ecommerce\Models\Wishlist as WishlistModel;
 use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
-use Botble\Ecommerce\Services\Products\GetProductService;
 use Botble\Marketplace\Models\Store;
 use Botble\Theme\Facades\Theme;
 use Botble\Theme\Http\Controllers\PublicController;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
 use Theme\Farmart\Http\Requests\ContactSellerRequest;
 use Theme\Farmart\Supports\Wishlist;
 
 class FarmartController extends PublicController
 {
+    use HasSearchProducts;
+
     public function __construct(protected BaseHttpResponse $httpResponse)
     {
         $this->middleware(function ($request, $next) {
@@ -35,7 +36,6 @@ class FarmartController extends PublicController
             'ajaxGetQuickView',
             'ajaxAddProductToWishlist',
             'ajaxSearchProducts',
-            'ajaxGetProductReviews',
             'ajaxGetRecentlyViewedProducts',
             'ajaxContactSeller',
             'ajaxGetProductsByCollection',
@@ -52,48 +52,12 @@ class FarmartController extends PublicController
         ]);
     }
 
-    public function ajaxGetQuickView(Request $request, int|string|null $id = null)
-    {
-        if (! $id) {
-            $id = $request->integer('product_id');
-        }
-
-        $product = null;
-
-        if ($id) {
-            $product = get_products([
-                    'condition' => [
-                        'ec_products.id' => $id,
-                    ],
-                    'take' => 1,
-                    'with' => [
-                        'slugable',
-                        'tags',
-                        'tags.slugable',
-                        'options',
-                        'options.values',
-                    ],
-                ] + EcommerceHelper::withReviewsParams());
-        }
-
-        if (! $product) {
-            return $this->httpResponse->setError()->setMessage(__('This product is not available.'));
-        }
-
-        [$productImages, $productVariation, $selectedAttrs] = EcommerceHelper::getProductVariationInfo($product);
-
-        $wishlistIds = Wishlist::getWishlistIds([$product->getKey()]);
-
-        return $this
-            ->httpResponse
-            ->setData(Theme::partial('ecommerce.quick-view', compact('product', 'selectedAttrs', 'productImages', 'productVariation', 'wishlistIds')));
-    }
-
     public function ajaxAddProductToWishlist(Request $request, $productId = null)
     {
         if (! EcommerceHelper::isWishlistEnabled()) {
             abort(404);
         }
+
         if (! $productId) {
             $productId = $request->input('product_id');
         }
@@ -160,64 +124,6 @@ class FarmartController extends PublicController
                 'count' => $customer->wishlist()->count(),
                 'added' => $added,
             ]);
-    }
-
-    public function ajaxSearchProducts(Request $request, GetProductService $productService)
-    {
-        $request->merge(['num' => 12]);
-
-        $with = EcommerceHelper::withProductEagerLoadingRelations();
-
-        $products = $productService->getProduct($request, null, null, $with);
-
-        $queries = $request->input();
-        foreach ($queries as $key => $query) {
-            if (! $query || $key == 'num' || (is_array($query) && ! Arr::get($query, 0))) {
-                unset($queries[$key]);
-            }
-        }
-
-        $total = $products->count();
-        $message = $total != 1 ? __(':total Products found', compact('total')) : __(':total Product found', compact('total'));
-
-        return $this->httpResponse
-            ->setData(Theme::partial('ajax-search-results', compact('products', 'queries')))
-            ->setMessage($message);
-    }
-
-    public function ajaxGetProductReviews(int|string $id, Request $request)
-    {
-        $product = Product::query()
-            ->wherePublished()
-            ->where([
-                'id' => $id,
-                'is_variation' => false,
-            ])
-            ->with(['variations'])
-            ->firstOrFail();
-
-        $star = $request->integer('star');
-        $perPage = $request->integer('per_page', 10) ?: 10;
-
-        $reviews = EcommerceHelper::getProductReviews($product, $star, $perPage);
-
-        if ($star) {
-            $message = __(':total review(s) ":star star" for ":product"', [
-                'total' => $reviews->total(),
-                'product' => $product->name,
-                'star' => $star,
-            ]);
-        } else {
-            $message = __(':total review(s) for ":product"', [
-                'total' => $reviews->total(),
-                'product' => $product->name,
-            ]);
-        }
-
-        return $this->httpResponse
-            ->setData(view(Theme::getThemeNamespace('views.ecommerce.includes.review-list'), compact('reviews'))->render())
-            ->setMessage($message)
-            ->toApiResponse();
     }
 
     public function ajaxGetRecentlyViewedProducts(ProductInterface $productRepository)
@@ -336,10 +242,5 @@ class FarmartController extends PublicController
         }
 
         return $response->setData($data);
-    }
-
-    public function ajaxGetComboPrice($amt)
-    {
-        return format_price($amt);
     }
 }

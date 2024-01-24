@@ -70,11 +70,7 @@ class ProductForm extends BaseProductForm
         $productAttributeSets = ProductAttributeSet::getAllWithSelected($productId, []);
 
         $this
-            ->setupModel(new Product())
-            ->addCustomField('customEditor', CustomEditorField::class)
-            ->addCustomField('customImages', CustomImagesField::class)
-            ->addCustomField('multiCheckList', MultiCheckListField::class)
-            ->addCustomField('tags', TagField::class)
+            ->model(Product::class)
             ->template(MarketplaceHelper::viewPath('vendor-dashboard.forms.base'))
             ->setFormOption('enctype', 'multipart/form-data')
             ->setValidatorClass(ProductRequest::class)
@@ -86,7 +82,7 @@ class ProductForm extends BaseProductForm
                     'data-counter' => 250,
                 ],
             ])
-            ->add('description', 'customEditor', [
+            ->add('description', CustomEditorField::class, [
                 'label' => trans('core/base::forms.description'),
                 'attr' => [
                     'rows' => 2,
@@ -94,13 +90,13 @@ class ProductForm extends BaseProductForm
                     'data-counter' => 1000,
                 ],
             ])
-            ->add('content', 'customEditor', [
+            ->add('content', CustomEditorField::class, [
                 'label' => trans('core/base::forms.content'),
                 'attr' => [
                     'rows' => 4,
                 ],
             ])
-            ->add('images', 'customImages', [
+            ->add('images', CustomImagesField::class, [
                 'label' => trans('plugins/ecommerce::products.form.image'),
                 'values' => $productId ? $this->getModel()->images : [],
             ])
@@ -132,12 +128,12 @@ class ProductForm extends BaseProductForm
                 'label' => trans('plugins/ecommerce::products.form.brand'),
                 'choices' => $brands,
             ])
-            ->add('product_collections[]', 'multiCheckList', [
+            ->add('product_collections[]', MultiCheckListField::class, [
                 'label' => trans('plugins/ecommerce::products.form.collections'),
                 'choices' => $productCollections,
                 'value' => old('product_collections', $selectedProductCollections),
             ])
-            ->add('product_labels[]', 'multiCheckList', [
+            ->add('product_labels[]', MultiCheckListField::class, [
                 'label' => trans('plugins/ecommerce::products.form.labels'),
                 'choices' => $productLabels,
                 'value' => old('product_labels', $selectedProductLabels),
@@ -153,7 +149,7 @@ class ProductForm extends BaseProductForm
                 $selectedTaxes = [$defaultTaxRate];
             }
 
-            $this->add('taxes[]', 'multiCheckList', [
+            $this->add('taxes[]', MultiCheckListField::class, [
                 'label' => trans('plugins/ecommerce::products.form.taxes'),
                 'choices' => $taxes,
                 'value' => old('taxes', $selectedTaxes),
@@ -161,7 +157,7 @@ class ProductForm extends BaseProductForm
         }
 
         $this
-            ->add('tag', 'tags', [
+            ->add('tag', TagField::class, [
                 'label' => trans('plugins/ecommerce::products.form.tags'),
                 'value' => $tags,
                 'attr' => [

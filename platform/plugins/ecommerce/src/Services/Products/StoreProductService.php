@@ -4,6 +4,7 @@ namespace Botble\Ecommerce\Services\Products;
 
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
+use Botble\Ecommerce\Enums\CrossSellPriceType;
 use Botble\Ecommerce\Enums\ProductTypeEnum;
 use Botble\Ecommerce\Events\ProductQuantityUpdatedEvent;
 use Botble\Ecommerce\Facades\EcommerceHelper;
@@ -110,7 +111,20 @@ class StoreProductService
 
         if ($request->has('cross_sale_products')) {
             $crossSaleProducts = $request->input('cross_sale_products', []);
-            $crossSaleProducts = array_map(fn ($item) => Arr::except($item, 'id'), $crossSaleProducts);
+            $crossSaleProducts = array_map(function ($item) {
+                unset($item['id']);
+
+                $item['is_variant'] = isset($item['is_variant']) && $item['is_variant'] == '1';
+                $item['price'] = $item['price'] ?? 0;
+                $item['price_type'] = $item['price_type'] ?? CrossSellPriceType::FIXED;
+
+                if (! $item['is_variant']) {
+                    $item['apply_to_all_variations'] = isset($item['apply_to_all_variations']) && $item['apply_to_all_variations'] == '1';
+                }
+
+                return $item;
+            }, $crossSaleProducts);
+
             $product->crossSales()->sync($crossSaleProducts);
         } else {
             $product->crossSales()->detach();

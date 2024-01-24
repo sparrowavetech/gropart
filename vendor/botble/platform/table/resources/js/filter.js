@@ -46,7 +46,9 @@ class TableFilter {
                 $(document).find('.filter-items-wrap').append(html.replace('<script>', '').replace('<\\/script>', ''))
                 Botble.initResources()
 
-                const element = $(document).find('.filter-items-wrap .filter-item:last-child').find('.filter-column-key')
+                const element = $(document)
+                    .find('.filter-items-wrap .filter-item:last-child')
+                    .find('.filter-column-key')
                 if ($(element).val()) {
                     that.loadData(element)
                 }
@@ -71,9 +73,20 @@ class TableFilter {
 
                 const params = new URLSearchParams(url.search)
                 const data = form.serializeArray()
+                const paramsKey = {}
 
                 $.each(data, (index, item) => {
-                    params.set(item.name, item.value)
+                    let keyName = item.name
+
+                    if (typeof keyName === 'string' && keyName.endsWith('[]')) {
+                        let keyValue = paramsKey[keyName] = paramsKey[keyName] || 0
+
+                        params.set(`${keyName.replace('[]', `[${keyValue}]`)}`, item.value)
+
+                        paramsKey[keyName]++
+                    } else {
+                        params.set(item.name, item.value)
+                    }
                 })
 
                 window.history.pushState({}, '', `${url.pathname}?${params.toString()}`)

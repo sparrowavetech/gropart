@@ -68,7 +68,6 @@ class CookieConsentServiceProvider extends ServiceProvider
             theme_option()
                 ->setSection([
                     'title' => trans('plugins/cookie-consent::cookie-consent.theme_options.name'),
-                    'desc' => trans('plugins/cookie-consent::cookie-consent.theme_options.description'),
                     'id' => 'opt-text-subsection-cookie-consent',
                     'subsection' => true,
                     'icon' => 'ti ti-cookie',

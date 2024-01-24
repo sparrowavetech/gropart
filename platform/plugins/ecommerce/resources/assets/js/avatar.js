@@ -308,4 +308,39 @@ CropAvatar.prototype = {
 
 $(function () {
     new CropAvatar($('.crop-avatar'))
+
+    $(document).on('change', '[data-bb-toggle="change-customer-avatar"]', (e) => {
+        const currentTarget = $(e.currentTarget)
+
+        const url = currentTarget.data('url')
+        const file = currentTarget[0].files[0]
+
+        if (typeof url === 'undefined' || typeof file === 'undefined') {
+            return
+        }
+
+        const formData = new FormData()
+        formData.append('avatar_file', file)
+
+        $.ajax({
+            url: url,
+            type: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: ({ data, message, error }) => {
+                if (typeof Theme !== 'undefined' && error) {
+                    Theme.showError(message)
+
+                    return
+                }
+
+                if (typeof Theme !== 'undefined') {
+                    Theme.showSuccess(message)
+                }
+
+                $('[data-bb-value="customer-avatar"]').prop('src', data.url)
+            },
+        })
+    })
 })

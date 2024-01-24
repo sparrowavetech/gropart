@@ -11,7 +11,7 @@ class LocaleRequest extends Request
     public function rules(): array
     {
         return [
-            'locale' => ['required', Rule::in(collect(Language::getListLanguages())->pluck(0)->unique()->all())],
+            'locale' => ['required', Rule::in(Language::getLocaleKeys())],
         ];
     }
 }

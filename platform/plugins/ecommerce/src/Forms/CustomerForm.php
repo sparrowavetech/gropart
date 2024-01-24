@@ -4,8 +4,12 @@ namespace Botble\Ecommerce\Forms;
 
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Forms\FieldOptions\NameFieldOption;
 use Botble\Base\Forms\FieldOptions\StatusFieldOption;
+use Botble\Base\Forms\FieldOptions\TextareaFieldOption;
 use Botble\Base\Forms\Fields\SelectField;
+use Botble\Base\Forms\Fields\TextareaField;
+use Botble\Base\Forms\Fields\TextField;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Ecommerce\Enums\CustomerStatusEnum;
 use Botble\Ecommerce\Http\Requests\CustomerCreateRequest;
@@ -25,14 +29,7 @@ class CustomerForm extends FormAbstract
             ->setupModel(new Customer())
             ->setValidatorClass(CustomerCreateRequest::class)
             ->template('plugins/ecommerce::customers.form')
-            ->add('name', 'text', [
-                'label' => trans('core/base::forms.name'),
-                'required' => true,
-                'attr' => [
-                    'placeholder' => trans('core/base::forms.name_placeholder'),
-                    'data-counter' => 120,
-                ],
-            ])
+            ->add('name', TextField::class, NameFieldOption::make()->maxLength(120)->toArray())
             ->add('email', 'text', [
                 'label' => trans('plugins/ecommerce::customer.email'),
                 'required' => true,
@@ -86,6 +83,15 @@ class CustomerForm extends FormAbstract
             ->add('closeRow1', 'html', [
                 'html' => '</div>',
             ])
+            ->add(
+                'private_notes',
+                TextareaField::class,
+                TextareaFieldOption::make()
+                    ->label(trans('plugins/ecommerce::customer.private_notes'))
+                    ->helperText(trans('plugins/ecommerce::customer.private_notes_helper'))
+                    ->rows(2)
+                    ->toArray()
+            )
             ->add('status', SelectField::class, StatusFieldOption::make()->choices(CustomerStatusEnum::labels())->toArray())
             ->add('avatar', 'mediaImage')
             ->setBreakFieldPoint('status');

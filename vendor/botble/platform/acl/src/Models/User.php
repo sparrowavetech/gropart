@@ -2,15 +2,15 @@
 
 namespace Botble\ACL\Models;
 
+use Botble\ACL\Concerns\HasPreferences;
 use Botble\ACL\Contracts\HasPermissions as HasPermissionsContract;
+use Botble\ACL\Contracts\HasPreferences as HasPreferencesContract;
 use Botble\ACL\Notifications\ResetPasswordNotification;
 use Botble\ACL\Traits\PermissionTrait;
 use Botble\Base\Casts\SafeContent;
 use Botble\Base\Models\BaseModel;
-use Botble\Base\Supports\Avatar;
 use Botble\Media\Facades\RvMedia;
 use Botble\Media\Models\MediaFile;
-use Exception;
 use Illuminate\Auth\Authenticatable;
 use Illuminate\Auth\Passwords\CanResetPassword;
 use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
@@ -29,7 +29,8 @@ class User extends BaseModel implements
     HasPermissionsContract,
     AuthenticatableContract,
     AuthorizableContract,
-    CanResetPasswordContract
+    CanResetPasswordContract,
+    HasPreferencesContract
 {
     use Authenticatable;
     use Authorizable;
@@ -41,6 +42,7 @@ class User extends BaseModel implements
         PermissionTrait::hasAnyPermission as traitHasAnyPermission;
     }
     use Notifiable;
+    use HasPreferences;
 
     protected $table = 'users';
 
@@ -122,11 +124,7 @@ class User extends BaseModel implements
                 return RvMedia::url($this->avatar->url);
             }
 
-            try {
-                return (new Avatar())->create($this->name)->toBase64();
-            } catch (Exception) {
-                return RvMedia::getDefaultImage();
-            }
+            return RvMedia::getDefaultImage();
         });
     }
 

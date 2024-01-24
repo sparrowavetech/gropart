@@ -2,8 +2,8 @@
 
 namespace Botble\Contact\Http\Requests;
 
-use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Rules\EmailRule;
+use Botble\Base\Rules\PhoneNumberRule;
 use Botble\Captcha\Facades\Captcha;
 use Botble\Support\Http\Requests\Request;
 
@@ -15,7 +15,7 @@ class ContactRequest extends Request
             'name' => ['required', 'string', 'max:40'],
             'email' => ['required', new EmailRule(), 'max:80'],
             'content' => ['required', 'string', 'max:1000'],
-            'phone' => 'nullable|' . BaseHelper::getPhoneValidationRule(),
+            'phone' => ['nullable', new PhoneNumberRule()],
         ];
 
         if (is_plugin_active('captcha')) {

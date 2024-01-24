@@ -5,7 +5,7 @@
     </div>
     <div class="section-content">
         <div class="table-responsive">
-            <table class="table table-striped">
+            <table class="table table-bordered table-striped">
                 <thead>
                     <tr>
                         <th>{{ __('ID number') }}</th>
@@ -17,7 +17,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @if (count($requests) > 0)
+                    @if ($requests->isNotEmpty())
                         @foreach ($requests as $item)
                             <tr>
                                 <th scope="row">{{ $item->code }}</th>

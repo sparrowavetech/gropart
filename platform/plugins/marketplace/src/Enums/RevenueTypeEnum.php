@@ -2,8 +2,8 @@
 
 namespace Botble\Marketplace\Enums;
 
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Supports\Enum;
-use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\HtmlString;
 
 /**
@@ -25,12 +25,12 @@ class RevenueTypeEnum extends Enum
     {
         $color = match ($this->value) {
             self::ADD_AMOUNT => 'info',
-            self::SUBTRACT_AMOUNT => 'primary',
+            self::SUBTRACT_AMOUNT => 'danger',
             self::ORDER_RETURN => 'warning',
-            default => null,
+            default => 'primary',
         };
 
-        return Blade::render(sprintf('<x-core::badge label="%s" color="%s" />', $this->label(), $color));
+        return BaseHelper::renderBadge($this->label(), $color);
     }
 
     public static function adjustValues(): array

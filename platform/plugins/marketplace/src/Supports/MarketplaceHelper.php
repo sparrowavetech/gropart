@@ -122,4 +122,9 @@ class MarketplaceHelper
     {
         return (bool) $this->getSetting('enabled_vendor_registration', true);
     }
+
+    public function getMinimumWithdrawalAmount(): float
+    {
+        return (float) $this->getSetting('minimum_withdrawal_amount') ?: 0;
+    }
 }

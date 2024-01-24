@@ -2,6 +2,7 @@
 
 namespace Botble\Ecommerce\Http\Requests;
 
+use Botble\Base\Facades\BaseHelper;
 use Botble\Ecommerce\Enums\DiscountTypeEnum;
 use Botble\Ecommerce\Enums\DiscountTypeOptionEnum;
 use Botble\Support\Http\Requests\Request;
@@ -12,7 +13,7 @@ class DiscountRequest extends Request
 {
     protected function prepareForValidation(): void
     {
-        $dateFormat = config('core.base.general.date_format.date_time');
+        $dateFormat = BaseHelper::getDateTimeFormat();
 
         $this->merge([
             'can_use_with_promotion' => $this->boolean('can_use_with_promotion'),
@@ -26,7 +27,7 @@ class DiscountRequest extends Request
 
     public function rules(): array
     {
-        $dateFormat = config('core.base.general.date_format.date_time');
+        $dateFormat = BaseHelper::getDateTimeFormat();
 
         return [
             'title' => ['nullable', 'string', 'required_if:type,promotion', 'max:255'],

@@ -49,9 +49,7 @@ export class ContextMenuService {
                     name: value.name,
                     icon: (opt, $itemElement, itemKey, item) => {
                         $itemElement.html(
-                            `${value.icon} ${
-                                Helpers.trans(`actions_list.${key}.${value.action}`) || item.name
-                            }`
+                            `${value.icon} ${Helpers.trans(`actions_list.${key}.${value.action}`) || item.name}`
                         )
 
                         return 'context-menu-icon-updated'

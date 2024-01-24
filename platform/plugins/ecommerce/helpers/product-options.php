@@ -22,7 +22,9 @@ if (! function_exists('render_product_options')) {
         $html = '<div class="pr_switch_wrap" id="product-option">';
 
         $script = 'vendor/core/plugins/ecommerce/js/change-product-options.js';
+        $style = 'vendor/core/plugins/ecommerce/css/front-ecommerce.css';
 
+        Theme::asset()->add('front-ecommerce-css', $style);
         Theme::asset()->container('footer')->add('change-product-options', $script, ['jquery']);
 
         foreach ($product->options as $option) {
@@ -41,7 +43,7 @@ if (! function_exists('render_product_options')) {
             return $html;
         }
 
-        return $html . Html::script($script)->toHtml();
+        return $html . Html::style($style)->toHtml() . Html::script($script)->toHtml();
     }
 }
 

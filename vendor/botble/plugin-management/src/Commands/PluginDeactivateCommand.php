@@ -17,9 +17,13 @@ class PluginDeactivateCommand extends Command implements PromptsForMissingInput
 
     public function handle(PluginService $pluginService): int
     {
-        $this->validatePluginName($this->argument('name'));
+        $name = $this->argument('name');
 
-        $plugin = Str::afterLast(strtolower($this->argument('name')), '/');
+        $name = rtrim($name, '/');
+
+        $this->validatePluginName($name);
+
+        $plugin = Str::afterLast(strtolower($name), '/');
 
         $result = $pluginService->deactivate($plugin);
 

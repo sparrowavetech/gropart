@@ -55,6 +55,18 @@
                         />
                     </div>
 
+                    <div class="mb-3 position-relative">
+                        <label class="form-check">
+                            <input class="form-check-input" type="checkbox" name="display_at_checkout" v-model="display_at_checkout" value="1">
+                            <span class="form-check-label">
+                                {{ __('discount.display_at_checkout') }}
+                            </span>
+                            <span class="form-check-description">
+                                {{ __('discount.display_at_checkout_description') }}
+                            </span>
+                        </label>
+                    </div>
+
                     <div class="border-top">
                         <h4 class="mt-3 mb-2">{{ __('discount.coupon_type') }}</h4>
                         <div class="row">
@@ -224,6 +236,7 @@ export default {
             loading: false,
             discountUnit: '$',
             type_options: [],
+            display_at_checkout: false,
         }
     },
     props: {

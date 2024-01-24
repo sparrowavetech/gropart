@@ -35,9 +35,9 @@
                     <span data-counter="counterup" data-value="{{ $value }}">0</span>
                 </div>
             </div>
-            <div class="visual pb-5 ps-1 position-absolute end-0">
+            <div class="visual ps-1 position-absolute end-0">
                 @if($icon)
-                    <x-core::icon :name="$icon" class="me-n2" style="opacity: .1;"></x-core::icon>
+                    <x-core::icon :name="$icon" class="me-n2" style="opacity: .1; --bb-icon-size: 80px;"></x-core::icon>
                 @endif
             </div>
         </div>

@@ -19,13 +19,6 @@ use Illuminate\Support\Facades\Auth;
 
 class ProductCategoryController extends BaseController
 {
-    public function __construct()
-    {
-        parent::__construct();
-
-        $this->breadcrumb();
-    }
-
     public function index(Request $request)
     {
         $this->pageTitle(trans('plugins/ecommerce::product-categories.name'));
@@ -234,8 +227,8 @@ class ProductCategoryController extends BaseController
                 'name',
                 'parent_id',
             ])
-            ->orderByDesc('created_at')
             ->orderBy('order')
+            ->orderByDesc('created_at')
             ->get();
 
         return $this

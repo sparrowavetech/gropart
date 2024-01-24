@@ -12,6 +12,7 @@ mix
     .js(source + '/resources/assets/js/front/checkout.js', dist + '/js')
     .js(source + '/resources/assets/js/admin-review.js', dist + '/js')
     .js(source + '/resources/assets/js/front/order-return.js', dist + '/js')
+    .js(source + '/resources/assets/js/front-review.js', dist + '/js')
 
 if (mix.inProduction()) {
     mix
@@ -19,7 +20,8 @@ if (mix.inProduction()) {
         .copy(dist + '/js/order-create.js', source + '/public/js')
         .copy(dist + '/js/checkout.js', source + '/public/js')
         .copy(dist + '/js/admin-review.js', source + '/public/js')
-        .copy(dist + '/js/order-return.js', source + '/public/js');
+        .copy(dist + '/js/order-return.js', source + '/public/js')
+        .copy(dist + '/js/front-review.js', source + '/public/js');
 }
 
 const scripts = [
@@ -50,6 +52,7 @@ const scripts = [
     'address.js',
     'tax.js',
     'invoice.js',
+    'front-ecommerce.js',
 ];
 
 scripts.forEach(item => {
@@ -68,12 +71,16 @@ const styles = [
     'currencies.scss',
     'review.scss',
     'customer.scss',
-    'front-theme.scss',
-    'front-theme-rtl.scss',
     'report.scss',
     'order-return.scss',
     'customer-admin.scss',
     'widget.scss',
+    'front-auth.scss',
+    'front-ecommerce.scss',
+    'front-faq.scss',
+    'front-review.scss',
+    'front-theme.scss',
+    'front-theme-rtl.scss',
 ];
 
 styles.forEach(item => {

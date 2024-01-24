@@ -2,13 +2,12 @@
     <div class="customer-order-detail">
         <div class="row">
             <div class="col-md-6">
-                <h5>{{ __('Return Product(s) Information') }}</h5>
                 <p>
                     <span>{{ __('Request number') }}: </span>
                     <strong>{{ $orderReturn->code }}</strong>
                 </p>
                 <p>
-                    <span>{{ __('Order Id') }}: </span>
+                    <span>{{ __('Order ID') }}: </span>
                     <strong>{{ $orderReturn->order->code }}</strong>
                 </p>
             </div>

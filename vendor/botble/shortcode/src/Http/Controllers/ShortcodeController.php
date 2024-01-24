@@ -5,6 +5,7 @@ namespace Botble\Shortcode\Http\Controllers;
 use Botble\Base\Facades\Html;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Base\Http\Controllers\BaseController;
+use Botble\Shortcode\Events\ShortcodeAdminConfigRendering;
 use Botble\Shortcode\Facades\Shortcode;
 use Botble\Shortcode\Http\Requests\GetShortcodeDataRequest;
 use Closure;
@@ -14,6 +15,8 @@ class ShortcodeController extends BaseController
 {
     public function ajaxGetAdminConfig(string|null $key, GetShortcodeDataRequest $request)
     {
+        ShortcodeAdminConfigRendering::dispatch();
+
         $registered = shortcode()->getAll();
 
         $key = $key ?: $request->input('key');
@@ -31,6 +34,11 @@ class ShortcodeController extends BaseController
 
         if ($data instanceof Closure || is_callable($data)) {
             $data = call_user_func($data, $attributes, $content);
+
+            if ($modifier = Arr::get($registered, $key . '.admin_config_modifier')) {
+                $data = call_user_func($modifier, $data, $attributes, $content);
+            }
+
             $data = $data instanceof FormAbstract ? $data->renderForm() : $data;
         }
 

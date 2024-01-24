@@ -10,7 +10,7 @@ $name = Str::contains($name = $menu['name'], '::') ?  BaseHelper::clean(trans($n
         'active show' => $menu['active'],
     ])
     href="{{ $hasChildren ? "#$menu[id]" : $menu['url'] }}"
-    id="main-menu-item-{{ $menu['id'] }}"
+    id="{{ $menu['id'] }}"
     @if ($hasChildren)
         data-bs-toggle="dropdown"
         data-bs-auto-close="{{ $autoClose ?? 'false' }}"

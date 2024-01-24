@@ -1,5 +1,12 @@
 # Change Log
 
+## [5.9.x] - YYYY-MM-DD
+
+- Fix keywords not being recognized as table alias (#496)
+- Add `bin/sql-parser` executable file (#517)
+- Fix bind parameter in LIMIT OFFSET (#498)
+- Fix using ? as a parameter (#515)
+
 ## [5.8.2] - 2023-09-19
 
 - Fix a regression with the ALTER operation (#511)

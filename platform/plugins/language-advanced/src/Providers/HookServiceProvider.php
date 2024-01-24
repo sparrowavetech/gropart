@@ -261,6 +261,8 @@ class HookServiceProvider extends ServiceProvider
             return $query;
         }
 
+        LanguageAdvancedManager::initModelRelations();
+
         return $query->with([
             'translations' => function ($query) use ($model, $currentLocale) {
                 $query->where($model->getTable() . '_translations' . '.lang_code', $currentLocale);
@@ -351,10 +353,6 @@ class HookServiceProvider extends ServiceProvider
 
     public function getSlugQuery(EloquentBuilder $query, array $condition = []): EloquentBuilder
     {
-        if (Language::getCurrentLocaleCode() === Language::getDefaultLocaleCode() && ! request()->has('from_lang')) {
-            return $query;
-        }
-
         try {
             return $query
                 ->orWhereHas('translations', function (EloquentBuilder $query) use ($condition) {

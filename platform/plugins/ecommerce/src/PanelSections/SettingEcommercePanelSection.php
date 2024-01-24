@@ -123,6 +123,12 @@ class SettingEcommercePanelSection extends PanelSection
                     ->withDescription(trans('plugins/ecommerce::setting.standard_and_format.panel_description'))
                     ->withPriority(180)
                     ->withRoute('ecommerce.settings.standard-and-format'),
+                PanelSectionItem::make('settings.ecommerce.flash_sale')
+                    ->setTitle(trans('plugins/ecommerce::setting.flash_sale.name'))
+                    ->withIcon('ti ti-speakerphone')
+                    ->withDescription(trans('plugins/ecommerce::setting.flash_sale.description'))
+                    ->withPriority(190)
+                    ->withRoute('ecommerce.settings.flash-sale'),
             ]);
     }
 }

@@ -6,7 +6,6 @@ use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Forms\FieldOptions\TextFieldOption;
 use Botble\Base\Forms\Fields\TextField;
 use Botble\Payment\Forms\PaymentMethodForm;
-use Illuminate\Support\Facades\Blade;
 
 class PaystackPaymentMethodForm extends PaymentMethodForm
 {
@@ -20,30 +19,7 @@ class PaystackPaymentMethodForm extends PaymentMethodForm
             ->paymentDescription(__('Customer can buy product and pay directly using Visa, Credit card via :name', ['name' => 'Paystack']))
             ->paymentLogo(url('vendor/core/plugins/paystack/images/paystack.png'))
             ->paymentUrl('https://paystack.com')
-            ->paymentInstructions(Blade::render(<<<BLADE
-                <ol>
-                    <li>
-                        <p>
-                            <a
-                                href="https://paystack.com"
-                                target="_blank"
-                            >
-                                {{ __('Register an account on :name', ['name' => 'Paystack']) }}
-                            </a>
-                        </p>
-                    </li>
-                    <li>
-                        <p>
-                            {{ __('After registration at :name, you will have Public & Secret keys', ['name' => 'Paystack']) }}
-                        </p>
-                    </li>
-                    <li>
-                        <p>
-                            {{ __('Enter Public, Secret into the box in right hand') }}
-                        </p>
-                    </li>
-                </ol>
-            BLADE))
+            ->paymentInstructions(view('plugins/paystack::instructions')->render())
             ->add(
                 sprintf('payment_%s_public', PAYSTACK_PAYMENT_METHOD_NAME),
                 TextField::class,

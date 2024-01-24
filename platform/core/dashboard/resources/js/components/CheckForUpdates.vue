@@ -25,7 +25,8 @@ export default {
     methods: {
         checkUpdate() {
             axios
-                .get(this.checkUpdateUrl).then(({ data }) => {
+                .get(this.checkUpdateUrl)
+                .then(({ data }) => {
                     if (!data.error && data.data.has_new_version) {
                         this.hasNewVersion = true
                         this.message = data.message

@@ -62,7 +62,7 @@
                         <hr>
                     </div>
                 </div>
-                <table class="table table-striped mb-3">
+                <table class="table table-striped table-bordered mb-3">
                     <thead>
                         <tr>
                             <th>{{ trans('plugins/ecommerce::invoice.detail.description') }}</th>

@@ -1,33 +1,20 @@
 <?php
 
+use Botble\Ecommerce\Http\Controllers\Fronts\PublicCartController;
+use Botble\Ecommerce\Http\Middleware\CheckCartEnabledMiddleware;
 use Botble\Theme\Facades\Theme;
 use Illuminate\Support\Facades\Route;
 
-Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers\Fronts'], function () {
-    Theme::registerRoutes(function () {
-        Route::get('cart', [
-            'as' => 'public.cart',
-            'uses' => 'PublicCartController@index',
-        ]);
-
-        Route::post('cart/add-to-cart', [
-            'as' => 'public.cart.add-to-cart',
-            'uses' => 'PublicCartController@store',
-        ]);
-
-        Route::post('cart/update', [
-            'as' => 'public.cart.update',
-            'uses' => 'PublicCartController@update',
-        ]);
-
-        Route::get('cart/remove/{id}', [
-            'as' => 'public.cart.remove',
-            'uses' => 'PublicCartController@destroy',
-        ]);
-
-        Route::get('cart/destroy', [
-            'as' => 'public.cart.destroy',
-            'uses' => 'PublicCartController@empty',
-        ]);
-    });
+Theme::registerRoutes(function () {
+    Route::middleware(CheckCartEnabledMiddleware::class)
+        ->controller(PublicCartController::class)
+        ->prefix('cart')
+        ->name('public.')
+        ->group(function () {
+            Route::get('/', 'index')->name('cart');
+            Route::post('add-to-cart', 'store')->name('cart.add-to-cart');
+            Route::post('update', 'update')->name('cart.update');
+            Route::get('remove/{id}', 'destroy')->name('cart.remove');
+            Route::get('destroy', 'empty')->name('cart.destroy');
+        });
 });

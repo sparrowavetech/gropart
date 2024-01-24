@@ -35,6 +35,7 @@ class MarketPlaceSettingFormRequest extends BaseProductRequest
             'max_filesize_upload_by_vendor' => 'sometimes|min:1|numeric',
             'max_product_images_upload_by_vendor' => 'sometimes|min:1|numeric',
             'enabled_vendor_registration' => [new OnOffRule()],
+            'minimum_withdrawal_amount' => 'nullable|numeric|min:0',
         ];
 
         if ($this->input('enable_commission_fee_for_each_category')) {

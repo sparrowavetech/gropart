@@ -30,7 +30,7 @@ class OrderReturn extends BaseModel
 
     protected static function booted(): void
     {
-        self::deleting(function (OrderReturn $orderReturn) {
+        static::deleted(function (OrderReturn $orderReturn) {
             $orderReturn->items()->delete();
         });
 

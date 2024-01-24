@@ -44,6 +44,8 @@ return [
         'max_upload_filesize_placeholder' => 'Default: 10',
         'max_product_images_upload_by_vendor' => 'Max number of images for each product',
         'enable_vendor_registration' => 'Enable vendor registration',
+        'minimum_withdrawal_amount' => 'Minimum withdrawal amount (Fixed)',
+        'minimum_withdrawal_amount_helper' => 'Specify the minimum amount a vendor can withdraw. Default is 0.',
     ],
     'theme_options' => [
         'name' => 'Marketplace',

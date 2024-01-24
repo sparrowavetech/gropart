@@ -2,8 +2,10 @@
 
 namespace Botble\Ecommerce\Forms;
 
+use Botble\Base\Forms\FieldOptions\NameFieldOption;
 use Botble\Base\Forms\FieldOptions\StatusFieldOption;
 use Botble\Base\Forms\Fields\SelectField;
+use Botble\Base\Forms\Fields\TextField;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Ecommerce\Http\Requests\ProductLabelRequest;
 use Botble\Ecommerce\Models\ProductLabel;
@@ -15,14 +17,7 @@ class ProductLabelForm extends FormAbstract
         $this
             ->setupModel(new ProductLabel())
             ->setValidatorClass(ProductLabelRequest::class)
-            ->add('name', 'text', [
-                'label' => trans('core/base::forms.name'),
-                'required' => true,
-                'attr' => [
-                    'placeholder' => trans('core/base::forms.name_placeholder'),
-                    'data-counter' => 250,
-                ],
-            ])
+            ->add('name', TextField::class, NameFieldOption::make()->toArray())
             ->add('color', 'customColor', [
                 'label' => trans('plugins/ecommerce::product-label.color'),
                 'attr' => [

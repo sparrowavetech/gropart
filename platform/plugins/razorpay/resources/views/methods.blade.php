@@ -73,10 +73,10 @@
         <script>
             $(document).ready(function() {
 
-                var $paymentCheckoutForm = $('.payment-checkout-form');
+                var $paymentCheckoutForm = $(document).find('.payment-checkout-form');
 
                 $paymentCheckoutForm.on('submit', function(e) {
-                    if ($('#checkout-form').valid() && $('input[name=payment_method]:checked').val() ===
+                    if ($paymentCheckoutForm.valid() && $('input[name=payment_method]:checked').val() ===
                         'razorpay' && !$('input[name=razorpay_payment_id]').val()) {
                         e.preventDefault();
                     }

@@ -131,6 +131,10 @@ class MetaBox
 
     public function saveMetaBoxData(Model $object, string $key, $value, $options = null): void
     {
+        if (! $object->getKey()) {
+            return;
+        }
+
         $key = apply_filters('stored_meta_box_key', $key, $object);
 
         $data = [
@@ -183,6 +187,10 @@ class MetaBox
 
     public function deleteMetaData(Model $object, string $key): bool
     {
+        if (! $object->getKey()) {
+            return false;
+        }
+
         $key = apply_filters('stored_meta_box_key', $key, $object);
 
         return MetaBoxModel::query()->where([

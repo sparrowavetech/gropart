@@ -135,6 +135,28 @@
     }
 }
 
+.core-menu-structure {
+    .card {
+        .card-header {
+            a {
+                color: var(--bb-card-title-color);
+
+                .btn-action {
+                    height: 1.5rem;
+                }
+
+                &[aria-expanded='true'] {
+                    .btn-action {
+                        span.icon-sm {
+                            rotate: 180deg;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 .box-links-for-menu {
     .list-item {
         padding-left: 0;
@@ -150,6 +172,10 @@
             list-style: none;
             position: relative;
             margin-bottom: 5px;
+
+            label.form-check {
+                margin-bottom: 0.75rem;
+            }
 
             ul {
                 padding-left: 20px;

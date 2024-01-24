@@ -92,8 +92,4 @@ return [
     'customer_used_coupon_code' => 'Customers who have used this discount code',
     'apply_via_url' => 'Apply via URL?',
     'apply_via_url_description' => 'This setting will apply coupon code when customers access the URL with the parameter "?coupon=code".',
-    'display_at_checkout' => 'Display coupon code at the checkout page?',
-    'display_at_checkout_description' => 'The list of coupon codes will be displayed at the checkout page and customers can choose to apply.',
-    'description' => 'Description',
-    'description_placeholder' => 'Short description about the discount program',
 ];

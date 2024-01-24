@@ -1,5 +1,39 @@
 # Changelog
 
+## [1.26.3](https://github.com/googleapis/gax-php/compare/v1.26.2...v1.26.3) (2024-01-18)
+
+
+### Bug Fixes
+
+* CallOptions should use transportOptions ([#513](https://github.com/googleapis/gax-php/issues/513)) ([2d45ee1](https://github.com/googleapis/gax-php/commit/2d45ee187cdc3619b30c51b653b508718baf3af4))
+
+## [1.26.2](https://github.com/googleapis/gax-php/compare/v1.26.1...v1.26.2) (2024-01-09)
+
+
+### Bug Fixes
+
+* Ensure modifyClientOptions is called for new surface clients ([#515](https://github.com/googleapis/gax-php/issues/515)) ([68231b8](https://github.com/googleapis/gax-php/commit/68231b896dec8efb86f8986aefba3d247d2a2d1c))
+
+## [1.26.1](https://github.com/googleapis/gax-php/compare/v1.26.0...v1.26.1) (2024-01-04)
+
+
+### Bug Fixes
+
+* Widen google/longrunning version ([#511](https://github.com/googleapis/gax-php/issues/511)) ([b93096d](https://github.com/googleapis/gax-php/commit/b93096d0e10bde14c50480ea9f0423c292fbd5a6))
+
+## [1.26.0](https://github.com/googleapis/gax-php/compare/v1.25.0...v1.26.0) (2024-01-03)
+
+
+### Features
+
+* Add support for universe domain ([#502](https://github.com/googleapis/gax-php/issues/502)) ([5a26fac](https://github.com/googleapis/gax-php/commit/5a26facad5c2e5c30945987c422bb78a3fffb9b1))
+* Interface and methods for middleware stack ([#473](https://github.com/googleapis/gax-php/issues/473)) ([766da7b](https://github.com/googleapis/gax-php/commit/766da7b369409ec1b29376b533e7f22ee7f745f4))
+
+
+### Bug Fixes
+
+* Accept throwable for retry settings ([#509](https://github.com/googleapis/gax-php/issues/509)) ([5af9c3c](https://github.com/googleapis/gax-php/commit/5af9c3c650419c8f1a590783e954cd11dc1f0d56))
+
 ## [1.25.0](https://github.com/googleapis/gax-php/compare/v1.24.0...v1.25.0) (2023-11-02)
 
 

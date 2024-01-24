@@ -1,8 +1,10 @@
 @extends(BaseHelper::getAdminMasterLayoutTemplate())
 
 @push('header-action')
-    @if (config('packages.plugin-management.general.enable_marketplace_feature') &&
-            auth()->user()->hasPermission('plugins.marketplace'))
+    @if (
+        config('packages.plugin-management.general.enable_marketplace_feature')
+        && auth()->user()->hasPermission('plugins.marketplace')
+    )
         <x-core::button
             tag="a"
             :href="route('plugins.new')"
@@ -16,87 +18,114 @@
 @endpush
 
 @section('content')
-    <div id="plugin-list">
-        <div class="app-grid--blank-slate row row-cards">
-            @foreach ($list as $plugin)
-                <div class="app-card-item col-lg-3 col-md-6 col-sm-6 col-12">
-                    <div class="card app-item app-{{ $plugin->path }}">
-                        <div
-                            class="app-icon"
-                            @if ($plugin->image) style="background-image: url('{{ $plugin->image }}');" @endif
-                        >
-                            @if (!$plugin->image)
-                                <x-core::icon
-                                    name="ti ti-puzzle-filled"
-                                    class="text-white"
-                                    size="lg"
-                                />
+    <x-core::form.text-input
+        type="search"
+        name="search"
+        :placeholder="__('Search...')"
+        :group-flat="true"
+    >
+        <x-slot:prepend>
+            <span class="input-group-text">
+                <x-core::icon name="ti ti-search" />
+            </span>
+        </x-slot:prepend>
+    </x-core::form.text-input>
+
+    <div class="row row-cards plugin-list">
+        @foreach ($plugins as $plugin)
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3 plugin-item" data-plugin="{{ Js::encode($plugin) }}">
+                <x-core::card class="h-100">
+                    <div
+                        class="position-relative img-responsive img-responsive-3x1 card-img-top border-bottom"
+                        @style(['background-color: var(--bb-primary-lt)', "background-image: url('$plugin->image')" => $plugin->image])
+                    >
+                        @if (! $plugin->image)
+                            <x-core::icon class="position-absolute" style="top: calc(50% - 28px); left: calc(50% - 28px)" name="ti ti-puzzle" size="lg" />
+                        @endif
+                    </div>
+
+                    <x-core::card.body class="d-flex flex-column justify-content-between">
+                        <div>
+                            <x-core::card.title class="text-truncate mb-2" title="{{ $plugin->name }}">
+                                {{ $plugin->name }}
+                            </x-core::card.title>
+                            @if ($plugin->description)
+                                <p class="text-secondary text-truncate" title="{{ $plugin->description }}">
+                                    {{ $plugin->description }}
+                                </p>
                             @endif
                         </div>
 
-                        <div class="app-details">
-                            <h4 class="app-name">{{ $plugin->name }}</h4>
-                        </div>
-                        <div class="app-footer border-top">
-                            <div
-                                class="app-description text-muted text-truncate py-2"
-                                title="{{ $plugin->description }}"
-                            >
-                                {{ $plugin->description }}
-                            </div>
-                            @if (!config('packages.plugin-management.general.hide_plugin_author', false))
-                                <div class="app-author">
+                        <div class="row g-1 g-lg-0">
+                            @if (!config('packages.plugin-management.general.hide_plugin_author', false) && $plugin->author)
+                                <div class="col-12 col-lg">
                                     {{ trans('packages/plugin-management::plugin.author') }}:
-                                    <a
-                                        href="{{ $plugin->url }}"
-                                        target="_blank"
-                                    >{{ $plugin->author }}</a>
+                                    @if ($plugin->url)
+                                        <a href="{{ $plugin->url }}" target="_blank" class="fw-bold">{{ $plugin->author }}</a>
+                                    @else
+                                        <strong>{{ $plugin->author }}</strong>
+                                    @endif
                                 </div>
                             @endif
-                            <div class="app-version mb-3">
-                                {{ trans('packages/plugin-management::plugin.version') }}: {{ $plugin->version }}
-                            </div>
-                            <div class="app-actions btn-list">
-                                @if (auth()->user()->hasPermission('plugins.edit'))
-                                    <x-core::button
-                                        type="button"
-                                        :color="$plugin->status ? 'warning' : 'primary'"
-                                        class="btn-trigger-change-status"
-                                        data-plugin="{{ $plugin->path }}"
-                                        data-status="{{ $plugin->status }}"
-                                    >
-                                        @if ($plugin->status)
-                                            {{ trans('packages/plugin-management::plugin.deactivate') }}
-                                        @else
-                                            {{ trans('packages/plugin-management::plugin.activate') }}
-                                        @endif
-                                    </x-core::button>
-                                @endif
-
-                                <button
-                                    class="btn btn-success btn-trigger-update-plugin"
-                                    style="display: none;"
-                                    data-name="{{ $plugin->path }}"
-                                    data-check-update="{{ $plugin->id ?? 'plugin-' . $plugin->path }}"
-                                    data-version="{{ $plugin->version }}"
-                                >{{ trans('packages/plugin-management::plugin.update') }}</button>
-
-                                @if (auth()->user()->hasPermission('plugins.remove'))
-                                    <x-core::button
-                                        type="button"
-                                        class="btn-trigger-remove-plugin"
-                                        data-plugin="{{ $plugin->path }}"
-                                    >
-                                        {{ trans('packages/plugin-management::plugin.remove') }}
-                                    </x-core::button>
-                                @endif
-                            </div>
+                            @if ($plugin->version)
+                                <div class="col-12 col-lg-auto">
+                                    {{ trans('packages/plugin-management::plugin.version') }}:
+                                    <strong>{{ $plugin->version }}</strong>
+                                </div>
+                            @endif
                         </div>
-                    </div>
-                </div>
-            @endforeach
-        </div>
+                    </x-core::card.body>
+
+                    <x-core::card.footer>
+                        <div class="btn-list">
+                            @if (auth()->user()->hasPermission('plugins.edit'))
+                                <x-core::button
+                                    type="button"
+                                    :color="$plugin->status ? 'warning' : 'primary'"
+                                    class="btn-trigger-change-status"
+                                    data-plugin="{{ $plugin->path }}"
+                                    data-status="{{ $plugin->status }}"
+                                >
+                                    @if ($plugin->status)
+                                        {{ trans('packages/plugin-management::plugin.deactivate') }}
+                                    @else
+                                        {{ trans('packages/plugin-management::plugin.activate') }}
+                                    @endif
+                                </x-core::button>
+                            @endif
+
+                            <x-core::button
+                                class="btn-trigger-update-plugin"
+                                color="success"
+                                style="display: none;"
+                                data-name="{{ $plugin->path }}"
+                                data-check-update="{{ $plugin->id ?? 'plugin-' . $plugin->path }}"
+                                data-version="{{ $plugin->version }}"
+                            >
+                                {{ trans('packages/plugin-management::plugin.update') }}
+                            </x-core::button>
+
+                            @if (auth()->user()->hasPermission('plugins.remove'))
+                                <x-core::button
+                                    type="button"
+                                    class="btn-trigger-remove-plugin"
+                                    data-plugin="{{ $plugin->path }}"
+                                >
+                                    {{ trans('packages/plugin-management::plugin.remove') }}
+                                </x-core::button>
+                            @endif
+                        </div>
+                    </x-core::card.footer>
+                </x-core::card>
+            </div>
+        @endforeach
     </div>
+
+    <x-core::empty-state
+        :title="trans('No plugins found')"
+        :subtitle="trans('It looks as there are no plugins here.')"
+        style="display: none;"
+    />
 
     <x-core::modal.action
         id="remove-plugin-modal"

@@ -26,7 +26,7 @@ class SaleCommissionHtml extends Html
             ->where(function (Builder $query) {
                 $query
                     ->whereNull('type')
-                    ->orWhere('type', RevenueTypeEnum::ORDER_RETURN);
+                    ->orWhere('type', RevenueTypeEnum::ADD_AMOUNT);
             })
             ->groupBy('date')
             ->get();

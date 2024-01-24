@@ -26,7 +26,7 @@ class SimpleSliderItem extends BaseModel
 
     protected static function booted(): void
     {
-        self::deleting(function (SimpleSliderItem $item) {
+        static::deleted(function (SimpleSliderItem $item) {
             $item->metadata()->delete();
         });
     }

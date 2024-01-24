@@ -70,7 +70,7 @@ if (! function_exists('get_cms_version')) {
 if (! function_exists('get_core_version')) {
     function get_core_version(): string
     {
-        return '7.0.5';
+        return '7.1.6';
     }
 }
 
@@ -97,17 +97,13 @@ if (! function_exists('platform_path')) {
 if (! function_exists('core_path')) {
     function core_path(string|null $path = null): string
     {
-        $path = ltrim($path, DIRECTORY_SEPARATOR);
-
-        return platform_path('core' . ($path ? DIRECTORY_SEPARATOR . $path : ''));
+        return platform_path('core' . ($path ? DIRECTORY_SEPARATOR . ltrim($path, DIRECTORY_SEPARATOR) : ''));
     }
 }
 
 if (! function_exists('package_path')) {
     function package_path(string|null $path = null): string
     {
-        $path = ltrim($path, DIRECTORY_SEPARATOR);
-
-        return platform_path('packages' . ($path ? DIRECTORY_SEPARATOR . $path : ''));
+        return platform_path('packages' . ($path ? DIRECTORY_SEPARATOR . ltrim($path, DIRECTORY_SEPARATOR) : ''));
     }
 }

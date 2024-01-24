@@ -56,5 +56,6 @@ return [
     'delete_confirmation_message' => 'Do you really want to delete this language? It also deletes all items in this language and cannot rollback!',
     'added_already' => 'This language was added already!',
     'language_auto_detect_user_language' => 'Auto detect user language?',
-    'setup_site_language' => 'To set up the site language, please go to :link page.',
+    'setup_site_language' => 'To set up the site language, please go to :link page. Or go to :appearance_link to set up the admin language.',
+    'no_languages' => 'There are no languages in your site!',
 ];

@@ -2,12 +2,11 @@
 
 return [
     'name' => 'Widgets',
-    'description' => 'Manage your system widgets',
     'create' => 'New widget',
     'edit' => 'Edit widget',
     'delete' => 'Delete',
     'available' => 'Available Widgets',
-    'usage_instruction' => 'To activate a widget drag and drop it to a sidebar. To deactivate a widget, open it in sidebar and click delete button.',
+    'instruction' => 'To activate a widget drag it to a sidebar or click on it. To deactivate a widget and delete its settings, drag it back.',
     'number_tag_display' => 'Number tags will be display',
     'number_post_display' => 'Number posts will be display',
     'select_menu' => 'Select Menu',
@@ -29,5 +28,4 @@ return [
     'delete_success' => 'Delete widget successfully!',
     'primary_sidebar_name' => 'Primary sidebar',
     'primary_sidebar_description' => 'Primary sidebar section',
-    'drag_widget_to_sidebar' => 'Drag and drop widgets to this area.',
 ];

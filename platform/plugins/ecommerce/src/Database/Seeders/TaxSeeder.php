@@ -12,25 +12,33 @@ class TaxSeeder extends BaseSeeder
     {
         Tax::query()->truncate();
 
-        Tax::query()->create([
-            'title' => 'VAT',
-            'percentage' => 10,
-            'priority' => 1,
-            'status' => BaseStatusEnum::PUBLISHED,
-        ]);
+        $taxes = [
+            [
+                'title' => 'VAT',
+                'percentage' => 10,
+                'priority' => 1,
+                'status' => BaseStatusEnum::PUBLISHED,
+                'created_at' => $this->now(),
+                'updated_at' => $this->now(),
+            ],
+            [
+                'title' => 'None',
+                'percentage' => 0,
+                'priority' => 2,
+                'status' => BaseStatusEnum::PUBLISHED,
+                'created_at' => $this->now(),
+                'updated_at' => $this->now(),
+            ],
+            [
+                'title' => 'Import Tax',
+                'percentage' => 15,
+                'priority' => 3,
+                'status' => BaseStatusEnum::PUBLISHED,
+                'created_at' => $this->now(),
+                'updated_at' => $this->now(),
+            ],
+        ];
 
-        Tax::query()->create([
-            'title' => 'None',
-            'percentage' => 0,
-            'priority' => 2,
-            'status' => BaseStatusEnum::PUBLISHED,
-        ]);
-
-        Tax::query()->create([
-            'title' => 'Import Tax',
-            'percentage' => 15,
-            'priority' => 3,
-            'status' => BaseStatusEnum::PUBLISHED,
-        ]);
+        Tax::query()->insert($taxes);
     }
 }

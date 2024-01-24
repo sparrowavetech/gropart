@@ -10,6 +10,9 @@ class LanguageSettingController extends SettingController
 {
     public function update(LanguageSettingRequest $request): BaseHttpResponse
     {
-        return $this->performUpdate($request->validated());
+        return $this->performUpdate([
+            ...$request->validated(),
+            'language_hide_languages' => $request->input('language_hide_languages', []),
+        ]);
     }
 }

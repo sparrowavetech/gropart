@@ -33,7 +33,7 @@ class MediaFolder extends BaseModel
 
     protected static function booted(): void
     {
-        static::deleting(function (MediaFolder $folder) {
+        static::deleted(function (MediaFolder $folder) {
             if ($folder->isForceDeleting()) {
                 $folder->files()->onlyTrashed()->each(fn (MediaFile $file) => $file->forceDelete());
 

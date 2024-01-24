@@ -16,6 +16,9 @@ mix
     .postCss(`${dist}/css/core.css`, `${dist}/css/core.rtl.css`, [
         require('rtlcss')
     ])
+    .postCss(`${dist}/css/libraries/select2.css`, `${dist}/css/libraries/select2.rtl.css`, [
+        require('rtlcss')
+    ])
     .js(`${source}/resources/js/core-ui.js`, `${dist}/js`)
     .js(`${source}/resources/js/app.js`, `${dist}/js`)
     .js(`${source}/resources/js/core.js`, `${dist}/js`)
@@ -48,6 +51,7 @@ if (mix.inProduction()) {
         .copy(`${dist}/css/tree-category.css`, `${source}/public/css`)
         .copy(`${dist}/css/crop-image.css`, `${source}/public/css`)
         .copy(`${dist}/css/core.rtl.css`, `${source}/public/css`)
+        .copy(`${dist}/css/libraries/select2.rtl.css`, `${source}/public/css/libraries`)
         .copy(`${dist}/js/core-ui.js`, `${source}/public/js`)
         .copy(`${dist}/js/app.js`, `${source}/public/js`)
         .copy(`${dist}/js/core.js`, `${source}/public/js`)

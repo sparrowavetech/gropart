@@ -31,6 +31,7 @@ return new class () extends Migration {
 
             Schema::dropIfExists('role_users_tmp');
         } catch (Throwable) {
+            Schema::dropIfExists('role_users_tmp');
         }
     }
 

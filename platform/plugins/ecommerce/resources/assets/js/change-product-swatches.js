@@ -11,11 +11,12 @@ class ChangeProductSwatches {
 
         $body.on('click', '.product-attributes .visual-swatch label, .product-attributes .text-swatch label', (e) => {
             e.preventDefault()
+
             let $this = $(e.currentTarget)
             let $radio = $this.find('input[type=radio]')
 
             if ($radio.is(':checked')) {
-                return false
+                return
             }
 
             $radio.prop('checked', true)
@@ -30,9 +31,7 @@ class ChangeProductSwatches {
         $body
             .off('change', '.product-attributes input, .product-attributes select')
             .on('change', '.product-attributes input, .product-attributes select', (event) => {
-                let $this = $(event.currentTarget)
-
-                let $parent = $this.closest('.product-attributes')
+                const $parent = $(event.currentTarget).closest('.product-attributes')
 
                 _self.getProductVariation($parent)
             })
@@ -105,6 +104,7 @@ class ChangeProductSwatches {
          * Get attributes
          */
         let $attributeSwatches = $productAttributes.find('.attribute-swatches-wrapper')
+
         let referenceProduct = null
         $attributeSwatches.each((index, el) => {
             let $current = $(el)
@@ -121,6 +121,7 @@ class ChangeProductSwatches {
 
             if (value) {
                 let setSlug = $current.find('.attribute-swatch').data('slug')
+
                 slugAttributes[setSlug] = slug
                 attributes.push(value)
 
@@ -142,7 +143,7 @@ class ChangeProductSwatches {
             formData.reference_product = referenceProduct
         }
 
-        let id = $productAttributes.attr('id')
+        let id = $productAttributes.prop('id')
 
         _self.xhr = $.ajax({
             url: $productAttributes.data('target'),
@@ -158,17 +159,21 @@ class ChangeProductSwatches {
                     window.onChangeSwatchesSuccess(res, $productAttributes)
                 }
 
-                if (!res.data.error_message) {
-                    if (res.data.selected_attributes) {
+                const { data, message } = res
+
+                if (!data.error_message) {
+                    if (data.selected_attributes) {
                         slugAttributes = {}
-                        $.each(res.data.selected_attributes, (index, item) => {
+                        $.each(data.selected_attributes, (index, item) => {
                             slugAttributes[item.set_slug] = item.slug
                         })
                     }
 
                     const url = new URL(window.location)
 
-                    _self.updateSelectingAttributes(slugAttributes, $('#' + id))
+                    if (id) {
+                        _self.updateSelectingAttributes(slugAttributes, $('#' + id))
+                    }
 
                     $.each(slugAttributes, (name, value) => {
                         url.searchParams.set(name, value)
@@ -177,13 +182,13 @@ class ChangeProductSwatches {
                     if (updateUrl && url != window.location.href) {
                         window.history.pushState(
                             { formData, data: res, product_attributes_id: id, slugAttributes },
-                            res.message,
+                            message,
                             url
                         )
                     } else {
                         window.history.replaceState(
                             { formData, data: res, product_attributes_id: id, slugAttributes },
-                            res.message,
+                            message,
                             url
                         )
                     }

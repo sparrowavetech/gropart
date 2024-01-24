@@ -6,10 +6,13 @@ use Botble\Base\Events\BeforeEditContentEvent;
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
+use Botble\Base\Supports\Breadcrumb;
+use Botble\Ecommerce\Facades\FlashSale as FlashSaleFacade;
 use Botble\Ecommerce\Forms\FlashSaleForm;
 use Botble\Ecommerce\Http\Requests\FlashSaleRequest;
 use Botble\Ecommerce\Models\FlashSale;
 use Botble\Ecommerce\Tables\FlashSaleTable;
+use Closure;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -18,10 +21,18 @@ class FlashSaleController extends BaseController
 {
     public function __construct()
     {
-        parent::__construct();
+        $this->middleware(function (Request $request, Closure $next) {
+            if (! FlashSaleFacade::isEnabled()) {
+                abort(404);
+            }
 
-        $this
-            ->breadcrumb()
+            return $next($request);
+        });
+    }
+
+    protected function breadcrumb(): Breadcrumb
+    {
+        return parent::breadcrumb()
             ->add(trans('plugins/ecommerce::flash-sale.name'), route('flash-sale.index'));
     }
 

@@ -21,6 +21,8 @@ class SocialLoginController extends BaseController
 {
     public function redirectToProvider(string $provider, Request $request)
     {
+        $this->ensureProviderIsExisted($provider);
+
         $guard = $this->guard($request);
 
         if (! $guard) {
@@ -71,6 +73,8 @@ class SocialLoginController extends BaseController
 
     public function handleProviderCallback(string $provider)
     {
+        $this->ensureProviderIsExisted($provider);
+
         $guard = $this->guard();
 
         if (! $guard) {
@@ -162,5 +166,10 @@ class SocialLoginController extends BaseController
             ->httpResponse()
             ->setNextUrl($providerData['redirect_url'] ?: route('public.index'))
             ->setMessage(trans('core/acl::auth.login.success'));
+    }
+
+    protected function ensureProviderIsExisted(string $provider): void
+    {
+        abort_if(! in_array($provider, SocialService::getProviderKeys(), true), 404);
     }
 }

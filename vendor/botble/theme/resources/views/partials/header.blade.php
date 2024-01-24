@@ -1,5 +1,3 @@
-<meta name="robots" content="index,follow" />
-
 {!! SeoHelper::render() !!}
 
 @if ($favicon = theme_option('favicon'))
@@ -32,5 +30,5 @@
 {!! apply_filters(THEME_FRONT_HEADER, null) !!}
 
 <script>
-    window.siteUrl = "{{ route('public.index') }}";
+    window.siteUrl = "{{ rescue(fn() => route('public.index')) }}";
 </script>

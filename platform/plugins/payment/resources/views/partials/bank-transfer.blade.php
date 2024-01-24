@@ -14,6 +14,8 @@
         class="payment_bank_transfer_wrap payment_collapse_wrap collapse @if (PaymentMethods::getSelectingMethod() == Botble\Payment\Enums\PaymentMethodEnum::BANK_TRANSFER) show @endif"
         style="padding: 15px 0;"
     >
-        {!! BaseHelper::clean(get_payment_setting('description', 'bank_transfer')) !!}
+        <div class="ck-content">
+            {!! BaseHelper::clean(get_payment_setting('description', 'bank_transfer')) !!}
+        </div>
     </div>
 </li>

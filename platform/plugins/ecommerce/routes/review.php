@@ -62,29 +62,51 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers'], function () {
                 'uses' => 'PublishedReviewController@destroy',
                 'permission' => 'reviews.publish',
             ]);
+
+            Route::post('{review}/reply', [
+                'as' => 'reply',
+                'uses' => 'ReviewReplyController@store',
+                'permission' => 'reviews.reply',
+            ]);
+
+            Route::put('{review}/reply/{reply}', [
+                'as' => 'reply.update',
+                'uses' => 'ReviewReplyController@update',
+                'permission' => 'reviews.reply',
+            ]);
+
+            Route::delete('{review}/reply/{reply}', [
+                'as' => 'reply.destroy',
+                'uses' => 'ReviewReplyController@destroy',
+                'permission' => 'reviews.reply',
+            ]);
         });
     });
 });
 
 Theme::registerRoutes(function () {
-    Route::group([
-        'namespace' => 'Botble\Ecommerce\Http\Controllers\Fronts',
-        'middleware' => ['customer'],
-    ], function () {
-        Route::post('review/create', [
-            'as' => 'public.reviews.create',
-            'uses' => 'ReviewController@store',
-        ]);
+    Route::namespace('Botble\Ecommerce\Http\Controllers\Fronts')->group(function () {
+        Route::group(['middleware' => ['customer']], function () {
+            Route::post('review/create', [
+                'as' => 'public.reviews.create',
+                'uses' => 'ReviewController@store',
+            ]);
 
-        Route::delete('review/delete/{id}', [
-            'as' => 'public.reviews.destroy',
-            'uses' => 'ReviewController@destroy',
+            Route::delete('review/delete/{id}', [
+                'as' => 'public.reviews.destroy',
+                'uses' => 'ReviewController@destroy',
+            ])->wherePrimaryKey();
+
+            Route::get(SlugHelper::getPrefix(Product::class, 'products') . '/{slug}/review', [
+                'uses' => 'ReviewController@getProductReview',
+                'as' => 'public.product.review',
+                'middleware' => 'customer',
+            ]);
+        });
+
+        Route::get('ajax/reviews/{id}', [
+            'uses' => 'ReviewController@ajaxReviews',
+            'as' => 'public.ajax.reviews',
         ])->wherePrimaryKey();
-
-        Route::get(SlugHelper::getPrefix(Product::class, 'products') . '/{slug}/review', [
-            'uses' => 'ReviewController@getProductReview',
-            'as' => 'public.product.review',
-            'middleware' => 'customer',
-        ]);
     });
 });

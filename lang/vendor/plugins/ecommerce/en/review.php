@@ -2,7 +2,6 @@
 
 return [
     'name' => 'Reviews',
-    'view' => 'View review ":name"',
     'add_review' => 'Add review',
     'delete_review' => 'Delete review',
     'create_review' => 'Create Review',
@@ -13,7 +12,6 @@ return [
     'disapprove' => 'Disapprove',
     'disapproved' => 'Disapproved',
     'product' => 'Product',
-    'customer' => 'Customer',
     'user' => 'User',
     'star' => 'Star',
     'status' => 'Status',
@@ -32,5 +30,4 @@ return [
         'title' => 'Delete review',
         'description' => 'Are you sure you want to delete this review? This action cannot be undone!',
     ],
-    'review_already_exists' => 'This customer has already reviewed this product.',
 ];

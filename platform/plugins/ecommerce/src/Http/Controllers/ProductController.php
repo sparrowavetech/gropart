@@ -4,6 +4,7 @@ namespace Botble\Ecommerce\Http\Controllers;
 
 use Botble\Base\Events\BeforeEditContentEvent;
 use Botble\Base\Facades\Assets;
+use Botble\Base\Supports\Breadcrumb;
 use Botble\Ecommerce\Enums\ProductTypeEnum;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Forms\ProductForm;
@@ -25,12 +26,9 @@ class ProductController extends BaseController
 {
     use ProductActionsTrait;
 
-    public function __construct()
+    protected function breadcrumb(): Breadcrumb
     {
-        parent::__construct();
-
-        $this
-            ->breadcrumb()
+        return parent::breadcrumb()
             ->add(trans('plugins/ecommerce::products.name'), route('products.index'));
     }
 

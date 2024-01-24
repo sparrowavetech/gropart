@@ -22,7 +22,7 @@
                     <li>
                         <a class="mr10 btn-trigger-edit-gallery-image" data-bs-toggle="tooltip" data-placement="bottom"
                            data-bs-original-title="{{ trans('core/base::base.change_image') }}">
-                            <i class="fa fa-edit"></i>
+                            <x-core::icon name="ti ti-edit" />
                         </a>
                     </li>
                     <li>

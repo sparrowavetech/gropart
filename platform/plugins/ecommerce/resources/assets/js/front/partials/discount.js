@@ -22,19 +22,11 @@ export class DiscountManagement {
             _self.find('i').remove()
             _self.html('<i class="fa fa-spin fa-spinner"></i> ' + _self.html())
 
-            let cpncode = _self.closest('.coupon-wrapper').find('.coupon-code').val();
-
-            if(!cpncode || cpncode == ""){
-                cpncode = _self.data('coupon-code');
-                _self.find('i').remove();
-                _self.addClass('loading');
-            }
-
             $.ajax({
                 url: _self.data('url'),
                 type: 'POST',
                 data: {
-                    coupon_code: cpncode,
+                    coupon_code: _self.closest('.coupon-wrapper').find('.coupon-code').val(),
                     token: $('#checkout-token').val(),
                 },
                 headers: {
@@ -114,19 +106,27 @@ export class DiscountManagement {
         })
 
 
-        $(document).on('click', '.checkout__coupon-item:not(.active)', function (e) {
-            e.preventDefault()
+        $(document).on('click', '[data-bb-toggle="apply-coupon-code"]', async function (e) {
+            e.preventDefault();
+
+            $(this).find('i').remove();
+            $(this).html('<i class="fa fa-spin fa-spinner"></i> ' + $(this).html());
 
             if ($(document).find('.remove-coupon-code').length) {
-                $(document).find('.remove-coupon-code').trigger('click')
+                $(document).find('.remove-coupon-code').trigger('click');
             }
 
-            const discountCode = $(this).data('discount-code')
+            const discountCode = $(this).data('discount-code');
 
-            $(document).find('.coupon-wrapper').show()
-            $('.coupon-wrapper .coupon-code').val(discountCode)
-            $('.apply-coupon-code').trigger('click')
-        })
+            $(document).find('.coupon-wrapper').show();
+            $('.coupon-wrapper .coupon-code').val(discountCode);
+
+            await new Promise(resolve => setTimeout(resolve, 200));
+
+            $('.apply-coupon-code').trigger('click');
+
+            $(this).find('i').remove();
+        });
 
         const navigateDiscounts = (direction) => {
             const couponList = document.querySelector('.checkout__coupon-list');

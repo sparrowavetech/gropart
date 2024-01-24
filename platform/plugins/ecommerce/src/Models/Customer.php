@@ -4,6 +4,7 @@ namespace Botble\Ecommerce\Models;
 
 use Botble\Base\Facades\MacroableModels;
 use Botble\Base\Models\BaseModel;
+use Botble\Base\Models\BaseQueryBuilder;
 use Botble\Base\Supports\Avatar;
 use Botble\Ecommerce\Enums\CustomerStatusEnum;
 use Botble\Ecommerce\Enums\DiscountTypeEnum;
@@ -22,7 +23,6 @@ use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Auth\Access\Authorizable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\File;
@@ -52,6 +52,7 @@ class Customer extends BaseModel implements
         'phone',
         'dob',
         'status',
+        'private_notes',
     ];
 
     protected $hidden = [
@@ -83,7 +84,7 @@ class Customer extends BaseModel implements
     {
         return $this
             ->hasMany(Address::class, 'customer_id', 'id')
-            ->when(is_plugin_active('location'), function (Builder $query) {
+            ->when(is_plugin_active('location'), function (BaseQueryBuilder $query) {
                 return $query->with(['locationCountry', 'locationState', 'locationCity']);
             });
     }
@@ -111,7 +112,7 @@ class Customer extends BaseModel implements
             $customer->orders()->update(['user_id' => 0]);
             $customer->addresses()->delete();
             $customer->wishlist()->delete();
-            $customer->reviews()->delete();
+            $customer->reviews()->each(fn (Review $review) => $review->delete());
         });
 
         static::deleted(function (Customer $customer) {

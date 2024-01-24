@@ -3,7 +3,6 @@
 namespace Botble\Theme;
 
 use Botble\Base\Facades\Html;
-use Botble\Theme\Contracts\Theme as ThemeContract;
 use Botble\Theme\Facades\Theme as ThemeFacade;
 use Exception;
 use Illuminate\Support\Arr;
@@ -51,7 +50,16 @@ class AssetContainer
      */
     public function getCurrentPath(): string
     {
-        return Asset::$path;
+        $path = Asset::$path;
+
+        return $this->isInheritTheme()
+            ? str_replace(ThemeFacade::getThemeName(), ThemeFacade::getInheritTheme(), $path)
+            : $path;
+    }
+
+    public function isInheritTheme(): bool
+    {
+        return Asset::$isInheritTheme;
     }
 
     /**
@@ -270,21 +278,16 @@ class AssetContainer
      */
     protected function evaluatePath(string $source): string
     {
-        static $theme;
-
-        // Make theme to use few features.
-        if (! $theme) {
-            $theme = app(ThemeContract::class);
-        }
-
-        $currentTheme = ThemeFacade::getThemeName();
+        $currentTheme = $this->isInheritTheme()
+            ? ThemeFacade::getInheritTheme()
+            : ThemeFacade::getThemeName();
 
         // Switch path to another theme.
-        if (! is_bool($this->usePath) && $theme->exists($this->usePath)) {
+        if (! is_bool($this->usePath) && ThemeFacade::exists($this->usePath)) {
             $source = str_replace($currentTheme, $this->usePath, $source);
         }
 
-        $publicThemeName = ThemeFacade::getPublicThemeName();
+        $publicThemeName = $this->isInheritTheme() ? $currentTheme : ThemeFacade::getPublicThemeName();
 
         if ($publicThemeName != $currentTheme) {
             $source = str_replace($currentTheme, $publicThemeName, $source);
@@ -314,6 +317,10 @@ class AssetContainer
 
             // Reset using path.
             $this->usePath(false);
+        }
+
+        if ($name === 'jquery') {
+            $attributes['data-pagespeed-no-defer'] = true;
         }
 
         $this->register('script', $name, $source, $dependencies, $attributes);
@@ -542,6 +549,11 @@ class AssetContainer
         }
 
         return $assets;
+    }
+
+    public function getAllAssets(): array
+    {
+        return $this->assets;
     }
 
     protected function assetUrl(string $group, string $name): string

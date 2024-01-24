@@ -34,7 +34,12 @@ class TagsManager {
             })
 
         document.querySelectorAll('.list-tagify').forEach((element) => {
+            if (! element.dataset.list) {
+                return;
+            }
+
             const list = JSON.parse(element.dataset.list)
+
             let whiteList = []
 
             for (const [key, value] of Object.entries(list)) {

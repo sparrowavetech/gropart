@@ -5,12 +5,14 @@ namespace Botble\Marketplace\Forms;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Base\Models\BaseModel;
 use Botble\Marketplace\Enums\PayoutPaymentMethodsEnum;
+use Botble\Marketplace\Forms\Concerns\HasSubmitButton;
 use Botble\Marketplace\Http\Requests\PayoutInformationSettingRequest;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Blade;
 
 class PayoutInformationForm extends FormAbstract
 {
+    use HasSubmitButton;
+
     public function setup(): void
     {
         $customer = $this->getModel();
@@ -52,11 +54,6 @@ class PayoutInformationForm extends FormAbstract
             ]);
         }
 
-        $this->add('submit', 'html', [
-            'html' => Blade::render(sprintf(
-                '<x-core::button type="submit" color="primary">%s</x-core::button>',
-                __('Save settings')
-            )),
-        ]);
+        $this->addSubmitButton(__('Save settings'));
     }
 }

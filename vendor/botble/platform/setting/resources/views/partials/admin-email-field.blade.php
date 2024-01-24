@@ -1,6 +1,6 @@
 <x-core-setting::form-group
     data-bb-toggle="admin-email"
-    data-emails="{{ json_encode(get_admin_email()) }}"
+    data-emails="{{ Js::encode(get_admin_email()) }}"
     data-max="4"
 >
     <x-core::form.label for="admin_email">

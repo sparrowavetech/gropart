@@ -63,7 +63,15 @@
         <div class="p-3">
             <h4 class="mb-2">{{ trans('plugins/ecommerce::order.return_reason') }}</h4>
 
-            <p class="text-danger mb-0">{{ $returnRequest->reason->label() }}</p>
+            <p class="text-danger mb-0">
+                @if($returnRequest->reason->label())
+                    {!! BaseHelper::clean($returnRequest->reason->toHtml()) !!}
+                @else
+                    @foreach($returnRequest->items as $returnItem)
+                        {!! BaseHelper::clean($returnItem->reason->toHtml()) !!}@if (! $loop->last), @endif
+                    @endforeach
+                @endif
+            </p>
         </div>
     </x-core::card.body>
 </x-core::card>

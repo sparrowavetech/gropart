@@ -1,7 +1,10 @@
 @if (is_plugin_active('ecommerce') && ! empty($categories))
     <div>
         <p>
-            <strong>{{ $config['name'] }}:</strong>
+            @if ($config['name'])
+                <strong>{{ $config['name'] }}:</strong>
+            @endif
+
             @foreach ($categories as $category)
                 <a
                     href="{{ route('public.single', $category->url) }}"

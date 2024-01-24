@@ -386,12 +386,13 @@ body,
 .select--arrow {
     position: relative;
 
-    i {
+    i, svg {
         position: absolute;
         top: 50%;
         transform: translateY(-50%);
         right: 10px;
         color: #ccc;
+        width: 16px;
     }
 
     .form-control {
@@ -403,10 +404,6 @@ body,
     }
 }
 
-.checkout-button-group {
-    margin-bottom: 40px;
-}
-
 @media screen and (min-width: 992px) {
     .left {
         border-right: 1px solid #c8c8c8;
@@ -416,17 +413,6 @@ body,
     .right {
         padding-left: 50px;
         display: block;
-    }
-}
-
-@media screen and (max-width: 992px) {
-    .checkout-button-group {
-        margin-bottom: 10px;
-    }
-
-    .back-to-cart-button-group {
-        margin-bottom: 40px;
-        text-align: center;
     }
 }
 
@@ -535,21 +521,53 @@ body,
 }
 
 .checkout {
+    &__coupon-section {
+        position: relative;
+        margin-top: 2rem;
+    }
+
+    &__coupon-heading {
+        font-weight: 600;
+        border-radius: 5px;
+        border: 1px solid #058db8;
+        color: #058db8;
+        font-size: 14px;
+        margin-bottom: 0px;
+        padding: 0.25rem 0.5rem;
+        position: absolute;
+        top: -1rem;
+        inset-inline-start: 1rem;
+        background: #ffffff;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+
+        img {
+            width: 1.5rem;
+            height: 1.5rem;
+        }
+    }
+
     &__coupon-list {
         display: flex;
-        column-gap: 1.25rem;
+        flex-direction: column;
+        gap: 0.75rem;
         margin-bottom: 1rem;
-        overflow-y: hidden;
-        -webkit-overflow-scrolling: touch;
+        overflow-y: auto;
+        border: 1px dashed #058db8;
+        border-radius: 8px;
+        padding: 0.75rem;
+        max-height: 600px;
+        padding-top: 2rem;
     }
 
     &__coupon-item {
         display: flex;
-        border: 1px solid rgba(36, 36, 36, 0.3);
         border-radius: 8px;
         cursor: pointer;
         transition: all 0.2s;
         min-width: 16rem;
+        box-shadow: 0px 0px 4px 0px rgba(205, 205, 205, 0.75);
 
         &.active {
             background: #058db8;
@@ -560,38 +578,6 @@ body,
             border-color: #058db8;
         }
 
-        &-icon {
-            flex: 1;
-            border-right: 2px dashed rgba(102, 102, 102, 0.7607843137);
-            min-width: 20px;
-            max-width: 20px;
-            position: relative;
-
-            .checkout__coupon-item.active & {
-                border-color: #ffffff;
-            }
-
-            &:before {
-                content: '';
-                display: block;
-                width: 1.3rem;
-                height: 1.3rem;
-                background: white;
-                top: 50%;
-                transform: translate(-50%, -50%) rotate(45deg);
-                position: absolute;
-                border-top: 1px solid rgba(36, 36, 36, 0.3);
-                border-right: 1px solid rgba(36, 36, 36, 0.3);
-                border-bottom: 1px solid rgba(0, 0, 0, 0);
-                border-left: 1px solid rgba(0, 0, 0, 0);
-                border-radius: 100em;
-
-                .checkout__coupon-item.active & {
-                    border-color: #ffffff;
-                }
-            }
-        }
-
         &-content {
             flex: 2;
             padding: 0.5rem 1rem 0.5rem 1rem;
@@ -600,9 +586,14 @@ body,
 
         &-title {
             h4 {
-                font-size: 14px;
+                font-size: 16px;
                 font-weight: bold;
                 display: inline-block;
+                color: #058db8;
+
+                .checkout__coupon-item.active & {
+                    color: #ffffff;
+                }
             }
         }
 
@@ -624,58 +615,76 @@ body,
                 color: #ffffff;
             }
         }
+
+        &-code {
+            margin-top: 0.5rem;
+            background: rgb(239, 239, 239);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem;
+            border-radius: 4px;
+
+            span {
+                font-weight: bold;
+            }
+
+            .checkout__coupon-item.active & {
+                background: #0c80a4;
+            }
+
+            button {
+                background: #058db8;
+                color: #ffffff;
+                border: none;
+                padding: 0.25rem 0.75rem;
+                border-radius: 4px;
+                font-size: 0.8em;
+                cursor: pointer;
+                transition: 0.2s all;
+                box-sizing: border-box;
+
+                .checkout__coupon-item.active & {
+                    background: #ffffff;
+                    color: #058db8;
+                    border: 1px solid #058db8;
+                }
+            }
+        }
+    }
+}
+
+.coupon-wrapper {
+    input {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
     }
 
-    &__coupon-navigation {
-        position: absolute;
-        width: 100%;
-    }
-
-    &__coupon-prev,
-    &__coupon-next {
-        position: absolute;
-        transform: translateY(100%);
-        background: #ffffff;
-        border: 1px solid rgba(36, 36, 36, 0.3);
-        border-radius: 100em;
+    .remove-coupon-code, .apply-coupon-code {
+        padding: 0.25rem 0.75rem;
         cursor: pointer;
         transition: 0.2s all;
-        z-index: 1;
-        width: 1.75rem;
-        height: 1.75rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        box-sizing: border-box;
+        border: none;
+        outline: none;
+    }
 
-        i {
-            font-size: 0.75rem;
-        }
+    .remove-coupon-code {
+        border-radius: 4px;
+        background: #ffffff;
+        color: #058db8;
+        border: 1px solid #058db8;
+        font-size: 0.8em;
+    }
+
+    .apply-coupon-code {
+        border-top-right-radius: 4px;
+        border-bottom-right-radius: 4px;
+        background: #058db8;
+        color: #ffffff;
 
         &:hover {
-            background: #058db8;
-            color: #ffffff;
-            border-color: #058db8;
-        }
-
-        &:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-    }
-
-    &__coupon-prev {
-        inset-inline-start: -0.75rem;
-
-        @media (min-width: 768px) {
-            inset-inline-start: -2rem;
-        }
-    }
-
-    &__coupon-next {
-        inset-inline-end: 1.25rem;
-
-        @media (min-width: 768px) {
-            inset-inline-end: 1.75rem;
+            background: #0c80a4;
         }
     }
 }

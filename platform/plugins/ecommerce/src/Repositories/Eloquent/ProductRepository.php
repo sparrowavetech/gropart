@@ -326,6 +326,7 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
             'min_price' => null,
             'max_price' => null,
             'categories' => [],
+            'price_ranges' => [],
             'tags' => [],
             'brands' => [],
             'attributes' => [],
@@ -342,6 +343,20 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
 
         if ($filters['max_price'] && ! $isUsingDefaultCurrency) {
             $filters['max_price'] = (float)$filters['max_price'] / $currentExchangeRate;
+        }
+
+        $priceRanges = $filters['price_ranges'];
+
+        if (! empty($priceRanges)) {
+            foreach ($priceRanges as $priceRangeKey => $priceRange) {
+                if ($priceRange['from'] && ! $isUsingDefaultCurrency) {
+                    $priceRanges[$priceRangeKey]['from'] = (float) $priceRange['from'] / $currentExchangeRate;
+                }
+
+                if ($priceRange['to'] && ! $isUsingDefaultCurrency) {
+                    $priceRanges[$priceRangeKey]['to'] = (float) $priceRange['to'] / $currentExchangeRate;
+                }
+            }
         }
 
         $params = array_merge([
@@ -560,6 +575,15 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
                 });
         }
 
+        // Filter product by price ranges
+        if (! empty($priceRanges)) {
+            $this->model = $this->model->where(function (EloquentBuilder $query) use ($priceRanges) {
+                foreach ($priceRanges as $priceRange) {
+                    $query->orWhereBetween('products_with_final_price.final_price', [$priceRange['from'], $priceRange['to']]);
+                }
+            });
+        }
+
         // Filter product by categories
         $filters['categories'] = array_filter($filters['categories']);
         if ($filters['categories']) {
@@ -641,6 +665,8 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
         if (! Arr::get($params, 'include_out_of_stock_products')) {
             $this->exceptOutOfStockProducts();
         }
+
+        $this->model = apply_filters('ecommerce_products_filter', $this->model, $filters, $params);
 
         return $this->advancedGet($params);
     }

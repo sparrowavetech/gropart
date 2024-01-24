@@ -2,7 +2,6 @@
 
 return [
     'name' => 'Menus',
-    'description' => 'Manage your system menus',
     'key_name' => 'Menu name (key: :key)',
     'basic_info' => 'Basic information',
     'add_to_menu' => 'Add to menu',

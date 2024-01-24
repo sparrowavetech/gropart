@@ -6,10 +6,12 @@ use Botble\Api\Facades\ApiHelper;
 use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Facades\EmailHandler;
 use Botble\Base\Facades\PanelSectionManager;
+use Botble\Base\Supports\DashboardMenu as DashboardMenuSupport;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Ecommerce\Facades\Cart;
 use Botble\Ecommerce\Facades\Currency as CurrencyFacade;
 use Botble\Ecommerce\Facades\EcommerceHelper;
+use Botble\Ecommerce\Facades\FlashSale as FlashSaleFacade;
 use Botble\Ecommerce\Facades\InvoiceHelper;
 use Botble\Ecommerce\Facades\OrderHelper;
 use Botble\Ecommerce\Facades\OrderReturnHelper;
@@ -377,7 +379,6 @@ class EcommerceServiceProvider extends ServiceProvider
                 'wishlist',
                 'compare',
                 'invoice',
-                'invoice-template',
                 'setting',
             ])
             ->loadAndPublishConfigurations([
@@ -462,10 +463,12 @@ class EcommerceServiceProvider extends ServiceProvider
                 'description',
             ]);
 
-            LanguageAdvancedManager::registerModule(FlashSale::class, [
-                'name',
-                'description',
-            ]);
+            if (FlashSaleFacade::isEnabled()) {
+                LanguageAdvancedManager::registerModule(FlashSale::class, [
+                    'name',
+                    'description',
+                ]);
+            }
 
             LanguageAdvancedManager::registerModule(ProductTag::class, [
                 'name',
@@ -660,15 +663,17 @@ class EcommerceServiceProvider extends ServiceProvider
                     'url' => fn () => route('ecommerce.report.index'),
                     'permissions' => ['ecommerce.report.index'],
                 ])
-                ->registerItem([
-                    'id' => 'cms-plugins-flash-sale',
-                    'priority' => 0,
-                    'parent_id' => 'cms-plugins-ecommerce',
-                    'name' => 'plugins/ecommerce::flash-sale.name',
-                    'icon' => 'ti ti-bolt',
-                    'url' => fn () => route('flash-sale.index'),
-                    'permissions' => ['flash-sale.index'],
-                ])
+                ->when(FlashSaleFacade::isEnabled(), function (DashboardMenuSupport $dashboardMenu) {
+                    $dashboardMenu->registerItem([
+                        'id' => 'cms-plugins-flash-sale',
+                        'priority' => 0,
+                        'parent_id' => 'cms-plugins-ecommerce',
+                        'name' => 'plugins/ecommerce::flash-sale.name',
+                        'icon' => 'ti ti-bolt',
+                        'url' => fn () => route('flash-sale.index'),
+                        'permissions' => ['flash-sale.index'],
+                    ]);
+                })
                 ->registerItem([
                     'id' => 'cms-plugins-ecommerce-order',
                     'priority' => 1,
@@ -814,6 +819,72 @@ class EcommerceServiceProvider extends ServiceProvider
                     'permissions' => ['customers.index'],
                 ]);
         });
+
+        DashboardMenu::for('customer')->beforeRetrieving(function () {
+            DashboardMenu::make()
+                ->registerItem([
+                    'id' => 'cms-customer-overview',
+                    'priority' => 10,
+                    'name' => __('Overview'),
+                    'url' => fn () => route('customer.overview'),
+                    'icon' => 'ti ti-home',
+                ])
+                ->registerItem([
+                    'id' => 'cms-customer-edit-account',
+                    'priority' => 20,
+                    'name' => __('Profile'),
+                    'url' => fn () => route('customer.edit-account'),
+                    'icon' => 'ti ti-user',
+                ])
+                ->registerItem([
+                    'id' => 'cms-customer-orders',
+                    'priority' => 30,
+                    'name' => __('Orders'),
+                    'url' => fn () => route('customer.orders'),
+                    'icon' => 'ti ti-shopping-cart',
+                ])
+                ->when(EcommerceHelper::isReviewEnabled(), function (DashboardMenuSupport $dashboardMenu) {
+                    $dashboardMenu->registerItem([
+                        'id' => 'cms-customer-product-reviews',
+                        'priority' => 40,
+                        'name' => __('Reviews'),
+                        'url' => fn () => route('customer.product-reviews'),
+                        'icon' => 'ti ti-star',
+                    ]);
+                })
+                ->when(EcommerceHelper::isEnabledSupportDigitalProducts(), function (DashboardMenuSupport $dashboardMenu) {
+                    $dashboardMenu->registerItem([
+                        'id' => 'cms-customer-downloads',
+                        'priority' => 50,
+                        'name' => __('Downloads'),
+                        'url' => fn () => route('customer.downloads'),
+                        'icon' => 'ti ti-download',
+                    ]);
+                })
+                ->registerItem([
+                    'id' => 'cms-customer-address',
+                    'priority' => 60,
+                    'name' => __('Addresses'),
+                    'url' => fn () => route('customer.address'),
+                    'icon' => 'ti ti-book',
+                ])
+                ->registerItem([
+                    'id' => 'cms-customer-change-password',
+                    'priority' => 70,
+                    'name' => __('Change Password'),
+                    'url' => fn () => route('customer.change-password'),
+                    'icon' => 'ti ti-key',
+                ])
+                ->registerItem([
+                    'id' => 'cms-customer-logout',
+                    'priority' => 999,
+                    'name' => __('Logout'),
+                    'url' => fn () => route('customer.logout'),
+                    'icon' => 'ti ti-logout',
+                ]);
+        });
+
+        DashboardMenu::default();
 
         PanelSectionManager::beforeRendering(function () {
             PanelSectionManager::default()

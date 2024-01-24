@@ -41,6 +41,7 @@ class RowActionsColumn extends FormattedColumn implements FormattedColumnContrac
         return view('core/table::row-actions', [
             'model' => $this->getItem(),
             'actions' => $this->getRowActions(),
+            'table' => $this->getTable(),
         ])->render();
     }
 }

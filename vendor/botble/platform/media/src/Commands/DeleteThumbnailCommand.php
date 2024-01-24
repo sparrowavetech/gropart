@@ -21,11 +21,19 @@ class DeleteThumbnailCommand extends Command
 
         $files = MediaFile::query()->select(['url', 'mime_type', 'folder_id'])->get();
 
+        if ($files->isEmpty()) {
+            $this->components->info('No media files to generate thumbnails!');
+
+            return self::SUCCESS;
+        }
+
         $errors = [];
 
+        $filesCount = $files->count();
+
         $progress = progress(
-            label: sprintf('Processing %s %s...', number_format($files->count()), Str::plural('file', $files->count())),
-            steps: $files->count(),
+            label: sprintf('Processing %s %s...', number_format($filesCount), Str::plural('file', $filesCount)),
+            steps: $filesCount,
         );
 
         foreach ($files as $file) {

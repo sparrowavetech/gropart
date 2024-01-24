@@ -9,9 +9,12 @@ use Illuminate\Support\Facades\Facade;
  * @method static \Botble\Theme\Theme layout(string $layout)
  * @method static \Botble\Theme\Theme uses(string|null $theme = null)
  * @method static \Botble\Theme\Theme theme(string|null $theme = null)
+ * @method static bool hasInheritTheme()
+ * @method static string|null getInheritTheme()
  * @method static bool exists(string|null $theme)
  * @method static string path(string|null $forceThemeName = null)
  * @method static mixed|null getConfig(string|null $key = null)
+ * @method static mixed|null getInheritConfig(string|null $key = null)
  * @method static string getThemeNamespace(string $path = '')
  * @method static string getThemeName()
  * @method static \Botble\Theme\Theme setThemeName(string $theme)
@@ -56,6 +59,8 @@ use Illuminate\Support\Facades\Facade;
  * @method static string getThemeScreenshot(string $theme)
  * @method static void registerThemeIconFields(array $icons, array $css = [], array $js = [])
  * @method static void registerFacebookIntegration()
+ * @method static void registerSocialLinks()
+ * @method static array getSocialLinks()
  *
  * @see \Botble\Theme\Theme
  */

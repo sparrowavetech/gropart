@@ -2,6 +2,8 @@
 
 namespace Botble\Ecommerce\Forms;
 
+use Botble\Base\Forms\FieldOptions\SelectFieldOption;
+use Botble\Base\Forms\Fields\SelectField;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Http\Requests\AddShippingRegionRequest;
@@ -32,15 +34,15 @@ class AddShippingRegionForm extends FormAbstract
             ->contentOnly()
             ->setTitle(trans('plugins/ecommerce::shipping.add_shipping_region'))
             ->setValidatorClass(AddShippingRegionRequest::class)
-            ->add('region', 'customSelect', [
-                'label' => trans('plugins/ecommerce::shipping.country'),
-                'label_attr' => [
-                    'class' => 'form-label required',
-                ],
-                'attr' => [
-                    'class' => 'select-country-search',
-                ],
-                'choices' => $countries,
-            ]);
+            ->add(
+                'region',
+                SelectField::class,
+                SelectFieldOption::make()
+                    ->label(trans('plugins/ecommerce::shipping.country'))
+                    ->required()
+                    ->searchable()
+                    ->choices($countries)
+                    ->toArray()
+            );
     }
 }

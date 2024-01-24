@@ -10,6 +10,7 @@ mix
     .js(`${source}/resources/js/payment-methods.js`, `${dist}/js/payment-methods.js`)
     .js(`${source}/resources/js/payment-detail.js`, `${dist}/js/payment-detail.js`)
     .sass(`${source}/resources/sass/payment.scss`, `${dist}/css`)
+    .sass(`${source}/resources/sass/payment-setting.scss`, `${dist}/css`)
 
 if (mix.inProduction()) {
     mix

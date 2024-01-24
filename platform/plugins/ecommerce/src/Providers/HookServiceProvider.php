@@ -34,10 +34,12 @@ use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
 use Botble\Ecommerce\Services\HandleFrontPages;
 use Botble\Ecommerce\Supports\InvoiceHelper;
 use Botble\Ecommerce\Supports\TwigExtension;
+use Botble\Faq\FaqSupport;
 use Botble\Media\Facades\RvMedia;
 use Botble\Menu\Events\RenderingMenuOptions;
 use Botble\Menu\Facades\Menu;
 use Botble\Payment\Enums\PaymentMethodEnum;
+use Botble\Payment\Enums\PaymentStatusEnum;
 use Botble\Payment\Services\Gateways\BankTransferPaymentService;
 use Botble\Payment\Services\Gateways\CodPaymentService;
 use Botble\Payment\Supports\PaymentHelper;
@@ -58,7 +60,6 @@ use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
@@ -134,6 +135,7 @@ class HookServiceProvider extends ServiceProvider
                     ->setColor('#32c5d2')
                     ->setStatsTotal($items)
                     ->setRoute(route('orders.index'))
+                    ->setColumn('col-12 col-md-6 col-lg-3')
                     ->init($widgets, $widgetSettings);
             }, 2, 2);
 
@@ -152,6 +154,7 @@ class HookServiceProvider extends ServiceProvider
                     ->setColor('#1280f5')
                     ->setStatsTotal($items)
                     ->setRoute(route('products.index'))
+                    ->setColumn('col-12 col-md-6 col-lg-3')
                     ->init($widgets, $widgetSettings);
             }, 3, 2);
 
@@ -167,6 +170,7 @@ class HookServiceProvider extends ServiceProvider
                     ->setColor('#75b6f9')
                     ->setStatsTotal($items)
                     ->setRoute(route('customers.index'))
+                    ->setColumn('col-12 col-md-6 col-lg-3')
                     ->init($widgets, $widgetSettings);
             }, 4, 2);
 
@@ -182,6 +186,7 @@ class HookServiceProvider extends ServiceProvider
                     ->setColor('#074f9d')
                     ->setStatsTotal($items)
                     ->setRoute(route('reviews.index'))
+                    ->setColumn('col-12 col-md-6 col-lg-3')
                     ->init($widgets, $widgetSettings);
             }, 5, 2);
         });
@@ -290,50 +295,39 @@ class HookServiceProvider extends ServiceProvider
                 return $html . $tagManagerCode;
             }, 16);
 
-            if (defined('FAQ_MODULE_SCREEN_NAME') && config(
-                'plugins.ecommerce.general.enable_faq_in_product_details',
-                false
-            )) {
+            if (
+                defined('FAQ_MODULE_SCREEN_NAME')
+                && config('plugins.ecommerce.general.enable_faq_in_product_details', false)
+            ) {
                 add_action(BASE_ACTION_META_BOXES, function ($context, $object) {
-                    if (! $object || $context != 'advanced') {
+                    if (
+                        ! $object
+                        || $context != 'advanced'
+                        || ! is_in_admin()
+                        || ! $object instanceof Product
+                        || ! in_array(Route::currentRouteName(), [
+                            'products.create',
+                            'products.edit',
+                            'marketplace.vendor.products.create',
+                            'marketplace.vendor.products.edit',
+                        ])
+                    ) {
                         return false;
                     }
-
-                    if (! is_in_admin() || get_class($object) != Product::class) {
-                        return false;
-                    }
-
-                    if (! in_array(Route::currentRouteName(), ['products.create', 'products.edit', 'marketplace.vendor.products.create', 'marketplace.vendor.products.edit'])) {
-                        return false;
-                    }
-
-                    Assets::addStylesDirectly(['vendor/core/plugins/faq/css/faq.css'])
-                        ->addScriptsDirectly(['vendor/core/plugins/faq/js/faq.js']);
 
                     MetaBox::addMetaBox('faq_schema_config_wrapper', __('Product FAQs'), function () {
-                        $value = [];
-
-                        $args = func_get_args();
-                        if ($args[0] && $args[0]->id) {
-                            $value = MetaBox::getMetaData($args[0], 'faq_schema_config', true);
-                        }
-
-                        $hasValue = ! empty($value);
-
-                        $value = json_encode((array)$value);
-
-                        return view('plugins/faq::schema-config-box', compact('value', 'hasValue'))->render();
-                    }, get_class($object), $context);
+                        return (new FaqSupport())->renderMetaBox(func_get_args()[0] ?? null);
+                    }, $object::class, $context);
 
                     return true;
                 }, 139, 2);
             }
 
             add_action(BASE_ACTION_PUBLIC_RENDER_SINGLE, function ($screen, $object) {
-                add_filter(THEME_FRONT_HEADER, function ($html) use ($object) {
+                add_filter(THEME_FRONT_HEADER, function (string|null $html) use ($object) {
                     if (
                         ! defined('FAQ_MODULE_SCREEN_NAME') ||
-                        get_class($object) != Product::class ||
+                        ! $object instanceof Product ||
                         ! config('plugins.ecommerce.general.enable_faq_in_product_details', false)
                     ) {
                         return $html;
@@ -373,8 +367,8 @@ class HookServiceProvider extends ServiceProvider
                     return $html . Html::tag('script', $schema, ['type' => 'application/ld+json'])->toHtml();
                 }, 139);
 
-                add_filter(THEME_FRONT_HEADER, function ($html) use ($object) {
-                    if (get_class($object) != Product::class) {
+                add_filter(THEME_FRONT_HEADER, function (string|null $html) use ($object) {
+                    if (! $object instanceof Product) {
                         return $html;
                     }
 
@@ -438,7 +432,11 @@ class HookServiceProvider extends ServiceProvider
         });
 
         add_action(BASE_ACTION_TOP_FORM_CONTENT_NOTIFICATION, function ($request, $data = null) {
-            if (! $data instanceof Product || Route::currentRouteName() != 'products.edit') {
+            if (
+                ! $data instanceof Product
+                || Route::currentRouteName() != 'products.edit'
+                || ! FlashSaleFacade::isEnabled()
+            ) {
                 return;
             }
 
@@ -462,14 +460,7 @@ class HookServiceProvider extends ServiceProvider
                 if ($discountPrice < $flashSalePrice) {
                     $flashSale = null;
 
-                    if (! $data->is_variation) {
-                        $productCollections = $data->productCollections;
-                    } else {
-                        $productCollections = $data->original_product->productCollections;
-                    }
-
-                    $discount = Discount::getFacadeRoot()
-                        ->promotionForProduct([$data->getKey()], $productCollections->pluck('id')->all());
+                    $discount = Discount::getFacadeRoot()->promotionForProduct([$data->getKey()]);
                 }
             }
 
@@ -571,6 +562,7 @@ class HookServiceProvider extends ServiceProvider
                         $products[] = [
                             'id' => $product->product_id,
                             'name' => $product->product_name,
+                            'image' => RvMedia::getImageUrl($product->product_image),
                             'price' => $this->convertOrderAmount($product->price),
                             'price_per_order' => $this->convertOrderAmount(
                                 ($product->price * $product->qty)
@@ -671,7 +663,7 @@ class HookServiceProvider extends ServiceProvider
                 $productItemView = Theme::getThemeNamespace('views.ecommerce.includes.product-item');
 
                 if (! view()->exists($productItemView)) {
-                    $productItemView = 'plugins/ecommerce::themes.includes.default-product';
+                    $productItemView = 'plugins/ecommerce::themes.includes.product-item';
                 }
 
                 $view = Theme::getThemeNamespace('views.ecommerce.shortcodes.recently-viewed-products');
@@ -695,18 +687,17 @@ class HookServiceProvider extends ServiceProvider
 
         add_action(INVOICE_PAYMENT_CREATED, function (Invoice $invoice) {
             try {
-                $customer = $invoice->payment->customer;
                 $localDisk = Storage::disk('local');
                 $invoiceName = 'invoice-' . $invoice->code . '.pdf';
                 $localDisk->put($invoiceName, (new InvoiceHelper())->makeInvoicePDF($invoice)->output());
 
                 EmailHandler::setModule(ECOMMERCE_MODULE_SCREEN_NAME)
                     ->setVariableValues([
-                        'customer_name' => $customer->name,
+                        'customer_name' => $invoice->customer_name,
                         'invoice_code' => $invoice->code,
                         'invoice_link' => route('customer.invoices.show', $invoice->getKey()),
                     ])
-                    ->sendUsingTemplate('invoice-payment-created', $customer->email, [
+                    ->sendUsingTemplate('invoice-payment-created', $invoice->customer_email, [
                         'attachments' => [$localDisk->path($invoiceName)],
                     ]);
 
@@ -717,6 +708,25 @@ class HookServiceProvider extends ServiceProvider
         });
 
         add_filter(BASE_FILTER_PUBLIC_SINGLE_DATA, [$this, 'handleSingleView'], 30);
+
+        if (defined('ACTION_AFTER_UPDATE_PAYMENT')) {
+            add_action(ACTION_AFTER_UPDATE_PAYMENT, function ($request, $payment) {
+                if (
+                    in_array($payment->payment_channel, [PaymentMethodEnum::COD, PaymentMethodEnum::BANK_TRANSFER])
+                    && $request->input('status') == PaymentStatusEnum::COMPLETED
+                    && EcommerceHelper::isEnabledSupportDigitalProducts()
+                ) {
+                    $order = Order::query()->where('id', $payment->order_id)->with('products')->first();
+
+                    if (
+                        $order
+                        && EcommerceHelper::countDigitalProducts($order->products) === $order->products->count()
+                    ) {
+                        OrderHelper::setOrderCompleted($order->getKey(), request(), Auth::id() ?? 0);
+                    }
+                }
+            }, 123, 2);
+        }
     }
 
     public function addCustomerSettingRules(array $rules): array
@@ -745,7 +755,6 @@ class HookServiceProvider extends ServiceProvider
         theme_option()
             ->setSection([
                 'title' => trans('plugins/ecommerce::ecommerce.theme_options.name'),
-                'desc' => trans('plugins/ecommerce::ecommerce.theme_options.description'),
                 'id' => 'opt-text-subsection-ecommerce',
                 'subsection' => true,
                 'icon' => 'ti ti-shopping-bag',
@@ -808,6 +817,34 @@ class HookServiceProvider extends ServiceProvider
                             'value' => null,
                             'attributes' => [
                                 'allow_thumb' => false,
+                            ],
+                        ],
+                    ],
+                    [
+                        'id' => 'login_background',
+                        'type' => 'mediaImage',
+                        'label' => trans('plugins/ecommerce::ecommerce.theme_options.login_background_image'),
+                        'attributes' => [
+                            'name' => 'login_background',
+                        ],
+                    ],
+                    [
+                        'id' => 'register_background',
+                        'type' => 'mediaImage',
+                        'label' => trans('plugins/ecommerce::ecommerce.theme_options.register_background_image'),
+                        'attributes' => [
+                            'name' => 'register_background',
+                        ],
+                    ],
+                    [
+                        'id' => 'ecommerce_term_and_privacy_policy_url',
+                        'type' => 'text',
+                        'label' => trans('plugins/ecommerce::ecommerce.theme_options.term_and_privacy_policy_url'),
+                        'attributes' => [
+                            'name' => 'ecommerce_term_and_privacy_policy_url',
+                            'value' => null,
+                            'options' => [
+                                'class' => 'form-control',
                             ],
                         ],
                     ],
@@ -882,28 +919,38 @@ class HookServiceProvider extends ServiceProvider
     {
         switch ($menuId) {
             case 'cms-plugins-ecommerce':
-
                 if (! Auth::user()->hasPermission('orders.index')) {
                     return $number;
                 }
 
-                return Blade::render('<x-core::navbar.badge-count class="ecommerce-count" />');
+                return view('core/base::partials.navbar.badge-count', ['class' => 'ecommerce-count'])->render();
 
             case 'cms-plugins-ecommerce-order':
-
                 if (! Auth::user()->hasPermission('orders.index')) {
                     return $number;
                 }
 
-                return Blade::render('<x-core::navbar.badge-count class="pending-orders" />');
+                return view('core/base::partials.navbar.badge-count', ['class' => 'pending-orders'])->render();
 
             case 'cms-plugins-ecommerce-order-return':
-
                 if (! Auth::user()->hasPermission('orders.index')) {
                     return $number;
                 }
 
-                return Blade::render('<x-core::navbar.badge-count class="pending-order-returns" />');
+                return view('core/base::partials.navbar.badge-count', ['class' => 'pending-order-returns'])->render();
+
+            case 'cms-ecommerce-review':
+                if (! Auth::user()->hasPermission('reviews.index')) {
+                    return $number;
+                }
+
+                $pendingCount = Review::query()->where('status', BaseStatusEnum::PENDING())->count();
+
+                if ($pendingCount > 0) {
+                    return BaseHelper::renderBadge(number_format($pendingCount));
+                }
+
+                break;
         }
 
         return $number;

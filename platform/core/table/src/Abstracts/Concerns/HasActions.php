@@ -18,6 +18,10 @@ trait HasActions
 
     protected array $rowActionsEditCallbacks = [];
 
+    protected bool $displayActionsAsDropdown = true;
+
+    protected int $displayActionsAsDropdownWhenActionsMoresThan = 3;
+
     /**
      * @deprecated since v6.8.0
      */
@@ -123,8 +127,39 @@ trait HasActions
     protected function getRowActionsHeading(): array
     {
         return [
-            RowActionsColumn::make()->width(70 * count($this->getRowActions())),
+            RowActionsColumn::make()->nowrap(),
         ];
+    }
+
+    public function displayActionsAsDropdown(bool $enabled = true): static
+    {
+        $this->displayActionsAsDropdown = $enabled;
+
+        return $this;
+    }
+
+    public function hasDisplayActionsAsDropdown(): bool
+    {
+        return $this->displayActionsAsDropdown
+            && count($this->getRowActions()) > $this->getDisplayActionsAsDropdownWhenActionsMoresThan();
+    }
+
+    public function displayActionsAsDropdownWhenActionsMoresThan(int $number): static
+    {
+        if ($number < 0) {
+            throw new LogicException('Number must be greater than 0.');
+        }
+
+        $this->displayActionsAsDropdown();
+
+        $this->displayActionsAsDropdownWhenActionsMoresThan = $number;
+
+        return $this;
+    }
+
+    public function getDisplayActionsAsDropdownWhenActionsMoresThan(): int
+    {
+        return $this->displayActionsAsDropdownWhenActionsMoresThan;
     }
 
     /**
@@ -135,7 +170,7 @@ trait HasActions
         return [
             Column::make('operations')
                 ->title(trans('core/base::tables.operations'))
-                ->width(134)
+                ->nowrap()
                 ->alignCenter()
                 ->orderable(false)
                 ->searchable(false)

@@ -64,6 +64,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static void renameFolder(\Botble\Media\Models\MediaFolder $folder, string $newName, bool $renameOnDisk = true)
  * @method static void refreshCache()
  * @method static array getFolderColors()
+ * @method static \Intervention\Image\ImageManager imageManager()
  *
  * @see \Botble\Media\RvMedia
  */

@@ -14,7 +14,7 @@ class LanguageSettingRequest extends Request
             'language_display' => ['required', 'in:all,flag,name'],
             'language_switcher_display' => ['required', 'in:dropdown,list'],
             'language_hide_languages' => ['nullable', 'array'],
-            'language_hide_languages.*' => 'sometimes',
+            'language_hide_languages.*' => ['sometimes', 'exists:languages,lang_id'],
             'language_show_default_item_if_current_version_not_existed' => $onOffRule,
             'language_auto_detect_user_language' => $onOffRule,
         ];

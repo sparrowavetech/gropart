@@ -125,6 +125,7 @@ return [
             'use_city_field_as_field_text' => 'Use city field as a free text field',
             'available_countries' => 'Available countries',
             'all' => 'All',
+            'all_helper_text' => 'If you uncheck all countries, it will apply for all countries.',
             'enable_guest_checkout' => 'Enable guest checkout',
             'recently_viewed' => [
                 'enable' => 'Enable customer recently viewed products',
@@ -192,6 +193,7 @@ return [
             'enable_recaptcha_in_register_page' => 'Enable Recaptcha in the registration page',
             'enable_math_captcha_in_register_page' => 'Enable Math captcha in the customer registration page',
             'enable_recaptcha_in_register_page_description' => 'Need to setup Captcha in Admin -> Settings -> General first.',
+            'login_using_phone' => 'Sign in with phone number instead of email',
         ],
     ],
     'shipping' => [
@@ -272,6 +274,13 @@ return [
     'sale_popup' => [
         'name' => 'Sale Popup',
         'description' => 'Customize your sale popup settings with ease',
+    ],
+    'flash_sale' => [
+        'name' => 'Flash Sale',
+        'description' => 'View and update flash sale settings',
+        'enable' => 'Enable flash sale',
+        'show_sale_count_left' => 'Show sale count left',
+        'show_sale_count_left_description' => 'This option will show the number of products left in the flash sale.',
     ],
     'payment_method_cod_minimum_amount' => 'Minimum order amount - :currency (Optional)',
     'display_bank_info_at_the_checkout_success_page' => 'Display bank info at the checkout success page?',

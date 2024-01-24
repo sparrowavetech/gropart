@@ -157,7 +157,7 @@ class ProductCategoryHelper
         ])->render();
     }
 
-    public function getProductCategoriesWithUrl(array $categoryIds = []): Collection
+    public function getProductCategoriesWithUrl(array $categoryIds = [], array $condition = [], int $limit = null): Collection
     {
         $query = ProductCategory::query()
             ->toBase()
@@ -168,35 +168,39 @@ class ProductCategoryHelper
                 'parent_id',
                 DB::raw('CONCAT(slugs.prefix, "/", slugs.key) as url'),
                 'icon',
+                'image',
                 'icon_image',
             ])
             ->leftJoin('slugs', function (JoinClause $join) {
                 $join
                     ->on('slugs.reference_id', 'ec_product_categories.id')
                     ->where('slugs.reference_type', ProductCategory::class);
-            });
-
-        if ($this->isEnabledMultiLanguages()) {
-            $query = $query
-                ->leftJoin('slugs_translations as st', function (JoinClause $join) {
-                    $join
-                        ->on('st.slugs_id', 'slugs.id')
-                        ->where('st.lang_code', Language::getCurrentLocale());
-                })
-                ->addSelect(DB::raw('IF(st.key IS NOT NULL, CONCAT(st.prefix, "/", st.key), CONCAT(slugs.prefix, "/", slugs.key)) as url'));
-        }
-
-        $query = $query
+            })
+            ->when($this->isEnabledMultiLanguages(), function (Builder $query) {
+                $query
+                    ->leftJoin('slugs_translations as st', function (JoinClause $join) {
+                        $join
+                            ->on('st.slugs_id', 'slugs.id')
+                            ->where('st.lang_code', Language::getCurrentLocaleCode());
+                    })
+                    ->addSelect(
+                        DB::raw(
+                            'IF(st.key IS NOT NULL, CONCAT(st.prefix, "/", st.key), CONCAT(slugs.prefix, "/", slugs.key)) as url'
+                        )
+                    );
+            })
             ->orderBy('ec_product_categories.order')
             ->orderByDesc('ec_product_categories.created_at')
             ->when(
                 ! empty($categoryIds),
                 fn (Builder $query) => $query->whereIn('ec_product_categories.id', $categoryIds)
-            );
+            )
+            ->when($limit > 0, fn ($query) => $query->limit($limit))
+            ->when($condition, fn ($query) => $query->where($condition));
 
         $query = $this->applyQuery($query);
 
-        return $query->get();
+        return $query->get()->unique('id');
     }
 
     public function applyQuery(Builder $query): Builder
@@ -206,7 +210,7 @@ class ProductCategoryHelper
                 ->leftJoin('ec_product_categories_translations as ct', function (JoinClause $join) {
                     $join
                         ->on('ec_product_categories_id', 'ec_product_categories.id')
-                        ->where('ct.lang_code', Language::getCurrentLocale());
+                        ->where('ct.lang_code', Language::getCurrentLocaleCode());
                 })
                 ->addSelect(DB::raw('IF(ct.name IS NOT NULL, ct.name, ec_product_categories.name) as name'));
         }

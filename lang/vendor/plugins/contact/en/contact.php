@@ -68,7 +68,10 @@ return [
         'blacklist_keywords' => 'Blacklist keywords',
         'blacklist_keywords_placeholder' => 'keywords...',
         'blacklist_keywords_helper' => 'Blacklist contact requests if it includes those keywords in the content field (separate by comma).',
-        'enable_math_captcha_in_contact_form' => 'Enable Math Captcha in the contact form?',
+        'blacklist_email_domains' => 'Blacklist email domains',
+        'blacklist_email_domains_placeholder' => 'domain...',
+        'blacklist_email_domains_helper' => 'Blacklist contact requests if the email domain is in blacklist domains (separate by comma).',
+        'enable_math_captcha' => 'Enable math captcha?',
     ],
     'no_reply' => 'No reply yet!',
     'reply' => 'Reply',
@@ -77,5 +80,4 @@ return [
     'shortcode_description' => 'Add a contact form',
     'shortcode_content_description' => 'Add shortcode [contact-form][/contact-form] to editor?',
     'message_sent_success' => 'Message sent successfully!',
-    'dropdown_show_label' => 'Show contacts',
 ];

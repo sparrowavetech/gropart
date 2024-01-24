@@ -85,7 +85,7 @@
                             {{ trans('plugins/ecommerce::order.status') }}:
                         </x-core::table.body.cell>
                         <x-core::table.body.cell class="text-end">
-                            {!! $returnRequest->return_status->toHtml() !!}
+                            {!! BaseHelper::clean($returnRequest->return_status->toHtml()) !!}
                         </x-core::table.body.cell>
                     </x-core::table.body.row>
                 </x-core::table.body>

@@ -1,18 +1,13 @@
 @extends(EcommerceHelper::viewPath('customers.master'))
+
 @section('content')
     @include('plugins/ecommerce::themes.customers.product-reviews.icons')
-    <div class="section-header">
-        <h3>{{ SeoHelper::getTitle() }}</h3>
-    </div>
-    <div class="section-content product-reviews-page">
-        <ul
-            class="nav nav-tabs nav-fill"
-            role="tablist"
-        >
-            <li
-                class="nav-item"
-                role="presentation"
-            >
+
+    <h3 class="customer-page-title mb-4">{{ SeoHelper::getTitle() }}</h3>
+
+    <div class="product-reviews-page">
+        <ul class="nav nav-tabs nav-fill" role="tablist">
+            <li class="nav-item" role="presentation">
                 <button
                     class="nav-link @if (!request()->has('page')) active @endif"
                     id="waiting-tab"
@@ -24,12 +19,11 @@
                     role="tab"
                     aria-controls="waiting-tab-pane"
                     aria-selected="true"
-                >{{ __('Waiting for your review') }} ({{ $products->count() }})</button>
+                >
+                    {{ __('Waiting for your review') }} ({{ $products->count() }})
+                </button>
             </li>
-            <li
-                class="nav-item"
-                role="presentation"
-            >
+            <li class="nav-item" role="presentation">
                 <button
                     class="nav-link @if (request()->has('page')) active @endif"
                     id="reviewed-tab"
@@ -41,61 +35,40 @@
                     role="tab"
                     aria-controls="reviewed-tab-pane"
                     aria-selected="false"
-                >{{ __('Reviewed') }} ({{ $reviews->total() }})</button>
+                >
+                    {{ __('Reviewed') }} ({{ $reviews->total() }})
+                </button>
             </li>
         </ul>
 
-        <div class="tab-content border border-top-0 p-2">
-            <div
-                class="tab-pane fade @if (!request()->has('page')) show active @endif"
-                id="waiting-tab-pane"
-                role="tabpanel"
-                aria-labelledby="waiting-tab"
-                tabindex="0"
-            >
+        <div class="tab-content pt-3">
+            <div class="tab-pane fade @if (!request()->has('page')) show active @endif" id="waiting-tab-pane" role="tabpanel" aria-labelledby="waiting-tab" tabindex="0">
                 @if ($products->isNotEmpty())
-                    <div class="row row-cols-md-2 row-cols-1 gx-2">
+                    <div class="row row-cols-md-2 row-cols-1 g-3">
                         @foreach ($products as $product)
-                            <div
-                                class="col mt-3 ecommerce-product-item"
-                                data-id="{{ $product->id }}"
-                            >
-                                <div class="card mb-3 p-3">
-                                    <div class="row g-1">
-                                        <div class="col-md-4">
-                                            <img
-                                                class="img-fluid rounded-start ecommerce-product-image"
-                                                src="{{ RvMedia::getImageUrl($product->order_product_image ?: $product->image, 'thumb', false, RvMedia::getDefaultImage()) }}"
-                                                alt="{{ $product->name }}"
-                                            >
-                                        </div>
-                                        <div class="col-md-8">
-                                            <h6 class="card-title ecommerce-product-name">
-                                                {{ $product->order_product_name ?: $product->name }}</h6>
+                            <div class="col">
+                                <div class="ecommerce-product-item border p-3" data-id="{{ $product->id }}">
+                                    <div class="d-flex gap-2">
+                                        {{ RvMedia::image($product->order_product_image ?: $product->image, $product->name, 'thumb', true, ['class' => 'img-fluid rounded-start ecommerce-product-image']) }}
+
+                                        <div>
+                                            <a href="{{ $product->url }}">
+                                                <h6 class="card-title ecommerce-product-name">
+                                                    {!! BaseHelper::clean($product->order_product_name ?: $product->name) !!}
+                                                </h6>
+                                            </a>
+
                                             @if ($product->order_completed_at)
-                                                <div class="text-secondary">
-                                                    <span class="d-inline-block me-1">{{ __('Order completed at') }}:</span>
+                                                <div class="text-muted mt-1">
+                                                    {{ __('Order completed at') }}:
                                                     <time>{{ Carbon\Carbon::parse($product->order_completed_at)->translatedFormat('M d, Y h:m') }}</time>
                                                 </div>
                                             @endif
 
-                                            <div
-                                                class="d-flex ecommerce-product-star mt-2"
-                                                style="max-width: 140px"
-                                            >
+                                            <div class="d-flex ecommerce-product-star mt-1 w-50">
                                                 @for ($i = 5; $i >= 1; $i--)
                                                     <label class="order-{{ $i }}">
-                                                        <span
-                                                            class="ecommerce-icon"
-                                                            data-star="{{ $i }}"
-                                                        >
-                                                            <svg>
-                                                                <use
-                                                                    href="#ecommerce-icon-star"
-                                                                    xlink:href="#ecommerce-icon-star"
-                                                                ></use>
-                                                            </svg>
-                                                        </span>
+                                                        <x-core::icon name="ti ti-star-filled" class="ecommerce-icon" data-star="{{ $i }}" />
                                                     </label>
                                                 @endfor
                                             </div>
@@ -106,23 +79,15 @@
                         @endforeach
                     </div>
                 @else
-                    <div class="alert alert-info">
-                        <span>{{ __('You do not have any products to review yet. Just shopping!') }}</span>
-                    </div>
+                    <div role="alert" class="alert alert-info">{{ __('You do not have any products to review yet. Just shopping!') }}</div>
                 @endif
             </div>
-            <div
-                class="tab-pane fade @if (request()->has('page')) show active @endif"
-                id="reviewed-tab-pane"
-                role="tabpanel"
-                aria-labelledby="reviewed-tab"
-                tabindex="0"
-            >
+
+            <div class="tab-pane fade @if (request()->has('page')) show active @endif" id="reviewed-tab-pane" role="tabpanel" aria-labelledby="reviewed-tab" tabindex="0">
                 @include('plugins/ecommerce::themes.customers.product-reviews.reviewed')
             </div>
         </div>
 
         @include('plugins/ecommerce::themes.customers.product-reviews.modal')
     </div>
-
 @endsection

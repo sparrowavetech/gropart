@@ -5,14 +5,14 @@
 <header>
     <h3>{{ $post->name }}</h3>
     <div>
-        @if (!$post->categories->isEmpty())
+        @if ($post->categories->isNotEmpty())
             <span>
                 <a href="{{ $post->categories->first()->url }}">{{ $post->categories->first()->name }}</a>
             </span>
         @endif
         <span>{{ $post->created_at->format('M d, Y') }}</span>
 
-        @if (!$post->tags->isEmpty())
+        @if ($post->tags->isNotEmpty())
             <span>
                 @foreach ($post->tags as $tag)
                     <a href="{{ $tag->url }}">{{ $tag->name }}</a>

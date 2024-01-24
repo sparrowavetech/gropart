@@ -116,7 +116,7 @@ class LanguageManagement {
                     $('#lang_locale').val(language.lang_locale)
                     $('#lang_code').val(language.lang_code)
                     $('#flag_list').val(language.lang_flag).trigger('change')
-                    $(`input[name=lang_rtl][value=${language.lang_is_rtl}]`).prop('checked', true)
+                    $(`input[name=lang_rtl][value="${language.lang_is_rtl ? 1 : 0}"]`).prop('checked', true)
                     $('#lang_order').val(language.lang_order)
 
                     $('#btn-language-submit').prop('id', 'btn-language-submit-edit').text('Update')
@@ -152,11 +152,16 @@ class LanguageManagement {
         return $(
             `<div>
                 <span class="dropdown-item-indicator">
-                    <img src="${$('#language_flag_path').val()}${state.element.value.toLowerCase()}.svg" class="flag" style="height: 16px;" alt="${state.text}">
+                    <img src="${$(
+                        '#language_flag_path'
+                    ).val()}${state.element.value.toLowerCase()}.svg" class="flag" style="height: 16px;" alt="${
+                        state.text
+                    }">
                 </span>
                 <span>${state.text}</span>
             </div
-        `)
+        `
+        )
     }
 
     static createOrUpdateLanguage(id, name, locale, code, flag, order, isRTL, edit) {
@@ -194,7 +199,7 @@ class LanguageManagement {
                 $('#lang_name').val('')
                 $('#lang_locale').val('')
                 $('#lang_code').val('')
-                $('input[name=lang_rtl][value=0]').prop('checked', true)
+                $('input[name=lang_rtl][value="0"]').prop('checked', true)
                 $('#flag_list').val('').trigger('change')
 
                 $('#btn-language-submit-edit').prop('id', 'btn-language-submit').text('Add new language')

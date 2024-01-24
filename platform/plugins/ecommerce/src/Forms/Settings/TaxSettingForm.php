@@ -21,18 +21,17 @@ class TaxSettingForm extends SettingForm
             ->add('ecommerce_tax_enabled', 'onOffCheckbox', [
                 'label' => trans('plugins/ecommerce::setting.tax.form.enable_tax'),
                 'value' => EcommerceHelper::isTaxEnabled(),
+                'wrapper' => [
+                    'class' => 'mb-0',
+                ],
                 'attr' => [
                     'data-bb-toggle' => 'collapse',
                     'data-bb-target' => '.tax-settings',
                 ],
             ])
-            ->add('display_tax_fields_at_checkout_page', 'onOffCheckbox', [
-                'label' => trans('plugins/ecommerce::setting.tax.form.display_tax_fields_at_checkout_page'),
-                'value' => EcommerceHelper::isDisplayTaxFieldsAtCheckoutPage(),
-            ])
             ->add('open_fieldset_tax_settings', 'html', [
                 'html' => sprintf(
-                    '<fieldset class="form-fieldset tax-settings" style="display: %s;" data-bb-value="1">',
+                    '<fieldset class="form-fieldset mt-3 tax-settings" style="display: %s;" data-bb-value="1">',
                     EcommerceHelper::isTaxEnabled() ? 'block' : 'none'
                 ),
             ])
@@ -48,6 +47,10 @@ class TaxSettingForm extends SettingForm
             ->add('display_product_price_including_taxes', 'onOffCheckbox', [
                 'label' => trans('plugins/ecommerce::setting.tax.form.display_product_price_including_taxes'),
                 'value' => EcommerceHelper::isDisplayProductIncludingTaxes(),
+            ])
+            ->add('display_tax_fields_at_checkout_page', 'onOffCheckbox', [
+                'label' => trans('plugins/ecommerce::setting.tax.form.display_tax_fields_at_checkout_page'),
+                'value' => EcommerceHelper::isDisplayTaxFieldsAtCheckoutPage(),
             ])
             ->add('close_fieldset_tax_settings', 'html', [
                 'html' => '</fieldset>',

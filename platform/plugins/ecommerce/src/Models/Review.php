@@ -6,6 +6,7 @@ use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Models\BaseModel;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Review extends BaseModel
 {
@@ -28,17 +29,19 @@ class Review extends BaseModel
 
     protected static function booted(): void
     {
-        self::creating(function (Review $review) {
+        static::creating(function (Review $review) {
             if (! $review->images || ! is_array($review->images) || ! count($review->images)) {
                 $review->images = null;
             }
         });
 
-        self::updating(function (Review $review) {
+        static::updating(function (Review $review) {
             if (! $review->images || ! is_array($review->images) || ! count($review->images)) {
                 $review->images = null;
             }
         });
+
+        static::deleting(fn (Review $review) => $review->reply()->delete());
     }
 
     public function user(): BelongsTo
@@ -49,6 +52,11 @@ class Review extends BaseModel
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class)->withDefault();
+    }
+
+    public function reply(): HasOne
+    {
+        return $this->hasOne(ReviewReply::class);
     }
 
     protected function productName(): Attribute

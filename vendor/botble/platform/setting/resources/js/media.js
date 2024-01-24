@@ -1,4 +1,4 @@
-$( document ).ready(function () {
+$(document).ready(function () {
     $('.generate-thumbnails-trigger-button').on('click', (event) => {
         event.preventDefault()
         const _self = $(event.currentTarget)
@@ -6,7 +6,7 @@ $( document ).ready(function () {
 
         _self.text(_self.data('saving'))
 
-        const $form = _self.closest('form');
+        const $form = _self.closest('form')
 
         $httpClient
             .make()
@@ -23,7 +23,7 @@ $( document ).ready(function () {
 
         Botble.showButtonLoading(_self)
 
-        const $form = _self.closest('form');
+        const $form = _self.closest('form')
 
         $httpClient
             .make()

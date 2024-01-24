@@ -79,7 +79,8 @@ $(() => {
         .on('show.bs.modal', '#simple-slider-item-modal', (e) => {
             const modal = $(e.currentTarget)
 
-            $httpClient.make()
+            $httpClient
+                .make()
                 .withLoading(modal.find('.modal-content'))
                 .get($(e.relatedTarget).prop('href'))
                 .then(({ data }) => {
@@ -97,7 +98,8 @@ $(() => {
             const modal = button.closest('.modal')
             const form = modal.find('form')
 
-            $httpClient.make()
+            $httpClient
+                .make()
                 .withLoading(form)
                 .withButtonLoading(button)
                 .post(form.prop('action'), form.serialize())

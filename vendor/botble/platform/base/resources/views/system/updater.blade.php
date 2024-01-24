@@ -105,8 +105,8 @@
                             first-step="{{ SystemUpdaterStepEnum::firstStep() }}"
                             first-step-message="{{ SystemUpdaterStepEnum::DOWNLOAD()->message() }}"
                             last-step="{{ SystemUpdaterStepEnum::lastStep() }}"
-                            :is-outdated="{{ json_encode($isOutdated) }}"
-                            :is-activated="{{ json_encode($activated) }}"
+                            :is-outdated="{{ Js::encode($isOutdated) }}"
+                            :is-activated="{{ Js::encode($activated) }}"
                             v-slot="{ performUpdate }"
                         >
                             @if (!$isOutdated)

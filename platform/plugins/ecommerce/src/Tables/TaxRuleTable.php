@@ -13,6 +13,7 @@ use Botble\Table\Actions\EditAction;
 use Botble\Table\BulkActions\DeleteBulkAction;
 use Botble\Table\Columns\Column;
 use Botble\Table\Columns\CreatedAtColumn;
+use Botble\Table\Columns\FormattedColumn;
 use Botble\Table\Columns\IdColumn;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -78,14 +79,18 @@ class TaxRuleTable extends TableAbstract
     {
         $columns = [
             IdColumn::make(),
-            Column::make('country')
-                ->title(trans('plugins/ecommerce::tax.country')),
-            Column::make('state')
-                ->title(trans('plugins/ecommerce::tax.state')),
-            Column::make('city')
-                ->title(trans('plugins/ecommerce::tax.city')),
-            Column::make('zip_code')
-                ->title(trans('plugins/ecommerce::tax.zip_code')),
+            FormattedColumn::make('country')
+                ->title(trans('plugins/ecommerce::tax.country'))
+                ->withEmptyState(),
+            FormattedColumn::make('state')
+                ->title(trans('plugins/ecommerce::tax.state'))
+                ->withEmptyState(),
+            FormattedColumn::make('city')
+                ->title(trans('plugins/ecommerce::tax.city'))
+                ->withEmptyState(),
+            FormattedColumn::make('zip_code')
+                ->title(trans('plugins/ecommerce::tax.zip_code'))
+                ->withEmptyState(),
             CreatedAtColumn::make(),
         ];
 

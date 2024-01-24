@@ -2,6 +2,7 @@
 
 return [
     'translations' => 'Translations',
+    'translations_description' => 'Translate all words in system.',
     'export_warning' => 'Warning, translations are not visible until they are exported back to lang folder. Please use "Publish translations" button to apply changes.',
     'import_done' => 'Done importing, processed :counter items! Reload this page to refresh the groups!',
     'translation_manager' => 'Translations Manager',
@@ -13,12 +14,11 @@ return [
     'publish_translations' => 'Publish translations',
     'back' => 'Back',
     'edit_title' => 'Enter translation',
-    'all' => 'All',
+    'choose_group_msg' => 'Choose a group to display the group translations. If no groups are visible, make sure you have imported the translations.',
+    'choose_a_group' => 'Choose a group',
     'locales' => 'Locales',
-    'no_translations' => 'No translations found for :locale, click on the import button to import translations.',
-    'locales_description' => 'Manage and download locales',
-    'theme-translations' => 'Theme Translations',
-    'admin-translations' => 'Other Translations',
+    'theme-translations' => 'Theme translations',
+    'admin-translations' => 'Other translations',
     'translate_from' => 'Translate from',
     'to' => 'to',
     'no_other_languages' => 'No other language to translate!',
@@ -38,21 +38,10 @@ return [
     'download' => 'Download',
     'select_locale' => 'Select locale',
     'theme_translations_instruction' => 'Click on text to translate. Do NOT translate variables, Eg. :username, :query, :link...',
+    'import_available_locale' => 'Or import available locale from our GitHub repository',
     'add_new_locale' => 'Add new locale',
+    'download_locale' => 'Download locale',
+    'import_available_locale_confirmation' => 'Download locale from GitHub',
+    'import_available_locale_confirmation_content' => 'Are you sure you want to download this locale? It will be downloaded into :lang_path, you can delete it later if you want.',
     'is_default' => 'Is default?',
-    'localization' => 'Localization',
-    'panel' => [
-        'locales' => [
-            'title' => 'Locales',
-            'description' => 'View, download and import locales',
-        ],
-        'theme-translations' => [
-            'title' => 'Theme Translations',
-            'description' => 'Manage the theme translations',
-        ],
-        'admin-translations' => [
-            'title' => 'Other Translations',
-            'description' => 'Manage the other translations (admin, plugins, packages...)',
-        ],
-    ],
 ];

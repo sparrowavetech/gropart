@@ -91,6 +91,7 @@ return [
         'auto_generate_sku' => 'Auto generate SKU?',
         'featured_image' => 'Featured image (optional)',
         'product_id' => 'Product ID',
+        'price_sale_percent_helper' => 'Discount :percent from original price.',
     ],
     'price' => 'Price',
     'quantity' => 'Quantity',
@@ -176,7 +177,6 @@ return [
         'external_link_download' => 'External link download',
         'generate_license_code_after_purchasing_product' => 'Generate license code after purchasing this product?',
     ],
-    'frequently_bought_together'=>'Frequently Bought Together',
     'this_action_will_reload_page' => 'This action will reload the page to update the data!',
     'select' => 'Select',
     'set_this_variant_as_default' => 'Set this variant as default',
@@ -185,5 +185,11 @@ return [
         'title' => 'Price type',
         'fixed' => 'Fixed',
         'percent' => 'Percent',
+    ],
+    'cross_sell_help' => [
+        'price' => '* Price field',
+        'price_description' => 'Enter the amount you want to reduce from the original price. Example: If the original price is $100, enter 20 to reduce the price to $80.',
+        'type' => '* Type field',
+        'type_description' => 'Choose the discount type: Fixed (reduce a specific amount) or Percent (reduce by a percentage).',
     ],
 ];

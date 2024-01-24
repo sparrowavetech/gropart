@@ -285,6 +285,15 @@ class ShortcodeCompiler
         $this->registered[$key]['admin_config'] = $html;
     }
 
+    public function modifyAdminConfig(string $key, callable $callback): void
+    {
+        if (! isset($this->registered[$key]['admin_config'])) {
+            return;
+        }
+
+        $this->registered[$key]['admin_config_modifier'] = $callback;
+    }
+
     public function getAttributes(string $value): array
     {
         $pattern = $this->getRegex();

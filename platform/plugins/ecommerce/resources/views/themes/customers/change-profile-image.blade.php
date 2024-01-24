@@ -3,7 +3,7 @@
 @section('content')
     <div class="panel panel-default">
         <div class="panel-heading">
-            <h2 class="customer-page-title">{{ __('Change avatar') }}</h2>
+            <h2 class="customer-page-title mb-4">{{ __('Change avatar') }}</h2>
         </div>
         <div class="panel-body">
 

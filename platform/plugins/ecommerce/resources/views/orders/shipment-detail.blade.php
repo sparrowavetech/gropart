@@ -16,7 +16,7 @@
             <x-slot:title>
                 {{ trans('plugins/ecommerce::shipping.status') }}
             </x-slot:title>
-            {!! $shipment->status->toHtml() !!}
+            {!! BaseHelper::clean($shipment->status->toHtml()) !!}
         </x-core::datagrid.item>
 
         <x-core::datagrid.item>
@@ -60,7 +60,7 @@
     </x-core::datagrid>
 </x-core::card.body>
 
-@if ($shipment->status != Botble\Ecommerce\Enums\ShippingStatusEnum::CANCELED)
+@if ($shipment->status != Botble\Ecommerce\Enums\ShippingStatusEnum::CANCELED && $order->status != Botble\Ecommerce\Enums\OrderStatusEnum::CANCELED)
     <x-core::card.footer class="shipment-actions-wrapper btn-list">
         @if (in_array($shipment->status, [
             Botble\Ecommerce\Enums\ShippingStatusEnum::NOT_APPROVED,

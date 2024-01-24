@@ -4,7 +4,6 @@ namespace Botble\Translation\Http\Controllers;
 
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
-use Botble\Base\Supports\Breadcrumb;
 use Botble\Base\Supports\Language;
 use Botble\Setting\Http\Controllers\SettingController;
 use Botble\Translation\Http\Requests\TranslationRequest;
@@ -20,19 +19,11 @@ class TranslationController extends SettingController
     {
     }
 
-    protected function breadcrumb(): Breadcrumb
-    {
-        return parent::breadcrumb()
-            ->add(trans('plugins/translation::translation.translations'), route('translations.locales'));
-    }
-
     public function index(Request $request, TranslationTable $translationTable)
     {
         $this->pageTitle(trans('plugins/translation::translation.admin-translations'));
 
-        Assets::addScripts(['bootstrap-editable'])
-            ->addStyles(['bootstrap-editable'])
-            ->addScriptsDirectly('vendor/core/plugins/translation/js/translation.js')
+        Assets::addScriptsDirectly('vendor/core/plugins/translation/js/translation.js')
             ->addStylesDirectly('vendor/core/plugins/translation/css/translation.css');
 
         $locales = Language::getAvailableLocales();

@@ -1,35 +1,44 @@
 @if ($discounts->isNotEmpty())
-    <div class="checkout__coupon-list">
-        @if ($discounts->count() > 2)
-            <div class="checkout__coupon-navigation">
-                <button class="checkout__coupon-prev" onclick="navigateDiscounts('prev')"><i class="fas fa-chevron-left"></i></button>
-                <button class="checkout__coupon-next" onclick="navigateDiscounts('next')"><i class="fas fa-chevron-right"></i></button>
-            </div>
-        @endif
+    <div class="checkout__coupon-section">
+        <div class="checkout__coupon-heading">
+            <img alt="MÃ GIẢM GIÁ" width="32" height="32" src="{{ asset('vendor/core/plugins/ecommerce/images/code_dis.gif') }}">
+            {{ __('Coupon codes (:count)', ['count' => $discounts->count()]) }}
+        </div>
 
-        @foreach ($discounts as $discount)
-            <div
-                @class(['checkout__coupon-item', 'active' => session()->has('applied_coupon_code') && session()->get('applied_coupon_code') === $discount->code])
-                data-discount-code="{{ $discount->code }}"
-            >
-                <div class="checkout__coupon-item-icon"></div>
-                <div class="checkout__coupon-item-content">
-                    <div class="checkout__coupon-item-title">
-                        <h4>{{ $discount->code }}</h4>
-                        @if($discount->quantity > 0)
-                            <span class="checkout__coupon-item-count">
-                                ({{ __('Left :left', ['left' => $discount->left_quantity]) }})
-                            </span>
-                        @endif
-                    </div>
-                    @if ($discount->description)
-                        <div class="checkout__coupon-item-description">
-                            {{ $discount->description }}
+        <div class="checkout__coupon-list">
+            @foreach ($discounts as $discount)
+                <div
+                    @class(['checkout__coupon-item', 'active' => session()->has('applied_coupon_code') && session()->get('applied_coupon_code') === $discount->code])
+                >
+                    <div class="checkout__coupon-item-icon"></div>
+                    <div class="checkout__coupon-item-content">
+                        <div class="checkout__coupon-item-title">
+                            <h4>{{ $discount->type_option === 'amount' ? format_price($discount->value) : $discount->value . '%' }}</h4>
+                            @if($discount->quantity > 0)
+                                <span class="checkout__coupon-item-count">
+                                    ({{ __('Left :left', ['left' => $discount->left_quantity]) }})
+                                </span>
+                            @endif
                         </div>
-                    @endif
+                        <div class="checkout__coupon-item-description">
+                            {{ $discount->description ?: get_discount_description($discount) }}
+                        </div>
+                        <div class="checkout__coupon-item-code">
+                            <span>{{ $discount->code }}</span>
+                            @if (!session()->has('applied_coupon_code') || session()->get('applied_coupon_code') !== $discount->code)
+                                <button type="button" data-bb-toggle="apply-coupon-code" data-discount-code="{{ $discount->code }}">
+                                    {{ __('Apply') }}
+                                </button>
+                            @else
+                                <button type="button" class="remove-coupon-code" data-url="{{ route('public.coupon.remove') }}">
+                                    {{ __('Remove') }}
+                                </button>
+                            @endif
+                        </div>
+                    </div>
                 </div>
-            </div>
-        @endforeach
+            @endforeach
+        </div>
     </div>
 @endif
 

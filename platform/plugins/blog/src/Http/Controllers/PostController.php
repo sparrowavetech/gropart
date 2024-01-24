@@ -58,6 +58,8 @@ class PostController extends BaseController
 
             $post = $form->getModel();
 
+            $form->fireModelEvents($post);
+
             $tagService->execute($request, $post);
 
             $categoryService->execute($request, $post);
@@ -88,13 +90,15 @@ class PostController extends BaseController
             ->saving(function (PostForm $form) use ($categoryService, $tagService) {
                 $request = $form->getRequest();
 
-                $model = $form->getModel();
-                $model->fill($request->input());
-                $model->save();
+                $post = $form->getModel();
+                $post->fill($request->input());
+                $post->save();
 
-                $tagService->execute($request, $model);
+                $form->fireModelEvents($post);
 
-                $categoryService->execute($request, $model);
+                $tagService->execute($request, $post);
+
+                $categoryService->execute($request, $post);
             });
 
         return $this

@@ -18,6 +18,7 @@
         Arr::set($options['attr'], 'class', str_replace('form-control', '', $options['attr']['class']));
     @endphp
     {!! Form::onOff($name, $options['value'], $options['attr']) !!}
+
     @include('core/base::forms.partials.help-block')
 @endif
 

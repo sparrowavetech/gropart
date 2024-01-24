@@ -2,24 +2,19 @@
 
 namespace Botble\Ecommerce\Http\Controllers;
 
-use Botble\Base\Events\DeletedContentEvent;
-use Botble\Base\Facades\Assets;
+use Botble\Base\Http\Actions\DeleteResourceAction;
+use Botble\Base\Supports\Breadcrumb;
 use Botble\Ecommerce\Forms\ProductAttributeSetForm;
 use Botble\Ecommerce\Http\Requests\ProductAttributeSetsRequest;
 use Botble\Ecommerce\Models\ProductAttributeSet;
 use Botble\Ecommerce\Services\ProductAttributes\StoreAttributeSetService;
 use Botble\Ecommerce\Tables\ProductAttributeSetsTable;
-use Exception;
-use Illuminate\Http\Request;
 
 class ProductAttributeSetsController extends BaseController
 {
-    public function __construct()
+    protected function breadcrumb(): Breadcrumb
     {
-        parent::__construct();
-
-        $this
-            ->breadcrumb()
+        return parent::breadcrumb()
             ->add(trans('plugins/ecommerce::product-attributes.name'), route('product-attribute-sets.index'));
     }
 
@@ -33,15 +28,6 @@ class ProductAttributeSetsController extends BaseController
     public function create()
     {
         $this->pageTitle(trans('plugins/ecommerce::product-attributes.create'));
-
-        Assets::addScripts(['spectrum', 'jquery-ui'])
-            ->addStyles(['spectrum'])
-            ->addStylesDirectly([
-                asset('vendor/core/plugins/ecommerce/css/ecommerce-product-attributes.css'),
-            ])
-            ->addScriptsDirectly([
-                asset('vendor/core/plugins/ecommerce/js/ecommerce-product-attributes.js'),
-            ]);
 
         return ProductAttributeSetForm::create()->renderForm();
     }
@@ -65,15 +51,6 @@ class ProductAttributeSetsController extends BaseController
     {
         $this->pageTitle(trans('plugins/ecommerce::product-attributes.edit'));
 
-        Assets::addScripts(['spectrum', 'jquery-ui'])
-            ->addStyles(['spectrum'])
-            ->addStylesDirectly([
-                'vendor/core/plugins/ecommerce/css/ecommerce-product-attributes.css',
-            ])
-            ->addScriptsDirectly([
-                'vendor/core/plugins/ecommerce/js/ecommerce-product-attributes.js',
-            ]);
-
         return ProductAttributeSetForm::createFromModel($productAttributeSet)
             ->renderForm();
     }
@@ -93,21 +70,8 @@ class ProductAttributeSetsController extends BaseController
             ->withUpdatedSuccessMessage();
     }
 
-    public function destroy(ProductAttributeSet $productAttributeSet, Request $request)
+    public function destroy(ProductAttributeSet $productAttributeSet)
     {
-        try {
-            $productAttributeSet->delete();
-
-            event(new DeletedContentEvent(PRODUCT_ATTRIBUTE_SETS_MODULE_SCREEN_NAME, $request, $productAttributeSet));
-
-            return $this
-                ->httpResponse()
-                ->setMessage(trans('core/base::notices.delete_success_message'));
-        } catch (Exception $exception) {
-            return $this
-                ->httpResponse()
-                ->setError()
-                ->setMessage($exception->getMessage());
-        }
+        return DeleteResourceAction::make($productAttributeSet);
     }
 }

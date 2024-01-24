@@ -15,6 +15,7 @@ class StoreLocatorSettingController extends BaseController
         Assets::addScripts(['jquery-ui'])
             ->addScriptsDirectly([
                 'vendor/core/plugins/ecommerce/js/store-locator.js',
+                'vendor/core/plugins/location/js/location.js',
             ]);
 
         $storeLocators = StoreLocator::query()->get();

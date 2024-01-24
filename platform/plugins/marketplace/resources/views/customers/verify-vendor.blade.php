@@ -42,12 +42,14 @@
                         @endif
                     </div>
 
-                    <div class="hr my-3"></div>
+                    @if($vendor->store->phone)
+                        <div class="hr my-3"></div>
 
-                    <dl class="row p-3 pt-0">
-                        <dt class="col">{{ trans('plugins/marketplace::store.store_phone') }}</dt>
-                        <dd class="col-auto">{{ $vendor->store->phone ?: 'N/A' }}</dd>
-                    </dl>
+                        <dl class="row p-3 pt-0">
+                            <dt class="col">{{ trans('plugins/marketplace::store.store_phone') }}</dt>
+                            <dd class="col-auto">{{ $vendor->store->phone }}</dd>
+                        </dl>
+                    @endif
                 </x-core::card.body>
             </x-core::card>
         </div>
@@ -77,12 +79,14 @@
                             {{ $vendor->email }}
                         </x-core::datagrid.item>
 
-                        <x-core::datagrid.item>
-                            <x-slot:title>
-                                {{ trans('plugins/marketplace::unverified-vendor.forms.vendor_phone') }}
-                            </x-slot:title>
-                            {{ $vendor->phone ?: 'N/A' }}
-                        </x-core::datagrid.item>
+                        @if ($vendor->phone)
+                            <x-core::datagrid.item>
+                                <x-slot:title>
+                                    {{ trans('plugins/marketplace::unverified-vendor.forms.vendor_phone') }}
+                                </x-slot:title>
+                                {{ $vendor->phone }}
+                            </x-core::datagrid.item>
+                        @endif
 
                         <x-core::datagrid.item>
                             <x-slot:title>

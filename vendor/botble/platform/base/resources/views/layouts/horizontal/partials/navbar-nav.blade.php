@@ -1,7 +1,7 @@
 @php
     $menuItems = DashboardMenu::getAll();
     $otherItems = $menuItems->splice(7);
-    $otherIcon = Blade::render('<x-core::icon name="ti ti-dots" />');
+    $otherIcon = BaseHelper::renderIcon('ti ti-dots');
 @endphp
 
 <ul @class(['navbar-nav', $navbarClass ?? null])>

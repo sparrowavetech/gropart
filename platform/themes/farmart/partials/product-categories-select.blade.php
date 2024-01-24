@@ -1,3 +1,6 @@
+@php
+$categories = $categories->where('is_enquiry','=' ,0);
+@endphp
 @foreach ($categories as $category)
     <option value="{{ $category->id }}">{!! BaseHelper::clean($indent) !!}{!! BaseHelper::clean($category->name) !!}</option>
     @if ($category->activeChildren->first())

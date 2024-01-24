@@ -5,7 +5,10 @@ namespace Botble\Ecommerce\Http\Controllers\Fronts;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Http\Controllers\BaseController;
+use Botble\Base\Models\BaseQueryBuilder;
 use Botble\Ecommerce\Facades\EcommerceHelper;
+use Botble\Ecommerce\Forms\Fronts\OrderTrackingForm;
+use Botble\Ecommerce\Http\Requests\Fronts\OrderTrackingRequest;
 use Botble\Ecommerce\Http\Resources\ProductVariationResource;
 use Botble\Ecommerce\Models\Order;
 use Botble\Ecommerce\Models\Product;
@@ -21,7 +24,6 @@ use Botble\SeoHelper\Facades\SeoHelper;
 use Botble\Theme\Facades\Theme;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 
 class PublicProductController extends BaseController
 {
@@ -99,6 +101,9 @@ class PublicProductController extends BaseController
                         'ec_products.quantity',
                         'ec_products.price',
                         'ec_products.sale_price',
+                        'ec_products.sale_type',
+                        'ec_products.start_date',
+                        'ec_products.end_date',
                         'ec_products.allow_checkout_when_out_of_stock',
                         'ec_products.with_storehouse_management',
                         'ec_products.stock_status',
@@ -297,7 +302,7 @@ class PublicProductController extends BaseController
             ->setData(new ProductVariationResource($product));
     }
 
-    public function getOrderTracking(Request $request)
+    public function getOrderTracking(OrderTrackingRequest $request)
     {
         if (! EcommerceHelper::isOrderTrackingEnabled()) {
             abort(404);
@@ -305,18 +310,13 @@ class PublicProductController extends BaseController
 
         $order = null;
 
-        $validator = Validator::make($request->only(['order_id', 'email']), [
-            'order_id' => 'nullable|min:1',
-            'email' => 'nullable|email',
-        ]);
-
         $title = __('Order tracking');
 
-        if ($validator->passes()) {
+        if ($request->validated()) {
             $code = $request->input('order_id');
             $email = $request->input('email');
 
-            $order = Order::query()
+            $query = Order::query()
                 ->where(function (Builder $query) use ($code) {
                     $query
                         ->where('ec_orders.code', $code)
@@ -333,7 +333,22 @@ class PublicProductController extends BaseController
                 })
                 ->with(['address', 'products'])
                 ->select('ec_orders.*')
-                ->first();
+                ->when(request()->input('phone'), function (BaseQueryBuilder $query, string $phone) {
+                    $query->orWhere(function (BaseQueryBuilder $query) use ($phone) {
+                        $query
+                            ->where(function (BaseQueryBuilder $query) {
+                                $code = request()->input('order_id');
+
+                                $query
+                                    ->where('ec_orders.code', $code)
+                                    ->orWhere('ec_orders.code', '#' . $code);
+                            })
+                            ->whereHas('address', fn ($subQuery) => $subQuery->where('phone', $phone))
+                            ->orWhereHas('user', fn ($subQuery) => $subQuery->where('phone', $phone));
+                    });
+                });
+
+            $order = apply_filters('ecommerce_order_tracking_query', $query)->first();
 
             if ($order && is_plugin_active('payment')) {
                 $order->load('payment');
@@ -347,7 +362,9 @@ class PublicProductController extends BaseController
         Theme::breadcrumb()
             ->add($title, route('public.orders.tracking'));
 
-        return Theme::scope('ecommerce.order-tracking', compact('order'), 'plugins/ecommerce::themes.order-tracking')
+        $form = OrderTrackingForm::createFromArray($request->validated());
+
+        return Theme::scope('ecommerce.order-tracking', compact('order', 'form'), 'plugins/ecommerce::themes.order-tracking')
             ->render();
     }
 

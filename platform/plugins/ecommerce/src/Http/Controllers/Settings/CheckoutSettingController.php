@@ -16,6 +16,11 @@ class CheckoutSettingController extends SettingController
 
     public function update(CheckoutSettingRequest $request)
     {
-        return $this->performUpdate($request->validated());
+        return $this->performUpdate([
+            ...$request->validated(),
+            'mandatory_form_fields_at_checkout' => $request->input('mandatory_form_fields_at_checkout', []),
+            'hide_form_fields_at_checkout' => $request->input('hide_form_fields_at_checkout', []),
+            'available_countries' => $request->boolean('available_countries_all') ? [] : $request->input('available_countries', []),
+        ]);
     }
 }

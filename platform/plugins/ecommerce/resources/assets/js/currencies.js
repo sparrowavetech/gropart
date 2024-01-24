@@ -114,36 +114,35 @@ class Currencies {
                 .then(({ data }) => {
                     if (data.error) {
                         Botble.showError(data.message)
-                    }
-                })
-
-            $httpClient.make()
-                .withButtonLoading(_self)
-                .withLoading(form.find('.swatches-container'))
-                .post(_self.data('url'))
-                .then(({ data }) => {
-                    if (!data.error) {
-                        Botble.showNotice('success', data.message)
-                        const data = data.data
-                        const template = $('#currency_template').html()
-                        let html = ''
-                        $.each(data, (index, item) => {
-                            html += template
-                                .replace(/__id__/gi, item.id)
-                                .replace(/__position__/gi, item.order)
-                                .replace(/__isPrefixSymbolChecked__/gi, item.is_prefix_symbol == 1 ? 'selected' : '')
-                                .replace(/__notIsPrefixSymbolChecked__/gi, item.is_prefix_symbol == 0 ? 'selected' : '')
-                                .replace(/__isDefaultChecked__/gi, item.is_default == 1 ? 'checked' : '')
-                                .replace(/__title__/gi, item.title)
-                                .replace(/__decimals__/gi, item.decimals)
-                                .replace(/__exchangeRate__/gi, item.exchange_rate)
-                                .replace(/__symbol__/gi, item.symbol)
-                        })
-                        setTimeout(() => {
-                            $('.swatches-container .swatches-list').html(html)
-                        }, 1000)
                     } else {
-                        Botble.showNotice('error', data.message)
+                        $httpClient.make()
+                            .withButtonLoading(_self)
+                            .withLoading(form.find('.swatches-container'))
+                            .post(_self.data('url'))
+                            .then(({ data }) => {
+                                if (!data.error) {
+                                    Botble.showNotice('success', data.message)
+                                    const template = $('#currency_template').html()
+                                    let html = ''
+                                    $.each(data.data, (index, item) => {
+                                        html += template
+                                            .replace(/__id__/gi, item.id)
+                                            .replace(/__position__/gi, item.order)
+                                            .replace(/__isPrefixSymbolChecked__/gi, item.is_prefix_symbol == 1 ? 'selected' : '')
+                                            .replace(/__notIsPrefixSymbolChecked__/gi, item.is_prefix_symbol == 0 ? 'selected' : '')
+                                            .replace(/__isDefaultChecked__/gi, item.is_default == 1 ? 'checked' : '')
+                                            .replace(/__title__/gi, item.title)
+                                            .replace(/__decimals__/gi, item.decimals)
+                                            .replace(/__exchangeRate__/gi, item.exchange_rate)
+                                            .replace(/__symbol__/gi, item.symbol)
+                                    })
+                                    setTimeout(() => {
+                                        $('.swatches-container .swatches-list').html(html)
+                                    }, 1000)
+                                } else {
+                                    Botble.showNotice('error', data.message)
+                                }
+                            })
                     }
                 })
         })

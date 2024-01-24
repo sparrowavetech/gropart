@@ -1,3 +1,17 @@
+@php
+    $shortcodes = Shortcode::getAll()
+@endphp
+
+<script>
+    window.BB_SHORTCODES = {!!
+        Js::from(
+            collect($shortcodes)->mapWithKeys(
+            fn( $shortcode, $key) => [$key => ($shortcode['name'] ?: $shortcode['description']) ?: $key]
+            )->toArray()
+        )
+    !!}
+</script>
+
 <x-core::modal
     :title="trans('packages/shortcode::shortcode.ui-blocks')"
     id="shortcode-list-modal"
@@ -6,12 +20,13 @@
     :scrollable="true"
 >
     <div class="row shortcode-list">
-        @foreach (Shortcode::getAll() as $key => $shortcode)
+        @foreach ($shortcodes as $key => $shortcode)
             @continue(!isset($shortcode['name']))
             <div class="col-xl-3 col-lg-4 col-sm-6 mb-3">
                 <label
                     class="shortcode-item-wrapper w-100"
                     data-bb-toggle="shortcode-select"
+                    data-name="{{ $shortcode['name'] }}"
                     data-description="{{ $shortcode['description'] }}"
                     href="{{ route('short-codes.ajax-get-admin-config', $key) }}"
                     data-key="{{ $key }}"
@@ -72,6 +87,7 @@
     :title="trans('core/base::forms.add_short_code')"
     id="shortcode-modal"
     class="shortcode-modal"
+    :scrollable="true"
 >
     <form class="shortcode-data-form">
         <input

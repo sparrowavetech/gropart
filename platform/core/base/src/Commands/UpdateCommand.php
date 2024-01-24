@@ -96,20 +96,12 @@ class UpdateCommand extends Command
             $progress->label('Downloading the latest update...');
             $progress->advance();
 
-            if (! $this->core->downloadUpdate($updateId, $version)) {
-                $this->components->error('Could not download updated file. Please check your license or your internet network.');
-
-                return self::FAILURE;
-            }
+            $this->core->downloadUpdate($updateId, $version);
 
             $progress->label('Updating files and database...');
             $progress->advance();
 
-            if (! $this->core->updateFilesAndDatabase($version)) {
-                $this->components->error('Could not update files & database.');
-
-                return self::FAILURE;
-            }
+            $this->core->updateFilesAndDatabase($version);
 
             $progress->label('Publishing all assets...');
             $progress->advance();

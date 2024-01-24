@@ -59,6 +59,10 @@
                 character_remain: '{{ trans('core/base::forms.character_remain') }}'
             }
         };
+
+        var RV_MEDIA_URL = {
+            'media_upload_from_editor': '{{ route('marketplace.vendor.upload-from-editor') }}'
+        };
     </script>
 
     @stack('header')

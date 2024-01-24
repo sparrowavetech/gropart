@@ -49,7 +49,7 @@ class DashboardServiceProvider extends ServiceProvider
                     'name' => 'core/base::layouts.dashboard',
                     'icon' => 'ti ti-home',
                     'route' => 'dashboard.index',
-                    'permissions' => [],
+                    'permissions' => false,
                 ]);
         });
     }

@@ -6,7 +6,7 @@ $(function () {
     let previousValue = ''
 
     const activateResult = (element) => {
-        if (! element) {
+        if (!element) {
             return
         }
 
@@ -15,7 +15,7 @@ $(function () {
     }
 
     const deactivateResult = (element) => {
-        if (! element) {
+        if (!element) {
             return
         }
 
@@ -49,7 +49,7 @@ $(function () {
     const autoSelectHandler = () => {
         const $links = getResults().find('a')
 
-        if($links.length <= 0) {
+        if ($links.length <= 0) {
             return
         }
 
@@ -62,13 +62,13 @@ $(function () {
             return
         }
 
-        if (! $selected.hasClass('active')) {
+        if (!$selected.hasClass('active')) {
             activateResult($selected)
         }
     }
 
     const navigateHandler = (e) => {
-        if (! $globalSearchModal.hasClass('show')) {
+        if (!$globalSearchModal.hasClass('show')) {
             return
         }
 
@@ -109,7 +109,7 @@ $(function () {
     }
 
     const selectHandler = (e) => {
-        if (! $globalSearchModal.hasClass('show')) {
+        if (!$globalSearchModal.hasClass('show')) {
             return
         }
 
@@ -129,7 +129,7 @@ $(function () {
     const searchHandler = (e) => {
         e.preventDefault()
 
-        if (! $globalSearchModal.hasClass('show')) {
+        if (!$globalSearchModal.hasClass('show')) {
             return
         }
 
@@ -143,11 +143,12 @@ $(function () {
 
         const $result = getResults()
 
-        $httpClient.make()
+        $httpClient
+            .make()
             .withLoading($result)
             .get($form.attr('action'), { keyword })
             .then(({ data: response }) => {
-                $result.html(response   .data)
+                $result.html(response.data)
 
                 autoSelectHandler()
             })
@@ -158,10 +159,10 @@ $(function () {
             return
         }
 
-        if ((
-            (e.code === 'Slash' || e.code === 'KeyK')
-            && (e.metaKey || e.ctrlKey)
-        ) || (e.code === 'Slash' && e.target.tagName === 'BODY')) {
+        if (
+            ((e.code === 'Slash' || e.code === 'KeyK') && (e.metaKey || e.ctrlKey)) ||
+            (e.code === 'Slash' && e.target.tagName === 'BODY')
+        ) {
             $globalSearchModal.modal('show')
         }
     })
@@ -171,9 +172,7 @@ $(function () {
     $form.on('submit', searchHandler)
 
     $globalSearchModal.on('show.bs.modal', () => {
-        getResults().html(
-            $noResultTemplate.html()
-        )
+        getResults().html($noResultTemplate.html())
     })
 
     $globalSearchModal.on('shown.bs.modal', () => {
@@ -186,7 +185,7 @@ $(function () {
     })
 
     $input.on('keydown', (e) => {
-        if(e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'Enter') {
+        if (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'Enter') {
             e.preventDefault()
             return
         }

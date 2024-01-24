@@ -1,8 +1,7 @@
 <?php
 
 return [
-    'cache_management' => 'Cache Management',
-    'cache_management_description' => 'Clear cache to make your site up to date.',
+    'cache_management' => 'Cache management',
     'cache_commands' => 'Clear cache commands',
     'commands' => [
         'clear_cms_cache' => [

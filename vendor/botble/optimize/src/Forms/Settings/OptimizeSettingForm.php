@@ -12,7 +12,6 @@ class OptimizeSettingForm extends SettingForm
         parent::setup();
 
         $this
-            ->setUrl(route('optimize.settings.update'))
             ->setSectionTitle(trans('packages/optimize::optimize.settings.title'))
             ->setSectionDescription(trans('packages/optimize::optimize.settings.description'))
             ->setValidatorClass(OptimizeSettingRequest::class)

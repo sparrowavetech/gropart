@@ -18,7 +18,7 @@ class HandleApplyProductCrossSaleService
     {
         $cart = Cart::instance('cart');
 
-        if (Cart::isEmpty()) {
+        if ($cart->isEmpty()) {
             return;
         }
 

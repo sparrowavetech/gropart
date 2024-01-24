@@ -208,10 +208,9 @@ export class ActionsService {
 
                 MessageService.showMessage('success', data.message, Helpers.trans('message.success_header'))
 
-                if (callback) {
-                    callback(data)
-                }
+                callback && callback(data)
             })
+            .catch(({ response }) => callback && callback(response.data))
             .finally(() => Helpers.hideAjaxLoading())
     }
 
@@ -234,7 +233,9 @@ export class ActionsService {
             $renamePhysicalFile
                 .closest('.form-check')
                 .find('span')
-                .text(value.is_folder ? $renamePhysicalFile.data('folder-label') : $renamePhysicalFile.data('file-label'))
+                .text(
+                    value.is_folder ? $renamePhysicalFile.data('folder-label') : $renamePhysicalFile.data('file-label')
+                )
 
             $item.find('input[name="rename_physical_file"]').on('change', function () {
                 $item.data('rename_physical_file', $(this).is(':checked'))
@@ -422,10 +423,7 @@ export class ActionsService {
                             '<i class="icon __icon__ dropdown-item-icon"></i>',
                             '<span class="icon-tabler-wrapper dropdown-item-icon">__icon__</span>'
                         )
-                        .replace(
-                            '__icon__',
-                            '<span class="icon-tabler-wrapper dropdown-item-icon">__icon__</span>'
-                        )
+                        .replace('__icon__', '<span class="icon-tabler-wrapper dropdown-item-icon">__icon__</span>')
                         .replace('__icon__', item.icon || '')
                         .replace(/__name__/gi, Helpers.trans(`actions_list.${key}.${item.action}`) || item.name)
 

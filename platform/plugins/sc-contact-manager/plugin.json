@@ -1,0 +1,11 @@
+{
+    "id": "skillcraft/sc-contact-manager",
+    "name": "Skillcraft Contact Manager",
+    "namespace": "Skillcraft\\ContactManager\\",
+    "provider": "Skillcraft\\ContactManager\\Providers\\ContactManagerServiceProvider",
+    "author": "William Troiano",
+    "url": "https://github.com/skillcraft-io",
+    "version": "2.0.0",
+    "description": "A simple contact manager plugin",
+    "require": ["skillcraft/sc-core"]
+}

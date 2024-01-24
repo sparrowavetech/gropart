@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Throwable;
 
 class PluginService
 {
@@ -230,9 +231,15 @@ class PluginService
             }
 
             Schema::disableForeignKeyConstraints();
-            if (class_exists($content['namespace'] . 'Plugin')) {
-                call_user_func([$content['namespace'] . 'Plugin', 'remove']);
+
+            try {
+                if (class_exists($content['namespace'] . 'Plugin')) {
+                    call_user_func([$content['namespace'] . 'Plugin', 'remove']);
+                }
+            } catch (Throwable $exception) {
+                BaseHelper::logError($exception);
             }
+
             Schema::enableForeignKeyConstraints();
         }
 

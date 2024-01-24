@@ -27,16 +27,6 @@ class GeneralSettingForm extends SettingForm
             ]);
 
         $availableLocales = Language::getAvailableLocales();
-        $defaultLocale = setting('locale', App::getLocale());
-
-        if (
-            BaseHelper::hasDemoModeEnabled()
-            && session('site-locale')
-            && array_key_exists(session('site-locale'), $availableLocales)
-        ) {
-            $defaultLocale = session('site-locale');
-        }
-
         $locales = collect($availableLocales)
             ->pluck('name', 'locale')
             ->map(fn ($item, $key) => $item . ' - ' . $key)
@@ -60,7 +50,17 @@ class GeneralSettingForm extends SettingForm
                     ->searchable()
                     ->toArray()
             )
-            ->when(count($locales) > 1, function (FormAbstract $form) use ($locales, $defaultLocale) {
+            ->when(count($locales) > 1, function (FormAbstract $form) use ($locales, $availableLocales) {
+                $defaultLocale = setting('locale', App::getLocale());
+
+                if (
+                    BaseHelper::hasDemoModeEnabled()
+                    && session('site-locale')
+                    && array_key_exists(session('site-locale'), $availableLocales)
+                ) {
+                    $defaultLocale = session('site-locale');
+                }
+
                 $form->add(
                     'locale',
                     SelectField::class,

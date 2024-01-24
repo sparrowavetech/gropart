@@ -20,12 +20,6 @@ class MenuForm extends FormAbstract
             ->addScriptsDirectly('vendor/core/packages/menu/js/menu.js')
             ->addStylesDirectly('vendor/core/packages/menu/css/menu.css');
 
-        $locations = [];
-
-        if ($this->getModel()) {
-            $locations = $this->getModel()->locations()->pluck('location')->all();
-        }
-
         $this
             ->model(Menu::class)
             ->setFormOption('class', 'form-save-menu')
@@ -35,10 +29,12 @@ class MenuForm extends FormAbstract
             ->addMetaBoxes([
                 'structure' => [
                     'wrap' => false,
-                    'content' => view('packages/menu::menu-structure', [
-                        'menu' => $this->getModel(),
-                        'locations' => $locations,
-                    ])->render(),
+                    'content' => function () {
+                        return view('packages/menu::menu-structure', [
+                            'menu' => $this->getModel(),
+                            'locations' => $this->getModel()->getKey() ? $this->getModel()->locations()->pluck('location')->all() : [],
+                        ])->render();
+                    },
                 ],
             ])
             ->setBreakFieldPoint('status');

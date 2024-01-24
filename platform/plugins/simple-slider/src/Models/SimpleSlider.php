@@ -27,7 +27,7 @@ class SimpleSlider extends BaseModel
 
     protected static function booted(): void
     {
-        self::deleting(function (SimpleSlider $slider) {
+        static::deleted(function (SimpleSlider $slider) {
             $slider->sliderItems()->each(fn (SimpleSliderItem $item) => $item->delete());
         });
     }

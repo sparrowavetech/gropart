@@ -1,5 +1,5 @@
 <div class="table-responsive">
-    <table class="table table-striped">
+    <table class="table table-striped table-bordered">
         <thead>
             <tr>
                 <th>{{ __('Image') }}</th>
@@ -39,9 +39,7 @@
                         <td>{{ $item->created_at->translatedFormat('M d, Y h:m') }}</td>
                         <td>
                             <span>{{ $item->star }}</span>
-                            <span class="ecommerce-icon text-primary">
-                                <x-core::icon name="ti ti-star" />
-                            </span>
+                            <x-core::icon name="ti ti-star" class="ecommerce-icon text-warning" />
                         </td>
                         <td><span title="{{ $item->comment }}">{{ Str::limit($item->comment, 120) }}</span></td>
                         <td>
@@ -49,22 +47,19 @@
                                 'url' => route('public.reviews.destroy', $item->id),
                                 'onSubmit' => 'return confirm("' . __('Do you really want to delete the review?') . '")',
                             ]) !!}
-                            <input
-                                name="_method"
-                                type="hidden"
-                                value="DELETE"
-                            >
-                            <button class="btn btn-danger btn-sm">{{ __('Delete') }}</button>
+                                <input
+                                    name="_method"
+                                    type="hidden"
+                                    value="DELETE"
+                                >
+                                <button class="btn btn-danger btn-sm">{{ __('Delete') }}</button>
                             {!! Form::close() !!}
                         </td>
                     </tr>
                 @endforeach
             @else
                 <tr>
-                    <td
-                        class="text-center"
-                        colspan="6"
-                    >{{ __('No reviews!') }}</td>
+                    <td class="text-center" colspan="6">{{ __('No reviews!') }}</td>
                 </tr>
             @endif
         </tbody>

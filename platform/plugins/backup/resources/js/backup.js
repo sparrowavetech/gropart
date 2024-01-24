@@ -63,35 +63,20 @@ class BackupManagement {
             event.preventDefault()
 
             const _self = $(event.currentTarget)
-            const form = _self.closest('form')
+            const $form = _self.closest('form')
 
-            const name = $('#name').val()
-            const description = $('#description').val()
-
-            let error = false
-
-            if (name === '' || name === null) {
-                error = true
-                Botble.showError('Backup name is required!')
-            }
-
-            if (!error) {
-                $httpClient
-                    .make()
-                    .withButtonLoading(_self)
-                    .post(form.prop('action'), {
-                        name: name,
-                        description: description,
-                    })
-                    .then(({ data }) => {
-                        backupTable.find('.no-backup-row').remove()
-                        backupTable.find('tbody').append(data.data)
-                        Botble.showSuccess(data.message)
-                    })
-                    .finally(() => {
-                        _self.closest('.modal').modal('hide')
-                    })
-            }
+            $httpClient
+                .make()
+                .withButtonLoading(_self)
+                .post($form.prop('action'), new FormData($form[0]))
+                .then(({ data }) => {
+                    backupTable.find('.no-backup-row').remove()
+                    backupTable.find('tbody').append(data.data)
+                    Botble.showSuccess(data.message)
+                })
+                .finally(() => {
+                    _self.closest('.modal').modal('hide')
+                })
         })
     }
 }

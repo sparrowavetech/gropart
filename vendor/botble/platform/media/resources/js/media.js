@@ -559,7 +559,7 @@ class MediaManagement {
             })
 
         /*Delete files*/
-        _self.$body.off('submit', '.form-delete-items').on('submit', '.form-delete-items', (event) => {
+        _self.$body.off('submit', 'form.form-delete-items').on('submit', 'form.form-delete-items', (event) => {
             event.preventDefault()
             let items = []
             let $form = $(event.currentTarget)
@@ -652,8 +652,8 @@ class MediaManagement {
         })
 
         $mainModal
-            .off('dblclick doubletap', '.js-media-list-title')
-            .on('dblclick doubletap', '.js-media-list-title', (event) => {
+            .off('dblclick doubletap', '.js-media-list-title[data-context="file"]')
+            .on('dblclick doubletap', '.js-media-list-title[data-context="file"]', (event) => {
                 event.preventDefault()
                 if (Helpers.getConfigs().request_params.view_in !== 'trash') {
                     let selectedFiles = Helpers.getSelectedFiles()

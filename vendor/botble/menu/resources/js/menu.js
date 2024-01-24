@@ -77,8 +77,7 @@ class MenuNestable {
             let current = $(e.currentTarget)
             let parent = current.closest('.box-links-for-menu').find('.the-box')
 
-
-            const position = $('#nestable .dd-list .dd-item').length + 1;
+            const position = $('#nestable .dd-list .dd-item').length + 1
 
             if (parent.attr('id') === 'external_link') {
                 const params = {}

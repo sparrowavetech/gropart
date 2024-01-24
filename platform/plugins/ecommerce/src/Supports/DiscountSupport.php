@@ -9,6 +9,7 @@ use Botble\Ecommerce\Repositories\Interfaces\DiscountInterface;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class DiscountSupport
 {
@@ -35,7 +36,7 @@ class DiscountSupport
         return $this->customerId;
     }
 
-    public function promotionForProduct(array $productIds, array $productCollectionIds, array $productCategoriesIds = []): ?Discount
+    public function promotionForProduct(array $productIds): ?Discount
     {
         if (! $this->promotions) {
             $this->getAvailablePromotions();
@@ -54,6 +55,11 @@ class DiscountSupport
                     break;
 
                 case DiscountTargetEnum::PRODUCT_COLLECTIONS:
+                    $productCollectionIds = DB::table('ec_product_collection_products')
+                        ->whereIn('product_id', $productIds)
+                        ->pluck('product_collection_id')
+                        ->all();
+
                     foreach ($promotion->productCollections as $productCollection) {
                         if (in_array($productCollection->id, $productCollectionIds)) {
                             return $promotion;
@@ -74,6 +80,11 @@ class DiscountSupport
                     break;
 
                 case DiscountTargetEnum::PRODUCT_CATEGORIES:
+                    $productCategoriesIds = DB::table('ec_product_category_product')
+                        ->whereIn('product_id', $productIds)
+                        ->pluck('category_id')
+                        ->all();
+
                     foreach ($promotion->productCategories as $productCategories) {
                         if (in_array($productCategories->id, $productCategoriesIds)) {
                             return $promotion;

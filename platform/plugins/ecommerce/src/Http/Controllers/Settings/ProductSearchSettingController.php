@@ -2,7 +2,7 @@
 
 namespace Botble\Ecommerce\Http\Controllers\Settings;
 
-use Botble\Ecommerce\Forms\Settings\ProductSearchForm;
+use Botble\Ecommerce\Forms\Settings\ProductSearchSettingForm;
 use Botble\Ecommerce\Http\Requests\Settings\ProductSearchSettingRequest;
 
 class ProductSearchSettingController extends SettingController
@@ -11,7 +11,7 @@ class ProductSearchSettingController extends SettingController
     {
         $this->pageTitle(trans('plugins/ecommerce::setting.product_search.name'));
 
-        return ProductSearchForm::create()->renderForm();
+        return ProductSearchSettingForm::create()->renderForm();
     }
 
     public function update(ProductSearchSettingRequest $request)

@@ -95,7 +95,7 @@ abstract class PaystackPaymentAbstract implements ProduceServiceInterface
         }
     }
 
-    public function getRefundDetails($refundId)
+    public function getRefundDetails($refundId): array
     {
         try {
             $response = (new Paystack())->getRefundDetails($refundId);

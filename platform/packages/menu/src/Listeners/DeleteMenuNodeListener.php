@@ -10,7 +10,7 @@ class DeleteMenuNodeListener
 {
     public function handle(DeletedContentEvent $event): void
     {
-        if (! in_array(get_class($event->data), Menu::getMenuOptionModels())) {
+        if (! in_array($event->data::class, Menu::getMenuOptionModels())) {
             return;
         }
 

@@ -56,6 +56,10 @@ if (! function_exists('get_sale_percentage')) {
     {
         $symbol = $appendSymbol ? '%' : '';
 
+        if ($salePrice == 0 && $price !== 0) {
+            return 100 . $symbol;
+        }
+
         if (! $salePrice) {
             return 0 . $symbol;
         }
@@ -64,7 +68,7 @@ if (! function_exists('get_sale_percentage')) {
         $result = $price > 0 ? ceil(-($down / $price) * 100) : 0;
 
         if (! $result) {
-            return 0;
+            return 0 . $symbol;
         }
 
         if ($abs === true) {

@@ -4,6 +4,20 @@ namespace Botble\Base\Traits\Forms;
 
 trait CanSpanColumns
 {
+    protected int $colspan = 0;
+
+    public function colspan(int $colspan): static
+    {
+        $this->colspan = $colspan;
+
+        return $this;
+    }
+
+    public function getColspan(): int
+    {
+        return $this->colspan;
+    }
+
     public function getColumnSpan(int|string|null $breakpoint = null): array|int|string|null
     {
         $columnSpan = [];

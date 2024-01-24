@@ -2,7 +2,6 @@
 
 return [
     'name' => 'Newsletters',
-    'description' => 'View and delete newsletter subscribers',
     'settings' => [
         'email' => [
             'templates' => [
@@ -19,7 +18,6 @@ return [
             ],
         ],
         'title' => 'Newsletter',
-        'panel_description' => 'View and update newsletter settings',
         'description' => 'Settings for newsletter (auto send newsletter email to SendGrid, Mailchimp... when someone register newsletter on website).',
         'mailchimp_api_key' => 'Mailchimp API Key',
         'mailchimp_list_id' => 'Mailchimp List ID',

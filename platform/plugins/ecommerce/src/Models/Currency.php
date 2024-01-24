@@ -17,4 +17,10 @@ class Currency extends BaseModel
         'is_default',
         'exchange_rate',
     ];
+
+    protected $casts = [
+        'is_prefix_symbol' => 'boolean',
+        'is_default' => 'boolean',
+        'exchange_rate' => 'double',
+    ];
 }

@@ -230,15 +230,15 @@
                             vFormatParts.indexOf('a') > -1
                                 ? vFormatParts.indexOf('a')
                                 : vFormatParts.indexOf('A') > -1
-                                ? vFormatParts.indexOf('A')
-                                : -1
+                                  ? vFormatParts.indexOf('A')
+                                  : -1
                         mer = vDateParts[vMeriIndex]
                         if (vMeriIndex !== -1) {
                             vMeriOffset = $h.compare(mer, vSettings.meridiem[0])
                                 ? 0
                                 : $h.compare(mer, vSettings.meridiem[1])
-                                ? 12
-                                : -1
+                                  ? 12
+                                  : -1
                             if (iDatePart >= 1 && iDatePart <= 12 && vMeriOffset !== -1) {
                                 out.hour = iDatePart % 12 === 0 ? vMeriOffset : iDatePart + vMeriOffset
                             } else {

@@ -26,7 +26,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static string getRichEditor()
  * @method static string|null removeQueryStringVars(string|null $url, array|string $key)
  * @method static string cleanEditorContent(string|null $value)
- * @method static string getPhoneValidationRule()
+ * @method static array|string getPhoneValidationRule(bool $asArray = false)
  * @method static \Illuminate\Support\Collection sortSearchResults(\Illuminate\Support\Collection|array $collection, string $searchTerms, string $column)
  * @method static array getDateFormats()
  * @method static array|string|null clean(array|string|null $dirty, array|string|null $config = null)
@@ -46,6 +46,9 @@ use Illuminate\Support\Facades\Facade;
  * @method static string getDateFormat()
  * @method static string getDateTimeFormat()
  * @method static string joinPaths(array $paths)
+ * @method static bool hasIcon(string $name)
+ * @method static string renderIcon(string $name, string|null $size = null, array $attributes = [])
+ * @method static string renderBadge(string $label, string $color = 'primary', array $attributes = [])
  *
  * @see \Botble\Base\Helpers\BaseHelper
  */

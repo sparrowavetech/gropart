@@ -273,11 +273,20 @@ class EcommerceHelper
 
     public function getShowParams(): array
     {
-        return apply_filters('ecommerce_number_of_products_display_options', [
+        $showParams = apply_filters('ecommerce_number_of_products_display_options', [
             12 => 12,
             24 => 24,
             36 => 36,
         ]);
+
+        $numberProductsPerPages = (int)theme_option('number_of_products_per_page');
+
+        if ($numberProductsPerPages) {
+            $showParams[$numberProductsPerPages] = $numberProductsPerPages;
+            ksort($showParams);
+        }
+
+        return $showParams;
     }
 
     public function getMinimumOrderAmount(): float
@@ -389,7 +398,7 @@ class EcommerceHelper
         }
 
         $reviews = Review::query()
-            ->wherePublished()
+            ->whereIn('status', [BaseStatusEnum::PUBLISHED, BaseStatusEnum::PENDING])
             ->select(['ec_reviews.*'])
             ->where($condition);
 
@@ -465,7 +474,12 @@ class EcommerceHelper
 
     public function loadCountriesStatesCitiesFromPluginLocation(): bool
     {
-        if (! is_plugin_active('location')) {
+        if (
+            ! is_plugin_active('location')
+            || ! Country::query()->exists()
+            || ! State::query()->exists()
+            || ! City::query()->exists()
+        ) {
             return false;
         }
 
@@ -559,7 +573,7 @@ class EcommerceHelper
                 new StateRule($prefix . 'country'),
             ];
 
-            if (self::useCityFieldAsTextField()) {
+            if ($this->useCityFieldAsTextField()) {
                 $rules[$prefix . 'city'] = [
                     'required',
                     'string',
@@ -746,6 +760,9 @@ class EcommerceHelper
                         'ec_products.quantity',
                         'ec_products.price',
                         'ec_products.sale_price',
+                        'ec_products.sale_type',
+                        'ec_products.start_date',
+                        'ec_products.end_date',
                         'ec_products.allow_checkout_when_out_of_stock',
                         'ec_products.with_storehouse_management',
                         'ec_products.stock_status',
@@ -870,6 +887,9 @@ class EcommerceHelper
             'q' => 'nullable|string|max:255',
             'max_price' => 'nullable|numeric',
             'min_price' => 'nullable|numeric',
+            'price_ranges' => 'sometimes|array',
+            'price_ranges.*.from' => 'required|numeric',
+            'price_ranges.*.to' => 'required|numeric',
             'attributes' => 'nullable|array',
             'categories' => 'nullable|array',
             'tags' => 'nullable|array',
@@ -1140,7 +1160,9 @@ class EcommerceHelper
         $maxFilterPrice = $this->getProductMaxPrice($categoryIds) * get_current_exchange_rate();
 
         if ($category) {
-            if ($category->activeChildren->isEmpty() && $category->parent_id) {
+            $categoriesRequest = request()->input('categories', []);
+
+            if (! $categoriesRequest && $category->activeChildren->isEmpty() && $category->parent_id) {
                 $category = $category->parent()->with(['activeChildren'])->first();
 
                 if ($category) {
@@ -1170,9 +1192,96 @@ class EcommerceHelper
         ];
     }
 
+    public function dataPriceRangesForFilter(): array
+    {
+        $priceRanges = request()->query('price_ranges', []);
+        $priceRanges = is_array($priceRanges) ? $priceRanges : [];
+
+        if (empty($priceRanges)) {
+            return [];
+        }
+
+        foreach ($priceRanges as $key => $value) {
+            if (
+                ! isset($value['from'])
+                || ! isset($value['to'])
+                || ! is_numeric($value['from'])
+                || ! is_numeric($value['to'])
+            ) {
+                unset($priceRanges[$key]);
+            }
+        }
+
+        return array_values($priceRanges);
+    }
+
+    public function isPriceRangesChecked(float $fromPrice, float $toPrice): bool
+    {
+        foreach ($this->dataPriceRangesForFilter() as $currentPriceRange) {
+            if ($currentPriceRange['from'] == $fromPrice && $currentPriceRange['to'] == $toPrice) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function dataPriceRanges(int $stepPrice = 1000, int $stepCount = 10): array
+    {
+        $configKey = 'plugins.ecommerce.general.display_big_money_in_million_billion';
+        $configValue = config($configKey);
+
+        if (! $configValue) {
+            config([$configKey => true]);
+        }
+
+        $maxPrice = $this->getProductMaxPrice();
+        $currency = get_application_currency();
+
+        $priceRanges[] = [
+            'from' => 0,
+            'to' => $last = $stepPrice,
+            'label' => __('Below :toPrice', ['toPrice' => human_price_text($stepPrice, $currency)]),
+        ];
+
+        for ($i = 1; $i < $stepCount; $i++) {
+            $priceRanges[] = [
+                'from' => $first = $last,
+                'to' => $last += $stepPrice,
+                'label' => __('From :fromPrice to :toPrice', [
+                    'fromPrice' => human_price_text($first, $currency),
+                    'toPrice' => human_price_text($last, $currency),
+                ]),
+            ];
+        }
+
+        $priceRanges[] = [
+            'from' => $last,
+            'to' => $maxPrice,
+            'label' => __('Over :fromPrice', ['fromPrice' => human_price_text($last, $currency)]),
+        ];
+
+        if (! $configValue) {
+            config([$configKey => false]);
+        }
+
+        return $priceRanges;
+    }
+
     public function useCityFieldAsTextField(): bool
     {
-        return ! self::loadCountriesStatesCitiesFromPluginLocation() ||
+        return ! $this->loadCountriesStatesCitiesFromPluginLocation() ||
             get_ecommerce_setting('use_city_field_as_field_text', false);
+    }
+
+    public function isLoginUsingPhone(): bool
+    {
+        return (bool)get_ecommerce_setting('login_using_phone', false);
+    }
+
+    public function registerThemeAssets(): void
+    {
+        Theme::asset()->add('front-ecommerce-css', 'vendor/core/plugins/ecommerce/css/front-ecommerce.css');
+        Theme::asset()->container('footer')->add('front-ecommerce-js', 'vendor/core/plugins/ecommerce/js/front-ecommerce.js', ['jquery', 'lightgallery-js', 'slick-js']);
     }
 }

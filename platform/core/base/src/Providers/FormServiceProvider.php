@@ -198,5 +198,11 @@ class FormServiceProvider extends ServiceProvider
             'asDropdown' => false,
             'ajaxUrl' => null,
         ]);
+
+        Form::component('coreIcon', 'core/base::forms.partials.core-icon', [
+            'name',
+            'value' => null,
+            'attributes' => [],
+        ]);
     }
 }

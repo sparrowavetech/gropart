@@ -50,7 +50,20 @@
                             <div class="mega-menu__column">
                                 @if ($hasChildren)
                                     <a href="{{ route('public.single', $childCategory->url) }}">
-                                        <h4>{{ $childCategory->name }}</h4>
+                                        <h4>
+                                            @if ($childCategory->icon_image)
+                                                <img
+                                                    src="{{ RvMedia::getImageUrl($childCategory->icon_image) }}"
+                                                    alt="{{ $childCategory->name }}"
+                                                    width="18"
+                                                    height="18"
+                                                    style="vertical-align: top;"
+                                                >
+                                            @elseif ($childCategory->icon)
+                                                <i class="{{ $childCategory->icon }}"></i>
+                                            @endif
+                                            <span class="ms-1">{{ $childCategory->name }}</span>
+                                        </h4>
                                         <span class="sub-toggle">
                                         <span class="svg-icon">
                                             <svg>
@@ -68,7 +81,22 @@
                                         @endphp
                                         @if($currentCategories)
                                             @foreach ($currentCategories as $item)
-                                                <li><a href="{{ route('public.single', $item->url) }}">{{ $item->name }}</a></li>
+                                                <li>
+                                                    <a href="{{ route('public.single', $item->url) }}">
+                                                        @if ($item->icon_image)
+                                                            <img
+                                                                src="{{ RvMedia::getImageUrl($item->icon_image) }}"
+                                                                alt="{{ $item->name }}"
+                                                                width="18"
+                                                                height="18"
+                                                                style="vertical-align: top;"
+                                                            >
+                                                        @elseif ($item->icon)
+                                                            <i class="{{ $item->icon }}"></i>
+                                                        @endif
+                                                        <span class="ms-1">{{ $item->name }}</span>
+                                                    </a>
+                                                </li>
                                             @endforeach
                                         @endif
                                     </ul>

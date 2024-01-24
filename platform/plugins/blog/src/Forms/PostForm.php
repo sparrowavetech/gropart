@@ -90,7 +90,7 @@ class PostForm extends FormAbstract
                     ->label(trans('plugins/blog::posts.form.tags'))
                     ->when($this->getModel()->id, function (TagFieldOption $fieldOption) {
                         return $fieldOption
-                            ->value(
+                            ->selected(
                                 $this->getModel()
                                 ->tags()
                                 ->select('name')

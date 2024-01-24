@@ -45,7 +45,9 @@ class LanguageGlobalManagement {
                         $.each(data.data, (index, el) => {
                             const flag = `<img src="${flagPath}${el.lang_flag}.svg" class="flag" style="height: 16px" title="${el.lang_name}" alt="${el.lang_name}">`
                             if (el.reference_id) {
-                                html += `<a href="${$('#route_edit').val()}" class="gap-2 d-flex align-items-center text-decoration-none">${flag}
+                                html += `<a href="${$(
+                                    '#route_edit'
+                                ).val()}" class="gap-2 d-flex align-items-center text-decoration-none">${flag}
                                         <span>
                                             ${el.lang_name}
                                             <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -57,7 +59,9 @@ class LanguageGlobalManagement {
                                     </span>
                                 </a>`
                             } else {
-                                html += `<a href="${$('#route_create').val()}?ref_from=${$(`#content_id`).val()}&ref_lang=${index}" class="gap-2 d-flex align-items-center text-decoration-none">${flag}
+                                html += `<a href="${$('#route_create').val()}?ref_from=${$(
+                                    `#content_id`
+                                ).val()}&ref_lang=${index}" class="gap-2 d-flex align-items-center text-decoration-none">${flag}
                                     <span>
                                         ${el.lang_name}
                                         <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">

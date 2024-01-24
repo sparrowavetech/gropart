@@ -1,5 +1,5 @@
 <div class="title">
-    <h2 class="customer-page-title">{{ __('Wishlist') }}</h2>
+    <h2 class="customer-page-title mb-4">{{ __('Wishlist') }}</h2>
 </div>
 <br>
 

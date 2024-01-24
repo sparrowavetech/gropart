@@ -39,16 +39,18 @@ class InvoiceHelper
             $address = $order->billingAddress;
         }
 
+        $taxInformation = EcommerceHelperFacade::isDisplayTaxFieldsAtCheckoutPage() ? $order->taxInformation()->first() : null;
+
         $invoiceData = [
             'reference_id' => $order->getKey(),
             'reference_type' => Order::class,
-            'customer_name' => $address->name ?: $order->user->name,
+            'customer_name' => $taxInformation ? $taxInformation->company_name : ($address->name ?: $order->user->name),
             'company_name' => '',
             'company_logo' => null,
-            'customer_email' => $address->email ?: $order->user->email,
-            'customer_phone' => $address->phone,
-            'customer_address' => $address->full_address,
-            'customer_tax_id' => null,
+            'customer_email' => $taxInformation ? $taxInformation->company_email : ($address->email ?: $order->user->email),
+            'customer_phone' => $taxInformation ? $taxInformation->company_phone : $address->phone,
+            'customer_address' => $taxInformation ? $taxInformation->company_address : $address->full_address,
+            'customer_tax_id' => $taxInformation?->company_tax_code,
             'payment_id' => null,
             'status' => InvoiceStatusEnum::COMPLETED,
             'paid_at' => Carbon::now(),
@@ -176,11 +178,7 @@ class InvoiceHelper
 
     public function downloadInvoice(Invoice $invoice): Response
     {
-        $pdf = $this->makeInvoicePDF($invoice);
-
-        return response($pdf->output())
-        ->header('Content-Type', 'application/pdf')
-        ->header('Content-Disposition', sprintf('inline; filename="invoice-%s.pdf"', $invoice->code));
+        return $this->makeInvoicePDF($invoice)->download(sprintf('invoice-%s.pdf', $invoice->code));
     }
 
     public function streamInvoice(Invoice $invoice): Response
@@ -204,7 +202,9 @@ class InvoiceHelper
 
     protected function getDataForInvoiceTemplate(Invoice $invoice): array
     {
-        $logo = get_ecommerce_setting('company_logo_for_invoicing') ? get_ecommerce_setting('company_logo_for_invoicing') : (theme_option('logo_in_invoices') ? theme_option('logo_in_invoices') : theme_option('logo'));
+        $logo = get_ecommerce_setting('company_logo_for_invoicing') ?: (theme_option(
+            'logo_in_invoices'
+        ) ?: theme_option('logo'));
 
         $paymentDescription = null;
 
@@ -218,20 +218,25 @@ class InvoiceHelper
             );
         }
 
-        $companyName = get_ecommerce_setting('company_name_for_invoicing') ? get_ecommerce_setting('company_name_for_invoicing') : get_ecommerce_setting('store_name');
+        $companyName = get_ecommerce_setting('company_name_for_invoicing') ?: get_ecommerce_setting('store_name');
 
         $companyAddress = get_ecommerce_setting('company_address_for_invoicing');
 
+        $country = EcommerceHelperFacade::getCountryNameById($this->getCompanyCountry());
+        $state = $this->getCompanyState();
+        $city = $this->getCompanyCity();
+
         if (! $companyAddress) {
-            $companyAddress = get_ecommerce_setting('store_address') . ', ' . get_ecommerce_setting(
-                'store_city'
-            ) . ', ' . get_ecommerce_setting('store_state') . ', ' . get_ecommerce_setting('store_country');
+            $companyAddress = implode(', ', array_filter([
+                get_ecommerce_setting('company_address_for_invoicing', get_ecommerce_setting('store_address')),
+                $city,
+                $state,
+                $country,
+            ]));
         }
 
         $companyPhone = get_ecommerce_setting('company_phone_for_invoicing') ?: get_ecommerce_setting('store_phone');
-
         $companyEmail = get_ecommerce_setting('company_email_for_invoicing') ?: get_ecommerce_setting('store_email');
-
         $companyTaxId = get_ecommerce_setting('company_tax_id_for_invoicing') ?: get_ecommerce_setting(
             'store_vat_number'
         );
@@ -246,12 +251,16 @@ class InvoiceHelper
             'company_logo_full_path' => RvMedia::getRealPath($logo),
             'company_name' => $companyName,
             'company_address' => $companyAddress,
+            'company_country' => $country,
+            'company_state' => $state,
+            'company_city' => $city,
+            'company_zipcode' => get_ecommerce_setting('company_zipcode_for_invoicing') ?: get_ecommerce_setting(
+                'store_zip_code'
+            ),
             'company_phone' => $companyPhone,
             'company_email' => $companyEmail,
             'company_tax_id' => $companyTaxId,
-            'product_has_options' => $invoice->items->count('options'),
             'total_quantity' => $invoice->items->sum('qty'),
-            'total_price' => $invoice->items->sum('price'),
             'payment_description' => $paymentDescription,
             'is_tax_enabled' => EcommerceHelperFacade::isTaxEnabled(),
             'settings' => [
@@ -267,6 +276,16 @@ class InvoiceHelper
             'ecommerce_invoice_footer' => apply_filters('ecommerce_invoice_footer', null, $invoice),
             'invoice_payment_info_filter' => apply_filters('invoice_payment_info_filter', null, $invoice),
         ];
+
+        $data['settings']['font_css'] = null;
+
+        if ($data['settings']['using_custom_font_for_invoice'] && $data['settings']['font_family']) {
+            $data['settings']['font_css'] = BaseHelper::googleFonts(
+                'https://fonts.googleapis.com/css2?family=' .
+                urlencode($data['settings']['font_family']) .
+                ':wght@400;600;700&display=swap'
+            );
+        }
 
         $order = $invoice->reference;
 
@@ -340,13 +359,42 @@ class InvoiceHelper
     public function getVariables(): array
     {
         return [
-            'invoice.*' => __('Invoice information from database, ex: invoice.code, invoice.amount, ...'),
-            'logo_full_path' => __('The site logo with full URL'),
-            'company_logo_full_path' => __('The company logo of invoice with full URL'),
+            'invoice.*' => trans('plugins/ecommerce::invoice-template.variables.invoice_data'),
+            'logo_full_path' => trans('plugins/ecommerce::invoice-template.variables.site_logo'),
+            'company_logo_full_path' => trans('plugins/ecommerce::setting.invoice.form.company_logo'),
+            'site_title' => trans('plugins/ecommerce::invoice-template.variables.site_title'),
+            'company_name' => trans('plugins/ecommerce::invoice-template.variables.company_name'),
+            'company_address' => trans('plugins/ecommerce::invoice-template.variables.company_address'),
+            'company_country' => trans('plugins/ecommerce::invoice-template.variables.company_country'),
+            'company_state' => trans('plugins/ecommerce::invoice-template.variables.company_state'),
+            'company_city' => trans('plugins/ecommerce::invoice-template.variables.company_city'),
+            'company_zipcode' => trans('plugins/ecommerce::invoice-template.variables.company_zipcode'),
+            'company_phone' => trans('plugins/ecommerce::invoice-template.variables.company_phone'),
+            'company_email' => trans('plugins/ecommerce::invoice-template.variables.company_email'),
+            'company_tax_id' => trans('plugins/ecommerce::invoice-template.variables.company_tax_id'),
             'payment_method' => __('Payment method'),
             'payment_status' => __('Payment status'),
             'payment_description' => __('Payment description'),
-            "get_ecommerce_setting('key')" => __('Get the ecommerce setting from database'),
         ];
+    }
+
+    public function getCompanyCountry(): string|null
+    {
+        return get_ecommerce_setting('company_country_for_invoicing', get_ecommerce_setting('store_country'));
+    }
+
+    public function getCompanyState(): string|null
+    {
+        return get_ecommerce_setting('company_state_for_invoicing', get_ecommerce_setting('store_state'));
+    }
+
+    public function getCompanyCity(): string|null
+    {
+        return get_ecommerce_setting('company_city_for_invoicing', get_ecommerce_setting('store_city'));
+    }
+
+    public function getCompanyZipCode(): string|null
+    {
+        return get_ecommerce_setting('company_zipcode_for_invoicing', get_ecommerce_setting('store_zip_code'));
     }
 }

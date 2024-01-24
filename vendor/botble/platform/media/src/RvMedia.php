@@ -26,6 +26,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 use Intervention\Image\Facades\Image;
+use Intervention\Image\ImageManager;
 use League\Flysystem\UnableToWriteFile;
 use Mimey\MimeTypes;
 use Throwable;
@@ -671,10 +672,9 @@ class RvMedia
 
     public function getRealPath(string|null $url): string
     {
-        $path = match (config('filesystems.default')) {
-            'local', 'public' => Storage::path($url),
-            default => Storage::url($url),
-        };
+        $path = $this->isUsingCloud()
+            ? Storage::url($url)
+            : Storage::path($url);
 
         return Arr::first(explode('?v=', $path));
     }
@@ -686,7 +686,9 @@ class RvMedia
 
     public function isUsingCloud(): bool
     {
-        return ! in_array(config('filesystems.default'), ['local', 'public']);
+        $defaultDisk = config('filesystems.default');
+
+        return config('filesystems.disks.' . $defaultDisk . '.driver', 'local') !== 'local';
     }
 
     public function uploadFromUrl(
@@ -788,6 +790,10 @@ class RvMedia
 
     public function getUploadPath(): string
     {
+        if ($customFolder = $this->getConfig('default_upload_folder')) {
+            return public_path($customFolder);
+        }
+
         return is_link(public_path('storage')) ? storage_path('app/public') : public_path('storage');
     }
 
@@ -1166,5 +1172,16 @@ class RvMedia
     public function getFolderColors(): array
     {
         return $this->getConfig('folder_colors', []);
+    }
+
+    public function imageManager(): ImageManager
+    {
+        $driver = 'gd';
+
+        if ($this->getImageProcessingLibrary() === 'imagick' && extension_loaded('imagick')) {
+            $driver = 'imagick';
+        }
+
+        return new ImageManager(['driver' => $driver]);
     }
 }

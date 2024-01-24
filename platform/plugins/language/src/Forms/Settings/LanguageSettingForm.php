@@ -2,9 +2,12 @@
 
 namespace Botble\Language\Forms\Settings;
 
+use Botble\Base\Forms\FieldOptions\AlertFieldOption;
+use Botble\Base\Forms\FieldOptions\HtmlFieldOption;
 use Botble\Base\Forms\FieldOptions\MultiChecklistFieldOption;
 use Botble\Base\Forms\FieldOptions\OnOffFieldOption;
 use Botble\Base\Forms\FieldOptions\RadioFieldOption;
+use Botble\Base\Forms\Fields\AlertField;
 use Botble\Base\Forms\Fields\HtmlField;
 use Botble\Base\Forms\Fields\MultiCheckListField;
 use Botble\Base\Forms\Fields\OnOffCheckboxField;
@@ -13,7 +16,6 @@ use Botble\Base\Forms\FormAbstract;
 use Botble\Language\Facades\Language;
 use Botble\Language\Http\Requests\Settings\LanguageSettingRequest;
 use Botble\Setting\Models\Setting;
-use Illuminate\Support\Facades\Blade;
 
 class LanguageSettingForm extends FormAbstract
 {
@@ -77,20 +79,24 @@ class LanguageSettingForm extends FormAbstract
                             ->label(trans('plugins/language::language.hide_languages'))
                             ->choices($choices)
                             ->selected(json_decode(setting('language_hide_languages', '[]'), true))
-                            ->emptyValue('')
                             ->toArray()
                     );
             }
         }
 
-        $this->add('hide_languages_helper_display_hidden', HtmlField::class, [
-            'html' => Blade::render(
-                sprintf(
-                    '<x-core::alert type="info"> %s </x-core::alert>',
-                    trans_choice('plugins/language::language.hide_languages_helper_display_hidden', ! empty(json_decode(setting('language_hide_languages', '[]'), true)), ['language' => Language::getHiddenLanguageText()])
+        $this->add(
+            'hide_languages_helper_display_hidden',
+            AlertField::class,
+            AlertFieldOption::make()
+                ->content(
+                    trans_choice(
+                        'plugins/language::language.hide_languages_helper_display_hidden',
+                        ! empty(json_decode(setting('language_hide_languages', '[]'), true)),
+                        ['language' => Language::getHiddenLanguageText()]
+                    )
                 )
-            ),
-        ])
+                ->toArray()
+        )
         ->add(
             'language_show_default_item_if_current_version_not_existed',
             OnOffCheckboxField::class,
@@ -107,11 +113,10 @@ class LanguageSettingForm extends FormAbstract
                 ->value(setting('language_auto_detect_user_language', false))
                 ->toArray()
         )
-        ->add('button_action', HtmlField::class, [
-            'html' => Blade::render(sprintf(
-                '<x-core::button color="primary" icon="ti ti-device-floppy" type="submit">%s</x-core::button>',
-                trans('core/setting::setting.save_settings')
-            )),
-        ]);
+        ->add(
+            'button_action',
+            HtmlField::class,
+            HtmlFieldOption::make()->view('plugins/language::forms.button-action')->toArray()
+        );
     }
 }

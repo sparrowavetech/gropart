@@ -2,7 +2,6 @@
 
 return [
     'name' => 'Products',
-    'description' => 'View and update your products settings',
     'create' => 'New product',
     'create_product_type' => [
         'physical' => 'New physical product',
@@ -17,6 +16,11 @@ return [
         'categories' => 'Categories',
         'content' => 'Content',
         'price' => 'Price',
+        'discount' => 'Discount',
+        'taxable_price' => 'Taxable Price',
+        'cgst' => 'CGST',
+        'sgst' => 'SGST',
+        'igst' => 'IGST',
         'quantity' => 'Quantity',
         'brand' => 'Brand',
         'width' => 'Width',
@@ -91,7 +95,7 @@ return [
         'auto_generate_sku' => 'Auto generate SKU?',
         'featured_image' => 'Featured image (optional)',
         'product_id' => 'Product ID',
-        'price_sale_percent_helper' => 'Discount :percent from original price.',
+        'is_enquiry' => 'Is enquiry'
     ],
     'price' => 'Price',
     'quantity' => 'Quantity',
@@ -177,19 +181,9 @@ return [
         'external_link_download' => 'External link download',
         'generate_license_code_after_purchasing_product' => 'Generate license code after purchasing this product?',
     ],
+    'frequently_bought_together'=>'Frequently Bought Together',
     'this_action_will_reload_page' => 'This action will reload the page to update the data!',
     'select' => 'Select',
     'set_this_variant_as_default' => 'Set this variant as default',
     'download' => 'Download',
-    'cross_sell_price_type' => [
-        'title' => 'Price type',
-        'fixed' => 'Fixed',
-        'percent' => 'Percent',
-    ],
-    'cross_sell_help' => [
-        'price' => '* Price field',
-        'price_description' => 'Enter the amount you want to reduce from the original price. Example: If the original price is $100, enter 20 to reduce the price to $80.',
-        'type' => '* Type field',
-        'type_description' => 'Choose the discount type: Fixed (reduce a specific amount) or Percent (reduce by a percentage).',
-    ],
 ];

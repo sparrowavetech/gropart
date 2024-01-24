@@ -1,7 +1,7 @@
 <ul {!! $options !!}>
     @foreach ($items as $key => $row)
         @php
-            $id = 'menu-id-' . strtolower(Str::slug(str_replace('\\', ' ', get_class($model)))) . '-' . $row->id;
+            $id = 'menu-id-' . strtolower(Str::slug(str_replace('\\', ' ', $model::class))) . '-' . $row->id;
         @endphp
 
         <li>
@@ -12,7 +12,7 @@
                 :value="$row->id"
                 data-title="{{ $row->name }}"
                 data-reference-id="{{ $row->id }}"
-                data-reference-type="{{ get_class($model) }}"
+                data-reference-type="{{ $model::class }}"
                 data-menu-id="{{ BaseHelper::stringify(request()->route('menu')) }}"
             />
 

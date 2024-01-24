@@ -1,6 +1,6 @@
 body {
-    background: rgb(63,94,251);
-    background: linear-gradient(45deg, rgba(63,94,251,1) 0%, rgba(252,70,107,1) 100%);
+    background: rgb(63, 94, 251);
+    background: linear-gradient(45deg, rgba(63, 94, 251, 1) 0%, rgba(252, 70, 107, 1) 100%);
     background-repeat: no-repeat;
     background-attachment: fixed;
 }
@@ -30,7 +30,6 @@ body {
             .step-item.active ~ .step-item:before {
                 background: #d3d5d8;
             }
-
         }
 
         .card {
@@ -64,7 +63,6 @@ body {
                 }
 
                 &:not(:last-child) {
-
                     &:after {
                         height: calc(100% + 30px);
                         left: calc(var(--bb-steps-dot-size) * 0.65);

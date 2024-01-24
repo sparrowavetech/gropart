@@ -13,24 +13,27 @@
                 alt="{{ $product->name }}"
             >
         </div>
-        @if ($product->isOutOfStock())
-            <div class="ribbons">
+        <span class="ribbons">
+            @if ($product->isOutOfStock())
                 <span class="ribbon out-stock">{{ __('Out Of Stock') }}</span>
-            </div>
-        @else
-            @if ($product->productLabels->count())
-                <div class="ribbons product-lable">
+            @else
+                @if ($product->productLabels->isNotEmpty())
                     @foreach ($product->productLabels as $label)
-                        <span class="ribbon" @if ($label->color) style="background-color: {{ $label->color }}" @endif><i class="lable-prop" @if ($label->color) style="border-color: transparent transparent transparent {{ $label->color }}" @endif></i>{{ $label->name }}</span>
+                        <span
+                            class="ribbon"
+                            @if ($label->color) style="background-color: {{ $label->color }}" @endif
+                        >{{ $label->name }}</span>
                     @endforeach
-                </div>
+                @else
+                    @if ($product->front_sale_price !== $product->price)
+                        <div
+                            class="featured ribbon"
+                            dir="ltr"
+                        >{{ get_sale_percentage($product->price, $product->front_sale_price) }}</div>
+                    @endif
+                @endif
             @endif
-            @if ($product->front_sale_price !== $product->price)
-                <div class="ribbons sale-ribbon">
-                    <span class="featured ribbon" dir="ltr">{{ get_sale_percentage($product->price, $product->front_sale_price) }}</span>
-                </div>
-            @endif
-        @endif
+        </span>
     </a>
     {!! Theme::partial(
         'ecommerce.product-loop-buttons',
@@ -45,10 +48,6 @@
                     href="{{ $product->store->url }}"
                     tabindex="0"
                 >{{ $product->store->name }}</a>
-                @if($product->store->is_verified)
-                    <img class="verified-store" src="{{ asset('/storage/stores/verified.png')}}"alt="Verified">
-                @endif
-                <small class="badge bg-warning text-dark">{{ $product->store->shop_category->label() }}</small>
             </div>
         @endif
         <h3 class="product__title">
@@ -63,17 +62,19 @@
         {!! Theme::partial('ecommerce.product-price', compact('product')) !!}
         @if (!empty($isFlashSale))
             <div class="deal-sold row mt-2">
-                <div class="deal-text col-auto">
-                    <span class="sold fw-bold">
-                        @if ($product->pivot->quantity > $product->pivot->sold)
-                            <span class="text">{{ __('Sold') }}: </span>
-                            <span class="value">{{ (int) $product->pivot->sold }} /
-                                {{ (int) $product->pivot->quantity }}</span>
-                        @else
-                            <span class="text text-danger">{{ __('Sold out') }}</span>
-                        @endif
-                    </span>
-                </div>
+                @if (Botble\Ecommerce\Facades\FlashSale::isShowSaleCountLeft())
+                    <div class="deal-text col-auto">
+                        <span class="sold fw-bold">
+                            @if ($product->pivot->quantity > $product->pivot->sold)
+                                <span class="text">{{ __('Sold') }}: </span>
+                                <span class="value">{{ (int) $product->pivot->sold }} /
+                                    {{ (int) $product->pivot->quantity }}</span>
+                            @else
+                                <span class="text text-danger">{{ __('Sold out') }}</span>
+                            @endif
+                        </span>
+                    </div>
+                @endif
                 <div class="deal-progress col">
                     <div class="progress">
                         <div
@@ -90,8 +91,8 @@
                 </div>
             </div>
         @endisset
-    </div>
-    <div class="product-bottom-box">
-        {!! Theme::partial('ecommerce.product-cart-form', compact('product')) !!}
-    </div>
+</div>
+<div class="product-bottom-box">
+    {!! Theme::partial('ecommerce.product-cart-form', compact('product')) !!}
+</div>
 </div>

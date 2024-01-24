@@ -33,7 +33,7 @@ class OpenExchangeRatesService implements ExchangeRateInterface
             $currency->update(['exchange_rate' => number_format($rates[strtoupper($currency->title)], 8, '.', '')]);
         }
 
-        return Currency::currencies();
+        return CurrencyModel::query()->get();
     }
 
     public function cacheExchangeRates(): array

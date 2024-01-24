@@ -2,7 +2,7 @@
 
 namespace Botble\Base\Http\Middleware;
 
-use Botble\ACL\Models\UserMeta;
+use Botble\Base\Facades\AdminAppearance;
 use Botble\Base\Facades\AdminHelper;
 use Botble\Base\Supports\Language;
 use Closure;
@@ -17,11 +17,10 @@ class AdminLocaleMiddleware
             return $next($request);
         }
 
-        $siteLocale = setting()->get('locale', config()->get('core.base.general.locale', config()->get('app.locale')));
-        $sessionLocale = $request->session()->get('site-locale');
-
         if (Auth::check()) {
-            $userLocale = UserMeta::getMeta('locale', $sessionLocale ?: $siteLocale);
+            $sessionLocale = $request->session()->get('site-locale');
+
+            $userLocale = AdminAppearance::forUser(auth()->user())->getLocale() ?: $sessionLocale;
 
             if (array_key_exists($userLocale, Language::getAvailableLocales())) {
                 app()->setLocale($userLocale);

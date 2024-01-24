@@ -1,7 +1,7 @@
 @if (!$isNotDefaultLanguage)
     <x-core::custom-template id="product_attribute_template">
         <x-core::table.body.row data-id="__id__">
-            <x-core::table.body.cell>
+            <x-core::table.body.cell width="5%">
                 <x-core::form.radio
                     name="related_attribute_is_default"
                     value="__position__"
@@ -15,14 +15,10 @@
             </x-core::table.body.cell>
 
             <x-core::table.body.cell>
-                <input type="text" name="swatch-slug" class="form-control" value="__slug__">
+                <input type="text" name="swatch-value" data-bb-color-picker style="display: none" value="__color__">
             </x-core::table.body.cell>
 
-            <x-core::table.body.cell>
-                <input type="text" name="swatch-value" class="form-control input-color-picker" value="__color__">
-            </x-core::table.body.cell>
-
-            <x-core::table.body.cell>
+            <x-core::table.body.cell width="5%">
                 <x-core::form.image
                     :allow-thumb="true"
                     name="swatch-image"
@@ -31,7 +27,7 @@
                 />
             </x-core::table.body.cell>
 
-            <x-core::table.body.cell class="text-end">
+            <x-core::table.body.cell>
                 <a href="javascript:(0)" class="remove-item text-decoration-none text-danger">
                     <x-core::icon name="ti ti-trash" />
                 </a>
@@ -54,7 +50,7 @@
 <x-core::table class="swatches-container text-center">
     <x-core::table.header class="header">
         @if (! $isNotDefaultLanguage)
-            <x-core::table.header.cell>
+            <x-core::table.header.cell width="5%">
                 {{ trans('plugins/ecommerce::product-attribute-sets.is_default') }}
             </x-core::table.header.cell>
         @endif
@@ -65,18 +61,14 @@
 
         @if(! $isNotDefaultLanguage)
             <x-core::table.header.cell>
-                {{ trans('plugins/ecommerce::product-attribute-sets.slug') }}
-            </x-core::table.header.cell>
-
-            <x-core::table.header.cell>
                 {{ trans('plugins/ecommerce::product-attribute-sets.color') }}
             </x-core::table.header.cell>
 
-            <x-core::table.header.cell>
+            <x-core::table.header.cell width="5%">
                 {{ trans('plugins/ecommerce::product-attribute-sets.image') }}
             </x-core::table.header.cell>
 
-            <x-core::table.header.cell>
+            <x-core::table.header.cell width="5%">
                 {{ trans('plugins/ecommerce::product-attribute-sets.remove') }}
             </x-core::table.header.cell>
         @endif
@@ -102,11 +94,7 @@
 
                 @if (!$isNotDefaultLanguage)
                     <x-core::table.body.cell>
-                        <input class="form-control" name="swatch-slug" type="text" value="{{ $attribute->slug }}" />
-                    </x-core::table.body.cell>
-
-                    <x-core::table.body.cell>
-                        <input class="form-control input-color-picker" name="swatch-value" type="text" value="{{ $attribute->color }}" />
+                        <input data-bb-color-picker style="display: none" name="swatch-value" type="text" value="{{ $attribute->color }}" />
                     </x-core::table.body.cell>
 
                     <x-core::table.body.cell>
@@ -119,7 +107,7 @@
                         />
                     </x-core::table.body.cell>
 
-                    <x-core::table.body.cell class="text-end">
+                    <x-core::table.body.cell>
                         <a href="javascript:(0)" class="remove-item text-decoration-none text-danger">
                             <x-core::icon name="ti ti-trash" />
                         </a>

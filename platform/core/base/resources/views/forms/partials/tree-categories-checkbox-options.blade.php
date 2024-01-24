@@ -15,13 +15,15 @@
                     :checked="in_array($category->id, $selected)"
                 />
 
-                @include('core/base::forms.partials.tree-categories-checkbox-options', [
-                    'categories' => $category->activeChildren,
-                    'selected' => $selected,
-                    'currentId' => $currentId,
-                    'name' => $name,
-                    'class' => 'ms-4'
-                ])
+                @if ($category->activeChildren->isNotEmpty())
+                    @include('core/base::forms.partials.tree-categories-checkbox-options', [
+                        'categories' => $category->activeChildren,
+                        'selected' => $selected,
+                        'currentId' => $currentId,
+                        'name' => $name,
+                        'class' => 'ms-4 mt-2'
+                    ])
+                @endif
             </li>
         @endforeach
     </ul>

@@ -54,7 +54,7 @@
             <span
                 class="order-customer-info-meta"
                 style="text-transform: uppercase"
-            >{!! $order->payment->status->toHtml() !!}</span>
+            >{!! BaseHelper::clean($order->payment->status->toHtml()) !!}</span>
         </p>
 
         @if (setting('payment_bank_transfer_display_bank_info_at_the_checkout_success_page', false) &&

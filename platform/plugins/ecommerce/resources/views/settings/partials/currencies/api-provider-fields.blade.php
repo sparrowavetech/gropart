@@ -10,7 +10,7 @@
                 'plugins/ecommerce::setting.currency.form.exchange_rate.provider.open_exchange_rate',
             ),
         ]"
-        :value="get_ecommerce_setting('exchange_rate_api_provider')"
+        :value="get_ecommerce_setting('exchange_rate_api_provider', 'none')"
         data-bb-toggle="collapse"
         data-bb-target=".api-provider-settings"
     />
@@ -64,7 +64,7 @@
 <x-core::form.fieldset
     class="api-provider-settings"
     data-bb-value="open_exchange_rate"
-    @style(['display: none' => get_ecommerce_setting('exchange_rate_api_provider') !== 'open_exchange_rate'])
+    @style(['display: none' => get_ecommerce_setting('exchange_rate_api_provider', 'none') !== 'open_exchange_rate'])
 >
     <x-core::form.text-input
         name="open_exchange_app_id"
@@ -77,7 +77,7 @@
     />
 
     @if (
-        get_ecommerce_setting('exchange_rate_api_provider') == 'open_exchange_rate'
+        get_ecommerce_setting('exchange_rate_api_provider', 'none') == 'open_exchange_rate'
         && get_ecommerce_setting('open_exchange_app_id')
     )
 

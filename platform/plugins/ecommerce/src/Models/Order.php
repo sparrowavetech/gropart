@@ -41,6 +41,7 @@ class Order extends BaseModel
         'is_finished',
         'token',
         'completed_at',
+        'proof_file',
     ];
 
     protected $casts = [
@@ -155,6 +156,10 @@ class Order extends BaseModel
 
     public function canBeCanceled(): bool
     {
+        if ($this->status == OrderStatusEnum::CANCELED) {
+            return false;
+        }
+
         if ($this->shipment) {
             $pendingShippingStatuses = [
                 ShippingStatusEnum::ARRANGE_SHIPMENT,
@@ -170,6 +175,10 @@ class Order extends BaseModel
 
     public function canBeCanceledByAdmin(): bool
     {
+        if ($this->status == OrderStatusEnum::CANCELED) {
+            return false;
+        }
+
         if ($this->shipment) {
             $pendingShippingStatuses = [
                 ShippingStatusEnum::APPROVED,

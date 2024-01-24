@@ -63,15 +63,15 @@ trait HasMenuSeeder
             $menuNode['url'] = str_replace(url(''), '', $menuNode['url']);
         }
 
-        if (Arr::has($menuNode, 'children')) {
+        if (Arr::has($menuNode, 'children') && ! empty($menuNode['children'])) {
             $children = $menuNode['children'];
             $menuNode['has_child'] = true;
-
-            unset($menuNode['children']);
         } else {
             $children = [];
             $menuNode['has_child'] = false;
         }
+
+        Arr::forget($menuNode, 'children');
 
         $createdNode = MenuNode::query()->create($menuNode);
 

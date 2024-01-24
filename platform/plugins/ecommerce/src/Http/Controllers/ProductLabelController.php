@@ -6,6 +6,7 @@ use Botble\Base\Events\BeforeEditContentEvent;
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
+use Botble\Base\Supports\Breadcrumb;
 use Botble\Ecommerce\Forms\ProductLabelForm;
 use Botble\Ecommerce\Http\Requests\ProductLabelRequest;
 use Botble\Ecommerce\Models\ProductLabel;
@@ -15,12 +16,9 @@ use Illuminate\Http\Request;
 
 class ProductLabelController extends BaseController
 {
-    public function __construct()
+    protected function breadcrumb(): Breadcrumb
     {
-        parent::__construct();
-
-        $this
-            ->breadcrumb()
+        return parent::breadcrumb()
             ->add(trans('plugins/ecommerce::product-label.name'), route('product-label.index'));
     }
 

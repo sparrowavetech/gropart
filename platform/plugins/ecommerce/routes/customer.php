@@ -240,6 +240,16 @@ if (defined('THEME_MODULE_SCREEN_NAME')) {
                 'as' => 'product-reviews',
                 'uses' => 'PublicController@getProductReviews',
             ]);
+
+            Route::post('orders/{id}/upload-proof', [
+                'as' => 'orders.upload-proof',
+                'uses' => 'UploadProofController@upload',
+            ])->wherePrimaryKey();
+
+            Route::delete('orders/{id}/download-proof', [
+                'as' => 'orders.download-proof',
+                'uses' => 'UploadProofController@delete',
+            ])->wherePrimaryKey();
         });
 
         Route::group([

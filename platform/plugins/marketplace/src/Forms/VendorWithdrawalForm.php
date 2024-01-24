@@ -2,6 +2,10 @@
 
 namespace Botble\Marketplace\Forms;
 
+use Botble\Base\Forms\FieldOptions\NumberFieldOption;
+use Botble\Base\Forms\FieldOptions\TextareaFieldOption;
+use Botble\Base\Forms\Fields\NumberField;
+use Botble\Base\Forms\Fields\TextareaField;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Marketplace\Facades\MarketplaceHelper;
 use Botble\Marketplace\Http\Requests\Fronts\VendorEditWithdrawalRequest;
@@ -28,50 +32,55 @@ class VendorWithdrawalForm extends FormAbstract
         $model = $user;
         $balance = $model->balance;
         $paymentChannel = $model->vendorInfo->payout_payment_method;
+
         if ($exists) {
             $model = $this->getModel();
             $paymentChannel = $model->payment_channel;
         }
 
-        $disabled = ['disabled' => 'disabled'];
-
         $this
             ->setupModel(new Withdrawal())
             ->setValidatorClass($exists ? VendorEditWithdrawalRequest::class : VendorWithdrawalRequest::class)
             ->template(MarketplaceHelper::viewPath('vendor-dashboard.forms.base'))
-            ->add('amount', 'number', [
-                'label' => trans('plugins/marketplace::withdrawal.forms.amount_with_balance', ['balance' => format_price($balance)]),
-                'required' => true,
-                'attr' => array_merge([
-                    'placeholder' => trans('plugins/marketplace::withdrawal.forms.amount_placeholder'),
-                    'data-counter' => 120,
-                    'max' => $balance,
-                ], $exists ? $disabled : []),
-                'help_block' => [
-                    'text' => $fee ? trans(
+            ->add(
+                'amount',
+                NumberField::class,
+                NumberFieldOption::make()
+                    ->label(trans('plugins/marketplace::withdrawal.forms.amount_with_balance', ['balance' => format_price($balance)]))
+                    ->required()
+                    ->placeholder(trans('plugins/marketplace::withdrawal.forms.amount_placeholder'))
+                    ->attributes([
+                        'data-counter' => 120,
+                        'max' => $balance,
+                    ])
+                    ->disabled($exists)
+                    ->helperText($fee ? trans(
                         'plugins/marketplace::withdrawal.forms.fee_helper',
                         ['fee' => format_price($fee)]
-                    ) : '',
-                ],
-            ]);
-
-        if ($exists) {
-            $this->add('fee', 'number', [
-                'label' => trans('plugins/marketplace::withdrawal.forms.fee'),
-                'required' => true,
-                'attr' => $disabled,
-            ]);
-        }
-
-        $this
-            ->add('description', 'textarea', [
-                'label' => trans('core/base::forms.description'),
-                'attr' => array_merge([
-                    'rows' => 3,
-                    'placeholder' => trans('core/base::forms.description_placeholder'),
-                    'data-counter' => 200,
-                ], $exists && ! $this->getModel()->vendor_can_edit ? $disabled : []),
-            ])
+                    ) : '')
+                    ->toArray()
+            )
+            ->when($exists, function (FormAbstract $form) {
+                $form->add(
+                    'fee',
+                    NumberField::class,
+                    NumberFieldOption::make()
+                        ->label(trans('plugins/marketplace::withdrawal.forms.fee'))
+                        ->required()
+                        ->disabled(true)
+                        ->toArray()
+                );
+            })
+            ->add(
+                'description',
+                TextareaField::class,
+                TextareaFieldOption::make()
+                    ->label(trans('core/base::forms.description'))
+                    ->disabled($exists && ! $this->getModel()->vendor_can_edit)
+                    ->placeholder(trans('core/base::forms.description_placeholder'))
+                    ->attributes(['data-counter' => 200, 'rows' => 3])
+                    ->toArray()
+            )
             ->add('bankInfo', 'html', [
                 'html' => view('plugins/marketplace::withdrawals.payout-info', [
                     'bankInfo' => $model->bank_info,

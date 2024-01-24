@@ -12,13 +12,17 @@
                 @php
                     $options['attr']['class'] = (rtrim(Arr::get($options, 'attr.class'), ' ') ?: '') . ' list-tagify';
 
-                    $choices = Arr::get($options, 'choices', []) ?: [];
+                    if (Arr::has($options, 'choices')) {
+                        $choices = $options['choices'];
 
-                    if ($choices instanceof \Illuminate\Support\Collection) {
-                        $choices = $choices->toArray();
+                        if ($choices instanceof \Illuminate\Support\Collection) {
+                            $choices = $choices->toArray();
+                        }
+
+                        if ($choices) {
+                            $options['attr']['data-list'] = json_encode($choices);
+                        }
                     }
-
-                    $options['attr']['data-list'] = json_encode($choices);
                 @endphp
                 {!! Form::text($name, $options['value'], $options['attr']) !!}
                 @include('core/base::forms.partials.help-block')

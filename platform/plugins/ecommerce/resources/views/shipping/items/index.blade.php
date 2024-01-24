@@ -9,7 +9,7 @@
                 data-url="{{ route('ecommerce.shipping-rule-items.create', ['shipping_rule_id' => $rule->id]) }}"
                 type="button"
             >
-                <i class="fa fa-add"></i>
+                <x-core::icon name="ti ti-plus" />
                 <span>{{ trans('core/base::forms.create') }}</span>
             </button>
         @endif
@@ -18,7 +18,7 @@
                 class="btn btn-info btn-sm"
                 href="{{ route('ecommerce.shipping-rule-items.bulk-import.index') }}"
             >
-                <i class="fas fa-file-import"></i>
+                <x-core::icon name="ti ti-file-import" />
                 <span>{{ trans('plugins/ecommerce::bulk-import.tables.import') }}</span>
             </a>
         @endif

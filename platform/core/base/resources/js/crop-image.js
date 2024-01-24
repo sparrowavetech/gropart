@@ -42,7 +42,8 @@ class CropImage {
 
                     formData.append(form.find('input[type="file"]').prop('name'), blob)
 
-                    $httpClient.make()
+                    $httpClient
+                        .make()
                         .withButtonLoading(button)
                         .post(form.prop('action'), formData)
                         .then(({ data }) => {
@@ -72,7 +73,8 @@ class CropImage {
 
             const button = $(e.currentTarget)
 
-            $httpClient.make()
+            $httpClient
+                .make()
                 .post(button.prop('href'))
                 .then(({ data }) => {
                     this.updateImage(data.data.url)
@@ -88,7 +90,7 @@ class CropImage {
 
         this.cropper = new Cropper(this.image[0], {
             aspectRatio: 1,
-            preview: '.img-preview'
+            preview: '.img-preview',
         })
     }
 
@@ -100,13 +102,15 @@ class CropImage {
     }
 
     updateImage(url) {
-        $(document).find('.crop-image-original').each((i, el) => {
-            if ($(el).is('img')) {
-                $(el).prop('src', url)
-            } else {
-                $(el).css('background-image', `url(${url})`)
-            }
-        })
+        $(document)
+            .find('.crop-image-original')
+            .each((i, el) => {
+                if ($(el).is('img')) {
+                    $(el).prop('src', url)
+                } else {
+                    $(el).css('background-image', `url(${url})`)
+                }
+            })
     }
 }
 

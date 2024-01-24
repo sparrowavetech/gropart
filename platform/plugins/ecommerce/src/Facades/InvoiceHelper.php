@@ -14,6 +14,10 @@ use Illuminate\Support\Facades\Facade;
  * @method static string getInvoiceTemplate()
  * @method static \Botble\Ecommerce\Models\Invoice getDataForPreview()
  * @method static array getVariables()
+ * @method static string|null getCompanyCountry()
+ * @method static string|null getCompanyState()
+ * @method static string|null getCompanyCity()
+ * @method static string|null getCompanyZipCode()
  *
  * @see \Botble\Ecommerce\Supports\InvoiceHelper
  */

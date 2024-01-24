@@ -4,6 +4,7 @@ namespace Botble\Base\Forms;
 
 use Botble\Base\Supports\Builders\HasAttributes;
 use Botble\Base\Supports\Builders\HasLabel;
+use Botble\Base\Traits\Forms\CanSpanColumns;
 use Closure;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Support\Traits\Conditionable;
@@ -15,10 +16,9 @@ class FormFieldOptions implements Arrayable
     use HasAttributes;
     use HasLabel;
     use Tappable;
+    use CanSpanColumns;
 
     protected bool $required = false;
-
-    protected int $colspan = 0;
 
     protected array $helperText = [];
 
@@ -29,6 +29,8 @@ class FormFieldOptions implements Arrayable
     protected bool $metadata = false;
 
     protected Closure|bool $disabled = false;
+
+    protected array|bool|string|int|null $defaultValue;
 
     public static function make(): static
     {
@@ -45,18 +47,6 @@ class FormFieldOptions implements Arrayable
     public function isRequired(): bool
     {
         return $this->required;
-    }
-
-    public function colspan(int $colspan): static
-    {
-        $this->colspan = $colspan;
-
-        return $this;
-    }
-
-    public function getColspan(): int
-    {
-        return $this->colspan;
     }
 
     public function labelAttributes(array $attributes): static
@@ -83,8 +73,12 @@ class FormFieldOptions implements Arrayable
         return $this->wrapperAttributes;
     }
 
-    public function helperText(string $helperText, array $attributes = []): static
+    public function helperText(string|null $helperText, array $attributes = []): static
     {
+        if (! $helperText) {
+            return $this;
+        }
+
         $attributes['class'] = (isset($attributes['class']) ? ' ' : '') . 'form-hint';
 
         $this->helperText = [
@@ -125,6 +119,18 @@ class FormFieldOptions implements Arrayable
         return is_callable($this->disabled) ? call_user_func($this->disabled) : $this->disabled;
     }
 
+    public function getDefaultValue(): array|bool|string|int|null
+    {
+        return $this->defaultValue;
+    }
+
+    public function defaultValue(array|bool|string|int|null $defaultValue): static
+    {
+        $this->defaultValue = $defaultValue;
+
+        return $this;
+    }
+
     public function toArray(): array
     {
         $data = [
@@ -155,6 +161,10 @@ class FormFieldOptions implements Arrayable
 
         if ($this->isDisabled()) {
             $data['attr']['disabled'] = true;
+        }
+
+        if (isset($this->defaultValue)) {
+            $data['default_value'] = $this->getDefaultValue();
         }
 
         return $data;

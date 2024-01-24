@@ -19,6 +19,7 @@ use Botble\Ecommerce\Facades\Cart;
 use Botble\Ecommerce\Facades\Discount;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Facades\EcommerceHelper as EcommerceHelperFacade;
+use Botble\Ecommerce\Facades\FlashSale;
 use Botble\Ecommerce\Facades\InvoiceHelper as InvoiceHelperFacade;
 use Botble\Ecommerce\Http\Requests\CheckoutRequest;
 use Botble\Ecommerce\Models\Address;
@@ -34,6 +35,7 @@ use Botble\Ecommerce\Models\ShipmentHistory;
 use Botble\Ecommerce\Models\ShippingRule;
 use Botble\Payment\Enums\PaymentMethodEnum;
 use Botble\Payment\Enums\PaymentStatusEnum;
+use Botble\Payment\Facades\PaymentMethods;
 use Botble\Payment\Models\Payment;
 use Carbon\Carbon;
 use Dompdf\Dompdf;
@@ -82,7 +84,7 @@ class OrderHelper
         }
 
         foreach ($orders as $order) {
-            if ((float)$order->amount && (is_plugin_active('payment') && ! $order->payment_id)) {
+            if ((float)$order->amount && (is_plugin_active('payment') && ! empty(PaymentMethods::methods()) && ! $order->payment_id)) {
                 continue;
             }
 
@@ -139,32 +141,37 @@ class OrderHelper
             ]);
 
             if (
-                is_plugin_active('payment') &&
-                $order->amount &&
-                $order->payment &&
-                $order->payment->status == PaymentStatusEnum::COMPLETED
+                (
+                    is_plugin_active('payment')
+                    && $order->amount
+                    && $order->payment
+                    && $order->payment->status == PaymentStatusEnum::COMPLETED
+                )
+                || $order->amount == 0
             ) {
                 $this->sendEmailForDigitalProducts($order);
             }
         }
 
-        foreach ($orders as $order) {
-            foreach ($order->products as $orderProduct) {
-                $product = $orderProduct->product->original_product;
+        if (FlashSale::isEnabled()) {
+            foreach ($orders as $order) {
+                foreach ($order->products as $orderProduct) {
+                    $product = $orderProduct->product->original_product;
 
-                $flashSale = $product->latestFlashSales()->first();
-                if (! $flashSale) {
-                    continue;
+                    $flashSale = $product->latestFlashSales()->first();
+                    if (! $flashSale) {
+                        continue;
+                    }
+
+                    $flashSale->products()->detach([$product->id]);
+                    $flashSale->products()->attach([
+                        $product->id => [
+                            'price' => $flashSale->pivot->price,
+                            'quantity' => (int)$flashSale->pivot->quantity,
+                            'sold' => (int)$flashSale->pivot->sold + $orderProduct->qty,
+                        ],
+                    ]);
                 }
-
-                $flashSale->products()->detach([$product->id]);
-                $flashSale->products()->attach([
-                    $product->id => [
-                        'price' => $flashSale->pivot->price,
-                        'quantity' => (int)$flashSale->pivot->quantity,
-                        'sold' => (int)$flashSale->pivot->sold + $orderProduct->qty,
-                    ],
-                ]);
             }
         }
 
@@ -279,6 +286,7 @@ class OrderHelper
                 'payment_method' => is_plugin_active('payment') ? $order->payment->payment_channel->label() : '&mdash;',
                 'digital_product_list' => $view,
             ]);
+
             $mailer->sendUsingTemplate('download_digital_products', $order->user->email ?: $order->address->email);
 
             if ($digitalProductsCount === $order->products->count()) {
@@ -303,7 +311,7 @@ class OrderHelper
         OrderHistory::query()->create([
             'action' => 'mark_order_as_completed',
             'description' => trans('plugins/ecommerce::order.mark_as_completed.history', [
-                'admin' => Auth::user()->name,
+                'admin' => Auth::check() ? Auth::user()->name : 'system',
                 'time' => Carbon::now(),
             ]),
             'order_id' => $orderId,
@@ -372,7 +380,7 @@ class OrderHelper
         $variables = [
             'order_id' => Html::link(
                 route('orders.edit', $history->order->id),
-                $history->order->code . ' <i class="fa fa-external-link-alt"></i>',
+                $history->order->code . ' ' . BaseHelper::renderIcon('ti ti-external-link'),
                 ['target' => '_blank'],
                 null,
                 false

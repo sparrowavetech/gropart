@@ -11,10 +11,10 @@ use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Dashboard\Supports\DashboardWidgetInstance;
 use Carbon\Carbon;
-use Exception;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use Throwable;
 
 class AnalyticsController extends BaseController
 {
@@ -41,7 +41,7 @@ class AnalyticsController extends BaseController
                 );
         } catch (InvalidConfiguration $exception) {
             return $this->handleInvalidConfigException($exception);
-        } catch (Exception $exception) {
+        } catch (Throwable $exception) {
             return $this
                 ->httpResponse()
                 ->setError()
@@ -159,7 +159,7 @@ class AnalyticsController extends BaseController
                 ->setData(view('plugins/analytics::widgets.page', compact('pages'))->render());
         } catch (InvalidConfiguration $exception) {
             return $this->handleInvalidConfigException($exception);
-        } catch (Exception $exception) {
+        } catch (Throwable $exception) {
             return $this
                 ->httpResponse()
                 ->setError()
@@ -179,7 +179,7 @@ class AnalyticsController extends BaseController
                 ->setData(view('plugins/analytics::widgets.browser', compact('browsers'))->render());
         } catch (InvalidConfiguration $exception) {
             return $this->handleInvalidConfigException($exception);
-        } catch (Exception $exception) {
+        } catch (Throwable $exception) {
             return $this
                 ->httpResponse()
                 ->setError()
@@ -208,7 +208,7 @@ class AnalyticsController extends BaseController
                 ->setData(view('plugins/analytics::widgets.referrer', compact('referrers'))->render());
         } catch (InvalidConfiguration $exception) {
             return $this->handleInvalidConfigException($exception);
-        } catch (Exception $exception) {
+        } catch (Throwable $exception) {
             return $this
                 ->httpResponse()
                 ->setError()

@@ -34,10 +34,10 @@ class ProductAttributeSet extends BaseModel
     protected static function booted(): void
     {
         self::saving(function (self $model) {
-            $model->slug = self::createSlug($model->slug ?: $model->title, $model->getKey());
+            $model->slug = self::createSlug($model->title, $model->getKey());
         });
 
-        self::deleting(function (ProductAttributeSet $productAttributeSet) {
+        static::deleted(function (ProductAttributeSet $productAttributeSet) {
             $productAttributeSet->attributes()->each(fn (ProductAttribute $attribute) => $attribute->delete());
 
             $productAttributeSet->categories()->detach();

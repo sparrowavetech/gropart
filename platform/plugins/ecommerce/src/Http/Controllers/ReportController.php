@@ -16,13 +16,6 @@ use Illuminate\Http\Request;
 
 class ReportController extends BaseController
 {
-    public function __construct()
-    {
-        parent::__construct();
-
-        $this->breadcrumb();
-    }
-
     public function getIndex(Request $request, AdminWidget $widget)
     {
         $this->pageTitle(trans('plugins/ecommerce::reports.name'));

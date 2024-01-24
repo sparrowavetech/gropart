@@ -439,4 +439,19 @@ class Language
             'flag' => 'us',
         ];
     }
+
+    public static function getLocales(): array
+    {
+        return collect(static::getListLanguages())->pluck('2', '0')->unique()->all();
+    }
+
+    public static function getLocaleKeys(): array
+    {
+        return array_unique(array_keys(static::getLocales()));
+    }
+
+    public static function getLanguageCodes(): array
+    {
+        return collect(static::getListLanguages())->pluck('1')->unique()->all();
+    }
 }

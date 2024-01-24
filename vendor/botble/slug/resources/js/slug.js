@@ -2,78 +2,64 @@ class PermalinkField {
     constructor() {
         let $slugBox = $(document).find('.slug-field-wrapper')
 
-        $(document).on('blur', `#${$slugBox.data('field-name')}`, (e) => {
+        $(document).on('blur', `.js-base-form input[name=${$slugBox.data('field-name')}]`, (e) => {
+            $slugBox = $(document).find('.slug-field-wrapper')
+
             if ($slugBox.find('input[name="slug"]').is('[readonly]')) {
                 return
             }
 
             const value = $(e.currentTarget).val()
 
-            if (value !== null && value !== '' && ! $slugBox.find('input[name="slug"]').val()) {
+            if (value !== null && value !== '' && !$slugBox.find('input[name="slug"]').val()) {
                 createSlug(value, 0)
             }
         })
 
-        $(document).on('change', 'input[name="slug"]', (event) => {
-            const input = $(event.currentTarget)
+        let timeoutId
 
-            $slugBox = $(document).find('.slug-field-wrapper')
+        $(document).on('keyup', 'input[name="slug"]', (event) => {
+            clearTimeout(timeoutId)
 
-            if ($slugBox.has('.slug-data').length === 0) {
-                return
-            }
+            timeoutId = setTimeout(() => {
+                const input = $(event.currentTarget)
 
-            const value = input.val()
+                $slugBox = $(document).find('.slug-field-wrapper')
 
-            const id = $slugBox.find('.slug-data').data('id') || 0
+                if ($slugBox.has('.slug-data').length === 0) {
+                    return
+                }
 
-            if (value !== null && value !== '') {
-                createSlug(value, id)
-            } else {
-                input.addClass('is-invalid')
-            }
+                const value = input.val()
+
+                if (value !== null && value !== '') {
+                    createSlug(value, $slugBox.find('.slug-data').data('id') || 0)
+                } else {
+                    input.addClass('is-invalid')
+                }
+            }, 700)
         })
 
-        $(document).on('click', '[data-bb-toggle="slug-edit"]', (event) => {
-            $slugBox = $(document).find('.slug-field-wrapper')
+        $(document).on('click', '[data-bb-toggle="generate-slug"]', (e) => {
+            e.preventDefault()
 
-            $slugBox.find('input[name="slug"]')
-                .prop('readonly', false)
-                .focus()
+            const $fromField = $(e.currentTarget).closest('.js-base-form').find(`input[name=${$slugBox.data('field-name')}]`)
 
-            $(event.currentTarget).hide()
-
-            $slugBox.find('[data-bb-toggle="slug-ok"]').show()
-        })
-
-        $(document).on('click', '[data-bb-toggle="slug-ok"]', (event) => {
-            $slugBox = $(document).find('.slug-field-wrapper')
-
-            $slugBox.find('input[name="slug"]')
-                .prop('readonly', true)
-
-            $(event.currentTarget).hide()
-
-            $slugBox.find('[data-bb-toggle="slug-edit"]').show()
+            if ($fromField.val() !== null && $fromField.val() !== '') {
+                createSlug($fromField.val(), $slugBox.find('.slug-data').data('id') || 0)
+            }
         })
 
         const toggleInputSlugState = () => {
-            const slugInput = $slugBox.find('input[name="slug"]')
+            const $icon = $slugBox.find('.slug-actions a')
+            const $spinner = $('<div class="spinner-border spinner-border-sm" role="status"></div>')
 
-            if (slugInput.prop('readonly')) {
-                slugInput.prop('readonly', false)
-
-                slugInput.closest('.mb-3.position-relative').find('.spinner-border').remove()
+            if ($icon.hasClass('d-none')) {
+                $icon.removeClass('d-none')
+                $slugBox.find('.spinner-border').remove()
             } else {
-                slugInput.prop('readonly', true)
-
-                slugInput.closest('.mb-3.position-relative').append(
-                    `<div
-                    class="spinner-border spinner-border-sm text-secondary"
-                    role="status"
-                    style="border-radius: 50%; position: absolute; top: 2.5rem; z-index: 3; ${slugInput.hasClass('is-invalid') || slugInput.hasClass('is-valid') ? 'inset-inline-end: 5rem;' : 'inset-inline-end: 1rem;'}"
-                ></div>`
-                )
+                $icon.addClass('d-none')
+                $icon.after($spinner)
             }
         }
 
@@ -82,6 +68,8 @@ class PermalinkField {
          * @param {number} id
          */
         const createSlug = (value, id) => {
+            $slugBox = $(document).find('.slug-field-wrapper')
+
             const form = $slugBox.closest('form')
             const $slugId = $slugBox.find('.slug-data')
 

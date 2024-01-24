@@ -39,7 +39,7 @@
                             @endforeach
                         @endif
                     </select>
-                    <i class="fas fa-angle-down"></i>
+                    <x-core::icon name="ti ti-chevron-down" />
                 </div>
                 <br>
                 <div class="address-item-selected @if (!$sessionAddressId) d-none @endif">
@@ -161,7 +161,7 @@
                             >{{ $countryName }}</option>
                         @endforeach
                     </select>
-                    <i class="fas fa-angle-down"></i>
+                    <x-core::icon name="ti ti-chevron-down" />
                     <label for="address_country">{{ __('Country') }}</label>
                 </div>
                 {!! Form::error('address.country', $errors) !!}
@@ -200,7 +200,7 @@
                                         @endforeach
                                     @endif
                                 </select>
-                                <i class="fas fa-angle-down"></i>
+                                <x-core::icon name="ti ti-chevron-down" />
                                 <label for="address_state">{{ __('State') }}</label>
                             </div>
                         @else
@@ -257,7 +257,7 @@
                                         @endforeach
                                     @endif
                                 </select>
-                                <i class="fas fa-angle-down"></i>
+                                <x-core::icon name="ti ti-chevron-down" />
                                 <label for="address_city">{{ __('City') }}</label>
                             </div>
                         @endif

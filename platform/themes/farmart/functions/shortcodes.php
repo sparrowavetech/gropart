@@ -1,13 +1,12 @@
 <?php
 
 use Botble\Ads\Facades\AdsManager;
-use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Ecommerce\Facades\EcommerceHelper;
+use Botble\Ecommerce\Facades\FlashSale as FlashSaleFacade;
+use Botble\Ecommerce\Facades\ProductCategoryHelper;
 use Botble\Ecommerce\Models\FlashSale;
 use Botble\Ecommerce\Models\ProductCategory;
 use Botble\Ecommerce\Models\ProductCollection;
-use Botble\Testimonial\Models\Testimonial;
-use Botble\Testimonial\Repositories\Interfaces\TestimonialInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
 use Botble\Faq\Models\FaqCategory;
 use Botble\Media\Facades\RvMedia;
@@ -15,8 +14,6 @@ use Botble\Shortcode\Compilers\Shortcode;
 use Botble\Theme\Facades\Theme;
 use Botble\Theme\Supports\ThemeSupport;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Query\JoinClause;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Theme\Farmart\Supports\Wishlist;
 
@@ -101,25 +98,7 @@ app()->booted(function () {
             __('Featured Product Categories'),
             __('Featured Product Categories'),
             function (Shortcode $shortcode) {
-                $categories = ProductCategory::query()
-                    ->toBase()
-                    ->where('status', BaseStatusEnum::PUBLISHED)
-                    ->select([
-                        'ec_product_categories.id',
-                        'ec_product_categories.name',
-                        'ec_product_categories.image',
-                        DB::raw('CONCAT(slugs.prefix, "/", slugs.key) as url'),
-                    ])
-                    ->where('is_featured', true)
-                    ->leftJoin('slugs', function (JoinClause $join) {
-                        $join
-                            ->on('slugs.reference_id', 'ec_product_categories.id')
-                            ->where('slugs.reference_type', ProductCategory::class);
-                    })
-                    ->orderByDesc('ec_product_categories.created_at')
-                    ->orderBy('ec_product_categories.order')
-                    ->when($shortcode->limit > 0, fn ($query) => $query->limit($shortcode->limit))
-                    ->get();
+                $categories = ProductCategoryHelper::getProductCategoriesWithUrl([], ['is_featured' => true], $shortcode->limit);
 
                 return Theme::partial('shortcodes.ecommerce.featured-product-categories', compact('shortcode', 'categories'));
             }
@@ -137,52 +116,47 @@ app()->booted(function () {
             return Theme::partial('shortcodes.ecommerce.featured-brands-admin-config', compact('attributes'));
         });
 
-        add_shortcode('all-brands', __('All Brands'), __('All Brands'), function(Shortcode $shortcode){
-            return Theme::partial('shortcodes.ecommerce.all-brands', compact('shortcode'));
-        });
-        shortcode()->setAdminConfig('all-brands', function (array $attributes) {
-            return Theme::partial('shortcodes.ecommerce.all-brands-admin-config', compact('attributes'));
-        });
+        if (FlashSaleFacade::isEnabled()) {
+            add_shortcode('flash-sale', __('Flash sale'), __('Flash sale'), function (Shortcode $shortcode) {
+                $flashSale = FlashSale::query()
+                    ->notExpired()
+                    ->where('id', $shortcode->flash_sale_id)
+                    ->wherePublished()
+                    ->with([
+                        'products' => function ($query) {
+                            $reviewParams = EcommerceHelper::withReviewsParams();
 
-        add_shortcode('flash-sale', __('Flash sale'), __('Flash sale'), function (Shortcode $shortcode) {
-            $flashSale = FlashSale::query()
-                ->notExpired()
-                ->where('id', $shortcode->flash_sale_id)
-                ->wherePublished()
-                ->with([
-                    'products' => function ($query) {
-                        $reviewParams = EcommerceHelper::withReviewsParams();
+                            if (EcommerceHelper::isReviewEnabled()) {
+                                $query->withAvg($reviewParams['withAvg'][0], $reviewParams['withAvg'][1]);
+                            }
 
-                        if (EcommerceHelper::isReviewEnabled()) {
-                            $query->withAvg($reviewParams['withAvg'][0], $reviewParams['withAvg'][1]);
-                        }
+                            return $query
+                                ->wherePublished()
+                                ->with(EcommerceHelper::withProductEagerLoadingRelations())
+                                ->withCount($reviewParams['withCount']);
+                        },
+                    ])
+                    ->first();
 
-                        return $query
-                            ->wherePublished()
-                            ->with(EcommerceHelper::withProductEagerLoadingRelations())
-                            ->withCount($reviewParams['withCount']);
-                    },
-                ])
-                ->first();
+                if (! $flashSale || $flashSale->products->isEmpty()) {
+                    return null;
+                }
 
-            if (! $flashSale || $flashSale->products->isEmpty()) {
-                return null;
-            }
+                $isFlashSale = true;
+                $wishlistIds = Wishlist::getWishlistIds($flashSale->products->pluck('id')->all());
 
-            $isFlashSale = true;
-            $wishlistIds = Wishlist::getWishlistIds($flashSale->products->pluck('id')->all());
+                return Theme::partial('shortcodes.ecommerce.flash-sale', compact('shortcode', 'flashSale', 'isFlashSale', 'wishlistIds'));
+            });
 
-            return Theme::partial('shortcodes.ecommerce.flash-sale', compact('shortcode', 'flashSale', 'isFlashSale', 'wishlistIds'));
-        });
+            shortcode()->setAdminConfig('flash-sale', function (array $attributes) {
+                $flashSales = FlashSale::query()
+                    ->wherePublished()
+                    ->notExpired()
+                    ->get();
 
-        shortcode()->setAdminConfig('flash-sale', function (array $attributes) {
-            $flashSales = FlashSale::query()
-                ->wherePublished()
-                ->notExpired()
-                ->get();
-
-            return Theme::partial('shortcodes.ecommerce.flash-sale-admin-config', compact('flashSales', 'attributes'));
-        });
+                return Theme::partial('shortcodes.ecommerce.flash-sale-admin-config', compact('flashSales', 'attributes'));
+            });
+        }
 
         add_shortcode(
             'product-collections',
@@ -308,14 +282,6 @@ app()->booted(function () {
         shortcode()->setAdminConfig('featured-posts', function (array $attributes) {
             return Theme::partial('shortcodes.featured-posts-admin-config', compact('attributes'));
         });
-
-        add_shortcode('blog-posts-by-category', __('Blog Posts by Category'), __('Blog Posts by Category'), function (Shortcode $shortcode) {
-            return Theme::partial('shortcodes.blog-posts-by-category', compact('shortcode'));
-        });
-
-        shortcode()->setAdminConfig('blog-posts-by-category', function (array $attributes) {
-            return Theme::partial('shortcodes.blog-posts-by-category-admin-config', compact('attributes'));
-        });
     }
 
     if (is_plugin_active('contact')) {
@@ -354,56 +320,7 @@ app()->booted(function () {
         shortcode()->setAdminConfig('faq', function (array $attributes) {
             return Theme::partial('shortcodes.faq-admin-config', compact('attributes'));
         });
-
-        add_shortcode('faq-by-category', __('FAQs by Category'), __('FAQs by Category'), function (Shortcode $shortcode) {
-            return Theme::partial('shortcodes.faq-by-category', compact('shortcode'));
-        });
-
-        shortcode()->setAdminConfig('faq-by-category', function (array $attributes) {
-            return Theme::partial('shortcodes.faq-by-category-admin-config', compact('attributes'));
-        });
-
-        add_shortcode('faq-by-group', __('Group FAQs'), __('Group FAQs'), function (Shortcode $shortcode) {
-            return Theme::partial('shortcodes.faq-by-group', compact('shortcode'));
-        });
-
-        shortcode()->setAdminConfig('faq-by-group', function (array $attributes) {
-            return Theme::partial('shortcodes.faq-by-group-admin-config', compact('attributes'));
-        });
     }
-
-    if (is_plugin_active('testimonial')) {
-        add_shortcode('testimonials', __('Testimonials'), __('Testimonials'), function (Shortcode $shortcode) {
-            $testimonials = app(TestimonialInterface::class)->advancedGet([
-                'condition' => [
-                    'status' => BaseStatusEnum::PUBLISHED,
-                ],
-                'take' => (int)$shortcode->number_of_displays,
-            ]);
-
-            return Theme::partial('shortcodes.testimonials.index', compact('shortcode', 'testimonials'));
-        });
-
-        shortcode()->setAdminConfig('testimonials', function (array $attributes) {
-            return Theme::partial('shortcodes.testimonials.admin-config', compact('attributes'));
-        });
-    }
-
-    add_shortcode('site-features', __('Site Features'), __('Site Features'), function (Shortcode $shortcode) {
-        return Theme::partial('shortcodes.site-features', compact('shortcode'));
-    });
-
-    shortcode()->setAdminConfig('site-features', function (array $attributes) {
-        return Theme::partial('shortcodes.site-features-admin-config', compact('attributes'));
-    });
-
-    add_shortcode('newsletter-home', __('Newsletter Form'), __('Newsletter Form'), function (Shortcode $shortcode) {
-        return Theme::partial('shortcodes.newsletter-home', compact('shortcode'));
-    });
-
-    shortcode()->setAdminConfig('newsletter-home', function (array $attributes) {
-        return Theme::partial('shortcodes.newsletter-home-admin-config', compact('attributes'));
-    });
 
     add_shortcode('coming-soon', __('Coming Soon'), __('Coming Soon'), function (Shortcode $shortcode) {
         return Theme::partial('shortcodes.coming-soon', compact('shortcode'));

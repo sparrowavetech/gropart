@@ -9,10 +9,10 @@ class CustomerCreateRequest extends Request
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:120|min:2',
-            'email' => 'required|max:60|min:6|email|unique:ec_customers',
-            'password' => 'required|string|min:6',
-            'password_confirmation' => 'required|same:password',
+            'name' => ['required', 'string', 'min:2', 'max:120'],
+            'email' => ['required', 'min:6', 'max:60', 'email', 'unique:ec_customers'],
+            'password' => ['required', 'string', 'min:6', 'confirmed'],
+            'private_notes' => ['nullable', 'string', 'max:1000'],
         ];
     }
 }

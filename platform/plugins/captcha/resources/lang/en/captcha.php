@@ -41,5 +41,7 @@ return [
         '*' => 'times',
         '/' => 'divided by',
     ],
-    'recaptcha_disclaimer_message' => 'This site is protected by reCAPTCHA and the Google Privacy Policy and Terms of Service apply.',
+    'recaptcha_disclaimer_message_with_link' => 'This site is protected by reCAPTCHA and the Google :privacyLink and :termsLink apply.',
+    'privacy_policy' => 'Privacy Policy',
+    'terms_of_service' => 'Terms of Service',
 ];

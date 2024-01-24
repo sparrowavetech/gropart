@@ -4,6 +4,7 @@ namespace Botble\Ecommerce\Http\Controllers;
 
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Supports\Breadcrumb;
 use Botble\Ecommerce\Exports\TemplateProductExport;
 use Botble\Ecommerce\Http\Requests\BulkImportRequest;
 use Botble\Ecommerce\Http\Requests\ProductImportRequest;
@@ -16,10 +17,11 @@ class BulkImportController extends BaseController
 {
     public function __construct(protected ProductImport $productImport, protected ValidateProductImport $validateProductImport)
     {
-        parent::__construct();
+    }
 
-        $this
-            ->breadcrumb()
+    protected function breadcrumb(): Breadcrumb
+    {
+        return parent::breadcrumb()
             ->add(trans('plugins/ecommerce::products.name'), route('products.index'))
             ->add(trans('plugins/ecommerce::bulk-import.name'), route('ecommerce.import.products.index'));
     }

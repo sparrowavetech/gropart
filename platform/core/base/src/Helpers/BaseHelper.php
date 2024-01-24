@@ -2,12 +2,17 @@
 
 namespace Botble\Base\Helpers;
 
+use Botble\Base\Facades\AdminAppearance;
 use Botble\Base\Facades\Html;
+use Botble\Base\View\Components\BadgeComponent;
+use Botble\Base\View\Components\IconComponent;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\HtmlString;
+use Illuminate\Support\Str;
 use Throwable;
 
 class BaseHelper
@@ -148,9 +153,7 @@ class BaseHelper
 
     public function adminLanguageDirection(): string
     {
-        $direction = session('admin_locale_direction', setting('admin_locale_direction', 'ltr'));
-
-        return apply_filters(BASE_FILTER_ADMIN_LANGUAGE_DIRECTION, $direction);
+        return apply_filters(BASE_FILTER_ADMIN_LANGUAGE_DIRECTION, AdminAppearance::forCurrentUser()->getLocaleDirection());
     }
 
     public function isHomepage(int|string|null $pageId = null): bool
@@ -235,9 +238,15 @@ class BaseHelper
         return htmlentities($this->clean($value));
     }
 
-    public function getPhoneValidationRule(): string
+    public function getPhoneValidationRule(bool $asArray = false): string|array
     {
-        return config('core.base.general.phone_validation_rule');
+        $rule = config('core.base.general.phone_validation_rule');
+
+        if ($asArray) {
+            return explode('|', $rule);
+        }
+
+        return $rule;
     }
 
     public function sortSearchResults(array|Collection $collection, string $searchTerms, string $column): Collection
@@ -318,6 +327,18 @@ class BaseHelper
 
     public function hexToRgb(string $color): array
     {
+        $color = Str::lower($color);
+
+        if (Str::startsWith($color, 'rgb')) {
+            $color = str_replace('rgb(', '', $color);
+            $color = str_replace(')', '', $color);
+            $color = str_replace(' ', '', $color);
+
+            [$red, $green, $blue] = explode(',', $color);
+
+            return compact('red', 'green', 'blue');
+        }
+
         [$red, $green, $blue] = sscanf($color, '#%02x%02x%02x');
 
         $blue = $blue === null ? 0 : $blue;
@@ -468,5 +489,24 @@ class BaseHelper
     public function joinPaths(array $paths): string
     {
         return implode(DIRECTORY_SEPARATOR, $paths);
+    }
+
+    public function hasIcon(string $name): bool
+    {
+        return File::exists(sprintf(core_path('base/resources/views/components/icons/%s.blade.php'), $name));
+    }
+
+    public function renderIcon(string $name, string $size = null, array $attributes = []): string
+    {
+        return Blade::renderComponent(
+            (new IconComponent($name, $size))->withAttributes($attributes)
+        );
+    }
+
+    public function renderBadge(string $label, string $color = 'primary', array $attributes = []): string
+    {
+        return Blade::renderComponent(
+            (new BadgeComponent($label, $color))->withAttributes($attributes)
+        );
     }
 }

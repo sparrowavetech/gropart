@@ -6,12 +6,18 @@ use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\Html;
 use Botble\Base\Facades\MetaBox;
+use Botble\Base\Forms\FieldOptions\InputFieldOption;
+use Botble\Base\Forms\FieldOptions\TextFieldOption;
+use Botble\Base\Forms\Fields\ColorField;
+use Botble\Base\Forms\Fields\TextField;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Base\Models\BaseModel;
 use Botble\Base\Supports\RepositoryHelper;
 use Botble\Menu\Forms\MenuNodeForm;
+use Botble\Menu\Http\Requests\MenuRequest;
 use Botble\Menu\Models\Menu as MenuModel;
 use Botble\Menu\Models\MenuNode;
+use Botble\Support\Http\Requests\Request as BaseRequest;
 use Botble\Support\Services\Cache\Cache;
 use Botble\Theme\Facades\Theme;
 use Exception;
@@ -307,7 +313,7 @@ class Menu
                 $items = $items->where('status', BaseStatusEnum::PUBLISHED);
             }
 
-            $items = apply_filters(BASE_FILTER_BEFORE_GET_ADMIN_LIST_ITEM, $items, $model, get_class($model))->get();
+            $items = apply_filters(BASE_FILTER_BEFORE_GET_ADMIN_LIST_ITEM, $items, $model, $model::class)->get();
         } else {
             $items = Arr::get($args, 'items', []);
         }
@@ -454,6 +460,74 @@ class Menu
 
             if (! empty($node['children'])) {
                 $this->saveMenuNodeImages($node['children'], $model);
+            }
+        }
+    }
+
+    public function useMenuItemBadge(): void
+    {
+        MenuNodeForm::extend(function (MenuNodeForm $form) {
+            $form->add(
+                'badge_text',
+                TextField::class,
+                TextFieldOption::make()
+                    ->label(trans('packages/menu::menu.badge_text'))
+                    ->value($form->getModel()->getMetaData('badge_text', true))
+                    ->toArray()
+            )
+                ->add(
+                    'badge_color',
+                    ColorField::class,
+                    InputFieldOption::make()
+                        ->value($form->getModel()->getMetaData('badge_color', true) ?: '#ffffff')
+                        ->label(trans('packages/menu::menu.badge_color'))
+                        ->toArray()
+                );
+
+            return $form;
+        });
+
+        MenuNodeForm::beforeSaving(function (FormAbstract $form) {
+            $model = $form->getModel();
+
+            if ($model instanceof MenuNode) {
+                $request = $form->getRequest();
+
+                if ($menuNodes = $request->input('menu_nodes')) {
+                    $menuNodes = json_decode($menuNodes, true);
+
+                    $this->saveMenuNodeBadges($menuNodes, $model);
+                }
+            }
+
+            return $form;
+        }, 170);
+
+        add_filter('core_request_rules', function (array $rules, BaseRequest $request) {
+            if ($request instanceof MenuRequest) {
+                $rules['badge_text'] = ['nullable', 'string'];
+                $rules['badge_color'] = ['nullable', 'string'];
+            }
+
+            return $rules;
+        }, 10, 2);
+    }
+
+    public function saveMenuNodeBadges(array $nodes, MenuNode $model): void
+    {
+        foreach ($nodes as $node) {
+            if ($node['menuItem']['id'] == $model->getKey()) {
+                if (isset($node['menuItem']['badge_text'])) {
+                    MetaBox::saveMetaBoxData($model, 'badge_text', $node['menuItem']['badge_text']);
+                }
+
+                if (isset($node['menuItem']['badge_color'])) {
+                    MetaBox::saveMetaBoxData($model, 'badge_color', $node['menuItem']['badge_color']);
+                }
+            }
+
+            if (! empty($node['children'])) {
+                $this->saveMenuNodeBadges($node['children'], $model);
             }
         }
     }

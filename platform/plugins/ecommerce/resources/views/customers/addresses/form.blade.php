@@ -51,7 +51,7 @@
                 :label="trans('plugins/ecommerce::addresses.country')"
                 name="country"
                 :options="EcommerceHelper::getAvailableCountries()"
-                :value="old('country', $address->country)"
+                :value="old('country', $address)"
                 data-type="country"
             />
         @else
@@ -69,8 +69,8 @@
             <x-core::form.select
                 :label="trans('plugins/ecommerce::addresses.state')"
                 name="state"
-                :options="EcommerceHelper::getAvailableStatesByCountry(old('country', $address->country))"
-                :value="old('state', $address->state)"
+                :options="$states = EcommerceHelper::getAvailableStatesByCountry(old('country', $address))"
+                :value="old('state', $address)"
                 data-type="state"
                 data-url="{{ route('ajax.states-by-country') }}"
             />
@@ -93,8 +93,8 @@
             <x-core::form.select
                 :label="trans('plugins/ecommerce::addresses.city')"
                 name="city"
-                :options="EcommerceHelper::getAvailableStatesByCountry(old('state', $address->state))"
-                :value="old('city', $address->city)"
+                :options="EcommerceHelper::getAvailableCitiesByState(old('state', $address) ?: Arr::first(array_keys($states)))"
+                :value="old('city', $address)"
                 data-type="city"
                 data-url="{{ route('ajax.cities-by-state') }}"
             />

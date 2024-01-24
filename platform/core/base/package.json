@@ -1,5 +1,6 @@
 {
     "name": "@botble/core",
+    "version": "1.0.0",
     "devDependencies": {
         "@tabler/core": "github:tabler/tabler#dev",
         "autosize": "^6.0.1",

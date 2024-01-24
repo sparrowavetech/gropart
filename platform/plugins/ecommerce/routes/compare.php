@@ -1,23 +1,18 @@
 <?php
 
+use Botble\Ecommerce\Http\Controllers\Fronts\CompareController;
+use Botble\Ecommerce\Http\Middleware\CheckCompareEnabledMiddleware;
 use Botble\Theme\Facades\Theme;
 use Illuminate\Support\Facades\Route;
 
-Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers\Fronts'], function () {
-    Theme::registerRoutes(function () {
-        Route::get('compare', [
-            'as' => 'public.compare',
-            'uses' => 'CompareController@index',
-        ]);
-
-        Route::post('compare/{productId}', [
-            'as' => 'public.compare.add',
-            'uses' => 'CompareController@store',
-        ])->wherePrimaryKey('productId');
-
-        Route::delete('compare/{productId}', [
-            'as' => 'public.compare.remove',
-            'uses' => 'CompareController@destroy',
-        ])->wherePrimaryKey('productId');
-    });
+Theme::registerRoutes(function () {
+    Route::middleware(CheckCompareEnabledMiddleware::class)
+        ->controller(CompareController::class)
+        ->prefix('compare')
+        ->name('public.')
+        ->group(function () {
+            Route::get('/', 'index')->name('compare');
+            Route::post('{productId}', 'store')->name('compare.add')->wherePrimaryKey('productId');
+            Route::delete('{productId}', 'destroy')->name('compare.remove')->wherePrimaryKey('productId');
+        });
 });

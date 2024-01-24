@@ -6,6 +6,7 @@ use Botble\Base\Events\BeforeEditContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Base\Facades\EmailHandler;
+use Botble\Base\Supports\Breadcrumb;
 use Botble\Marketplace\Enums\WithdrawalStatusEnum;
 use Botble\Marketplace\Forms\WithdrawalForm;
 use Botble\Marketplace\Http\Requests\WithdrawalRequest;
@@ -17,12 +18,9 @@ use Illuminate\Support\Facades\Auth;
 
 class WithdrawalController extends BaseController
 {
-    public function __construct()
+    protected function breadcrumb(): Breadcrumb
     {
-        parent::__construct();
-
-        $this
-            ->breadcrumb()
+        return parent::breadcrumb()
             ->add(trans('plugins/marketplace::withdrawal.name'), route('marketplace.withdrawal.index'));
     }
 

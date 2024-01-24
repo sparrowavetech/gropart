@@ -3,7 +3,8 @@
 namespace Botble\Marketplace\Forms\Settings;
 
 use Botble\Base\Facades\Assets;
-use Botble\Base\Forms\Fields\MultiCheckListField;
+use Botble\Base\Forms\FieldOptions\NumberFieldOption;
+use Botble\Base\Forms\Fields\NumberField;
 use Botble\Marketplace\Facades\MarketplaceHelper;
 use Botble\Marketplace\Http\Requests\MarketPlaceSettingFormRequest;
 use Botble\Marketplace\Models\Store;
@@ -32,7 +33,6 @@ class MarketplaceSettingForm extends SettingForm
             ->setSectionTitle(trans('plugins/marketplace::marketplace.settings.title'))
             ->setSectionDescription(trans('plugins/marketplace::marketplace.settings.description'))
             ->setValidatorClass(MarketPlaceSettingFormRequest::class)
-            ->addCustomField('multiCheckList', MultiCheckListField::class)
             ->contentOnly()
             ->add('fee_per_order', 'number', [
                 'label' => trans('plugins/marketplace::marketplace.settings.default_commission_fee'),
@@ -87,6 +87,10 @@ class MarketplaceSettingForm extends SettingForm
                     'step' => 1,
                 ],
             ])
+            ->add('enabled_vendor_registration', 'onOffCheckbox', [
+                'label' => trans('plugins/marketplace::marketplace.settings.enable_vendor_registration'),
+                'value' => MarketplaceHelper::isVendorRegistrationEnabled(),
+            ])
             ->add('hide_store_phone_number', 'onOffCheckbox', [
                 'label' => trans('plugins/marketplace::marketplace.settings.hide_store_phone_number'),
                 'value' => MarketplaceHelper::hideStorePhoneNumber(),
@@ -105,6 +109,15 @@ class MarketplaceSettingForm extends SettingForm
             ])
             ->add('payment_method_fields', 'html', [
                 'html' => view('plugins/marketplace::settings.partials.payment-method-fields')->render(),
-            ]);
+            ])
+            ->add(
+                'minimum_withdrawal_amount',
+                NumberField::class,
+                NumberFieldOption::make()
+                    ->label(trans('plugins/marketplace::marketplace.settings.minimum_withdrawal_amount'))
+                    ->helperText(trans('plugins/marketplace::marketplace.settings.minimum_withdrawal_amount_helper'))
+                    ->value(MarketplaceHelper::getMinimumWithdrawalAmount())
+                    ->toArray(),
+            );
     }
 }

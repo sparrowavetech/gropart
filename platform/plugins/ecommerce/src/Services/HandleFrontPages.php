@@ -14,11 +14,13 @@ use Botble\Ecommerce\Models\ProductTag;
 use Botble\Ecommerce\Services\Products\GetProductService;
 use Botble\Ecommerce\Services\Products\ProductCrossSalePriceService;
 use Botble\Ecommerce\Services\Products\UpdateDefaultProductService;
+use Botble\Ecommerce\Traits\CheckReviewConditionTrait;
 use Botble\Media\Facades\RvMedia;
 use Botble\SeoHelper\Entities\Twitter\Card;
 use Botble\SeoHelper\Facades\SeoHelper;
 use Botble\SeoHelper\SeoOpenGraph;
 use Botble\Slug\Models\Slug;
+use Botble\Theme\Facades\AdminBar;
 use Botble\Theme\Facades\Theme;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -28,6 +30,8 @@ use Illuminate\Support\Facades\Auth;
 
 class HandleFrontPages
 {
+    use CheckReviewConditionTrait;
+
     public function __construct(
         protected ProductCrossSalePriceService $productCrossSalePriceService
     ) {
@@ -106,7 +110,9 @@ class HandleFrontPages
                 $card->addMeta('label1', 'Price');
                 $card->addMeta(
                     'data1',
-                    format_price($product->front_sale_price_with_taxes) . ' ' . strtoupper(get_application_currency()->title)
+                    format_price($product->front_sale_price_with_taxes) . ' ' . strtoupper(
+                        get_application_currency()->title
+                    )
                 );
                 $card->addMeta('label2', 'Website');
                 $card->addMeta('data2', SeoHelper::openGraph()->getProperty('site_name'));
@@ -163,24 +169,23 @@ class HandleFrontPages
                     $product->image = $selectedProductVariation->configurableProduct->image ?: $product->image;
                 }
 
+                $checkReview = $this->checkReviewCondition($product->getKey());
+
                 return [
                     'view' => 'ecommerce.product',
                     'default_view' => 'plugins/ecommerce::themes.product',
-                    'data' => compact('product', 'selectedAttrs', 'productImages', 'productVariation'),
+                    'data' => compact('product', 'selectedAttrs', 'productImages', 'productVariation', 'checkReview'),
                     'slug' => $product->slug,
                 ];
 
             case ProductCategory::class:
-                $condition = [
-                    'ec_product_categories.id' => $slug->reference_id,
-                    'ec_product_categories.status' => BaseStatusEnum::PUBLISHED,
-                ];
-
-                if ($isPreview) {
-                    Arr::forget($condition, 'ec_product_categories.status');
-                }
-
-                $category = ProductCategory::query()->with(['slugable'])->where($condition)->firstOrFail();
+                $category = ProductCategory::query()
+                    ->where('id', $slug->reference_id)
+                    ->when(! $isPreview, function ($query) {
+                        $query->wherePublished();
+                    })
+                    ->with(['slugable'])
+                    ->firstOrFail();
 
                 if ($category->slugable->key !== $slug->key) {
                     return redirect()->to($category->url);
@@ -229,18 +234,17 @@ class HandleFrontPages
                 SeoHelper::meta()->setUrl($category->url);
 
                 if (function_exists('admin_bar')) {
-                    admin_bar()
-                        ->registerLink(
-                            trans('plugins/ecommerce::product-categories.edit_this_category'),
-                            route('product-categories.edit', $category->getKey()),
-                            null,
-                            'product-categories.edit'
-                        );
+                    AdminBar::registerLink(
+                        trans('plugins/ecommerce::product-categories.edit_this_category'),
+                        route('product-categories.edit', $category->getKey()),
+                        null,
+                        'product-categories.edit'
+                    );
                 }
 
                 Theme::breadcrumb()->add(__('Products'), route('public.products'));
 
-                if ($category->parents->count()) {
+                if ($category->parents->isNotEmpty()) {
                     foreach ($category->parents->reverse() as $parentCategory) {
                         Theme::breadcrumb()->add($parentCategory->name, $parentCategory->url);
                     }
@@ -262,17 +266,11 @@ class HandleFrontPages
                 ];
 
             case Brand::class:
-                $condition = [
-                    'ec_brands.id' => $slug->reference_id,
-                    'ec_brands.status' => BaseStatusEnum::PUBLISHED,
-                ];
-
-                if ($isPreview) {
-                    Arr::forget($condition, 'ec_brands.status');
-                }
-
                 $brand = Brand::query()
-                    ->where($condition)
+                    ->where('id', $slug->reference_id)
+                    ->when(! $isPreview, function ($query) {
+                        $query->wherePublished();
+                    })
                     ->with(['slugable'])
                     ->firstOrFail();
 
@@ -284,7 +282,7 @@ class HandleFrontPages
                     return $response->setNextUrl($brand->url);
                 }
 
-                $request->merge(['brands' => array_merge((array) request()->input('brands', []), [$brand->getKey()])]);
+                $request->merge(['brands' => array_merge((array)request()->input('brands', []), [$brand->getKey()])]);
 
                 $products = app(GetProductService::class)->getProduct(
                     $request,
@@ -409,7 +407,7 @@ class HandleFrontPages
         $products,
         BaseHttpResponse $response,
         ?ProductCategory $category = null
-    ) {
+    ): array {
         $total = $products->total();
         $message = $total > 1 ? __(':total Products found', compact('total')) : __(
             ':total Product found',
@@ -432,7 +430,7 @@ class HandleFrontPages
             $additional['breadcrumb'] = Theme::breadcrumb()->render();
         }
 
-        $filtersView = Theme::getThemeNamespace('views.ecommerce.includes.filters');
+        $filtersView = EcommerceHelper::viewPath('includes.filters');
 
         if (view()->exists($filtersView)) {
             $additional['filters_html'] = view($filtersView, compact('category'))->render();
@@ -441,6 +439,7 @@ class HandleFrontPages
         return $response
             ->setData($data)
             ->setAdditional($additional)
-            ->setMessage($message);
+            ->setMessage($message)
+            ->toArray();
     }
 }

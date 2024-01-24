@@ -3,22 +3,15 @@
 return [
     'settings' => [
         'title' => 'Captcha',
-        'description' => 'reCAPTCHA is a free service from Google that helps protect websites from spam and abuse.
-        <br/><br/> Math Captcha allows you to use simple math problems to test site users to prove their human identity.',
-        'panel_description' => 'View and update reCAPTCHA and math captcha.',
-        'recaptcha_site_key' => 'reCAPTCHA Site Key',
-        'recaptcha_secret' => 'reCAPTCHA Secret',
-        'enable_recaptcha' => 'Enable reCAPTCHA?',
-        'recaptcha_score' => 'Score',
-        'recaptcha_credential_helper' => 'Obtain your Google reCAPTCHA credentials :link.',
-        'recaptcha_credential_helper_here' => 'here',
-        'recaptcha_warning' => 'Must use reCAPTCHA in credentials setup. Be careful, the wrong settings will make the login system interruption.',
-        'hide_badge' => 'Hide reCAPTCHA badge?',
-        'show_disclaimer' => 'Display reCAPTCHA disclaimer?',
+        'description' => 'Settings for Google Captcha',
+        'captcha_site_key' => 'Captcha Site Key',
+        'captcha_secret' => 'Captcha Secret',
+        'enable_captcha' => 'Enable Captcha?',
+        'helper' => 'Go here to get credentials https://www.google.com/recaptcha/admin#list.',
+        'hide_badge' => 'Hide recaptcha badge (for v3)',
         'type' => 'Type',
         'v2_description' => 'V2 (Verify requests with a challenge)',
         'v3_description' => 'V3 (Verify requests with a score)',
-        'enable_math_captcha' => 'Enable Math Captcha?',
     ],
     'numbers' => [
         '0' => 'Zero',
@@ -41,5 +34,4 @@ return [
         '*' => 'times',
         '/' => 'divided by',
     ],
-    'recaptcha_disclaimer_message' => 'This site is protected by reCAPTCHA and the Google Privacy Policy and Terms of Service apply.',
 ];

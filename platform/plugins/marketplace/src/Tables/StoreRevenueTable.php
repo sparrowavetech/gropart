@@ -20,6 +20,8 @@ class StoreRevenueTable extends TableAbstract
 {
     protected ?int $customerId;
 
+    protected $hasOperations = false;
+
     public function setup(): void
     {
         $this

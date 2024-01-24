@@ -3,8 +3,59 @@ import CKEditorUploadAdapter from './ckeditor-upload-adapter'
 class EditorManagement {
     constructor() {
         this.CKEDITOR = {}
+        this.ckEditorConfigCallbacks = []
+        this.ckEditorInitialCallbacks = []
+        this.ckFinderCallback = null
+        this.tinyMceConfigCallbacks = []
+        this.tinyMceInitialCallbacks = []
+
+        document.dispatchEvent(
+            new CustomEvent('core-editor-init', { detail: this })
+        )
     }
 
+    ckEditorConfigUsing(callback) {
+        this.ckEditorConfigCallbacks.push(callback)
+    }
+
+    ckEditorInitialUsing(callback) {
+        this.ckEditorInitialCallbacks.push(callback)
+    }
+
+    ckEditorConfig(config) {
+        for (let callback of this.ckEditorConfigCallbacks) {
+            config = callback(config)
+        }
+
+        return config
+    }
+
+    ckFinderUsing(callback) {
+        this.ckFinderCallback = callback
+    }
+
+    async ckFinderInitial(editor, element) {
+        if (this.ckFinderCallback) {
+            return this.ckFinderCallback(editor, element)
+        }
+
+        const ckFileRepository = editor.plugins.get('FileRepository')
+
+        if (ckFileRepository && RV_MEDIA_URL.media_upload_from_editor) {
+            ckFileRepository.createUploadAdapter = (loader) => {
+                return new CKEditorUploadAdapter(loader, RV_MEDIA_URL.media_upload_from_editor, editor.t)
+            }
+        }
+
+        const ckfinder = editor.commands.get('ckfinder')
+        const btnGalleries =  $(`#${element}`).parent().find('.btn_gallery[data-action="media-insert-ckeditor"]')
+
+        if (ckfinder && btnGalleries.length) {
+            ckfinder.execute = () => btnGalleries.trigger('click');
+        } else {
+            ckfinder.execute = () => Botble.showError('Not available.')
+        }
+    }
     initCkEditor(element, extraConfig) {
         if (this.CKEDITOR[element] || !$('#' + element).is(':visible')) {
             return false
@@ -12,9 +63,9 @@ class EditorManagement {
 
         const editor = document.querySelector('#' + element)
 
-        ClassicEditor.create(editor, {
+        let config = {
             fontSize: {
-                options: [9, 11, 13, 'default', 17, 16, 18, 19, 21, 22, 23, 24],
+                options: [9, 10, 11, 12, 13, 'default', 15, 16, 17, 18, 19, 20, 21, 22, 23, 24],
             },
 
             alignment: {
@@ -28,6 +79,8 @@ class EditorManagement {
                     { model: 'heading2', view: 'h2', title: 'Heading 2', class: 'ck-heading_heading2' },
                     { model: 'heading3', view: 'h3', title: 'Heading 3', class: 'ck-heading_heading3' },
                     { model: 'heading4', view: 'h4', title: 'Heading 4', class: 'ck-heading_heading4' },
+                    { model: 'heading5', view: 'h5', title: 'Heading 5', class: 'ck-heading_heading4' },
+                    { model: 'heading6', view: 'h6', title: 'Heading 6', class: 'ck-heading_heading4' },
                 ],
             },
             placeholder: ' ',
@@ -55,6 +108,7 @@ class EditorManagement {
                     '|',
                     'htmlEmbed',
                     'imageInsert',
+                    'ckfinder',
                     'blockQuote',
                     'insertTable',
                     'mediaEmbed',
@@ -64,7 +118,9 @@ class EditorManagement {
                     'removeFormat',
                     'sourceEditing',
                     'codeBlock',
+                    'fullScreen',
                 ],
+                shouldNotGroupWhenFull: true,
             },
             language: {
                 ui: window.siteEditorLocale || 'en',
@@ -77,6 +133,8 @@ class EditorManagement {
                     'imageStyle:inline',
                     'imageStyle:block',
                     'imageStyle:side',
+                    'imageStyle:wrapText',
+                    'imageStyle:breakText',
                     'toggleImageCaption',
                     'ImageResize',
                 ],
@@ -136,12 +194,12 @@ class EditorManagement {
                 ],
             },
             ...extraConfig,
-        })
-            .then((editor) => {
-                editor.plugins.get('FileRepository').createUploadAdapter = (loader) => {
-                    return new CKEditorUploadAdapter(loader, RV_MEDIA_URL.media_upload_from_editor, editor.t)
-                }
+        }
 
+        config = this.ckEditorConfig(config)
+
+        ClassicEditor.create(editor, config)
+            .then(async (editor) => {
                 // create function insert html
                 editor.insertHtml = (html) => {
                     const viewFragment = editor.data.processor.toView(html)
@@ -155,6 +213,7 @@ class EditorManagement {
 
                 const minHeight = $('#' + element).prop('rows') * 90
                 const className = `ckeditor-${element}-inline`
+
                 $(editor.ui.view.editable.element).addClass(className).after(`
                     <style>
                         .ck-editor__editable_inline {
@@ -177,6 +236,10 @@ class EditorManagement {
                 editor.commands._commands.get('mediaEmbed').execute = (url) => {
                     editor.insertHtml(`[media url="${url}"][/media]`)
                 }
+
+                await this.ckEditorInitialUsing(editor)
+
+                await this.ckFinderInitial(editor, element)
             })
             .catch((error) => {
                 console.error(error)
@@ -201,8 +264,28 @@ class EditorManagement {
             })
     }
 
-    initTinyMce(element) {
-        const options = {
+    tinyMceConfigUsing(callback) {
+        this.tinyMceConfigCallbacks.push(callback)
+    }
+
+    tinyMceInitialUsing(callback) {
+        this.tinyMceInitialCallbacks.push(callback)
+    }
+
+    tinyMceConfig(config) {
+        for (let callback of this.tinyMceConfigCallbacks) {
+            config = callback(config)
+        }
+
+        return config
+    }
+
+    async tinyMceInitial(editor) {
+        return editor
+    }
+
+   async initTinyMce(element) {
+        let options = {
             menubar: true,
             selector: `#${element}`,
             min_height: $(`#${element}`).prop('rows') * 110,
@@ -237,7 +320,11 @@ class EditorManagement {
             options.content_css = 'dark'
         }
 
-        tinymce.init(options)
+        options = this.tinyMceConfig(options)
+
+        const tinymceInstance = tinymce.init(options)
+
+        await this.tinyMceInitial(tinymceInstance)
     }
 
     initEditor(element, extraConfig, type) {
@@ -302,7 +389,7 @@ $(() => {
     window.EDITOR = new EditorManagement().init()
     window.EditorManagement = window.EditorManagement || EditorManagement
 
-    $(document).on('shown.bs.modal', function() {
+    $(document).on('shown.bs.modal', function () {
         window.EDITOR.init()
     })
 })
