@@ -1,5 +1,4 @@
 @extends(BaseHelper::getAdminMasterLayoutTemplate())
-
 @section('content')
     <div class="row row-cards">
         <div class="col-md-3">
@@ -20,6 +19,9 @@
                             />
                         </div>
 
+                        @if($store->is_verified)
+                            <img class="verified-store" style="max-height: 25px;" src="{{ asset('/storage/stores/verified.png')}}"alt="Verified">
+                        @endif
                         <a href="{{ $store->url }}" target="_blank">
                             {{ $store->name }}
                             <x-core::icon name="ti ti-external-link" />

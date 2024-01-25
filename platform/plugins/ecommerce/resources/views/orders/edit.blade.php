@@ -795,7 +795,12 @@
                             <div class="hr my-1"></div>
 
                             <div class="p-3">
-                                <h4 class="mb-2">{{ trans('plugins/marketplace::store.store') }}</h4>
+                                <h4 class="mb-2">{{ trans('plugins/marketplace::store.store') }}
+                                    @if($order->store->is_verified)
+                                        <img class="verified-store-main" style="width: 20px;" src="{{ asset('/storage/stores/verified.png')}}"alt="Verified">
+                                    @endif
+                                </h4>
+                                <small class="badge bg-warning text-dark">{{ $order->store->shop_category->label() }}</small>
                                 <a href="{{ $order->store->url }}" target="_blank">{{ $order->store->name }}</a>
                             </div>
                         @endif

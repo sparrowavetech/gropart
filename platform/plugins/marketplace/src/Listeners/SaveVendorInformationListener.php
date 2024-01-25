@@ -8,9 +8,12 @@ use Botble\Base\Facades\EmailHandler;
 use Botble\Base\Supports\AdminNotificationItem;
 use Botble\Ecommerce\Models\Customer;
 use Botble\Marketplace\Events\NewVendorRegistered;
+use Botble\Marketplace\Enums\ShopTypeEnum;
 use Botble\Marketplace\Facades\MarketplaceHelper;
 use Botble\Marketplace\Models\Store;
 use Botble\Marketplace\Models\VendorInfo;
+use Botble\Marketplace\Repositories\Interfaces\StoreInterface;
+use Botble\Marketplace\Repositories\Interfaces\VendorInfoInterface;
 use Botble\Slug\Facades\SlugHelper;
 use Botble\Slug\Models\Slug;
 use Carbon\Carbon;
@@ -33,10 +36,19 @@ class SaveVendorInformationListener
             $store = Store::query()
                 ->where('customer_id', $customer->getAuthIdentifier())
                 ->first();
+
+                if ($this->request->input('shop_category') == ShopTypeEnum::MANUFACTURE) {
+                    $shop_category = ShopTypeEnum::MANUFACTURE();
+                } elseif ($this->request->input('shop_category') == ShopTypeEnum::WHOLESALER) {
+                    $shop_category = ShopTypeEnum::WHOLESALER();
+                } elseif ($this->request->input('shop_category') == ShopTypeEnum::RETAILER) {
+                    $shop_category = ShopTypeEnum::RETAILER();
+                }
             if (! $store) {
                 $store = Store::query()->create([
                     'name' => BaseHelper::clean($this->request->input('shop_name')),
                     'phone' => BaseHelper::clean($this->request->input('shop_phone')),
+                    'shop_category' => $shop_category,
                     'email' => BaseHelper::clean($this->request->input('email')),
                     'customer_id' => $customer->getAuthIdentifier(),
                 ]);

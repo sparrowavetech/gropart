@@ -3,6 +3,10 @@
 namespace Botble\Marketplace\Forms;
 
 use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Marketplace\Enums\ShopTypeEnum;
+use Botble\Location\Models\State;
+use Botble\Location\Repositories\Interfaces\StateInterface;
+use Botble\Ecommerce\Repositories\Interfaces\CustomerInterface;
 use Botble\Base\Facades\Assets;
 use Botble\Base\Forms\FieldOptions\MediaImageFieldOption;
 use Botble\Base\Forms\FieldOptions\NameFieldOption;
@@ -38,6 +42,15 @@ class StoreForm extends FormAbstract
                 'html' => view('plugins/marketplace::stores.partials.shop-url-field', ['store' => $this->getModel()])->render(),
                 'colspan' => 3,
             ])
+            ->add('customer_id', 'customSelect', [
+                'label' => trans('plugins/marketplace::store.forms.store_owner'),
+                'required' => true,
+                'choices' => [0 => trans('plugins/marketplace::store.forms.select_store_owner')] + Customer::query()
+                    ->where('is_vendor', true)
+                    ->pluck('name', 'id')
+                    ->all(),
+                'colspan' => 3,
+            ])
             ->add('email', 'email', [
                 'label' => trans('plugins/marketplace::store.forms.email'),
                 'required' => true,
@@ -54,6 +67,33 @@ class StoreForm extends FormAbstract
                     'placeholder' => trans('plugins/marketplace::store.forms.phone_placeholder'),
                     'data-counter' => 15,
                 ],
+                'colspan' => 3,
+            ])
+            ->add('shop_category', 'customSelect', [
+                'label'      => trans('plugins/marketplace::store.forms.shop_category'),
+                'label_attr' => ['class' => 'control-label required'],
+                'attr'       => [
+                    'class' => 'form-control',
+                ],
+                'choices'    => ShopTypeEnum::labels(),
+                'colspan' => 3,
+            ])
+            ->add('status', 'customSelect', [
+                'label' => trans('core/base::tables.status'),
+                'required' => true,
+                'choices' => BaseStatusEnum::labels(),
+                'help_block' => [
+                    'text' => trans('plugins/marketplace::marketplace.helpers.store_status', [
+                        'customer' => CustomerStatusEnum::LOCKED()->label(),
+                        'status' => BaseStatusEnum::PUBLISHED()->label(),
+                    ]),
+                ],
+                'colspan' => 3,
+            ])
+            ->add('is_verified', 'onOff', [
+                'label'         => trans('plugins/marketplace::store.forms.is_verified'),
+                'label_attr'    => ['class' => 'control-label'],
+                'default_value' => false,
                 'colspan' => 6,
             ])
             ->add('description', 'textarea', [
@@ -73,6 +113,22 @@ class StoreForm extends FormAbstract
                     'with-short-code' => false,
                 ],
                 'colspan' => 6,
+            ])
+            ->add('company', 'text', [
+                'label' => trans('plugins/marketplace::store.forms.company'),
+                'attr' => [
+                    'placeholder' => trans('plugins/marketplace::store.forms.company_placeholder'),
+                    'data-counter' => 255,
+                ],
+                'colspan' => 3,
+            ])
+            ->add('address', 'text', [
+                'label' => trans('plugins/marketplace::store.forms.address'),
+                'attr' => [
+                    'placeholder' => trans('plugins/marketplace::store.forms.address_placeholder'),
+                    'data-counter' => 120,
+                ],
+                'colspan' => 3,
             ])
             ->when(EcommerceHelper::isUsingInMultipleCountries(), function (FormAbstract $form) {
                 $form->add('country', 'customSelect', [
@@ -132,25 +188,9 @@ class StoreForm extends FormAbstract
                         'placeholder' => trans('plugins/marketplace::store.forms.zip_code_placeholder'),
                         'data-counter' => 120,
                     ],
-                    'colspan' => 3,
+                    'colspan' => 2,
                 ]);
             })
-            ->add('address', 'text', [
-                'label' => trans('plugins/marketplace::store.forms.address'),
-                'attr' => [
-                    'placeholder' => trans('plugins/marketplace::store.forms.address_placeholder'),
-                    'data-counter' => 120,
-                ],
-                'colspan' => 3,
-            ])
-            ->add('company', 'text', [
-                'label' => trans('plugins/marketplace::store.forms.company'),
-                'attr' => [
-                    'placeholder' => trans('plugins/marketplace::store.forms.company_placeholder'),
-                    'data-counter' => 255,
-                ],
-                'colspan' => 3,
-            ])
             ->add('logo', 'mediaImage', [
                 'label' => trans('plugins/marketplace::store.forms.logo'),
                 'colspan' => 3,
@@ -164,27 +204,6 @@ class StoreForm extends FormAbstract
                     ->value($this->getModel()->id ? $this->getModel()->getMetaData('cover_image', true) : null)
                     ->toArray()
             )
-            ->add('status', 'customSelect', [
-                'label' => trans('core/base::tables.status'),
-                'required' => true,
-                'choices' => BaseStatusEnum::labels(),
-                'help_block' => [
-                    'text' => trans('plugins/marketplace::marketplace.helpers.store_status', [
-                        'customer' => CustomerStatusEnum::LOCKED()->label(),
-                        'status' => BaseStatusEnum::PUBLISHED()->label(),
-                    ]),
-                ],
-                'colspan' => 3,
-            ])
-            ->add('customer_id', 'customSelect', [
-                'label' => trans('plugins/marketplace::store.forms.store_owner'),
-                'required' => true,
-                'choices' => [0 => trans('plugins/marketplace::store.forms.select_store_owner')] + Customer::query()
-                    ->where('is_vendor', true)
-                    ->pluck('name', 'id')
-                    ->all(),
-                'colspan' => 3,
-            ])
             ->addSubmitButton(trans('core/base::forms.save_and_continue'), attributes: ['colspan' => 6]);
     }
 }

@@ -46,6 +46,7 @@
                     <div class="ps-block__right">
                         <p>{{ __('Hello') }}, {{ auth('customer')->user()->name }} <img class="verified-store-info" style="max-width: 15px;" src="{{ asset('/storage/stores/verified.png')}}"alt="Verified" /></p>
                         <small>{{ __('Joined on :date', ['date' => auth('customer')->user()->created_at->translatedFormat('M d, Y')]) }}</small>
+
                         <br>
                         @if(auth('customer')->user()->store->is_verified)
                             <span style="position: absolute;"><small class="badge bg-success">{{ __('You are verified now') }}</small></span>
@@ -85,6 +86,7 @@
         <header class="header--dashboard">
             <div class="header__left">
                 <h3>{{ page_title()->getTitle(false) }}</h3>
+
                 @if(!auth('customer')->user()->store->is_verified)
                     <div class="alert alert-warning d-flex align-items-center mt-4" role="alert">
                         <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">

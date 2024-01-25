@@ -2,8 +2,9 @@
 
 namespace Botble\Marketplace\Enums;
 
+use Botble\Base\Facades\Html;
 use Botble\Base\Supports\Enum;
-use Html;
+use Illuminate\Support\HtmlString;
 
 /**
  * @method static  ShopTypeEnum MANUFACTURE()
@@ -16,28 +17,15 @@ class ShopTypeEnum extends Enum
     public const WHOLESALER = 'wholesaler';
     public const RETAILER = 'retailer';
 
-    /**
-     * @var string
-     */
     public static $langPath = 'plugins/marketplace::store.types';
 
-    /**
-     * @return string
-     */
-    public function toHtml()
+    public function toHtml(): string|HtmlString
     {
-        switch ($this->value) {
-            case self::MANUFACTURE:
-                return Html::tag('span', self::MANUFACTURE()->label(), ['class' => 'label-info status-label'])
-                    ->toHtml();
-            case self::WHOLESALER:
-                return Html::tag('span', self::WHOLESALER()->label(), ['class' => 'label-primary status-label'])
-                    ->toHtml();
-            case self::RETAILER:
-                return Html::tag('span', self::RETAILER()->label(), ['class' => 'label-primary status-label'])
-                    ->toHtml();
-            default:
-                return parent::toHtml();
-        }
+        return match ($this->value) {
+            self::MANUFACTURE => Html::tag('span', self::MANUFACTURE()->label(), ['class' => 'badge bg-info text-info-fg']),
+            self::WHOLESALER => Html::tag('span', self::WHOLESALER()->label(), ['class' => 'badge bg-primary text-primary-fg']),
+            self::RETAILER => Html::tag('span', self::RETAILER()->label(), ['class' => 'badge bg-secondary text-secondary-fg']),
+            default => parent::toHtml(),
+        };
     }
 }

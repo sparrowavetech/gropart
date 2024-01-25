@@ -1,11 +1,13 @@
 <?php
 
 namespace Botble\Marketplace\Models;
-
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Casts\SafeContent;
 use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Marketplace\Enums\ShopTypeEnum;
 use Botble\Base\Models\BaseModel;
 use Botble\Base\Supports\Avatar;
+use Botble\Base\Traits\EnumCastable;
 use Botble\Ecommerce\Models\Customer;
 use Botble\Ecommerce\Models\Discount;
 use Botble\Ecommerce\Models\Order;
@@ -42,10 +44,13 @@ class Store extends BaseModel
         'status',
         'company',
         'zip_code',
+        'is_verified',
+        'shop_category'
     ];
 
     protected $casts = [
         'status' => BaseStatusEnum::class,
+        'shop_category' => ShopTypeEnum::class,
         'name' => SafeContent::class,
         'description' => SafeContent::class,
         'content' => SafeContent::class,

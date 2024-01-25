@@ -42,6 +42,10 @@
                                 <a href="{{ $product->store->url }}">
                                     {{ $product->store->name }}
                                 </a>
+                                @if($product->store->is_verified)
+                                    <img class="verified-store-main" src="{{ asset('/storage/stores/verified.png')}}"alt="Verified">
+                                @endif
+                                <small class="badge bg-warning text-dark">{{ $product->store->shop_category->label() }}</small>
                             </div>
                         @endif
 
