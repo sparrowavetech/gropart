@@ -2,6 +2,9 @@
 
 All notable changes to the Contact Manager plugin will be documented in this file, from latest change to the oldest.
 
+## [2.0.1] - 2024-01-18
+- [Bug] - Fixed bug on model for sc-core update
+
 ## [2.0.0] - 2024-01-18
 - [Enhancement] - Renamed plugin & folder
 

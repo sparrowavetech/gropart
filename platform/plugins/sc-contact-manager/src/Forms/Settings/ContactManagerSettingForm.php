@@ -2,9 +2,9 @@
 
 namespace Skillcraft\ContactManager\Forms\Settings;
 
-use Botble\Setting\Forms\SettingForm;
-use Botble\Base\Forms\Fields\OnOffField;
 use Botble\Base\Forms\FieldOptions\OnOffFieldOption;
+use Botble\Base\Forms\Fields\OnOffField;
+use Botble\Setting\Forms\SettingForm;
 use Skillcraft\ContactManager\Http\Requests\Settings\ContactManagerSettingRequest;
 
 class ContactManagerSettingForm extends SettingForm

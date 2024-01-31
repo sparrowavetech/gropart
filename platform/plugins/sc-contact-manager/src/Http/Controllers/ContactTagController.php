@@ -2,21 +2,21 @@
 
 namespace Skillcraft\ContactManager\Http\Controllers;
 
-use Exception;
 use Botble\ACL\Models\User;
-use Illuminate\Http\Request;
-use Botble\Base\Facades\PageTitle;
-use Botble\Base\Forms\FormBuilder;
-use Illuminate\Support\Facades\Auth;
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
-use Skillcraft\ContactManager\Models\ContactTag;
-use Skillcraft\ContactManager\Forms\ContactTagForm;
+use Botble\Base\Facades\PageTitle;
+use Botble\Base\Forms\FormBuilder;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
-use Skillcraft\ContactManager\Tables\ContactTagTable;
+use Exception;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Skillcraft\ContactManager\Forms\ContactTagForm;
 use Skillcraft\ContactManager\Http\Requests\ContactTagRequest;
+use Skillcraft\ContactManager\Models\ContactTag;
+use Skillcraft\ContactManager\Tables\ContactTagTable;
 
 class ContactTagController extends BaseController
 {
@@ -37,10 +37,10 @@ class ContactTagController extends BaseController
     public function store(ContactTagRequest $request, BaseHttpResponse $response)
     {
         $request->merge([
-            'author_id'   => Auth::check() ? Auth::id() : 0,
+            'author_id' => Auth::check() ? Auth::id() : 0,
             'author_type' => User::class,
         ]);
-        
+
         $contactTag = ContactTag::query()->create($request->input());
 
         event(new CreatedContentEvent(CONTACT_MANAGER_TAG_MODULE_SCREEN_NAME, $request, $contactTag));

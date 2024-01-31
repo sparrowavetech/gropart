@@ -33,7 +33,8 @@ return [
         'info_description' => 'All information about current system configuration.',
     ],
     'info' => [
-        'title' => 'System information',
+        'title' => 'System Information',
+        'description' => 'All information about current system configuration.',
         'cache' => 'Cache',
         'locale' => 'Active locale',
         'environment' => 'Environment',
@@ -83,6 +84,7 @@ return [
     'allow_url_fopen_enabled' => 'allow_url_fopen enabled',
     'cleanup' => [
         'title' => 'Cleanup System',
+        'description' => 'Cleanup your unused data in database',
         'table' => [
             'name' => 'Table Name',
             'count' => 'Records',

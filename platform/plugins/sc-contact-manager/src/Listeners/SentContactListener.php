@@ -2,9 +2,9 @@
 
 namespace Skillcraft\ContactManager\Listeners;
 
-use Exception;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Contact\Events\SentContactEvent;
+use Exception;
 use Illuminate\Support\Arr;
 use Skillcraft\ContactManager\Enums\ContactTypeEnum;
 use Skillcraft\ContactManager\Models\ContactManager;
@@ -21,24 +21,24 @@ class SentContactListener
                     'first_name' => Arr::first(array: $name, default: 'N/A'),
                     'last_name' => Arr::last(array: $name, default: 'N/A'),
                     'type' => ContactTypeEnum::LEAD,
-                    'source' => 'contact-form'
+                    'source' => 'contact-form',
                 ]);
 
                 if ($event->data->phone) {
                     $contactManager->phones()->create([
-                        'phone' => $event->data->phone
+                        'phone' => $event->data->phone,
                     ]);
                 }
 
                 if ($event->data->email) {
                     $contactManager->emails()->create([
-                        'email' => $event->data->email
+                        'email' => $event->data->email,
                     ]);
                 }
 
                 if ($event->data->address) {
                     $contactManager->addresses()->create([
-                        'address' => $event->data->address
+                        'address' => $event->data->address,
                     ]);
                 }
             }

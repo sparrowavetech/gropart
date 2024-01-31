@@ -9,9 +9,10 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Skillcraft\ContactManager\Enums\ContactDataTypeEnum;
+use Botble\Base\Models\BaseQueryBuilder;
 
 /**
- * @method static \Skillcraft\Base\Models\BaseQueryBuilder<static> query()
+ * @method static BaseQueryBuilder<static> query()
  */
 class ContactAddress extends BaseModel
 {

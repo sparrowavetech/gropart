@@ -9,14 +9,15 @@ use Botble\Base\Enums\BaseStatusEnum;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Botble\Base\Models\BaseQueryBuilder;
 
 /**
- * @method static \Skillcraft\Base\Models\BaseQueryBuilder<static> query()
+ * @method static BaseQueryBuilder<static> query()
  */
 class ContactGroup extends BaseModel
 {
     use SoftDeletes;
-    
+
     protected $table = 'contact_groups';
 
     protected $fillable = [

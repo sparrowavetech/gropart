@@ -2,21 +2,21 @@
 
 namespace Skillcraft\ContactManager\Http\Controllers;
 
-use Exception;
-use Illuminate\Http\Request;
-use Botble\Base\Facades\PageTitle;
-use Botble\Base\Forms\FormBuilder;
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
+use Botble\Base\Facades\PageTitle;
+use Botble\Base\Forms\FormBuilder;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
-use Skillcraft\ContactManager\Models\ContactManager;
+use Exception;
+use Illuminate\Http\Request;
 use Skillcraft\ContactManager\Forms\ContactManagerForm;
-use Skillcraft\ContactManager\Tables\ContactManagerTable;
+use Skillcraft\ContactManager\Http\Requests\ContactManagerRequest;
+use Skillcraft\ContactManager\Models\ContactManager;
 use Skillcraft\ContactManager\Services\ContactManagerService;
 use Skillcraft\ContactManager\Services\StoreContactTagService;
-use Skillcraft\ContactManager\Http\Requests\ContactManagerRequest;
+use Skillcraft\ContactManager\Tables\ContactManagerTable;
 
 class ContactManagerController extends BaseController
 {
@@ -37,7 +37,6 @@ class ContactManagerController extends BaseController
     public function store(ContactManagerRequest $request, BaseHttpResponse $response, StoreContactTagService $tagService)
     {
         $contactManager = ContactManager::query()->create($request->validated());
-
 
         $tagService->execute($request, $contactManager);
 

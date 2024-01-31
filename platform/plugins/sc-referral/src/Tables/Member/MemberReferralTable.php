@@ -2,13 +2,14 @@
 
 namespace Skillcraft\Referral\Tables\Member;
 
-use Botble\Member\Models\Member;
-use Botble\Table\Columns\Column;
-use Skillcraft\Referral\Models\Referral;
 use Botble\Table\Abstracts\TableAbstract;
+use Botble\Table\Columns\Column;
 use Botble\Table\Columns\CreatedAtColumn;
-use Skillcraft\Referral\Tables\Traits\ForMember;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Skillcraft\Referral\Models\Referral;
+use Skillcraft\Referral\Services\ReferralService;
+use Skillcraft\Referral\Tables\HeaderActions\ChangeReferralLevelHeaderAction;
+use Skillcraft\Referral\Tables\Traits\ForMember;
 
 class MemberReferralTable extends TableAbstract
 {
@@ -20,7 +21,7 @@ class MemberReferralTable extends TableAbstract
             ->model(Referral::class)
             ->addColumns([
                 Column::make('referral_id'),
-                CreatedAtColumn::make()
+                CreatedAtColumn::make(),
             ])
             ->queryUsing(function (EloquentBuilder $query) {
                 return $query
@@ -31,13 +32,11 @@ class MemberReferralTable extends TableAbstract
                         'sponsor_type',
                         'sponsor_id',
                         'created_at',
-                    ])
-                    ->where([
-                        'sponsor_id' => auth('member')->id(),
-                        'sponsor_type' => Member::class,
-                    ]);
-            })->addActions([
-                
-            ]);
+                    ])->whereIn('id', auth('member')->user()->getSubLevelReferrals(request()->get('level', 1))->pluck('id')->toArray());
+            });
+
+        if((new ReferralService)->getReferralLevels() > 1){
+            $this->addHeaderAction(ChangeReferralLevelHeaderAction::make());
+        }
     }
 }

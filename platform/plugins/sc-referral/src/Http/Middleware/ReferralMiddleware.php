@@ -2,9 +2,11 @@
 
 namespace Skillcraft\Referral\Http\Middleware;
 
+use Botble\Base\Facades\BaseHelper;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Throwable;
 
 class ReferralMiddleware
 {
@@ -20,11 +22,15 @@ class ReferralMiddleware
             }
         }
 
-        if (!$isLoggedIn) {
-            do_action(ACTION_HOOK_REFERRAL_MIDDLEWARE_RUN, $request);
+        if (! $isLoggedIn) {
+            try {
+                do_action(ACTION_HOOK_REFERRAL_MIDDLEWARE_RUN, $request);
+            } catch (Throwable $exception) {
+                BaseHelper::logError($exception);
+            }
         }
 
         return $next($request);
     }
-   
+
 }

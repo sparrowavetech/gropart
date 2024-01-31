@@ -2,20 +2,13 @@
 
 return [
     'name' => 'Reviews',
-    'add_review' => 'Add review',
-    'delete_review' => 'Delete review',
+    'view' => 'View review ":name"',
     'create_review' => 'Create Review',
-    'please_select_rating' => 'Please select rating',
     'comment' => 'Comment',
-    'approve' => 'Approve',
-    'approved' => 'Approved',
-    'disapprove' => 'Disapprove',
-    'disapproved' => 'Disapproved',
     'product' => 'Product',
+    'customer' => 'Customer',
     'user' => 'User',
     'star' => 'Star',
-    'status' => 'Status',
-    'list_review' => 'Customer reviews',
     'intro' => [
         'title' => 'Manage customer reviews',
         'description' => 'Customer reviews will be shown here and you can manage it to show/hide in product detail page.',
@@ -29,5 +22,15 @@ return [
     'delete_modal' => [
         'title' => 'Delete review',
         'description' => 'Are you sure you want to delete this review? This action cannot be undone!',
+    ],
+    'review_already_exists' => 'This customer has already reviewed this product.',
+    'reply_to_review' => 'Reply to review',
+    'reply' => 'Reply',
+    'replied_success_message' => 'Replied successfully!',
+    'write_your_reply' => 'Write your reply...',
+    'already_replied' => 'You have already replied to this review.',
+    'delete_reply_modal' => [
+        'title' => 'Delete reply',
+        'description' => 'Are you sure you want to delete this reply? This action cannot be undone!',
     ],
 ];

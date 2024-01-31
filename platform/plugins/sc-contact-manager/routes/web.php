@@ -13,14 +13,14 @@ Route::group(['namespace' => 'Skillcraft\ContactManager\Http\Controllers', 'midd
 
         Route::group(['prefix' => 'contact-tags', 'as' => 'contact-tag.'], function () {
             Route::resource('', 'ContactTagController')->parameters(['' => 'contact-tag']);
-        
+
             Route::get('json', [
-                'as'         => 'all',
-                'uses'       => 'ContactTagController@getAllTags',
+                'as' => 'all',
+                'uses' => 'ContactTagController@getAllTags',
                 'permission' => 'tags.index',
             ]);
         });
-        
+
         Route::group(['prefix' => 'contact-groups', 'as' => 'contact-group.'], function () {
             Route::resource('', 'ContactGroupController')->parameters(['' => 'contact-group']);
         });

@@ -50,5 +50,5 @@ return [
         'addresses' => 'Addresses',
         'emails' => 'Emails',
         'phones' => 'Phones',
-    ]
+    ],
 ];

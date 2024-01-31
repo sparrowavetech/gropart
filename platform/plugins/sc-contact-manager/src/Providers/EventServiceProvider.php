@@ -3,10 +3,10 @@
 namespace Skillcraft\ContactManager\Providers;
 
 use Botble\Contact\Events\SentContactEvent;
-use Skillcraft\ContactManager\Models\ContactManager;
-use Skillcraft\ContactManager\Listeners\SentContactListener;
-use Skillcraft\ContactManager\Observers\ContactManagerObserver;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
+use Skillcraft\ContactManager\Listeners\SentContactListener;
+use Skillcraft\ContactManager\Models\ContactManager;
+use Skillcraft\ContactManager\Observers\ContactManagerObserver;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -18,7 +18,7 @@ class EventServiceProvider extends ServiceProvider
 
     protected $observers = [
         ContactManager::class => [
-            ContactManagerObserver::class
+            ContactManagerObserver::class,
         ],
     ];
 }

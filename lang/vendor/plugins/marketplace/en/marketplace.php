@@ -15,8 +15,6 @@ return [
         'product_approved_description' => 'Send email to vendor when their product approved',
         'withdrawal_approved_title' => 'Withdrawal approved',
         'withdrawal_approved_description' => 'Send email to vendor when their withdrawal request approved',
-        'store_new_enquiry_title' => 'Notice about new enquiry',
-        'store_new_enquiry_description' => 'Send email to the store owner when an enquiry placed',
     ],
     'current_balance' => 'Current balance',
     'settings' => [
@@ -45,6 +43,9 @@ return [
         'max_upload_filesize' => 'Max upload filesize (MB)',
         'max_upload_filesize_placeholder' => 'Default: 10',
         'max_product_images_upload_by_vendor' => 'Max number of images for each product',
+        'enable_vendor_registration' => 'Enable vendor registration',
+        'minimum_withdrawal_amount' => 'Minimum withdrawal amount (Fixed)',
+        'minimum_withdrawal_amount_helper' => 'Specify the minimum amount a vendor can withdraw. Default is 0.',
     ],
     'theme_options' => [
         'name' => 'Marketplace',
@@ -54,6 +55,8 @@ return [
     'store_name' => 'Store name',
     'store_email' => 'Store email',
     'store_phone' => 'Store phone',
+    'store_address' => 'Store address',
+    'store_url' => 'Store URL',
     'product_name' => 'Product name',
     'product_url' => 'Product URL',
     'withdrawal_amount' => 'Withdrawal amount',
@@ -65,8 +68,6 @@ return [
         'earnings' => 'Earnings',
         'products_count' => 'Products Count',
     ],
-    'enquiry_id' => 'Enquiry ID',
-    'enquiry_description' => 'Addition Description',
     'vendors' => 'Vendors',
     'payout_payment_methods' => [
         'bank_transfer' => 'Bank Transfer',

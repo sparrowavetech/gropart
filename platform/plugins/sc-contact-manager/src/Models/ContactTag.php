@@ -9,9 +9,10 @@ use Botble\Base\Enums\BaseStatusEnum;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Botble\Base\Models\BaseQueryBuilder;
 
 /**
- * @method static \Skillcraft\Base\Models\BaseQueryBuilder<static> query()
+ * @method static BaseQueryBuilder<static> query()
  */
 class ContactTag extends BaseModel
 {

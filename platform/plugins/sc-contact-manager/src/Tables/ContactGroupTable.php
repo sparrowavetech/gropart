@@ -2,10 +2,9 @@
 
 namespace Skillcraft\ContactManager\Tables;
 
+use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\Html;
-use Botble\Base\Enums\BaseStatusEnum;
-use Skillcraft\ContactManager\Models\ContactGroup;
 use Botble\Table\Abstracts\TableAbstract;
 use Botble\Table\Actions\DeleteAction;
 use Botble\Table\Actions\EditAction;
@@ -14,11 +13,11 @@ use Botble\Table\Columns\CreatedAtColumn;
 use Botble\Table\Columns\IdColumn;
 use Botble\Table\Columns\NameColumn;
 use Botble\Table\Columns\StatusColumn;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
+use Skillcraft\ContactManager\Models\ContactGroup;
 
 class ContactGroupTable extends TableAbstract
 {
@@ -42,6 +41,7 @@ class ContactGroupTable extends TableAbstract
                 if (! $this->hasPermission('contact-group.edit')) {
                     return BaseHelper::clean($item->name);
                 }
+
                 return Html::link(route('contact-group.edit', $item->getKey()), BaseHelper::clean($item->name));
             });
 

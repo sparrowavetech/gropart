@@ -2,6 +2,7 @@
 
 namespace Skillcraft\ContactManager\Models;
 
+use Botble\Base\Models\BaseQueryBuilder;
 use Illuminate\Support\Str;
 use Botble\Base\Casts\SafeContent;
 use Illuminate\Support\Facades\DB;
@@ -16,7 +17,7 @@ use Skillcraft\ContactManager\Enums\ContactTypeEnum;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 /**
- * @method static \Skillcraft\Base\Models\BaseQueryBuilder<static> query()
+ * @method static BaseQueryBuilder<static> query()
  */
 class ContactManager extends BaseModel
 {
@@ -40,10 +41,10 @@ class ContactManager extends BaseModel
         'business_name' => SafeContent::class
     ];
 
-    protected static function booted()
+    protected static function booted():void
     {
         parent::boot();
-        
+
         static::deleted(function ($contact) {
             $contact->phones()->delete();
             $contact->emails()->delete();
@@ -114,7 +115,7 @@ class ContactManager extends BaseModel
             get: fn (string $value) => $this->firstName . ' ' . $this->lastName,
         );
     }
-    
+
     public function scopeHasType($query, ContactTypeEnum $type): Builder
     {
         return $query->where('type', $type->getKey());

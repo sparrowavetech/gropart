@@ -1,9 +1,9 @@
 <?php
 
-if (!function_exists('get_state_abrrv_array')) {
-    function get_state_abrrv_array()
+if (! function_exists('get_state_abrrv_array')) {
+    function get_state_abrrv_array(): array
     {
-        return array(
+        return [
             'AL' => 'ALABAMA',
             'AK' => 'ALASKA',
             'AS' => 'AMERICAN SAMOA',
@@ -65,15 +65,15 @@ if (!function_exists('get_state_abrrv_array')) {
             'WY' => 'WYOMING',
             'AE' => 'ARMED FORCES AFRICA \ CANADA \ EUROPE \ MIDDLE EAST',
             'AA' => 'ARMED FORCES AMERICA (EXCEPT CANADA)',
-            'AP' => 'ARMED FORCES PACIFIC'
-        );
+            'AP' => 'ARMED FORCES PACIFIC',
+        ];
     }
 }
 
-if (!function_exists('get_state_array')) {
-    function get_state_array()
+if (! function_exists('get_state_array')) {
+    function get_state_array(): array
     {
-        return array(
+        return [
             'Alabama' => 'AL',
             'Alaska' => 'AK',
             'Arizona' => 'AZ',
@@ -123,12 +123,12 @@ if (!function_exists('get_state_array')) {
             'Washington' => 'WA',
             'West Virginia' => 'WV',
             'Wisconsin' => 'WI',
-            'Wyoming' => 'WY'
-        );
+            'Wyoming' => 'WY',
+        ];
     }
 }
 
-if (!function_exists('get_state_from_abbr')) {
+if (! function_exists('get_state_from_abbr')) {
     function get_state_from_abbr(string $abbrv = null)
     {
 
@@ -140,7 +140,7 @@ if (!function_exists('get_state_from_abbr')) {
 
         $us_state_abbrevs_names = get_state_abrrv_array();
 
-        if (!key_exists($abbrv, $us_state_abbrevs_names)) {
+        if (! key_exists($abbrv, $us_state_abbrevs_names)) {
             return $abbrv;
         }
 
@@ -148,9 +148,8 @@ if (!function_exists('get_state_from_abbr')) {
     }
 }
 
-
-if (!function_exists('get_abbrv_from_state')) {
-    function get_abbrv_from_state(string $state = null)
+if (! function_exists('get_abbrv_from_state')) {
+    function get_abbrv_from_state(string $state = null): ?string
     {
         if (is_null($state)) {
             return null;
@@ -160,7 +159,7 @@ if (!function_exists('get_abbrv_from_state')) {
 
         $states = get_state_array();
 
-        if (!key_exists($state, $states)) {
+        if (! key_exists($state, $states)) {
             return $state;
         }
 

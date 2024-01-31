@@ -13,19 +13,5 @@ class SimpleStatusEnum extends Enum
     public const ACTIVE = 'active';
     public const DEACTIVE = 'deactive';
 
-    /**
-     * @var string
-     */
     public static $langPath = 'plugins/sc-contact-manager::enums.simple_status';
-
-    /**
-     * @return string
-     */
-    public function toHtml()
-    {
-        switch ($this->value) {
-            default:
-                return parent::toHtml();
-        }
-    }
 }

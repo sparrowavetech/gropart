@@ -2,30 +2,23 @@
 
 namespace Skillcraft\ContactManager\Tables;
 
-use Illuminate\Support\Arr;
-use Botble\Base\Facades\Html;
-use Botble\Table\Columns\Column;
-use Illuminate\Http\JsonResponse;
-use Botble\Table\Columns\IdColumn;
-use Illuminate\Support\Facades\DB;
 use Botble\Base\Facades\BaseHelper;
-use Botble\Table\Actions\EditAction;
-use Botble\Table\Columns\EnumColumn;
-use Botble\Table\Columns\NameColumn;
-use Illuminate\Support\Facades\Auth;
-use Botble\Base\Enums\BaseStatusEnum;
-use Botble\Table\Actions\DeleteAction;
-use Botble\Table\Columns\StatusColumn;
+use Botble\Base\Facades\Html;
 use Botble\Table\Abstracts\TableAbstract;
-use Botble\Table\Columns\CreatedAtColumn;
-use Illuminate\Database\Eloquent\Builder;
+use Botble\Table\Actions\DeleteAction;
+use Botble\Table\Actions\EditAction;
 use Botble\Table\BulkActions\DeleteBulkAction;
-use Skillcraft\ContactManager\Models\ContactTag;
-use Skillcraft\ContactManager\Models\ContactGroup;
+use Botble\Table\Columns\Column;
+use Botble\Table\Columns\CreatedAtColumn;
+use Botble\Table\Columns\EnumColumn;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use Skillcraft\ContactManager\Enums\ContactTypeEnum;
-use Skillcraft\ContactManager\Models\ContactManager;
 use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Http\JsonResponse;
+use Skillcraft\ContactManager\Enums\ContactTypeEnum;
+use Skillcraft\ContactManager\Models\ContactGroup;
+use Skillcraft\ContactManager\Models\ContactManager;
+use Skillcraft\ContactManager\Models\ContactTag;
 
 class ContactManagerTable extends TableAbstract
 {
@@ -49,6 +42,7 @@ class ContactManagerTable extends TableAbstract
                 if (! $this->hasPermission('contact-manager.edit')) {
                     return BaseHelper::clean($item->name);
                 }
+
                 return Html::link(route('contact-manager.edit', $item->getKey()), BaseHelper::clean($item->name));
             });
 
@@ -101,75 +95,75 @@ class ContactManagerTable extends TableAbstract
     {
         return [
             'contact_manager.first_name' => [
-                'title'    => trans('plugins/sc-contact-manager::contact-manager.forms.first_name'),
-                'type'     => 'text',
+                'title' => trans('plugins/sc-contact-manager::contact-manager.forms.first_name'),
+                'type' => 'text',
                 'validate' => 'required|string',
             ],
             'contact_manager.last_name' => [
-                'title'    => trans('plugins/sc-contact-manager::contact-manager.forms.last_name'),
-                'type'     => 'text',
+                'title' => trans('plugins/sc-contact-manager::contact-manager.forms.last_name'),
+                'type' => 'text',
                 'validate' => 'required|string',
             ],
             'contact_manager.group_id' => [
-                'title'    => trans('plugins/sc-contact-manager::contact-manager.forms.group'),
-                'type'     => 'select',
+                'title' => trans('plugins/sc-contact-manager::contact-manager.forms.group'),
+                'type' => 'select',
                 'validate' => 'required|integer',
-                'choices'  => ['0' => trans('plugins/contacts-manager::contacts-manager.no_group')] + (new ContactGroup())->query()->pluck('name', 'id')->toArray(),
+                'choices' => ['0' => trans('plugins/contacts-manager::contacts-manager.no_group')] + (new ContactGroup())->query()->pluck('name', 'id')->toArray(),
             ],
-           
+
             'contact_addresses.address' => [
-                'title'    => trans('plugins/sc-contact-manager::contact-manager.forms.address'),
-                'type'     => 'text',
+                'title' => trans('plugins/sc-contact-manager::contact-manager.forms.address'),
+                'type' => 'text',
                 'validate' => 'required|string',
             ],
             'contact_addresses.address2' => [
-                'title'    => trans('plugins/sc-contact-manager::contact-manager.forms.address2'),
-                'type'     => 'text',
+                'title' => trans('plugins/sc-contact-manager::contact-manager.forms.address2'),
+                'type' => 'text',
                 'validate' => 'required|string',
             ],
             'contact_addresses.city' => [
-                'title'    => trans('plugins/sc-contact-manager::contact-manager.forms.city'),
-                'type'     => 'text',
+                'title' => trans('plugins/sc-contact-manager::contact-manager.forms.city'),
+                'type' => 'text',
                 'validate' => 'required|string',
             ],
             'contact_addresses.state' => [
-                'title'    => trans('plugins/sc-contact-manager::contact-manager.forms.state'),
-                'type'     => 'text',
+                'title' => trans('plugins/sc-contact-manager::contact-manager.forms.state'),
+                'type' => 'text',
                 'validate' => 'required|string',
             ],
             'contact_addresses.postalcode' => [
-                'title'    => trans('plugins/sc-contact-manager::contact-manager.forms.postalcode'),
-                'type'     => 'text',
+                'title' => trans('plugins/sc-contact-manager::contact-manager.forms.postalcode'),
+                'type' => 'text',
                 'validate' => 'required|string',
             ],
             'contact_phones.phone' => [
-                'title'    => trans('plugins/sc-contact-manager::contact-manager.forms.phone'),
-                'type'     => 'text',
+                'title' => trans('plugins/sc-contact-manager::contact-manager.forms.phone'),
+                'type' => 'text',
                 'validate' => 'required|string',
             ],
             'contact_emails.email' => [
-                'title'    => trans('plugins/sc-contact-manager::contact-manager.forms.email'),
-                'type'     => 'text',
+                'title' => trans('plugins/sc-contact-manager::contact-manager.forms.email'),
+                'type' => 'text',
                 'validate' => 'required|string',
             ],
             'contact_tags' => [
-                'title'    => trans('plugins/sc-contact-manager::contact-manager.forms.tag'),
-                'type'     => 'select-search',
+                'title' => trans('plugins/sc-contact-manager::contact-manager.forms.tag'),
+                'type' => 'select-search',
                 'validate' => 'required|integer',
-                'choices'  => (new ContactTag())
+                'choices' => (new ContactTag())
                     ->query()
                     ->pluck('name', 'id')
                     ->toArray(),
             ],
             'contact_manager.type' => [
-                'title'    => trans('plugins/sc-contact-manager::contact-manager.forms.type'),
-                'type'     => 'select-search',
+                'title' => trans('plugins/sc-contact-manager::contact-manager.forms.type'),
+                'type' => 'select-search',
                 'validate' => 'required|in:' . implode(',', ContactTypeEnum::values()),
-                'choices'  => ContactTypeEnum::labels(),
+                'choices' => ContactTypeEnum::labels(),
             ],
             'contact_manager.source' => [
-                'title'    => trans('plugins/sc-contact-manager::contact-manager.forms.source'),
-                'type'     => 'text',
+                'title' => trans('plugins/sc-contact-manager::contact-manager.forms.source'),
+                'type' => 'text',
                 'validate' => 'required|string',
             ],
         ];
@@ -183,35 +177,25 @@ class ContactManagerTable extends TableAbstract
         ];
     }
 
-
     public function applyFilterCondition($query, string $key, string $operator, ?string $value)
     {
-       
-        if (!empty($value)) {
+
+        if (! empty($value)) {
             if ($operator === 'like') {
-                $value = '%'.$value.'%';
+                $value = '%' . $value . '%';
             }
 
-            switch ($key) {
-                case 'contact_addresses.state':
-                case 'contact_addresses.address':
-                case 'contact_addresses.address2':
-                case 'contact_addresses.postalcode':
-                case 'contact_addresses.city':
-                    $query = $query->HasAddressInfo($key, $operator, $value);
-                    break;
-                case 'contact_emails.email':
-                    $query = $query->HasEmailInfo($key, $operator, $value);
-                    break;
-                case 'contact_phones.phone':
-                    $query = $query->HasPhoneInfo($key, $operator, $value);
-                    break;
-                case 'contact_tags':
-                    $query = $query->HasContactTag($operator, $value);
-                    break;
-                default:
-                    $query = parent::applyFilterCondition($query, $key, $operator, $value);
-            }
+            $query = match ($key) {
+                'contact_addresses.state', 'contact_addresses.address', 'contact_addresses.address2', 'contact_addresses.postalcode', 'contact_addresses.city' => $query->HasAddressInfo(
+                    $key,
+                    $operator,
+                    $value
+                ),
+                'contact_emails.email' => $query->hasEmailInfo($key, $operator, $value),
+                'contact_phones.phone' => $query->hasPhoneInfo($key, $operator, $value),
+                'contact_tags' => $query->hasContactTag($operator, $value),
+                default => parent::applyFilterCondition($query, $key, $operator, $value),
+            };
         }
 
         return $query;

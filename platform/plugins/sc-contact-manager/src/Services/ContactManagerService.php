@@ -4,17 +4,17 @@ namespace Skillcraft\ContactManager\Services;
 
 use Botble\Base\Models\BaseModel;
 use Illuminate\Support\Arr;
-use Skillcraft\ContactManager\Models\ContactEmail;
-use Skillcraft\ContactManager\Models\ContactPhone;
-use Skillcraft\ContactManager\Models\ContactAddress;
-use Skillcraft\ContactManager\Models\ContactManager;
 use Skillcraft\ContactManager\Enums\ContactDataTypeEnum;
+use Skillcraft\ContactManager\Models\ContactAddress;
+use Skillcraft\ContactManager\Models\ContactEmail;
+use Skillcraft\ContactManager\Models\ContactManager;
+use Skillcraft\ContactManager\Models\ContactPhone;
 
 final class ContactManagerService
 {
-    public function executeUpdateContactInfo(ContactManager $contact, array $data = [])
+    public function executeUpdateContactInfo(ContactManager $contact, array $data = []): void
     {
-        $condition = ['contact_id'    => $contact->id];
+        $condition = ['contact_id' => $contact->id];
 
         if (Arr::exists($data, 'addresses')) {
             $contact->addresses()->delete();
@@ -24,7 +24,7 @@ final class ContactManagerService
                     if ($value2['key'] == 'address') {
                         $address_value[$value2['key']] = Arr::get($value2, 'value');
                     }
-    
+
                     if ($value2['key'] == 'address2') {
                         $address_value[$value2['key']] = Arr::get($value2, 'value');
                     }
@@ -45,15 +45,15 @@ final class ContactManagerService
                     }
                 }
 
-                (new ContactAddress)->query()->create($condition + $address_value);
+                (new ContactAddress())->query()->create($condition + $address_value);
             }
         }
 
         if (Arr::exists($data, 'emails')) {
             $contact->emails()->delete();
 
-            foreach (Arr::get($data, 'emails') as $key => $value) {
-                foreach ($value as $key => $value2) {
+            foreach (Arr::get($data, 'emails') as $value) {
+                foreach ($value as $value2) {
                     if ($value2['key'] == 'email') {
                         $email_value[$value2['key']] = Arr::get($value2, 'value');
                     }
@@ -63,15 +63,15 @@ final class ContactManagerService
                     }
                 }
 
-                (new ContactEmail)->query()->create($condition + $email_value);
+                (new ContactEmail())->query()->create($condition + $email_value);
             }
         }
 
         if (Arr::exists($data, 'phones')) {
             $contact->phones()->delete();
 
-            foreach (Arr::get($data, 'phones') as $key => $value) {
-                foreach ($value as $key => $value2) {
+            foreach (Arr::get($data, 'phones') as $value) {
+                foreach ($value as $value2) {
                     if ($value2['key'] == 'phone') {
                         $phone_value[$value2['key']] = Arr::get($value2, 'value');
                     }
@@ -81,12 +81,12 @@ final class ContactManagerService
                     }
                 }
 
-                (new ContactPhone)->query()->create($condition + $phone_value);
+                (new ContactPhone())->query()->create($condition + $phone_value);
             }
         }
     }
 
-    public static function getEmailRepeaterData(?BaseModel $baseModel):string|array
+    public static function getEmailRepeaterData(?BaseModel $baseModel): string|array
     {
         if ($baseModel && $baseModel->id && $baseModel->emails()->count() > 0) {
             foreach ($baseModel->emails()->get() as $email) {
@@ -108,7 +108,7 @@ final class ContactManagerService
         return $repeaterValue;
     }
 
-    public static function getPhoneRepeaterData(?BaseModel $baseModel):string|array
+    public static function getPhoneRepeaterData(?BaseModel $baseModel): string|array
     {
         if ($baseModel && $baseModel->id && $baseModel->phones()->count() > 0) {
             foreach ($baseModel->phones()->get() as $phone) {
@@ -130,7 +130,7 @@ final class ContactManagerService
         return $repeaterValue;
     }
 
-    public static function getAddressRepeaterData(?BaseModel $baseModel):string|array
+    public static function getAddressRepeaterData(?BaseModel $baseModel): string|array
     {
         if ($baseModel && $baseModel->id && $baseModel->addresses()->count() > 0) {
             foreach ($baseModel->addresses()->get() as $address) {

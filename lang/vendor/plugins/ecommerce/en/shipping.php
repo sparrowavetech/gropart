@@ -150,12 +150,12 @@ return [
                 'state_placeholder' => 'State',
                 'city' => 'City',
                 'city_placeholder' => 'City',
+                'shipping_rule' => 'Shipping rule',
                 'zip_code' => 'Zip code',
                 'zip_code_placeholder' => 'Zip code',
                 'adjustment_price' => 'Adjustment price',
                 'adjustment_price_placeholder' => 'Adjustment price',
                 'is_enabled' => 'Is enabled?',
-                'shipping_rule' => 'Shipping rule',
                 'no_shipping_rule' => 'No shipping rule',
             ],
             'bulk-import' => [
@@ -170,5 +170,9 @@ return [
         ],
         'select_type' => 'Select type',
         'cannot_create_rule_type_for_this_location' => 'Cannot create rule type ":type" on this location!',
+    ],
+    'empty_shipping_options' => [
+        'title' => 'No shipping options',
+        'subtitle' => 'Click on add country from the left side to add new shipping options.',
     ],
 ];

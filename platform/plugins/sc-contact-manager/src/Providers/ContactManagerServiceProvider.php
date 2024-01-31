@@ -22,7 +22,7 @@ class ContactManagerServiceProvider extends ServiceProvider
         if (! is_plugin_active('sc-core')) {
             return;
         }
-        
+
         $this
             ->setNamespace('plugins/sc-contact-manager')
             ->loadHelpers()
@@ -74,7 +74,7 @@ class ContactManagerServiceProvider extends ServiceProvider
         PanelSectionManager::default()->beforeRendering(function () {
             PanelSectionManager::registerItem(
                 CorePanelSection::class,
-                fn() => PanelSectionItem::make('contact-manager')
+                fn () => PanelSectionItem::make('contact-manager')
                     ->setTitle(trans('plugins/sc-contact-manager::contact-manager.settings.title'))
                     ->withIcon('ti ti-user-plus')
                     ->withDescription(trans('plugins/sc-contact-manager::contact-manager.settings.description'))

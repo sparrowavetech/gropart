@@ -2,19 +2,19 @@
 
 namespace Skillcraft\ContactManager\Http\Controllers;
 
-use Skillcraft\ContactManager\Http\Requests\ContactGroupRequest;
-use Skillcraft\ContactManager\Models\ContactGroup;
-use Botble\Base\Facades\PageTitle;
-use Botble\Base\Http\Controllers\BaseController;
-use Illuminate\Http\Request;
-use Exception;
-use Skillcraft\ContactManager\Tables\ContactGroupTable;
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
-use Botble\Base\Http\Responses\BaseHttpResponse;
-use Skillcraft\ContactManager\Forms\ContactGroupForm;
+use Botble\Base\Facades\PageTitle;
 use Botble\Base\Forms\FormBuilder;
+use Botble\Base\Http\Controllers\BaseController;
+use Botble\Base\Http\Responses\BaseHttpResponse;
+use Exception;
+use Illuminate\Http\Request;
+use Skillcraft\ContactManager\Forms\ContactGroupForm;
+use Skillcraft\ContactManager\Http\Requests\ContactGroupRequest;
+use Skillcraft\ContactManager\Models\ContactGroup;
+use Skillcraft\ContactManager\Tables\ContactGroupTable;
 
 class ContactGroupController extends BaseController
 {

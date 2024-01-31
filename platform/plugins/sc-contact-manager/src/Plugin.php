@@ -3,9 +3,9 @@
 namespace Skillcraft\ContactManager;
 
 use Botble\Base\Facades\BaseHelper;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Botble\PluginManagement\Abstracts\PluginOperationAbstract;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class Plugin extends PluginOperationAbstract
 {
@@ -18,7 +18,7 @@ class Plugin extends PluginOperationAbstract
         }
     }
 
-    public static function pluginModels():array
+    public static function pluginModels(): array
     {
         $pluginModels = [];
 
@@ -30,10 +30,11 @@ class Plugin extends PluginOperationAbstract
                 $pluginModels[] = new $className();
             }
         }
+
         return $pluginModels;
     }
 
-    public static function pluginTables():array
+    public static function pluginTables(): array
     {
         $pluginTables = [];
 
@@ -46,7 +47,7 @@ class Plugin extends PluginOperationAbstract
         return $pluginTables;
     }
 
-    public function pluginInstallSchema():void
+    public function pluginInstallSchema(): void
     {
         foreach (self::pluginModels() as $model) {
             if (method_exists($model, 'modelInstallSchema')) {

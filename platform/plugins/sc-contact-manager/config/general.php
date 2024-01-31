@@ -7,5 +7,5 @@ return [
          * a new contact will be added to the manager.
          */
         'contact_form' => env('ENABLE_CONTACT_FORM_CONTACT_IMPORT', true),
-    ]
+    ],
 ];

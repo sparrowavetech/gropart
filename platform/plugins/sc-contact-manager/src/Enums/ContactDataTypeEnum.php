@@ -3,6 +3,7 @@
 namespace Skillcraft\ContactManager\Enums;
 
 use Botble\Base\Supports\Enum;
+use Illuminate\Support\HtmlString;
 
 /**
  * @method static ContactDataTypeEnum WORK()
@@ -13,25 +14,16 @@ use Botble\Base\Supports\Enum;
  */
 class ContactDataTypeEnum extends Enum
 {
-    public const WORK       = 'work';
-    public const HOME       = 'home';
-    public const BILLING    = 'billing';
-    public const SHIPPING   = 'shipping';
-    public const OTHER      = 'other';
+    public const WORK = 'work';
+    public const HOME = 'home';
+    public const BILLING = 'billing';
+    public const SHIPPING = 'shipping';
+    public const OTHER = 'other';
 
-    /**
-     * @var string
-     */
     public static $langPath = 'plugins/sc-contact-manager::enums.contact_status';
 
-    /**
-     * @return string
-     */
-    public function toHtml()
+    public function toHtml(): HtmlString|string
     {
-        switch ($this->value) {
-            default:
-                return $this->value;
-        }
+        return $this->value;
     }
 }

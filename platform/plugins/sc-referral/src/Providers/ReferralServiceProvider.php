@@ -2,6 +2,7 @@
 
 namespace Skillcraft\Referral\Providers;
 
+use Botble\Member\Http\Requests\MemberCreateRequest;
 use Botble\Member\Models\Member;
 use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Supports\ServiceProvider;
@@ -9,16 +10,17 @@ use Illuminate\Routing\Events\RouteMatched;
 use Botble\Base\Facades\PanelSectionManager;
 use Botble\Base\PanelSections\PanelSectionItem;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
-use Botble\Member\Http\Requests\SettingRequest;
 use Botble\Member\Http\Requests\MemberEditRequest;
 use Skillcraft\Core\PanelSections\CorePanelSection;
+use Skillcraft\Core\Traits\FillableValidation;
+use Skillcraft\Referral\Services\ReferralService;
 use Skillcraft\Referral\Supports\ReferralHookManager;
 use Skillcraft\Referral\Http\Middleware\ReferralMiddleware;
 
 class ReferralServiceProvider extends ServiceProvider
 {
     use LoadAndPublishDataTrait;
-    public function register()
+    public function register(): void
     {
         $events = $this->app['events'];
 
@@ -30,9 +32,11 @@ class ReferralServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        if (!is_plugin_active('sc-core')) {
+        if (!is_plugin_active('sc-core') || !trait_exists(FillableValidation::class)) {
             return;
         }
+
+        $this->app->register(EventServiceProvider::class);
 
         $this
             ->setNamespace('plugins/sc-referral')
@@ -41,7 +45,7 @@ class ReferralServiceProvider extends ServiceProvider
             ->loadMigrations()
             ->loadAndPublishTranslations()
             ->loadAndPublishViews()
-            ->loadRoutes(['web']);
+            ->loadRoutes();
 
         PanelSectionManager::default()->beforeRendering(function () {
             PanelSectionManager::registerItem(
@@ -53,19 +57,28 @@ class ReferralServiceProvider extends ServiceProvider
                         ->withDescription(trans('plugins/sc-referral::referral.description'))
                         ->withPriority(-9980)
                         ->withRoute('referral.index'),
+
+                    PanelSectionItem::make('referral_settings')
+                        ->setTitle(trans('plugins/sc-referral::referral.settings.title'))
+                        ->withIcon('ti ti-settings-cog')
+                        ->withDescription(trans('plugins/sc-referral::referral.settings.description'))
+                        ->withPriority(-9980)
+                        ->withRoute('referral.settings'),
                 ]
             );
         });
 
         if (is_plugin_active('member')) {
-            if (config('plugins.sc-referral.general.enable_member_default')) {
+           if ((new ReferralService())->isMemberPluginEnabled()) {
                 ReferralHookManager::registerHooks(Member::class, 'member');
-                ReferralHookManager::registerFormHooks(MemberEditRequest::class, 'member');
+                ReferralHookManager::registerFormHooks(MemberCreateRequest::class, 'member_create');
+                ReferralHookManager::registerFormHooks(MemberEditRequest::class, 'member_edit');
             }
-        }
+       }
 
         $this->app->booted(function () {
-            $this->app->register(HookServiceProvider::class);
+            (new ReferralHookManager())->load();
+
             if (is_plugin_active('member')) {
                 if (ReferralHookManager::isSupported(Member::class)) {
                     $this->loadRoutes(['member']);
@@ -80,10 +93,9 @@ class ReferralServiceProvider extends ServiceProvider
                                 'icon' => 'ti ti-sitemap',
                             ]);
                     });
-
                     DashboardMenu::default();
                 }
-            }
+           }
         });
     }
 }

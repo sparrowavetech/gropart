@@ -1,9 +1,9 @@
 <?php
 
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 use Skillcraft\ContactManager\Models\ContactManager;
 
 return new class () extends Migration {
@@ -18,7 +18,7 @@ return new class () extends Migration {
 
     public function down(): void
     {
-        if (!Schema::hasColumn($this->getContactTable(), 'uuid')) {
+        if (! Schema::hasColumn($this->getContactTable(), 'uuid')) {
             Schema::table($this->getContactTable(), function (Blueprint $table) {
                 $table->string('uuid')->nullable()->after('id');
             });
@@ -31,8 +31,8 @@ return new class () extends Migration {
         }
     }
 
-    private function getContactTable():string
+    private function getContactTable(): string
     {
-        return (new ContactManager)->getTable();
+        return (new ContactManager())->getTable();
     }
 };

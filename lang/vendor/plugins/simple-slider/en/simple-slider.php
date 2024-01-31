@@ -2,9 +2,10 @@
 
 return [
     'create' => 'New slider',
-    'menu' => 'Simple sliders',
+    'menu' => 'Simple Sliders',
+    'simple_slider_description' => 'Manage your system simple sliders',
     'settings' => [
-        'title' => 'Simple sliders',
+        'title' => 'Simple Sliders',
         'description' => 'Settings for Simple sliders',
         'using_assets' => 'Using default assets?',
         'using_assets_description' => 'If using assets option is enabled then below scripts will be auto added to front site.',
@@ -19,4 +20,5 @@ return [
     'simple_slider_shortcode_name' => 'Simple slider',
     'simple_slider_shortcode_description' => 'Add a simple slider',
     'select_slider' => 'Select a slider',
+    'shortcode' => 'Shortcode',
 ];

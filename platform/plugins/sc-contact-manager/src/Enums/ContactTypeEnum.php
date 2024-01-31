@@ -12,12 +12,9 @@ use Illuminate\Support\HtmlString;
  */
 class ContactTypeEnum extends Enum
 {
-    public const CUSTOMER   = 'customer';
-    public const LEAD       = 'lead';
+    public const CUSTOMER = 'customer';
+    public const LEAD = 'lead';
 
-    /**
-     * @var string
-     */
     public static $langPath = 'plugins/sc-contact-manager::enums.contact_type';
 
     public function toHtml(): HtmlString|string

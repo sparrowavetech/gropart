@@ -2,13 +2,13 @@
 
 namespace Skillcraft\ContactManager\Forms;
 
-use Botble\Base\Forms\FormAbstract;
-use Botble\Base\Forms\Fields\TextField;
-use Botble\Base\Forms\Fields\SelectField;
-use Skillcraft\ContactManager\Models\ContactGroup;
 use Botble\Base\Forms\FieldOptions\NameFieldOption;
 use Botble\Base\Forms\FieldOptions\StatusFieldOption;
+use Botble\Base\Forms\Fields\SelectField;
+use Botble\Base\Forms\Fields\TextField;
+use Botble\Base\Forms\FormAbstract;
 use Skillcraft\ContactManager\Http\Requests\ContactGroupRequest;
+use Skillcraft\ContactManager\Models\ContactGroup;
 
 class ContactGroupForm extends FormAbstract
 {

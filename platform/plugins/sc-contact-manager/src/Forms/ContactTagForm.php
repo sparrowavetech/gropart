@@ -2,13 +2,13 @@
 
 namespace Skillcraft\ContactManager\Forms;
 
-use Botble\Base\Forms\FormAbstract;
-use Botble\Base\Forms\Fields\TextField;
-use Botble\Base\Forms\Fields\SelectField;
-use Skillcraft\ContactManager\Models\ContactTag;
 use Botble\Base\Forms\FieldOptions\NameFieldOption;
 use Botble\Base\Forms\FieldOptions\StatusFieldOption;
+use Botble\Base\Forms\Fields\SelectField;
+use Botble\Base\Forms\Fields\TextField;
+use Botble\Base\Forms\FormAbstract;
 use Skillcraft\ContactManager\Http\Requests\ContactTagRequest;
+use Skillcraft\ContactManager\Models\ContactTag;
 
 class ContactTagForm extends FormAbstract
 {

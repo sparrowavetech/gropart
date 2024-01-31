@@ -2,14 +2,13 @@
 
 namespace Skillcraft\ContactManager\Forms;
 
-use Botble\Base\Forms\FormAbstract;
-use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Forms\Fields\TagField;
+use Botble\Base\Forms\FormAbstract;
 use Skillcraft\ContactManager\Enums\ContactDataTypeEnum;
 use Skillcraft\ContactManager\Enums\ContactTypeEnum;
-use Skillcraft\ContactManager\Models\ContactManager;
 use Skillcraft\ContactManager\Http\Requests\ContactManagerRequest;
 use Skillcraft\ContactManager\Models\ContactGroup;
+use Skillcraft\ContactManager\Models\ContactManager;
 use Skillcraft\ContactManager\Services\ContactManagerService;
 
 class ContactManagerForm extends FormAbstract
@@ -24,7 +23,7 @@ class ContactManagerForm extends FormAbstract
         }
 
         $this
-            ->setupModel(new ContactManager)
+            ->setupModel(new ContactManager())
             ->setValidatorClass(ContactManagerRequest::class)
             ->withCustomFields()
             ->addCustomField('tags', TagField::class)
@@ -35,10 +34,10 @@ class ContactManagerForm extends FormAbstract
                 'label' => trans('plugins/sc-contact-manager::contact-manager.forms.first_name'),
                 'label_attr' => ['class' => 'control-label required'],
                 'attr' => [
-                    'placeholder'  => trans('plugins/sc-contact-manager::contact-manager.forms.first_name'),
+                    'placeholder' => trans('plugins/sc-contact-manager::contact-manager.forms.first_name'),
                     'data-counter' => 120,
                 ],
-                'wrapper'    => [
+                'wrapper' => [
                     'class' => $this->formHelper->getConfig('defaults.wrapper_class') . ' col-md-6',
                 ],
             ])
@@ -46,10 +45,10 @@ class ContactManagerForm extends FormAbstract
                 'label' => trans('plugins/sc-contact-manager::contact-manager.forms.last_name'),
                 'label_attr' => ['class' => 'control-label'],
                 'attr' => [
-                    'placeholder'  => trans('plugins/sc-contact-manager::contact-manager.forms.last_name'),
+                    'placeholder' => trans('plugins/sc-contact-manager::contact-manager.forms.last_name'),
                     'data-counter' => 120,
                 ],
-                'wrapper'    => [
+                'wrapper' => [
                     'class' => $this->formHelper->getConfig('defaults.wrapper_class') . ' col-md-6',
                 ],
             ])
@@ -57,35 +56,35 @@ class ContactManagerForm extends FormAbstract
                 'label' => trans('plugins/sc-contact-manager::contact-manager.forms.business_name'),
                 'label_attr' => ['class' => 'control-label'],
                 'attr' => [
-                    'placeholder'  => trans('plugins/sc-contact-manager::contact-manager.forms.business_name'),
+                    'placeholder' => trans('plugins/sc-contact-manager::contact-manager.forms.business_name'),
                     'data-counter' => 255,
                 ],
-                'wrapper'    => [
+                'wrapper' => [
                     'class' => $this->formHelper->getConfig('defaults.wrapper_class') . ' col-md-12',
                 ],
             ])
             ->add('emails', 'repeater', [
-                'label'      => __('plugins/sc-contact-manager::contact-manager.forms.emails'),
+                'label' => __('plugins/sc-contact-manager::contact-manager.forms.emails'),
                 'label_attr' => ['class' => 'control-label'],
                 'fields' => [
                     [
-                        'type'       => 'text',
-                        'label'      => trans('plugins/sc-contact-manager::contact-manager.forms.email'),
+                        'type' => 'text',
+                        'label' => trans('plugins/sc-contact-manager::contact-manager.forms.email'),
                         'label_attr' => ['class' => 'control-label'],
                         'attributes' => [
-                            'name'    => 'email',
-                            'value'   => null,
+                            'name' => 'email',
+                            'value' => null,
                             'options' => [
-                                'class'        => 'form-control'
+                                'class' => 'form-control',
                             ],
-                            
+
                         ],
                     ],
                     [
                         'type' => 'customSelect',
                         'label' => trans('plugins/sc-contact-manager::contact-manager.forms.contact_type'),
                         'label_attr' => [
-                            'class' => 'control-label'
+                            'class' => 'control-label',
                         ],
                         'attributes' => [
                             'name' => 'type',
@@ -100,27 +99,27 @@ class ContactManagerForm extends FormAbstract
                 'value' => ContactManagerService::getEmailRepeaterData($this->getModel()),
             ])
             ->add('phones', 'repeater', [
-                'label'      => __('plugins/sc-contact-manager::contact-manager.forms.phones'),
+                'label' => __('plugins/sc-contact-manager::contact-manager.forms.phones'),
                 'label_attr' => ['class' => 'control-label'],
                 'fields' => [
                     [
-                        'type'       => 'text',
-                        'label'      => trans('plugins/sc-contact-manager::contact-manager.forms.phone'),
+                        'type' => 'text',
+                        'label' => trans('plugins/sc-contact-manager::contact-manager.forms.phone'),
                         'label_attr' => ['class' => 'control-label'],
                         'attributes' => [
-                            'name'    => 'phone',
-                            'value'   => null,
+                            'name' => 'phone',
+                            'value' => null,
                             'options' => [
-                                'class'        => 'form-control'
+                                'class' => 'form-control',
                             ],
-                            
+
                         ],
                     ],
                     [
                         'type' => 'customSelect',
                         'label' => trans('plugins/sc-contact-manager::contact-manager.forms.contact_type'),
                         'label_attr' => [
-                            'class' => 'control-label'
+                            'class' => 'control-label',
                         ],
                         'attributes' => [
                             'name' => 'type',
@@ -135,79 +134,79 @@ class ContactManagerForm extends FormAbstract
                 'value' => ContactManagerService::getPhoneRepeaterData($this->getModel()),
             ])
             ->add('addresses', 'repeater', [
-                'label'      => __('plugins/sc-contact-manager::contact-manager.forms.addresses'),
+                'label' => __('plugins/sc-contact-manager::contact-manager.forms.addresses'),
                 'label_attr' => ['class' => 'control-label'],
                 'fields' => [
                     [
-                        'type'       => 'text',
-                        'label'      => trans('plugins/sc-contact-manager::contact-manager.forms.address'),
+                        'type' => 'text',
+                        'label' => trans('plugins/sc-contact-manager::contact-manager.forms.address'),
                         'label_attr' => ['class' => 'control-label'],
                         'attributes' => [
-                            'name'    => 'address',
-                            'value'   => null,
+                            'name' => 'address',
+                            'value' => null,
                             'options' => [
-                                'class'        => 'form-control'
+                                'class' => 'form-control',
                             ],
-                            
+
                         ],
                     ],
                     [
-                        'type'       => 'text',
-                        'label'      => trans('plugins/sc-contact-manager::contact-manager.forms.address2'),
+                        'type' => 'text',
+                        'label' => trans('plugins/sc-contact-manager::contact-manager.forms.address2'),
                         'label_attr' => ['class' => 'control-label'],
                         'attributes' => [
-                            'name'    => 'address2',
-                            'value'   => null,
+                            'name' => 'address2',
+                            'value' => null,
                             'options' => [
-                                'class'        => 'form-control'
+                                'class' => 'form-control',
                             ],
-                            
+
                         ],
                     ],
                     [
-                        'type'       => 'text',
-                        'label'      => trans('plugins/sc-contact-manager::contact-manager.forms.city'),
+                        'type' => 'text',
+                        'label' => trans('plugins/sc-contact-manager::contact-manager.forms.city'),
                         'label_attr' => ['class' => 'control-label'],
                         'attributes' => [
-                            'name'    => 'city',
-                            'value'   => null,
+                            'name' => 'city',
+                            'value' => null,
                             'options' => [
-                                'class'        => 'form-control'
+                                'class' => 'form-control',
                             ],
-                            
+
                         ],
                     ],
                     [
-                        'type'       => 'text',
-                        'label'      => trans('plugins/sc-contact-manager::contact-manager.forms.state'),
+                        'type' => 'text',
+                        'label' => trans('plugins/sc-contact-manager::contact-manager.forms.state'),
                         'label_attr' => ['class' => 'control-label'],
                         'attributes' => [
-                            'name'    => 'state',
-                            'value'   => null,
+                            'name' => 'state',
+                            'value' => null,
                             'options' => [
-                                'class'        => 'form-control'
+                                'class' => 'form-control',
                             ],
-                            
+
                         ],
                     ],
                     [
-                        'type'       => 'text',
-                        'label'      => trans('plugins/sc-contact-manager::contact-manager.forms.postalcode'),
+                        'type' => 'text',
+                        'label' => trans('plugins/sc-contact-manager::contact-manager.forms.postalcode'),
                         'label_attr' => ['class' => 'control-label'],
                         'attributes' => [
-                            'name'    => 'postalcode',
-                            'value'   => null,
+                            'name' => 'postalcode',
+                            'value' => null,
                             'options' => [
-                                'class'        => 'form-control'
+                                'class' => 'form-control',
                             ],
-                            
+
                         ],
                     ],
                     [
                         'type' => 'customSelect',
                         'label' => trans('plugins/sc-contact-manager::contact-manager.forms.contact_type'),
                         'label_attr' => [
-                            'class' => 'control-label'
+                            'class' => 'control-label',
                         ],
                         'attributes' => [
                             'name' => 'type',
@@ -228,7 +227,7 @@ class ContactManagerForm extends FormAbstract
                 'label' => trans('plugins/sc-contact-manager::contact-manager.forms.source'),
                 'label_attr' => ['class' => 'control-label'],
                 'attr' => [
-                    'placeholder'  => trans('plugins/sc-contact-manager::contact-manager.forms.source'),
+                    'placeholder' => trans('plugins/sc-contact-manager::contact-manager.forms.source'),
                     'data-counter' => 255,
                 ],
             ])
@@ -241,20 +240,20 @@ class ContactManagerForm extends FormAbstract
                 'choices' => ContactTypeEnum::labels(),
             ])
             ->add('group_id', 'customSelect', [
-                'label'      => trans('plugins/sc-contact-manager::contact-manager.forms.group'),
+                'label' => trans('plugins/sc-contact-manager::contact-manager.forms.group'),
                 'label_attr' => ['class' => 'control-label'],
                 'attr' => [
                     'class' => 'form-control',
                 ],
-                'choices'    => ['' => 'None'] + (new ContactGroup())->query()->pluck('name', 'id')->toArray(),
+                'choices' => ['' => 'None'] + (new ContactGroup())->query()->pluck('name', 'id')->toArray(),
             ])
             ->add('tag', 'tags', [
-                'label'      => trans('plugins/blog::posts.form.tags'),
+                'label' => trans('plugins/blog::posts.form.tags'),
                 'label_attr' => ['class' => 'control-label'],
-                'value'      => $tags,
-                'attr'       => [
+                'value' => $tags,
+                'attr' => [
                     'placeholder' => trans('plugins/blog::base.write_some_tags'),
-                    'data-url'    => route('contact-tag.all'),
+                    'data-url' => route('contact-tag.all'),
                 ],
             ])
             ->setBreakFieldPoint('source');
