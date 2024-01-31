@@ -12,8 +12,6 @@ use Botble\Marketplace\Enums\ShopTypeEnum;
 use Botble\Marketplace\Facades\MarketplaceHelper;
 use Botble\Marketplace\Models\Store;
 use Botble\Marketplace\Models\VendorInfo;
-use Botble\Marketplace\Repositories\Interfaces\StoreInterface;
-use Botble\Marketplace\Repositories\Interfaces\VendorInfoInterface;
 use Botble\Slug\Facades\SlugHelper;
 use Botble\Slug\Models\Slug;
 use Carbon\Carbon;

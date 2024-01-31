@@ -1,4 +1,4 @@
-<div class="widget-products-with-category py-5 bg-light">
+<div class="widget-products-with-category py-5 pt-3 bg-light">
     <div class="container-xxxl">
         <div class="row">
             <div class="col-12">
@@ -26,28 +26,49 @@
                                 [
                                     'breakpoint' => 1400,
                                     'settings' => [
+                                        'slidesToShow' => 6,
+                                    ],
+                                ],
+                                [
+                                    'breakpoint' => 1201,
+                                    'settings' => [
                                         'slidesToShow' => 5,
                                     ],
                                 ],
                                 [
-                                    'breakpoint' => 1199,
-                                    'settings' => [
-                                        'slidesToShow' => 4,
-                                    ],
-                                ],
-                                [
-                                    'breakpoint' => 1024,
-                                    'settings' => [
-                                        'slidesToShow' => 3,
-                                    ],
-                                ],
-                                [
-                                    'breakpoint' => 767,
+                                    'breakpoint' => 1025,
                                     'settings' => [
                                         'arrows' => true,
                                         'dots' => false,
+                                        'slidesToShow' => 4,
+                                        'slidesToScroll' => 4,
+                                    ],
+                                ],
+                                [
+                                    'breakpoint' => 769,
+                                    'settings' => [
+                                        'arrows' => true,
+                                        'dots' => false,
+                                        'slidesToShow' => 3,
+                                        'slidesToScroll' => 3,
+                                    ],
+                                ],
+                                [
+                                    'breakpoint' => 426,
+                                    'settings' => [
+                                        'arrows' => false,
+                                        'dots' => true,
                                         'slidesToShow' => 2,
                                         'slidesToScroll' => 2,
+                                    ],
+                                ],
+                                [
+                                    'breakpoint' => 376,
+                                    'settings' => [
+                                        'arrows' => false,
+                                        'dots' => true,
+                                        'slidesToShow' => 1,
+                                        'slidesToScroll' => 1,
                                     ],
                                 ],
                             ],

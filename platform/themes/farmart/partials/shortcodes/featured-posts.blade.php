@@ -41,9 +41,9 @@
         <div class="row">
             <div class="@if ($shortcode->app_enabled) col-lg-8 @else col-12 @endif py-4 py-lg-0">
                 <div class="row justify-content-between align-items-center widget-header ms-0 me-0">
-                    <h2 class="col-auto mb-0 py-2 ps-0">{{ $shortcode->title }}</h2>
+                    <h2 class="col-auto mb-0 py-2">{{ $shortcode->title }}</h2>
                     <a
-                        class="col-auto pe-0"
+                        class="col-auto"
                         href="{{ get_blog_page_url() }}"
                     >
                         <span class="link-text">{{ __('All Articles') }}

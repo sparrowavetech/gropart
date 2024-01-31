@@ -13,27 +13,24 @@
                 alt="{{ $product->name }}"
             >
         </div>
-        <span class="ribbons">
-            @if ($product->isOutOfStock())
+        @if ($product->isOutOfStock())
+            <div class="ribbons">
                 <span class="ribbon out-stock">{{ __('Out Of Stock') }}</span>
-            @else
-                @if ($product->productLabels->isNotEmpty())
+            </div>
+        @else
+            @if ($product->productLabels->isNotEmpty())
+                <div class="ribbons product-lable">
                     @foreach ($product->productLabels as $label)
-                        <span
-                            class="ribbon"
-                            @if ($label->color) style="background-color: {{ $label->color }}" @endif
-                        >{{ $label->name }}</span>
+                        <span class="ribbon" @if ($label->color) style="background-color: {{ $label->color }}" @endif><i class="lable-prop" @if ($label->color) style="border-color: transparent transparent transparent {{ $label->color }}" @endif></i>{{ $label->name }}</span>
                     @endforeach
-                @else
-                    @if ($product->front_sale_price !== $product->price)
-                        <div
-                            class="featured ribbon"
-                            dir="ltr"
-                        >{{ get_sale_percentage($product->price, $product->front_sale_price) }}</div>
-                    @endif
-                @endif
+                </div>
             @endif
-        </span>
+            @if ($product->front_sale_price !== $product->price)
+                <div class="ribbons sale-ribbon">
+                    <span class="featured ribbon" dir="ltr">{{ get_sale_percentage($product->price, $product->front_sale_price) }}</span>
+                </div>
+            @endif
+        @endif
     </a>
     {!! Theme::partial(
         'ecommerce.product-loop-buttons',
@@ -92,8 +89,8 @@
                 </div>
             </div>
         @endisset
-</div>
-<div class="product-bottom-box">
-    {!! Theme::partial('ecommerce.product-cart-form', compact('product')) !!}
-</div>
+    </div>
+    <div class="product-bottom-box">
+        {!! Theme::partial('ecommerce.product-cart-form', compact('product')) !!}
+    </div>
 </div>

@@ -1,7 +1,21 @@
+<style type="text/css">
+    @media screen and (max-width: 768px) {
+        .container, .left, .page-wrap, .right, body, html { height: auto !important; min-height: auto !important; }
+        #main-checkout-product-info .coupon-wrapper, .accepted-payments { margin-bottom: 15px !important; }
+        #main-checkout-product-info .checkout-discount-section { text-align: center; }
+        .checkout-logo { text-align: center; }
+        .back-to-cart-button-group { margin-bottom: 20px !important; }
+        .checkout-form, .checkout-content-wrap { margin:0 !important; }
+    }
+    .form-group .iti.iti--allow-dropdown { width: 100%; }
+    .text-right { text-align: right; }
+    .btn.payment-checkout-btn-step.payment-checkout-btn { width: 100%; font-size: 1.25rem; color: #fff; padding: 10px 0; font-weight: 600; text-transform: uppercase; background-color: #198754; }
+    .back-to-cart-btn { font-size: 1.25rem; font-weight: 600; }
+    .accepted-payments { max-width: 420px; margin: auto; }
+    .btn.payment-checkout-btn-step.payment-checkout-btn:hover { background-color: #00b460!important; }
+</style>
 @extends('plugins/ecommerce::orders.master')
-
 @section('title', __('Checkout'))
-
 @section('content')
     @if (Cart::instance('cart')->isNotEmpty())
         @php
@@ -32,81 +46,75 @@
 
                             {!! apply_filters(RENDER_PRODUCTS_IN_CHECKOUT_PAGE, $products) !!}
 
-                            <div class="mt-2 p-2">
+                            <div class="mt-2 p-3 bg-light pricing-data">
                                 <div class="row">
-                                    <div class="col-6">
-                                        <p>{{ __('Subtotal') }}:</p>
+                                    <div class="col-8">
+                                        <p class="price-text-label m-0">{{ __('Subtotal') }}:</p>
                                     </div>
-                                    <div class="col-6">
-                                        <p class="price-text sub-total-text text-end">
-                                            {{ format_price(Cart::instance('cart')->rawSubTotal()) }}
-                                        </p>
+                                    <div class="col-4">
+                                        <p class="price-text sub-total-text text-end m-0"> {{ format_price(Cart::instance('cart')->rawSubTotal()) }} </p>
                                     </div>
                                 </div>
-                                @if (EcommerceHelper::isTaxEnabled())
+                                @if (EcommerceHelper::isTaxEnabled() && Cart::instance('cart')->rawTax() > 0)
                                     <div class="row">
-                                        <div class="col-6">
-                                            <p>{{ __('Tax') }}:</p>
+                                        <div class="col-8">
+                                            <p class="price-text-label m-0">{{ __('Tax') }}:</p>
                                         </div>
-                                        <div class="col-6 float-end">
-                                            <p class="price-text tax-price-text">
-                                                {{ format_price(Cart::instance('cart')->rawTax()) }}
-                                            </p>
+                                        <div class="col-4 float-end">
+                                            <p class="price-text tax-price-text m-0 text-success"><span>(+)</span> {{ format_price(Cart::instance('cart')->rawTax()) }}</p>
                                         </div>
                                     </div>
                                 @endif
                                 @if (session('applied_coupon_code'))
                                     <div class="row coupon-information">
-                                        <div class="col-6">
-                                            <p>{{ __('Coupon code') }}:</p>
+                                        <div class="col-8">
+                                            <p class="price-text-label m-0">{{ __('Coupon code') }}:</p>
                                         </div>
-                                        <div class="col-6">
-                                            <p class="price-text coupon-code-text">
-                                                {{ session('applied_coupon_code') }}
-                                            </p>
+                                        <div class="col-4">
+                                            <p class="price-text coupon-code-text m-0 text-success">{{ session('applied_coupon_code') }}</p>
                                         </div>
                                     </div>
                                 @endif
                                 @if ($couponDiscountAmount > 0)
                                     <div class="row price discount-amount">
-                                        <div class="col-6">
-                                            <p>{{ __('Coupon code discount amount') }}:</p>
+                                        <div class="col-8">
+                                            <p class="price-text-label m-0">{{ __('Coupon code discount amount') }}:</p>
                                         </div>
-                                        <div class="col-6">
-                                            <p class="price-text total-discount-amount-text">
-                                                {{ format_price($couponDiscountAmount) }}
+                                        <div class="col-4">
+                                            <p class="price-text total-discount-amount-text m-0 text-danger">
+                                            <span>(-)</span> {{ format_price($couponDiscountAmount) }}
                                             </p>
                                         </div>
                                     </div>
                                 @endif
                                 @if ($promotionDiscountAmount > 0)
                                     <div class="row">
-                                        <div class="col-6">
-                                            <p>{{ __('Promotion discount amount') }}:</p>
+                                        <div class="col-8">
+                                            <p class="price-text-label m-0">{{ __('Promotion discount amount') }}:</p>
                                         </div>
-                                        <div class="col-6">
-                                            <p class="price-text">
-                                                {{ format_price($promotionDiscountAmount) }}
+                                        <div class="col-4">
+                                            <p class="price-text m-0 text-danger">
+                                            <span>(-)</span> {{ format_price($promotionDiscountAmount) }}
                                             </p>
                                         </div>
                                     </div>
                                 @endif
                                 @if (!empty($shipping) && Arr::get($sessionCheckoutData, 'is_available_shipping', true))
                                     <div class="row">
-                                        <div class="col-6">
-                                            <p>{{ __('Shipping fee') }}:</p>
+                                        <div class="col-8">
+                                            <p class="price-text-label m-0">{{ __('Shipping fee') }}:</p>
                                         </div>
-                                        <div class="col-6 float-end">
-                                            <p class="price-text shipping-price-text">{{ format_price($shippingAmount) }}</p>
+                                        <div class="col-4 float-end">
+                                            <p class="price-text shipping-price-text m-0 text-success"><span>(+)</span> {{ format_price($shippingAmount) }}</p>
                                         </div>
                                     </div>
                                 @endif
 
                                 <div class="row">
-                                    <div class="col-6">
-                                        <p><strong>{{ __('Total') }}</strong>:</p>
+                                    <div class="col-8">
+                                        <p class="price-text-label m-0"><strong>{{ __('Total') }}</strong>:</p>
                                     </div>
-                                    <div class="col-6 float-end">
+                                    <div class="col-4 float-end">
                                         <p class="total-text raw-total-text" data-price="{{ format_price($rawTotal, null, true) }}">
                                             {{ format_price($orderAmount) }}
                                         </p>
@@ -114,23 +122,46 @@
                                 </div>
                             </div>
                         </div>
-
-                        <hr>
-
-                        <div class="mt-3 mb-5">
+                        <hr class="mt-0" />
+                        <div class="mt-3">
                             @include('plugins/ecommerce::themes.discounts.partials.form', compact('discounts'))
                         </div>
-                    </div>
+                        @if (theme_option('payment_methods_image'))
+                            <hr/>
+                            <div class="accepted-payments">
+                                @if (theme_option('payment_methods_link'))
+                                    <a href="{{ url(theme_option('payment_methods_link')) }}" target="_blank">
+                                @endif
 
+                                <img class="img-fluid" src="{{ RvMedia::getImageUrl(theme_option('payment_methods_image')) }}" alt="payments accepted">
+
+                                @if (theme_option('payment_methods_link'))
+                                    </a>
+                                @endif
+                            </div>
+                        @endif
+                    </div>
                     <div class="col-lg-7 col-md-6 left">
                         <div class="d-none d-sm-block">
-                            @include('plugins/ecommerce::orders.partials.logo')
+                            <div class="container g-0">
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        @include('plugins/ecommerce::orders.partials.logo')
+                                    </div>
+                                    <div class="col-sm-6 text-right">
+                                        <div class="back-to-cart-button-group mt-3">
+                                            <a class="back-to-cart-btn text-danger" href="{{ route('public.cart') }}"><i class="fas fa-long-arrow-alt-left"></i> <span class="d-inline-block">{{ __('Back to cart') }}</span></a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr>
                         </div>
                         <div class="form-checkout">
                             {!! apply_filters('ecommerce_checkout_form_before', null, $products) !!}
 
                             @if ($isShowAddressForm)
-                                <div class="mb-4">
+                                <div>
                                     <h5 class="checkout-payment-title">{{ __('Shipping information') }}</h5>
                                     <input
                                         id="save-shipping-information-url"
@@ -139,28 +170,26 @@
                                     >
                                     @include(
                                         'plugins/ecommerce::orders.partials.address-form',
-                                        compact('sessionCheckoutData')
-                                    )
+                                        compact('sessionCheckoutData'))
                                 </div>
-
+                                <br>
                                 {!! apply_filters('ecommerce_checkout_form_after_shipping_address_form', null, $products) !!}
                             @endif
 
                             @if (EcommerceHelper::isBillingAddressEnabled())
-                                <div class="mb-4">
+                                <div>
                                     <h5 class="checkout-payment-title">{{ __('Billing information') }}</h5>
                                     @include(
                                         'plugins/ecommerce::orders.partials.billing-address-form',
-                                        compact('sessionCheckoutData')
-                                    )
+                                        compact('sessionCheckoutData'))
                                 </div>
-
+                                <br>
                                 {!! apply_filters('ecommerce_checkout_form_after_billing_address_form', null, $products) !!}
                             @endif
 
                             @if (!is_plugin_active('marketplace'))
                                 @if (Arr::get($sessionCheckoutData, 'is_available_shipping', true))
-                                    <div id="shipping-method-wrapper" class="mb-4">
+                                    <div id="shipping-method-wrapper">
                                         <h5 class="checkout-payment-title">{{ __('Shipping method') }}</h5>
                                         <div class="shipping-info-loading" style="display: none;">
                                             <div class="shipping-info-loading-content">
@@ -211,7 +240,7 @@
                                             <p>{{ __('No shipping methods available!') }}</p>
                                         @endif
                                     </div>
-
+                                    <br>
                                     {!! apply_filters('ecommerce_checkout_form_after_shipping_address_form', null, $products) !!}
                                 @endif
                             @endif
@@ -283,8 +312,7 @@
                             @if (EcommerceHelper::isDisplayTaxFieldsAtCheckoutPage())
                                 @include(
                                     'plugins/ecommerce::orders.partials.tax-information',
-                                    compact('sessionCheckoutData')
-                                )
+                                    compact('sessionCheckoutData'))
 
                                 {!! apply_filters('ecommerce_checkout_form_after_tax_information_form', null, $products) !!}
                             @endif
@@ -293,7 +321,7 @@
 
                             <div class="row align-items-center g-3">
                                 <div class="order-2 order-md-1 col-md-6 text-center text-md-start mb-4 mb-md-0">
-                                    <a class="text-info" href="{{ route('public.cart') }}">
+                                    <a class="back-to-cart-btn text-danger" href="{{ route('public.cart') }}">
                                         <x-core::icon name="ti ti-arrow-narrow-left" />
                                         <span class="d-inline-block back-to-cart">{{ __('Back to cart') }}</span>
                                     </a>

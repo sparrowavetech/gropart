@@ -155,6 +155,11 @@ class HookServiceProvider extends ServiceProvider
                                 'string',
                                 'min:2',
                             ],
+                            'shop_category' => [
+                                'nullable',
+                                'required_if:is_vendor,1',
+                                'string',
+                            ],
                         ];
                 }, 45, 2);
 
@@ -163,6 +168,7 @@ class HookServiceProvider extends ServiceProvider
                             'shop_name' => __('Shop Name'),
                             'shop_phone' => __('Shop Phone'),
                             'shop_url' => __('Shop URL'),
+                            'shop_category' => __('Shop Category'),
                         ];
                 }, 45);
 
@@ -171,6 +177,7 @@ class HookServiceProvider extends ServiceProvider
                             'shop_name.required_if' => __('Shop Name is required.'),
                             'shop_phone.required_if' => __('Shop Phone is required.'),
                             'shop_url.required_if' => __('Shop URL is required.'),
+                            'shop_category.required_if' => __('Shop Category is required.'),
                         ];
                 }, 45);
 
@@ -228,6 +235,8 @@ class HookServiceProvider extends ServiceProvider
                 Theme::asset()
                     ->container('footer')
                     ->add('marketplace-register', 'vendor/core/plugins/marketplace/js/customer-register.js', ['jquery']);
+                
+                $shoptype = \Botble\Marketplace\Enums\ShopTypeEnum::labels();
 
                 $form
                     ->addAfter(
@@ -237,7 +246,7 @@ class HookServiceProvider extends ServiceProvider
                         RadioFieldOption::make()
                             ->label(__('Register as'))
                             ->choices(['0' => __('I am a customer'), '1' => __('I am a vendor')])
-                            ->wrapperAttributes(['style' => 'margin-bottom: -1rem !important;'])
+                            ->wrapperAttributes(['style' => 'margin-bottom: -5px !important;'])
                             ->toArray()
                     )
                     ->addAfter(
@@ -298,7 +307,16 @@ class HookServiceProvider extends ServiceProvider
                             ->placeholder(__('Ex: 0943243332'))
                             ->toArray()
                     )
-                    ->addAfter('shop_phone', 'closeVendorWrapper', HtmlField::class, ['html' => '</div>']);
+                    ->addAfter(
+                        'shop_phone',
+                        'shop_category',
+                        SelectField::class,
+                            SelectFieldOption::make()
+                                ->label(__('Are You A ?'))
+                                ->choices([0 => '---Select Your Type---'] + $shoptype)
+                                ->toArray()
+                    )
+                    ->addAfter('shop_category', 'closeVendorWrapper', HtmlField::class, ['html' => '</div>']);
             });
         }
     }

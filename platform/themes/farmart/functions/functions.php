@@ -18,9 +18,11 @@ use Theme\Farmart\Supports\Wishlist;
 
 register_page_template([
     'default' => __('Default'),
+    'default-sidebar' => __('Default with Sidebar'),
     'homepage' => __('Homepage'),
     'full-width' => __('Full Width'),
     'coming-soon' => __('Coming Soon'),
+    'blog-right-sidebar' => __('Blog with Sidebar'),
 ]);
 
 RvMedia::setUploadPathAndURLToPublic()
@@ -49,6 +51,18 @@ register_sidebar([
     'id' => 'footer_sidebar',
     'name' => __('Footer sidebar'),
     'description' => __('Widgets in footer sidebar'),
+]);
+
+register_sidebar([
+    'id' => 'default_page_sidebar',
+    'name' => __('Default Page sidebar'),
+    'description' => __('Widgets in Default Page sidebar'),
+]);
+
+register_sidebar([
+    'id' => 'blog-right-sidebar',
+    'name' => __('Blog with Sidebar'),
+    'description' => __('Blogs with sidebar'),
 ]);
 
 register_sidebar([

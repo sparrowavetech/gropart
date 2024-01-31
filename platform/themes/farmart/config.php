@@ -114,6 +114,12 @@ return [
                         'version' => $version,
                     ],
                 ],
+                'swiper-css' => [
+                    'local' => [
+                        'source' => 'plugins/swiper-bundle.min.css',
+                        'version' => $version,
+                    ],
+                ],
                 'jquery' => [
                     'cdn' => [
                         'source' => '//ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js',
@@ -218,6 +224,13 @@ return [
                         'source' => 'js/main.js',
                         'dependencies' => ['jquery'],
                         'version' => $version,
+                    ],
+                    'container' => 'footer',
+                ],
+                'swiper-js' => [
+                    'local' => [
+                        'source' => 'js/swiper-bundle.min.js',
+                        'dependencies' => ['jquery'],
                     ],
                     'container' => 'footer',
                 ],

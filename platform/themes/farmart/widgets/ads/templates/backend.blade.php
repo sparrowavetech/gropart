@@ -13,17 +13,17 @@
     <div class="mb-3">
         <label class="form-label" for="widget_ads">{{ __('Select Ads') }}</label>
         {!! Form::customSelect(
-            'ads_key',
+            'ads_key[]',
             ['' => __('-- Select --')] +
                 AdsManager::getData(true)->pluck('name', 'key')->toArray(),
-            $config['ads_key'],
-            ['class' => 'form-control select-full'],
+            $config['ads_key'] ?? [],
+            ['class' => 'form-control select-full', 'multiple' => 'multiple'],
         ) !!}
     </div>
 
     <div class="mb-3">
         <label>{{ __('Background') }}</label>
-        {!! Form::mediaImage('background', $config['background']) !!}
+        {!! Form::mediaImage('background', $config['background'] ?? '') !!}
     </div>
 
     <div class="mb-3">
@@ -35,7 +35,7 @@
                 'large' => __('Large'),
                 'medium' => __('Medium'),
             ],
-            $config['size'],
+            $config['size'] ?? 'full-with',
             ['class' => 'form-control select-full'],
         ) !!}
     </div>

@@ -54,10 +54,15 @@ class ResetPasswordForm extends AuthForm
                     ->icon('ti ti-lock')
                     ->toArray()
             )
-            ->submitButton(__('Reset Password'))
+            ->submitButton(__('Reset Password'), 'ti ti-arrow-narrow-right')
             ->add('back_to_login', HtmlField::class, [
                 'html' => sprintf(
-                    '<div class="mt-3 text-center"><a href="%s" class="text-decoration-underline">%s</a></div>',
+                    '<div class="mt-3 text-center"><a href="%s" class="text-decoration-underline"><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-arrow-narrow-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                    <path d="M5 12l14 0"></path>
+                    <path d="M5 13l4 4"></path>
+                    <path d="M5 11l4 -4"></path>
+                  </svg> %s</a></div>',
                     route('customer.login'),
                     __('Back to login page')
                 ),

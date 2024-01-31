@@ -22,7 +22,7 @@
                         <div class="header-countdown row align-items-center justify-content-center gx-2">
                             <div class="ends-text col-auto">
                                 <div class="d-flex align-items-center justify-content-center">
-                                    <span class="svg-icon me-2">
+                                    <span class="svg-icon">
                                         <i class="icon icon-speed-fast"></i>
                                     </span>{{ __('Expires in') }}:
                                 </div>
@@ -56,28 +56,49 @@
                                 [
                                     'breakpoint' => 1400,
                                     'settings' => [
+                                        'slidesToShow' => 6,
+                                    ],
+                                ],
+                                [
+                                    'breakpoint' => 1201,
+                                    'settings' => [
                                         'slidesToShow' => 5,
                                     ],
                                 ],
                                 [
-                                    'breakpoint' => 1199,
-                                    'settings' => [
-                                        'slidesToShow' => 4,
-                                    ],
-                                ],
-                                [
-                                    'breakpoint' => 1024,
-                                    'settings' => [
-                                        'slidesToShow' => 3,
-                                    ],
-                                ],
-                                [
-                                    'breakpoint' => 767,
+                                    'breakpoint' => 1025,
                                     'settings' => [
                                         'arrows' => true,
                                         'dots' => false,
+                                        'slidesToShow' => 4,
+                                        'slidesToScroll' => 4,
+                                    ],
+                                ],
+                                [
+                                    'breakpoint' => 769,
+                                    'settings' => [
+                                        'arrows' => true,
+                                        'dots' => false,
+                                        'slidesToShow' => 3,
+                                        'slidesToScroll' => 3,
+                                    ],
+                                ],
+                                [
+                                    'breakpoint' => 426,
+                                    'settings' => [
+                                        'arrows' => false,
+                                        'dots' => true,
                                         'slidesToShow' => 2,
                                         'slidesToScroll' => 2,
+                                    ],
+                                ],
+                                [
+                                    'breakpoint' => 376,
+                                    'settings' => [
+                                        'arrows' => false,
+                                        'dots' => true,
+                                        'slidesToShow' => 1,
+                                        'slidesToScroll' => 1,
                                     ],
                                 ],
                             ],
