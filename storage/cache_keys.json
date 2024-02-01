@@ -1,7 +1,10 @@
 {
     "Botble\\Ecommerce\\Services\\HandleShippingFeeService": [
         "66d6c800acf0bbfe034c13e9e2145ba3@e08a0c9c7a7fd1657f5945873c2fd372",
-        "66d6c800acf0bbfe034c13e9e2145ba3@aae9ff321a92fe949c15cef21f16f8ef"
+        "66d6c800acf0bbfe034c13e9e2145ba3@aae9ff321a92fe949c15cef21f16f8ef",
+        "66d6c800acf0bbfe034c13e9e2145ba3@0c0726d2b924b388dd31438e90fdc519",
+        "66d6c800acf0bbfe034c13e9e2145ba3@4a908b6210732415b4bda9c3e554f0f3",
+        "66d6c800acf0bbfe034c13e9e2145ba3@6432e254082de3c9b69e12345b29c766"
     ],
     "Botble\\EditLock\\Supports\\EditLock": [
         "8dec79f4f9a41c4523197a63aa465e31@921d084f542659ce181cc278e5eae6c2",
