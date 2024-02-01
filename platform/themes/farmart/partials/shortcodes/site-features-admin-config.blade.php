@@ -3,7 +3,7 @@
     <input type="text" class="form-control" name="title" value="{{ Arr::get($attributes, 'title') }}" placeholder="{{ __('Title') }}" />
 </div>
 
-@for ($i = 1; $i <= 4; $i++)
+@for ($i = 1; $i <= 5; $i++)
 <div class="form-group">
     <label class="control-label">{{ __('Name :number', ['number' => $i]) }}</label>
     <input type="text" class="form-control" name="name_{{ $i }}" value="{{ Arr::get($attributes, 'name_' . $i) }}">

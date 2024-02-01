@@ -47,7 +47,7 @@
                                                 <div class="faq-tab-wrapper">
                                                     <!--<h4 class="faq-title">{{ $faq->question }}</h4>
                                                     <div class="faq-desc">{!! BaseHelper::clean($faq->answer) !!}</div>-->
-                                                    <div class="accordion" id="faq-accordion">
+                                                    <div class="accordion mb-3" id="faq-accordion">
                                                         <div class="card">
                                                             <div class="card-header" id="heading-faq-{{ $prvIndex }}">
                                                                 <h2 class="faq-title m-0">

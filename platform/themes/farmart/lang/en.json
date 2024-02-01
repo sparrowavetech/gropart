@@ -915,5 +915,7 @@
     "when shipping fee less than or equal :amount": "when shipping fee less than or equal :amount",
     "x:quantity": "x:quantity",
     "© :year Your Company. All right reserved.": "© :year Your Company. All right reserved.",
-    "✅ Purchased :time": "✅ Purchased :time"
+    "✅ Purchased :time": "✅ Purchased :time",
+    "I have read " : "Note: By clicking checkout button you are agree that you have read ",
+    "refund and return policy" : "refund and return policy"
 }

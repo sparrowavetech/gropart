@@ -320,7 +320,7 @@
                             {!! apply_filters('ecommerce_checkout_form_after', null, $products) !!}
 
                             <div class="row align-items-center g-3">
-                                <div class="order-2 order-md-1 col-md-6 text-center text-md-start mb-4 mb-md-0">
+                                <div class="order-2 order-md-1 col-md-6 text-center text-md-start mb-md-0">
                                     <a class="back-to-cart-btn text-danger" href="{{ route('public.cart') }}">
                                         <x-core::icon name="ti ti-arrow-narrow-left" />
                                         <span class="d-inline-block back-to-cart">{{ __('Back to cart') }}</span>
@@ -330,11 +330,11 @@
                                 </div>
                                 <div class="order-1 order-md-2 col-md-6">
                                     @if (EcommerceHelper::isValidToProcessCheckout())
-                                        <button
+                                        <button id="checkoutBtn"
                                             class="btn payment-checkout-btn payment-checkout-btn-step float-end"
                                             data-processing-text="{{ __('Processing. Please wait...') }}"
                                             data-error-header="{{ __('Error') }}"
-                                            type="submit"
+                                            type="submit" disabled
                                         >
                                             {{ __('Checkout') }}
                                         </button>
@@ -344,6 +344,11 @@
                                         </span>
                                     @endif
                                 </div>
+                            </div>
+                            <div class="ps-0 mt-2">
+                                <p class="m-0 fs-6 text-default text-decoration-underline">
+                                    <em>({{ __('I have read ') }} <a target="_BLANK" title="{{ _('refund and return policy') }}" href="{{ url(theme_option('ecommerce_checkout_policy_url')) }}"><strong>{{ _('refund and return policy') }}</strong></a>)</em>
+                                </p>
                             </div>
                         </div>
                     </div>

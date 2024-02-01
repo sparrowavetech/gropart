@@ -1,10 +1,17 @@
-<div class="widget-site-features py-5">
+@php
+    $checkHomePage = false;
+    $currentRoute = \Illuminate\Support\Facades\Route::currentRouteName();
+    if ($currentRoute === 'public.index') {
+        $checkHomePage = true;
+    }
+@endphp
+<div class="widget-site-features @if($checkHomePage) py-5 @else pt-5 @endif border-top mt-5">
     <div class="container-xxxl">
         <!--<div class="row align-items-center mb-2 widget-header">
             <h2 class="col-auto mb-0 py-2">{!! BaseHelper::clean($shortcode->title) !!}</h2>
         </div>-->
         <div class="row">
-            @for ($i = 1; $i <= 4; $i++)
+            @for ($i = 1; $i <= 5; $i++)
                 @if ($shortcode->{'name_' . $i} && $shortcode->{'subtitle_' . $i} && $shortcode->{'icon_' . $i})
                     <div class="col-sm-3 py-2">
                         <div class="site-info__item d-flex align-items-center">

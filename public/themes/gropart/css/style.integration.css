@@ -1,3 +1,12 @@
+.pagination-numeric-short {
+	margin-top: 0;
+  	margin-bottom: 80px;
+}
+.faq-title .btn { 
+    font-size: 16px;
+    font-weight: 600;
+    color: #000;
+}
 .checkout__coupon-section {
     position: relative;
 }
@@ -276,7 +285,7 @@ a{ color: var(--primary-color); }
 .vendor-store-info { color: #000; }
 .vendor-info { background-color: #f5f5f5; border-radius: 10px; }
 #product-faqs #faq-accordion .card .collapse.show:last-child { border-bottom: 1px solid rgba(0,0,0,.125); }
-#footer .footer-widgets .border-top { padding-top: 2rem !important; padding-bottom: 1rem !important; }
+#footer .footer-widgets .border-top { padding-top: 0rem !important; padding-bottom: 1rem !important; border-top: none !important; }
 #footer .border-top { padding-bottom: 0.25rem !important; padding-top: 0.25rem !important; }
 #footer .footer-widgets .row.border-top .col.mb-5 { margin-bottom: 0 !important; }
 .verified-store { max-width:15px; }
