@@ -1,5 +1,6 @@
 {
-    "Botble\\EditLock\\Supports\\EditLock": [
-        "8dec79f4f9a41c4523197a63aa465e31@91eaf0fba578d92c4ad16b7ec0f673e2"
+    "Botble\\Ecommerce\\Services\\HandleShippingFeeService": [
+        "66d6c800acf0bbfe034c13e9e2145ba3@e08a0c9c7a7fd1657f5945873c2fd372",
+        "66d6c800acf0bbfe034c13e9e2145ba3@aae9ff321a92fe949c15cef21f16f8ef"
     ]
 }

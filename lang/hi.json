@@ -854,5 +854,7 @@
     "visit our home page": "visit our home page",
     "when shipping fee less than or equal": "when shipping fee less than or equal",
     "© :year Your Company. All right reserved.": "© :year Your Company. All right reserved.",
-    "✅ Purchased :time": "✅ Purchased :time"
+    "✅ Purchased :time": "✅ Purchased :time",
+    "I have read " : "Note: By clicking checkout button you are agree that you have read ",
+    "refund and return policy" : "refund and return policy"
 }
