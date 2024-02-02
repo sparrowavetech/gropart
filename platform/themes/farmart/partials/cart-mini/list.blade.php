@@ -31,7 +31,7 @@
 @if (Cart::instance('cart')->isNotEmpty() &&
         Cart::instance('cart')->products()->count())
     <div class="control-buttons">
-        @if (EcommerceHelper::isTaxEnabled())
+        @if (EcommerceHelper::isTaxEnabled() && setting('ecommerce_display_product_price_including_taxes') != 1)
             <div class="mini-cart__total">
                 <strong>{{ __('Sub Total') }}:</strong>
                 <span class="price-amount">

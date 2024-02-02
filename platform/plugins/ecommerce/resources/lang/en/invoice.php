@@ -13,9 +13,11 @@ return [
         'amount' => 'Amount',
     ],
     'detail' => [
+        'sku'         => 'SKU',
+        'seller_signature' => 'Seller Signature',
         'invoice_for' => 'Invoice For',
         'invoice_to' => 'Invoice To',
-        'tax_id' => 'Tax ID',
+        'tax_id' => 'GSTIN',
         'code' => 'Invoice Code',
         'issue_at' => 'Issue At',
         'description' => 'Description',

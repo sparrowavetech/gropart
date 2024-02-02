@@ -6,6 +6,8 @@ use Botble\Base\Forms\FormAbstract;
 use Botble\Base\Models\BaseModel;
 use Botble\Marketplace\Forms\Concerns\HasSubmitButton;
 use Botble\Marketplace\Http\Requests\TaxInformationSettingRequest;
+use Botble\Base\Forms\FieldOptions\MediaImageFieldOption;
+use Botble\Base\Forms\Fields\MediaImageField;
 use Illuminate\Support\Arr;
 
 class TaxInformationForm extends FormAbstract
@@ -40,6 +42,10 @@ class TaxInformationForm extends FormAbstract
                 'attr' =>
                     ['placeholder' => __('Address'),
                 ],
+            ])
+            ->add('tax_info[signature_image]', 'mediaImage', [
+                'label' => trans('plugins/marketplace::store.forms.invoice_signature_image'),
+                'value' => Arr::get($customer->tax_info, 'signature_image'),
             ])
             ->addSubmitButton(__('Save settings'));
     }

@@ -9,7 +9,7 @@ class ProductImportRequest extends ProductRequest
         $rules = parent::rules();
 
         $rules['barcode'] = [
-            'nullable',
+            'required',
             'string',
             'max:50',
         ];

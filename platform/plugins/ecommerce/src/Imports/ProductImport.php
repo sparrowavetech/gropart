@@ -747,7 +747,7 @@ class ProductImport implements
         Arr::set($row, $key, $value);
 
         if ($value && $key == 'barcode') {
-            if ($barcode = $this->barcodes->firstWhere('value', $value)) {
+            /*if ($barcode = $this->barcodes->firstWhere('value', $value)) {
                 if (method_exists($this, 'onFailure')) {
                     $failures[] = new Failure(
                         $this->rowCurrent,
@@ -764,7 +764,8 @@ class ProductImport implements
                 }
             } else {
                 $this->barcodes->push(['row' => $this->rowCurrent, 'value' => $value]);
-            }
+            }*/
+            $this->barcodes->push(['row' => $this->rowCurrent, 'value' => $value]);
         }
 
         return $this;

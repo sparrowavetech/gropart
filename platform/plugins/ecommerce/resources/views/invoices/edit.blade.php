@@ -211,7 +211,7 @@
                                 <x-core::table.body.row>
                                     <x-core::table.body.cell colspan="4"></x-core::table.body.cell>
                                     <x-core::table.body.cell>
-                                        {{ trans('plugins/ecommerce::invoice.detail.quantity') }}
+                                        {{ trans('plugins/ecommerce::invoice.detail.total_quantity') }}
                                     </x-core::table.body.cell>
                                     <x-core::table.body.cell class="fw-bold">
                                         {{ number_format($invoice->items->sum('qty')) }}
@@ -220,7 +220,7 @@
                                 <x-core::table.body.row>
                                     <x-core::table.body.cell colspan="4"></x-core::table.body.cell>
                                     <x-core::table.body.cell>
-                                        {{ trans('plugins/ecommerce::invoice.detail.sub_total') }}
+                                        {{ trans('plugins/ecommerce::invoice.detail.sub_amount') }}
                                     </x-core::table.body.cell>
                                     <x-core::table.body.cell class="fw-bold">
                                         {{ format_price($invoice->sub_total) }}
@@ -233,35 +233,26 @@
                                             {{ trans('plugins/ecommerce::invoice.detail.tax') }}
                                         </x-core::table.body.cell>
                                         <x-core::table.body.cell class="fw-bold">
-                                            {{ format_price($invoice->tax_amount) }}
+                                            <span class="text-success">(+) {{ format_price($invoice->tax_amount) }}</span>
                                         </x-core::table.body.cell>
                                     </x-core::table.body.row>
                                 @endif
                                 <x-core::table.body.row>
                                     <x-core::table.body.cell colspan="4"></x-core::table.body.cell>
                                     <x-core::table.body.cell>
-                                        {{ trans('plugins/ecommerce::invoice.detail.shipping_fee') }}
-                                    </x-core::table.body.cell>
-                                    <x-core::table.body.cell class="fw-bold">
-                                        {{ format_price($invoice->shipping_amount) }}
-                                    </x-core::table.body.cell>
-                                </x-core::table.body.row>
-                                <x-core::table.body.row>
-                                    <x-core::table.body.cell colspan="4"></x-core::table.body.cell>
-                                    <x-core::table.body.cell>
                                         {{ trans('plugins/ecommerce::invoice.detail.discount') }}
                                     </x-core::table.body.cell>
                                     <x-core::table.body.cell class="fw-bold">
-                                        {{ format_price($invoice->discount_amount) }}
+                                        <span class="text-danger">(-) {{ format_price($invoice->discount_amount) }}</span>
                                     </x-core::table.body.cell>
                                 </x-core::table.body.row>
                                 <x-core::table.body.row>
                                     <x-core::table.body.cell colspan="4"></x-core::table.body.cell>
                                     <x-core::table.body.cell>
-                                        {{ trans('plugins/ecommerce::invoice.detail.grand_total') }}
+                                        {{ trans('plugins/ecommerce::invoice.detail.shipping_fee') }}
                                     </x-core::table.body.cell>
                                     <x-core::table.body.cell class="fw-bold">
-                                        {{ format_price($invoice->amount) }}
+                                        <span class="text-success">(+) {{ format_price($invoice->shipping_amount) }}</span>
                                     </x-core::table.body.cell>
                                 </x-core::table.body.row>
                                 <x-core::table.body.row>
@@ -270,7 +261,7 @@
                                         {{ trans('plugins/ecommerce::invoice.total_amount') }}
                                     </x-core::table.body.cell>
                                     <x-core::table.body.cell class="fw-bold">
-                                        <h3 class="mt-0 mb-0 text-danger">{{ format_price($invoice->amount) }}</h3>
+                                        <h3 class="mt-0 mb-0 text-warning">{{ format_price($invoice->amount) }}</h3>
                                     </x-core::table.body.cell>
                                 </x-core::table.body.row>
                             </x-core::table.footer>

@@ -10,7 +10,7 @@ return [
     'city' => 'City',
     'address' => 'Address',
     'company' => 'Company',
-    'tax_id' => 'Tax ID',
+    'tax_id' => 'GSTIN',
     'store_address' => 'Store address',
     'store_phone' => 'Store phone',
     'order_id' => 'Order ID',

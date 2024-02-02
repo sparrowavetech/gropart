@@ -127,7 +127,7 @@
                                 <x-core::table :hover="false" :striped="false" class="table-borderless text-end">
                                     <x-core::table.body>
                                         <x-core::table.body.row>
-                                            <x-core::table.body.cell>{{ trans('plugins/ecommerce::order.quantity') }}</x-core::table.body.cell>
+                                            <x-core::table.body.cell>{{ trans('plugins/ecommerce::order.total_quantity') }}</x-core::table.body.cell>
                                             <x-core::table.body.cell>
                                                 {{ number_format($order->products->sum('qty')) }}
                                             </x-core::table.body.cell>
@@ -139,21 +139,31 @@
                                                 {{ format_price($order->sub_total) }}
                                             </x-core::table.body.cell>
                                         </x-core::table.body.row>
+                                        @if (EcommerceHelper::isTaxEnabled())
+                                            <x-core::table.body.row>
+                                                <x-core::table.body.cell>
+                                                    {{ trans('plugins/ecommerce::order.tax') }}
+                                                </x-core::table.body.cell>
+                                                <x-core::table.body.cell>
+                                                    <span class="text-success">(+) {{ format_price($order->tax_amount) }}</span>
+                                                </x-core::table.body.cell>
+                                            </x-core::table.body.row>
+                                        @endif
                                         <x-core::table.body.row>
                                             <x-core::table.body.cell>
                                                 {{ trans('plugins/ecommerce::order.discount') }}
                                                 @if ($order->coupon_code)
-                                                    <p class="mb-0">
+                                                    <p class="mb-0 text-success fw-bold">
                                                         {!! trans('plugins/ecommerce::order.coupon_code', [
                                                             'code' => Html::tag('strong', $order->coupon_code)->toHtml(),
                                                         ]) !!}
                                                     </p>
                                                 @elseif ($order->discount_description)
-                                                    <p class="mb-0">{{ $order->discount_description }}</p>
+                                                    <p class="mb-0 text-success"><em>{{ $order->discount_description }}</em></p>
                                                 @endif
                                             </x-core::table.body.cell>
                                             <x-core::table.body.cell>
-                                                {{ format_price($order->discount_amount) }}
+                                                <span class="text-danger">(-) {{ format_price($order->discount_amount) }}</span>
                                             </x-core::table.body.cell>
                                         </x-core::table.body.row>
                                         <x-core::table.body.row>
@@ -163,19 +173,9 @@
                                                 <span class="small d-block">{{ $weight }} {{ ecommerce_weight_unit(true) }}</span>
                                             </x-core::table.body.cell>
                                             <x-core::table.body.cell>
-                                                {{ format_price($order->shipping_amount) }}
+                                                <span class="text-success">(+) {{ format_price($order->shipping_amount) }}</span>
                                             </x-core::table.body.cell>
                                         </x-core::table.body.row>
-                                        @if (EcommerceHelper::isTaxEnabled())
-                                            <x-core::table.body.row>
-                                                <x-core::table.body.cell>
-                                                    {{ trans('plugins/ecommerce::order.tax') }}
-                                                </x-core::table.body.cell>
-                                                <x-core::table.body.cell>
-                                                    {{ format_price($order->tax_amount) }}
-                                                </x-core::table.body.cell>
-                                            </x-core::table.body.row>
-                                        @endif
                                         <x-core::table.body.row>
                                             <x-core::table.body.cell>
                                                 {{ trans('plugins/ecommerce::order.total_amount') }}

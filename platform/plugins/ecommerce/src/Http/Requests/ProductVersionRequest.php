@@ -29,10 +29,10 @@ class ProductVersionRequest extends Request
             'product_files_external.*.link' => 'required|url|max:400',
             'product_files_external.*.size' => 'nullable|numeric|min:0|max:100000000',
             'barcode' => [
-                'nullable',
+                'required',
                 'max:50',
                 'string',
-                Rule::unique('ec_products')->ignore($this->input('product_id')),
+                //Rule::unique('ec_products')->ignore($this->input('product_id')),
             ],
             'cost_per_item' => 'nullable|numeric|min:0|max:' . $this->input('price'),
             'attribute_sets' => 'nullable|array',

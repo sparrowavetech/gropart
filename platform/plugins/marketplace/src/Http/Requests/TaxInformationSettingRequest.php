@@ -13,6 +13,7 @@ class TaxInformationSettingRequest extends Request
             'tax_info.business_name' => ['nullable', 'string', 'max:255'],
             'tax_info.tax_id' => ['nullable', 'string', 'max:255'],
             'tax_info.address' => ['nullable', 'string', 'max:255'],
+            'tax_info.signature_image' => ['nullable', 'string', 'max:255'],
         ];
     }
 }

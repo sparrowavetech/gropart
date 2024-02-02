@@ -20,7 +20,7 @@ return [
         'company_state' => 'The company state',
         'company_city' => 'The company city',
         'company_zipcode' => 'The company zipcode',
-        'company_tax_id' => 'The company tax ID',
+        'company_tax_id' => 'The company GSTIN',
         'payment_method' => 'The payment method',
         'payment_status' => 'The payment status',
         'payment_description' => 'The payment description',

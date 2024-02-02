@@ -23,6 +23,9 @@ use Botble\Ecommerce\Forms\Fronts\Auth\RegisterForm;
 use Botble\Ecommerce\Models\Customer;
 use Botble\Ecommerce\Models\Discount;
 use Botble\Ecommerce\Models\Invoice;
+use Botble\Location\Models\State;
+use Botble\Location\Models\City;
+use Botble\Location\Models\Country;
 use Botble\Ecommerce\Models\Order;
 use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Tables\CustomerTable;
@@ -36,6 +39,10 @@ use Botble\Marketplace\Models\Revenue;
 use Botble\Marketplace\Models\Store;
 use Botble\Marketplace\Models\VendorInfo;
 use Botble\Marketplace\Models\Withdrawal;
+use Botble\Marketplace\Repositories\Interfaces\StoreInterface;
+use Botble\Marketplace\Repositories\Interfaces\VendorInfoInterface;
+use Botble\Marketplace\Repositories\Interfaces\WithdrawalInterface;
+use Botble\Slug\Models\Slug;
 use Botble\Media\Facades\RvMedia;
 use Botble\Slug\Facades\SlugHelper;
 use Botble\Table\Abstracts\TableAbstract;
@@ -203,25 +210,51 @@ class HookServiceProvider extends ServiceProvider
 
                 $store = $invoice->reference->store;
 
+                $storesCityData = City::where('id', $store->city)->first();
+                $storesStateData = State::where('id', $store->state)->first();
+                $storesCountryData = Country::where('id', $store->country)->first();
+
+                $storesCity = $storesCityData->name;
+                $storesState = $storesStateData->name;
+                $storesCountry = $storesCountryData->name;
+
+                $storesTaxInfo = VendorInfo::where('customer_id', $store->customer_id)->first();
+
+                $taxInfoArray = $storesTaxInfo->tax_info;
+
+                $storeTaxId = isset($taxInfoArray['tax_id']) ? $taxInfoArray['tax_id'] : null;
+                $storeSignatureImagePath = isset($taxInfoArray['signature_image']) ? $taxInfoArray['signature_image'] : null;
+
                 if (! $store || ! $store->id) {
                     return $variables;
                 }
 
                 if ($store->logo) {
-                    $variables['logo_full_path'] = RvMedia::getRealPath($store->logo);
+                    //$variables['logo_full_path'] = RvMedia::getRealPath($store->logo);
                     $variables['company_logo_full_path'] = RvMedia::getRealPath($store->logo);
                 }
 
-                if ($store->name) {
-                    $variables['site_title'] = $store->name;
+                $storeSignatureImage = null; // Initialize with null
+
+                if ($storeSignatureImagePath !== null) {
+                    $storeSignatureImage = RvMedia::getRealPath($storeSignatureImagePath);
                 }
+
+                /*if ($store->name) {
+                    $variables['site_title'] = $store->name;
+                }*/
 
                 return array_merge($variables, [
                     'company_name' => $store->name,
                     'company_address' => $store->address,
+                    'company_state' => $storesState,
+                    'company_city' => $storesCity,
+                    'company_country' => $storesCountry,
+                    'company_zipcode' => $store->zip_code,
                     'company_phone' => $store->phone,
                     'company_email' => $store->email,
-                    'company_tax_id' => $store->tax_id,
+                    'company_signature_image' => $storeSignatureImage,
+                    'company_tax_id' => $storeTaxId,
                 ]);
             }, 45, 2);
 
@@ -235,7 +268,7 @@ class HookServiceProvider extends ServiceProvider
                 Theme::asset()
                     ->container('footer')
                     ->add('marketplace-register', 'vendor/core/plugins/marketplace/js/customer-register.js', ['jquery']);
-                
+
                 $shoptype = \Botble\Marketplace\Enums\ShopTypeEnum::labels();
 
                 $form

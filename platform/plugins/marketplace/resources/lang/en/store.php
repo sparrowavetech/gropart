@@ -8,6 +8,7 @@ return [
     'forms' => [
         'logo' => 'Logo',
         'email' => 'Email',
+        'invoice_signature_image' => 'Upload Signature for Invoice',
         'email_placeholder' => 'Ex: name@store.com',
         'phone' => 'Phone',
         'phone_placeholder' => 'Phone',

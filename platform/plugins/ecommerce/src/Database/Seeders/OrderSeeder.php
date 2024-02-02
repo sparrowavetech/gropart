@@ -148,6 +148,7 @@ class OrderSeeder extends BaseSeeder
                         'tax_amount' => $groupedProduct->tax_amount,
                         'options' => [
                             'sku' => $groupedProduct->sku,
+                            'barcode' => $groupedProduct->barcode,
                             'attributes' => $groupedProduct->is_variation ? $groupedProduct->variation_attributes : '',
                         ],
                         'product_type' => $groupedProduct->product_type,

@@ -900,6 +900,7 @@ class PublicCheckoutController extends BaseController
                     'ec_products.start_date',
                     'ec_products.end_date',
                     'ec_products.sku',
+                    'ec_products.barcode',
                     'ec_products.order',
                     'ec_products.created_at',
                     'ec_products.is_variation',

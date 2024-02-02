@@ -148,6 +148,7 @@ return [
     ],
     'invoice' => [
         'name' => 'Invoices',
+        'tax_id' => 'Seller GSTIN',
         'description' => 'View and update your invoices settings',
         'company_settings' => 'Company settings',
         'company_settings_description' => 'Settings Company information for invoicing',
@@ -158,7 +159,7 @@ return [
             'company_email' => 'Company email',
             'company_phone' => 'Company phone',
             'company_logo' => 'Company logo',
-            'company_tax_id' => 'Company tax ID',
+            'company_tax_id' => 'Company GSTIN',
             'invoice_code_prefix' => 'Invoice code prefix',
             'using_custom_font_for_invoice' => 'Using custom font for invoice',
             'invoice_font_family' => 'Invoice font family (Only work for Latin language)',

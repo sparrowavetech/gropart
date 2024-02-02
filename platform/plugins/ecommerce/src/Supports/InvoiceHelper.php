@@ -92,7 +92,8 @@ class InvoiceHelper
                 'sub_total' => $orderProduct->price * $orderProduct->qty,
                 'tax_amount' => $orderProduct->tax_amount,
                 'discount_amount' => 0,
-                'amount' => $orderProduct->price * $orderProduct->qty + $orderProduct->tax_amount,
+                //'amount' => $orderProduct->price * $orderProduct->qty + $orderProduct->tax_amount,
+                'amount' => ($orderProduct->price * $orderProduct->qty) + ($orderProduct->tax_amount * $orderProduct->qty),
                 'options' => array_merge(
                     $orderProduct->options,
                     $orderProduct->product_options_implode ? [
@@ -178,7 +179,13 @@ class InvoiceHelper
 
     public function downloadInvoice(Invoice $invoice): Response
     {
-        return $this->makeInvoicePDF($invoice)->download(sprintf('invoice-%s.pdf', $invoice->code));
+        //return $this->makeInvoicePDF($invoice)->download(sprintf('invoice-%s.pdf', $invoice->code));
+
+        $pdf = $this->makeInvoicePDF($invoice);
+
+        return response($pdf->output())
+        ->header('Content-Type', 'application/pdf')
+        ->header('Content-Disposition', sprintf('inline; filename="invoice-%s.pdf"', $invoice->code));
     }
 
     public function streamInvoice(Invoice $invoice): Response
@@ -225,6 +232,7 @@ class InvoiceHelper
         $country = EcommerceHelperFacade::getCountryNameById($this->getCompanyCountry());
         $state = $this->getCompanyState();
         $city = $this->getCompanyCity();
+        $zipcode = get_ecommerce_setting('company_zipcode_for_invoicing') ?: get_ecommerce_setting('store_zip_code');
 
         if (! $companyAddress) {
             $companyAddress = implode(', ', array_filter([
@@ -232,19 +240,27 @@ class InvoiceHelper
                 $city,
                 $state,
                 $country,
+                $zipcode,
             ]));
         }
 
         $companyPhone = get_ecommerce_setting('company_phone_for_invoicing') ?: get_ecommerce_setting('store_phone');
         $companyEmail = get_ecommerce_setting('company_email_for_invoicing') ?: get_ecommerce_setting('store_email');
-        $companyTaxId = get_ecommerce_setting('company_tax_id_for_invoicing') ?: get_ecommerce_setting(
-            'store_vat_number'
-        );
+        $companyTaxId = get_ecommerce_setting('company_tax_id_for_invoicing') ?: get_ecommerce_setting('store_vat_number');
 
         $invoice->loadMissing(['items', 'reference']);
 
+        $storeStateId = setting('ecommerce_store_state', 0);
+
+        if ($invoice->reference && $invoice->reference->store_id) {
+            $storeStateId = $invoice->reference->store->state;
+        }
+
         $data = [
             'invoice' => $invoice->toArray(),
+            'toState' => $invoice->reference && $invoice->reference->address ? $invoice->reference->address->state : null,
+            'fromState'=> $storeStateId,
+            'isIgst' => $invoice->reference && $invoice->reference->address && $invoice->reference->address->state !== $storeStateId ? true : false,
             'logo' => $logo,
             'logo_full_path' => RvMedia::getRealPath($logo),
             'site_title' => theme_option('site_title'),
@@ -254,13 +270,12 @@ class InvoiceHelper
             'company_country' => $country,
             'company_state' => $state,
             'company_city' => $city,
-            'company_zipcode' => get_ecommerce_setting('company_zipcode_for_invoicing') ?: get_ecommerce_setting(
-                'store_zip_code'
-            ),
+            'company_zipcode' => $zipcode,
             'company_phone' => $companyPhone,
             'company_email' => $companyEmail,
             'company_tax_id' => $companyTaxId,
             'total_quantity' => $invoice->items->sum('qty'),
+            'total_price' => $invoice->items->sum('price'),
             'payment_description' => $paymentDescription,
             'is_tax_enabled' => EcommerceHelperFacade::isTaxEnabled(),
             'settings' => [

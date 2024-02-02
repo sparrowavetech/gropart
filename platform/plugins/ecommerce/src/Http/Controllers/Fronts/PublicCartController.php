@@ -13,8 +13,13 @@ use Botble\Ecommerce\Models\Discount;
 use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Services\HandleApplyCouponService;
 use Botble\Ecommerce\Services\HandleApplyPromotionsService;
+use Botble\Support\Http\Requests\Request;
+use Illuminate\Http\RedirectResponse;
 use Botble\SeoHelper\Facades\SeoHelper;
 use Botble\Theme\Facades\Theme;
+use Exception;
+use Response;
+use Illuminate\Routing\Controller;
 use Illuminate\Support\Arr;
 use Throwable;
 
