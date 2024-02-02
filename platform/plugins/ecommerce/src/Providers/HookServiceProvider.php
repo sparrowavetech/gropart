@@ -837,6 +837,18 @@ class HookServiceProvider extends ServiceProvider
                         ],
                     ],
                     [
+                        'id' => 'ecommerce_checkout_policy_url',
+                        'type' => 'text',
+                        'label' => trans('plugins/ecommerce::ecommerce.theme_options.checkout_policy_url'),
+                        'attributes' => [
+                            'name' => 'ecommerce_checkout_policy_url',
+                            'value' => null,
+                            'options' => [
+                                'class' => 'form-control',
+                            ],
+                        ],
+                    ],
+                    [
                         'id' => 'ecommerce_term_and_privacy_policy_url',
                         'type' => 'text',
                         'label' => trans('plugins/ecommerce::ecommerce.theme_options.term_and_privacy_policy_url'),
