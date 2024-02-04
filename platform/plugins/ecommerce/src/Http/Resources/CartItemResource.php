@@ -16,7 +16,14 @@ class CartItemResource extends JsonResource
     public function toArray($request): array
     {
         $originalPrice = Arr::get($this->options, 'original_price');
-        $taxPrice = $this->price * Arr::get($this->options, 'taxRate') / 100;
+
+        if(setting('ecommerce_display_product_price_including_taxes') == 1){
+            $withoutTaxPrice = ($this->price * 100) / (100 + Arr::get($this->options, 'taxRate'));
+            $taxPrice = $this->price - $withoutTaxPrice;
+        } else {
+            $taxPrice = $this->price * Arr::get($this->options, 'taxRate') / 100;
+        }
+
         $totalPrice = $this->price * $this->qty;
 
         $options = collect(Arr::get($this->options, 'options.optionCartValue', []))->map(function ($item) use ($originalPrice) {

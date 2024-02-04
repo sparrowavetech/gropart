@@ -90,10 +90,11 @@ class InvoiceHelper
                 'qty' => $orderProduct->qty,
                 'price' => $orderProduct->price,
                 'sub_total' => $orderProduct->price * $orderProduct->qty,
-                'tax_amount' => $orderProduct->tax_amount,
+                //'tax_amount' => $orderProduct->tax_amount,
+                'tax_amount' => $orderProduct->tax_amount * $orderProduct->qty,
                 'discount_amount' => 0,
                 //'amount' => $orderProduct->price * $orderProduct->qty + $orderProduct->tax_amount,
-                'amount' => ($orderProduct->price * $orderProduct->qty) + ($orderProduct->tax_amount * $orderProduct->qty),
+                'amount' => $orderProduct->price * $orderProduct->qty,
                 'options' => array_merge(
                     $orderProduct->options,
                     $orderProduct->product_options_implode ? [

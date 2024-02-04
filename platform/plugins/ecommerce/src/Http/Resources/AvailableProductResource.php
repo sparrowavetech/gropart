@@ -18,7 +18,15 @@ class AvailableProductResource extends JsonResource
         if (is_plugin_active('marketplace') && $this->original_product->store_id && $this->original_product->store->name) {
             $name .= ' (' . $this->original_product->store->name . ')';
         }
-        $taxPrice = $this->front_sale_price * $this->total_taxes_percentage / 100;
+
+        if(setting('ecommerce_display_product_price_including_taxes') == 1){
+            $withoutTaxPrice = ($this->front_sale_price * 100) / (100 + $this->total_taxes_percentage);
+            $taxPrice = $this->front_sale_price - $withoutTaxPrice;
+            $finalPrice = $this->front_sale_price;
+        } else {
+            $taxPrice = $this->front_sale_price * $this->total_taxes_percentage / 100;
+            $finalPrice = $this->front_sale_price + $taxPrice;
+        }
 
         return [
             'id' => $this->id,
@@ -33,7 +41,7 @@ class AvailableProductResource extends JsonResource
             'stock_status_html' => $this->stock_status_html,
             'price' => $this->front_sale_price,
             'formatted_price' => format_price($this->front_sale_price),
-            'final_price' => $this->front_sale_price + $taxPrice,
+            'final_price' => $finalPrice,
             'original_price' => $this->original_price,
             'tax_price' => $taxPrice,
             'total_taxes_percentage' => $this->total_taxes_percentage,
