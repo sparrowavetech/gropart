@@ -68,6 +68,7 @@ return array(
     'Spatie\\FlareClient\\' => array($vendorDir . '/spatie/flare-client-php/src'),
     'Spatie\\DataTransferObject\\' => array($vendorDir . '/spatie/data-transfer-object/src'),
     'Spatie\\Backtrace\\' => array($vendorDir . '/spatie/backtrace/src'),
+    'Skillcraft\\Referral\\Tests\\' => array($baseDir . '/platform/plugins/sc-referral/tests'),
     'Shalvah\\Upgrader\\' => array($vendorDir . '/shalvah/upgrader/src'),
     'Shalvah\\Clara\\' => array($vendorDir . '/shalvah/clara/src'),
     'Sample\\' => array($vendorDir . '/paypal/paypal-checkout-sdk/samples'),

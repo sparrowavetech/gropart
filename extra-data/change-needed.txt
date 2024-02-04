@@ -8,13 +8,17 @@ with all language list default, then this pop up should not come again, should o
 ---------------------------------------------------------------------------------------------------------------------------
 
 Add a notice to vendor to complete his profile before adding product
-
 Need to make Module for Seller Invoice in Backend
+Commision Fee+GST
+Platform Fee+GST
+Shipping Cost+GST
+Signature Upload for Seller Invoice
+
 
 Add Tax in all products
 Add Hindi Language in all products
 
 -----------------------------------------------------------------------------------------------------------------------------
 
-Need to fix create order total and tax calculation in admin
+Need to fix create order total and tax calculation in admin - botble team
 Shop type required condition not working while register as vendor
