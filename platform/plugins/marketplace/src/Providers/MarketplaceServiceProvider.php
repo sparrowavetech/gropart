@@ -2,6 +2,7 @@
 
 namespace Botble\Marketplace\Providers;
 
+use Illuminate\Support\Facades\Auth;
 use Botble\ACL\Models\User;
 use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Facades\EmailHandler;
@@ -168,6 +169,9 @@ class MarketplaceServiceProvider extends ServiceProvider
         });
 
         DashboardMenu::for('vendor')->beforeRetrieving(function () {
+            $customerID = Auth::guard('customer')->user()->id;
+            $isManageShippingEnabled = Store::where('customer_id', $customerID)->value('is_manage_shipping');
+
             DashboardMenu::make()
                 ->registerItem([
                     'id' => 'marketplace.vendor.dashboard',
@@ -243,7 +247,7 @@ class MarketplaceServiceProvider extends ServiceProvider
                         'icon' => 'ti ti-reload',
                     ]);
                 })
-                ->when(MarketplaceHelper::allowVendorManageShipping(), function (DashboardMenuSupport $dashboardMenu) {
+                ->when(MarketplaceHelper::allowVendorManageShipping() && $isManageShippingEnabled, function (DashboardMenuSupport $dashboardMenu) {
                     return $dashboardMenu->registerItem([
                         'id' => 'marketplace.vendor.shipments',
                         'priority' => 3,

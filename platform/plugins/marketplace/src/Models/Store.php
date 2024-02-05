@@ -44,6 +44,7 @@ class Store extends BaseModel
         'status',
         'company',
         'zip_code',
+        'is_manage_shipping',
         'is_verified',
         'shop_category'
     ];

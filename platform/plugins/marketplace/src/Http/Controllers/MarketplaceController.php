@@ -69,6 +69,22 @@ class MarketplaceController extends BaseController
             $settingStore->set($key, $settingValue);
         }
 
+        foreach ($filtered as $key1 => $settingValue1) {
+            if ($key1 == $settingKey . 'default_platform_fee') {
+                $settingValue1 = $settingValue1 < 0 ? 0 : min($settingValue1, 100);
+            }
+
+            $settingStore->set($key1, $settingValue1);
+        }
+
+        foreach ($filtered as $key2 => $settingValue2) {
+            if ($key2 == $settingKey . 'default_fee_tax') {
+                $settingValue2 = $settingValue2 < 0 ? 0 : min($settingValue2, 100);
+            }
+
+            $settingStore->set($key2, $settingValue2);
+        }
+
         $settingStore->save();
 
         if ($preVerifyVendor != MarketplaceHelper::getSetting('verify_vendor', 1)) {

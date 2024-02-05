@@ -9,6 +9,8 @@ use Botble\Marketplace\Facades\MarketplaceHelper;
 use Botble\Marketplace\Http\Requests\MarketPlaceSettingFormRequest;
 use Botble\Marketplace\Models\Store;
 use Botble\Setting\Forms\SettingForm;
+use Botble\Base\Forms\FieldOptions\MediaImageFieldOption;
+use Botble\Base\Forms\Fields\MediaImageField;
 
 class MarketplaceSettingForm extends SettingForm
 {
@@ -34,9 +36,25 @@ class MarketplaceSettingForm extends SettingForm
             ->setSectionDescription(trans('plugins/marketplace::marketplace.settings.description'))
             ->setValidatorClass(MarketPlaceSettingFormRequest::class)
             ->contentOnly()
+            ->add('default_platform_fee', 'number', [
+                'label' => trans('plugins/marketplace::marketplace.settings.default_platform_fee'),
+                'value' => MarketplaceHelper::getSetting('default_platform_fee', 0),
+                'attr' => [
+                    'min' => 0,
+                    'max' => 100,
+                ],
+            ])
             ->add('fee_per_order', 'number', [
                 'label' => trans('plugins/marketplace::marketplace.settings.default_commission_fee'),
                 'value' => MarketplaceHelper::getSetting('fee_per_order', 0),
+                'attr' => [
+                    'min' => 0,
+                    'max' => 100,
+                ],
+            ])
+            ->add('default_fee_tax', 'number', [
+                'label' => trans('plugins/marketplace::marketplace.settings.default_fee_tax'),
+                'value' => MarketplaceHelper::getSetting('default_fee_tax', 0),
                 'attr' => [
                     'min' => 0,
                     'max' => 100,
@@ -57,6 +75,10 @@ class MarketplaceSettingForm extends SettingForm
             ->add('fee_withdrawal', 'number', [
                 'label' => trans('plugins/marketplace::marketplace.settings.fee_withdrawal'),
                 'value' => MarketplaceHelper::getSetting('fee_withdrawal', 0),
+            ])
+            ->add('authorised_signature_image', 'mediaImage', [
+                'label' => trans('plugins/marketplace::marketplace.settings.authorised_signature_image'),
+                'value' => MarketplaceHelper::getSetting('authorised_signature_image'),
             ])
             ->add('check_valid_signature', 'onOffCheckbox', [
                 'label' => trans('plugins/marketplace::marketplace.settings.check_valid_signature'),

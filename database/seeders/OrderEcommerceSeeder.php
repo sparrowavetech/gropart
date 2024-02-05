@@ -20,6 +20,7 @@ use Botble\Ecommerce\Services\HandleShippingFeeService;
 use Botble\Marketplace\Enums\WithdrawalStatusEnum;
 use Botble\Marketplace\Models\CategoryCommission;
 use Botble\Marketplace\Models\Revenue;
+use Botble\Marketplace\Models\Store;
 use Botble\Marketplace\Models\Withdrawal;
 use Botble\Payment\Enums\PaymentMethodEnum;
 use Botble\Payment\Enums\PaymentStatusEnum;
@@ -330,7 +331,16 @@ class OrderEcommerceSeeder extends BaseSeeder
 
                     if ($vendorInfo->id) {
                         $fee = $this->calculatorCommissionFeeByProduct($order->products);
-                        $amount = $order->amount - $fee;
+                        //$amount = $order->amount - $fee;
+
+                        $vendorShippingAllow = Store::where('customer_id', $order->store->customer->id)->value('is_manage_shipping');
+
+                        if(setting('marketplace_allow_vendor_manage_shipping') == 1 && $vendorShippingAllow == 1) {
+                            $amount = ($order->amount) - $fee;
+                        } else {
+                            $amount = ($order->amount) - $order->shipping_amount - $fee;
+                        }
+
                         $currentBalance = $customer->balance;
 
                         $amountByCurrency = $amount;
@@ -422,11 +432,22 @@ class OrderEcommerceSeeder extends BaseSeeder
             $product = Product::with(['categories'])->find($id);
             $listCategories = $product->categories->pluck('id')->all();
             $commissionSetting = CategoryCommission::whereIn('product_category_id', $listCategories)->orderBy('commission_percentage', 'desc')->first(); // lay commission setting cao nhat
+
             $commissionFeePercentage = MarketplaceHelper::getSetting('fee_per_order', 0);
+            $platformFeePercentage = MarketplaceHelper::getSetting('default_platform_fee', 0);
+            $FeeTaxPercentage = MarketplaceHelper::getSetting('default_fee_tax', 0);
+
+            $totalSystemFees = $platformFeePercentage + $commissionFeePercentage;
+
             if (! empty($commissionSetting)) {
-                $commissionFeePercentage = $commissionSetting->commission_percentage;
+                $totalSystemFees = $commissionSetting->commission_percentage + $platformFeePercentage;
             }
-            $totalFee += $orderProduct->price * $commissionFeePercentage / 100;
+
+            $totalFeeAmount = $orderProduct->price * $totalSystemFees / 100;
+
+            $FeeTax = $totalFeeAmount * ($FeeTaxPercentage / 100);
+
+            $totalFee += $totalFeeAmount + $FeeTax;
         }
 
         return $totalFee;

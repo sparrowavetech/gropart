@@ -7,6 +7,8 @@ use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\Html;
+use Botble\Base\Supports\TwigCompiler;
+use Botble\Marketplace\Supports\TwigExtension;
 use Botble\Base\Forms\FieldOptions\HtmlFieldOption;
 use Botble\Base\Forms\FieldOptions\RadioFieldOption;
 use Botble\Base\Forms\FieldOptions\SelectFieldOption;
@@ -78,6 +80,14 @@ class HookServiceProvider extends ServiceProvider
             add_filter(BASE_FILTER_GET_LIST_DATA, [$this, 'addColumnToEcommerceTable'], 153, 2);
             add_filter(BASE_FILTER_TABLE_HEADINGS, [$this, 'addHeadingToEcommerceTable'], 153, 2);
             add_filter(BASE_FILTER_TABLE_QUERY, [$this, 'modifyQueryInCustomerTable'], 153);
+
+            add_filter('cms_twig_compiler', function (TwigCompiler $twigCompiler) {
+                if (! array_key_exists(TwigExtension::class, $twigCompiler->getExtensions())) {
+                    $twigCompiler->addExtension(new TwigExtension());
+                }
+
+                return $twigCompiler;
+            }, 123);
 
             add_filter('base_filter_table_filters', function (array $filters, TableAbstract $table) {
                 if ($table instanceof CustomerTable) {

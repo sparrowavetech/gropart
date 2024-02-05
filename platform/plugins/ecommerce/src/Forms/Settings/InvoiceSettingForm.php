@@ -50,56 +50,111 @@ class InvoiceSettingForm extends SettingForm
                     ->colspan(6)
                     ->toArray()
             )
-            ->add(
-                'company_country_for_invoicing',
-                SelectField::class,
-                SelectFieldOption::make()
-                    ->label(trans('plugins/ecommerce::ecommerce.country'))
-                    ->choices(EcommerceHelper::getAvailableCountries())
-                    ->selected(InvoiceHelper::getCompanyCountry())
-                    ->searchable()
-                    ->colspan(2)
-                    ->toArray(),
-            )
-            ->add(
-                'company_state_for_invoicing',
-                TextField::class,
-                TextFieldOption::make()
-                    ->label(trans('plugins/ecommerce::ecommerce.state'))
-                    ->value(InvoiceHelper::getCompanyState())
-                    ->colspan(2)
-                    ->toArray()
-            )
-            ->add(
-                'company_city_for_invoicing',
-                TextField::class,
-                TextFieldOption::make()
-                    ->label(trans('plugins/ecommerce::ecommerce.city'))
-                    ->value(InvoiceHelper::getCompanyCity())
-                    ->colspan(2)
-                    ->toArray()
-            )
+            ->when(EcommerceHelper::isUsingInMultipleCountries() && EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation(), function (FormAbstract $form) {
+                $form->add(
+                    'company_country_for_invoicing',
+                    SelectField::class,
+                    SelectFieldOption::make()
+                        ->label(trans('plugins/ecommerce::ecommerce.country'))
+                        ->choices(EcommerceHelper::getAvailableCountries())
+                        ->selected(InvoiceHelper::getCompanyCountry())
+                        ->searchable()
+                        ->colspan(2)
+                        ->toArray(),
+                );
+                $form->add(
+                    'company_state_for_invoicing',
+                    SelectField::class,
+                    SelectFieldOption::make()
+                        ->label(trans('plugins/ecommerce::ecommerce.state'))
+                        ->choices(['' => trans('plugins/location::city.select_state')] + EcommerceHelper::getAvailableStatesByCountry(old('country', $this->getModel()->country)))
+                        ->selected(InvoiceHelper::getCompanyState())
+                        ->searchable()
+                        ->colspan(2)
+                        ->toArray(),
+                );
+                $form->add(
+                    'company_city_for_invoicing',
+                    SelectField::class,
+                    SelectFieldOption::make()
+                        ->label(trans('plugins/ecommerce::ecommerce.city'))
+                        ->choices(['' => trans('plugins/location::city.select_city')] + EcommerceHelper::getAvailableCitiesByState(old('state', $this->getModel()->state)))
+                        ->selected(InvoiceHelper::getCompanyCity())
+                        ->searchable()
+                        ->colspan(2)
+                        ->toArray(),
+                );
+            })
+            ->when(EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation(), function (FormAbstract $form) {
+                $form->add(
+                    'company_state_for_invoicing',
+                    SelectField::class,
+                    SelectFieldOption::make()
+                        ->label(trans('plugins/ecommerce::ecommerce.state'))
+                        ->choices(['' => trans('plugins/location::city.select_state')] + EcommerceHelper::getAvailableStatesByCountry(old('country', $this->getModel()->country)))
+                        ->selected(InvoiceHelper::getCompanyState())
+                        ->searchable()
+                        ->colspan(3)
+                        ->toArray(),
+                );
+                $form->add(
+                    'company_city_for_invoicing',
+                    SelectField::class,
+                    SelectFieldOption::make()
+                        ->label(trans('plugins/ecommerce::ecommerce.city'))
+                        ->choices(['' => trans('plugins/location::city.select_city')] + EcommerceHelper::getAvailableCitiesByState(old('state', $this->getModel()->state)))
+                        ->selected(InvoiceHelper::getCompanyCity())
+                        ->searchable()
+                        ->colspan(3)
+                        ->toArray(),
+                );
+            })
+            ->when(! EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation(), function (FormAbstract $form) {
+                $form->add(
+                    'company_state_for_invoicing',
+                    TextField::class,
+                    TextFieldOption::make()
+                        ->label(trans('plugins/ecommerce::ecommerce.state'))
+                        ->value(InvoiceHelper::getCompanyState())
+                        ->colspan(2)
+                        ->toArray()
+                );
+                $form->add(
+                    'company_city_for_invoicing',
+                    TextField::class,
+                    TextFieldOption::make()
+                        ->label(trans('plugins/ecommerce::ecommerce.city'))
+                        ->value(InvoiceHelper::getCompanyCity())
+                        ->colspan(2)
+                        ->toArray()
+                );
+            })
             ->when(EcommerceHelper::isZipCodeEnabled(), function (FormAbstract $form) {
                 $form->add('company_zipcode_for_invoicing', TextField::class, [
                     'label' => trans('plugins/ecommerce::setting.invoice.form.company_zipcode'),
                     'value' => InvoiceHelper::getCompanyZipCode(),
-                    'colspan' => 3,
+                    'colspan' => 2,
                 ]);
             })
             ->add('company_email_for_invoicing', 'email', [
                 'label' => trans('plugins/ecommerce::setting.invoice.form.company_email'),
                 'value' => get_ecommerce_setting('company_email_for_invoicing') ?: get_ecommerce_setting('store_email'),
-                'colspan' => 3,
+                'colspan' => 2,
             ])
             ->add('company_phone_for_invoicing', TextField::class, [
                 'label' => trans('plugins/ecommerce::setting.invoice.form.company_phone'),
                 'value' => get_ecommerce_setting('company_phone_for_invoicing') ?: get_ecommerce_setting('store_phone'),
-                'colspan' => 3,
+                'colspan' => 2,
             ])
             ->add('company_tax_id_for_invoicing', TextField::class, [
                 'label' => trans('plugins/ecommerce::setting.invoice.form.company_tax_id'),
                 'value' => get_ecommerce_setting('company_tax_id_for_invoicing') ?: get_ecommerce_setting('store_vat_number'),
-                'colspan' => 6,
+                'colspan' => 3,
+            ])
+            ->add('invoice_code_prefix', TextField::class, [
+                'label' => trans('plugins/ecommerce::setting.invoice.form.invoice_code_prefix'),
+                'value' => get_ecommerce_setting('invoice_code_prefix', 'INV-'),
+                'colspan' => 3,
             ])
             ->add('company_logo_for_invoicing', 'mediaImage', [
                 'value' => get_ecommerce_setting('company_logo_for_invoicing') ?: (theme_option('logo_in_invoices') ?: theme_option('logo')),
@@ -137,11 +192,6 @@ class InvoiceSettingForm extends SettingForm
             ->add('enable_invoice_stamp', 'onOffCheckbox', [
                 'label' => trans('plugins/ecommerce::setting.invoice.form.enable_invoice_stamp'),
                 'value' => get_ecommerce_setting('enable_invoice_stamp', true),
-                'colspan' => 6,
-            ])
-            ->add('invoice_code_prefix', TextField::class, [
-                'label' => trans('plugins/ecommerce::setting.invoice.form.invoice_code_prefix'),
-                'value' => get_ecommerce_setting('invoice_code_prefix', 'INV-'),
                 'colspan' => 6,
             ])
             ->add('disable_order_invoice_until_order_confirmed', 'onOffCheckbox', [

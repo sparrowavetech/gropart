@@ -94,7 +94,13 @@ class StoreForm extends FormAbstract
                 'label'         => trans('plugins/marketplace::store.forms.is_verified'),
                 'label_attr'    => ['class' => 'control-label'],
                 'default_value' => false,
-                'colspan' => 6,
+                'colspan' => 3,
+            ])
+            ->add('is_manage_shipping', 'onOff', [
+                'label'         => trans('plugins/marketplace::store.forms.is_manage_shipping'),
+                'label_attr'    => ['class' => 'control-label'],
+                'default_value' => false,
+                'colspan' => 3,
             ])
             ->add('description', 'textarea', [
                 'label' => trans('core/base::forms.description'),

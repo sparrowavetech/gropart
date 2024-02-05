@@ -48,6 +48,16 @@ class MarketplaceSettingController extends SettingController
             $validated['fee_per_order'] = $value < 0 ? 0 : min($value, 100);
         }
 
+        if (in_array('default_platform_fee', array_keys($validated))) {
+            $value = $validated['default_platform_fee'];
+            $validated['default_platform_fee'] = $value < 0 ? 0 : min($value, 100);
+        }
+
+        if (in_array('default_fee_tax', array_keys($validated))) {
+            $value = $validated['default_fee_tax'];
+            $validated['default_fee_tax'] = $value < 0 ? 0 : min($value, 100);
+        }
+
         $this->saveSettings($validated);
 
         if ($preVerifyVendor != MarketplaceHelper::getSetting('verify_vendor', 1)) {

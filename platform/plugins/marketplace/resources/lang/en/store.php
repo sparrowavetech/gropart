@@ -29,6 +29,7 @@ return [
         'company_placeholder' => 'Company',
         'zip_code' => 'Zip Code',
         'zip_code_placeholder' => 'Zip Code',
+        'is_manage_shipping' => 'Vender Will Manage Shipping?',
         'is_verified' => 'Is Verified',
         'shop_category' => 'Shop Type',
     ],

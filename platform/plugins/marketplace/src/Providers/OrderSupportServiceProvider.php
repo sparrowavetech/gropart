@@ -2,6 +2,7 @@
 
 namespace Botble\Marketplace\Providers;
 
+use Illuminate\Support\Str;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\EmailHandler;
 use Botble\Base\Http\Responses\BaseHttpResponse;
@@ -1217,13 +1218,41 @@ class OrderSupportServiceProvider extends ServiceProvider
 
             if ($vendorInfo->id) {
                 $revenue = Revenue::query()->where('order_id', $order->getKey())->first();
-                $orderAmountWithoutShippingFee = $order->amount - $order->shipping_amount - $order->tax_amount;
+
+                //$orderAmountWithoutShippingFee = $order->amount - $order->shipping_amount - $order->tax_amount;
+
+                $vendorShippingAllow = Store::where('customer_id', $order->store->customer->id)->value('is_manage_shipping');
+
+                if(setting('marketplace_allow_vendor_manage_shipping') == 1 && $vendorShippingAllow == 1) {
+                    $orderAmountWithoutShippingFee = $order->amount - $order->shipping_amount;
+
+                    $revenueShippingCost = 0;
+                } else {
+                    $orderAmountWithoutShippingFee = $order->amount;
+
+                    $revenueShippingCost = $order->shipping_amount;
+                }
+
+                $feePercentage = MarketplaceHelper::getSetting('fee_per_order', 0);
+                $platformFeePercentage = MarketplaceHelper::getSetting('default_platform_fee', 0);
+                $FeeTaxPercentage = MarketplaceHelper::getSetting('default_fee_tax', 0);
+
+                $totalSystemFeePercentage = $platformFeePercentage + $feePercentage;
+
+                $commissionFeeWithoutTax = ($order->amount - $order->shipping_amount) * ($feePercentage / 100);
+
+                $platformFeeWithoutTax = ($order->amount - $order->shipping_amount) * ($platformFeePercentage / 100);
+
+                $totalFeeAmountWithoutTax = ($order->amount - $order->shipping_amount) * ($totalSystemFeePercentage / 100);
+
+                $FeeTax = $totalFeeAmountWithoutTax * ($FeeTaxPercentage / 100); //Will go in Invoice totalFeeTax
+
                 if (! MarketplaceHelper::isCommissionCategoryFeeBasedEnabled()) {
-                    $feePercentage = MarketplaceHelper::getSetting('fee_per_order', 0);
-                    $fee = $orderAmountWithoutShippingFee * ($feePercentage / 100);
+                    $fee = $totalFeeAmountWithoutTax + $FeeTax + $revenueShippingCost;
                 } else {
                     $fee = $this->calculatorCommissionFeeByProduct($order->products);
                 }
+
                 $amount = $orderAmountWithoutShippingFee - $fee;
                 $currentBalance = $customer->balance;
 
@@ -1238,6 +1267,12 @@ class OrderSupportServiceProvider extends ServiceProvider
                     'current_balance' => $currentBalance,
                     'customer_id' => $customer->getKey(),
                     'type' => RevenueTypeEnum::ADD_AMOUNT,
+                    'seller_inv_code' => $this->generateSellerInvoiceCode(),
+                    'shipping_cost' => $revenueShippingCost,
+                    'platform_fee' => $platformFeeWithoutTax,
+                    'commission_fee' => $commissionFeeWithoutTax,
+                    'fee_tax_rate' => $FeeTaxPercentage,
+                    'seller_state_code' => $order->store->state,
                 ];
 
                 try {
@@ -1276,6 +1311,47 @@ class OrderSupportServiceProvider extends ServiceProvider
         return $order;
     }
 
+    public function generateSellerInvoiceCode(): string {
+        $prefix = get_ecommerce_setting('invoice_code_prefix', 'INV-');
+        $suffix = "SIN";
+        $currentDate = now()->format('dmY');
+
+        $lastSellerInvCode = Revenue::latest()->value('seller_inv_code');
+
+        if($lastSellerInvCode == "") {
+            $uniqueCode = "000";
+
+            // Concatenate all parts to generate the seller invoice code
+            $sellerInvCode = sprintf('%s%s%s%s', $prefix, $currentDate, $suffix, $uniqueCode);
+
+            // Check if the generated invoice code already exists in the database
+            $existingInvoice = Revenue::where('seller_inv_code', $sellerInvCode)->exists();
+            if ($existingInvoice) {
+                do {
+                    $uniqueCode++;
+                    $sellerInvCode = sprintf('%s%s%s%s', $prefix, $currentDate, $suffix, $uniqueCode);
+                } while(Revenue::where('seller_inv_code', $sellerInvCode)->exists());
+            }
+        } else {
+            $invLastValue = explode("SIN", $lastSellerInvCode);
+            $invLastCode = end($invLastValue);
+
+            $invLastCode += 1;
+
+            $sellerInvCode = sprintf('%s%s%s%s', $prefix, $currentDate, $suffix, $invLastCode);
+
+            $existingInvoice = Revenue::where('seller_inv_code', $sellerInvCode)->exists();
+            if ($existingInvoice) {
+                do {
+                    $invLastCode++;
+                    $sellerInvCode = sprintf('%s%s%s%s', $prefix, $currentDate, $suffix, $invLastCode);
+                } while(Revenue::where('seller_inv_code', $sellerInvCode)->exists());
+            }
+        }
+
+        return $sellerInvCode;
+    }
+
     protected function calculatorCommissionFeeByProduct(Collection $orderProducts): float|int
     {
         $totalFee = 0;
@@ -1288,17 +1364,26 @@ class OrderSupportServiceProvider extends ServiceProvider
 
             $listCategories = $product->categories()->pluck('category_id')->all();
 
-            $commissionFeePercentage = MarketplaceHelper::getSetting('fee_per_order', 0);
             $commissionSetting = CategoryCommission::query()
                 ->whereIn('product_category_id', $listCategories)
                 ->orderByDesc('commission_percentage')
                 ->value('commission_percentage');
 
+            $commissionFeePercentage = MarketplaceHelper::getSetting('fee_per_order', 0);
+            $platformFeePercentage = MarketplaceHelper::getSetting('default_platform_fee', 0);
+            $FeeTaxPercentage = MarketplaceHelper::getSetting('default_fee_tax', 0);
+
+            $totalSystemFees = $platformFeePercentage + $commissionFeePercentage;
+
             if ($commissionSetting) {
-                $commissionFeePercentage = $commissionSetting;
+                $totalSystemFees = $commissionSetting + $platformFeePercentage;
             }
 
-            $totalFee += $orderProduct->price * $commissionFeePercentage / 100;
+            $totalFeeAmount = $orderProduct->price * $totalSystemFees / 100;
+
+            $FeeTax = $totalFeeAmount * ($FeeTaxPercentage / 100);
+
+            $totalFee += $totalFeeAmount + $FeeTax;
         }
 
         return $totalFee;
@@ -1319,13 +1404,40 @@ class OrderSupportServiceProvider extends ServiceProvider
 
             if ($vendorInfo->id) {
                 $refundAmount = $orderReturn->items->sum('refund_amount');
+
+                $vendorShippingAllow = Store::where('customer_id', $order->store->customer->id)->value('is_manage_shipping');
+
+                if(setting('marketplace_allow_vendor_manage_shipping') == 1 && $vendorShippingAllow == 1) {
+                    $orderAmountWithoutShippingFee = $order->amount - $order->shipping_amount;
+
+                    $revenueShippingCost = 0;
+                } else {
+                    $orderAmountWithoutShippingFee = $order->amount;
+
+                    $revenueShippingCost = $order->shipping_amount;
+                }
+
+                $feePercentage = MarketplaceHelper::getSetting('fee_per_order', 0);
+                $platformFeePercentage = MarketplaceHelper::getSetting('default_platform_fee', 0);
+                $FeeTaxPercentage = MarketplaceHelper::getSetting('default_fee_tax', 0);
+
+                $totalSystemFeePercentage = $platformFeePercentage + $feePercentage;
+
+                $commissionFeeWithoutTax = ($order->amount - $order->shipping_amount) * ($feePercentage / 100);
+
+                $platformFeeWithoutTax = ($order->amount - $order->shipping_amount) * ($platformFeePercentage / 100);
+
+                $totalFeeAmountWithoutTax = ($order->amount - $order->shipping_amount) * ($totalSystemFeePercentage / 100);
+
+                $FeeTax = $totalFeeAmountWithoutTax * ($FeeTaxPercentage / 100); //Will go in Invoice totalFeeTax
+
                 if (! MarketplaceHelper::isCommissionCategoryFeeBasedEnabled()) {
-                    $feePercentage = MarketplaceHelper::getSetting('fee_per_order', 0);
-                    $fee = $refundAmount * ($feePercentage / 100);
+                    $fee = $totalFeeAmountWithoutTax + $FeeTax + $revenueShippingCost;
                 } else {
                     $products = $orderReturn->items->map(fn ($item) => $item->product);
                     $fee = $this->calculatorCommissionFeeByProduct($products);
                 }
+
                 $fee = $fee * -1;
                 $refundAmount = $refundAmount * -1;
                 $amount = $refundAmount - $fee;
@@ -1340,6 +1452,12 @@ class OrderSupportServiceProvider extends ServiceProvider
                     'customer_id' => $customer->getKey(),
                     'order_id' => $order->id,
                     'type' => RevenueTypeEnum::ORDER_RETURN,
+                    'seller_inv_code' => $this->generateSellerInvoiceCode(),
+                    'shipping_cost' => $revenueShippingCost,
+                    'platform_fee' => $platformFeeWithoutTax,
+                    'commission_fee' => $commissionFeeWithoutTax,
+                    'fee_tax_rate' => $FeeTaxPercentage,
+                    'seller_state_code' => $order->store->state,
                     'description' => trans('plugins/marketplace::order.return.description', [
                         'order' => $order->code,
                     ]),

@@ -1125,11 +1125,11 @@ class OrderController extends BaseController
                 'sku' => $product->sku,
                 'barcode' => $product->barcode,
                 'weight' => $product->original_product->weight,
-                'original_price' => $product->original_price,
+                'original_price' => $product->front_sale_price,
                 'product_link' => route('products.edit', $product->original_product->id),
                 'product_type' => (string)$product->product_type,
             ];
-            $price = $product->original_price;
+            $price = $product->front_sale_price;
             $price = Cart::getPriceByOptions($price, $productOptions);
 
             $cartItem = CartItem::fromAttributes(

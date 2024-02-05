@@ -19,12 +19,21 @@
                             />
                         </div>
 
+                        <a href="{{ route('marketplace.store.edit', $store->id) }}" target="_blank">
+                            {{ $store->name }}
+                            <x-core::icon name="ti ti-edit" />
+                        </a>
                         @if($store->is_verified)
                             <img class="verified-store" style="max-height: 25px;" src="{{ asset('/storage/stores/verified.png')}}"alt="Verified">
                         @endif
+                        <small style="vertical-align: middle;" class="badge bg-warning text-white">{{ $store->shop_category->label() }}</small>
+                    </div>
+
+                    <div class="hr my-2"></div>
+
+                    <div class="mt-2 mb-2 text-center">
                         <a href="{{ $store->url }}" target="_blank">
-                            {{ $store->name }}
-                            <x-core::icon name="ti ti-external-link" />
+                        {{ __('Visit Store') }} <x-core::icon name="ti ti-external-link" />
                         </a>
                     </div>
 
@@ -36,7 +45,7 @@
                             <dd class="col-auto">
                                 <a href="{{ route('customers.edit', $customer->id) }}" target="_blank">
                                     {{ $customer->name }}
-                                    <x-core::icon name="ti ti-external-link" />
+                                    <x-core::icon name="ti ti-edit" />
                                 </a>
                             </dd>
                         </dl>
