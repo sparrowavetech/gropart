@@ -91,7 +91,7 @@
             <div>
                 <h4 class="mb-10 setionheading mt-2">{{ 'plugins/marketplace::invoice-template.invoice_from'|trans }}:</h4>
                 {% if company_name %}
-                    <p><strong>{{ 'plugins/marketplace::invoice-template.invoice_from'|trans }}: </strong>{{ company_name }}</p>
+                    <p><strong>{{ company_name }}</strong></p>
                 {% endif %}
                 {% if company_address %}
                     <p><strong>{{ 'plugins/marketplace::invoice-template.address'|trans }}: </strong>{{ company_address }}
@@ -105,13 +105,13 @@
                     {{ company_zipcode }}</p>
                     {% endif %}
                 {% endif %}
+                {% if company_tax_id %}
+                <p><strong>{{ 'plugins/marketplace::invoice-template.tax_id'|trans }}: </strong>{{ company_tax_id }}</p>
+                {% endif %}
             </div>
             <!-- Invoice Details -->
             <div>
                 <h4 class="mb-10 setionheading">{{ 'plugins/marketplace::invoice-template.order_information'|trans }}:</h4>
-                {% if company_tax_id %}
-                <p><strong>{{ 'plugins/marketplace::invoice-template.tax_id'|trans }}: </strong>{{ company_tax_id }}</p>
-                {% endif %}
                 <p class="orderId"><strong>{{ 'plugins/marketplace::invoice-template.invoice_id'|trans }}: </strong> {{ invoice.seller_inv_code }}</p>
                 <p class="orderId"><strong>{{ 'plugins/marketplace::invoice-template.order_id'|trans }}: </strong> {{ order_id }}</p>
                 {% if invoice.created_at %}
@@ -140,9 +140,6 @@
                         {{ seller_zip_code }}</p>
                     {% endif %}
                 {% endif %}
-                {% if seller_company_tax_id %}
-                <p><strong>{{ 'plugins/marketplace::invoice-template.tax_id'|trans }}: </strong>{{ seller_company_tax_id }}</p>
-                {% endif %}
                 {% if seller_state %}
                 <p><strong>{{ 'plugins/marketplace::invoice-template.supply_place'|trans }}: </strong>{{ seller_state }}</p>
                 {% endif %}
@@ -156,6 +153,9 @@
                 {% endif %}
                 {% if seller_owner_email %}
                 <p><strong>{{ 'plugins/marketplace::invoice-template.email'|trans }}:</strong> {{ seller_owner_email }}</p>
+                {% endif %}
+                {% if seller_company_tax_id %}
+                <p><strong>{{ 'plugins/marketplace::invoice-template.tax_id'|trans }}: </strong>{{ seller_company_tax_id }}</p>
                 {% endif %}
             </div>
         </div>

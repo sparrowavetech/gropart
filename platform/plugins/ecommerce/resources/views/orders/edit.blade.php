@@ -276,6 +276,25 @@
                                 </x-core::table>
 
                                 <div class="btn-list justify-content-end my-3">
+                                    @if(is_plugin_active('marketplace') && $order->shipment->status == 'delivered')
+                                        @php
+                                            $revenueId = Botble\Marketplace\Models\Revenue::where('order_id', $order->id)->value('id');
+                                            $url = '';
+                                            if (is_in_admin(true)) {
+                                                $url = route('marketplace.generate-seller-invoice', $revenueId);
+                                            } else {
+                                                $url = route('marketplace.revenue.generate-seller-invoice', $revenueId);
+                                            }
+                                        @endphp
+                                        <x-core::button
+                                            tag="a"
+                                            href="{{ $url }}"
+                                            target="_blank"
+                                            icon="ti ti-download"
+                                        >
+                                            {{ trans('plugins/marketplace::revenue.seller_inv_code') }}
+                                        </x-core::button>
+                                    @endif
                                     @if ($order->isInvoiceAvailable())
                                         <x-core::button
                                             tag="a"
