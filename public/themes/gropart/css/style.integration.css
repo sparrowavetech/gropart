@@ -429,7 +429,7 @@ a{ color: var(--primary-color); }
 .box-swiper .swiper-button-next,
 .box-swiper .swiper-button-prev {
     height: 64px;
-    margin-top: -55px;
+    margin-top: -15px;
     width: 64px;
 }
 .swiper-pagination {

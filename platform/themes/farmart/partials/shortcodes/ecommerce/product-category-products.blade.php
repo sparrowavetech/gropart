@@ -54,16 +54,7 @@
                                     ],
                                 ],
                                 [
-                                    'breakpoint' => 426,
-                                    'settings' => [
-                                        'arrows' => false,
-                                        'dots' => true,
-                                        'slidesToShow' => 2,
-                                        'slidesToScroll' => 2,
-                                    ],
-                                ],
-                                [
-                                    'breakpoint' => 376,
+                                    'breakpoint' => 440,
                                     'settings' => [
                                         'arrows' => false,
                                         'dots' => true,
