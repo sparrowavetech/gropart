@@ -10,6 +10,7 @@ use PhpParser\Node\Expr\MethodCall;
 use PHPStan\Analyser\Scope;
 use PHPStan\Reflection\ParametersAcceptorSelector;
 use PHPStan\Rules\Rule;
+use PHPStan\Rules\RuleError;
 use PHPStan\Rules\RuleErrorBuilder;
 use PHPStan\Type\Constant\ConstantStringType;
 use PHPStan\Type\ObjectType;
@@ -38,7 +39,7 @@ class RelationExistenceRule implements Rule
     }
 
     /**
-     * @inheritDoc
+     * @return RuleError[]
      */
     public function processNode(Node $node, Scope $scope): array
     {
@@ -57,9 +58,11 @@ class RelationExistenceRule implements Rule
             'doesntHave',
             'orDoesntHave',
             'whereHas',
+            'withWhereHas',
             'orWhereHas',
             'whereDoesntHave',
             'orWhereDoesntHave',
+            'whereRelation'
         ],
             true)
         ) {
@@ -176,7 +179,7 @@ class RelationExistenceRule implements Rule
     ): \PHPStan\Rules\RuleError {
         return RuleErrorBuilder::message(sprintf("Relation '%s' is not found in %s model.", $relationName,
             $modelReflection->getName()))
-            ->identifier('rules.relationExistence')
+            ->identifier('larastan.relationExistence')
             ->line($node->getAttribute('startLine'))
             ->build();
     }

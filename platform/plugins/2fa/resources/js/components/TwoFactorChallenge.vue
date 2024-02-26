@@ -18,20 +18,21 @@ export default {
     },
 
     methods: {
-        async submit() {
+        async submit(e) {
             this.loading = true
 
             const body = this.recovery ? { recovery_code: this.recovery_code } : { code: this.code }
+
             $httpClient
                 .make()
+                .withButtonLoading(e.currentTarget.querySelector('button[type="submit"]'))
                 .post(this.url, body)
                 .then(({ data }) => {
                     if (!data.error) {
                         window.location.href = data.data.next_url
                     }
-
-                    this.loading = false
                 })
+                .finally(() => this.loading = false)
         },
         toggleRecovery() {
             this.recovery = !this.recovery
@@ -101,6 +102,7 @@ export default {
                                         inputmode="numeric"
                                         pattern="[0-9]*"
                                         data-code-input
+                                        :disabled="loading"
                                     />
                                 </div>
                                 <div class="col">
@@ -111,6 +113,7 @@ export default {
                                         inputmode="numeric"
                                         pattern="[0-9]*"
                                         data-code-input
+                                        :disabled="loading"
                                     />
                                 </div>
                                 <div class="col">
@@ -121,6 +124,7 @@ export default {
                                         inputmode="numeric"
                                         pattern="[0-9]*"
                                         data-code-input
+                                        :disabled="loading"
                                     />
                                 </div>
                             </div>
@@ -135,6 +139,7 @@ export default {
                                         inputmode="numeric"
                                         pattern="[0-9]*"
                                         data-code-input
+                                        :disabled="loading"
                                     />
                                 </div>
                                 <div class="col">
@@ -145,6 +150,7 @@ export default {
                                         inputmode="numeric"
                                         pattern="[0-9]*"
                                         data-code-input
+                                        :disabled="loading"
                                     />
                                 </div>
                                 <div class="col">
@@ -155,6 +161,7 @@ export default {
                                         inputmode="numeric"
                                         pattern="[0-9]*"
                                         data-code-input
+                                        :disabled="loading"
                                     />
                                 </div>
                             </div>
@@ -170,6 +177,7 @@ export default {
                             v-model="recovery_code"
                             autofocus
                             autocomplete="one-time-code"
+                            :disabled="loading"
                         />
                     </div>
                 </div>
@@ -178,7 +186,7 @@ export default {
                         <button
                             type="button"
                             class="btn w-100"
-                            v-text="recovery ? __('trans.use_recovery_code') : __('trans.use_code')"
+                            v-text="recovery ? __('trans.use_code') : __('trans.use_recovery_code')"
                             @click="toggleRecovery"
                         />
                         <button type="submit" class="btn btn-primary w-100">{{ __('trans.login') }}</button>

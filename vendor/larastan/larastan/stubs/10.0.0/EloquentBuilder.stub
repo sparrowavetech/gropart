@@ -101,7 +101,7 @@ class Builder
     /**
      * Execute the query and get the first result.
      *
-     * @param  array<model-property<TModelClass>|int, mixed>|string  $columns
+     * @param  array<int, (model-property<TModelClass>|'*')>|model-property<TModelClass>|'*'  $columns
      * @return TModelClass|null
      */
     public function first($columns = ['*']);
@@ -255,6 +255,19 @@ class Builder
      * @return static
      */
     public function whereHas($relation, \Closure $callback = null, $operator = '>=', $count = 1);
+
+    /**
+     * Add a relationship count / exists condition to the query with where clauses.
+     *
+     * Also load the relationship with same condition.
+     *
+     * @param  string  $relation
+     * @param  \Closure|null  $callback
+     * @param  string  $operator
+     * @param  int  $count
+     * @return static
+     */
+    public function withWhereHas($relation, \Closure $callback = null, $operator = '>=', $count = 1);
 
     /**
      * Add a relationship count / exists condition to the query with where clauses and an "or".
@@ -478,6 +491,13 @@ class Builder
      */
      public function cursorPaginate($perPage = null, $columns = ['*'], $cursorName = 'cursor', $cursor = null);
 
+    /**
+     * Get a lazy collection for the given query.
+     *
+     * @phpstan-return \Illuminate\Support\LazyCollection<int, TModelClass>
+     */
+    public function cursor();
+
      /**
       * Query lazily, by chunks of the given size.
       *
@@ -540,5 +560,7 @@ class Scope {}
  * @method static \Illuminate\Database\Eloquent\Builder<static> onlyTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static> withoutTrashed()
  * @method static bool restore()
+ * @method static static restoreOrCreate(array<string, mixed> $attributes = [], array<string, mixed> $values = [])
+ * @method static static createOrRestore(array<string, mixed> $attributes = [], array<string, mixed> $values = [])
  */
 trait SoftDeletes {}
