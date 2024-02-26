@@ -1,24 +1,13 @@
+barcode required issue fix
+
 Frequently Bought Together Functionality
 
-Make product description and this each section as separate section (Dynamic)
+Shop type required condition not working while register as vendor
 
 Need pop up to come automatically the first time when visiting home page only for language change,
 with all language list default, then this pop up should not come again, should only come when first time visiting site
 
----------------------------------------------------------------------------------------------------------------------------
 
-Add a notice to vendor to complete his profile before adding product
-Need to make Module for Seller Invoice in Backend
-Commision Fee+GST
-Platform Fee+GST
-Shipping Cost+GST
-Signature Upload for Seller Invoice
-
-
-Add Tax in all products
-Add Hindi Language in all products
-
------------------------------------------------------------------------------------------------------------------------------
-
-Need to fix create order total and tax calculation in admin - botble team
-Shop type required condition not working while register as vendor
+Bulk Order Button Color
+Need to fix create order total and tax calculation in admin
+Make product description and this each section as separate section (Dynamic)

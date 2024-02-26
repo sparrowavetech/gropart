@@ -7,6 +7,8 @@ use Botble\Base\Supports\EmailHandler as BaseEmailHandler;
 use Botble\Ecommerce\Enums\DiscountTypeOptionEnum;
 use Botble\Ecommerce\Facades\OrderHelper;
 use Botble\Ecommerce\Models\Order as OrderModel;
+use Botble\Marketplace\Models\VendorInfo;
+use Botble\Marketplace\Models\Store;
 use Botble\Theme\Facades\Theme;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
@@ -65,6 +67,58 @@ class MarketplaceHelper
     public function allowVendorManageShipping(): bool
     {
         return (bool)$this->getSetting('allow_vendor_manage_shipping', false);
+    }
+
+    public function isVendorProfileComplete(int $customerID)
+    {
+        $isVendorData = Store::where('customer_id', $customerID)->first();
+        $isVendorTaxData = VendorInfo::where('customer_id', $customerID)->value('tax_info');
+
+        $data['status'] = 0;
+        $data['completePercentage'] = "10";
+        $data['storeVerified'] = $isVendorData['is_verified'];
+
+        $percentageIncrease = 5;
+
+        if ($isVendorTaxData) {
+            $taxVendorSignature     = $isVendorTaxData['signature_image'];
+            $taxVendorBusinessName  = $isVendorTaxData['business_name'];
+            $taxVendorAddress       = $isVendorTaxData['address'];
+            $taxVendorTaxNumber     = $isVendorTaxData['tax_id'];
+
+            if ($taxVendorSignature && $taxVendorBusinessName && $taxVendorAddress && $taxVendorTaxNumber) {
+                $data['completePercentage'] = 80;
+                $data['status'] = 1;
+            } else {
+                // Increase percentage for each available tax data field
+                if ($taxVendorSignature) {
+                    $data['completePercentage'] += $percentageIncrease;
+                }
+                if ($taxVendorBusinessName) {
+                    $data['completePercentage'] += $percentageIncrease;
+                }
+                if ($taxVendorAddress) {
+                    $data['completePercentage'] += $percentageIncrease;
+                }
+                if ($taxVendorTaxNumber) {
+                    $data['completePercentage'] += $percentageIncrease;
+                }
+            }
+        }
+
+        $vendorDataFields = [
+            'email', 'company', 'address', 'state', 'city', 'zip_code', 'logo'
+        ];
+
+        foreach ($vendorDataFields as $field) {
+            if ($isVendorData[$field]) {
+                $data['completePercentage'] += $percentageIncrease;
+            }
+        }
+
+        $data['completePercentage'] = min($data['completePercentage'], 80);
+
+        return $data;
     }
 
     public function sendMailToVendorAfterProcessingOrder($orders)

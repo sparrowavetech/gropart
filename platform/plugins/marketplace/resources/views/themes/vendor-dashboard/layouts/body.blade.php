@@ -52,8 +52,8 @@
                         <p>{{ __('Hello') }}, {{ auth('customer')->user()->name }}</p>
                         <small>{{ __('Joined on :date', ['date' => auth('customer')->user()->created_at->translatedFormat('M d, Y')]) }}</small>
                     </div>
-                    <div class="ps-block__action">
-                        <a href="{{ route('customer.logout') }}">
+                    <div class="ps-block__action bg-danger p-1" style="border-radius:2px">
+                        <a class="text-white fw-bold" href="{{ route('customer.logout') }}">
                             <x-core::icon name="ti ti-logout" />
                         </a>
                     </div>

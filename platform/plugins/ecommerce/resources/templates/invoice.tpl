@@ -153,12 +153,6 @@
             </div>
         </div>
 
-        {% if invoice.description %}
-            <hr>
-                <p class="m-0">{{ 'plugins/ecommerce::order.note'|trans }}: {{ invoice.description }}</p>
-            <hr>
-        {% endif %}
-
         <table class="item-table">
             <thead>
                 <tr>
@@ -168,13 +162,11 @@
 
                     <th>{{ 'plugins/ecommerce::products.form.price'| trans }}</th>
 
-                    {% if invoice.tax_amount > 0 %}
-                        {% if isIgst %}
-                            <th>{{ 'plugins/ecommerce::products.form.igst'| trans }}</th>
-                        {% else %}
-                            <th>{{ 'plugins/ecommerce::products.form.cgst'| trans }}</th>
-                            <th>{{ 'plugins/ecommerce::products.form.sgst'| trans }}</th>
-                        {% endif %}
+                    {% if isIgst %}
+                        <th>{{ 'plugins/ecommerce::products.form.igst'| trans }}</th>
+                    {% else %}
+                        <th>{{ 'plugins/ecommerce::products.form.cgst'| trans }}</th>
+                        <th>{{ 'plugins/ecommerce::products.form.sgst'| trans }}</th>
                     {% endif %}
 
                     <th>{{ 'plugins/ecommerce::products.form.total'|trans }}</th>
@@ -207,13 +199,11 @@
 
                         <td>{{ item.price|price_format }}</td>
 
-                        {% if item.tax_amount > 0 %}
-                            {% if isIgst %}
-                                <td class="right">{{ item.tax_amount|price_format }}</td>
-                            {% else %}
-                                <td class="right">{{ (item.tax_amount/2)|price_format }}</td>
-                                <td class="right">{{ (item.tax_amount/2)|price_format }}</td>
-                            {% endif %}
+                        {% if isIgst %}
+                            <td class="right">{{ item.tax_amount|price_format }}</td>
+                        {% else %}
+                            <td class="right">{{ (item.tax_amount/2)|price_format }}</td>
+                            <td class="right">{{ (item.tax_amount/2)|price_format }}</td>
                         {% endif %}
 
                         <td>{{ item.amount|price_format }}</td>
@@ -228,16 +218,14 @@
 
                     <th>{{ total_price|price_format }}</th>
 
-                    {% if invoice.tax_amount > 0 %}
-                        {% if isIgst %}
-                            <th>{{ invoice.tax_amount|price_format }}</th>
-                        {% else %}
-                            <th>{{ (invoice.tax_amount/2)|price_format }}</th>
-                            <th>{{ (invoice.tax_amount/2)|price_format }}</th>
-                        {% endif %}
+                    {% if isIgst %}
+                        <th>{{ total_tax|price_format }}</th>
+                    {% else %}
+                        <th>{{ (total_tax/2)|price_format }}</th>
+                        <th>{{ (total_tax/2)|price_format }}</th>
                     {% endif %}
 
-                    <th>{{ ((invoice.amount + invoice.discount_amount) - invoice.shipping_amount)|price_format }}</th>
+                    <th>{{ (invoice.sub_total + invoice.tax_amount)|price_format }}</th>
                 </tr>
             </tfoot>
         </table>
@@ -267,6 +255,17 @@
                         {{ 'plugins/ecommerce::order.payment_info'|trans }}: <strong>{{ payment_description | raw }}</strong>
                     </p>
                 {% endif %}
+                {% if invoice.description %}
+                    <hr>
+                        <p class="m-0">{{ 'plugins/ecommerce::order.note'|trans }}: {{ invoice.description }}</p>
+                    <hr>
+                {% endif %}
+
+                {% if company_signature_image %}
+                    <hr>
+                    <p><strong>{{ 'plugins/ecommerce::invoice.detail.seller_signature'|trans }}</strong></p>
+                    <img src="{{ company_signature_image }}" style="max-width:80px;" />
+                {% endif %}
 
                 {{ invoice_payment_info_filter | raw }}
 
@@ -287,6 +286,31 @@
             <div>
                 <table class="item-table">
                     <tbody>
+                        {% if invoice.tax_amount > 0 %}
+                            <tr>
+                                <th class="large total">{{ 'plugins/ecommerce::products.form.sub_total'|trans }}</th>
+                                <th class="large total">{{ invoice.sub_total|price_format }}</th>
+                            </tr>
+                            {% if isIgst %}
+                                <tr>
+                                    <td>{{ 'plugins/ecommerce::products.form.total'|trans }} {{ 'plugins/ecommerce::products.form.igst'|trans }}</td>
+                                    <td>{{ invoice.tax_amount|price_format }}</td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td>{{ 'plugins/ecommerce::products.form.total'|trans }} {{ 'plugins/ecommerce::products.form.cgst'|trans }}</td>
+                                    <td>{{ (invoice.tax_amount/2)|price_format }}</td>
+                                </tr>
+                                <tr>
+                                    <td>{{ 'plugins/ecommerce::products.form.total'|trans }} {{ 'plugins/ecommerce::products.form.sgst'|trans }}</td>
+                                    <td>{{ (invoice.tax_amount/2)|price_format }}</td>
+                                </tr>
+                            {% endif %}
+                            <tr>
+                                <th class="large total">{{ 'plugins/ecommerce::products.form.total'|trans }}</th>
+                                <th class="large total">{{ (invoice.sub_total + invoice.tax_amount)|price_format }}</th>
+                            </tr>
+                        {% endif %}
                         {% if invoice.coupon_code %}
                         <tr>
                             <td>{{ 'plugins/ecommerce::order.coupon_code_lable'|trans }}</td>
@@ -309,20 +333,13 @@
                         {% endif %}
 
                         <tr>
-                            <td class="large total">{{ 'plugins/ecommerce::order.grand_total'|trans }}</td>
-                            <td class="large total">{{ invoice.amount|price_format }}</td>
+                            <th class="large total">{{ 'plugins/ecommerce::order.grand_total'|trans }}</th>
+                            <th class="large total">{{ invoice.amount|price_format }}</th>
                         </tr>
                     </tbody>
                 </table>
             </div>
         </div>
-
-        {% if company_signature_image %}
-        <div class="text-right">
-            <p><strong>{{ 'plugins/ecommerce::invoice.detail.seller_signature'|trans }}</strong></p>
-                <img src="{{ company_signature_image }}" style="max-width:80px;" />
-        </div>
-        {% endif %}
 
         <div class="footer">
             <p class="mb-20 mt-20">{{ ecommerce_invoice_footer | raw }}</p>

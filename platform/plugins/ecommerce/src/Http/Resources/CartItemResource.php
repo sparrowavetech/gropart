@@ -21,6 +21,7 @@ class CartItemResource extends JsonResource
             $withoutTaxPrice = ($this->price * 100) / (100 + Arr::get($this->options, 'taxRate'));
             $taxPrice = $this->price - $withoutTaxPrice;
         } else {
+            $withoutTaxPrice = $this->price;
             $taxPrice = $this->price * Arr::get($this->options, 'taxRate') / 100;
         }
 
@@ -69,8 +70,8 @@ class CartItemResource extends JsonResource
             'quantity' => $this->qty,
             'select_qty' => $this->qty,
             'description' => Arr::get($this->options, 'description'),
-            'price' => $this->price,
-            'price_label' => format_price($this->price),
+            'price' => $withoutTaxPrice,
+            'price_label' => format_price($withoutTaxPrice),
             'original_price' => $originalPrice,
             'original_price_label' => format_price($originalPrice),
             'total_price' => $totalPrice,

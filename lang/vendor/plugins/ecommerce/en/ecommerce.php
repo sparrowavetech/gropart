@@ -36,7 +36,6 @@ return [
         'login_background_image' => 'Login background image',
         'register_background_image' => 'Register background image',
         'term_and_privacy_policy_url' => 'Terms and Privacy Policy URL',
-        'checkout_policy_url' => 'Checkout Page Refund Policy URL',
     ],
     'basic_settings' => 'Basic settings',
     'general_settings' => 'General',

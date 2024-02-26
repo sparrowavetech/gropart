@@ -17,6 +17,7 @@ return [
         'categories' => 'Categories',
         'content' => 'Content',
         'price' => 'Price',
+        'price_taxed' => 'Price (Incl. Tax)',
         'discount' => 'Discount',
         'taxable_price' => 'Taxable Price',
         'cgst' => 'CGST',

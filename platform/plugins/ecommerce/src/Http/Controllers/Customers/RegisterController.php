@@ -71,10 +71,12 @@ class RegisterController extends BaseController
         if (EcommerceHelper::isEnableEmailVerification()) {
             $this->registered($request, $customer);
 
+            $message = __('We have sent you an email to verify your email. Please check and confirm your email address!');
+
             return $this
                 ->httpResponse()
                 ->setNextUrl(route('customer.login'))
-                ->setMessage(__('We have sent you an email to verify your email. Please check and confirm your email address!'));
+                ->setMessage($message);
         }
 
         $customer->confirmed_at = Carbon::now();
@@ -141,8 +143,10 @@ class RegisterController extends BaseController
 
         $customer->sendEmailVerificationNotification();
 
+        $message = __('We sent you another confirmation email. You should receive it shortly.');
+
         return $this
             ->httpResponse()
-            ->setMessage(__('We sent you another confirmation email. You should receive it shortly.'));
+            ->setMessage($message);
     }
 }

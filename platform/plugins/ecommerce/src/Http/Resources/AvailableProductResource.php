@@ -24,6 +24,7 @@ class AvailableProductResource extends JsonResource
             $taxPrice = $this->front_sale_price - $withoutTaxPrice;
             $finalPrice = $this->front_sale_price;
         } else {
+            $withoutTaxPrice = $this->front_sale_price;
             $taxPrice = $this->front_sale_price * $this->total_taxes_percentage / 100;
             $finalPrice = $this->front_sale_price + $taxPrice;
         }
@@ -39,7 +40,7 @@ class AvailableProductResource extends JsonResource
             'is_out_of_stock' => $this->isOutOfStock(),
             'stock_status_label' => $this->stock_status_label,
             'stock_status_html' => $this->stock_status_html,
-            'price' => $this->front_sale_price,
+            'price' => $withoutTaxPrice,
             'formatted_price' => format_price($this->front_sale_price),
             'final_price' => $finalPrice,
             'original_price' => $this->original_price,

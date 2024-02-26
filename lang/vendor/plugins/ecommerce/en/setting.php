@@ -148,6 +148,7 @@ return [
     ],
     'invoice' => [
         'name' => 'Invoices',
+        'tax_id' => 'Seller GSTIN',
         'description' => 'View and update your invoices settings',
         'company_settings' => 'Company settings',
         'company_settings_description' => 'Settings Company information for invoicing',

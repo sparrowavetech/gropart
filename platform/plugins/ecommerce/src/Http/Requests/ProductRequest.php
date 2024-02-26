@@ -62,7 +62,7 @@ class ProductRequest extends Request
             'taxes' => 'nullable|array',
             'cost_per_item' => 'numeric|nullable|min:0|max:100000000000',
             'barcode' => [
-                'required',
+                'nullable',
                 'string',
                 'max:50',
                 //Rule::unique('ec_products')->ignore($this->route('product')),

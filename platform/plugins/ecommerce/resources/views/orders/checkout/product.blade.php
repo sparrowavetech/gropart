@@ -10,7 +10,7 @@
         </div>
     </div>
     <div class="col-sm-7 col-6">
-        <h6 class="mb-0"><a class="fw-bold text-black" href="{{ $product ? route('products.edit', $product->original_product->id) : '#' }}" target="_BLANK" title="{{ $product->original_product->name }}">{{ $product->original_product->name }}</a> @if ($product->isOutOfStock()) <span class="stock-status-label">({!! $product->stock_status_html !!})</span> @endif</h6>
+        <h6 class="mb-0"><a class="fw-bold text-black" href="{{ $product->original_product->url }}" target="_BLANK" title="{{ $product->original_product->name }}">{{ $product->original_product->name }}</a> @if ($product->isOutOfStock()) <span class="stock-status-label">({!! $product->stock_status_html !!})</span> @endif</h6>
         <p class="mb-0">
             <small><em>{{ $product->variation_attributes }}</em></small>
         </p>

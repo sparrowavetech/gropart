@@ -23,7 +23,7 @@ return [
     'update_balance_title' => 'Add/Subtract amount of vendor',
     'statements' => 'Statements',
     'products' => 'Products',
-    'commision' => 'Total Deduction (Incl. GST)',
+    'commision' => 'Commision',
     'product_cost' => 'Product Cost (Incl. GST)',
     'seller_amount' => 'Sattlement Amount',
     'action' => 'Action',

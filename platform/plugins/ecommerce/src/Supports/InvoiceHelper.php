@@ -90,11 +90,10 @@ class InvoiceHelper
                 'qty' => $orderProduct->qty,
                 'price' => $orderProduct->price,
                 'sub_total' => $orderProduct->price * $orderProduct->qty,
-                //'tax_amount' => $orderProduct->tax_amount,
-                'tax_amount' => $orderProduct->tax_amount * $orderProduct->qty,
+                'tax_amount' => $orderProduct->tax_amount,
                 'discount_amount' => 0,
                 //'amount' => $orderProduct->price * $orderProduct->qty + $orderProduct->tax_amount,
-                'amount' => $orderProduct->price * $orderProduct->qty,
+                'amount' => ($orderProduct->price + $orderProduct->tax_amount) * $orderProduct->qty,
                 'options' => array_merge(
                     $orderProduct->options,
                     $orderProduct->product_options_implode ? [
@@ -277,6 +276,8 @@ class InvoiceHelper
             'company_tax_id' => $companyTaxId,
             'total_quantity' => $invoice->items->sum('qty'),
             'total_price' => $invoice->items->sum('price'),
+            'total_tax' => $invoice->items->sum('tax_amount'),
+            'total_amount' => $invoice->items->sum('price') + $invoice->items->sum('tax_amount'),
             'payment_description' => $paymentDescription,
             'is_tax_enabled' => EcommerceHelperFacade::isTaxEnabled(),
             'settings' => [

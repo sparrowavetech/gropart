@@ -73,7 +73,7 @@
         </div>
     @endif
     <div class="product-loop_button bulk-order-button">
-        <a class="product-loop_action" href="{{ url('bulk-enquiry') }}?pid={{($product->is_variation || !$product->defaultVariation->product_id) ? $product->id : $product->defaultVariation->product_id}}" title="{{ __('Bulk Order') }}" data-bs-toggle="tooltip">
+        <a class="product-loop_action" target="_BLANK" href="{{ __('bulk_enq_form_url') }}?pid={{($product->is_variation || !$product->defaultVariation->product_id) ? $product->id : $product->defaultVariation->product_id}}" title="{{ __('Bulk Order') }}" data-bs-toggle="tooltip">
             <div class="product-loop_icon">
                 <i class="icon-server"></i>
             </div>

@@ -195,7 +195,7 @@ a{ color: var(--primary-color); }
 #footer .widget.widget-custom-menu ul li a { font-size: .9rem; }
 .footer__links { padding: 20px 0 0; }
 .widget-layered-nav-list ul .category-filter.opened ul li.category-filter:before { content: "\e93c"; display: inline-block; width: 15px; height: 15px; font-size: .6rem; float: left; font-family: 'Linearicons'; margin-top: 5px; }
-.rightFloatingBar .dockerTab { background-color: #bbbbbb; color: #555555; text-align: center; height: 30px; border-radius: 10px; }
+.rightFloatingBar .dockerTab { background-color: #00a751; color: #c8ee81; text-align: center; height: 30px; border-radius: 10px; }
 .rightFloatingBar .dockerTab .fa { position: relative; bottom: 12px; }
 .rightFloatingBar { position: fixed; top: 60%; left:-15px; transform-origin: left; transform: rotate(90deg); font-size: 24px; z-index: 1000; }
 .rightFloatingBar.closed { transition:all 0.2s ease; }
@@ -359,12 +359,12 @@ a{ color: var(--primary-color); }
   	.widget-header { margin-right: 0; }
 }
 @media screen and (max-width: 425px) {
-    .rightFloatingBar a { padding: 8px; }
+    .rightFloatingBar a { padding: 8px; font-size: 22px; }
     .product-price { font-size: 0.95rem; }
     .rightFloatingBar .dockerTab { height: 25px; }
-    .rightFloatingBar.open { left: 25px; }
+    .rightFloatingBar.open { left: 32px; }
     .rightFloatingBar .dockerTab .fa { bottom: 8px; }
-    .rightFloatingBar { left: -5px; font-size: 14px; }
+    .rightFloatingBar { left: -10px; font-size: 18px; }
   	.all-brands .featured-brand-item .brand__thumb.img-fluid-eq { max-height:250px; }
 }
 @media screen and (max-width: 375px) {

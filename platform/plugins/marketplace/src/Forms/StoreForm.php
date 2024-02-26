@@ -31,6 +31,8 @@ class StoreForm extends FormAbstract
             'vendor/core/plugins/marketplace/js/store.js',
         ]);
 
+        $isAdmin = is_in_admin(true);
+
         $this
             ->setupModel(new Store())
             ->setValidatorClass(StoreRequest::class)
@@ -90,18 +92,21 @@ class StoreForm extends FormAbstract
                 ],
                 'colspan' => 3,
             ])
-            ->add('is_verified', 'onOff', [
-                'label'         => trans('plugins/marketplace::store.forms.is_verified'),
-                'label_attr'    => ['class' => 'control-label'],
-                'default_value' => false,
-                'colspan' => 3,
-            ])
-            ->add('is_manage_shipping', 'onOff', [
-                'label'         => trans('plugins/marketplace::store.forms.is_manage_shipping'),
-                'label_attr'    => ['class' => 'control-label'],
-                'default_value' => false,
-                'colspan' => 3,
-            ])
+            ->when($isAdmin, function ($form) {
+                $form
+                    ->add('is_verified', 'onOff', [
+                        'label'         => trans('plugins/marketplace::store.forms.is_verified'),
+                        'label_attr'    => ['class' => 'control-label'],
+                        'default_value' => false,
+                        'colspan' => 3,
+                    ])
+                    ->add('is_manage_shipping', 'onOff', [
+                        'label'         => trans('plugins/marketplace::store.forms.is_manage_shipping'),
+                        'label_attr'    => ['class' => 'control-label'],
+                        'default_value' => false,
+                        'colspan' => 3,
+                    ]);
+            })
             ->add('description', 'textarea', [
                 'label' => trans('core/base::forms.description'),
                 'attr' => [

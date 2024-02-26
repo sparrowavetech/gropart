@@ -341,7 +341,7 @@
         $supportedLocales = Language::getSupportedLocales();
     @endphp
 
-    <div id="rightFloatingBar" class="rightFloatingBar"><div class="dockerTab"><i class="fa fa-chevron-circle-up"></i></div>@if ($supportedLocales && count($supportedLocales) > 1)<a href="#" data-bs-toggle="modal" data-bs-target="#languageModel" class="langChange" style="margin-right:-6px;"><i class="fa fa-language"></i></a>@endif @if (theme_option('hotline'))<a href="http://api.whatsapp.com/send?phone={{ theme_option('hotline') }}" class="supportWhatsApp"><i class="fa fa-whatsapp"></i></a>@endif<a class="orderTrack" href="{{ route('public.orders.tracking') }}"><i class="fa fa-truck"></i></a></div>
+    <div id="rightFloatingBar" class="rightFloatingBar"><div class="dockerTab"><i class="fa fa-chevron-circle-up"></i></div>@if ($supportedLocales && count($supportedLocales) > 1)<a href="#" data-bs-toggle="modal" data-bs-target="#languageModel" class="langChange" style="margin-right:-6px;"><i class="fa fa-language"></i></a>@endif @if (theme_option('hotline'))<a target="_BLANK" href="http://api.whatsapp.com/send?phone={{ theme_option('hotline') }}" class="supportWhatsApp"><i class="fa fa-whatsapp"></i></a>@endif<a class="orderTrack" href="{{ route('public.orders.tracking') }}"><i class="fa fa-truck"></i></a></div>
 
     <!-- Modal Language-->
     <div class="modal fade" id="languageModel" tabindex="-1" role="dialog" aria-labelledby="languageModel" aria-hidden="true">
