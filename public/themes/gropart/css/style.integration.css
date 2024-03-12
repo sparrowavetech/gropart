@@ -245,7 +245,7 @@ a{ color: var(--primary-color); }
 #footer .widget.widget-custom-menu ul li a { font-size: .9rem; }
 .footer__links { padding: 20px 0 0; }
 .widget-layered-nav-list ul .category-filter.opened ul li.category-filter:before { content: "\e93c"; display: inline-block; width: 15px; height: 15px; font-size: .6rem; float: left; font-family: 'Linearicons'; margin-top: 5px; }
-.rightFloatingBar .dockerTab { background-color: #F9B52E; color: #9d6b06; text-align: center; height: 30px; border-radius: 10px; }
+.rightFloatingBar .dockerTab { background-color: #F9B52E; color: #232323; text-align: center; height: 30px; border-radius: 10px; }
 .rightFloatingBar .dockerTab .fa { position: relative; bottom: 12px; }
 .rightFloatingBar { position: fixed; top: 60%; left:-15px; transform-origin: left; transform: rotate(90deg); font-size: 24px; z-index: 1000; }
 .rightFloatingBar.closed { transition:all 0.2s ease; }
@@ -256,7 +256,7 @@ a{ color: var(--primary-color); }
 .rightFloatingBar a i.fa { transform: rotate(270deg); }
 .rightFloatingBar a.langChange { background-color: #222026; }
 .rightFloatingBar a.supportWhatsApp { background-color: #28d33d; }
-.rightFloatingBar a.orderTrack { background-color: #F9B52E; }
+.rightFloatingBar a.orderTrack { background-color: #F76707; }
 .checkout-button.btn-primary {text-transform: uppercase;}
 .contact-form .btn-primary.btn-submit {padding: 15px 50px; font-size: 1.15rem; text-transform: uppercase;}
 .header .header-info.header-info-right .become-vendor-link { background: var(--primary-color); color: #fff; padding: 10px 20px; border-radius: 3px; font-weight: 700; }
@@ -789,6 +789,10 @@ body[dir="rtl"] .box-slider-3 .block-slider-bottom-banner .swiper-button-prev {
   	.section-content.section-content__slider .section-slides-wrapper .slide-item .slide-item__image {
   		height: 26.4vw;
   	}
+    .product-inner .product__title a {
+          font-size: 1rem;
+          line-height: 1.5;
+    }
 }
 @media (min-width: 1024px) and (max-width: 1300px) {
   .product-inner.slick-slide .product-price .product-price-original, 
@@ -797,6 +801,10 @@ body[dir="rtl"] .box-slider-3 .block-slider-bottom-banner .swiper-button-prev {
   }
   .product-inner.slick-slide .product-price .product-price-sale del {
       font-size: 14px !important;
+  }
+  .product-inner .product__title a {
+      font-size: 1rem;
+      line-height: 1.5;
   }
 }
 @media (max-width: 767px) {
