@@ -69,7 +69,7 @@
                 </h4>
                 <p>{{ __('Attract your customers with the best products.') }}</p>
                 <hr>
-                @if(!$totalProducts)
+                @if(!$totalProducts && $isVendorStatus)
                     <h4 class="alert-heading">{{ __('Your profile is :profileScore % completed now!', ['profileScore' => $profileScore]) }}</h4>
                     <div class="progress" style="height: 16px; font-size: 14px; font-weight: 800;">
                         <div class="progress-bar" role="progressbar" style="width: {{ $profileScore }}%;" aria-valuenow="{{ $profileScore }}" aria-valuemin="0" aria-valuemax="100">

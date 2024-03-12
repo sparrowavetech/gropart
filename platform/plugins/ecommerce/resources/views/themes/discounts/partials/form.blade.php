@@ -13,7 +13,7 @@
                     <div class="checkout__coupon-item-icon"></div>
                     <div class="checkout__coupon-item-content">
                         <div class="checkout__coupon-item-title">
-                            <h4>{{ $discount->type_option === 'amount' ? format_price($discount->value) : $discount->value . '%' }}</h4>
+                            <h4>{{ $discount->type_option === 'amount' ? format_price($discount->value) : $discount->value . '% OFF Coupon' }}</h4>
                             @if($discount->quantity > 0)
                                 <span class="checkout__coupon-item-count">
                                     ({{ __('Left :left', ['left' => $discount->left_quantity]) }})
@@ -21,7 +21,7 @@
                             @endif
                         </div>
                         <div class="checkout__coupon-item-description">
-                            {{ $discount->description ?: get_discount_description($discount) }}
+                            {!! $discount->description ?: get_discount_description($discount) !!}
                         </div>
                         <div class="checkout__coupon-item-code">
                             <span>{{ $discount->code }}</span>

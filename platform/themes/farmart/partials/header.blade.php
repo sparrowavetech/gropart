@@ -348,31 +348,48 @@
                 <nav class="navigation">
                     <div class="container-xxxl">
                         <div class="navigation__left">
-                            @if (is_plugin_active('ecommerce') && theme_option('enabled_product_categories_on_header', 'yes') == 'yes')
-                                <div class="menu--product-categories">
-                                    <div class="menu__toggle">
-                                        <span class="svg-icon">
-                                            <svg>
-                                                <use
-                                                    href="#svg-icon-list"
-                                                    xlink:href="#svg-icon-list"
-                                                ></use>
-                                            </svg>
-                                        </span>
-                                        <span class="menu__toggle-title">{{ __('Shop by Category') }}</span>
+                            @if(is_plugin_active('ecommerce'))
+                                @php
+                                    Theme::set('productCategoriesDropdown', Theme::partial('product-categories-dropdown', ['categories' => ProductCategoryHelper::getProductCategoriesWithUrl()]));
+                                @endphp
+                                @if (theme_option('enabled_product_categories_on_header', 'yes') == 'yes' && theme_option('enabled_product_categories_sidebar_on_header', 'yes') != 'yes')
+                                    <div class="menu--product-categories">
+                                        <div class="menu__toggle">
+                                            <span class="svg-icon">
+                                                <svg>
+                                                    <use
+                                                        href="#svg-icon-list"
+                                                        xlink:href="#svg-icon-list"
+                                                    ></use>
+                                                </svg>
+                                            </span>
+                                            <span class="menu__toggle-title">{{ __('Shop by Category') }}</span>
+                                        </div>
+                                        <div class="menu__content">
+                                            <ul class="menu--dropdown">
+                                                {!! Theme::get('productCategoriesDropdown') !!}
+                                            </ul>
+                                        </div>
                                     </div>
-                                    <div class="menu__content">
-                                        <ul class="menu--dropdown">
-                                            @php
-                                                Theme::set('productCategoriesDropdown', Theme::partial('product-categories-dropdown', ['categories' => ProductCategoryHelper::getProductCategoriesWithUrl()]));
-                                            @endphp
-                                            {!! Theme::get('productCategoriesDropdown') !!}
-                                        </ul>
+                                @endif
+                                @if(theme_option('enabled_product_categories_sidebar_on_header', 'yes') == 'yes')
+                                    <div class="menu--product-categories">
+                                        <a class="menu__toggle toggle--sidebar" href="#navigation-desktop">
+                                            <span class="svg-icon">
+                                                <svg>
+                                                    <use
+                                                        href="#svg-icon-list"
+                                                        xlink:href="#svg-icon-list"
+                                                    ></use>
+                                                </svg>
+                                            </span>
+                                            <span class="menu__toggle-title">{{ __('Shop by Category') }}</span>
+                                        </a>
                                     </div>
-                                </div>
+                                @endif
                             @endif
                         </div>
-                        <div @class(['navigation__center', 'ps-0' => theme_option('enabled_product_categories_on_header', 'yes') != 'yes'])>
+                        <div @class(['navigation__center', 'ps-0' => theme_option('enabled_product_categories_on_header', 'yes') != 'yes' && theme_option('enabled_product_categories_sidebar_on_header', 'yes') != 'yes'])>
                             {!! Menu::renderMenuLocation('main-menu', [
                                 'view' => 'menu',
                                 'options' => ['class' => 'menu'],

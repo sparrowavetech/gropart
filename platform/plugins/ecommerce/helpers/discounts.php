@@ -1,5 +1,6 @@
 <?php
 
+use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Facades\Html;
 use Botble\Ecommerce\Enums\DiscountTargetEnum;
 use Botble\Ecommerce\Enums\DiscountTypeOptionEnum;
@@ -19,6 +20,8 @@ if (! function_exists('get_discount_description')) {
         $value = $discount->value;
 
         $description = [];
+
+        $isAdmin = is_in_admin(true);
 
         switch ($type) {
             case DiscountTypeOptionEnum::SHIPPING:
@@ -75,8 +78,13 @@ if (! function_exists('get_discount_description')) {
                             ->all();
 
                         $productLinks = [];
+                        $user = Auth::user();
                         foreach (array_unique($products) as $productId => $productName) {
-                            $productLinks[] = Html::link(route('products.edit', $productId), $productName, ['target' => '_blank'])->toHtml();
+                            if($isAdmin) {
+                                $productLinks[] = Html::link(route('products.edit', $productId), $productName, ['target' => '_blank'])->toHtml();
+                            } else {
+                                $productLinks[] = '<strong>' . $productName . '</strong>';
+                            }
                         }
 
                         $description[] = __('for product(s) :products', ['products' => implode(', ', $productLinks)]);
@@ -90,7 +98,11 @@ if (! function_exists('get_discount_description')) {
 
                         $customerLinks = [];
                         foreach (array_unique($customers) as $customerId => $customerName) {
-                            $customerLinks[] = Html::link(route('customers.edit', $customerId), $customerName, ['target' => '_blank'])->toHtml();
+                            if($isAdmin) {
+                                $customerLinks[] = Html::link(route('customers.edit', $customerId), $customerName, ['target' => '_blank'])->toHtml();
+                            } else {
+                                $customerLinks[] = '<strong>' . $customerName . '</strong>';
+                            }
                         }
 
                         $description[] = __('for customer(s) :customers', ['customers' => implode(', ', $customerLinks)]);
@@ -109,7 +121,11 @@ if (! function_exists('get_discount_description')) {
 
                         $collectionLinks = [];
                         foreach (array_unique($collections) as $collectionId => $collectionName) {
-                            $collectionLinks[] = Html::link(route('product-collections.edit', $collectionId), $collectionName, ['target' => '_blank'])->toHtml();
+                            if($isAdmin) {
+                                $collectionLinks[] = Html::link(route('product-collections.edit', $collectionId), $collectionName, ['target' => '_blank'])->toHtml();
+                            } else {
+                                $collectionLinks[] = '<strong>' . $collectionName . '</strong>';
+                            }
                         }
 
                         $description[] = __('for all products in collection :collections', ['collections' => implode(', ', $collectionLinks)]);
@@ -125,7 +141,11 @@ if (! function_exists('get_discount_description')) {
 
                         $productLinks = [];
                         foreach ($products as $variant) {
-                            $productLinks[] = Html::link(route('products.edit', $variant->originalProduct->getKey()), $variant->originalProduct->name . ' ' . $variant->variation_attributes, ['target' => '_blank'])->toHtml();
+                            if($isAdmin) {
+                                $productLinks[] = Html::link(route('products.edit', $variant->originalProduct->getKey()), $variant->originalProduct->name . ' ' . $variant->variation_attributes, ['target' => '_blank'])->toHtml();
+                            } else {
+                                $productLinks[] = '<strong>' . $variant->originalProduct->name . '</strong>' . ' ' . $variant->variation_attributes;
+                            }
                         }
 
                         $description[] = __('for product variant(s) :variants', ['variants' => implode(', ', $productLinks)]);
@@ -143,7 +163,11 @@ if (! function_exists('get_discount_description')) {
 
                         $categoryLinks = [];
                         foreach (array_unique($categories) as $categoryId => $categoryName) {
-                            $categoryLinks[] = Html::link(route('product-categories.edit', $categoryId), $categoryName, ['target' => '_blank'])->toHtml();
+                            if($isAdmin) {
+                                $categoryLinks[] = Html::link(route('product-categories.edit', $categoryId), $categoryName, ['target' => '_blank'])->toHtml();
+                            } else {
+                                $categoryLinks[] = '<strong>' . $categoryName . '</strong>';
+                            }
                         }
 
                         $description[] = __('for all products in category :categories', ['categories' => implode(', ', $categoryLinks)]);

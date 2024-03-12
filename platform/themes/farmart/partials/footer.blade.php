@@ -81,10 +81,7 @@
         </div>
     </footer>
     @if (is_plugin_active('ecommerce'))
-        <div
-            class="panel--sidebar"
-            id="navigation-mobile"
-        >
+        <div class="panel--sidebar" id="navigation-mobile">
             <div class="panel__header">
                 <span class="svg-icon close-toggle--sidebar">
                     <svg>
@@ -102,6 +99,26 @@
                 </ul>
             </div>
         </div>
+        @if(theme_option('enabled_product_categories_sidebar_on_header', 'yes') == 'yes')
+            <div class="panel--sidebar" id="navigation-desktop">
+                <div class="panel__header">
+                    <span class="svg-icon close-toggle--sidebar">
+                        <svg>
+                            <use
+                                href="#svg-icon-arrow-left"
+                                xlink:href="#svg-icon-arrow-left"
+                            ></use>
+                        </svg>
+                    </span>
+                    <h3>{{ __('Categories') }}</h3>
+                </div>
+                <div class="panel__content">
+                    <ul class="menu--mobile">
+                        {!! Theme::get('productCategoriesDropdown') !!}
+                    </ul>
+                </div>
+            </div>
+        @endif
     @endif
 
     <div

@@ -230,10 +230,14 @@ class HookServiceProvider extends ServiceProvider
 
                 $storesTaxInfo = VendorInfo::where('customer_id', $store->customer_id)->first();
 
-                $taxInfoArray = $storesTaxInfo->tax_info;
-
-                $storeTaxId = isset($taxInfoArray['tax_id']) ? $taxInfoArray['tax_id'] : null;
-                $storeSignatureImagePath = isset($taxInfoArray['signature_image']) ? $taxInfoArray['signature_image'] : null;
+                if ($storesTaxInfo !== null && $storesTaxInfo->tax_info) {
+                    $taxInfoArray = $storesTaxInfo->tax_info;
+                    $storeTaxId = isset($taxInfoArray['tax_id']) ? $taxInfoArray['tax_id'] : null;
+                    $storeSignatureImagePath = isset($taxInfoArray['signature_image']) ? $taxInfoArray['signature_image'] : null;
+                } else {
+                    $storeTaxId = setting('ecommerce_company_tax_id_for_invoicing', 0);
+                    $storeSignatureImagePath = setting('marketplace_authorised_signature_image', 0);
+                }
 
                 if (! $store || ! $store->id) {
                     return $variables;

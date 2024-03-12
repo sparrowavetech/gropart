@@ -347,7 +347,7 @@
                             </div>
                             <div class="ps-0 mt-2">
                                 <p class="m-0 fs-6 text-default text-decoration-underline">
-                                    <em>({{ __('I have read ') }} <a target="_BLANK" title="{{ _('refund and return policy') }}" href="{{ url(theme_option('ecommerce_checkout_policy_url')) }}"><strong>{{ _('refund and return policy') }}</strong></a>)</em>
+                                    <em>({{ __('I have read ') }} <a target="_BLANK" title="{{ _('refund and return policy') }}" href="{{ url(theme_option('ecommerce_checkout_policy_url')?:'') }}"><strong>{{ _('refund and return policy') }}</strong></a>)</em>
                                 </p>
                             </div>
                         </div>

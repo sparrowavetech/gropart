@@ -35,6 +35,7 @@ return [
         'logo_in_the_checkout_page' => 'Logo in the checkout page (Default is the main logo)',
         'login_background_image' => 'Login background image',
         'register_background_image' => 'Register background image',
+        'checkout_policy_url' => 'Return & Shipping Policy URL For Checkout Page',
         'term_and_privacy_policy_url' => 'Terms and Privacy Policy URL',
     ],
     'basic_settings' => 'Basic settings',

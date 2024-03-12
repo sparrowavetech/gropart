@@ -446,5 +446,22 @@ app('events')->listen(RenderingThemeOptionSettings::class, function () {
                     'class' => 'form-control',
                 ],
             ],
+        ])
+        ->setField([
+            'id' => 'enabled_product_categories_sidebar_on_header',
+            'section_id' => 'opt-text-subsection-ecommerce',
+            'type' => 'customSelect',
+            'label' => __('Enable categories with sidebar on header?'),
+            'attributes' => [
+                'name' => 'enabled_product_categories_sidebar_on_header',
+                'list' => [
+                    'yes' => trans('core/base::base.yes'),
+                    'no' => trans('core/base::base.no'),
+                ],
+                'value' => 'yes',
+                'options' => [
+                    'class' => 'form-control',
+                ],
+            ],
         ]);
 });

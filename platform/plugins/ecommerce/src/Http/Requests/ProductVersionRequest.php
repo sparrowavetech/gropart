@@ -29,7 +29,7 @@ class ProductVersionRequest extends Request
             'product_files_external.*.link' => 'required|url|max:400',
             'product_files_external.*.size' => 'nullable|numeric|min:0|max:100000000',
             'barcode' => [
-                'required',
+                'nullable',
                 'max:50',
                 'string',
                 //Rule::unique('ec_products')->ignore($this->input('product_id')),

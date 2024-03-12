@@ -17,15 +17,18 @@
 @endphp
 
 @if (is_plugin_active('ads'))
-    @if (is_array($config['ads_key']) && count($config['ads_key']) > 0)
-        <div id="ad-widget-sidbar" class="mb-5 ad-widget slick-slides-carousel" data-slick='{{ $slickOptions }}'>
-            @foreach ($config['ads_key'] as $adKey)
-                @php
-                    $image = display_ads_advanced($adKey, ['class' => 'd-flex justify-content-center']);
-                    if (!$image) continue;
-                @endphp
-                <div class="slick-slide">
-                    <div class="lazyload" @if ($config['background']) data-bg="{{ RvMedia::getImageUrl($config['background']) }}" @endif>
+    @php
+        $ads_key = is_array($config['ads_key']) ? $config['ads_key'] : [$config['ads_key']];
+    @endphp
+    @if (is_array($config['ads_key']) && count($config['ads_key']) > 1)
+        <div class="lazyload" @if ($config['background']) data-bg="{{ RvMedia::getImageUrl($config['background']) }}" @endif>
+            <div id="ad-widget-sidbar" class="mb-5 slick-slides-carousel" data-slick='{{ $slickOptions }}'>
+                @foreach ($config['ads_key'] as $adKey)
+                    @php
+                        $image = display_ads_advanced($adKey, ['class' => 'd-flex justify-content-center']);
+                        if (!$image) continue;
+                    @endphp
+                    <div class="slick-slide">
                         @php
                             $size = 'xxxl';
                             switch ($config['size']) {
@@ -42,6 +45,35 @@
                                 <div class="my-4">
                                     {!! $image !!}
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    @else
+        <div id="ad-widget-sidbar" class="mb-4">
+            @foreach ($ads_key as $adKey)
+                @php
+                    $image = display_ads_advanced($adKey, ['class' => 'd-flex justify-content-center']);
+                    if (!$image) continue;
+                @endphp
+                <div class="lazyload" @if ($config['background']) data-bg="{{ RvMedia::getImageUrl($config['background']) }}" @endif>
+                    @php
+                        $size = 'xxxl';
+                        switch ($config['size']) {
+                            case 'large':
+                                $size = 'xxl';
+                                break;
+                            case 'medium':
+                                $size = 'lg';
+                                break;
+                        }
+                    @endphp
+                    <div class="container-{{ $size }}">
+                        <div class="row">
+                            <div class="my-4">
+                                {!! $image !!}
                             </div>
                         </div>
                     </div>
