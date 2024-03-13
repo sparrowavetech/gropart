@@ -120,6 +120,12 @@
                 :value="EcommerceHelper::isQuickBuyButtonEnabled()"
             />
 
+            <x-core-setting::on-off
+                name="enable_full_page_product_description"
+                :label="trans('plugins/ecommerce::ecommerce.setting.enable_full_page_product_description')"
+                :value="EcommerceHelper::isFullPageProductDescriptionEnabled()"
+            />
+
             <x-core-setting::radio
                 name="quick_buy_target_page"
                 :label="trans('plugins/ecommerce::ecommerce.setting.quick_buy_target')"

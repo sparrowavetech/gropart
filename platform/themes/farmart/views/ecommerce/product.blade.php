@@ -141,122 +141,157 @@
         </div>
     </div>
     <div class="container-xxxl">
-        <div class="row product-detail-tabs mt-3 mb-4">
-            <div class="col-md-12 col-lg-3">
-                <div
-                    class="nav flex-column nav-pills me-3"
-                    id="product-detail-tabs"
-                    role="tablist"
-                    aria-orientation="vertical"
-                >
-                    <a
-                        class="nav-link active"
-                        id="product-description-tab"
-                        data-bs-toggle="pill"
-                        type="button"
-                        href="#product-description"
-                        role="tab"
-                        aria-controls="product-description"
-                        aria-selected="true"
-                    >
-                        {{ __('Description') }}
-                    </a>
-                    @if (EcommerceHelper::isReviewEnabled())
-                        <a
-                            class="nav-link"
-                            id="product-reviews-tab"
-                            data-bs-toggle="pill"
-                            type="button"
-                            href="#product-reviews"
-                            role="tab"
-                            aria-controls="product-reviews"
-                            aria-selected="false"
-                        >
-                            {{ __('Reviews') }} ({{ $product->reviews_count }})
-                        </a>
-                    @endif
-                    @if (is_plugin_active('marketplace') && $product->store_id)
-                        <a
-                            class="nav-link"
-                            id="product-vendor-info-tab"
-                            data-bs-toggle="pill"
-                            type="button"
-                            href="#product-vendor-info"
-                            role="tab"
-                            aria-controls="product-vendor-info"
-                            aria-selected="false"
-                        >
-                            {{ __('Vendor Info') }}
-                        </a>
-                    @endif
-                    @if (is_plugin_active('faq') && count($product->faq_items) > 0)
-                        <a
-                            class="nav-link"
-                            id="product-faqs-tab"
-                            data-bs-toggle="pill"
-                            type="button"
-                            href="#product-faqs"
-                            role="tab"
-                            aria-controls="product-faqs"
-                            aria-selected="false"
-                        >
-                            {{ __('Questions & Answers') }}
-                        </a>
-                    @endif
-                </div>
-            </div>
-            <div class="col-md-12 col-lg-9">
-                <div
-                    class="tab-content"
-                    id="product-detail-tabs-content"
-                >
-                    <div
-                        class="tab-pane fade show active"
-                        id="product-description"
-                        role="tabpanel"
-                        aria-labelledby="product-description-tab"
-                    >
-                        <div class="ck-content">
-                            {!! BaseHelper::clean($product->content) !!}
-                        </div>
-
-                        {!! apply_filters(BASE_FILTER_PUBLIC_COMMENT_AREA, null, $product) !!}
-                    </div>
-                    @if (EcommerceHelper::isReviewEnabled())
-                        <div
-                            class="tab-pane fade"
-                            id="product-reviews"
-                            role="tabpanel"
-                            aria-labelledby="product-reviews-tab"
-                        >
+        @if(get_ecommerce_setting('enable_full_page_product_description'))
+            <div class="row">
+                <div class="col-sm-12">
+                    @if (EcommerceHelper::isReviewEnabled() && $product->reviews_count > 0)
+                        <h4 class="entry-title mt-4 pb-4 border-bottom">{{ __('Reviews') }} ({{ $product->reviews_count }})</h4>
+                        <div class="mt-4">
                             @include('plugins/ecommerce::themes.includes.reviews')
                         </div>
+                        <hr/>
+                    @endif
+                    <h4 class="entry-title mt-4 pb-4 border-bottom">{{ __('Description') }}</h4>
+                    <div class="ck-content mt-4">
+                        {!! BaseHelper::clean($product->content) !!}
+                    </div>
+                    {!! apply_filters(BASE_FILTER_PUBLIC_COMMENT_AREA, null, $product) !!}
+                    @if (is_plugin_active('faq') && count($product->faq_items) > 0)
+                        <hr/>
+                        <h4 class="entry-title mt-4 pb-4 border-bottom">{{ __('Questions & Answers') }}</h4>
+                        <div class="mt-4">
+                            @include('plugins/ecommerce::themes.includes.product-faqs', ['faqs' => $product->faq_items])
+                        </div>
                     @endif
                     @if (is_plugin_active('marketplace') && $product->store_id)
-                        <div
-                            class="tab-pane fade"
-                            id="product-vendor-info"
-                            role="tabpanel"
-                            aria-labelledby="product-vendor-info-tab"
-                        >
+                        <hr/>
+                        <h4 class="entry-title mt-4 pb-4 border-bottom">{{ __('Vendor Info') }}</h4>
+                        <div class="mt-4">
                             @include(Theme::getThemeNamespace() . '::views.marketplace.includes.info-box', [
                                 'store' => $product->store,
                             ])
                         </div>
                     @endif
-                    @if (is_plugin_active('faq') && count($product->faq_items) > 0)
-                        <div
-                            class="tab-pane fade"
-                            id="product-faqs"
-                            role="tabpanel"
-                            aria-labelledby="product-faqs-tab"
-                        >
-                            @include('plugins/ecommerce::themes.includes.product-faqs', ['faqs' => $product->faq_items])
-                        </div>
-                    @endif
                 </div>
             </div>
-        </div>
+        @else
+            <div class="row product-detail-tabs mt-3 mb-4">
+                <div class="col-md-12 col-lg-3">
+                    <div
+                        class="nav flex-column nav-pills me-3"
+                        id="product-detail-tabs"
+                        role="tablist"
+                        aria-orientation="vertical"
+                    >
+                        <a
+                            class="nav-link active"
+                            id="product-description-tab"
+                            data-bs-toggle="pill"
+                            type="button"
+                            href="#product-description"
+                            role="tab"
+                            aria-controls="product-description"
+                            aria-selected="true"
+                        >
+                            {{ __('Description') }}
+                        </a>
+                        @if (EcommerceHelper::isReviewEnabled())
+                            <a
+                                class="nav-link"
+                                id="product-reviews-tab"
+                                data-bs-toggle="pill"
+                                type="button"
+                                href="#product-reviews"
+                                role="tab"
+                                aria-controls="product-reviews"
+                                aria-selected="false"
+                            >
+                                {{ __('Reviews') }} ({{ $product->reviews_count }})
+                            </a>
+                        @endif
+                        @if (is_plugin_active('marketplace') && $product->store_id)
+                            <a
+                                class="nav-link"
+                                id="product-vendor-info-tab"
+                                data-bs-toggle="pill"
+                                type="button"
+                                href="#product-vendor-info"
+                                role="tab"
+                                aria-controls="product-vendor-info"
+                                aria-selected="false"
+                            >
+                                {{ __('Vendor Info') }}
+                            </a>
+                        @endif
+                        @if (is_plugin_active('faq') && count($product->faq_items) > 0)
+                            <a
+                                class="nav-link"
+                                id="product-faqs-tab"
+                                data-bs-toggle="pill"
+                                type="button"
+                                href="#product-faqs"
+                                role="tab"
+                                aria-controls="product-faqs"
+                                aria-selected="false"
+                            >
+                                {{ __('Questions & Answers') }}
+                            </a>
+                        @endif
+                    </div>
+                </div>
+                <div class="col-md-12 col-lg-9">
+                    <div
+                        class="tab-content"
+                        id="product-detail-tabs-content"
+                    >
+                        <div
+                            class="tab-pane fade show active"
+                            id="product-description"
+                            role="tabpanel"
+                            aria-labelledby="product-description-tab"
+                        >
+                            <div class="ck-content">
+                                {!! BaseHelper::clean($product->content) !!}
+                            </div>
+
+                            {!! apply_filters(BASE_FILTER_PUBLIC_COMMENT_AREA, null, $product) !!}
+                        </div>
+                        @if (EcommerceHelper::isReviewEnabled())
+                            <div
+                                class="tab-pane fade"
+                                id="product-reviews"
+                                role="tabpanel"
+                                aria-labelledby="product-reviews-tab"
+                            >
+                                @include('plugins/ecommerce::themes.includes.reviews')
+                            </div>
+                        @endif
+                        @if (is_plugin_active('marketplace') && $product->store_id)
+                            <div
+                                class="tab-pane fade"
+                                id="product-vendor-info"
+                                role="tabpanel"
+                                aria-labelledby="product-vendor-info-tab"
+                            >
+                                @include(Theme::getThemeNamespace() . '::views.marketplace.includes.info-box', [
+                                    'store' => $product->store,
+                                ])
+                            </div>
+                        @endif
+                        @if (is_plugin_active('faq') && count($product->faq_items) > 0)
+                            <div
+                                class="tab-pane fade"
+                                id="product-faqs"
+                                role="tabpanel"
+                                aria-labelledby="product-faqs-tab"
+                            >
+                                @include('plugins/ecommerce::themes.includes.product-faqs', ['faqs' => $product->faq_items])
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        @endif
     </div>
 </div>
 
@@ -290,7 +325,7 @@
                                 [
                                     'breakpoint' => 1199,
                                     'settings' => [
-                                        'slidesToShow' => 6,
+                                        'slidesToShow' => 5,
                                     ],
                                 ],
                                 [

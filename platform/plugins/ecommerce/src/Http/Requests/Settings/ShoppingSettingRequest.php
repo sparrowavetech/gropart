@@ -16,6 +16,7 @@ class ShoppingSettingRequest extends Request
             'compare_enabled' => $onOffRule,
             'order_tracking_enabled' => $onOffRule,
             'enable_quick_buy_button' => $onOffRule,
+            'enable_full_page_product_description' => $onOffRule,
             'order_auto_confirmed' => $onOffRule,
             'quick_buy_target_page' => ['nullable', 'required_if:enable_quick_buy_button,1', 'in:checkout,cart'],
         ];

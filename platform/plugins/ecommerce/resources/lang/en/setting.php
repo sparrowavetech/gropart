@@ -101,6 +101,7 @@ return [
             'enable_compare' => 'Enable compare',
             'enable_order_tracking' => 'Enable order tracking',
             'enable_quick_buy_button' => 'Enable quick buy button',
+            'enable_full_page_product_description' => 'Enable Full Page Product Description',
             'enable_order_auto_confirmed' => 'Auto confirm order',
             'quick_buy_target' => 'Quick buy target page',
             'checkout_page' => 'Checkout page',

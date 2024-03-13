@@ -138,6 +138,11 @@ class EcommerceHelper
         return (bool)get_ecommerce_setting('enable_quick_buy_button', 1);
     }
 
+    public function isFullPageProductDescriptionEnabled(): bool
+    {
+        return (bool)get_ecommerce_setting('enable_full_page_product_description', 1);
+    }
+
     public function getQuickBuyButtonTarget(): string
     {
         return get_ecommerce_setting('quick_buy_target_page', 'checkout');
