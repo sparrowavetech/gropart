@@ -3,6 +3,7 @@
 namespace Botble\DevTool\Commands;
 
 use Botble\DevTool\Commands\Abstracts\BaseMakeCommand;
+use Botble\DevTool\Helper;
 use Botble\Theme\Facades\Theme;
 use Illuminate\Contracts\Console\PromptsForMissingInput;
 use Illuminate\Filesystem\Filesystem as File;
@@ -19,7 +20,7 @@ class WidgetCreateCommand extends BaseMakeCommand implements PromptsForMissingIn
         $path = $this->getPath();
 
         if ($files->isDirectory($path)) {
-            $this->components->error('Widget "' . $widget . '" is already exists.');
+            $this->components->error(sprintf('Widget "%s" is already exists.', $widget));
 
             return self::FAILURE;
         }
@@ -28,7 +29,7 @@ class WidgetCreateCommand extends BaseMakeCommand implements PromptsForMissingIn
         $this->searchAndReplaceInFiles($widget, $path);
         $this->renameFiles($widget, $path);
 
-        $this->components->info('Widget "' . $widget . '" has been created in ' . $path . '.');
+        $this->components->info(sprintf('Widget "%s" has been created in %s.', $widget, $path));
 
         return self::SUCCESS;
     }
@@ -40,12 +41,14 @@ class WidgetCreateCommand extends BaseMakeCommand implements PromptsForMissingIn
 
     protected function getPath(): string
     {
-        return theme_path(Theme::getThemeName() . '/widgets/' . $this->getWidget());
+        return theme_path(
+            Helper::joinPaths([Theme::getThemeName(), 'widgets', $this->getWidget()])
+        );
     }
 
     public function getStub(): string
     {
-        return __DIR__ . '/../../stubs/widget';
+        return Helper::joinPaths([dirname(__DIR__, 2), 'stubs', 'widget']);
     }
 
     public function getReplacements(string $replaceText): array

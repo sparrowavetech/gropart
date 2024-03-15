@@ -8,6 +8,47 @@ Breaking changes are marked with ⚠️.
 
 ## [Unreleased]
 
+## [v2.0.4] - 2024-03-05
+
+**Fixed**
+
+- Fix event listener propagation by @bakerkretzmar in https://github.com/tighten/ziggy/pull/724
+
+## [v2.0.3] - 2024-02-20
+
+**Fixed**
+
+- Add Vue plugin and React hook types by @bakerkretzmar in https://github.com/tighten/ziggy/pull/715
+
+## [v2.0.2] - 2024-02-20
+
+**Fixed**
+
+- Fix package.json module and exports by @bakerkretzmar in https://github.com/tighten/ziggy/pull/714
+
+## [v2.0.1] - 2024-02-20
+
+**Fixed**
+
+- Remove default export from type declarations by @bakerkretzmar in https://github.com/tighten/ziggy/pull/713
+
+## [v2.0.0] - 2024-02-20
+
+See [UPGRADING](UPGRADING.md#upgrading-from-1x-to-2x) for detailed upgrade instructions.
+
+**Changed**
+
+- Changed PHP package namespace from `Tightenco\Ziggy` to `Tighten\Ziggy`.
+- Updated JavaScript package to only provide named exports.
+- Moved Vue and React integrations to root of JavaScript module.
+- Updated builds to only use ES Modules.
+- Updated minimum dependency versions to Laravel 9 and PHP 8.1.
+
+**Removed**
+
+- Made `makeDirectory` method of `CommandRouteGenerator` class private.
+- Removed deprecated JavaScript `check()` method.
+
 ## [v1.8.2] - 2024-02-20
 
 **Added**
@@ -333,7 +374,12 @@ Breaking changes are marked with ⚠️.
 
 For previous changes see the [Releases](https://github.com/tighten/ziggy/releases) page.
 
-[Unreleased]: https://github.com/tighten/ziggy/compare/v1.8.2...HEAD
+[Unreleased]: https://github.com/tighten/ziggy/compare/v2.0.4...HEAD
+[v2.0.4]: https://github.com/tighten/ziggy/compare/v2.0.3...v2.0.4
+[v2.0.3]: https://github.com/tighten/ziggy/compare/v2.0.2...v2.0.3
+[v2.0.2]: https://github.com/tighten/ziggy/compare/v2.0.1...v2.0.2
+[v2.0.1]: https://github.com/tighten/ziggy/compare/v2.0.0...v2.0.1
+[v2.0.0]: https://github.com/tighten/ziggy/compare/v1.8.2...v2.0.0
 [v1.8.2]: https://github.com/tighten/ziggy/compare/v1.8.1...v1.8.2
 [v1.8.1]: https://github.com/tighten/ziggy/compare/v1.8.0...v1.8.1
 [v1.8.0]: https://github.com/tighten/ziggy/compare/v1.7.0...v1.8.0

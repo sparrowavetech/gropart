@@ -2,18 +2,14 @@
 
 namespace Database\Seeders;
 
-use Botble\Base\Models\MetaBox as MetaBoxModel;
 use Botble\Base\Supports\BaseSeeder;
+use Botble\Ecommerce\Database\Seeders\Traits\HasProductCategorySeeder;
 use Botble\Ecommerce\Models\ProductCategory;
-use Botble\Slug\Models\Slug;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
-use MetaBox;
-use SlugHelper;
 
 class ProductCategorySeeder extends BaseSeeder
 {
+    use HasProductCategorySeeder;
+
     public function run(): void
     {
         $this->uploadFiles('product-categories');
@@ -22,7 +18,7 @@ class ProductCategorySeeder extends BaseSeeder
             [
                 'name' => 'Fruits & Vegetables',
                 'is_featured' => true,
-                'image' => 'product-categories/1.png',
+                'image' => $this->filePath('product-categories/1.png'),
                 'icon' => 'icon-star',
                 'children' => [
                     [
@@ -180,194 +176,10 @@ class ProductCategorySeeder extends BaseSeeder
             ],
         ];
 
-        ProductCategory::truncate();
-        Slug::where('reference_type', ProductCategory::class)->delete();
-        MetaBoxModel::where('reference_type', ProductCategory::class)->delete();
+        ProductCategory::query()->truncate();
 
         foreach ($categories as $index => $item) {
             $this->createCategoryItem($index, $item);
-        }
-
-        // Translations
-        DB::table('ec_product_categories_translations')->truncate();
-
-        $translations = [
-            [
-                'name' => 'Rau củ quả',
-                'children' => [
-                    [
-                        'name' => 'Trái cây',
-                        'children' => [
-                            ['name' => 'Táo'],
-                            ['name' => 'Chuối'],
-                            ['name' => 'Quả Mọng'],
-                            ['name' => 'Cam'],
-                            ['name' => 'Nho'],
-                            ['name' => 'Chanh'],
-                            ['name' => 'Quả Đào'],
-                            ['name' => 'Lê'],
-                            ['name' => 'Dưa Gang'],
-                            ['name' => 'Bơ'],
-                            ['name' => 'Mận & Mơ'],
-                        ],
-                    ],
-                    [
-                        'name' => 'Rau',
-                        'children' => [
-                            ['name' => 'Khoai Tây'],
-                            ['name' => 'Cà rốt'],
-                            ['name' => 'Bông cải xanh & súp lơ trắng'],
-                            ['name' => 'Bắp cải, rau bina & rau xanh'],
-                            ['name' => 'Hành tây, tỏi tây'],
-                            ['name' => 'Nấm'],
-                            ['name' => 'Cà chua'],
-                            ['name' => 'Đậu, Đậu Hà Lan & Bắp rang bơ'],
-                            ['name' => 'Nước uống tươi'],
-                        ],
-                    ],
-                ],
-            ],
-            [
-                'name' => 'Bánh mì kẹo',
-                'children' => [
-                    [
-                        'name' => 'Crisps, Snack & Nuts',
-                        'children' => [
-                            ['name' => 'Khoai tây chiên giòn & bỏng ngô'],
-                            ['name' => 'Nuts & Seeds'],
-                            ['name' => 'Lighter Options'],
-                            ['name' => 'Cereal Bars'],
-                            ['name' => 'Bánh mì que & Pretzels'],
-                            ['name' => 'Fruit Snacking'],
-                            ['name' => 'Bánh gạo'],
-                            ['name' => 'Protein & Energy Snacks'],
-                            ['name' => 'Toddler Snacks'],
-                            ['name' => 'Meat Snacks'],
-                            ['name' => 'Đậu'],
-                            ['name' => 'Lentils'],
-                            ['name' => 'Chickpeas'],
-                        ],
-                    ],
-                    [
-                        'name' => 'Tins & Cans',
-                        'children' => [
-                            ['name' => 'Khoai tây'],
-                            ['name' => 'Baked Beans, Spaghetti'],
-                            ['name' => 'Cá'],
-                            ['name' => 'Đậu & Pulses'],
-                            ['name' => 'Trái cây'],
-                            ['name' => 'Coconut Milk & Cream'],
-                            ['name' => 'Lighter Options'],
-                            ['name' => 'Olives'],
-                            ['name' => 'Sweetcorn'],
-                            ['name' => 'Cà rốt'],
-                            ['name' => 'Đậu Hà Lan'],
-                            ['name' => 'Mixed Vegetables'],
-                        ],
-                    ],
-                ],
-            ],
-            ['name' => 'Hải sản đông lạnh'],
-            ['name' => 'Thịt sống'],
-            [
-                'name' => 'Rượu & Đồ uống có cồn',
-                'children' => [
-                    [
-                        'name' => 'Ready Meals',
-                        'children' => [
-                            ['name' => 'Meals for 1'],
-                            ['name' => 'Meals for 2'],
-                            ['name' => 'Indian'],
-                            ['name' => 'Italian'],
-                            ['name' => 'Chinese'],
-                            ['name' => 'Traditional British'],
-                            ['name' => 'Thai & Oriental'],
-                            ['name' => 'Mediterranean & Moroccan'],
-                            ['name' => 'Mexican & Caribbean'],
-                            ['name' => 'Lighter Meals'],
-                            ['name' => 'Lunch & Veg Pots'],
-                        ],
-                    ],
-                    [
-                        'name' => 'Salad & thảo mộc',
-                        'children' => [
-                            ['name' => 'Túi đựng salad'],
-                            ['name' => 'Quả dưa chuột'],
-                            ['name' => 'Cà chua'],
-                            ['name' => 'Rau xà lách'],
-                            ['name' => 'Lunch Salad Bowls'],
-                            ['name' => 'Fresh Herbs'],
-                            ['name' => 'Avocados'],
-                            ['name' => 'Peppers'],
-                            ['name' => 'Coleslaw & Potato Salad'],
-                            ['name' => 'Spring Onions'],
-                            ['name' => 'Chilli, Ginger & Garlic'],
-                        ],
-                    ],
-                ],
-            ],
-            ['name' => 'Trà & Cà phê'],
-            ['name' => 'Sữa và các loại sữa'],
-            ['name' => 'Thức ăn cho thú cưng'],
-            ['name' => 'Tủ đựng thức ăn'],
-        ];
-
-        $count = 1;
-        foreach ($translations as $translation) {
-            $this->createCategoryItemTrans($count, $translation);
-        }
-    }
-
-    /**
-     * @param int $index
-     * @param array $category
-     * @param int $parentId
-     */
-    protected function createCategoryItem(int $index, array $category, int $parentId = 0): void
-    {
-        $category['parent_id'] = $parentId;
-        $category['order'] = $index;
-
-        if (Arr::has($category, 'children')) {
-            $children = $category['children'];
-            unset($category['children']);
-        } else {
-            $children = [];
-        }
-
-        $createdCategory = ProductCategory::create(Arr::except($category, ['icon']));
-
-        Slug::create([
-            'reference_type' => ProductCategory::class,
-            'reference_id' => $createdCategory->id,
-            'key' => Str::slug($createdCategory->name),
-            'prefix' => SlugHelper::getPrefix(ProductCategory::class),
-        ]);
-
-        if (isset($category['icon'])) {
-            MetaBox::saveMetaBoxData($createdCategory, 'icon', $category['icon']);
-        }
-
-        if ($children) {
-            foreach ($children as $childIndex => $child) {
-                $this->createCategoryItem($childIndex, $child, $createdCategory->id);
-            }
-        }
-    }
-
-    protected function createCategoryItemTrans(int &$count, array $translation): void
-    {
-        $translation['lang_code'] = 'vi';
-        $translation['ec_product_categories_id'] = $count;
-
-        DB::table('ec_product_categories_translations')->insert(Arr::except($translation, ['children']));
-
-        $count++;
-
-        if (Arr::get($translation, 'children')) {
-            foreach ($translation['children'] as $child) {
-                $this->createCategoryItemTrans($count, $child);
-            }
         }
     }
 }

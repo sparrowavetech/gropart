@@ -3,6 +3,8 @@
 namespace Botble\DevTool\Commands;
 
 use Botble\DevTool\Commands\Abstracts\BaseMakeCommand;
+use Botble\DevTool\Commands\Concerns\HasSubModule;
+use Botble\DevTool\Helper;
 use Botble\PluginManagement\Commands\Concern\HasPluginNameValidation;
 use Illuminate\Contracts\Console\PromptsForMissingInput;
 use Illuminate\Support\Facades\File;
@@ -14,6 +16,7 @@ use Symfony\Component\Console\Input\InputArgument;
 class PluginMakeCrudCommand extends BaseMakeCommand implements PromptsForMissingInput
 {
     use HasPluginNameValidation;
+    use HasSubModule;
 
     public function handle(): int
     {
@@ -24,75 +27,51 @@ class PluginMakeCrudCommand extends BaseMakeCommand implements PromptsForMissing
         $location = plugin_path($plugin);
 
         if (! File::isDirectory($location)) {
-            $this->components->error('Plugin named [' . $plugin . '] does not exists.');
+            $this->components->error(sprintf('Plugin named [%s] does not exists.', $plugin));
 
             return self::FAILURE;
         }
 
         $name = strtolower($this->argument('name'));
-
         $this->publishStubs($this->getStub(), $location);
         $this->removeUnusedFiles($location);
         $this->renameFiles($name, $location);
         $this->searchAndReplaceInFiles($name, $location);
-        $this->line('------------------');
-        $this->line(
-            '<info>The CRUD for plugin </info> <comment>' . $plugin . '</comment> <info>was created in</info> <comment>' . $location . '</comment><info>, customize it!</info>'
+
+        $this->components->info(
+            sprintf('<info>The CRUD for plugin </info> <comment>%s</comment> <info>was created in</info> <comment>%s</comment><info>, customize it!</info>', $plugin, $location)
         );
-        $this->line('------------------');
+
         $this->call('cache:clear');
 
-        $replacements = [
-            'config/permissions.stub',
-            'helpers/constants.stub',
-            'routes/web.stub',
-            'src/Providers/{Module}ServiceProvider.stub',
-            'src/Plugin.stub',
-        ];
-
-        foreach ($replacements as $replacement) {
-            $this->line(
-                'Add below code into ' . $this->replacementSubModule(
-                    null,
-                    str_replace(base_path(), '', $location) . '/' . $replacement
-                )
-            );
-            $this->info($this->replacementSubModule($replacement));
-        }
+        $this->handleReplacements($location, [
+            Helper::joinPaths(['config', 'permissions.stub']),
+            Helper::joinPaths(['helpers', 'helpers.stub']),
+            Helper::joinPaths(['routes', 'web.stub']),
+            Helper::joinPaths(['src', 'Providers', '{Module}ServiceProvider.stub']),
+            Helper::joinPaths(['src', 'Plugin.stub']),
+        ]);
 
         return self::SUCCESS;
     }
 
     public function getStub(): string
     {
-        return __DIR__ . '/../../../dev-tool/stubs/module';
+        return Helper::joinPaths([dirname(__DIR__, 3), 'dev-tool', 'stubs', 'module']);
     }
 
     protected function removeUnusedFiles(string $location): void
     {
         $files = [
-            'config/permissions.stub',
-            'helpers/constants.stub',
-            'routes/web.stub',
-            'src/Providers/{Module}ServiceProvider.stub',
+            Helper::joinPaths(['config', 'permissions.stub']),
+            Helper::joinPaths(['helpers', 'constants.stub']),
+            Helper::joinPaths(['routes', 'web.stub']),
+            Helper::joinPaths(['src', 'Providers', '{Module}ServiceProvider.stub']),
         ];
 
         foreach ($files as $file) {
-            File::delete($location . '/' . $file);
+            File::delete(Helper::joinPaths([$location, $file]));
         }
-    }
-
-    protected function replacementSubModule(string $file = null, $content = null): string
-    {
-        $name = strtolower($this->argument('name'));
-
-        if ($file && empty($content)) {
-            $content = file_get_contents($this->getStub() . '/../sub-module/' . $file);
-        }
-
-        $replace = $this->getReplacements($name) + $this->baseReplacements($name);
-
-        return str_replace(array_keys($replace), $replace, $content);
     }
 
     public function getReplacements(string $replaceText): array

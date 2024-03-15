@@ -4,10 +4,7 @@ namespace Database\Seeders;
 
 use Botble\Base\Supports\BaseSeeder;
 use Botble\Ecommerce\Models\Brand;
-use Botble\Slug\Models\Slug;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
-use SlugHelper;
+use Botble\Slug\Facades\SlugHelper;
 
 class BrandSeeder extends BaseSeeder
 {
@@ -43,52 +40,14 @@ class BrandSeeder extends BaseSeeder
             ],
         ];
 
-        Brand::truncate();
-        Slug::where('reference_type', Brand::class)->delete();
+        Brand::query()->truncate();
 
         foreach ($brands as $key => $item) {
             $item['order'] = $key;
             $item['is_featured'] = true;
-            $brand = Brand::create($item);
+            $brand = Brand::query()->create($item);
 
-            Slug::create([
-                'reference_type' => Brand::class,
-                'reference_id' => $brand->id,
-                'key' => Str::slug($brand->name),
-                'prefix' => SlugHelper::getPrefix(Brand::class),
-            ]);
-        }
-
-        DB::table('ec_brands_translations')->truncate();
-
-        $translations = [
-            [
-                'name' => 'FoodPound',
-                'description' => 'New Snacks Release',
-            ],
-            [
-                'name' => 'iTea JSC',
-                'description' => 'Happy Tea 100% Organic. From $29.9',
-            ],
-            [
-                'name' => 'Soda Brand',
-                'description' => 'Fresh Meat Sausage. BUY 2 GET 1!',
-            ],
-            [
-                'name' => 'Farmart',
-                'description' => 'Fresh Meat Sausage. BUY 2 GET 1!',
-            ],
-            [
-                'name' => 'Soda Brand',
-                'description' => 'Fresh Meat Sausage. BUY 2 GET 1!',
-            ],
-        ];
-
-        foreach ($translations as $index => $item) {
-            $item['lang_code'] = 'vi';
-            $item['ec_brands_id'] = $index + 1;
-
-            DB::table('ec_brands_translations')->insert($item);
+            SlugHelper::createSlug($brand);
         }
     }
 }

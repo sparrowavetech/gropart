@@ -3,12 +3,13 @@
 namespace Botble\DevTool\Commands;
 
 use Botble\DevTool\Commands\Abstracts\BaseMakeCommand;
+use Botble\DevTool\Helper;
 use Illuminate\Contracts\Console\PromptsForMissingInput;
 use Illuminate\Support\Str;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
 
-#[AsCommand('cms:package:create', 'Create a package in the /platform/packages directory.')]
+#[AsCommand('cms:package:create', 'Create a new package.')]
 class PackageCreateCommand extends BaseMakeCommand implements PromptsForMissingInput
 {
     public function handle(): int
@@ -23,7 +24,7 @@ class PackageCreateCommand extends BaseMakeCommand implements PromptsForMissingI
         $location = package_path($package);
 
         if ($this->laravel['files']->isDirectory($location)) {
-            $this->components->error('A package named [' . $package . '] already exists.');
+            $this->components->error(sprintf('A package named [%s] already exists.', $package));
 
             return self::FAILURE;
         }
@@ -31,14 +32,14 @@ class PackageCreateCommand extends BaseMakeCommand implements PromptsForMissingI
         $this->publishStubs($this->getStub(), $location);
         $this->renameFiles($package, $location);
         $this->searchAndReplaceInFiles($package, $location);
-        $this->line('------------------');
-        $this->line(
-            '<info>The package</info> <comment>' . $package . '</comment> <info>was created in</info> <comment>' . $location . '</comment><info>, customize it!</info>'
+
+        $this->components->info(
+            sprintf('<info>The package</info> <comment>%s</comment> <info>was created in</info> <comment>%s</comment><info>, customize it!</info>', $package, $location)
         );
-        $this->line(
-            '<info>Add</info> <comment>"botble/' . $package . '": "*@dev"</comment> to composer.json then run <comment>composer update</comment> to install this package!'
+        $this->components->info(
+            sprintf('<info>Add</info> <comment>"botble/%s": "*@dev"</comment> to composer.json then run <comment>composer update</comment> to install this package!', $package)
         );
-        $this->line('------------------');
+
         $this->call('cache:clear');
 
         return self::SUCCESS;
@@ -46,7 +47,9 @@ class PackageCreateCommand extends BaseMakeCommand implements PromptsForMissingI
 
     public function getStub(): string
     {
-        return __DIR__ . '/../../stubs/module';
+        return dirname(__DIR__, 2) .
+            DIRECTORY_SEPARATOR .
+            Helper::joinPaths(['stubs', 'module']);
     }
 
     public function getReplacements(string $replaceText): array
@@ -59,7 +62,11 @@ class PackageCreateCommand extends BaseMakeCommand implements PromptsForMissingI
             '{Modules}' => ucfirst(Str::plural(Str::snake(str_replace('-', '_', $replaceText)))),
             '{-modules}' => Str::plural($replaceText),
             '{MODULE}' => strtoupper(Str::snake(str_replace('-', '_', $replaceText))),
-            '{Module}' => ucfirst(Str::camel($replaceText)),
+            '{Module}' => str($replaceText)
+                ->replace('/', '\\')
+                ->afterLast('\\')
+                ->studly()
+                ->prepend('Botble\\'),
         ];
     }
 

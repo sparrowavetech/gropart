@@ -4,8 +4,8 @@ namespace Database\Seeders;
 
 use Botble\Ads\Models\Ads;
 use Botble\Base\Supports\BaseSeeder;
+use Carbon\Carbon;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class AdsSeeder extends BaseSeeder
@@ -14,7 +14,7 @@ class AdsSeeder extends BaseSeeder
     {
         $this->uploadFiles('promotion');
 
-        Ads::truncate();
+        Ads::query()->truncate();
 
         $items = [
             [
@@ -56,44 +56,10 @@ class AdsSeeder extends BaseSeeder
             if (! isset($item['key'])) {
                 $item['key'] = strtoupper(Str::random(12));
             }
-            $item['expired_at'] = now()->addYears(5)->toDateString();
+            $item['expired_at'] = Carbon::now()->addYears(5)->toDateString();
             $item['url'] = Arr::get($item, 'url', '/products');
 
-            Ads::create($item);
-        }
-
-        DB::table('ads_translations')->truncate();
-
-        $translations = [
-            [
-                'name' => 'Top Slider Image 1',
-                'image' => 'promotion/1.jpg',
-            ],
-            [
-                'name' => 'Homepage middle 1',
-                'image' => 'promotion/2.png',
-            ],
-            [
-                'name' => 'Homepage middle 2',
-                'image' => 'promotion/3.png',
-
-            ],
-            [
-                'name' => 'Homepage middle 3',
-                'image' => 'promotion/4.png',
-            ],
-            [
-                'name' => 'Products list 1',
-                'image' => 'promotion/5.png',
-            ],
-        ];
-
-        foreach ($translations as $index => $item) {
-            $item['lang_code'] = 'vi';
-            $item['ads_id'] = $index + 1;
-            $item['url'] = '/vi/products';
-
-            DB::table('ads_translations')->insert($item);
+            Ads::query()->create($item);
         }
     }
 }

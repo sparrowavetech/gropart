@@ -2,13 +2,12 @@
 
 namespace Database\Seeders;
 
-use Botble\Base\Models\MetaBox as MetaBoxModel;
+use Botble\Base\Facades\MetaBox;
 use Botble\Base\Supports\BaseSeeder;
 use Botble\Language\Models\LanguageMeta;
-use Botble\Setting\Models\Setting;
+use Botble\Setting\Facades\Setting;
 use Botble\SimpleSlider\Models\SimpleSlider;
 use Botble\SimpleSlider\Models\SimpleSliderItem;
-use MetaBox;
 
 class SimpleSliderSeeder extends BaseSeeder
 {
@@ -16,81 +15,44 @@ class SimpleSliderSeeder extends BaseSeeder
     {
         $this->uploadFiles('sliders');
 
-        SimpleSlider::truncate();
-        SimpleSliderItem::truncate();
-        LanguageMeta::where('reference_type', SimpleSlider::class)->delete();
-        MetaBoxModel::where('reference_type', SimpleSlider::class)->delete();
+        SimpleSlider::query()->truncate();
+        SimpleSliderItem::query()->truncate();
 
         $sliders = [
-            'en_US' => [
-                [
-                    'name' => 'Home slider',
-                    'key' => 'home-slider',
-                    'description' => 'The main slider on homepage',
-                ],
-            ],
-            'vi' => [
-                [
-                    'name' => 'Slider trang chủ',
-                    'key' => 'slider-trang-chu',
-                    'description' => 'Slider chính trên trang chủ',
-                ],
+            [
+                'name' => 'Home slider',
+                'key' => 'home-slider',
+                'description' => 'The main slider on homepage',
             ],
         ];
 
         $sliderItems = [
-            'en_US' => [
-                [
-                    'title' => 'Slider 1',
-                ],
-                [
-                    'title' => 'Slider 2',
-                ],
+            [
+                'title' => 'Slider 1',
             ],
-            'vi' => [
-                [
-                    'title' => 'Slider 1',
-                ],
-                [
-                    'title' => 'Slider 2',
-                ],
+            [
+                'title' => 'Slider 2',
             ],
         ];
 
-        foreach ($sliders as $locale => $sliderItem) {
-            foreach ($sliderItem as $index => $value) {
-                $slider = SimpleSlider::create($value);
+        foreach ($sliders as $value) {
+            $slider = SimpleSlider::query()->create($value);
 
-                $originValue = null;
+            LanguageMeta::saveMetaData($slider);
 
-                if ($locale !== 'en_US') {
-                    $originValue = LanguageMeta::where([
-                        'reference_id' => $index + 1,
-                        'reference_type' => SimpleSlider::class,
-                    ])->value('lang_meta_origin');
-                }
+            foreach ($sliderItems as $key => $item) {
+                $item['link'] = '/products';
+                $item['image'] = 'sliders/0' . ($key + 1) . '.jpg';
+                $item['order'] = $key + 1;
+                $item['simple_slider_id'] = $slider->id;
 
-                LanguageMeta::saveMetaData($slider, $locale, $originValue);
+                $ssItem = SimpleSliderItem::query()->create($item);
 
-                foreach ($sliderItems[$locale] as $key => $item) {
-                    $item['link'] = '/products';
-                    $item['image'] = 'sliders/0' . ($key + 1) . '.jpg';
-                    $item['order'] = $key + 1;
-                    $item['simple_slider_id'] = $slider->id;
-
-                    $ssItem = SimpleSliderItem::create($item);
-
-                    MetaBox::saveMetaBoxData($ssItem, 'tablet_image', 'sliders/0' . ($key + 1) . '.jpg');
-                    MetaBox::saveMetaBoxData($ssItem, 'mobile_image', 'sliders/0' . ($key + 1) . '-sm.jpg');
-                }
+                MetaBox::saveMetaBoxData($ssItem, 'tablet_image', 'sliders/0' . ($key + 1) . '.jpg');
+                MetaBox::saveMetaBoxData($ssItem, 'mobile_image', 'sliders/0' . ($key + 1) . '-sm.jpg');
             }
         }
 
-        Setting::insertOrIgnore([
-            [
-                'key' => 'simple_slider_using_assets',
-                'value' => 0,
-            ],
-        ]);
+        Setting::set('simple_slider_using_assets', 0)->save();
     }
 }

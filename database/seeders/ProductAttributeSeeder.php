@@ -5,15 +5,14 @@ namespace Database\Seeders;
 use Botble\Base\Supports\BaseSeeder;
 use Botble\Ecommerce\Models\ProductAttribute;
 use Botble\Ecommerce\Models\ProductAttributeSet;
-use Illuminate\Support\Facades\DB;
 
 class ProductAttributeSeeder extends BaseSeeder
 {
     public function run(): void
     {
-        ProductAttributeSet::truncate();
+        ProductAttributeSet::query()->truncate();
 
-        ProductAttributeSet::create([
+        ProductAttributeSet::query()->create([
             'title' => 'Color',
             'slug' => 'color',
             'display_layout' => 'visual',
@@ -22,7 +21,7 @@ class ProductAttributeSeeder extends BaseSeeder
             'order' => 0,
         ]);
 
-        ProductAttributeSet::create([
+        ProductAttributeSet::query()->create([
             'title' => 'Size',
             'slug' => 'size',
             'display_layout' => 'text',
@@ -31,7 +30,7 @@ class ProductAttributeSeeder extends BaseSeeder
             'order' => 1,
         ]);
 
-        ProductAttributeSet::create([
+        ProductAttributeSet::query()->create([
             'title' => 'Weight',
             'slug' => 'weight',
             'display_layout' => 'text',
@@ -40,7 +39,7 @@ class ProductAttributeSeeder extends BaseSeeder
             'order' => 0,
         ]);
 
-        ProductAttributeSet::create([
+        ProductAttributeSet::query()->create([
             'title' => 'Boxes',
             'slug' => 'boxes',
             'display_layout' => 'text',
@@ -49,7 +48,7 @@ class ProductAttributeSeeder extends BaseSeeder
             'order' => 1,
         ]);
 
-        ProductAttribute::truncate();
+        ProductAttribute::query()->truncate();
 
         $productAttributes = [
             [
@@ -79,7 +78,7 @@ class ProductAttributeSeeder extends BaseSeeder
             [
                 'attribute_set_id' => 1,
                 'title' => 'Black',
-                'slug' => 'back',
+                'slug' => 'black',
                 'color' => '#2F366C',
                 'is_default' => false,
                 'order' => 4,
@@ -201,94 +200,7 @@ class ProductAttributeSeeder extends BaseSeeder
         ];
 
         foreach ($productAttributes as $item) {
-            ProductAttribute::create($item);
-        }
-
-        if (is_plugin_active('language')) {
-            DB::table('ec_product_attributes_translations')->truncate();
-            DB::table('ec_product_attribute_sets_translations')->truncate();
-
-            DB::table('ec_product_attribute_sets_translations')->insert([
-                'title' => 'Màu sắc',
-                'ec_product_attribute_sets_id' => 1,
-                'lang_code' => 'vi',
-            ]);
-
-            DB::table('ec_product_attribute_sets_translations')->insert([
-                'title' => 'Kích thước',
-                'ec_product_attribute_sets_id' => 2,
-                'lang_code' => 'vi',
-            ]);
-
-            $translations = [
-                [
-                    'title' => 'Xanh lá cây',
-                ],
-                [
-                    'title' => 'Xanh da trời',
-                ],
-                [
-                    'title' => 'Đỏ',
-                ],
-                [
-                    'title' => 'Đen',
-                ],
-                [
-                    'title' => 'Nâu',
-                ],
-                [
-                    'title' => 'S',
-                ],
-                [
-                    'title' => 'M',
-                ],
-                [
-                    'title' => 'L',
-                ],
-                [
-                    'title' => 'XL',
-                ],
-                [
-                    'title' => 'XXL',
-                ],
-                [
-                    'title' => '1KG',
-                ],
-                [
-                    'title' => '2KG',
-                ],
-                [
-                    'title' => '3KG',
-                ],
-                [
-                    'title' => '4KG',
-                ],
-                [
-                    'title' => '5KG',
-                ],
-                [
-                    'title' => '1 Hộp',
-                ],
-                [
-                    'title' => '2 Hộp',
-                ],
-                [
-                    'title' => '3 Hộp',
-                ],
-                [
-                    'title' => '4 Hộp',
-                ],
-                [
-                    'title' => '5 Hộp',
-                ],
-            ];
-
-            foreach ($translations as $index => $item) {
-                $item['lang_code'] = 'vi';
-                $item['ec_product_attributes_id'] = $index + 1;
-
-                DB::table('ec_product_attributes_translations')->insert($item);
-            }
+            ProductAttribute::query()->create($item);
         }
     }
 }

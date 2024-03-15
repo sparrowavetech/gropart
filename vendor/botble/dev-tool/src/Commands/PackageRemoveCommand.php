@@ -4,6 +4,7 @@ namespace Botble\DevTool\Commands;
 
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Supports\Helper;
+use Botble\DevTool\Helper as HelperDevTool;
 use Illuminate\Console\Command;
 use Illuminate\Contracts\Console\PromptsForMissingInput;
 use Illuminate\Support\Facades\DB;
@@ -38,7 +39,9 @@ class PackageRemoveCommand extends Command implements PromptsForMissingInput
     protected function processRemove(string $package, string $location): bool
     {
         $migrations = [];
-        foreach (BaseHelper::scanFolder($location . '/database/migrations') as $file) {
+        foreach (BaseHelper::scanFolder(
+            HelperDevTool::joinPaths([$location, 'database', 'migrations'])
+        ) as $file) {
             $migrations[] = pathinfo($file, PATHINFO_FILENAME);
         }
 
@@ -52,7 +55,7 @@ class PackageRemoveCommand extends Command implements PromptsForMissingInput
 
         $this->components->info('Removed package files successfully!');
 
-        $this->components->info('Remove <comment>"botble/' . $package . '": "*@dev"</comment> to composer.json then run <comment>composer update</comment> to remove this package!');
+        $this->components->info(sprintf('Remove <comment>"botble/%s": "*@dev"</comment> to composer.json then run <comment>composer update</comment> to remove this package!', $package));
 
         return true;
     }

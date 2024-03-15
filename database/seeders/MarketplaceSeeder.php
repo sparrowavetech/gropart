@@ -2,52 +2,17 @@
 
 namespace Database\Seeders;
 
-use Botble\Base\Models\MetaBox as MetaBoxModel;
+use Botble\Base\Facades\MetaBox;
 use Botble\Base\Supports\BaseSeeder;
-use Botble\Ecommerce\Models\Customer;
-use Botble\Ecommerce\Models\Product;
-use Botble\Marketplace\Models\Store;
-use Botble\Marketplace\Models\VendorInfo;
-use Botble\Slug\Models\Slug;
-use Faker\Factory;
-use Illuminate\Support\Str;
-use MetaBox;
-use SlugHelper;
+use Botble\Marketplace\Database\Seeders\Traits\HasMarketplaceSeeder;
 
 class MarketplaceSeeder extends BaseSeeder
 {
+    use HasMarketplaceSeeder;
+
     public function run(): void
     {
         $this->uploadFiles('stores');
-
-        Customer::where('is_vendor', 1)->update(['is_vendor' => 0]);
-        Store::truncate();
-        VendorInfo::truncate();
-        Slug::where('reference_type', Store::class)->delete();
-        MetaBoxModel::where('reference_type', Store::class)->delete();
-        $faker = Factory::create();
-
-        $vendors = [];
-        foreach (Customer::get() as $customer) {
-            $customer->is_vendor = $customer->id < 9;
-            $customer->vendor_verified_at = $customer->is_vendor ? now() : null;
-            $customer->save();
-
-            if ($customer->is_vendor) {
-                $vendors[] = $customer->id;
-
-                $vendorInfo = new VendorInfo();
-                $vendorInfo->bank_info = [
-                    'name' => $faker->name(),
-                    'number' => $faker->e164PhoneNumber(),
-                    'full_name' => $faker->name(),
-                    'description' => $faker->name(),
-                ];
-                $vendorInfo->customer_id = $customer->id;
-
-                $vendorInfo->save();
-            }
-        }
 
         $storeNames = [
             'GoPro',
@@ -60,7 +25,9 @@ class MarketplaceSeeder extends BaseSeeder
             'Old El Paso',
         ];
 
-        for ($i = 0; $i < count($vendors); $i++) {
+        $stores = [];
+
+        for ($i = 0; $i < count($storeNames); $i++) {
             $content = '<p>I have seen many people underestimating the power of their wallets. To them, they are just a functional item they use to carry. As a result, they often end up with the wallets which are not really suitable for them.</p>
 
 <p>You should pay more attention when you choose your wallets. There are a lot of them on the market with the different designs and styles. When you choose carefully, you would be able to buy a wallet that is catered to your needs. Not to mention that it will help to enhance your style significantly.</p>
@@ -70,7 +37,7 @@ class MarketplaceSeeder extends BaseSeeder
 <p><br />
 &nbsp;</p>
 
-<p><strong><em>For all of the reason above, here are 7 expert tips to help you pick up the right men&rsquo;s wallet for you:</em></strong></p>
+<p><strong><em>For all the reason above, here are 7 expert tips to help you pick up the right men&rsquo;s wallet for you:</em></strong></p>
 
 <h4><strong>Number 1: Choose A Neat Wallet</strong></h4>
 
@@ -118,28 +85,17 @@ class MarketplaceSeeder extends BaseSeeder
 <p>&nbsp;</p>
 ';
 
-            $store = Store::create([
+            $stores[] = [
                 'name' => $storeNames[$i],
-                'email' => $faker->safeEmail(),
-                'phone' => $faker->e164PhoneNumber(),
-                'logo' => 'stores/' . ($i + 1) . '.png',
-                'country' => $faker->countryCode(),
-                'state' => $faker->state(),
-                'city' => $faker->city(),
-                'address' => $faker->streetAddress(),
-                'customer_id' => $vendors[$i],
-                'description' => $faker->text(400),
+                'logo' => $this->filePath('stores/' . ($i + 1) . '.png'),
                 'content' => $content,
-            ]);
+            ];
+        }
 
-            Slug::create([
-                'reference_type' => Store::class,
-                'reference_id' => $store->id,
-                'key' => Str::slug($store->name),
-                'prefix' => SlugHelper::getPrefix(Store::class),
-            ]);
+        $stores = $this->createStores($stores);
 
-            MetaBox::saveMetaBoxData($store, 'background', 'stores/background-' . rand(1, 2) . '.jpg');
+        foreach ($stores as $store) {
+            MetaBox::saveMetaBoxData($store, 'background', $this->filePath(sprintf('stores/background-%s.jpg', rand(1, 2))));
 
             MetaBox::saveMetaBoxData($store, 'socials', [
                 'facebook' => 'https://www.facebook.com/',
@@ -147,11 +103,6 @@ class MarketplaceSeeder extends BaseSeeder
                 'youtube' => 'https://www.youtube.com/',
                 'linkedin' => 'https://www.linkedin.com/',
             ]);
-        }
-
-        foreach (Product::where('is_variation', 0)->get() as $product) {
-            $product->store_id = Store::inRandomOrder()->value('id');
-            $product->save();
         }
     }
 }

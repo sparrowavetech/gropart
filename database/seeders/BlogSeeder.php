@@ -3,21 +3,12 @@
 namespace Database\Seeders;
 
 use Botble\ACL\Models\User;
-use Botble\Base\Models\MetaBox as MetaBoxModel;
 use Botble\Base\Supports\BaseSeeder;
 use Botble\Blog\Models\Category;
-use Botble\Blog\Models\CategoryTranslation;
 use Botble\Blog\Models\Post;
-use Botble\Blog\Models\PostTranslation;
 use Botble\Blog\Models\Tag;
-use Botble\Blog\Models\TagTranslation;
-use Botble\Language\Models\LanguageMeta;
-use Botble\Slug\Models\Slug;
-use Faker\Factory;
+use Botble\Slug\Facades\SlugHelper;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Str;
-use MetaBox;
-use SlugHelper;
 
 class BlogSeeder extends BaseSeeder
 {
@@ -25,23 +16,11 @@ class BlogSeeder extends BaseSeeder
     {
         $this->uploadFiles('news');
 
-        Post::truncate();
-        Category::truncate();
-        Tag::truncate();
-        PostTranslation::truncate();
-        CategoryTranslation::truncate();
-        TagTranslation::truncate();
-        Slug::where('reference_type', Post::class)->delete();
-        Slug::where('reference_type', Tag::class)->delete();
-        Slug::where('reference_type', Category::class)->delete();
-        MetaBoxModel::where('reference_type', Post::class)->delete();
-        MetaBoxModel::where('reference_type', Tag::class)->delete();
-        MetaBoxModel::where('reference_type', Category::class)->delete();
-        LanguageMeta::where('reference_type', Post::class)->delete();
-        LanguageMeta::where('reference_type', Tag::class)->delete();
-        LanguageMeta::where('reference_type', Category::class)->delete();
+        Post::query()->truncate();
+        Category::query()->truncate();
+        Tag::query()->truncate();
 
-        $faker = Factory::create();
+        $faker = $this->fake();
 
         $categories = [
             [
@@ -60,13 +39,7 @@ class BlogSeeder extends BaseSeeder
         ];
 
         foreach ($categories as $index => $item) {
-            $category = $this->createCategory(Arr::except($item, 'children'), 0, $index != 0);
-
-            if (isset($item['children']) && ! empty($item['children'])) {
-                foreach ($item['children'] as $child) {
-                    $this->createCategory($child, $category->id);
-                }
-            }
+            $this->createCategory(Arr::except($item, 'children'), 0, $index != 0);
         }
 
         $tags = [
@@ -88,16 +61,11 @@ class BlogSeeder extends BaseSeeder
         ];
 
         foreach ($tags as $item) {
-            $item['author_id'] = 1;
+            $item['author_id'] = User::query()->value('id');
             $item['author_type'] = User::class;
-            $tag = Tag::create($item);
+            $tag = Tag::query()->create($item);
 
-            Slug::create([
-                'reference_type' => Tag::class,
-                'reference_id' => $tag->id,
-                'key' => Str::slug($tag->name),
-                'prefix' => SlugHelper::getPrefix(Tag::class),
-            ]);
+            SlugHelper::createSlug($tag);
         }
 
         $posts = [
@@ -146,7 +114,7 @@ class BlogSeeder extends BaseSeeder
 <p><br />
 &nbsp;</p>
 
-<p><strong><em>For all of the reason above, here are 7 expert tips to help you pick up the right men&rsquo;s wallet for you:</em></strong></p>
+<p><strong><em>For all the reason above, here are 7 expert tips to help you pick up the right men&rsquo;s wallet for you:</em></strong></p>
 
 <h4><strong>Number 1: Choose A Neat Wallet</strong></h4>
 
@@ -194,7 +162,7 @@ class BlogSeeder extends BaseSeeder
 <p>&nbsp;</p>
 ';
 
-            $item['author_id'] = 1;
+            $item['author_id'] = User::query()->value('id');
             $item['author_type'] = User::class;
             $item['views'] = $faker->numberBetween(100, 2500);
             $item['is_featured'] = $index < 10;
@@ -202,12 +170,7 @@ class BlogSeeder extends BaseSeeder
             $item['description'] = 'You should pay more attention when you choose your wallets. There are a lot of them on the market with the different designs and styles. When you choose carefully, you would be able to buy a wallet that is catered to your needs. Not to mention that it will help to enhance your style significantly.';
             $item['content'] = str_replace(url(''), '', $item['content']);
 
-            $post = Post::create(Arr::except($item, ['layout']));
-
-            $layout = $item['layout'] ?? null;
-            if ($layout) {
-                MetaBox::saveMetaBoxData($post, 'layout', $layout);
-            }
+            $post = Post::query()->create($item);
 
             $post->categories()->sync([
                 $faker->numberBetween(1, 2),
@@ -216,133 +179,25 @@ class BlogSeeder extends BaseSeeder
 
             $post->tags()->sync([1, 2, 3, 4, 5]);
 
-            Slug::create([
-                'reference_type' => Post::class,
-                'reference_id' => $post->id,
-                'key' => Str::slug($post->name),
-                'prefix' => SlugHelper::getPrefix(Post::class),
-            ]);
-        }
-
-        $translations = [
-            [
-                'name' => 'Thương mại điện tử',
-            ],
-            [
-                'name' => 'Thời trang',
-            ],
-            [
-                'name' => 'Điện tử',
-            ],
-            [
-                'name' => 'Thương mại',
-            ],
-        ];
-
-        foreach ($translations as $index => $item) {
-            $item['lang_code'] = 'vi';
-            $item['categories_id'] = $index + 1;
-
-            CategoryTranslation::insert($item);
-        }
-
-        $translations = [
-            [
-                'name' => 'Chung',
-            ],
-            [
-                'name' => 'Thiết kế',
-            ],
-            [
-                'name' => 'Thời trang',
-            ],
-            [
-                'name' => 'Thương hiệu',
-            ],
-            [
-                'name' => 'Hiện đại',
-            ],
-        ];
-
-        foreach ($translations as $index => $item) {
-            $item['lang_code'] = 'vi';
-            $item['tags_id'] = $index + 1;
-
-            TagTranslation::insert($item);
-        }
-
-        $translations = [
-            [
-                'name' => '4 Lời khuyên của Chuyên gia về Cách Chọn Ví Nam Phù hợp',
-            ],
-            [
-                'name' => 'Sexy Clutches: Cách Mua & Đeo Túi Clutch Thiết kế',
-            ],
-            [
-                'name' => 'Xu hướng túi xách hàng đầu năm 2020 cần biết',
-            ],
-            [
-                'name' => 'Cách Phối Màu Túi Xách Của Bạn Với Trang Phục',
-            ],
-            [
-                'name' => 'Cách Chăm sóc Túi Da',
-            ],
-            [
-                'name' => 'Chúng tôi đang nghiền ngẫm 10 xu hướng túi lớn nhất của mùa hè',
-            ],
-            [
-                'name' => 'Những phẩm chất cần thiết của âm nhạc thành công cao',
-            ],
-            [
-                'name' => '9 điều tôi thích khi cạo đầu',
-            ],
-            [
-                'name' => 'Tại sao làm việc theo nhóm thực sự biến giấc mơ thành công',
-            ],
-            [
-                'name' => 'Thế giới phục vụ cho những người trung bình',
-            ],
-            [
-                'name' => 'Các đương sự trên màn hình không phải là diễn viên',
-            ],
-        ];
-
-        foreach ($translations as $index => $item) {
-            $item['lang_code'] = 'vi';
-            $item['posts_id'] = $index + 1;
-            $item['description'] = 'Bạn nên chú ý hơn khi chọn ví. Có rất nhiều trong số chúng trên thị trường với các mẫu mã và phong cách khác nhau. Khi bạn lựa chọn cẩn thận, bạn sẽ có thể mua một chiếc ví phù hợp với nhu cầu của bạn. Chưa kể nó sẽ giúp nâng tầm phong cách của bạn một cách đáng kể.';
-            $item['content'] = Post::find($index + 1)->value('content');
-
-            PostTranslation::insert($item);
+            SlugHelper::createSlug($post);
         }
     }
 
-    /**
-     * @param array $item
-     * @param int $parentId
-     * @param bool $isFeatured
-     * @return Category|\Illuminate\Database\Eloquent\Model
-     */
     protected function createCategory(
         array $item,
-        int $parentId = 0,
+        int|string|null $parentId = 0,
         bool $isFeatured = false
-    ) {
-        $faker = Factory::create();
+    ): Category {
+        $faker = fake();
 
         $item['description'] = $faker->text();
-        $item['author_id'] = 1;
+        $item['author_id'] = User::query()->value('id');
         $item['parent_id'] = $parentId;
         $item['is_featured'] = $isFeatured;
 
-        $category = Category::create($item);
+        $category = Category::query()->create($item);
 
-        Slug::create([
-            'reference_type' => Category::class,
-            'reference_id' => $category->id,
-            'key' => Str::slug($category->name),
-            'prefix' => SlugHelper::getPrefix(Category::class),
-        ]);
+        SlugHelper::createSlug($category);
 
         return $category;
     }

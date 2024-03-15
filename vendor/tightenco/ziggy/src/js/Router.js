@@ -1,5 +1,5 @@
 import { stringify } from 'qs';
-import Route from './Route';
+import Route from './Route.js';
 
 /**
  * A collection of Laravel routes. This class constitutes Ziggy's main API.
@@ -237,8 +237,8 @@ export default class Router extends String {
                     segments[i]
                         ? { ...result, [segments[i].name]: current }
                         : typeof current === 'object'
-                        ? { ...result, ...current }
-                        : { ...result, [current]: '' },
+                          ? { ...result, ...current }
+                          : { ...result, [current]: '' },
                 {},
             );
         } else if (
@@ -318,12 +318,5 @@ export default class Router extends String {
 
     valueOf() {
         return this.toString();
-    }
-
-    /**
-     * @deprecated since v1.0, use `has()` instead.
-     */
-    check(name) {
-        return this.has(name);
     }
 }

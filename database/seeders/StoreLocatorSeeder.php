@@ -3,16 +3,16 @@
 namespace Database\Seeders;
 
 use Botble\Ecommerce\Models\StoreLocator;
-use Botble\Setting\Models\Setting;
+use Botble\Setting\Facades\Setting;
 use Illuminate\Database\Seeder;
 
 class StoreLocatorSeeder extends Seeder
 {
     public function run(): void
     {
-        StoreLocator::truncate();
+        StoreLocator::query()->truncate();
 
-        $storeLocator = StoreLocator::create([
+        $storeLocator = StoreLocator::query()->create([
             'name' => 'Farmart',
             'email' => 'sales@botble.com',
             'phone' => '1800979769',
@@ -24,40 +24,22 @@ class StoreLocatorSeeder extends Seeder
             'is_shipping_location' => 1,
         ]);
 
-        Setting::whereIn('key', [
+        Setting::delete([
             'ecommerce_store_name',
             'ecommerce_store_phone',
             'ecommerce_store_address',
             'ecommerce_store_state',
             'ecommerce_store_city',
             'ecommerce_store_country',
-        ])->delete();
-
-        Setting::insertOrIgnore([
-            [
-                'key' => 'ecommerce_store_name',
-                'value' => $storeLocator->name,
-            ],
-            [
-                'key' => 'ecommerce_store_phone',
-                'value' => $storeLocator->phone,
-            ],
-            [
-                'key' => 'ecommerce_store_address',
-                'value' => $storeLocator->address,
-            ],
-            [
-                'key' => 'ecommerce_store_state',
-                'value' => $storeLocator->state,
-            ],
-            [
-                'key' => 'ecommerce_store_city',
-                'value' => $storeLocator->city,
-            ],
-            [
-                'key' => 'ecommerce_store_country',
-                'value' => $storeLocator->country,
-            ],
         ]);
+
+        Setting::set([
+            'ecommerce_store_name' => $storeLocator->name,
+            'ecommerce_store_phone' => $storeLocator->phone,
+            'ecommerce_store_address' => $storeLocator->address,
+            'ecommerce_store_state' => $storeLocator->state,
+            'ecommerce_store_city' => $storeLocator->city,
+            'ecommerce_store_country' => $storeLocator->country,
+        ])->save();
     }
 }

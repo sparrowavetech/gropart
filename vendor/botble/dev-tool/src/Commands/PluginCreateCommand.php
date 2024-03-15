@@ -3,6 +3,7 @@
 namespace Botble\DevTool\Commands;
 
 use Botble\DevTool\Commands\Abstracts\BaseMakeCommand;
+use Botble\DevTool\Helper;
 use Botble\PluginManagement\Commands\Concern\HasPluginNameValidation;
 use Illuminate\Contracts\Console\PromptsForMissingInput;
 use Illuminate\Support\Facades\File;
@@ -10,7 +11,7 @@ use Illuminate\Support\Str;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
 
-#[AsCommand('cms:plugin:create', 'Create a plugin in the /platform/plugins directory.')]
+#[AsCommand('cms:plugin:create', 'Create a new plugin.')]
 class PluginCreateCommand extends BaseMakeCommand implements PromptsForMissingInput
 {
     use HasPluginNameValidation;
@@ -24,22 +25,28 @@ class PluginCreateCommand extends BaseMakeCommand implements PromptsForMissingIn
         $location = plugin_path($plugin);
 
         if (File::isDirectory($location)) {
-            $this->components->error('A plugin named [' . $plugin . '] already exists.');
+            $this->components->error(sprintf('A plugin named [%s] already exists.', $plugin));
 
             return self::FAILURE;
         }
 
         $this->publishStubs($this->getStub(), $location);
-        File::copy(__DIR__ . '/../../stubs/plugin/plugin.json', $location . '/plugin.json');
-        File::copy(__DIR__ . '/../../stubs/plugin/Plugin.stub', $location . '/src/Plugin.php');
+        File::copy(
+            Helper::joinPaths([dirname(__DIR__, 2), 'stubs', 'plugin', 'plugin.json']),
+            Helper::joinPaths([$location, 'plugin.json'])
+        );
+        File::copy(
+            Helper::joinPaths([dirname(__DIR__, 2), 'stubs', 'plugin', 'Plugin.stub']),
+            Helper::joinPaths([$location, 'src', 'Plugin.php'])
+        );
         $this->renameFiles($plugin, $location);
         $this->searchAndReplaceInFiles($plugin, $location);
         $this->removeUnusedFiles($location);
-        $this->line('------------------');
-        $this->line(
-            '<info>The plugin</info> <comment>' . $plugin . '</comment> <info>was created in</info> <comment>' . $location . '</comment><info>, customize it!</info>'
+
+        $this->components->info(
+            sprintf('<info>The plugin</info> <comment>%s</comment> <info>was created in</info> <comment>%s</comment><info>, customize it!</info>', $plugin, $location)
         );
-        $this->line('------------------');
+
         $this->call('cache:clear');
 
         return self::SUCCESS;
@@ -47,12 +54,12 @@ class PluginCreateCommand extends BaseMakeCommand implements PromptsForMissingIn
 
     public function getStub(): string
     {
-        return __DIR__ . '/../../stubs/module';
+        return Helper::joinPaths([dirname(__DIR__, 2), 'stubs', 'module']);
     }
 
     protected function removeUnusedFiles(string $location): void
     {
-        File::delete($location . '/composer.json');
+        File::delete(Helper::joinPaths([$location, 'composer.json']));
     }
 
     public function getReplacements(string $replaceText): array
@@ -67,7 +74,11 @@ class PluginCreateCommand extends BaseMakeCommand implements PromptsForMissingIn
             '{Modules}' => ucfirst(Str::plural(Str::snake(str_replace('-', '_', $replaceText)))),
             '{-modules}' => Str::plural($replaceText),
             '{MODULE}' => strtoupper(Str::snake(str_replace('-', '_', $replaceText))),
-            '{Module}' => ucfirst(Str::camel($replaceText)),
+            '{Module}' => str($replaceText)
+                ->replace('/', '\\')
+                ->afterLast('\\')
+                ->studly()
+                ->prepend('Botble\\'),
         ];
     }
 

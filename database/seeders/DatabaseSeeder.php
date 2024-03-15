@@ -2,7 +2,14 @@
 
 namespace Database\Seeders;
 
+use Botble\ACL\Database\Seeders\UserSeeder;
 use Botble\Base\Supports\BaseSeeder;
+use Botble\Contact\Database\Seeders\ContactSeeder;
+use Botble\Ecommerce\Database\Seeders\CurrencySeeder;
+use Botble\Ecommerce\Database\Seeders\ReviewSeeder;
+use Botble\Ecommerce\Database\Seeders\ShippingSeeder;
+use Botble\Ecommerce\Database\Seeders\TaxSeeder;
+use Botble\Language\Database\Seeders\LanguageSeeder;
 
 class DatabaseSeeder extends BaseSeeder
 {
@@ -11,40 +18,36 @@ class DatabaseSeeder extends BaseSeeder
         $this->prepareRun();
 
         $this->call([
+            UserSeeder::class,
             LanguageSeeder::class,
+            FaqSeeder::class,
             BrandSeeder::class,
             CurrencySeeder::class,
             ProductCategorySeeder::class,
             ProductCollectionSeeder::class,
             ProductLabelSeeder::class,
-            ProductSeeder::class,
             ProductAttributeSeeder::class,
+            ProductOptionSeeder::class,
             CustomerSeeder::class,
-            ReviewSeeder::class,
             TaxSeeder::class,
             ProductTagSeeder::class,
-            FlashSaleSeeder::class,
             ShippingSeeder::class,
+            ProductSeeder::class,
+            FlashSaleSeeder::class,
+            ReviewSeeder::class,
+            StoreLocatorSeeder::class,
+            MarketplaceSeeder::class,
+            OrderEcommerceSeeder::class,
             ContactSeeder::class,
             BlogSeeder::class,
             SimpleSliderSeeder::class,
             PageSeeder::class,
             AdsSeeder::class,
-            FaqSeeder::class,
-            UserSeeder::class,
             SettingSeeder::class,
-            StoreLocatorSeeder::class,
             MenuSeeder::class,
             ThemeOptionSeeder::class,
             WidgetSeeder::class,
-            ProductOptionSeeder::class,
         ]);
-
-        if (is_plugin_active('marketplace')) {
-            $this->call(MarketplaceSeeder::class);
-        }
-
-        $this->call(OrderEcommerceSeeder::class);
 
         $this->finished();
     }

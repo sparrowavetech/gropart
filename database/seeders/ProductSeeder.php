@@ -2,40 +2,19 @@
 
 namespace Database\Seeders;
 
-use Botble\Base\Enums\BaseStatusEnum;
-use Botble\Base\Models\MetaBox as MetaBoxModel;
 use Botble\Base\Supports\BaseSeeder;
-use Botble\Ecommerce\Enums\ProductTypeEnum;
-use Botble\Ecommerce\Models\Order;
-use Botble\Ecommerce\Models\OrderAddress;
-use Botble\Ecommerce\Models\OrderHistory;
-use Botble\Ecommerce\Models\OrderProduct;
-use Botble\Ecommerce\Models\Product;
-use Botble\Ecommerce\Models\ProductFile;
-use Botble\Ecommerce\Models\ProductVariation;
-use Botble\Ecommerce\Models\ProductVariationItem;
-use Botble\Ecommerce\Models\Shipment;
-use Botble\Ecommerce\Models\ShipmentHistory;
-use Botble\Ecommerce\Models\Wishlist;
-use Botble\Ecommerce\Services\Products\StoreProductService;
-use Botble\Payment\Models\Payment;
-use Botble\Slug\Models\Slug;
-use Faker\Factory;
-use File;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
-use MetaBox;
-use SlugHelper;
+use Botble\Ecommerce\Database\Seeders\Traits\HasProductSeeder;
+use Illuminate\Support\Facades\File;
 
 class ProductSeeder extends BaseSeeder
 {
+    use HasProductSeeder;
+
     public function run(): void
     {
         $this->uploadFiles('products');
 
-        $faker = Factory::create();
+        $faker = $this->fake();
 
         $products = [
             [
@@ -319,29 +298,7 @@ class ProductSeeder extends BaseSeeder
             ],
         ];
 
-        Product::truncate();
-        DB::table('ec_product_with_attribute_set')->truncate();
-        DB::table('ec_product_variations')->truncate();
-        DB::table('ec_product_variation_items')->truncate();
-        DB::table('ec_product_collection_products')->truncate();
-        DB::table('ec_product_label_products')->truncate();
-        DB::table('ec_product_category_product')->truncate();
-        DB::table('ec_product_related_relations')->truncate();
-        DB::table('ec_tax_products')->truncate();
-        Slug::where('reference_type', Product::class)->delete();
-        Wishlist::truncate();
-        Order::truncate();
-        OrderAddress::truncate();
-        OrderProduct::truncate();
-        OrderHistory::truncate();
-        Shipment::truncate();
-        ShipmentHistory::truncate();
-        Payment::truncate();
-        MetaBoxModel::where('reference_type', Product::class)->delete();
-
-        ProductFile::truncate();
-
-        foreach ($products as $key => $item) {
+        foreach ($products as $key => &$item) {
             $item['description'] = '<ul><li> Unrestrained and portable active stereo speaker</li>
             <li> Free from the confines of wires and chords</li>
             <li> 20 hours of portable capabilities</li>
@@ -373,23 +330,6 @@ class ProductSeeder extends BaseSeeder
                                 <p>- Ultrasonically welded seams</p>
 
                                 <p>This is a unisex item, please check our clothing &amp; footwear sizing guide for specific Rains jacket sizing information. RAINS comes from the rainy nation of Denmark at the edge of the European continent, close to the ocean and with prevailing westerly winds; all factors that contribute to an average of 121 rain days each year. Arising from these rainy weather conditions comes the attitude that a quick rain shower may be beautiful, as well as moody- but first and foremost requires the right outfit. Rains focus on the whole experience of going outside on rainy days, issuing an invitation to explore even in the most mercurial weather.</p>';
-            $item['status'] = BaseStatusEnum::PUBLISHED;
-            $item['sku'] = 'SW-' . $faker->numberBetween(100, 200);
-            $item['brand_id'] = $faker->numberBetween(1, 5);
-            $item['views'] = $faker->numberBetween(1000, 200000);
-            $item['quantity'] = $faker->numberBetween(10, 20);
-            $item['length'] = $faker->numberBetween(10, 20);
-            $item['wide'] = $faker->numberBetween(10, 20);
-            $item['height'] = $faker->numberBetween(10, 20);
-            $item['weight'] = $faker->numberBetween(500, 900);
-            $item['with_storehouse_management'] = true;
-
-            // Support Digital Product
-            $productName = $item['name'];
-            if ($key % 4 == 0) {
-                $item['product_type'] = ProductTypeEnum::DIGITAL;
-                $item['name'] .= ' (' . ProductTypeEnum::DIGITAL()->label() . ')';
-            }
 
             $images = [
                 'products/' . ($key + 1) . '.jpg',
@@ -401,283 +341,9 @@ class ProductSeeder extends BaseSeeder
                 }
             }
 
-            $item['images'] = json_encode($images);
-
-            $product = Product::create($item);
-
-            $product->productCollections()->sync([$faker->numberBetween(1, 3)]);
-
-            if ($product->id % 3 == 0) {
-                $product->productLabels()->sync([$faker->numberBetween(1, 3)]);
-            }
-
-            $product->categories()->sync([
-                $faker->numberBetween(1, 37),
-                $faker->numberBetween(1, 37),
-                $faker->numberBetween(1, 37),
-                $faker->numberBetween(15, 37),
-            ]);
-
-            $product->tags()->sync([
-                $faker->numberBetween(1, 6),
-                $faker->numberBetween(1, 6),
-                $faker->numberBetween(1, 6),
-            ]);
-
-            $product->taxes()->sync([1]);
-
-            Slug::create([
-                'reference_type' => Product::class,
-                'reference_id' => $product->id,
-                'key' => Str::slug($productName),
-                'prefix' => SlugHelper::getPrefix(Product::class),
-            ]);
-
-            MetaBox::saveMetaBoxData(
-                $product,
-                'faq_schema_config',
-                json_decode(
-                    '[[{"key":"question","value":"What Shipping Methods Are Available?"},{"key":"answer","value":"Ex Portland Pitchfork irure mustache. Eutra fap before they sold out literally. Aliquip ugh bicycle rights actually mlkshk, seitan squid craft beer tempor."}],[{"key":"question","value":"Do You Ship Internationally?"},{"key":"answer","value":"Hoodie tote bag mixtape tofu. Typewriter jean shorts wolf quinoa, messenger bag organic freegan cray."}],[{"key":"question","value":"How Long Will It Take To Get My Package?"},{"key":"answer","value":"Swag slow-carb quinoa VHS typewriter pork belly brunch, paleo single-origin coffee Wes Anderson. Flexitarian Pitchfork forage, literally paleo fap pour-over. Wes Anderson Pinterest YOLO fanny pack meggings, deep v XOXO chambray sustainable slow-carb raw denim church-key fap chillwave Etsy. +1 typewriter kitsch, American Apparel tofu Banksy Vice."}],[{"key":"question","value":"What Payment Methods Are Accepted?"},{"key":"answer","value":"Fashion axe DIY jean shorts, swag kale chips meh polaroid kogi butcher Wes Anderson chambray next level semiotics gentrify yr. Voluptate photo booth fugiat Vice. Austin sed Williamsburg, ea labore raw denim voluptate cred proident mixtape excepteur mustache. Twee chia photo booth readymade food truck, hoodie roof party swag keytar PBR DIY."}],[{"key":"question","value":"Is Buying On-Line Safe?"},{"key":"answer","value":"Art party authentic freegan semiotics jean shorts chia cred. Neutra Austin roof party Brooklyn, synth Thundercats swag 8-bit photo booth. Plaid letterpress leggings craft beer meh ethical Pinterest."}]]',
-                    true
-                )
-            );
+            $item['images'] = $images;
         }
 
-        foreach ($products as $key => $item) {
-            $product = Product::find($key + 1);
-            $product->productAttributeSets()->sync($product->id >= 24 ? [3, 4] : [1, 2]);
-
-            $product->crossSales()->sync([
-                $this->random(1, 20, [$product->id]),
-                $this->random(1, 20, [$product->id]),
-                $this->random(1, 20, [$product->id]),
-                $this->random(1, 20, [$product->id]),
-                $this->random(1, 20, [$product->id]),
-                $this->random(1, 20, [$product->id]),
-                $this->random(1, 20, [$product->id]),
-            ]);
-
-            for ($j = 0; $j < $faker->numberBetween(1, 5); $j++) {
-                $variation = Product::create([
-                    'name' => $product->name,
-                    'status' => BaseStatusEnum::PUBLISHED,
-                    'sku' => $product->sku . '-A' . $j,
-                    'quantity' => $product->quantity,
-                    'weight' => $product->weight,
-                    'height' => $product->height,
-                    'wide' => $product->wide,
-                    'length' => $product->length,
-                    'price' => $product->price,
-                    'sale_price' => $product->id % 4 == 0 ? ($product->price - $product->price * $faker->numberBetween(
-                        10,
-                        30
-                    ) / 100) : null,
-                    'brand_id' => $product->brand_id,
-                    'with_storehouse_management' => $product->with_storehouse_management,
-                    'is_variation' => true,
-                    'images' => json_encode([$product->images[$j] ?? Arr::first($product->images)]),
-                    'product_type' => $product->product_type,
-                ]);
-
-                $productVariation = ProductVariation::create([
-                    'product_id' => $variation->id,
-                    'configurable_product_id' => $product->id,
-                    'is_default' => $j == 0,
-                ]);
-
-                if ($productVariation->is_default) {
-                    $product->update([
-                        'sku' => $variation->sku,
-                        'sale_price' => $variation->sale_price,
-                    ]);
-                }
-
-                ProductVariationItem::create([
-                    'attribute_id' => $faker->numberBetween($product->id >= 24 ? 11 : 1, $product->id >= 24 ? 15 : 5),
-                    'variation_id' => $productVariation->id,
-                ]);
-
-                ProductVariationItem::create([
-                    'attribute_id' => $faker->numberBetween($product->id >= 24 ? 16 : 6, $product->id >= 24 ? 20 : 10),
-                    'variation_id' => $productVariation->id,
-                ]);
-
-                if ($product->isTypeDigital()) {
-                    foreach ($product->images as $img) {
-                        $productFile = database_path('seeders/files/' . $img);
-
-                        if (! File::isFile($productFile)) {
-                            continue;
-                        }
-
-                        $fileUpload = new UploadedFile($productFile, Str::replace('products/', '', $img), 'image/jpeg', null, true);
-                        $productFileData = app(StoreProductService::class)->saveProductFile($fileUpload);
-                        $variation->productFiles()->create($productFileData);
-                    }
-                }
-            }
-        }
-
-        DB::table('ec_products_translations')->truncate();
-
-        $translations = [
-            [
-                'name' => 'Dual Camera 20MP',
-            ],
-            [
-                'name' => 'Smart Watches',
-            ],
-            [
-                'name' => 'Beat Headphone',
-            ],
-            [
-                'name' => 'Red & Black Headphone',
-            ],
-            [
-                'name' => 'Smart Watch External',
-            ],
-            [
-                'name' => 'Nikon HD camera',
-            ],
-            [
-                'name' => 'Audio Equipment',
-            ],
-            [
-                'name' => 'Smart Televisions',
-            ],
-            [
-                'name' => 'Samsung Smart Phone',
-            ],
-            [
-                'name' => 'Herschel Leather Duffle Bag In Brown Color',
-            ],
-            [
-                'name' => 'Xbox One Wireless Controller Black Color',
-            ],
-            [
-                'name' => 'EPSION Plaster Printer',
-            ],
-            [
-                'name' => 'Sound Intone I65 Earphone White Version',
-            ],
-            [
-                'name' => 'B&O Play Mini Bluetooth Speaker',
-            ],
-            [
-                'name' => 'Apple MacBook Air Retina 13.3-Inch Laptop',
-            ],
-            [
-                'name' => 'Apple MacBook Air Retina 12-Inch Laptop',
-            ],
-            [
-                'name' => 'Samsung Gear VR Virtual Reality Headset',
-            ],
-            [
-                'name' => 'Aveeno Moisturizing Body Shower 450ml',
-            ],
-            [
-                'name' => 'NYX Beauty Couton Pallete Makeup 12',
-            ],
-            [
-                'name' => 'NYX Beauty Couton Pallete Makeup 12',
-            ],
-            [
-                'name' => 'MVMTH Classical Leather Watch In Black',
-            ],
-            [
-                'name' => 'Baxter Care Hair Kit For Bearded Mens',
-            ],
-            [
-                'name' => 'Ciate Palemore Lipstick Bold Red Color',
-            ],
-            [
-                'name' => 'Vimto Squash Remix Apple 1.5 Litres',
-            ],
-            [
-                'name' => 'Crock Pot Slow Cooker',
-            ],
-            [
-                'name' => 'Taylors of Harrogate Yorkshire Coffee',
-            ],
-            [
-                'name' => 'Soft Mochi & Galeto Ice Cream',
-            ],
-            [
-                'name' => 'Naked Noodle Egg Noodles Singapore',
-            ],
-            [
-                'name' => 'Saute Pan Silver',
-            ],
-            [
-                'name' => 'Bar S – Classic Bun Length Franks',
-            ],
-            [
-                'name' => 'Broccoli Crowns',
-            ],
-            [
-                'name' => 'Slimming World Vegan Mac Greens',
-            ],
-            [
-                'name' => 'Häagen-Dazs Salted Caramel',
-            ],
-            [
-                'name' => 'Iceland 3 Solo Exotic Burst',
-            ],
-            [
-                'name' => 'Extreme Budweiser Light Can',
-            ],
-            [
-                'name' => 'Iceland Macaroni Cheese Traybake',
-            ],
-            [
-                'name' => 'Dolmio Bolognese Pasta Sauce',
-            ],
-            [
-                'name' => 'Sitema BakeIT Plastic Box',
-            ],
-            [
-                'name' => 'Wayfair Basics Dinner Plate Storage',
-            ],
-            [
-                'name' => 'Miko The Panda Water Bottle',
-            ],
-            [
-                'name' => 'Sesame Seed Bread',
-            ],
-            [
-                'name' => 'Morrisons The Best Beef',
-            ],
-            [
-                'name' => 'Avocado, Hass Large',
-            ],
-            [
-                'name' => 'Italia Beef Lasagne',
-            ],
-            [
-                'name' => 'Maxwell House Classic Roast Mocha',
-            ],
-            [
-                'name' => 'Bottled Pure Water 500ml',
-            ],
-        ];
-
-        foreach ($translations as $index => $item) {
-            $item['lang_code'] = 'vi';
-            $item['ec_products_id'] = $index + 1;
-
-            DB::table('ec_products_translations')->insert($item);
-
-            $product = Product::find($index + 1);
-            if ($product) {
-                $variations = $product->variations()->get();
-
-                foreach ($variations as $variation) {
-                    $item['lang_code'] = 'vi';
-                    $item['ec_products_id'] = $variation->product->id;
-
-                    DB::table('ec_products_translations')->insert($item);
-                }
-            }
-        }
+        $this->createProducts($products);
     }
 }

@@ -8,9 +8,13 @@ use Botble\DevTool\Commands\LocaleRemoveCommand;
 use Botble\DevTool\Commands\Make\ControllerMakeCommand;
 use Botble\DevTool\Commands\Make\FormMakeCommand;
 use Botble\DevTool\Commands\Make\ModelMakeCommand;
-use Botble\DevTool\Commands\Make\RepositoryMakeCommand;
+use Botble\DevTool\Commands\Make\PanelSectionMakeCommand;
 use Botble\DevTool\Commands\Make\RequestMakeCommand;
 use Botble\DevTool\Commands\Make\RouteMakeCommand;
+use Botble\DevTool\Commands\Make\SettingControllerMakeCommand;
+use Botble\DevTool\Commands\Make\SettingFormMakeCommand;
+use Botble\DevTool\Commands\Make\SettingMakeCommand;
+use Botble\DevTool\Commands\Make\SettingRequestMakeCommand;
 use Botble\DevTool\Commands\Make\TableMakeCommand;
 use Botble\DevTool\Commands\PackageCreateCommand;
 use Botble\DevTool\Commands\PackageMakeCrudCommand;
@@ -38,7 +42,6 @@ class CommandServiceProvider extends ServiceProvider
             RequestMakeCommand::class,
             FormMakeCommand::class,
             ModelMakeCommand::class,
-            RepositoryMakeCommand::class,
             PackageCreateCommand::class,
             PackageMakeCrudCommand::class,
             PackageRemoveCommand::class,
@@ -47,6 +50,16 @@ class CommandServiceProvider extends ServiceProvider
             LocaleRemoveCommand::class,
             LocaleCreateCommand::class,
         ]);
+
+        if (version_compare(get_core_version(), '7.0.0', '>=')) {
+            $this->commands([
+                PanelSectionMakeCommand::class,
+                SettingControllerMakeCommand::class,
+                SettingRequestMakeCommand::class,
+                SettingFormMakeCommand::class,
+                SettingMakeCommand::class,
+            ]);
+        }
 
         if (class_exists(\Botble\PluginManagement\Providers\PluginManagementServiceProvider::class)) {
             $this->commands([
