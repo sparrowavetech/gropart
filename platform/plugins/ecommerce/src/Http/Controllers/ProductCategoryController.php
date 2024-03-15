@@ -67,9 +67,9 @@ class ProductCategoryController extends BaseController
 
         event(new CreatedContentEvent(PRODUCT_CATEGORY_MODULE_SCREEN_NAME, $request, $productCategory));
 
-        if ($request->ajax()) {
-            $response = $this->httpResponse();
+        $response = $this->httpResponse();
 
+        if ($request->ajax()) {
             $productCategory = ProductCategory::query()->findOrFail($productCategory->id);
 
             if ($response->isSaving()) {
@@ -84,8 +84,7 @@ class ProductCategoryController extends BaseController
             ]);
         }
 
-        return $this
-            ->httpResponse()
+        return $response
             ->setPreviousUrl(route('product-categories.index'))
             ->setNextUrl(route('product-categories.edit', $productCategory->id))
             ->withCreatedSuccessMessage();
@@ -111,9 +110,9 @@ class ProductCategoryController extends BaseController
 
         event(new UpdatedContentEvent(PRODUCT_CATEGORY_MODULE_SCREEN_NAME, $request, $productCategory));
 
-        if ($request->ajax()) {
-            $response = $this->httpResponse();
+        $response = $this->httpResponse();
 
+        if ($request->ajax()) {
             if ($response->isSaving()) {
                 $form = $this->getForm();
             } else {
@@ -126,9 +125,7 @@ class ProductCategoryController extends BaseController
             ]);
         }
 
-        return $this
-            ->httpResponse()
-
+        return $response
             ->setPreviousUrl(route('product-categories.index'))
             ->withUpdatedSuccessMessage();
     }

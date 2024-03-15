@@ -92,6 +92,8 @@ class ShippingManagement {
                 formData.shipping_id = shippingId
             }
 
+            formData = Botble.unmaskInputNumber($form, formData)
+
             formData = $.extend({}, formData)
 
             $httpClient.make()
@@ -234,11 +236,15 @@ class ShippingManagement {
                 return
             }
 
+            let formData = new FormData($form[0])
+
+            formData = Botble.unmaskInputNumber($form, formData)
+
             $httpClient.make()
                 .withButtonLoading(_self)
                 [method](
                     $form.prop('action'),
-                    new FormData($form[0])
+                    formData
                 )
                 .then(({ data }) => {
                     if (!data.error) {

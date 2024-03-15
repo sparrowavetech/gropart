@@ -3,10 +3,16 @@
 namespace Botble\Ecommerce\Forms;
 
 use Botble\Base\Facades\Assets;
-use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Forms\FieldOptions\DatePickerFieldOption;
+use Botble\Base\Forms\FieldOptions\EmailFieldOption;
 use Botble\Base\Forms\FieldOptions\NameFieldOption;
+use Botble\Base\Forms\FieldOptions\OnOffFieldOption;
 use Botble\Base\Forms\FieldOptions\StatusFieldOption;
 use Botble\Base\Forms\FieldOptions\TextareaFieldOption;
+use Botble\Base\Forms\FieldOptions\TextFieldOption;
+use Botble\Base\Forms\Fields\DatePickerField;
+use Botble\Base\Forms\Fields\MediaImageField;
+use Botble\Base\Forms\Fields\OnOffField;
 use Botble\Base\Forms\Fields\SelectField;
 use Botble\Base\Forms\Fields\TextareaField;
 use Botble\Base\Forms\Fields\TextField;
@@ -14,7 +20,6 @@ use Botble\Base\Forms\FormAbstract;
 use Botble\Ecommerce\Enums\CustomerStatusEnum;
 use Botble\Ecommerce\Http\Requests\CustomerCreateRequest;
 use Botble\Ecommerce\Models\Customer;
-use Carbon\Carbon;
 
 class CustomerForm extends FormAbstract
 {
@@ -30,56 +35,60 @@ class CustomerForm extends FormAbstract
             ->setValidatorClass(CustomerCreateRequest::class)
             ->template('plugins/ecommerce::customers.form')
             ->add('name', TextField::class, NameFieldOption::make()->maxLength(120)->toArray())
-            ->add('email', 'text', [
-                'label' => trans('plugins/ecommerce::customer.email'),
-                'required' => true,
-                'attr' => [
-                    'placeholder' => trans('plugins/ecommerce::customer.email_placeholder'),
-                    'data-counter' => 60,
-                ],
-            ])
-            ->add('phone', 'text', [
-                'label' => trans('plugins/ecommerce::customer.phone'),
-                'attr' => [
-                    'placeholder' => trans('plugins/ecommerce::customer.phone_placeholder'),
-                    'data-counter' => 20,
-                ],
-            ])
-            ->add('dob', 'datePicker', [
-                'label' => trans('plugins/ecommerce::customer.dob'),
-                'default_value' => BaseHelper::formatDate(Carbon::now()),
-            ])
-            ->add('is_change_password', 'onOff', [
-                'label' => trans('plugins/ecommerce::customer.change_password'),
-                'value' => 0,
-                'attr' => [
-                    'data-bb-toggle' => 'collapse',
-                    'data-bb-target' => '#password-collapse',
-                ],
-            ])
+            ->add('email', TextField::class, EmailFieldOption::make()->required()->colspan(2)->toArray())
+            ->add(
+                'phone',
+                TextField::class,
+                TextFieldOption::make()
+                    ->label(trans('plugins/ecommerce::customer.phone'))
+                    ->placeholder(trans('plugins/ecommerce::customer.phone_placeholder'))
+                    ->maxLength(15)
+                    ->toArray()
+            )
+            ->add(
+                'dob',
+                DatePickerField::class,
+                DatePickerFieldOption::make()->label(trans('plugins/ecommerce::customer.dob'))->toArray()
+            )
+            ->add(
+                'is_change_password',
+                OnOffField::class,
+                OnOffFieldOption::make()
+                    ->label(trans('plugins/ecommerce::customer.change_password'))
+                    ->attributes([
+                        'data-bb-toggle' => 'collapse',
+                        'data-bb-target' => '#password-collapse',
+                    ])
+                    ->defaultValue(0)
+                    ->toArray()
+            )
             ->add('openRow1', 'html', [
                 'html' => '<div class="row" id="password-collapse" data-bb-value="1"' . ($this->getModel()->id ? ' style="display: none"' : '') . '>',
             ])
-            ->add('password', 'password', [
-                'label' => trans('plugins/ecommerce::customer.password'),
-                'required' => true,
-                'attr' => [
-                    'data-counter' => 60,
-                ],
-                'wrapper' => [
-                    'class' => $this->formHelper->getConfig('defaults.wrapper_class') . ' col-md-6',
-                ],
-            ])
-            ->add('password_confirmation', 'password', [
-                'label' => trans('plugins/ecommerce::customer.password_confirmation'),
-                'required' => true,
-                'attr' => [
-                    'data-counter' => 60,
-                ],
-                'wrapper' => [
-                    'class' => $this->formHelper->getConfig('defaults.wrapper_class') . ' col-md-6',
-                ],
-            ])
+            ->add(
+                'password',
+                'password',
+                TextFieldOption::make()
+                    ->label(trans('plugins/ecommerce::customer.password'))
+                    ->required()
+                    ->maxLength(60)
+                    ->wrapperAttributes([
+                        'class' => $this->formHelper->getConfig('defaults.wrapper_class') . ' col-md-6',
+                    ])
+                    ->toArray()
+            )
+            ->add(
+                'password_confirmation',
+                'password',
+                TextFieldOption::make()
+                    ->label(trans('plugins/ecommerce::customer.password_confirmation'))
+                    ->required()
+                    ->maxLength(60)
+                    ->wrapperAttributes([
+                        'class' => $this->formHelper->getConfig('defaults.wrapper_class') . ' col-md-6',
+                    ])
+                    ->toArray()
+            )
             ->add('closeRow1', 'html', [
                 'html' => '</div>',
             ])
@@ -93,12 +102,11 @@ class CustomerForm extends FormAbstract
                     ->toArray()
             )
             ->add('status', SelectField::class, StatusFieldOption::make()->choices(CustomerStatusEnum::labels())->toArray())
-            ->add('avatar', 'mediaImage')
-            ->setBreakFieldPoint('status');
-
-        if ($this->getModel()->id) {
-            $this
-                ->addMetaBoxes([
+            ->add('avatar', MediaImageField::class)
+            ->setBreakFieldPoint('status')
+            ->when($this->getModel()->id, function () {
+                $this
+                    ->addMetaBoxes([
                     'addresses' => [
                         'title' => trans('plugins/ecommerce::addresses.addresses'),
                         'content' => view('plugins/ecommerce::customers.addresses.addresses', [
@@ -119,6 +127,6 @@ class CustomerForm extends FormAbstract
                         'has_table' => true,
                     ],
                 ]);
-        }
+            });
     }
 }

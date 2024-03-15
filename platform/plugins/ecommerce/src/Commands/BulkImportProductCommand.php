@@ -13,9 +13,9 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
-use Mimey\MimeTypes;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Mime\MimeTypes;
 
 #[AsCommand('cms:ecommerce:products:import', 'Bulk import products command')]
 class BulkImportProductCommand extends Command
@@ -23,8 +23,10 @@ class BulkImportProductCommand extends Command
     protected bool $deleteFileAfter = false;
     protected string $path;
 
-    public function __construct(protected ProductImport $productImport, protected ValidateProductImport $validateProductImport)
-    {
+    public function __construct(
+        protected ProductImport $productImport,
+        protected ValidateProductImport $validateProductImport
+    ) {
         parent::__construct();
     }
 
@@ -143,9 +145,8 @@ class BulkImportProductCommand extends Command
             }
 
             $path = storage_path('app/tmp');
-            if (! File::isDirectory($path)) {
-                File::makeDirectory($path, 0755);
-            }
+
+            File::ensureDirectoryExists($path);
 
             $this->path = $path . '/' . $info['basename'] . '-' . Str::random(5);
             file_put_contents($this->path, $contents);
@@ -161,13 +162,13 @@ class BulkImportProductCommand extends Command
         }
         $this->info('File path at: ' . $this->path);
 
-        $mimeType = (new MimeTypes())->getMimeType(File::extension($pathToFile));
+        $mimeType = Arr::first((new MimeTypes())->getMimeTypes(File::extension($pathToFile)));
         $this->info('Mime type of file: "' . $mimeType . '"');
 
         return new UploadedFile($this->path, $info['basename'], $mimeType, null, true);
     }
 
-    protected function deleteFile()
+    protected function deleteFile(): void
     {
         if ($this->deleteFileAfter && $this->path) {
             File::delete($this->path);

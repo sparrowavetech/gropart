@@ -63,6 +63,15 @@ class ProductReviewSettingForm extends SettingForm
                     ->value(get_ecommerce_setting('review_need_to_be_approved'))
                     ->toArray(),
             )
+            ->add(
+                'show_customer_full_name',
+                OnOffCheckboxField::class,
+                OnOffFieldOption::make()
+                    ->label(trans('plugins/ecommerce::setting.product_review.form.show_customer_full_name'))
+                    ->value(get_ecommerce_setting('show_customer_full_name', true))
+                    ->helperText(trans('plugins/ecommerce::setting.product_review.form.show_customer_full_name_help'))
+                    ->toArray(),
+            )
             ->add('close_fieldset_review_settings', 'html', ['html' => '</fieldset>']);
     }
 }

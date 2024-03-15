@@ -348,14 +348,8 @@ class EcommerceProduct {
         let createOrUpdateVariation = ($current) => {
             let $form = $current.closest('.modal-content').find('.variation-form-wrapper form')
             let formData = new FormData($form[0])
-            if (jQuery().inputmask) {
-                $form.find('input.input-mask-number').map(function (i, e) {
-                    const $input = $(e)
-                    if ($input.inputmask) {
-                        formData.append($input.attr('name'), $input.inputmask('unmaskedvalue'))
-                    }
-                })
-            }
+
+            formData = Botble.unmaskInputNumber($form, formData)
 
             $.ajax({
                 url: $current.data('target'),
@@ -379,8 +373,6 @@ class EcommerceProduct {
                                 LaravelDataTables[$table.attr('id')] &&
                                 LaravelDataTables[$table.attr('id')].draw()
                         }
-
-                        $current.closest('.modal-content').find('.variation-form-wrapper').remove()
                     }
                 },
                 complete: () => {
@@ -402,11 +394,11 @@ class EcommerceProduct {
             createOrUpdateVariation($(event.currentTarget))
         })
 
-        $('#add-new-product-variation-modal').on('hidden.bs.modal', function (e) {
+        $('#add-new-product-variation-modal').on('hidden.bs.modal', function () {
             $(this).find('.modal-content .variation-form-wrapper').remove()
         })
 
-        $('#edit-product-variation-modal').on('hidden.bs.modal', function (e) {
+        $('#edit-product-variation-modal').on('hidden.bs.modal', function () {
             $(this).find('.modal-content .variation-form-wrapper').remove()
         })
 
@@ -661,7 +653,7 @@ class EcommerceProduct {
     }
 
     static tableInitComplete = (table, settings) => {
-        if (!settings.oInit.paging) {
+        if (! settings.oInit.paging) {
             return
         }
 
@@ -706,7 +698,7 @@ class EcommerceProduct {
             const th = $(document.createElement('th')).appendTo($(tr))
 
             if (setting.searchable) {
-                if (setting?.search_data?.type == 'customSelect') {
+                if (setting?.search_data?.type == 'customSelect' && typeof window.CustomDataApdapterSelect2 !== 'undefined') {
                     let select = $(
                         `<div><select class='form-select input-sm' data-placeholder='${
                             setting.search_data.placeholder || 'Select'
@@ -902,7 +894,11 @@ $(() => {
         let $attributeItemTemplate = $('#attribute_item_wrap_template')
 
         let id = 'product-attribute-set-' + (Math.random() + 1).toString(36).substring(7)
-        let html = $attributeItemTemplate.html().replace('__id__', id)
+        let html = $attributeItemTemplate.html()
+
+        if (html) {
+            html = html.replace('__id__', id)
+        }
 
         let selectedValue = null
         if ($('.list-product-attribute-items-wrap .product-attribute-set-item').length) {

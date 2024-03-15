@@ -2,6 +2,7 @@
 
 namespace Botble\Ecommerce\Http\Controllers\Customers;
 
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Ecommerce\Enums\OrderStatusEnum;
 use Botble\Ecommerce\Enums\ProductTypeEnum;
@@ -334,8 +335,15 @@ class PublicController extends BaseController
             ])
             ->firstOrFail();
 
-        if ($request->input('is_default')) {
-            $address->update(['is_default' => 0]);
+        if ($request->input('is_default') == 1) {
+            Address::query()
+                ->where([
+                    'is_default' => 1,
+                    'customer_id' => auth('customer')->id(),
+                ])
+                ->update(['is_default' => 0]);
+
+            $address->is_default = 1;
         }
 
         $address->fill($request->input());
@@ -546,7 +554,7 @@ class PublicController extends BaseController
         return Theme::scope(
             'ecommerce.customers.order-returns.list',
             compact('requests'),
-            'plugins/ecommerce::themes.customers.orders.returns.list'
+            'plugins/ecommerce::themes.customers.order-returns.list'
         )->render();
     }
 
@@ -631,7 +639,10 @@ class PublicController extends BaseController
             ])
             ->whereHas('order', function (Builder $query) {
                 $query
-                    ->where('user_id', auth('customer')->id())
+                    ->when(
+                        auth('customer')->id(),
+                        fn (Builder $query, $customerId) => $query->where('user_id', $customerId)
+                    )
                     ->where('is_finished', 1)
                     ->when(is_plugin_active('payment'), function (Builder $query) {
                         $query
@@ -660,7 +671,7 @@ class PublicController extends BaseController
         } elseif ($hash = $request->input('hash')) {
             $this
                 ->httpResponse()
-                ->setNextUrl(route('public.index'));
+                ->setNextUrl(BaseHelper::getHomepageUrl());
             if (! $orderProduct->download_token || ! Hash::check($orderProduct->download_token, $hash)) {
                 abort(404);
             }

@@ -8,27 +8,22 @@ use Botble\Ecommerce\Forms\Concerns\HasSubmitButton;
 use Botble\Ecommerce\Http\Requests\TaxRuleRequest;
 use Botble\Ecommerce\Models\Tax;
 use Botble\Ecommerce\Models\TaxRule;
+use Botble\Location\Fields\SelectLocationField;
 use Illuminate\Support\Facades\Request;
 
 class TaxRuleForm extends FormAbstract
 {
     use HasSubmitButton;
 
-    public function __construct()
-    {
-        parent::__construct();
-        $this->setFormOption('id', 'ecommerce-tax-rule-form');
-
-        if (Request::ajax()) {
-            $this->contentOnly();
-        }
-    }
-
     public function setup(): void
     {
         $this
             ->setupModel(new TaxRule())
-            ->setValidatorClass(TaxRuleRequest::class);
+            ->setValidatorClass(TaxRuleRequest::class)
+            ->setFormOption('id', 'ecommerce-tax-rule-form')
+            ->when(Request::ajax(), function (FormAbstract $form) {
+                $form->contentOnly();
+            });
 
         if (! $this->getModel()->getKey()) {
             $this
@@ -52,14 +47,17 @@ class TaxRuleForm extends FormAbstract
         }
 
         if (EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation()) {
-            $this
-                ->add('location', 'selectLocation', [
+            $this->add(
+                'location',
+                SelectLocationField::class,
+                [
                     'locationKeys' => [
                         'country' => 'country',
                         'state' => 'state',
                         'city' => 'city',
                     ],
-                ]);
+                ]
+            );
         } else {
             $this
                 ->add('country', 'customSelect', [

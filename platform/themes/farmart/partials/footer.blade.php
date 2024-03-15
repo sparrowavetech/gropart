@@ -308,7 +308,7 @@
     <div class="footer-mobile">
         <ul class="menu--footer">
             <li>
-                <a href="{{ route('public.index') }}">
+                <a href="{{ BaseHelper::getHomepageUrl() }}">
                     <i class="icon-home3"></i>
                     <span>{{ __('Home') }}</span>
                 </a>
@@ -405,7 +405,7 @@
         };
 
         window.siteConfig = {
-            "url": "{{ route('public.index') }}",
+            "url": "{{ BaseHelper::getHomepageUrl() }}",
             "img_placeholder": "{{ theme_option('lazy_load_image_enabled', 'yes') == 'yes' ? image_placeholder() : null }}",
             "countdown_text": {
                 "days": "{{ __('days') }}",

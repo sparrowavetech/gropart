@@ -364,7 +364,7 @@
             <div class="row">
                 <div class="col-12">
                     <div class="alert alert-warning my-5">
-                        <span>{!! __('No products in cart. :link!', ['link' => Html::link(route('public.index'), __('Back to shopping'))]) !!}</span>
+                        <span>{!! __('No products in cart. :link!', ['link' => Html::link(BaseHelper::getHomepageUrl(), __('Back to shopping'))]) !!}</span>
                     </div>
                 </div>
             </div>

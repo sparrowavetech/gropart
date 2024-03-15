@@ -5,6 +5,7 @@ namespace Botble\Ecommerce\Models;
 use Botble\Base\Models\BaseModel;
 use Botble\Ecommerce\Enums\InvoiceStatusEnum;
 use Botble\Payment\Models\Payment;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -86,5 +87,24 @@ class Invoice extends BaseModel
         } while (static::query()->where('code', $code)->exists());
 
         return $code;
+    }
+
+    protected function taxClassesName(): Attribute
+    {
+        return Attribute::get(function () {
+            $taxes = [];
+
+            foreach ($this->items as $invoiceItem) {
+                if (! $invoiceItem->tax_amount || empty($invoiceItem->options['taxClasses'])) {
+                    continue;
+                }
+
+                foreach ($invoiceItem->options['taxClasses'] as $taxName => $taxRate) {
+                    $taxes[] = $taxName . ' - ' . $taxRate . '%';
+                }
+            }
+
+            return implode(', ', array_unique($taxes));
+        });
     }
 }

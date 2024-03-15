@@ -70,7 +70,7 @@
                     <div class="ps-copyright">
                         @php $logo = theme_option('logo_vendor_dashboard', theme_option('logo')); @endphp
                         @if ($logo)
-                            <a href="{{ route('public.index') }}" title="{{ $siteTitle = theme_option('site_title') }}">
+                            <a href="{{ BaseHelper::getHomepageUrl() }}" title="{{ $siteTitle = theme_option('site_title') }}">
                                 <img
                                     src="{{ RvMedia::getImageUrl($logo) }}"
                                     alt="{{ $siteTitle }}"
@@ -104,7 +104,7 @@
                     </a>
                 @endif
 
-                <a href="{{ route('public.index') }}" target="_blank" class="text-uppercase">
+                <a href="{{ BaseHelper::getHomepageUrl() }}" target="_blank" class="text-uppercase">
                     {{ __('Go to homepage') }}
                     <x-core::icon name="ti ti-arrow-right" />
                 </a>

@@ -59,12 +59,12 @@
                         {{ trans('plugins/ecommerce::product-option.add_new_option') }}
                     </x-core::button>
                 </div>
-                @if (count($globalOptions))
+                @if (! empty($globalOptions))
                     <div class="col ms-auto">
                         <div class="d-flex gap-2 align-items-start justify-content-end">
                             <x-core::form.select
                                 id="global-option"
-                                :options="array_merge([0 => trans('plugins/ecommerce::product-option.select_global_option')], $globalOptions)"
+                                :options="[0 => trans('plugins/ecommerce::product-option.select_global_option')] + $globalOptions"
                             />
                             <x-core::button
                                 type="button"

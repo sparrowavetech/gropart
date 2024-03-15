@@ -30,7 +30,7 @@
 
                 <a
                     class="btn payment-checkout-btn"
-                    href="{{ route('public.index') }}"
+                    href="{{ BaseHelper::getHomepageUrl() }}"
                 > {{ __('Continue shopping') }} </a>
             </div>
             <div class="col-lg-5 col-md-6 d-none d-md-block right">

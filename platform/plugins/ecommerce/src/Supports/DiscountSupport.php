@@ -106,7 +106,7 @@ class DiscountSupport
 
         if ($this->promotions->isEmpty()) {
             $this->promotions = app(DiscountInterface::class)
-                ->getAvailablePromotions(['products', 'customers', 'productCollections'], $forProductSingle);
+                ->getAvailablePromotions(['products', 'customers', 'productCollections', 'productCategories'], $forProductSingle);
         }
 
         return $this->promotions;
@@ -116,6 +116,9 @@ class DiscountSupport
     {
         $now = Carbon::now();
 
+        /**
+         * @var Discount $discount
+         */
         $discount = Discount::query()
             ->where('code', $couponCode)
             ->where('type', DiscountTypeEnum::COUPON)
@@ -143,6 +146,9 @@ class DiscountSupport
 
     public function afterOrderCancelled(string $couponCode, int|string|null $customerId = 0): void
     {
+        /**
+         * @var Discount $discount
+         */
         $discount = Discount::query()
             ->where('code', $couponCode)
             ->where('type', DiscountTypeEnum::COUPON)

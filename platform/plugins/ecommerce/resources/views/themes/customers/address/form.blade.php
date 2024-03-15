@@ -93,7 +93,7 @@
             <x-core::form.select
                 :label="trans('plugins/ecommerce::addresses.city')"
                 name="city"
-                :options="EcommerceHelper::getAvailableStatesByCountry(old('state', $address->state))"
+                :options="EcommerceHelper::getAvailableCitiesByState(old('state', $address->state))"
                 :value="old('city', $address->city)"
                 data-type="city"
                 data-url="{{ route('ajax.cities-by-state') }}"
@@ -104,8 +104,9 @@
 
 <x-core::form.checkbox
     :label="__('Use this address as default.')"
-    name="send_mail"
+    name="is_default"
     :value="1"
+    :checked="old('city', $address->is_default)"
     :inline="true"
 />
 

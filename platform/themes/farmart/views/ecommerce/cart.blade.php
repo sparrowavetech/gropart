@@ -119,7 +119,7 @@
                                             </svg>
                                         </span> {{ __('Continue Shopping') }}
                                     </a>
-                                    <a class="btn btn-secondary mb-2 ms-md-2" href="{{ route('public.index') }}">
+                                    <a class="btn btn-secondary mb-2 ms-md-2" href="{{ BaseHelper::getHomepageUrl() }}">
                                         <span class="svg-icon">
                                             <svg>
                                                 <use href="#svg-icon-home" xlink:href="#svg-icon-home"></use>
@@ -236,7 +236,7 @@
                                             </svg>
                                         </span> {{ __('Continue Shopping') }}
                                     </a>
-                                    <a class="btn btn-secondary mb-2 ms-md-2" href="{{ route('public.index') }}">
+                                    <a class="btn btn-secondary mb-2 ms-md-2" href="{{ BaseHelper::getHomepageUrl() }}">
                                         <span class="svg-icon">
                                             <svg>
                                                 <use href="#svg-icon-home" xlink:href="#svg-icon-home"></use>

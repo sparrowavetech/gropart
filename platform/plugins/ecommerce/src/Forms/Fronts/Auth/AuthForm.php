@@ -11,7 +11,9 @@ abstract class AuthForm extends FormAbstract
 {
     public function setup(): void
     {
-        Theme::asset()->add('auth-css', 'vendor/core/plugins/ecommerce/css/front-auth.css');
+        Theme::asset()->add('auth-css', 'vendor/core/plugins/ecommerce/css/front-auth.css', version: get_cms_version());
+
+        Theme::addBodyAttributes(['id' => 'page-auth']);
 
         $this
             ->contentOnly()

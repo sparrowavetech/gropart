@@ -15,6 +15,7 @@ class ProductReviewSettingRequest extends Request
             'review_max_file_number' => ['nullable', 'required_if:review_enabled,1', 'integer', 'min:1'],
             'only_allow_customers_purchased_to_review' => $onOffRule,
             'review_need_to_be_approved' => $onOffRule,
+            'show_customer_full_name' => $onOffRule,
         ];
     }
 }

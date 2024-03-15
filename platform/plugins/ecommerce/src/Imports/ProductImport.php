@@ -95,9 +95,6 @@ class ProductImport implements
             ->get();
         $this->allTaxes = Tax::query()->get();
         $this->barcodes = collect();
-
-        config(['excel.imports.ignore_empty' => true]);
-        config(['excel.imports.csv.input_encoding' => 'ISO-8859-1']);
     }
 
     public function setImportType(string $importType): self
@@ -747,7 +744,7 @@ class ProductImport implements
         Arr::set($row, $key, $value);
 
         if ($value && $key == 'barcode') {
-            /*if ($barcode = $this->barcodes->firstWhere('value', $value)) {
+            if ($barcode = $this->barcodes->firstWhere('value', $value)) {
                 if (method_exists($this, 'onFailure')) {
                     $failures[] = new Failure(
                         $this->rowCurrent,
@@ -764,8 +761,7 @@ class ProductImport implements
                 }
             } else {
                 $this->barcodes->push(['row' => $this->rowCurrent, 'value' => $value]);
-            }*/
-            $this->barcodes->push(['row' => $this->rowCurrent, 'value' => $value]);
+            }
         }
 
         return $this;

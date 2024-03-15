@@ -183,7 +183,7 @@
                     <div class="header-items header__left">
                         @if (theme_option('logo'))
                             <div class="logo">
-                                <a href="{{ route('public.index') }}">
+                                <a href="{{ BaseHelper::getHomepageUrl() }}">
                                     <img
                                         src="{{ RvMedia::getImageUrl(theme_option('logo')) }}"
                                         alt="{{ theme_option('site_title') }}"
@@ -514,7 +514,7 @@
             <div class="header-items-mobile header-items-mobile--center">
                 @if (theme_option('logo'))
                     <div class="logo">
-                        <a href="{{ route('public.index') }}">
+                        <a href="{{ BaseHelper::getHomepageUrl() }}">
                             <img
                                 src="{{ RvMedia::getImageUrl(theme_option('logo')) }}"
                                 alt="{{ theme_option('site_title') }}"

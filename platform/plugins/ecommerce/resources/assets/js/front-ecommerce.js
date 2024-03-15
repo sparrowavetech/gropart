@@ -106,8 +106,46 @@ class Ecommerce {
 
                 this.#ajaxSearchProducts(currentTarget.closest('form'), currentTarget.prop('href'))
             })
+            .on('click', '[data-bb-toggle="quick-shop"]', (e) => {
+                const currentTarget = $(e.currentTarget)
+                const modal = $('#quick-shop-modal')
 
-        this.initPriceFilter()
+                $.ajax({
+                    url: currentTarget.data('url'),
+                    type: 'GET',
+                    beforeSend: () => {
+                        modal.find('.modal-body').html('')
+                        modal.modal('show')
+
+                        document.dispatchEvent(
+                            new CustomEvent('ecommerce.quick-shop.before-send', {
+                                detail: {
+                                    element: currentTarget,
+                                    modal,
+                                },
+                            })
+                        )
+                    },
+                    success: ({ data }) => {
+                        modal.find('.modal-body').html(data)
+                    },
+                    error: (error) => Theme.handleError(error),
+                    complete: () => {
+                        document.dispatchEvent(
+                            new CustomEvent('ecommerce.quick-shop.completed', {
+                                detail: {
+                                    element: currentTarget,
+                                    modal,
+                                },
+                            })
+                        )
+                    },
+                })
+            })
+
+        if ($('.bb-product-price-filter').length) {
+            this.initPriceFilter()
+        }
     }
 
     /**
@@ -140,71 +178,81 @@ class Ecommerce {
         })
     }
 
-    initProductGallery() {
-        const $gallery = $('.bb-product-gallery-images')
-        const $thumbnails = $('.bb-product-thumbnails')
+    initProductGallery(onlyQuickView = false) {
+        if (!onlyQuickView) {
+            const $gallery = $('.bb-product-gallery-images')
+            const $thumbnails = $('.bb-product-gallery-thumbnails')
 
-        if ($gallery.length) {
-            $gallery.map((index, item) => {
-                const $item = $(item)
-                if ($item.hasClass('slick-initialized')) {
-                    $item.slick('unslick')
-                }
+            if ($gallery.length) {
+                $gallery.map((index, item) => {
+                    const $item = $(item)
+                    if ($item.hasClass('slick-initialized')) {
+                        $item.slick('unslick')
+                    }
 
-                $item.slick({
-                    slidesToShow: 1,
-                    slidesToScroll: 1,
-                    arrows: false,
-                    dots: false,
-                    infinite: false,
-                    fade: true,
-                    lazyLoad: 'ondemand',
-                    asNavFor: '.bb-product-thumbnails',
-                    rtl: this.isRtl(),
+                    $item.slick({
+                        slidesToShow: 1,
+                        slidesToScroll: 1,
+                        arrows: false,
+                        dots: false,
+                        infinite: false,
+                        fade: true,
+                        lazyLoad: 'ondemand',
+                        asNavFor: '.bb-product-gallery-thumbnails',
+                        rtl: this.isRtl(),
+                    })
                 })
-            })
-        }
+            }
 
-        if ($thumbnails.length) {
-            $thumbnails.map((index, item) => {
-                const $item = $(item)
-                if ($item.hasClass('slick-initialized')) {
-                    $item.slick('unslick')
-                }
-
-                $item.slick({
+            if ($thumbnails.length) {
+                $thumbnails.slick({
                     slidesToShow: 6,
                     slidesToScroll: 1,
-                    arrows: true,
                     asNavFor: '.bb-product-gallery-images',
                     focusOnSelect: true,
                     infinite: false,
-                    variableWidth: true,
-                    centerMode: true,
                     rtl: this.isRtl(),
+                    vertical: $thumbnails.data('vertical') === 1,
                     prevArrow:
                         '<button class="slick-prev slick-arrow"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M15 6l-6 6l6 6" /></svg></button>',
                     nextArrow:
-                        '<button class="slick-next slick-arrow"><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 6l6 6l-6 6" /></svg></button>',
+                        '<button class="slick-next slick-arrow"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 6l6 6l-6 6" /></svg></button>',
                     responsive: [
                         {
                             breakpoint: 992,
                             settings: {
                                 slidesToShow: 4,
+                                vertical: false,
                             },
                         },
                         {
                             breakpoint: 768,
                             settings: {
                                 slidesToShow: 3,
+                                vertical: false,
                             },
                         },
                     ],
                 })
+            }
+
+            this.initLightGallery($gallery)
+        }
+
+        const $quickViewGallery = $('.bb-quick-view-gallery-images')
+
+        if ($quickViewGallery.length) {
+            $quickViewGallery.slick({
+                slidesToShow: 1,
+                slidesToScroll: 1,
+                dots: false,
+                arrows: true,
+                adaptiveHeight: false,
+                rtl: this.isRtl(),
             })
         }
 
-        this.initLightGallery($gallery)
+        this.initLightGallery($quickViewGallery)
     }
 
     initPriceFilter() {
@@ -226,8 +274,8 @@ class Ecommerce {
                 max: $sliderRange.data('max'),
                 values: [$minPrice.val(), $maxPrice.val()],
                 slide: function (event, ui) {
-                    $rangeLabel.find('.from').text(ui.values[0])
-                    $rangeLabel.find('.to').text(ui.values[1])
+                    $rangeLabel.find('.from').text(EcommerceApp.formatPrice(ui.values[0]))
+                    $rangeLabel.find('.to').text(EcommerceApp.formatPrice(ui.values[1]))
                 },
                 change: function (event, ui) {
                     if (parseInt($minPrice.val()) !== ui.values[0]) {
@@ -240,9 +288,50 @@ class Ecommerce {
                 },
             })
 
-            $rangeLabel.find('.from').text($sliderRange.slider('values', 0))
-            $rangeLabel.find('.to').text($sliderRange.slider('values', 1))
+            $rangeLabel.find('.from').text(this.formatPrice($sliderRange.slider('values', 0)))
+            $rangeLabel.find('.to').text(this.formatPrice($sliderRange.slider('values', 1)))
         }
+    }
+
+    formatPrice(price, numberAfterDot, x) {
+        const currencies = window.currencies || {}
+
+        if (!numberAfterDot) {
+            numberAfterDot = currencies.number_after_dot !== undefined ? currencies.number_after_dot : 2
+        }
+
+        const regex = '\\d(?=(\\d{' + (x || 3) + '})+$)'
+        let priceUnit = ''
+
+        if (currencies.show_symbol_or_title) {
+            priceUnit = currencies.symbol || currencies.title
+        }
+
+        if (currencies.display_big_money) {
+            let label = ''
+
+            if (price >= 1000000 && price < 1000000000) {
+                price = price / 1000000
+                label = currencies.million
+            } else if (price >= 1000000000) {
+                price = price / 1000000000
+                label = currencies.billion
+            }
+
+            priceUnit = label + (priceUnit ? ` ${priceUnit}` : '')
+        }
+
+        price = price.toFixed(Math.max(0, ~~numberAfterDot)).toString().split('.')
+
+        price =
+            price[0].toString().replace(new RegExp(regex, 'g'), `$&${currencies.thousands_separator}`) +
+            (price[1] ? currencies.decimal_separator + price[1] : '')
+
+        if (currencies.show_symbol_or_title) {
+            price = currencies.is_prefix_symbol ? priceUnit + price : price + priceUnit
+        }
+
+        return price
     }
 
     #transformFormData = (formData) => {

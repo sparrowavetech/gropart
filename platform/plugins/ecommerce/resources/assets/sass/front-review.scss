@@ -29,7 +29,7 @@
             align-items: center;
 
             p {
-                margin-left: 4px;
+                margin-inline-start: 4px;
                 font-size: 14px;
                 margin-bottom: 0;
             }
@@ -75,11 +75,11 @@
             > div {
                 &:before {
                     position: absolute;
-                    left: 10px;
+                    inset-inline-start: 10px;
                     top: -10px;
                     content: '';
-                    border-left: 10px solid transparent;
-                    border-right: 10px solid transparent;
+                    border-inline-start: 10px solid transparent;
+                    border-inline-end: 10px solid transparent;
                     border-bottom: 10px solid #f5f5f5;
                 }
             }
@@ -98,7 +98,7 @@
         .loading-spinner {
             position: absolute;
             top: 0;
-            left: 0;
+            inset-inline-start: 0;
             width: 100%;
             height: 100%;
             display: flex;
@@ -151,6 +151,7 @@
             svg {
                 width: 1rem;
                 height: 1rem;
+                margin-bottom: 0;
             }
         }
 
@@ -207,6 +208,7 @@
                 svg {
                     width: 1rem;
                     height: 1rem;
+                    margin-bottom: 0;
                 }
             }
 
@@ -233,7 +235,7 @@
             -webkit-transition: all 0.3s cubic-bezier(0.46, 0.03, 0.52, 0.96);
             transition: all 0.3s cubic-bezier(0.46, 0.03, 0.52, 0.96);
             text-align: initial;
-            margin-right: 2px;
+            margin-inline-end: 2px;
             background-color: #eee;
             width: 70px;
             height: 70px;
@@ -298,7 +300,7 @@
 
         .image-upload__file-input {
             position: absolute;
-            left: 0;
+            inset-inline-start: 0;
             top: 0;
             opacity: 0;
             width: 100%;
@@ -317,7 +319,7 @@
         .image-viewer__icon-remove {
             cursor: pointer;
             position: absolute;
-            right: 3px;
+            inset-inline-end: 3px;
             top: 3px;
             z-index: 1;
             height: 20px;
@@ -331,6 +333,7 @@
                 color: #ffffff;
                 width: 10px;
                 height: 10px;
+                margin-bottom: 0;
             }
         }
     }

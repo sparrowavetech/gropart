@@ -43,7 +43,7 @@
     @yield('header', view(MarketplaceHelper::viewPath('dashboard.layouts.header')))
 
     <script>
-        window.siteUrl = "{{ route('public.index') }}";
+        window.siteUrl = "{{ BaseHelper::getHomepageUrl() }}";
     </script>
 
     <!-- Put translation key to translate in VueJS -->

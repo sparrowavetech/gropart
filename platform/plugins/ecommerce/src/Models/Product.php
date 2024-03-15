@@ -410,7 +410,7 @@ class Product extends BaseModel
     public function getDiscountPrice(): float|int|null
     {
         $promotion = DiscountFacade::getFacadeRoot()
-            ->promotionForProduct([$this->id]);
+            ->promotionForProduct([$this->id, $this->original_product->id]);
 
         if (! $promotion) {
             return $this->price;
@@ -741,7 +741,7 @@ class Product extends BaseModel
             return null;
         }
 
-        if (! Str::contains($setting, ['[%s]', '[%d]', '[%S]', '[%D]'])) {
+        if (! Str::contains($setting, ['[%s]', '[%d]', '[%S]', '[%D]', '%s', '%d'])) {
             return $setting . mt_rand(10000, 99999) + time();
         }
 

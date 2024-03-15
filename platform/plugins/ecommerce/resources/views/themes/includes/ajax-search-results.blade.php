@@ -11,12 +11,14 @@
                             {{ $product->name }}
                         </div>
 
-                        <div class="bb-quick-search-item-rating">
-                            <div class="bb-product-rating" style="--bb-rating-size: 70px">
-                                <span style="width: {{ $product->reviews_avg * 20 }}%"></span>
+                        @if (EcommerceHelper::isReviewEnabled())
+                            <div class="bb-quick-search-item-rating">
+                                <div class="bb-product-rating" style="--bb-rating-size: 70px">
+                                    <span style="width: {{ $product->reviews_avg * 20 }}%"></span>
+                                </div>
+                                <span>({{ $product->reviews_count }})</span>
                             </div>
-                            <span>({{ $product->reviews_count }})</span>
-                        </div>
+                        @endif
 
                         <div class="bb-quick-search-item-price">
                             <span class="new-price">{{ format_price($product->front_sale_price_with_taxes) }}</span>

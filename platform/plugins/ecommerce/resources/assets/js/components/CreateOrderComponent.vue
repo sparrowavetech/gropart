@@ -277,7 +277,7 @@
                                             <template v-else>{{ __('order.discount') }}</template>
                                         </button>
                                         <span class="d-block small fw-bold" v-if="has_applied_discount">
-                                            {{child_coupon_code || child_discount_description }}
+                                            {{ child_coupon_code || child_discount_description }}
                                         </span>
                                     </td>
                                     <td>
@@ -636,7 +636,7 @@
                 <div class="next-form-grid">
                     <div class="mb-3 position-relative">
                         <label class="form-label">{{ __('order.or_coupon_code') }}</label>
-                        <input class="form-control coupon-code-input" :value="child_coupon_code" />
+                        <input class="form-control coupon-code-input" v-model="child_coupon_code" />
                     </div>
                     <div class="position-relative">
                         <label class="form-label">{{ __('order.description') }}</label>
@@ -1525,7 +1525,6 @@ export default {
             let $button = $target.find('.btn-primary')
 
             $button.addClass('button-loading').prop('disabled', true)
-            context.child_coupon_code = $target.find('.coupon-code-input').val()
 
             if (context.child_coupon_code) {
                 context.discount_custom_value = 0

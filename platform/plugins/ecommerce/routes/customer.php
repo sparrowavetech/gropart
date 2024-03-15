@@ -12,9 +12,12 @@ Route::group(
             Route::group(['prefix' => 'customers', 'as' => 'customers.'], function () {
                 Route::resource('', 'CustomerController')->parameters(['' => 'customer']);
 
-                Route::group(['prefix' => 'addresses', 'as' => 'addresses.'], function () {
-                    Route::resource('', 'AddressController')->parameters(['' => 'address'])->except(['index']);
-                });
+                Route::group(
+                    ['prefix' => 'addresses', 'as' => 'addresses.', 'permission' => 'customers.edit'],
+                    function () {
+                        Route::resource('', 'AddressController')->parameters(['' => 'address'])->except(['index']);
+                    }
+                );
             });
 
             Route::group(['prefix' => 'customers', 'as' => 'customers.'], function () {
@@ -244,6 +247,11 @@ if (defined('THEME_MODULE_SCREEN_NAME')) {
             Route::post('orders/{id}/upload-proof', [
                 'as' => 'orders.upload-proof',
                 'uses' => 'UploadProofController@upload',
+            ])->wherePrimaryKey();
+
+            Route::get('orders/{id}/download-proof', [
+                'as' => 'orders.download-proof',
+                'uses' => 'UploadProofController@download',
             ])->wherePrimaryKey();
 
             Route::delete('orders/{id}/download-proof', [

@@ -18,7 +18,7 @@ class DiscountSeeder extends BaseSeeder
         $now = $this->now();
 
         foreach (range(1, 10) as $index) {
-            Discount::create([
+            Discount::query()->create([
                 'type' => DiscountTypeEnum::COUPON,
                 'title' => sprintf('Discount %s', $index),
                 'code' => strtoupper(Str::random(12)),
@@ -29,6 +29,7 @@ class DiscountSeeder extends BaseSeeder
                     DiscountTypeOptionEnum::PERCENTAGE => $fake->numberBetween(1, 100),
                     default => $fake->numberBetween(10, 1000),
                 },
+                'display_at_checkout' => true,
             ]);
         }
     }

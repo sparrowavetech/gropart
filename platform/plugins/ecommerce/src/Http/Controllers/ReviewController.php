@@ -86,7 +86,7 @@ class ReviewController extends BaseController
 
     public function destroy(Review $review)
     {
-        DeleteResourceAction::make($review);
+        return DeleteResourceAction::make($review);
     }
 
     public function ajaxSearchCustomers(SelectSearchAjaxRequest $request)

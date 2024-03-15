@@ -3,9 +3,9 @@
 namespace Botble\Ecommerce\Http\Controllers\Customers;
 
 use Botble\Base\Events\CreatedContentEvent;
-use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Base\Facades\Assets;
+use Botble\Base\Http\Actions\DeleteResourceAction;
 use Botble\Base\Supports\Breadcrumb;
 use Botble\Ecommerce\Forms\CustomerForm;
 use Botble\Ecommerce\Http\Controllers\BaseController;
@@ -19,7 +19,6 @@ use Botble\Ecommerce\Models\Customer;
 use Botble\Ecommerce\Tables\CustomerReviewTable;
 use Botble\Ecommerce\Tables\CustomerTable;
 use Carbon\Carbon;
-use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -66,11 +65,9 @@ class CustomerController extends BaseController
             ->withCreatedSuccessMessage();
     }
 
-    public function edit(int|string $id)
+    public function edit(Customer $customer)
     {
         Assets::addScriptsDirectly('vendor/core/plugins/ecommerce/js/customer.js');
-
-        $customer = Customer::query()->findOrFail($id);
 
         $this->pageTitle(trans('plugins/ecommerce::customer.edit', ['name' => $customer->name]));
 
@@ -79,10 +76,8 @@ class CustomerController extends BaseController
         return CustomerForm::createFromModel($customer)->renderForm();
     }
 
-    public function update(int|string $id, CustomerEditRequest $request)
+    public function update(Customer $customer, CustomerEditRequest $request)
     {
-        $customer = Customer::query()->findOrFail($id);
-
         $customer->fill($request->except('password'));
 
         if ($request->input('is_change_password') == 1) {
@@ -101,22 +96,9 @@ class CustomerController extends BaseController
             ->withUpdatedSuccessMessage();
     }
 
-    public function destroy(int|string $id, Request $request)
+    public function destroy(Customer $customer)
     {
-        try {
-            $customer = Customer::query()->findOrFail($id);
-            $customer->delete();
-            event(new DeletedContentEvent(CUSTOMER_MODULE_SCREEN_NAME, $request, $customer));
-
-            return $this
-                ->httpResponse()
-                ->setMessage(trans('core/base::notices.delete_success_message'));
-        } catch (Exception $exception) {
-            return $this
-                ->httpResponse()
-                ->setError()
-                ->setMessage($exception->getMessage());
-        }
+        return DeleteResourceAction::make($customer);
     }
 
     public function verifyEmail(int|string $id, Request $request)

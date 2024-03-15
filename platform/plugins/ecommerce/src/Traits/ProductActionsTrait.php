@@ -29,7 +29,10 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Throwable;
 
 trait ProductActionsTrait
 {
@@ -161,15 +164,27 @@ trait ProductActionsTrait
         $addedAttributeSets = array_filter((array)$request->input('added_attribute_sets', []));
 
         if ($addedAttributes && $addedAttributeSets) {
-            $result = ProductVariation::getVariationByAttributesOrCreate($id, $addedAttributes);
+            try {
+                DB::beginTransaction();
 
-            $storeAttributesOfProductService->execute($product, $addedAttributeSets, $addedAttributes);
+                $result = ProductVariation::getVariationByAttributesOrCreate($id, $addedAttributes);
 
-            $variation = $result['variation']->toArray();
-            $variation['variation_default_id'] = $variation['id'];
-            $variation['auto_generate_sku'] = true;
+                $storeAttributesOfProductService->execute($product, $addedAttributeSets, $addedAttributes);
 
-            $this->postSaveAllVersions([$variation['id'] => $variation], $id, $response);
+                $variation = $result['variation']->toArray();
+                $variation['variation_default_id'] = $variation['id'];
+                $variation['auto_generate_sku'] = true;
+
+                $this->postSaveAllVersions([$variation['id'] => $variation], $id, $response);
+
+                DB::commit();
+            } catch (Throwable $exception) {
+                DB::rollBack();
+
+                return $response
+                    ->setError()
+                    ->setMessage($exception->getMessage());
+            }
         }
 
         return $response->withUpdatedSuccessMessage();
@@ -449,14 +464,21 @@ trait ProductActionsTrait
         $keyword = $request->input('keyword');
 
         $availableProducts = Product::query()
-            ->wherePublished()
+            ->when(! Auth::check(), function ($query) {
+                $query->wherePublished();
+            })
             ->where('is_variation', 0)
             ->when($productId, fn ($query) => $query->whereNot('id', $productId))
             ->when($keyword, function ($query) use ($keyword) {
                 $query->where(function ($query) use ($keyword) {
+                    $keyword = '%' . trim($keyword) . '%';
+
                     $query
-                        ->where('name', 'LIKE', '%' . $keyword . '%')
-                        ->orWhere('sku', 'LIKE', '%' . $keyword . '%');
+                        ->where('name', 'LIKE', $keyword)
+                        ->orWhere('sku', 'LIKE', $keyword)
+                        ->orWhereHas('variations.product', function ($query) use ($keyword) {
+                            $query->where('sku', 'LIKE', $keyword);
+                        });
                 });
             })
             ->select([
@@ -466,7 +488,7 @@ trait ProductActionsTrait
                 'image',
                 'price',
             ])
-            ->simplePaginate(5);
+            ->simplePaginate(10);
 
         $includeVariation = $request->input('include_variation', 0);
 
@@ -506,9 +528,22 @@ trait ProductActionsTrait
         $includeVariation = $request->input('include_variation');
 
         $availableProducts = Product::query()
-            ->wherePublished()
+            ->when(! Auth::check(), function ($query) {
+                $query->wherePublished();
+            })
             ->where('is_variation', '<>', 1)
-            ->when($keyword, fn ($query) => $query->where('name', 'LIKE', '%' . $keyword . '%'))
+            ->when($keyword, function ($query) use ($keyword) {
+                $query->where(function ($query) use ($keyword) {
+                    $keyword = '%' . trim($keyword) . '%';
+
+                    $query
+                        ->where('name', 'LIKE', $keyword)
+                        ->orWhere('sku', 'LIKE', $keyword)
+                        ->orWhereHas('variations.product', function ($query) use ($keyword) {
+                            $query->where('sku', 'LIKE', $keyword);
+                        });
+                });
+            })
             ->select([
                 'ec_products.*',
             ])
@@ -528,7 +563,7 @@ trait ProductActionsTrait
                         'ec_product_variations.id'
                     );
             })
-            ->simplePaginate(5);
+            ->simplePaginate(10);
 
         foreach ($availableProducts as &$availableProduct) {
             $image = Arr::first($availableProduct->images) ?? null;
@@ -567,7 +602,9 @@ trait ProductActionsTrait
         $selectedProducts = collect();
         if ($productIds = $request->input('product_ids', [])) {
             $selectedProducts = Product::query()
-                ->wherePublished()
+                ->when(! Auth::check(), function ($query) {
+                    $query->wherePublished();
+                })
                 ->whereIn('id', $productIds)
                 ->with(['variationInfo.configurableProduct'])
                 ->get();
@@ -578,13 +615,20 @@ trait ProductActionsTrait
         $availableProducts = Product::query()
             ->select(['ec_products.*'])
             ->where('is_variation', false)
-            ->wherePublished()
+            ->when(! Auth::check(), function ($query) {
+                $query->wherePublished();
+            })
             ->with(['variationInfo.configurableProduct'])
             ->when($keyword, function ($query) use ($keyword) {
                 $query->where(function ($query) use ($keyword) {
+                    $keyword = '%' . trim($keyword) . '%';
+
                     $query
-                        ->where('name', 'LIKE', '%' . $keyword . '%')
-                        ->orWhere('sku', 'LIKE', '%' . $keyword . '%');
+                        ->where('name', 'LIKE', $keyword)
+                        ->orWhere('sku', 'LIKE', $keyword)
+                        ->orWhereHas('variations.product', function ($query) use ($keyword) {
+                            $query->where('sku', 'LIKE', $keyword);
+                        });
                 });
             });
 
@@ -604,7 +648,7 @@ trait ProductActionsTrait
             $availableProducts = $availableProducts->whereIn('store_id', $storeIds)->with(['store']);
         }
 
-        $availableProducts = $availableProducts->simplePaginate(5);
+        $availableProducts = $availableProducts->simplePaginate(10);
 
         return $response->setData(AvailableProductResource::collection($availableProducts)->response()->getData());
     }

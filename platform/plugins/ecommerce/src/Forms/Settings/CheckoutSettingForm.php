@@ -70,7 +70,7 @@ class CheckoutSettingForm extends SettingForm
                 $this
                     ->add('load_countries_states_cities_from_location_plugin', 'customRadio', [
                         'label' => trans('plugins/ecommerce::setting.checkout.form.load_countries_states_cities_from_location_plugin'),
-                        'value' => $loadLocationFromPlugin = EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation(),
+                        'value' => $loadLocationFromPlugin = (bool)get_ecommerce_setting('load_countries_states_cities_from_location_plugin', 0),
                         'values' => [
                             0 => trans('core/base::base.no'),
                             1 => trans('core/base::base.yes'),

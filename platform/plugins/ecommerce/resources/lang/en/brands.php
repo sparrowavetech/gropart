@@ -22,7 +22,7 @@ return [
     'cannot_delete' => 'Brand could not be deleted',
     'brand_deleted' => 'Brand deleted',
     'menu' => 'Brands',
-    'no_brand' => 'No brand',
+    'select_brand' => 'Select a brand...',
     'intro' => [
         'title' => 'Manage brands',
         'description' => 'Manage product brands such as Nike, Adidas, Bitis ...',

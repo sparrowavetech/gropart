@@ -5,6 +5,7 @@ namespace Botble\Ecommerce\Exports;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Models\ProductVariation;
+use Botble\Media\Facades\RvMedia;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\FromCollection;
@@ -67,6 +68,7 @@ class CsvProductExport implements FromCollection, WithHeadings
                 'name' => $product->name,
                 'description' => $product->description,
                 'slug' => $product->slug,
+                'url' => $product->url,
                 'sku' => $product->sku,
                 'categories' => implode(',', $product->categories->pluck('name')->all()),
                 'status' => $product->status->getValue(),
@@ -75,7 +77,8 @@ class CsvProductExport implements FromCollection, WithHeadings
                 'product_collections' => implode(',', $product->productCollections->pluck('name')->all()),
                 'labels' => implode(',', $product->productLabels->pluck('name')->all()),
                 'taxes' => implode(',', $product->taxes->pluck('title')->all()),
-                'images' => implode(',', $product->images),
+                'image' => RvMedia::getImageUrl($product->image),
+                'images' => collect($product->images)->map(fn ($value) => RvMedia::getImageUrl($value))->implode(','),
                 'price' => $product->price,
                 'product_attributes' => implode(',', $productAttributes),
                 'import_type' => 'product',
@@ -116,6 +119,7 @@ class CsvProductExport implements FromCollection, WithHeadings
                             'name' => $variation->product->name,
                             'description' => '',
                             'slug' => '',
+                            'url' => '',
                             'sku' => $variation->product->sku,
                             'categories' => '',
                             'status' => $variation->product->status->getValue(),
@@ -124,7 +128,8 @@ class CsvProductExport implements FromCollection, WithHeadings
                             'product_collections' => '',
                             'labels' => '',
                             'taxes' => '',
-                            'images' => implode(',', $variation->product->images),
+                            'image' => RvMedia::getImageUrl($variation->product->image),
+                            'images' => collect($variation->product->images)->map(fn ($value) => RvMedia::getImageUrl($value))->implode(','),
                             'price' => $variation->product->price,
                             'product_attributes' => implode(',', $productAttributes),
                             'import_type' => 'variation',
@@ -178,6 +183,7 @@ class CsvProductExport implements FromCollection, WithHeadings
             'name' => 'Product name',
             'description' => 'Description',
             'slug' => 'Slug',
+            'url' => 'URL',
             'sku' => 'SKU',
             'categories' => 'Categories',
             'status' => 'Status',
@@ -186,6 +192,7 @@ class CsvProductExport implements FromCollection, WithHeadings
             'product_collections' => 'Product collections',
             'labels' => 'Labels',
             'taxes' => 'Taxes',
+            'image' => 'Image',
             'images' => 'Images',
             'price' => 'Price',
             'product_attributes' => 'Product attributes',

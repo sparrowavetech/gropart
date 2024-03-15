@@ -9,6 +9,8 @@ use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Models\Brand;
 use Botble\Ecommerce\Models\ProductAttributeSet;
 use Botble\Ecommerce\Models\ProductCategory;
+use Botble\Ecommerce\Models\ProductCollection;
+use Botble\Ecommerce\Models\ProductLabel;
 use Botble\Ecommerce\Models\ProductTag;
 use Botble\Ecommerce\Models\Tax;
 use Carbon\Carbon;
@@ -71,6 +73,10 @@ class TemplateProductExport implements
 
         $categories = ProductCategory::query()->inRandomOrder()->limit(2)->get();
         $brands = Brand::query()->pluck('name', 'id')->all();
+
+        $productCollections = ProductCollection::query()->inRandomOrder()->limit(2)->get();
+        $productLabels = ProductLabel::query()->inRandomOrder()->limit(2)->get();
+
         $this->brands = collect($brands);
         $taxes = Tax::query()->inRandomOrder()->limit(2)->get();
 
@@ -87,11 +93,16 @@ class TemplateProductExport implements
 
         $product = array_replace($this->getTempProductData(), [
             'name' => $productName,
+            'slug' => Str::slug($productName),
             'description' => $descriptions->random(),
             'sku' => Str::upper(Str::random(7)),
             'categories' => implode(',', $categories->pluck('name')->all()),
+            'product_collections' => implode(',', $productCollections->pluck('name')->all()),
+            'labels' => implode(',', $productLabels->pluck('name')->all()),
             'status' => BaseStatusEnum::PUBLISHED,
             'is_featured' => Arr::random(['Yes', 'No']),
+            'allow_checkout_when_out_of_stock' => Arr::random(['Yes', 'No']),
+            'content' => $descriptions->random(),
             'brand' => $this->brands->count() ? $this->brands->random() : null,
             'taxes' => implode(',', $taxes->pluck('title')->all()),
             'images' => 'products/1.jpg',

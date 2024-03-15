@@ -861,6 +861,15 @@ class EcommerceServiceProvider extends ServiceProvider
                         'icon' => 'ti ti-download',
                     ]);
                 })
+                ->when(EcommerceHelper::isOrderReturnEnabled(), function (DashboardMenuSupport $dashboardMenu) {
+                    $dashboardMenu->registerItem([
+                        'id' => 'cms-customer-order-returns',
+                        'priority' => 50,
+                        'name' => __('Order Return Requests'),
+                        'url' => fn () => route('customer.order_returns'),
+                        'icon' => 'ti ti-shopping-cart-cancel',
+                    ]);
+                })
                 ->registerItem([
                     'id' => 'cms-customer-address',
                     'priority' => 60,

@@ -15,7 +15,7 @@ class ProductWishlistService
         if (! $guard->check()) {
             $instance = Cart::instance('wishlist');
 
-            $wishlist = $instance->search(fn ($cartItem) => $cartItem->id === $product->getKey());
+            $wishlist = $instance->search(fn ($cartItem) => $cartItem->id == $product->getKey());
 
             if ($wishlist->isEmpty()) {
                 $instance

@@ -160,7 +160,7 @@ class Order extends BaseModel
             return false;
         }
 
-        if ($this->shipment) {
+        if ($this->shipment && $this->shipment->id) {
             $pendingShippingStatuses = [
                 ShippingStatusEnum::ARRANGE_SHIPMENT,
                 ShippingStatusEnum::PENDING,
@@ -179,7 +179,7 @@ class Order extends BaseModel
             return false;
         }
 
-        if ($this->shipment) {
+        if ($this->shipment && $this->shipment->id) {
             $pendingShippingStatuses = [
                 ShippingStatusEnum::APPROVED,
                 ShippingStatusEnum::ARRANGE_SHIPMENT,

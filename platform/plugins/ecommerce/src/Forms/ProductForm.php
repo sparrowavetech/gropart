@@ -115,7 +115,8 @@ class ProductForm extends FormAbstract
                             ->label(trans('plugins/ecommerce::products.form.brand'))
                             ->choices($brands)
                             ->searchable()
-                            ->emptyValue(trans('plugins/ecommerce::brands.no_brand'))
+                            ->emptyValue(trans('plugins/ecommerce::brands.select_brand'))
+                            ->allowClear()
                             ->toArray()
                     );
             })

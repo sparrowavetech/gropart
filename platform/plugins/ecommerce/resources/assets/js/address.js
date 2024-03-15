@@ -21,7 +21,7 @@ $(function () {
                     Botble.showNotice('success', data.message)
                     $('#add-address-modal').modal('hide')
                     form.get(0).reset()
-                    $('#address-histories').load($('.page-content form').prop('action') + ' #address-histories > *')
+                    $('#address-histories').load($('.page-wrapper form.js-base-form').prop('action') + ' #address-histories > *')
                 } else {
                     Botble.showNotice('error', data.message)
                 }
@@ -76,7 +76,7 @@ $(function () {
                     Botble.showNotice('success', data.message)
                     $('#edit-address-modal').modal('hide')
                     form.get(0).reset()
-                    $('#address-histories').load($('.page-wrapper form').prop('action') + ' #address-histories > *')
+                    $('#address-histories').load($('.page-wrapper form.js-base-form').prop('action') + ' #address-histories > *')
                 } else {
                     Botble.showNotice('error', data.message)
                 }
@@ -87,7 +87,7 @@ $(function () {
 
     $(document).on('click', '.deleteDialog', function (event) {
         event.preventDefault()
-        var _self = $(event.currentTarget)
+        const _self = $(event.currentTarget)
         $('.delete-crud-entry').data('section', _self.data('section'))
         $('.modal-confirm-delete').modal('show')
     })

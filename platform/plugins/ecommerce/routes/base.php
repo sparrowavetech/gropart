@@ -2,6 +2,7 @@
 
 use Botble\Base\Facades\AdminHelper;
 use Botble\Base\Http\Middleware\RequiresJsonRequestMiddleware;
+use Botble\Ecommerce\Http\Controllers\Fronts\QuickShopController;
 use Botble\Ecommerce\Http\Controllers\Fronts\QuickViewController;
 use Botble\Ecommerce\Models\Product;
 use Botble\Slug\Facades\SlugHelper;
@@ -247,6 +248,11 @@ Theme::registerRoutes(function () {
             Route::get('ajax/quick-view/{id?}', [QuickViewController::class, 'show'])
                 ->middleware(RequiresJsonRequestMiddleware::class)
                 ->name('public.ajax.quick-view')
+                ->wherePrimaryKey();
+
+            Route::get('ajax/quick-shop/{slug}', [QuickShopController::class, 'show'])
+                ->middleware(RequiresJsonRequestMiddleware::class)
+                ->name('public.ajax.quick-shop')
                 ->wherePrimaryKey();
         });
     });

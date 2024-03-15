@@ -24,7 +24,6 @@ use Botble\Theme\Facades\AdminBar;
 use Botble\Theme\Facades\Theme;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 
@@ -37,7 +36,7 @@ class HandleFrontPages
     ) {
     }
 
-    public function handle(Slug|array $slug): BaseHttpResponse|array|Slug|RedirectResponse
+    public function handle(Slug|array $slug): array|Slug
     {
         if (! $slug instanceof Slug) {
             return $slug;
@@ -86,10 +85,6 @@ class HandleFrontPages
                 }
 
                 $this->productCrossSalePriceService->applyProduct($product);
-
-                if ($product->slugable->key !== $slug->key) {
-                    return redirect()->to($product->url);
-                }
 
                 SeoHelper::setTitle($product->name)->setDescription($product->description);
 
@@ -142,6 +137,8 @@ class HandleFrontPages
 
                 Theme::breadcrumb()->add($product->name);
 
+                Theme::addBodyAttributes(['class' => 'single-product']);
+
                 if (function_exists('admin_bar')) {
                     admin_bar()
                         ->registerLink(
@@ -187,12 +184,8 @@ class HandleFrontPages
                     ->with(['slugable'])
                     ->firstOrFail();
 
-                if ($category->slugable->key !== $slug->key) {
-                    return redirect()->to($category->url);
-                }
-
                 if (! EcommerceHelper::productFilterParamsValidated($request)) {
-                    return $response->setNextUrl($category->url);
+                    $request = request();
                 }
 
                 $with = EcommerceHelper::withProductEagerLoadingRelations();
@@ -274,12 +267,8 @@ class HandleFrontPages
                     ->with(['slugable'])
                     ->firstOrFail();
 
-                if ($brand->slugable->key !== $slug->key) {
-                    return redirect()->to($brand->url);
-                }
-
                 if (! EcommerceHelper::productFilterParamsValidated($request)) {
-                    return $response->setNextUrl($brand->url);
+                    $request = request();
                 }
 
                 $request->merge(['brands' => array_merge((array)request()->input('brands', []), [$brand->getKey()])]);
@@ -345,12 +334,8 @@ class HandleFrontPages
                     ->where($condition)
                     ->firstOrFail();
 
-                if ($tag->slugable->key !== $slug->key) {
-                    return redirect()->to($tag->url);
-                }
-
                 if (! EcommerceHelper::productFilterParamsValidated($request)) {
-                    return $response->setNextUrl($tag->url);
+                    $request = request();
                 }
 
                 $with = EcommerceHelper::withProductEagerLoadingRelations();
@@ -409,8 +394,8 @@ class HandleFrontPages
         ?ProductCategory $category = null
     ): array {
         $total = $products->total();
-        $message = $total > 1 ? __(':total Products found', compact('total')) : __(
-            ':total Product found',
+        $message = $total === 1 ? __(':total Product found', compact('total')) : __(
+            ':total Products found',
             compact('total')
         );
 

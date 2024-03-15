@@ -89,6 +89,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static array dataPriceRanges(int $stepPrice = 1000, int $stepCount = 10)
  * @method static bool useCityFieldAsTextField()
  * @method static bool isLoginUsingPhone()
+ * @method static void registerThemeAssets()
  *
  * @see \Botble\Ecommerce\Supports\EcommerceHelper
  */

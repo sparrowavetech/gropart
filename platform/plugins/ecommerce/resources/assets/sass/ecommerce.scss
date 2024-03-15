@@ -545,3 +545,11 @@ Product option
         }
     }
 }
+
+@media screen and (max-width: 768px) {
+    .order-products-table {
+        td {
+            width: 100% !important;
+        }
+    }
+}

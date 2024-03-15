@@ -73,11 +73,13 @@ class ProductVariation extends BaseModel
 
     public static function getVariationByAttributes(int|string $configurableProductId, array $attributes)
     {
+        $attributes = array_unique($attributes);
+
         return self::query()
             ->where('configurable_product_id', $configurableProductId)
             ->whereHas('variationItems', function ($query) use ($attributes) {
-                $query->whereIn('attribute_id', array_unique($attributes));
-            }, '=', count(array_unique($attributes)))
+                $query->whereIn('attribute_id', $attributes);
+            }, '=', count($attributes))
             ->with('variationItems')
             ->first();
     }

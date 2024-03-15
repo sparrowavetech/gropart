@@ -2,7 +2,6 @@
 
 namespace Botble\Ecommerce\Tables;
 
-use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\Html;
 use Botble\Ecommerce\Enums\ProductTypeEnum;
@@ -15,6 +14,11 @@ use Botble\Table\Abstracts\TableAbstract;
 use Botble\Table\Actions\DeleteAction;
 use Botble\Table\Actions\EditAction;
 use Botble\Table\BulkActions\DeleteBulkAction;
+use Botble\Table\BulkChanges\CreatedAtBulkChange;
+use Botble\Table\BulkChanges\IsFeaturedBulkChange;
+use Botble\Table\BulkChanges\NameBulkChange;
+use Botble\Table\BulkChanges\NumberBulkChange;
+use Botble\Table\BulkChanges\StatusBulkChange;
 use Botble\Table\Columns\Column;
 use Botble\Table\Columns\CreatedAtColumn;
 use Botble\Table\Columns\IdColumn;
@@ -99,6 +103,32 @@ class ProductTable extends TableAbstract
             })
             ->editColumn('stock_status', function (Product $item) {
                 return BaseHelper::clean($item->stock_status_html);
+            })
+            ->filter(function ($query) {
+                $keyword = request()->input('search.value');
+                if ($keyword) {
+                    $keyword = '%' . $keyword . '%';
+
+                    $query
+                        ->where('ec_products.name', 'LIKE', $keyword)
+                        ->where('is_variation', 0)
+                        ->orWhere(function ($query) use ($keyword) {
+                            $query
+                                ->where('is_variation', 0)
+                                ->where(function ($query) use ($keyword) {
+                                    $query
+                                        ->orWhere('ec_products.sku', 'LIKE', $keyword)
+                                        ->orWhere('ec_products.created_at', 'LIKE', $keyword)
+                                        ->orWhereHas('variations.product', function ($query) use ($keyword) {
+                                            $query->where('sku', 'LIKE', $keyword);
+                                        });
+                                });
+                        });
+
+                    return $query;
+                }
+
+                return $query;
             });
 
         return $this->toJson($data);
@@ -135,7 +165,7 @@ class ProductTable extends TableAbstract
 
     public function htmlDrawCallbackFunction(): string|null
     {
-        return parent::htmlDrawCallbackFunction() . '$(".editable").editable({mode: "inline"});';
+        return parent::htmlDrawCallbackFunction() . 'Botble.initEditable()';
     }
 
     public function columns(): array
@@ -277,22 +307,10 @@ class ProductTable extends TableAbstract
     public function getBulkChanges(): array
     {
         return [
-            'name' => [
-                'title' => trans('core/base::tables.name'),
-                'type' => 'text',
-                'validate' => 'required|max:120',
-            ],
-            'order' => [
-                'title' => trans('core/base::tables.order'),
-                'type' => 'number',
-                'validate' => 'required|min:0',
-            ],
-            'status' => [
-                'title' => trans('core/base::tables.status'),
-                'type' => 'select',
-                'choices' => BaseStatusEnum::labels(),
-                'validate' => 'required|in:' . implode(',', BaseStatusEnum::values()),
-            ],
+            NameBulkChange::make(),
+            NumberBulkChange::make()
+                ->name('order')
+                ->title(trans('core/base::tables.order')),
             'category' => [
                 'title' => trans('plugins/ecommerce::products.category'),
                 'type' => 'select-ajax',
@@ -327,10 +345,9 @@ class ProductTable extends TableAbstract
                     ];
                 },
             ],
-            'created_at' => [
-                'title' => trans('core/base::tables.created_at'),
-                'type' => 'datePicker',
-            ],
+            StatusBulkChange::make(),
+            CreatedAtBulkChange::make(),
+            IsFeaturedBulkChange::make(),
         ];
     }
 

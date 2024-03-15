@@ -126,9 +126,10 @@ class ShippingRuleTypeEnum extends Enum
         ];
     }
 
-    public static function availableLabels(?Shipping $shipping = null): array
+    public static function availableLabels(Shipping|null $shipping = null): array
     {
         $labels = parent::labels();
+
         if ($shipping && ! $shipping->country) {
             Arr::forget($labels, self::BASED_ON_ZIPCODE);
             Arr::forget($labels, self::BASED_ON_LOCATION);

@@ -9,5 +9,7 @@
             {{ __(':count decrease', ['count' => number_format($result)]) }}
             <x-core::icon name="ti ti-trending-down" />
         </span>
+    @else
+        <span class="text-danger fw-semibold" style="visibility: hidden">&mdash;</span>
     @endif
 </div>

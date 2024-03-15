@@ -12,7 +12,7 @@
                 <div class="my-5">
                     <a
                         class="btn btn-secondary px-5"
-                        href="{{ route('public.index') }}"
+                        href="{{ BaseHelper::getHomepageUrl() }}"
                     >{{ __('Go back home') }}</a>
                 </div>
             </div>

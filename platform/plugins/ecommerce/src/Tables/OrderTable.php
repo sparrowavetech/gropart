@@ -20,6 +20,7 @@ use Botble\Table\Columns\Column;
 use Botble\Table\Columns\CreatedAtColumn;
 use Botble\Table\Columns\IdColumn;
 use Botble\Table\Columns\StatusColumn;
+use Exception;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
@@ -72,7 +73,7 @@ class OrderTable extends TableAbstract
                 return BaseHelper::clean($item->user->email ?: $item->address->email);
             })
             ->editColumn('customer_phone', function (Order $item) {
-                return BaseHelper::clean($item->user->phone ?: $item->address->phone);
+                return BaseHelper::clean($item->user->phone ?: $item->address->phone) ?: '&mdash;';
             });
 
         if (EcommerceHelper::isTaxEnabled()) {
@@ -283,7 +284,7 @@ class OrderTable extends TableAbstract
              * @var Order $item
              */
             if (! $item->canBeCanceledByAdmin()) {
-                return $item;
+                throw new Exception(trans('plugins/ecommerce::order.order_cannot_be_canceled'));
             }
 
             OrderHelper::cancelOrder($item);

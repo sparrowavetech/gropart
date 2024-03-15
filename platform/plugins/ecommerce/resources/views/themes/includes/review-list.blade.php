@@ -8,7 +8,11 @@
         <div class="col">
             <div class="d-flex flex-wrap align-items-center gap-2 mb-2 review-item__header">
                 <div class="fw-medium">
-                    {{ $review->user->name }}
+                    @if (get_ecommerce_setting('show_customer_full_name', true))
+                        {{ $review->user->name }}
+                    @else
+                        {{ Str::mask($review->user->name, '*', 1, -1) }}
+                    @endif
                 </div>
                 <time class="text-muted small" datetime="{{ $review->created_at->translatedFormat('Y-m-d\TH:i:sP') }}">
                     {{ $review->created_at->diffForHumans() }}

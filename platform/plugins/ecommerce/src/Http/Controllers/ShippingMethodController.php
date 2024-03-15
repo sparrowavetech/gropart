@@ -123,6 +123,9 @@ class ShippingMethodController extends BaseController
 
     public function putUpdateRule(int|string $id, ShippingRuleRequest $request)
     {
+        /**
+         * @var ShippingRule $rule
+         */
         $rule = ShippingRule::query()->findOrFail($id);
 
         $rule->fill($request->input());

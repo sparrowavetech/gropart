@@ -15,7 +15,7 @@
         .auth-input-icon {
             position: absolute;
             top: 3px;
-            left: 1px;
+            inset-inline-start: 1px;
             z-index: 10;
             background: transparent;
             border: 0;
@@ -24,10 +24,6 @@
         .form-control {
             background-color: #fff;
         }
-    }
-
-    .text-end {
-        text-align: right !important;
     }
 
     .text-decoration-underline {
@@ -39,26 +35,26 @@
     }
 
     .pb-0 {
-        padding-bottom: 0!important;
+        padding-bottom: 0 !important;
     }
 
     .ps-5 {
-        padding-left: 3rem!important;
+        padding-inline-start: 3rem !important;
     }
 
     .form-check {
         display: block;
         min-height: 1.5rem;
-        padding-left: 1.5em;
+        padding-inline-start: 1.5em;
         margin-bottom: 0.125rem;
 
         &.form-check-inline {
             display: inline-block;
-            margin-right: 1rem;
+            margin-inline-end: 1rem;
         }
 
         .form-check-input {
-            margin-left: -1.5em;
+            margin-inline-start: -1.5em;
 
             &:checked {
                 background-color: var(--primary-color);
@@ -69,7 +65,7 @@
 
     .shop-url-status {
         top: 0;
-        right: 0;
+        inset-inline-end: 0;
     }
 
     .text-primary {

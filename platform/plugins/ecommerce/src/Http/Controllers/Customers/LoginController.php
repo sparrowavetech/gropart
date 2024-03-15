@@ -4,6 +4,7 @@ namespace Botble\Ecommerce\Http\Controllers\Customers;
 
 use Botble\ACL\Traits\AuthenticatesUsers;
 use Botble\ACL\Traits\LogoutGuardTrait;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Ecommerce\Enums\CustomerStatusEnum;
 use Botble\Ecommerce\Facades\EcommerceHelper;
@@ -98,7 +99,7 @@ class LoginController extends BaseController
 
         $this->loggedOut($request);
 
-        return redirect()->to(route('public.index'));
+        return redirect()->to(BaseHelper::getHomepageUrl());
     }
 
     protected function attemptLogin(Request $request)

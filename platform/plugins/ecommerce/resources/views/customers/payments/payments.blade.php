@@ -18,9 +18,11 @@
         <x-core::table.header.cell>
             {{ trans('plugins/ecommerce::payment.status') }}
         </x-core::table.header.cell>
-        <x-core::table.header.cell>
-            {{ trans('plugins/ecommerce::payment.action') }}
-        </x-core::table.header.cell>
+        @if (auth()->user()->hasPermission('payment.show'))
+            <x-core::table.header.cell>
+                {{ trans('plugins/ecommerce::payment.action') }}
+            </x-core::table.header.cell>
+        @endif
     </x-core::table.header>
 
     <x-core::table.body>
@@ -31,9 +33,13 @@
                 </x-core::table.body.cell>
                 <x-core::table.body.cell class="text-start">
                     @if ($payment->order->id)
-                        <a href="{{ route('orders.edit', $payment->order->id) }}" target="_blank">
-                            {{ $payment->order->code }} <i class="fa fa-external-link"></i>
-                        </a>
+                        @if (auth()->user()->hasPermission('orders.edit'))
+                            <a href="{{ route('orders.edit', $payment->order->id) }}" target="_blank">
+                                {{ $payment->order->code }} <i class="fa fa-external-link"></i>
+                            </a>
+                        @else
+                            {{ $payment->order->code }}
+                        @endif
                     @else
                         &mdash;
                     @endif
@@ -45,22 +51,28 @@
                     {{ $payment->amount }} {{ $payment->currency }}
                 </x-core::table.body.cell>
                 <x-core::table.body.cell>
-                    {{ $payment->payment_channel->label() }}
+                    @if ($paymentMethod = $payment->payment_channel->label())
+                        {{ $paymentMethod }}
+                    @else
+                        &mdash;
+                    @endif
                 </x-core::table.body.cell>
                 <x-core::table.body.cell>
                     {!! BaseHelper::clean($payment->status->toHtml()) !!}
                 </x-core::table.body.cell>
-                <x-core::table.body.cell>
-                    <x-core::button
-                        tag="a"
-                        :href="route('payment.show', $payment->id)"
-                        target="_blank"
-                        size="sm"
-                        :tooltip="trans('core/base::forms.view_new_tab')"
-                        icon="ti ti-external-link"
-                        :icon-only="true"
-                    />
-                </x-core::table.body.cell>
+                @if (auth()->user()->hasPermission('payment.show'))
+                    <x-core::table.body.cell>
+                            <x-core::button
+                                tag="a"
+                                :href="route('payment.show', $payment->id)"
+                                target="_blank"
+                                size="sm"
+                                :tooltip="trans('core/base::forms.view_new_tab')"
+                                icon="ti ti-external-link"
+                                :icon-only="true"
+                            />
+                    </x-core::table.body.cell>
+                @endif
             </x-core::table.body.row>
         @empty
             <x-core::table.body.row class="text-center text-muted">

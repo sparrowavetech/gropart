@@ -47,6 +47,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static void setEventDispatcher(\Illuminate\Contracts\Events\Dispatcher $dispatcher)
  * @method static mixed withoutEvents(callable $callback)
  * @method static void refresh()
+ * @method static string taxClassesName()
  *
  * @see \Botble\Ecommerce\Cart\Cart
  */

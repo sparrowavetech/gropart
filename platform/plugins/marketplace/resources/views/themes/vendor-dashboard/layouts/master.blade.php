@@ -43,7 +43,7 @@
     @yield('header', view(MarketplaceHelper::viewPath('vendor-dashboard.layouts.header')))
 
     <script>
-        window.siteUrl = "{{ route('public.index') }}";
+        window.siteUrl = "{{ BaseHelper::getHomepageUrl() }}";
     </script>
 
     <script type="text/javascript">

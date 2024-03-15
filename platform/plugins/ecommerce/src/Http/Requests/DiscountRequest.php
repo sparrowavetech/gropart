@@ -2,7 +2,6 @@
 
 namespace Botble\Ecommerce\Http\Requests;
 
-use Botble\Base\Facades\BaseHelper;
 use Botble\Ecommerce\Enums\DiscountTypeEnum;
 use Botble\Ecommerce\Enums\DiscountTypeOptionEnum;
 use Botble\Support\Http\Requests\Request;
@@ -13,13 +12,11 @@ class DiscountRequest extends Request
 {
     protected function prepareForValidation(): void
     {
-        $dateFormat = BaseHelper::getDateTimeFormat();
-
         $this->merge([
             'can_use_with_promotion' => $this->boolean('can_use_with_promotion'),
             'quantity' => $this->boolean('is_unlimited') ? null : $this->input('quantity'),
-            'start_date' => Carbon::parse("{$this->input('start_date')} {$this->input('start_time')}")->format($dateFormat),
-            'end_date' => $this->has('end_date') && ! $this->has('unlimited_time') ? Carbon::parse("{$this->input('end_date')} {$this->input('end_time')}")->format($dateFormat) : null,
+            'start_date' => Carbon::parse("{$this->input('start_date')} {$this->input('start_time')}")->toDateString(),
+            'end_date' => $this->has('end_date') && ! $this->has('unlimited_time') ? Carbon::parse("{$this->input('end_date')} {$this->input('end_time')}")->toDateString() : null,
             'apply_via_url' => $this->boolean('apply_via_url'),
             'display_at_checkout' => $this->boolean('display_at_checkout'),
         ]);
@@ -27,8 +24,6 @@ class DiscountRequest extends Request
 
     public function rules(): array
     {
-        $dateFormat = BaseHelper::getDateTimeFormat();
-
         return [
             'title' => ['nullable', 'string', 'required_if:type,promotion', 'max:255'],
             'code' => 'nullable|string|required_if:type,coupon|max:20|unique:ec_discounts,code,' . $this->route('discount.id'),
@@ -48,8 +43,8 @@ class DiscountRequest extends Request
             'min_order_price' => ['nullable', 'numeric', 'min:0'],
             'product_quantity' => ['nullable', 'numeric', 'min:0'],
             'discount_on' => ['nullable', 'string', 'max:40'],
-            'start_date' => ['nullable', 'date', 'date_format:' . $dateFormat],
-            'end_date' => ['nullable', 'date', 'date_format:' . $dateFormat, 'after_or_equal:start_date'],
+            'start_date' => ['nullable', 'date'],
+            'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
             'apply_via_url' => ['nullable', 'boolean'],
             'display_at_checkout' => ['nullable', 'boolean'],
             'description' => ['nullable', 'string', 'max:255'],

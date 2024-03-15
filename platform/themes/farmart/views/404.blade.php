@@ -32,7 +32,7 @@
                             >{{ __('return to the previous page') }}</a>,
                             <a
                                 class="text-primary"
-                                href="{{ route('public.index') }}"
+                                href="{{ BaseHelper::getHomepageUrl() }}"
                             >{{ __('visit our home page') }}</a>
                             @if (is_plugin_active('blog') || is_plugin_active('ecommerce'))
                                 {{ __('or search for something else.') }}

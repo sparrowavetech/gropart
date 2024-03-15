@@ -65,7 +65,7 @@ class ProductRequest extends Request
                 'nullable',
                 'string',
                 'max:50',
-                //Rule::unique('ec_products')->ignore($this->route('product')),
+                Rule::unique('ec_products')->ignore($this->route('product.id')),
             ],
             'general_license_code' => 'nullable|in:0,1',
             'categories' => 'nullable|array',

@@ -870,4 +870,21 @@ class Cart
             }
         }
     }
+
+    public function taxClassesName(): string
+    {
+        $taxes = [];
+
+        foreach ($this->content() as $cartItem) {
+            if (! $cartItem->taxRate || ! $cartItem->options->taxClasses) {
+                continue;
+            }
+
+            foreach ($cartItem->options->taxClasses as $taxName => $taxRate) {
+                $taxes[] = $taxName . ' - ' . $taxRate . '%';
+            }
+        }
+
+        return implode(', ', array_unique($taxes));
+    }
 }

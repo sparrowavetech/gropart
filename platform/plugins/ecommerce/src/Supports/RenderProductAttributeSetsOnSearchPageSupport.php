@@ -17,7 +17,12 @@ class RenderProductAttributeSetsOnSearchPageSupport
 
         $params = array_merge(['view' => 'plugins/ecommerce::themes.attributes.attributes-filter-renderer'], $params);
 
-        $with = ['attributes', 'categories:id'];
+        $with = [
+            'attributes' => function ($query) {
+                $query->whereHas('productVariationItems');
+            },
+            'categories:id',
+        ];
 
         if (is_plugin_active('language') && is_plugin_active('language-advanced')) {
             $with[] = 'attributes.translations';
