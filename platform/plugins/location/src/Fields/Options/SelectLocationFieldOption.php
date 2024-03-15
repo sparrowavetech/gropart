@@ -14,7 +14,7 @@ class SelectLocationFieldOption extends FormFieldOptions
 
         $colspan = $this->getColspan() ?: 3;
 
-        if ($colspan) {
+        if ($colspan > 0) {
             $data['wrapper']['class'] = 'col-md-' . (12 / $colspan);
         }
 

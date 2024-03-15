@@ -4,6 +4,7 @@ namespace Botble\Location;
 
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Models\BaseQueryBuilder;
+use Botble\Base\Supports\Helper;
 use Botble\Base\Supports\Zipper;
 use Botble\Language\Facades\Language;
 use Botble\Location\Events\DownloadedCities;
@@ -17,6 +18,7 @@ use GuzzleHttp\Psr7\Utils;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
@@ -135,20 +137,24 @@ class Location
     public function getRemoteAvailableLocations(): array
     {
         try {
-            $info = Http::withoutVerifying()
-                ->asJson()
-                ->acceptJson()
-                ->get('https://api.github.com/repos/botble/locations/git/trees/master');
+            $url = 'https://api.github.com/repos/botble/locations/git/trees/master';
 
-            if ($info->failed()) {
-                return ['us', 'ca', 'vn'];
-            }
+            $data = Cache::remember($url, 60 * 60, function () use ($url) {
+                $response = Http::withoutVerifying()
+                    ->asJson()
+                    ->acceptJson()
+                    ->get($url);
 
-            $info = $info->json();
+                if ($response->failed()) {
+                    return ['us', 'ca', 'vn'];
+                }
+
+                return $response->json('tree');
+            });
 
             $availableLocations = [];
 
-            foreach ($info['tree'] as $tree) {
+            foreach ($data as $tree) {
                 if (in_array($tree['path'], ['.gitignore', 'README.md'])) {
                     continue;
                 }
@@ -162,7 +168,7 @@ class Location
         return $availableLocations;
     }
 
-    public function downloadRemoteLocation(string $countryCode): array
+    public function downloadRemoteLocation(string $countryCode, bool $continue = false): array
     {
         $repository = 'https://github.com/botble/locations';
 
@@ -177,29 +183,29 @@ class Location
             ];
         }
 
-        try {
-            $response = Http::withoutVerifying()
-                ->sink(Utils::tryFopen($destination, 'w'))
-                ->get($repository . '/archive/refs/heads/master.zip');
+        if (! File::exists($destination)) {
+            try {
+                $response = Http::withoutVerifying()
+                    ->sink(Utils::tryFopen($destination, 'w'))
+                    ->get($repository . '/archive/refs/heads/master.zip');
 
-            if (! $response->ok()) {
+                if (! $response->ok()) {
+                    return [
+                        'error' => true,
+                        'message' => $response->reason(),
+                    ];
+                }
+            } catch (Throwable $exception) {
                 return [
                     'error' => true,
-                    'message' => $response->reason(),
+                    'message' => $exception->getMessage(),
                 ];
             }
-        } catch (Throwable $exception) {
-            return [
-                'error' => true,
-                'message' => $exception->getMessage(),
-            ];
-        }
 
-        $zip = new Zipper();
+            $zip = new Zipper();
 
-        $zip->extract($destination, storage_path('app'));
+            $zip->extract($destination, storage_path('app'));
 
-        if (File::exists($destination)) {
             File::delete($destination);
         }
 
@@ -276,7 +282,9 @@ class Location
             event(new DownloadedCities());
         }
 
-        File::deleteDirectory(storage_path('app/locations-master'));
+        if (! $continue) {
+            File::deleteDirectory(storage_path('app/locations-master'));
+        }
 
         return [
             'error' => false,
@@ -336,5 +344,32 @@ class Location
         }
 
         return $model;
+    }
+
+    public function getAvailableCountries(): array
+    {
+        $remoteLocations = $this->getRemoteAvailableLocations();
+
+        $availableLocations = Country::query()->pluck('code')->all();
+
+        $listCountries = Helper::countries();
+
+        $locations = [];
+
+        foreach ($remoteLocations as $location) {
+            $location = strtoupper($location);
+
+            if (in_array($location, $availableLocations)) {
+                continue;
+            }
+
+            foreach ($listCountries as $key => $country) {
+                if ($location === strtoupper($key)) {
+                    $locations[$location] = $country;
+                }
+            }
+        }
+
+        return array_unique($locations);
     }
 }

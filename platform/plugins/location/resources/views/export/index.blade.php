@@ -1,4 +1,5 @@
 @extends(BaseHelper::getAdminMasterLayoutTemplate())
+
 @section('content')
     <x-core::card>
         <x-core::card.header>

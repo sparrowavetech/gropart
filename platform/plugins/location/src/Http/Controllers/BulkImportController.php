@@ -6,10 +6,9 @@ use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Supports\Breadcrumb;
-use Botble\Base\Supports\Helper;
 use Botble\Location\Exports\TemplateLocationExport;
-use Botble\Location\Location;
-use Botble\Location\Models\Country;
+use Botble\Location\Facades\Location;
+use Botble\Location\Http\Requests\ImportLocationRequest;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Excel;
 
@@ -28,13 +27,13 @@ class BulkImportController extends BaseController
 
         $mimetypes = collect(config('plugins.location.general.bulk-import.mime_types', []))->implode(',');
 
-        Assets::addScriptsDirectly([
-            'vendor/core/plugins/location/js/bulk-import.js',
-        ])
-            ->addScripts(['dropzone'])
-            ->addStyles(['dropzone']);
+        Assets::addScriptsDirectly('vendor/core/plugins/location/js/bulk-import.js')
+            ->addScripts('dropzone')
+            ->addStyles('dropzone');
 
-        return view('plugins/location::bulk-import.index', compact('mimetypes'));
+        $countries = Location::getAvailableCountries();
+
+        return view('plugins/location::bulk-import.index', compact('mimetypes', 'countries'));
     }
 
     public function downloadTemplate(Request $request)
@@ -48,42 +47,14 @@ class BulkImportController extends BaseController
         return (new TemplateLocationExport($extension))->download($fileName, $writeType, $contentType);
     }
 
-    public function ajaxGetAvailableRemoteLocations(Location $location)
-    {
-        $remoteLocations = $location->getRemoteAvailableLocations();
-
-        $availableLocations = Country::query()->pluck('code')->all();
-
-        $listCountries = Helper::countries();
-
-        $locations = [];
-
-        foreach ($remoteLocations as $location) {
-            $location = strtoupper($location);
-
-            if (in_array($location, $availableLocations)) {
-                continue;
-            }
-
-            foreach ($listCountries as $key => $country) {
-                if ($location === strtoupper($key)) {
-                    $locations[$location] = $country;
-                }
-            }
-        }
-
-        $locations = array_unique($locations);
-
-        return $this
-            ->httpResponse()
-            ->setData(view('plugins/location::partials.available-remote-locations', compact('locations'))->render());
-    }
-
-    public function importLocationData(string $countryCode, Location $location)
+    public function importLocationData(ImportLocationRequest $request)
     {
         BaseHelper::maximumExecutionTimeAndMemoryLimit();
 
-        $result = $location->downloadRemoteLocation($countryCode);
+        $result = Location::downloadRemoteLocation(
+            strtolower($request->input('country_code')),
+            $request->boolean('continue')
+        );
 
         return $this
             ->httpResponse()

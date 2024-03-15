@@ -65,13 +65,7 @@ Route::group(['namespace' => 'Botble\Location\Http\Controllers'], function () {
                 'permission' => 'location.bulk-import.index',
             ]);
 
-            Route::get('ajax/available-remote-locations', [
-                'as' => 'available-remote-locations',
-                'uses' => 'BulkImportController@ajaxGetAvailableRemoteLocations',
-                'permission' => 'location.bulk-import.index',
-            ]);
-
-            Route::post('/import-location-data/{country}', [
+            Route::post('/import-location-data', [
                 'as' => 'import-location-data',
                 'uses' => 'BulkImportController@importLocationData',
                 'permission' => 'location.bulk-import.index',

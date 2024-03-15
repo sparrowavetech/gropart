@@ -15,7 +15,7 @@ return new class () extends Migration {
 
         if (! Schema::hasColumn('cities', 'image')) {
             Schema::table('cities', function (Blueprint $table) {
-                $table->string('image', 255)->after('order')->nullable();
+                $table->string('image')->after('order')->nullable();
             });
         }
 
@@ -27,7 +27,7 @@ return new class () extends Migration {
 
         if (! Schema::hasColumn('states', 'image')) {
             Schema::table('states', function (Blueprint $table) {
-                $table->string('image', 255)->after('order')->nullable();
+                $table->string('image')->after('order')->nullable();
             });
         }
     }

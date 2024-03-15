@@ -121,13 +121,13 @@ $(() => {
 
         const $button = $form.find('button[type=submit]')
 
-        Botble.showLoading($form)
-        Botble.showButtonLoading($button)
-
-        container.find('.bulk-import-message').removeClass('alert-success').addClass('alert-info').hide()
-        container.find('.show-errors').hide()
-
         if (dropzone.getQueuedFiles().length > 0) {
+            Botble.showLoading($form)
+            Botble.showButtonLoading($button)
+
+            container.find('.bulk-import-message').removeClass('alert-success').addClass('alert-info').hide()
+            container.find('.show-errors').hide()
+
             dropzone.processQueue()
         }
 
@@ -178,45 +178,37 @@ $(() => {
             })
     })
 
-    const $availableRemoteLocations = $(document).find('#available-remote-locations')
+    $(document).on('submit', '.form-import-available-data', async (e) => {
+        e.preventDefault()
 
-    if ($availableRemoteLocations.length) {
-        let getRemoteLocations = () => {
-            $httpClient
-                .make()
-                .get($availableRemoteLocations.data('url'))
-                .then(({ data: response }) => {
-                    $availableRemoteLocations.html(response.data)
-                })
-        }
+        const currentTarget = $(e.currentTarget)
+        const countries = currentTarget.find('select').val()
 
-        getRemoteLocations()
+        for (const value of countries) {
+            const isLast = value === countries[countries.length - 1]
 
-        $(document).on('click', '.btn-import-location-data', function (event) {
-            event.preventDefault()
+            try {
+                const formData = new FormData()
+                formData.append('country_code', value)
+                formData.append('continue', isLast ? 0 : 1)
 
-            $(document).find('.button-confirm-import').data('url', $(this).data('url'))
-            $(document).find('.modal-confirm-import').modal('show')
-        })
-
-        $(document)
-            .find('.button-confirm-import')
-            .on('click', (event) => {
-                event.preventDefault()
-                let _self = $(event.currentTarget)
-
-                Botble.showButtonLoading(_self)
-
-                $httpClient
+                const { error, data } = await $httpClient
                     .make()
-                    .post(_self.data('url'))
-                    .then(({ data }) => {
-                        _self.closest('.modal').modal('hide')
-                        return Botble.showSuccess(data.message)
-                    })
-                    .finally(() => {
-                        Botble.hideButtonLoading(_self)
-                    })
-            })
-    }
+                    .withButtonLoading(currentTarget.find('button[type=submit]'))
+                    .post(currentTarget.prop('action'), formData)
+
+                if (error) {
+                    Botble.showError(data.message)
+                    return
+                }
+
+                if (isLast) {
+                    Botble.showSuccess(data.message)
+                    currentTarget.find('select').val('').trigger('change')
+                }
+            } catch (error) {
+                Botble.showError(error.message)
+            }
+        }
+    })
 })

@@ -234,6 +234,10 @@ class SelectLocationField extends FormField
                     'translationTemplate' => $this->parent->getTranslationTemplate(),
                 ]
             )->render();
+
+            if (request()->ajax()) {
+                $html .= Html::script('vendor/core/plugins/location/js/location.js');
+            }
         }
 
         return Html::tag(

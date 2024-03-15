@@ -16,8 +16,9 @@ use Illuminate\Support\Facades\Facade;
  * @method static array getSupported(object|string|null $model = null)
  * @method static bool registerModule(string $model, array $keys = [])
  * @method static array getRemoteAvailableLocations()
- * @method static array downloadRemoteLocation(string $countryCode)
+ * @method static array downloadRemoteLocation(string $countryCode, bool $continue = false)
  * @method static mixed filter($model, string|int|null $cityId = null, string|null $location = null, string|int|null $stateId = null)
+ * @method static array getAvailableCountries()
  *
  * @see \Botble\Location\Location
  */
