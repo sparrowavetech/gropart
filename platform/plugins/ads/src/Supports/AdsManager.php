@@ -85,6 +85,10 @@ class AdsManager
 
         $data = [$ads];
 
+        if (! isset($attributes['style'])) {
+            $attributes['style'] = 'text-align: center;';
+        }
+
         return view('plugins/ads::partials.ad-display', compact('data', 'attributes'))->render();
     }
 

@@ -14,6 +14,8 @@ use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
 use Botble\Faq\Models\FaqCategory;
 use Botble\Media\Facades\RvMedia;
 use Botble\Shortcode\Compilers\Shortcode;
+use Botble\Shortcode\Facades\Shortcode as ShortcodeFacade;
+use Botble\Shortcode\Forms\ShortcodeForm;
 use Botble\Theme\Facades\Theme;
 use Botble\Theme\Supports\ThemeSupport;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -375,12 +377,35 @@ app()->booted(function () {
         });
     }
 
-    add_shortcode('site-features', __('Site Features'), __('Site Features'), function (Shortcode $shortcode) {
+    add_shortcode('site-features', __('Site features'), __('Site features'), function (Shortcode $shortcode) {
         return Theme::partial('shortcodes.site-features', compact('shortcode'));
     });
 
-    shortcode()->setAdminConfig('site-features', function (array $attributes) {
-        return Theme::partial('shortcodes.site-features-admin-config', compact('attributes'));
+    ShortcodeFacade::setAdminConfig('site-features', function (array $attributes) {
+        $fields = [
+            'title' => [
+                'title' => __('Title'),
+                'required' => true,
+            ],
+            'subtitle' => [
+                'title' => __('Subtitle'),
+                'required' => true,
+            ],
+            'icon' => [
+                'type' => 'image',
+                'title' => __('Icon'),
+                'required' => true,
+            ],
+        ];
+
+        return ShortcodeForm::createFromArray($attributes)
+            ->add('title', 'text', [
+                'label' => __('Title'),
+            ])
+            ->add('feature_tabs', 'tabs', [
+                'fields' => $fields,
+                'shortcode_attributes' => $attributes,
+            ]);
     });
 
     add_shortcode('newsletter-home', __('Newsletter Form'), __('Newsletter Form'), function (Shortcode $shortcode) {
