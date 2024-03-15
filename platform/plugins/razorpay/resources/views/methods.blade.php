@@ -9,7 +9,8 @@
             @if ($selecting == RAZORPAY_PAYMENT_METHOD_NAME) checked @endif
         >
         <label
-            for="payment_{{ RAZORPAY_PAYMENT_METHOD_NAME }}">{{ get_payment_setting('name', RAZORPAY_PAYMENT_METHOD_NAME) }}</label>
+            class="form-label"
+            for="payment_{{ RAZORPAY_PAYMENT_METHOD_NAME }}">{{ get_payment_setting('name', RAZORPAY_PAYMENT_METHOD_NAME, __('Payment with :paymentType', ['paymentType' => 'Razorpay']),) }}</label>
         <div
             class="payment_{{ RAZORPAY_PAYMENT_METHOD_NAME }}_wrap payment_collapse_wrap collapse @if ($selecting == RAZORPAY_PAYMENT_METHOD_NAME) show @endif">
             @if ($errorMessage)

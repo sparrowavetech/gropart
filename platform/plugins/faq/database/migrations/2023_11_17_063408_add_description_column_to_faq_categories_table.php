@@ -8,7 +8,7 @@ return new class () extends Migration {
     public function up(): void
     {
         Schema::table('faq_categories', function (Blueprint $table) {
-            $table->string('description', 300)->nullable();
+            $table->string('description', 400)->nullable();
         });
     }
 

@@ -1,9 +1,10 @@
 @if ($payment)
+    <br>
     <p>{{ trans('plugins/payment::payment.payment_id') }}: {{ $payment->id }}</p>
     <p>{{ trans('plugins/payment::payment.amount') }}: {{ $payment->amount / 100 }} {{ $payment->currency }}</p>
     <p>{{ trans('plugins/payment::payment.email') }}: {{ $payment->email }}</p>
     <p>{{ trans('plugins/payment::payment.phone') }}: {{ $payment->contact }}</p>
-    <p>{{ trans('core/base::tables.created_at') }}: {{ Carbon\Carbon::now()->parse($payment->created_at) }}</p>
+    <p>{{ trans('core/base::tables.created_at') }}: {{ BaseHelper::formatDate($payment->created_at) }}</p>
     <hr>
 
     @if ($payment->amount_refunded)

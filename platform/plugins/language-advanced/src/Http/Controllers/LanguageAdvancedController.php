@@ -6,6 +6,7 @@ use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\LanguageAdvanced\Http\Requests\LanguageAdvancedRequest;
 use Botble\LanguageAdvanced\Supports\LanguageAdvancedManager;
+use Botble\Slug\Events\UpdatedSlugEvent;
 use Botble\Slug\Facades\SlugHelper;
 use Illuminate\Support\Facades\DB;
 
@@ -43,7 +44,7 @@ class LanguageAdvancedController extends BaseController
                 'slugs_id' => $slugId,
             ];
 
-            $data = array_merge($condition, [
+            $slugData = array_merge($condition, [
                 'key' => $request->input('slug'),
                 'prefix' => SlugHelper::getPrefix($model),
             ]);
@@ -51,10 +52,12 @@ class LanguageAdvancedController extends BaseController
             $translate = DB::table($table)->where($condition)->first();
 
             if ($translate) {
-                DB::table($table)->where($condition)->update($data);
+                DB::table($table)->where($condition)->update($slugData);
             } else {
-                DB::table($table)->insert($data);
+                DB::table($table)->insert($slugData);
             }
+
+            UpdatedSlugEvent::dispatch($data, $data->slugable);
         }
 
         return $this

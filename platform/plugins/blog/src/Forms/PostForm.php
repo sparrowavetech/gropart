@@ -4,8 +4,8 @@ namespace Botble\Blog\Forms;
 
 use Botble\Base\Forms\FieldOptions\ContentFieldOption;
 use Botble\Base\Forms\FieldOptions\DescriptionFieldOption;
+use Botble\Base\Forms\FieldOptions\IsFeaturedFieldOption;
 use Botble\Base\Forms\FieldOptions\NameFieldOption;
-use Botble\Base\Forms\FieldOptions\OnOffFieldOption;
 use Botble\Base\Forms\FieldOptions\RadioFieldOption;
 use Botble\Base\Forms\FieldOptions\SelectFieldOption;
 use Botble\Base\Forms\FieldOptions\StatusFieldOption;
@@ -38,9 +38,7 @@ class PostForm extends FormAbstract
             ->add(
                 'is_featured',
                 OnOffField::class,
-                OnOffFieldOption::make()
-                    ->label(trans('core/base::forms.is_featured'))
-                    ->defaultValue(false)
+                IsFeaturedFieldOption::make()
                     ->toArray()
             )
             ->add('content', EditorField::class, ContentFieldOption::make()->allowedShortcodes()->toArray())

@@ -251,13 +251,13 @@ class HookServiceProvider extends ServiceProvider
     protected function getDataByCurrentLanguageCode(
         $query,
         Model|string|null $model,
-        string $currentLocale
+        string|null $currentLocale
     ): Builder|EloquentBuilder|Model {
         if ($query instanceof Builder || $query instanceof EloquentBuilder) {
             $model = $query->getModel();
         }
 
-        if (! LanguageAdvancedManager::isSupported($model)) {
+        if (! LanguageAdvancedManager::isSupported($model) || ! $currentLocale) {
             return $query;
         }
 

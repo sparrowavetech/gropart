@@ -47,8 +47,8 @@ class RenderingSiteMapListener
                 if (($year = Arr::get($matches, 1)) && ($month = Arr::get($matches, 2))) {
                     $posts = Post::query()
                         ->wherePublished()
-                        ->whereYear('updated_at', $year)
-                        ->whereMonth('updated_at', $month)
+                        ->whereYear('created_at', $year)
+                        ->whereMonth('created_at', $month)
                         ->latest('updated_at')
                         ->select(['id', 'name', 'updated_at'])
                         ->with(['slugable'])
@@ -68,17 +68,17 @@ class RenderingSiteMapListener
         }
 
         $posts = Post::query()
-            ->selectRaw('YEAR(updated_at) as updated_year, MONTH(updated_at) as updated_month, MAX(updated_at) as updated_at')
+            ->selectRaw('YEAR(created_at) as created_year, MONTH(created_at) as created_month, MAX(created_at) as created_at')
             ->wherePublished()
-            ->groupBy('updated_year', 'updated_month')
-            ->orderByDesc('updated_year')
-            ->orderByDesc('updated_month')
+            ->groupBy('created_year', 'created_month')
+            ->orderByDesc('created_year')
+            ->orderByDesc('created_month')
             ->get();
 
         if ($posts->isNotEmpty()) {
             foreach ($posts as $post) {
-                $key = sprintf('blog-posts-%s-%s', $post->updated_year, str_pad($post->updated_month, 2, '0', STR_PAD_LEFT));
-                SiteMapManager::addSitemap(SiteMapManager::route($key), $post->updated_at);
+                $key = sprintf('blog-posts-%s-%s', $post->created_year, str_pad($post->created_month, 2, '0', STR_PAD_LEFT));
+                SiteMapManager::addSitemap(SiteMapManager::route($key), $post->created_at);
             }
         }
 

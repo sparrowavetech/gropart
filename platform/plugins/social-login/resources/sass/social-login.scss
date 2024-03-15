@@ -1,23 +1,43 @@
 .login-options {
+    text-align: center;
+
+    &-title {
+        position: relative;
+        z-index: 1;
+        margin-top: 20px;
+        margin-bottom: 14px;
+
+        &:after {
+            position: absolute;
+            content: "";
+            left: 0;
+            right: 0;
+            bottom: 12px;
+            width: 100%;
+            height: 1px;
+            background-color: #E0E2E3;
+            z-index: -1;
+        }
+
+        p {
+            font-size: 15px;
+            color: #55585B;
+            margin-bottom: 0;
+            padding: 0 20px;
+            position: relative;
+            display: inline-block;
+            background-color: rgba(var(--bs-tertiary-bg-rgb), var(--bs-bg-opacity));
+        }
+    }
+
     .social-icons {
-        padding: 0;
-        margin: 0;
-
-        &:before,
-        &:after {
-            content: ' ';
-            display: table;
-        }
-
-        &:after {
-            clear: both;
-        }
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
 
         li {
-            display: inline-block;
             list-style: none;
-            margin-right: 5px;
-            margin-bottom: 5px;
 
             > a {
                 border-radius: 2px;
@@ -26,16 +46,10 @@
                 display: block;
                 background-position: 0 0;
                 background-repeat: no-repeat;
-                transition: all 0.3s ease-in-out;
-                -o-transition: all 0.3s ease-in-out;
-                -ms-transition: all 0.3s ease-in-out;
-                -moz-transition: all 0.3s ease-in-out;
-                -webkit-transition: all 0.3s ease-in-out;
             }
 
             .google {
                 background: url('../images/google.svg') no-repeat center center;
-
                 border-radius: 2px;
                 box-shadow: 0 3px 4px 0 rgba(0, 0, 0, 0.25);
                 border: 1px solid #4285f4;

@@ -64,9 +64,9 @@
                                 <x-slot:title>{{ trans('plugins/payment::payment.status') }}</x-slot:title>
                                 {!! BaseHelper::clean($payment->status->toHtml()) !!}
                             </x-core::datagrid.item>
-
-                            {!! $detail !!}
                         </x-core::datagrid>
+
+                        {!! $detail !!}
                     </x-core::card.body>
                 </x-core::card>
 

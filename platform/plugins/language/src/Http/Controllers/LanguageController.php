@@ -37,7 +37,7 @@ class LanguageController extends SettingController
 
         $languages = Language::getListLanguages();
         $flags = Language::getListLanguageFlags();
-        $activeLanguages = LanguageModel::query()->get();
+        $activeLanguages = LanguageModel::query()->orderBy('lang_order')->get();
 
         $languageSettingForm = LanguageSettingForm::create();
 
@@ -94,14 +94,7 @@ class LanguageController extends SettingController
                     $this->createLocaleInPath(lang_path('vendor/packages'), $locale);
                     $this->createLocaleInPath(lang_path('vendor/plugins'), $locale);
 
-                    $themeLocale = Arr::first(BaseHelper::scanFolder(theme_path(Theme::getThemeName() . '/lang')));
-
-                    if ($themeLocale) {
-                        File::copy(
-                            theme_path(Theme::getThemeName() . '/lang/' . $themeLocale),
-                            lang_path($locale . '.json')
-                        );
-                    }
+                    $this->copyThemeLangFiles($locale);
                 }
             }
 
@@ -448,5 +441,31 @@ class LanguageController extends SettingController
         }
 
         return true;
+    }
+
+    protected function copyThemeLangFiles(mixed $locale)
+    {
+        if (Theme::hasInheritTheme()) {
+            $this->copyThemeLangFilesFromTheme(Theme::getInheritTheme(), $locale);
+        }
+
+        $this->copyThemeLangFilesFromTheme(Theme::getThemeName(), $locale);
+    }
+
+    protected function copyThemeLangFilesFromTheme(string $theme, string $locale): void
+    {
+        $themeLangPath = theme_path($theme . '/lang');
+
+        if (! File::isDirectory($themeLangPath)) {
+            return;
+        }
+        $themeLocale = Arr::first(BaseHelper::scanFolder($themeLangPath));
+        $themeLocalePath = $themeLangPath . '/' . $themeLocale;
+
+        if (! $themeLocale) {
+            return;
+        }
+
+        File::copy($themeLocalePath, lang_path($locale . '.json'));
     }
 }

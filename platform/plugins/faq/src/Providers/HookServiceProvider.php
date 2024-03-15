@@ -5,6 +5,7 @@ namespace Botble\Faq\Providers;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\Html;
 use Botble\Base\Facades\MetaBox;
+use Botble\Base\Models\BaseModel;
 use Botble\Base\Supports\ServiceProvider;
 use Botble\Faq\Contracts\Faq as FaqContract;
 use Botble\Faq\FaqCollection;
@@ -20,7 +21,7 @@ class HookServiceProvider extends ServiceProvider
     {
         add_action(BASE_ACTION_META_BOXES, function (string $context, array|string|Model|null $object = null): void {
             if (
-                ! $object
+                ! $object instanceof BaseModel
                 || $context != 'advanced'
                 || ! in_array($object::class, config('plugins.faq.general.schema_supported', []))
                 || ! setting('enable_faq_schema', 0)

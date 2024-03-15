@@ -2,6 +2,7 @@
 
 namespace Botble\Newsletter\Http\Controllers;
 
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Newsletter\Enums\NewsletterStatusEnum;
 use Botble\Newsletter\Events\SubscribeNewsletterEvent;
@@ -54,14 +55,14 @@ class PublicController extends BaseController
 
             return $this
                 ->httpResponse()
-                ->setNextRoute('public.index')
+                ->setNextUrl(BaseHelper::getHomepageUrl())
                 ->setMessage(__('Unsubscribe to newsletter successfully'));
         }
 
         return $this
             ->httpResponse()
             ->setError()
-            ->setNextRoute('public.index')
+            ->setNextUrl(BaseHelper::getHomepageUrl())
             ->setMessage(__('Your email does not exist in the system or you have unsubscribed already!'));
     }
 }

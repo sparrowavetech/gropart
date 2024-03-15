@@ -54,10 +54,16 @@ class PaymentMethods
 
         event(new RenderingPaymentMethods($this->methods));
 
+        $country = apply_filters('payment_checkout_country', null);
+
         $html = '';
 
         foreach (collect($this->methods)->sortBy('priority') as $name => $method) {
             if (! get_payment_setting('status', $name) == 1) {
+                continue;
+            }
+
+            if ($country && ! in_array($country, array_keys(PaymentHelper::getAvailableCountries($name)))) {
                 continue;
             }
 

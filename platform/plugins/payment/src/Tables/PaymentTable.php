@@ -51,7 +51,7 @@ class PaymentTable extends TableAbstract
                 return '&mdash;';
             })
             ->editColumn('payment_channel', function (Payment $item) {
-                return $item->payment_channel->label();
+                return $item->payment_channel->label() ?: '&mdash;';
             })
             ->editColumn('amount', function (Payment $item) {
                 return $item->amount . ' ' . $item->currency;
@@ -76,7 +76,8 @@ class PaymentTable extends TableAbstract
                 'order_id',
                 'customer_id',
                 'customer_type',
-            ])->with(['customer']);
+            ])
+            ->with(['customer']);
 
         if (method_exists($query->getModel(), 'order')) {
             $query->with(['customer', 'order']);

@@ -18,7 +18,9 @@ class ContactPluginManagement {
             event.preventDefault()
             event.stopPropagation()
 
-            Botble.showButtonLoading($(event.currentTarget))
+            const _self = $(event.currentTarget)
+
+            Botble.showButtonLoading(_self)
 
             let message = $('#message').val()
             if (typeof tinymce != 'undefined') {
@@ -27,7 +29,7 @@ class ContactPluginManagement {
 
             $httpClient
                 .make()
-                .post(route('contacts.reply', $('#input_contact_id').val()), {
+                .post(_self.data('url'), {
                     message,
                 })
                 .then(({ data }) => {

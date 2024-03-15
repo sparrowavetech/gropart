@@ -19,7 +19,7 @@
 
     @if (Arr::get($data, 'tran_date'))
         <p>{{ trans('core/base::tables.created_at') }}:
-            {{ Carbon\Carbon::now()->parse(Arr::get($data, 'tran_date')) }}</p>
+            {{ BaseHelper::formatDate(Arr::get($data, 'tran_date')) }}</p>
         <hr>
     @endif
     @if ($refunds = Arr::get($paymentModel->metadata, 'refunds', []))

@@ -9,7 +9,6 @@ use Botble\Language\Models\Language;
 use Botble\Language\Models\LanguageMeta;
 use Botble\Page\Models\Page;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
@@ -76,8 +75,8 @@ class LanguageTest extends TestCase
             'first_name' => 'Super',
             'last_name' => 'Admin',
             'email' => 'admin@domain.com',
-            'username' => 'admin',
-            'password' => Hash::make('12345678'),
+            'username' => config('core.base.general.demo.account.username'),
+            'password' => config('core.base.general.demo.account.password'),
             'super_user' => 1,
             'manage_supers' => 1,
         ]);

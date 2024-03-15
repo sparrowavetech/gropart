@@ -191,10 +191,10 @@
                                     :checked="setting('shipping_shippo_validate')"
                                 />
 
-                                @if (count($logFiles))
+                                @if (! empty($logFiles))
                                     <div class="form-group mb-3">
                                         <p class="mb-0">{{ __('Log files') }}: </p>
-                                        <ul>
+                                        <ul class="list-unstyled">
                                             @foreach ($logFiles as $logFile)
                                                 <li><a
                                                         href="{{ route('ecommerce.shipments.shippo.view-log', $logFile) }}"

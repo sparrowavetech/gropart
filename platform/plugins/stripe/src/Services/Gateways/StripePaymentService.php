@@ -89,6 +89,7 @@ class StripePaymentService extends StripePaymentAbstract
         $requestData = [
             'line_items' => $lineItems,
             'mode' => 'payment',
+            'locale' => $this->getCurrentLocale(),
             'success_url' => route('payments.stripe.success') . '?session_id={CHECKOUT_SESSION_ID}',
             'cancel_url' => route('payments.stripe.error'),
             'metadata' => [
@@ -321,5 +322,59 @@ class StripePaymentService extends StripePaymentAbstract
             'LTL',
             'SLL',
         ];
+    }
+
+    public function getCurrentLocale(): string
+    {
+        $supportedLocales = [
+            'bg',
+            'cs',
+            'da',
+            'de',
+            'el',
+            'en',
+            'en-GB',
+            'es',
+            'es-419',
+            'et',
+            'fi',
+            'fil',
+            'fr',
+            'fr-CA',
+            'hr',
+            'hu',
+            'id',
+            'it',
+            'ja',
+            'ko',
+            'lt',
+            'lv',
+            'ms',
+            'mt',
+            'nb',
+            'nl',
+            'pl',
+            'pt',
+            'pt-BR',
+            'ro',
+            'ru',
+            'sk',
+            'sl',
+            'sv',
+            'th',
+            'tr',
+            'vi',
+            'zh',
+            'zh-HK',
+            'zh-TW',
+        ];
+
+        $currentLocale = app()->getLocale();
+
+        if (in_array($currentLocale, $supportedLocales)) {
+            return $currentLocale;
+        }
+
+        return 'auto';
     }
 }

@@ -2,12 +2,17 @@
 
 namespace Botble\Contact\Providers;
 
+use Botble\Base\Forms\FieldOptions\HtmlFieldOption;
+use Botble\Base\Forms\Fields\HtmlField;
 use Botble\Base\Rules\OnOffRule;
 use Botble\Base\Supports\ServiceProvider;
 use Botble\Captcha\Forms\CaptchaSettingForm;
 use Botble\Contact\Enums\ContactStatusEnum;
+use Botble\Contact\Forms\Fronts\ContactForm;
 use Botble\Contact\Models\Contact;
 use Botble\Shortcode\Compilers\Shortcode;
+use Botble\Shortcode\Facades\Shortcode as ShortcodeFacade;
+use Botble\Shortcode\Forms\ShortcodeForm;
 use Botble\Theme\Facades\Theme;
 use Illuminate\Support\Facades\Auth;
 
@@ -31,15 +36,24 @@ class HookServiceProvider extends ServiceProvider
             add_filter('captcha_settings_validation_rules', [$this, 'addContactSettingRules'], 99);
         }
 
-        if (function_exists('add_shortcode')) {
-            shortcode()
-                ->register(
-                    'contact-form',
-                    trans('plugins/contact::contact.shortcode_name'),
-                    trans('plugins/contact::contact.shortcode_description'),
-                    [$this, 'form']
-                )
-                ->setAdminConfig('contact-form', fn () => view('plugins/contact::partials.short-code-admin-config')->render());
+        if (class_exists(ShortcodeFacade::class)) {
+            ShortcodeFacade::register(
+                'contact-form',
+                trans('plugins/contact::contact.shortcode_name'),
+                trans('plugins/contact::contact.shortcode_description'),
+                [$this, 'form']
+            );
+
+            ShortcodeFacade::setAdminConfig('contact-form', function (array $attributes) {
+                return ShortcodeForm::createFromArray($attributes)
+                    ->add(
+                        'description',
+                        HtmlField::class,
+                        HtmlFieldOption::make()
+                            ->content(trans('plugins/contact::contact.shortcode_content_description'))
+                            ->toArray()
+                    );
+            });
         }
     }
 
@@ -112,7 +126,9 @@ class HookServiceProvider extends ServiceProvider
             $view = $shortcode->view;
         }
 
-        return view($view, compact('shortcode'))->render();
+        $form = ContactForm::create();
+
+        return view($view, compact('shortcode', 'form'))->render();
     }
 
     public function addContactSettingRules(array $rules): array

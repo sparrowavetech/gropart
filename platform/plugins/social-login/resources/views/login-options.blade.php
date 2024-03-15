@@ -1,7 +1,9 @@
 @if (SocialService::hasAnyProviderEnable())
     <div class="login-options">
-        <br>
-        <p style="font-size: 14px">{{ __('Login with social networks') }}</p>
+
+        <div class="login-options-title">
+            <p>{{ __('Login with social networks') }}</p>
+        </div>
 
         <ul class="social-icons">
             @foreach (SocialService::getProviderKeys() as $item)

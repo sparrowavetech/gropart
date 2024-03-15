@@ -15,7 +15,9 @@ class LanguageManagement {
                 $('#lang_code').val(language[1])
                 $(`input[name=lang_rtl][value="${language[3] === 'rtl' ? 1 : 0}"]`).prop('checked', true)
                 $('#flag_list').val(language[4]).trigger('change')
-                $('#btn-language-submit-edit').prop('id', 'btn-language-submit').text('Add new language')
+                $('#btn-language-submit-edit')
+                    .prop('id', 'btn-language-submit')
+                    .text($('#btn-language-submit').data('add-language-text'))
             }
         })
 
@@ -80,9 +82,9 @@ class LanguageManagement {
                 .make()
                 .get(_self.data('section'))
                 .then(({ data }) => {
-                    const icon = languageTable.find('td > span.icon-tabler-wrapper')
+                    const icon = languageTable.find('td > svg')
 
-                    icon.closest('td span.icon-tabler-wrapper').removeClass('text-yellow')
+                    icon.closest('td svg').removeClass('text-yellow')
 
                     icon.replaceWith(
                         `<a href="javascript:void(0);" data-section="${route(
@@ -93,7 +95,7 @@ class LanguageManagement {
                             'name'
                         )} as default language">${icon.closest('td').html()}</a>`
                     )
-                    _self.find('span.icon-tabler-wrapper').unwrap().addClass('text-yellow')
+                    _self.find('svg').unwrap().addClass('text-yellow')
 
                     $('.tooltip').remove()
 
@@ -107,7 +109,7 @@ class LanguageManagement {
 
             $httpClient
                 .make()
-                .get(`${route('languages.get')}?lang_id=${_self.data('id')}`)
+                .get(_self.data('url'))
                 .then(({ data }) => {
                     let language = data.data
 
@@ -119,7 +121,9 @@ class LanguageManagement {
                     $(`input[name=lang_rtl][value="${language.lang_is_rtl ? 1 : 0}"]`).prop('checked', true)
                     $('#lang_order').val(language.lang_order)
 
-                    $('#btn-language-submit').prop('id', 'btn-language-submit-edit').text('Update')
+                    $('#btn-language-submit')
+                        .prop('id', 'btn-language-submit-edit')
+                        .text($('#btn-language-submit-edit').data('update-language-text'))
                 })
         })
 
@@ -165,13 +169,15 @@ class LanguageManagement {
     }
 
     static createOrUpdateLanguage(id, name, locale, code, flag, order, isRTL, edit) {
-        let url = route('languages.store')
+        const $buttonSubmit = $('#btn-language-submit')
+
+        let url = $buttonSubmit.data('store-url')
 
         if (edit) {
-            url = `${route('languages.edit')}?lang_code=${code}`
+            url = $('#btn-language-submit-edit').data('update-url') + `?lang_code=${code}`
         }
 
-        Botble.showButtonLoading($('#btn-language-submit'), true)
+        Botble.showButtonLoading($buttonSubmit, true)
 
         $httpClient
             .make()
@@ -202,8 +208,10 @@ class LanguageManagement {
                 $('input[name=lang_rtl][value="0"]').prop('checked', true)
                 $('#flag_list').val('').trigger('change')
 
-                $('#btn-language-submit-edit').prop('id', 'btn-language-submit').text('Add new language')
-                Botble.hideButtonLoading($('#btn-language-submit'))
+                $('#btn-language-submit-edit')
+                    .prop('id', 'btn-language-submit')
+                    .text($('#btn-language-submit').data('add-language-text'))
+                Botble.hideButtonLoading($buttonSubmit)
             })
     }
 }

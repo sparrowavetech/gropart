@@ -8,10 +8,13 @@ use Botble\Base\Forms\Fields\EditorField;
 use Botble\Base\Forms\Fields\HtmlField;
 use Botble\Base\Forms\Fields\TextField;
 use Botble\Base\Forms\FormAbstract;
+use Botble\Payment\Concerns\Forms\HasAvailableCountriesField;
 use Botble\Payment\Enums\PaymentMethodEnum;
 
 class BankTransferPaymentMethodForm extends FormAbstract
 {
+    use HasAvailableCountriesField;
+
     public function setup(): void
     {
         $this
@@ -46,6 +49,7 @@ class BankTransferPaymentMethodForm extends FormAbstract
                     ->value(get_payment_setting('description', PaymentMethodEnum::BANK_TRANSFER))
                     ->toArray()
             )
+            ->addAvailableCountriesField(PaymentMethodEnum::BANK_TRANSFER)
             ->when(
                 apply_filters(PAYMENT_METHOD_SETTINGS_CONTENT, null, PaymentMethodEnum::BANK_TRANSFER),
                 function (FormAbstract $form, string|null $data) {

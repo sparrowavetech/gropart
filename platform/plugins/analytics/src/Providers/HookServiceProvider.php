@@ -54,7 +54,7 @@ class HookServiceProvider extends ServiceProvider
     {
         $dashboardWidgetInstance = new DashboardWidgetInstance();
 
-        $widgets = $dashboardWidgetInstance
+        $dashboardWidgetInstance
             ->setPermission('analytics.general')
             ->setKey('widget_analytics_general')
             ->setTitle(trans('plugins/analytics::analytics.widget_analytics_general'))
@@ -66,7 +66,7 @@ class HookServiceProvider extends ServiceProvider
             ->setSettings(['show_predefined_ranges' => true])
             ->init($widgets, $widgetSettings);
 
-        $widgets = $dashboardWidgetInstance
+        $dashboardWidgetInstance
             ->setPermission('analytics.page')
             ->setKey('widget_analytics_page')
             ->setTitle(trans('plugins/analytics::analytics.widget_analytics_page'))
@@ -77,7 +77,7 @@ class HookServiceProvider extends ServiceProvider
             ->setSettings(['show_predefined_ranges' => true])
             ->init($widgets, $widgetSettings);
 
-        $widgets = $dashboardWidgetInstance
+        $dashboardWidgetInstance
             ->setPermission('analytics.browser')
             ->setKey('widget_analytics_browser')
             ->setTitle(trans('plugins/analytics::analytics.widget_analytics_browser'))

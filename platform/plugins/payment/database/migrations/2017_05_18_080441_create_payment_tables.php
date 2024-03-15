@@ -13,14 +13,14 @@ return new class () extends Migration {
             $table->foreignId('user_id')->default(0);
             $table->string('charge_id', 60)->nullable();
             $table->string('payment_channel', 60)->nullable();
-            $table->string('description', 255)->nullable();
+            $table->string('description', 400)->nullable();
             $table->decimal('amount', 15, 2)->unsigned();
             $table->foreignId('order_id')->nullable();
             $table->string('status', 60)->default('pending')->nullable();
             $table->string('payment_type')->default('confirm')->nullable();
             $table->foreignId('customer_id')->nullable();
             $table->decimal('refunded_amount', 15)->unsigned()->nullable();
-            $table->string('refund_note', 255)->nullable();
+            $table->string('refund_note')->nullable();
             $table->timestamps();
         });
     }

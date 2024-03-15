@@ -29,10 +29,6 @@ class LanguageServiceProvider extends ServiceProvider
 
     public function register(): void
     {
-        $this
-            ->setNamespace('plugins/language')
-            ->loadAndPublishConfigurations(['general']);
-
         $this->app->bind(LanguageInterface::class, function () {
             return new LanguageRepository(new LanguageModel());
         });
@@ -52,6 +48,8 @@ class LanguageServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this
+            ->setNamespace('plugins/language')
+            ->loadAndPublishConfigurations(['general'])
             ->setNamespace('plugins/language')
             ->loadHelpers()
             ->loadAndPublishConfigurations(['permissions'])

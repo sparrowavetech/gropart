@@ -2,6 +2,7 @@
 
 namespace Botble\SslCommerz\Library\SslCommerz;
 
+use Botble\Base\Facades\BaseHelper;
 use Illuminate\Support\Arr;
 use stdClass;
 
@@ -179,7 +180,7 @@ class SslCommerzNotification extends AbstractSslCommerz
         }
     }
 
-    public function makePayment(array $requestData, string $type = 'checkout', string $pattern = 'json')
+    public function makePayment(array $requestData, string $type = 'checkout', string $pattern = 'json'): array
     {
         if (empty($requestData)) {
             return [
@@ -227,34 +228,34 @@ class SslCommerzNotification extends AbstractSslCommerz
         return $data;
     }
 
-    public function setParams(array $requestData)
+    public function setParams(array $data): void
     {
         //  Integration Required Parameters
-        $this->setRequiredInfo($requestData);
+        $this->setRequiredInfo($data);
 
         //  Customer Information
-        $this->setCustomerInfo($requestData);
+        $this->setCustomerInfo($data);
 
         //  Shipment Information
-        $this->setShipmentInfo($requestData);
+        $this->setShipmentInfo($data);
 
         //  Product Information
-        $this->setProductInfo($requestData);
+        $this->setProductInfo($data);
 
         //  Customized or Additional Parameters
-        $this->setAdditionalInfo($requestData);
+        $this->setAdditionalInfo($data);
     }
 
-    public function setRequiredInfo(array $info)
+    public function setRequiredInfo(array $data): array
     {
         // decimal (10,2) Mandatory - The amount which will process by SslCommerz. It shall be decimal value (10,2). Example : 55.40. The transaction amount must be from 10.00 BDT to 500000.00 BDT
-        $this->data['total_amount'] = $info['total_amount'];
+        $this->data['total_amount'] = $data['total_amount'];
         // string (3) Mandatory - The currency type must be mentioned. It shall be three characters. Example : BDT, USD, EUR, SGD, INR, MYR, etc. If the transaction currency is not BDT, then it will be converted to BDT based on the current convert rate. Example : 1 USD = 82.22 BDT.
-        $this->data['currency'] = $info['currency'];
+        $this->data['currency'] = $data['currency'];
         // string (30) Mandatory - Unique transaction ID to identify your order in both your end and SslCommerz
-        $this->data['tran_id'] = $info['tran_id'];
+        $this->data['tran_id'] = $data['tran_id'];
         // string (50) Mandatory - Mention the product category. It is a open field. Example - clothing,shoes,watches,gift,healthcare, jewellery,top up,toys,baby care,pants,laptop,donation,etc
-        $this->data['product_category'] = $info['product_category'];
+        $this->data['product_category'] = $data['product_category'];
 
         // Set the SUCCESS, FAIL, CANCEL Redirect URL before setting the other parameters
         $this->setSuccessUrl();
@@ -276,7 +277,7 @@ class SslCommerzNotification extends AbstractSslCommerz
          * Important! Not mandatory, however better to use to avoid missing any payment notification - It is the Instant Payment Notification (IPN) URL of your website where SSLCOMMERZ will send the transaction's status (Length: 255).
          * The data will be communicated as SSLCOMMERZ Server to your Server. So, customer session will not work.
          * */
-        $this->data['ipn_url'] = (isset($info['ipn_url'])) ? $info['ipn_url'] : null;
+        $this->data['ipn_url'] = (isset($data['ipn_url'])) ? $data['ipn_url'] : null;
 
         /*
          * Type: string (30)
@@ -312,23 +313,23 @@ class SslCommerzNotification extends AbstractSslCommerz
             mastercard = For All Master card
             amexcard = For Amex Card
          * */
-        $this->data['multi_card_name'] = (isset($info['multi_card_name'])) ? $info['multi_card_name'] : null;
+        $this->data['multi_card_name'] = (isset($data['multi_card_name'])) ? $data['multi_card_name'] : null;
 
         /*
          * Type: string (255)
          * Do not Use! If you do not control on transaction - You can provide the BIN of card to allow the transaction must be completed by this BIN. You can declare by coma ',' separate of these BIN.
          * Example: 371598,371599,376947,376948,376949
          * */
-        $this->data['allowed_bin'] = (isset($info['allowed_bin'])) ? $info['allowed_bin'] : null;
+        $this->data['allowed_bin'] = (isset($data['allowed_bin'])) ? $data['allowed_bin'] : null;
 
         // Parameters to Handle EMI Transaction
         // integer (1) Mandatory - This is mandatory if transaction is EMI enabled and Value must be 1/0. Here, 1 means customer will get EMI facility for this transaction
-        $this->data['emi_option'] = (isset($info['emi_option'])) ? $info['emi_option'] : null;
+        $this->data['emi_option'] = (isset($data['emi_option'])) ? $data['emi_option'] : null;
         // integer (2) Max instalment Option, Here customer will get 3,6, 9 instalment at gateway page
-        $this->data['emi_max_inst_option'] = (isset($info['emi_max_inst_option'])) ? $info['emi_max_inst_option'] : null;
+        $this->data['emi_max_inst_option'] = (isset($data['emi_max_inst_option'])) ? $data['emi_max_inst_option'] : null;
         // integer (2) Customer has selected from your Site, So no instalment option will be displayed at gateway page
-        $this->data['emi_selected_inst'] = (isset($info['emi_selected_inst'])) ? $info['emi_selected_inst'] : null;
-        $this->data['emi_allow_only'] = (isset($info['emi_allow_only'])) ? $info['emi_allow_only'] : 0;
+        $this->data['emi_selected_inst'] = (isset($data['emi_selected_inst'])) ? $data['emi_selected_inst'] : null;
+        $this->data['emi_allow_only'] = (isset($data['emi_allow_only'])) ? $data['emi_allow_only'] : 0;
 
         return $this->data;
     }
@@ -338,9 +339,9 @@ class SslCommerzNotification extends AbstractSslCommerz
         return $this->successUrl;
     }
 
-    protected function setSuccessUrl()
+    protected function setSuccessUrl(): void
     {
-        $this->successUrl = route('public.index') . '/' . ltrim($this->config['success_url'], '/');
+        $this->successUrl = BaseHelper::getHomepageUrl() . '/' . ltrim($this->config['success_url'], '/');
     }
 
     protected function getFailedUrl(): string
@@ -348,9 +349,9 @@ class SslCommerzNotification extends AbstractSslCommerz
         return $this->failedUrl;
     }
 
-    protected function setFailedUrl()
+    protected function setFailedUrl(): void
     {
-        $this->failedUrl = route('public.index') . '/' . ltrim($this->config['failed_url'], '/');
+        $this->failedUrl = BaseHelper::getHomepageUrl() . '/' . ltrim($this->config['failed_url'], '/');
     }
 
     protected function getCancelUrl(): string
@@ -358,67 +359,67 @@ class SslCommerzNotification extends AbstractSslCommerz
         return $this->cancelUrl;
     }
 
-    protected function setCancelUrl()
+    protected function setCancelUrl(): void
     {
-        $this->cancelUrl = route('public.index') . '/' . ltrim($this->config['cancel_url'], '/');
+        $this->cancelUrl = BaseHelper::getHomepageUrl() . '/' . ltrim($this->config['cancel_url'], '/');
     }
 
-    public function setCustomerInfo(array $info): array
+    public function setCustomerInfo(array $data): array
     {
         // string (50) Mandatory - Your customer name to address the customer in payment receipt email
-        $this->data['cus_name'] = $info['cus_name'];
+        $this->data['cus_name'] = $data['cus_name'];
         // string (50) Mandatory - Valid email address of your customer to send payment receipt from SslCommerz end
-        $this->data['cus_email'] = $info['cus_email'];
+        $this->data['cus_email'] = $data['cus_email'];
         // string (50) Mandatory - Address of your customer. Not mandatory but useful if provided
-        $this->data['cus_add1'] = $info['cus_add1'];
+        $this->data['cus_add1'] = $data['cus_add1'];
         // string (50) Address line 2 of your customer. Not mandatory but useful if provided
-        $this->data['cus_add2'] = $info['cus_add2'];
+        $this->data['cus_add2'] = $data['cus_add2'];
         // string (50) Mandatory - City of your customer. Not mandatory but useful if provided
-        $this->data['cus_city'] = $info['cus_city'];
+        $this->data['cus_city'] = $data['cus_city'];
         // string (50) State of your customer. Not mandatory but useful if provided
-        $this->data['cus_state'] = (isset($info['cus_state'])) ? $info['cus_state'] : null;
+        $this->data['cus_state'] = (isset($data['cus_state'])) ? $data['cus_state'] : null;
         // string (30) Mandatory - Postcode of your customer. Not mandatory but useful if provided
-        $this->data['cus_postcode'] = $info['cus_postcode'];
+        $this->data['cus_postcode'] = $data['cus_postcode'];
         // string (50) Mandatory - Country of your customer. Not mandatory but useful if provided
-        $this->data['cus_country'] = $info['cus_country'];
+        $this->data['cus_country'] = $data['cus_country'];
         // string (20) Mandatory - The phone/mobile number of your customer to contact if any issue arises
-        $this->data['cus_phone'] = $info['cus_phone'];
+        $this->data['cus_phone'] = $data['cus_phone'];
         // string (20) Fax number of your customer. Not mandatory but useful if provided
-        $this->data['cus_fax'] = (isset($info['cus_fax'])) ? $info['cus_fax'] : null;
+        $this->data['cus_fax'] = (isset($data['cus_fax'])) ? $data['cus_fax'] : null;
 
         return $this->data;
     }
 
-    public function setShipmentInfo(array $info): array
+    public function setShipmentInfo(array $data): array
     {
         // string (50) Mandatory - Shipping method of the order. Example: YES or NO or Courier
-        $this->data['shipping_method'] = $info['shipping_method'];
+        $this->data['shipping_method'] = $data['shipping_method'];
         // integer (1) Mandatory - No of product will be shipped. Example: 1 or 2 or etc
-        $this->data['num_of_item'] = $info['num_of_item'] ?? 1;
+        $this->data['num_of_item'] = $data['num_of_item'] ?? 1;
         // string (50) Mandatory, if shipping_method is YES - Shipping Address of your order. Not mandatory but useful if provided
-        $this->data['ship_name'] = $info['ship_name'];
+        $this->data['ship_name'] = $data['ship_name'];
         // string (50) Mandatory, if shipping_method is YES - Additional Shipping Address of your order. Not mandatory but useful if provided
-        $this->data['ship_add1'] = $info['ship_add1'];
+        $this->data['ship_add1'] = $data['ship_add1'];
         // string (50) Additional Shipping Address of your order. Not mandatory but useful if provided
-        $this->data['ship_add2'] = $info['ship_add2'] ?? null;
+        $this->data['ship_add2'] = $data['ship_add2'] ?? null;
         // string (50) Mandatory, if shipping_method is YES - Shipping city of your order. Not mandatory but useful if provided
-        $this->data['ship_city'] = $info['ship_city'];
+        $this->data['ship_city'] = $data['ship_city'];
         // string (50) Shipping state of your order. Not mandatory but useful if provided
-        $this->data['ship_state'] = $info['ship_state'] ?? null;
+        $this->data['ship_state'] = $data['ship_state'] ?? null;
         // string (50) Mandatory, if shipping_method is YES - Shipping postcode of your order. Not mandatory but useful if provided
-        $this->data['ship_postcode'] = $info['ship_postcode'] ?? null;
+        $this->data['ship_postcode'] = $data['ship_postcode'] ?? null;
         // string (50) Mandatory, if shipping_method is YES - Shipping country of your order. Not mandatory but useful if provided
-        $this->data['ship_country'] = $info['ship_country'] ?? null;
+        $this->data['ship_country'] = $data['ship_country'] ?? null;
 
         return $this->data;
     }
 
-    public function setProductInfo(array $info): array
+    public function setProductInfo(array $data): array
     {
         // String (256) Mandatory - Mention the product name briefly. Mention the product name by coma separate. Example: Computer,Speaker
-        $this->data['product_name'] = (isset($info['product_name'])) ? $info['product_name'] : '';
+        $this->data['product_name'] = (isset($data['product_name'])) ? $data['product_name'] : '';
         // String (100) Mandatory - Mention the product category. Example: Electronic or top up or bus ticket or air ticket
-        $this->data['product_category'] = (isset($info['product_category'])) ? $info['product_category'] : '';
+        $this->data['product_category'] = (isset($data['product_category'])) ? $data['product_category'] : '';
 
         /*
          * String (100)
@@ -431,32 +432,32 @@ class SslCommerzNotification extends AbstractSslCommerz
             5) travel-vertical
             6) telecom-vertical
         */
-        $this->data['product_profile'] = (isset($info['product_profile'])) ? $info['product_profile'] : '';
+        $this->data['product_profile'] = (isset($data['product_profile'])) ? $data['product_profile'] : '';
 
         // string (30) Mandatory, if product_profile is airline-tickets - Provide the remaining time of departure of flight till at the time of purchasing the ticket. Example: 12 hrs or 36 hrs
-        $this->data['hours_till_departure'] = (isset($info['hours_till_departure'])) ? $info['hours_till_departure'] : null;
+        $this->data['hours_till_departure'] = (isset($data['hours_till_departure'])) ? $data['hours_till_departure'] : null;
         // string (30) Mandatory, if product_profile is airline-tickets - Provide the flight type. Example: Oneway or Return or Multistop
-        $this->data['flight_type'] = (isset($info['flight_type'])) ? $info['flight_type'] : null;
+        $this->data['flight_type'] = (isset($data['flight_type'])) ? $data['flight_type'] : null;
         // string (50) Mandatory, if product_profile is airline-tickets - Provide the PNR.
-        $this->data['pnr'] = (isset($info['pnr'])) ? $info['pnr'] : null;
+        $this->data['pnr'] = (isset($data['pnr'])) ? $data['pnr'] : null;
         // string (256) - Mandatory, if product_profile is airline-tickets - Provide the journey route. Example: DAC-CGP or DAC-CGP CGP-DAC
-        $this->data['journey_from_to'] = (isset($info['journey_from_to'])) ? $info['journey_from_to'] : null;
+        $this->data['journey_from_to'] = (isset($data['journey_from_to'])) ? $data['journey_from_to'] : null;
         // string (20) Mandatory, if product_profile is airline-tickets - No/Yes. Whether the ticket has been taken from third party booking system.
-        $this->data['third_party_booking'] = (isset($info['third_party_booking'])) ? $info['third_party_booking'] : null;
+        $this->data['third_party_booking'] = (isset($data['third_party_booking'])) ? $data['third_party_booking'] : null;
         // string (256) Mandatory, if product_profile is travel-vertical - Please provide the hotel name. Example: Sheraton
-        $this->data['hotel_name'] = (isset($info['hotel_name'])) ? $info['hotel_name'] : null;
+        $this->data['hotel_name'] = (isset($data['hotel_name'])) ? $data['hotel_name'] : null;
         // string (30) Mandatory, if product_profile is travel-vertical - How long stay in hotel. Example: 2 days
-        $this->data['length_of_stay'] = (isset($info['length_of_stay'])) ? $info['length_of_stay'] : null;
+        $this->data['length_of_stay'] = (isset($data['length_of_stay'])) ? $data['length_of_stay'] : null;
         // string (30) Mandatory, if product_profile is travel-vertical - Checking hours for the hotel room. Example: 24 hrs
-        $this->data['check_in_time'] = (isset($info['check_in_time'])) ? $info['check_in_time'] : null;
+        $this->data['check_in_time'] = (isset($data['check_in_time'])) ? $data['check_in_time'] : null;
         // string (50) Mandatory, if product_profile is travel-vertical - Location of the hotel. Example: Dhaka
-        $this->data['hotel_city'] = (isset($info['hotel_city'])) ? $info['hotel_city'] : null;
+        $this->data['hotel_city'] = (isset($data['hotel_city'])) ? $data['hotel_city'] : null;
         // string (30) Mandatory, if product_profile is telecom-vertical - For mobile or any recharge, this information is necessary. Example: Prepaid or Postpaid
-        $this->data['product_type'] = (isset($info['product_type'])) ? $info['product_type'] : null;
+        $this->data['product_type'] = (isset($data['product_type'])) ? $data['product_type'] : null;
         // string (150) Mandatory, if product_profile is telecom-vertical - Provide the mobile number which will be recharged. Example: 8801700000000 or 8801700000000,8801900000000
-        $this->data['topup_number'] = (isset($info['topup_number'])) ? $info['topup_number'] : null;
+        $this->data['topup_number'] = (isset($data['topup_number'])) ? $data['topup_number'] : null;
         // string (30) Mandatory, if product_profile is telecom-vertical - Provide the country name in where the service is given. Example: Bangladesh
-        $this->data['country_topup'] = (isset($info['country_topup'])) ? $info['country_topup'] : null;
+        $this->data['country_topup'] = (isset($data['country_topup'])) ? $data['country_topup'] : null;
 
         /*
          * Type: JSON
@@ -464,29 +465,29 @@ class SslCommerzNotification extends AbstractSslCommerz
          * Example:
            [{"product":"DHK TO BRS AC A1","quantity":"1","amount":"200.00"},{"product":"DHK TO BRS AC A2","quantity":"1","amount":"200.00"},{"product":"DHK TO BRS AC A3","quantity":"1","amount":"200.00"},{"product":"DHK TO BRS AC A4","quantity":"2","amount":"200.00"}]
          * */
-        $this->data['cart'] = (isset($info['cart'])) ? $info['cart'] : null;
+        $this->data['cart'] = (isset($data['cart'])) ? $data['cart'] : null;
         // decimal (10,2) Product price which will be displayed in your merchant panel and will help you to reconcile the transaction. It shall be decimal value (10,2). Example : 50.40
-        $this->data['product_amount'] = (isset($info['product_amount'])) ? $info['product_amount'] : null;
+        $this->data['product_amount'] = (isset($data['product_amount'])) ? $data['product_amount'] : null;
         // decimal (10,2) The VAT included on the product price which will be displayed in your merchant panel and will help you to reconcile the transaction. It shall be decimal value (10,2). Example : 4.00
-        $this->data['vat'] = (isset($info['vat'])) ? $info['vat'] : null;
+        $this->data['vat'] = (isset($data['vat'])) ? $data['vat'] : null;
         // decimal (10,2) Discount given on the invoice which will be displayed in your merchant panel and will help you to reconcile the transaction. It shall be decimal value (10,2). Example : 2.00
-        $this->data['discount_amount'] = (isset($info['discount_amount'])) ? $info['discount_amount'] : null;
+        $this->data['discount_amount'] = (isset($data['discount_amount'])) ? $data['discount_amount'] : null;
         // decimal (10,2) Any convenience fee imposed on the invoice which will be displayed in your merchant panel and will help you to reconcile the transaction. It shall be decimal value (10,2). Example : 3.00
-        $this->data['convenience_fee'] = (isset($info['convenience_fee'])) ? $info['convenience_fee'] : null;
+        $this->data['convenience_fee'] = (isset($data['convenience_fee'])) ? $data['convenience_fee'] : null;
 
         return $this->data;
     }
 
-    public function setAdditionalInfo(array $info): array
+    public function setAdditionalInfo(array $data): array
     {
         // value_a [ string (255) - Extra parameter to pass your metadata if it is needed. Not mandatory]
-        $this->data['value_a'] = (isset($info['value_a'])) ? $info['value_a'] : null;
+        $this->data['value_a'] = (isset($data['value_a'])) ? $data['value_a'] : null;
         // value_b [ string (255) - Extra parameter to pass your metadata if it is needed. Not mandatory]
-        $this->data['value_b'] = (isset($info['value_b'])) ? $info['value_b'] : null;
+        $this->data['value_b'] = (isset($data['value_b'])) ? $data['value_b'] : null;
         // value_c [ string (255) - Extra parameter to pass your metadata if it is needed. Not mandatory]
-        $this->data['value_c'] = (isset($info['value_c'])) ? $info['value_c'] : null;
+        $this->data['value_c'] = (isset($data['value_c'])) ? $data['value_c'] : null;
         // value_d [ string (255) - Extra parameter to pass your metadata if it is needed. Not mandatory]
-        $this->data['value_d'] = (isset($info['value_d'])) ? $info['value_d'] : null;
+        $this->data['value_d'] = (isset($data['value_d'])) ? $data['value_d'] : null;
 
         return $this->data;
     }

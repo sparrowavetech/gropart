@@ -2,13 +2,15 @@
 
 namespace Botble\Shippo;
 
+use Botble\Base\Facades\BaseHelper;
 use Botble\Ecommerce\Enums\ShippingStatusEnum;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Models\Shipment;
 use Botble\Location\Facades\Location;
+use Botble\Location\Models\City;
+use Botble\Location\Models\State;
 use Botble\Support\Services\Cache\Cache;
 use Carbon\Carbon;
-use Exception;
 use Illuminate\Log\Logger;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
@@ -20,6 +22,7 @@ use Shippo_Error;
 use Shippo_Rate;
 use Shippo_Shipment;
 use Shippo_Transaction;
+use Throwable;
 
 class Shippo
 {
@@ -160,8 +163,10 @@ class Shippo
             ]);
 
             return true;
-        } catch (Exception $ex) {
+        } catch (Throwable $ex) {
             report($ex);
+
+            $this->log([__LINE__, $ex->getMessage()]);
 
             return false;
         }
@@ -169,9 +174,10 @@ class Shippo
 
     public function getRates(array $params, bool $suggest = true): array
     {
-        $this->log([__LINE__, 'getRates: ' . json_encode($params)]);
-
         $prepareParams = $this->getPrepareParams($params);
+
+        $this->log([__LINE__, 'getRates: ' . BaseHelper::jsonEncodePrettify($prepareParams)]);
+
         $newResponse = $this->getCacheOrNewRates($prepareParams);
 
         if (! Arr::get($newResponse, 'shipment.rates', []) && $suggest && Arr::get($prepareParams, 'extra.COD', [])) {
@@ -198,7 +204,7 @@ class Shippo
         $response = $this->getCacheValue($cacheKey);
         if (! $response) {
             if (! $params['address_from'] || ! $params['address_to']) {
-                $this->log([__LINE__, 'Cannot detect address, ' . json_encode($params)]);
+                $this->log([__LINE__, 'Cannot detect address, ' . BaseHelper::jsonEncodePrettify($params)]);
             } else {
                 $requestParams = $this->getRatesParams($params);
                 $response = $this->createShipment($requestParams);
@@ -207,7 +213,9 @@ class Shippo
             $this->log([__LINE__, 'Found previously returned rates, so return them']);
         }
 
-        $this->log([__LINE__, print_r($response, true)]);
+        if ($response) {
+            $this->log([__LINE__, print_r($response, true)]);
+        }
 
         return $this->getRatesResponse($response, $params);
     }
@@ -248,8 +256,9 @@ class Shippo
                     $this->log([__LINE__, 'Cache shipment for the future']);
                     $this->setCacheValue($cacheKey, $response);
                 }
-            } catch (Exception $ex) {
+            } catch (Throwable $ex) {
                 report($ex);
+                $this->log([__LINE__, $ex->getMessage()]);
             }
         } else {
             $this->log([__LINE__, 'Found previously returned rates, so return them']);
@@ -362,12 +371,12 @@ class Shippo
         }
 
         if ($addressFrom = Arr::get($inParams, 'address_from')) {
-            $this->log([__LINE__, 'From Address: ' . json_encode($addressFrom)]);
+            $this->log([__LINE__, 'From Address: ' . BaseHelper::jsonEncodePrettify($addressFrom)]);
             $params['address_from'] = $this->getCachedAddress($addressFrom);
         }
 
         if ($addressTo = Arr::get($inParams, 'address_to')) {
-            $this->log([__LINE__, 'To Address: ' . json_encode($addressTo)]);
+            $this->log([__LINE__, 'To Address: ' . BaseHelper::jsonEncodePrettify($addressTo)]);
             $params['address_to'] = $this->getCachedAddress($addressTo);
         }
 
@@ -493,10 +502,12 @@ class Shippo
     {
         $addr = $this->mergeAddress($options);
 
+        $addr = $this->beforePrepareAddress($addr);
+
         $validator = Validator::make($addr, $this->getAddressFromValidationRules());
 
         if ($validator->fails()) {
-            $this->log([__LINE__, 'Address is invalid ' . json_encode($addr)]);
+            $this->log([__LINE__, 'Address is invalid ' . BaseHelper::jsonEncodePrettify($addr)]);
 
             $this->log([__LINE__, $validator->getMessageBag()->first()]);
 
@@ -506,16 +517,53 @@ class Shippo
         return $this->afterPrepareAddress($addr);
     }
 
+    protected function beforePrepareAddress(array $addr): array
+    {
+        if (EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation()) {
+            $cityId = $addr['city'];
+            if (! EcommerceHelper::useCityFieldAsTextField()) {
+                if (! is_numeric($cityId)) {
+                    $city = City::query()->where('name', $cityId)->first();
+                    if ($city) {
+                        $addr['city'] = $city->id;
+                        $addr['state'] = $city->state->id;
+                        $addr['country'] = $city->state->country->id;
+                    }
+                }
+            } else {
+                if (! is_numeric($addr['state'])) {
+                    $state = State::query()->where('name', $addr['state'])->first();
+                    if ($state) {
+                        $addr['state'] = $state->id;
+                        $addr['country'] = $state->country->id;
+                    }
+                }
+            }
+        }
+
+        return $addr;
+    }
+
     protected function afterPrepareAddress(array $addr): array
     {
         if (EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation()) {
             $cityId = $addr['city'];
-            $city = Location::getCityById($cityId);
-            if ($city) {
-                $addr['city'] = $city->name;
-                $addr['state'] = $city->state->abbreviation;
-                $addr['country'] = $city->state->country->code;
+            if (! EcommerceHelper::useCityFieldAsTextField()) {
+                $city = Location::getCityById($cityId);
+                if ($city) {
+                    $addr['city'] = $city->name;
+                    $addr['state'] = $city->state->abbreviation;
+                    $addr['country'] = $city->state->country->code;
+                }
+            } else {
+                $state = State::query()->find($addr['state']);
+
+                if ($state) {
+                    $addr['state'] = $state->abbreviation;
+                    $addr['country'] = $state->country->code;
+                }
             }
+
         }
 
         return $addr;
@@ -856,8 +904,10 @@ class Shippo
             $this->log([__LINE__, $transaction]);
 
             return $transaction;
-        } catch (Exception $ex) {
+        } catch (Throwable $ex) {
             report($ex);
+
+            $this->log([__LINE__, $ex->getMessage()]);
 
             return [];
         }
@@ -888,7 +938,7 @@ class Shippo
                 $response['message'] = $ex->getMessage();
 
                 $this->log([__LINE__, $ex->getMessage()]);
-            } catch (Exception $ex) {
+            } catch (Throwable $ex) {
                 $this->log([__LINE__, $ex->getMessage()]);
             }
         }

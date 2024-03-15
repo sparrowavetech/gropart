@@ -63,7 +63,7 @@
         :submit-button-attrs="['class' => 'delete-crud-entry']"
     />
 
-    <x-core-base::modal.action
+    <x-core::modal.action
         class="modal-confirm-import-locale"
         :title="trans('plugins/translation::translation.import_available_locale_confirmation')"
         :description="BaseHelper::clean(

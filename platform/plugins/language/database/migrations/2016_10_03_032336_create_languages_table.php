@@ -21,7 +21,7 @@ return new class () extends Migration {
         Schema::create('language_meta', function (Blueprint $table) {
             $table->id('lang_meta_id');
             $table->text('lang_meta_code')->nullable();
-            $table->string('lang_meta_origin', 255);
+            $table->string('lang_meta_origin');
             $table->foreignId('reference_id')->index();
             $table->string('reference_type', 120);
         });

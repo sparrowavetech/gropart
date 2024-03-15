@@ -62,7 +62,7 @@ class PluginAnalytics {
 $(() => {
     const $analyticsGeneral = $('#widget_analytics_general')
 
-    BDashboard.loadWidget($analyticsGeneral.find('.widget-content'), route('analytics.general'), null, () => {
+    BDashboard.loadWidget($analyticsGeneral.find('.widget-content'), $analyticsGeneral.data('url'), null, () => {
         PluginAnalytics.initCharts()
 
         let stats = window.analyticsStats.stats || []
@@ -75,7 +75,13 @@ $(() => {
             $analyticsGeneral.find('.stats-warning').removeClass('d-block')
         }
     })
-    BDashboard.loadWidget($('#widget_analytics_page').find('.widget-content'), route('analytics.page'))
-    BDashboard.loadWidget($('#widget_analytics_browser').find('.widget-content'), route('analytics.browser'))
-    BDashboard.loadWidget($('#widget_analytics_referrer').find('.widget-content'), route('analytics.referrer'))
+    BDashboard.loadWidget($('#widget_analytics_page').find('.widget-content'), $('#widget_analytics_page').data('url'))
+    BDashboard.loadWidget(
+        $('#widget_analytics_browser').find('.widget-content'),
+        $('#widget_analytics_browser').data('url')
+    )
+    BDashboard.loadWidget(
+        $('#widget_analytics_referrer').find('.widget-content'),
+        $('#widget_analytics_referrer').data('url')
+    )
 })

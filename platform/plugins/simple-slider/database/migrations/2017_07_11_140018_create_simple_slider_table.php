@@ -11,7 +11,7 @@ return new class () extends Migration {
             $table->id();
             $table->string('name', 120);
             $table->string('key', 120);
-            $table->string('description', 255)->nullable();
+            $table->string('description', 400)->nullable();
             $table->string('status', 60)->default('published');
             $table->timestamps();
         });
@@ -19,9 +19,9 @@ return new class () extends Migration {
         Schema::create('simple_slider_items', function (Blueprint $table) {
             $table->id();
             $table->foreignId('simple_slider_id');
-            $table->string('title', 255)->nullable();
-            $table->string('image', 255);
-            $table->string('link', 255)->nullable();
+            $table->string('title')->nullable();
+            $table->string('image');
+            $table->string('link')->nullable();
             $table->text('description')->nullable();
             $table->integer('order')->unsigned()->default(0);
             $table->timestamps();

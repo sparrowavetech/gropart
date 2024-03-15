@@ -13,14 +13,14 @@ class PostRequest extends Request
     public function rules(): array
     {
         $rules = [
-            'name' => 'required|string|max:250',
-            'description' => 'nullable|string|max:400',
-            'content' => 'nullable|string|max:100000',
-            'tag' => 'nullable|string|max:255',
-            'categories' => 'sometimes|array',
-            'categories.*' => 'sometimes|exists:categories,id',
+            'name' => ['required', 'string', 'max:250'],
+            'description' => ['nullable', 'string', 'max:400'],
+            'content' => ['nullable', 'string', 'max:300000'],
+            'tag' => ['nullable', 'string', 'max:255'],
+            'categories' => ['sometimes', 'array'],
+            'categories.*' => ['sometimes', 'exists:categories,id'],
             'status' => Rule::in(BaseStatusEnum::values()),
-            'is_featured' => 'sometimes|boolean',
+            'is_featured' => ['sometimes', 'boolean'],
             'image' => ['nullable', 'string', new MediaImageRule()],
         ];
 

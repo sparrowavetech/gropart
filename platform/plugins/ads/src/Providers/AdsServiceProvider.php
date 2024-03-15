@@ -8,8 +8,12 @@ use Botble\Ads\Models\Ads;
 use Botble\Ads\Repositories\Eloquent\AdsRepository;
 use Botble\Ads\Repositories\Interfaces\AdsInterface;
 use Botble\Base\Facades\DashboardMenu;
+use Botble\Base\Forms\FieldOptions\SelectFieldOption;
+use Botble\Base\Forms\Fields\SelectField;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\LanguageAdvanced\Supports\LanguageAdvancedManager;
+use Botble\Shortcode\Facades\Shortcode;
+use Botble\Shortcode\Forms\ShortcodeForm;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\Facades\Route;
@@ -52,23 +56,30 @@ class AdsServiceProvider extends ServiceProvider
         });
 
         $this->app['events']->listen(RouteMatched::class, function () {
-            if (function_exists('shortcode')) {
-                add_shortcode('ads', __('Ads'), __('Ads'), function ($shortcode) {
+            if (class_exists(Shortcode::class)) {
+                Shortcode::register('ads', __('Ads'), __('Ads'), function ($shortcode) {
                     if (! $shortcode->key) {
                         return null;
                     }
 
-                    return AdsManager::displayAds((string)$shortcode->key);
+                    return AdsManager::displayAds((string) $shortcode->key);
                 });
 
-                shortcode()->setAdminConfig('ads', function ($attributes) {
+                Shortcode::setAdminConfig('ads', function ($attributes) {
                     $ads = Ads::query()
                         ->wherePublished()
                         ->pluck('name', 'key')
                         ->all();
 
-                    return view('plugins/ads::partials.ads-admin-config', compact('ads', 'attributes'))
-                        ->render();
+                    return ShortcodeForm::createFromArray($attributes)
+                        ->add(
+                            'key',
+                            SelectField::class,
+                            SelectFieldOption::make()
+                                ->label(trans('plugins/ads::ads.select_ad'))
+                                ->choices($ads)
+                                ->toArray()
+                        );
                 });
             }
         });

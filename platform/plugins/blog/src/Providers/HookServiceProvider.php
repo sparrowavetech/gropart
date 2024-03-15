@@ -36,9 +36,10 @@ class HookServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
+        Menu::addMenuOptionModel(Category::class);
+        Menu::addMenuOptionModel(Tag::class);
+
         $this->app['events']->listen(RenderingMenuOptions::class, function () {
-            Menu::addMenuOptionModel(Category::class);
-            Menu::addMenuOptionModel(Tag::class);
             add_action(MENU_ACTION_SIDEBAR_OPTIONS, [$this, 'registerMenuOptions'], 2);
         });
 
@@ -138,7 +139,7 @@ class HookServiceProvider extends ServiceProvider
                         ],
                         'author' => [
                             '@type' => 'Person',
-                            'url' => fn () => route('public.index'),
+                            'url' => fn () => BaseHelper::getHomepageUrl(),
                             'name' => class_exists($post->author_type) ? $post->author->name : '',
                         ],
                         'publisher' => [

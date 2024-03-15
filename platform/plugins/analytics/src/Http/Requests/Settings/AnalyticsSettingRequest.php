@@ -10,7 +10,7 @@ class AnalyticsSettingRequest extends Request
     public function rules(): array
     {
         return [
-            'google_analytics' => ['required', 'string', 'starts_with:G-'],
+            'google_analytics' => ['nullable', 'string', 'starts_with:G-'],
             'analytics_property_id' => ['nullable', 'string', 'size:9'],
             'analytics_service_account_credentials' => ['nullable', new AnalyticsCredentialRule()],
         ];

@@ -85,6 +85,14 @@ class Post extends BaseModel
                     return null;
                 }
 
+                $this->loadMissing('metadata');
+
+                $timeToRead = $this->getMetaData('time_to_read', true);
+
+                if ($timeToRead != null) {
+                    return number_format((float)$timeToRead);
+                }
+
                 return number_format(ceil(str_word_count(strip_tags($this->content)) / 200));
             }
         );

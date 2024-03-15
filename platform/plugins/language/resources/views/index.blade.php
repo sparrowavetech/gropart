@@ -112,6 +112,10 @@
                                 type="submit"
                                 color="primary"
                                 id="btn-language-submit"
+                                data-store-url="{{ route('languages.store') }}"
+                                data-update-url="{{ route('languages.edit') }}"
+                                data-add-language-text="{{ trans('plugins/language::language.add_new_language') }}"
+                                data-update-language-text="{{ trans('plugins/language::language.update') }}"
                             >
                                 {{ trans('plugins/language::language.add_new_language') }}
                             </x-core::button>

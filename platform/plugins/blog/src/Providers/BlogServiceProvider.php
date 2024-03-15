@@ -68,7 +68,7 @@ class BlogServiceProvider extends ServiceProvider
             ->loadMigrations()
             ->publishAssets();
 
-        if (ApiHelper::enabled()) {
+        if (class_exists('ApiHelper') && ApiHelper::enabled()) {
             $this->loadRoutes(['api']);
         }
 

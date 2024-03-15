@@ -12,12 +12,18 @@ if (! function_exists('convert_stripe_amount_from_api')) {
 }
 
 if (! function_exists('get_payment_setting')) {
-    function get_payment_setting(string $key, $type = null, $default = null): ?string
+    function get_payment_setting(string $key, $type = null, $default = null): string|array|null
+    {
+        return setting(get_payment_setting_key($key, $type), $default);
+    }
+}
+
+if (! function_exists('get_payment_setting_key')) {
+    function get_payment_setting_key(string $key, string|null $type = null): string
     {
         $key = $type ? "payment_{$type}_{$key}" : "payment_$key";
-        $key = apply_filters('payment_setting_key', $key);
 
-        return setting($key, $default);
+        return apply_filters('payment_setting_key', $key);
     }
 }
 

@@ -14,15 +14,16 @@ class UpdateThemeTranslationCommand extends Command
 {
     public function handle(): int
     {
+        $theme = Theme::hasInheritTheme() ? Theme::getInheritTheme() : Theme::getThemeName();
         $keys = $this->findTranslations(core_path());
         $keys += $this->findTranslations(package_path());
         $keys += $this->findTranslations(plugin_path());
-        $keys += $this->findTranslations(theme_path(Theme::getThemeName()));
+        $keys += $this->findTranslations(theme_path($theme));
         ksort($keys);
 
         $data = json_encode($keys, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 
-        BaseHelper::saveFileData(theme_path(sprintf('%s/lang/en.json', Theme::getThemeName())), $data, false);
+        BaseHelper::saveFileData(theme_path(sprintf('%s/lang/en.json', $theme)), $data, false);
 
         $this->components->info(sprintf('Found %s keys.', count($keys)));
 

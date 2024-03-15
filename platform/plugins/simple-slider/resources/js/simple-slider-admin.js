@@ -36,37 +36,35 @@ class SimpleSliderAdminManagement {
             })
         })
 
-        $table
-            .closest('.card')
-            .find('.btn-save-sort-order')
-            .off('click')
-            .on('click', (event) => {
-                event.preventDefault()
-                const _self = $(event.currentTarget)
+        const $sortButton = $table.closest('.card').find('.btn-save-sort-order')
 
-                let items = []
-                $.each(_self.closest('.card').find('tbody tr'), (index, sort) => {
-                    items.push(parseInt($(sort).find('td:first-child').text()))
-                    $(sort)
-                        .find('.order-column')
-                        .text(index + 1)
-                })
+        $sortButton.off('click').on('click', (event) => {
+            event.preventDefault()
+            const _self = $(event.currentTarget)
 
-                Botble.showButtonLoading(_self)
-
-                $httpClient
-                    .make()
-                    .post(route('simple-slider.sorting'), {
-                        items,
-                    })
-                    .then(({ data }) => {
-                        Botble.showSuccess(data.message)
-                    })
-                    .finally(() => {
-                        Botble.hideButtonLoading(_self)
-                        _self.hide()
-                    })
+            let items = []
+            $.each(_self.closest('.card').find('tbody tr'), (index, sort) => {
+                items.push(parseInt($(sort).find('td:first-child').text()))
+                $(sort)
+                    .find('.order-column')
+                    .text(index + 1)
             })
+
+            Botble.showButtonLoading(_self)
+
+            $httpClient
+                .make()
+                .post($sortButton.data('url'), {
+                    items,
+                })
+                .then(({ data }) => {
+                    Botble.showSuccess(data.message)
+                })
+                .finally(() => {
+                    Botble.hideButtonLoading(_self)
+                    _self.hide()
+                })
+        })
     }
 }
 

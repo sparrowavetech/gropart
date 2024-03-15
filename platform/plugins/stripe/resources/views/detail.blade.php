@@ -45,7 +45,7 @@
                     {{ strtoupper($item->currency) }}</p>
                 <p>{{ trans('plugins/payment::payment.refunds.status') }}: {{ strtoupper($item->status) }}</p>
                 <p>{{ trans('plugins/payment::payment.refunds.create_time') }}:
-                    {{ Carbon\Carbon::now()->parse($item->created) }}</p>
+                    {{ BaseHelper::formatDate($item->created) }}</p>
             </div>
             <br />
         @endforeach

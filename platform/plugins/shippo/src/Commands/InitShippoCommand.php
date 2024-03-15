@@ -77,14 +77,16 @@ class InitShippoCommand extends Command implements PromptsForMissingInput
             if (is_plugin_active('marketplace')) {
                 $store = DB::table('mp_stores')->first();
                 if ($store) {
-                    $store->update([
-                        'country' => $countryId,
-                        'state' => $stateId,
-                        'city' => $cityId,
-                        'zip_code' => $zipCode,
-                        'address' => $address,
-                        'phone' => $phone,
-                    ]);
+                    DB::table('mp_stores')
+                        ->where('id', $store->id)
+                        ->update([
+                            'country' => $countryId,
+                            'state' => $stateId,
+                            'city' => $cityId,
+                            'zip_code' => $zipCode,
+                            'address' => $address,
+                            'phone' => $phone,
+                        ]);
 
                     $this->info('Updated store id: ' . $store->id);
                 }

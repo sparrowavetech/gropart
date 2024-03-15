@@ -10,47 +10,47 @@ return new class () extends Migration {
     {
         if (! Schema::hasColumn('categories', 'author_type')) {
             Schema::table('categories', function (Blueprint $table) {
-                $table->string('author_type', 255);
+                $table->string('author_type');
             });
         }
 
         Schema::table('categories', function (Blueprint $table) {
-            $table->string('author_type', 255)->change();
+            $table->string('author_type')->change();
         });
 
         if (! Schema::hasColumn('tags', 'author_type')) {
             Schema::table('tags', function (Blueprint $table) {
-                $table->string('author_type', 255);
+                $table->string('author_type');
             });
         }
 
         Schema::table('tags', function (Blueprint $table) {
-            $table->string('author_type', 255)->change();
+            $table->string('author_type')->change();
         });
 
         if (! Schema::hasColumn('posts', 'author_type')) {
             Schema::table('posts', function (Blueprint $table) {
-                $table->string('author_type', 255);
+                $table->string('author_type');
             });
         }
 
         Schema::table('posts', function (Blueprint $table) {
-            $table->string('author_type', 255)->change();
+            $table->string('author_type')->change();
         });
     }
 
     public function down(): void
     {
         Schema::table('categories', function (Blueprint $table) {
-            $table->string('author_type', 255)->default(addslashes(User::class))->change();
+            $table->string('author_type')->default(addslashes(User::class))->change();
         });
 
         Schema::table('tags', function (Blueprint $table) {
-            $table->string('author_type', 255)->default(addslashes(User::class))->change();
+            $table->string('author_type')->default(addslashes(User::class))->change();
         });
 
         Schema::table('posts', function (Blueprint $table) {
-            $table->string('author_type', 255)->default(addslashes(User::class))->change();
+            $table->string('author_type')->default(addslashes(User::class))->change();
         });
     }
 };

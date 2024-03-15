@@ -38,8 +38,8 @@ class ContactTable extends TableAbstract
             ->addColumns([
                 IdColumn::make(),
                 NameColumn::make()->route('contacts.edit'),
-                EmailColumn::make()->linkable(),
-                PhoneColumn::make()->linkable(),
+                EmailColumn::make()->linkable()->withEmptyState(),
+                PhoneColumn::make()->linkable()->withEmptyState(),
                 CreatedAtColumn::make(),
                 StatusColumn::make(),
             ])

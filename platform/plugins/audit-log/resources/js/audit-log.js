@@ -1,6 +1,6 @@
 $(() => {
     if (typeof BDashboard !== 'undefined') {
-        BDashboard.loadWidget($('#widget_audit_logs').find('.widget-content'), route('audit-log.widget.activities'))
+        BDashboard.loadWidget($('#widget_audit_logs').find('.widget-content'), $('#widget_audit_logs').data('url'))
     }
 
     $(document).on('click', '.empty-activities-logs-button', function (event) {

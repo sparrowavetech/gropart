@@ -91,7 +91,7 @@ class LanguageSettingForm extends FormAbstract
                 ->content(
                     trans_choice(
                         'plugins/language::language.hide_languages_helper_display_hidden',
-                        ! empty(json_decode(setting('language_hide_languages', '[]'), true)),
+                        count(json_decode(setting('language_hide_languages', '[]'), true)),
                         ['language' => Language::getHiddenLanguageText()]
                     )
                 )

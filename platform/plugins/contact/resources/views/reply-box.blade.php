@@ -33,6 +33,7 @@
             color="primary"
             icon="ti ti-send"
             class="answer-send-button"
+            data-url="{{ route('contacts.reply', $contact->id) }}"
         >
             {{ trans('plugins/contact::contact.send') }}
         </x-core::button>

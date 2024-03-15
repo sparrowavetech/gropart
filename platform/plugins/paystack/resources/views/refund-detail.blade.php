@@ -24,7 +24,7 @@
         <p>{{ trans('plugins/payment::payment.refunds.status') }}: {{ Arr::get($refundData, 'status') }}</p>
         @if (Arr::has($refundData, 'createdAt'))
             <p>{{ trans('core/base::tables.created_at') }}:
-                {{ Carbon\Carbon::now()->parse(Arr::get($refundData, 'createdAt')) }}</p>
+                {{ BaseHelper::formatDate(Arr::get($refundData, 'createdAt')) }}</p>
         @endif
         @if ($customerNote = Arr::get($refundData, 'customer_note'))
             <p>{{ trans('plugins/payment::payment.refunds.description') }}: {{ $customerNote }}</p>

@@ -40,11 +40,15 @@ class RouteTranslationsListCommand extends RouteListCommand implements PromptsFo
 
         $key = LanguageManager::ENV_ROUTE_KEY;
 
-        putenv("{$key}={$locale}");
+        if (function_exists('putenv')) {
+            putenv("{$key}={$locale}");
+        }
 
         $app->make(Kernel::class)->bootstrap();
 
-        putenv("{$key}=");
+        if (function_exists('putenv')) {
+            putenv("{$key}=");
+        }
 
         $this->router = $app['router'];
     }

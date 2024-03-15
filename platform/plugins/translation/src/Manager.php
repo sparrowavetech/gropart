@@ -35,9 +35,7 @@ class Manager
 
     public function publishLocales(): void
     {
-        if (! $this->files->isDirectory(lang_path('vendor/themes'))) {
-            $this->files->makeDirectory(lang_path('vendor/themes'));
-        }
+        $this->files->ensureDirectoryExists(lang_path('vendor/themes'));
 
         $paths = ServiceProvider::pathsToPublish(null, 'cms-lang');
 
@@ -66,15 +64,6 @@ class Manager
         Arr::set($translations, $key, $value);
 
         $translations = array_merge($englishTranslations, $translations);
-
-        if (
-            $locale != 'en' &&
-            isset($tree['en'][$group]) &&
-            is_array($tree['en'][$group]) &&
-            count($tree['en'][$group]) !== count($translations)
-        ) {
-            $translations = array_merge($tree['en'][$group], $translations);
-        }
 
         $file = $locale . '/' . $group;
 
@@ -112,9 +101,28 @@ class Manager
 
     public function removeUnusedThemeTranslations(): bool
     {
-        $theme = Theme::getThemeName();
+        if (Theme::hasInheritTheme()) {
+            $this->removeUnusedThemeTranslationsFromTheme(
+                Theme::getInheritTheme()
+            );
+        }
 
-        foreach ($this->files->allFiles(lang_path("vendor/themes/$theme")) as $file) {
+        $this->removeUnusedThemeTranslationsFromTheme(
+            Theme::getThemeName()
+        );
+
+        return true;
+    }
+
+    public function removeUnusedThemeTranslationsFromTheme(string $theme): bool
+    {
+        $themePath = lang_path("vendor/themes/$theme");
+
+        if (! $this->files->isDirectory($themePath)) {
+            return true;
+        }
+
+        foreach ($this->files->allFiles($themePath) as $file) {
             if ($this->files->isFile($file) && $file->getExtension() === 'json') {
                 $locale = $file->getFilenameWithoutExtension();
 
@@ -179,33 +187,71 @@ class Manager
         ];
     }
 
-    public function getThemeTranslations(string $locale): array
+    public function getThemeTranslations(string $locale, bool $withInherit = true): array
     {
-        $translations = BaseHelper::getFileData($themeTranslationsFilePath = $this->getThemeTranslationPath($locale));
+        $translations = $withInherit ? $this->getInheritThemeTranslations($locale) : [];
+
+        $translations = [
+            ...$translations,
+            ...BaseHelper::getFileData($this->getThemeTranslationPath($locale)),
+        ];
 
         ksort($translations);
 
-        $defaultEnglishFile = theme_path(Theme::getThemeName() . '/lang/en.json');
-
-        if ($defaultEnglishFile && ($locale !== 'en' || $defaultEnglishFile !== $themeTranslationsFilePath)) {
-            $enTranslations = BaseHelper::getFileData($defaultEnglishFile);
-            $translations = array_merge($enTranslations, $translations);
-
-            $enTranslationKeys = array_keys($enTranslations);
-
-            foreach ($translations as $key => $translation) {
-                if (! in_array($key, $enTranslationKeys)) {
-                    Arr::forget($translations, $key);
-                }
-            }
-        }
+        $translations = $this->getThemeTranslationsFromThemeWithInherit($translations, $locale, $withInherit);
 
         return array_combine(array_map('trim', array_keys($translations)), $translations);
     }
 
-    public function getThemeTranslationPath(string $locale): string
+    public function getInheritThemeTranslations(string $locale): array
     {
-        $theme = Theme::getThemeName();
+        if (! Theme::hasInheritTheme()) {
+            return [];
+        }
+
+        return BaseHelper::getFileData($this->getThemeTranslationPath($locale, Theme::getInheritTheme()));
+    }
+
+    public function getThemeTranslationsFromTheme(string $theme, string $locale): array
+    {
+        $themeTranslationsFilePath = $this->getThemeTranslationPath($locale);
+        $defaultEnglishFile = theme_path(BaseHelper::joinPaths([$theme, 'lang', 'en.json']));
+
+        if (File::exists($defaultEnglishFile)
+            && ($locale !== 'en' || $defaultEnglishFile !== $themeTranslationsFilePath)) {
+            return BaseHelper::getFileData($defaultEnglishFile);
+        }
+
+        return [];
+    }
+
+    public function getThemeTranslationsFromThemeWithInherit(array $translations, string $locale, bool $withInherit = true): array
+    {
+        $enTranslations = [];
+
+        if ($withInherit && Theme::hasInheritTheme()) {
+            $enTranslations = $this->getThemeTranslationsFromTheme(Theme::getInheritTheme(), $locale);
+        }
+
+        $enTranslations = [
+            ...$enTranslations,
+            ...$this->getThemeTranslationsFromTheme(Theme::getThemeName(), $locale),
+        ];
+        $translations = [...$enTranslations, ...$translations];
+        $enTranslationKeys = array_keys($enTranslations);
+
+        foreach ($translations as $key => $translation) {
+            if (! in_array($key, $enTranslationKeys)) {
+                Arr::forget($translations, $key);
+            }
+        }
+
+        return $translations;
+    }
+
+    public function getThemeTranslationPath(string $locale, string|null $theme = ''): string
+    {
+        $theme = $theme ?: Theme::getThemeName();
 
         $localeFilePath = $defaultLocaleFilePath = lang_path("vendor/themes/$theme/$locale.json");
 
@@ -224,17 +270,28 @@ class Manager
                 $themeLangPath = theme_path("$theme/lang/en.json");
             }
 
-            File::copy($themeLangPath, $localeFilePath);
+            if (File::exists($themeLangPath)) {
+                File::copy($themeLangPath, $localeFilePath);
+            } else {
+                File::put($localeFilePath, '{}');
+            }
         }
 
         return $localeFilePath;
     }
 
-    public function saveThemeTranslations(string $locale, array $translations): bool
+    public function saveThemeTranslations(string $locale, array $translations, string|null $theme = null): bool
     {
+        $theme = $theme ?: Theme::getThemeName();
+
         ksort($translations);
 
-        return BaseHelper::saveFileData($this->getThemeTranslationPath($locale), $translations);
+        return BaseHelper::saveFileData($this->getThemeTranslationPath($locale, $theme), $translations);
+    }
+
+    public function saveInheritThemeTranslation(string $locale, array $translations): bool
+    {
+        return $this->saveThemeTranslations($locale, $translations, Theme::getInheritTheme());
     }
 
     public function ensureAllDirectoriesAreCreated(): void

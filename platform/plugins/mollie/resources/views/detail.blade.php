@@ -6,8 +6,8 @@
         {{ $payment->amountRemaining->currency }}</p>
     <p>{{ trans('plugins/payment::payment.method_name') }}: {{ $payment->method }}</p>
     <p>{{ trans('plugins/payment::payment.status') }}: {{ $payment->status }}</p>
-    <p>{{ trans('core/base::tables.created_at') }}: {{ Carbon\Carbon::now()->parse($payment->createdAt) }}</p>
-    <p>{{ trans('plugins/payment::payment.paid_at') }}: {{ Carbon\Carbon::now()->parse($payment->paidAt) }}</p>
+    <p>{{ trans('core/base::tables.created_at') }}: {{ BaseHelper::formatDate($payment->createdAt) }}</p>
+    <p>{{ trans('plugins/payment::payment.paid_at') }}: {{ BaseHelper::formatDate($payment->paidAt) }}</p>
 
     @if ($payment->amount->value - $payment->amountRemaining->value)
         @php
@@ -31,7 +31,7 @@
                 <p>{{ trans('plugins/payment::payment.refunds.description') }}: {{ $refund->description }}</p>
                 <p>{{ trans('plugins/payment::payment.refunds.status') }}: {{ $refund->status }}</p>
                 <p>{{ trans('plugins/payment::payment.refunds.create_time') }}:
-                    {{ Carbon\Carbon::now()->parse($refund->createdAt) }}</p>
+                    {{ BaseHelper::formatDate($refund->createdAt) }}</p>
             </div>
             <br />
         @endforeach

@@ -9,6 +9,7 @@ use Botble\Base\Forms\FieldOptions\TextFieldOption;
 use Botble\Base\Forms\Fields\AlertField;
 use Botble\Base\Forms\Fields\OnOffCheckboxField;
 use Botble\Base\Forms\Fields\TextField;
+use Botble\Base\Forms\FormAbstract;
 use Botble\Base\Forms\FormCollapse;
 use Botble\Setting\Forms\SettingForm;
 use Botble\SocialLogin\Facades\SocialService;
@@ -64,15 +65,28 @@ class SocialLoginSettingForm extends SettingForm
                                     );
                             }
 
-                            $form->add(
-                                'social_login_' . $provider . '_helper',
-                                AlertField::class,
-                                AlertFieldOption::make()
-                                    ->content(BaseHelper::clean($item['label']['helper'] ?? trans('plugins/social-login::social-login.settings.' . $provider . '.helper', [
-                                        'callback' => '<code class=\'text-danger\'>' . route('auth.social.callback', $provider) . '</code>',
-                                    ])))
-                                    ->toArray()
-                            );
+                            $form
+                                ->add(
+                                    'social_login_' . $provider . '_helper',
+                                    AlertField::class,
+                                    AlertFieldOption::make()
+                                        ->content(BaseHelper::clean($item['label']['helper'] ?? trans('plugins/social-login::social-login.settings.' . $provider . '.helper', [
+                                            'callback' => '<code class=\'text-danger\'>' . route('auth.social.callback', $provider) . '</code>',
+                                        ])))
+                                        ->toArray()
+                                )
+                                ->when($provider === 'facebook', function (FormAbstract $form) {
+                                    $form
+                                        ->add(
+                                            'social_login_facebook_data_deletion_request_callback_url',
+                                            AlertField::class,
+                                            AlertFieldOption::make()
+                                                ->content(trans('plugins/social-login::social-login.settings.facebook.data_deletion_request_callback_url', [
+                                                    'url' => sprintf('<code class="text-danger">%s</code>', route('facebook-data-deletion-request-callback')),
+                                                ]))
+                                                ->toArray()
+                                        );
+                                });
                         })
                         ->isOpened((bool) old($enabledKey, setting($enabledKey)))
                     );

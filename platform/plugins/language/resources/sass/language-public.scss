@@ -146,5 +146,13 @@ body[dir='rtl'] {
                 }
             }
         }
+
+        .language_bar_chooser.dropdown-menu {
+            li {
+                a {
+                    text-align: right;
+                }
+            }
+        }
     }
 }

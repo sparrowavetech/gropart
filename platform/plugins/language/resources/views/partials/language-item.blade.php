@@ -4,6 +4,7 @@
             href="javascript:void(0);"
             class="gap-2 edit-language-button d-flex align-items-center text-decoration-none"
             data-id="{{ $item->lang_id }}"
+            data-url="{{ route('languages.get', ['lang_id' => $item->lang_id]) }}"
             data-bs-original-title="{{ trans('plugins/language::language.edit_tooltip') }}"
             data-bs-toggle="tooltip"
         >
@@ -44,6 +45,7 @@
             icon="ti ti-edit"
             :icon-only="true"
             :data-id="$item->lang_id"
+            :data-url="route('languages.get', ['lang_id' => $item->lang_id])"
             :tooltip="trans('plugins/language::language.edit_tooltip')"
             size="sm"
             class="edit-language-button"

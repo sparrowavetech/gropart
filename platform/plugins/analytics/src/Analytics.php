@@ -4,6 +4,7 @@ namespace Botble\Analytics;
 
 use Botble\Analytics\Abstracts\AnalyticsAbstract;
 use Botble\Analytics\Abstracts\AnalyticsContract;
+use Botble\Analytics\Exceptions\InvalidConfiguration;
 use Botble\Analytics\Traits\DateRangeTrait;
 use Botble\Analytics\Traits\DimensionTrait;
 use Botble\Analytics\Traits\FilterByDimensionTrait;
@@ -48,14 +49,18 @@ class Analytics extends AnalyticsAbstract implements AnalyticsContract
     {
         $storage = Storage::disk('local');
 
-        $filePath = $storage->path('analytics-credentials.json');
+        $fileName = 'analytics-credentials.json';
 
-        if (! $storage->exists($filePath) || md5_file($filePath) !== md5($this->getCredentials())) {
+        if (! $storage->exists($fileName) || md5_file($storage->path($fileName)) !== md5($this->getCredentials())) {
             $storage->put('analytics-credentials.json', $this->getCredentials());
         }
 
+        if (! $storage->exists($fileName)) {
+            throw new InvalidConfiguration('The credentials file does not exist.');
+        }
+
         return new BetaAnalyticsDataClient([
-            'credentials' => $filePath,
+            'credentials' => $storage->path($fileName),
         ]);
     }
 

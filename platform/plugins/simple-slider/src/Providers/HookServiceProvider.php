@@ -54,7 +54,7 @@ class HookServiceProvider extends ServiceProvider
             ->where('key', $shortcode->key)
             ->first();
 
-        if (empty($slider)) {
+        if (empty($slider) || $slider->sliderItems->isEmpty()) {
             return null;
         }
 

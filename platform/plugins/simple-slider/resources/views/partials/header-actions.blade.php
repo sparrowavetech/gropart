@@ -12,6 +12,7 @@
     type="button"
     icon="ti ti-device-floppy"
     class="btn-save-sort-order"
+    data-url="{{ route('simple-slider.sorting') }}"
     style="display: none;"
 >
     {{ trans('plugins/simple-slider::simple-slider.save_sorting') }}

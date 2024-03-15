@@ -1,6 +1,7 @@
 <?php
 
 use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Models\BaseModel;
 use Botble\Base\Supports\SortItemsWithChildrenHelper;
 use Botble\Blog\Repositories\Interfaces\CategoryInterface;
@@ -191,13 +192,13 @@ if (! function_exists('get_blog_page_url')) {
         $blogPageId = (int)theme_option('blog_page_id', setting('blog_page_id'));
 
         if (! $blogPageId) {
-            return route('public.index');
+            return BaseHelper::getHomepageUrl();
         }
 
         $blogPage = Page::query()->find($blogPageId);
 
         if (! $blogPage) {
-            return route('public.index');
+            return BaseHelper::getHomepageUrl();
         }
 
         return $blogPage->url;

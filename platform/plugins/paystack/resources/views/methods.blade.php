@@ -9,14 +9,14 @@
             @if ($selecting == PAYSTACK_PAYMENT_METHOD_NAME) checked @endif
         >
         <label
-            for="payment_{{ PAYSTACK_PAYMENT_METHOD_NAME }}">{{ get_payment_setting('name', PAYSTACK_PAYMENT_METHOD_NAME) }}</label>
+            class="form-label"
+            for="payment_{{ PAYSTACK_PAYMENT_METHOD_NAME }}">{{ get_payment_setting('name', PAYSTACK_PAYMENT_METHOD_NAME, __('Payment with :paymentType', ['paymentType' => 'Paystack'])) }}</label>
         <div
             class="payment_{{ PAYSTACK_PAYMENT_METHOD_NAME }}_wrap payment_collapse_wrap collapse @if ($selecting == PAYSTACK_PAYMENT_METHOD_NAME) show @endif">
             <p>{!! BaseHelper::clean(
                 get_payment_setting(
                     'description',
                     PAYSTACK_PAYMENT_METHOD_NAME,
-                    __('Payment with :paymentType', ['paymentType' => 'Paystack']),
                 ),
             ) !!}</p>
 

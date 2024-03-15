@@ -10,10 +10,15 @@ class CreateSelectedLanguageWhenInstallationFinished
     public function handle(): void
     {
         $siteLocale = app()->getLocale();
+
+        if ($siteLocale === 'en') {
+            return;
+        }
+
         $language = collect(LanguageSupport::getListLanguages())
             ->firstWhere('0', $siteLocale);
 
-        if (! $language) {
+        if (! $language || Language::query()->where('lang_locale', $language[0])->exists()) {
             return;
         }
 

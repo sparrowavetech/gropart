@@ -11,6 +11,12 @@ Route::group(['namespace' => 'Botble\Language\Http\Controllers'], function () {
                 'uses' => 'LanguageController@index',
             ]);
 
+            Route::get('options', [
+                'as' => 'settings.language',
+                'uses' => 'LanguageController@index',
+                'permission' => 'languages.index',
+            ]);
+
             Route::post('store', [
                 'as' => 'languages.store',
                 'uses' => 'LanguageController@store',

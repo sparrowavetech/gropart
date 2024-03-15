@@ -42,42 +42,43 @@ $(() => {
         showError(message)
     }
 
-    $(document).on('click', '.contact-form button[type=submit]', function (event) {
+    $(document).on('submit', '.contact-form', function (event) {
         event.preventDefault()
         event.stopPropagation()
 
-        $(this).addClass('button-loading')
+        const $form = $(this)
+        const $button = $form.find('button[type=submit]')
+
         $('.contact-success-message').html('').hide()
         $('.contact-error-message').html('').hide()
 
         $.ajax({
             type: 'POST',
             cache: false,
-            url: $(this).closest('form').prop('action'),
-            data: new FormData($(this).closest('form')[0]),
+            url: $form.prop('action'),
+            data: new FormData($form[0]),
             contentType: false,
             processData: false,
-            success: (res) => {
-                if (!res.error) {
-                    $(this).closest('form').find('input[type=text]').val('')
-                    $(this).closest('form').find('input[type=email]').val('')
-                    $(this).closest('form').find('textarea').val('')
-                    showSuccess(res.message)
+            beforeSend: () => $button.addClass('button-loading'),
+            success: ({ error, message }) => {
+                if (!error) {
+                    $form[0].reset()
+                    showSuccess(message)
                 } else {
-                    showError(res.message)
+                    showError(message)
                 }
 
                 if (typeof refreshRecaptcha !== 'undefined') {
                     refreshRecaptcha()
                 }
             },
-            error: (res) => {
+            error: (error) => {
                 if (typeof refreshRecaptcha !== 'undefined') {
                     refreshRecaptcha()
                 }
-                handleError(res)
+                handleError(error)
             },
-            complete: () => $(this).removeClass('button-loading'),
+            complete: () => $button.removeClass('button-loading'),
         })
     })
 })

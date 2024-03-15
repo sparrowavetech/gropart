@@ -31,7 +31,7 @@ class Categories extends AbstractWidget
         $categories = Category::query()
             ->wherePublished()
             ->with('slugable')
-            ->take((int)$this->getConfig('number_display') ?? 10)
+            ->take((int)$this->getConfig('number_display') ?: 10)
             ->get();
 
         return [

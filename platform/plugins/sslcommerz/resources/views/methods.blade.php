@@ -9,7 +9,7 @@
             @if ($selecting == SSLCOMMERZ_PAYMENT_METHOD_NAME) checked @endif
         >
         <label
-            for="payment_{{ SSLCOMMERZ_PAYMENT_METHOD_NAME }}">{{ get_payment_setting('name', SSLCOMMERZ_PAYMENT_METHOD_NAME) }}</label>
+            for="payment_{{ SSLCOMMERZ_PAYMENT_METHOD_NAME }}">{{ get_payment_setting('name', SSLCOMMERZ_PAYMENT_METHOD_NAME, __('Payment with :paymentType', ['paymentType' => 'SslCommerz'])) }}</label>
         <div
             class="payment_{{ SSLCOMMERZ_PAYMENT_METHOD_NAME }}_wrap payment_collapse_wrap collapse @if ($selecting == SSLCOMMERZ_PAYMENT_METHOD_NAME) show @endif">
             <p>{!! get_payment_setting(

@@ -68,6 +68,18 @@ class HookServiceProvider extends ServiceProvider
                 ->remove('locale_direction')
                 ->modify('locale', HtmlField::class, HtmlFieldOption::make()->view('plugins/language::forms.general-setting-form-label')->toArray());
         });
+
+        add_filter('cms_language_flag', function (string|null $flag, string|null $name = null) {
+            if (! $name) {
+                return $flag;
+            }
+
+            if ($languageFlag = LanguageModel::query()->where('lang_name', $name)->value('lang_flag')) {
+                return $languageFlag;
+            }
+
+            return $flag;
+        }, 50, 2);
     }
 
     public function settingEmailTemplateMetaBoxes(string|null $data, array $params = []): string

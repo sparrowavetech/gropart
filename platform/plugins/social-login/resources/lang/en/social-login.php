@@ -9,6 +9,7 @@ return [
             'app_id' => 'App ID',
             'app_secret' => 'App Secret',
             'helper' => 'Please go to https://developers.facebook.com to create new app update App ID, App Secret. Callback URL is :callback',
+            'data_deletion_request_callback_url' => 'Set this URL :url as the Data Deletion Request URL in your Facebook app settings to allow users to request deletion of their data.',
         ],
         'google' => [
             'enable' => 'Enable Google login',

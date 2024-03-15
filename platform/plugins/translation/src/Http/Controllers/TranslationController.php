@@ -4,17 +4,18 @@ namespace Botble\Translation\Http\Controllers;
 
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
-use Botble\Base\Supports\Language;
 use Botble\Setting\Http\Controllers\SettingController;
+use Botble\Translation\Http\Controllers\Concerns\HasMapTranslationsTable;
 use Botble\Translation\Http\Requests\TranslationRequest;
 use Botble\Translation\Manager;
 use Botble\Translation\Tables\TranslationTable;
 use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
 
 class TranslationController extends SettingController
 {
+    use HasMapTranslationsTable;
+
     public function __construct(protected Manager $manager)
     {
     }
@@ -26,24 +27,8 @@ class TranslationController extends SettingController
         Assets::addScriptsDirectly('vendor/core/plugins/translation/js/translation.js')
             ->addStylesDirectly('vendor/core/plugins/translation/css/translation.css');
 
-        $locales = Language::getAvailableLocales();
-        $defaultLanguage = Language::getDefaultLanguage();
-
-        if (! count($locales)) {
-            $locales = [
-                'en' => $defaultLanguage,
-            ];
-        }
-
-        $currentLocale = $request->has('ref_lang') ? $request->input('ref_lang') : app()->getLocale();
-
-        $locale = Arr::first($locales, fn ($item) => $item['locale'] == $currentLocale);
-
-        if (! $locale) {
-            $locale = $defaultLanguage;
-        }
-
-        $translationTable->setLocale($locale['locale']);
+        [$locales, $locale, $defaultLanguage, $translationTable]
+            = $this->mapTranslationsTable($translationTable, $request);
 
         if ($request->expectsJson()) {
             return $translationTable->renderTable();

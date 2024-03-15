@@ -102,11 +102,15 @@ class RouteCacheCommand extends BaseRouteCacheCommand
 
         $key = LanguageManager::ENV_ROUTE_KEY;
 
-        putenv("{$key}={$locale}");
+        if (function_exists('putenv')) {
+            putenv("{$key}={$locale}");
+        }
 
         $routes = $this->getFreshApplicationRoutes();
 
-        putenv("{$key}=");
+        if (function_exists('putenv')) {
+            putenv("{$key}=");
+        }
 
         return $routes;
     }

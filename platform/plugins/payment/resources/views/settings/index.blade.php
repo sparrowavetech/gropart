@@ -6,7 +6,7 @@
 @extends(BaseHelper::getAdminMasterLayoutTemplate())
 
 @section('content')
-    {!! $form !!}
+    {!! $form->renderForm() !!}
 
     @php
         do_action(BASE_ACTION_META_BOXES, 'top', new Payment);
@@ -58,7 +58,7 @@
                         <x-core::table.body.row class="payment-content-item hidden">
                             <x-core::table.body.cell colspan="3">
                                 <x-core::form>
-                                    {!! $codForm !!}
+                                    {!! $codForm->renderForm() !!}
 
                                     <div class="btn-list justify-content-end">
                                         <x-core::button
@@ -116,7 +116,7 @@
                         <x-core::table.body.row class="payment-content-item hidden">
                             <x-core::table.body.cell colspan="3">
                                 <x-core::form>
-                                    {!! $bankTransferForm !!}
+                                    {!! $bankTransferForm->renderForm() !!}
 
                                     <div class="btn-list justify-content-end">
                                         <x-core::button

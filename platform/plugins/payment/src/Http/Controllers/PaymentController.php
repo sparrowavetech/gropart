@@ -61,11 +61,14 @@ class PaymentController extends SettingController
 
         Assets::addScriptsDirectly('vendor/core/plugins/payment/js/payment-methods.js');
 
-        $form = PaymentMethodSettingForm::create()->renderForm();
-        $codForm = CODPaymentMethodForm::create()->renderForm();
-        $bankTransferForm = BankTransferPaymentMethodForm::create()->renderForm();
+        $form = PaymentMethodSettingForm::create();
+        $codForm = CODPaymentMethodForm::create();
+        $bankTransferForm = BankTransferPaymentMethodForm::create();
 
-        return view('plugins/payment::settings.index', compact('form', 'codForm', 'bankTransferForm'));
+        return view(
+            'plugins/payment::settings.index',
+            compact('form', 'codForm', 'bankTransferForm')
+        );
     }
 
     public function updateSettings(PaymentMethodSettingRequest $request)
@@ -73,23 +76,13 @@ class PaymentController extends SettingController
         return $this->performUpdate($request->validated());
     }
 
-    public function updateMethods(PaymentMethodRequest $request, SettingStore $settingStore)
+    public function updateMethods(PaymentMethodRequest $request)
     {
-        $type = $request->input('type');
-        $data = $request->except(['_token', 'type']);
+        $data = Arr::except($request->input(), ['_token', 'type']);
 
-        foreach ($data as $settingKey => $settingValue) {
-            $key = apply_filters('payment_setting_key', $settingKey);
-            $settingStore->set($key, $settingValue);
-        }
+        $data[get_payment_setting_key('status', $request->input('type'))] = 1;
 
-        $settingStore
-            ->set('payment_' . $type . '_status', 1)
-            ->save();
-
-        return $this
-            ->httpResponse()
-            ->setMessage(trans('plugins/payment::payment.saved_payment_method_success'));
+        return $this->performUpdate($data);
     }
 
     public function updateMethodStatus(Request $request, SettingStore $settingStore)

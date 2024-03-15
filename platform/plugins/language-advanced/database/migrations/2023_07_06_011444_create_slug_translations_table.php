@@ -14,7 +14,7 @@ return new class () extends Migration {
         Schema::create('slugs_translations', function (Blueprint $table) {
             $table->string('lang_code', 20);
             $table->foreignId('slugs_id');
-            $table->string('key', 255)->nullable();
+            $table->string('key')->nullable();
             $table->string('prefix', 120)->nullable()->default('');
 
             $table->primary(['lang_code', 'slugs_id'], 'slugs_translations_primary');
