@@ -18,7 +18,6 @@ use Botble\Table\Columns\IdColumn;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Route;
 
@@ -48,17 +47,6 @@ class TaxRuleTable extends TableAbstract
             ]);
     }
 
-    public function ajax(): JsonResponse
-    {
-        $data = $this->table
-            ->eloquent($this->query())
-            ->editColumn('country', fn (TaxRule $item) => $item->country_name)
-            ->editColumn('state', fn (TaxRule $item) => $item->state_name)
-            ->editColumn('city', fn (TaxRule $item) => $item->city_name);
-
-        return $this->toJson($data);
-    }
-
     public function query(): Relation|Builder|QueryBuilder
     {
         $with = [];
@@ -69,7 +57,7 @@ class TaxRuleTable extends TableAbstract
         $query = $this
             ->getModel()
             ->query()
-            ->where('tax_id', $this->tax->id)
+            ->where('tax_id', $this->tax->getKey())
             ->with($with);
 
         return $this->applyScopes($query);
@@ -81,13 +69,16 @@ class TaxRuleTable extends TableAbstract
             IdColumn::make(),
             FormattedColumn::make('country')
                 ->title(trans('plugins/ecommerce::tax.country'))
-                ->withEmptyState(),
+                ->withEmptyState()
+                ->getValueUsing(fn (FormattedColumn $column) => $column->getItem()->country_name),
             FormattedColumn::make('state')
                 ->title(trans('plugins/ecommerce::tax.state'))
-                ->withEmptyState(),
+                ->withEmptyState()
+                ->getValueUsing(fn (FormattedColumn $column) => $column->getItem()->state_name),
             FormattedColumn::make('city')
                 ->title(trans('plugins/ecommerce::tax.city'))
-                ->withEmptyState(),
+                ->withEmptyState()
+                ->getValueUsing(fn (FormattedColumn $column) => $column->getItem()->city_name),
             FormattedColumn::make('zip_code')
                 ->title(trans('plugins/ecommerce::tax.zip_code'))
                 ->withEmptyState(),

@@ -2,6 +2,7 @@
 
 namespace Botble\Ecommerce\Http\Controllers\Fronts;
 
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Ecommerce\Models\Currency;
 use Illuminate\Http\Request;
@@ -31,7 +32,7 @@ class PublicEcommerceController extends BaseController
         if (! $url || $url === URL::current()) {
             return $this
                 ->httpResponse()
-                ->setNextUrl(route('public.index'));
+                ->setNextUrl(BaseHelper::getHomepageUrl());
         }
 
         if (Str::contains($url, ['min_price', 'max_price'])) {

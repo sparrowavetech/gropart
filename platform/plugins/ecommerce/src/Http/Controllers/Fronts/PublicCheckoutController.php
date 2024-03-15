@@ -30,6 +30,7 @@ use Botble\Ecommerce\Services\HandleApplyPromotionsService;
 use Botble\Ecommerce\Services\HandleRemoveCouponService;
 use Botble\Ecommerce\Services\HandleShippingFeeService;
 use Botble\Ecommerce\Services\HandleTaxService;
+use Botble\Location\Models\Country;
 use Botble\Optimize\Facades\OptimizerHelper;
 use Botble\Payment\Enums\PaymentStatusEnum;
 use Botble\Payment\Supports\PaymentHelper;
@@ -73,7 +74,7 @@ class PublicCheckoutController extends BaseController
             if (! $order) {
                 return $this
                     ->httpResponse()
-                    ->setNextUrl(route('public.index'));
+                    ->setNextUrl(BaseHelper::getHomepageUrl());
             }
         }
 
@@ -132,6 +133,20 @@ class PublicCheckoutController extends BaseController
         if ($paymentMethod) {
             session()->put('selected_payment_method', $paymentMethod);
         }
+
+        add_filter('payment_checkout_country', function ($default) use ($sessionCheckoutData) {
+            if ($country = Arr::get($sessionCheckoutData, 'country')) {
+                if (EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation()) {
+                    $country = Country::query()
+                        ->where('id', $country)
+                        ->value('code');
+                }
+
+                return $country;
+            }
+
+            return $default;
+        }, 999);
 
         if (is_plugin_active('marketplace')) {
             [
@@ -538,7 +553,7 @@ class PublicCheckoutController extends BaseController
             if (! $order) {
                 return $this
                     ->httpResponse()
-                    ->setNextUrl(route('public.index'));
+                    ->setNextUrl(BaseHelper::getHomepageUrl());
             }
         }
 
@@ -642,6 +657,7 @@ class PublicCheckoutController extends BaseController
         }
 
         $paymentMethod = $request->input('payment_method', session('selected_payment_method'));
+
         if ($paymentMethod) {
             session()->put('selected_payment_method', $paymentMethod);
         }

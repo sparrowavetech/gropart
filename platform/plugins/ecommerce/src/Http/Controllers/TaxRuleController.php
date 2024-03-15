@@ -54,7 +54,7 @@ class TaxRuleController extends BaseController
 
     public function edit(TaxRule $rule, TaxRuleRequest $request)
     {
-        $this->pageTitle(trans('plugins/ecommerce::tax.rule.edit', ['title' => '#' . $rule->id]));
+        $this->pageTitle(trans('plugins/ecommerce::tax.rule.edit', ['title' => '#' . $rule->getKey()]));
 
         $form = TaxRuleForm::createFromModel($rule)->renderForm();
 

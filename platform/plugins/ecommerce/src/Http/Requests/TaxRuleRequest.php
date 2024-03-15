@@ -39,7 +39,7 @@ class TaxRuleRequest extends Request
             $rules['zip_code'] = [
                 'nullable',
                 'max:20',
-                Rule::unique(TaxRule::class, 'zip_code')->ignore($this->route('rule')),
+                Rule::unique(TaxRule::class, 'zip_code')->ignore($this->route('rule.id')),
             ];
         }
 
