@@ -26,7 +26,7 @@ return new class () extends Migration {
             });
 
             DB::table('role_users_tmp')->oldest()->chunk(1000, function ($chunked) {
-                DB::table('role_users')->insertOrIgnore(array_map(fn($item) => (array)$item, $chunked->toArray()));
+                DB::table('role_users')->insertOrIgnore(array_map(fn ($item) => (array)$item, $chunked->toArray()));
             });
 
             Schema::dropIfExists('role_users_tmp');

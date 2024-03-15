@@ -29,7 +29,7 @@ class SiteMapManager
         $this->siteMap->setCache('cache_site_map_key' . $prefix . $extension, setting('cache_time_site_map', 60), setting('enable_cache_site_map', true));
 
         if ($prefix == 'pages' && ! BaseHelper::getHomepageId()) {
-            $this->add(route('public.index'), Carbon::now()->toDateTimeString());
+            $this->add(BaseHelper::getHomepageUrl(), Carbon::now()->toDateTimeString());
         }
 
         $this->extension = $extension;

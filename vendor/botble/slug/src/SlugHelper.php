@@ -271,7 +271,6 @@ class SlugHelper
 
         foreach ($this->supportedModels() as $class => $model) {
             $normalizeModel = Str::slug(str_replace('\\', '_', $class));
-            $foundModelPrefix = false;
 
             foreach ($allSettingPrefixes as $key => $value) {
                 if (! Str::startsWith($key, 'permalink-' . $normalizeModel)) {
@@ -279,14 +278,11 @@ class SlugHelper
                 }
 
                 $prefixes[] = $value;
-                $foundModelPrefix = true;
 
                 unset($allSettingPrefixes[$key]);
             }
 
-            if (! $foundModelPrefix) {
-                $prefixes[] =  Arr::get(config('packages.slug.general.prefixes', []), $class);
-            }
+            $prefixes[] =  Arr::get(config('packages.slug.general.prefixes', []), $class);
         }
 
         return array_unique(array_filter($prefixes ?: []));

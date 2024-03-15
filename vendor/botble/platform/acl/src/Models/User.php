@@ -9,6 +9,7 @@ use Botble\ACL\Notifications\ResetPasswordNotification;
 use Botble\ACL\Traits\PermissionTrait;
 use Botble\Base\Casts\SafeContent;
 use Botble\Base\Models\BaseModel;
+use Botble\Base\Supports\Avatar;
 use Botble\Media\Facades\RvMedia;
 use Botble\Media\Models\MediaFile;
 use Illuminate\Auth\Authenticatable;
@@ -24,6 +25,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\Access\Authorizable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Throwable;
 
 class User extends BaseModel implements
     HasPermissionsContract,
@@ -124,7 +126,11 @@ class User extends BaseModel implements
                 return RvMedia::url($this->avatar->url);
             }
 
-            return RvMedia::getDefaultImage();
+            try {
+                return Avatar::createBase64Image($this->name);
+            } catch (Throwable) {
+                return RvMedia::getDefaultImage();
+            }
         });
     }
 

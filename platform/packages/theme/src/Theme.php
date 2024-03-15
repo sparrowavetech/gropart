@@ -3,19 +3,14 @@
 namespace Botble\Theme;
 
 use Botble\Base\Facades\BaseHelper;
-use Botble\Base\Facades\Form;
 use Botble\Base\Facades\Html;
-use Botble\Base\Forms\FormAbstract;
-use Botble\Base\Forms\FormHelper;
 use Botble\Media\Facades\RvMedia;
 use Botble\Setting\Facades\Setting;
 use Botble\Theme\Contracts\Theme as ThemeContract;
-use Botble\Theme\Events\RenderingThemeOptionSettings;
 use Botble\Theme\Exceptions\UnknownPartialFileException;
 use Botble\Theme\Exceptions\UnknownThemeException;
-use Botble\Theme\Facades\ThemeOption;
-use Botble\Theme\Forms\Fields\ThemeIconField;
 use Botble\Theme\Supports\SocialLink;
+use Botble\Theme\Supports\ThemeSupport;
 use Closure;
 use Illuminate\Config\Repository;
 use Illuminate\Events\Dispatcher;
@@ -51,6 +46,8 @@ class Theme implements ThemeContract
     protected ?Cookie $cookie = null;
 
     protected array $widgets = [];
+
+    protected array $bodyAttributes = [];
 
     public function __construct(
         protected Repository $config,
@@ -137,7 +134,7 @@ class Theme implements ThemeContract
 
     protected function getThemeAssetsPath(): string
     {
-        $publicThemeName =  $this->getPublicThemeName();
+        $publicThemeName = $this->getPublicThemeName();
 
         $currentTheme = $this->getThemeName();
 
@@ -346,7 +343,7 @@ class Theme implements ThemeContract
     public function breadcrumb(): Breadcrumb
     {
         if (! $this->breadcrumb->getCrumbs()) {
-            $this->breadcrumb->add(__('Home'), route('public.index'));
+            $this->breadcrumb->add(__('Home'), BaseHelper::getHomepageUrl());
         }
 
         return $this->breadcrumb;
@@ -891,10 +888,6 @@ class Theme implements ThemeContract
             $screenshot = $this->path($theme) . '/screenshot.png';
         }
 
-        if (! File::exists($screenshot) && $this->hasInheritTheme()) {
-            $screenshot = $this->path($this->getInheritTheme()) . '/screenshot.png';
-        }
-
         if (! File::exists($screenshot)) {
             return RvMedia::getDefaultImage();
         }
@@ -904,258 +897,22 @@ class Theme implements ThemeContract
 
     public function registerThemeIconFields(array $icons, array $css = [], array $js = []): void
     {
-        Form::component('themeIcon', 'packages/theme::forms.fields.icons-field', [
-            'name',
-            'value' => null,
-            'attributes' => [],
-        ]);
-
-        add_filter('form_custom_fields', function (FormAbstract $form, FormHelper $formHelper) {
-            if ($formHelper->hasCustomField('themeIcon')) {
-                return $form;
-            }
-
-            return $form->addCustomField('themeIcon', ThemeIconField::class);
-        }, 29, 2);
-
-        add_filter('theme_icon_js_code', function (string|null $html) use ($css, $js) {
-            $cssHtml = '';
-            $jsHtml = '';
-
-            foreach ($css as $cssItem) {
-                $cssHtml .= Html::style($cssItem)->toHtml();
-            }
-
-            foreach ($js as $jsItem) {
-                $jsHtml .= Html::style($jsItem)->toHtml();
-            }
-
-            return $html . $cssHtml . $jsHtml;
-        });
-
-        add_filter('theme_icon_list_icons', function (array $defaultIcons) use ($icons) {
-            return array_merge($defaultIcons, $icons);
-        });
+        ThemeSupport::registerThemeIconFields($icons, $css, $js);
     }
 
     public function registerFacebookIntegration(): void
     {
-        app('events')->listen(RenderingThemeOptionSettings::class, function () {
-            theme_option()
-                ->setSection([
-                    'title' => __('Facebook Integration'),
-                    'id' => 'opt-text-subsection-facebook-integration',
-                    'subsection' => true,
-                    'icon' => 'ti ti-brand-facebook',
-                    'fields' => [
-                        [
-                            'id' => 'facebook_chat_enabled',
-                            'type' => 'customSelect',
-                            'label' => __('Enable Facebook chat?'),
-                            'attributes' => [
-                                'name' => 'facebook_chat_enabled',
-                                'list' => [
-                                    'no' => trans('core/base::base.no'),
-                                    'yes' => trans('core/base::base.yes'),
-                                ],
-                                'value' => 'no',
-                                'options' => [
-                                    'class' => 'form-control',
-                                ],
-                            ],
-                            'helper' => __(
-                                'To show chat box on that website, please go to :link and add :domain to whitelist domains!',
-                                [
-                                    'domain' => Html::link(url('')),
-                                    'link' => Html::link(sprintf(
-                                        'https://www.facebook.com/%s/settings/?tab=messenger_platform',
-                                        theme_option('facebook_page_id', '[PAGE_ID]')
-                                    )),
-                                ]
-                            ),
-                        ],
-                        [
-                            'id' => 'facebook_page_id',
-                            'type' => 'text',
-                            'label' => __('Facebook page ID'),
-                            'helper' => __(
-                                'You can get fan page ID using this site :link',
-                                ['link' => Html::link('https://findidfb.com')]
-                            ),
-                            'attributes' => [
-                                'name' => 'facebook_page_id',
-                                'value' => null,
-                                'options' => [
-                                    'class' => 'form-control',
-                                ],
-                            ],
-                        ],
-                        [
-                            'id' => 'facebook_comment_enabled_in_post',
-                            'type' => 'customSelect',
-                            'label' => __('Enable Facebook comment in post detail page?'),
-                            'attributes' => [
-                                'name' => 'facebook_comment_enabled_in_post',
-                                'list' => [
-                                    'yes' => trans('core/base::base.yes'),
-                                    'no' => trans('core/base::base.no'),
-                                ],
-                                'value' => 'no',
-                                'options' => [
-                                    'class' => 'form-control',
-                                ],
-                            ],
-                        ],
-                        [
-                            'id' => 'facebook_app_id',
-                            'type' => 'text',
-                            'label' => __('Facebook App ID'),
-                            'attributes' => [
-                                'name' => 'facebook_app_id',
-                                'value' => null,
-                                'options' => [
-                                    'class' => 'form-control',
-                                ],
-                                'placeholder' => 'Ex: 2061237023872679',
-                            ],
-                            'helper' => __(
-                                'You can create your app in :link',
-                                ['link' => Html::link('https://developers.facebook.com/apps')]
-                            ),
-                        ],
-                        [
-                            'id' => 'facebook_admins',
-                            'type' => 'repeater',
-                            'label' => __('Facebook Admins'),
-                            'attributes' => [
-                                'name' => 'facebook_admins',
-                                'value' => null,
-                                'fields' => [
-                                    [
-                                        'type' => 'text',
-                                        'label' => __('Facebook Admin ID'),
-                                        'attributes' => [
-                                            'name' => 'text',
-                                            'value' => null,
-                                            'options' => [
-                                                'class' => 'form-control',
-                                                'data-counter' => 40,
-                                            ],
-                                        ],
-                                    ],
-                                ],
-                            ],
-                            'helper' => __(
-                                'Facebook admins to manage comments :link',
-                                ['link' => Html::link('https://developers.facebook.com/docs/plugins/comments')]
-                            ),
-                        ],
-                    ],
-                ]);
-        });
-
-        add_filter(THEME_FRONT_HEADER, function (string|null $html): string|null {
-            if (theme_option('facebook_app_id')) {
-                $html .= Html::meta('', theme_option('facebook_app_id'), ['property' => 'fb:app_id'])->toHtml();
-            }
-
-            if (theme_option('facebook_admins')) {
-                foreach (json_decode(theme_option('facebook_admins'), true) as $facebookAdminId) {
-                    if (Arr::get($facebookAdminId, '0.value')) {
-                        $html .= Html::meta('', Arr::get($facebookAdminId, '0.value'), ['property' => 'fb:admins'])
-                            ->toHtml();
-                    }
-                }
-            }
-
-            if (theme_option('facebook_chat_enabled', 'no') == 'yes' && theme_option('facebook_page_id')) {
-                $html .= '<link href="//connect.facebook.net" rel="dns-prefetch" />';
-            }
-
-            return $html;
-        }, 1180);
-
-        add_filter(THEME_FRONT_FOOTER, function (string|null $html): string {
-            return $html . view('packages/theme::partials.facebook-integration')->render();
-        }, 1180);
-
-        add_filter(BASE_FILTER_PUBLIC_COMMENT_AREA, function ($html) {
-            if (
-                theme_option('facebook_comment_enabled_in_post', 'yes') == 'yes' ||
-                theme_option('facebook_comment_enabled_in_gallery', 'yes') == 'yes' ||
-                theme_option('facebook_comment_enabled_in_product', 'yes') == 'yes'
-            ) {
-                return $html . view('packages/theme::partials.facebook-comments')->render();
-            }
-
-            return $html;
-        }, 1180);
+        ThemeSupport::registerFacebookIntegration();
     }
 
     public function registerSocialLinks(): void
     {
-        app('events')->listen(RenderingThemeOptionSettings::class, function () {
-            ThemeOption::setSection([
-                'title' => __('Social Links'),
-                'id' => 'opt-text-subsection-social-links',
-                'subsection' => true,
-                'icon' => 'ti ti-share',
-                'fields' => [
-                    [
-                        'id' => 'social_links',
-                        'type' => 'repeater',
-                        'label' => __('Social Links'),
-                        'attributes' => [
-                            'name' => 'social_links',
-                            'value' => null,
-                            'fields' => [
-                                [
-                                    'type' => 'text',
-                                    'label' => __('Name'),
-                                    'attributes' => [
-                                        'name' => 'name',
-                                        'value' => null,
-                                        'options' => [
-                                            'class' => 'form-control',
-                                        ],
-                                    ],
-                                ],
-                                [
-                                    'type' => 'coreIcon',
-                                    'label' => __('Icon'),
-                                    'attributes' => [
-                                        'name' => 'icon',
-                                        'value' => null,
-                                        'options' => [
-                                            'class' => 'form-control',
-                                        ],
-                                    ],
-                                ],
-                                [
-                                    'type' => 'text',
-                                    'label' => __('URL'),
-                                    'attributes' => [
-                                        'name' => 'url',
-                                        'value' => null,
-                                        'options' => [
-                                            'class' => 'form-control',
-                                        ],
-                                    ],
-                                ],
-                                [
-                                    'type' => 'mediaImage',
-                                    'label' => __('Icon Image (It will override icon above if set)'),
-                                    'attributes' => [
-                                        'name' => 'image',
-                                        'value' => null,
-                                    ],
-                                ],
-                            ],
-                        ],
-                    ],
-                ],
-            ]);
-        });
+        ThemeSupport::registerSocialLinks();
+    }
+
+    public function getSocialLinksRepeaterFields(): array
+    {
+        return ThemeSupport::getSocialLinksRepeaterFields();
     }
 
     /**
@@ -1163,31 +920,66 @@ class Theme implements ThemeContract
      */
     public function getSocialLinks(): array
     {
-        $data = theme_option('social_links');
+        return ThemeSupport::getSocialLinks();
+    }
 
-        if (empty($data)) {
-            return [];
+    public function convertSocialLinksToArray(array $data): array
+    {
+        return ThemeSupport::convertSocialLinksToArray($data);
+    }
+
+    public function getThemeIcons(): array
+    {
+        return ThemeSupport::getThemeIcons();
+    }
+
+    public function addBodyAttributes(array $bodyAttributes): static
+    {
+        $this->bodyAttributes = [...$this->bodyAttributes, ...$bodyAttributes];
+
+        return $this;
+    }
+
+    public function getBodyAttribute(string $attribute): string|null
+    {
+        return $this->bodyAttributes[$attribute] ?? null;
+    }
+
+    public function getBodyAttributes(): array
+    {
+        return $this->bodyAttributes;
+    }
+
+    public function bodyAttributes(): string
+    {
+        if (BaseHelper::isRtlEnabled()) {
+            $this->bodyAttributes['dir'] = 'rtl';
         }
 
-        $data = json_decode($data, true);
-
-        if (empty($data)) {
-            return [];
+        if ($this->get('bodyClass')) {
+            $this->bodyAttributes['class'] = $this->get('bodyClass');
         }
 
-        $socialLinks = [];
+        return apply_filters('theme_body_attributes', Html::attributes($this->bodyAttributes));
+    }
 
-        foreach ($data as $item) {
-            $item = collect($item)->pluck('value', 'key');
+    public function registerPreloader(): void
+    {
+        ThemeSupport::registerPreloader();
+    }
 
-            $socialLinks[] = new SocialLink(
-                name: $item->get('name'),
-                url: $item->get('url'),
-                icon: $item->get('icon'),
-                image: $item->get('image')
-            );
-        }
+    public function getPreloaderVersions(): array
+    {
+        return ThemeSupport::getPreloaderVersions();
+    }
 
-        return $socialLinks;
+    public function registerToastNotification(): void
+    {
+        ThemeSupport::registerToastNotification();
+    }
+
+    public function getSiteCopyright(): string|null
+    {
+        return ThemeSupport::getSiteCopyright();
     }
 }

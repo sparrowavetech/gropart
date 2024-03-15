@@ -7,11 +7,19 @@
 div[data-bb-toggle="tree-checkboxes"] {
     max-height: 400px;
     overflow-y: auto;
-}
 
-.multi-check-list-wrapper {
-    overflow: auto;
-    max-height: 25rem;
+    > ul {
+        padding-left: 5px;
+        padding-top: 5px;
+
+        > li {
+            &:last-child {
+                > label {
+                    margin-bottom: 0 !important;
+                }
+            }
+        }
+    }
 }
 
 div[data-bb-toggle="tree-checkboxes"] ul li, .multi-check-list-wrapper {
@@ -20,16 +28,9 @@ div[data-bb-toggle="tree-checkboxes"] ul li, .multi-check-list-wrapper {
     }
 }
 
-div[data-bb-toggle="tree-checkboxes"] {
-    > ul {
-       > li {
-            &:last-child {
-                > label {
-                    margin-bottom: 0 !important;
-                }
-            }
-        }
-    }
+.multi-check-list-wrapper {
+    overflow: auto;
+    max-height: 25rem;
 }
 
 .form-fieldset {

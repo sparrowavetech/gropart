@@ -2,6 +2,7 @@
 
 namespace Botble\Base\Providers;
 
+use Botble\ACL\Models\User;
 use Botble\Base\Supports\ServiceProvider;
 use Botble\Media\Facades\RvMedia;
 use Illuminate\Contracts\View\Factory;
@@ -13,8 +14,16 @@ class ComposerServiceProvider extends ServiceProvider
     {
         $view->composer(['core/media::config'], function () {
             $mediaPermissions = RvMedia::getConfig('permissions', []);
-            if (Auth::guard()->check() && ! Auth::guard()->user()->isSuperUser() && Auth::guard()->user()->permissions) {
-                $mediaPermissions = array_intersect(array_keys(Auth::guard()->user()->permissions), $mediaPermissions);
+
+            if (Auth::guard()->check()) {
+                /**
+                 * @var User $user
+                 */
+                $user = Auth::guard()->user();
+
+                if (! $user->isSuperUser() && $user->permissions) {
+                    $mediaPermissions = array_intersect(array_keys($user->permissions), $mediaPermissions);
+                }
             }
 
             RvMedia::setPermissions($mediaPermissions);

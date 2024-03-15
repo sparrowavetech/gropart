@@ -2,9 +2,9 @@
 
 namespace Botble\Base\Forms\Fields;
 
-use Botble\Base\Forms\FormField;
+use Botble\Base\Forms\FieldTypes\SelectType;
 
-class UiSelectorField extends FormField
+class UiSelectorField extends SelectType
 {
     protected function getTemplate(): string
     {

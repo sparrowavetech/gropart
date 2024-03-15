@@ -6,8 +6,8 @@ use Botble\Base\Supports\Breadcrumb as BreadcrumbSupport;
 use Illuminate\Support\Facades\Facade;
 
 /**
- * @method static static for(string $group)
- * @method static static default()
+ * @method static \Botble\Base\Supports\Breadcrumb for(string $group)
+ * @method static \Botble\Base\Supports\Breadcrumb default()
  * @method static static add(string $label, string $url = '')
  * @method static static prepend(string $label, string $url = '')
  * @method static \Illuminate\Support\Collection getItems()

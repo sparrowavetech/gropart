@@ -30,6 +30,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static string|null renderField(array $field)
  * @method static bool hasOption(string $key)
  * @method static string|null getOption(string $key = '', array|string|null $default = '')
+ * @method static array getOptions()
  * @method static bool saveOptions()
  * @method static array getFields()
  * @method static bool hasField(string $id)

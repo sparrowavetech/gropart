@@ -162,6 +162,6 @@ class MediaFile extends BaseModel
             $slug = $slug . '-' . time();
         }
 
-        return Str::limit($slug, end: null) . '.' . $extension;
+        return Str::limit($slug, end: '') . '.' . $extension;
     }
 }

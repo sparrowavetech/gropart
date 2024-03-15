@@ -8,7 +8,7 @@
             ])>
             @include('core/base::layouts.partials.page-header')
 
-            <div class="page-body">
+            <div class="page-body page-content">
                 <div class="{{ AdminAppearance::getContainerWidth() }}">
                     {!! apply_filters('core_layout_before_content', null) !!}
 
@@ -32,7 +32,8 @@
     <x-slot:footer>
         @include('core/base::global-search.form')
         @include('core/media::partials.media')
-        @routes
+
+        {!! rescue(fn () => app(Tighten\Ziggy\BladeRouteGenerator::class)->generate(), report: false) !!}
 
         @if(App::hasDebugModeEnabled())
             <x-core::debug-badge />

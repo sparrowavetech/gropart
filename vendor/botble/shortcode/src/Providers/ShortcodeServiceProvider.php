@@ -9,7 +9,6 @@ use Botble\Shortcode\Compilers\ShortcodeCompiler;
 use Botble\Shortcode\Shortcode;
 use Botble\Shortcode\View\Factory;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Blade;
 
 class ShortcodeServiceProvider extends ServiceProvider
 {
@@ -43,6 +42,11 @@ class ShortcodeServiceProvider extends ServiceProvider
             return do_shortcode($expression);
         });
 
+        $this->app->instance('shortcode.modal.rendered', false);
+    }
+
+    public function boot(): void
+    {
         $this
             ->setNamespace('packages/shortcode')
             ->loadRoutes()
@@ -51,50 +55,47 @@ class ShortcodeServiceProvider extends ServiceProvider
             ->loadAndPublishViews()
             ->publishAssets();
 
-        $this->app->instance('shortcode.modal.rendered', false);
-    }
+        $this->app->booted(function () {
+            add_filter(BASE_FILTER_FORM_EDITOR_BUTTONS, function (string|null $buttons, array $attributes, string $id) {
+                if (! $this->hasWithShortcode($attributes)) {
+                    return $buttons;
+                }
 
-    public function boot(): void
-    {
-        add_filter(BASE_FILTER_FORM_EDITOR_BUTTONS, function (string|null $buttons, array $attributes, string $id) {
-            if (! $this->hasWithShortcode($attributes)) {
+                $buttons = (string) $buttons;
+
+                $buttons .= view('packages/shortcode::partials.shortcode-button', compact('id'))->render();
+
                 return $buttons;
-            }
+            }, 120, 3);
 
-            $buttons = (string) $buttons;
+            add_filter(BASE_FILTER_FORM_EDITOR_BUTTONS_HEADER, function (string|null $header, array $attributes) {
+                if (! $this->hasWithShortcode($attributes)) {
+                    return $header;
+                }
 
-            $buttons .= view('packages/shortcode::partials.shortcode-button', compact('id'))->render();
+                Assets::addStylesDirectly('vendor/core/packages/shortcode/css/shortcode.css');
 
-            return $buttons;
-        }, 120, 3);
-
-        add_filter(BASE_FILTER_FORM_EDITOR_BUTTONS_HEADER, function (string|null $header, array $attributes) {
-            if (! $this->hasWithShortcode($attributes)) {
                 return $header;
-            }
+            }, 120, 2);
 
-            Assets::addStylesDirectly('vendor/core/packages/shortcode/css/shortcode.css');
+            add_filter(BASE_FILTER_FORM_EDITOR_BUTTONS_FOOTER, function (string|null $footer, array $attributes) {
+                if (! $this->hasWithShortcode($attributes)) {
+                    return $footer;
+                }
 
-            return $header;
-        }, 120, 2);
+                Assets::addScriptsDirectly('vendor/core/packages/shortcode/js/shortcode.js');
 
-        add_filter(BASE_FILTER_FORM_EDITOR_BUTTONS_FOOTER, function (string|null $footer, array $attributes) {
-            if (! $this->hasWithShortcode($attributes)) {
+                $footer = (string) $footer;
+
+                if (! $this->isShortcodeModalRendered()) {
+                    $footer .= view('packages/shortcode::partials.shortcode-modal')->render();
+
+                    $this->shortcodeModalRendered();
+                }
+
                 return $footer;
-            }
-
-            Assets::addScriptsDirectly('vendor/core/packages/shortcode/js/shortcode.js');
-
-            $footer = (string) $footer;
-
-            if (! $this->isShortcodeModalRendered()) {
-                $footer .= view('packages/shortcode::partials.shortcode-modal')->render();
-
-                $this->shortcodeModalRendered();
-            }
-
-            return $footer;
-        }, 120, 2);
+            }, 120, 2);
+        });
     }
 
     protected function hasWithShortcode(array $attributes): bool

@@ -23,10 +23,6 @@ class MenuServiceProvider extends ServiceProvider
 
     public function register(): void
     {
-        $this
-            ->setNamespace('packages/menu')
-            ->loadHelpers();
-
         $this->app->bind(MenuInterface::class, function () {
             return new MenuRepository(new MenuModel());
         });
@@ -43,7 +39,9 @@ class MenuServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this
+            ->setNamespace('packages/menu')
             ->loadAndPublishConfigurations(['permissions', 'general'])
+            ->loadHelpers()
             ->loadRoutes()
             ->loadAndPublishViews()
             ->loadAndPublishTranslations()

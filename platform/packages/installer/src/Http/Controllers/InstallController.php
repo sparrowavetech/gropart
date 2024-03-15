@@ -33,6 +33,10 @@ class InstallController extends BaseController
 
         $language = $request->input('language');
 
+        if ($language === 'en') {
+            return $this->redirectToNextStep();
+        }
+
         try {
             $downloadLocaleService->handle($language);
         } catch (Throwable $e) {
@@ -41,11 +45,16 @@ class InstallController extends BaseController
 
         Session::put('site-locale', $language);
 
-        $url = URL::signedRoute(
-            'installers.requirements.index',
-            expiration: Carbon::now()->addMinutes(30)
-        );
+        return $this->redirectToNextStep();
+    }
 
-        return redirect()->to($url);
+    protected function redirectToNextStep()
+    {
+        return redirect()->to(
+            URL::signedRoute(
+                'installers.requirements.index',
+                expiration: Carbon::now()->addMinutes(30)
+            )
+        );
     }
 }

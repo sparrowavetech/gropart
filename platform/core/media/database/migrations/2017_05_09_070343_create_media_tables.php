@@ -10,8 +10,8 @@ return new class () extends Migration {
         Schema::create('media_folders', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->index();
-            $table->string('name', 255)->nullable();
-            $table->string('slug', 255)->nullable();
+            $table->string('name')->nullable();
+            $table->string('slug')->nullable();
             $table->foreignId('parent_id')->default(0);
             $table->timestamps();
             $table->softDeletes();
@@ -20,11 +20,11 @@ return new class () extends Migration {
         Schema::create('media_files', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->index();
-            $table->string('name', 255);
+            $table->string('name');
             $table->foreignId('folder_id')->default(0);
             $table->string('mime_type', 120);
             $table->integer('size');
-            $table->string('url', 255);
+            $table->string('url');
             $table->text('options')->nullable();
             $table->timestamps();
             $table->softDeletes();

@@ -23,7 +23,7 @@ class PluginManifest
 
     public function getManifest(): array
     {
-        if (! config('packages.plugin-management.general.enable_plugin_list_cache', true)) {
+        if (! $this->isPluginManifestCacheEnabled()) {
             return $this->getPluginInfo();
         }
 
@@ -53,7 +53,7 @@ class PluginManifest
             $data = $this->getPluginInfo();
         }
 
-        if (File::isWritable(File::dirname($this->manifestPath))) {
+        if ($this->isPluginManifestCacheEnabled() && File::isWritable(File::dirname($this->manifestPath))) {
             File::replace(
                 $this->manifestPath,
                 '<?php return ' . var_export($data, true) . ';'
@@ -95,5 +95,10 @@ class PluginManifest
         }
 
         return compact('namespaces', 'providers');
+    }
+
+    public function isPluginManifestCacheEnabled(): bool
+    {
+        return config('packages.plugin-management.general.enable_plugin_list_cache', true);
     }
 }

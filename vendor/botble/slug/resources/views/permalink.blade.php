@@ -18,7 +18,7 @@
             :label="trans('core/base::forms.permalink')"
             name="slug"
             :group-flat="true"
-            :value="route('public.index')"
+            :value="BaseHelper::getHomepageUrl()"
             :readonly="true"
         />
     @else
@@ -36,22 +36,20 @@
                 </span>
             </x-slot:prepend>
 
-            @if($id)
-                <x-slot:append>
-                    <span class="input-group-text slug-actions">
-                        <a
-                            href="#"
-                            class="link-secondary"
-                            data-bs-toggle="tooltip"
-                            aria-label="{{ trans('packages/slug::slug.generate_url') }}"
-                            data-bs-original-title="{{ trans('packages/slug::slug.generate_url') }}"
-                            data-bb-toggle="generate-slug"
-                        >
-                            <x-core::icon name="ti ti-wand" />
-                        </a>
-                    </span>
-                </x-slot:append>
-            @endif
+            <x-slot:append>
+                <span class="input-group-text slug-actions">
+                    <a
+                        href="#"
+                        @class(['link-secondary', 'd-none' => ! $value])
+                        data-bs-toggle="tooltip"
+                        aria-label="{{ trans('packages/slug::slug.generate_url') }}"
+                        data-bs-original-title="{{ trans('packages/slug::slug.generate_url') }}"
+                        data-bb-toggle="generate-slug"
+                    >
+                        <x-core::icon name="ti ti-wand" />
+                    </a>
+                </span>
+            </x-slot:append>
         </x-core::form.text-input>
         @if (Auth::user() && $id && is_in_admin(true))
             <x-core::form.helper-text class="mt-n2 text-truncate">

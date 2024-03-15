@@ -18,6 +18,10 @@ abstract class SettingStore
         'theme',
         'licensed_to',
         'media_random_hash',
+        'admin_appearance_custom_css',
+        'admin_appearance_custom_header_js',
+        'admin_appearance_custom_body_js',
+        'admin_appearance_custom_footer_js',
     ];
 
     public function get(string|array $key, mixed $default = null): mixed

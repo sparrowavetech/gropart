@@ -2,6 +2,8 @@
 
 namespace Botble\Base\Commands;
 
+use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Services\ClearCacheService;
 use Botble\Base\Supports\Database;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -14,6 +16,8 @@ class ImportDatabaseCommand extends Command
 {
     public function handle(): int
     {
+        BaseHelper::maximumExecutionTimeAndMemoryLimit();
+
         $fileName = $this->argument('file');
 
         if (str_contains($fileName, DIRECTORY_SEPARATOR)) {
@@ -34,6 +38,11 @@ class ImportDatabaseCommand extends Command
             $this->components->task(
                 'Importing database from SQL file',
                 fn () => Database::restoreFromPath($filePath)
+            );
+
+            $this->components->task(
+                'Clearing cache',
+                fn () => ClearCacheService::make()->purgeAll()
             );
 
             $this->components->info('Imported successfully.');

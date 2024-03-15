@@ -8,6 +8,7 @@ use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Media\Chunks\Storage\ChunkStorage;
 use Botble\Media\Commands\ClearChunksCommand;
+use Botble\Media\Commands\CropImageCommand;
 use Botble\Media\Commands\DeleteThumbnailCommand;
 use Botble\Media\Commands\GenerateThumbnailCommand;
 use Botble\Media\Commands\InsertWatermarkCommand;
@@ -192,6 +193,10 @@ class MediaServiceProvider extends ServiceProvider
                 break;
         }
 
+        if (! $config->get('core.media.media.use_storage_symlink')) {
+            RvMedia::setUploadPathAndURLToPublic();
+        }
+
         DashboardMenu::default()->beforeRetrieving(function () {
             DashboardMenu::make()
                 ->registerItem([
@@ -206,6 +211,7 @@ class MediaServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 GenerateThumbnailCommand::class,
+                CropImageCommand::class,
                 DeleteThumbnailCommand::class,
                 InsertWatermarkCommand::class,
                 ClearChunksCommand::class,

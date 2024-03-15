@@ -22,18 +22,17 @@ class ThemeServiceProvider extends ServiceProvider
 
     public function register(): void
     {
-        $this->setNamespace('packages/theme')
-            ->loadHelpers();
-
         $this->app->singleton(ThemeContract::class, Theme::class);
     }
 
     public function boot(): void
     {
         $this
+            ->setNamespace('packages/theme')
             ->loadAndPublishConfigurations(['general', 'permissions'])
             ->loadAndPublishViews()
             ->loadAndPublishTranslations()
+            ->loadHelpers()
             ->loadRoutes()
             ->publishAssets();
 

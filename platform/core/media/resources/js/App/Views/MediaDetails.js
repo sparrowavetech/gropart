@@ -29,9 +29,10 @@ export class MediaDetails {
         let useClipboard = false
         Helpers.forEach(data, (val, index) => {
             if (Helpers.inArray(_self.onlyFields, index) && val) {
-                if (!Helpers.inArray(['size', 'mime_type'], index)) {
-                    description += _self.descriptionItemTemplate.replace(/__title__/gi, Helpers.trans(index)).replace(
-                        /__url__/gi,
+                if (!Helpers.inArray(['mime_type'], index)) {
+                    description += _self.descriptionItemTemplate
+                        .replace(/__title__/gi, Helpers.trans(index))
+                        .replace(/__url__/gi,
                         val
                             ? index === 'full_url'
                                 ? `<div class="input-group">
@@ -53,6 +54,7 @@ export class MediaDetails {
                 }
             }
         })
+
         _self.$detailsWrapper.find('.rv-media-thumbnail').html(thumb)
         _self.$detailsWrapper.find('.rv-media-thumbnail').css('color', data.color)
         _self.$detailsWrapper.find('.rv-media-description').html(description)
@@ -66,6 +68,25 @@ export class MediaDetails {
                 .on('mouseleave', (event) => {
                     $(event.currentTarget).tooltip('hide')
                 })
+        }
+
+        let dimensions = ''
+
+        if (data.mime_type && data.mime_type.indexOf('image') !== -1) {
+            const image = new Image()
+            image.src = data.full_url
+
+            image.onload = () => {
+                dimensions += this.descriptionItemTemplate
+                    .replace(/__title__/gi, Helpers.trans('width'))
+                    .replace(/__url__/gi, `<span title="${image.width}">${image.width}px</span>`)
+
+                dimensions += this.descriptionItemTemplate
+                    .replace(/__title__/gi, Helpers.trans('height'))
+                    .replace(/__url__/gi, `<span title="${image.height}">${image.height}px</span>`)
+
+                _self.$detailsWrapper.find('.rv-media-description').append(dimensions)
+            }
         }
     }
 }

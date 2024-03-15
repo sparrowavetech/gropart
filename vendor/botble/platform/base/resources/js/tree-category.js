@@ -143,7 +143,7 @@ $(() => {
 
                 reloadTree(activeId, function () {
                     if (activeId) {
-                        const fetchDataButton = $(`.dd-item[data-id="${activeId}"] .fetch-data`)
+                        const fetchDataButton = $(`.dd-item[data-id="${activeId}"] > .dd3-content .fetch-data`)
                         if (fetchDataButton.length) {
                             fetchDataButton.trigger('click')
                         } else {

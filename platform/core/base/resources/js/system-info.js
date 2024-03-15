@@ -14,6 +14,13 @@ class SystemInformationManagement {
             $('#txt-report').trigger('select')
             document.execCommand('copy')
         })
+
+        $httpClient
+            .make()
+            .get($('[data-get-addition-data-url]').data('get-addition-data-url'))
+            .then(({ data }) => {
+                $('#system-app-size').text(data.data.appSize)
+            })
     }
 }
 

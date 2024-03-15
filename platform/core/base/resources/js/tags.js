@@ -1,5 +1,6 @@
 class TagsManager {
     init() {
+
         $(document)
             .find('.tags')
             .each(function (index, element) {
@@ -25,7 +26,7 @@ class TagsManager {
                         $httpClient
                             .make()
                             .get($(element).data('url'))
-                            .then(({ data }) => {
+                            .then(({data}) => {
                                 tagify.settings.whitelist = data
                                 tagify.loading(false).dropdown.show.call(tagify, e.detail.value)
                             })
@@ -34,8 +35,8 @@ class TagsManager {
             })
 
         document.querySelectorAll('.list-tagify').forEach((element) => {
-            if (! element.dataset.list) {
-                return;
+            if (!element.dataset.list) {
+                return
             }
 
             const list = JSON.parse(element.dataset.list)
@@ -43,14 +44,14 @@ class TagsManager {
             let whiteList = []
 
             for (const [key, value] of Object.entries(list)) {
-                whiteList.push({ value: key, name: value })
+                whiteList.push({value: key, name: value})
             }
 
             let listChosen = String(element.value).split(',')
 
             let arrayChosen = whiteList.filter((obj) => {
                 if (listChosen.includes(String(obj.value))) {
-                    return { value: obj.id, name: obj.name }
+                    return {value: obj.id, name: obj.name}
                 }
             })
 

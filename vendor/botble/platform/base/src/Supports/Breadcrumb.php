@@ -20,14 +20,14 @@ class Breadcrumb implements Htmlable
 
     protected string $view = 'core/base::breadcrumb';
 
-    public function for(string $group): static
+    public function for(string $group): Breadcrumb
     {
         $this->currentGroup = $group;
 
         return $this;
     }
 
-    public function default(): static
+    public function default(): Breadcrumb
     {
         return $this->for('admin');
     }

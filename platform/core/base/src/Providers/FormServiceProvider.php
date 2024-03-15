@@ -3,10 +3,53 @@
 namespace Botble\Base\Providers;
 
 use Botble\Base\Facades\Form;
+use Botble\Base\Forms\Form as PlainFormClass;
+use Botble\Base\Forms\FormBuilder;
+use Botble\Base\Forms\FormHelper;
+use Botble\Base\Supports\FormBuilder as FormCollectiveBuilder;
+use Botble\Base\Supports\HtmlBuilder;
 use Botble\Base\Supports\ServiceProvider;
+use Illuminate\Config\Repository;
+use Illuminate\Support\Str;
+use Illuminate\View\Compilers\BladeCompiler;
 
 class FormServiceProvider extends ServiceProvider
 {
+    protected bool $defer = true;
+
+    public function register(): void
+    {
+        /**
+         * @var Repository $config
+         */
+        $config = $this->app['config'];
+
+        $config->set([
+            'laravel-form-builder' => [
+                ...$config->get('laravel-form-builder', []),
+                'defaults.wrapper_class' => 'mb-3 position-relative',
+                'defaults.label_class' => 'form-label',
+                'defaults.field_error_class' => 'is-invalid',
+                'defaults.help_block_class' => 'form-hint',
+                'defaults.error_class' => 'invalid-feedback',
+                'defaults.help_block_tag' => 'small',
+                'defaults.select' => [
+                    'field_class' => 'form-select',
+                ],
+                'plain_form_class' => PlainFormClass::class,
+                'form_builder_class' => FormBuilder::class,
+                'form_helper_class' => FormHelper::class,
+            ],
+        ]);
+
+        $this->app->alias('html', HtmlBuilder::class);
+        $this->app->alias('form', FormCollectiveBuilder::class);
+
+        $this->registerHtmlBuilder();
+        $this->registerFormBuilder();
+        $this->registerBladeDirectives();
+    }
+
     public function boot(): void
     {
         Form::component('mediaImage', 'core/base::forms.partials.image', [
@@ -165,6 +208,12 @@ class FormServiceProvider extends ServiceProvider
             'attributes' => [],
         ]);
 
+        Form::component('timePicker', 'core/base::forms.partials.time-picker', [
+            'name',
+            'value' => null,
+            'attributes' => [],
+        ]);
+
         Form::component('codeEditor', 'core/base::forms.partials.code-editor', [
             'name',
             'value' => null,
@@ -204,5 +253,111 @@ class FormServiceProvider extends ServiceProvider
             'value' => null,
             'attributes' => [],
         ]);
+    }
+
+    public function provides(): array
+    {
+        return ['html', 'form', HtmlBuilder::class, FormBuilder::class];
+    }
+
+    protected function registerHtmlBuilder(): void
+    {
+        $this->app->singleton('html', function ($app) {
+            return new HtmlBuilder($app['url'], $app['view']);
+        });
+    }
+
+    protected function registerFormBuilder(): void
+    {
+        $this->app->singleton('form', function ($app) {
+            $form = new FormCollectiveBuilder(
+                $app['html'],
+                $app['url'],
+                $app['view'],
+                $app['session.store']->token(),
+                $app['request']
+            );
+
+            return $form->setSessionStore($app['session.store']);
+        });
+    }
+
+    protected function registerBladeDirectives(): void
+    {
+        $this->app->afterResolving('blade.compiler', function (BladeCompiler $bladeCompiler) {
+            $namespaces = [
+                'Html' => get_class_methods(HtmlBuilder::class),
+                'Form' => get_class_methods(FormCollectiveBuilder::class),
+            ];
+
+            $directives = [
+                'entities',
+                'decode',
+                'script',
+                'style',
+                'image',
+                'favicon',
+                'link',
+                'secureLink',
+                'linkAsset',
+                'linkSecureAsset',
+                'linkRoute',
+                'linkAction',
+                'mailto',
+                'email',
+                'ol',
+                'ul',
+                'dl',
+                'meta',
+                'tag',
+                'open',
+                'model',
+                'close',
+                'token',
+                'label',
+                'input',
+                'text',
+                'password',
+                'hidden',
+                'email',
+                'tel',
+                'number',
+                'date',
+                'datetime',
+                'datetimeLocal',
+                'time',
+                'url',
+                'file',
+                'textarea',
+                'select',
+                'selectRange',
+                'selectYear',
+                'selectMonth',
+                'getSelectOption',
+                'checkbox',
+                'radio',
+                'reset',
+                'image',
+                'color',
+                'submit',
+                'button',
+                'old',
+            ];
+
+            foreach ($namespaces as $namespace => $methods) {
+                foreach ($methods as $method) {
+                    if (! in_array($method, $directives)) {
+                        continue;
+                    }
+
+                    $snakeMethod = Str::snake($method);
+                    $directive = strtolower($namespace) . '_' . $snakeMethod;
+
+                    $bladeCompiler->directive($directive, function ($expression) use ($namespace, $method) {
+                        return "<?php echo $namespace::$method($expression); ?>";
+                    });
+                }
+            }
+        });
     }
 }

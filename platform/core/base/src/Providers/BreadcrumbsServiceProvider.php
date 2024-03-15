@@ -2,6 +2,7 @@
 
 namespace Botble\Base\Providers;
 
+use Botble\Base\Supports\BreadcrumbsManager;
 use Botble\Base\Supports\ServiceProvider;
 
 /**
@@ -9,8 +10,15 @@ use Botble\Base\Supports\ServiceProvider;
  */
 class BreadcrumbsServiceProvider extends ServiceProvider
 {
-    public function boot(): void
+    protected bool $defer = true;
+
+    public function register(): void
     {
-        //
+        $this->app->singleton(BreadcrumbsManager::class);
+    }
+
+    public function provides(): array
+    {
+        return [BreadcrumbsManager::class];
     }
 }

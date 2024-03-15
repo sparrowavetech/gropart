@@ -31,7 +31,7 @@ return [
     ],
     'allowed_mime_types' => env(
         'RV_MEDIA_ALLOWED_MIME_TYPES',
-        'jpg,jpeg,png,gif,txt,docx,zip,mp3,bmp,csv,xls,xlsx,ppt,pptx,pdf,mp4,doc,mpga,wav,webp,mov'
+        'jpg,jpeg,png,gif,txt,docx,zip,mp3,bmp,csv,xls,xlsx,ppt,pptx,pdf,mp4,doc,mpga,wav,webp,webm,mov'
     ),
     'mime_types' => [
         'image' => [
@@ -147,4 +147,5 @@ return [
         '#27ae60',
         '#c0392b',
     ],
+    'use_storage_symlink' => env('RV_MEDIA_USE_STORAGE_SYMLINK', false),
 ];

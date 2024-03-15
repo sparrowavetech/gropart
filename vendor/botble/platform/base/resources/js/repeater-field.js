@@ -42,6 +42,7 @@ $(() => {
         if (window.Botble) {
             window.Botble.initResources()
             window.Botble.initMediaIntegrate()
+            window.Botble.initCoreIcon()
         }
 
         if (window.EditorManagement) {

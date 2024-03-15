@@ -13,6 +13,7 @@
         <script src="{{ asset('vendor/core/packages/theme/js/icons-field.js') }}?v=1.1.0"></script>
     @else
         @include('packages/theme::forms.fields.includes.icon-fields-script')
+
         @push('footer')
             <script src="{{ asset('vendor/core/packages/theme/js/icons-field.js') }}?v=1.1.0"></script>
         @endpush

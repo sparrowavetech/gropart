@@ -52,4 +52,5 @@ return [
         'email_in_blacklist' => 'The :attribute is in blacklist. Please use another email address.',
         'domain' => 'The :attribute must be a valid domain.',
     ],
+    'showing_records' => 'Showing :from to :to of :total records',
 ];

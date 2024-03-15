@@ -444,7 +444,7 @@ class ThemeOption
 
             $attributes['name'] = $name;
 
-            if ($this->hasOption($name)) {
+            if (Arr::get($field, 'type') !== 'hidden' && $this->hasOption($name)) {
                 $attributes['value'] = $this->getOption($name);
             }
 
@@ -478,6 +478,14 @@ class ThemeOption
         }
 
         return $value;
+    }
+
+    public function getOptions(): array
+    {
+        return Setting::newQuery()
+            ->where('key', 'like', $this->getOptionKey('%'))
+            ->pluck('value', 'key')
+            ->all();
     }
 
     public function saveOptions(): bool

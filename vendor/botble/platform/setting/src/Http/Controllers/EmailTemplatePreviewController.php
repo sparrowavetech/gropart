@@ -22,7 +22,7 @@ class EmailTemplatePreviewController extends BaseController
             }
         }
 
-        $routeParams = [$type, $module, $template];
+        $routeParams = [$type, $module, $template, 'ref_lang' => request()->input('ref_lang')];
 
         $backUrl = route('settings.email.template.edit', $routeParams);
 

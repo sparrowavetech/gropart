@@ -1,6 +1,5 @@
 @php
     $values = Arr::wrap($values ?? []);
-    Arr::set($attributes, 'class', str_replace('form-control', '', $attributes['class']));
 @endphp
 
 <div class="position-relative form-check-group mb-3">

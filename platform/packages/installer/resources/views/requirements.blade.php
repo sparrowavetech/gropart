@@ -1,6 +1,12 @@
 @extends('packages/installer::layouts.master')
 
-@section('pageTitle', trans('packages/installer::installer.requirements.pageTitle'))
+@section(
+    'pageTitle',
+     trans(
+         'packages/installer::installer.install_step_title',
+         ['step' => 2, 'title' => trans('packages/installer::installer.requirements.title')]
+     )
+)
 
 @section('header')
     <x-core::card.title>
@@ -37,8 +43,8 @@
                     <x-core::icon
                         :name="'ti ' . ($enabled ? 'ti-circle-check' : 'ti-alert-circle')"
                         @class([
-                            'text-success' => $phpSupportInfo['supported'],
-                            'text-danger' => !$phpSupportInfo['supported'],
+                            'text-success' => $enabled,
+                            'text-danger' => !$enabled,
                         ])
                     />
                 </div>

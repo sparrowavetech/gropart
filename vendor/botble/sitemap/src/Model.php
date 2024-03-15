@@ -85,7 +85,7 @@ class Model
 
     public function getCacheKey(): string
     {
-        return $this->cacheKey . route('public.index');
+        return $this->cacheKey . url('/');
     }
 
     public function getCacheDuration(): int|string

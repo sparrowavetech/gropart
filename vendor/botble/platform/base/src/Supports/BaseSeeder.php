@@ -5,6 +5,8 @@ namespace Botble\Base\Supports;
 use Botble\Base\Events\FinishedSeederEvent;
 use Botble\Base\Events\SeederPrepared;
 use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\MetaBox as MetaBoxFacade;
+use Botble\Base\Models\BaseModel;
 use Botble\Base\Models\MetaBox as MetaBoxModel;
 use Botble\Media\Facades\RvMedia;
 use Botble\Media\Models\MediaFile;
@@ -30,9 +32,13 @@ class BaseSeeder extends Seeder
 
     protected Carbon $now;
 
+    protected string $basePath;
+
     public function uploadFiles(string $folder, string|null $basePath = null): array
     {
-        $folderPath = $basePath ?: database_path('seeders/files/' . $folder);
+        $folderPath = $basePath ?: $this->getBasePath() . '/' . $folder;
+
+        $folder = ltrim(str_replace(database_path('seeders/files'), '', $folderPath), '/');
 
         if (! File::isDirectory($folderPath)) {
             throw new FileNotFoundException('Folder not found: ' . $folderPath);
@@ -58,25 +64,21 @@ class BaseSeeder extends Seeder
 
     protected function filePath(string $path, string|null $basePath = null): string
     {
-        $storage = Storage::disk('public');
+        $filePath = ($basePath ? sprintf('%s/%s', $basePath, $path) : $this->getBasePath() . '/' . $path);
+        $path = str_replace(database_path('seeders/files/'), '', $filePath);
 
-        if ($storage->exists($path)) {
+        if (Storage::disk('public')->exists($path)) {
             return $path;
         }
 
-        $filePath = ($basePath ?: database_path('seeders/files/' . $path));
-
-        if (! File::exists($filePath)) {
-            throw new FileNotFoundException('File not found: ' . $filePath);
-        }
-
-        RvMedia::uploadFromPath($filePath, 0, File::dirname($path));
-
-        return $path;
+        throw new FileNotFoundException('File not found: ' . $filePath);
     }
 
     public function prepareRun(): void
     {
+        MediaFile::query()->truncate();
+        MediaFolder::query()->truncate();
+
         $this->faker = $this->fake();
 
         Setting::newQuery()->truncate();
@@ -165,7 +167,7 @@ class BaseSeeder extends Seeder
 
     protected function getFilesFromPath(string $path): Collection
     {
-        $directoryPath = database_path('seeders/files/' . $path);
+        $directoryPath = $this->getBasePath() . '/' . $path;
 
         $files = [];
 
@@ -181,5 +183,28 @@ class BaseSeeder extends Seeder
         Setting::delete(array_keys($settings));
 
         Setting::forceSet($settings)->save();
+    }
+
+    protected function getBasePath(): string|null
+    {
+        return $this->basePath ?? database_path('seeders/files');
+    }
+
+    protected function setBasePath(string $path): static
+    {
+        $this->basePath = $path;
+
+        return $this;
+    }
+
+    protected function createMetadata(BaseModel $model, array $data): void
+    {
+        if (! isset($data['metadata']) || ! is_array($data['metadata'])) {
+            return;
+        }
+
+        foreach ($data['metadata'] as $key => $value) {
+            MetaBoxFacade::saveMetaBoxData($model, $key, $value);
+        }
     }
 }

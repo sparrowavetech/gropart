@@ -7,6 +7,7 @@ use Botble\Theme\Facades\Theme as ThemeFacade;
 use Exception;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 
 class AssetContainer
 {
@@ -40,9 +41,21 @@ class AssetContainer
             return $uri;
         }
 
-        $path = $this->getCurrentPath() . ltrim($uri, '/');
+        $uri = ltrim($uri, '/');
 
-        return $this->configAssetUrl($path);
+        $path = $this->getCurrentPath() . $uri;
+        $filePath = public_path($path);
+        $pathExtension = File::extension($path);
+
+        if (Str::contains($pathExtension, '?')) {
+            $filePath = str_replace($pathExtension, Str::before($pathExtension, '?'), $filePath);
+        }
+
+        if (File::exists($filePath)) {
+            return $this->configAssetUrl($path);
+        }
+
+        return $this->configAssetUrl($this->getInheritPath() . $uri);
     }
 
     /**
@@ -52,9 +65,20 @@ class AssetContainer
     {
         $path = Asset::$path;
 
-        return $this->isInheritTheme()
-            ? str_replace(ThemeFacade::getThemeName(), ThemeFacade::getInheritTheme(), $path)
-            : $path;
+        return $this->isInheritTheme() ? $this->getInheritPath() : $path;
+    }
+
+    public function getInheritPath(): string
+    {
+        $path = Asset::$path;
+        $inheritTheme = ThemeFacade::getInheritTheme();
+        $theme = ThemeFacade::getThemeName();
+
+        if ($inheritTheme === $theme) {
+            return $path;
+        }
+
+        return str_replace($theme, $inheritTheme, $path);
     }
 
     public function isInheritTheme(): bool
@@ -282,9 +306,21 @@ class AssetContainer
             ? ThemeFacade::getInheritTheme()
             : ThemeFacade::getThemeName();
 
+        $isLocal = ! Str::startsWith($source, ['http://', 'https://']);
+
         // Switch path to another theme.
         if (! is_bool($this->usePath) && ThemeFacade::exists($this->usePath)) {
             $source = str_replace($currentTheme, $this->usePath, $source);
+        }
+
+        // If this is a child theme, and the file (local) does not exist in the child theme, use the parent theme.
+        if (
+            ThemeFacade::hasInheritTheme()
+            && ! $this->isInheritTheme()
+            && $isLocal
+            && ! File::exists(public_path($source))
+        ) {
+            $source = str_replace($currentTheme, ThemeFacade::getInheritTheme(), $source);
         }
 
         $publicThemeName = $this->isInheritTheme() ? $currentTheme : ThemeFacade::getPublicThemeName();

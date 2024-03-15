@@ -12,7 +12,7 @@ use Illuminate\Support\Arr;
 class Manager implements ManagerContract
 {
     public function __construct(
-        protected string $groupId,
+        protected string $groupId = 'settings',
         protected array $groups = [],
         protected array $groupNames = [],
         protected array $sections = [],

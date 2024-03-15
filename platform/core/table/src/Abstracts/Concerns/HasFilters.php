@@ -121,7 +121,7 @@ trait HasFilters
     {
         $tableId = $this->getOption('id');
         $class = $this::class;
-        $columns = apply_filters('base_filter_table_filters', $this->getFilters(), $this);
+        $columns = $this->getFilters();
 
         foreach ($columns as $key => $bulkChange) {
             if ($bulkChange instanceof TableBulkChangeAbstract) {

@@ -8,17 +8,13 @@ use Botble\Base\Events\UpdatingEvent;
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Services\CleanDatabaseService;
-use Botble\Base\Services\ClearCacheService;
 use Botble\Base\Supports\Core;
 use Botble\Base\Supports\MembershipAuthorization;
 use Botble\Base\Supports\SystemManagement;
-use Botble\Base\Tables\InfoTable;
 use Exception;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\Rule;
 use Throwable;
 
 class SystemController extends BaseSystemController
@@ -28,95 +24,6 @@ class SystemController extends BaseSystemController
         $this->pageTitle(trans('core/base::base.panel.system'));
 
         return view('core/base::system.index');
-    }
-
-    public function getInfo(Request $request, InfoTable $infoTable)
-    {
-        $this->pageTitle(trans('core/base::system.info.title'));
-
-        Assets::addScriptsDirectly('vendor/core/core/base/js/system-info.js');
-
-        $composerArray = SystemManagement::getComposerArray();
-        $packages = SystemManagement::getPackagesAndDependencies($composerArray['require']);
-
-        if ($request->expectsJson()) {
-            return $infoTable->renderTable();
-        }
-
-        $systemEnv = SystemManagement::getSystemEnv();
-        $serverEnv = SystemManagement::getServerEnv();
-
-        $requiredPhpVersion = Arr::get($composerArray, 'require.php', get_minimum_php_version());
-        $requiredPhpVersion = str_replace('^', '', $requiredPhpVersion);
-        $requiredPhpVersion = str_replace('~', '', $requiredPhpVersion);
-
-        $matchPHPRequirement = version_compare(phpversion(), $requiredPhpVersion, '>=') > 0;
-
-        return view(
-            'core/base::system.info',
-            compact(
-                'packages',
-                'infoTable',
-                'systemEnv',
-                'serverEnv',
-                'matchPHPRequirement',
-                'requiredPhpVersion',
-            )
-        );
-    }
-
-    public function getCacheManagement()
-    {
-        $this->pageTitle(trans('core/base::cache.cache_management'));
-
-        Assets::addScriptsDirectly('vendor/core/core/base/js/cache.js');
-
-        return view('core/base::system.cache');
-    }
-
-    public function postClearCache(Request $request, ClearCacheService $clearCacheService)
-    {
-        $request->validate([
-            'type' => ['required', 'string', Rule::in([
-                'clear_cms_cache',
-                'refresh_compiled_views',
-                'clear_config_cache',
-                'clear_route_cache',
-                'clear_log',
-            ])],
-        ]);
-
-        $type = $request->input('type');
-
-        switch ($type) {
-            case 'clear_cms_cache':
-                $clearCacheService->clearFrameworkCache();
-                $clearCacheService->clearGoogleFontsCache();
-                $clearCacheService->clearPurifier();
-                $clearCacheService->clearDebugbar();
-
-                break;
-            case 'refresh_compiled_views':
-                $clearCacheService->clearCompiledViews();
-
-                break;
-            case 'clear_config_cache':
-                $clearCacheService->clearConfig();
-
-                break;
-            case 'clear_route_cache':
-                $clearCacheService->clearRoutesCache();
-
-                break;
-            case 'clear_log':
-                $clearCacheService->clearLogs();
-
-                break;
-        }
-
-        return $this
-            ->httpResponse()
-            ->setMessage(trans('core/base::cache.commands.' . $type . '.success_msg'));
     }
 
     public function postAuthorize(MembershipAuthorization $authorization)
@@ -139,7 +46,7 @@ class SystemController extends BaseSystemController
     {
         $response = $this->httpResponse();
 
-        if (! config('core.base.general.enable_system_updater')) {
+        if (! config('core.base.general.enable_system_updater') || BaseHelper::hasDemoModeEnabled()) {
             return $response;
         }
 

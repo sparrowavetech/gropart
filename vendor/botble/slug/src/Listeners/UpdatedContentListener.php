@@ -2,6 +2,7 @@
 
 namespace Botble\Slug\Listeners;
 
+use Botble\Base\Contracts\BaseModel;
 use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Slug\Events\UpdatedSlugEvent;
@@ -15,7 +16,7 @@ class UpdatedContentListener
 {
     public function handle(UpdatedContentEvent $event): void
     {
-        if (SlugHelper::isSupportedModel($class = get_class($event->data)) && $event->request->input('is_slug_editable', 0)) {
+        if ($event->data instanceof BaseModel && SlugHelper::isSupportedModel($class = $event->data::class) && $event->request->input('is_slug_editable', 0)) {
             try {
                 $slug = $event->request->input('slug');
 
@@ -37,6 +38,9 @@ class UpdatedContentListener
                     $slug = time();
                 }
 
+                /**
+                 * @var Slug $item
+                 */
                 $item = Slug::query()
                     ->where([
                         'reference_type' => $class,
@@ -52,6 +56,9 @@ class UpdatedContentListener
                         $item->save();
                     }
                 } else {
+                    /**
+                     * @var Slug $item
+                     */
                     $item = Slug::query()->create([
                         'key' => $slug,
                         'reference_type' => $class,
@@ -60,10 +67,7 @@ class UpdatedContentListener
                     ]);
                 }
 
-                /**
-                 * @var Slug $item
-                 */
-                event(new UpdatedSlugEvent($event->data, $item));
+                UpdatedSlugEvent::dispatch($event->data, $item);
             } catch (Exception $exception) {
                 BaseHelper::logError($exception);
             }

@@ -8,7 +8,7 @@ $(document).ready(function () {
 
         $httpClient
             .make()
-            .postForm(route('settings.email.update'), form)
+            .postForm(_self.data('url'), form)
             .then(({ data }) => {
                 Botble.showSuccess(data.message)
                 $('#send-test-email-modal').modal('show')
@@ -26,7 +26,7 @@ $(document).ready(function () {
 
         $httpClient
             .make()
-            .post(route('settings.email.test.send'), {
+            .post(_self.data('url'), {
                 email: _self.closest('.modal-content').find('input[name=email]').val(),
             })
             .then(({ data }) => {

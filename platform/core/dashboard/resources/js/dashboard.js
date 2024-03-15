@@ -45,7 +45,7 @@ class BDashboard {
             .catch(({ response, message }) => {
                 let content = response?.data?.data
 
-                if (! content && message) {
+                if (!content && message) {
                     content = `<div class="empty"><p class="empty-subtitle text-muted">${message}</p></div>`
                 }
 
@@ -86,7 +86,7 @@ class BDashboard {
 
                     $httpClient
                         .makeWithoutErrorHandler()
-                        .post(route('dashboard.update_widget_order'), { items: items })
+                        .post($widgetsList.data('url'), { items: items })
                         .then(({ data }) => {
                             Botble.showSuccess(data.message)
                         })

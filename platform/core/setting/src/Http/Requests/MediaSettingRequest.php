@@ -40,7 +40,7 @@ class MediaSettingRequest extends Request
             'media_bunnycdn_hostname' => ['nullable', 'string', 'required_if:media_driver,bunnycdn'],
             'media_bunnycdn_zone' => ['nullable', 'string', 'required_if:media_driver,bunnycdn'],
             'media_bunnycdn_key' => ['nullable', 'string', 'required_if:media_driver,bunnycdn'],
-            'media_bunnycdn_region' => ['nullable', 'string', 'max:200', 'required_if:media_driver,bunnycdn'],
+            'media_bunnycdn_region' => ['nullable', 'string', 'max:200'],
 
             'media_turn_off_automatic_url_translation_into_latin' => $onOffRule = new OnOffRule(),
             'media_use_original_name_for_file_path' => $onOffRule,

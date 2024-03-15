@@ -607,3 +607,7 @@ a.dropdown-toggle.dropdown-header-name {
         display: none;
     }
 }
+
+.btn i {
+    margin: 0 calc(var(--bb-btn-padding-x) / 2) 0 calc(var(--bb-btn-padding-x) / -4);
+}

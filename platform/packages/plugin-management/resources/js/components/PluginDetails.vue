@@ -233,12 +233,7 @@ export default defineComponent({
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button
-                        type="button"
-                        class="btn btn-primary"
-                        @click="install"
-                        v-if="!isInstalled"
-                    >
+                    <button type="button" class="btn btn-primary" @click="install" v-if="!isInstalled">
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
                             class="icon"

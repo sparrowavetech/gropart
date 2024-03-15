@@ -13,18 +13,6 @@ class TableServiceProvider extends ServiceProvider
 {
     use LoadAndPublishDataTrait;
 
-    public function register(): void
-    {
-        $this->app['config']->set([
-            'datatables.engines' => [
-                'eloquent' => EloquentDataTable::class,
-                'query' => QueryDataTable::class,
-                'collection' => CollectionDataTable::class,
-                'resource' => ApiResourceDataTable::class,
-            ],
-        ]);
-    }
-
     public function boot(): void
     {
         $this
@@ -34,5 +22,14 @@ class TableServiceProvider extends ServiceProvider
             ->loadAndPublishTranslations()
             ->loadRoutes()
             ->publishAssets();
+
+        $this->app['config']->set([
+            'datatables.engines' => [
+                'eloquent' => EloquentDataTable::class,
+                'query' => QueryDataTable::class,
+                'collection' => CollectionDataTable::class,
+                'resource' => ApiResourceDataTable::class,
+            ],
+        ]);
     }
 }

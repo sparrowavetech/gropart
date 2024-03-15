@@ -43,18 +43,14 @@ class ClearCacheService
 
     public function clearBootstrapCache(): void
     {
-        if ($pluginCachePath = $this->app->bootstrapPath('cache/plugins.php')) {
-            $this->files->delete($pluginCachePath);
+        foreach ($this->files->glob($this->app->bootstrapPath('cache/*.php')) as $view) {
+            $this->files->delete($view);
         }
-
-        $this->clearServicesCache();
-
-        $this->clearPackagesCache();
     }
 
     public function clearCompiledViews(): void
     {
-        foreach ($this->files->glob(config('view.compiled') . '/*') as $view) {
+        foreach ($this->files->glob(config('view.compiled') . '/*.php') as $view) {
             $this->files->delete($view);
         }
     }
@@ -79,8 +75,8 @@ class ClearCacheService
             return;
         }
 
-        foreach ($this->files->allFiles($logPath) as $file) {
-            $this->files->delete($file->getPathname());
+        foreach ($this->files->glob($logPath . '/*.log') as $file) {
+            $this->files->delete($file);
         }
     }
 

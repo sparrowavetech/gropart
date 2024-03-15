@@ -8,6 +8,7 @@ use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Supports\Breadcrumb;
 use Botble\Setting\Http\Controllers\Concerns\InteractsWithSettings;
 use Botble\Theme\Events\RenderingThemeOptionSettings;
+use Botble\Theme\Facades\Manager;
 use Botble\Theme\Facades\Theme;
 use Botble\Theme\Facades\ThemeOption;
 use Botble\Theme\Forms\CustomCSSForm;
@@ -42,7 +43,9 @@ class ThemeController extends BaseController
 
         Assets::addScriptsDirectly('vendor/core/packages/theme/js/theme.js');
 
-        return view('packages/theme::list');
+        $themes = Manager::getThemes();
+
+        return view('packages/theme::list', compact('themes'));
     }
 
     public function getOptions()

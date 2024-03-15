@@ -9,6 +9,7 @@ use Botble\Base\Facades\MetaBox;
 use Botble\Base\Forms\FieldOptions\InputFieldOption;
 use Botble\Base\Forms\FieldOptions\TextFieldOption;
 use Botble\Base\Forms\Fields\ColorField;
+use Botble\Base\Forms\Fields\CoreIconField;
 use Botble\Base\Forms\Fields\TextField;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Base\Models\BaseModel;
@@ -379,32 +380,26 @@ class Menu
             $model = $form->getModel();
 
             if ($model instanceof MenuNode) {
-                $iconImage = $model->icon_image ?: $model->getMetaData('icon_image', true);
-
-                if ($form->getFormHelper()->hasCustomField('themeIcon')) {
-                    $form
-                        ->modify('icon_font', 'themeIcon', [
-                            'attr' => [
-                                'placeholder' => null,
-                            ],
-                            'empty_value' => __('-- None --'),
-                        ]);
-                }
-
                 $form
-                    ->addAfter('icon_font', 'icon_image', 'mediaImage', [
-                        'label' => __('Icon image'),
+                    ->modify('icon_font', $form->getFormHelper()->hasCustomField('themeIcon') ? 'themeIcon' : CoreIconField::class, [
                         'attr' => [
-                            'data-update' => 'icon_image',
+                            'placeholder' => null,
                         ],
-                        'value' => $iconImage,
-                        'help_block' => [
-                            'text' => __('It will replace Icon Font if it is present.'),
-                        ],
-                        'wrapper' => [
-                            'style' => 'display: block;',
-                        ],
-                    ]);
+                        'empty_value' => __('-- None --'),
+                    ])
+                ->addAfter('icon_font', 'icon_image', 'mediaImage', [
+                    'label' => __('Icon image'),
+                    'attr' => [
+                        'data-update' => 'icon_image',
+                    ],
+                    'value' => $model->icon_image ?: $model->getMetaData('icon_image', true),
+                    'help_block' => [
+                        'text' => __('It will replace Icon Font if it is present.'),
+                    ],
+                    'wrapper' => [
+                        'style' => 'display: block;',
+                    ],
+                ]);
             }
 
             return $form;

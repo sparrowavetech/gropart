@@ -2,7 +2,7 @@
 
 @push('header-action')
     @if (
-        config('packages.plugin-management.general.enable_marketplace_feature')
+        $isEnabledMarketplaceFeature = config('packages.plugin-management.general.enable_marketplace_feature')
         && auth()->user()->hasPermission('plugins.marketplace')
     )
         <x-core::button
@@ -37,7 +37,7 @@
                 <x-core::card class="h-100">
                     <div
                         class="position-relative img-responsive img-responsive-3x1 card-img-top border-bottom"
-                        @style(['background-color: var(--bb-primary-lt)', "background-image: url('$plugin->image')" => $plugin->image])
+                        @style(['background-color: #efefef', "background-image: url('$plugin->image')" => $plugin->image])
                     >
                         @if (! $plugin->image)
                             <x-core::icon class="position-absolute" style="top: calc(50% - 28px); left: calc(50% - 28px)" name="ti ti-puzzle" size="lg" />
@@ -85,6 +85,8 @@
                                     class="btn-trigger-change-status"
                                     data-plugin="{{ $plugin->path }}"
                                     data-status="{{ $plugin->status }}"
+                                    :data-check-requirement-url="route('plugins.check-requirement', ['name' => $plugin->path])"
+                                    :data-change-status-url="route('plugins.change.status', ['name' => $plugin->path])"
                                 >
                                     @if ($plugin->status)
                                         {{ trans('packages/plugin-management::plugin.deactivate') }}
@@ -94,22 +96,27 @@
                                 </x-core::button>
                             @endif
 
-                            <x-core::button
-                                class="btn-trigger-update-plugin"
-                                color="success"
-                                style="display: none;"
-                                data-name="{{ $plugin->path }}"
-                                data-check-update="{{ $plugin->id ?? 'plugin-' . $plugin->path }}"
-                                data-version="{{ $plugin->version }}"
-                            >
-                                {{ trans('packages/plugin-management::plugin.update') }}
-                            </x-core::button>
+                            @if ($isEnabledMarketplaceFeature)
+                                <x-core::button
+                                    class="btn-trigger-update-plugin"
+                                    color="success"
+                                    style="display: none;"
+                                    data-name="{{ $plugin->path }}"
+                                    data-check-update="{{ $plugin->id ?? 'plugin-' . $plugin->path }}"
+                                    :data-check-update-url="route('plugins.marketplace.ajax.check-update')"
+                                    :data-update-url="route('plugins.marketplace.ajax.update', ['id' => '__id__', 'name' => $plugin->path])"
+                                    data-version="{{ $plugin->version }}"
+                                >
+                                    {{ trans('packages/plugin-management::plugin.update') }}
+                                </x-core::button>
+                            @endif
 
                             @if (auth()->user()->hasPermission('plugins.remove'))
                                 <x-core::button
                                     type="button"
                                     class="btn-trigger-remove-plugin"
                                     data-plugin="{{ $plugin->path }}"
+                                    :data-url="route('plugins.remove', ['plugin' => $plugin->path])"
                                 >
                                     {{ trans('packages/plugin-management::plugin.remove') }}
                                 </x-core::button>
@@ -136,22 +143,24 @@
         :submit-button-label="trans('packages/plugin-management::plugin.remove_plugin_confirm_yes')"
     />
 
-    <x-core::modal
-        id="confirm-install-plugin-modal"
-        :title="trans('packages/plugin-management::plugin.install_plugin')"
-        button-id="confirm-install-plugin-button"
-        :button-label="trans('packages/plugin-management::plugin.install')"
-    >
-        <input
-            type="hidden"
-            name="plugin_name"
-            value=""
+    @if ($isEnabledMarketplaceFeature)
+        <x-core::modal
+            id="confirm-install-plugin-modal"
+            :title="trans('packages/plugin-management::plugin.install_plugin')"
+            button-id="confirm-install-plugin-button"
+            :button-label="trans('packages/plugin-management::plugin.install')"
         >
-        <input
-            type="hidden"
-            name="ids"
-            value=""
-        >
-        <p id="requirement-message"></p>
-    </x-core::modal>
+            <input
+                type="hidden"
+                name="plugin_name"
+                value=""
+            >
+            <input
+                type="hidden"
+                name="ids"
+                value=""
+            >
+            <p id="requirement-message"></p>
+        </x-core::modal>
+    @endif
 @endsection

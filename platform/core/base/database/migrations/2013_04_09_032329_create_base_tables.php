@@ -9,7 +9,7 @@ return new class () extends Migration {
     {
         Schema::create('meta_boxes', function (Blueprint $table) {
             $table->id();
-            $table->string('meta_key', 255);
+            $table->string('meta_key');
             $table->text('meta_value')->nullable();
             $table->foreignId('reference_id')->index();
             $table->string('reference_type', 120);

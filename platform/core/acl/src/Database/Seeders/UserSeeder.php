@@ -7,7 +7,6 @@ use Botble\ACL\Models\User;
 use Botble\ACL\Services\ActivateUserService;
 use Botble\Base\Supports\BaseSeeder;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
 
 class UserSeeder extends BaseSeeder
@@ -23,22 +22,12 @@ class UserSeeder extends BaseSeeder
 
         $faker = $this->fake();
 
-        $this->createUser([
-            'first_name' => $faker->firstName(),
-            'last_name' => $faker->lastName(),
-            'email' => $faker->companyEmail(),
-            'username' => 'botble',
-            'password' => Hash::make('159357'),
-            'super_user' => 1,
-            'manage_supers' => 1,
-        ]);
-
         $superuser = $this->createUser([
             'first_name' => $faker->firstName(),
             'last_name' => $faker->lastName(),
             'email' => $faker->companyEmail(),
-            'username' => 'admin',
-            'password' => Hash::make('12345678'),
+            'username' => config('core.base.general.demo.account.username'),
+            'password' => config('core.base.general.demo.account.password'),
             'super_user' => 1,
             'manage_supers' => 1,
         ]);

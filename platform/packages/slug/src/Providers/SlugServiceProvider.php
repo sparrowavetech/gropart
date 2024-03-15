@@ -26,10 +26,6 @@ class SlugServiceProvider extends ServiceProvider
 
     public function register(): void
     {
-        $this
-            ->setNamespace('packages/slug')
-            ->loadAndPublishTranslations();
-
         $this->app->bind(SlugInterface::class, function () {
             return new SlugRepository(new Slug());
         });
@@ -42,8 +38,10 @@ class SlugServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this
+            ->setNamespace('packages/slug')
             ->loadAndPublishConfigurations(['general'])
             ->loadHelpers()
+            ->loadAndPublishTranslations()
             ->loadAndPublishViews()
             ->loadRoutes()
             ->loadMigrations()
@@ -119,9 +117,9 @@ class SlugServiceProvider extends ServiceProvider
                             if (
                                 ! $slug ||
                                 ! $slug->key ||
-                                (get_class($model) == Page::class && BaseHelper::isHomepage($model->getKey()))
+                                ($model instanceof Page && BaseHelper::isHomepage($model->getKey()))
                             ) {
-                                return route('public.index');
+                                return BaseHelper::getHomepageUrl();
                             }
 
                             $prefix = SlugHelperFacade::getTranslator()->compile(

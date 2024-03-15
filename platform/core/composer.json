@@ -1,11 +1,7 @@
 {
     "name": "botble/platform",
     "description": "The Botble Platform based on Laravel Framework.",
-    "keywords": [
-        "botble",
-        "botble cms",
-        "botble platform"
-    ],
+    "keywords": ["botble", "botble cms", "botble platform"],
     "homepage": "https://botble.com",
     "support": {
         "issues": "https://botble.ticksy.com",
@@ -23,12 +19,10 @@
         "ext-gd": "*",
         "barryvdh/laravel-dompdf": "^2.0",
         "botble/assets": "^1.0",
-        "intervention/image": "^2.6",
+        "intervention/image": "^3.4",
         "kris/laravel-form-builder": "dev-master",
-        "laravelcollective/html": "^6.2",
         "maennchen/zipstream-php": "3.1.*",
-        "xantios/mimey": "^2.2",
-        "tightenco/ziggy": "^1.4",
+        "tightenco/ziggy": "^2.0",
         "yajra/laravel-datatables-buttons": "^10.0",
         "yajra/laravel-datatables-oracle": "^10.11",
         "mews/purifier": "^3.3",
@@ -50,7 +44,9 @@
             "Botble\\Setting\\": "setting/src",
             "Botble\\Table\\": "table/src",
             "Botble\\JsValidation\\": "js-validation/src",
-            "Botble\\Chart\\": "chart/src"
+            "Botble\\Chart\\": "chart/src",
+            "Botble\\Icon\\": "icon/src",
+            "Tightenco\\Ziggy\\": "base/src/Ziggy"
         }
     },
     "extra": {
@@ -68,7 +64,8 @@
                 "Botble\\Dashboard\\Providers\\DashboardServiceProvider",
                 "Botble\\Media\\Providers\\MediaServiceProvider",
                 "Botble\\JsValidation\\Providers\\JsValidationServiceProvider",
-                "Botble\\Chart\\Providers\\ChartServiceProvider"
+                "Botble\\Chart\\Providers\\ChartServiceProvider",
+                "Botble\\Icon\\Providers\\IconServiceProvider"
             ],
             "aliases": {
                 "Action": "Botble\\Base\\Facades\\Action",
@@ -78,6 +75,7 @@
                 "BaseHelper": "Botble\\Base\\Facades\\BaseHelper",
                 "Breadcrumbs": "Botble\\Base\\Facades\\Breadcrumbs",
                 "DashboardMenu": "Botble\\Base\\Facades\\DashboardMenu",
+                "CoreIcon": "Botble\\Icon\\Facades\\Icon",
                 "EmailHandler": "Botble\\Base\\Facades\\EmailHandler",
                 "Filter": "Botble\\Base\\Facades\\Filter",
                 "Form": "Botble\\Base\\Facades\\Form",

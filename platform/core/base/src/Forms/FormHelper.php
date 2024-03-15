@@ -5,6 +5,7 @@ namespace Botble\Base\Forms;
 use Illuminate\Contracts\View\Factory as View;
 use Illuminate\Translation\Translator;
 use InvalidArgumentException;
+use Kris\LaravelFormBuilder\Fields\FormField as BaseFormField;
 use Kris\LaravelFormBuilder\FormHelper as BaseFormHelper;
 
 class FormHelper extends BaseFormHelper
@@ -48,8 +49,10 @@ class FormHelper extends BaseFormHelper
         }
 
         if (class_exists($type)) {
-            if (! is_subclass_of($type, FormField::class)) {
-                throw new InvalidArgumentException(sprintf('Could not load type "%s": class is not a subclass of "%s".', $type, FormField::class));
+            if (! is_subclass_of($type, BaseFormField::class)) {
+                throw new InvalidArgumentException(
+                    sprintf('Could not load type "%s": class is not a subclass of "%s".', $type, BaseFormField::class)
+                );
             }
 
             return $type;

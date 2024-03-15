@@ -11,13 +11,12 @@ use Botble\SeoHelper\Facades\SeoHelper;
 use Botble\SeoHelper\SeoOpenGraph;
 use Botble\Slug\Models\Slug;
 use Botble\Theme\Facades\Theme;
-use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 
 class PageService
 {
-    public function handleFrontRoutes(Slug|array $slug): Slug|array|Builder
+    public function handleFrontRoutes(Slug|array $slug): Slug|array
     {
         if (! $slug instanceof Slug) {
             return $slug;

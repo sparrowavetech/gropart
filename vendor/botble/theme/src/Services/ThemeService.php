@@ -11,6 +11,7 @@ use Botble\Theme\Events\ThemeRemoveEvent;
 use Botble\Theme\Facades\Theme;
 use Botble\Theme\Facades\ThemeOption;
 use Botble\Widget\Models\Widget;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Arr;
@@ -39,8 +40,18 @@ class ThemeService
             ];
         }
 
+        $config = $this->getThemeConfig($theme);
+        $inheritTheme = Arr::get($config, 'inherit');
+
         try {
             $content = BaseHelper::getFileData($this->getPath($theme, 'theme.json'));
+
+            if (! Theme::exists($inheritTheme)) {
+                return [
+                    'error' => true,
+                    'message' => trans('packages/theme::theme.theme_inherit_not_found', ['name' => $inheritTheme]),
+                ];
+            }
 
             if (! empty($content)) {
                 $requiredPlugins = Arr::get($content, 'required_plugins', []);
@@ -55,6 +66,40 @@ class ThemeService
                 'error' => true,
                 'message' => $exception->getMessage(),
             ];
+        }
+
+        if (! empty($inheritTheme)) {
+            $themeOptions = ThemeOption::getOptions();
+
+            if (! empty($themeOptions)) {
+                $copiedOptions = [];
+                foreach ($themeOptions as $key => $option) {
+                    $key = str_replace(ThemeOption::getOptionKey(''), 'theme-' . $theme . '-', $key);
+                    $copiedOptions[] = [
+                        'key' => $key,
+                        'value' => $option,
+                        'created_at' => Carbon::now(),
+                        'updated_at' => Carbon::now(),
+                    ];
+                }
+
+                Setting::query()
+                    ->insertOrIgnore($copiedOptions);
+
+                $copiedWidgets = Widget::query()
+                    ->where('theme', $inheritTheme)
+                    ->get()
+                    ->toArray();
+
+                foreach ($copiedWidgets as $key => $widget) {
+                    $copiedWidgets[$key]['theme'] = $theme;
+                    $copiedWidgets[$key]['data'] = json_encode($widget['data']);
+                    unset($copiedWidgets[$key]['id']);
+                }
+
+                Widget::query()
+                    ->insertOrIgnore($copiedWidgets);
+            }
         }
 
         Theme::setThemeName($theme);
@@ -169,10 +214,17 @@ class ThemeService
             return $validate;
         }
 
-        if (Theme::getThemeName() == $theme) {
+        if (Theme::getThemeName() === $theme) {
             return [
                 'error' => true,
                 'message' => trans('packages/theme::theme.cannot_remove_theme', ['name' => $theme]),
+            ];
+        }
+
+        if (Theme::getInheritTheme() === $theme) {
+            return [
+                'error' => true,
+                'message' => trans('packages/theme::theme.cannot_remove_inherit_theme', ['name' => $theme]),
             ];
         }
 
@@ -209,5 +261,12 @@ class ThemeService
             'error' => false,
             'message' => trans('packages/theme::theme.removed_assets', ['name' => $theme]),
         ];
+    }
+
+    public function getThemeConfig(string $theme): array
+    {
+        $configFile = $this->getPath($theme, 'config.php');
+
+        return $this->files->exists($configFile) ? $this->files->getRequire($configFile) : [];
     }
 }

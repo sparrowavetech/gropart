@@ -55,7 +55,6 @@ trait Copyable
 
     public function copyableMessage(string $message): static
     {
-
         $this->copyableMessage = $message;
 
         return $this;

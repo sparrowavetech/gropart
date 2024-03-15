@@ -1,7 +1,7 @@
 @php
-    try {
-        $icon = File::get(sprintf(core_path('base/resources/views/components/icons/%s.blade.php'), $value));
-    } catch (\Exception) {
+    if (BaseHelper::hasIcon($value)) {
+        $icon = BaseHelper::renderIcon($value);
+    } else {
         $icon = $value;
     }
 @endphp

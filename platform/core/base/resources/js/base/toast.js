@@ -360,7 +360,7 @@ function injectCSS() {
             border-radius: 2px;
             cursor: pointer;
             text-decoration: none;
-            z-index: 9999;
+            z-index: 999999;
             width: 25rem;
             max-width: calc(100% - 30px);
         }
@@ -391,6 +391,11 @@ function injectCSS() {
         .toast-close svg {
             width: 1em;
             height: 1em;
+        }
+
+        .toastify-text a {
+            text-decoration: underline;
+            color: #fff;
         }
 
         .toastify-right {

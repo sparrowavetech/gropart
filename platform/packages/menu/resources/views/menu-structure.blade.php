@@ -32,7 +32,7 @@
                                 type="button"
                                 class="btn-action"
                             >
-                                <x-core::icon name="ti ti-chevron-down" class="icon-sm" />
+                                <x-core::icon name="ti ti-chevron-down" size="sm" />
                             </button>
                         </a>
                     </x-core::card.header>
@@ -57,6 +57,7 @@
                             <x-core::button
                                 type="button"
                                 class="btn-add-to-menu"
+                                :data-url="route('menus.get-node')"
                                 icon="ti ti-plus"
                             >
                                 {{ trans('packages/menu::menu.add_to_menu') }}

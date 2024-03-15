@@ -24,6 +24,7 @@ use Botble\Theme\Supports\Youtube;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Throwable;
 
@@ -200,13 +201,7 @@ class HookServiceProvider extends ServiceProvider
                 return null;
             }
 
-            $iframe = null;
-
-            $data = [
-                'class' => 'embed-responsive-item',
-                'height' => 315,
-                'width' => 420,
-            ];
+            $data = [];
 
             if ($shortcode->width) {
                 $data['width'] = $shortcode->width;
@@ -216,36 +211,50 @@ class HookServiceProvider extends ServiceProvider
                 $data['height'] = $shortcode->height;
             }
 
+            $type = null;
+
             if (Youtube::isYoutubeURL($url)) {
-                $data['allowfullscreen'] = true;
-                $data['frameborder'] = 0;
+                $data['url'] = Youtube::getYoutubeVideoEmbedURL($url);
 
-                $data['src'] = Youtube::getYoutubeVideoEmbedURL($url);
-
-                $iframe = Html::tag('iframe', '', $data)->toHtml();
+                $type = 'youtube';
             } elseif (Vimeo::isVimeoURL($url)) {
                 $videoId = Vimeo::getVimeoID($url);
                 if ($videoId) {
-                    $data['allow'] = 'autoplay; fullscreen; picture-in-picture';
-                    $data['src'] = 'https://player.vimeo.com/video/' . $videoId;
+                    $data['url'] = 'https://player.vimeo.com/video/' . $videoId;
 
-                    $iframe = Html::tag('iframe', '', $data)->toHtml();
+                    $type = 'vimeo';
                 }
-            } else {
-                $extension = File::extension($url) ?: 'mp4';
+            } elseif (preg_match('/^.*https:\/\/(?:m|www|vm)?\.?tiktok\.com\/((?:.*\b(?:(?:usr|v|embed|user|video)\/|\?shareId=|\&item_id=)(\d+))|\w+)/', $url)) {
+                $type = 'tiktok';
 
+                $data['url'] = $url;
+                $data['video_id'] = Str::afterLast($url, 'video/');
+
+                Theme::asset()->container('footer')->add(
+                    'tiktok-embed',
+                    'https://www.tiktok.com/embed.js',
+                    attributes: ['async' => true]
+                );
+            } elseif (preg_match('/^.*https:\/\/twitter\.com\/(?:#!\/)?(\w+)\/status(es)?\/(\d+)/', $url)) {
+                $data['url'] = $url;
+
+                $type = 'twitter';
+
+                Theme::asset()->container('footer')->add(
+                    'twitter-embed',
+                    'https://platform.twitter.com/widgets.js',
+                    attributes: ['async' => true, 'charset' => 'utf-8']
+                );
+            } elseif (in_array(Str::lower(File::extension($url)), ['mp4', 'webm', 'ogg'])) {
                 $data['width'] = $shortcode->width ?: '100%';
                 $data['height'] = $shortcode->height ?: 400;
+                $data['extension'] = File::extension($url) ?: 'mp4';
+                $data['url'] = $url;
 
-                return view('packages/theme::shortcodes.video', compact('url', 'data', 'extension'))->render();
+                $type = 'video';
             }
 
-            if ($iframe) {
-                return Html::tag('div', $iframe, ['class' => 'embed-responsive embed-responsive-16by9 mb30'])
-                    ->toHtml();
-            }
-
-            return null;
+            return view('packages/theme::shortcodes.media', ['type' => $type, 'data' => $data])->render();
         });
 
         shortcode()->setPreviewImage('media', asset('vendor/core/packages/theme/images/ui-blocks/media.jpg'));
@@ -255,7 +264,7 @@ class HookServiceProvider extends ServiceProvider
                 ->add('url', TextField::class, [
                     'label' => __('Media URL'),
                     'attr' => [
-                        'placeholder' => 'https://www.youtube.com/watch?v=SlPhMPnQ58k',
+                        'placeholder' => 'YouTube, Vimeo, TikTok, ...',
                     ],
                 ])
                 ->add('width', NumberField::class, [

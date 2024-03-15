@@ -149,7 +149,15 @@ class Handler extends ExceptionHandler
 
                 $previous = $e->getPrevious();
 
-                $inputs = $request->input() ? BaseHelper::jsonEncodePrettify($request->input()) : null;
+                $inputs = $request->except([
+                    'current_password',
+                    'password',
+                    'password_confirmation',
+                    'token',
+                    'remember_token',
+                ]);
+
+                $inputs = $inputs ? BaseHelper::jsonEncodePrettify($inputs) : null;
 
                 logger()->channel('slack')->critical(
                     $e->getMessage() . ($previous ? '(' . $previous . ')' : null),

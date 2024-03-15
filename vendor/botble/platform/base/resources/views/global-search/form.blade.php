@@ -16,7 +16,9 @@
             wrapper-class="input-icon"
         >
             <x-slot:prepend>
-                <x-core::icon name="ti ti-search" class="input-icon-addon" />
+                <span class="input-icon-addon">
+                    <x-core::icon name="ti ti-search" />
+                </span>
             </x-slot:prepend>
         </x-core::form.text-input>
     </x-core::form>

@@ -36,6 +36,8 @@ class AdminAppearanceSettingController extends SettingController
             $data[$localeDirectionKey] = $adminLocalDirection;
         }
 
+        $this->forceSaveSettings =  ! $isDemoModeEnabled;
+
         return $this->performUpdate($data);
     }
 }

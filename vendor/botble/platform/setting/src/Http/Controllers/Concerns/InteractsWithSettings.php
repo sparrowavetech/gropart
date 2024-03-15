@@ -7,6 +7,8 @@ use Botble\Setting\Facades\Setting;
 
 trait InteractsWithSettings
 {
+    protected bool $forceSaveSettings = false;
+
     protected function saveSettings(array $data, string $prefix = ''): void
     {
         foreach ($data as $settingKey => $settingValue) {
@@ -14,7 +16,7 @@ trait InteractsWithSettings
                 $settingValue = json_encode(array_filter($settingValue));
             }
 
-            Setting::set($prefix . $settingKey, (string) $settingValue);
+            Setting::set($prefix . $settingKey, (string) $settingValue, $this->forceSaveSettings);
         }
 
         Setting::save();

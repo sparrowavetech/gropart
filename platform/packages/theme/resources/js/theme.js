@@ -7,7 +7,7 @@ class ThemeManagement {
 
             $httpClient
                 .make()
-                .post(route('theme.active', { theme: _self.data('theme') }))
+                .post(_self.data('url'))
                 .then(({ data }) => {
                     Botble.showSuccess(data.message)
                     window.location.reload()
@@ -30,7 +30,7 @@ class ThemeManagement {
 
             $httpClient
                 .make()
-                .post(route('theme.remove', { theme: _self.data('theme') }))
+                .post(_self.data('url'))
                 .then(({ data }) => {
                     Botble.showSuccess(data.message)
                     window.location.reload()

@@ -1,6 +1,12 @@
 @extends('packages/installer::layouts.master')
 
-@section('pageTitle', trans('packages/installer::installer.createAccount.pageTitle'))
+@section(
+    'pageTitle',
+     trans(
+         'packages/installer::installer.install_step_title',
+         ['step' => 5, 'title' => trans('packages/installer::installer.createAccount.title')]
+     )
+)
 
 @section('header')
     <x-core::card.title>
@@ -80,8 +86,8 @@
 @section('footer')
     <x-core::button
         color="primary"
-        type="button"
-        onclick="document.getElementById('create-account-form').submit()"
+        type="submit"
+        form="create-account-form"
     >
         {{ trans('packages/installer::installer.createAccount.form.create') }}
     </x-core::button>

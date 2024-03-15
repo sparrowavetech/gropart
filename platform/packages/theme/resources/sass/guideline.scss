@@ -27,6 +27,9 @@
         height: 30px;
         text-align: center;
         transition: all 0.2s ease-in-out;
+        display: flex;
+        align-items: center;
+        justify-content: center;
 
         svg {
             width: 12px;

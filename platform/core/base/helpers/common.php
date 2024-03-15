@@ -16,10 +16,13 @@ if (! function_exists('language_flag')) {
             return '';
         }
 
+        $flag = apply_filters('cms_language_flag', $flag, $name);
+
         return Html::image(asset(BASE_LANGUAGE_FLAG_PATH . $flag . '.svg'), sprintf('%s flag', $name), [
             'title' => $name,
             'class' => 'flag',
             'style' => "height: {$width}px",
+            'loading' => 'lazy',
         ]);
     }
 }
@@ -70,7 +73,7 @@ if (! function_exists('get_cms_version')) {
 if (! function_exists('get_core_version')) {
     function get_core_version(): string
     {
-        return '7.1.6';
+        return '7.2.3';
     }
 }
 

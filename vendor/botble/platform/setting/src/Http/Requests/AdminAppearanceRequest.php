@@ -35,6 +35,10 @@ class AdminAppearanceRequest extends Request
             'admin_text_color' => ['nullable', 'string'],
             'admin_link_color' => ['nullable', 'string'],
             'admin_link_hover_color' => ['nullable', 'string'],
+            'admin_appearance_custom_css' => ['nullable', 'string', 'max:100000'],
+            'admin_appearance_custom_header_js' => ['nullable', 'string', 'max:2500'],
+            'admin_appearance_custom_body_js' => ['nullable', 'string', 'max:2500'],
+            'admin_appearance_custom_footer_js' => ['nullable', 'string', 'max:2500'],
         ];
     }
 }

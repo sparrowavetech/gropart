@@ -10,7 +10,7 @@ class CheckIfInstalledMiddleware extends InstallerMiddleware
     public function handle(Request $request, Closure $next)
     {
         if ($this->alreadyInstalled()) {
-            return redirect()->route('public.index');
+            return redirect()->to('/');
         }
 
         return $next($request);

@@ -189,7 +189,7 @@ class DashboardWidgetInstance
         return $this;
     }
 
-    public function init(array $widgets, Collection $widgetSettings): array
+    public function init(array &$widgets, Collection $widgetSettings): array
     {
         if (! Auth::guard()->user()->hasPermission($this->permission)) {
             return $widgets;

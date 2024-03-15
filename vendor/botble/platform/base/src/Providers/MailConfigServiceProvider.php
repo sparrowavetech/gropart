@@ -3,6 +3,7 @@
 namespace Botble\Base\Providers;
 
 use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Hooks\EmailSettingHooks;
 use Botble\Base\Supports\ServiceProvider;
 use Botble\Setting\Supports\SettingStore;
 
@@ -108,6 +109,12 @@ class MailConfigServiceProvider extends ServiceProvider
 
                     break;
             }
+
+            add_filter(
+                BASE_FILTER_AFTER_SETTING_EMAIL_CONTENT,
+                [EmailSettingHooks::class, 'addEmailTemplateSettings'],
+                99
+            );
         });
     }
 }

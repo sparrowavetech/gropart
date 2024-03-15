@@ -51,6 +51,10 @@
 
     @stack('header')
 
+    {!! AdminAppearance::getCustomCSS() !!}
+
+    {!! AdminAppearance::getCustomJs('header') !!}
+
     {!! apply_filters(BASE_FILTER_HEAD_LAYOUT_TEMPLATE, null) !!}
 </head>
 
@@ -63,6 +67,8 @@
         data-bs-theme="dark"
     @endif
 >
+    {!! AdminAppearance::getCustomJs('body') !!}
+
     {{ $headerLayout ?? null }}
 
     {!! apply_filters(BASE_FILTER_HEADER_LAYOUT_TEMPLATE, null) !!}
@@ -81,6 +87,8 @@
         {{ $footer ?? null }}
         @stack('footer')
     </div>
+
+    {!! AdminAppearance::getCustomJs('footer') !!}
 
     {!! apply_filters(BASE_FILTER_FOOTER_LAYOUT_TEMPLATE, null) !!}
 </body>

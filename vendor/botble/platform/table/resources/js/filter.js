@@ -79,7 +79,7 @@ class TableFilter {
                     let keyName = item.name
 
                     if (typeof keyName === 'string' && keyName.endsWith('[]')) {
-                        let keyValue = paramsKey[keyName] = paramsKey[keyName] || 0
+                        let keyValue = (paramsKey[keyName] = paramsKey[keyName] || 0)
 
                         params.set(`${keyName.replace('[]', `[${keyValue}]`)}`, item.value)
 

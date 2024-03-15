@@ -10,6 +10,7 @@
             <a
                 id="add"
                 class="link btn-link cursor-pointer"
+                href="#"
                 data-placeholder="{{ sprintf('email@%s', request()->getHost()) }}"
             >
                 <small>+ {{ trans('core/setting::setting.email_add_more') }}</small>

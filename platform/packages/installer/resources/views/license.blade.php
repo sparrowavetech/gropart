@@ -1,6 +1,12 @@
 @extends('packages/installer::layouts.master')
 
-@section('pageTitle', trans('packages/installer::installer.license.pageTitle'))
+@section(
+    'pageTitle',
+     trans(
+         'packages/installer::installer.install_step_title',
+         ['step' => 6, 'title' => trans('packages/installer::installer.license.title')]
+     )
+)
 
 @section('header')
     <x-core::card.title>

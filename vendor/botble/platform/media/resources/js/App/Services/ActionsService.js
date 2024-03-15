@@ -219,7 +219,14 @@ export class ActionsService {
         let $itemsWrapper = $('#modal_rename_items .rename-items').empty()
 
         Helpers.each(Helpers.getSelectedItems(), (value) => {
-            let item = VIEW.replace(/__icon__/gi, value.icon || 'fa fa-file')
+            let item = VIEW.replace(
+                /__icon__/gi,
+                value.icon ||
+                    `<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                    <path d="M5 4h4l3 3h7a2 2 0 0 1 2 2v8a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-11a2 2 0 0 1 2 -2"></path>
+                </svg>`
+            )
                 .replace(/__placeholder__/gi, 'Input file name')
                 .replace(/__value__/gi, value.name)
 
@@ -252,7 +259,14 @@ export class ActionsService {
         let $itemsWrapper = $('#modal_alt_text_items .alt-text-items').empty()
 
         Helpers.each(Helpers.getSelectedItems(), (value) => {
-            let item = VIEW.replace(/__icon__/gi, value.icon || 'fa fa-file')
+            let item = VIEW.replace(
+                /__icon__/gi,
+                value.icon ||
+                    `<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                    <path d="M5 4h4l3 3h7a2 2 0 0 1 2 2v8a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-11a2 2 0 0 1 2 -2"></path>
+                </svg>`
+            )
                 .replace(/__placeholder__/gi, 'Input file alt')
                 .replace(/__value__/gi, value.alt === null ? '' : value.alt)
 
@@ -420,7 +434,7 @@ export class ActionsService {
                 if (!is_break) {
                     let template = ACTION_TEMPLATE.replace(/__action__/gi, item.action || '')
                         .replace(
-                            '<i class="icon __icon__ dropdown-item-icon"></i>',
+                            '<i class="__icon__ dropdown-item-icon dropdown-item-icon"></i>',
                             '<span class="icon-tabler-wrapper dropdown-item-icon">__icon__</span>'
                         )
                         .replace('__icon__', '<span class="icon-tabler-wrapper dropdown-item-icon">__icon__</span>')

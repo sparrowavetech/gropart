@@ -7,7 +7,7 @@
 <div {{ $attributes->class('empty') }}>
     @if ($icon)
         <div class="empty-icon">
-            <x-core-base::icon :name="$icon" />
+            <x-core::icon :name="$icon" />
         </div>
     @endif
     @if ($title)

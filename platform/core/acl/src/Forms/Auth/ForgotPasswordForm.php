@@ -31,6 +31,13 @@ class ForgotPasswordForm extends AuthForm
                     ->required()
                     ->toArray()
             )
-            ->submitButton(trans('core/acl::auth.forgot_password.submit'), 'ti ti-mail');
+            ->submitButton(trans('core/acl::auth.forgot_password.submit'), 'ti ti-mail')
+            ->add('back_to_login', HtmlField::class, [
+                'html' => sprintf(
+                    '<div class="mt-3 text-center"><a href="%s">%s</a></div>',
+                    route('access.login'),
+                    trans('core/acl::auth.back_to_login')
+                ),
+            ]);
     }
 }

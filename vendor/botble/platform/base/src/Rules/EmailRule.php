@@ -134,11 +134,11 @@ class EmailRule implements ValidationRule
             $validations[] = new NoRFCWarningsValidation();
         }
 
-        if ($this->dns) {
+        if ($this->dns && function_exists('idn_to_ascii')) {
             $validations[] = new DNSCheckValidation();
         }
 
-        if ($this->spoof) {
+        if ($this->spoof && extension_loaded('intl')) {
             $validations[] = new SpoofCheckValidation();
         }
 

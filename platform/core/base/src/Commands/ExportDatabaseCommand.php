@@ -5,6 +5,7 @@ namespace Botble\Base\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Process\Process;
 
 #[AsCommand('cms:db:export', 'Export database to SQL file.')]
@@ -16,7 +17,12 @@ class ExportDatabaseCommand extends Command
 
         switch ($driver = $config['driver']) {
             case 'mysql':
-                $sqlPath = base_path('database.sql');
+                $sqlPath = $this->argument('output');
+
+                if (! $sqlPath) {
+                    $sqlPath = base_path('database.sql');
+                }
+
                 $command = 'mysqldump --user="%s" --password="%s" --host="%s" --port="%s" "%s" > "%s"';
 
                 Process::fromShellCommandline(
@@ -43,5 +49,10 @@ class ExportDatabaseCommand extends Command
         $this->components->error(sprintf('The driver [%s] does not support.', $driver));
 
         return self::FAILURE;
+    }
+
+    protected function configure(): void
+    {
+        $this->addArgument('output', InputArgument::OPTIONAL, 'The SQL file output file path.', 'database.sql');
     }
 }

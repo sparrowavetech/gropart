@@ -87,7 +87,7 @@
         </div>
 
         <div class="col-sm-4">
-            <x-core::card class="mb-3">
+            <x-core::card class="mb-3" data-get-addition-data-url="{{ route('system.info.get-addition-data') }}">
                 <x-core::card.header>
                     <x-core::card.title>{{ trans('core/base::system.system_environment') }}</x-core::card.title>
                 </x-core::card.header>
@@ -111,7 +111,7 @@
                         {{ trans('core/base::system.cache_dir_writable') }}: @include('core/base::system.partials.status-icon', ['status' => $systemEnv['cache_dir_writable']])
                     </li>
                     <li class="list-group-item">
-                        {{ trans('core/base::system.app_size') }}: {{ $systemEnv['app_size'] }}
+                        {{ trans('core/base::system.app_size') }}: <span id="system-app-size"><div class="spinner-border spinner-border-sm text-secondary" role="status"></div></span>
                     </li>
                 </ul>
             </x-core::card>

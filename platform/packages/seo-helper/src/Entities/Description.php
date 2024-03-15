@@ -104,15 +104,9 @@ class Description implements DescriptionContract
         return $this;
     }
 
-    /**
-     * Make a description instance.
-     *
-     * @param string $content
-     * @param int $max
-     */
-    public static function make($content, $max = 386): self
+    public static function make(): self
     {
-        return new self();
+        return app(Description::class);
     }
 
     /**

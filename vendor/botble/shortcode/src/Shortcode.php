@@ -19,6 +19,11 @@ class Shortcode
         return $this;
     }
 
+    public function remove(string $key): void
+    {
+        $this->compiler->remove($key);
+    }
+
     public function setPreviewImage(string $key, string $previewImage): Shortcode
     {
         $this->compiler->setPreviewImage($key, $previewImage);

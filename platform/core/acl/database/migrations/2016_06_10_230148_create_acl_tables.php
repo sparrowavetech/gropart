@@ -37,7 +37,7 @@ return new class () extends Migration {
             $table->string('slug', 120)->unique();
             $table->string('name', 120);
             $table->text('permissions')->nullable();
-            $table->string('description', 255)->nullable();
+            $table->string('description', 400)->nullable();
             $table->tinyInteger('is_default')->unsigned()->default(0);
             $table->foreignId('created_by')->index();
             $table->foreignId('updated_by')->index();
@@ -54,7 +54,7 @@ return new class () extends Migration {
         Schema::create('user_meta', function (Blueprint $table) {
             $table->id();
             $table->string('key', 120)->nullable();
-            $table->string('value', 255)->nullable();
+            $table->string('value')->nullable();
             $table->foreignId('user_id')->index();
             $table->timestamps();
         });

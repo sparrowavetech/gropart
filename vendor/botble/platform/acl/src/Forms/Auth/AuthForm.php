@@ -2,6 +2,7 @@
 
 namespace Botble\ACL\Forms\Auth;
 
+use Botble\Base\Facades\Assets;
 use Botble\Base\Forms\FieldOptions\HtmlFieldOption;
 use Botble\Base\Forms\Fields\HtmlField;
 use Botble\Base\Forms\FormAbstract;
@@ -11,6 +12,29 @@ class AuthForm extends FormAbstract
 {
     public function setup(): void
     {
+        Assets::addScripts('form-validation')
+            ->removeStyles([
+                'select2',
+                'fancybox',
+                'spectrum',
+                'custom-scrollbar',
+                'datepicker',
+                'fontawesome',
+                'toastr',
+            ])
+            ->removeScripts([
+                'select2',
+                'fancybox',
+                'cookie',
+                'spectrum',
+                'toastr',
+                'modernizr',
+                'excanvas',
+                'jquery-waypoints',
+                'stickytableheaders',
+                'ie8-fix',
+            ]);
+
         $this
             ->model(BaseModel::class)
             ->template('core/acl::auth.form');

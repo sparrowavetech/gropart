@@ -1,14 +1,14 @@
 @php
-if ($field['type'] === 'select') {
-    $field['type'] = 'customSelect';
-}
+    if ($field['type'] === 'select') {
+        $field['type'] = 'customSelect';
+    }
 
-$hiddenField = Form::hidden($name . '[' . $index . '][' . $key . '][key]', $field['attributes']['name']);
-$field['attributes']['name'] = $name . '[' . $index . '][' . $key . '][value]';
-$field['attributes']['value'] = Arr::get($values, $index . '.' . $key . '.value');
-$field['attributes']['options']['id'] = $id = 'repeater_field_' . md5($field['attributes']['name']);
-$field['attributes']['id'] = $id;
-$field['attributes']['label_attr']['for'] = $id;
+    $hiddenField = Form::hidden($name . '[' . $index . '][' . $key . '][key]', $field['attributes']['name']);
+    $field['attributes']['name'] = $name . '[' . $index . '][' . $key . '][value]';
+    $field['attributes']['value'] = Arr::get($values, $index . '.' . $key . '.value');
+    $field['attributes']['options']['id'] = $id = 'repeater_field_' . md5($field['attributes']['name']) . uniqid('_');
+    $field['attributes']['id'] = $id;
+    $field['attributes']['label_attr']['for'] = $id;
 @endphp
 
 <x-core::form-group>

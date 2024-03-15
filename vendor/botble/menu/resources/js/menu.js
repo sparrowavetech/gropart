@@ -64,9 +64,9 @@ class MenuNestable {
                 currentInfo[name] = value
 
                 parent.data('menu-item', currentInfo)
-                parent.find('> .dd3-content .text[data-update="' + name + '"]').text(value)
+                parent.find('> .dd3-content .fw-medium[data-update="' + name + '"]').text(value)
                 if (value.trim() === '') {
-                    parent.find('> .dd3-content .text[data-update="' + name + '"]').text(old)
+                    parent.find('> .dd3-content .fw-medium[data-update="' + name + '"]').text(old)
                 }
             }
         )
@@ -91,7 +91,7 @@ class MenuNestable {
 
                 params.position = position + 1
 
-                createMenuNode(params, that, parent)
+                createMenuNode(params, that, parent, current.data('url'))
             } else {
                 parent.find('.list-item li.active').each((index, el) => {
                     const findIn = $(el).find('> label > input[type=checkbox]')
@@ -110,15 +110,15 @@ class MenuNestable {
 
                     params.position = position + index
 
-                    createMenuNode(params, that, parent)
+                    createMenuNode(params, that, parent, current.data('url'))
                 })
             }
         })
 
-        let createMenuNode = (params, current, parent) => {
+        let createMenuNode = (params, current, parent, url) => {
             $httpClient
                 .make()
-                .get(route('menus.get-node'), { data: params })
+                .get(url, { data: params })
                 .then(({ data }) => {
                     current.appendMenuNode(data.data.html, parent)
                 })

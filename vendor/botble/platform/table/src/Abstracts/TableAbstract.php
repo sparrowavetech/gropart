@@ -6,7 +6,6 @@ use Botble\ACL\Models\User;
 use Botble\Base\Contracts\BaseModel as BaseModelContract;
 use Botble\Base\Contracts\Builders\Extensible as ExtensibleContract;
 use Botble\Base\Facades\Assets;
-use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\Form;
 use Botble\Base\Facades\Html;
 use Botble\Base\Models\BaseModel;
@@ -565,12 +564,7 @@ abstract class TableAbstract extends DataTable implements ExtensibleContract
         $this->hasColumnVisibility = (bool) setting('datatables_default_show_column_visibility');
 
         if ($this->hasColumnVisibility) {
-            $buttons[] = [
-                'extend' => 'colvis',
-                'text' => BaseHelper::renderIcon('ti ti-list'),
-                'align' => 'button-right',
-                'columns' => ':not(.no-column-visibility)',
-            ];
+            $buttons[] = 'visibility';
         }
 
         return $buttons;
@@ -784,7 +778,7 @@ abstract class TableAbstract extends DataTable implements ExtensibleContract
 
     public function getFilters(): array
     {
-        return $this->getAllBulkChanges();
+        return apply_filters('base_filter_table_filters', $this->getAllBulkChanges(), $this);
     }
 
     protected function addCreateButton(string $url, string|null $permission = null, array $buttons = []): array

@@ -1,5 +1,5 @@
 <x-core::form.color-picker
     :name="$name"
-    :value="$value ?? '#000'"
+    :value="$value ?: 'transparent'"
     :attributes="new Illuminate\View\ComponentAttributeBag((array) $attributes)"
 />

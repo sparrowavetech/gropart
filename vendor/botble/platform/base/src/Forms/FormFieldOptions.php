@@ -5,6 +5,7 @@ namespace Botble\Base\Forms;
 use Botble\Base\Supports\Builders\HasAttributes;
 use Botble\Base\Supports\Builders\HasLabel;
 use Botble\Base\Traits\Forms\CanSpanColumns;
+use Botble\Base\Traits\Forms\HasCollapsibleField;
 use Closure;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Support\Traits\Conditionable;
@@ -12,11 +13,12 @@ use Illuminate\Support\Traits\Tappable;
 
 class FormFieldOptions implements Arrayable
 {
+    use CanSpanColumns;
     use Conditionable;
     use HasAttributes;
+    use HasCollapsibleField;
     use HasLabel;
     use Tappable;
-    use CanSpanColumns;
 
     protected bool $required = false;
 
@@ -24,7 +26,7 @@ class FormFieldOptions implements Arrayable
 
     protected array $labelAttributes = [];
 
-    protected array $wrapperAttributes = [];
+    protected array|bool $wrapperAttributes = [];
 
     protected bool $metadata = false;
 
@@ -61,14 +63,14 @@ class FormFieldOptions implements Arrayable
         return $this->labelAttributes;
     }
 
-    public function wrapperAttributes(array $attributes): static
+    public function wrapperAttributes(array|bool $attributes): static
     {
         $this->wrapperAttributes = $attributes;
 
         return $this;
     }
 
-    public function getWrapperAttributes(): array
+    public function getWrapperAttributes(): array|bool
     {
         return $this->wrapperAttributes;
     }
@@ -151,7 +153,7 @@ class FormFieldOptions implements Arrayable
             $data['label_attr'] = $this->getLabelAttributes();
         }
 
-        if ($this->wrapperAttributes) {
+        if ($this->wrapperAttributes || $this->wrapperAttributes === false) {
             $data['wrapper'] = $this->getWrapperAttributes();
         }
 

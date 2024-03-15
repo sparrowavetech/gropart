@@ -21,6 +21,8 @@ class PublicController extends BaseController
 {
     public function getIndex()
     {
+        Theme::addBodyAttributes(['id' => 'page-home']);
+
         if (
             defined('PAGE_MODULE_SCREEN_NAME') &&
             ($homepageId = BaseHelper::getHomepageId()) &&
@@ -61,7 +63,7 @@ class PublicController extends BaseController
             $slug->reference_type === Page::class &&
             BaseHelper::isHomepage($slug->reference_id)
         ) {
-            return redirect()->route('public.index');
+            return redirect()->to(BaseHelper::getHomepageUrl());
         }
 
         $result = apply_filters(BASE_FILTER_PUBLIC_SINGLE_DATA, $slug);
@@ -86,6 +88,8 @@ class PublicController extends BaseController
 
         if (! empty($result) && is_array($result)) {
             if (isset($result['view'])) {
+                Theme::addBodyAttributes(['id' => Str::slug(Str::snake(Str::afterLast($slug->reference_type, '\\'))) . '-' . $slug->reference_id]);
+
                 return Theme::scope($result['view'], $result['data'], Arr::get($result, 'default_view'))->render();
             }
 

@@ -21,6 +21,8 @@ use Illuminate\Support\Facades\Facade;
  * @method static mixed getUserSetting(string $key, mixed|null $default = null)
  * @method static string getSettingKey(string $key)
  * @method static void setSetting(array|string $key, mixed|null $value = null)
+ * @method static string getCustomCSS()
+ * @method static string getCustomJS(string $location)
  *
  * @see \Botble\Base\Supports\AdminAppearance
  */

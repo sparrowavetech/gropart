@@ -9,8 +9,8 @@
                 title="{{ $row->title }}"
                 @if ($row->target !== '_self') target="{{ $row->target }}" @endif
             >
-                @if ($row->icon_font) <i class="{{ trim($row->icon_font) }}"></i> @endif
-                <span>{!! BaseHelper::clean($row->title) !!}</span>
+                {!! $row->icon_html !!}
+                <span class="menu-title">{!! BaseHelper::clean($row->title) !!}</span>
             </a>
             @if ($row->has_child)
                 {!! Menu::generateMenu([

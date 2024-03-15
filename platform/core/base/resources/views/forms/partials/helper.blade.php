@@ -3,7 +3,7 @@
     v-pre
 >
     @if (!$icon)
-        <i class="fa fa-info-circle me-1"></i>
+        <x-core::icon name="info-circle" class="me-1" />
     @else
         {!! $icon !!}
     @endif

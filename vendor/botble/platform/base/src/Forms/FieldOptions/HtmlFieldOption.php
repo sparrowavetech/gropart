@@ -9,11 +9,6 @@ class HtmlFieldOption extends FormFieldOptions
 {
     protected string $html = '';
 
-    public static function make(): static
-    {
-        return new static();
-    }
-
     public function view(string $view, array $data = [], array $mergeData = []): static
     {
         return $this->content(

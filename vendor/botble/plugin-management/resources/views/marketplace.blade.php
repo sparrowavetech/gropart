@@ -8,7 +8,7 @@
         issues related to our official products and services.
     </div>
 
-    <plugin-list></plugins-list>
+    <plugin-list plugin-list-url="{{ route('plugins.marketplace.ajax.list') }}" plugin-remove-url="{{ route('plugins.remove', '__name__') }}"></plugins-list>
 @endsection
 
 @push('footer')

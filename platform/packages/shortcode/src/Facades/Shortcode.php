@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Facade;
 
 /**
  * @method static \Botble\Shortcode\Shortcode register(string $key, string|null $name, string|null $description = null, $callback = null, string $previewImage = '')
+ * @method static void remove(string $key)
  * @method static \Botble\Shortcode\Shortcode setPreviewImage(string $key, string $previewImage)
  * @method static \Botble\Shortcode\Shortcode enable()
  * @method static \Botble\Shortcode\Shortcode disable()

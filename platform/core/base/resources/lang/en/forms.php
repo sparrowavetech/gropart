@@ -30,7 +30,7 @@ return [
     'content_placeholder' => 'Write your content',
     'parent' => 'Parent',
     'icon' => 'Icon',
-    'icon_placeholder' => 'Ex: fa fa-home',
+    'icon_placeholder' => 'Ex: ti ti-home',
     'order_by' => 'Order by',
     'order_by_placeholder' => 'Order by',
     'is_featured' => 'Is featured?',

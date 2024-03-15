@@ -68,15 +68,18 @@
     .show-item-details {
         background-color: var(--bb-body-bg);
         left: 319px;
-        line-height: 38px;
         position: absolute;
         text-align: center;
         top: 1px;
+        height: 38px;
         width: 43px;
         color: var(--bb-secondary);
         border-left: var(--bb-border-width) var(--bb-border-style) var(--bb-border-color);
         border-bottom-right-radius: var(--bb-border-radius);
         border-top-right-radius: var(--bb-border-radius);
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
 
         &.active {
             .icon {

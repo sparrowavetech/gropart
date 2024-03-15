@@ -60,7 +60,18 @@ use Illuminate\Support\Facades\Facade;
  * @method static void registerThemeIconFields(array $icons, array $css = [], array $js = [])
  * @method static void registerFacebookIntegration()
  * @method static void registerSocialLinks()
+ * @method static array getSocialLinksRepeaterFields()
  * @method static array getSocialLinks()
+ * @method static array convertSocialLinksToArray(array $data)
+ * @method static array getThemeIcons()
+ * @method static static addBodyAttributes(array $bodyAttributes)
+ * @method static string|null getBodyAttribute(string $attribute)
+ * @method static array getBodyAttributes()
+ * @method static string bodyAttributes()
+ * @method static void registerPreloader()
+ * @method static array getPreloaderVersions()
+ * @method static void registerToastNotification()
+ * @method static string|null getSiteCopyright()
  *
  * @see \Botble\Theme\Theme
  */

@@ -1,6 +1,12 @@
 @extends('packages/installer::layouts.master')
 
-@section('pageTitle', trans('packages/installer::installer.environment.wizard.pageTitle'))
+@section(
+    'pageTitle',
+     trans(
+         'packages/installer::installer.install_step_title',
+         ['step' => 3, 'title' => trans('packages/installer::installer.environment.wizard.title')]
+     )
+)
 
 @section('header')
     <x-core::card.title>
@@ -94,8 +100,8 @@
 @section('footer')
     <x-core::button
         color="primary"
-        type="button"
-        onclick="document.getElementById('environment-form').submit()"
+        type="submit"
+        form="environment-form"
     >
         {{ trans('packages/installer::installer.environment.wizard.form.buttons.install') }}
     </x-core::button>

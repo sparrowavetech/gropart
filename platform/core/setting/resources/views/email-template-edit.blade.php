@@ -82,7 +82,7 @@
                 </x-core::button>
                 <x-core::button
                     tag="a"
-                    href="{{ route('settings.email.template.preview', ['type' => $pluginData['type'], 'module' => $pluginData['name'], 'template' => $pluginData['template_file']]) }}"
+                    href="{{ route('settings.email.template.preview', ['type' => $pluginData['type'], 'module' => $pluginData['name'], 'template' => $pluginData['template_file'], 'ref_lang' => request()->input('ref_lang')]) }}"
                     target="_blank"
                     icon="ti ti-eye"
                 >

@@ -49,6 +49,8 @@ trait HasMenuSeeder
             if (is_plugin_active('language')) {
                 LanguageMeta::saveMetaData($menu);
             }
+
+            $this->createMetadata($menu, $item);
         }
 
         Menu::clearCacheMenuItems();
@@ -58,6 +60,7 @@ trait HasMenuSeeder
     {
         $menuNode['menu_id'] = $menuId;
         $menuNode['parent_id'] = $parentId;
+        $menuNode['position'] = $index;
 
         if (isset($menuNode['url'])) {
             $menuNode['url'] = str_replace(url(''), '', $menuNode['url']);
@@ -74,6 +77,8 @@ trait HasMenuSeeder
         Arr::forget($menuNode, 'children');
 
         $createdNode = MenuNode::query()->create($menuNode);
+
+        $this->createMetadata($createdNode, $menuNode);
 
         if ($children) {
             foreach ($children as $child) {

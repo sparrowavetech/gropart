@@ -4,18 +4,16 @@ namespace Botble\Installer\Http\Controllers;
 
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Http\Controllers\BaseController;
-use Botble\Base\Supports\Database;
 use Botble\Installer\Events\EnvironmentSaved;
 use Botble\Installer\Http\Requests\SaveEnvironmentRequest;
+use Botble\Installer\Services\ImportDatabaseService;
 use Botble\Installer\Supports\EnvironmentManager;
+use Botble\Theme\Facades\Manager;
 use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
-use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\URL;
-use Illuminate\Support\MessageBag;
 
 class EnvironmentController extends BaseController
 {
@@ -28,8 +26,11 @@ class EnvironmentController extends BaseController
         return view('packages/installer::environment');
     }
 
-    public function store(SaveEnvironmentRequest $request, EnvironmentManager $environmentManager): RedirectResponse
-    {
+    public function store(
+        SaveEnvironmentRequest $request,
+        EnvironmentManager $environmentManager,
+        ImportDatabaseService $importDatabaseService
+    ): RedirectResponse {
         $driverName = $request->input('database_connection');
         $connectionName = 'database.connections.' . $driverName;
         $databaseName = $request->input('database_name');
@@ -45,15 +46,11 @@ class EnvironmentController extends BaseController
             ]),
         ]);
 
-        try {
-            Database::restoreFromPath(base_path('database.sql'));
-
-            File::delete(app()->bootstrapPath('cache/plugins.php'));
-        } catch (QueryException $exception) {
-            $errors = new MessageBag();
-            $errors->add('database', $exception->getMessage());
-
-            return back()->withInput()->withErrors($errors);
+        if (count(Manager::getThemes()) > 1) {
+            $nextRouteName = 'installers.themes.index';
+        } else {
+            $nextRouteName = 'installers.accounts.index';
+            $importDatabaseService->handle(base_path('database.sql'));
         }
 
         $results = $environmentManager->save($request);
@@ -63,7 +60,7 @@ class EnvironmentController extends BaseController
         BaseHelper::saveFileData(storage_path(INSTALLING_SESSION_NAME), Carbon::now()->toDateTimeString());
 
         return redirect()
-            ->to(URL::temporarySignedRoute('installers.accounts.index', Carbon::now()->addMinutes(30)))
+            ->to(URL::temporarySignedRoute($nextRouteName, Carbon::now()->addMinutes(30)))
             ->with('install_message', $results);
     }
 }

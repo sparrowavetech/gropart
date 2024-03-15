@@ -2,6 +2,7 @@
 
 namespace Botble\Base\Supports;
 
+use Botble\Base\Contracts\BaseModel;
 use Botble\Base\Models\MetaBox as MetaBoxModel;
 use Closure;
 use Illuminate\Database\Eloquent\Model;
@@ -92,7 +93,7 @@ class MetaBox
         }
 
         $data = '';
-        $reference = $object::class;
+        $reference = $object instanceof BaseModel ? $object::class : $object;
         if (isset($this->metaBoxes[$reference][$context])) {
             foreach (['high', 'sorted', 'core', 'default', 'low'] as $priority) {
                 if (! isset($this->metaBoxes[$reference][$context][$priority])) {

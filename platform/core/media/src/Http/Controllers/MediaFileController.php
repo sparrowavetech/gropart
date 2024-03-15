@@ -7,12 +7,12 @@ use Botble\Media\Chunks\Exceptions\UploadMissingFileException;
 use Botble\Media\Chunks\Handler\DropZoneUploadHandler;
 use Botble\Media\Chunks\Receiver\FileReceiver;
 use Botble\Media\Facades\RvMedia;
-use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Throwable;
 
 /**
  * @since 19/08/2015 07:50 AM
@@ -21,13 +21,13 @@ class MediaFileController extends BaseController
 {
     public function postUpload(Request $request)
     {
-        if (! RvMedia::isChunkUploadEnabled()) {
-            $result = RvMedia::handleUpload(Arr::first($request->file('file')), $request->input('folder_id', 0));
-
-            return $this->handleUploadResponse($result);
-        }
-
         try {
+            if (! RvMedia::isChunkUploadEnabled()) {
+                $result = RvMedia::handleUpload(Arr::first($request->file('file')), $request->input('folder_id', 0));
+
+                return $this->handleUploadResponse($result);
+            }
+
             // Create the file receiver
             $receiver = new FileReceiver('file', $request, DropZoneUploadHandler::class);
             // Check if the upload is success, throw exception or return response you need
@@ -49,7 +49,7 @@ class MediaFileController extends BaseController
                 'done' => $handler->getPercentageDone(),
                 'status' => true,
             ]);
-        } catch (Exception $exception) {
+        } catch (Throwable $exception) {
             return RvMedia::responseError($exception->getMessage());
         }
     }

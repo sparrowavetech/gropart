@@ -20,7 +20,7 @@ return new class () extends Migration {
             $table->foreignId('menu_id')->index();
             $table->foreignId('parent_id')->default(0)->index();
             $table->foreignId('reference_id')->nullable();
-            $table->string('reference_type', 255)->nullable();
+            $table->string('reference_type')->nullable();
             $table->string('url', 120)->nullable();
             $table->string('icon_font', 50)->nullable();
             $table->tinyInteger('position')->unsigned()->default(0);

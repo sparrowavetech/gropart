@@ -89,6 +89,8 @@ return [
         'updated_at' => 'Modified at',
         'nothing_selected' => 'Nothing is selected',
         'visit_link' => 'Open link',
+        'width' => 'Width',
+        'height' => 'Height',
 
         'no_item' => [
             'all_media' => [

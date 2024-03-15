@@ -45,62 +45,74 @@
                                 @php
                                     $key = $k . '_' . $i;
                                     $name = $i <= $current ? $key : '';
+                                    $title = Arr::get($field, 'title');
+                                    $placeholder = Arr::get($field, 'placeholder', $title);
+                                    $defaultValue = Arr::get($field, 'value', Arr::get($field, 'default_value'));
+                                    $value = Arr::get($attributes, $key, $defaultValue);
+                                    $fieldAttributes = [...Arr::get($field, 'attributes', []), 'data-name' => $key];
+
+                                    $options = [];
+                                    if (Arr::has($field, 'options')) {
+                                        $options = Arr::get($field, 'options', []);
+                                    }
                                 @endphp
+
                                 <div class="mb-3">
-                                    <label @class(['form-label', 'required' => Arr::get($field, 'required')])>{{ Arr::get($field, 'title') }}</label>
+                                    <label @class(['form-label', 'required' => Arr::get($field, 'required')])>{{ $title }}</label>
                                     @switch(Arr::get($field, 'type'))
                                         @case('image')
-                                            {!! Form::mediaImage($name, Arr::get($attributes, $key), ['data-name' => $key]) !!}
+                                            {!! Form::mediaImage($name, $value, $fieldAttributes) !!}
+                                            @break
+
+                                        @case('file')
+                                            {!! Form::mediaFile($name, $value, $fieldAttributes) !!}
                                             @break
 
                                         @case('color')
-                                            {!! Form::customColor($name, Arr::get($attributes, $key), ['data-name' => $key]) !!}
+                                            {!! Form::customColor($name, $value, $fieldAttributes) !!}
                                             @break
 
                                         @case('icon')
-                                            {!! Form::themeIcon($name, Arr::get($attributes, $key), ['data-name' => $key]) !!}
+                                            {!! Form::themeIcon($name, $value, $fieldAttributes) !!}
                                             @break
 
                                         @case('number')
-                                            {!! Form::number($name, Arr::get($attributes, $key), [
+                                            {!! Form::number($name, $value, [
                                                 'class' => 'form-control',
-                                                'placeholder' => Arr::get($field, 'placeholder', Arr::get($field, 'title')),
+                                                'placeholder' => $placeholder,
                                                 'data-name' => $key,
                                             ]) !!}
                                             @break
 
                                         @case('textarea')
-                                            {!! Form::textarea($name, Arr::get($attributes, $key), [
+                                            {!! Form::textarea($name, $value, [
                                                 'class' => 'form-control',
-                                                'placeholder' => Arr::get($field, 'placeholder', Arr::get($field, 'title')),
-                                                'data-name' => $key,
+                                                'placeholder' => $placeholder,
                                                 'rows' => 3,
+                                                ...$fieldAttributes,
                                             ]) !!}
                                             @break
 
                                         @case('checkbox')
-                                            {!! Form::customSelect($name, ['no' => __('No'), 'yes' => __('Yes')], Arr::get($attributes, $key), [
-                                                'data-name' => $key,
-                                            ]) !!}
-                                            @break
+                                            @php($options =  ['no' => __('No'), 'yes' => __('Yes')])
 
                                         @case('select')
-                                            {!! Form::customSelect($name, Arr::get($field, 'options', []), Arr::get($attributes, $key), [
-                                                'data-name' => $key,
-                                            ]) !!}
+                                            {!! Form::customSelect($name, $options, $value, $fieldAttributes) !!}
                                             @break
 
                                         @case('onOff')
-                                            {!! Form::onOff($name, Arr::get($attributes, $key), [...Arr::get($field, 'options', []),
-                                                'data-name' => $key,
-                                            ]) !!}
+                                            {!! Form::onOff($name, $value, [...$options, ...$fieldAttributes]) !!}
+                                            @break
+
+                                        @case('coreIcon')
+                                            {!! Form::coreIcon($name, $value, [...$options, ...$fieldAttributes]) !!}
                                             @break
 
                                         @default
-                                            {!! Form::text($name, Arr::get($attributes, $key), [
+                                            {!! Form::text($name, $value, [
                                                 'class' => 'form-control',
-                                                'placeholder' => Arr::get($field, 'placeholder', Arr::get($field, 'title')),
-                                                'data-name' => $key,
+                                                'placeholder' => $placeholder,
+                                                ...$fieldAttributes,
                                             ]) !!}
                                     @endswitch
 

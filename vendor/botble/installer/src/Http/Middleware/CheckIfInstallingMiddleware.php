@@ -18,10 +18,10 @@ class CheckIfInstallingMiddleware
             $startingDate = Carbon::parse($content);
 
             if (! $content || Carbon::now()->diffInMinutes($startingDate) > 30) {
-                return redirect()->route('public.index');
+                return redirect()->to('/');
             }
         } catch (Exception) {
-            return redirect()->route('public.index');
+            return redirect()->to('/');
         }
 
         return $next($request);

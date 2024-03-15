@@ -34,16 +34,14 @@ class WidgetServiceProvider extends ServiceProvider
         $this->app->singleton('botble.widget-group-collection', function (Application $app) {
             return new WidgetGroupCollection($app);
         });
-
-        $this
-            ->setNamespace('packages/widget')
-            ->loadHelpers();
     }
 
     public function boot(): void
     {
         $this
+            ->setNamespace('packages/widget')
             ->loadAndPublishConfigurations(['permissions'])
+            ->loadHelpers()
             ->loadRoutes()
             ->loadMigrations()
             ->loadAndPublishViews()

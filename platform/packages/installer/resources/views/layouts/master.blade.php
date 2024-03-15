@@ -73,19 +73,13 @@
 
 <body>
     @php
-        $currentStep = match (true) {
-            Route::is('installers.welcome') => 1,
-            Route::is('installers.requirements.index') => 2,
-            Route::is('installers.environments.index') => 3,
-            Route::is('installers.accounts.index') => 4,
-            Route::is('installers.licenses.index') => 5,
-            Route::is('installers.final') => 6,
-            default => 1,
-        };
+        use Botble\Installer\InstallerStep\InstallerStep;
+
+        $currentStep = InstallerStep::currentStep();
     @endphp
 
     <div class="page-wrapper justify-content-center min-h-full">
-        <div class="page-body">
+        <div class="page-body page-content">
             <div class="container-xl installer-container">
                 <div class="row mb-6">
                     <div class="col">
@@ -99,45 +93,15 @@
                     <div class="col-md-3 p-4">
                         <div class="steps-backdrop"></div>
                         <x-core::step :counter="true" :vertical="true">
-                            <x-core::step.item :is-active="$currentStep === 1">
-                                @if ($currentStep > 1)
-                                    <a href="{{ route('installers.welcome') }}">{{ trans('packages/installer::installer.welcome.title') }}</a>
-                                @else
-                                    {{ trans('packages/installer::installer.welcome.title') }}
-                                @endif
-                            </x-core::step.item>
-                            <x-core::step.item :is-active="$currentStep === 2">
-                                @if ($currentStep > 2)
-                                    <a href="{{ route('installers.requirements.index') }}">{{ trans('packages/installer::installer.requirements.title') }}</a>
-                                @else
-                                    {{ trans('packages/installer::installer.requirements.title') }}
-                                @endif
-                            </x-core::step.item>
-                            <x-core::step.item :is-active="$currentStep === 3">
-                                @if ($currentStep > 3)
-                                    <a href="{{ route('installers.environments.index') }}">{{ trans('packages/installer::installer.environment.wizard.title') }}</a>
-                                @else
-                                    {{ trans('packages/installer::installer.environment.wizard.title') }}
-                                @endif
-                            </x-core::step.item>
-                            <x-core::step.item :is-active="$currentStep === 4">
-                                @if ($currentStep > 4)
-                                    <a href="{{ route('installers.accounts.index') }}">{{ trans('packages/installer::installer.createAccount.title') }}</a>
-                                @else
-                                    {{ trans('packages/installer::installer.createAccount.title') }}
-                                @endif
-                            </x-core::step.item>
-                            <x-core::step.item :is-active="$currentStep === 5">
-                                @if ($currentStep > 5)
-                                    <a href="{{ route('installers.licenses.index') }}">{{ trans('packages/installer::installer.license.title') }}</a>
-                                @else
-                                    {{ trans('packages/installer::installer.license.title') }}
-                                @endif
-                            </x-core::step.item>
-
-                            <x-core::step.item :is-active="$currentStep === 6">
-                                {{ trans('packages/installer::installer.final.title') }}
-                            </x-core::step.item>
+                            @foreach(InstallerStep::getItems() as $step)
+                                <x-core::step.item :is-active="$currentStep === $loop->iteration">
+                                    @if($step->getRoute() && $currentStep > $loop->iteration)
+                                        <a href="{{ route($step->getRoute()) }}">{{ $step->getLabel() }}</a>
+                                    @else
+                                        {{ $step->getLabel() }}
+                                    @endif
+                                </x-core::step.item>
+                            @endforeach
                         </x-core::step>
                     </div>
                     <div class="col-md-9 p-0">

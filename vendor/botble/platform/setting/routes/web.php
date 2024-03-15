@@ -12,6 +12,12 @@ Route::group(['namespace' => 'Botble\Setting\Http\Controllers'], function () {
                 'uses' => 'HomeSettingController@index',
             ]);
 
+            Route::get('options', [
+                'as' => 'options',
+                'uses' => 'HomeSettingController@index',
+                'permission' => 'settings.index',
+            ]);
+
             Route::prefix('general')->group(function () {
                 Route::get('/', [
                     'as' => 'general',

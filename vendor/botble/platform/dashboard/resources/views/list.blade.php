@@ -59,6 +59,7 @@
             id="list_widgets"
             class="row row-cards"
             data-bb-toggle="widgets-list"
+            data-url="{{ route('dashboard.update_widget_order') }}"
         >
             @foreach ($userWidgets as $widget)
                 {!! $widget !!}

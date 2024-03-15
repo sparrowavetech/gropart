@@ -1,10 +1,6 @@
 @if (! $asDropdown && $choices)
     <x-core::form.fieldset class="fieldset-for-multi-check-list">
         <div class="multi-check-list-wrapper">
-            @php
-                $attributes['class'] = str_replace('form-control', '', $attributes['class']);
-            @endphp
-
             @foreach ($choices as $key => $item)
                 <x-core::form.checkbox
                     :id="sprintf('%s-item-%s', Str::slug($name), $key)"

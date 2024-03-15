@@ -5,11 +5,13 @@ namespace Botble\Menu\Models;
 use Botble\Base\Casts\SafeContent;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Models\BaseModel;
+use Botble\Media\Facades\RvMedia;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Facades\Request;
+use Illuminate\Support\HtmlString;
 
 class MenuNode extends BaseModel
 {
@@ -75,7 +77,6 @@ class MenuNode extends BaseModel
     protected function title(): Attribute
     {
         return Attribute::make(
-            set: fn ($value) => str_replace('&amp;', '&', $value),
             get: function ($value) {
                 if ($value) {
                     return $value;
@@ -86,6 +87,34 @@ class MenuNode extends BaseModel
                 }
 
                 return $this->reference->name;
+            },
+            set: fn ($value) => str_replace('&amp;', '&', $value),
+        );
+    }
+
+    protected function iconHtml(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                $iconImage = $iconImage = $this->getMetaData('icon_image', true);
+
+                if ($iconImage) {
+                    return RvMedia::image($iconImage, 'icon', attributes: ['class' => 'menu-icon-image']);
+                }
+
+                $icon = $this->icon_font;
+
+                if (! $icon) {
+                    return null;
+                }
+
+                if (BaseHelper::hasIcon($icon)) {
+                    $icon = BaseHelper::renderIcon($icon);
+                } else {
+                    $icon = sprintf('<i class="%s"></i>', $icon);
+                }
+
+                return new HtmlString($icon);
             },
         );
     }

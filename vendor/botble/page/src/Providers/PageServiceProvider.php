@@ -20,12 +20,6 @@ class PageServiceProvider extends ServiceProvider
 {
     use LoadAndPublishDataTrait;
 
-    public function register(): void
-    {
-        $this->setNamespace('packages/page')
-            ->loadHelpers();
-    }
-
     public function boot(): void
     {
         $this->app->bind(PageInterface::class, function () {
@@ -33,7 +27,9 @@ class PageServiceProvider extends ServiceProvider
         });
 
         $this
+            ->setNamespace('packages/page')
             ->loadAndPublishConfigurations(['permissions', 'general'])
+            ->loadHelpers()
             ->loadAndPublishViews()
             ->loadAndPublishTranslations()
             ->loadRoutes()

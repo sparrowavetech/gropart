@@ -2,6 +2,7 @@
 
 namespace Botble\Slug\Listeners;
 
+use Botble\Base\Contracts\BaseModel;
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Slug\Facades\SlugHelper;
@@ -14,7 +15,7 @@ class CreatedContentListener
 {
     public function handle(CreatedContentEvent $event): void
     {
-        if (SlugHelper::isSupportedModel($class = get_class($event->data)) && $event->request->input('is_slug_editable', 0)) {
+        if ($event->data instanceof BaseModel && SlugHelper::isSupportedModel($class = $event->data::class) && $event->request->input('is_slug_editable', 0)) {
             try {
                 $slug = $event->request->input('slug');
 

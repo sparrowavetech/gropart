@@ -164,9 +164,9 @@ class MediaSettingForm extends SettingForm
                 ->isOpened((bool) old('media_watermark_enabled', setting('media_watermark_enabled')))
             )
             ->add('media_image_processing_library', 'customRadio', [
-                'label' => trans('core/setting::setting.admin_appearance.form.rich_editor'),
-                'value' => RvMedia::getImageProcessingLibrary(),
-                'values' => array_merge(
+                'label' => trans('core/setting::setting.media.image_processing_library'),
+                'selected' => RvMedia::getImageProcessingLibrary(),
+                'choices' => array_merge(
                     ['gd' => 'GD Library'],
                     extension_loaded('imagick')
                         ? ['imagick' => 'Imagick', ]

@@ -11,6 +11,10 @@ class CheckUserUpdatePermission
     public function handle(Request $request, Closure $next)
     {
         $currentUser = $request->user();
+
+        /**
+         * @var \Botble\ACL\Models\User $user
+         */
         $user = $request->route('user');
 
         $hasRightToUpdate = $currentUser->hasPermission('users.edit')

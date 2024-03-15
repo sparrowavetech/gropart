@@ -1,19 +1,16 @@
-@if ($showLabel && $showField)
-    @if ($options['wrapper'] !== false)
-        <div {!! $options['wrapperAttrs'] !!}>
-   @endif
-@endif
-
-@if ($showField)
+<x-core::form.field
+    :showLabel="$showLabel"
+    :showField="$showField"
+    :options="$options"
+    :name="$name"
+    :prepend="$prepend ?? null"
+    :append="$append ?? null"
+    :showError="$showError"
+    :nameKey="$nameKey"
+>
     <x-core::alert
         :attributes="new Illuminate\View\ComponentAttributeBag((array) $options['attr'])"
         :type="$options['type']">
         {!! $options['html'] !!}
     </x-core::alert>
-@endif
-
-@if ($showLabel && $showField)
-    @if ($options['wrapper'] !== false)
-        </div>
-    @endif
-@endif
+</x-core::form.field>

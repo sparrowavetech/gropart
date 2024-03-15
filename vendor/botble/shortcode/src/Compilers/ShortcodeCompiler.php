@@ -72,6 +72,13 @@ class ShortcodeCompiler
         $this->registered[$key]['previewImage'] = $previewImage;
     }
 
+    public function remove(string $key): void
+    {
+        if ($this->hasShortcode($key)) {
+            unset($this->registered[$key]);
+        }
+    }
+
     public function compile(string $value, bool $force = false): string
     {
         // Only continue is shortcode have been registered

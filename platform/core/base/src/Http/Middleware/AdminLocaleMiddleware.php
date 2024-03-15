@@ -17,15 +17,17 @@ class AdminLocaleMiddleware
             return $next($request);
         }
 
+        $sessionLocale = $request->session()->get('site-locale');
+
         if (Auth::check()) {
-            $sessionLocale = $request->session()->get('site-locale');
-
             $userLocale = AdminAppearance::forUser(auth()->user())->getLocale() ?: $sessionLocale;
+        } else {
+            $userLocale = AdminAppearance::getLocale() ?: $sessionLocale;
+        }
 
-            if (array_key_exists($userLocale, Language::getAvailableLocales())) {
-                app()->setLocale($userLocale);
-                $request->setLocale($userLocale);
-            }
+        if (array_key_exists($userLocale, Language::getAvailableLocales())) {
+            app()->setLocale($userLocale);
+            $request->setLocale($userLocale);
         }
 
         return $next($request);

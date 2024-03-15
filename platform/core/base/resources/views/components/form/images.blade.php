@@ -89,6 +89,7 @@
     >
         <a
             data-bb-toggle="gallery-add"
+            href="#"
             class="me-2 cursor-pointer"
         >{{ $addImagesLabel }}</a>
         <button

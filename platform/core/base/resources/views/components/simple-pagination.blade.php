@@ -1,12 +1,10 @@
 <div class="simple-pagination d-flex align-items-center">
     <p class="m-0 text-secondary">
-        {!! __('Showing') !!}
-        <span>{{ $paginator->firstItem() }}</span>
-        {!! __('to') !!}
-        <span>{{ $paginator->lastItem() }}</span>
-        {!! __('of') !!}
-        <span>{{ $paginator->total() }}</span>
-        {!! __('results') !!}
+        {{ trans('core/base::base.showing_records', [
+            'from' => $paginator->firstItem(),
+            'to' => $paginator->lastItem(),
+            'total' => $paginator->total(),
+        ]) }}
     </p>
 
     @if ($paginator->hasPages())

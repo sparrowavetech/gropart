@@ -5,7 +5,7 @@
                 <li class="dropdown">
                     <a
                         class="dropdown-toggle dropdown-header-name pe-2"
-                        href="{{ route('public.index') }}"
+                        href="{{ BaseHelper::getHomepageUrl() }}"
                         target="_blank"
                     >
                         <i class="fa fa-globe"></i>

@@ -71,16 +71,20 @@
                                 tabindex="0"
                             >
                                 @foreach (ThemeOption::constructFields($section['id']) as $field)
-                                    <x-core::form-group
-                                        class="{{ $errors->has($field['attributes']['name'] ?? $field['id']) ? 'has-error' : null }}"
-                                    >
-                                        <x-core::form.label
-                                            :for="$field['id']"
-                                            :label="$field['label']"
-                                        />
+                                    @if (Arr::get($field, 'type') === 'hidden')
                                         {!! ThemeOption::renderField($field) !!}
-                                        @if (array_key_exists('helper', $field))
-                                            <small class="form-hint">{!! BaseHelper::clean($field['helper']) !!}</small>
+                                    @else
+                                        <x-core::form-group
+                                            class="{{ $errors->has($field['attributes']['name'] ?? $field['id']) ? 'has-error' : null }}"
+                                        >
+                                            <x-core::form.label
+                                                :for="$field['id']"
+                                                :label="$field['label']"
+                                            />
+                                            {!! ThemeOption::renderField($field) !!}
+                                            @if (array_key_exists('helper', $field))
+                                                <small class="form-hint">{!! BaseHelper::clean($field['helper']) !!}</small>
+                                            @endif
                                         @endif
                                     </x-core::form-group>
                                 @endforeach

@@ -21,7 +21,7 @@ class PasswordForm extends FormAbstract
             ->when(
                 $this->getModel()->exists &&
                 $this->getRequest()->user()->is($this->getModel()),
-                function (PasswordForm $form) {
+                function (FormAbstract $form) {
                     $form->add(
                         'old_password',
                         'password',

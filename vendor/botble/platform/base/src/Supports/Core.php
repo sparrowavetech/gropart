@@ -42,7 +42,6 @@ use Illuminate\Contracts\Session\Session;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\ServiceProvider as IlluminateServiceProvider;
@@ -387,7 +386,17 @@ final class Core
                 $this->files->deleteDirectory($oldLibrary);
             }
 
+            $bootstrapCachePath = base_path('bootstrap/cache');
+
+            @unlink($bootstrapCachePath . '/packages.php');
+            @unlink($bootstrapCachePath . '/services.php');
+
             if ($zip->extract($filePath, $this->basePath)) {
+                @unlink($bootstrapCachePath . '/packages.php');
+                @unlink($bootstrapCachePath . '/services.php');
+
+                $this->cleanCaches();
+
                 $this->files->delete($filePath);
 
                 SystemUpdateExtractedFiles::dispatch();
@@ -403,6 +412,11 @@ final class Core
 
             return false;
         } catch (Throwable $exception) {
+            $bootstrapCachePath = base_path('bootstrap/cache');
+
+            @unlink($bootstrapCachePath . '/packages.php');
+            @unlink($bootstrapCachePath . '/services.php');
+
             if ($this->files->exists($coreTempPath)) {
                 $this->files->move($coreTempPath, $this->coreDataFilePath);
             }

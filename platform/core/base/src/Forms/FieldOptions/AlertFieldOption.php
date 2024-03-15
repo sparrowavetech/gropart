@@ -2,14 +2,8 @@
 
 namespace Botble\Base\Forms\FieldOptions;
 
-use Botble\Base\Supports\Builders\HasAttributes;
-use Botble\Base\Traits\Forms\CanSpanColumns;
-
 class AlertFieldOption extends HtmlFieldOption
 {
-    use CanSpanColumns;
-    use HasAttributes;
-
     protected string $type = 'info';
 
     public function type(string $type): static

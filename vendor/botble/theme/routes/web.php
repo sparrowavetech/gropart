@@ -15,6 +15,7 @@ Route::group(['namespace' => 'Botble\Theme\Http\Controllers'], function () {
                 Route::post('active', [
                     'as' => 'theme.active',
                     'uses' => 'ThemeController@postActivateTheme',
+                    'middleware' => 'preventDemo',
                     'permission' => 'theme.index',
                 ]);
 

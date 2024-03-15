@@ -5,7 +5,6 @@ namespace Botble\ACL\Http\Controllers\Auth;
 use Botble\ACL\Forms\Auth\LoginForm;
 use Botble\ACL\Models\User;
 use Botble\ACL\Traits\AuthenticatesUsers;
-use Botble\Base\Facades\Assets;
 use Botble\Base\Http\Controllers\BaseController;
 use Carbon\Carbon;
 use Closure;
@@ -29,29 +28,6 @@ class LoginController extends BaseController
     public function showLoginForm()
     {
         $this->pageTitle(trans('core/acl::auth.login_title'));
-
-        Assets::addScripts('form-validation')
-            ->removeStyles([
-                'select2',
-                'fancybox',
-                'spectrum',
-                'custom-scrollbar',
-                'datepicker',
-                'fontawesome',
-                'toastr',
-            ])
-            ->removeScripts([
-                'select2',
-                'fancybox',
-                'cookie',
-                'spectrum',
-                'toastr',
-                'modernizr',
-                'excanvas',
-                'jquery-waypoints',
-                'stickytableheaders',
-                'ie8-fix',
-            ]);
 
         return LoginForm::create()->renderForm();
     }

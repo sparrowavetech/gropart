@@ -4,16 +4,16 @@ namespace Botble\Base\Supports\Builders;
 
 trait HasLabel
 {
-    protected string $label = '';
+    protected string|bool $label = '';
 
-    public function label(string $label): static
+    public function label(string|bool $label): static
     {
         $this->label = $label;
 
         return $this;
     }
 
-    public function getLabel(): string
+    public function getLabel(): string|bool
     {
         return $this->label;
     }

@@ -43,12 +43,5 @@ interface DescriptionContract extends RenderableContract
      */
     public function setMax($max);
 
-    /**
-     * Make a description instance.
-     *
-     * @param string $content
-     * @param int $max
-     * @return $this
-     */
-    public static function make($content, $max = 155);
+    public static function make();
 }

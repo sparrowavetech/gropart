@@ -3,7 +3,6 @@
 namespace Botble\Page\Database\Traits;
 
 use Botble\ACL\Models\User;
-use Botble\Base\Facades\MetaBox;
 use Botble\Page\Models\Page;
 use Botble\Slug\Facades\SlugHelper;
 use Illuminate\Support\Arr;
@@ -27,11 +26,7 @@ trait HasPageSeeder
              */
             $page = Page::query()->create(Arr::except($item, 'metadata'));
 
-            if (Arr::has($item, 'metadata')) {
-                foreach ($item['metadata'] as $key => $value) {
-                    MetaBox::saveMetaBoxData($page, $key, $value);
-                }
-            }
+            $this->createMetadata($page, $item);
 
             SlugHelper::createSlug($page);
         }

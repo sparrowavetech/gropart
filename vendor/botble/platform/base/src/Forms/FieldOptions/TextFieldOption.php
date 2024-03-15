@@ -18,6 +18,8 @@ class TextFieldOption extends InputFieldOption
     {
         if ($maxLength > 0) {
             $this->addAttribute('data-counter', $maxLength);
+        } else {
+            $this->removeAttribute('data-counter');
         }
 
         return $this;
@@ -46,7 +48,13 @@ class TextFieldOption extends InputFieldOption
 
     public function cssClass(string $class): static
     {
-        $this->addAttribute('class', $this->getAttribute('class') . ' ' . $class);
+        $cssClass = trim($this->getAttribute('class') . ' ' . $class);
+
+        if ($cssClass) {
+            $this->addAttribute('class', $cssClass);
+        } else {
+            $this->removeAttribute('class');
+        }
 
         return $this;
     }

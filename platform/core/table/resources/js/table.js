@@ -43,7 +43,7 @@
                             a.href = downloadUrl
                             a.download = filename
                             document.body.appendChild(a)
-                            a.trigger('click')
+                            a.click()
                         }
                     } else {
                         window.location = downloadUrl
@@ -435,9 +435,15 @@
                 event.preventDefault()
                 let _self = $(event.currentTarget)
 
-                $('.delete-crud-entry')
-                    .data('section', _self.prop('href'))
-                    .data('parent-table', _self.closest('.table').prop('id'))
+                let url = _self.data('section')
+
+                if (!url) {
+                    url = _self.prop('href')
+                }
+
+                console.log(url)
+
+                $('.delete-crud-entry').data('section', url).data('parent-table', _self.closest('.table').prop('id'))
                 $('.modal-confirm-delete').modal('show')
             })
 
@@ -765,6 +771,29 @@
                 setTimeout(() => {
                     $searchInput.closest('.table-wrapper').find('table').DataTable().search($searchInput.val()).draw()
                 }, 200)
+            })
+
+            $(document).on('click', '[data-bb-toggle="dt-buttons"]', (event) => {
+                const target = $(event.currentTarget)
+                const tableId = target.attr('aria-controls')
+                const buttonTarget = target.data('bb-target')
+
+                console.log(`${buttonTarget}[aria-controls="${tableId}"]`)
+
+                $(`${buttonTarget}[aria-controls="${tableId}"]`).trigger('click')
+            })
+
+            $(document).on('click', '[data-bb-toggle="dt-exports"]', (event) => {
+                const target = $(event.currentTarget)
+                const tableId = target.attr('aria-controls')
+                const value = target.data('bb-target')
+
+                const dt = window.LaravelDataTables[tableId]
+
+                let url = dt.ajax.url() || window.location.href
+                let params = _buildParams(dt, value)
+
+                _downloadFromUrl(url, params)
             })
         }
 

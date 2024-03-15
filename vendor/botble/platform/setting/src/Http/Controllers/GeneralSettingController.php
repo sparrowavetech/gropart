@@ -136,7 +136,7 @@ class GeneralSettingController extends SettingController
             return $this
                 ->httpResponse()
                 ->setError()
-                ->setMessage('Something went wrong. Please try again later.');
+                ->setMessage($exception->getMessage() ?: 'Something went wrong. Please try again later.');
         }
     }
 

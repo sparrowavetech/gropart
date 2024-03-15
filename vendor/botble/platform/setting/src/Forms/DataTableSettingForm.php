@@ -31,14 +31,6 @@ class DataTableSettingForm extends SettingForm
                     ->toArray()
             )
             ->add(
-                'datatables_default_show_column_visibility',
-                OnOffCheckboxField::class,
-                CheckboxFieldOption::make()
-                    ->label(trans('core/setting::setting.datatable.form.show_column_visibility'))
-                    ->value(setting('datatables_default_show_column_visibility', false))
-                    ->toArray()
-            )
-            ->add(
                 'datatables_default_show_export_button',
                 OnOffCheckboxField::class,
                 CheckboxFieldOption::make()

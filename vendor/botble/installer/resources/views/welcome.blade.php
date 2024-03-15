@@ -1,20 +1,26 @@
 @extends('packages/installer::layouts.master')
 
-@section('pageTitle')
-    {{ trans('packages/installer::installer.welcome.pageTitle') }}
-@endsection
+@section(
+    'pageTitle',
+     trans(
+         'packages/installer::installer.install_step_title',
+         ['step' => 1, 'title' => trans('packages/installer::installer.welcome.title')]
+     )
+)
 
 @section('header')
-    <x-core::card.title>
-        {{ trans('packages/installer::installer.welcome.title') }}
-    </x-core::card.title>
+    <div>
+        <x-core::card.title class="text-start">
+            {{ trans('packages/installer::installer.welcome.title') }}
+        </x-core::card.title>
+
+        <x-core::card.subtitle>
+            {{ trans('packages/installer::installer.welcome.message') }}
+        </x-core::card.subtitle>
+    </div>
 @endsection
 
 @section('content')
-    <p class="text-secondary">
-        {{ trans('packages/installer::installer.welcome.message') }}
-    </p>
-
     <form method="POST" action="{{ route('installers.welcome.next') }}" id="welcome-form">
         @csrf
 

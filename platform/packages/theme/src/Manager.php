@@ -4,13 +4,15 @@ namespace Botble\Theme;
 
 use Botble\Base\Facades\BaseHelper;
 use Botble\Theme\Facades\Theme as ThemeFacade;
+use Botble\Theme\Services\ThemeService;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
 
 class Manager
 {
     protected array $themes = [];
 
-    public function __construct()
+    public function __construct(protected ThemeService $themeService)
     {
         $this->registerTheme(self::getAllThemes());
     }
@@ -42,8 +44,12 @@ class Manager
             }
 
             $theme = BaseHelper::getFileData($jsonFile);
+
             if (! empty($theme)) {
+                $themeConfig = $this->themeService->getThemeConfig($folder);
+
                 $themes[$folder] = $theme;
+                $themes[$folder]['inherit'] = Arr::get($themeConfig, 'inherit');
             }
         }
 

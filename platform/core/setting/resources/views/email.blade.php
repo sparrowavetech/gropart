@@ -45,6 +45,7 @@
                     <x-core::button
                         color="primary"
                         id="send-test-email-btn"
+                        data-url="{{ route('settings.email.test.send') }}"
                         class="w-100"
                     >
                         {{ trans('core/setting::setting.send') }}

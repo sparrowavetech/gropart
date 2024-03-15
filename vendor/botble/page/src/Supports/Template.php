@@ -26,9 +26,20 @@ class Template
 
     protected static function getExistsTemplate(): array
     {
-        $files = BaseHelper::scanFolder(theme_path(Theme::getThemeName() . DIRECTORY_SEPARATOR . config('packages.theme.general.containerDir.layout')));
-        foreach ($files as $key => $file) {
-            $files[$key] = str_replace('.blade.php', '', $file);
+        $themes = [
+            Theme::getThemeName(),
+        ];
+
+        if (Theme::hasInheritTheme()) {
+            $themes[] = Theme::getInheritTheme();
+        }
+
+        foreach ($themes as $theme) {
+            $files = BaseHelper::scanFolder(theme_path($theme . DIRECTORY_SEPARATOR . config('packages.theme.general.containerDir.layout')));
+
+            foreach ($files as $key => $file) {
+                $files[$key] = str_replace('.blade.php', '', $file);
+            }
         }
 
         return $files;

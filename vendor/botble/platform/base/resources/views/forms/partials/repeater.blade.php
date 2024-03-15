@@ -29,9 +29,9 @@
         ]);
     }
 
-    $defaultFields = [view('core/base::forms.partials.repeater-group', compact('group'))];
+    $defaultFields = [view('core/base::forms.partials.repeater-group', compact('group'))->render()];
 
-    $repeaterId = 'repeater_field_' . md5($name) . '_' . uniqid();
+    $repeaterId = 'repeater_field_' . md5($name) . uniqid('_');
 @endphp
 
 <input

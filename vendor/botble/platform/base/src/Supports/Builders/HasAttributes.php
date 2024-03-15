@@ -22,6 +22,13 @@ trait HasAttributes
         return $this;
     }
 
+    public function removeAttribute(string $attribute): static
+    {
+        Arr::forget($this->attributes, $attribute);
+
+        return $this;
+    }
+
     public function getAttributes(): array
     {
         return $this->attributes;

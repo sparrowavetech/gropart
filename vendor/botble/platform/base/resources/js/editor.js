@@ -9,9 +9,7 @@ class EditorManagement {
         this.tinyMceConfigCallbacks = []
         this.tinyMceInitialCallbacks = []
 
-        document.dispatchEvent(
-            new CustomEvent('core-editor-init', { detail: this })
-        )
+        document.dispatchEvent(new CustomEvent('core-editor-init', { detail: this }))
     }
 
     ckEditorConfigUsing(callback) {
@@ -48,10 +46,10 @@ class EditorManagement {
         }
 
         const ckfinder = editor.commands.get('ckfinder')
-        const btnGalleries =  $(`#${element}`).parent().find('.btn_gallery[data-action="media-insert-ckeditor"]')
+        const btnGalleries = $(`#${element}`).parent().find('.btn_gallery[data-action="media-insert-ckeditor"]')
 
         if (ckfinder && btnGalleries.length) {
-            ckfinder.execute = () => btnGalleries.trigger('click');
+            ckfinder.execute = () => btnGalleries.trigger('click')
         } else {
             ckfinder.execute = () => Botble.showError('Not available.')
         }
@@ -193,6 +191,17 @@ class EditorManagement {
                     },
                 ],
             },
+            mediaEmbed: {
+                extraProviders: [
+                    {
+                        name: 'tiktok',
+                        url: '^.*https:\\/\\/(?:m|www|vm)?\\.?tiktok\\.com\\/((?:.*\\b(?:(?:usr|v|embed|user|video)\\/|\\?shareId=|\\&item_id=)(\\d+))|\\w+)',
+                        html: (match) => {
+                            return `<iframe src="https://www.tiktok.com/embed/v2/${match[1]}" width="100%" height="400" frameborder="0"></iframe>`
+                        },
+                    },
+                ],
+            },
             ...extraConfig,
         }
 
@@ -234,7 +243,7 @@ class EditorManagement {
 
                 // insert media embed
                 editor.commands._commands.get('mediaEmbed').execute = (url) => {
-                    editor.insertHtml(`[media url="${url}"][/media]`)
+                    editor.execute('shortcode', `[media url="${url}"][/media]`)
                 }
 
                 await this.ckEditorInitialUsing(editor)
@@ -284,7 +293,7 @@ class EditorManagement {
         return editor
     }
 
-   async initTinyMce(element) {
+    async initTinyMce(element) {
         let options = {
             menubar: true,
             selector: `#${element}`,
@@ -359,10 +368,9 @@ class EditorManagement {
             current.initEditor($tinyMce, {}, 'tinymce')
         }
 
-        $(document).on('click', '.show-hide-editor-btn', (event) => {
+        $(document).off('click', '.show-hide-editor-btn').on('click', '.show-hide-editor-btn', (event) => {
             event.preventDefault()
-            let _self = $(event.currentTarget)
-            const editorInstance = _self.data('result')
+            const editorInstance = $(event.currentTarget).data('result')
 
             let $result = $('#' + editorInstance)
 

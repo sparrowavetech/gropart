@@ -172,7 +172,7 @@ $(() => {
 
         shortcodeCallback({
             key: name,
-            href: route('short-codes.ajax-get-admin-config', name),
+            href: $shortcodeItem.data('url'),
             data: {
                 key: name,
                 code: shortcode,

@@ -4,7 +4,9 @@ namespace Botble\Setting\Forms;
 
 use Botble\Base\Facades\AdminAppearance;
 use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Forms\FieldOptions\CodeEditorFieldOption;
 use Botble\Base\Forms\FieldOptions\SelectFieldOption;
+use Botble\Base\Forms\Fields\CodeEditorField;
 use Botble\Base\Forms\Fields\GoogleFontsField;
 use Botble\Base\Forms\Fields\MediaImageField;
 use Botble\Base\Forms\Fields\SelectField;
@@ -124,6 +126,48 @@ class AdminAppearanceSettingForm extends SettingForm
             ->add('show_theme_guideline_link', 'onOffCheckbox', [
                 'label' => trans('core/setting::setting.admin_appearance.form.show_guidelines'),
                 'value' => setting('show_theme_guideline_link', false),
-            ]);
+            ])
+            ->add(
+                AdminAppearance::getSettingKey('custom_css'),
+                CodeEditorField::class,
+                CodeEditorFieldOption::make()
+                    ->label(trans('core/setting::setting.admin_appearance.form.custom_css'))
+                    ->value(AdminAppearance::getSetting('custom_css'))
+                    ->mode('css')
+                    ->toArray()
+            )
+            ->add(
+                AdminAppearance::getSettingKey('custom_header_js'),
+                CodeEditorField::class,
+                CodeEditorFieldOption::make()
+                    ->label(trans('core/setting::setting.admin_appearance.form.custom_header_js'))
+                    ->helperText(trans('core/setting::setting.admin_appearance.form.custom_header_js_placeholder'))
+                    ->value(AdminAppearance::getSetting('custom_header_js'))
+                    ->mode('javascript')
+                    ->maxLength(2500)
+                    ->toArray()
+            )
+            ->add(
+                AdminAppearance::getSettingKey('custom_body_js'),
+                CodeEditorField::class,
+                CodeEditorFieldOption::make()
+                    ->label(trans('core/setting::setting.admin_appearance.form.custom_body_js'))
+                    ->helperText(trans('core/setting::setting.admin_appearance.form.custom_body_js_placeholder'))
+                    ->value(AdminAppearance::getSetting('custom_body_js'))
+                    ->mode('javascript')
+                    ->maxLength(2500)
+                    ->toArray()
+            )
+            ->add(
+                AdminAppearance::getSettingKey('custom_footer_js'),
+                CodeEditorField::class,
+                CodeEditorFieldOption::make()
+                    ->label(trans('core/setting::setting.admin_appearance.form.custom_footer_js'))
+                    ->helperText(trans('core/setting::setting.admin_appearance.form.custom_footer_js_placeholder'))
+                    ->value(AdminAppearance::getSetting('custom_footer_js'))
+                    ->mode('javascript')
+                    ->maxLength(2500)
+                    ->toArray()
+            );
     }
 }

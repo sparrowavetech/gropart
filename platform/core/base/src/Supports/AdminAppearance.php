@@ -3,8 +3,10 @@
 namespace Botble\Base\Supports;
 
 use Botble\ACL\Contracts\HasPreferences;
+use Botble\Base\Facades\Html;
 use Botble\Setting\Facades\Setting;
 use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Support\Str;
 
 class AdminAppearance
 {
@@ -114,5 +116,31 @@ class AdminAppearance
         }
 
         Setting::save();
+    }
+
+    public function getCustomCSS(): string
+    {
+        $css = $this->getSetting('custom_css');
+
+        if (empty($css)) {
+            return '';
+        }
+
+        return Html::tag('style', $css);
+    }
+
+    public function getCustomJS(string $location): string
+    {
+        $js = $this->getSetting('custom_' . $location . '_js');
+
+        if (empty($js)) {
+            return '';
+        }
+
+        if ((! Str::contains($js, '<script') || ! Str::contains($js, '</script>')) && ! Str::contains($js, '<noscript') && ! Str::contains($js, '</noscript>')) {
+            $js = Html::tag('script', $js);
+        }
+
+        return $js;
     }
 }
