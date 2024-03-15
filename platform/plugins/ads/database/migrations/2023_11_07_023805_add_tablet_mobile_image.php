@@ -8,8 +8,8 @@ return new class () extends Migration {
     public function up(): void
     {
         Schema::table('ads', function (Blueprint $table) {
-            $table->string('tablet_image')->nullable();
-            $table->string('mobile_image')->nullable();
+            $table->string('tablet_image', 255)->nullable();
+            $table->string('mobile_image', 255)->nullable();
         });
     }
 

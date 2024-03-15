@@ -43,8 +43,7 @@ class AdsTable extends TableAbstract
                         return shortcode()->generateShortcode('ads', ['key' => $value]);
                     })
                     ->renderUsing(fn (FormattedColumn $column) => Html::tag('code', $column->getValue()))
-                    ->copyable()
-                    ->copyableState(fn (FormattedColumn $column) => $column->getValue()),
+                    ->copyable(),
                 Column::make('clicked')
                     ->title(trans('plugins/ads::ads.clicked'))
                     ->alignStart(),

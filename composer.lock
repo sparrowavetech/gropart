@@ -3588,16 +3588,16 @@
         },
         {
             "name": "knuckleswtf/scribe",
-            "version": "4.33.0",
+            "version": "4.34.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/knuckleswtf/scribe.git",
-                "reference": "c0afe840081f8c9872b346694a0ab95a0e378842"
+                "reference": "30624433a37a8d2ee277c86297bab62d4a2b8338"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/knuckleswtf/scribe/zipball/c0afe840081f8c9872b346694a0ab95a0e378842",
-                "reference": "c0afe840081f8c9872b346694a0ab95a0e378842",
+                "url": "https://api.github.com/repos/knuckleswtf/scribe/zipball/30624433a37a8d2ee277c86297bab62d4a2b8338",
+                "reference": "30624433a37a8d2ee277c86297bab62d4a2b8338",
                 "shasum": ""
             },
             "require": {
@@ -3671,7 +3671,7 @@
             ],
             "support": {
                 "issues": "https://github.com/knuckleswtf/scribe/issues",
-                "source": "https://github.com/knuckleswtf/scribe/tree/4.33.0"
+                "source": "https://github.com/knuckleswtf/scribe/tree/4.34.0"
             },
             "funding": [
                 {
@@ -3679,7 +3679,7 @@
                     "type": "patreon"
                 }
             ],
-            "time": "2024-02-29T19:10:57+00:00"
+            "time": "2024-03-15T19:25:29+00:00"
         },
         {
             "name": "kris/laravel-form-builder",

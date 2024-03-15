@@ -17,16 +17,6 @@ Route::group(['namespace' => 'Botble\Ads\Http\Controllers'], function () {
                 'as' => 'public.ads-click',
                 'uses' => 'PublicController@getAdsClick',
             ]);
-
-            Route::get('ac-{randomHash}/{adsKey}', [
-                'as' => 'public.ads-click.alternative',
-                'uses' => 'PublicController@getAdsClickAlternative',
-            ]);
-
-            Route::get('ac-{randomHash}/{adsKey}/{size}/{hashName}', [
-                'as' => 'public.ads-click.image',
-                'uses' => 'PublicController@getAdsImage',
-            ]);
         });
     }
 });
