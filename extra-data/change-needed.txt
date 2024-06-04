@@ -1,13 +1,19 @@
-barcode required issue fix
-
-Frequently Bought Together Functionality
-
+Barcode Required Condition not working as Expected
+Need to fix create order total and tax calculation in admin
 Shop type required condition not working while register as vendor
 
-Need pop up to come automatically the first time when visiting home page only for language change,
-with all language list default, then this pop up should not come again, should only come when first time visiting site
+
+15. Add New Page Dealership and Dropshipping - Page Pending
+16. Need a option for minimum buy quantity in products - dynamic function
+
+17. Remove button is not working in coupon codes
+18. Need pop up to come automatically the first time when visiting home page only for language change,
+    with all language list default, then this pop up should not come again, should only come when first time visiting site
 
 
-Bulk Order Button Color
-Need to fix create order total and tax calculation in admin
-Make product description and this each section as separate section (Dynamic)
+
+19. 3 images wala shortcode hindi version me nahi aa raha
+20. 3 images wala shortcode ka mobile and tablet version update nahi ho rha hai
+
+
+1. Frequently Bought Together Functionality

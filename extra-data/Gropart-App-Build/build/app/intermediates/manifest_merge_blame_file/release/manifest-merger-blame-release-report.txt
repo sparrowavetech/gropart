@@ -1,0 +1,192 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.example.gropart"
+4    android:versionCode="1"
+5    android:versionName="1.0.0" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="19"
+8-->/Users/macpc/Documents/gropart/gropart/android/app/src/main/AndroidManifest.xml
+9        android:targetSdkVersion="31" />
+9-->/Users/macpc/Documents/gropart/gropart/android/app/src/main/AndroidManifest.xml
+10
+11    <uses-permission android:name="android.permission.INTERNET" />
+11-->/Users/macpc/Documents/gropart/gropart/android/app/src/main/AndroidManifest.xml:3:5-67
+11-->/Users/macpc/Documents/gropart/gropart/android/app/src/main/AndroidManifest.xml:3:22-64
+12    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+12-->/Users/macpc/Documents/gropart/gropart/android/app/src/main/AndroidManifest.xml:4:1-75
+12-->/Users/macpc/Documents/gropart/gropart/android/app/src/main/AndroidManifest.xml:4:18-72
+13
+14    <queries>
+14-->[:flutter_inappwebview] /Users/macpc/Documents/gropart/gropart/build/flutter_inappwebview/intermediates/merged_manifest/release/AndroidManifest.xml:9:5-13:15
+15        <intent>
+15-->[:flutter_inappwebview] /Users/macpc/Documents/gropart/gropart/build/flutter_inappwebview/intermediates/merged_manifest/release/AndroidManifest.xml:10:9-12:18
+16            <action android:name="android.support.customtabs.action.CustomTabsService" />
+16-->[:flutter_inappwebview] /Users/macpc/Documents/gropart/gropart/build/flutter_inappwebview/intermediates/merged_manifest/release/AndroidManifest.xml:11:13-90
+16-->[:flutter_inappwebview] /Users/macpc/Documents/gropart/gropart/build/flutter_inappwebview/intermediates/merged_manifest/release/AndroidManifest.xml:11:21-87
+17        </intent>
+18    </queries>
+19
+20    <application
+21        android:name="android.app.Application"
+21-->/Users/macpc/Documents/gropart/gropart/android/app/src/main/AndroidManifest.xml:9:9-42
+22        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+22-->[androidx.core:core:1.8.0] /Users/macpc/.gradle/caches/transforms-3/d363e3b5616f580c766e3e2b3c05f27d/transformed/core-1.8.0/AndroidManifest.xml:24:18-86
+23        android:icon="@mipmap/launcher_icon"
+23-->/Users/macpc/Documents/gropart/gropart/android/app/src/main/AndroidManifest.xml:10:9-45
+24        android:label="gropart"
+24-->/Users/macpc/Documents/gropart/gropart/android/app/src/main/AndroidManifest.xml:8:9-32
+25        android:usesCleartextTraffic="true" >
+25-->/Users/macpc/Documents/gropart/gropart/android/app/src/main/AndroidManifest.xml:7:10-45
+26        <activity
+26-->/Users/macpc/Documents/gropart/gropart/android/app/src/main/AndroidManifest.xml:12:9-32:20
+27            android:name="com.example.gropart.MainActivity"
+27-->/Users/macpc/Documents/gropart/gropart/android/app/src/main/AndroidManifest.xml:13:13-41
+28            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+28-->/Users/macpc/Documents/gropart/gropart/android/app/src/main/AndroidManifest.xml:17:13-163
+29            android:exported="true"
+29-->/Users/macpc/Documents/gropart/gropart/android/app/src/main/AndroidManifest.xml:14:13-36
+30            android:hardwareAccelerated="true"
+30-->/Users/macpc/Documents/gropart/gropart/android/app/src/main/AndroidManifest.xml:18:13-47
+31            android:launchMode="singleTop"
+31-->/Users/macpc/Documents/gropart/gropart/android/app/src/main/AndroidManifest.xml:15:13-43
+32            android:theme="@style/LaunchTheme"
+32-->/Users/macpc/Documents/gropart/gropart/android/app/src/main/AndroidManifest.xml:16:13-47
+33            android:windowSoftInputMode="adjustResize" >
+33-->/Users/macpc/Documents/gropart/gropart/android/app/src/main/AndroidManifest.xml:19:13-55
+34
+35            <!--
+36                 Specifies an Android theme to apply to this Activity as soon as
+37                 the Android process has started. This theme is visible to the user
+38                 while the Flutter UI initializes. After that, this theme continues
+39                 to determine the Window background behind the Flutter UI.
+40            -->
+41            <meta-data
+41-->/Users/macpc/Documents/gropart/gropart/android/app/src/main/AndroidManifest.xml:24:13-27:17
+42                android:name="io.flutter.embedding.android.NormalTheme"
+42-->/Users/macpc/Documents/gropart/gropart/android/app/src/main/AndroidManifest.xml:25:15-70
+43                android:resource="@style/NormalTheme" />
+43-->/Users/macpc/Documents/gropart/gropart/android/app/src/main/AndroidManifest.xml:26:15-52
+44
+45            <intent-filter>
+45-->/Users/macpc/Documents/gropart/gropart/android/app/src/main/AndroidManifest.xml:28:13-31:29
+46                <action android:name="android.intent.action.MAIN" />
+46-->/Users/macpc/Documents/gropart/gropart/android/app/src/main/AndroidManifest.xml:29:17-68
+46-->/Users/macpc/Documents/gropart/gropart/android/app/src/main/AndroidManifest.xml:29:25-66
+47
+48                <category android:name="android.intent.category.LAUNCHER" />
+48-->/Users/macpc/Documents/gropart/gropart/android/app/src/main/AndroidManifest.xml:30:17-76
+48-->/Users/macpc/Documents/gropart/gropart/android/app/src/main/AndroidManifest.xml:30:27-74
+49            </intent-filter>
+50        </activity>
+51        <!--
+52             Don't delete the meta-data below.
+53             This is used by the Flutter tool to generate GeneratedPluginRegistrant.java
+54        -->
+55        <meta-data
+55-->/Users/macpc/Documents/gropart/gropart/android/app/src/main/AndroidManifest.xml:35:9-37:33
+56            android:name="flutterEmbedding"
+56-->/Users/macpc/Documents/gropart/gropart/android/app/src/main/AndroidManifest.xml:36:13-44
+57            android:value="2" />
+57-->/Users/macpc/Documents/gropart/gropart/android/app/src/main/AndroidManifest.xml:37:13-30
+58
+59        <activity
+59-->[:flutter_inappwebview] /Users/macpc/Documents/gropart/gropart/build/flutter_inappwebview/intermediates/merged_manifest/release/AndroidManifest.xml:16:9-20:47
+60            android:name="com.pichillilorenzo.flutter_inappwebview.in_app_browser.InAppBrowserActivity"
+60-->[:flutter_inappwebview] /Users/macpc/Documents/gropart/gropart/build/flutter_inappwebview/intermediates/merged_manifest/release/AndroidManifest.xml:17:13-104
+61            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|layoutDirection|fontScale|screenLayout|density"
+61-->[:flutter_inappwebview] /Users/macpc/Documents/gropart/gropart/build/flutter_inappwebview/intermediates/merged_manifest/release/AndroidManifest.xml:18:13-137
+62            android:exported="false"
+62-->[:flutter_inappwebview] /Users/macpc/Documents/gropart/gropart/build/flutter_inappwebview/intermediates/merged_manifest/release/AndroidManifest.xml:19:13-37
+63            android:theme="@style/AppTheme" />
+63-->[:flutter_inappwebview] /Users/macpc/Documents/gropart/gropart/build/flutter_inappwebview/intermediates/merged_manifest/release/AndroidManifest.xml:20:13-44
+64        <activity
+64-->[:flutter_inappwebview] /Users/macpc/Documents/gropart/gropart/build/flutter_inappwebview/intermediates/merged_manifest/release/AndroidManifest.xml:21:9-24:55
+65            android:name="com.pichillilorenzo.flutter_inappwebview.chrome_custom_tabs.ChromeCustomTabsActivity"
+65-->[:flutter_inappwebview] /Users/macpc/Documents/gropart/gropart/build/flutter_inappwebview/intermediates/merged_manifest/release/AndroidManifest.xml:22:13-112
+66            android:exported="false"
+66-->[:flutter_inappwebview] /Users/macpc/Documents/gropart/gropart/build/flutter_inappwebview/intermediates/merged_manifest/release/AndroidManifest.xml:23:13-37
+67            android:theme="@style/ThemeTransparent" />
+67-->[:flutter_inappwebview] /Users/macpc/Documents/gropart/gropart/build/flutter_inappwebview/intermediates/merged_manifest/release/AndroidManifest.xml:24:13-52
+68        <activity
+68-->[:flutter_inappwebview] /Users/macpc/Documents/gropart/gropart/build/flutter_inappwebview/intermediates/merged_manifest/release/AndroidManifest.xml:25:9-28:55
+69            android:name="com.pichillilorenzo.flutter_inappwebview.chrome_custom_tabs.TrustedWebActivity"
+69-->[:flutter_inappwebview] /Users/macpc/Documents/gropart/gropart/build/flutter_inappwebview/intermediates/merged_manifest/release/AndroidManifest.xml:26:13-106
+70            android:exported="false"
+70-->[:flutter_inappwebview] /Users/macpc/Documents/gropart/gropart/build/flutter_inappwebview/intermediates/merged_manifest/release/AndroidManifest.xml:27:13-37
+71            android:theme="@style/ThemeTransparent" />
+71-->[:flutter_inappwebview] /Users/macpc/Documents/gropart/gropart/build/flutter_inappwebview/intermediates/merged_manifest/release/AndroidManifest.xml:28:13-52
+72        <activity
+72-->[:flutter_inappwebview] /Users/macpc/Documents/gropart/gropart/build/flutter_inappwebview/intermediates/merged_manifest/release/AndroidManifest.xml:29:9-33:55
+73            android:name="com.pichillilorenzo.flutter_inappwebview.chrome_custom_tabs.ChromeCustomTabsActivitySingleInstance"
+73-->[:flutter_inappwebview] /Users/macpc/Documents/gropart/gropart/build/flutter_inappwebview/intermediates/merged_manifest/release/AndroidManifest.xml:30:13-126
+74            android:exported="false"
+74-->[:flutter_inappwebview] /Users/macpc/Documents/gropart/gropart/build/flutter_inappwebview/intermediates/merged_manifest/release/AndroidManifest.xml:31:13-37
+75            android:launchMode="singleInstance"
+75-->[:flutter_inappwebview] /Users/macpc/Documents/gropart/gropart/build/flutter_inappwebview/intermediates/merged_manifest/release/AndroidManifest.xml:32:13-48
+76            android:theme="@style/ThemeTransparent" />
+76-->[:flutter_inappwebview] /Users/macpc/Documents/gropart/gropart/build/flutter_inappwebview/intermediates/merged_manifest/release/AndroidManifest.xml:33:13-52
+77        <activity
+77-->[:flutter_inappwebview] /Users/macpc/Documents/gropart/gropart/build/flutter_inappwebview/intermediates/merged_manifest/release/AndroidManifest.xml:34:9-38:55
+78            android:name="com.pichillilorenzo.flutter_inappwebview.chrome_custom_tabs.TrustedWebActivitySingleInstance"
+78-->[:flutter_inappwebview] /Users/macpc/Documents/gropart/gropart/build/flutter_inappwebview/intermediates/merged_manifest/release/AndroidManifest.xml:35:13-120
+79            android:exported="false"
+79-->[:flutter_inappwebview] /Users/macpc/Documents/gropart/gropart/build/flutter_inappwebview/intermediates/merged_manifest/release/AndroidManifest.xml:36:13-37
+80            android:launchMode="singleInstance"
+80-->[:flutter_inappwebview] /Users/macpc/Documents/gropart/gropart/build/flutter_inappwebview/intermediates/merged_manifest/release/AndroidManifest.xml:37:13-48
+81            android:theme="@style/ThemeTransparent" />
+81-->[:flutter_inappwebview] /Users/macpc/Documents/gropart/gropart/build/flutter_inappwebview/intermediates/merged_manifest/release/AndroidManifest.xml:38:13-52
+82
+83        <receiver
+83-->[:flutter_inappwebview] /Users/macpc/Documents/gropart/gropart/build/flutter_inappwebview/intermediates/merged_manifest/release/AndroidManifest.xml:40:9-43:40
+84            android:name="com.pichillilorenzo.flutter_inappwebview.chrome_custom_tabs.ActionBroadcastReceiver"
+84-->[:flutter_inappwebview] /Users/macpc/Documents/gropart/gropart/build/flutter_inappwebview/intermediates/merged_manifest/release/AndroidManifest.xml:41:13-111
+85            android:enabled="true"
+85-->[:flutter_inappwebview] /Users/macpc/Documents/gropart/gropart/build/flutter_inappwebview/intermediates/merged_manifest/release/AndroidManifest.xml:42:13-35
+86            android:exported="false" />
+86-->[:flutter_inappwebview] /Users/macpc/Documents/gropart/gropart/build/flutter_inappwebview/intermediates/merged_manifest/release/AndroidManifest.xml:43:13-37
+87
+88        <meta-data
+88-->[:flutter_inappwebview] /Users/macpc/Documents/gropart/gropart/build/flutter_inappwebview/intermediates/merged_manifest/release/AndroidManifest.xml:45:9-47:36
+89            android:name="io.flutter.embedded_views_preview"
+89-->[:flutter_inappwebview] /Users/macpc/Documents/gropart/gropart/build/flutter_inappwebview/intermediates/merged_manifest/release/AndroidManifest.xml:46:13-61
+90            android:value="true" />
+90-->[:flutter_inappwebview] /Users/macpc/Documents/gropart/gropart/build/flutter_inappwebview/intermediates/merged_manifest/release/AndroidManifest.xml:47:13-33
+91
+92        <uses-library
+92-->[androidx.window:window:1.0.0-beta04] /Users/macpc/.gradle/caches/transforms-3/49bc944d29f70d45aa5add8e43e3247e/transformed/jetified-window-1.0.0-beta04/AndroidManifest.xml:25:9-27:40
+93            android:name="androidx.window.extensions"
+93-->[androidx.window:window:1.0.0-beta04] /Users/macpc/.gradle/caches/transforms-3/49bc944d29f70d45aa5add8e43e3247e/transformed/jetified-window-1.0.0-beta04/AndroidManifest.xml:26:13-54
+94            android:required="false" />
+94-->[androidx.window:window:1.0.0-beta04] /Users/macpc/.gradle/caches/transforms-3/49bc944d29f70d45aa5add8e43e3247e/transformed/jetified-window-1.0.0-beta04/AndroidManifest.xml:27:13-37
+95        <uses-library
+95-->[androidx.window:window:1.0.0-beta04] /Users/macpc/.gradle/caches/transforms-3/49bc944d29f70d45aa5add8e43e3247e/transformed/jetified-window-1.0.0-beta04/AndroidManifest.xml:28:9-30:40
+96            android:name="androidx.window.sidecar"
+96-->[androidx.window:window:1.0.0-beta04] /Users/macpc/.gradle/caches/transforms-3/49bc944d29f70d45aa5add8e43e3247e/transformed/jetified-window-1.0.0-beta04/AndroidManifest.xml:29:13-51
+97            android:required="false" />
+97-->[androidx.window:window:1.0.0-beta04] /Users/macpc/.gradle/caches/transforms-3/49bc944d29f70d45aa5add8e43e3247e/transformed/jetified-window-1.0.0-beta04/AndroidManifest.xml:30:13-37
+98
+99        <provider
+99-->[androidx.emoji2:emoji2:1.2.0] /Users/macpc/.gradle/caches/transforms-3/9fc546b4b41c30406c1c6f8de93a0c6d/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:24:9-32:20
+100            android:name="androidx.startup.InitializationProvider"
+100-->[androidx.emoji2:emoji2:1.2.0] /Users/macpc/.gradle/caches/transforms-3/9fc546b4b41c30406c1c6f8de93a0c6d/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:25:13-67
+101            android:authorities="com.example.gropart.androidx-startup"
+101-->[androidx.emoji2:emoji2:1.2.0] /Users/macpc/.gradle/caches/transforms-3/9fc546b4b41c30406c1c6f8de93a0c6d/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:26:13-68
+102            android:exported="false" >
+102-->[androidx.emoji2:emoji2:1.2.0] /Users/macpc/.gradle/caches/transforms-3/9fc546b4b41c30406c1c6f8de93a0c6d/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:27:13-37
+103            <meta-data
+103-->[androidx.emoji2:emoji2:1.2.0] /Users/macpc/.gradle/caches/transforms-3/9fc546b4b41c30406c1c6f8de93a0c6d/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:29:13-31:52
+104                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+104-->[androidx.emoji2:emoji2:1.2.0] /Users/macpc/.gradle/caches/transforms-3/9fc546b4b41c30406c1c6f8de93a0c6d/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:30:17-75
+105                android:value="androidx.startup" />
+105-->[androidx.emoji2:emoji2:1.2.0] /Users/macpc/.gradle/caches/transforms-3/9fc546b4b41c30406c1c6f8de93a0c6d/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:31:17-49
+106            <meta-data
+106-->[androidx.lifecycle:lifecycle-process:2.4.1] /Users/macpc/.gradle/caches/transforms-3/c7dc2d946f639e7b414f5fbe78913a76/transformed/jetified-lifecycle-process-2.4.1/AndroidManifest.xml:31:13-33:52
+107                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+107-->[androidx.lifecycle:lifecycle-process:2.4.1] /Users/macpc/.gradle/caches/transforms-3/c7dc2d946f639e7b414f5fbe78913a76/transformed/jetified-lifecycle-process-2.4.1/AndroidManifest.xml:32:17-78
+108                android:value="androidx.startup" />
+108-->[androidx.lifecycle:lifecycle-process:2.4.1] /Users/macpc/.gradle/caches/transforms-3/c7dc2d946f639e7b414f5fbe78913a76/transformed/jetified-lifecycle-process-2.4.1/AndroidManifest.xml:33:17-49
+109        </provider>
+110    </application>
+111
+112</manifest>

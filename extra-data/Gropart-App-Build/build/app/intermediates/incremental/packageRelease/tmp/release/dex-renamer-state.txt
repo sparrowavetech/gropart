@@ -1,0 +1,4 @@
+#Fri Nov 04 17:20:23 IST 2022
+base.0=/Users/macpc/Documents/gropart/gropart/build/app/intermediates/dex/release/minifyReleaseWithR8/classes.dex
+renamed.0=classes.dex
+path.0=classes.dex
