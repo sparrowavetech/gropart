@@ -32,6 +32,7 @@ class ProductVersionRequest extends Request
                 'nullable',
                 'max:50',
                 'string',
+                //Rule::unique('ec_products')->ignore($this->route('product.id')),
             ],
             'cost_per_item' => 'nullable|numeric|min:0|max:' . $this->input('price'),
             'attribute_sets' => 'nullable|array',

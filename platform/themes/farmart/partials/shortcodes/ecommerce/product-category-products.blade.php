@@ -24,13 +24,13 @@
                             'swipeToSlide' => true,
                             'responsive' => [
                                 [
-                                    'breakpoint' => 1400,
+                                    'breakpoint' => 1800,
                                     'settings' => [
                                         'slidesToShow' => 6,
                                     ],
                                 ],
                                 [
-                                    'breakpoint' => 1201,
+                                    'breakpoint' => 1601,
                                     'settings' => [
                                         'slidesToShow' => 5,
                                     ],
@@ -56,10 +56,10 @@
                                 [
                                     'breakpoint' => 440,
                                     'settings' => [
-                                        'arrows' => false,
-                                        'dots' => true,
-                                        'slidesToShow' => 1,
-                                        'slidesToScroll' => 1,
+                                        'arrows' => true,
+                                        'dots' => false,
+                                        'slidesToShow' => 2,
+                                        'slidesToScroll' => 2,
                                     ],
                                 ],
                             ],

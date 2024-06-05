@@ -81,10 +81,10 @@ class MarketplaceHelper
         $percentageIncrease = 5;
 
         if ($isVendorTaxData) {
-            $taxVendorSignature     = $isVendorTaxData['signature_image'];
-            $taxVendorBusinessName  = $isVendorTaxData['business_name'];
-            $taxVendorAddress       = $isVendorTaxData['address'];
-            $taxVendorTaxNumber     = $isVendorTaxData['tax_id'];
+            $taxVendorSignature     = isset($isVendorTaxData['signature_image']) ? $isVendorTaxData['signature_image'] : '';
+            $taxVendorBusinessName  = isset($isVendorTaxData['business_name']) ? $isVendorTaxData['business_name'] : '';
+            $taxVendorAddress       = isset($isVendorTaxData['address']) ? $isVendorTaxData['address'] : '';
+            $taxVendorTaxNumber     = isset($isVendorTaxData['tax_id']) ? $isVendorTaxData['tax_id'] : '';
 
             if ($taxVendorSignature && $taxVendorBusinessName && $taxVendorAddress && $taxVendorTaxNumber) {
                 $data['completePercentage'] = 80;

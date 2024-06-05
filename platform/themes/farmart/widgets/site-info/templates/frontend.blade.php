@@ -1,5 +1,5 @@
 @if ($sidebar == 'footer_sidebar')
-    <div class="col-xl-3 col-sm-6">
+    <div class="col-sm-3">
         <div class="widget mb-2 mb-md-0">
             <p class="h5 fw-bold widget-title mb-2">{{ $config['name'] }}</p>
             <div class="widget-description">{!! BaseHelper::clean($config['about']) !!}</div>

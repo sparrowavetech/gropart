@@ -8,10 +8,10 @@
     <div class="bg-light py-md-5 px-lg-3 px-2">
         <div class="container-xxxl rounded-7 bg-white py-lg-5 py-md-4 py-3 px-3 px-md-4 px-lg-5">
             <div class="row">
-                <div class="col-lg-5 col-md-12">
+                <div class="col-lg-4 col-md-12">
                     {!! Theme::partial('ecommerce.product-gallery', compact('product', 'productImages')) !!}
                 </div>
-                <div class="col-lg-4 col-md-12 ps-4 product-details-content">
+                <div class="col-lg-5 col-md-12 ps-4 product-details-content">
                     <div class="product-details js-product-content">
                         <div class="entry-product-header">
                             <div class="product-header-left">
@@ -134,13 +134,13 @@
                         @endif
                     </div>
                 </div>
-                <div class="col-lg-3 d-block d-sm-block d-md-none d-lg-block d-xl-block">
+                <div class="col-lg-3 d-none d-sm-none d-md-none d-lg-block d-xl-block">
                     {!! dynamic_sidebar('product_detail_sidebar') !!}
                 </div>
             </div>
         </div>
     </div>
-    <div class="container-xxxl">
+    <div class="container-xxxl product-description-section">
         @if(get_ecommerce_setting('enable_full_page_product_description'))
             <div class="row">
                 <div class="col-sm-12">
@@ -292,10 +292,15 @@
                 </div>
             </div>
         @endif
+        <div class="row mt-4">
+            <div class="col-lg-3 d-block d-sm-block d-md-none d-lg-none d-xl-none">
+                {!! dynamic_sidebar('product_detail_sidebar') !!}
+            </div>
+        </div>
     </div>
 </div>
 
-<div class="widget-products-with-category pt-4 pb-5 bg-light">
+<div class="widget-products-with-category mt-4 pt-4 pb-5 bg-light">
     <div class="container-xxxl">
         <div class="row">
             <div class="col-12">
@@ -317,25 +322,37 @@
                             'swipeToSlide' => true,
                             'responsive' => [
                                 [
-                                    'breakpoint' => 1400,
+                                    'breakpoint' => 1800,
                                     'settings' => [
                                         'slidesToShow' => 6,
                                     ],
                                 ],
                                 [
-                                    'breakpoint' => 1199,
+                                    'breakpoint' => 1601,
                                     'settings' => [
                                         'slidesToShow' => 5,
                                     ],
                                 ],
                                 [
-                                    'breakpoint' => 1024,
+                                    'breakpoint' => 1025,
                                     'settings' => [
+                                        'arrows' => true,
+                                        'dots' => false,
                                         'slidesToShow' => 4,
+                                        'slidesToScroll' => 4,
                                     ],
                                 ],
                                 [
-                                    'breakpoint' => 767,
+                                    'breakpoint' => 769,
+                                    'settings' => [
+                                        'arrows' => true,
+                                        'dots' => false,
+                                        'slidesToShow' => 3,
+                                        'slidesToScroll' => 3,
+                                    ],
+                                ],
+                                [
+                                    'breakpoint' => 440,
                                     'settings' => [
                                         'arrows' => true,
                                         'dots' => false,

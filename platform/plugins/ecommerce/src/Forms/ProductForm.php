@@ -113,7 +113,8 @@ class ProductForm extends FormAbstract
                         SelectField::class,
                         SelectFieldOption::make()
                             ->label(trans('plugins/ecommerce::products.form.brand'))
-                            ->choices($brands)
+                            //->choices($brands)
+                            ->choices([0 => trans('plugins/ecommerce::brands.select_brand')] + $brands)
                             ->searchable()
                             ->emptyValue(trans('plugins/ecommerce::brands.select_brand'))
                             ->allowClear()

@@ -7,7 +7,7 @@
 @endphp
 
 @if($menu)
-    <div class="col-xl-2">
+    <div class="col-sm-2">
         <div class="col mb-5">
             <div class="widget widget-custom-menu">
                 <p class="h5 fw-bold widget-title mb-2">{{ $config['name'] }}</p>

@@ -130,6 +130,13 @@ app()->booted(function () {
             return Theme::partial('shortcodes.ecommerce.all-brands-admin-config', compact('attributes'));
         });
 
+        add_shortcode('all-categories', __('All Categories'), __('All Categories'), function(Shortcode $shortcode){
+            return Theme::partial('shortcodes.ecommerce.all-categories', compact('shortcode'));
+        });
+        shortcode()->setAdminConfig('all-categories', function (array $attributes) {
+            return Theme::partial('shortcodes.ecommerce.all-categories-admin-config', compact('attributes'));
+        });
+
         if (FlashSaleFacade::isEnabled()) {
             add_shortcode('flash-sale', __('Flash sale'), __('Flash sale'), function (Shortcode $shortcode) {
                 $flashSale = FlashSale::query()
@@ -266,7 +273,7 @@ app()->booted(function () {
             $request = request();
 
             $products = get_featured_products([
-                    'take' => $request->integer('limit', 10),
+                    'take' => $request->integer('limit', $shortcode->limit),
                     'with' => EcommerceHelper::withProductEagerLoadingRelations(),
                 ] + EcommerceHelper::withReviewsParams());
 

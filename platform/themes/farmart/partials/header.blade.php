@@ -106,16 +106,16 @@
                                     @if (is_plugin_active('marketplace'))
                                          @if (auth('customer')->check())
                                             @if (auth('customer')->user()->is_vendor)
-                                                <li>
-                                                    <a class="become-vendor-link" href="{{ route('marketplace.vendor.dashboard') }}">{{ __('Vendor dashboard') }}</a>
+                                                <li class="become-vendor">
+                                                    <a class="become-vendor-link" href="{{ route('marketplace.vendor.dashboard') }}"><i class="icon-speed-fast"></i> {{ __('Vendor dashboard') }}</a>
                                                 </li>
                                             @else
-                                                <li>
-                                                    <a class="become-vendor-link" href="{{ route('marketplace.vendor.become-vendor') }}"><i class="icon-user"></i> {{ __('Become a vendor') }}</a>
+                                                <li class="become-vendor">
+                                                    <a class="become-vendor-link" href="{{ route('marketplace.vendor.become-vendor') }}"><i class="icon-users2"></i> {{ __('Become a vendor') }}</a>
                                                 </li>
                                             @endif
                                         @else
-                                            <li><a class="become-vendor-link" href="{{ route('customer.register') }}"><i class="icon-user"></i> {{ __('Become Vendor') }}</a></li>
+                                            <li class="become-vendor"><a class="become-vendor-link" href="{{ route('customer.register') }}"><i class="icon-users2"></i> {{ __('Become Vendor') }}</a></li>
                                         @endif
                                     @endif
                                     @if (is_plugin_active('language'))
@@ -159,11 +159,11 @@
                                                 <span class="d-inline-block ms-1">(<a
                                                         class="color-primary"
                                                         href="{{ route('customer.logout') }}"
-                                                    >{{ __('Logout') }}</a>)</span>
+                                                    ><i class="icon-exit"></i> {{ __('Logout') }}</a>)</span>
                                             </li>
                                         @else
-                                            <li><a href="{{ route('customer.login') }}">{{ __('Login') }}</a></li>
-                                            <li><a href="{{ route('customer.register') }}">{{ __('Register') }}</a></li>
+                                            <li><a href="{{ route('customer.login') }}"><i class="icon-enter"></i> {{ __('Login') }}</a></li>
+                                            <li><a href="{{ route('customer.register') }}"><i class="icon-user"></i> {{ __('Register') }}</a></li>
                                         @endif
                                     @endif
                                 </ul>

@@ -62,7 +62,7 @@ class GeneralSettingForm extends SettingForm
             $this->add('store_state', 'customSelect', [
                 'label' => trans('plugins/location::city.state'),
                 'selected' => get_ecommerce_setting('store_state'),
-                'choices' => get_ecommerce_setting('store_country') || ! EcommerceHelper::isUsingInMultipleCountries()
+                'choices' => get_ecommerce_setting('store_state') || ! EcommerceHelper::isUsingInMultipleCountries()
                     ? EcommerceHelper::getAvailableStatesByCountry(get_ecommerce_setting('store_country'))
                     : [],
                 'attr' => [

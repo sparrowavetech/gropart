@@ -268,10 +268,11 @@ class MarketplaceServiceProvider extends ServiceProvider
                 ->when(auth('customer')->user()->is_vendor, function () {
                     return DashboardMenu::make()
                         ->registerItem([
-                            'id' => 'marketplace.vendor.dashboard',
+                            'id' => 'marketplace-vendor-dashboard',
                             'priority' => 990,
                             'name' => __('Vendor Dashboard'),
                             'url' => fn () => route('marketplace.vendor.dashboard'),
+                            'class' => 'vendor-dashboard-link',
                             'icon' => 'ti ti-building-store',
                         ]);
                 }, function () {
@@ -279,7 +280,7 @@ class MarketplaceServiceProvider extends ServiceProvider
                         ->when(MarketplaceHelper::isVendorRegistrationEnabled(), function () {
                             return DashboardMenu::make()
                                 ->registerItem([
-                                    'id' => 'marketplace.vendor.become-vendor',
+                                    'id' => 'marketplace-vendor-dashboard',
                                     'priority' => 991,
                                     'name' => __('Become A Vendor'),
                                     'url' => fn () => route('marketplace.vendor.become-vendor'),

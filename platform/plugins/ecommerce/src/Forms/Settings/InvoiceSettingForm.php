@@ -62,28 +62,6 @@ class InvoiceSettingForm extends SettingForm
                         ->colspan(2)
                         ->toArray(),
                 );
-                $form->add(
-                    'company_state_for_invoicing',
-                    SelectField::class,
-                    SelectFieldOption::make()
-                        ->label(trans('plugins/ecommerce::ecommerce.state'))
-                        ->choices(['' => trans('plugins/location::city.select_state')] + EcommerceHelper::getAvailableStatesByCountry(old('country', $this->getModel()->country)))
-                        ->selected(InvoiceHelper::getCompanyState())
-                        ->searchable()
-                        ->colspan(2)
-                        ->toArray(),
-                );
-                $form->add(
-                    'company_city_for_invoicing',
-                    SelectField::class,
-                    SelectFieldOption::make()
-                        ->label(trans('plugins/ecommerce::ecommerce.city'))
-                        ->choices(['' => trans('plugins/location::city.select_city')] + EcommerceHelper::getAvailableCitiesByState(old('state', $this->getModel()->state)))
-                        ->selected(InvoiceHelper::getCompanyCity())
-                        ->searchable()
-                        ->colspan(2)
-                        ->toArray(),
-                );
             })
             ->when(EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation(), function (FormAbstract $form) {
                 $form->add(
@@ -91,7 +69,7 @@ class InvoiceSettingForm extends SettingForm
                     SelectField::class,
                     SelectFieldOption::make()
                         ->label(trans('plugins/ecommerce::ecommerce.state'))
-                        ->choices(['' => trans('plugins/location::city.select_state')] + EcommerceHelper::getAvailableStatesByCountry(old('country', $this->getModel()->country)))
+                        ->choices(['' => trans('plugins/location::city.select_state')] + EcommerceHelper::getAvailableStatesByCountry(old('country', get_ecommerce_setting('store_country'))))
                         ->selected(InvoiceHelper::getCompanyState())
                         ->searchable()
                         ->colspan(3)
@@ -102,7 +80,7 @@ class InvoiceSettingForm extends SettingForm
                     SelectField::class,
                     SelectFieldOption::make()
                         ->label(trans('plugins/ecommerce::ecommerce.city'))
-                        ->choices(['' => trans('plugins/location::city.select_city')] + EcommerceHelper::getAvailableCitiesByState(old('state', $this->getModel()->state)))
+                        ->choices(['' => trans('plugins/location::city.select_city')] + EcommerceHelper::getAvailableCitiesByState(old('state', get_ecommerce_setting('company_state_for_invoicing'))))
                         ->selected(InvoiceHelper::getCompanyCity())
                         ->searchable()
                         ->colspan(3)
