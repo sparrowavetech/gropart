@@ -47,7 +47,7 @@ class TaxRuleController extends BaseController
 
         return $this
             ->httpResponse()
-            ->setPreviousUrl(route('tax.rule.index', $rule->tax_id))
+            ->setPreviousUrl(route('tax.edit', $rule->tax_id))
             ->setNextUrl(route('tax.rule.edit', $rule->id))
             ->withCreatedSuccessMessage();
     }
@@ -77,7 +77,8 @@ class TaxRuleController extends BaseController
 
         return $this
             ->httpResponse()
-            ->setPreviousUrl(route('tax.rule.index', $rule->tax_id))
+            ->setPreviousUrl(route('tax.edit', $rule->tax_id))
+            ->setNextUrl(route('tax.rule.index', $rule->id))
             ->withUpdatedSuccessMessage();
     }
 

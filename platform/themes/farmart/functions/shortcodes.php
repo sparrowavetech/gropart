@@ -415,6 +415,14 @@ app()->booted(function () {
             ]);
     });
 
+    add_shortcode('text-image-row', __('Text Image Row'), __('Text Image Row'), function (Shortcode $shortcode) {
+        return Theme::partial('shortcodes.text-image-row', compact('shortcode'));
+    });
+
+    shortcode()->setAdminConfig('text-image-row', function (array $attributes) {
+        return Theme::partial('shortcodes.text-image-row-admin-config', compact('attributes'));
+    });
+
     add_shortcode('newsletter-home', __('Newsletter Form'), __('Newsletter Form'), function (Shortcode $shortcode) {
         return Theme::partial('shortcodes.newsletter-home', compact('shortcode'));
     });

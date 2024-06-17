@@ -23,26 +23,28 @@ $(() => {
         resetModal()
     })
 
-    $(document).on('click', wrapper + ' .create-tax-rule-item', function (e) {
-        e.preventDefault()
-        const $this = $(e.currentTarget)
-        $modal.modal('show')
+    $(document)
+        .off('click', '.create-tax-rule-item')
+        .on('click', '.create-tax-rule-item', function (e) {
+            e.preventDefault()
+            const $this = $(e.currentTarget)
+            $modal.modal('show')
 
-        $.ajax({
-            url: $this.find('[data-action=create]').data('href'),
-            success: (res) => {
-                if (res.error == false) {
-                    setModal(res)
-                    Botble.initResources()
-                } else {
-                    Botble.showError(res.message)
-                }
-            },
-            error: (res) => {
-                Botble.handleError(res)
-            },
+            $.ajax({
+                url: $this.find('[data-action=create]').data('href'),
+                success: (res) => {
+                    if (res.error == false) {
+                        setModal(res)
+                        Botble.initResources()
+                    } else {
+                        Botble.showError(res.message)
+                    }
+                },
+                error: (res) => {
+                    Botble.handleError(res)
+                },
+            })
         })
-    })
 
     $(document).on('click', _table + ' .btn-edit-item', function (e) {
         e.preventDefault()
