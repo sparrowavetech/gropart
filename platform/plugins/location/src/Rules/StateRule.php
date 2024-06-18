@@ -12,7 +12,7 @@ class StateRule implements DataAwareRule, Rule
 {
     protected array $data = [];
 
-    public function __construct(protected string|null $countryKey = '')
+    public function __construct(protected ?string $countryKey = '')
     {
     }
 

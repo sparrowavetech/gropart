@@ -183,7 +183,7 @@ trait HasActions
     /**
      * @deprecated since v6.8.0, will be removed after operations removed.
      */
-    protected function getOperations(string|null $edit, string|null $delete, Model $item, string|null $extra = null): string
+    protected function getOperations(?string $edit, ?string $delete, Model $item, ?string $extra = null): string
     {
         return apply_filters(
             'table_operation_buttons',

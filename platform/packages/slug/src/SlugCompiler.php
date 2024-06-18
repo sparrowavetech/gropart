@@ -27,7 +27,7 @@ class SlugCompiler
         ]);
     }
 
-    public function compile(string|null $prefix, BaseModel|string|null $model = null): string
+    public function compile(?string $prefix, BaseModel|string|null $model = null): string
     {
         if (! $prefix) {
             return '';

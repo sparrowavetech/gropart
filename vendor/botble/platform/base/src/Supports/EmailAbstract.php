@@ -2,6 +2,7 @@
 
 namespace Botble\Base\Supports;
 
+use Botble\Base\Facades\EmailHandler;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
@@ -19,7 +20,7 @@ class EmailAbstract extends Mailable
 
     public array $data;
 
-    public function __construct(string|null $content, string|null $subject, array $data = [])
+    public function __construct(?string $content, ?string $subject, array $data = [])
     {
         $this->content = $content;
         $this->subject = $subject;
@@ -46,7 +47,7 @@ class EmailAbstract extends Mailable
         $email = $this
             ->from($fromAddress, $fromName)
             ->subject($this->subject)
-            ->html($inlineCss->convert($this->content));
+            ->html($inlineCss->convert($this->content, EmailHandler::getCssContent()));
 
         $attachments = Arr::get($this->data, 'attachments');
         if (! empty($attachments)) {

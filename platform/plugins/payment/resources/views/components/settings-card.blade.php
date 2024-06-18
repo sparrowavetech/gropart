@@ -39,7 +39,7 @@
                         <div>
                             <div @class(['payment-name-label-group', 'hidden' => !$status])>
                                 {{ trans('plugins/payment::payment.use') }}
-                                <span class="method-name-label">{{ setting(sprintf('payment_%s_name', $id)) }}</span>
+                                <span class="method-name-label">{{ get_payment_setting_key('name', $id) }}</span>
                             </div>
                         </div>
 
@@ -71,16 +71,23 @@
                             <div class="col-md-6">
                                 <x-core::form.text-input
                                     :label="trans('plugins/payment::payment.method_name')"
-                                    :name="sprintf('payment_%s_name', $id)"
+                                    :name="get_payment_setting_key('name', $id)"
                                     data-counter="400"
                                     :value="get_payment_setting('name', $id, trans('plugins/payment::payment.pay_online_via', ['name' => $name]))"
                                 />
 
                                 <x-core::form.textarea
                                     :label="trans('core/base::forms.description')"
-                                    :name="sprintf('payment_%s_description', $id)"
+                                    :name="get_payment_setting_key('description', $id)"
                                     :value="get_payment_setting('description', $id, $defaultDescriptionValue)"
                                 />
+
+                                <x-core::form-group>
+                                    <x-core::form.label for="{{ $logoKey = get_payment_setting_key('logo', $id) }}">
+                                        {{ trans('plugins/payment::payment.method_logo') }}
+                                    </x-core::form.label>
+                                    {{ Form::mediaImage($logoKey, get_payment_setting('logo', $id)) }}
+                                </x-core::form-group>
 
                                 <x-core::form.fieldset>
                                     <legend class="fs-4 fw-semibold mb-3">

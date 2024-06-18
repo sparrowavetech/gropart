@@ -1,6 +1,8 @@
 <?php
 
 use Botble\Base\Facades\AdminHelper;
+use Botble\Location\Http\Controllers\ExportLocationController;
+use Botble\Location\Http\Controllers\ImportLocationController;
 use Botble\Theme\Facades\Theme;
 use Illuminate\Support\Facades\Route;
 
@@ -36,53 +38,17 @@ Route::group(['namespace' => 'Botble\Location\Http\Controllers'], function () {
             ]);
         });
 
-        Route::prefix('location')->name('location.')->group(function () {
-            Route::post('upload/process', [
-                'as' => 'upload.process',
-                'uses' => 'ChunkUploadController@__invoke',
-            ]);
-
-            Route::post('upload/validate', [
-                'as' => 'upload.validate',
-                'uses' => 'ChunkValidateController@__invoke',
-            ]);
-
-            Route::post('import', [
-                'as' => 'import',
-                'uses' => 'ChunkImportController@__invoke',
-            ]);
+        Route::group(['prefix' => 'locations/bulk-import', 'as' => 'location.bulk-import.', 'permission' => 'location.bulk-import.index'], function () {
+            Route::get('/', [ImportLocationController::class, 'index'])->name('index');
+            Route::post('/', [ImportLocationController::class, 'import'])->name('store');
+            Route::post('validate', [ImportLocationController::class, 'validateData'])->name('validate');
+            Route::post('download-example', [ImportLocationController::class, 'downloadExample'])->name('download-example');
+            Route::post('import-location-data', [ImportLocationController::class, 'importLocationData'])->name('import-location-data');
         });
 
-        Route::group(['prefix' => 'locations/bulk-import', 'as' => 'location.bulk-import.'], function () {
-            Route::get('/', [
-                'as' => 'index',
-                'uses' => 'BulkImportController@index',
-            ]);
-
-            Route::post('/download-template', [
-                'as' => 'download-template',
-                'uses' => 'BulkImportController@downloadTemplate',
-                'permission' => 'location.bulk-import.index',
-            ]);
-
-            Route::post('/import-location-data', [
-                'as' => 'import-location-data',
-                'uses' => 'BulkImportController@importLocationData',
-                'permission' => 'location.bulk-import.index',
-            ]);
-        });
-
-        Route::group(['prefix' => 'locations/export', 'as' => 'location.export.'], function () {
-            Route::get('/', [
-                'as' => 'index',
-                'uses' => 'ExportController@index',
-            ]);
-
-            Route::post('/', [
-                'as' => 'process',
-                'uses' => 'ExportController@export',
-                'permission' => 'location.export.index',
-            ]);
+        Route::group(['prefix' => 'locations/export', 'as' => 'location.export.', 'permission' => 'location.export.index'], function () {
+            Route::get('/', [ExportLocationController::class, 'index'])->name('index');
+            Route::post('/', [ExportLocationController::class, 'store'])->name('process');
         });
     });
 

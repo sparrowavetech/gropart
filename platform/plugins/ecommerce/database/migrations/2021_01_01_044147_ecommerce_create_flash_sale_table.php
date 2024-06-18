@@ -9,7 +9,7 @@ return new class () extends Migration {
     {
         Schema::create('ec_flash_sales', function (Blueprint $table) {
             $table->id();
-            $table->string('name', 255);
+            $table->string('name');
             $table->dateTime('end_date');
             $table->string('status', 60)->default('published');
             $table->timestamps();

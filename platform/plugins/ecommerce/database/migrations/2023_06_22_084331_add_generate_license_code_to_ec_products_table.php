@@ -37,7 +37,7 @@ return new class () extends Migration {
                 foreach ($invoiceItems as $invoiceItem) {
                     $orderProduct = $order->products->firstWhere('product_id', $invoiceItem->reference_id);
                     if ($orderProduct && $orderProduct->product_options_implode) {
-                        $invoiceItem->options = array_merge((array)$invoiceItem->options, [
+                        $invoiceItem->options = array_merge((array) $invoiceItem->options, [
                             'product_options' => $orderProduct->product_options_implode,
                         ]);
 

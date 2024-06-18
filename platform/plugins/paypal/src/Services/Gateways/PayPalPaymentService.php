@@ -12,7 +12,7 @@ class PayPalPaymentService extends PayPalPaymentAbstract
 {
     public function makePayment(array $data)
     {
-        $amount = round((float)$data['amount'], $this->isSupportedDecimals() ? 2 : 0);
+        $amount = round((float) $data['amount'], $this->isSupportedDecimals() ? 2 : 0);
 
         $currency = $data['currency'];
         $currency = strtoupper($currency);
@@ -46,13 +46,13 @@ class PayPalPaymentService extends PayPalPaymentAbstract
             ->createPayment($description);
     }
 
-    public function afterMakePayment(array $data): string|null
+    public function afterMakePayment(array $data): ?string
     {
         $status = PaymentStatusEnum::COMPLETED;
 
         $chargeId = session('paypal_payment_id');
 
-        $orderIds = (array)Arr::get($data, 'order_id', []);
+        $orderIds = (array) Arr::get($data, 'order_id', []);
 
         do_action(PAYMENT_ACTION_PAYMENT_PROCESSED, [
             'amount' => $data['amount'],

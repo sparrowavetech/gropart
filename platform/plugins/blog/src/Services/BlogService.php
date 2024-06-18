@@ -131,7 +131,7 @@ class BlogService
                 $allRelatedCategoryIds = array_merge([$category->getKey()], $category->activeChildren->pluck('id')->all());
 
                 $posts = app(PostInterface::class)
-                    ->getByCategory($allRelatedCategoryIds, (int)theme_option('number_of_posts_in_a_category', 12));
+                    ->getByCategory($allRelatedCategoryIds, (int) theme_option('number_of_posts_in_a_category', 12));
 
                 if ($category->parents->isNotEmpty()) {
                     foreach ($category->parents->reverse() as $parentCategory) {
@@ -177,7 +177,7 @@ class BlogService
                     );
                 }
 
-                $posts = get_posts_by_tag($tag->getKey(), (int)theme_option('number_of_posts_in_a_tag', 12));
+                $posts = get_posts_by_tag($tag->getKey(), (int) theme_option('number_of_posts_in_a_tag', 12));
 
                 Theme::breadcrumb()->add($tag->name, $tag->url);
 

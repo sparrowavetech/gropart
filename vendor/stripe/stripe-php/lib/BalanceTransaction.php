@@ -30,9 +30,6 @@ class BalanceTransaction extends ApiResource
 {
     const OBJECT_NAME = 'balance_transaction';
 
-    use ApiOperations\All;
-    use ApiOperations\Retrieve;
-
     const TYPE_ADJUSTMENT = 'adjustment';
     const TYPE_ADVANCE = 'advance';
     const TYPE_ADVANCE_FUNDING = 'advance_funding';
@@ -48,12 +45,8 @@ class BalanceTransaction extends ApiResource
     const TYPE_ISSUING_AUTHORIZATION_RELEASE = 'issuing_authorization_release';
     const TYPE_ISSUING_DISPUTE = 'issuing_dispute';
     const TYPE_ISSUING_TRANSACTION = 'issuing_transaction';
-    const TYPE_OBLIGATION_INBOUND = 'obligation_inbound';
     const TYPE_OBLIGATION_OUTBOUND = 'obligation_outbound';
-    const TYPE_OBLIGATION_PAYOUT = 'obligation_payout';
-    const TYPE_OBLIGATION_PAYOUT_FAILURE = 'obligation_payout_failure';
     const TYPE_OBLIGATION_REVERSAL_INBOUND = 'obligation_reversal_inbound';
-    const TYPE_OBLIGATION_REVERSAL_OUTBOUND = 'obligation_reversal_outbound';
     const TYPE_PAYMENT = 'payment';
     const TYPE_PAYMENT_FAILURE_REFUND = 'payment_failure_refund';
     const TYPE_PAYMENT_NETWORK_RESERVE_HOLD = 'payment_network_reserve_hold';
@@ -77,4 +70,48 @@ class BalanceTransaction extends ApiResource
     const TYPE_TRANSFER_CANCEL = 'transfer_cancel';
     const TYPE_TRANSFER_FAILURE = 'transfer_failure';
     const TYPE_TRANSFER_REFUND = 'transfer_refund';
+
+    /**
+     * Returns a list of transactions that have contributed to the Stripe account
+     * balance (e.g., charges, transfers, and so forth). The transactions are returned
+     * in sorted order, with the most recent transactions appearing first.
+     *
+     * Note that this endpoint was previously called “Balance history” and used the
+     * path <code>/v1/balance/history</code>.
+     *
+     * @param null|array $params
+     * @param null|array|string $opts
+     *
+     * @throws \Stripe\Exception\ApiErrorException if the request fails
+     *
+     * @return \Stripe\Collection<\Stripe\BalanceTransaction> of ApiResources
+     */
+    public static function all($params = null, $opts = null)
+    {
+        $url = static::classUrl();
+
+        return static::_requestPage($url, \Stripe\Collection::class, $params, $opts);
+    }
+
+    /**
+     * Retrieves the balance transaction with the given ID.
+     *
+     * Note that this endpoint previously used the path
+     * <code>/v1/balance/history/:id</code>.
+     *
+     * @param array|string $id the ID of the API resource to retrieve, or an options array containing an `id` key
+     * @param null|array|string $opts
+     *
+     * @throws \Stripe\Exception\ApiErrorException if the request fails
+     *
+     * @return \Stripe\BalanceTransaction
+     */
+    public static function retrieve($id, $opts = null)
+    {
+        $opts = \Stripe\Util\RequestOptions::parse($opts);
+        $instance = new static($id, $opts);
+        $instance->refresh();
+
+        return $instance;
+    }
 }

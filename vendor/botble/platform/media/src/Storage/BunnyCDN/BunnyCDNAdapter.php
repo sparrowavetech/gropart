@@ -34,7 +34,7 @@ class BunnyCDNAdapter implements FilesystemAdapter, PublicUrlGenerator, Checksum
 
     public function __construct(protected BunnyCDNClient $client, protected string $pullZoneURL = '')
     {
-        if (func_num_args() > 2 && (string)func_get_arg(2) !== '') {
+        if (func_num_args() > 2 && (string) func_get_arg(2) !== '') {
             throw new RuntimeException('PrefixPath is no longer supported directly. Use PathPrefixedAdapter instead: https://flysystem.thephpleague.com/docs/adapter/path-prefixing/');
         }
     }
@@ -333,7 +333,7 @@ class BunnyCDNAdapter implements FilesystemAdapter, PublicUrlGenerator, Checksum
             return Util::normalizePath($item->path()) === Util::normalizePath($path);
         })->toArray();
 
-        return (bool)count($count);
+        return (bool) count($count);
     }
 
     public function publicUrl(string $path, Config $config): string
@@ -355,7 +355,7 @@ class BunnyCDNAdapter implements FilesystemAdapter, PublicUrlGenerator, Checksum
         $position = strpos($subject, $search);
 
         if ($position !== false) {
-            return (string)substr_replace($subject, $replace, $position, strlen($search));
+            return (string) substr_replace($subject, $replace, $position, strlen($search));
         }
 
         return $subject;

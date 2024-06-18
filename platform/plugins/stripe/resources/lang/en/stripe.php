@@ -13,5 +13,5 @@ return [
         'step_3_description' => 'Click the "Add Endpoint" button to save the webhook.',
         'step_4_label' => 'Copy Signing Secret',
         'step_4_description' => 'Copy the "Signing Secret" value from the "Webhook Details" section and paste it into the "Stripe Webhook Secret" field in the "Stripe" section of the "Payment" tab in the "Settings" page.',
-    ]
+    ],
 ];

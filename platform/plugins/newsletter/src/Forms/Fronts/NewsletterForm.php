@@ -7,28 +7,39 @@ use Botble\Base\Forms\FieldOptions\EmailFieldOption;
 use Botble\Base\Forms\FieldOptions\HtmlFieldOption;
 use Botble\Base\Forms\Fields\EmailField;
 use Botble\Base\Forms\Fields\HtmlField;
-use Botble\Base\Forms\FormAbstract;
-use Botble\Captcha\Facades\Captcha;
-use Botble\Captcha\Forms\Fields\ReCaptchaField;
+use Botble\Newsletter\Http\Requests\NewsletterRequest;
+use Botble\Newsletter\Models\Newsletter;
+use Botble\Theme\FormFront;
 
-class NewsletterForm extends FormAbstract
+class NewsletterForm extends FormFront
 {
+    protected string $errorBag = 'newsletter';
+
+    public static function formTitle(): string
+    {
+        return trans('plugins/newsletter::newsletter.newsletter_form');
+    }
+
     public function setup(): void
     {
         $this
             ->contentOnly()
             ->setUrl(route('public.newsletter.subscribe'))
             ->setFormOption('class', 'subscribe-form')
+            ->setValidatorClass(NewsletterRequest::class)
+            ->model(Newsletter::class)
             ->add('wrapper_before', HtmlField::class, HtmlFieldOption::make()->content('<div class="input-group mb-3">')->toArray())
             ->add(
                 'email',
                 EmailField::class,
                 EmailFieldOption::make()
                     ->label(false)
+                    ->required()
                     ->cssClass('')
                     ->wrapperAttributes(false)
                     ->maxLength(-1)
                     ->placeholder(__('Enter Your Email'))
+                    ->addAttribute('id', 'newsletter-email')
                     ->toArray()
             )
             ->add(
@@ -39,12 +50,6 @@ class NewsletterForm extends FormAbstract
                     ->cssClass('btn btn-primary')
                     ->toArray(),
             )
-            ->add('wrapper_after', HtmlField::class, HtmlFieldOption::make()->content('</div>')->toArray())
-            ->when(is_plugin_active('captcha') && Captcha::reCaptchaEnabled(), function (FormAbstract $form) {
-                $form->add(
-                    'captcha',
-                    ReCaptchaField::class,
-                );
-            });
+            ->add('wrapper_after', HtmlField::class, HtmlFieldOption::make()->content('</div>')->toArray());
     }
 }

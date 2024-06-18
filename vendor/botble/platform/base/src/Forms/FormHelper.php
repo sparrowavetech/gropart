@@ -21,7 +21,7 @@ class FormHelper extends BaseFormHelper
 
     protected function loadCustomTypes(): void
     {
-        $customFields = (array)$this->getConfig('custom_fields');
+        $customFields = (array) $this->getConfig('custom_fields');
 
         if (! empty($customFields)) {
             foreach ($customFields as $fieldName => $fieldClass) {
@@ -67,12 +67,12 @@ class FormHelper extends BaseFormHelper
         );
     }
 
-    public function hasCustomField($name): bool
+    public function hasCustomField(string $name): bool
     {
         return array_key_exists($name, $this->customTypes);
     }
 
-    public function addCustomField($name, $class)
+    public function addCustomField(string $name, string $class): string
     {
         if (! $this->hasCustomField($name)) {
             return $this->customTypes[$name] = $class;

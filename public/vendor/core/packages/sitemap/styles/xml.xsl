@@ -103,9 +103,6 @@ footer
 		<thead>
 	      <tr bgcolor="#9acd32">
 	        <th style="text-align:left">URL</th>
-	        <th style="text-align:left">Alternates</th>
-			<th style="text-align:left">Images</th>
-			<th style="text-align:left">Videos</th>
 	        <th style="text-align:left">Priority</th>
 	        <th style="text-align:left">Update freq</th>
 	        <th style="text-align:left">Updated at</th>
@@ -115,9 +112,6 @@ footer
 	      <xsl:for-each select="s:urlset/s:url">
 	      <tr>
 	        <td class="url"><xsl:value-of select="s:loc"/></td>
-	        <td><xsl:value-of select="count(xhtml:link)"/></td>
-	        <td><xsl:value-of select="count(image:image)"/></td>
-	        <td><xsl:value-of select="count(video:video)"/></td>
 	        <td><xsl:value-of select="concat(s:priority*100,'%')"/></td>
 	        <td><xsl:value-of select="s:changefreq"/></td>
 	        <td><xsl:value-of select="concat(substring(s:lastmod,0,11),concat(' ', substring(s:lastmod,12,5)))"/></td>

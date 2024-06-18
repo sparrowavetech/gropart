@@ -17,10 +17,10 @@
     "require": {
         "ext-zip": "*",
         "ext-gd": "*",
-        "barryvdh/laravel-dompdf": "^2.0",
+        "barryvdh/laravel-dompdf": "^3.0",
         "botble/assets": "^1.0",
+        "botble/form-builder": "^1.0",
         "intervention/image": "^3.4",
-        "kris/laravel-form-builder": "dev-master",
         "maennchen/zipstream-php": "3.1.*",
         "tightenco/ziggy": "^2.0",
         "yajra/laravel-datatables-buttons": "^10.0",

@@ -20,7 +20,7 @@ $name = Str::contains($name = $menu['name'], '::') ?  BaseHelper::clean(trans($n
     title="{{ $menu['title'] ?? $name }}"
 >
     @if (AdminAppearance::showMenuItemIcon() && $menu['icon'] !== false)
-        <span class="nav-link-icon d-md-none d-lg-inline-block">
+        <span class="nav-link-icon d-md-none d-lg-inline-block" title="{{ $name }}">
             <x-core::icon :name="$menu['icon'] ?: 'ti ti-point'" />
         </span>
     @endif

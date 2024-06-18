@@ -83,6 +83,7 @@ class HookServiceProvider extends ServiceProvider
                             ->all();
 
                         return ShortcodeForm::createFromArray($attributes)
+                            ->withLazyLoading()
                             ->add('paginate', 'number', [
                                 'label' => trans('plugins/blog::base.number_posts_per_page'),
                                 'attr' => [
@@ -154,7 +155,7 @@ class HookServiceProvider extends ServiceProvider
                         'dateModified' => $post->updated_at->toDateString(),
                     ];
 
-                    return $html . Html::tag('script', json_encode($schema), ['type' => 'application/ld+json'])
+                    return $html . Html::tag('script', json_encode($schema, JSON_UNESCAPED_UNICODE), ['type' => 'application/ld+json'])
                             ->toHtml();
                 }, 35);
             }, 35, 2);
@@ -265,7 +266,7 @@ class HookServiceProvider extends ServiceProvider
                     $query->whereIn('categories.id', $categoryIds);
                 });
             })
-            ->paginate((int)$shortcode->paginate ?: 12);
+            ->paginate((int) $shortcode->paginate ?: 12);
 
         $view = 'plugins/blog::themes.templates.posts';
         $themeView = Theme::getThemeNamespace() . '::views.templates.posts';
@@ -277,7 +278,7 @@ class HookServiceProvider extends ServiceProvider
         return view($view, compact('posts'))->render();
     }
 
-    public function renderBlogPage(string|null $content, Page $page): string|null
+    public function renderBlogPage(?string $content, Page $page): ?string
     {
         if ($page->getKey() == $this->getBlogPageId()) {
             $view = 'plugins/blog::themes.loop';
@@ -287,14 +288,14 @@ class HookServiceProvider extends ServiceProvider
             }
 
             return view($view, [
-                'posts' => get_all_posts(true, (int)theme_option('number_of_posts_in_a_category', 12)),
+                'posts' => get_all_posts(true, (int) theme_option('number_of_posts_in_a_category', 12)),
             ])->render();
         }
 
         return $content;
     }
 
-    public function addAdditionNameToPageName(string|null $name, Page $page): string|null
+    public function addAdditionNameToPageName(?string $name, Page $page): ?string
     {
         if ($page->getKey() == $this->getBlogPageId()) {
             $subTitle = Html::tag('span', trans('plugins/blog::base.blog_page'), ['class' => 'additional-page-name'])

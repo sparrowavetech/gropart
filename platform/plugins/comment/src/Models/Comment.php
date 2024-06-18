@@ -44,12 +44,10 @@ class Comment extends BaseModel
         'user',
     ];
 
-    protected static function boot()
+    protected static function booted(): void
     {
-        parent::boot();
-
         static::created(function (Comment $comment) {
-            if ((int)$comment->parent_id !== 0) {
+            if ((int) $comment->parent_id !== 0) {
                 $parent = Comment::where(['id' => $comment->parent_id])->first();
                 $parent->reply_count = Comment::where(['parent_id' => $parent->id])->count();
                 $parent->save();
@@ -87,7 +85,7 @@ class Comment extends BaseModel
 
     public function getRepAttribute(): LengthAwarePaginator|array
     {
-        return (int)$this->reply_count > 0 ? $this->replies()
+        return (int) $this->reply_count > 0 ? $this->replies()
             ->orderBy('created_at', 'DESC')
             ->paginate(5, ['*'], 'rep_page') : [];
     }
@@ -99,7 +97,7 @@ class Comment extends BaseModel
 
     public function getLikedAttribute(): bool
     {
-        if ((int)$this->like_count > 0 && auth()->guard(COMMENT_GUARD)->check()) {
+        if ((int) $this->like_count > 0 && auth()->guard(COMMENT_GUARD)->check()) {
             return $this->likes()->where(['user_id' => auth()->guard(COMMENT_GUARD)->id()])->exists();
         }
 

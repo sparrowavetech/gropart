@@ -31,6 +31,27 @@
             :placeholder="trans('core/setting::setting.test_email_input_placeholder')"
         />
 
+        @php
+            $emailTemplates = [
+                '' => trans('core/setting::setting.test_email_template'),
+            ];
+
+            foreach (EmailHandler::getTemplates() as $type => $item) {
+                foreach ($item as $module => $data) {
+                    foreach ($data['templates'] as $key => $template) {
+                        $emailTemplates[$type . '.' . $module . '.' . $key] = trans($template['title']);
+                    }
+                }
+            }
+        @endphp
+
+        <x-core::form.select
+            :label="trans('core/setting::setting.select_email_template')"
+            type="template"
+            name="template"
+            :options="$emailTemplates"
+        />
+
         <x-slot:footer>
             <div class="w-100 row">
                 <div class="col">

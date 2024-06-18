@@ -56,4 +56,5 @@ return [
     'select_placeholder' => 'Select an option',
     'selected' => 'selected',
     'count_selected' => ':count selected',
+    'sort_order' => 'Sort order',
 ];

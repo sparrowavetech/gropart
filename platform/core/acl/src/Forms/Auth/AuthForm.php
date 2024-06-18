@@ -56,7 +56,7 @@ class AuthForm extends FormAbstract
         return $this;
     }
 
-    public function submitButton(string $label, string|null $icon = null): self
+    public function submitButton(string $label, ?string $icon = null): self
     {
         $this
             ->add(
@@ -65,7 +65,7 @@ class AuthForm extends FormAbstract
                 HtmlFieldOption::make()->content('<div class="form-footer">')->toArray()
             )
             ->add(
-                'button_submit',
+                'submit',
                 HtmlField::class,
                 HtmlFieldOption::make()->view('core/acl::auth.includes.submit', compact('label', 'icon'))->toArray()
             )

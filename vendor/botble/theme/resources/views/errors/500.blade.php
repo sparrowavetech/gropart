@@ -1,38 +1,26 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8" />
-    <meta name="robots" content="noindex,nofollow,noarchive" />
-    <title>{{ __('An Error Occurred: Internal Server Error') }}</title>
-    <style>
-        body {
-            background-color: #fff;
-            color: #222;
-            font: 16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            margin: 0;
-        }
-        .container {
-            margin: 30px;
-            max-width: 600px;
-        }
-        h1 {
-            color: #dc3545;
-            font-size: 24px;
-        }
+@extends('packages/theme::errors.master')
 
-        h2 {
-            font-size: 18px;
-        }
-    </style>
-</head>
-<body>
-<div class="container">
-    <h1>{{ __('Oops! An Error Occurred') }}</h1>
-    <h2>{{ __('The server returned a "500 Internal Server Error".') }}</h2>
+@section('title', __('500 Internal Server Error'))
 
-    <p>
-        {{ __('Something is broken. Please let us know what you were doing when this error occurred. We will fix it as soon as possible. Sorry for any inconvenience caused.') }}
-    </p>
-</div>
-</body>
-</html>
+@section('content')
+    <div class="empty">
+        <div class="empty-header">500</div>
+        <p class="empty-title">{{ __('Internal Server Error') }}</p>
+        <p class="empty-subtitle text-secondary">
+            {{ __('Something is broken. Please let us know what you were doing when this error occurred. We will fix it as soon as possible. Sorry for any inconvenience caused.') }}
+        </p>
+
+        <p class="empty-subtitle text-secondary">{!! BaseHelper::clean(__('Please try again in a few minutes, or alternatively return to the homepage by <a href=":link">clicking here</a>.', ['link' => BaseHelper::getHomepageUrl()])) !!}</p>
+
+        <div class="empty-action">
+            <x-core::button
+                tag="a"
+                href="{{ BaseHelper::getHomepageUrl() }}"
+                color="primary"
+                icon="ti ti-arrow-left"
+            >
+                {{ __('Take me home') }}
+            </x-core::button>
+        </div>
+    </div>
+@endsection

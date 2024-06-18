@@ -3,11 +3,7 @@
 return [
     [
         'name' => 'Captcha',
-        'flag' => 'plugins.captcha',
-    ],
-    [
-        'name' => 'Captcha Settings',
         'flag' => 'captcha.settings',
-        'parent_flag' => 'plugins.captcha',
+        'parent_flag' => 'settings.others',
     ],
 ];

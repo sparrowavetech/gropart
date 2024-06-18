@@ -4,6 +4,7 @@ namespace Botble\Comment\Models;
 
 use Botble\Base\Models\BaseModel;
 use Botble\Base\Supports\Avatar;
+use Botble\Media\Facades\RvMedia;
 use Botble\Media\Models\MediaFile;
 use Exception;
 use Illuminate\Auth\Authenticatable;
@@ -17,7 +18,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\Access\Authorizable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use RvMedia;
 
 class CommentUser extends BaseModel implements
     AuthenticatableContract,
@@ -58,16 +58,16 @@ class CommentUser extends BaseModel implements
     protected function firstName(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => ucfirst((string)$value),
-            set: fn ($value) => ucfirst((string)$value),
+            get: fn ($value) => ucfirst((string) $value),
+            set: fn ($value) => ucfirst((string) $value),
         );
     }
 
     protected function lastName(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => ucfirst((string)$value),
-            set: fn ($value) => ucfirst((string)$value),
+            get: fn ($value) => ucfirst((string) $value),
+            set: fn ($value) => ucfirst((string) $value),
         );
     }
 

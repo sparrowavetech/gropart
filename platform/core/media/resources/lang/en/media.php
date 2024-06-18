@@ -135,9 +135,11 @@ return [
             ],
             'file' => [
                 'copy_link' => 'Copy link',
+                'copy_indirect_link' => 'Copy indirect link',
                 'rename' => 'Rename',
                 'make_copy' => 'Make a copy',
                 'alt_text' => 'ALT text',
+                'share' => 'Share',
             ],
             'user' => [
                 'favorite' => 'Add to favorite',
@@ -185,4 +187,11 @@ return [
         'color_label' => 'Choose a color for this folder',
     ],
     'update_properties_success' => 'Update properties successfully!',
+    'share' => 'Share',
+    'share_type' => 'Share Type',
+    'share_as_url' => 'URL',
+    'share_as_indirect_url' => 'Indirect URL',
+    'share_as_html' => 'HTML',
+    'share_as_markdown' => 'Markdown',
+    'share_results' => 'Share Results',
 ];

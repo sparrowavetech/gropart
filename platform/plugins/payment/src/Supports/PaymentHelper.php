@@ -101,6 +101,7 @@ class PaymentHelper
         return [
             get_payment_setting_key('name', $paymentMethod) => ['required', 'string', 'max:255'],
             get_payment_setting_key('description', $paymentMethod) => ['required', 'string'],
+            get_payment_setting_key('logo', $paymentMethod) => ['nullable', 'string'],
             get_payment_setting_key('available_countries', $paymentMethod) => ['nullable', 'array'],
             sprintf('%s.*', get_payment_setting_key('available_countries', $paymentMethod)) => ['nullable', 'string'],
         ];

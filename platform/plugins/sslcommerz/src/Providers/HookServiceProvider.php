@@ -82,7 +82,7 @@ class HookServiceProvider extends ServiceProvider
                 if (! Arr::get($refundDetail, 'error')) {
                     $refunds = Arr::get($payment->metadata, 'refunds', []);
                     $refund = collect($refunds)->firstWhere('refund_ref_id', $refundId);
-                    $refund = array_merge((array)$refund, Arr::get($refundDetail, 'data'));
+                    $refund = array_merge((array) $refund, Arr::get($refundDetail, 'data'));
 
                     return array_merge($refundDetail, [
                         'view' => view(
@@ -99,12 +99,12 @@ class HookServiceProvider extends ServiceProvider
         }, 20, 3);
     }
 
-    public function addPaymentSettings(string|null $settings): string
+    public function addPaymentSettings(?string $settings): string
     {
         return $settings . SslCommerzPaymentMethodForm::create()->renderForm();
     }
 
-    public function registerSslCommerzMethod(string|null $html, array $data): string|null
+    public function registerSslCommerzMethod(?string $html, array $data): ?string
     {
         PaymentMethods::method(SSLCOMMERZ_PAYMENT_METHOD_NAME, [
             'html' => view('plugins/sslcommerz::methods', $data)->render(),

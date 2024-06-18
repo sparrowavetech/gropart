@@ -24,6 +24,10 @@ class InsertDNSPrefetch extends PageSpeed
                 str_replace('//', '', $domain)
             );
 
+            if (filter_var($domain[0], FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME) === false) {
+                return '';
+            }
+
             return '<link rel="dns-prefetch" href="//' . $domain[0] . '">';
         })->unique()->implode("\n");
 

@@ -1,156 +1,64 @@
-<ul
-    class="list-unstyled list-feature"
-    id="auto-checkboxes"
-    data-name="foo"
->
-    <li
-        id="mainNode"
-        class="permissions-tree border-0"
-        style="background-color: inherit;"
-    >
-        <x-core::form.checkbox
-            label="{{ trans('core/acl::permissions.all') }}"
-            id="expandCollapseAllTree"
-            class="label label-default allTree"
-        >
-            <x-slot:label>
-                <x-core::badge
-                    color="secondary"
-                    :label="trans('core/acl::permissions.all')"
-                />
-            </x-slot:label>
-        </x-core::form.checkbox>
-        <ul class="p-0 list-unstyled">
-            @foreach ($children['root'] as $elementKey => $element)
-                <li
-                    class="collapsed mx-0"
-                    style="background-color: inherit"
-                    id="node{{ $elementKey }}"
-                >
-                    <x-core::form.checkbox
-                        id="checkSelect{{ $elementKey }}"
-                        name="flags[]"
-                        value="{{ $flags[$element]['flag'] }}"
-                        checked="{{ in_array($flags[$element]['flag'], $active) }}"
-                    >
+<div class="permissions-tree" id="checkboxes-permisstions" data-name="foo" >
+    @foreach ($children['root'] as $keyOne => $elOne)
+        <ul class="parent_tree m-0 p-0 list-unstyled" id="node{{ $keyOne }}" >
+            <li class="permissions-item list-unstyled">
+                <div class="permissions-header">
+                    <x-core::form.checkbox id="checkbox_one_{{ $keyOne }}" class="check-success" name="flags[]" value="{{ $flags[$elOne]['flag'] }}" checked="{{ in_array($flags[$elOne]['flag'], $active) }}" >
                         <x-slot:label>
-                            <x-core::badge
-                                lite
-                                color="primary"
-                                :label="$flags[$element]['name']"
-                            />
+                            <x-core::badge lite color="success" :label="$flags[$elOne]['name']" />
                         </x-slot:label>
                     </x-core::form.checkbox>
-                    @if (isset($children[$element]))
-                        <ul class="list-unstyled">
-                            @foreach ($children[$element] as $subKey => $subElements)
-                                <li
-                                    class="collapsed mx-0"
-                                    style="background-color: inherit"
-                                    id="node_sub_{{ $elementKey }}_{{ $subKey }}"
-                                >
-                                    <x-core::form.checkbox
-                                        id="checkSelect_sub_{{ $elementKey }}_{{ $subKey }}"
-                                        name="flags[]"
-                                        value="{{ $flags[$subElements]['flag'] }}"
-                                        checked="{{ in_array($flags[$subElements]['flag'], $active) }}"
-                                    >
-                                        <x-slot:label>
-                                            <x-core::badge
-                                                lite
-                                                color="yellow"
-                                                :label="$flags[$subElements]['name']"
-                                            />
-                                        </x-slot:label>
-                                    </x-core::form.checkbox>
-                                    @if (isset($children[$subElements]))
-                                        <ul class="list-unstyled">
-                                            @foreach ($children[$subElements] as $subSubKey => $subSubElements)
-                                                <li
-                                                    class="collapsed mx-0"
-                                                    style="background-color: inherit"
-                                                    id="node_sub_sub_{{ $subSubKey }}"
-                                                >
-                                                    <x-core::form.checkbox
-                                                        id="checkSelect_sub_sub{{ $subSubKey }}"
-                                                        name="flags[]"
-                                                        value="{{ $flags[$subSubElements]['flag'] }}"
-                                                        checked="{{ in_array($flags[$subSubElements]['flag'], $active) }}"
-                                                    >
-                                                        <x-slot:label>
-                                                            <x-core::badge
-                                                                lite
-                                                                color="cyan"
-                                                                :label="$flags[$subSubElements]['name']"
-                                                            />
-                                                        </x-slot:label>
-                                                    </x-core::form.checkbox>
-                                                    @if (isset($children[$subSubElements]))
-                                                        <ul class="list-unstyled">
-                                                            @foreach ($children[$subSubElements] as $grandChildrenKey => $grandChildrenElements)
-                                                                <li
-                                                                    class="collapsed mx-0"
-                                                                    style="background-color: inherit"
-                                                                    id="node_grand_child{{ $grandChildrenKey }}"
-                                                                >
-                                                                    <x-core::form.checkbox
-                                                                        id="checkSelect_grand_child{{ $grandChildrenKey }}"
-                                                                        name="flags[]"
-                                                                        value="{{ $flags[$grandChildrenElements]['flag'] }}"
-                                                                        checked="{{ in_array($flags[$grandChildrenElements]['flag'], $active) }}"
-                                                                    >
-                                                                        <x-slot:label>
-                                                                            <x-core::badge
-                                                                                lite
-                                                                                color="lime"
-                                                                                :label="$flags[
-                                                                                    $grandChildrenElements
-                                                                                ]['name']"
-                                                                            />
-                                                                        </x-slot:label>
-                                                                    </x-core::form.checkbox>
-                                                                    @if (isset($children[$grandChildrenElements]))
-                                                                        <ul class="list-unstyled">
-                                                                            @foreach ($children[$grandChildrenElements] as $grandChildrenKeySub => $greatGrandChildrenElements)
-                                                                                <li
-                                                                                    class="collapsed mx-0"
-                                                                                    style="background-color: inherit"
-                                                                                    id="node{{ $grandChildrenKey }}"
-                                                                                >
-                                                                                    <x-core::form.checkbox
-                                                                                        label="{{ $flags[$grandChildrenElements]['name'] }}"
-                                                                                        id="checkSelect_grand_child{{ $grandChildrenKeySub }}"
-                                                                                        name="flags[]"
-                                                                                        value="{{ $flags[$grandChildrenElements]['flag'] }}"
-                                                                                        checked="{{ in_array($flags[$grandChildrenElements]['flag'], $active) }}"
-                                                                                    >
-                                                                                        <x-slot:label>
-                                                                                            <x-core::badge
-                                                                                                lite
-                                                                                                color="purple"
-                                                                                                :label="$flags[
-                                                                                                    $grandChildrenElements
-                                                                                                ]['name']"
-                                                                                            />
-                                                                                        </x-slot:label>
-                                                                                    </x-core::form.checkbox>
-                                                                            @endforeach
-                                                                        </ul>
-                                                                    @endif
-                                                                </li>
-                                                            @endforeach
-                                                        </ul>
-                                                    @endif
-                                                </li>
-                                            @endforeach
-                                        </ul>
-                                    @endif
-                                </li>
-                            @endforeach
-                        </ul>
-                    @endif
-                </li>
-            @endforeach
+                </div>
+            @if (isset($children[$elOne]))
+                <ul class="row permissions-body {{ (isset($children[$elOne]) && count($children[$elOne]) > 0) ? 'has-children' : 'single-node' }}">
+                    @foreach ($children[$elOne] as $keyTwo => $elTwo)
+                        <li class="list-unstyled col-4 m-0" style="background-color: inherit" id="node_sub_{{ $keyOne }}_{{ $keyTwo }}" >
+                            <x-core::form.checkbox id="checkbox_two_{{ $keyOne }}_{{ $keyTwo }}" name="flags[]" value="{{ $flags[$elTwo]['flag'] }}" checked="{{ in_array($flags[$elTwo]['flag'], $active) }}" >
+                                <x-slot:label>
+                                    <x-core::badge lite color="primary" :label="$flags[$elTwo]['name']" />
+                                </x-slot:label>
+                            </x-core::form.checkbox>
+                            @if (isset($children[$elTwo]))
+                                <ul class="list-unstyled">
+                                    @foreach ($children[$elTwo] as $keyThree => $elThree)
+                                        <li style="background-color: inherit" id="node_sub_sub_{{ $keyThree }}" >
+                                            <x-core::form.checkbox id="checkbox_three_{{ $keyThree }}" class="check-yellow" name="flags[]" value="{{ $flags[$elThree]['flag'] }}" checked="{{ in_array($flags[$elThree]['flag'], $active) }}" >
+                                                <x-slot:label class="small">
+                                                    <x-core::badge lite color="yellow" :label="$flags[$elThree]['name']" />
+                                                </x-slot:label>
+                                            </x-core::form.checkbox>
+                                            @if (isset($children[$elThree]))
+                                                <ul class="list-unstyled">
+                                                    @foreach ($children[$elThree] as $keyFour => $elFour)
+                                                        <li style="background-color: inherit" id="node_grand_child{{ $keyFour }}" >
+                                                            <x-core::form.checkbox id="checkbox_four_{{ $keyFour }}" name="flags[]" value="{{ $flags[$elFour]['flag'] }}" checked="{{ in_array($flags[$elFour]['flag'], $active) }}" >
+                                                                <x-slot:label>
+                                                                    <small>{{ $flags[ $elFour ]['name'] }}</small>
+                                                                </x-slot:label>
+                                                            </x-core::form.checkbox>
+                                                            @if (isset($children[$elFour]))
+                                                                <ul class="list-unstyled">
+                                                                    @foreach ($children[$elFour] as $keyFive => $elFive)
+                                                                        <li style="background-color: inherit" id="node{{ $grandChildrenKey }}" >
+                                                                            <x-core::form.checkbox id="checkbox_five_{{ $keyFive }}" name="flags[]" value="{{ $flags[$elFour]['flag'] }}" checked="{{ in_array($flags[$elFour]['flag'], $active) }}" >
+                                                                                <x-slot:label>{{ $flags[$elFour]['name'] }}</x-slot:label>
+                                                                            </x-core::form.checkbox>
+                                                                    @endforeach
+                                                                </ul>
+                                                            @endif
+                                                        </li>
+                                                    @endforeach
+                                                </ul>
+                                            @endif
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            @endif
+                            </li>
+                    @endforeach
+                </ul>
+            @endif
+            </li>
         </ul>
-    </li>
-</ul>
+    @endforeach
+</div>

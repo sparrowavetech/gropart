@@ -9,7 +9,7 @@ trait HasUuidsOrIntegerIds
     public static function bootHasUuidsOrIntegerIds(): void
     {
         static::creating(static function (self $model): void {
-            if (self::getTypeOfId() === 'BIGINT') {
+            if (static::isUsingIntegerId()) {
                 return;
             }
 
@@ -17,18 +17,18 @@ trait HasUuidsOrIntegerIds
         });
     }
 
-    public function newUniqueId(): string|null
+    public function newUniqueId(): ?string
     {
-        return match (self::getTypeOfId()) {
-            'ULID' => (string)Str::ulid(),
+        return match (static::getTypeOfId()) {
+            'ULID' => (string) Str::ulid(),
             'BIGINT' => null,
-            default => (string)Str::orderedUuid(),
+            default => (string) Str::orderedUuid(),
         };
     }
 
     public function getKeyType(): string
     {
-        if (self::getTypeOfId() !== 'BIGINT') {
+        if (static::isUsingStringId()) {
             return 'string';
         }
 
@@ -37,7 +37,7 @@ trait HasUuidsOrIntegerIds
 
     public function getIncrementing(): bool
     {
-        if (self::getTypeOfId() !== 'BIGINT') {
+        if (static::isUsingStringId()) {
             return false;
         }
 
@@ -46,12 +46,12 @@ trait HasUuidsOrIntegerIds
 
     public static function determineIfUsingUuidsForId(): bool
     {
-        return self::getTypeOfId() === 'UUID';
+        return static::getTypeOfId() === 'UUID';
     }
 
     public static function determineIfUsingUlidsForId(): bool
     {
-        return self::getTypeOfId() === 'ULID';
+        return static::getTypeOfId() === 'ULID';
     }
 
     public static function getTypeOfId(): string
@@ -65,5 +65,22 @@ trait HasUuidsOrIntegerIds
         }
 
         return strtoupper(config('core.base.general.type_id', 'BIGINT'));
+    }
+
+    public function ensureIdCanBeCreated(): void
+    {
+        if (static::getTypeOfId() !== 'BIGINT') {
+            $this->id = $this->newUniqueId();
+        }
+    }
+
+    public static function isUsingIntegerId(): bool
+    {
+        return static::getTypeOfId() === 'BIGINT';
+    }
+
+    public static function isUsingStringId(): bool
+    {
+        return ! static::isUsingIntegerId();
     }
 }

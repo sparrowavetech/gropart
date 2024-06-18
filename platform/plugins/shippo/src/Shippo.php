@@ -26,11 +26,11 @@ use Throwable;
 
 class Shippo
 {
-    protected string|null $liveApiToken;
+    protected ?string $liveApiToken;
 
-    protected string|null $testApiToken;
+    protected ?string $testApiToken;
 
-    protected string|null $labelFileType;
+    protected ?string $labelFileType;
 
     protected Cache $cache;
 
@@ -42,7 +42,7 @@ class Shippo
 
     public const MAX_DESCRIPTION_LENGTH = 45;
 
-    protected string|null $currency;
+    protected ?string $currency;
 
     protected array $statuses;
 
@@ -452,10 +452,10 @@ class Shippo
         }
 
         $parcel = [
-            'weight' => round(EcommerceHelper::validateOrderWeight(Arr::get($inParams, 'weight', 0)), 2),
-            'length' => round($length, 2),
-            'width' => round($width, 2),
-            'height' => round($height, 2),
+            'weight' => round(EcommerceHelper::validateOrderWeight(Arr::get($inParams, 'weight', 0)), 2) ?: 200,
+            'length' => round($length, 2) ?: 10,
+            'width' => round($width, 2) ?: 10,
+            'height' => round($height, 2) ?: 10,
             'distance_unit' => $this->distanceUnit,
             'mass_unit' => $this->massUnit,
         ];
@@ -552,18 +552,17 @@ class Shippo
                 $city = Location::getCityById($cityId);
                 if ($city) {
                     $addr['city'] = $city->name;
-                    $addr['state'] = $city->state->abbreviation;
+                    $addr['state'] = $city->state->abbreviation ?: $city->state->name;
                     $addr['country'] = $city->state->country->code;
                 }
             } else {
                 $state = State::query()->find($addr['state']);
 
                 if ($state) {
-                    $addr['state'] = $state->abbreviation;
+                    $addr['state'] = $state->abbreviation ?: $state->name;
                     $addr['country'] = $state->country->code;
                 }
             }
-
         }
 
         return $addr;

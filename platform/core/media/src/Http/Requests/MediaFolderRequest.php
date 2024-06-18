@@ -10,6 +10,7 @@ class MediaFolderRequest extends Request
     {
         return [
             'name' => 'required|regex:/^[\pL\s\ \_\-0-9]+$/u',
+            'color' => ['nullable', 'hex_color'],
         ];
     }
 

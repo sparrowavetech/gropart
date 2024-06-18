@@ -4,6 +4,7 @@ return [
     [
         'name' => 'Blog',
         'flag' => 'plugins.blog',
+        'parent_flag' => 'core.cms',
     ],
     [
         'name' => 'Posts',
@@ -68,8 +69,18 @@ return [
         'parent_flag' => 'tags.index',
     ],
     [
-        'name' => 'Blog Settings',
+        'name' => 'Blog',
         'flag' => 'blog.settings',
-        'parent_flag' => 'plugins.blog',
+        'parent_flag' => 'settings.others',
+    ],
+    [
+        'name' => 'Export Posts',
+        'flag' => 'posts.export',
+        'parent_flag' => 'tools.data-synchronize',
+    ],
+    [
+        'name' => 'Import Posts',
+        'flag' => 'posts.import',
+        'parent_flag' => 'tools.data-synchronize',
     ],
 ];

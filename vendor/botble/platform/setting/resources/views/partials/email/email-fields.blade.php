@@ -32,7 +32,7 @@
         name="email_host"
         :label="trans('core/setting::setting.email.host')"
         type="text"
-        data-counter="60"
+        data-counter="255"
         :value="old('email_host', setting('email_host', config('mail.mailers.smtp.host')))"
         :placeholder="trans('core/setting::setting.email.host_placeholder')"
     />
@@ -50,7 +50,7 @@
         name="email_password"
         :label="trans('core/setting::setting.email.password')"
         type="password"
-        data-counter="120"
+        data-counter="255"
         :value="old('email_password', setting('email_password', config('mail.mailers.smtp.password')))"
         :placeholder="trans('core/setting::setting.email.password_placeholder')"
     />
@@ -61,6 +61,14 @@
         data-counter="20"
         :value="old('email_encryption', setting('email_encryption', config('mail.mailers.smtp.encryption')))"
         :placeholder="trans('core/setting::setting.email.encryption_placeholder')"
+    />
+
+    <x-core::form.text-input
+        name="email_local_domain"
+        :label="trans('core/setting::setting.email.local_domain')"
+        data-counter="20"
+        :value="old('email_local_domain', setting('email_local_domain', config('mail.mailers.smtp.local_domain')))"
+        :placeholder="trans('core/setting::setting.email.local_domain_placeholder')"
     />
 </div>
 

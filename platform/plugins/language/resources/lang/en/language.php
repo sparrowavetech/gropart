@@ -5,6 +5,8 @@ return [
     'description' => 'View and update your website languages',
     'choose_language' => 'Choose a language',
     'select_language' => 'Select language',
+    'select_language_code' => 'Select language code',
+    'select_locale' => 'Select locale',
     'choose_language_helper' => 'You can choose a language in the list or directly edit it below.',
     'language_name' => 'Language name',
     'language_name_helper' => 'The name is how it is displayed on your site (for example: English).',

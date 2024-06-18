@@ -32,7 +32,7 @@ class PaystackController extends BaseController
             'customer_id' => Arr::get($result['data']['metadata'], 'customer_id'),
             'customer_type' => Arr::get($result['data']['metadata'], 'customer_type'),
             'payment_type' => 'direct',
-            'order_id' => (array)$result['data']['metadata']['order_id'],
+            'order_id' => (array) $result['data']['metadata']['order_id'],
         ], $request);
 
         return $response

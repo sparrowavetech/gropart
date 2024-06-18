@@ -89,9 +89,9 @@ class RuleParser
      */
     public function addConditionalRules($attribute, $rules = [])
     {
-        foreach ((array)$attribute as $key) {
+        foreach ((array) $attribute as $key) {
             $current = $this->conditional[$key] ?? [];
-            $rules = $this->validator->explodeRules((array)$rules);
+            $rules = $this->validator->explodeRules((array) $rules);
             $merge = reset($rules);
             $this->conditional[$key] = array_merge($current, $merge);
         }

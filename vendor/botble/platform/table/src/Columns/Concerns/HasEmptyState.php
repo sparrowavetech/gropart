@@ -24,7 +24,7 @@ trait HasEmptyState
         return $this;
     }
 
-    public function renderEmptyStateIfAvailable(string|null $default): string|null
+    public function renderEmptyStateIfAvailable(?string $default): ?string
     {
         $default = trim((string) $default);
 

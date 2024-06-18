@@ -11,8 +11,8 @@ class CoreProduct
         public string $updateId,
         public string $version,
         public CarbonInterface $releasedDate,
-        public string|null $summary = null,
-        public string|null $changelog = null,
+        public ?string $summary = null,
+        public ?string $changelog = null,
         public bool $hasSQL = false
     ) {
     }

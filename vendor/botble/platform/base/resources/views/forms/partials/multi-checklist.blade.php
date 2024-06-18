@@ -1,13 +1,26 @@
 @if (! $asDropdown && $choices)
     <x-core::form.fieldset class="fieldset-for-multi-check-list">
         <div class="multi-check-list-wrapper">
+            @php
+                if (isset($attributes['class'])) {
+                    $attributes['class'] = str_replace('form-control', '', $attributes['class']);
+                }
+
+                if (is_string($value) && str_contains($value, ',')) {
+                    $value = explode(',', $value);
+                }
+            @endphp
+
             @foreach ($choices as $key => $item)
+                @php
+                    $checked = is_array($value) ? in_array($key, $value) : ($key == $value);
+                @endphp
                 <x-core::form.checkbox
                     :id="sprintf('%s-item-%s', Str::slug($name), $key)"
                     :name="$name"
                     :value="$key"
                     :label="$item"
-                    :checked="in_array($key, $value)"
+                    :checked="$checked"
                     :inline="$inline"
                     :attributes="new Illuminate\View\ComponentAttributeBag((array) $attributes)"
                 />

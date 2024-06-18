@@ -12,13 +12,13 @@ class SendEmailNotificationAboutNewSubscriberListener implements ShouldQueue
 {
     public function handle(SubscribeNewsletterEvent $event): void
     {
+        $unsubscribeUrl = URL::signedRoute('public.newsletter.unsubscribe', ['user' => $event->newsletter->id]);
+
         $mailer = EmailHandler::setModule(NEWSLETTER_MODULE_SCREEN_NAME)->setVariableValues([
             'newsletter_name' => $event->newsletter->name ?? 'N/A',
             'newsletter_email' => $event->newsletter->email,
-            'newsletter_unsubscribe_link' => Html::link(
-                URL::signedRoute('public.newsletter.unsubscribe', ['user' => $event->newsletter->id]),
-                __('here')
-            )->toHtml(),
+            'newsletter_unsubscribe_link' => Html::link($unsubscribeUrl, __('here'))->toHtml(),
+            'newsletter_unsubscribe_url' => $unsubscribeUrl,
         ]);
 
         $mailer->sendUsingTemplate('subscriber_email', $event->newsletter->email);

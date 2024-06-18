@@ -84,5 +84,5 @@ interface OpenGraphContract extends RenderableContract
      */
     public function hasImage();
 
-    public function getProperty(string $property): string|null;
+    public function getProperty(string $property): ?string;
 }

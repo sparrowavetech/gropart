@@ -5,7 +5,7 @@
             @endif
 
             @if ($showLabel && $options['label'] !== false && $options['label_show'])
-                {!! Form::customLabel($name, $options['label'], $options['label_attr']) !!}
+                {!! Form::label($name, $options['label'], $options['label_attr']) !!}
             @endif
 
             @if ($showField)

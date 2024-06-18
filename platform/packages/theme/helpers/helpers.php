@@ -42,7 +42,7 @@ if (! function_exists('parse_args')) {
 }
 
 if (! function_exists('theme')) {
-    function theme(string|null $themeName = null, string|null $layoutName = null): mixed
+    function theme(?string $themeName = null, ?string $layoutName = null): mixed
     {
         $theme = app(ThemeContract::class);
 
@@ -76,9 +76,9 @@ if (! function_exists('theme_option')) {
 }
 
 if (! function_exists('theme_path')) {
-    function theme_path(string|null $path = null): string
+    function theme_path(?string $path = null): string
     {
-        return platform_path('themes' . DIRECTORY_SEPARATOR . ltrim((string)$path, DIRECTORY_SEPARATOR));
+        return platform_path('themes' . DIRECTORY_SEPARATOR . ltrim((string) $path, DIRECTORY_SEPARATOR));
     }
 }
 

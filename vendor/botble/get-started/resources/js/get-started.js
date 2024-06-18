@@ -3,8 +3,8 @@ window.getStartedCookie = (() => {
     const COOKIE_NAME = 'get_started_cookie'
     const COOKIE_DOMAIN = window.location.hostname
 
-    function setupCookie() {
-        setCookie(COOKIE_NAME, COOKIE_VALUE, 1)
+    function setupCookie(expirationInDays = 1) {
+        setCookie(COOKIE_NAME, COOKIE_VALUE, expirationInDays)
     }
 
     function cookieExists() {
@@ -73,5 +73,11 @@ $(() => {
     $(document).on('click', '.resume-setup-wizard', function (event) {
         event.preventDefault()
         $('.get-started-modal[data-step="1"]').modal('show')
+    })
+
+    $('.get-started-modal').on('hide.bs.modal', () => {
+        if (!window.getStartedCookie.cookieExists()) {
+            window.getStartedCookie.setupCookie(0.2)
+        }
     })
 })

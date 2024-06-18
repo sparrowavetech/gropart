@@ -42,10 +42,7 @@ class MarketplaceController extends BaseController
 
     public function list(Request $request): array|BaseHttpResponse
     {
-        $request->merge([
-            'type' => 'plugin',
-            'per_page' => 12,
-        ]);
+        $request->merge(['type' => 'plugin']);
 
         $response = $this->marketplaceService->callApi('get', '/products', $request->input());
 
@@ -126,7 +123,7 @@ class MarketplaceController extends BaseController
             ]);
     }
 
-    public function update(string $id, string|null $name = null): JsonResponse
+    public function update(string $id, ?string $name = null): JsonResponse
     {
         $detail = $this->detail($id);
 

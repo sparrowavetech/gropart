@@ -35,7 +35,7 @@ class FaqSupport implements FaqContract
             ];
         }
 
-        $schema = json_encode($schema);
+        $schema = json_encode($schema, JSON_UNESCAPED_UNICODE);
 
         Theme::asset()
             ->container('header')
@@ -69,7 +69,7 @@ class FaqSupport implements FaqContract
         }
     }
 
-    public function renderMetaBox(Model|null $model = null): string
+    public function renderMetaBox(?Model $model = null): string
     {
         Assets::addStylesDirectly(['vendor/core/plugins/faq/css/faq.css'])
             ->addScriptsDirectly(['vendor/core/plugins/faq/js/faq.js']);
@@ -83,7 +83,7 @@ class FaqSupport implements FaqContract
 
         $hasValue = ! empty($value);
 
-        $value = (array)$value;
+        $value = (array) $value;
 
         foreach ($value as $key => $item) {
             if (! is_array($item)) {

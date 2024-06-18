@@ -5,6 +5,7 @@ namespace Botble\PluginManagement\Services;
 use Botble\Base\Exceptions\RequiresLicenseActivatedException;
 use Botble\Base\Supports\Core;
 use Botble\Base\Supports\Zipper;
+use Exception;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
 use Illuminate\Http\JsonResponse;
@@ -17,7 +18,7 @@ class MarketplaceService
 {
     protected string $url;
 
-    protected string|null $token;
+    protected ?string $token;
 
     protected string $publishedPath;
 
@@ -62,19 +63,14 @@ class MarketplaceService
             if ($response->status() !== 200) {
                 $body = json_decode($response->body(), true);
 
-                return $this->responseReturn(
-                    Arr::get($body, 'message') ?: trans('packages/plugin-management::marketplace.api_connect_error'),
-                    true,
-                    [],
-                    $response->getStatusCode()
-                );
+                throw new Exception(Arr::get($body, 'message') ?: trans('packages/plugin-management::marketplace.could_not_connect'));
             }
 
             return $response;
         } catch (Throwable $e) {
             report($e);
 
-            return $this->responseReturn(trans('packages/plugin-management::marketplace.api_connect_error'), true);
+            throw new Exception(trans('packages/plugin-management::marketplace.could_not_connect'));
         }
     }
 
@@ -112,7 +108,7 @@ class MarketplaceService
         if ($data->getStatusCode() != 200) {
             $content = json_decode($data->getContent(), true);
 
-            return $this->responseReturn(Arr::get($content, 'message') ?: $data, true);
+            throw new Exception(Arr::get($content, 'message') ?: $data);
         }
 
         File::ensureDirectoryExists($this->publishedPath . $id);
@@ -137,7 +133,7 @@ class MarketplaceService
         $zipper = new Zipper();
 
         if (! $zipper->extract($destination, $pathTo)) {
-            return $this->responseReturn(trans('packages/plugin-management::marketplace.unzip_failed'), true);
+            throw new Exception(trans('packages/plugin-management::marketplace.unzip_failed'));
         }
 
         File::delete($destination);
@@ -155,18 +151,5 @@ class MarketplaceService
         }
 
         return $path;
-    }
-
-    protected function responseReturn(
-        string $message,
-        bool $error = false,
-        array $data = [],
-        int $statusCode = 200
-    ): JsonResponse {
-        return response()->json([
-            'error' => $error,
-            'message' => $message,
-            'data' => $data,
-        ], $statusCode);
     }
 }

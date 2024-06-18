@@ -25,6 +25,7 @@ parameters:
     checkModelProperties: false
     checkPhpDocMissingReturn: false
     checkUnusedViews: false
+    checkModelAppends: false
 
 parametersSchema:
     checkOctaneCompatibility: bool()
@@ -40,6 +41,7 @@ parametersSchema:
     disableSchemaScan: bool()
     checkModelProperties: bool()
     checkUnusedViews: bool()
+    checkModelAppends: bool()
 
 conditionalTags:
     Larastan\Larastan\Rules\NoEnvCallsOutsideOfConfigRule:
@@ -56,6 +58,8 @@ conditionalTags:
         phpstan.rules.rule: %checkModelProperties%
     Larastan\Larastan\Rules\UnusedViewsRule:
         phpstan.rules.rule: %checkUnusedViews%
+    Larastan\Larastan\Rules\ModelAppendsRule:
+        phpstan.rules.rule: %checkModelAppends%
 
 services:
     -
@@ -295,7 +299,7 @@ services:
             - phpstan.broker.dynamicMethodReturnTypeExtension
 
     -
-        class: Larastan\Larastan\ReturnTypes\CollectionGenericStaticMethodDynamicMethodReturnTypeExtension
+        class: Larastan\Larastan\ReturnTypes\EnumerableGenericStaticMethodDynamicMethodReturnTypeExtension
         tags:
             - phpstan.broker.dynamicMethodReturnTypeExtension
 
@@ -310,7 +314,7 @@ services:
             - phpstan.broker.dynamicMethodReturnTypeExtension
 
     -
-        class: Larastan\Larastan\ReturnTypes\CollectionGenericStaticMethodDynamicStaticMethodReturnTypeExtension
+        class: Larastan\Larastan\ReturnTypes\EnumerableGenericStaticMethodDynamicStaticMethodReturnTypeExtension
         tags:
             - phpstan.broker.dynamicStaticMethodReturnTypeExtension
 
@@ -400,6 +404,9 @@ services:
         class: Larastan\Larastan\Rules\ModelProperties\ModelPropertyRule
 
     -
+        class: Larastan\Larastan\Rules\ModelAppendsRule
+
+    -
         class: Larastan\Larastan\Rules\ModelProperties\ModelPropertyStaticCallRule
 
     -
@@ -441,6 +448,9 @@ services:
         class: Larastan\Larastan\Properties\ModelCastHelper
 
     -
+        class: Larastan\Larastan\Properties\ModelPropertyHelper
+
+    -
         class: Larastan\Larastan\Rules\ModelProperties\ModelPropertiesRuleHelper
 
     -
@@ -468,11 +478,14 @@ services:
             dispatchableClass: Illuminate\Foundation\Events\Dispatchable
         tags:
             - phpstan.rules.rule
-    - Larastan\Larastan\Properties\Schema\PhpMyAdminDataTypeToPhpTypeConverter
+
+    -
+        class: Larastan\Larastan\Properties\Schema\PhpMyAdminDataTypeToPhpTypeConverter
 
     -
         class: Larastan\Larastan\LarastanStubFilesExtension
-        tags: [phpstan.stubFilesExtension]
+        tags:
+            - phpstan.stubFilesExtension
 
     -
         class: Larastan\Larastan\Rules\UnusedViewsRule
@@ -524,35 +537,48 @@ services:
         class: Larastan\Larastan\ReturnTypes\ConsoleCommand\ArgumentDynamicReturnTypeExtension
         tags:
             - phpstan.broker.dynamicMethodReturnTypeExtension
+
     -
         class: Larastan\Larastan\ReturnTypes\ConsoleCommand\HasArgumentDynamicReturnTypeExtension
         tags:
             - phpstan.broker.dynamicMethodReturnTypeExtension
+
     -
         class: Larastan\Larastan\ReturnTypes\ConsoleCommand\OptionDynamicReturnTypeExtension
         tags:
             - phpstan.broker.dynamicMethodReturnTypeExtension
+
     -
         class: Larastan\Larastan\ReturnTypes\ConsoleCommand\HasOptionDynamicReturnTypeExtension
         tags:
             - phpstan.broker.dynamicMethodReturnTypeExtension
+
     -
         class: Larastan\Larastan\ReturnTypes\TranslatorGetReturnTypeExtension
         tags:
             - phpstan.broker.dynamicMethodReturnTypeExtension
+
     -
         class: Larastan\Larastan\ReturnTypes\TransHelperReturnTypeExtension
         tags:
             - phpstan.broker.dynamicFunctionReturnTypeExtension
+
     -
         class: Larastan\Larastan\ReturnTypes\DoubleUnderscoreHelperReturnTypeExtension
         tags:
             - phpstan.broker.dynamicFunctionReturnTypeExtension
 
-    - Larastan\Larastan\ReturnTypes\AppMakeHelper
-    - Larastan\Larastan\Internal\ConsoleApplicationResolver
-    - Larastan\Larastan\Internal\ConsoleApplicationHelper
-    - Larastan\Larastan\Support\HigherOrderCollectionProxyHelper
+    -
+        class: Larastan\Larastan\ReturnTypes\AppMakeHelper
+
+    -
+        class: Larastan\Larastan\Internal\ConsoleApplicationResolver
+
+    -
+        class: Larastan\Larastan\Internal\ConsoleApplicationHelper
+
+    -
+        class: Larastan\Larastan\Support\HigherOrderCollectionProxyHelper
 
 rules:
     - Larastan\Larastan\Rules\UselessConstructs\NoUselessWithFunctionCallsRule

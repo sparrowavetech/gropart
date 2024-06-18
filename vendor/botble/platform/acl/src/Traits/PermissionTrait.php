@@ -6,7 +6,7 @@ use Illuminate\Support\Str;
 
 trait PermissionTrait
 {
-    protected array|null $preparedPermissions = null;
+    protected ?array $preparedPermissions = null;
 
     public function updatePermission(string $permission, bool $value = true, bool $create = false): static
     {
@@ -14,7 +14,7 @@ trait PermissionTrait
             $this->addPermission($permission, $value);
         }
 
-        if (array_key_exists($permission, (array)$this->permissions)) {
+        if (array_key_exists($permission, (array) $this->permissions)) {
             $permissions = $this->permissions;
 
             $permissions[$permission] = $value;
@@ -35,7 +35,7 @@ trait PermissionTrait
             return $this;
         }
 
-        if (! array_key_exists($permission, (array)$this->permissions)) {
+        if (! array_key_exists($permission, (array) $this->permissions)) {
             $this->permissions = array_merge($this->permissions, [$permission => $value]);
         }
 
@@ -48,7 +48,7 @@ trait PermissionTrait
             return $this;
         }
 
-        if (array_key_exists($permission, (array)$this->permissions)) {
+        if (array_key_exists($permission, (array) $this->permissions)) {
             $permissions = $this->permissions;
 
             unset($permissions[$permission]);
@@ -122,7 +122,7 @@ trait PermissionTrait
     protected function extractClassPermissions(string $key): array
     {
         if (! Str::contains($key, '@')) {
-            return (array)$key;
+            return (array) $key;
         }
 
         $keys = [];

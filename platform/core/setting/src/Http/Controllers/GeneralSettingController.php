@@ -91,6 +91,8 @@ class GeneralSettingController extends SettingController
                 'licensed_to' => setting('licensed_to'),
             ];
 
+            $core->clearLicenseReminder();
+
             return $this
                 ->httpResponse()
                 ->setMessage('Your license is activated.')->setData($data);
@@ -182,6 +184,8 @@ class GeneralSettingController extends SettingController
         Setting::forceSet('licensed_to', $buyer)->save();
 
         $activatedAt = Carbon::createFromTimestamp(filectime($core->getLicenseFilePath()));
+
+        $core->clearLicenseReminder();
 
         return [
             'activated_at' => $activatedAt->format('M d Y'),

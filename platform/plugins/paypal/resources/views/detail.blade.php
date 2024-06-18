@@ -35,14 +35,12 @@
             <p class="mb-2">{{ trans('plugins/payment::payment.country') }}: {{ $payer->address->country_code }}</p>
             <p class="mb-0">
                 {{ trans('plugins/payment::payment.shipping_address') }}:
-                {{ $shipping->name->full_name }}, {{ $shipping->address->address_line_1 }},
-                {{ $shipping->address->admin_area_2 }}, {{ $shipping->address->admin_area_1 }}
-                {{ $shipping->address->postal_code }}, {{ $shipping->address->country_code }}
+                {{ implode(', ', (array) $shipping->name) }}, {{ implode(', ', (array) $shipping->address)  }}
             </p>
         </div>
 
         @php
-            $refunds = null;
+            $refunds = [];
             $payments = $purchaseUnit->payments;
             if ($payments && !empty($payments->refunds)) {
                 $refunds = $payments->refunds;

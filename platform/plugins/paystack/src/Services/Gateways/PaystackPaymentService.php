@@ -25,6 +25,7 @@ class PaystackPaymentService extends PaystackPaymentAbstract
             'GHS',
             'USD',
             'ZAR',
+            'KES',
         ];
     }
 }

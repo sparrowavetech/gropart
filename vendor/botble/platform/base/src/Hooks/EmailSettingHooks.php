@@ -6,7 +6,7 @@ use Botble\Base\Facades\EmailHandler;
 
 class EmailSettingHooks
 {
-    public static function addEmailTemplateSettings(string|null $html): string
+    public static function addEmailTemplateSettings(?string $html): string
     {
         $templates = '';
 

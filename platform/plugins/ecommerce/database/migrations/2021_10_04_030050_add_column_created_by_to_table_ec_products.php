@@ -10,7 +10,7 @@ return new class () extends Migration {
     {
         Schema::table('ec_products', function (Blueprint $table) {
             $table->foreignId('created_by_id')->nullable()->default(0);
-            $table->string('created_by_type', 255)->default(addslashes(User::class));
+            $table->string('created_by_type')->default(addslashes(User::class));
         });
     }
 

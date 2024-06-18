@@ -29,18 +29,26 @@ class CreateLocaleService
             $this->createLocaleFiles(lang_path('vendor/packages'), $locale);
             $this->createLocaleFiles(lang_path('vendor/plugins'), $locale);
 
-            $themeLocale = Arr::first(BaseHelper::scanFolder(theme_path(Theme::getThemeName() . '/lang')));
+            $parentTheme = Theme::getThemeName();
+
+            if (Theme::hasInheritTheme()) {
+                $parentTheme = Theme::getInheritTheme();
+            }
+
+            $themeLocale = Arr::first(BaseHelper::scanFolder(theme_path($parentTheme . '/lang')));
 
             if ($themeLocale) {
+                File::ensureDirectoryExists(lang_path('vendor/themes/' . Theme::getThemeName()));
+
                 File::copy(
-                    theme_path(Theme::getThemeName() . '/lang/' . $themeLocale),
-                    lang_path($locale . '.json')
+                    theme_path($parentTheme . '/lang/' . $themeLocale),
+                    lang_path('vendor/themes/' . Theme::getThemeName() . '/' . $locale . '.json')
                 );
             }
         }
     }
 
-    protected function createLocaleFiles(string $locale, string $path): void
+    protected function createLocaleFiles(string $path, string $locale): void
     {
         $folders = File::directories($path);
 

@@ -26,7 +26,7 @@ trait HasUrl
         return isset($this->url);
     }
 
-    public function getUrl(): string|null
+    public function getUrl(): ?string
     {
         if (! $this->hasUrl()) {
             return null;

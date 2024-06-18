@@ -5,14 +5,10 @@
     }
 </style>
 
-<link
-    href="{{ BaseHelper::getGoogleFontsURL() }}"
-    rel="preconnect"
->
-<link
-    href="{{ BaseHelper::getGoogleFontsURL(sprintf('css2?family=%s:wght@100;200;300;400;500;600;700;800;900&display=swap', setting('admin_primary_font', 'Inter'))) }}"
-    rel="stylesheet"
->
+{!! BaseHelper::googleFonts('https://fonts.googleapis.com/' . sprintf(
+        'css2?family=%s:wght@300;400;500;600;700&display=swap',
+        urlencode(setting('admin_primary_font', 'Inter')),
+)) !!}
 
 <style>
     :root {

@@ -11,8 +11,8 @@ return [
         'parent_flag' => 'newsletter.index',
     ],
     [
-        'name' => 'Newsletter Settings',
+        'name' => 'Newsletters',
         'flag' => 'newsletter.settings',
-        'parent_flag' => 'newsletter.index',
+        'parent_flag' => 'settings.others',
     ],
 ];

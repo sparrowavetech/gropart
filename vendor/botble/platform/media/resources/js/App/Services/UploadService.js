@@ -68,7 +68,7 @@ export class UploadService {
                     percent = percent - 1
                 }
                 let percentShow = (percent > 100 ? '100' : parseInt(percent)) + '%'
-                let el = _self.uploadProgressContainer.find('li').eq(file.index - 1)
+                let el = _self.uploadProgressContainer.find('tr').eq(file.index - 1)
                 el.find('.progress-percent').html(percentShow)
             },
         })
@@ -112,7 +112,7 @@ export class UploadService {
                 $('.rv-upload-progress').addClass('hide-the-pane')
                 _self.totalError = 0
                 setTimeout(() => {
-                    $('.rv-upload-progress li').remove()
+                    $('.rv-upload-progress tr').remove()
                     _self.totalQueued = 1
                 }, 300)
             })
@@ -123,45 +123,44 @@ export class UploadService {
             .replace(/__fileName__/gi, $fileName)
             .replace(/__fileSize__/gi, UploadService.formatFileSize($fileSize))
             .replace(/__status__/gi, 'warning')
-            .replace(/__message__/gi, 'Uploading')
+            .replace(/__message__/gi, 'Uploading...')
 
-        if (this.checkUploadTotalProgress() && this.uploadProgressContainer.find('li').length >= 1) {
+        if (this.checkUploadTotalProgress() && this.uploadProgressContainer.find('tr').length >= 1) {
             return
         }
 
         this.uploadProgressContainer.append(template)
         this.uploadProgressBox.removeClass('hide-the-pane')
-        this.uploadProgressBox.find('.panel-body').animate({ scrollTop: this.uploadProgressContainer.height() }, 150)
+        this.uploadProgressBox.find('.table').animate({ scrollTop: this.uploadProgressContainer.height() }, 150)
     }
 
     changeProgressStatus(file) {
-        let _self = this
-        let $progressLine = _self.uploadProgressContainer.find('td:nth-child(' + file.index + ')')
-        if (this.checkUploadTotalProgress()) {
-            $progressLine = _self.uploadProgressContainer.find('td:first')
-        }
+        const _self = this
 
-        let $label = $progressLine.find('.label')
-        $label.removeClass('label-success label-danger label-warning')
+        const $progressLine = _self.uploadProgressContainer.find(`tr:nth-child(${file.index})`)
 
-        let response = Helpers.jsonDecode(file.xhr.responseText || '', {})
+        const $label = $progressLine.find('.file-status')
+
+        const response = Helpers.jsonDecode(file.xhr.responseText || '', {})
 
         _self.totalError = _self.totalError + (response.error === true || file.status === 'error' ? 1 : 0)
 
-        $label.addClass(response.error === true || file.status === 'error' ? 'label-danger' : 'label-success')
+        $label.removeClass('text-success text-danger text-warning')
+        $label.addClass(response.error === true || file.status === 'error' ? 'text-danger' : 'text-success')
         $label.html(response.error === true || file.status === 'error' ? 'Error' : 'Uploaded')
+
         if (file.status === 'error') {
             if (file.xhr.status === 422) {
                 let errorHtml = ''
                 $.each(response.errors, (key, item) => {
-                    errorHtml += '<span class="text-danger">' + item + '</span><br>'
+                    errorHtml += `<span class="text-danger">${item}</span><br>`
                 })
                 $progressLine.find('.file-error').html(errorHtml)
             } else if (file.xhr.status === 500) {
-                $progressLine.find('.file-error').html('<span class="text-danger">' + file.xhr.statusText + '</span>')
+                $progressLine.find('.file-error').html(`<span class="text-danger">${file.xhr.statusText}</span>`)
             }
         } else if (response.error) {
-            $progressLine.find('.file-error').html('<span class="text-danger">' + response.message + '</span>')
+            $progressLine.find('.file-error').html(`<span class="text-danger">${response.message}</span>`)
         } else {
             Helpers.addToRecent(response.data.id)
             Helpers.setSelectedFile(response.data.id)

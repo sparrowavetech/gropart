@@ -4,16 +4,11 @@ declare(strict_types=1);
 
 namespace Intervention\Image\Drivers\Imagick\Modifiers;
 
-use Intervention\Image\Drivers\DriverSpecialized;
 use Intervention\Image\Interfaces\ImageInterface;
-use Intervention\Image\Interfaces\ModifierInterface;
-use Intervention\Image\Interfaces\SizeInterface;
+use Intervention\Image\Interfaces\SpecializedInterface;
+use Intervention\Image\Modifiers\CoverModifier as GenericCoverModifier;
 
-/**
- * @method SizeInterface getCropSize(ImageInterface $image)
- * @method SizeInterface getResizeSize(SizeInterface $size)
- */
-class CoverModifier extends DriverSpecialized implements ModifierInterface
+class CoverModifier extends GenericCoverModifier implements SpecializedInterface
 {
     public function apply(ImageInterface $image): ImageInterface
     {
@@ -21,7 +16,7 @@ class CoverModifier extends DriverSpecialized implements ModifierInterface
         $resize = $this->getResizeSize($crop);
 
         foreach ($image as $frame) {
-            $frame->native()->extentImage(
+            $frame->native()->cropImage(
                 $crop->width(),
                 $crop->height(),
                 $crop->pivot()->x(),
@@ -32,6 +27,8 @@ class CoverModifier extends DriverSpecialized implements ModifierInterface
                 $resize->width(),
                 $resize->height()
             );
+
+            $frame->native()->setImagePage(0, 0, 0, 0);
         }
 
         return $image;

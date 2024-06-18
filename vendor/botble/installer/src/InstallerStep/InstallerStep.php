@@ -44,7 +44,7 @@ class InstallerStep
                 ->priority(70),
         ];
 
-        if (count(Manager::getThemes()) > 1) {
+        if (class_exists(Manager::class) && count(Manager::getThemes()) > 1) {
             self::$steps['theme'] = InstallerStepItem::make()
                 ->label(fn () => trans('packages/installer::installer.theme.title'))
                 ->route('installers.themes.index')

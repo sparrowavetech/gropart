@@ -48,7 +48,7 @@ abstract class PageSpeed
 
     protected function isEnable(): bool
     {
-        return (bool)setting('optimize_page_speed_enable', false);
+        return (bool) setting('optimize_page_speed_enable', false);
     }
 
     protected function shouldProcessPageSpeed(Request $request): bool

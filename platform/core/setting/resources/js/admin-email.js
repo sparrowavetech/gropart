@@ -1,4 +1,4 @@
-$(function () {
+$(() => {
     const $wrapper = $('[data-bb-toggle="admin-email"]')
 
     if (!$wrapper.length) {

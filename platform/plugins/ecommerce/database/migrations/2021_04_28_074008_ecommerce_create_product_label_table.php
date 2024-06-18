@@ -9,7 +9,7 @@ return new class () extends Migration {
     {
         Schema::create('ec_product_labels', function (Blueprint $table) {
             $table->id();
-            $table->string('name', 255);
+            $table->string('name');
             $table->string('color', 120)->nullable();
             $table->string('status', 60)->default('published');
             $table->timestamps();

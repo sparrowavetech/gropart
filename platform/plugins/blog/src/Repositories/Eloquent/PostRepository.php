@@ -82,7 +82,7 @@ class PostRepository extends RepositoriesAbstract implements PostInterface
         $data = $this->model
             ->wherePublished()
             ->whereHas('categories', function (Builder $query) use ($categoryId) {
-                $query->whereIn('categories.id', array_filter((array)$categoryId));
+                $query->whereIn('categories.id', array_filter((array) $categoryId));
             })
             ->select('*')
             ->distinct()
@@ -150,7 +150,7 @@ class PostRepository extends RepositoriesAbstract implements PostInterface
     }
 
     public function getSearch(
-        string|null $keyword,
+        ?string $keyword,
         int $limit = 10,
         int $paginate = 10
     ): Collection|LengthAwarePaginator {
@@ -208,7 +208,7 @@ class PostRepository extends RepositoriesAbstract implements PostInterface
         $data = $this->originalModel;
 
         if ($filters['categories'] !== null) {
-            $categories = array_filter((array)$filters['categories']);
+            $categories = array_filter((array) $filters['categories']);
 
             $data = $data->whereHas('categories', function (Builder $query) use ($categories) {
                 $query->whereIn('categories.id', $categories);
@@ -218,24 +218,24 @@ class PostRepository extends RepositoriesAbstract implements PostInterface
         if ($filters['categories_exclude'] !== null) {
             $data = $data
                 ->whereHas('categories', function (Builder $query) use ($filters) {
-                    $query->whereNotIn('categories.id', array_filter((array)$filters['categories_exclude']));
+                    $query->whereNotIn('categories.id', array_filter((array) $filters['categories_exclude']));
                 });
         }
 
         if ($filters['exclude'] !== null) {
-            $data = $data->whereNotIn('id', array_filter((array)$filters['exclude']));
+            $data = $data->whereNotIn('id', array_filter((array) $filters['exclude']));
         }
 
         if ($filters['include'] !== null) {
-            $data = $data->whereNotIn('id', array_filter((array)$filters['include']));
+            $data = $data->whereNotIn('id', array_filter((array) $filters['include']));
         }
 
         if ($filters['author'] !== null) {
-            $data = $data->whereIn('author_id', array_filter((array)$filters['author']));
+            $data = $data->whereIn('author_id', array_filter((array) $filters['author']));
         }
 
         if ($filters['author_exclude'] !== null) {
-            $data = $data->whereNotIn('author_id', array_filter((array)$filters['author_exclude']));
+            $data = $data->whereNotIn('author_id', array_filter((array) $filters['author_exclude']));
         }
 
         if ($filters['featured'] !== null) {
@@ -253,10 +253,10 @@ class PostRepository extends RepositoriesAbstract implements PostInterface
             ->wherePublished()
             ->orderBy($orderBy, $order);
 
-        return $this->applyBeforeExecuteQuery($data)->paginate((int)$filters['per_page']);
+        return $this->applyBeforeExecuteQuery($data)->paginate((int) $filters['per_page']);
     }
 
-    protected function search(BaseQueryBuilder|Builder $model, string|null $keyword): BaseQueryBuilder|Builder
+    protected function search(BaseQueryBuilder|Builder $model, ?string $keyword): BaseQueryBuilder|Builder
     {
         if (! $model instanceof BaseQueryBuilder || ! $keyword) {
             return $model;

@@ -2,17 +2,17 @@
 
 namespace Botble\Comment\Providers;
 
+use Botble\Base\Facades\Html;
+use Botble\Base\Facades\MetaBox;
 use Botble\Base\Models\BaseModel;
 use Botble\Blog\Models\Post;
 use Botble\Comment\Facades\BbComment;
 use Botble\Comment\Repositories\Interfaces\CommentInterface;
-use Collective\Html\HtmlFacade as Html;
+use Botble\Media\Facades\RvMedia;
+use Botble\Slug\Facades\SlugHelper;
+use Botble\Theme\Facades\Theme;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\ServiceProvider;
-use MetaBox;
-use RvMedia;
-use SlugHelper;
-use Theme;
 
 class HookServiceProvider extends ServiceProvider
 {
@@ -155,7 +155,7 @@ class HookServiceProvider extends ServiceProvider
             ]);
 
             if ($unread > 0) {
-                return Html::tag('span', (string)$unread, ['class' => 'badge badge-success'])->toHtml();
+                return Html::tag('span', (string) $unread, ['class' => 'badge badge-success'])->toHtml();
             }
         }
 

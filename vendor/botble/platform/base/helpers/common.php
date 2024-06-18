@@ -10,7 +10,7 @@ use Botble\Base\Supports\Editor;
 use Botble\Base\Supports\PageTitle as PageTitleSupport;
 
 if (! function_exists('language_flag')) {
-    function language_flag(string|null $flag, string|null $name = null, int $width = 16): string
+    function language_flag(?string $flag, ?string $name = null, int $width = 16): string
     {
         if (! $flag) {
             return '';
@@ -30,7 +30,7 @@ if (! function_exists('language_flag')) {
 if (! function_exists('render_editor')) {
     function render_editor(
         string $name,
-        string|null $value = null,
+        ?string $value = null,
         bool $withShortCode = false,
         array $attributes = []
     ): string {
@@ -73,7 +73,7 @@ if (! function_exists('get_cms_version')) {
 if (! function_exists('get_core_version')) {
     function get_core_version(): string
     {
-        return '7.2.3';
+        return '7.3.5';
     }
 }
 
@@ -89,7 +89,7 @@ if (! function_exists('get_minimum_php_version')) {
 }
 
 if (! function_exists('platform_path')) {
-    function platform_path(string|null $path = null): string
+    function platform_path(?string $path = null): string
     {
         $path = ltrim($path, DIRECTORY_SEPARATOR);
 
@@ -98,14 +98,14 @@ if (! function_exists('platform_path')) {
 }
 
 if (! function_exists('core_path')) {
-    function core_path(string|null $path = null): string
+    function core_path(?string $path = null): string
     {
         return platform_path('core' . ($path ? DIRECTORY_SEPARATOR . ltrim($path, DIRECTORY_SEPARATOR) : ''));
     }
 }
 
 if (! function_exists('package_path')) {
-    function package_path(string|null $path = null): string
+    function package_path(?string $path = null): string
     {
         return platform_path('packages' . ($path ? DIRECTORY_SEPARATOR . ltrim($path, DIRECTORY_SEPARATOR) : ''));
     }

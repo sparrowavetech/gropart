@@ -12,7 +12,7 @@ use Illuminate\Database\Query\JoinClause;
 
 class CityRepository extends RepositoriesAbstract implements CityInterface
 {
-    public function filters(string|null $keyword, int|null $limit = 10, array $with = [], array $select = ['cities.*']): Collection
+    public function filters(?string $keyword, ?int $limit = 10, array $with = [], array $select = ['cities.*']): Collection
     {
         $data = $this->model
             ->wherePublished('cities.status')

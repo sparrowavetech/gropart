@@ -26,21 +26,21 @@ class PluginManagement {
         $(document).on('click', '.btn-trigger-update-plugin', (event) => {
             event.preventDefault()
 
-            const _self = $(event.currentTarget)
-            const url = _self.data('update-url')
+            const currentTarget = $(event.currentTarget)
+            const url = currentTarget.data('update-url')
 
-            _self.prop('disabled', true)
+            currentTarget.prop('disabled', true)
 
             $httpClient
                 .make()
-                .withButtonLoading(_self)
+                .withButtonLoading(currentTarget)
                 .post(url)
                 .then(({ data }) => {
                     Botble.showSuccess(data.message)
 
                     setTimeout(() => window.location.reload(), 2000)
                 })
-                .finally(() => _self.prop('disabled', false))
+                .finally(() => currentTarget.prop('disabled', false))
         })
 
         $(document).on('click', '.btn-trigger-change-status', async (event) => {
@@ -81,35 +81,80 @@ class PluginManagement {
                 })
         })
 
-        $(document).on('keyup', 'input[type="search"][name="search"]', (event) => {
-            event.preventDefault()
+        if ($('button[data-check-update]').length) {
+            this.checkUpdate()
+        }
 
-            const search = $(event.currentTarget).val().toLowerCase()
+        this.handleFilters()
+    }
 
-            $('.plugin-item').each((index, element) => {
+    handleFilters() {
+        let search = $('[data-bb-toggle="change-search"]').val().toLowerCase()
+        let status = $('[data-bb-toggle="change-filter-plugin-status"]:checked').val()
+
+        $('button[data-bb-toggle="change-filter-plugin-status"]').each((index, element) => {
+            const status = $(element).data('value') || $(element).val()
+            const $visiblePluginItems =
+                status === 'all' ? $('.plugin-item:visible') : $(`.plugin-item[data-status="${status}"]:visible`)
+            $(`[data-bb-toggle="plugins-count"][data-status="${status}"]`).text($visiblePluginItems.length)
+        })
+
+        const applyFilters = () => {
+            const $pluginItems = $('.plugin-item')
+
+            $pluginItems.each((index, element) => {
                 const $element = $(element)
-                const plugin = $element.data('plugin')
+                const name = $element.data('name').toLowerCase()
+                const description = $element.data('description').toLowerCase()
+                const author = $element.data('author').toLowerCase()
 
-                const name = plugin.name.toLowerCase()
-                const description = plugin.description.toLowerCase()
+                const nameMatch = name.includes(search)
+                const authorMatch = author.includes(search)
+                const descriptionMatch = description.includes(search)
+                const statusMatch =
+                    status === 'all' ||
+                    $element.data('status') === status ||
+                    (status === 'updates-available' && $element.data('available-for-updates'))
 
-                if (name.includes(search) || description.includes(search)) {
+                if ((nameMatch || descriptionMatch || authorMatch) && statusMatch) {
                     $element.show()
                 } else {
                     $element.hide()
                 }
             })
 
-            if ($('.plugin-item:visible').length === 0) {
+            const $visiblePluginItems = $('.plugin-item:visible')
+
+            if ($visiblePluginItems.length === 0) {
                 $('.empty').show()
             } else {
                 $('.empty').hide()
             }
+        }
+
+        $(document).on('keyup', '[data-bb-toggle="change-search"]', (event) => {
+            event.preventDefault()
+
+            search = $(event.currentTarget).val().toLowerCase()
+            applyFilters()
         })
 
-        if ($('button[data-check-update]').length) {
-            this.checkUpdate()
-        }
+        $(document).on('change', 'input[data-bb-toggle="change-filter-plugin-status"]', (event) => {
+            status = $(event.currentTarget).val()
+            applyFilters()
+        })
+
+        $(document).on('click', 'button[data-bb-toggle="change-filter-plugin-status"]', (event) => {
+            const newValue = $(event.target).data('value')
+            $('[data-bb-toggle="status-filter-label"]').text($(event.target).text())
+
+            $('.dropdown-item').removeClass('active')
+
+            $(event.target).addClass('active')
+
+            status = newValue
+            applyFilters()
+        })
     }
 
     checkUpdate() {
@@ -129,6 +174,12 @@ class PluginManagement {
                     const url = $button.data('update-url').replace('__id__', plugin.id)
 
                     $button.data('update-url', url).show()
+
+                    const $parent = $button.closest('.plugin-item')
+
+                    $parent.data('available-for-updates', true).trigger('change')
+
+                    $('[data-bb-toggle="plugins-count"][data-status="updates-available"]').text(data.data.length)
                 })
             })
     }

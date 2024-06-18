@@ -50,7 +50,7 @@ class SlugController extends SettingController
                 }
             }
 
-            $prefix = (string)$settingValue;
+            $prefix = (string) $settingValue;
             $reference = $request->input($settingKey . '-model-key');
 
             if ($reference && $settingStore->get($settingKey) !== $prefix) {

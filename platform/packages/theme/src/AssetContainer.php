@@ -21,12 +21,12 @@ class AssetContainer
     {
     }
 
-    public function originUrl(string|null $uri): string
+    public function originUrl(?string $uri): string
     {
         return $this->configAssetUrl($uri);
     }
 
-    protected function configAssetUrl(string|null $path): string
+    protected function configAssetUrl(?string $path): string
     {
         return asset($path);
     }
@@ -34,7 +34,7 @@ class AssetContainer
     /**
      * Return asset path with current theme path.
      */
-    public function url(string|null $uri): string
+    public function url(?string $uri): string
     {
         // If path is full, so we just return.
         if (preg_match('#^http|//:#', $uri)) {
@@ -74,11 +74,15 @@ class AssetContainer
         $inheritTheme = ThemeFacade::getInheritTheme();
         $theme = ThemeFacade::getThemeName();
 
-        if ($inheritTheme === $theme) {
+        if (! $inheritTheme || $inheritTheme === $theme) {
             return $path;
         }
 
-        return str_replace($theme, $inheritTheme, $path);
+        return str_replace(
+            '//',
+            '/',
+            str_replace($theme, $inheritTheme, $path)
+        );
     }
 
     public function isInheritTheme(): bool
@@ -109,7 +113,7 @@ class AssetContainer
         string|array $source,
         array $dependencies = [],
         array $attributes = [],
-        string|null $version = null
+        ?string $version = null
     ): self {
         if (is_array($source)) {
             foreach ($source as $path) {
@@ -156,7 +160,7 @@ class AssetContainer
         string|array $source,
         array $dependencies = [],
         array $attributes = [],
-        string|null $version = null
+        ?string $version = null
     ): self {
         return $this
             ->usePath()
@@ -479,7 +483,7 @@ class AssetContainer
     /**
      * Get the HTML link to a registered asset.
      */
-    protected function asset(string $group, string $name): string|null
+    protected function asset(string $group, string $name): ?string
     {
         if (! isset($this->assets[$group][$name])) {
             return '';
@@ -516,7 +520,7 @@ class AssetContainer
     /**
      * Render asset as HTML.
      */
-    public function html(string $group, string $source, array $attributes): string|null
+    public function html(string $group, string $source, array $attributes): ?string
     {
         switch ($group) {
             case 'script':
@@ -560,7 +564,7 @@ class AssetContainer
     /**
      * Build a single attribute element.
      */
-    protected function attributeElement(string $key, string|null $value): string|null
+    protected function attributeElement(string $key, ?string $value): ?string
     {
         if (is_numeric($key)) {
             return $value;

@@ -119,7 +119,7 @@ class Menu
                 break;
 
             default:
-                $menuNode->reference_id = (int)Arr::get($item, 'reference_id');
+                $menuNode->reference_id = (int) Arr::get($item, 'reference_id');
                 $menuNode->reference_type = Arr::get($item, 'reference_type');
 
                 if (class_exists($menuNode->reference_type)) {
@@ -162,6 +162,12 @@ class Menu
 
     public function renderMenuLocation(string $location, array $attributes = []): string
     {
+        $cacheKey = 'menu_location_' . md5(serialize(url()->current()) . serialize(func_get_args()));
+
+        if ($this->cache->has($cacheKey)) {
+            return $this->cache->get($cacheKey);
+        }
+
         $this->load();
 
         $html = '';
@@ -174,6 +180,8 @@ class Menu
             $attributes['slug'] = $menu->slug;
             $html .= $this->generateMenu($attributes);
         }
+
+        $this->cache->put($cacheKey, $html, 60 * 24);
 
         return $html;
     }
@@ -214,7 +222,7 @@ class Menu
         return RepositoryHelper::applyBeforeExecuteQuery($items, new MenuModel())->get();
     }
 
-    public function generateMenu(array $args = []): string|null
+    public function generateMenu(array $args = []): ?string
     {
         $this->load();
 
@@ -291,7 +299,7 @@ class Menu
         echo view('packages/menu::menu-options', compact('options', 'name'));
     }
 
-    public function generateSelect(array $args = []): string|null
+    public function generateSelect(array $args = []): ?string
     {
         /**
          * @var BaseModel|Builder $model

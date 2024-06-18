@@ -11,7 +11,7 @@ class EditorRendered
     public function __construct(
         public string $rendered,
         public string $name,
-        public string|null $value = null,
+        public ?string $value = null,
         public bool $withShortcode = false,
         public array $attributes = []
     ) {

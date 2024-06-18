@@ -13,6 +13,7 @@ use Botble\Base\Supports\MembershipAuthorization;
 use Botble\Base\Supports\SystemManagement;
 use Exception;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Throwable;
@@ -92,10 +93,17 @@ class SystemController extends BaseSystemController
 
         $activated = $core->verifyLicense();
         $isOutdated = false;
-        $latestUpdate = $core->getLatestVersion();
 
-        if ($latestUpdate) {
-            $isOutdated = version_compare($core->version(), $latestUpdate->version, '<');
+        try {
+            $latestUpdate = $core->getLatestVersion();
+
+            if ($latestUpdate) {
+                $isOutdated = version_compare($core->version(), $latestUpdate->version, '<');
+            }
+        } catch (ConnectionException $exception) {
+            $latestUpdate = null;
+
+            BaseHelper::logError($exception);
         }
 
         $updateData = ['message' => null, 'status' => false];

@@ -2,17 +2,31 @@
 
 namespace Botble\Captcha\Providers;
 
+use Botble\ACL\Forms\Auth\ForgotPasswordForm;
+use Botble\ACL\Forms\Auth\LoginForm;
+use Botble\ACL\Forms\Auth\ResetPasswordForm;
+use Botble\ACL\Http\Requests\ForgotPasswordRequest;
+use Botble\ACL\Http\Requests\LoginRequest;
+use Botble\ACL\Http\Requests\ResetPasswordRequest;
 use Botble\Base\Facades\PanelSectionManager;
+use Botble\Base\Forms\FormAbstract;
 use Botble\Base\PanelSections\PanelSectionItem;
 use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Captcha\Captcha;
 use Botble\Captcha\CaptchaV3;
 use Botble\Captcha\Facades\Captcha as CaptchaFacade;
+use Botble\Captcha\Forms\Fields\MathCaptchaField;
+use Botble\Captcha\Forms\Fields\ReCaptchaField;
 use Botble\Captcha\MathCaptcha;
 use Botble\Setting\PanelSections\SettingOthersPanelSection;
+use Botble\Support\Http\Requests\Request;
+use Botble\Theme\FormFront;
 use Illuminate\Foundation\AliasLoader;
+use Illuminate\Http\Request as IlluminateRequest;
+use Illuminate\Routing\Events\Routing;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Validator;
 
 class CaptchaServiceProvider extends ServiceProvider
@@ -60,6 +74,90 @@ class CaptchaServiceProvider extends ServiceProvider
                     ->withRoute('captcha.settings')
             );
         });
+
+        CaptchaFacade::registerFormSupport(LoginForm::class, LoginRequest::class, trans('plugins/captcha::captcha.admin_login_form'));
+        CaptchaFacade::registerFormSupport(ForgotPasswordForm::class, ForgotPasswordRequest::class, trans('plugins/captcha::captcha.admin_forgot_password_form'));
+        CaptchaFacade::registerFormSupport(ResetPasswordForm::class, ResetPasswordRequest::class, trans('plugins/captcha::captcha.admin_reset_password_form'));
+
+        FormAbstract::beforeRendering(function (FormAbstract $form): void {
+            if (! CaptchaFacade::isEnabled() && ! CaptchaFacade::mathCaptchaEnabled()) {
+                return;
+            }
+
+            $fieldKey = 'submit';
+
+            if ($form instanceof FormFront) {
+                $fieldKey = $form->getFormEndKey() ?: ($form->has($fieldKey) ? $fieldKey : array_key_last($form->getFields()));
+            }
+
+            if (CaptchaFacade::reCaptchaEnabled() && ! $form->has('recaptcha') && CaptchaFacade::formSetting($form::class, 'enable_recaptcha')) {
+                $form->addBefore(
+                    $fieldKey,
+                    'recaptcha',
+                    ReCaptchaField::class
+                );
+            }
+
+            if (CaptchaFacade::mathCaptchaEnabled() && ! $form->has('math_captcha') && CaptchaFacade::formSetting($form::class, 'enable_math_captcha')) {
+                $form->addBefore(
+                    $fieldKey,
+                    'math_captcha',
+                    MathCaptchaField::class
+                );
+            }
+        });
+
+        Event::listen(Routing::class, function () {
+            add_filter('core_request_rules', function (array $rules, Request $request) {
+                if (! CaptchaFacade::isEnabled() && ! CaptchaFacade::mathCaptchaEnabled()) {
+                    return $rules;
+                }
+
+                CaptchaFacade::getFormsSupport();
+
+                $form = CaptchaFacade::formByRequest($request::class);
+
+                if (! $form) {
+                    return $rules;
+                }
+
+                if (CaptchaFacade::reCaptchaEnabled() && CaptchaFacade::formSetting($form, 'enable_recaptcha')) {
+                    $rules = [...$rules, ...CaptchaFacade::rules()];
+                }
+
+                if (CaptchaFacade::mathCaptchaEnabled() && CaptchaFacade::formSetting($form, 'enable_math_captcha')) {
+                    $rules = [...$rules, ...CaptchaFacade::mathCaptchaRules()];
+                }
+
+                return $rules;
+            }, 128, 2);
+        });
+
+        add_filter('form_extra_fields_render', function (?string $fields = null, ?string $form = null): ?string {
+            if (! CaptchaFacade::isEnabled() && ! CaptchaFacade::mathCaptchaEnabled()) {
+                return $fields;
+            }
+
+            return $fields . view('plugins/captcha::forms.old-version-support', compact('form'))->render();
+        }, 128, 2);
+
+        add_action('form_extra_fields_validate', function (IlluminateRequest $request, ?string $form = null): void {
+            if (! CaptchaFacade::isEnabled() && ! CaptchaFacade::mathCaptchaEnabled()) {
+                return;
+            }
+
+            if (
+                CaptchaFacade::reCaptchaEnabled()
+                && (! $form || ! class_exists($form) || CaptchaFacade::formSetting($form, 'enable_recaptcha'))
+                && ! $request instanceof Request
+            ) {
+                Validator::validate($request->input(), CaptchaFacade::rules());
+            }
+
+            if (CaptchaFacade::mathCaptchaEnabled() && (! $form || ! class_exists($form) || CaptchaFacade::formSetting($form, 'enable_math_captcha'))) {
+                Validator::validate($request->input(), CaptchaFacade::mathCaptchaRules());
+            }
+        }, 999, 2);
     }
 
     public function bootValidator(): void

@@ -56,7 +56,7 @@ class ShortcodeServiceProvider extends ServiceProvider
             ->publishAssets();
 
         $this->app->booted(function () {
-            add_filter(BASE_FILTER_FORM_EDITOR_BUTTONS, function (string|null $buttons, array $attributes, string $id) {
+            add_filter(BASE_FILTER_FORM_EDITOR_BUTTONS, function (?string $buttons, array $attributes, string $id) {
                 if (! $this->hasWithShortcode($attributes)) {
                     return $buttons;
                 }
@@ -68,7 +68,7 @@ class ShortcodeServiceProvider extends ServiceProvider
                 return $buttons;
             }, 120, 3);
 
-            add_filter(BASE_FILTER_FORM_EDITOR_BUTTONS_HEADER, function (string|null $header, array $attributes) {
+            add_filter(BASE_FILTER_FORM_EDITOR_BUTTONS_HEADER, function (?string $header, array $attributes) {
                 if (! $this->hasWithShortcode($attributes)) {
                     return $header;
                 }
@@ -78,7 +78,7 @@ class ShortcodeServiceProvider extends ServiceProvider
                 return $header;
             }, 120, 2);
 
-            add_filter(BASE_FILTER_FORM_EDITOR_BUTTONS_FOOTER, function (string|null $footer, array $attributes) {
+            add_filter(BASE_FILTER_FORM_EDITOR_BUTTONS_FOOTER, function (?string $footer, array $attributes) {
                 if (! $this->hasWithShortcode($attributes)) {
                     return $footer;
                 }

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Intervention\Image;
 
+use Closure;
+use Intervention\Image\Exceptions\RuntimeException;
 use Traversable;
 use Intervention\Image\Analyzers\ColorspaceAnalyzer;
 use Intervention\Image\Analyzers\HeightAnalyzer;
@@ -12,7 +14,6 @@ use Intervention\Image\Analyzers\PixelColorsAnalyzer;
 use Intervention\Image\Analyzers\ProfileAnalyzer;
 use Intervention\Image\Analyzers\ResolutionAnalyzer;
 use Intervention\Image\Analyzers\WidthAnalyzer;
-use Intervention\Image\Colors\Rgb\Color;
 use Intervention\Image\Encoders\AutoEncoder;
 use Intervention\Image\Encoders\AvifEncoder;
 use Intervention\Image\Encoders\BmpEncoder;
@@ -27,12 +28,18 @@ use Intervention\Image\Encoders\PngEncoder;
 use Intervention\Image\Encoders\TiffEncoder;
 use Intervention\Image\Encoders\WebpEncoder;
 use Intervention\Image\Exceptions\EncoderException;
+use Intervention\Image\Geometry\Bezier;
+use Intervention\Image\Geometry\Circle;
+use Intervention\Image\Geometry\Ellipse;
+use Intervention\Image\Geometry\Factories\BezierFactory;
 use Intervention\Image\Geometry\Factories\CircleFactory;
 use Intervention\Image\Geometry\Factories\EllipseFactory;
 use Intervention\Image\Geometry\Factories\LineFactory;
 use Intervention\Image\Geometry\Factories\PolygonFactory;
 use Intervention\Image\Geometry\Factories\RectangleFactory;
+use Intervention\Image\Geometry\Line;
 use Intervention\Image\Geometry\Point;
+use Intervention\Image\Geometry\Polygon;
 use Intervention\Image\Geometry\Rectangle;
 use Intervention\Image\Interfaces\AnalyzerInterface;
 use Intervention\Image\Interfaces\CollectionInterface;
@@ -43,11 +50,13 @@ use Intervention\Image\Interfaces\DriverInterface;
 use Intervention\Image\Interfaces\EncodedImageInterface;
 use Intervention\Image\Interfaces\EncoderInterface;
 use Intervention\Image\Interfaces\FontInterface;
+use Intervention\Image\Interfaces\FrameInterface;
 use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\ModifierInterface;
 use Intervention\Image\Interfaces\ProfileInterface;
 use Intervention\Image\Interfaces\ResolutionInterface;
 use Intervention\Image\Interfaces\SizeInterface;
+use Intervention\Image\Modifiers\AlignRotationModifier;
 use Intervention\Image\Modifiers\BlendTransparencyModifier;
 use Intervention\Image\Modifiers\BlurModifier;
 use Intervention\Image\Modifiers\BrightnessModifier;
@@ -56,6 +65,7 @@ use Intervention\Image\Modifiers\ColorspaceModifier;
 use Intervention\Image\Modifiers\ContainModifier;
 use Intervention\Image\Modifiers\ContrastModifier;
 use Intervention\Image\Modifiers\CropModifier;
+use Intervention\Image\Modifiers\DrawBezierModifier;
 use Intervention\Image\Modifiers\DrawEllipseModifier;
 use Intervention\Image\Modifiers\DrawLineModifier;
 use Intervention\Image\Modifiers\DrawPixelModifier;
@@ -87,6 +97,7 @@ use Intervention\Image\Modifiers\ScaleModifier;
 use Intervention\Image\Modifiers\SharpenModifier;
 use Intervention\Image\Modifiers\SliceAnimationModifier;
 use Intervention\Image\Modifiers\TextModifier;
+use Intervention\Image\Modifiers\TrimModifier;
 use Intervention\Image\Typography\FontFactory;
 
 final class Image implements ImageInterface
@@ -99,19 +110,12 @@ final class Image implements ImageInterface
     protected Origin $origin;
 
     /**
-     * Color is mixed with transparent areas when converting to a format which
-     * does not support transparency.
-     *
-     * @var ColorInterface
-     */
-    protected ColorInterface $blendingColor;
-
-    /**
      * Create new instance
      *
      * @param DriverInterface $driver
      * @param CoreInterface $core
      * @param CollectionInterface $exif
+     * @throws RuntimeException
      * @return void
      */
     public function __construct(
@@ -120,9 +124,6 @@ final class Image implements ImageInterface
         protected CollectionInterface $exif = new Collection()
     ) {
         $this->origin = new Origin();
-        $this->blendingColor = $this->colorspace()->importColor(
-            new Color(255, 255, 255, 0)
-        );
     }
 
     /**
@@ -180,7 +181,7 @@ final class Image implements ImageInterface
     /**
      * Implementation of IteratorAggregate
      *
-     * @return Traversable
+     * @return Traversable<FrameInterface>
      */
     public function getIterator(): Traversable
     {
@@ -252,7 +253,7 @@ final class Image implements ImageInterface
     /**
      * {@inheritdoc}
      *
-     * @see ImgageInterface::setExif()
+     * @see ImageInterface::setExif()
      */
     public function setExif(CollectionInterface $exif): ImageInterface
     {
@@ -296,7 +297,7 @@ final class Image implements ImageInterface
      *
      * @see ImageInterface::save()
      */
-    public function save(?string $path = null, ...$options): ImageInterface
+    public function save(?string $path = null, mixed ...$options): ImageInterface
     {
         $path = is_null($path) ? $this->origin()->filePath() : $path;
 
@@ -414,7 +415,9 @@ final class Image implements ImageInterface
      */
     public function blendingColor(): ColorInterface
     {
-        return $this->blendingColor;
+        return $this->driver()->handleInput(
+            $this->driver()->config()->blendingColor
+        );
     }
 
     /**
@@ -424,7 +427,9 @@ final class Image implements ImageInterface
      */
     public function setBlendingColor(mixed $color): ImageInterface
     {
-        $this->blendingColor = $this->driver()->handleInput($color);
+        $this->driver()->config()->setOptions(
+            blendingColor: $this->driver()->handleInput($color)
+        );
 
         return $this;
     }
@@ -602,9 +607,19 @@ final class Image implements ImageInterface
     /**
      * {@inheritdoc}
      *
+     * @see ImageInterface::orient()
+     */
+    public function orient(): ImageInterface
+    {
+        return $this->modify(new AlignRotationModifier());
+    }
+
+    /**
+     * {@inheritdoc}
+     *
      * @see ImageInterface::text()
      */
-    public function text(string $text, int $x, int $y, callable|FontInterface $font): ImageInterface
+    public function text(string $text, int $x, int $y, callable|Closure|FontInterface $font): ImageInterface
     {
         return $this->modify(
             new TextModifier(
@@ -750,6 +765,16 @@ final class Image implements ImageInterface
     /**
      * {@inheritdoc}
      *
+     * @see ImageInterface::trim()
+     */
+    public function trim(int $tolerance = 0): ImageInterface
+    {
+        return $this->modify(new TrimModifier($tolerance));
+    }
+
+    /**
+     * {@inheritdoc}
+     *
      * @see ImageInterface::place()
      */
     public function place(
@@ -792,7 +817,7 @@ final class Image implements ImageInterface
      *
      * @see ImageInterface::drawRectangle()
      */
-    public function drawRectangle(int $x, int $y, callable|Rectangle $init): ImageInterface
+    public function drawRectangle(int $x, int $y, callable|Closure|Rectangle $init): ImageInterface
     {
         return $this->modify(
             new DrawRectangleModifier(
@@ -806,7 +831,7 @@ final class Image implements ImageInterface
      *
      * @see ImageInterface::drawEllipse()
      */
-    public function drawEllipse(int $x, int $y, callable $init): ImageInterface
+    public function drawEllipse(int $x, int $y, callable|Closure|Ellipse $init): ImageInterface
     {
         return $this->modify(
             new DrawEllipseModifier(
@@ -820,7 +845,7 @@ final class Image implements ImageInterface
      *
      * @see ImageInterface::drawCircle()
      */
-    public function drawCircle(int $x, int $y, callable $init): ImageInterface
+    public function drawCircle(int $x, int $y, callable|Closure|Circle $init): ImageInterface
     {
         return $this->modify(
             new DrawEllipseModifier(
@@ -829,7 +854,12 @@ final class Image implements ImageInterface
         );
     }
 
-    public function drawPolygon(callable $init): ImageInterface
+    /**
+     * {@inheritdoc}
+     *
+     * @see ImageInterface::drawPolygon()
+     */
+    public function drawPolygon(callable|Closure|Polygon $init): ImageInterface
     {
         return $this->modify(
             new DrawPolygonModifier(
@@ -838,11 +868,30 @@ final class Image implements ImageInterface
         );
     }
 
-    public function drawLine(callable $init): ImageInterface
+    /**
+     * {@inheritdoc}
+     *
+     * @see ImageInterface::drawLine()
+     */
+    public function drawLine(callable|Closure|Line $init): ImageInterface
     {
         return $this->modify(
             new DrawLineModifier(
                 call_user_func(new LineFactory($init)),
+            ),
+        );
+    }
+
+     /**
+     * {@inheritdoc}
+     *
+     * @see ImageInterface::drawBezier()
+     */
+    public function drawBezier(callable|Closure|Bezier $init): ImageInterface
+    {
+        return $this->modify(
+            new DrawBezierModifier(
+                call_user_func(new BezierFactory($init)),
             ),
         );
     }
@@ -852,7 +901,7 @@ final class Image implements ImageInterface
      *
      * @see ImageInterface::encodeByMediaType()
      */
-    public function encodeByMediaType(?string $type = null, ...$options): EncodedImageInterface
+    public function encodeByMediaType(null|string|MediaType $type = null, mixed ...$options): EncodedImageInterface
     {
         return $this->encode(new MediaTypeEncoder($type, ...$options));
     }
@@ -862,8 +911,10 @@ final class Image implements ImageInterface
      *
      * @see ImageInterface::encodeByExtension()
      */
-    public function encodeByExtension(?string $extension = null, mixed ...$options): EncodedImageInterface
-    {
+    public function encodeByExtension(
+        null|string|FileExtension $extension = null,
+        mixed ...$options
+    ): EncodedImageInterface {
         return $this->encode(new FileExtensionEncoder($extension, ...$options));
     }
 
@@ -891,6 +942,7 @@ final class Image implements ImageInterface
      * Alias of self::toJpeg()
      *
      * @param mixed $options
+     * @throws RuntimeException
      * @return EncodedImageInterface
      */
     public function toJpg(mixed ...$options): EncodedImageInterface
@@ -912,6 +964,7 @@ final class Image implements ImageInterface
      * ALias of self::toJpeg2000()
      *
      * @param mixed $options
+     * @throws RuntimeException
      * @return EncodedImageInterface
      */
     public function toJp2(mixed ...$options): EncodedImageInterface
@@ -962,6 +1015,7 @@ final class Image implements ImageInterface
     /**
      * Alias if self::toBitmap()
      *
+     * @throws RuntimeException
      * @return EncodedImageInterface
      */
     public function toBmp(mixed ...$options): EncodedImageInterface
@@ -993,6 +1047,7 @@ final class Image implements ImageInterface
      * Alias of self::toTiff()
      *
      * @param mixed $options
+     * @throws RuntimeException
      * @return EncodedImageInterface
      */
     public function toTif(mixed ...$options): EncodedImageInterface

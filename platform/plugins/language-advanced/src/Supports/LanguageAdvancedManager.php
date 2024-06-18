@@ -15,7 +15,7 @@ use Illuminate\Support\Str;
 
 class LanguageAdvancedManager
 {
-    public static function save(Model|null $object, Request $request): bool
+    public static function save(?Model $object, Request $request): bool
     {
         if (! self::isSupported($object)) {
             return false;
@@ -42,6 +42,8 @@ class LanguageAdvancedManager
         }
 
         $data = array_merge($data, $condition);
+
+        $data = apply_filters('language_advanced_before_save', $data, $object, $request);
 
         $translate = DB::table($table)->where($condition)->first();
 

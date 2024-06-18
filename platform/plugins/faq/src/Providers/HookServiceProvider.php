@@ -54,7 +54,7 @@ class HookServiceProvider extends ServiceProvider
                 return;
             }
 
-            $faqs = (array)$object->getMetaData('faq_schema_config', true);
+            $faqs = (array) $object->getMetaData('faq_schema_config', true);
 
             if (is_plugin_active('faq')) {
                 $selectedExistingFaqs = $object->getMetaData('faq_ids', true);

@@ -8,7 +8,7 @@ use Illuminate\Support\Str;
 
 class SlugService
 {
-    public function create(string|null $name, int|null $slugId = 0, $model = null): string|null
+    public function create(?string $name, int|string|null $slugId = 0, $model = null): ?string
     {
         $slug = Str::slug($name, '-', ! SlugHelper::turnOffAutomaticUrlTranslationIntoLatin() ? 'en' : false);
 
@@ -31,14 +31,14 @@ class SlugService
         return apply_filters(FILTER_SLUG_STRING, $slug, $model);
     }
 
-    protected function checkIfExistedSlug(string|null $slug, int|string|null $slugId, string|null $prefix): bool
+    protected function checkIfExistedSlug(?string $slug, int|string|null $slugId, ?string $prefix): bool
     {
         return Slug::query()
             ->where([
                 'key' => $slug,
                 'prefix' => $prefix,
             ])
-            ->where('id', '!=', (int)$slugId)
+            ->where('id', '!=', $slugId)
             ->exists();
     }
 }

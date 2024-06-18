@@ -4,6 +4,7 @@ namespace Botble\Setting\Http\Controllers\Concerns;
 
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Setting\Facades\Setting;
+use Illuminate\Support\Arr;
 
 trait InteractsWithSettings
 {
@@ -11,7 +12,7 @@ trait InteractsWithSettings
 
     protected function saveSettings(array $data, string $prefix = ''): void
     {
-        foreach ($data as $settingKey => $settingValue) {
+        foreach (Arr::except($data, ['_token', '_method']) as $settingKey => $settingValue) {
             if (is_array($settingValue)) {
                 $settingValue = json_encode(array_filter($settingValue));
             }

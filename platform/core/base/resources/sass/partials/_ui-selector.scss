@@ -24,4 +24,18 @@
             }
         }
     }
+
+    &.without-ratio {
+        .form-imagecheck-figure {
+            padding: unset !important;
+            overflow: unset !important;
+
+            .form-imagecheck-image {
+                position: unset !important;
+                inset: unset !important;
+                object-fit: unset !important;
+                margin: unset !important;
+            }
+        }
+    }
 }

@@ -71,9 +71,22 @@ class PostTable extends TableAbstract
                     ->width(150)
                     ->orderable(false)
                     ->searchable(false)
-                    ->getValueUsing(fn (FormattedColumn $column) => $column->getItem()->author?->name)
+                    ->getValueUsing(function (FormattedColumn $column) {
+                        $post = $column->getItem();
+
+                        if (! class_exists($post->author_type)) {
+                            return null;
+                        }
+
+                        return $post->author?->name;
+                    })
                     ->renderUsing(function (FormattedColumn $column) {
                         $post = $column->getItem();
+
+                        if (! class_exists($post->author_type)) {
+                            return null;
+                        }
+
                         $author = $post->author;
 
                         if (! $author->getKey()) {
@@ -109,7 +122,6 @@ class PostTable extends TableAbstract
                         'categories' => function (BelongsToMany $query) {
                             $query->select(['categories.id', 'categories.name']);
                         },
-                        'author',
                     ])
                     ->select([
                         'id',
@@ -154,7 +166,7 @@ class PostTable extends TableAbstract
                     EloquentBuilder|QueryBuilder|EloquentRelation $query,
                     string $key,
                     string $operator,
-                    string|null $value
+                    ?string $value
                 ) {
                     if (! $value || $key !== 'category') {
                         return false;
@@ -166,7 +178,7 @@ class PostTable extends TableAbstract
                     );
                 }
             )
-            ->onSavingBulkChangeItem(function (Post $item, string $inputKey, string|null $inputValue) {
+            ->onSavingBulkChangeItem(function (Post $item, string $inputKey, ?string $inputValue) {
                 if ($inputKey !== 'category') {
                     return null;
                 }

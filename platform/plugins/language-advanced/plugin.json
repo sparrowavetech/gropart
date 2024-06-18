@@ -5,7 +5,9 @@
     "provider": "Botble\\LanguageAdvanced\\Providers\\LanguageAdvancedServiceProvider",
     "author": "Botble Technologies",
     "url": "https://botble.com",
-    "version": "1.2.0",
+    "version": "1.2.2",
     "description": "Advanced Multi-language",
-    "require": ["botble/language"]
+    "require": [
+        "botble/language"
+    ]
 }

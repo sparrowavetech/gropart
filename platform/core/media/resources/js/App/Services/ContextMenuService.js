@@ -94,6 +94,9 @@ export class ContextMenuService {
             items.preview = undefined
             items.crop = undefined
             items.copy_link = undefined
+            items.copy_indirect_link = undefined
+            items.share = undefined
+            items.alt_text = undefined
 
             if (!Helpers.hasPermission('folders.create')) {
                 items.make_copy = undefined
@@ -165,6 +168,12 @@ export class ContextMenuService {
         if (!fileIsImage) {
             items.crop = undefined
             items.alt_text = undefined
+        }
+
+        if (! Helpers.arrayFilter(selectedFiles, function (value) {
+            return value.full_url
+        }).length) {
+            items.copy_link = undefined
         }
 
         return items

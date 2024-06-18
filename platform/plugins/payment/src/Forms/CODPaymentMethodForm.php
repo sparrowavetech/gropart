@@ -28,7 +28,7 @@ class CODPaymentMethodForm extends FormAbstract
                     ->toArray()
             )
             ->add(
-                sprintf('payment_%s_name', PaymentMethodEnum::COD),
+                get_payment_setting_key('name', PaymentMethodEnum::COD),
                 TextField::class,
                 TextFieldOption::make()
                     ->label(trans('plugins/payment::payment.method_name'))
@@ -41,7 +41,7 @@ class CODPaymentMethodForm extends FormAbstract
                     ->toArray(),
             )
             ->add(
-                sprintf('payment_%s_description', PaymentMethodEnum::COD),
+                get_payment_setting_key('description', PaymentMethodEnum::COD),
                 EditorField::class,
                 EditorFieldOption::make()
                     ->wrapperAttributes(['style' => 'max-width: 99.8%'])
@@ -52,7 +52,7 @@ class CODPaymentMethodForm extends FormAbstract
             ->addAvailableCountriesField(PaymentMethodEnum::COD)
             ->when(
                 apply_filters(PAYMENT_METHOD_SETTINGS_CONTENT, null, PaymentMethodEnum::COD),
-                function (FormAbstract $form, string|null $data) {
+                function (FormAbstract $form, ?string $data) {
                     $form->add('metabox', HtmlField::class, ['html' => $data]);
                 }
             );

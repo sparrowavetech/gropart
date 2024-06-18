@@ -13,7 +13,7 @@ use ReflectionClass;
  */
 trait LoadAndPublishDataTrait
 {
-    protected string|null $namespace = null;
+    protected ?string $namespace = null;
 
     protected function setNamespace(string $namespace): self
     {

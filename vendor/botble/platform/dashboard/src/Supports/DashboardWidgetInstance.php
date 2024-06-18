@@ -26,17 +26,19 @@ class DashboardWidgetInstance
 
     protected bool $isEqualHeight = true;
 
-    protected string|null $column = null;
+    protected ?string $column = null;
 
     protected string $permission;
 
-    protected int $statsTotal = 0;
+    protected int|string $statsTotal = 0;
 
     protected bool $hasLoadCallback = false;
 
     protected array $settings = [];
 
     protected array $predefinedRanges = [];
+
+    protected int $priority = 999;
 
     public function getType(): string
     {
@@ -158,12 +160,24 @@ class DashboardWidgetInstance
         return $this;
     }
 
+    public function getPriority(): int
+    {
+        return $this->priority;
+    }
+
+    public function setPriority(int $priority): self
+    {
+        $this->priority = $priority;
+
+        return $this;
+    }
+
     public function getStatsTotal(): int
     {
         return $this->statsTotal;
     }
 
-    public function setStatsTotal(int $statsTotal): self
+    public function setStatsTotal(int|string $statsTotal): self
     {
         $this->statsTotal = $statsTotal;
 
@@ -240,6 +254,7 @@ class DashboardWidgetInstance
         $widgets[$this->key] = [
             'id' => $widget->id,
             'type' => $this->type,
+            'priority' => $this->priority,
             'view' => view('core/dashboard::widgets.stats', compact('widget', 'widgetSetting'))->render(),
         ];
 
@@ -308,7 +323,7 @@ class DashboardWidgetInstance
         ];
     }
 
-    public function getFilterRange(string|null $filterRangeInput)
+    public function getFilterRange(?string $filterRangeInput)
     {
         $predefinedRanges = $this->getPredefinedRanges();
         $predefinedRanges = collect($predefinedRanges);
@@ -339,7 +354,7 @@ class DashboardWidgetInstance
             'user_id' => Auth::guard()->id(),
         ]);
 
-        $widgetSetting->settings = array_merge((array)$widgetSetting->settings, $settings);
+        $widgetSetting->settings = array_merge((array) $widgetSetting->settings, $settings);
 
         $widgetSetting->save();
 

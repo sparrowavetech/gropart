@@ -9,6 +9,19 @@ Route::group(['namespace' => 'Botble\Ads\Http\Controllers'], function () {
         Route::group(['prefix' => 'ads', 'as' => 'ads.'], function () {
             Route::resource('', 'AdsController')->parameters(['' => 'ads']);
         });
+
+        Route::group(['prefix' => 'settings'], function () {
+            Route::get('ads', [
+                'as' => 'ads.settings',
+                'uses' => 'Settings\AdsSettingController@edit',
+            ]);
+
+            Route::put('ads', [
+                'as' => 'ads.settings.update',
+                'uses' => 'Settings\AdsSettingController@update',
+                'permission' => 'ads.settings',
+            ]);
+        });
     });
 
     if (defined('THEME_MODULE_SCREEN_NAME')) {

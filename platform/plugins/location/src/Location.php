@@ -63,7 +63,7 @@ class Location
         ])->first();
     }
 
-    public function getCityNameById(int|string|null $cityId): string|null
+    public function getCityNameById(int|string|null $cityId): ?string
     {
         if (! $cityId) {
             return null;
@@ -74,7 +74,7 @@ class Location
         return $city?->name;
     }
 
-    public function getStateNameById(int|string|null $stateId): string|null
+    public function getStateNameById(int|string|null $stateId): ?string
     {
         if (! $stateId) {
             return null;

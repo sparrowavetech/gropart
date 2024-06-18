@@ -389,31 +389,27 @@
             </footer>
         </div>
         <div class="rv-upload-progress hide-the-pane position-fixed bottom-0 end-0 ">
-            <div class="panel panel-default">
-                <x-core::card>
-                    <x-core::card.header class="position-relative">
-                        <h3 class="panel-title mb-0">{{ trans('core/media::media.upload_progress') }}</h3>
-                        <x-core::button
-                            class="close-pane position-absolute top-50 bg-primary text-white text-center p-0"
-                        >
-                            <x-core::icon
-                                class="m-0"
-                                name="ti ti-x"
-                            />
-                        </x-core::button>
-                    </x-core::card.header>
-                    <div
-                        class="table-responsive overflow-auto"
-                        style="max-height: 180px"
+            <x-core::card>
+                <x-core::card.header class="position-relative">
+                    <h3 class="panel-title mb-0">{{ trans('core/media::media.upload_progress') }}</h3>
+                    <x-core::button
+                        class="close-pane position-absolute top-50 bg-primary text-white text-center p-0"
                     >
-                        <x-core::table>
-                            <x-core::table.body class="rv-upload-progress-table">
-
-                            </x-core::table.body>
-                        </x-core::table>
-                    </div>
-                </x-core::card>
-            </div>
+                        <x-core::icon
+                            class="m-0"
+                            name="ti ti-x"
+                        />
+                    </x-core::button>
+                </x-core::card.header>
+                <div
+                    class="table-responsive overflow-auto"
+                    style="max-height: 180px"
+                >
+                    <x-core::table>
+                        <x-core::table.body class="rv-upload-progress-table"></x-core::table.body>
+                    </x-core::table>
+                </div>
+            </x-core::card>
         </div>
     </x-core::card>
 </div>
@@ -687,6 +683,52 @@
     </x-slot:footer>
 </x-core::modal>
 
+<x-core::modal
+    id="modal_share_items"
+    :title="trans('core/media::media.share')"
+>
+    <div class="share-items">
+        <div class="mb-3">
+            {!! Form::label('media-share-type', trans('core/media::media.share_type'), [
+                'class' => 'form-label',
+            ]) !!}
+            {!! Form::customSelect('share_type', [
+                    'url' => trans('core/media::media.share_as_url'),
+                    'indirect_url' => trans('core/media::media.share_as_indirect_url'),
+                    'html' => trans('core/media::media.share_as_html'),
+                    'markdown' => trans('core/media::media.share_as_markdown'),
+                ], null, [
+                'id' => 'media-share-type',
+                'data-bb-value' => 'share-type',
+            ]) !!}
+        </div>
+
+        <div class="mb-3" data-bb-value="results">
+            {!! Form::label('media-share-results', trans('core/media::media.share_results'), [
+                'class' => 'form-label',
+            ]) !!}
+            {!! Form::textarea('share_result', '', [
+                'id' => 'media-share-results',
+                'class' => 'form-control',
+                'readonly' => true,
+                'data-bb-value' => 'share-result',
+            ]) !!}
+        </div>
+
+        <div class="mb-0 text-end">
+            <x-core::button
+                class="btn-icon"
+                data-bb-toggle="clipboard"
+                data-clipboard-parent="#modal_share_items .share-items"
+                data-clipboard-target="[data-bb-value='share-result']"
+            >
+                <x-core::icon name="ti ti-clipboard" data-clipboard-icon="true" />
+                <x-core::icon name="ti ti-check" data-clipboard-success-icon="true" class="text-success d-none" />
+            </x-core::button>
+        </div>
+    </div>
+</x-core::modal>
+
 <button class="d-none js-rv-clipboard-temp"></button>
 
 <x-core::custom-template id="rv_media_loading">
@@ -791,7 +833,7 @@
             <span class="file-size">__fileSize__</span>
         </x-core::table.body.cell>
         <x-core::table.body.cell>
-            <span class="label label-__status__">__message__</span>
+            <span class="file-status text-__status__">__message__</span>
         </x-core::table.body.cell>
     </x-core::table.body.row>
 </x-core::custom-template>
@@ -831,7 +873,7 @@
     <div class="mb-3">
         <div class="input-group">
             <div class="input-group-text">
-                <x-core::icon name="__icon__" />
+                __icon__
             </div>
             <input class="form-control" placeholder="__placeholder__" value="__value__">
         </div>

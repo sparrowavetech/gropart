@@ -69,17 +69,30 @@
                                 :helper-text="trans('plugins/language::language.language_name_helper')"
                             />
 
-                            <x-core::form.text-input
-                                :label="trans('plugins/language::language.locale')"
+                            <x-core::form.select
                                 name="lang_locale"
+                                :label="trans('plugins/language::language.locale')"
                                 :helper-text="trans('plugins/language::language.locale_helper')"
-                            />
+                                searchable
+                            >
+                                <option>{{ trans('plugins/language::language.select_locale') }}</option>
+                                @foreach ($localeKeys as $localeKey)
+                                    <option value="{{ $localeKey }}">{{ $localeKey }}</option>
+                                @endforeach
+                            </x-core::form.select>
 
-                            <x-core::form.text-input
-                                :label="trans('plugins/language::language.language_code')"
+                            <x-core::form.select
                                 name="lang_code"
+                                :label="trans('plugins/language::language.language_code')"
                                 :helper-text="trans('plugins/language::language.language_code_helper')"
-                            />
+                                searchable
+                            >
+                                <option>{{ trans('plugins/language::language.select_language_code') }}
+                                </option>
+                                @foreach ($languageCodes as $key => $code)
+                                    <option value="{{ $code }}">{{ $code }}</option>
+                                @endforeach
+                            </x-core::form.select>
 
                             <x-core::form.radio-list
                                 name="lang_rtl"

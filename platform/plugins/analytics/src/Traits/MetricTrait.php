@@ -20,7 +20,7 @@ trait MetricTrait
     {
         $this->metrics = [];
 
-        foreach ((array)$items as $item) {
+        foreach ((array) $items as $item) {
             $item = trim($item);
             $this->metric($item);
         }

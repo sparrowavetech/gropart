@@ -24,15 +24,19 @@
             'class' => $classes,
             'href' => $url,
         ]) }}
-        @if(str_contains($color, '#'))
-            style="background-color: {{ $color }}"
-        @endif
+        @style([
+            'background-color: ' . $color => str_contains($color, '#'),
+        ])
     >
         <div class="d-flex justify-content-between align-items-center">
             <div class="details px-4 py-3 d-flex flex-column justify-content-between">
                 <div class="desc fw-medium">{{ $label }}</div>
                 <div class="number fw-bolder">
-                    <span data-counter="counterup" data-value="{{ $value }}">0</span>
+                    @if (is_int($value))
+                        <span data-counter="counterup" data-value="{{ $value }}">0</span>
+                    @else
+                        <span>{{ $value }}</span>
+                    @endif
                 </div>
             </div>
             <div class="visual ps-1 position-absolute end-0">

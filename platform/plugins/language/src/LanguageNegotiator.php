@@ -113,7 +113,7 @@ class LanguageNegotiator
                 $option = array_map('trim', explode(';', $option));
                 $la = $option[0];
                 if (isset($option[1])) {
-                    $qa = (float)str_replace('q=', '', $option[1]);
+                    $qa = (float) str_replace('q=', '', $option[1]);
                 } else {
                     $qa = null;
                     // Assign default low weight for generic values

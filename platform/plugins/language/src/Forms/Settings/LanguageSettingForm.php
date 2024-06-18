@@ -40,14 +40,14 @@ class LanguageSettingForm extends FormAbstract
                 'language_display',
                 RadioField::class,
                 RadioFieldOption::make()
-                ->label(trans('plugins/language::language.language_display'))
-                ->choices([
-                    'all' => trans('plugins/language::language.language_display_all'),
-                    'flag' => trans('plugins/language::language.language_display_flag_only'),
-                    'name' => trans('plugins/language::language.language_display_name_only'),
-                ])
-                ->selected(setting('language_display', 'all'))
-                ->toArray()
+                    ->label(trans('plugins/language::language.language_display'))
+                    ->choices([
+                        'all' => trans('plugins/language::language.language_display_all'),
+                        'flag' => trans('plugins/language::language.language_display_flag_only'),
+                        'name' => trans('plugins/language::language.language_display_name_only'),
+                    ])
+                    ->selected(setting('language_display', 'all'))
+                    ->toArray()
             )
             ->add(
                 'language_switcher_display',
@@ -97,26 +97,26 @@ class LanguageSettingForm extends FormAbstract
                 )
                 ->toArray()
         )
-        ->add(
-            'language_show_default_item_if_current_version_not_existed',
-            OnOffCheckboxField::class,
-            OnOffFieldOption::make()
-                ->label(trans('plugins/language::language.language_show_default_item_if_current_version_not_existed'))
-                ->value(setting('language_show_default_item_if_current_version_not_existed', true))
-                ->toArray()
-        )
-        ->add(
-            'language_auto_detect_user_language',
-            OnOffCheckboxField::class,
-            OnOffFieldOption::make()
-                ->label(trans('plugins/language::language.language_auto_detect_user_language'))
-                ->value(setting('language_auto_detect_user_language', false))
-                ->toArray()
-        )
-        ->add(
-            'button_action',
-            HtmlField::class,
-            HtmlFieldOption::make()->view('plugins/language::forms.button-action')->toArray()
-        );
+            ->add(
+                'language_show_default_item_if_current_version_not_existed',
+                OnOffCheckboxField::class,
+                OnOffFieldOption::make()
+                    ->label(trans('plugins/language::language.language_show_default_item_if_current_version_not_existed'))
+                    ->value(setting('language_show_default_item_if_current_version_not_existed', true))
+                    ->toArray()
+            )
+            ->add(
+                'language_auto_detect_user_language',
+                OnOffCheckboxField::class,
+                OnOffFieldOption::make()
+                    ->label(trans('plugins/language::language.language_auto_detect_user_language'))
+                    ->value(setting('language_auto_detect_user_language', false))
+                    ->toArray()
+            )
+            ->add(
+                'button_action',
+                HtmlField::class,
+                HtmlFieldOption::make()->view('plugins/language::forms.button-action')->toArray()
+            );
     }
 }

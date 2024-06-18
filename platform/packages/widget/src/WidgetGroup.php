@@ -15,7 +15,7 @@ class WidgetGroup
 
     protected string $name;
 
-    protected string|null $description = null;
+    protected ?string $description = null;
 
     protected array $widgets = [];
 
@@ -57,7 +57,7 @@ class WidgetGroup
     /**
      * Display a widget according to its type.
      */
-    protected function displayWidget(array $widget, int|null $position): string|null
+    protected function displayWidget(array $widget, ?int $position): ?string
     {
         $widget['arguments'][] = $this->id;
         $widget['arguments'][] = $position;
@@ -171,12 +171,12 @@ class WidgetGroup
         return $this;
     }
 
-    public function getDescription(): string|null
+    public function getDescription(): ?string
     {
         return $this->description;
     }
 
-    public function setDescription(string|null $description): self
+    public function setDescription(?string $description): self
     {
         $this->description = $description;
 

@@ -25,7 +25,7 @@ class Authenticate extends BaseAuthenticate
             $flag = preg_replace('/.create.store$/', '.create', $flag);
             $flag = preg_replace('/.edit.update$/', '.edit', $flag);
 
-            if ($flag && ! $request->user()->hasAnyPermission((array)$flag)) {
+            if ($flag && ! $request->user()->hasAnyPermission((array) $flag)) {
                 if ($request->expectsJson()) {
                     return response()->json(['message' => 'Unauthenticated.'], 401);
                 }

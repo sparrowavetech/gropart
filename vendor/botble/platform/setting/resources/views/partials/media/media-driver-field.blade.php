@@ -61,6 +61,16 @@
             :value="config('filesystems.disks.s3.endpoint')"
             :placeholder="trans('core/setting::setting.media.optional')"
         />
+
+        <x-core::form.select
+            name="media_aws_use_path_style_endpoint"
+            :label="trans('core/setting::setting.media.use_path_style_endpoint')"
+            :options="[
+                0 => trans('core/base::base.no'),
+                1 => trans('core/base::base.yes'),
+            ]"
+            :value="setting('media_aws_use_path_style_endpoint')"
+        />
     </x-core::form.fieldset>
 
     <x-core::form.fieldset
@@ -102,6 +112,16 @@
             :value="config('filesystems.disks.r2.url')"
             placeholder="Ex: https://pub-f70218cc331a40689xxx.r2.dev"
         />
+
+        <x-core::form.select
+            name="media_r2_use_path_style_endpoint"
+            :label="trans('core/setting::setting.media.use_path_style_endpoint')"
+            :options="[
+                0 => trans('core/base::base.no'),
+                1 => trans('core/base::base.yes'),
+            ]"
+            :value="setting('media_r2_use_path_style_endpoint')"
+        />
     </x-core::form.fieldset>
 
     <x-core::form.fieldset
@@ -141,7 +161,7 @@
             name="media_do_spaces_endpoint"
             :label="trans('core/setting::setting.media.do_spaces_endpoint')"
             :value="config('filesystems.disks.do_spaces.endpoint')"
-            placeholder="Ex: https://sfo2.digitaloceanspaces.com"
+            placeholder="Ex: https://botble.sfo2.digitaloceanspaces.com"
         />
 
         <x-core::form.on-off.checkbox
@@ -155,6 +175,15 @@
             :label="trans('core/setting::setting.media.media_do_spaces_cdn_custom_domain')"
             :value="setting('media_do_spaces_cdn_custom_domain')"
             :placeholder="trans('core/setting::setting.media.media_do_spaces_cdn_custom_domain_placeholder')"
+        />
+        <x-core::form.select
+            name="media_do_use_path_style_endpoint"
+            :label="trans('core/setting::setting.media.use_path_style_endpoint')"
+            :options="[
+                0 => trans('core/base::base.no'),
+                1 => trans('core/base::base.yes'),
+            ]"
+            :value="setting('media_do_use_path_style_endpoint')"
         />
     </x-core::form.fieldset>
 
@@ -196,6 +225,7 @@
             :label="trans('core/setting::setting.media.wasabi_root')"
             :value="config('filesystems.disks.wasabi.root')"
             placeholder="Default: /"
+            :helperText="trans('core/setting::setting.media.wasabi_root_helper')"
         />
     </x-core::form.fieldset>
 

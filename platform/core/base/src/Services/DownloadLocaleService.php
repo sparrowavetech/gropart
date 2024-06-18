@@ -4,6 +4,7 @@ namespace Botble\Base\Services;
 
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Supports\Zipper;
+use Botble\Theme\Facades\Theme;
 use Exception;
 use GuzzleHttp\Psr7\Utils;
 use Illuminate\Support\Facades\File;
@@ -47,12 +48,18 @@ class DownloadLocaleService
 
         File::copyDirectory("{$path}/{$locale}", lang_path($locale));
 
-        if (File::exists("{$path}/{$locale}.json")) {
-            File::copy("{$path}/{$locale}.json", lang_path("{$locale}.json"));
-        }
-
         if (File::isDirectory("{$path}/vendor")) {
             File::copyDirectory("{$path}/vendor", lang_path('vendor'));
+        }
+
+        $parentTheme = Theme::getThemeName();
+
+        if (Theme::hasInheritTheme()) {
+            $parentTheme = Theme::getInheritTheme();
+        }
+
+        if (File::exists("{$path}/{$locale}.json") && ! File::exists(lang_path("vendor/themes/{$parentTheme}/{$locale}.json"))) {
+            File::copy("{$path}/{$locale}.json", lang_path("vendor/themes/{$parentTheme}/{$locale}.json"));
         }
 
         File::delete($destination);

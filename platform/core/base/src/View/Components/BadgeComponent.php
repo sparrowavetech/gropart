@@ -10,7 +10,8 @@ class BadgeComponent extends Component
 {
     public function __construct(
         public string $label,
-        public string $color = 'primary'
+        public string $color = 'primary',
+        public ?string $icon = null
     ) {
     }
 

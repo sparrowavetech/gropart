@@ -19,6 +19,7 @@ return [
         'v2_description' => 'V2 (Verify requests with a challenge)',
         'v3_description' => 'V3 (Verify requests with a score)',
         'enable_math_captcha' => 'Enable Math Captcha?',
+        'enable_for_form' => 'Enable for :form?',
     ],
     'numbers' => [
         '0' => 'Zero',
@@ -44,4 +45,7 @@ return [
     'recaptcha_disclaimer_message_with_link' => 'This site is protected by reCAPTCHA and the Google :privacyLink and :termsLink apply.',
     'privacy_policy' => 'Privacy Policy',
     'terms_of_service' => 'Terms of Service',
+    'admin_login_form' => 'Admin login form',
+    'admin_forgot_password_form' => 'Admin forgot password form',
+    'admin_reset_password_form' => 'Admin reset password form',
 ];

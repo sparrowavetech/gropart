@@ -7,7 +7,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
 
 if (! function_exists('setting')) {
-    function setting(string|null $key = null, $default = null)
+    function setting(?string $key = null, $default = null)
     {
         if (! empty($key)) {
             try {
@@ -30,7 +30,7 @@ if (! function_exists('get_admin_email')) {
             return collect();
         }
 
-        $email = is_array($email) ? $email : (array)json_decode($email, true);
+        $email = is_array($email) ? $email : (array) json_decode($email, true);
 
         return collect(array_filter($email));
     }

@@ -46,7 +46,7 @@ class PublicController extends BaseController
         return Theme::scope('index')->render();
     }
 
-    public function getView(string|null $key = null, string $prefix = '')
+    public function getView(?string $key = null, string $prefix = '')
     {
         if (empty($key)) {
             return $this->getIndex();
@@ -118,7 +118,7 @@ class PublicController extends BaseController
         return SiteMapManager::render($key ? $extension : 'sitemapindex');
     }
 
-    public function getViewWithPrefix(string $prefix, string|null $slug = null)
+    public function getViewWithPrefix(string $prefix, ?string $slug = null)
     {
         return $this->getView($slug, $prefix);
     }

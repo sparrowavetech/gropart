@@ -9,7 +9,7 @@ use Intervention\Image\Colors\Rgb\Channels\Blue;
 use Intervention\Image\Colors\Rgb\Channels\Green;
 use Intervention\Image\Colors\Rgb\Channels\Red;
 use Intervention\Image\Colors\Rgb\Channels\Alpha;
-use Intervention\Image\Drivers\AbstractInputHandler;
+use Intervention\Image\InputHandler;
 use Intervention\Image\Interfaces\ColorChannelInterface;
 use Intervention\Image\Interfaces\ColorInterface;
 use Intervention\Image\Interfaces\ColorspaceInterface;
@@ -27,6 +27,7 @@ class Color extends AbstractColor
      */
     public function __construct(int $r, int $g, int $b, int $a = 255)
     {
+        /** @throws void */
         $this->channels = [
             new Red($r),
             new Green($g),
@@ -35,6 +36,11 @@ class Color extends AbstractColor
         ];
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * @see ColorInterface::colorspace()
+     */
     public function colorspace(): ColorspaceInterface
     {
         return new Colorspace();
@@ -47,14 +53,12 @@ class Color extends AbstractColor
      */
     public static function create(mixed $input): ColorInterface
     {
-        return (new class ([
+        return InputHandler::withDecoders([
             Decoders\HexColorDecoder::class,
             Decoders\StringColorDecoder::class,
             Decoders\TransparentColorDecoder::class,
             Decoders\HtmlColornameDecoder::class,
-        ]) extends AbstractInputHandler
-        {
-        })->handle($input);
+        ])->handle($input);
     }
 
     /**
@@ -64,6 +68,7 @@ class Color extends AbstractColor
      */
     public function red(): ColorChannelInterface
     {
+        /** @throws void */
         return $this->channel(Red::class);
     }
 
@@ -74,6 +79,7 @@ class Color extends AbstractColor
      */
     public function green(): ColorChannelInterface
     {
+        /** @throws void */
         return $this->channel(Green::class);
     }
 
@@ -84,6 +90,7 @@ class Color extends AbstractColor
      */
     public function blue(): ColorChannelInterface
     {
+        /** @throws void */
         return $this->channel(Blue::class);
     }
 
@@ -94,6 +101,7 @@ class Color extends AbstractColor
      */
     public function alpha(): ColorChannelInterface
     {
+        /** @throws void */
         return $this->channel(Alpha::class);
     }
 
@@ -104,29 +112,24 @@ class Color extends AbstractColor
      */
     public function toHex(string $prefix = ''): string
     {
-        if ($this->isFullyOpaque()) {
+        if ($this->isTransparent()) {
             return sprintf(
-                '%s%02x%02x%02x',
+                '%s%02x%02x%02x%02x',
                 $prefix,
                 $this->red()->value(),
                 $this->green()->value(),
-                $this->blue()->value()
+                $this->blue()->value(),
+                $this->alpha()->value()
             );
         }
 
         return sprintf(
-            '%s%02x%02x%02x%02x',
+            '%s%02x%02x%02x',
             $prefix,
             $this->red()->value(),
             $this->green()->value(),
-            $this->blue()->value(),
-            $this->alpha()->value()
+            $this->blue()->value()
         );
-    }
-
-    public function isFullyOpaque(): bool
-    {
-        return $this->alpha()->value() === 255;
     }
 
     /**
@@ -136,21 +139,21 @@ class Color extends AbstractColor
      */
     public function toString(): string
     {
-        if ($this->isFullyOpaque()) {
+        if ($this->isTransparent()) {
             return sprintf(
-                'rgb(%d, %d, %d)',
+                'rgba(%d, %d, %d, %.1F)',
                 $this->red()->value(),
                 $this->green()->value(),
-                $this->blue()->value()
+                $this->blue()->value(),
+                $this->alpha()->normalize(),
             );
         }
 
         return sprintf(
-            'rgba(%d, %d, %d, %.1F)',
+            'rgb(%d, %d, %d)',
             $this->red()->value(),
             $this->green()->value(),
-            $this->blue()->value(),
-            $this->alpha()->normalize(),
+            $this->blue()->value()
         );
     }
 
@@ -164,5 +167,15 @@ class Color extends AbstractColor
         $values = [$this->red()->value(), $this->green()->value(), $this->blue()->value()];
 
         return count(array_unique($values, SORT_REGULAR)) === 1;
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @see ColorInterface::isTransparent()
+     */
+    public function isTransparent(): bool
+    {
+        return $this->alpha()->value() < $this->alpha()->max();
     }
 }

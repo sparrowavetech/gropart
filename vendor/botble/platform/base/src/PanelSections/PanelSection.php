@@ -27,7 +27,7 @@ class PanelSection implements PanelSectionContract
 
     protected int $priority = 0;
 
-    protected array|null $permissions = null;
+    protected ?array $permissions = null;
 
     protected array $items = [];
 

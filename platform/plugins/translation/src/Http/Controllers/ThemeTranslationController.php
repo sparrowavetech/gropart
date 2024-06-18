@@ -21,7 +21,8 @@ class ThemeTranslationController extends SettingController
     {
         $this->pageTitle(trans('plugins/translation::translation.theme-translations'));
 
-        Assets::addStylesDirectly('vendor/core/plugins/translation/css/translation.css');
+        Assets::addStylesDirectly('vendor/core/plugins/translation/css/translation.css')
+            ->addScriptsDirectly('vendor/core/plugins/translation/js/translation.js');
 
         [$groups, $group, $defaultLanguage, $translationTable]
             = $this->mapTranslationsTable($translationTable, $request);
@@ -64,20 +65,25 @@ class ThemeTranslationController extends SettingController
 
         $inheritTranslations = $manager->getInheritThemeTranslations($locale);
         $translations = $manager->getThemeTranslations($locale, false);
-        $allTranslations = [...$inheritTranslations, ...$translations];
+        $allTranslations =  $manager->getThemeTranslations($locale);
 
         if (! Arr::has($allTranslations, $request->input('name'))) {
             return $this->updateResponse();
         }
 
-        if (Theme::hasInheritTheme()
-            && Arr::has($inheritTranslations, $name)) {
-            $inheritTranslations[$name] = $value;
+        if (Theme::hasInheritTheme()) {
+            if (Arr::has($inheritTranslations, $name)) {
+                $inheritTranslations[$name] = $value;
+            }
+
             $manager->saveInheritThemeTranslation($locale, $inheritTranslations);
-        } elseif (Arr::has($translations, $name)) {
-            $translations[$name] = $value;
-            $manager->saveThemeTranslations($locale, $translations);
         }
+
+        if (Arr::has($translations, $name)) {
+            $translations[$name] = $value;
+        }
+
+        $manager->saveThemeTranslations($locale, $translations);
 
         return $this->updateResponse();
     }

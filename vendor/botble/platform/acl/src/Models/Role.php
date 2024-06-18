@@ -48,7 +48,7 @@ class Role extends BaseModel
         });
     }
 
-    public function delete(): bool|null
+    public function delete(): ?bool
     {
         if ($this->exists) {
             $this->users()->detach();

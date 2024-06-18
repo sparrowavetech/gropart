@@ -9,7 +9,6 @@ use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Supports\Database;
 use Botble\Base\Supports\Zipper;
 use Carbon\Carbon;
-use Exception;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
@@ -19,13 +18,13 @@ use Throwable;
 
 class Backup
 {
-    protected string|null $folder = null;
+    protected ?string $folder = null;
 
     public function __construct(protected Filesystem $files, protected Zipper $zipper)
     {
     }
 
-    public function createBackupFolder(string $name, string|null $description = null): array
+    public function createBackupFolder(string $name, ?string $description = null): array
     {
         $backupFolder = $this->createFolder($this->getBackupPath());
         $now = Carbon::now()->format('Y-m-d-H-i-s');
@@ -59,7 +58,7 @@ class Backup
         return $folder;
     }
 
-    public function getBackupPath(string|null $path = null): string
+    public function getBackupPath(?string $path = null): string
     {
         return storage_path('app/backup') . ($path ? '/' . $path : null);
     }
@@ -127,15 +126,19 @@ class Backup
 
         try {
             Process::fromShellCommandline($sql)->mustRun();
-        } catch (Exception) {
+        } catch (Throwable $exception) {
+            BaseHelper::logError($exception);
+
             try {
                 if (function_exists('system')) {
                     system($sql);
                 } else {
                     $this->processMySqlDumpPHP($path, $config);
                 }
-            } catch (Exception) {
+            } catch (Throwable $exception) {
                 $this->processMySqlDumpPHP($path, $config);
+
+                BaseHelper::logError($exception);
             }
         }
 
@@ -247,7 +250,7 @@ class Backup
             $driver === 'mysql' ? '.sql' : '.dump'
         );
 
-        if (! $this->files->exists($file)) {
+        if (! $this->files->exists($file) || $this->files->size($file) < 1024) {
             return false;
         }
 

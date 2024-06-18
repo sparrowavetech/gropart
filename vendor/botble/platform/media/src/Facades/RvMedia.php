@@ -29,7 +29,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static \Botble\Media\RvMedia addSize(string $name, string|int $width, string|int $height = 'auto')
  * @method static \Botble\Media\RvMedia removeSize(string $name)
  * @method static mixed uploadFromEditor(\Illuminate\Http\Request $request, string|int|null $folderId = 0, $folderName = null, string $fileInput = 'upload')
- * @method static array handleUpload(\Illuminate\Http\UploadedFile|null $fileUpload, string|int|null $folderId = 0, string|null $folderSlug = null, bool $skipValidation = false)
+ * @method static array handleUpload(\Illuminate\Http\UploadedFile|null $fileUpload, string|int|null $folderId = 0, string|null $folderSlug = null, bool $skipValidation = false, string $visibility = 'public')
  * @method static float getServerConfigMaxUploadFileSize()
  * @method static float parseSize(string|int $size)
  * @method static bool generateThumbnails(\Botble\Media\Models\MediaFile $file, \Illuminate\Http\UploadedFile|null $fileUpload = null)

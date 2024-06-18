@@ -169,6 +169,6 @@ class ValidatorHandler
         };
 
         $this->validator->sometimes($attribute, $rules, $callback);
-        $this->rules->addConditionalRules($attribute, (array)$rules);
+        $this->rules->addConditionalRules($attribute, (array) $rules);
     }
 }

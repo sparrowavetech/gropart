@@ -2,14 +2,15 @@
 
 namespace Botble\Theme\Supports;
 
+use Botble\Media\Facades\RvMedia;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 
 class Youtube
 {
-    public static function getYoutubeVideoEmbedURL(string|null $url): string
+    public static function getYoutubeVideoEmbedURL(?string $url): string
     {
-        $url = rtrim((string)$url, '/');
+        $url = rtrim((string) $url, '/');
 
         if (! $url) {
             return $url;
@@ -30,9 +31,9 @@ class Youtube
         return $url;
     }
 
-    public static function getYoutubeWatchURL(string|null $url): string
+    public static function getYoutubeWatchURL(?string $url): string
     {
-        $url = rtrim((string)$url, '/');
+        $url = rtrim((string) $url, '/');
 
         if (! $url) {
             return $url;
@@ -53,9 +54,9 @@ class Youtube
         return $url;
     }
 
-    public static function getYoutubeVideoID(string|null $url): string|null
+    public static function getYoutubeVideoID(?string $url): ?string
     {
-        $url = rtrim((string)$url, '/');
+        $url = rtrim((string) $url, '/');
 
         if (! $url) {
             return $url;
@@ -72,9 +73,9 @@ class Youtube
         return null;
     }
 
-    public static function isYoutubeURL(string|null $url): bool
+    public static function isYoutubeURL(?string $url): bool
     {
-        $url = rtrim((string)$url, '/');
+        $url = rtrim((string) $url, '/');
 
         if (! $url) {
             return false;
@@ -83,5 +84,12 @@ class Youtube
         $regExp = '/^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|shorts\/|v\/)?)([\w\-]+)(\S+)?$/';
 
         return preg_match($regExp, $url);
+    }
+
+    public static function getThumbnail(?string $url): string
+    {
+        $id = self::getYoutubeVideoID($url);
+
+        return $id ? "https://i.ytimg.com/vi_webp/$id/maxresdefault.webp" : RvMedia::getDefaultImage();
     }
 }

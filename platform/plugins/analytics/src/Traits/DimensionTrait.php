@@ -20,7 +20,7 @@ trait DimensionTrait
     {
         $this->dimensions = [];
 
-        foreach ((array)$items as $item) {
+        foreach ((array) $items as $item) {
             $this->dimension($item);
         }
 

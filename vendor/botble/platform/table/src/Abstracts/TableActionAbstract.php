@@ -84,7 +84,7 @@ abstract class TableActionAbstract implements Htmlable, Stringable
         return $this;
     }
 
-    public function getDropdownItemView()
+    public function getDropdownItemView(): string
     {
         return $this->dropdownItemView;
     }

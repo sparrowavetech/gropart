@@ -10,6 +10,10 @@ class Plugin extends PluginOperationAbstract
 {
     public static function remove(): void
     {
+        Schema::dropIfExists('contact_custom_fields');
+        Schema::dropIfExists('contact_custom_field_options');
+        Schema::dropIfExists('contact_custom_fields_translations');
+        Schema::dropIfExists('contact_custom_field_options_translations');
         Schema::dropIfExists('contact_replies');
         Schema::dropIfExists('contacts');
 

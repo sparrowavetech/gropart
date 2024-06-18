@@ -8,7 +8,6 @@ use Botble\Base\Supports\RepositoryHelper;
 use Botble\Media\Facades\RvMedia;
 use Botble\Page\Models\Page;
 use Botble\SeoHelper\Facades\SeoHelper;
-use Botble\SeoHelper\SeoOpenGraph;
 use Botble\Slug\Models\Slug;
 use Botble\Theme\Facades\Theme;
 use Illuminate\Support\Arr;
@@ -49,33 +48,23 @@ class PageService
             abort(404);
         }
 
-        $meta = new SeoOpenGraph();
-
-        if ($page->image) {
-            $meta->setImage(RvMedia::getImageUrl($page->image));
-        }
-
         if (! BaseHelper::isHomepage($page->getKey())) {
             SeoHelper::setTitle($page->name)
                 ->setDescription($page->description);
-
-            $meta->setTitle($page->name);
-            $meta->setDescription($page->description);
         } else {
             $siteTitle = theme_option('seo_title') ?: theme_option('site_title');
             $seoDescription = theme_option('seo_description');
 
             SeoHelper::setTitle($siteTitle)
                 ->setDescription($seoDescription);
-
-            $meta->setTitle($siteTitle);
-            $meta->setDescription($seoDescription);
         }
 
-        $meta->setUrl($page->url);
-        $meta->setType('article');
+        if ($page->image) {
+            SeoHelper::openGraph()->setImage(RvMedia::getImageUrl($page->image));
+        }
 
-        SeoHelper::setSeoOpenGraph($meta);
+        SeoHelper::openGraph()->setUrl($page->url);
+        SeoHelper::openGraph()->setType('article');
 
         SeoHelper::meta()->setUrl($page->url);
 
@@ -86,7 +75,12 @@ class PageService
 
         if (function_exists('admin_bar')) {
             admin_bar()
-                ->registerLink(trans('packages/page::pages.edit_this_page'), route('pages.edit', $page->getKey()), null, 'pages.edit');
+                ->registerLink(
+                    trans('packages/page::pages.edit_this_page'),
+                    route('pages.edit', $page->getKey()),
+                    null,
+                    'pages.edit'
+                );
         }
 
         if (function_exists('shortcode')) {

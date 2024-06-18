@@ -16,7 +16,7 @@ class SvgDriver extends IconDriver
     public function __construct(
         protected Filesystem $files,
     ) {
-        $this->setIconpath(core_path('icon/resources/svg'));
+        $this->setIconPath(core_path('icon/resources/svg'));
     }
 
     public function all(): array

@@ -5,7 +5,9 @@
     "provider": "Botble\\SslCommerz\\Providers\\SslCommerzServiceProvider",
     "author": "Botble Technologies",
     "url": "https://botble.com",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "SslCommerz payment gateway integration",
-    "require": ["botble/payment"]
+    "require": [
+        "botble/payment"
+    ]
 }

@@ -17,24 +17,32 @@ class FetchGoogleFontsCommand extends Command
 
     public function handle(): int
     {
-        $font = text(
-            label: 'Google Font URL',
+        $fontName = text(
+            label: 'Google Fonts Name',
             required: true,
-            validate: $this->validate('url|starts_with:https://fonts.googleapis.com/css2?family='),
+            validate: $this->validate('string')
         );
 
-        $this->components->info(sprintf('Fetching <comment>%s</comment>...', $font));
+        $this->components->info(sprintf('Fetching <comment>%s</comment>...', $fontName));
+
+        $font = 'https://fonts.googleapis.com/css2?family=' . urlencode($fontName) . '&display=swap';
 
         try {
-            app('core.google-fonts')->load($font, forceDownload: true);
+            $font = app('core.google-fonts')->load($font, forceDownload: true);
+
+            if (! $font) {
+                $this->components->error('Failed to fetch Google Fonts.');
+
+                return self::FAILURE;
+            }
+
+            $this->components->info('Google Fonts <info>' . $fontName . '</info> has been fetched and stored into <comment>' . ltrim(str_replace(url(''), '', $font->url()), '/') . '</comment> successfully.');
+
+            return self::SUCCESS;
         } catch (Exception $exception) {
             $this->components->error($exception->getMessage());
 
             return self::FAILURE;
         }
-
-        $this->components->info('All done!');
-
-        return self::SUCCESS;
     }
 }

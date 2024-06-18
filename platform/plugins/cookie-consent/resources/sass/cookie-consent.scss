@@ -7,6 +7,11 @@
     left: 0;
     right: 0;
     z-index: 999999;
+    display: none;
+
+    &.cookie-consent--visible {
+        display: block;
+    }
 
     &.cookie-consent-minimal {
         bottom: 1em;

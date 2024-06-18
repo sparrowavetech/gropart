@@ -120,7 +120,7 @@ abstract class RazorpayPaymentAbstract implements ProduceServiceInterface
             return [
                 'error' => false,
                 'message' => $response->status,
-                'data' => (array)$response->toArray(),
+                'data' => (array) $response->toArray(),
                 'status' => $response->status,
             ];
         } catch (Exception $exception) {

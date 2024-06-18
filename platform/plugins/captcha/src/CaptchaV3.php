@@ -44,7 +44,7 @@ class CaptchaV3 extends CaptchaContract
         return $score && $score >= $minScore;
     }
 
-    public function display(array $attributes = ['action' => 'form'], array $options = []): string|null
+    public function display(array $attributes = ['action' => 'form'], array $options = []): ?string
     {
         if (! $this->siteKey || ! $this->reCaptchaEnabled()) {
             return null;
@@ -58,10 +58,14 @@ class CaptchaV3 extends CaptchaContract
         CaptchaRendering::dispatch($attributes, $options, $headContent, $footerContent);
 
         if (defined('THEME_FRONT_FOOTER')) {
-            add_filter(THEME_FRONT_FOOTER, function (string|null $html) use ($headContent, $footerContent): string {
+            add_filter(THEME_FRONT_FOOTER, function (?string $html) use ($headContent, $footerContent): string {
                 return $html . $headContent . $footerContent;
             }, 99);
         }
+
+        add_filter(BASE_FILTER_FOOTER_LAYOUT_TEMPLATE, function (?string $html) use ($headContent, $footerContent): string {
+            return $html . $headContent . $footerContent;
+        }, 99);
 
         $this->rendered = true;
 

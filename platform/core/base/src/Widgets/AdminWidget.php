@@ -12,7 +12,7 @@ class AdminWidget implements AdminWidgetContract
 
     protected string $namespace = 'global';
 
-    public function register(array $widgets, string|null $namespace): static
+    public function register(array $widgets, ?string $namespace): static
     {
         foreach ($widgets as $key => $widget) {
             $this->widgets[$namespace][is_string($key) ? $key : $widget] = $widget;
@@ -21,14 +21,14 @@ class AdminWidget implements AdminWidgetContract
         return $this;
     }
 
-    public function remove(string $id, string|null $namespace): static
+    public function remove(string $id, ?string $namespace): static
     {
         unset($this->widgets[$namespace][$id]);
 
         return $this;
     }
 
-    public function getColumns(string|null $namespace): int
+    public function getColumns(?string $namespace): int
     {
         return match ($count = count($this->widgets[$namespace])) {
             5, 6, 9, 11 => 3,

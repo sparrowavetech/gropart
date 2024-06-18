@@ -4,8 +4,8 @@ namespace Botble\Base\Forms;
 
 use Botble\Base\Supports\Builders\HasAttributes;
 use Botble\Base\Supports\Builders\HasLabel;
+use Botble\Base\Traits\FieldOptions\HasCollapsibleField;
 use Botble\Base\Traits\Forms\CanSpanColumns;
-use Botble\Base\Traits\Forms\HasCollapsibleField;
 use Closure;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Support\Traits\Conditionable;
@@ -75,7 +75,7 @@ class FormFieldOptions implements Arrayable
         return $this->wrapperAttributes;
     }
 
-    public function helperText(string|null $helperText, array $attributes = []): static
+    public function helperText(?string $helperText, array $attributes = []): static
     {
         if (! $helperText) {
             return $this;

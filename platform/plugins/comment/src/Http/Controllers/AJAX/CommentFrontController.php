@@ -14,11 +14,11 @@ use Botble\Comment\Models\Comment;
 use Botble\Comment\Repositories\Interfaces\CommentInterface;
 use Botble\Comment\Repositories\Interfaces\CommentLikeInterface;
 use Botble\Comment\Repositories\Interfaces\CommentRecommendInterface;
+use Botble\Media\Facades\RvMedia;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
-use RvMedia;
 
 class CommentFrontController extends BaseController
 {

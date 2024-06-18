@@ -27,7 +27,7 @@ interface PostInterface extends RepositoryInterface
 
     public function getRecentPosts(int $limit = 5, int|string $categoryId = 0): Collection;
 
-    public function getSearch(string|null $keyword, int $limit = 10, int $paginate = 10): Collection|LengthAwarePaginator;
+    public function getSearch(?string $keyword, int $limit = 10, int $paginate = 10): Collection|LengthAwarePaginator;
 
     public function getAllPosts(int $perPage = 12, bool $active = true, array $with = ['slugable']): Collection|LengthAwarePaginator;
 

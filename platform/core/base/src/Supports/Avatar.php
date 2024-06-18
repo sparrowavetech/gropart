@@ -16,7 +16,7 @@ use Throwable;
 
 class Avatar
 {
-    protected string|null $name = null;
+    protected ?string $name = null;
 
     protected int $chars = 1;
 
@@ -209,7 +209,7 @@ class Avatar
 
         // if name contains single word, use first N character
         if ($words->count() === 1) {
-            $initial = (string)$words->first();
+            $initial = (string) $words->first();
 
             if (strlen($this->name) >= $length) {
                 $initial = Str::substr($this->name, 0, $length);
@@ -255,7 +255,7 @@ class Avatar
         $this->name = $name;
     }
 
-    public function create(string|null $name): self
+    public function create(?string $name): self
     {
         $this->name = $name;
 
@@ -282,7 +282,7 @@ class Avatar
         );
     }
 
-    protected function getBorderColor(): string|null
+    protected function getBorderColor(): ?string
     {
         if ($this->borderColor == 'foreground') {
             return $this->foreground;
@@ -297,7 +297,7 @@ class Avatar
 
     protected function createSquareShape(): void
     {
-        $edge = (int)ceil($this->borderSize / 2);
+        $edge = (int) ceil($this->borderSize / 2);
         $width = $this->width - $edge;
         $height = $this->height - $edge;
 
@@ -312,7 +312,7 @@ class Avatar
         );
     }
 
-    public static function createBase64Image(string|null $name): string
+    public static function createBase64Image(?string $name): string
     {
         try {
             return (new self())->create($name)->toBase64();

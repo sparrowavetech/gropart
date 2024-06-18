@@ -4,9 +4,9 @@ namespace Botble\Media\Services;
 
 use Botble\Base\Facades\BaseHelper;
 use Botble\Media\Facades\RvMedia;
-use Exception;
 use Illuminate\Support\Facades\File;
 use Intervention\Image\Encoders\AutoEncoder;
+use Throwable;
 
 class ThumbnailService
 {
@@ -20,9 +20,9 @@ class ThumbnailService
 
     protected string $destinationPath;
 
-    protected int|null $xCoordinate;
+    protected ?int $xCoordinate;
 
-    protected int|null $yCoordinate;
+    protected ?int $yCoordinate;
 
     protected string $fitPosition;
 
@@ -56,13 +56,13 @@ class ThumbnailService
         if (! $height || $height == 'auto') {
             $this->thumbHeight = 0;
         } elseif ($height == 'rate') {
-            $this->thumbHeight = (int)($this->thumbWidth * $this->thumbRate);
+            $this->thumbHeight = (int) ($this->thumbWidth * $this->thumbRate);
         }
 
         if (! $width || $width == 'auto') {
             $this->thumbWidth = 0;
         } elseif ($width == 'rate') {
-            $this->thumbWidth = (int)($this->thumbHeight * $this->thumbRate);
+            $this->thumbWidth = (int) ($this->thumbHeight * $this->thumbRate);
         }
 
         return $this;
@@ -129,7 +129,7 @@ class ThumbnailService
                     return $destinationPath;
                 }
 
-                $thumbImage->resize($this->thumbWidth);
+                $thumbImage->scale($this->thumbWidth);
 
                 break;
 
@@ -138,7 +138,7 @@ class ThumbnailService
                     return $destinationPath;
                 }
 
-                $thumbImage->resize(null, $this->thumbHeight);
+                $thumbImage->scale(null, $this->thumbHeight);
 
                 break;
 
@@ -173,7 +173,7 @@ class ThumbnailService
 
         try {
             $this->uploadManager->saveFile($destinationPath, $thumbImage->encode(new AutoEncoder()));
-        } catch (Exception $exception) {
+        } catch (Throwable $exception) {
             BaseHelper::logError($exception);
 
             throw $exception;

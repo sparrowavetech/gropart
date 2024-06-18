@@ -6,8 +6,8 @@ use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\Html;
 use Botble\SimpleSlider\Models\SimpleSliderItem;
 use Botble\Table\Abstracts\TableAbstract;
-use Botble\Table\Actions\Action;
 use Botble\Table\Actions\DeleteAction;
+use Botble\Table\Actions\EditAction;
 use Botble\Table\Columns\Column;
 use Botble\Table\Columns\CreatedAtColumn;
 use Botble\Table\Columns\FormattedColumn;
@@ -49,9 +49,8 @@ class SimpleSliderItemTable extends TableAbstract
                 CreatedAtColumn::make(),
             ])
             ->addActions([
-                Action::make('customEdit')
+                EditAction::make()
                     ->route('simple-slider-item.edit')
-                    ->icon('ti ti-edit')
                     ->attributes([
                         'data-bs-toggle' => 'modal',
                         'data-bs-target' => '#simple-slider-item-modal',

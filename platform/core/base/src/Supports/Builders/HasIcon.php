@@ -28,7 +28,7 @@ trait HasIcon
         return $this->icon instanceof Closure;
     }
 
-    public function getIcon(): string|null
+    public function getIcon(): ?string
     {
         if (! $this->hasIcon()) {
             return null;

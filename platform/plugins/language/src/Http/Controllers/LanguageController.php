@@ -37,11 +37,16 @@ class LanguageController extends SettingController
 
         $languages = Language::getListLanguages();
         $flags = Language::getListLanguageFlags();
+        $languageCodes = Language::getLanguageCodes();
+        $localeKeys = Language::getLocaleKeys();
         $activeLanguages = LanguageModel::query()->orderBy('lang_order')->get();
 
         $languageSettingForm = LanguageSettingForm::create();
 
-        return view('plugins/language::index', compact('languages', 'flags', 'activeLanguages', 'languageSettingForm'));
+        return view(
+            'plugins/language::index',
+            compact('languages', 'flags', 'activeLanguages', 'languageSettingForm', 'languageCodes', 'localeKeys')
+        );
     }
 
     public function store(LanguageRequest $request, LanguageManager $languageManager)

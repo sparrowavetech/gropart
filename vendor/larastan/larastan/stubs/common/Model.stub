@@ -20,12 +20,35 @@ abstract class Model implements \JsonSerializable, \ArrayAccess
     /**
      * @var list<string>
      */
+    protected $fillable = [];
+
+    /**
+     * @var list<string>
+     */
     protected $visible = [];
 
     /**
      * @var list<string>
      */
     protected $appends = [];
+
+    /**
+     * @var list<string>
+     */
+    protected $with = [];
+
+    /**
+     * @var list<string>
+     */
+    protected $withCount = [];
+
+    /**
+     * Update the model in the database.
+     *
+     * @param  array<array-key, mixed>  $options
+     * @return bool
+     */
+    public function save(array $options = []);
 
     /**
      * Update the model in the database.
@@ -45,4 +68,7 @@ abstract class Model implements \JsonSerializable, \ArrayAccess
     public static function with($relations);
 }
 
+/**
+ * @template TModel of Model
+ */
 class ModelNotFoundException extends \RuntimeException {}

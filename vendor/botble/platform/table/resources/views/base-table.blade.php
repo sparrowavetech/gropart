@@ -2,6 +2,14 @@
     /** @var Botble\Table\Abstracts\TableAbstract $table */
 @endphp
 
+@once
+    @if ($randomHash = setting('datatables_random_hash'))
+        <script>window.DATATABLES_RANDOM_HASH = "{{ $randomHash }}";</script>
+    @endif
+@endonce
+
+{!! apply_filters(BASE_FILTER_TABLE_BEFORE_RENDER, null, $table) !!}
+
 <div class="table-wrapper">
     @if ($table->hasFilters())
         <x-core::card
@@ -27,12 +35,13 @@
         'has-filter' => $table->hasFilters(),
     ])>
         <x-core::card.header>
-            <div class="w-100 gap-2 d-flex align-items-start justify-content-between flex-wrap">
-                <div class="d-flex gap-2 mb-1">
+            <div class="w-100 justify-content-between d-flex flex-wrap align-items-center gap-1">
+                <div class="d-flex flex-wrap flex-md-nowrap align-items-center gap-1">
                     @if ($table->hasBulkActions())
                         <x-core::dropdown
                             type="button"
                             :label="trans('core/table::table.bulk_actions')"
+                            wrapper-class="d-inline-block"
                         >
                             @foreach ($table->getBulkActions() as $action)
                                 {!! $action !!}
@@ -50,14 +59,15 @@
                     @endif
 
                     <div class="table-search-input">
-                        <label><input type="search" class="form-control input-sm" placeholder="{{ trans('core/table::table.search') }}" style="min-width: 120px"></label>
+                        <label>
+                            <input type="search" class="form-control input-sm" placeholder="{{ trans('core/table::table.search') }}" style="min-width: 120px">
+                        </label>
                     </div>
                 </div>
-
-                <div class="d-flex gap-2 mb-1">
+                <div class="d-flex align-items-center gap-1">
                     @foreach($table->getButtons() as $button)
                         @if (Arr::get($button, 'extend') === 'collection')
-                            <div class="dropdown">
+                            <div class="dropdown d-inline-block">
                                 <button class="btn buttons-collection dropdown-toggle {{ $button['className'] }}" data-bs-toggle="dropdown" tabindex="0" aria-controls="{{ $table->getOption('id') }}" type="button" aria-haspopup="dialog" aria-expanded="false">
                                     {!! $button['text'] !!}
                                 </button>
@@ -80,38 +90,64 @@
                         @if (is_string($defaultButton))
                             @switch($defaultButton)
                                 @case('reload')
-                                        <button class="btn item-action" data-bb-toggle="dt-buttons" data-bb-target=".buttons-reload" tabindex="0" aria-controls="{{ $table->getOption('id') }}" type="button" aria-haspopup="dialog" aria-expanded="false">
+                                    <x-core::button
+                                        type="button"
+                                        data-bb-toggle="dt-buttons"
+                                        data-bb-target=".buttons-reload"
+                                        tabindex="0"
+                                        aria-controls="{{ $table->getOption('id') }}"
+                                        icon="ti ti-refresh"
+                                    >
+                                        {{ trans('core/base::tables.reload') }}
+                                    </x-core::button>
+                                    @break
+                                @case('export')
+                                    <div class="dropdown">
+                                        <button title="{{ trans('core/base::tables.export') }}" class="btn buttons-collection dropdown-toggle buttons-export" data-bs-toggle="dropdown" tabindex="0" aria-controls="{{ $table->getOption('id') }}" type="button" aria-haspopup="dialog" aria-expanded="false">
                                             <span>
-                                                <x-core::icon name="ti ti-refresh" /> {{ trans('core/base::tables.reload') }}
+                                                <x-core::icon name="ti ti-download" /> {{ trans('core/base::tables.export') }}
                                             </span>
                                         </button>
-                                @break
-                                @case('export')
-                                        <div class="dropdown">
-                                            <button class="btn buttons-collection dropdown-toggle buttons-export" data-bs-toggle="dropdown" tabindex="0" aria-controls="{{ $table->getOption('id') }}" type="button" aria-haspopup="dialog" aria-expanded="false">
+                                        <div class="dropdown-menu">
+                                            <button class="dropdown-item" data-bb-toggle="dt-exports" data-bb-target="csv" aria-controls="{{ $table->getOption('id') }}">
                                                 <span>
-                                                    <x-core::icon name="ti ti-download" /> {{ trans('core/base::tables.export') }}
+                                                    <x-core::icon name="ti ti-file-type-csv" /> {{ trans('core/base::tables.csv') }}
                                                 </span>
                                             </button>
-                                            <div class="dropdown-menu">
-                                                <button class="dropdown-item" data-bb-toggle="dt-exports" data-bb-target="csv" aria-controls="{{ $table->getOption('id') }}">
-                                                    <span>
-                                                        <x-core::icon name="ti ti-file-type-csv" /> {{ trans('core/base::tables.csv') }}
-                                                    </span>
-                                                </button>
-                                                <button class="dropdown-item" data-bb-toggle="dt-exports" data-bb-target="excel" aria-controls="{{ $table->getOption('id') }}">
-                                                    <span>
-                                                        <x-core::icon name="ti ti-file-type-xls" /> {{ trans('core/base::tables.excel') }}
-                                                    </span>
-                                                </button>
-                                            </div>
+                                            <button class="dropdown-item" data-bb-toggle="dt-exports" data-bb-target="excel" aria-controls="{{ $table->getOption('id') }}">
+                                                <span>
+                                                    <x-core::icon name="ti ti-file-type-xls" /> {{ trans('core/base::tables.excel') }}
+                                                </span>
+                                            </button>
                                         </div>
-                                @break
+                                    </div>
+                                    @break
                                 @case('visibility')
-                                @break
+                                    @break(! Auth::user() instanceof \Botble\ACL\Models\User || ! AdminHelper::isInAdmin(true))
+
+                                    <div class="dropdown" data-bb-toggle="dt-columns-visibility-dropdown" aria-controls="{{ $table->getOption('id') }}">
+                                        <button title="{{ trans('core/base::tables.toggle_columns') }}" class="btn buttons-collection dropdown-toggle buttons-visibility" data-bs-toggle="dropdown" data-bs-auto-close="outside" tabindex="0" aria-controls="{{ $table->getOption('id') }}" type="button" aria-haspopup="dialog" aria-expanded="false">
+                                            <span>
+                                                <x-core::icon name="ti ti-columns-3" />
+                                            </span>
+                                        </button>
+
+                                        <div class="dropdown-menu p-2">
+                                            <x-core::form :url="route('table.update-columns-visibility')" method="PUT" data-bb-toggle="dt-columns-visibility">
+                                                <input type="hidden" name="table" value="{{ $table::class }}" />
+
+                                                @foreach($table->getColumns() as $column)
+                                                    @php /** @var \Botble\Table\Columns\Column $column */ @endphp
+
+                                                    @continue(Str::contains($column->className, 'no-column-visibility') || in_array($column->name, $table->getDefaultVisibleColumns(), true))
+
+                                                    {{ Form::onOffCheckbox("columns_visibility[{$column->name}]", $table->determineIfColumnIsVisible($column), ['label' => $column->titleAttr ?: $column->title, 'data-bb-toggle' => 'dt-columns-visibility-toggle']) }}
+                                                @endforeach
+                                            </x-core::form>
+                                        </div>
+                                    </div>
+                                    @break
                             @endswitch
-                        @else
-                            @dd($defaultButton)
                         @endif
                     @endforeach
                 </div>
@@ -132,8 +168,12 @@
     </x-core::card>
 </div>
 
+{!! apply_filters(BASE_FILTER_TABLE_AFTER_RENDER, null, $table) !!}
+
 @push('footer')
     @include('core/table::modal')
 
     {!! $dataTable->scripts() !!}
+
+    {!! apply_filters(BASE_FILTER_TABLE_FOOTER_RENDER, null, $table) !!}
 @endpush

@@ -70,6 +70,10 @@
                                 aria-labelledby="{{ $section['id'] }}-tab"
                                 tabindex="0"
                             >
+                                @isset($section['description'])
+                                    <p class="mb-3">{!! BaseHelper::clean($section['description']) !!}</p>
+                                @endisset
+
                                 @foreach (ThemeOption::constructFields($section['id']) as $field)
                                     @if (Arr::get($field, 'type') === 'hidden')
                                         {!! ThemeOption::renderField($field) !!}
@@ -83,7 +87,9 @@
                                             />
                                             {!! ThemeOption::renderField($field) !!}
                                             @if (array_key_exists('helper', $field))
-                                                <small class="form-hint">{!! BaseHelper::clean($field['helper']) !!}</small>
+                                                <x-core::form.helper-text>
+                                                    {!! BaseHelper::clean($field['helper']) !!}
+                                                </x-core::form.helper-text>
                                             @endif
                                         @endif
                                     </x-core::form-group>

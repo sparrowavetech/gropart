@@ -13,6 +13,7 @@ return [
                 'newsletter_name' => 'Full name of user who subscribe newsletter',
                 'newsletter_email' => 'Email of user who subscribe newsletter',
                 'newsletter_unsubscribe_link' => 'Link for unsubscribe newsletter',
+                'newsletter_unsubscribe_url' => 'URL for unsubscribe newsletter',
             ],
         ],
         'admin_email' => [

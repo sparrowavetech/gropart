@@ -3,10 +3,14 @@
 namespace Botble\SeoHelper\Entities;
 
 use Botble\SeoHelper\Contracts\Entities\AnalyticsContract;
+use Botble\Theme\Supports\ThemeSupport;
 
+/**
+ * @deprecated since 7.3.0 use ThemeSupport::renderGoogleTagManagerScript() instead.
+ */
 class Analytics implements AnalyticsContract
 {
-    protected string|null $google = '';
+    protected ?string $google = '';
 
     public function setGoogle($code): static
     {
@@ -29,20 +33,6 @@ class Analytics implements AnalyticsContract
 
     protected function renderGoogleScript(): string
     {
-        if (empty($this->google)) {
-            return '';
-        }
-
-        return <<<EOT
-<!-- Global site tag (gtag.js) - Google Analytics -->
-<script async defer src="https://www.googletagmanager.com/gtag/js?id=$this->google"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', '$this->google');
-</script>
-EOT;
+        return ThemeSupport::renderGoogleTagManagerScript();
     }
 }

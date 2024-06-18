@@ -2,8 +2,8 @@
 
 return [
     [
-        'name' => 'Optimize Settings',
+        'name' => 'Optimize',
         'flag' => 'optimize.settings',
-        'parent_flag' => 'settings.options',
+        'parent_flag' => 'settings.common',
     ],
 ];

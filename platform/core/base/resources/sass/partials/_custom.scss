@@ -1,5 +1,5 @@
-body {
-    font-feature-settings: 'cv03', 'cv04', 'cv11';
+* {
+    scrollbar-width: thin !important;
 }
 
 [data-bs-theme='dark'] {
@@ -26,6 +26,17 @@ body {
 
     .form-check-input[type=checkbox] {
         box-shadow: 0 0 0 0.05rem rgba(255, 255, 255, .5);
+    }
+
+    .permissions-tree {
+        .permissions-item {
+            background-color: var(--bb-bg-forms);
+
+            .permissions-header {
+                background-color: var(--bb-bg-surface);
+                border-bottom: 1px solid var(--bb-bg-surface);
+            }
+        }
     }
 }
 
@@ -337,5 +348,30 @@ small {
 [data-bs-theme=dark] {
     .h1, .h2, .h3, .h4, .h5, .h6, h1, h2, h3, h4, h5, h6 {
         color: inherit;
+    }
+}
+
+.nav-link-title {
+    text-transform: capitalize;
+}
+
+.preview-image-wrapper {
+    &.preview-image-wrapper-not-allow-thumb {
+        .preview-image-inner {
+            .image-box-actions {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+
+                .preview-image {
+                    object-fit: contain;
+                    -o-object-fit: contain;
+                    position: static;
+                    width: auto;
+                    height: auto;
+                    inset: auto;
+                }
+            }
+        }
     }
 }

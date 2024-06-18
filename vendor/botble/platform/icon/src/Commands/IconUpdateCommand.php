@@ -53,7 +53,7 @@ class IconUpdateCommand extends Command
 
         $currentIconsCount = count(File::allFiles($iconsDestination));
 
-        foreach (File::allFiles("$destination/svg") as $file) {
+        foreach (File::allFiles("$destination/svg/outline") as $file) {
             $fileName = $file->getFilename();
 
             File::move($file->getPathname(), "$iconsDestination/$fileName");

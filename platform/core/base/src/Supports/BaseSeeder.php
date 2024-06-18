@@ -13,6 +13,7 @@ use Botble\Media\Models\MediaFile;
 use Botble\Media\Models\MediaFolder;
 use Botble\Setting\Facades\Setting;
 use Carbon\Carbon;
+use Faker\Factory;
 use Faker\Generator;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Database\Seeder;
@@ -34,7 +35,7 @@ class BaseSeeder extends Seeder
 
     protected string $basePath;
 
-    public function uploadFiles(string $folder, string|null $basePath = null): array
+    public function uploadFiles(string $folder, ?string $basePath = null): array
     {
         $folderPath = $basePath ?: $this->getBasePath() . '/' . $folder;
 
@@ -62,7 +63,7 @@ class BaseSeeder extends Seeder
         return $files;
     }
 
-    protected function filePath(string $path, string|null $basePath = null): string
+    protected function filePath(string $path, ?string $basePath = null): string
     {
         $filePath = ($basePath ? sprintf('%s/%s', $basePath, $path) : $this->getBasePath() . '/' . $path);
         $path = str_replace(database_path('seeders/files/'), '', $filePath);
@@ -85,7 +86,7 @@ class BaseSeeder extends Seeder
 
         Setting::forgetAll();
 
-        Setting::forceSet('media_random_hash', md5((string)time()));
+        Setting::forceSet('media_random_hash', md5((string) time()));
 
         Setting::set('api_enabled', 0);
 
@@ -123,7 +124,7 @@ class BaseSeeder extends Seeder
             return $this->faker;
         }
 
-        if (! class_exists(\Faker\Factory::class)) {
+        if (! class_exists(Factory::class)) {
             $this->command->warn('It requires <info>fakerphp/faker</info> to run seeder. Need to run <info>composer install</info> to install it first.');
 
             try {
@@ -160,7 +161,7 @@ class BaseSeeder extends Seeder
         return $this->now;
     }
 
-    protected function removeBaseUrlFromString(string $value): string|null
+    protected function removeBaseUrlFromString(string $value): ?string
     {
         return str_replace(url(''), '', $value);
     }
@@ -185,7 +186,7 @@ class BaseSeeder extends Seeder
         Setting::forceSet($settings)->save();
     }
 
-    protected function getBasePath(): string|null
+    protected function getBasePath(): ?string
     {
         return $this->basePath ?? database_path('seeders/files');
     }

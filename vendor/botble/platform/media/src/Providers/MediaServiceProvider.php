@@ -122,15 +122,15 @@ class MediaServiceProvider extends ServiceProvider
         $config->set([
             'filesystems.default' => $mediaDriver,
             'filesystems.disks.public.throw' => true,
-            'core.media.media.chunk.enabled' => (bool)$setting->get(
+            'core.media.media.chunk.enabled' => (bool) $setting->get(
                 'media_chunk_enabled',
                 $config->get('core.media.media.chunk.enabled')
             ),
-            'core.media.media.chunk.chunk_size' => (int)$setting->get(
+            'core.media.media.chunk.chunk_size' => (int) $setting->get(
                 'media_chunk_size',
                 $config->get('core.media.media.chunk.chunk_size')
             ),
-            'core.media.media.chunk.max_file_size' => (int)$setting->get(
+            'core.media.media.chunk.max_file_size' => (int) $setting->get(
                 'media_max_file_size',
                 $config->get('core.media.media.chunk.max_file_size')
             ),
@@ -145,18 +145,18 @@ class MediaServiceProvider extends ServiceProvider
                     'bucket' => $setting->get('media_aws_bucket', $config->get('filesystems.disks.s3.bucket')),
                     'url' => $setting->get('media_aws_url', $config->get('filesystems.disks.s3.url')),
                     'endpoint' => $setting->get('media_aws_endpoint', $config->get('filesystems.disks.s3.endpoint')) ?: null,
-                    'use_path_style_endpoint' => $config->get('filesystems.disks.s3.use_path_style_endpoint'),
+                    'use_path_style_endpoint' => $setting->get('media_aws_use_path_style_endpoint', $config->get('filesystems.disks.s3.use_path_style_endpoint')),
                 ]);
 
                 break;
             case 'r2':
                 RvMedia::setR2Disk([
-                    'key' => $setting->get('media_r2_access_key_id', $config->get('filesystems.disks.r2.key')),
-                    'secret' => $setting->get('media_r2_secret_key', $config->get('filesystems.disks.r2.secret')),
-                    'bucket' => $setting->get('media_r2_bucket', $config->get('filesystems.disks.r2.bucket')),
-                    'url' => $setting->get('media_r2_url', $config->get('filesystems.disks.r2.url')),
-                    'endpoint' => $setting->get('media_r2_endpoint', $config->get('filesystems.disks.r2.endpoint')) ?: null,
-                    'use_path_style_endpoint' => $config->get('filesystems.disks.s3.use_path_style_endpoint'),
+                    'key' => $setting->get('media_r2_access_key_id'),
+                    'secret' => $setting->get('media_r2_secret_key'),
+                    'bucket' => $setting->get('media_r2_bucket'),
+                    'url' => $setting->get('media_r2_url'),
+                    'endpoint' => $setting->get('media_r2_endpoint') ?: null,
+                    'use_path_style_endpoint' => $setting->get('media_r2_use_path_style_endpoint', false),
                 ]);
 
                 break;
@@ -188,6 +188,7 @@ class MediaServiceProvider extends ServiceProvider
                     'region' => $setting->get('media_do_spaces_default_region'),
                     'bucket' => $setting->get('media_do_spaces_bucket'),
                     'endpoint' => $setting->get('media_do_spaces_endpoint'),
+                    'use_path_style_endpoint' => $setting->get('media_do_use_path_style_endpoint', false),
                 ]);
 
                 break;

@@ -3,10 +3,10 @@
 namespace Botble\Comment\Tables;
 
 use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Base\Facades\Html;
 use Botble\Comment\Repositories\Interfaces\CommentInterface;
 use Botble\Setting\Supports\SettingStore;
 use Botble\Table\Abstracts\TableAbstract;
-use Collective\Html\HtmlFacade as Html;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -90,9 +90,9 @@ class CommentTable extends TableAbstract
 
     protected function storageLatestViewed(): void
     {
-        if ((int)request()->input('start', -1) === 0) {
+        if ((int) request()->input('start', -1) === 0) {
             $latestId = $this->repository->getModel()->latest()->first();
-            if ($latestId && (int)setting('admin-comment_latest_viewed_id', 0) !== $latestId) {
+            if ($latestId && (int) setting('admin-comment_latest_viewed_id', 0) !== $latestId) {
                 app(SettingStore::class)->set('admin-comment_latest_viewed_id', $latestId->id)->save();
             }
         }

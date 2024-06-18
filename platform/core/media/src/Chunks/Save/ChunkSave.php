@@ -140,12 +140,12 @@ class ChunkSave extends AbstractSave
     /**
      * Returns the full file path.
      */
-    public function getChunkFullFilePath(): string|null
+    public function getChunkFullFilePath(): ?string
     {
         return $this->chunkFullFilePath;
     }
 
-    protected function createFullChunkFile(string|null $finalPath): UploadedFile
+    protected function createFullChunkFile(?string $finalPath): UploadedFile
     {
         return new UploadedFile(
             $finalPath,

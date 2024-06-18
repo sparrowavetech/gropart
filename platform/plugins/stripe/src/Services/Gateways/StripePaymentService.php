@@ -14,7 +14,7 @@ use Stripe\Checkout\Session as StripeCheckoutSession;
 
 class StripePaymentService extends StripePaymentAbstract
 {
-    public function makePayment(array $data): string|null
+    public function makePayment(array $data): ?string
     {
         $request = request();
         $this->amount = $data['amount'];
@@ -125,13 +125,17 @@ class StripePaymentService extends StripePaymentAbstract
 
     protected function convertAmount(float $amount): int
     {
+        if (! cms_currency()->getApplicationCurrency()->decimals) {
+            $amount = round($amount);
+        }
+
         $multiplier = StripeHelper::getStripeCurrencyMultiplier($this->currency);
 
         if ($multiplier > 1) {
             $amount = round($amount, 2) * $multiplier;
         }
 
-        return (int)$amount;
+        return (int) $amount;
     }
 
     public function afterMakePayment(string $chargeId, array $data): string
@@ -151,7 +155,7 @@ class StripePaymentService extends StripePaymentAbstract
             'amount' => $data['amount'],
             'currency' => $data['currency'],
             'charge_id' => $chargeId,
-            'order_id' => (array)$data['order_id'],
+            'order_id' => (array) $data['order_id'],
             'customer_id' => Arr::get($data, 'customer_id'),
             'customer_type' => Arr::get($data, 'customer_type'),
             'payment_channel' => STRIPE_PAYMENT_METHOD_NAME,

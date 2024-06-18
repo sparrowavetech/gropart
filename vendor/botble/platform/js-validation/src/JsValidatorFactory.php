@@ -8,6 +8,7 @@ use Botble\JsValidation\Javascript\RuleParser;
 use Botble\JsValidation\Javascript\ValidatorHandler;
 use Botble\JsValidation\Support\DelegatedValidator;
 use Botble\JsValidation\Support\ValidationRuleParserProxy;
+use Botble\Support\Http\Requests\Request;
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Validation\Factory as ValidationFactory;
 use Illuminate\Foundation\Http\FormRequest;
@@ -37,8 +38,12 @@ class JsValidatorFactory
     /**
      * Creates JsValidator instance based on rules and message arrays.
      */
-    public function make(array $rules, array $messages = [], array $customAttributes = [], string|null $selector = null): JavascriptValidator
-    {
+    public function make(
+        array $rules,
+        array $messages = [],
+        array $customAttributes = [],
+        ?string $selector = null
+    ): JavascriptValidator {
         $validator = $this->getValidatorInstance($rules, $messages, $customAttributes);
 
         return $this->validator($validator, $selector);
@@ -90,11 +95,17 @@ class JsValidatorFactory
 
         $rules = method_exists($formRequest, 'rules') ? $formRequest->rules() : [];
 
-        $rules = apply_filters('core_request_rules', $rules, $formRequest);
+        $messages = $formRequest->messages();
 
-        $messages = apply_filters('core_request_messages', $formRequest->messages(), $formRequest);
+        $attributes = $formRequest->attributes();
 
-        $attributes = apply_filters('core_request_attributes', $formRequest->attributes(), $formRequest);
+        if ($formRequest instanceof Request) {
+            $rules = apply_filters('core_request_rules', $rules, $formRequest);
+
+            $messages = apply_filters('core_request_messages', $messages, $formRequest);
+
+            $attributes = apply_filters('core_request_attributes', $attributes, $formRequest);
+        }
 
         $validator = $this->getValidatorInstance($rules, $messages, $attributes);
 
@@ -127,7 +138,7 @@ class JsValidatorFactory
         // @phpstan-ignore-next-line
         $formRequest = $this->app->build($class, $params);
 
-        if ($session = $request->getSession()) {
+        if ($request->hasSession() && $session = $request->getSession()) {
             $formRequest->setLaravelSession($session);
         }
         $formRequest->setUserResolver($request->getUserResolver());
@@ -141,7 +152,7 @@ class JsValidatorFactory
     /**
      * Creates JsValidator instance based on Validator.
      */
-    public function validator(Validator $validator, string|null $selector = null): JavascriptValidator
+    public function validator(Validator $validator, ?string $selector = null): JavascriptValidator
     {
         return $this->jsValidator($validator, $selector);
     }
@@ -149,7 +160,7 @@ class JsValidatorFactory
     /**
      * Creates JsValidator instance based on Validator.
      */
-    protected function jsValidator(Validator $validator, string|null $selector = null): JavascriptValidator
+    protected function jsValidator(Validator $validator, ?string $selector = null): JavascriptValidator
     {
         $remote = ! $this->options['disable_remote_validation'];
         $view = $this->options['view'];
@@ -168,7 +179,7 @@ class JsValidatorFactory
     /**
      * Get and encrypt token from session store.
      */
-    protected function getSessionToken(): string|null
+    protected function getSessionToken(): ?string
     {
         $token = null;
         if ($session = $this->app->__get('session')) {

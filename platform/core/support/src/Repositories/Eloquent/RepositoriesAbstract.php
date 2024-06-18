@@ -213,7 +213,7 @@ abstract class RepositoriesAbstract implements RepositoryInterface
         return $this->applyBeforeExecuteQuery($data, true)->first();
     }
 
-    public function delete(Model $model): bool|null
+    public function delete(Model $model): ?bool
     {
         return $model->delete();
     }
@@ -288,9 +288,9 @@ abstract class RepositoriesAbstract implements RepositoryInterface
         $data = $this->applyBeforeExecuteQuery($data);
 
         if (! empty(Arr::get($args, 'paginate'))) {
-            return $data->paginate((int)$args['paginate']);
+            return $data->paginate((int) $args['paginate']);
         } elseif (! empty(Arr::get($args, 'limit'))) {
-            return $data->limit((int)$args['limit']);
+            return $data->limit((int) $args['limit']);
         }
 
         return $data->get();
@@ -345,7 +345,7 @@ abstract class RepositoriesAbstract implements RepositoryInterface
         if ($params['take'] == 1) {
             $result = $this->applyBeforeExecuteQuery($data, true)->first();
         } elseif ($params['take'] && $params['take'] > 0) {
-            $result = $this->applyBeforeExecuteQuery($data)->take((int)$params['take'])->get();
+            $result = $this->applyBeforeExecuteQuery($data)->take((int) $params['take'])->get();
         } elseif ($params['paginate']['per_page']) {
             $paginateType = 'paginate';
 
@@ -355,9 +355,9 @@ abstract class RepositoriesAbstract implements RepositoryInterface
 
             $originalModel = $this->originalModel instanceof BaseQueryBuilder ? $this->originalModel->getModel() : $this->originalModel;
 
-            $perPage = (int)Arr::get($params, 'paginate.per_page') ?: 10;
+            $perPage = (int) Arr::get($params, 'paginate.per_page') ?: 10;
 
-            $currentPage = (int)Arr::get($params, 'paginate.current_paged', 1) ?: 1;
+            $currentPage = (int) Arr::get($params, 'paginate.current_paged', 1) ?: 1;
 
             $result = $this->applyBeforeExecuteQuery($data)
                 ->$paginateType(

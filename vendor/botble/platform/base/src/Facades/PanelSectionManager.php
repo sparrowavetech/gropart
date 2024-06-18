@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static static setGroupName(string $name)
  * @method static string getGroupName()
  * @method static static default()
+ * @method static static moveGroup(string $from, string $to)
  * @method static static register(array|string|\Closure $panelSections)
  * @method static array getAllSections()
  * @method static array getSections()

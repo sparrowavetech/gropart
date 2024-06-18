@@ -26,7 +26,7 @@ abstract class IconDriver
 
     abstract public function has(string $name): bool;
 
-    public function setIconpath(string $path): static
+    public function setIconPath(string $path): static
     {
         $this->iconPath = $path;
 
@@ -43,7 +43,7 @@ abstract class IconDriver
         $attributes = $this->formatAttributes($attributes);
 
         return collect($attributes)
-            ->map(function (string|null $value, string|int $key) {
+            ->map(function (?string $value, string|int $key) {
                 if (is_int($key)) {
                     return $value;
                 }

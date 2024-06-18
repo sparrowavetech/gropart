@@ -17,7 +17,7 @@ class SettingSeeder extends BaseSeeder
         $settings = [
             'show_admin_bar' => '1',
             'theme' => Theme::getThemeName(),
-            'media_random_hash' => md5((string)time()),
+            'media_random_hash' => md5((string) time()),
             'admin_favicon' => 'general/favicon.png',
             'admin_logo' => 'general/logo-light.png',
             SlugHelper::getPermalinkSettingKey(Post::class) => 'blog',

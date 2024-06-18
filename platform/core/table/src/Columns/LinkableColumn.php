@@ -55,7 +55,7 @@ class LinkableColumn extends FormattedColumn implements FormattedColumnContract
         return $this;
     }
 
-    public function getUrl($value): string|null
+    public function getUrl($value): ?string
     {
         if (isset($this->urlUsingCallback)) {
             return call_user_func($this->urlUsingCallback, $this);
@@ -81,7 +81,7 @@ class LinkableColumn extends FormattedColumn implements FormattedColumnContract
         return $this;
     }
 
-    public function getPermission(): string|null
+    public function getPermission(): ?string
     {
         if (isset($this->permission)) {
             return $this->permission;
@@ -90,7 +90,7 @@ class LinkableColumn extends FormattedColumn implements FormattedColumnContract
         return null;
     }
 
-    public function formattedValue($value): string|null
+    public function formattedValue($value): ?string
     {
         $item = $this->getItem();
 
@@ -111,7 +111,7 @@ class LinkableColumn extends FormattedColumn implements FormattedColumnContract
             return $valueTruncated ?: null;
         }
 
-        $attributes = ['title' => $value];
+        $attributes = ['title' => $this->getOriginalValue()];
         $link = $valueTruncated;
 
         if ($this->externalLink) {

@@ -2,12 +2,12 @@
 
 namespace Botble\Comment\Supports;
 
-use BaseHelper;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Models\BaseModel;
 use Botble\Comment\Models\CommentUser;
-use Hash;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Hash;
 
 class BbComment
 {
@@ -32,7 +32,7 @@ class BbComment
         return true;
     }
 
-    public function getVersion(): string|null
+    public function getVersion(): ?string
     {
         $content = BaseHelper::getFileData(plugin_path('comment/plugin.json'));
 
@@ -69,10 +69,10 @@ class BbComment
             return true;
         }
 
-        return (bool)$user;
+        return (bool) $user;
     }
 
-    public function getCurrentUser(): Authenticatable|null
+    public function getCurrentUser(): ?Authenticatable
     {
         return auth(COMMENT_GUARD)->user();
     }

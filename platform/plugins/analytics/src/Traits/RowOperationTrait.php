@@ -4,11 +4,11 @@ namespace Botble\Analytics\Traits;
 
 trait RowOperationTrait
 {
-    public bool|null $keepEmptyRows = null;
+    public ?bool $keepEmptyRows = null;
 
-    public int|null $limit = null;
+    public ?int $limit = null;
 
-    public int|null $offset = null;
+    public ?int $offset = null;
 
     public function keepEmptyRows(bool $keepEmptyRows = false): self
     {

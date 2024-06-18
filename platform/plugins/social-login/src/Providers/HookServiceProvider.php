@@ -17,7 +17,7 @@ class HookServiceProvider extends ServiceProvider
         });
     }
 
-    public function addLoginOptions(string|null $html, string $module): string|null
+    public function addLoginOptions(?string $html, string $module): ?string
     {
         if (! SocialService::setting('enable') || ! SocialService::isSupportedModule($module)) {
             return $html;

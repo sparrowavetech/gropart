@@ -2,6 +2,7 @@
 
 namespace Botble\SeoHelper;
 
+use Botble\Base\Facades\BaseHelper;
 use Botble\SeoHelper\Contracts\Entities\AnalyticsContract;
 use Botble\SeoHelper\Contracts\Entities\DescriptionContract;
 use Botble\SeoHelper\Contracts\Entities\MiscTagsContract;
@@ -43,10 +44,12 @@ class SeoMeta implements SeoMetaContract
      * The Analytics instance.
      *
      * @var AnalyticsContract
+     *
+     * @deprecated since 7.3.0 use ThemeSupport::renderGoogleTagManagerScript() instead.
      */
     protected $analytics;
 
-    protected string|null $currentUrl = null;
+    protected ?string $currentUrl = null;
 
     /**
      * Make SeoMeta instance.
@@ -58,7 +61,6 @@ class SeoMeta implements SeoMetaContract
         $this->misc(new Entities\MiscTags());
         $this->webmasters(new Entities\Webmasters());
         $this->analytics(new Entities\Analytics());
-        $this->setGoogle(setting('google_analytics'));
     }
 
     /**
@@ -123,6 +125,8 @@ class SeoMeta implements SeoMetaContract
      * @param AnalyticsContract $analytics
      *
      * @return $this
+     *
+     * @deprecated since 7.3.0 use ThemeSupport::renderGoogleTagManagerScript() instead.
      */
     protected function analytics(AnalyticsContract $analytics)
     {
@@ -156,6 +160,11 @@ class SeoMeta implements SeoMetaContract
         }
 
         return $this->title->getTitle();
+    }
+
+    public function getTitleOnly(): ?string
+    {
+        return $this->title->getTitleOnly();
     }
 
     /**
@@ -193,6 +202,8 @@ class SeoMeta implements SeoMetaContract
      */
     public function setDescription($content)
     {
+        $content = BaseHelper::cleanShortcodes($content);
+
         $this->description->set($content);
 
         return $this;

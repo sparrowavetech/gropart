@@ -3,9 +3,9 @@
 namespace Botble\Comment\Http\Controllers\AJAX;
 
 use App\Http\Controllers\Controller;
-use Botble\Comment\Facades\BbComment;
 use Botble\ACL\Traits\RegistersUsers;
 use Botble\Base\Http\Responses\BaseHttpResponse;
+use Botble\Comment\Facades\BbComment;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;

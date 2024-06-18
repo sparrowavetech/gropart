@@ -5,6 +5,6 @@
     "provider": "Botble\\Shippo\\Providers\\ShippoServiceProvider",
     "author": "Botble Technologies",
     "url": "https://botble.com",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Multi-Carrier Shippo Shipping Rates & Address Validation for Ecommerce"
 }

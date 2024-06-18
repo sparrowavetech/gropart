@@ -16,6 +16,11 @@ use Illuminate\Support\Facades\Facade;
  * @method static string reCaptchaType()
  * @method static array attributes()
  * @method static array scores()
+ * @method static static registerFormSupport(string $form, string $request, string $title)
+ * @method static array getFormsSupport()
+ * @method static string|null formByRequest(string $request)
+ * @method static string formSettingKey(string $form, string $key)
+ * @method static mixed|null formSetting(string $form, string $key, mixed|null $default = false)
  *
  * @see \Botble\Captcha\Contracts\Captcha
  */

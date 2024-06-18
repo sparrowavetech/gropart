@@ -35,8 +35,8 @@ class LanguageMeta extends BaseModel
 
     public static function saveMetaData(
         BaseModel $model,
-        string|null $locale = null,
-        string|null $originValue = null
+        ?string $locale = null,
+        ?string $originValue = null
     ): void {
         if (! $locale) {
             $locale = LanguageFacade::getDefaultLocaleCode();

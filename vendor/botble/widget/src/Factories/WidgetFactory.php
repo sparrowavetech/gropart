@@ -35,7 +35,7 @@ class WidgetFactory extends AbstractWidgetFactory
         return $this->convertToViewExpression($this->getContent());
     }
 
-    protected function getContent(): string|null
+    protected function getContent(): ?string
     {
         $content = $this->app->call([$this->widget, 'run'], $this->widgetParams);
 

@@ -76,6 +76,11 @@ Route::group(['namespace' => 'Botble\Base\Http\Controllers'], function () {
             'middleware' => 'preventDemo',
         ]);
 
+        Route::get('system/cronjob', [
+            'as' => 'system.cronjob',
+            'uses' => 'CronjobSettingController@index',
+        ]);
+
         Route::group(['permission' => false], function () {
             Route::post('membership/authorize', [
                 'as' => 'membership.authorize',

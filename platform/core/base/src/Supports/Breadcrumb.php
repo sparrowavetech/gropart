@@ -93,7 +93,7 @@ class Breadcrumb implements Htmlable
         foreach ($arMenu as $menuCategory) {
             if ((
                 $url == $menuCategory['url']
-                    || (Str::contains((string)$menuCategory['url'], $prefix) && $prefix != '//')
+                    || (Str::contains((string) $menuCategory['url'], $prefix) && $prefix != '//')
             )
                 && ! empty($menuCategory['name'])
             ) {
@@ -114,7 +114,7 @@ class Breadcrumb implements Htmlable
                     if (
                         (
                             $url == $menuItem['url']
-                            || (Str::contains((string)$menuItem['url'], $prefix) && $prefix != '//')
+                            || (Str::contains((string) $menuItem['url'], $prefix) && $prefix != '//')
                         )
                         && ! empty($menuItem['name'])
                     ) {

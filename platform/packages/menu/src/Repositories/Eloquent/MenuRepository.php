@@ -9,7 +9,7 @@ use Botble\Support\Repositories\Eloquent\RepositoriesAbstract;
 
 class MenuRepository extends RepositoriesAbstract implements MenuInterface
 {
-    public function findBySlug(string $slug, bool $active, array $select = [], array $with = []): BaseModel|null
+    public function findBySlug(string $slug, bool $active, array $select = [], array $with = []): ?BaseModel
     {
         $data = $this->model->where('slug', $slug);
 

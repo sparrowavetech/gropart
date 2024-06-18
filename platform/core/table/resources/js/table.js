@@ -327,36 +327,9 @@
         })
     }
 
-    if (typeof DataTable.ext.buttons.colvis !== 'undefined') {
-        $.extend(DataTable.ext.buttons.colvis, {
-            text: (dt) => {
-                return `<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                    <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"></path>
-                    <path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6"></path>
-                </svg>
-                ${dt.i18n('buttons.colvis', 'Column visibility')}`
-            },
-        })
-        $.extend(DataTable.ext.buttons.columnVisibility, {
-            _columnText: function (b, a) {
-                let c = b.column(a.columns).index(),
-                    d = b.settings()[0].aoColumns[c].titleAttr || b.settings()[0].aoColumns[c].sTitle
-                d || (d = b.column(c).header().innerHTML)
-                d = d
-                    .replace(/\n/g, ' ')
-                    .replace(/<br\s*\/?>/gi, ' ')
-                    .replace(/<select(.*?)<\/select>/g, '')
-                    .replace(/<!\-\-.*?\-\->/g, '')
-                    .replace(/<.*?>/g, '')
-                    .replace(/^\s+|\s+$/g, '')
-                return a.columnText ? a.columnText(b, c, d) : d
-            },
-        })
-    }
-
     class TableManagement {
         constructor() {
+            this.currentTableHash = window.DATATABLES_RANDOM_HASH || ""
             this.init()
             this.handleActionsRow()
             this.handleActionsExport()
@@ -427,6 +400,26 @@
                     window.location.href = url
                 }
             })
+
+            this.initRandomHash()
+        }
+
+        initRandomHash() {
+            let localRandomHash = localStorage.getItem('DataTables_Random_Hash')
+
+            if (! localRandomHash && ! this.currentTableHash) {
+                return;
+            }
+
+            if (localRandomHash !== this.currentTableHash) {
+                Object.keys(localStorage).filter(key => key.startsWith('DataTables_')).forEach(key => {
+                    localStorage.removeItem(key)
+                })
+
+                localStorage.setItem('DataTables_Random_Hash', this.currentTableHash)
+
+                window.location.reload()
+            }
         }
 
         handleActionsRow() {
@@ -440,8 +433,6 @@
                 if (!url) {
                     url = _self.prop('href')
                 }
-
-                console.log(url)
 
                 $('.delete-crud-entry').data('section', url).data('parent-table', _self.closest('.table').prop('id'))
                 $('.modal-confirm-delete').modal('show')
@@ -778,8 +769,6 @@
                 const tableId = target.attr('aria-controls')
                 const buttonTarget = target.data('bb-target')
 
-                console.log(`${buttonTarget}[aria-controls="${tableId}"]`)
-
                 $(`${buttonTarget}[aria-controls="${tableId}"]`).trigger('click')
             })
 
@@ -794,6 +783,44 @@
                 let params = _buildParams(dt, value)
 
                 _downloadFromUrl(url, params)
+            })
+
+            const $columsVisibleDropdowns = document.querySelectorAll('[data-bb-toggle="dt-columns-visibility-dropdown"]')
+
+            let $formDirty = {}
+
+            if ($columsVisibleDropdowns.length) {
+                for (const $dropdown of $columsVisibleDropdowns) {
+                    $dropdown.addEventListener('hidden.bs.dropdown', function (event) {
+                        const target = $(event.currentTarget)
+                        const tableId = target.attr('aria-controls')
+                        const form = target.find('form[data-bb-toggle="dt-columns-visibility"]')
+
+                        if (! $formDirty[tableId]) {
+                            return
+                        }
+
+                        $httpClient
+                            .make()
+                            .putForm(form.prop('action'), new FormData(form[0]))
+                            .then(() => {
+                                const dt = window.LaravelDataTables[tableId]
+
+                                dt.state.clear()
+
+                                location.reload()
+
+                                $formDirty[tableId] = false
+                            })
+                    })
+                }
+            }
+
+            $(document).on('change', '[data-bb-toggle="dt-columns-visibility-toggle"]', (event) => {
+                const target = $(event.currentTarget).closest('.dropdown')
+                const tableId = target.attr('aria-controls')
+
+                $formDirty[tableId] = true
             })
         }
 

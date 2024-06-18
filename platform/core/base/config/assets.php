@@ -7,7 +7,7 @@
 return [
     'offline' => env('ASSETS_OFFLINE', true),
     'enable_version' => env('ASSETS_ENABLE_VERSION', true),
-    'version' => env('ASSETS_VERSION', get_cms_version()),
+    'version' => env('ASSETS_VERSION'),
     'scripts' => [
         'core-ui',
         'excanvas',
@@ -155,6 +155,14 @@ return [
                     'local' => '/vendor/core/core/base/libraries/jquery-tree/jquery.tree.min.js',
                 ],
             ],
+            'jqueryTreeView' => [
+                'use_cdn' => false,
+                'location' => 'footer',
+                'include_style' => true,
+                'src' => [
+                    'local' => '/vendor/core/core/base/libraries/jquery-treeview/jquery.treeview.min.js',
+                ],
+            ],
             'bootstrap-editable' => [
                 'use_cdn' => true,
                 'location' => 'footer',
@@ -176,7 +184,7 @@ return [
                 'location' => 'footer',
                 'src' => [
                     'local' => '/vendor/core/core/base/libraries/fancybox/jquery.fancybox.min.js',
-                    'cdn' => '//cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js',
+                    'cdn' => '//fastly.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js',
                 ],
             ],
             'fslightbox' => [
@@ -184,7 +192,7 @@ return [
                 'location' => 'footer',
                 'src' => [
                     'local' => '/vendor/core/core/base/libraries/fslightbox.js',
-                    'cdn' => '//cdn.jsdelivr.net/npm/fslightbox@3.4.1/index.min.js',
+                    'cdn' => '//fastly.jsdelivr.net/npm/fslightbox@3.4.1/index.min.js',
                 ],
             ],
             'datatables' => [
@@ -197,7 +205,6 @@ return [
                         '/vendor/core/core/base/libraries/datatables/extensions/Buttons/js/dataTables.buttons.min.js',
                         '/vendor/core/core/base/libraries/datatables/extensions/Buttons/js/buttons.bootstrap.min.js',
                         '/vendor/core/core/base/libraries/datatables/extensions/Responsive/js/dataTables.responsive.min.js',
-                        '/vendor/core/core/base/libraries/datatables/extensions/Buttons/js/buttons.colVis.min.js',
                     ],
                 ],
             ],
@@ -239,7 +246,7 @@ return [
                 'location' => 'footer',
                 'src' => [
                     'local' => '/vendor/core/core/base/libraries/flatpickr/flatpickr.min.js',
-                    'cdn' => '//cdn.jsdelivr.net/npm/flatpickr',
+                    'cdn' => '//fastly.jsdelivr.net/npm/flatpickr',
                 ],
             ],
             'sortable' => [
@@ -347,7 +354,7 @@ return [
                 'location' => 'footer',
                 'src' => [
                     'local' => '/vendor/core/core/base/libraries/coloris/coloris.min.js',
-                    'cdn' => '//cdn.jsdelivr.net/gh/mdbassit/Coloris@latest/dist/coloris.min.js',
+                    'cdn' => '//fastly.jsdelivr.net/gh/mdbassit/Coloris@latest/dist/coloris.min.js',
                 ],
             ],
             'tagify' => [
@@ -387,6 +394,13 @@ return [
                 'location' => 'footer',
                 'src' => [
                     'local' => '/vendor/core/core/base/libraries/jquery-tree/jquery.tree.min.css',
+                ],
+            ],
+            'jqueryTreeView' => [
+                'use_cdn' => false,
+                'location' => 'footer',
+                'src' => [
+                    'local' => '/vendor/core/core/base/libraries/jquery-treeview/jquery.treeview.min.css',
                 ],
             ],
             'jquery-ui' => [
@@ -452,7 +466,7 @@ return [
                 'location' => 'header',
                 'src' => [
                     'local' => '/vendor/core/core/base/libraries/flatpickr/flatpickr.min.css',
-                    'cdn' => '//cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css',
+                    'cdn' => '//fastly.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css',
                 ],
             ],
             'jquery-nestable' => [
@@ -478,7 +492,7 @@ return [
                 'location' => 'header',
                 'src' => [
                     'local' => '/vendor/core/core/base/libraries/fancybox/jquery.fancybox.min.css',
-                    'cdn' => '//cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css',
+                    'cdn' => '//fastly.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css',
                 ],
             ],
             'custom-scrollbar' => [
@@ -529,7 +543,7 @@ return [
                 'location' => 'header',
                 'src' => [
                     'local' => '/vendor/core/core/base/libraries/coloris/coloris.min.css',
-                    'cdn' => '//cdn.jsdelivr.net/gh/mdbassit/Coloris@latest/dist/coloris.min.css',
+                    'cdn' => '//fastly.jsdelivr.net/gh/mdbassit/Coloris@latest/dist/coloris.min.css',
                 ],
             ],
             'tagify' => [

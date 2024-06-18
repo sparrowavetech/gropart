@@ -18,6 +18,7 @@ class MediaSettingRequest extends Request
             'media_aws_default_region' => ['nullable', 'string', 'required_if:media_driver,s3'],
             'media_aws_bucket' => ['nullable', 'string', 'required_if:media_driver,s3'],
             'media_aws_url' => ['nullable', 'string', 'required_if:media_driver,s3'],
+            'media_aws_use_path_style_endpoint' => ['nullable', 'numeric', 'in:0,1', 'required_if:media_driver,s3'],
 
             'media_r2_access_key_id' => ['nullable', 'string', 'required_if:media_driver,r2'],
             'media_r2_secret_key' => ['nullable', 'string', 'required_if:media_driver,r2'],
@@ -58,14 +59,14 @@ class MediaSettingRequest extends Request
             'media_image_processing_library' => ['nullable', 'in:gd,imagick'],
             'media_watermark_source' => ['nullable', 'string', 'required_if:media_watermark_enabled,1'],
             'media_watermark_size' => ['nullable', 'numeric', 'min:0', 'required_if:media_watermark_enabled,1'],
-            'watermark_opacity' => ['nullable', 'numeric', 'min:0', 'max:100', 'required_if:media_watermark_enabled,1'],
+            'media_watermark_opacity' => ['nullable', 'numeric', 'min:0', 'max:100', 'required_if:media_watermark_enabled,1'],
             'media_watermark_position' => [
                 'nullable',
                 Rule::in(['top-left', 'top-right', 'bottom-left', 'bottom-right', 'center']),
                 'required_if:media_watermark_enabled,1',
             ],
-            'watermark_position_x' => ['nullable', 'numeric', 'min:0', 'required_if:media_watermark_enabled,1'],
-            'watermark_position_y' => ['nullable', 'numeric', 'min:0', 'required_if:media_watermark_enabled,1'],
+            'media_watermark_position_x' => ['nullable', 'numeric', 'min:0', 'required_if:media_watermark_enabled,1'],
+            'media_watermark_position_y' => ['nullable', 'numeric', 'min:0', 'required_if:media_watermark_enabled,1'],
         ];
 
         foreach (array_keys(RvMedia::getSizes()) as $size) {

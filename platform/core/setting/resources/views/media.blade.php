@@ -14,5 +14,7 @@
         :submit-button-attrs="['id' => 'generate-thumbnails-button']"
         :has-form="true"
         :form-action="route('settings.media.generate-thumbnails')"
+        :data-total-files="0"
+        :data-chunk-limit="RvMedia::getConfig('generate_thumbnails_chunk_limit')"
     />
 @endpush

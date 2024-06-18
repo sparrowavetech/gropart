@@ -34,7 +34,7 @@ interface RepositoryInterface
 
     public function createOrUpdate($data, array $condition = []);
 
-    public function delete(Model $model): bool|null;
+    public function delete(Model $model): ?bool;
 
     public function firstOrCreate(array $data, array $with = []);
 

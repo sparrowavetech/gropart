@@ -6,7 +6,7 @@ interface SslCommerzInterface
 {
     public function makePayment(array $requestData);
 
-    public function orderValidate(array|null $postData, string $transactionId, float $amount, string $currency = 'BDT');
+    public function orderValidate(?array $postData, string $transactionId, float $amount, string $currency = 'BDT');
 
     public function setParams(array $data);
 

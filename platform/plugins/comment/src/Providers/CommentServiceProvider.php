@@ -2,6 +2,7 @@
 
 namespace Botble\Comment\Providers;
 
+use Botble\Base\Facades\EmailHandler;
 use Botble\Base\Supports\Helper;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Blog\Models\Post;
@@ -19,7 +20,6 @@ use Botble\Comment\Repositories\Interfaces\CommentInterface;
 use Botble\Comment\Repositories\Interfaces\CommentLikeInterface;
 use Botble\Comment\Repositories\Interfaces\CommentRecommendInterface;
 use Botble\Page\Models\Page;
-use EmailHandler;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Routing\Events\RouteMatched;
@@ -71,7 +71,7 @@ class CommentServiceProvider extends ServiceProvider
             if (is_plugin_active('blog')) {
                 Post::resolveRelationUsing('comments', function ($model) {
                     return $model->morphMany(Comment::class, 'reference');
-                });   
+                });
             }
 
             Page::resolveRelationUsing('comments', function ($model) {

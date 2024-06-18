@@ -26,7 +26,7 @@ class MediaFileRepository extends RepositoriesAbstract implements MediaFileInter
         return MediaFile::createName($name, $folder);
     }
 
-    public function createSlug(string $name, string $extension, string|null $folderPath): string
+    public function createSlug(string $name, string $extension, ?string $folderPath): string
     {
         return MediaFile::createSlug($name, $extension, $folderPath);
     }
@@ -52,6 +52,7 @@ class MediaFileRepository extends RepositoriesAbstract implements MediaFileInter
                 'media_files.updated_at as updated_at',
                 'media_files.options as options',
                 'media_files.folder_id as folder_id',
+                'media_files.visibility as visibility',
                 DB::raw('0 as is_folder'),
                 DB::raw('NULL as slug'),
                 DB::raw('NULL as parent_id'),
@@ -84,6 +85,7 @@ class MediaFileRepository extends RepositoriesAbstract implements MediaFileInter
                     'media_folders.updated_at as updated_at',
                     DB::raw('NULL as options'),
                     DB::raw('NULL as folder_id'),
+                    DB::raw('NULL as visibility'),
                     DB::raw('1 as is_folder'),
                     'media_folders.slug as slug',
                     'media_folders.parent_id as parent_id',
@@ -266,6 +268,7 @@ class MediaFileRepository extends RepositoriesAbstract implements MediaFileInter
                 'media_files.updated_at as updated_at',
                 'media_files.options as options',
                 'media_files.folder_id as folder_id',
+                'media_files.visibility as visibility',
                 DB::raw('0 as is_folder'),
                 DB::raw('NULL as slug'),
                 DB::raw('NULL as parent_id'),
@@ -295,6 +298,7 @@ class MediaFileRepository extends RepositoriesAbstract implements MediaFileInter
                     'media_folders.updated_at as updated_at',
                     DB::raw('NULL as options'),
                     DB::raw('NULL as folder_id'),
+                    DB::raw('NULL as visibility'),
                     DB::raw('1 as is_folder'),
                     'media_folders.slug as slug',
                     'media_folders.parent_id as parent_id',

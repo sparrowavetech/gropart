@@ -21,10 +21,22 @@
         {{ $contact->created_at->translatedFormat('d M Y H:i:s') }}
     </x-core::datagrid.item>
 
-    <x-core::datagrid.item>
-        <x-slot:title>{{ trans('plugins/contact::contact.tables.address') }}</x-slot:title>
-        {{ $contact->address ?: 'N/A' }}
-    </x-core::datagrid.item>
+    @if($contact->address)
+        <x-core::datagrid.item>
+            <x-slot:title>{{ trans('plugins/contact::contact.tables.address') }}</x-slot:title>
+            {{ $contact->address }}
+        </x-core::datagrid.item>
+    @endif
+
+    @if($contact->custom_fields)
+        @foreach($contact->custom_fields as $key => $value)
+            @continue(blank($value))
+            <x-core::datagrid.item>
+                <x-slot:title>{{ $key }}</x-slot:title>
+                {{ $value }}
+            </x-core::datagrid.item>
+        @endforeach
+    @endif
 
     @if ($contact->subject)
         <x-core::datagrid.item>

@@ -25,7 +25,7 @@ class PageTitle
         $this->title = $title;
     }
 
-    public function getTitle(bool $withSiteName = true): string|null
+    public function getTitle(bool $withSiteName = true): ?string
     {
         $siteName = $this->siteName ?? setting('admin_title', config('core.base.general.base_name'));
 

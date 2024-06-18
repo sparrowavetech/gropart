@@ -2,6 +2,7 @@
 
 return [
     'name' => 'Newsletters',
+    'newsletter_form' => 'Newsletters form',
     'description' => 'View and delete newsletter subscribers',
     'settings' => [
         'email' => [

@@ -24,24 +24,32 @@ class HookServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
-        add_action(BASE_ACTION_META_BOXES, [$this, 'addLanguageBox'], 1134, 2);
-        add_action(BASE_ACTION_TOP_FORM_CONTENT_NOTIFICATION, [$this, 'addCurrentLanguageEditingAlert'], 1134, 3);
-        add_action(BASE_ACTION_BEFORE_EDIT_CONTENT, [$this, 'getCurrentAdminLanguage'], 1134, 2);
-        add_action(BASE_ACTION_META_BOXES, [$this, 'customizeMetaBoxes'], 10, 2);
+        if (! $this->app->runningInConsole()) {
+            add_action(BASE_ACTION_META_BOXES, [$this, 'addLanguageBox'], 1134, 2);
+            add_action(BASE_ACTION_TOP_FORM_CONTENT_NOTIFICATION, [$this, 'addCurrentLanguageEditingAlert'], 1134, 3);
+            add_action(BASE_ACTION_BEFORE_EDIT_CONTENT, [$this, 'getCurrentAdminLanguage'], 1134, 2);
+            add_action(BASE_ACTION_META_BOXES, [$this, 'customizeMetaBoxes'], 10, 2);
 
-        add_filter(BASE_FILTER_TABLE_HEADINGS, [$this, 'addLanguageTableHeading'], 1134, 2);
-        add_filter(BASE_FILTER_GET_LIST_DATA, [$this, 'addLanguageColumn'], 1134, 2);
-        add_filter(BASE_FILTER_BEFORE_GET_FRONT_PAGE_ITEM, [$this, 'checkItemLanguageBeforeShow'], 1134, 2);
-        add_filter(BASE_FILTER_BEFORE_GET_ADMIN_LIST_ITEM, [$this, 'checkItemLanguageBeforeGetAdminListItem'], 50, 2);
+            add_filter(BASE_FILTER_TABLE_HEADINGS, [$this, 'addLanguageTableHeading'], 1134, 2);
+            add_filter(BASE_FILTER_GET_LIST_DATA, [$this, 'addLanguageColumn'], 1134, 2);
+            add_filter(BASE_FILTER_BEFORE_GET_FRONT_PAGE_ITEM, [$this, 'checkItemLanguageBeforeShow'], 1134, 2);
+            add_filter(BASE_FILTER_BEFORE_GET_ADMIN_LIST_ITEM, [$this, 'checkItemLanguageBeforeGetAdminListItem'], 50, 2);
+            add_filter('setting_permalink_meta_boxes', [$this, 'addPermalinkMetaBox'], 1134, 2);
+        }
+
         add_filter('stored_meta_box_key', [$this, 'storeMetaBoxKey'], 1134, 2);
         add_filter('slug_helper_get_slug_query', [$this, 'getSlugQuery'], 1134, 2);
-        add_filter('setting_permalink_meta_boxes', [$this, 'addPermalinkMetaBox'], 1134, 2);
         add_filter(['model_after_execute_get', 'model_after_execute_paginate'], function ($data, BaseModel $model) {
+
+            if ($model instanceof LanguageModel) {
+                return $data;
+            }
+
             if (
                 is_plugin_active('language') &&
                 is_plugin_active('language-advanced') &&
-                Language::getCurrentLocaleCode() != Language::getDefaultLocaleCode() &&
-                LanguageAdvancedManager::isSupported($model)
+                LanguageAdvancedManager::isSupported($model) &&
+                Language::getCurrentLocaleCode() != Language::getDefaultLocaleCode()
             ) {
                 $data->loadMissing('translations');
             }
@@ -75,7 +83,7 @@ class HookServiceProvider extends ServiceProvider
         }
     }
 
-    public function languageMetaField(): string|null
+    public function languageMetaField(): ?string
     {
         $languages = Language::getActiveLanguage([
             'lang_code',
@@ -156,11 +164,15 @@ class HookServiceProvider extends ServiceProvider
                 $language = LanguageModel::query()->where('lang_code', $code)->value('lang_name');
             }
 
+            if (! $language) {
+                $language = Language::getDefaultLanguage(['lang_name'])->lang_name;
+            }
+
             echo view('plugins/language::partials.notification', compact('language'))->render();
         }
     }
 
-    public function getCurrentAdminLanguage(Request $request, Model|string|null $data = null): string|null
+    public function getCurrentAdminLanguage(Request $request, Model|string|null $data = null): ?string
     {
         $code = null;
         if ($refLang = Language::getRefLang()) {
@@ -251,7 +263,7 @@ class HookServiceProvider extends ServiceProvider
     protected function getDataByCurrentLanguageCode(
         $query,
         Model|string|null $model,
-        string|null $currentLocale
+        ?string $currentLocale
     ): Builder|EloquentBuilder|Model {
         if ($query instanceof Builder || $query instanceof EloquentBuilder) {
             $model = $query->getModel();
@@ -274,10 +286,10 @@ class HookServiceProvider extends ServiceProvider
     {
         $model = $form->getModel();
 
-        if (! $model instanceof BaseModel
+        if (
+            ! $model instanceof BaseModel
             || ! $model->getKey()
             || ! is_in_admin()
-            || ! Language::getRefLang()
             || Language::getCurrentAdminLocaleCode() === Language::getDefaultLocaleCode()
             || ! LanguageAdvancedManager::isSupported($model)) {
             return $form;
@@ -292,9 +304,21 @@ class HookServiceProvider extends ServiceProvider
         }
 
         $columns = LanguageAdvancedManager::getTranslatableColumns($model);
+
+        $columns = [
+            ...$columns,
+            'submit',
+            'save',
+            'save_and_continue',
+        ];
+
         foreach ($form->getFields() as $key => $field) {
             if (! in_array($key, $columns)) {
-                $form->remove($key);
+                $field = $form->getField($key);
+
+                if ($field->getType() !== 'hidden') {
+                    $form->remove($key);
+                }
             }
         }
 
@@ -306,14 +330,13 @@ class HookServiceProvider extends ServiceProvider
 
         return $form
             ->setFormOption('url', route('language-advanced.save', $model->getKey()) . $refLang)
-            ->add('model', 'hidden', ['value' => get_class($model)]);
+            ->add('model', 'hidden', ['value' => $model::class]);
     }
 
     public function customizeMetaBoxes(string $context, array|string|Model|null $object = null): void
     {
         if (
             is_in_admin() &&
-            Language::getRefLang() &&
             Language::getCurrentAdminLocaleCode() != Language::getDefaultLocaleCode() &&
             LanguageAdvancedManager::isSupported($object)
         ) {
@@ -363,7 +386,7 @@ class HookServiceProvider extends ServiceProvider
         }
     }
 
-    public function addPermalinkMetaBox(string|null $data, array $params = []): string
+    public function addPermalinkMetaBox(?string $data, array $params = []): string
     {
         $languages = Language::getActiveLanguage(['lang_id', 'lang_name', 'lang_code', 'lang_flag']);
 

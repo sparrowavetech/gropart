@@ -1,35 +1,23 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8" />
-    <meta name="robots" content="noindex,nofollow,noarchive" />
-    <title>{{ __('Maintenance mode') }}</title>
-    <style>
-        body {
-            background-color: #fff;
-            color: #222;
-            font: 16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            margin: 0;
-        }
-        .container {
-            margin: 30px;
-            max-width: 600px;
-        }
-        h1 {
-            color: #dc3545;
-            font-size: 24px;
-        }
-    </style>
-</head>
-<body>
-<div class="container">
-    <h1>{{ __('Maintenance mode') }}</h1>
-    <p>{{ __('Sorry, we are doing some maintenance. Please check back soon.') }}</p>
-    <small>{!! BaseHelper::clean(__("If you are the administrator and you can't access your site after enabling maintenance mode, just need to delete file <strong>storage/framework/down</strong> to turn-off maintenance mode.")) !!}</small>
-    @if ($email = get_admin_email()->first())
-        <p>{!! BaseHelper::clean(__('If you need help, contact us at :mail.', ['mail' => Html::mailto($email)])) !!}</p>
-    @endif
-</div>
-</body>
-</html>
+@extends('packages/theme::errors.master')
+
+@section('title', __('503 Service Unavailable'))
+
+@section('content')
+    <div class="empty">
+        <div class="empty-img">
+            <img
+                src="{{ asset('vendor/core/core/base/images/503.svg') }}"
+                alt="503"
+                height="128"
+            >
+        </div>
+        <p class="empty-title">{{ __('Temporarily down for maintenance') }}</p>
+        <p class="empty-subtitle text-secondary">{{ __('Sorry, we are doing some maintenance. Please check back soon.') }}</p>
+        <p class="empty-subtitle text-secondary"><i>{!! BaseHelper::clean(__("If you are the administrator and you can't access your site after enabling maintenance mode, just need to delete file <strong>storage/framework/down</strong> to turn-off maintenance mode.")) !!}</i></p>
+        @if ($email = get_admin_email()->first())
+            <p class="empty-subtitle text-secondary">{!! BaseHelper::clean(__('If you need help, contact us at :mail.', ['mail' => Html::mailto($email)])) !!}</p>
+        @endif
+    </div>
+@endsection
+
 

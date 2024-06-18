@@ -7,6 +7,7 @@
     'helperText' => null,
     'inline' => false,
     'single' => false,
+    'marginZero' => false
 ])
 
 @php
@@ -14,6 +15,7 @@
         'form-check',
         'form-check-inline mb-3' => $inline,
         'form-check-single' => $single,
+        'form-check m-0' => $marginZero,
     ]);
 
     if (isset($attributes['label_attr'])) {
@@ -28,7 +30,8 @@
 
 <label {!! Html::attributes($labelAttr) !!}>
     <input
-        {{ $attributes->merge(['type' => 'checkbox', 'id' => $id, 'name' => $name, 'class' => 'form-check-input', 'value' => $value]) }}
+        {{ $attributes->merge(['type' => 'checkbox', 'id' => $id, 'name' => $name, 'class' => 'form-check-input']) }}
+        value="{{ $value }}"
         @checked($name ? old($name, $checked) : $checked)
     >
 

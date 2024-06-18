@@ -21,6 +21,7 @@ return [
             'can_off' => false,
             'variables' => [
                 'verify_link' => 'Verify email link',
+                'customer_name' => 'Customer name',
             ],
         ],
         'password-reminder' => [
@@ -51,12 +52,26 @@ return [
         ],
         'customer_cancel_order' => [
             'title' => 'plugins/ecommerce::email.order_cancellation_title',
-            'description' => 'plugins/ecommerce::email.order_cancellation_description',
-            'subject' => 'Order cancelled {{ order_id }}',
+            'description' => 'plugins/ecommerce::email.customer_order_cancellation_description',
+            'subject' => 'Your order has been cancelled {{ order_id }}',
             'can_off' => true,
             'variables' => [
                 'customer_name' => 'plugins/ecommerce::ecommerce.customer_name',
                 'order_id' => 'plugins/ecommerce::ecommerce.order_id',
+                'cancellation_reason' => 'plugins/ecommerce::order.order_cancellation_reason',
+                'product_list' => 'plugins/ecommerce::ecommerce.product_list',
+            ],
+        ],
+        'admin_cancel_order' => [
+            'title' => 'plugins/ecommerce::email.admin_order_cancellation_title',
+            'description' => 'plugins/ecommerce::email.admin_order_cancellation_description',
+            'subject' => 'Your order has been cancelled {{ order_id }}',
+            'can_off' => true,
+            'variables' => [
+                'customer_name' => 'plugins/ecommerce::ecommerce.customer_name',
+                'order_id' => 'plugins/ecommerce::ecommerce.order_id',
+                'cancellation_reason' => 'plugins/ecommerce::order.order_cancellation_reason',
+                'product_list' => 'plugins/ecommerce::ecommerce.product_list',
             ],
         ],
         'customer_delivery_order' => [
@@ -68,6 +83,7 @@ return [
                 'customer_name' => 'plugins/ecommerce::ecommerce.customer_name',
                 'order_id' => 'plugins/ecommerce::ecommerce.order_id',
                 'order_delivery_notes' => 'Order delivery notes',
+                'product_list' => 'plugins/ecommerce::ecommerce.product_list',
             ],
         ],
         'customer_order_delivered' => [
@@ -80,6 +96,7 @@ return [
                 'customer_name' => 'plugins/ecommerce::ecommerce.customer_name',
                 'order_id' => 'plugins/ecommerce::ecommerce.order_id',
                 'order_delivery_notes' => 'Order delivery notes',
+                'product_list' => 'plugins/ecommerce::ecommerce.product_list',
             ],
         ],
         'admin_new_order' => [
@@ -161,6 +178,7 @@ return [
                 'order_id' => 'plugins/ecommerce::ecommerce.order_id',
                 'order_note' => 'plugins/ecommerce::ecommerce.order_note',
                 'return_reason' => 'plugins/ecommerce::order.order_return_reason',
+                'product_list' => 'plugins/ecommerce::ecommerce.product_list',
             ],
         ],
         'invoice-payment-created' => [
@@ -193,7 +211,60 @@ return [
             'can_off' => false,
             'variables' => [
                 'customer_name' => 'plugins/ecommerce::ecommerce.customer_name',
+                'customer_phone' => 'plugins/ecommerce::ecommerce.customer_phone',
+                'customer_address' => 'plugins/ecommerce::ecommerce.customer_address',
+                'payment_method' => 'plugins/ecommerce::ecommerce.payment_method',
+                'order_note' => 'plugins/ecommerce::ecommerce.order_note',
+                'order_id' => 'plugins/ecommerce::ecommerce.order_id',
                 'digital_product_list' => 'Digital product list',
+                'digital_products' => 'Digital products',
+            ],
+        ],
+        'customer-deletion-request-confirmation' => [
+            'title' => 'Account deletion confirmation',
+            'description' => 'Send confirmation email to user when they request to delete their account',
+            'subject' => 'Confirm your account deletion request',
+            'can_off' => false,
+            'variables' => [
+                'customer_name' => 'plugins/ecommerce::ecommerce.customer_name',
+                'customer_email' => 'plugins/ecommerce::ecommerce.customer_email',
+                'confirm_url' => 'plugins/ecommerce::account-deletion.confirm_url',
+            ],
+        ],
+        'customer-deletion-request-completed' => [
+            'title' => 'Account deletion completed',
+            'description' => 'Send email to user when their account is deleted',
+            'subject' => 'Account deletion completed',
+            'can_off' => false,
+            'variables' => [
+                'customer_name' => 'plugins/ecommerce::ecommerce.customer_name',
+            ],
+        ],
+        'order-return-status-updated' => [
+            'title' => 'Order return request status updated',
+            'description' => 'Notify the customer when their order return request status is updated',
+            'subject' => 'Your order return request {{ order_id }} has been {{ status }}',
+            'can_off' => true,
+            'variables' => [
+                'customer_name' => 'plugins/ecommerce::ecommerce.customer_name',
+                'order_id' => 'plugins/ecommerce::ecommerce.order_id',
+                'description' => 'core/base::forms.description',
+                'status' => 'core/base::forms.status',
+                'product_list' => 'plugins/ecommerce::ecommerce.product_list',
+            ],
+        ],
+        'payment-proof-upload-notification' => [
+            'title' => 'Payment Proof Upload Notification',
+            'description' => 'Notice to admin when customer uploads payment proof',
+            'subject' => 'Payment proof uploaded by {{ customer_name }} for order {{ order_id }}',
+            'can_off' => true,
+            'variables' => [
+                'customer_name' => 'plugins/ecommerce::ecommerce.customer_name',
+                'customer_email' => 'plugins/ecommerce::ecommerce.customer_email',
+                'order_id' => 'plugins/ecommerce::ecommerce.order_id',
+                'payment_link' => 'plugins/ecommerce::ecommerce.order_link',
+                'order_link' => 'plugins/ecommerce::ecommerce.payment_link',
+                'product_list' => 'plugins/ecommerce::ecommerce.product_list',
             ],
         ],
     ],

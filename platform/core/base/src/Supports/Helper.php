@@ -2,6 +2,7 @@
 
 namespace Botble\Base\Supports;
 
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Models\BaseModel;
 use Botble\Base\Services\ClearCacheService;
 use Illuminate\Support\Arr;
@@ -58,16 +59,25 @@ class Helper
     public static function removeModuleFiles(string $module, string $type = 'packages'): bool
     {
         $folders = [
-            public_path('vendor/core/' . $type . '/' . $module),
-            resource_path('assets/' . $type . '/' . $module),
-            resource_path('views/vendor/' . $type . '/' . $module),
-            lang_path('vendor/' . $type . '/' . $module),
-            config_path($type . '/' . $module),
+            public_path('vendor' . DIRECTORY_SEPARATOR . 'core' . DIRECTORY_SEPARATOR . $type . DIRECTORY_SEPARATOR . $module),
+            resource_path('assets' . DIRECTORY_SEPARATOR . $type . DIRECTORY_SEPARATOR . $module),
+            resource_path('views' . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . $type . DIRECTORY_SEPARATOR . $module),
+            config_path($type . DIRECTORY_SEPARATOR . $module),
         ];
 
         foreach ($folders as $folder) {
             if (File::isDirectory($folder)) {
                 File::deleteDirectory($folder);
+            }
+        }
+
+        $langPath = lang_path('vendor' . DIRECTORY_SEPARATOR . $type . DIRECTORY_SEPARATOR . $module);
+
+        if (File::isDirectory($langPath)) {
+            try {
+                File::deleteDirectory($langPath);
+            } catch (Throwable $throwable) {
+                BaseHelper::logError($throwable);
             }
         }
 
@@ -96,7 +106,7 @@ class Helper
         return true;
     }
 
-    public static function getCountryNameByCode(string|null $countryCode): string|null
+    public static function getCountryNameByCode(?string $countryCode): ?string
     {
         if (empty($countryCode)) {
             return null;
@@ -105,7 +115,7 @@ class Helper
         return Arr::get(self::countries(), $countryCode, $countryCode);
     }
 
-    public static function getCountryCodeByName(string|null $countryName): string|null
+    public static function getCountryCodeByName(?string $countryName): ?string
     {
         if (empty($countryName)) {
             return null;
@@ -172,7 +182,7 @@ class Helper
     public static function convertHrToBytes(string|float|int|null $value): float|int
     {
         $value = strtolower(trim($value));
-        $bytes = (int)$value;
+        $bytes = (int) $value;
 
         if (str_contains($value, 'g')) {
             $bytes *= 1024 * 1024 * 1024;

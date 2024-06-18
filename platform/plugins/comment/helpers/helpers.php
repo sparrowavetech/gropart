@@ -1,5 +1,6 @@
 <?php
 
+use Botble\Base\Facades\BaseHelper;
 use Illuminate\Support\Arr;
 
 if (! function_exists('has_member')) {

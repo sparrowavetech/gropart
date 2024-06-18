@@ -106,6 +106,8 @@ interface SeoMetaContract extends RenderableContract
 
     public function getTitle();
 
+    public function getTitleOnly(): ?string;
+
     public function getDescription();
 
     public function setGoogle($code);

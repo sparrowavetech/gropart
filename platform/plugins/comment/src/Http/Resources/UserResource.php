@@ -3,8 +3,8 @@
 namespace Botble\Comment\Http\Resources;
 
 use Botble\Comment\Models\CommentUser;
+use Botble\Media\Facades\RvMedia;
 use Illuminate\Http\Resources\Json\JsonResource;
-use RvMedia;
 
 /**
  * @mixin CommentUser

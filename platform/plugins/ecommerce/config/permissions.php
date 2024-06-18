@@ -7,12 +7,6 @@ return [
     ],
 
     [
-        'name' => 'Settings',
-        'flag' => 'ecommerce.settings',
-        'parent_flag' => 'plugins.ecommerce',
-    ],
-
-    [
         'name' => 'Reports',
         'flag' => 'ecommerce.report.index',
         'parent_flag' => 'plugins.ecommerce',
@@ -46,6 +40,36 @@ return [
         'flag' => 'products.duplicate',
         'parent_flag' => 'products.index',
     ],
+
+    /**
+     * Product Prices
+     */
+    [
+        'name' => 'Product Prices',
+        'flag' => 'ecommerce.product-prices.index',
+        'parent_flag' => 'plugins.ecommerce',
+    ],
+    [
+        'name' => 'Update',
+        'flag' => 'ecommerce.product-prices.edit',
+        'parent_flag' => 'ecommerce.product-prices.index',
+    ],
+
+    /**
+     * Product Inventory
+     */
+
+    [
+        'name' => 'Product Inventory',
+        'flag' => 'ecommerce.product-inventory.index',
+        'parent_flag' => 'plugins.ecommerce',
+    ],
+    [
+        'name' => 'Update',
+        'flag' => 'ecommerce.product-inventory.edit',
+        'parent_flag' => 'ecommerce.product-inventory.index',
+    ],
+
     /**
      * Categories
      */
@@ -231,38 +255,6 @@ return [
     ],
 
     [
-        'name' => 'Shipping',
-        'flag' => 'shipping_methods.index',
-        'parent_flag' => 'plugins.ecommerce',
-    ],
-
-    [
-        'name' => 'Shipping Rule Items',
-        'flag' => 'ecommerce.shipping-rule-items.index',
-        'parent_flag' => 'plugins.ecommerce',
-    ],
-    [
-        'name' => 'Create',
-        'flag' => 'ecommerce.shipping-rule-items.create',
-        'parent_flag' => 'ecommerce.shipping-rule-items.index',
-    ],
-    [
-        'name' => 'Edit',
-        'flag' => 'ecommerce.shipping-rule-items.edit',
-        'parent_flag' => 'ecommerce.shipping-rule-items.index',
-    ],
-    [
-        'name' => 'Delete',
-        'flag' => 'ecommerce.shipping-rule-items.destroy',
-        'parent_flag' => 'ecommerce.shipping-rule-items.index',
-    ],
-    [
-        'name' => 'Bulk Import',
-        'flag' => 'ecommerce.shipping-rule-items.bulk-import',
-        'parent_flag' => 'ecommerce.shipping-rule-items.index',
-    ],
-
-    [
         'name' => 'Shipments',
         'flag' => 'ecommerce.shipments.index',
         'parent_flag' => 'plugins.ecommerce',
@@ -389,13 +381,13 @@ return [
     [
         'name' => 'Import Products',
         'flag' => 'ecommerce.import.products.index',
-        'parent_flag' => 'plugins.ecommerce',
+        'parent_flag' => 'tools.data-synchronize',
     ],
 
     [
         'name' => 'Export Products',
         'flag' => 'ecommerce.export.products.index',
-        'parent_flag' => 'plugins.ecommerce',
+        'parent_flag' => 'tools.data-synchronize',
     ],
 
     [
@@ -455,93 +447,123 @@ return [
         'parent_flag' => 'ecommerce.invoice.index',
     ],
     [
-        'name' => 'Invoice Template',
-        'flag' => 'ecommerce.invoice-template.index',
-        'parent_flag' => 'plugins.ecommerce',
+        'name' => 'Ecommerce',
+        'flag' => 'ecommerce.settings',
+        'parent_flag' => 'settings.index',
     ],
     [
-        'name' => 'General Settings',
+        'name' => 'General',
         'flag' => 'ecommerce.settings.general',
         'parent_flag' => 'ecommerce.settings',
     ],
     [
-        'name' => 'Currency Settings',
+        'name' => 'Invoice Template',
+        'flag' => 'ecommerce.invoice-template.index',
+        'parent_flag' => 'ecommerce.settings',
+    ],
+    [
+        'name' => 'Currencies',
         'flag' => 'ecommerce.settings.currencies',
         'parent_flag' => 'ecommerce.settings',
     ],
     [
-        'name' => 'Product Settings',
+        'name' => 'Product',
         'flag' => 'ecommerce.settings.products',
         'parent_flag' => 'ecommerce.settings',
     ],
     [
-        'name' => 'Product Search Settings',
+        'name' => 'Product Search',
         'flag' => 'ecommerce.settings.product-search',
         'parent_flag' => 'ecommerce.settings',
     ],
     [
-        'name' => 'Digital Product Settings',
+        'name' => 'Digital Product',
         'flag' => 'ecommerce.settings.digital-products',
         'parent_flag' => 'ecommerce.settings',
     ],
     [
-        'name' => 'Store Locators Settings',
+        'name' => 'Store Locators',
         'flag' => 'ecommerce.settings.store-locators',
         'parent_flag' => 'ecommerce.settings',
     ],
     [
-        'name' => 'Invoice Settings',
+        'name' => 'Invoice',
         'flag' => 'ecommerce.settings.invoices',
         'parent_flag' => 'ecommerce.settings',
     ],
     [
-        'name' => 'Product Review Settings',
+        'name' => 'Product Review',
         'flag' => 'ecommerce.settings.product-reviews',
         'parent_flag' => 'ecommerce.settings',
     ],
     [
-        'name' => 'Customer Settings',
+        'name' => 'Customer',
         'flag' => 'ecommerce.settings.customers',
         'parent_flag' => 'ecommerce.settings',
     ],
     [
-        'name' => 'Shopping Settings',
+        'name' => 'Shopping',
         'flag' => 'ecommerce.settings.shopping',
         'parent_flag' => 'ecommerce.settings',
     ],
     [
-        'name' => 'Tax Settings',
+        'name' => 'Tax',
         'flag' => 'ecommerce.settings.taxes',
         'parent_flag' => 'ecommerce.settings',
     ],
     [
-        'name' => 'Shipping Settings',
+        'name' => 'Shipping',
         'flag' => 'ecommerce.settings.shipping',
         'parent_flag' => 'ecommerce.settings',
     ],
     [
-        'name' => 'Tracking Settings',
+        'name' => 'Shipping Rule Items',
+        'flag' => 'ecommerce.shipping-rule-items.index',
+        'parent_flag' => 'settings.index.shipping',
+    ],
+    [
+        'name' => 'Create',
+        'flag' => 'ecommerce.shipping-rule-items.create',
+        'parent_flag' => 'ecommerce.shipping-rule-items.index',
+    ],
+    [
+        'name' => 'Edit',
+        'flag' => 'ecommerce.shipping-rule-items.edit',
+        'parent_flag' => 'ecommerce.shipping-rule-items.index',
+    ],
+    [
+        'name' => 'Delete',
+        'flag' => 'ecommerce.shipping-rule-items.destroy',
+        'parent_flag' => 'ecommerce.shipping-rule-items.index',
+    ],
+    [
+        'name' => 'Bulk Import',
+        'flag' => 'ecommerce.shipping-rule-items.bulk-import',
+        'parent_flag' => 'ecommerce.shipping-rule-items.index',
+    ],
+    [
+        'name' => 'Tracking',
         'flag' => 'ecommerce.settings.tracking',
         'parent_flag' => 'ecommerce.settings',
     ],
     [
-        'name' => 'Standard and Format Settings',
+        'name' => 'Standard and Format',
         'flag' => 'ecommerce.settings.standard-and-format',
         'parent_flag' => 'ecommerce.settings',
     ],
     [
-        'name' => 'Checkout Settings',
+        'name' => 'Checkout',
         'flag' => 'ecommerce.settings.checkout',
         'parent_flag' => 'ecommerce.settings',
     ],
     [
-        'name' => 'Return Settings',
+        'name' => 'Return',
         'flag' => 'ecommerce.settings.return',
         'parent_flag' => 'ecommerce.settings',
     ],
 
     [
-        'name' => 'Flash Sale Settings',
+        'name' => 'Flash Sale',
         'flag' => 'ecommerce.settings.flash-sale',
         'parent_flag' => 'ecommerce.settings',
     ],

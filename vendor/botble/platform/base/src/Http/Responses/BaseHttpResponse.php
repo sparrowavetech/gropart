@@ -16,11 +16,11 @@ class BaseHttpResponse extends Response implements Responsable
 
     protected mixed $data = null;
 
-    protected string|null $message = null;
+    protected ?string $message = null;
 
-    protected string|null $previousUrl = '';
+    protected ?string $previousUrl = '';
 
-    protected string|null $nextUrl = '';
+    protected ?string $nextUrl = '';
 
     protected bool $withInput = false;
 
@@ -89,7 +89,7 @@ class BaseHttpResponse extends Response implements Responsable
         return $this->message;
     }
 
-    public function setMessage(string|null $message): static
+    public function setMessage(?string $message): static
     {
         $this->message = BaseHelper::clean($message);
 
@@ -195,7 +195,7 @@ class BaseHttpResponse extends Response implements Responsable
 
     protected function getSubmitterValue(): string
     {
-        return (string)request()->input('submitter');
+        return (string) request()->input('submitter');
     }
 
     public function toArray(): array

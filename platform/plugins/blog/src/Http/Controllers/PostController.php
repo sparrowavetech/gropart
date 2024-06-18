@@ -56,6 +56,9 @@ class PostController extends BaseController
                 ])
                 ->save();
 
+            /**
+             * @var Post $post
+             */
             $post = $form->getModel();
 
             $form->fireModelEvents($post);

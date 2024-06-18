@@ -5,6 +5,8 @@ namespace Botble\Translation\Tables;
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\Html;
 use Botble\Base\Supports\Language;
+use Botble\DataSynchronize\Table\HeaderActions\ExportHeaderAction;
+use Botble\DataSynchronize\Table\HeaderActions\ImportHeaderAction;
 use Botble\Table\Abstracts\TableAbstract;
 use Botble\Table\Columns\Column;
 use Botble\Translation\Manager;
@@ -19,12 +21,17 @@ class ThemeTranslationTable extends TableAbstract
     {
         parent::setup();
 
-        $this->setView($this->simpleTableView());
+        $this->setView('core/table::base-table');
         $this->pageLength = 100;
         $this->hasOperations = false;
 
         Assets::addScripts(['bootstrap-editable'])
             ->addStyles(['bootstrap-editable']);
+
+        $this->addHeaderActions([
+            ExportHeaderAction::make()->route('tools.data-synchronize.export.theme-translations.index')->permission('theme-translations.export'),
+            ImportHeaderAction::make()->route('tools.data-synchronize.import.theme-translations.index')->permission('other-translations.import'),
+        ]);
     }
 
     public function ajax(): JsonResponse
@@ -69,12 +76,12 @@ class ThemeTranslationTable extends TableAbstract
         return $this;
     }
 
-    protected function formatKeyAndValue(string|null $value): string|null
+    protected function formatKeyAndValue(?string $value): ?string
     {
         return htmlentities($value, ENT_QUOTES, 'UTF-8', false);
     }
 
-    public function htmlDrawCallbackFunction(): string|null
+    public function htmlDrawCallbackFunction(): ?string
     {
         return parent::htmlDrawCallbackFunction() . 'Botble.initEditable()';
     }

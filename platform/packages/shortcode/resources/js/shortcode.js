@@ -144,6 +144,7 @@ $(() => {
 
                 Botble.initResources()
                 Botble.initMediaIntegrate()
+                Botble.initFieldCollapse()
 
                 document.dispatchEvent(new CustomEvent('core-shortcode-config-loaded'))
             })
@@ -183,4 +184,39 @@ $(() => {
             update: true,
         })
     })
+
+    $('.shortcode-list-modal')
+        .on('keyup', 'input[type="search"]', function (e) {
+            e.preventDefault()
+
+            const search = $(this).val().toLowerCase()
+
+            $('.shortcode-item-wrapper').each((index, element) => {
+                const $element = $(element)
+                const name = $element.data('name').toLowerCase()
+                const description = $element.data('description').toLowerCase()
+
+                if (name.includes(search) || description.includes(search)) {
+                    $element.parent().show()
+                } else {
+                    $element.parent().hide()
+                }
+            })
+
+            if ($('.shortcode-item-wrapper:visible').length === 0) {
+                $('.shortcode-empty').show()
+            } else {
+                $('.shortcode-empty').hide()
+            }
+        })
+        .on('click', '[data-bb-toggle="shortcode-clear-search"]', function (e) {
+            e.preventDefault()
+
+            $(this)
+                .closest('.shortcode-list-modal')
+                .find('input[type="search"]')
+                .val('')
+                .trigger('keyup')
+                .trigger('focus')
+        })
 })

@@ -1,6 +1,8 @@
 <?php
 
 use Botble\Base\Facades\AdminHelper;
+use Botble\Blog\Http\Controllers\ExportPostController;
+use Botble\Blog\Http\Controllers\ImportPostController;
 use Botble\Theme\Facades\Theme;
 use Illuminate\Support\Facades\Route;
 
@@ -38,6 +40,24 @@ Route::group(['namespace' => 'Botble\Blog\Http\Controllers'], function () {
                     'uses' => 'TagController@getAllTags',
                     'permission' => 'tags.index',
                 ]);
+            });
+
+            Route::prefix('tools/data-synchronize')->name('tools.data-synchronize.')->group(function () {
+                Route::prefix('export')->name('export.')->group(function () {
+                    Route::group(['prefix' => 'posts', 'as' => 'posts.', 'permission' => 'posts.export'], function () {
+                        Route::get('/', [ExportPostController::class, 'index'])->name('index');
+                        Route::post('/', [ExportPostController::class, 'store'])->name('store');
+                    });
+                });
+
+                Route::prefix('import')->name('import.')->group(function () {
+                    Route::group(['prefix' => 'posts', 'as' => 'posts.', 'permission' => 'posts.import'], function () {
+                        Route::get('/', [ImportPostController::class, 'index'])->name('index');
+                        Route::post('/', [ImportPostController::class, 'import'])->name('store');
+                        Route::post('validate', [ImportPostController::class, 'validateData'])->name('validate');
+                        Route::post('download-example', [ImportPostController::class, 'downloadExample'])->name('download-example');
+                    });
+                });
             });
         });
 

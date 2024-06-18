@@ -10,9 +10,9 @@ class Fonts implements Htmlable
 {
     public function __construct(
         protected string $googleFontsUrl,
-        protected string|null $localizedUrl = null,
-        protected string|null $localizedCss = null,
-        protected string|null $nonce = null,
+        protected ?string $localizedUrl = null,
+        protected ?string $localizedCss = null,
+        protected ?string $nonce = null,
         protected bool $preferInline = false,
     ) {
     }

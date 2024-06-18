@@ -10,9 +10,9 @@ class LanguageManagement {
         $(document).on('change', '#language_id', (event) => {
             let language = $(event.currentTarget).find('option:selected').data('language')
             if (typeof language != 'undefined' && language.length > 0) {
-                $('#lang_name').val(language[2])
-                $('#lang_locale').val(language[0])
-                $('#lang_code').val(language[1])
+                $('#lang_name').val(language[2]).trigger('change')
+                $('#lang_locale').val(language[0]).trigger('change')
+                $('#lang_code').val(language[1]).trigger('change')
                 $(`input[name=lang_rtl][value="${language[3] === 'rtl' ? 1 : 0}"]`).prop('checked', true)
                 $('#flag_list').val(language[4]).trigger('change')
                 $('#btn-language-submit-edit')

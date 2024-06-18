@@ -116,7 +116,7 @@ class SystemManagement
             }
         }
 
-        return (int)$memoryLimit;
+        return (int) $memoryLimit;
     }
 
     public static function getMaximumExecutionTime(): int

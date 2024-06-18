@@ -8,6 +8,7 @@ use Botble\Base\Commands\ClearExpiredCacheCommand;
 use Botble\Base\Commands\ClearLogCommand;
 use Botble\Base\Commands\ExportDatabaseCommand;
 use Botble\Base\Commands\FetchGoogleFontsCommand;
+use Botble\Base\Commands\GoogleFontsUpdateCommand;
 use Botble\Base\Commands\ImportDatabaseCommand;
 use Botble\Base\Commands\InstallCommand;
 use Botble\Base\Commands\PublishAssetsCommand;
@@ -35,6 +36,7 @@ class CommandServiceProvider extends ServiceProvider
             InstallCommand::class,
             PublishAssetsCommand::class,
             UpdateCommand::class,
+            GoogleFontsUpdateCommand::class,
         ]);
 
         AboutCommand::add('Core Information', fn () => [

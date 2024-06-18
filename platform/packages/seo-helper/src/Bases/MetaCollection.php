@@ -160,7 +160,7 @@ abstract class MetaCollection extends Collection implements MetaCollectionContra
      */
     public function forget($keys)
     {
-        foreach ((array)$keys as $key) {
+        foreach ((array) $keys as $key) {
             $this->offsetUnset($key);
         }
 
@@ -190,6 +190,6 @@ abstract class MetaCollection extends Collection implements MetaCollectionContra
     {
         return array_map(function ($name) {
             return strtolower(trim($name));
-        }, (array)$names);
+        }, (array) $names);
     }
 }

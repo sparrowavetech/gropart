@@ -7,6 +7,7 @@ use Botble\Base\Http\Controllers\BaseController;
 use Botble\Newsletter\Enums\NewsletterStatusEnum;
 use Botble\Newsletter\Events\SubscribeNewsletterEvent;
 use Botble\Newsletter\Events\UnsubscribeNewsletterEvent;
+use Botble\Newsletter\Forms\Fronts\NewsletterForm;
 use Botble\Newsletter\Http\Requests\NewsletterRequest;
 use Botble\Newsletter\Models\Newsletter;
 use Illuminate\Http\Request;
@@ -16,15 +17,31 @@ class PublicController extends BaseController
 {
     public function postSubscribe(NewsletterRequest $request)
     {
-        /**
-         * @var Newsletter $newsletter
-         */
-        $newsletter = Newsletter::query()->firstOrNew(['email' => $request->input('email')], $request->validated());
+        do_action('form_extra_fields_validate', $request, NewsletterForm::class);
 
-        $newsletter->status = NewsletterStatusEnum::SUBSCRIBED;
-        $newsletter->save();
+        $newsletterForm = NewsletterForm::create();
+        $newsletterForm->setRequest($request);
 
-        event(new SubscribeNewsletterEvent($newsletter));
+        $newsletterForm->onlyValidatedData()->saving(function (NewsletterForm $form) {
+            /**
+             * @var NewsletterRequest $request
+             */
+            $request = $form->getRequest();
+
+            /**
+             * @var Newsletter $newsletter
+             */
+            $newsletter = $form->getModel()->newQuery()->firstOrNew([
+                'email' => $request->input('email'),
+            ], [
+                ...$form->getRequestData(),
+                'status' => NewsletterStatusEnum::SUBSCRIBED,
+            ]);
+
+            $newsletter->save();
+
+            SubscribeNewsletterEvent::dispatch($newsletter);
+        });
 
         return $this
             ->httpResponse()
@@ -48,10 +65,9 @@ class PublicController extends BaseController
             ->first();
 
         if ($newsletter) {
-            $newsletter->status = NewsletterStatusEnum::UNSUBSCRIBED;
-            $newsletter->save();
+            $newsletter->update(['status' => NewsletterStatusEnum::UNSUBSCRIBED]);
 
-            event(new UnsubscribeNewsletterEvent($newsletter));
+            UnsubscribeNewsletterEvent::dispatch($newsletter);
 
             return $this
                 ->httpResponse()

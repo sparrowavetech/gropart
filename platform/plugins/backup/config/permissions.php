@@ -4,6 +4,7 @@ return [
     [
         'name' => 'Backup',
         'flag' => 'backups.index',
+        'parent_flag' => 'core.system',
     ],
     [
         'name' => 'Create',

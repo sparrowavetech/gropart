@@ -7,8 +7,8 @@ use Botble\ACL\Models\User;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Forms\FieldOptions\CheckboxFieldOption;
 use Botble\Base\Forms\FieldOptions\TextFieldOption;
+use Botble\Base\Forms\Fields\CheckboxField;
 use Botble\Base\Forms\Fields\HtmlField;
-use Botble\Base\Forms\Fields\OnOffCheckboxField;
 use Botble\Base\Forms\Fields\TextField;
 
 class LoginForm extends AuthForm
@@ -41,7 +41,7 @@ class LoginForm extends AuthForm
             )
             ->add(
                 'remember',
-                OnOffCheckboxField::class,
+                CheckboxField::class,
                 CheckboxFieldOption::make()
                     ->label(trans('core/acl::auth.login.remember'))
                     ->value(true)

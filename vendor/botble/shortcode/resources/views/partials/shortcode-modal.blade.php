@@ -6,7 +6,7 @@
     window.BB_SHORTCODES = {!!
         Js::from(
             collect($shortcodes)->mapWithKeys(
-            fn( $shortcode, $key) => [$key => ($shortcode['name'] ?: $shortcode['description']) ?: $key]
+            fn( $shortcode, $key) => [$key => ! empty($shortcode['name']) ? $shortcode['name'] : (! empty($shortcode['description']) ?: $key)]
             )->toArray()
         )
     !!}
@@ -19,9 +19,28 @@
     size="full"
     :scrollable="true"
 >
+    <x-core::form.text-input
+        type="search"
+        name="search"
+        :placeholder="trans('packages/shortcode::shortcode.search')"
+        :group-flat="true"
+    >
+        <x-slot:prepend>
+            <span class="input-group-text">
+                <x-core::icon name="ti ti-search" />
+            </span>
+        </x-slot:prepend>
+
+        <x-slot:append>
+            <button type="button" class="input-group-text" data-bb-toggle="shortcode-clear-search">
+                <x-core::icon name="ti ti-x" />
+            </button>
+        </x-slot:append>
+    </x-core::form.text-input>
+
     <div class="row shortcode-list">
         @foreach ($shortcodes as $key => $shortcode)
-            @continue(!isset($shortcode['name']))
+            @continue(! isset($shortcode['name']))
             <div class="col-xl-3 col-lg-4 col-sm-6 mb-3">
                 <label
                     class="shortcode-item-wrapper w-100"
@@ -65,6 +84,13 @@
             </div>
         @endforeach
     </div>
+
+    <x-core::empty-state
+        :title="trans('packages/shortcode::shortcode.no_shortcode_found')"
+        style="display: none;"
+        class="shortcode-empty"
+    />
+
     <x-slot:footer>
         <div class="btn-list">
             <x-core::button

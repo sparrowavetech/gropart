@@ -1,10 +1,12 @@
 @php
+    $mathCaptcha = app('math-captcha');
+
     $options = [
         ...$options,
         'label_attr' => [
-            'class' => 'required',
+            'class' => 'form-label required',
         ],
-        'label' => app('math-captcha')->label(),
+        'label' => $mathCaptcha->label(),
     ];
 @endphp
 
@@ -18,5 +20,15 @@
     :showError="$showError"
     :nameKey="$nameKey"
 >
-    {!! app('math-captcha')->input(['class' => 'form-control', 'id' => 'math-group']) !!}
+    <x-slot:label>
+        @if ($showLabel && $options['label'] !== false && $options['label_show'])
+            {!! Form::customLabel($name, $options['label'], $options['label_attr']) !!}
+        @endif
+    </x-slot:label>
+
+    {!! $mathCaptcha->input([
+        'class' => 'form-control',
+        'id' => 'math-group',
+        'placeholder' => $showLabel ? $mathCaptcha->getMathLabelOnly() . ' = ?' : $mathCaptcha->label(),
+    ]) !!}
 </x-core::form.field>

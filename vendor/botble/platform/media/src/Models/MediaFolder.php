@@ -76,7 +76,7 @@ class MediaFolder extends BaseModel
         });
     }
 
-    public static function getFullPath(int|string|null $folderId, string|null $path = ''): string|null
+    public static function getFullPath(int|string|null $folderId, ?string $path = ''): ?string
     {
         if (! $folderId) {
             return $path;

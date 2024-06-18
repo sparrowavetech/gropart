@@ -93,8 +93,17 @@ Route::group(['namespace' => 'Botble\Setting\Http\Controllers'], function () {
             });
 
             Route::prefix('license')->name('license.')->group(function () {
-                Route::get('verify', [
+                /**
+                 * @deprecated
+                 */
+                Route::get('verify/old', [
                     'as' => 'verify',
+                    'uses' => 'GeneralSettingController@getVerifyLicense',
+                    'permission' => false,
+                ]);
+
+                Route::get('verify', [
+                    'as' => 'verify.index',
                     'uses' => 'GeneralSettingController@getVerifyLicense',
                     'permission' => false,
                 ]);
@@ -144,6 +153,11 @@ Route::group(['namespace' => 'Botble\Setting\Http\Controllers'], function () {
                         'uses' => 'EmailTemplateSettingController@index',
                     ]);
 
+                    Route::put('', [
+                        'as' => 'template.update-settings',
+                        'uses' => 'EmailTemplateSettingController@update',
+                    ]);
+
                     Route::prefix('{type}/{module}/{template}')->name('template.')->group(function () {
                         Route::post('status', [
                             'as' => 'status.update',
@@ -189,11 +203,6 @@ Route::group(['namespace' => 'Botble\Setting\Http\Controllers'], function () {
                     'permission' => 'settings.email.rules',
                 ]);
             });
-
-            Route::get('cronjob', [
-                'as' => 'cronjob',
-                'uses' => 'CronjobSettingController@index',
-            ]);
         });
     });
 });

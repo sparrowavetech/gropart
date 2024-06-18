@@ -11,10 +11,12 @@
         content="ie=edge"
     >
     <title>{{ PageTitle::getTitle() }}</title>
-    <meta
-        name="csrf-token"
-        content="{{ csrf_token() }}"
-    >
+    @if ($csrfToken = csrf_token())
+        <meta
+            name="csrf-token"
+            content="{{ $csrfToken }}"
+        >
+    @endif
 
     @if (setting('admin_favicon') || config('core.base.general.favicon'))
         <link
@@ -42,9 +44,12 @@
 
     <script>
         window.siteUrl = "{{ url('') }}";
-        window.siteEditorLocale = "{{ apply_filters('cms_site_editor_locale', App::getLocale()) }}";
-        window.siteAuthorizedUrl = "{{ route('settings.license.verify') }}";
-        window.isAuthenticated = {{ Auth::check() ? 'true' : 'false' }};
+
+        @if (Auth::check())
+            window.siteEditorLocale = "{{ apply_filters('cms_site_editor_locale', App::getLocale()) }}";
+            window.siteAuthorizedUrl = "{{ rescue(fn() => route('settings.license.verify.index')) }}";
+            window.isAuthenticated = {{ Auth::check() ? 'true' : 'false' }};
+        @endif
     </script>
 
     {{ $header ?? null }}

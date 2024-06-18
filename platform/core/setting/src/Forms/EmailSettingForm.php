@@ -34,7 +34,7 @@ class EmailSettingForm extends SettingForm
             ])
             ->add('email_from_address', TextField::class, [
                 'label' => trans('core/setting::setting.email.sender_email'),
-                'value' => old('email_from_address', setting('email_from_address', config('mail.from.address'))),
+                'value' => old('email_from_address', setting('email_from_address', get_admin_email()->first())),
                 'attr' => [
                     'placeholder' => 'admin@example.com',
                     'data-counter' => 60,

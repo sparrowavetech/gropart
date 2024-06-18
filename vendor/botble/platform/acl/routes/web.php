@@ -75,6 +75,11 @@ Route::group(['namespace' => 'Botble\ACL\Http\Controllers'], function () {
                         'permission' => false,
                         'middleware' => 'preventDemo',
                     ])->wherePrimaryKey('user');
+
+                    Route::patch('profile/{user}/preferences', [
+                        'uses' => 'UserController@patchUpdatePreferences',
+                        'permission' => false,
+                    ])->wherePrimaryKey('user');
                 });
 
                 Route::get('make-super/{user}', [

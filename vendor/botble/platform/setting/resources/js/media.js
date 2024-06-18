@@ -1,50 +1,69 @@
-$(document).ready(function () {
+$(() => {
     $('.generate-thumbnails-trigger-button').on('click', (event) => {
         event.preventDefault()
-        const _self = $(event.currentTarget)
-        const defaultText = _self.text()
 
-        _self.text(_self.data('saving'))
+        const currentTarget = $(event.currentTarget)
 
-        const $form = _self.closest('form')
+        const $form = currentTarget.closest('form')
 
         $httpClient
             .make()
+            .withButtonLoading(currentTarget)
             .postForm($form.prop('action'), new FormData($form[0]))
-            .then(() => $('#generate-thumbnails-modal').modal('show'))
-            .finally(() => {
-                _self.text(defaultText)
+            .then(({ data }) => {
+                $('#generate-thumbnails-modal').modal('show')
+                $('#generate-thumbnails-modal').data('total-files', data.data.files_count)
             })
     })
 
     $('#generate-thumbnails-button').on('click', (event) => {
         event.preventDefault()
-        let _self = $(event.currentTarget)
 
-        Botble.showButtonLoading(_self)
+        const currentTarget = $(event.currentTarget)
 
-        const $form = _self.closest('form')
+        const $modal = currentTarget.closest('.modal')
+        const $form = currentTarget.closest('form')
 
-        $httpClient
-            .make()
-            .post($form.prop('action'))
-            .then(({ data }) => Botble.showSuccess(data.message))
-            .finally(() => {
-                Botble.hideButtonLoading(_self)
-                _self.closest('.modal').modal('hide')
-            })
+        const totalFiles = $modal.data('total-files')
+        let message = null
+
+        Botble.showButtonLoading(currentTarget)
+
+        function sendRequest(offset = 0, limit = $modal.data('chunk-limit')) {
+            if (offset > totalFiles) {
+                Botble.hideButtonLoading(currentTarget)
+                $modal.modal('hide')
+
+                Botble.showSuccess(message)
+
+                return
+            }
+
+            $httpClient
+                .make()
+                .post($form.prop('action'), { total: totalFiles, offset, limit })
+                .then(({ data }) => {
+                    message = data.message
+
+                    if (data.data.next) {
+                        sendRequest(data.data.next, limit)
+                    }
+                })
+                .finally(() => {
+                    Botble.hideButtonLoading(currentTarget)
+                });
+        }
+
+        sendRequest()
     })
 
     $(document).on('change', '.check-all', (event) => {
-        let _self = $(event.currentTarget)
-        let set = _self.attr('data-set')
-        let checked = _self.prop('checked')
+        const currentTarget = $(event.currentTarget)
+        const set = currentTarget.attr('data-set')
+        const checked = currentTarget.prop('checked')
+
         $(set).each((index, el) => {
-            if (checked) {
-                $(el).prop('checked', true)
-            } else {
-                $(el).prop('checked', false)
-            }
+            $(el).prop('checked', checked)
         })
     })
 })

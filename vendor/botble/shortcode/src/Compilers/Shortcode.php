@@ -7,11 +7,11 @@ class Shortcode
     public function __construct(
         protected string $name,
         protected array $attributes = [],
-        public string|null $content = null
+        public ?string $content = null
     ) {
     }
 
-    public function get(string $attribute, string|null $fallback = null): string
+    public function get(string $attribute, ?string $fallback = null): string
     {
         $value = $this->{$attribute};
 
@@ -24,12 +24,12 @@ class Shortcode
         return '';
     }
 
-    public function getName(): string|null
+    public function getName(): ?string
     {
         return $this->name;
     }
 
-    public function getContent(): string|null
+    public function getContent(): ?string
     {
         return $this->content;
     }

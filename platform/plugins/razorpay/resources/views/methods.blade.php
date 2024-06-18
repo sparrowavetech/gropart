@@ -1,74 +1,24 @@
 @if (get_payment_setting('status', RAZORPAY_PAYMENT_METHOD_NAME) == 1)
-    <li class="list-group-item">
-        <input
-            class="magic-radio js_payment_method"
-            id="payment_{{ RAZORPAY_PAYMENT_METHOD_NAME }}"
-            name="payment_method"
-            type="radio"
-            value="{{ RAZORPAY_PAYMENT_METHOD_NAME }}"
-            @if ($selecting == RAZORPAY_PAYMENT_METHOD_NAME) checked @endif
-        >
-        <label
-            class="form-label"
-            for="payment_{{ RAZORPAY_PAYMENT_METHOD_NAME }}">{{ get_payment_setting('name', RAZORPAY_PAYMENT_METHOD_NAME, __('Payment with :paymentType', ['paymentType' => 'Razorpay']),) }}</label>
-        <div
-            class="payment_{{ RAZORPAY_PAYMENT_METHOD_NAME }}_wrap payment_collapse_wrap collapse @if ($selecting == RAZORPAY_PAYMENT_METHOD_NAME) show @endif">
-            @if ($errorMessage)
-                <div class="text-danger my-2">
-                    {!! BaseHelper::clean($errorMessage) !!}
-                </div>
-            @else
-                <p>{!! get_payment_setting(
-                    'description',
-                    RAZORPAY_PAYMENT_METHOD_NAME,
-                    __('Payment with :paymentType', ['paymentType' => 'Razorpay']),
-                ) !!}</p>
-            @endif
+    <x-plugins-payment::payment-method
+        :name="RAZORPAY_PAYMENT_METHOD_NAME"
+        paymentName="Razorpay"
+        :supportedCurrencies="(new Botble\Razorpay\Services\Gateways\RazorpayPaymentService)->supportedCurrencyCodes()"
+    >
+        <x-slot name="currencyNotSupportedMessage">
+            <p class="mt-1 mb-0">
+                {{ __('Learn more') }}:
+                {{ Html::link('https://razorpay.com/docs/payments/payments/international-payments/#supported-currencies', attributes: ['target' => '_blank', 'rel' => 'nofollow']) }}.
+            </p>
+        </x-slot>
 
-            @php $supportedCurrencies = (new Botble\Razorpay\Services\Gateways\RazorpayPaymentService)->supportedCurrencyCodes(); @endphp
-            @if (!in_array(get_application_currency()->title, $supportedCurrencies))
-                <div
-                    class="alert alert-warning"
-                    style="margin-top: 15px;"
-                >
-                    {{ __(":name doesn't support :currency. List of currencies supported by :name: :currencies.", ['name' => 'Razorpay', 'currency' => get_application_currency()->title, 'currencies' => implode(', ', $supportedCurrencies)]) }}
+        @if ($errorMessage)
+            <div class="text-danger my-2">
+                {!! BaseHelper::clean($errorMessage) !!}
+            </div>
+        @endif
 
-                    <div style="margin-top: 10px;">
-                        {{ __('Learn more') }}: <a
-                            href="https://razorpay.com/docs/payments/payments/international-payments/#supported-currencies"
-                            target="_blank"
-                            rel="nofollow"
-                        >https://razorpay.com/docs/payments/payments/international-payments/#supported-currencies</a>
-                    </div>
-
-                    @php
-                        $currencies = get_all_currencies()->filter(function ($item) use ($supportedCurrencies) {
-                            return in_array($item->title, $supportedCurrencies);
-                        });
-                    @endphp
-                    @if (count($currencies))
-                        <div style="margin-top: 10px;">
-                            {{ __('Please switch currency to any supported currency') }}:&nbsp;&nbsp;
-                            @foreach ($currencies as $currency)
-                                <a
-                                    href="{{ route('public.change-currency', $currency->title) }}"
-                                    @if (get_application_currency_id() == $currency->id) class="active" @endif
-                                ><span>{{ $currency->title }}</span></a>
-                                @if (!$loop->last)
-                                    &nbsp; | &nbsp;
-                                @endif
-                            @endforeach
-                        </div>
-                    @endif
-                </div>
-            @endif
-        </div>
-        <input
-            id="rzp_order_id"
-            type="hidden"
-            value="{{ $orderId }}"
-        >
-    </li>
+        <input id="rzp_order_id" type="hidden" value="{{ $orderId }}">
+    </x-plugins-payment::payment-method>
 
     @if (EcommerceHelper::isValidToProcessCheckout())
         <script>

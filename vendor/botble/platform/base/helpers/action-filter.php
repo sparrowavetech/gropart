@@ -48,7 +48,7 @@ if (! function_exists('do_action')) {
 }
 
 if (! function_exists('get_hooks')) {
-    function get_hooks(string|null $name = null, bool $isFilter = true): array
+    function get_hooks(?string $name = null, bool $isFilter = true): array
     {
         if ($isFilter) {
             $listeners = Filter::getListeners();

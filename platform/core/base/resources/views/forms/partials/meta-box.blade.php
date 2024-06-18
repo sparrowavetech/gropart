@@ -31,6 +31,12 @@
         @else
             {!! Arr::get($metaBox, 'content') !!}
         @endif
+
+        @if(($footer = Arr::get($metaBox, 'footer')))
+            <x-core::card.footer>
+                {!! $footer !!}
+            </x-core::card.footer>
+        @endif
     </x-core::card>
 @else
     {!! Arr::get($metaBox, 'content') !!}

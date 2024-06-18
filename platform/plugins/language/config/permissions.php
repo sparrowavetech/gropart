@@ -4,6 +4,7 @@ return [
     [
         'name' => 'Languages',
         'flag' => 'languages.index',
+        'parent_flag' => 'settings.common',
     ],
     [
         'name' => 'Create',

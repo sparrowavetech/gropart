@@ -18,6 +18,11 @@ class CaptchaSettingController extends SettingController
 
     public function update(CaptchaSettingRequest $request): BaseHttpResponse
     {
+        $request->merge([
+            'enable_math_captcha_for_contact_form' => $request->input('enable_math_captcha_botble_contact_forms_fronts_contact_form'),
+            'enable_math_captcha_for_newsletter_form' => $request->input('enable_math_captcha_botble_newsletter_forms_fronts_newsletter_form'),
+        ]);
+
         return $this->performUpdate($request->validated());
     }
 }

@@ -2,14 +2,14 @@
 
 namespace Botble\Comment\Listeners;
 
+use Botble\Base\Facades\EmailHandler;
 use Botble\Comment\Events\NewCommentEvent;
 use Botble\Comment\Repositories\Interfaces\CommentInterface;
-use EmailHandler;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
 class NewCommentListener implements ShouldQueue
 {
-    public function handle(NewCommentEvent $event)
+    public function handle(NewCommentEvent $event): void
     {
         $parentId = request()->input('parent_id');
         $article = $event->comment->reference()->first();

@@ -43,10 +43,6 @@ class InstallCommand extends Command
         $this->call('cms:publish:assets');
         $this->components->info('Publishing assets done!');
 
-        $this->components->info('Publishing lang...');
-        $this->call('vendor:publish', ['--tag' => 'cms-lang']);
-        $this->components->info('Publishing lang done!');
-
         $this->components->info('Your CMS is ready to use!');
 
         return self::SUCCESS;

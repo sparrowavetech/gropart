@@ -100,7 +100,7 @@ class SystemUpdaterStepEnum extends Enum
         };
     }
 
-    public static function tryFrom($step): self|null
+    public static function tryFrom($step): ?self
     {
         try {
             return call_user_func([static::class, Str::upper(Str::snake($step))]);

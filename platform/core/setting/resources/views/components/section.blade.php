@@ -6,11 +6,12 @@
     'card' => true,
 ])
 
-<div class="mb-5 d-block d-md-flex">
+<div class="row mb-5 d-block d-md-flex">
     <div class="col-12 col-md-3">
         @if ($title)
             <h2>{{ $title }}</h2>
         @endif
+
         @if ($description)
             <p class="text-muted">{!! BaseHelper::clean($description) !!}</p>
         @endif

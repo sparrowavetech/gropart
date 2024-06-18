@@ -58,7 +58,7 @@ return new class () extends Migration {
             $table->string('lang_code');
             $table->foreignId('ec_brands_id');
             $table->string('name')->nullable();
-            $table->string('description')->nullable();
+            $table->string('description', 400)->nullable();
 
             $table->primary(['lang_code', 'ec_brands_id'], 'ec_brands_translations_primary');
         });
@@ -67,7 +67,7 @@ return new class () extends Migration {
             $table->string('lang_code');
             $table->foreignId('ec_product_collections_id');
             $table->string('name')->nullable();
-            $table->string('description')->nullable();
+            $table->string('description', 400)->nullable();
 
             $table->primary(['lang_code', 'ec_product_collections_id'], 'ec_product_collections_translations_primary');
         });
@@ -76,7 +76,7 @@ return new class () extends Migration {
             $table->string('lang_code');
             $table->foreignId('ec_product_labels_id');
             $table->string('name')->nullable();
-            $table->string('description')->nullable();
+            $table->string('description', 400)->nullable();
 
             $table->primary(['lang_code', 'ec_product_labels_id'], 'ec_product_labels_translations_primary');
         });

@@ -5,19 +5,13 @@ namespace Botble\Language\Http\Middleware;
 use Botble\Language\Facades\Language;
 use Botble\Language\LanguageNegotiator;
 use Closure;
-use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Contracts\Session\Session;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Session;
 
 class LocaleSessionRedirect extends LaravelLocalizationMiddlewareBase
 {
-    public function __construct(
-        protected Application $app,
-        protected Session $session
-    ) {
-    }
-
     public function handle(Request $request, Closure $next)
     {
         // If the URL of the request is in exceptions.
@@ -31,14 +25,14 @@ class LocaleSessionRedirect extends LaravelLocalizationMiddlewareBase
         if (count($params) > 0 && Language::checkLocaleInSupportedLocales($paramLocale)) {
             $this->updatePreviousLanguage($paramLocale);
 
-            $this->session->put(['language' => $paramLocale]);
+            Session::put(['language' => $paramLocale]);
 
-            $this->app->setLocale($paramLocale);
+            App::setLocale($paramLocale);
 
             return $next($request);
         }
 
-        $locale = $this->session->get('language', false);
+        $locale = Session::get('language', false);
 
         $defaultLocale = Language::getDefaultLocale();
 
@@ -65,16 +59,19 @@ class LocaleSessionRedirect extends LaravelLocalizationMiddlewareBase
         }
 
         $this->updatePreviousLanguage($defaultLocale);
-        $this->session->put(['language' => $defaultLocale]);
-        $this->app->setLocale($defaultLocale);
+
+        $locale = $locale ?: $defaultLocale;
+
+        Session::put(['language' => $locale]);
+
+        App::setLocale($locale);
 
         if (
             $locale
             && Language::checkLocaleInSupportedLocales($locale)
-            && ! ($defaultLocale === $locale
-            && Language::hideDefaultLocaleInURL())
+            && (! ($defaultLocale === $locale) && Language::hideDefaultLocaleInURL())
         ) {
-            $this->session->reflash();
+            Session::reflash();
 
             $redirection = Language::getLocalizedURL($locale, null, [], false);
 
@@ -86,9 +83,9 @@ class LocaleSessionRedirect extends LaravelLocalizationMiddlewareBase
 
     protected function updatePreviousLanguage(string $language): void
     {
-        if ($this->session->has('language')
-            && ($sessionLanguage = $this->session->get('language')) !== $language) {
-            $this->session->put(['previous_language' => $sessionLanguage]);
+        if (Session::has('language')
+            && ($sessionLanguage = Session::get('language')) !== $language) {
+            Session::put(['previous_language' => $sessionLanguage]);
         }
     }
 }

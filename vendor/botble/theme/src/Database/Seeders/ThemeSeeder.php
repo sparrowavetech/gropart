@@ -25,7 +25,7 @@ class ThemeSeeder extends BaseSeeder
         return $this;
     }
 
-    protected function currentDirectoryPath(string $path, string|null $theme = null): string
+    protected function currentDirectoryPath(string $path, ?string $theme = null): string
     {
         $theme = $theme ?: $this->getThemeName();
 
@@ -39,7 +39,7 @@ class ThemeSeeder extends BaseSeeder
         return Str::slug(Str::afterLast($reflection->getNamespaceName(), '\\'));
     }
 
-    protected function filePath(string $path, string|null $basePath = null): string
+    protected function filePath(string $path, ?string $basePath = null): string
     {
         if (! $basePath && ! isset($this->basePath)) {
             $this->setCurrentDirectoryPath('');

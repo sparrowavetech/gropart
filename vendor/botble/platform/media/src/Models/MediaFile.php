@@ -30,6 +30,7 @@ class MediaFile extends BaseModel
         'folder_id',
         'user_id',
         'alt',
+        'visibility',
     ];
 
     protected $casts = [
@@ -37,9 +38,13 @@ class MediaFile extends BaseModel
         'name' => SafeContent::class,
     ];
 
+    protected $appends = [
+        'indirect_url',
+    ];
+
     protected static function booted(): void
     {
-        static::forceDeleting(fn (MediaFile $file) => RvMedia::deleteFile($file));
+        static::forceDeleted(fn (MediaFile $file) => RvMedia::deleteFile($file));
     }
 
     public function folder(): BelongsTo
@@ -79,6 +84,7 @@ class MediaFile extends BaseModel
                 'video' => 'ti ti-video',
                 'pdf' => 'ti ti-file-type-pdf',
                 'excel' => 'ti ti-file-spreadsheet',
+                'zip' => 'ti ti-file-zip',
                 default => 'ti ti-file',
             };
 
@@ -88,11 +94,16 @@ class MediaFile extends BaseModel
 
     protected function previewUrl(): Attribute
     {
-        return Attribute::get(function (): string|null {
+        return Attribute::get(function (): ?string {
             $preview = null;
 
             switch ($this->type) {
                 case 'image':
+                    if ($this->visibility === 'public') {
+                        $preview = RvMedia::url($this->url);
+                    }
+
+                    break;
                 case 'pdf':
                 case 'text':
                 case 'video':
@@ -100,7 +111,7 @@ class MediaFile extends BaseModel
 
                     break;
                 case 'document':
-                    if ($this->mime_type === 'application/pdf') {
+                    if ($this->mime_type === 'application/pdf' && $this->visibility === 'public') {
                         $preview = RvMedia::url($this->url);
 
                         break;
@@ -108,6 +119,7 @@ class MediaFile extends BaseModel
 
                     $config = config('core.media.media.preview.document', []);
                     if (
+                        $this->visibility === 'public' &&
                         Arr::get($config, 'enabled') &&
                         Request::ip() !== '127.0.0.1' &&
                         in_array($this->mime_type, Arr::get($config, 'mime_types', [])) &&
@@ -128,9 +140,21 @@ class MediaFile extends BaseModel
         return Attribute::get(fn () => Arr::get(config('core.media.media.preview', []), "$this->type.type"));
     }
 
+    protected function indirectUrl(): Attribute
+    {
+        return Attribute::get(function () {
+            $id = static::isUsingStringId()
+                ? $this->getKey()
+                : dechex($this->getKey());
+            $hash = sha1($id);
+
+            return route('media.indirect.url', compact('hash', 'id'));
+        })->shouldCache();
+    }
+
     public function canGenerateThumbnails(): bool
     {
-        return RvMedia::canGenerateThumbnails($this->mime_type);
+        return (! $this->visibility || $this->visibility === 'public') && RvMedia::canGenerateThumbnails($this->mime_type);
     }
 
     public static function createName(string $name, int|string|null $folder): string
@@ -144,7 +168,7 @@ class MediaFile extends BaseModel
         return $name;
     }
 
-    public static function createSlug(string $name, string $extension, string|null $folderPath): string
+    public static function createSlug(string $name, string $extension, ?string $folderPath): string
     {
         if (setting('media_use_original_name_for_file_path')) {
             $slug = $name;

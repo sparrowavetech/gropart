@@ -1,4 +1,4 @@
-<x-core::form.helper-text class="mt-2">
+<x-core::form.helper-text class="mb-3">
     {!! BaseHelper::clean(trans(
         'plugins/language::language.setup_site_language',
         [

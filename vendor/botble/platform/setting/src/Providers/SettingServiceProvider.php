@@ -96,7 +96,7 @@ class SettingServiceProvider extends ServiceProvider
                     ->withIcon('ti ti-calendar-event')
                     ->withDescription(trans('core/setting::setting.cronjob.description'))
                     ->withPriority(50)
-                    ->withRoute('settings.cronjob')
+                    ->withRoute('system.cronjob')
             );
         });
 

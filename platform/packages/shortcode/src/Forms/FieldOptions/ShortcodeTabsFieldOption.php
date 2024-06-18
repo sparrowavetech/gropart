@@ -2,6 +2,7 @@
 
 namespace Botble\Shortcode\Forms\FieldOptions;
 
+use Botble\Base\Contracts\BaseModel;
 use Botble\Base\Forms\FormFieldOptions;
 use Illuminate\Support\Arr;
 
@@ -12,15 +13,23 @@ class ShortcodeTabsFieldOption extends FormFieldOptions
         return parent::make()->max(20);
     }
 
-    public function fields(array $fields = []): static
+    public function fields(array $fields = [], ?string $key = null): static
     {
         $this->addAttribute('fields', $fields);
+
+        if ($key) {
+            $this->addAttribute('tab_key', $key);
+        }
 
         return $this;
     }
 
-    public function attrs(array $attributes = []): static
+    public function attrs(array|BaseModel $attributes = []): static
     {
+        if ($attributes instanceof BaseModel) {
+            $attributes = $attributes->toArray();
+        }
+
         $this->addAttribute('shortcode_attributes', $attributes);
 
         return $this;
@@ -29,6 +38,13 @@ class ShortcodeTabsFieldOption extends FormFieldOptions
     public function max(int $max): static
     {
         $this->addAttribute('max', $max);
+
+        return $this;
+    }
+
+    public function min(int $min): static
+    {
+        $this->addAttribute('min', $min);
 
         return $this;
     }
@@ -44,7 +60,9 @@ class ShortcodeTabsFieldOption extends FormFieldOptions
             }
         }
 
-        if (! Arr::has($data['shortcode_attributes'], 'quantity')) {
+        $tabKey = $this->getAttribute('tab_key');
+
+        if (! Arr::has($data['shortcode_attributes'], $tabKey ? "{$tabKey}_quantity" : 'quantity')) {
             $data['shortcode_attributes']['quantity'] = min(Arr::get($data, 'max'), 6);
         }
 

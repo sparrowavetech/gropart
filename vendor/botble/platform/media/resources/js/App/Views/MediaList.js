@@ -129,7 +129,7 @@ export class MediaList {
             } else {
                 item = item.replace(
                     /__thumb__/gi,
-                    value.type === 'image'
+                    value.thumb
                         ? `<img src="${value.thumb ? value.thumb : value.full_url}" alt="${value.name}">`
                         : value.icon
                 )

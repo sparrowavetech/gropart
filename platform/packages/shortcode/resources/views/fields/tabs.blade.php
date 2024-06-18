@@ -1,9 +1,10 @@
 <div class="mb-3">
     <div class="mb-3">
         <label class="form-label">{{ __('Quantity') }}</label>
-        {!! Form::customSelect('quantity', $choices, $current, [
+        {!! Form::customSelect($tabKey ? "{$tabKey}_quantity" : 'quantity', $choices, $current, [
             'id' => $selector,
             'data-max' => $max,
+            'data-key' => $tabKey,
             'class' => 'shortcode-tabs-quantity-select',
         ]) !!}
     </div>
@@ -13,37 +14,41 @@
         id="accordion-tab-shortcode mt-2"
         style="--bs-accordion-btn-padding-y: .7rem;"
     >
-        @for ($i = 1; $i <= $max; $i++)
+        @for ($i = $min; $i <= $max; $i++)
+            @php
+                $tabItemKey = $tabKey ? "{$tabKey}_{$i}" : $i;
+            @endphp
             <div
-                class="accordion-item @if ($i > $current) d-none @endif"
-                data-tab-id="{{ $i }}"
+                class="accordion-item"
+                @style(['display: none' => $i > $current])
+                data-tab-id="{{ $tabItemKey }}"
             >
                 <h2
                     class="accordion-header"
-                    id="heading-{{ $i }}"
+                    id="heading-{{ $tabItemKey }}"
                 >
                     <button
                         class="accordion-button collapsed"
                         data-bs-toggle="collapse"
-                        data-bs-target="#collapse-{{ $i }}"
+                        data-bs-target="#collapse-{{ $tabItemKey }}"
                         type="button"
                         aria-expanded="false"
-                        aria-controls="collapse-{{ $i }}"
+                        aria-controls="collapse-{{ $tabItemKey }}"
                     >
                         {{ __('Tab #:number', ['number' => $i]) }}
                     </button>
                 </h2>
                 <div
                     class="accordion-collapse collapse"
-                    id="collapse-{{ $i }}"
+                    id="collapse-{{ $tabItemKey }}"
                     data-bs-parent="#accordion-tab-shortcode"
-                    aria-labelledby="heading-{{ $i }}"
+                    aria-labelledby="heading-{{ $tabItemKey }}"
                 >
                     <div class="accordion-body bg-light">
                         <div class="section">
                             @foreach ($fields as $k => $field)
                                 @php
-                                    $key = $k . '_' . $i;
+                                    $key = $tabKey ? "{$tabKey}_{$k}_{$i}" : "{$k}_{$i}";
                                     $name = $i <= $current ? $key : '';
                                     $title = Arr::get($field, 'title');
                                     $placeholder = Arr::get($field, 'placeholder', $title);

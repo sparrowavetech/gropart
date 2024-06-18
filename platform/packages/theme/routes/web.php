@@ -82,5 +82,34 @@ Route::group(['namespace' => 'Botble\Theme\Http\Controllers'], function () {
                 'middleware' => 'preventDemo',
             ]);
         });
+
+        Route::group(['prefix' => 'theme/robots-txt'], function () {
+            Route::get('', [
+                'as' => 'theme.robots-txt',
+                'uses' => 'ThemeController@getRobotsTxt',
+            ]);
+
+            Route::post('', [
+                'as' => 'theme.robots-txt.post',
+                'uses' => 'ThemeController@postRobotsTxt',
+                'permission' => 'theme.robots-txt',
+                'middleware' => 'preventDemo',
+            ]);
+        });
+
+        Route::prefix('settings')->name('settings.')->group(function () {
+            Route::prefix('website-tracking')->group(function () {
+                Route::get('/', [
+                    'as' => 'website-tracking',
+                    'uses' => 'WebsiteTrackingSettingController@edit',
+                ]);
+
+                Route::put('/', [
+                    'as' => 'website-tracking.update',
+                    'uses' => 'WebsiteTrackingSettingController@update',
+                    'permission' => 'settings.website-tracking',
+                ]);
+            });
+        });
     });
 });

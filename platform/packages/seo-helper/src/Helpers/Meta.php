@@ -227,7 +227,7 @@ class Meta implements MetaContract
      */
     protected function setName($name)
     {
-        $name = trim(strip_tags((string)$name));
+        $name = trim(strip_tags((string) $name));
         $this->name = str_replace([' '], '-', $name);
 
         return $this;
@@ -242,7 +242,7 @@ class Meta implements MetaContract
      */
     public function clean($value)
     {
-        return BaseHelper::html(strip_tags((string)$value));
+        return BaseHelper::html(strip_tags((string) $value));
     }
 
     /**

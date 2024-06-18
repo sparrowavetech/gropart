@@ -4,6 +4,7 @@ return [
     [
         'name' => 'Analytics',
         'flag' => 'analytics.general',
+        'parent_flag' => 'core.system',
     ],
     [
         'name' => 'Top Page',
@@ -21,8 +22,8 @@ return [
         'parent_flag' => 'analytics.general',
     ],
     [
-        'name' => 'Analytics Settings',
+        'name' => 'Analytics',
         'flag' => 'analytics.settings',
-        'parent_flag' => 'analytics.general',
+        'parent_flag' => 'settings.others',
     ],
 ];

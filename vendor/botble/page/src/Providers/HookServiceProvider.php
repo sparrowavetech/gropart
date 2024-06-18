@@ -76,7 +76,7 @@ class HookServiceProvider extends ServiceProvider
         $this->app['events']->listen(RouteMatched::class, function () {
             if (defined('THEME_FRONT_HEADER')) {
                 add_action(BASE_ACTION_PUBLIC_RENDER_SINGLE, function ($screen, $page): void {
-                    add_filter(THEME_FRONT_HEADER, function (string|null $html) use ($page): string|null {
+                    add_filter(THEME_FRONT_HEADER, function (?string $html) use ($page): string|null {
                         if (get_class($page) != Page::class) {
                             return $html;
                         }
@@ -92,13 +92,13 @@ class HookServiceProvider extends ServiceProvider
                             ],
                         ];
 
-                        return $html . Html::tag('script', json_encode($schema), ['type' => 'application/ld+json'])
+                        return $html . Html::tag('script', json_encode($schema, JSON_UNESCAPED_UNICODE), ['type' => 'application/ld+json'])
                                 ->toHtml();
                     }, 2);
                 }, 2, 2);
             }
 
-            add_filter(PAGE_FILTER_FRONT_PAGE_CONTENT, fn (string|null $html) => (string) $html, 1, 2);
+            add_filter(PAGE_FILTER_FRONT_PAGE_CONTENT, fn (?string $html) => (string) $html, 1, 2);
 
             add_filter('table_name_column_data', [$this, 'appendPageName'], 2, 3);
         });

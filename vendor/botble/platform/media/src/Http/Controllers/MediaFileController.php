@@ -74,8 +74,8 @@ class MediaFileController extends BaseController
     public function postDownloadUrl(Request $request)
     {
         $validator = Validator::make($request->input(), [
-            'url' => 'required|url',
-            'folderId' => 'nullable|integer',
+            'url' => ['required', 'url'],
+            'folderId' => ['nullable', 'integer'],
         ]);
 
         if ($validator->fails()) {

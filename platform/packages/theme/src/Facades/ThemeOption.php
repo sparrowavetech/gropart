@@ -2,7 +2,7 @@
 
 namespace Botble\Theme\Facades;
 
-use Botble\Theme\ThemeOption as BaseThemeOption;
+use Botble\Theme\ThemeOption as ThemeOptionBase;
 use Illuminate\Support\Facades\Facade;
 
 /**
@@ -12,11 +12,11 @@ use Illuminate\Support\Facades\Facade;
  * @method static bool getSection(string $id = '')
  * @method static void checkOptName()
  * @method static array getSections()
- * @method static \Botble\Theme\ThemeOption setSections(array $sections = [])
- * @method static \Botble\Theme\ThemeOption setSection(array $section = [])
+ * @method static \Botble\Theme\ThemeOption setSections(\Botble\Theme\ThemeOption\ThemeOptionSection[]|array $sections = [])
+ * @method static \Botble\Theme\ThemeOption setSection(\Botble\Theme\ThemeOption\ThemeOptionSection|array $section = [])
  * @method static int getPriority(string $type)
- * @method static void processFieldsArray(string $sectionId = '', array $fields = [])
- * @method static \Botble\Theme\ThemeOption setField(array $field = [])
+ * @method static void processFieldsArray(string $sectionId = '', \Botble\Theme\ThemeOption\ThemeOptionField[]|array $fields = [])
+ * @method static \Botble\Theme\ThemeOption setField(\Botble\Theme\ThemeOption\ThemeOptionField|array $field = [])
  * @method static \Botble\Theme\ThemeOption removeSection(string $id = '', bool $fields = false)
  * @method static void hideSection(string $id = '', bool $hide = true)
  * @method static array|bool getField(string $id = '')
@@ -26,6 +26,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static \Botble\Theme\ThemeOption setArgs(array $args = [])
  * @method static string|null getArg(string $key = '')
  * @method static \Botble\Theme\ThemeOption setOption(string $key, array|string|null $value = '')
+ * @method static \Botble\Theme\ThemeOption setOptions(array $options)
  * @method static string getOptionKey(string $key, string|null $locale = '', string|null $theme = null)
  * @method static string|null renderField(array $field)
  * @method static bool hasOption(string $key)
@@ -45,6 +46,6 @@ class ThemeOption extends Facade
 {
     protected static function getFacadeAccessor(): string
     {
-        return BaseThemeOption::class;
+        return ThemeOptionBase::class;
     }
 }

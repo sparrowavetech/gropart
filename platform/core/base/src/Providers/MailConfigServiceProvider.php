@@ -40,7 +40,7 @@ class MailConfigServiceProvider extends ServiceProvider
                         'mail.mailers.smtp' => array_merge($config->get('mail.mailers.smtp'), [
                             'transport' => 'smtp',
                             'host' => $setting->get('email_host', $config->get('mail.mailers.smtp.host')),
-                            'port' => (int)$setting->get('email_port', $config->get('mail.mailers.smtp.port')),
+                            'port' => (int) $setting->get('email_port', $config->get('mail.mailers.smtp.port')),
                             'encryption' => $setting->get(
                                 'email_encryption',
                                 $config->get('mail.mailers.smtp.encryption')
@@ -68,6 +68,7 @@ class MailConfigServiceProvider extends ServiceProvider
                                 'email_mail_gun_endpoint',
                                 $config->get('services.mailgun.endpoint')
                             ),
+                            'scheme' => 'https',
                         ],
                     ]);
 

@@ -143,7 +143,7 @@ if (! function_exists('get_categories')) {
         $categories = sort_item_with_children($categories);
 
         foreach ($categories as $category) {
-            $depth = (int)$category->depth;
+            $depth = (int) $category->depth;
             $indentText = str_repeat($indent, $depth);
             $category->indent_text = $indentText;
         }
@@ -180,7 +180,7 @@ if (! function_exists('get_post_formats')) {
 }
 
 if (! function_exists('get_blog_page_id')) {
-    function get_blog_page_id(): string|null
+    function get_blog_page_id(): ?string
     {
         return theme_option('blog_page_id', setting('blog_page_id'));
     }
@@ -189,7 +189,7 @@ if (! function_exists('get_blog_page_id')) {
 if (! function_exists('get_blog_page_url')) {
     function get_blog_page_url(): string
     {
-        $blogPageId = (int)theme_option('blog_page_id', setting('blog_page_id'));
+        $blogPageId = (int) theme_option('blog_page_id', setting('blog_page_id'));
 
         if (! $blogPageId) {
             return BaseHelper::getHomepageUrl();

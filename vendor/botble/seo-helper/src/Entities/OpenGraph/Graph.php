@@ -140,7 +140,7 @@ class Graph implements OpenGraphContract
         return $this;
     }
 
-    public function getProperty(string $name): string|null
+    public function getProperty(string $name): ?string
     {
         if (! $this->meta->has($name)) {
             return null;
@@ -148,7 +148,7 @@ class Graph implements OpenGraphContract
 
         $meta = $this->meta->get($name);
 
-        return (string)$meta?->getContent();
+        return (string) $meta?->getContent();
     }
 
     /**

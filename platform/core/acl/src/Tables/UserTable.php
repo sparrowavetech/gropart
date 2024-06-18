@@ -148,12 +148,12 @@ class UserTable extends TableAbstract
             });
     }
 
-    public function htmlDrawCallbackFunction(): string|null
+    public function htmlDrawCallbackFunction(): ?string
     {
         return parent::htmlDrawCallbackFunction() . 'Botble.initEditable()';
     }
 
-    public function saveBulkChanges(array $ids, string $inputKey, string|null $inputValue): bool
+    public function saveBulkChanges(array $ids, string $inputKey, ?string $inputValue): bool
     {
         if (BaseHelper::hasDemoModeEnabled()) {
             throw new DisabledInDemoModeException();
@@ -198,7 +198,7 @@ class UserTable extends TableAbstract
         EloquentBuilder|QueryBuilder|EloquentRelation $query,
         string $key,
         string $operator,
-        string|null $value
+        ?string $value
     ): EloquentRelation|EloquentBuilder|QueryBuilder {
         if ($key === 'status' && $value) {
 

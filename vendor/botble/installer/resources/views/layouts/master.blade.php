@@ -12,6 +12,11 @@
     >
     <title>@yield('pageTitle', trans('packages/installer::installer.title'))</title>
 
+    <meta
+        name="description"
+        content="Installation Botble CMS v{{ get_cms_version() }}"
+    >
+
     <link
         href="{{ asset('vendor/core/core/base/images/favicon.png') }}"
         rel="icon"
@@ -79,13 +84,13 @@
     @endphp
 
     <div class="page-wrapper justify-content-center min-h-full">
-        <div class="page-body page-content">
+        <div class="page-body page-content mt-8 mb-8">
             <div class="container-xl installer-container">
                 <div class="row mb-6">
                     <div class="col">
-                        <h2 class="h1 page-title justify-content-center text-white">
+                        <h3 class="h1 page-title justify-content-center text-white">
                             {{ trans('packages/installer::installer.title') }}
-                        </h2>
+                        </h3>
                     </div>
                 </div>
 

@@ -17,6 +17,11 @@ class DataTableSettingController extends SettingController
 
     public function update(DataTableSettingRequest $request): BaseHttpResponse
     {
+        if (setting('datatables_default_show_column_visibility')
+            != $request->input('datatables_default_show_column_visibility')) {
+            setting()->set('datatables_random_hash', hash('sha256', time()));
+        }
+
         return $this->performUpdate($request->validated());
     }
 }

@@ -22,7 +22,7 @@
         </div>
         <div class="position-relative col-12 col-lg-6 col-xl-8 d-none d-lg-block">
             <div
-                class="bg-cover h-100 min-vh-100"
+                class="bg-cover bg-white h-100 min-vh-100"
                 style="background-image: url({{ $backgroundUrl }})"
             ></div>
             <div class="end-0 bottom-0 position-absolute">

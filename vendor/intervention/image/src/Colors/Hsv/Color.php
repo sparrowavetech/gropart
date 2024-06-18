@@ -9,7 +9,7 @@ use Intervention\Image\Colors\Hsv\Channels\Hue;
 use Intervention\Image\Colors\Hsv\Channels\Saturation;
 use Intervention\Image\Colors\Hsv\Channels\Value;
 use Intervention\Image\Colors\Rgb\Colorspace as RgbColorspace;
-use Intervention\Image\Drivers\AbstractInputHandler;
+use Intervention\Image\InputHandler;
 use Intervention\Image\Interfaces\ColorChannelInterface;
 use Intervention\Image\Interfaces\ColorInterface;
 use Intervention\Image\Interfaces\ColorspaceInterface;
@@ -18,6 +18,7 @@ class Color extends AbstractColor
 {
     public function __construct(int $h, int $s, int $v)
     {
+        /** @throws void */
         $this->channels = [
             new Hue($h),
             new Saturation($s),
@@ -25,6 +26,11 @@ class Color extends AbstractColor
         ];
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * @see ColorInterface::colorspace()
+     */
     public function colorspace(): ColorspaceInterface
     {
         return new Colorspace();
@@ -37,11 +43,9 @@ class Color extends AbstractColor
      */
     public static function create(mixed $input): ColorInterface
     {
-        return (new class ([
+        return InputHandler::withDecoders([
             Decoders\StringColorDecoder::class,
-        ]) extends AbstractInputHandler
-        {
-        })->handle($input);
+        ])->handle($input);
     }
 
     /**
@@ -51,6 +55,7 @@ class Color extends AbstractColor
      */
     public function hue(): ColorChannelInterface
     {
+        /** @throws void */
         return $this->channel(Hue::class);
     }
 
@@ -61,6 +66,7 @@ class Color extends AbstractColor
      */
     public function saturation(): ColorChannelInterface
     {
+        /** @throws void */
         return $this->channel(Saturation::class);
     }
 
@@ -71,6 +77,7 @@ class Color extends AbstractColor
      */
     public function value(): ColorChannelInterface
     {
+        /** @throws void */
         return $this->channel(Value::class);
     }
 
@@ -102,5 +109,15 @@ class Color extends AbstractColor
     public function isGreyscale(): bool
     {
         return $this->saturation()->value() == 0;
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @see ColorInterface::isTransparent()
+     */
+    public function isTransparent(): bool
+    {
+        return false;
     }
 }

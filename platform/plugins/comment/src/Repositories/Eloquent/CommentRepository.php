@@ -2,8 +2,8 @@
 
 namespace Botble\Comment\Repositories\Eloquent;
 
-use BaseHelper;
 use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Comment\Repositories\Interfaces\CommentInterface;
 use Botble\Support\Repositories\Eloquent\RepositoriesAbstract;
 

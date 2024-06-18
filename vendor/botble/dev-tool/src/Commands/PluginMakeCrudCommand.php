@@ -2,6 +2,7 @@
 
 namespace Botble\DevTool\Commands;
 
+use Botble\Base\Facades\BaseHelper;
 use Botble\DevTool\Commands\Abstracts\BaseMakeCommand;
 use Botble\DevTool\Commands\Concerns\HasSubModule;
 use Botble\DevTool\Helper;
@@ -46,7 +47,6 @@ class PluginMakeCrudCommand extends BaseMakeCommand implements PromptsForMissing
 
         $this->handleReplacements($location, [
             Helper::joinPaths(['config', 'permissions.stub']),
-            Helper::joinPaths(['helpers', 'helpers.stub']),
             Helper::joinPaths(['routes', 'web.stub']),
             Helper::joinPaths(['src', 'Providers', '{Module}ServiceProvider.stub']),
             Helper::joinPaths(['src', 'Plugin.stub']),
@@ -64,9 +64,15 @@ class PluginMakeCrudCommand extends BaseMakeCommand implements PromptsForMissing
     {
         $files = [
             Helper::joinPaths(['config', 'permissions.stub']),
-            Helper::joinPaths(['helpers', 'constants.stub']),
             Helper::joinPaths(['routes', 'web.stub']),
-            Helper::joinPaths(['src', 'Providers', '{Module}ServiceProvider.stub']),
+            Helper::joinPaths(['helpers', 'helpers.stub']),
+            Helper::joinPaths(['resources', 'views', '.gitkeep']),
+            'composer.json',
+            Helper::joinPaths(['src', 'Providers', '{Name}ServiceProvider.stub']),
+            Helper::joinPaths(['src', 'Forms', 'Settings', '{Name}Form.stub']),
+            Helper::joinPaths(['src', 'Http', 'Controllers', 'Settings', '{Name}Controller.stub']),
+            Helper::joinPaths(['src', 'Http', 'Requests', 'Settings', '{Name}Request.stub']),
+            Helper::joinPaths(['src', 'PanelSections', '{Name}PanelSection.stub']),
         ];
 
         foreach ($files as $file) {
@@ -78,6 +84,14 @@ class PluginMakeCrudCommand extends BaseMakeCommand implements PromptsForMissing
     {
         $module = strtolower($this->argument('plugin'));
 
+        $pluginContent = BaseHelper::getFileData(BaseHelper::joinPaths([plugin_path($module), 'plugin.json']));
+
+        $namespace = $module;
+
+        if ($pluginContent) {
+            $namespace = $pluginContent['namespace'];
+        }
+
         return [
             '{type}' => 'plugin',
             '{types}' => 'plugins',
@@ -88,7 +102,7 @@ class PluginMakeCrudCommand extends BaseMakeCommand implements PromptsForMissing
             '{Modules}' => ucfirst(Str::plural(Str::snake(str_replace('-', '_', $module)))),
             '{-modules}' => Str::plural($module),
             '{MODULE}' => strtoupper(Str::snake(str_replace('-', '_', $module))),
-            '{Module}' => ucfirst(Str::camel($module)),
+            '{Module}' => rtrim($namespace, '\\'),
         ];
     }
 

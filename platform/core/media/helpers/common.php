@@ -19,10 +19,10 @@ if (! function_exists('get_image_url')) {
      */
     function get_image_url(
         string $url,
-        string|null $size = null,
+        ?string $size = null,
         bool $relativePath = false,
         $default = null
-    ): string|null {
+    ): ?string {
         return RvMedia::getImageUrl($url, $size, $relativePath, $default);
     }
 }
@@ -31,7 +31,7 @@ if (! function_exists('get_object_image')) {
     /**
      * @deprecated since 5.7
      */
-    function get_object_image(string $image, string|null $size = null, bool $relativePath = false): string|null
+    function get_object_image(string $image, ?string $size = null, bool $relativePath = false): ?string
     {
         return RvMedia::getImageUrl($image, $size, $relativePath, RvMedia::getDefaultImage());
     }

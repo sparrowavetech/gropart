@@ -12,7 +12,7 @@ interface PageInterface extends RepositoryInterface
 
     public function whereIn(array $array, array $select = []): Collection;
 
-    public function getSearch(string|null $query, int $limit = 10): Collection|LengthAwarePaginator;
+    public function getSearch(?string $query, int $limit = 10): Collection|LengthAwarePaginator;
 
     public function getAllPages(bool $active = true): Collection;
 }

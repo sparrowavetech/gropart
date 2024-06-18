@@ -67,10 +67,16 @@
             <x-core::button
                 type="button"
                 id="copy-report"
-                color="info"
                 size="sm"
                 class="mt-2"
+                data-bb-toggle="clipboard"
+                data-clipboard-action="copy"
+                data-clipboard-message="Copied"
+                data-clipboard-target="#txt-report"
             >
+                <x-core::icon name="ti ti-clipboard" data-clipboard-icon="true" />
+                <x-core::icon name="ti ti-check" data-clipboard-success-icon="true" class="text-success d-none" />
+
                 {{ trans('core/base::system.copy_report') }}
             </x-core::button>
         </div>

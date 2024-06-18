@@ -4,7 +4,7 @@ namespace Botble\Revision;
 
 class FieldFormatter
 {
-    public static function format(string $key, string|null $value, array $formats): string|null
+    public static function format(string $key, ?string $value, array $formats): ?string
     {
         foreach ($formats as $pkey => $format) {
             $parts = explode(':', $format);

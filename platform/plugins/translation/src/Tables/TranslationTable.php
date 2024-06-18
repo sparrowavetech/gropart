@@ -3,18 +3,17 @@
 namespace Botble\Translation\Tables;
 
 use Botble\Base\Facades\Assets;
-use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\Html;
 use Botble\Base\Supports\Language;
+use Botble\DataSynchronize\Table\HeaderActions\ExportHeaderAction;
+use Botble\DataSynchronize\Table\HeaderActions\ImportHeaderAction;
 use Botble\Table\Abstracts\TableAbstract;
 use Botble\Table\BulkChanges\SelectBulkChange;
 use Botble\Table\CollectionDataTable;
 use Botble\Table\Columns\FormattedColumn;
+use Botble\Translation\Services\GetGroupedTranslationsService;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Str;
-use Throwable;
 
 class TranslationTable extends TableAbstract
 {
@@ -25,7 +24,7 @@ class TranslationTable extends TableAbstract
         parent::setup();
 
         $this->hasOperations = false;
-        $this->setView('plugins/translation::table');
+        $this->setView('core/table::base-table');
         $this->pageLength = 100;
 
         Assets::addScripts(['bootstrap-editable'])
@@ -34,43 +33,15 @@ class TranslationTable extends TableAbstract
         $this->useDefaultSorting = false;
 
         $this
+            ->addHeaderActions([
+                ExportHeaderAction::make()->route('tools.data-synchronize.export.other-translations.index')->permission('other-translations.export'),
+                ImportHeaderAction::make()->route('tools.data-synchronize.import.other-translations.index')->permission('other-translations.import'),
+            ])
             ->onAjax(function () {
-                $translations = [];
-
-                $langLoader = Lang::getLoader();
-
-                foreach ($this->getGroups() as $group) {
-                    if (! str_contains($group, DIRECTORY_SEPARATOR)) {
-                        $trans = $langLoader->load('en', $group);
-                    } else {
-                        $trans = $langLoader->load('en', Str::afterLast($group, DIRECTORY_SEPARATOR), Str::beforeLast($group, DIRECTORY_SEPARATOR));
-                    }
-
-                    if ($trans && is_array($trans)) {
-                        foreach (Arr::dot($trans) as $key => $value) {
-                            if (empty($value)) {
-                                continue;
-                            }
-
-                            $translations[$group][$key] = $value;
-                        }
-                    }
-                }
-
-                $translationsCollection = collect();
-
-                foreach ($translations as $group => $items) {
-                    foreach (Arr::dot($items) as $key => $value) {
-                        $translationsCollection->push([
-                            'group' => $group,
-                            'key' => $key,
-                            'value' => $value,
-                        ]);
-                    }
-                }
+                $translations = (new GetGroupedTranslationsService())->handle();
 
                 if ($this->isFiltering()) {
-                    $translationsCollection = $translationsCollection->filter(function ($item) {
+                    $translations = $translations->filter(function ($item) {
                         $filterColumns = $this->request()->query('filter_columns');
                         $filterOperator = $this->request()->query('filter_operators');
                         $filterValues = $this->request()->query('filter_values');
@@ -101,7 +72,7 @@ class TranslationTable extends TableAbstract
                 }
 
                 if ($this->request()->filled('group')) {
-                    $translationsCollection = $translationsCollection->filter(function ($item) {
+                    $translations = $translations->filter(function ($item) {
                         return $item['group'] === $this->request()->query('group');
                     });
                 }
@@ -109,7 +80,7 @@ class TranslationTable extends TableAbstract
                 return $this->toJson(
                     $this
                         ->table
-                        ->of($translationsCollection)
+                        ->of($translations)
                         ->filter(function (CollectionDataTable $query) {
                             if ($keyword = $this->request->input('search.value')) {
                                 $query->collection = $query->collection->filter(function ($item) use ($keyword) {
@@ -129,7 +100,7 @@ class TranslationTable extends TableAbstract
             'group' => SelectBulkChange::make()
                 ->name('group')
                 ->title(trans('plugins/translation::translation.group'))
-                ->choices($this->getGroups())
+                ->choices((new GetGroupedTranslationsService())->getGroups())
                 ->validate(['required', 'string'])->toArray(),
         ];
     }
@@ -140,7 +111,6 @@ class TranslationTable extends TableAbstract
             FormattedColumn::make('group')
                 ->title(trans('plugins/translation::translation.group'))
                 ->alignStart()
-                ->nowrap()
                 ->searchable(false)
                 ->getValueUsing(function (FormattedColumn $column) {
                     $item = $column->getItem();
@@ -182,7 +152,7 @@ class TranslationTable extends TableAbstract
                 ->getValueUsing(function (FormattedColumn $column) {
                     $item = $column->getItem();
 
-                    $trans = trans(Str::of($item->group)->replaceLast('/', '::')->append(".$item->key")->toString(), [], 'en');
+                    $trans = trans(Str::of($item->group)->replaceLast(DIRECTORY_SEPARATOR, '::')->append(".$item->key")->toString(), [], 'en');
 
                     return $this->formatKeyAndValue(is_array($trans) ? $item->key : $trans);
                 }),
@@ -192,7 +162,7 @@ class TranslationTable extends TableAbstract
                 ->getValueUsing(function (FormattedColumn $column) {
                     $item = $column->getItem();
 
-                    $trans = trans(Str::of($item->group)->replaceLast('/', '::')->append(".$item->key")->toString(), [], $this->locale);
+                    $trans = trans(Str::of($item->group)->replaceLast(DIRECTORY_SEPARATOR, '::')->append(".$item->key")->toString(), [], $this->locale);
 
                     $value = $this->formatKeyAndValue(is_array($trans) ? $item->value : $trans);
 
@@ -216,60 +186,12 @@ class TranslationTable extends TableAbstract
         return $this;
     }
 
-    protected function formatKeyAndValue(string|null $value): string|null
+    protected function formatKeyAndValue(?string $value): ?string
     {
         return htmlentities($value, ENT_QUOTES, 'UTF-8', false);
     }
 
-    protected function getGroups(): array
-    {
-        $groups = [];
-
-        $langPaths = File::glob(lang_path(BaseHelper::joinPaths(['vendor', '*', '*', 'en'])));
-        $langPaths[] = lang_path('en');
-
-        foreach ($langPaths as $langPath) {
-            if (! File::isWritable($langPath)) {
-                continue;
-            }
-
-            try {
-                foreach (File::allFiles($langPath) as $file) {
-                    $group = str_replace(lang_path(), '', dirname($file));
-
-                    if ($group) {
-                        $group = str_replace('vendor' . DIRECTORY_SEPARATOR, '', $group);
-                    }
-
-                    $group = str_replace(DIRECTORY_SEPARATOR . 'en', '', $group);
-
-                    if (! $group) {
-                        $group = null;
-                    } else {
-                        $group = ltrim($group, DIRECTORY_SEPARATOR);
-                    }
-
-                    $fileName = File::name($file);
-
-                    if ($group) {
-                        $group .= DIRECTORY_SEPARATOR . $fileName;
-                    } else {
-                        $group = $fileName;
-                    }
-
-                    $groups[$group] = $group;
-                }
-            } catch (Throwable $exception) {
-                BaseHelper::logError($exception);
-
-                continue;
-            }
-        }
-
-        return $groups;
-    }
-
-    public function htmlDrawCallbackFunction(): string|null
+    public function htmlDrawCallbackFunction(): ?string
     {
         return parent::htmlDrawCallbackFunction() . 'Botble.initEditable()';
     }

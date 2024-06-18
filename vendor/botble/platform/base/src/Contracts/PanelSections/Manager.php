@@ -20,6 +20,8 @@ interface Manager extends Htmlable, Renderable
 
     public function default(): static;
 
+    public function moveGroup(string $from, string $to): static;
+
     /**
      * @param array<int, class-string<PanelSection>>|class-string<PanelSection>|\Closure(): PanelSection $panelSections
      */

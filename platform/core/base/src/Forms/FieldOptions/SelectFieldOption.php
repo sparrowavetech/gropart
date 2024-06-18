@@ -31,7 +31,7 @@ class SelectFieldOption extends FormFieldOptions
         return $this->choices;
     }
 
-    public function selected(array|string|bool|null $selected): static
+    public function selected(array|string|bool|float|null $selected): static
     {
         $this->selected = $selected;
 
@@ -122,9 +122,10 @@ class SelectFieldOption extends FormFieldOptions
             $data['selected'] = $this->getDefaultValue();
         }
 
-        if (isset($this->emptyValue)) {
-            $data['attr']['placeholder'] = $this->getEmptyValue();
-            $data['attr']['data-placeholder'] = $this->getEmptyValue();
+        if (isset($this->emptyValue) && $placeholder = $this->getEmptyValue()) {
+            $data['attr']['placeholder'] = $placeholder;
+            $data['attr']['data-placeholder'] = $placeholder;
+
         }
 
         if ($this->searchable) {

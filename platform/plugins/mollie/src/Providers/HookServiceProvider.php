@@ -78,12 +78,12 @@ class HookServiceProvider extends ServiceProvider
         }, 20, 2);
     }
 
-    public function addPaymentSettings(string|null $settings): string
+    public function addPaymentSettings(?string $settings): string
     {
         return $settings . view('plugins/mollie::settings')->render();
     }
 
-    public function registerMollieMethod(string|null $html, array $data): string|null
+    public function registerMollieMethod(?string $html, array $data): ?string
     {
         PaymentMethods::method(MOLLIE_PAYMENT_METHOD_NAME, [
             'html' => view('plugins/mollie::methods', $data)->render(),
@@ -109,10 +109,10 @@ class HookServiceProvider extends ServiceProvider
         try {
             $api = Mollie::api();
 
-            $response = $api->payments()->create([
+            $response = $api->payments->create([
                 'amount' => [
                     'currency' => $paymentData['currency'],
-                    'value' => number_format((float)$paymentData['amount'], 2, '.', ''),
+                    'value' => number_format((float) $paymentData['amount'], 2, '.', ''),
                 ],
                 'description' => 'Order(s) ' . $orderCodes->implode(', '),
                 'redirectUrl' => PaymentHelper::getRedirectURL(),

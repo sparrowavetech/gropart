@@ -8,7 +8,9 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
-use Mollie;
+use Mollie\Api\MollieApiClient;
+use Mollie\Api\Resources\Payment;
+use Mollie\Laravel\Facades\Mollie;
 
 abstract class MolliePaymentAbstract implements ProduceServiceInterface
 {
@@ -16,10 +18,7 @@ abstract class MolliePaymentAbstract implements ProduceServiceInterface
 
     protected string $paymentCurrency;
 
-    /**
-     * @var object
-     */
-    protected $client;
+    protected MollieApiClient $client;
 
     protected bool $supportRefundOnline;
 
@@ -48,10 +47,7 @@ abstract class MolliePaymentAbstract implements ProduceServiceInterface
         return $this;
     }
 
-    /**
-     * @return object
-     */
-    public function getClient()
+    public function getClient(): MollieApiClient
     {
         return $this->client;
     }
@@ -63,12 +59,12 @@ abstract class MolliePaymentAbstract implements ProduceServiceInterface
         return $this;
     }
 
-    public function getCurrency(): string|null
+    public function getCurrency(): ?string
     {
         return $this->paymentCurrency;
     }
 
-    public function getPaymentDetails(string $paymentId)
+    public function getPaymentDetails(string $paymentId): bool|Payment
     {
         try {
             $response  = $this->client->payments->get($paymentId); // Returns a particular payment
@@ -81,10 +77,7 @@ abstract class MolliePaymentAbstract implements ProduceServiceInterface
         return $response;
     }
 
-    /**
-     * This function can be used to preform refund on the capture.
-     */
-    public function refundOrder($paymentId, $amount, array $options = [])
+    public function refundOrder($paymentId, $amount, array $options = []): array
     {
         try {
             $payment = $this->client->payments->get($paymentId);
@@ -126,7 +119,7 @@ abstract class MolliePaymentAbstract implements ProduceServiceInterface
         }
     }
 
-    public function execute(Request $request)
+    public function execute(Request $request): bool
     {
         try {
             return $this->makePayment($request);

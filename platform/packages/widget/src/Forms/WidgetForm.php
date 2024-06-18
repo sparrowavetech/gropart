@@ -14,7 +14,7 @@ class WidgetForm extends FormAbstract
             ->contentOnly();
     }
 
-    public function renderForm(array $options = [], $showStart = false, $showFields = true, $showEnd = false): string
+    public function renderForm(array $options = [], bool $showStart = false, bool $showFields = true, bool $showEnd = false): string
     {
         return parent::renderForm($options, $showStart, $showFields, $showEnd);
     }

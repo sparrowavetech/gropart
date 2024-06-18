@@ -2,7 +2,6 @@
 
 namespace Botble\Base\Traits\Forms;
 
-use Botble\Base\Facades\MetaBox;
 use Botble\Base\Models\BaseModel;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
@@ -69,11 +68,7 @@ trait HasMetadata
         foreach ($this->getMetadataFields() as $field) {
             $name = $this->getMetadataFieldName($field);
 
-            MetaBox::saveMetaBoxData(
-                $this->model,
-                $name,
-                $this->getRequest()->input($name)
-            );
+            $this->model->saveMetaDataFromFormRequest($name, $this->getRequest());
         }
     }
 

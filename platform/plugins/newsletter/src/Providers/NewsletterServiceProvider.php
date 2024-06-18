@@ -9,11 +9,14 @@ use Botble\Base\PanelSections\PanelSectionItem;
 use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Newsletter\Contracts\Factory;
+use Botble\Newsletter\Forms\Fronts\NewsletterForm;
+use Botble\Newsletter\Http\Requests\NewsletterRequest;
 use Botble\Newsletter\Models\Newsletter;
 use Botble\Newsletter\NewsletterManager;
 use Botble\Newsletter\Repositories\Eloquent\NewsletterRepository;
 use Botble\Newsletter\Repositories\Interfaces\NewsletterInterface;
 use Botble\Setting\PanelSections\SettingOthersPanelSection;
+use Botble\Theme\FormFrontManager;
 use Illuminate\Contracts\Support\DeferrableProvider;
 use Illuminate\Routing\Events\RouteMatched;
 
@@ -40,6 +43,7 @@ class NewsletterServiceProvider extends ServiceProvider implements DeferrablePro
             ->loadAndPublishConfigurations(['permissions', 'email'])
             ->loadAndPublishTranslations()
             ->loadRoutes()
+            ->publishAssets()
             ->loadAndPublishViews()
             ->loadMigrations();
 
@@ -71,6 +75,8 @@ class NewsletterServiceProvider extends ServiceProvider implements DeferrablePro
         $this->app['events']->listen(RouteMatched::class, function () {
             EmailHandler::addTemplateSettings(NEWSLETTER_MODULE_SCREEN_NAME, config('plugins.newsletter.email', []));
         });
+
+        FormFrontManager::register(NewsletterForm::class, NewsletterRequest::class);
     }
 
     public function provides(): array

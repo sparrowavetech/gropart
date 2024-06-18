@@ -2,25 +2,40 @@
 
 namespace Botble\Theme\Supports;
 
+use Botble\Base\Facades\AdminHelper;
 use Botble\Base\Facades\BaseHelper;
-use Botble\Base\Facades\Form;
 use Botble\Base\Facades\Html;
 use Botble\Base\Forms\Fields\NumberField;
 use Botble\Base\Forms\Fields\TextField;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Base\Forms\FormHelper;
+use Botble\Media\Facades\RvMedia;
+use Botble\SeoHelper\Facades\SeoHelper;
 use Botble\Shortcode\Compilers\Shortcode;
 use Botble\Shortcode\Forms\ShortcodeForm;
+use Botble\Support\Http\Requests\Request;
 use Botble\Theme\Events\RenderingThemeOptionSettings;
+use Botble\Theme\Facades\Theme;
 use Botble\Theme\Facades\ThemeOption;
 use Botble\Theme\Forms\Fields\ThemeIconField;
+use Botble\Theme\Http\Requests\UpdateOptionsRequest;
+use Botble\Theme\ThemeOption\Fields\ColorField;
+use Botble\Theme\ThemeOption\Fields\IconField;
+use Botble\Theme\ThemeOption\Fields\MediaImageField;
+use Botble\Theme\ThemeOption\Fields\RepeaterField;
+use Botble\Theme\ThemeOption\Fields\SelectField;
+use Botble\Theme\ThemeOption\ThemeOptionSection;
 use Carbon\Carbon;
+use Carbon\CarbonInterface;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class ThemeSupport
 {
-    public static function registerYoutubeShortcode(string $viewPath = null): void
+    public static function registerYoutubeShortcode(?string $viewPath = null): void
     {
         $viewPath = $viewPath ?: 'packages/theme::shortcodes';
 
@@ -58,7 +73,7 @@ class ThemeSupport
             });
     }
 
-    public static function registerGoogleMapsShortcode(string $viewPath = null): void
+    public static function registerGoogleMapsShortcode(?string $viewPath = null): void
     {
         $viewPath = $viewPath ?: 'packages/theme::shortcodes';
 
@@ -82,7 +97,7 @@ class ThemeSupport
                 }
             )
             ->setPreviewImage('google-map', asset('vendor/core/packages/theme/images/ui-blocks/google-map.jpg'))
-            ->setAdminConfig('google-map', function (array $attributes, string|null $content) {
+            ->setAdminConfig('google-map', function (array $attributes, ?string $content) {
                 return ShortcodeForm::createFromArray($attributes)
                     ->add('address', 'textarea', [
                         'label' => __('Address'),
@@ -132,7 +147,7 @@ class ThemeSupport
         return $html;
     }
 
-    public static function insertBlockAfterTopHtmlTags(string|null $block, string|null $html): string|null
+    public static function insertBlockAfterTopHtmlTags(?string $block, ?string $html): ?string
     {
         if (! $block || ! $html) {
             return $html;
@@ -155,7 +170,7 @@ class ThemeSupport
 
     public static function registerPreloader(): void
     {
-        add_filter(THEME_FRONT_HEADER, function (string|null $html): string {
+        add_filter(THEME_FRONT_HEADER, function (?string $html): string {
             if (theme_option('preloader_enabled', 'no') != 'yes') {
                 return $html;
             }
@@ -217,7 +232,11 @@ class ThemeSupport
 
     public static function registerToastNotification(): void
     {
-        add_filter(THEME_FRONT_FOOTER, function (string|null $html): string {
+        add_filter(THEME_FRONT_FOOTER, function (?string $html): string {
+            if (AdminHelper::isInAdmin()) {
+                return $html;
+            }
+
             $toastNotification = view('packages/theme::fronts.toast-notification')->render();
 
             return $html . apply_filters('theme_toast_notification', $toastNotification);
@@ -226,38 +245,46 @@ class ThemeSupport
 
     public static function registerThemeIconFields(array $icons, array $css = [], array $js = []): void
     {
-        Form::component('themeIcon', 'packages/theme::forms.fields.icons-field', [
-            'name',
-            'value' => null,
-            'attributes' => [],
-        ]);
+        app()->booted(function () use ($icons) {
+            app('form')->component(
+                'themeIcon',
+                $icons ? 'packages/theme::forms.fields.icons-field' : 'core/base::forms.partials.core-icon',
+                [
+                    'name',
+                    'value' => null,
+                    'attributes' => [],
+                ]
+            );
 
-        add_filter('form_custom_fields', function (FormAbstract $form, FormHelper $formHelper) {
-            if ($formHelper->hasCustomField('themeIcon')) {
-                return $form;
-            }
+            add_filter('form_custom_fields', function (FormAbstract $form, FormHelper $formHelper) {
+                if ($formHelper->hasCustomField('themeIcon')) {
+                    return $form;
+                }
 
-            return $form->addCustomField('themeIcon', ThemeIconField::class);
-        }, 29, 2);
-
-        add_filter('theme_icon_js_code', function (string|null $html) use ($css, $js) {
-            $cssHtml = '';
-            $jsHtml = '';
-
-            foreach ($css as $cssItem) {
-                $cssHtml .= Html::style($cssItem)->toHtml();
-            }
-
-            foreach ($js as $jsItem) {
-                $jsHtml .= Html::style($jsItem)->toHtml();
-            }
-
-            return $html . $cssHtml . $jsHtml;
+                return $form->addCustomField('themeIcon', ThemeIconField::class);
+            }, 29, 2);
         });
 
-        add_filter('theme_icon_list_icons', function (array $defaultIcons) use ($icons) {
-            return array_merge($defaultIcons, $icons);
-        });
+        if ($icons) {
+            add_filter('theme_icon_js_code', function (?string $html) use ($css, $js) {
+                $cssHtml = '';
+                $jsHtml = '';
+
+                foreach ($css as $cssItem) {
+                    $cssHtml .= Html::style($cssItem)->toHtml();
+                }
+
+                foreach ($js as $jsItem) {
+                    $jsHtml .= Html::style($jsItem)->toHtml();
+                }
+
+                return $html . $cssHtml . $jsHtml;
+            });
+
+            add_filter('theme_icon_list_icons', function (array $defaultIcons) use ($icons) {
+                return array_merge($defaultIcons, $icons);
+            });
+        }
     }
 
     public static function registerFacebookIntegration(): void
@@ -378,7 +405,7 @@ class ThemeSupport
                 ]);
         });
 
-        add_filter(THEME_FRONT_HEADER, function (string|null $html): string|null {
+        add_filter(THEME_FRONT_HEADER, function (?string $html): ?string {
             if (theme_option('facebook_app_id')) {
                 $html .= Html::meta('', theme_option('facebook_app_id'), ['property' => 'fb:app_id'])->toHtml();
             }
@@ -399,7 +426,11 @@ class ThemeSupport
             return $html;
         }, 1180);
 
-        add_filter(THEME_FRONT_FOOTER, function (string|null $html): string {
+        add_filter(THEME_FRONT_FOOTER, function (?string $html): string {
+            if (AdminHelper::isInAdmin()) {
+                return $html;
+            }
+
             return $html . view('packages/theme::partials.facebook-integration')->render();
         }, 1180);
 
@@ -419,24 +450,23 @@ class ThemeSupport
     public static function registerSocialLinks(): void
     {
         app('events')->listen(RenderingThemeOptionSettings::class, function () {
-            ThemeOption::setSection([
-                'title' => __('Social Links'),
-                'id' => 'opt-text-subsection-social-links',
-                'subsection' => true,
-                'icon' => 'ti ti-share',
-                'fields' => [
-                    [
-                        'id' => 'social_links',
-                        'type' => 'repeater',
-                        'label' => __('Social Links'),
-                        'attributes' => [
-                            'name' => 'social_links',
-                            'value' => null,
-                            'fields' => static::getSocialLinksRepeaterFields(),
+            ThemeOption::setSection(
+                ThemeOptionSection::make('opt-text-subsection-social-links')
+                    ->title(__('Social Links'))
+                    ->icon('ti ti-social')
+                    ->fields([
+                        [
+                            'id' => 'social_links',
+                            'type' => 'repeater',
+                            'label' => __('Social Links'),
+                            'attributes' => [
+                                'name' => 'social_links',
+                                'value' => null,
+                                'fields' => static::getSocialLinksRepeaterFields(),
+                            ],
                         ],
-                    ],
-                ],
-            ]);
+                    ])
+            );
         });
     }
 
@@ -553,6 +583,32 @@ class ThemeSupport
         return $socialLinks;
     }
 
+    public static function getDefaultSocialLinksData(): array
+    {
+        return [
+            [
+                ['key' => 'name', 'value' => 'Facebook'],
+                ['key' => 'icon', 'value' => 'ti ti-brand-facebook'],
+                ['key' => 'url', 'value' => 'https://www.facebook.com'],
+            ],
+            [
+                ['key' => 'name', 'value' => 'X'],
+                ['key' => 'icon', 'value' => 'ti ti-brand-x'],
+                ['key' => 'url', 'value' => 'https://x.com'],
+            ],
+            [
+                ['key' => 'name', 'value' => 'Youtube'],
+                ['key' => 'icon', 'value' => 'ti ti-brand-youtube'],
+                ['key' => 'url', 'value' => 'https://www.youtube.com'],
+            ],
+            [
+                ['key' => 'name', 'value' => 'Instagram'],
+                ['key' => 'icon', 'value' => 'ti ti-brand-linkedin'],
+                ['key' => 'url', 'value' => 'https://www.linkedin.com'],
+            ],
+        ];
+    }
+
     public static function getThemeIcons(): array
     {
         return apply_filters('theme_icon_list_icons', []);
@@ -581,7 +637,7 @@ class ThemeSupport
         });
     }
 
-    public static function getSiteCopyright(): string|null
+    public static function getSiteCopyright(): ?string
     {
         $copyright = theme_option('copyright');
 
@@ -596,5 +652,349 @@ class ThemeSupport
         }
 
         return BaseHelper::clean(nl2br($copyright));
+    }
+
+    public static function registerLazyLoadImages(): void
+    {
+        app('events')->listen(RenderingThemeOptionSettings::class, function () {
+            ThemeOption::setField([
+                'id' => 'lazy_load_images',
+                'section_id' => 'opt-text-subsection-general',
+                'type' => 'onOff',
+                'label' => __('Lazy load images'),
+                'attributes' => [
+                    'name' => 'lazy_load_images',
+                    'value' => false,
+                ],
+                'helper' => 'Enable lazy load images to improve page load time.',
+            ])->setField([
+                'id' => 'lazy_load_placeholder_image',
+                'section_id' => 'opt-text-subsection-general',
+                'type' => 'mediaImage',
+                'label' => __('Lazy load placeholder image'),
+                'attributes' => [
+                    'name' => 'lazy_load_placeholder_image',
+                    'value' => null,
+                ],
+                'helper' => __('This image will be used as placeholder for lazy load images.'),
+            ]);
+        });
+
+        if (! theme_option('lazy_load_images', false)) {
+            return;
+        }
+
+        add_filter('core_media_image', function (
+            HtmlString $html,
+            ?string $url = null,
+            array|string|null $alt = null,
+            array $attributes = [],
+            bool $secure = false
+        ) {
+            if (
+                AdminHelper::isInAdmin()
+                || Arr::get($attributes, 'loading') !== 'lazy'
+            ) {
+                return $html;
+            }
+
+            $placeholderPath = theme_option('lazy_load_placeholder_image');
+
+            if (! $placeholderPath) {
+                return $html;
+            }
+
+            $attributes['data-src'] = $url;
+
+            return Html::image(RvMedia::getImageUrl($placeholderPath), $alt, $attributes, $secure);
+        }, 120, 4);
+
+        Theme::asset()
+            ->container('footer')
+            ->add('lazyload', asset('vendor/core/packages/theme/plugins/lazyload.min.js'));
+
+        add_filter(THEME_FRONT_FOOTER, function (?string $html) {
+            if (AdminHelper::isInAdmin()) {
+                return $html;
+            }
+
+            return $html . <<<'HTML'
+                <script>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        window.Theme = window.Theme || {};
+
+                        Theme.lazyLoadInstance = new LazyLoad({
+                            elements_selector: '[loading="lazy"]',
+                        });
+                    });
+
+                    document.addEventListener('shortcode.loaded', function () {
+                        Theme.lazyLoadInstance.update()
+                    });
+                </script>
+            HTML;
+        });
+    }
+
+    public static function registerSocialSharing(): void
+    {
+        app('events')->listen(RenderingThemeOptionSettings::class, function () {
+            ThemeOption::setSection(
+                ThemeOptionSection::make('opt-text-subsection-social-sharing')
+                    ->title(__('Social Sharing'))
+                    ->icon('ti ti-share')
+                    ->fields([
+                        RepeaterField::make()
+                            ->name('social_sharing')
+                            ->label(__('Social sharing buttons'))
+                            ->defaultValue(self::getDefaultSocialSharingData())
+                            ->fields([
+                                SelectField::make()
+                                    ->name('social')
+                                    ->label(__('Social'))
+                                    ->options([
+                                        'facebook' => __('Facebook'),
+                                        'x' => __('X (Twitter)'),
+                                        'linkedin' => __('LinkedIn'),
+                                        'pinterest' => __('Pinterest'),
+                                        'whatsapp' => __('WhatsApp'),
+                                        'telegram' => __('Telegram'),
+                                        'email' => __('Email'),
+                                    ]),
+                                IconField::make()
+                                    ->name('icon')
+                                    ->label(__('Icon')),
+                                MediaImageField::make()
+                                    ->name('icon_image')
+                                    ->label(__('Icon image (It will override icon above if set)')),
+                                ColorField::make()
+                                    ->name('color')
+                                    ->label(__('Color')),
+                                ColorField::make()
+                                    ->name('background_color')
+                                    ->label(__('Background color')),
+                            ]),
+                    ])
+            );
+        });
+    }
+
+    public static function getDefaultSocialSharingData(): array
+    {
+        return [
+            [
+                ['key' => 'social', 'value' => 'facebook'],
+                ['key' => 'icon', 'value' => 'ti ti-brand-facebook'],
+            ],
+            [
+                ['key' => 'social', 'value' => 'x'],
+                ['key' => 'icon', 'value' => 'ti ti-brand-x'],
+            ],
+            [
+                ['key' => 'social', 'value' => 'pinterest'],
+                ['key' => 'icon', 'value' => 'ti ti-brand-pinterest'],
+            ],
+            [
+                ['key' => 'social', 'value' => 'linkedin'],
+                ['key' => 'icon', 'value' => 'ti ti-brand-linkedin'],
+            ],
+            [
+                ['key' => 'social', 'value' => 'whatsapp'],
+                ['key' => 'icon', 'value' => 'ti ti-brand-whatsapp'],
+            ],
+            [
+                ['key' => 'social', 'value' => 'email'],
+                ['key' => 'icon', 'value' => 'ti ti-mail'],
+            ],
+        ];
+    }
+
+    public static function getSocialSharingButtons(string $url, string $title, ?string $thumbnail = null): array
+    {
+        $socialSharing = theme_option('social_sharing') ?: self::getDefaultSocialSharingData();
+
+        if (empty($socialSharing)) {
+            return [];
+        }
+
+        if (! is_array($socialSharing)) {
+            $socialSharing = json_decode($socialSharing, true);
+        }
+
+        if (empty($socialSharing)) {
+            return [];
+        }
+
+        $items = [];
+
+        foreach ($socialSharing as $item) {
+            $item = Arr::pluck($item, 'value', 'key');
+
+            $social = (string) Arr::get($item, 'social');
+            $icon = (string) Arr::get($item, 'icon');
+            $image = (string) Arr::get($item, 'icon_image');
+            $color = (string) Arr::get($item, 'color');
+            $backgroundColor = (string) Arr::get($item, 'background_color');
+
+            if (! $social || (! $icon && ! $image)) {
+                continue;
+            }
+
+            $encodedTitle = match ($social) {
+                'linkedin' => rawurldecode(strip_tags($title)),
+                'email' => $title,
+                'x' => Str::limit(strip_tags($title), 200),
+                default => strip_tags($title),
+            };
+
+            $encodedUrl = match ($social) {
+                'x', 'whatsapp' => $url,
+                default => urlencode($url),
+            };
+
+            $items[$social] = [
+                'name' => $name = match ($social) {
+                    'facebook' => __('Facebook'),
+                    'x' => __('X (Twitter)'),
+                    'linkedin' => __('LinkedIn'),
+                    'pinterest' => __('Pinterest'),
+                    'whatsapp' => __('WhatsApp'),
+                    'telegram' => __('Telegram'),
+                    'email' => __('Email'),
+                    default => __('Unknown'),
+                },
+                'icon' => $image ? Html::image(RvMedia::getImageUrl($image), $name, attributes: ['loading' => false]) : BaseHelper::renderIcon($icon),
+                'url' => match ($social) {
+                    'facebook' => sprintf('https://www.facebook.com/sharer.php?u=%s', $encodedUrl),
+                    'x' => sprintf('https://x.com/intent/tweet?url=%s&text=%s', $encodedUrl, $encodedTitle),
+                    'linkedin' => sprintf('https://www.linkedin.com/sharing/share-offsite?url=%s&sumary=%s', $encodedUrl, $encodedTitle),
+                    'pinterest' => sprintf(
+                        'https://pinterest.com/pin/create/button/?url=%s&description=%s&media=%s',
+                        $encodedUrl,
+                        $encodedTitle,
+                        $thumbnail
+                    ),
+                    'whatsapp' => sprintf('https://api.whatsapp.com/send?text=%s %s', $encodedTitle, $encodedUrl),
+                    'telegram' => sprintf('https://t.me/share/url?url=%s&text=%s', $encodedUrl, $encodedTitle),
+                    'email' => sprintf('mailto:?subject=%s&body=%s', $encodedTitle, $encodedUrl),
+                    default => $encodedUrl,
+                },
+                'color' => $color === 'transparent' ? null : $color,
+                'background_color' => $backgroundColor === 'transparent' ? null : $backgroundColor,
+            ];
+        }
+
+        return $items;
+    }
+
+    public static function renderSocialSharingButtons(?string $url = null, ?string $title = null, ?string $thumbnail = null): string
+    {
+        $socials = static::getSocialSharingButtons(
+            $url ?: URL::current(),
+            $title ?: SeoHelper::getDescription(),
+            $thumbnail ?: SeoHelper::openGraph()->getProperty('image')
+        );
+
+        if (empty($socials)) {
+            return '';
+        }
+
+        return view('packages/theme::fronts.social-sharing', compact('socials', 'url'));
+    }
+
+    public static function supportedDateFormats(): array
+    {
+        $formats = [
+            'M d, Y',
+            'F j, Y',
+            'F d, Y',
+            'Y-m-d',
+            'Y-M-d',
+            'd-m-Y',
+            'd-M-Y',
+            'm/d/Y',
+            'M/d/Y',
+            'd/m/Y',
+            'd/M/Y',
+        ];
+
+        if ($extraDateFormat = config('packages.theme.extra_date_format')) {
+            $formats[] = $extraDateFormat;
+        }
+
+        return apply_filters('theme_date_formats', array_unique($formats));
+    }
+
+    public static function registerDateFormatOption(): void
+    {
+        app('events')->listen(RenderingThemeOptionSettings::class, function () {
+            ThemeOption::setField(
+                SelectField::make()
+                    ->sectionId('opt-text-subsection-general')
+                    ->label(__('Date format'))
+                    ->name('date_format')
+                    ->defaultValue(Arr::first(self::supportedDateFormats()))
+                    ->options(
+                        collect(self::supportedDateFormats())
+                            ->mapWithKeys(fn ($format) => [$format => sprintf('%s (%s)', $format, date($format))])
+                            ->all()
+                    )
+                    ->helperText(__('Choose date format for your front theme.'))
+            );
+        });
+
+        add_filter('core_request_rules', function (array $rules, Request $request): array {
+            if (! $request instanceof UpdateOptionsRequest) {
+                return $rules;
+            }
+
+            $rules['date_format'] = ['required', 'string', Rule::in(self::supportedDateFormats())];
+
+            return $rules;
+        }, 999, 2);
+    }
+
+    public static function formatDate(CarbonInterface|string|int|null $date, ?string $format = null): ?string
+    {
+        $format = $format ?: theme_option('date_format');
+        $supportedDateFormats = self::supportedDateFormats();
+
+        if (! $format || ! in_array($format, $supportedDateFormats)) {
+            $format = Arr::first($supportedDateFormats);
+        }
+
+        return BaseHelper::formatDate($date, $format, true);
+    }
+
+    public static function renderGoogleTagManagerScript(): string
+    {
+        $googleTagManagerCode = setting('google_tag_manager_code');
+        $googleTagManagerId = setting('google_tag_manager_id', setting('google_analytics'));
+        $renderType = setting(
+            'google_tag_manager_type',
+            $googleTagManagerCode ? 'code' : 'id'
+        );
+
+        if (! BaseHelper::hasDemoModeEnabled() && $renderType === 'code' && $googleTagManagerCode) {
+            return trim($googleTagManagerCode);
+        }
+
+        if ($renderType === 'id' && $googleTagManagerId) {
+            return trim(
+                <<<HTML
+                <!-- Global site tag (gtag.js) - Google Analytics -->
+                <script async defer src='https://www.googletagmanager.com/gtag/js?id=$googleTagManagerId'></script>
+                <script>
+                  window.dataLayer = window.dataLayer || [];
+                  function gtag(){dataLayer.push(arguments);}
+                  gtag('js', new Date());
+
+                  gtag('config', '$googleTagManagerId');
+                </script>
+            HTML
+            );
+        }
+
+        return '';
     }
 }

@@ -1,5 +1,5 @@
 $(() => {
-    $(document).on('click', '.button-import-groups', (event) => {
+    $(document).on('click', '.button-import-groups, .button-re-import', (event) => {
         event.preventDefault()
 
         const $button = $(event.currentTarget)

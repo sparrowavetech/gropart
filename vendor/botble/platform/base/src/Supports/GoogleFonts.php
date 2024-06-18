@@ -5,6 +5,7 @@ namespace Botble\Base\Supports;
 use Exception;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -24,7 +25,7 @@ class GoogleFonts
         $this->files = Storage::disk('public');
     }
 
-    public function load(string $font, string|null $nonce = null, bool $forceDownload = false): Fonts|null
+    public function load(string $font, ?string $nonce = null, bool $forceDownload = false): ?Fonts
     {
         ['font' => $font, 'nonce' => $nonce] = $this->parseOptions($font, $nonce);
 
@@ -51,7 +52,7 @@ class GoogleFonts
         }
     }
 
-    protected function loadLocal(string $url, string|null $nonce): ?Fonts
+    protected function loadLocal(string $url, ?string $nonce): ?Fonts
     {
         if (! $this->files->exists($this->path($url, 'fonts.css'))) {
             return null;
@@ -85,7 +86,7 @@ class GoogleFonts
         );
     }
 
-    protected function fetch(string $url, string|null $nonce): Fonts|null
+    protected function fetch(string $url, ?string $nonce): ?Fonts
     {
         $response = Http::withHeaders(['User-Agent' => $this->userAgent])
             ->timeout(300)
@@ -156,11 +157,26 @@ class GoogleFonts
         return $segments->filter()->join('/');
     }
 
-    protected function parseOptions(string $font, string|null $nonce = null): array
+    protected function parseOptions(string $font, ?string $nonce = null): array
     {
         return [
             'font' => $font,
             'nonce' => $nonce,
         ];
+    }
+
+    public static function getFonts(): array
+    {
+        $path = core_path('base/resources/data/google-fonts.json');
+
+        try {
+            if (! File::exists($path)) {
+                return [];
+            }
+
+            return File::json($path);
+        } catch (Exception) {
+            return [];
+        }
     }
 }

@@ -121,7 +121,7 @@ class AnalyticsController extends BaseController
         return match ($dimensions) {
             'date' => BaseHelper::formatDate($dateRow),
             'yearMonth' => Carbon::createFromFormat('Ym', $dateRow)->format('M Y'),
-            default => (int)$dateRow . 'h',
+            default => (int) $dateRow . 'h',
         };
     }
 

@@ -18,7 +18,7 @@ class MollieController extends BaseController
         try {
             $api = Mollie::api();
 
-            $result = $api->payments()->get($request->input('id'));
+            $result = $api->payments->get($request->input('id'));
         } catch (ApiException $exception) {
             return $response
                 ->setError()
@@ -50,7 +50,7 @@ class MollieController extends BaseController
             $status = PaymentStatusEnum::PENDING;
         }
 
-        $orderIds = (array)$result->metadata->order_id;
+        $orderIds = (array) $result->metadata->order_id;
 
         do_action(PAYMENT_ACTION_PAYMENT_PROCESSED, [
             'amount' => $request->input('amount'),

@@ -45,10 +45,7 @@
     </div>
 </div>
 
-<div
-    class="hidden seo-edit-section"
-    v-pre
->
+<div class="hidden seo-edit-section" v-pre>
     <x-core::hr class="my-4" />
 
     {!! $form !!}

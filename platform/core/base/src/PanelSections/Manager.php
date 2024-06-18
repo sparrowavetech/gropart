@@ -18,6 +18,7 @@ class Manager implements ManagerContract
         protected array $sections = [],
         protected array $sectionItems = [],
         protected array $ignoreItemIds = [],
+        protected array $movedGroups = []
     ) {
         $this->default();
     }
@@ -57,6 +58,13 @@ class Manager implements ManagerContract
         return $this->group('settings');
     }
 
+    public function moveGroup(string $from, string $to): static
+    {
+        $this->movedGroups[$to][] = $from;
+
+        return $this;
+    }
+
     public function register(array|string|Closure $panelSections): static
     {
         foreach (Arr::wrap($panelSections) as $panelSection) {
@@ -89,7 +97,9 @@ class Manager implements ManagerContract
 
     public function getSections(): array
     {
-        return collect($this->sections[$this->groupId] ?? [])
+        $sections = $this->sections[$this->groupId] ?? [];
+
+        return collect($sections)
             ->map(
                 fn (string|Closure $panelSection)
                 => is_string($panelSection) ? app($panelSection) : value($panelSection)
@@ -159,6 +169,14 @@ class Manager implements ManagerContract
         $content = apply_filters('panel_sections_content', $content, $this->groupId, $sections, $this);
 
         $this->dispatchAfterRendering();
+
+        if (! empty($this->movedGroups[$this->groupId])) {
+            $movedGroups = array_unique($this->movedGroups[$this->groupId]);
+
+            foreach ($movedGroups as $group) {
+                $content .= $this->group($group)->render();
+            }
+        }
 
         return $content;
     }

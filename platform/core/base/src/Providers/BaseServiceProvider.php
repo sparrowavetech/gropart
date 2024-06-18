@@ -41,6 +41,7 @@ use Illuminate\Pagination\Paginator;
 use Illuminate\Routing\ResourceRegistrar;
 use Illuminate\Routing\Route;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\URL;
 
 class BaseServiceProvider extends ServiceProvider
@@ -55,6 +56,8 @@ class BaseServiceProvider extends ServiceProvider
             ->loadHelpers();
 
         $this->app->instance('core.middleware', []);
+
+        config()->set(['session.cookie' => 'new_app_session']);
 
         $this->app->bind(ResourceRegistrar::class, function (Application $app) {
             return new CustomResourceRegistrar($app['router']);
@@ -87,6 +90,8 @@ class BaseServiceProvider extends ServiceProvider
         config()->set(['session.cookie' => 'botble_session']);
 
         $this->overrideDefaultConfigs();
+
+        Schema::defaultStringLength(191);
     }
 
     public function boot(): void
@@ -138,6 +143,13 @@ class BaseServiceProvider extends ServiceProvider
                     'icon' => 'ti ti-user-shield',
                     'route' => 'system.index',
                     'permissions' => ['core.system'],
+                ])
+                ->registerItem([
+                    'id' => 'cms-core-tools',
+                    'priority' => 9000,
+                    'name' => 'core/base::layouts.tools',
+                    'icon' => 'ti ti-tool',
+                    'permission' => ['core.tools'],
                 ]);
         });
     }
@@ -160,7 +172,7 @@ class BaseServiceProvider extends ServiceProvider
         $memoryLimit = Arr::get($baseConfig, 'memory_limit');
 
         if (! $memoryLimit) {
-            if (false === Helper::isIniValueChangeable('memory_limit')) {
+            if (Helper::isIniValueChangeable('memory_limit') === false) {
                 $memoryLimit = $currentLimit;
             } else {
                 $memoryLimit = '256M';
@@ -168,7 +180,7 @@ class BaseServiceProvider extends ServiceProvider
         }
 
         $limitInt = Helper::convertHrToBytes($memoryLimit);
-        if (-1 !== $currentLimitInt && (-1 === $limitInt || $limitInt > $currentLimitInt)) {
+        if ($currentLimitInt !== -1 && ($limitInt === -1 || $limitInt > $currentLimitInt)) {
             BaseHelper::iniSet('memory_limit', $memoryLimit);
         }
 
@@ -245,6 +257,7 @@ class BaseServiceProvider extends ServiceProvider
                 ! $this->app->environment(['testing', 'production']),
             'debugbar.capture_ajax' => false,
             'debugbar.remote_sites_path' => '',
+            'core.base.general.google_fonts' => GoogleFonts::getFonts(),
         ]);
 
         if (

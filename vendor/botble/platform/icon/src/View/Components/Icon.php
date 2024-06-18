@@ -11,7 +11,7 @@ class Icon extends Component
 {
     public function __construct(
         public string $name,
-        public string|null $size = null
+        public ?string $size = null
     ) {
     }
 

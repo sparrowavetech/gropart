@@ -2,6 +2,7 @@
 
 namespace Botble\Blog\Providers;
 
+use Botble\ACL\Models\User;
 use Botble\Api\Facades\ApiHelper;
 use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Facades\PanelSectionManager;
@@ -17,12 +18,15 @@ use Botble\Blog\Repositories\Eloquent\TagRepository;
 use Botble\Blog\Repositories\Interfaces\CategoryInterface;
 use Botble\Blog\Repositories\Interfaces\PostInterface;
 use Botble\Blog\Repositories\Interfaces\TagInterface;
+use Botble\DataSynchronize\PanelSections\ExportPanelSection;
+use Botble\DataSynchronize\PanelSections\ImportPanelSection;
 use Botble\Language\Facades\Language;
 use Botble\LanguageAdvanced\Supports\LanguageAdvancedManager;
 use Botble\SeoHelper\Facades\SeoHelper;
 use Botble\Setting\PanelSections\SettingOthersPanelSection;
 use Botble\Shortcode\View\View;
 use Botble\Slug\Facades\SlugHelper;
+use Botble\Slug\Models\Slug;
 use Botble\Theme\Events\ThemeRoutingBeforeEvent;
 use Botble\Theme\Facades\SiteMapManager;
 
@@ -125,6 +129,28 @@ class BlogServiceProvider extends ServiceProvider
             );
         });
 
+        PanelSectionManager::setGroupId('data-synchronize')->beforeRendering(function () {
+            PanelSectionManager::default()
+                ->registerItem(
+                    ExportPanelSection::class,
+                    fn () => PanelSectionItem::make('posts')
+                        ->setTitle(trans('plugins/blog::posts.posts'))
+                        ->withDescription(trans('plugins/blog::posts.export.description'))
+                        ->withPriority(999)
+                        ->withPermission('posts.export')
+                        ->withRoute('tools.data-synchronize.export.posts.index')
+                )
+                ->registerItem(
+                    ImportPanelSection::class,
+                    fn () => PanelSectionItem::make('posts')
+                        ->setTitle(trans('plugins/blog::posts.posts'))
+                        ->withDescription(trans('plugins/blog::posts.import.description'))
+                        ->withPriority(999)
+                        ->withPermission('posts.import')
+                        ->withRoute('tools.data-synchronize.import.posts.index')
+                );
+        });
+
         if (defined('LANGUAGE_MODULE_SCREEN_NAME')) {
             if (
                 defined('LANGUAGE_ADVANCED_MODULE_SCREEN_NAME') &&
@@ -149,6 +175,14 @@ class BlogServiceProvider extends ServiceProvider
                 Language::registerModule([Post::class, Category::class, Tag::class]);
             }
         }
+
+        User::resolveRelationUsing('posts', function (User $user) {
+            return $user->morphMany(Post::class, 'author');
+        });
+
+        User::resolveRelationUsing('slugable', function (User $user) {
+            return $user->morphMany(Slug::class, 'reference');
+        });
 
         $this->app->booted(function () {
             SeoHelper::registerModule([Post::class, Category::class, Tag::class]);

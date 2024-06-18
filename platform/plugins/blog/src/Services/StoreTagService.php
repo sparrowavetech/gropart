@@ -20,7 +20,7 @@ class StoreTagService extends StoreTagServiceAbstract
         if (! $tagsInput) {
             $tagsInput = [];
         } else {
-            $tagsInput = collect(json_decode($tagsInput, true))->pluck('value')->all();
+            $tagsInput = is_array($tagsInput) ? $tagsInput : collect(json_decode($tagsInput, true))->pluck('value')->all();
         }
 
         $tags = $post->tags->pluck('name')->all();

@@ -58,4 +58,15 @@ return [
             'description' => 'Manage the other translations (admin, plugins, packages...)',
         ],
     ],
+    'please_select_locale' => 'Please select a language to start translating. If your language is not listed, you can go to Settings -> Locales to add it.',
+    'import_translations' => 'Import translations',
+    'export_description' => 'Export :name data to a CSV or Excel file.',
+    'import_description' => 'Import :name data from a CSV or Excel file.',
+    'import_translations_description' => 'It will find all translation texts for front theme and add them to translation',
+    'import' => [
+        'rules' => [
+            'key' => 'Do not modify this column when translating words.',
+            'trans' => 'Can be empty or a string with a maximum length of :max characters if provided.',
+        ],
+    ],
 ];

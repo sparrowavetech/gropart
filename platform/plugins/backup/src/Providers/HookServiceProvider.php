@@ -15,7 +15,7 @@ class HookServiceProvider extends ServiceProvider
         });
     }
 
-    public function registerAdminAlert(string|null $alert): string
+    public function registerAdminAlert(?string $alert): string
     {
         if (! BaseHelper::hasDemoModeEnabled()) {
             return $alert;

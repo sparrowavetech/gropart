@@ -12,7 +12,6 @@ class SystemInformationManagement {
 
         $('#copy-report').on('click', () => {
             $('#txt-report').trigger('select')
-            document.execCommand('copy')
         })
 
         $httpClient

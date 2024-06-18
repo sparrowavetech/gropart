@@ -17,7 +17,7 @@
         <div @class(['d-flex align-items-center gap-1 attachment-details form-control mb-2 pe-5', 'hidden' => ! $value])>
             <x-core::icon name="ti ti-file" class="me-1" style="--bb-icon-size: 1.5rem" />
             <div class="attachment-info text-truncate">
-                <a href="{{ $url ?? $value }}" target="_blank" data-bs-toggle="tooltip" title="{{ $value }}">
+                <a href="{{ RvMedia::url($url ?? $value) }}" target="_blank" data-bs-toggle="tooltip" title="{{ $value }}">
                     {{ $value }}
                 </a>
                 <small class="d-block">{{ RvMedia::getFileSize($value) }}</small>

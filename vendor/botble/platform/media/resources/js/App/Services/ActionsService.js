@@ -1,5 +1,4 @@
 import Cropper from 'cropperjs'
-import Clipboard from 'clipboard'
 import { RecentItems } from '../Config/MediaConfig'
 import { Helpers } from '../Helpers/Helpers'
 import { MessageService } from './MessageService'
@@ -102,27 +101,47 @@ export class ActionsService {
         }
     }
 
-    static handleCopyLink() {
+    static async handleCopyLink() {
         let links = ''
+
         Helpers.each(Helpers.getSelectedFiles(), (value) => {
             if (!Helpers.isEmpty(links)) {
                 links += '\n'
             }
             links += value.full_url
         })
-        let $clipboardTemp = $('.js-rv-clipboard-temp')
-        $clipboardTemp.data('clipboard-text', links)
-        new Clipboard('.js-rv-clipboard-temp', {
-            text: () => {
-                return links
-            },
-        })
+
+        await Botble.copyToClipboard(links)
+
         MessageService.showMessage(
             'success',
             Helpers.trans('clipboard.success'),
             Helpers.trans('message.success_header')
         )
-        $clipboardTemp.trigger('click')
+    }
+
+    static async handleCopyIndirectLink() {
+        let links = ''
+
+        Helpers.each(Helpers.getSelectedFiles(), (value) => {
+            if (!Helpers.isEmpty(links)) {
+                links += '\n'
+            }
+
+            links += value.indirect_url
+        })
+
+        await Botble.copyToClipboard(links)
+
+        MessageService.showMessage(
+            'success',
+            Helpers.trans('clipboard.success'),
+            Helpers.trans('message.success_header')
+        )
+    }
+
+    static handleShare() {
+        $('#modal_share_items').modal('show').find('form.form-alt-text').data('action', type)
     }
 
     static handleGlobalAction(type, callback) {
@@ -140,7 +159,13 @@ export class ActionsService {
                 $('#modal_rename_items').modal('show').find('form.form-rename').data('action', type)
                 break
             case 'copy_link':
-                ActionsService.handleCopyLink()
+                ActionsService.handleCopyLink().then(() => {})
+                break
+            case 'copy_indirect_link':
+                ActionsService.handleCopyIndirectLink().then(() => {})
+                break
+            case 'share':
+                $('#modal_share_items').modal('show')
                 break
             case 'preview':
                 ActionsService.handlePreview()
@@ -277,6 +302,39 @@ export class ActionsService {
         })
     }
 
+    static renderShareItems() {
+        const target = $('#modal_share_items [data-bb-value="share-result"]')
+        const shareType =  $('#modal_share_items select[data-bb-value="share-type"]').val()
+        target.val('')
+
+        let results = []
+
+        Helpers.each(Helpers.getSelectedItems(), (value) => {
+            switch (shareType) {
+                case 'html':
+                    results.push(
+                        value.type === 'image'
+                            ? `<img src="${value.full_url}" alt="${value.alt}" />`
+                            : `<a href="${value.full_url}" target="_blank">${value.alt}</a>`
+                    )
+                    break;
+                case 'markdown':
+                    results.push(
+                        (value.type === 'image' ? '!' : '') +
+                        `[${value.alt}](${value.full_url})`
+                    )
+                    break;
+                case 'indirect_url':
+                    results.push(value.indirect_url)
+                    break;
+                default:
+                    results.push(value.full_url)
+            }
+        })
+
+        target.val(results.join('\n'))
+    }
+
     static renderActions() {
         let hasFolderSelected = Helpers.getSelectedFolder().length > 0
 
@@ -288,18 +346,11 @@ export class ActionsService {
         let actionsList = $.extend({}, true, Helpers.getConfigs().actions_list)
 
         if (hasFolderSelected) {
-            actionsList.basic = Helpers.arrayReject(actionsList.basic, (item) => {
-                return item.action === 'preview'
-            })
-            actionsList.basic = Helpers.arrayReject(actionsList.basic, (item) => {
-                return item.action === 'crop'
-            })
-            actionsList.file = Helpers.arrayReject(actionsList.file, (item) => {
-                return item.action === 'alt_text'
-            })
-            actionsList.file = Helpers.arrayReject(actionsList.file, (item) => {
-                return item.action === 'copy_link'
-            })
+            const ignoreActions = ['preview', 'crop', 'alt_text', 'copy_link', 'copy_direct_link', 'share']
+
+            actionsList.basic = Helpers.arrayReject(
+                actionsList.basic, (item) => ignoreActions.includes(item.action)
+            )
 
             if (!Helpers.hasPermission('folders.create')) {
                 actionsList.file = Helpers.arrayReject(actionsList.file, (item) => {

@@ -15,16 +15,12 @@ class PublicController extends BaseController
     {
         $query = BaseHelper::stringify($request->input('q'));
 
-        if (! $query) {
-            abort(404);
-        }
-
         $title = __('Search result for: ":query"', compact('query'));
 
         SeoHelper::setTitle($title)
             ->setDescription($title);
 
-        $posts = $postRepository->getSearch($query, 0, (int)theme_option('number_of_posts_in_a_category', 12));
+        $posts = $postRepository->getSearch($query, 0, (int) theme_option('number_of_posts_in_a_category', 12));
 
         Theme::breadcrumb()->add($title, route('public.search'));
 

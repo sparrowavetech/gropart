@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'search' => 'Search...',
     'enabled' => 'Enabled',
     'deactivated' => 'Deactivated',
     'activated' => 'Activated',
@@ -39,4 +40,12 @@ return [
     'install' => 'Install now',
     'install_plugin' => 'Install Plugin',
     'minimum_core_version_not_met' => 'Plugin :plugin requires :minimum_core_version version of core, but your core version is :current_core_version. Please upgrade your core to use this plugin!',
+    'enums' => [
+        'plugin_filter_status' => [
+            'all' => 'All',
+            'activated' => 'Activated',
+            'not-activated' => 'Not Activated',
+            'updates-available' => 'Updates Available',
+        ],
+    ],
 ];

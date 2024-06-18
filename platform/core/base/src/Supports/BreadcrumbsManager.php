@@ -23,7 +23,7 @@ class BreadcrumbsManager
 
     protected array $after = [];
 
-    protected array|null $route;
+    protected ?array $route;
 
     public function __construct(
         protected BreadcrumbsGenerator $generator,
@@ -67,7 +67,7 @@ class BreadcrumbsManager
         return isset($this->callbacks[$name]);
     }
 
-    protected function getCurrentRoute(): array|null
+    protected function getCurrentRoute(): ?array
     {
         // Manually set route
         if ($this->route) {

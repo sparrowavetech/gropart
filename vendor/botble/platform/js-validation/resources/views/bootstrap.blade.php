@@ -11,6 +11,8 @@
                         error.insertAfter(element.closest('[data-bb-toggle="tree-checkboxes"]'));
                     } else if (element.parent('.input-group').length || element.prop('type') === 'checkbox' || element.prop('type') === 'radio') {
                         error.insertAfter(element.parent());
+                    } else if ($(element).data('select2')) {
+                        error.insertAfter(element.next('span'));
                     } else {
                         error.insertAfter(element);
                     }

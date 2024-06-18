@@ -14,7 +14,7 @@ class Cache implements CacheInterface
 {
     public function __construct(
         protected CacheManager $cache,
-        protected string|null $cacheGroup,
+        protected ?string $cacheGroup,
         protected array $config = []
     ) {
         $this->config = ! empty($config) ? $config : [

@@ -34,7 +34,7 @@ class SocialService
         return ! ! $this->getModule($key);
     }
 
-    public function getModule(string $key): array|null
+    public function getModule(string $key): ?array
     {
         return Arr::get($this->supportedModules(), $key);
     }
@@ -62,7 +62,7 @@ class SocialService
 
     public function setting(string $key, bool $default = false): string
     {
-        return (string)setting('social_login_' . $key, $default);
+        return (string) setting('social_login_' . $key, $default);
     }
 
     public function hasAnyProviderEnable(): bool
@@ -107,7 +107,7 @@ class SocialService
 
     public function getProviderEnabled(string $provider): bool
     {
-        return (bool)$this->setting($provider . '_enable');
+        return (bool) $this->setting($provider . '_enable');
     }
 
     public function getProviderKeysEnabled(): array

@@ -24,7 +24,7 @@ class RemoteValidationMiddleware
     public function __construct(protected ValidationFactory $factory, Config $config)
     {
         $this->field = $config->get('core.js-validation.js-validation.remote_validation_field');
-        $this->escape = (bool)$config->get('core.js-validation.js-validation.escape', false);
+        $this->escape = (bool) $config->get('core.js-validation.js-validation.escape', false);
     }
 
     /**

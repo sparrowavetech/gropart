@@ -16,11 +16,11 @@ class FileResource extends JsonResource
     public function toArray($request): array
     {
         return [
-            'id' => $this->id,
+            'id' => $this->getKey(),
             'name' => $this->name,
             'basename' => File::basename($this->url),
             'url' => $this->url,
-            'full_url' => RvMedia::url($this->url),
+            'full_url' => $this->visibility === 'public' ? RvMedia::url($this->url) : null,
             'type' => $this->type,
             'icon' => $this->icon,
             'thumb' => $this->canGenerateThumbnails() ? RvMedia::getImageUrl($this->url, 'thumb') : null,
@@ -32,6 +32,7 @@ class FileResource extends JsonResource
             'folder_id' => $this->folder_id,
             'preview_url' => $this->preview_url,
             'preview_type' => $this->preview_type,
+            'indirect_url' => $this->indirect_url,
             'alt' => $this->alt,
         ];
     }

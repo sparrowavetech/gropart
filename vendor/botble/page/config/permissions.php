@@ -2,8 +2,9 @@
 
 return [
     [
-        'name' => 'Page',
+        'name' => 'Pages',
         'flag' => 'pages.index',
+        'parent_flag' => 'core.cms',
     ],
     [
         'name' => 'Create',

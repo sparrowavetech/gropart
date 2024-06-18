@@ -20,13 +20,15 @@ class LanguageAdvancedServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        $this->setNamespace('plugins/language-advanced')
+            ->loadMigrations();
+
         if (! is_plugin_active('language')) {
             return;
         }
 
-        $this->setNamespace('plugins/language-advanced')
+        $this
             ->loadHelpers()
-            ->loadMigrations()
             ->loadAndPublishConfigurations(['general'])
             ->loadAndPublishViews()
             ->loadRoutes();

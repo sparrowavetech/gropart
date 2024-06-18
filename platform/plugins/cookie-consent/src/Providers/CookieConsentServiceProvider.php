@@ -33,9 +33,7 @@ class CookieConsentServiceProvider extends ServiceProvider
                 $this->app['view']->composer('plugins/cookie-consent::index', function (View $view) {
                     $cookieConsentConfig = config('plugins.cookie-consent.general', []);
 
-                    $alreadyConsentedWithCookies = Cookie::has($cookieConsentConfig['cookie_name'] ?? 'cookie_for_consent');
-
-                    $view->with(compact('alreadyConsentedWithCookies', 'cookieConsentConfig'));
+                    $view->with(compact('cookieConsentConfig'));
                 });
 
                 if (! Cookie::has(config('plugins.cookie-consent.general.cookie_name'))) {
@@ -46,7 +44,7 @@ class CookieConsentServiceProvider extends ServiceProvider
                             asset('vendor/core/plugins/cookie-consent/css/cookie-consent.css'),
                             [],
                             [],
-                            '1.0.1'
+                            '1.0.2'
                         );
                     Theme::asset()
                         ->container('footer')
@@ -56,7 +54,7 @@ class CookieConsentServiceProvider extends ServiceProvider
                             asset('vendor/core/plugins/cookie-consent/js/cookie-consent.js'),
                             ['jquery'],
                             [],
-                            '1.0.1'
+                            '1.0.2'
                         );
                 }
 
@@ -211,9 +209,13 @@ class CookieConsentServiceProvider extends ServiceProvider
         });
     }
 
-    public function registerCookieConsent(string|null $html): string
+    public function registerCookieConsent(?string $html): string
     {
-        if (is_in_admin()) {
+        $cookieConsentConfig = config('plugins.cookie-consent.general', []);
+
+        $alreadyConsentedWithCookies = Cookie::has($cookieConsentConfig['cookie_name'] ?? 'cookie_for_consent');
+
+        if (is_in_admin() || $alreadyConsentedWithCookies) {
             return $html;
         }
 

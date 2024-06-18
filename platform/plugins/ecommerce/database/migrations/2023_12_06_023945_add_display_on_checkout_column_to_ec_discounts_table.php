@@ -13,7 +13,7 @@ return new class () extends Migration {
 
         Schema::table('ec_discounts', function (Blueprint $table) {
             $table->boolean('display_at_checkout')->default(false)->after('apply_via_url');
-            $table->string('description')->nullable();
+            $table->string('description', 400)->nullable();
         });
     }
 

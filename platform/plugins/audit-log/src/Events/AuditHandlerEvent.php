@@ -16,7 +16,7 @@ class AuditHandlerEvent extends Event
         public string $module,
         public string $action,
         public int|string $referenceId,
-        public string|null $referenceName,
+        public ?string $referenceName,
         public string $type,
         int|string $referenceUser = 0
     ) {

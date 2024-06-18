@@ -6,6 +6,7 @@ use Botble\Base\Events\FormRendering;
 use Botble\Base\Facades\AdminHelper;
 use Botble\JsValidation\Facades\JsValidator;
 use Botble\Theme\Facades\Theme;
+use Illuminate\Support\Str;
 
 class AddFormJsValidation
 {
@@ -26,11 +27,13 @@ class AddFormJsValidation
             ->usePath(false)
             ->add('js-validation', 'vendor/core/core/js-validation/js/js-validation.js', ['jquery']);
 
+        $formSelector = $form->getDomSelector();
+
         Theme::asset()
             ->container('footer')
             ->writeContent(
-                'js-validation-form-rules',
-                JsValidator::formRequest($form->getValidatorClass(), '#' . $form->getFormOption('id'))->render(),
+                'js-validation-form-rules-' . Str::slug($formSelector),
+                JsValidator::formRequest($form->getValidatorClass(), $formSelector)->render(),
                 ['jquery']
             );
     }

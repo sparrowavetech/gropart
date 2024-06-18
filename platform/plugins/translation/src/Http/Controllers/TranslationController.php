@@ -3,14 +3,12 @@
 namespace Botble\Translation\Http\Controllers;
 
 use Botble\Base\Facades\Assets;
-use Botble\Base\Facades\BaseHelper;
 use Botble\Setting\Http\Controllers\SettingController;
 use Botble\Translation\Http\Controllers\Concerns\HasMapTranslationsTable;
 use Botble\Translation\Http\Requests\TranslationRequest;
 use Botble\Translation\Manager;
 use Botble\Translation\Tables\TranslationTable;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\File;
 
 class TranslationController extends SettingController
 {
@@ -34,11 +32,9 @@ class TranslationController extends SettingController
             return $translationTable->renderTable();
         }
 
-        $exists = File::isDirectory(lang_path($locale['locale'])) && File::exists(lang_path('vendor'));
-
         return view(
             'plugins/translation::index',
-            compact('locales', 'locale', 'defaultLanguage', 'translationTable', 'exists')
+            compact('locales', 'locale', 'defaultLanguage', 'translationTable')
         );
     }
 
@@ -54,16 +50,5 @@ class TranslationController extends SettingController
         $this->manager->updateTranslation($locale, $group, $key, $value);
 
         return $this->httpResponse();
-    }
-
-    public function import()
-    {
-        BaseHelper::maximumExecutionTimeAndMemoryLimit();
-
-        $this->manager->publishLocales();
-
-        return $this
-            ->httpResponse()
-            ->setMessage(trans('plugins/translation::translation.import_success_message'));
     }
 }

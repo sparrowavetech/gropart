@@ -18,7 +18,7 @@ trait AuthenticatesUsers
     use RedirectsUsers;
     use ThrottlesLogins;
 
-    public function showLoginForm(): View|null
+    public function showLoginForm(): ?View
     {
         return null;
     }

@@ -21,6 +21,10 @@ class Assets extends BaseAssets
 
         $this->config = $config->get('core.base.assets');
 
+        if (empty($this->config['version'])) {
+            $this->config['version'] = get_cms_version();
+        }
+
         $this->scripts = $this->config['scripts'];
 
         $this->styles = $this->config['styles'];

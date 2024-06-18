@@ -198,7 +198,7 @@ class DashboardMenu
         });
     }
 
-    public function getItemById(string $itemId): array|null
+    public function getItemById(string $itemId): ?array
     {
         if (! $this->hasItem($itemId)) {
             return null;
@@ -210,7 +210,7 @@ class DashboardMenu
         );
     }
 
-    public function getItemsByParentId(string $parentId): Collection|null
+    public function getItemsByParentId(string $parentId): ?Collection
     {
         return collect($this->links[$this->groupId] ?? [])
             ->filter(fn ($item) => $item['parent_id'] === $parentId)

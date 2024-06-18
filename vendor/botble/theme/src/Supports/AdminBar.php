@@ -102,7 +102,7 @@ class AdminBar
 
         $this->registerLink(trans('core/base::layouts.dashboard'), route('dashboard.index'), 'appearance', 'dashboard.index');
         $this->registerLink(trans('core/acl::users.users'), route('users.create'), 'add-new', 'users.create');
-        $this->registerLink(trans('core/setting::setting.title'), route('settings.general'), 'appearance', 'settings.options');
+        $this->registerLink(trans('core/setting::setting.title'), route('settings.index'), 'appearance', 'settings.options');
 
         RenderingAdminBar::dispatch();
 

@@ -6,52 +6,13 @@ namespace Intervention\Image\Drivers;
 
 use Exception;
 use Intervention\Image\Collection;
-use Intervention\Image\Exceptions\DecoderException;
 use Intervention\Image\Interfaces\CollectionInterface;
-use Intervention\Image\Interfaces\ColorInterface;
 use Intervention\Image\Interfaces\DecoderInterface;
-use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Traits\CanBuildFilePointer;
 
-abstract class AbstractDecoder extends DriverSpecialized implements DecoderInterface
+abstract class AbstractDecoder implements DecoderInterface
 {
     use CanBuildFilePointer;
-
-    public function __construct(protected ?self $successor = null)
-    {
-    }
-
-    /**
-     * Try to decode given input to image or color object
-     *
-     * @param mixed $input
-     * @return ImageInterface|ColorInterface
-     * @throws DecoderException
-     */
-    final public function handle(mixed $input): ImageInterface|ColorInterface
-    {
-        try {
-            $decoded = $this->decode($input);
-        } catch (DecoderException $e) {
-            if (!$this->hasSuccessor()) {
-                throw new DecoderException($e->getMessage());
-            }
-
-            return $this->successor->handle($input);
-        }
-
-        return $decoded;
-    }
-
-    /**
-     * Determine if current decoder has a successor
-     *
-     * @return bool
-     */
-    protected function hasSuccessor(): bool
-    {
-        return $this->successor !== null;
-    }
 
     /**
      * Determine if the given input is GIF data format
@@ -68,11 +29,38 @@ abstract class AbstractDecoder extends DriverSpecialized implements DecoderInter
     }
 
     /**
+     * Determine if given input is a path to an existing regular file
+     *
+     * @param mixed $input
+     * @return bool
+     */
+    protected function isFile(mixed $input): bool
+    {
+        if (!is_string($input)) {
+            return false;
+        }
+
+        if (strlen($input) > PHP_MAXPATHLEN) {
+            return false;
+        }
+
+        try {
+            if (!@is_file($input)) {
+                return false;
+            }
+        } catch (Exception) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
      * Extract and return EXIF data from given input which can be binary image
      * data or a file path.
      *
      * @param string $path_or_data
-     * @return CollectionInterface
+     * @return CollectionInterface<string, mixed>
      */
     protected function extractExifData(string $path_or_data): CollectionInterface
     {
@@ -82,7 +70,7 @@ abstract class AbstractDecoder extends DriverSpecialized implements DecoderInter
 
         try {
             $source = match (true) {
-                (strlen($path_or_data) <= PHP_MAXPATHLEN && is_file($path_or_data)) => $path_or_data, // path
+                $this->isFile($path_or_data) => $path_or_data, // path
                 default => $this->buildFilePointer($path_or_data), // data
             };
 
@@ -128,10 +116,18 @@ abstract class AbstractDecoder extends DriverSpecialized implements DecoderInter
 
         return new class ($matches, $result)
         {
-            private $matches;
-            private $result;
+            /**
+             * @var array<mixed>
+             */
+            private array $matches;
+            private int|false $result;
 
-            public function __construct($matches, $result)
+            /**
+             * @param array<mixed> $matches
+             * @param int|false $result
+             * @return void
+             */
+            public function __construct(array $matches, int|false $result)
             {
                 $this->matches = $matches;
                 $this->result = $result;

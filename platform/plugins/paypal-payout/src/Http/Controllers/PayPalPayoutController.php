@@ -29,7 +29,7 @@ class PayPalPayoutController extends BaseController
                 ->setMessage(__('Payout method is not accepted!'));
         }
 
-        $totalAmount = round((float)$withdrawal->amount, 2);
+        $totalAmount = round((float) $withdrawal->amount, 2);
 
         $payPalId = Arr::get($withdrawal->bank_info, 'paypal_id');
 
@@ -54,7 +54,7 @@ class PayPalPayoutController extends BaseController
                 {
                       "recipient_type": "EMAIL",
                       "amount": {
-                        "value": "' . ((string)$totalAmount) . '",
+                        "value": "' . ((string) $totalAmount) . '",
                         "currency": "' . $withdrawal->currency . '"
                       },
                       "note": "Thanks for selling on our site!",

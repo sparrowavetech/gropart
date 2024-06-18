@@ -36,7 +36,7 @@ abstract class AbstractSave
      *
      * @return string|null
      */
-    public function getErrorMessage(): string|null
+    public function getErrorMessage(): ?string
     {
         return $this->file->getErrorMessage();
     }

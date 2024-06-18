@@ -102,7 +102,7 @@ class CropImageCommand extends Command
         ;
     }
 
-    protected function cropImage(string $path, int $width, int $height, string|null $saveTo, string|null $newName = null): void
+    protected function cropImage(string $path, int $width, int $height, ?string $saveTo, ?string $newName = null): void
     {
         $this->components->task(
             sprintf('Cropping %s', $path),
@@ -124,7 +124,7 @@ class CropImageCommand extends Command
         );
     }
 
-    protected function extractDimension(string|null $dimension): array
+    protected function extractDimension(?string $dimension): array
     {
         if (! $dimension) {
             return [null, null];

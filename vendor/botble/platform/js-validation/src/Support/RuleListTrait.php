@@ -115,7 +115,7 @@ trait RuleListTrait
      */
     protected function validationDisabled($rules)
     {
-        $rules = (array)$rules;
+        $rules = (array) $rules;
 
         return in_array($this->disableJsValidationRule, $rules);
     }

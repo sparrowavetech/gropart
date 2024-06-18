@@ -24,17 +24,17 @@ class PaymentMethods
         return $this->methods;
     }
 
-    public function getDefaultMethod(): string|null
+    public function getDefaultMethod(): ?string
     {
         return setting('default_payment_method', PaymentMethodEnum::COD);
     }
 
-    public function getSelectedMethod(): string|null
+    public function getSelectedMethod(): ?string
     {
-        return session('selected_payment_method');
+        return session('selected_payment_method', $this->getDefaultMethod());
     }
 
-    public function getSelectingMethod(): string|null
+    public function getSelectingMethod(): ?string
     {
         return $this->getSelectedMethod() ?: $this->getDefaultMethod();
     }
@@ -52,13 +52,20 @@ class PaymentMethods
             ],
         ] + $this->methods;
 
-        event(new RenderingPaymentMethods($this->methods));
+        $methods = collect($this->methods)->sortBy('priority');
+        $defaultMethod = $methods->pull(PaymentHelper::defaultPaymentMethod());
+
+        if ($defaultMethod) {
+            $methods = $methods->prepend($defaultMethod, PaymentHelper::defaultPaymentMethod());
+        }
+
+        event(new RenderingPaymentMethods($methods->all()));
 
         $country = apply_filters('payment_checkout_country', null);
 
         $html = '';
 
-        foreach (collect($this->methods)->sortBy('priority') as $name => $method) {
+        foreach ($methods as $name => $method) {
             if (! get_payment_setting('status', $name) == 1) {
                 continue;
             }

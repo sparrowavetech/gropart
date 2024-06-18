@@ -16,7 +16,10 @@ class HookServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->app['events']->listen(RenderingDashboardWidgets::class, function () {
-            if (! config('plugins.analytics.general.enabled_dashboard_widgets')) {
+            if (
+                ! config('plugins.analytics.general.enabled_dashboard_widgets')
+                || setting('analytics_dashboard_widgets', '0') != '1'
+            ) {
                 return;
             }
 
@@ -100,7 +103,7 @@ class HookServiceProvider extends ServiceProvider
             ->init($widgets, $widgetSettings);
     }
 
-    public function showMissingLibraryWarning(string|null $html): string|null
+    public function showMissingLibraryWarning(?string $html): ?string
     {
         if (! Route::is('plugins.index') || class_exists('Google\ApiCore\Call')) {
             return $html;

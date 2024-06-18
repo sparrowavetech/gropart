@@ -28,7 +28,7 @@
             </ul>
         </x-core::alert>
 
-        @if ($memoryLimit < $requiredMemoryLimit || $maximumExecutionTime < $requiredMaximumExecutionTime)
+        @if (($memoryLimit && $memoryLimit != -1 && $memoryLimit < $requiredMemoryLimit) || ($maximumExecutionTime && $maximumExecutionTime < $requiredMaximumExecutionTime))
             <x-core::alert
                 type="warning"
                 title="Warning"
@@ -39,12 +39,12 @@
                     update to the latest version. Please enhance the following:
 
                     <ul class="mt-3 mb-0 ps-2">
-                        @if ($memoryLimit < $requiredMemoryLimit)
+                        @if ($memoryLimit && $memoryLimit < $requiredMemoryLimit)
                             <li class="mb-2"><code>memory_limit</code>: <code>{{ $memoryLimit }}M</code> =>
                                 <code>{{ $requiredMemoryLimit }}M</code></li>
                         @endif
 
-                        @if ($maximumExecutionTime < $requiredMaximumExecutionTime)
+                        @if ($maximumExecutionTime && $maximumExecutionTime < $requiredMaximumExecutionTime)
                             <li class="mb-2"><code>max_execution_time</code>: <code>{{ $maximumExecutionTime }}</code>
                                 => <code>{{ $requiredMaximumExecutionTime }}</code></li>
                          @endif

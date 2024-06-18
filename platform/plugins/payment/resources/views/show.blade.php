@@ -21,6 +21,13 @@
 
                     <x-core::card.body>
                         <x-core::datagrid>
+                            @if($payment->charge_id)
+                                <x-core::datagrid.item>
+                                    <x-slot:title>{{ trans('plugins/payment::payment.charge_id') }}</x-slot:title>
+                                    {{ $payment->charge_id }}
+                                </x-core::datagrid.item>
+                            @endif
+
                             @if ($payment->customer_id && $payment->customer && $payment->customer_type && class_exists($payment->customer_type))
                                 <x-core::datagrid.item>
                                     <x-slot:title>{{ trans('plugins/payment::payment.payer_name') }}</x-slot:title>

@@ -1,5 +1,6 @@
 <?php
 
+use Botble\Base\Facades\BaseHelper;
 use Illuminate\Support\Facades\Route;
 
 Route::group(['namespace' => 'Botble\Comment\Http\Controllers', 'middleware' => ['web', 'core']], function () {

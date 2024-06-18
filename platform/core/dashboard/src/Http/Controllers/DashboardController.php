@@ -40,7 +40,6 @@ class DashboardController extends BaseController
             ->get();
 
         $widgetData = apply_filters(DASHBOARD_FILTER_ADMIN_LIST, [], $widgets);
-        ksort($widgetData);
 
         $availableWidgetIds = collect($widgetData)->pluck('id')->all();
 
@@ -48,8 +47,17 @@ class DashboardController extends BaseController
             return ! in_array($item->getKey(), $availableWidgetIds);
         });
 
-        $statWidgets = collect($widgetData)->where('type', '!=', 'widget')->pluck('view')->all();
-        $userWidgets = collect($widgetData)->where('type', 'widget')->pluck('view')->all();
+        $statWidgets = collect($widgetData)
+            ->where('type', '!=', 'widget')
+            ->sortBy('priority')
+            ->pluck('view')
+            ->all();
+
+        $userWidgets = collect($widgetData)
+            ->where('type', 'widget')
+            ->sortBy('priority')
+            ->pluck('view')
+            ->all();
 
         return view('core/dashboard::list', compact('widgets', 'userWidgets', 'statWidgets'));
     }
@@ -73,7 +81,7 @@ class DashboardController extends BaseController
                 'user_id' => $request->user()->getKey(),
             ]);
 
-            $widgetSetting->settings = array_merge((array)$widgetSetting->settings, [
+            $widgetSetting->settings = array_merge((array) $widgetSetting->settings, [
                 $request->input('setting_name') => $request->input('setting_value'),
             ]);
 
@@ -122,7 +130,7 @@ class DashboardController extends BaseController
             ]);
 
             $widgetSetting->status = 0;
-            $widgetSetting->order = 99 + $widgetSetting->getKey();
+            $widgetSetting->order = DashboardWidgetSetting::query()->max('order') + 1;
             $widgetSetting->save();
         }
 
@@ -148,7 +156,7 @@ class DashboardController extends BaseController
                 $widgetSetting->status = 1;
             } else {
                 $widgetSetting->status = 0;
-                $widgetSetting->order = 99 + $widgetSetting->getKey();
+                $widgetSetting->order = DashboardWidgetSetting::query()->max('order') + 1;
             }
 
             $widgetSetting->save();

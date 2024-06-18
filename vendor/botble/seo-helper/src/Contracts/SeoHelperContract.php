@@ -16,9 +16,11 @@ interface SeoHelperContract extends RenderableContract
 
     public function setSeoTwitter(SeoTwitterContract $seoTwitter): self;
 
-    public function setTitle(string|null $title, string|null $siteName = null, string|null $separator = null): self;
+    public function setTitle(?string $title, ?string $siteName = null, ?string $separator = null): self;
 
-    public function getTitle(): string|null;
+    public function getTitle(): ?string;
 
-    public function setDescription(string|null $description): self;
+    public function setDescription(?string $description): self;
+
+    public function setImage(?string $image): self;
 }

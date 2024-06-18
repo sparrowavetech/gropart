@@ -34,7 +34,7 @@ trait HasAttributes
         return $this->attributes;
     }
 
-    public function getAttribute(string $attribute, string $default = null)
+    public function getAttribute(string $attribute, string|array|null $default = null)
     {
         return Arr::get($this->attributes, $attribute, $default);
     }

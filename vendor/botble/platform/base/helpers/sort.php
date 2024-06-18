@@ -25,7 +25,7 @@ if (! function_exists('sort_item_with_children')) {
                 continue;
             }
 
-            if ((int)$object->parent_id == (int)$parent) {
+            if ((int) $object->parent_id == (int) $parent) {
                 $result[] = $object;
                 $object->depth = $depth;
                 unset($list[$key]);

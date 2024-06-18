@@ -47,6 +47,6 @@ class Template
 
     public static function getPageTemplates(): array
     {
-        return (array)config('packages.page.general.templates', []);
+        return (array) config('packages.page.general.templates', []);
     }
 }

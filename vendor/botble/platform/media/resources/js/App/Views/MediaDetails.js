@@ -1,5 +1,4 @@
 import { Helpers } from '../Helpers/Helpers'
-import Clipboard from 'clipboard'
 
 export class MediaDetails {
     constructor() {
@@ -24,9 +23,8 @@ export class MediaDetails {
 
     renderData(data) {
         const _self = this
-        const thumb = data.type === 'image' ? `<img src="${data.full_url}" alt="${data.name}">` : data.icon
+        const thumb = data.type === 'image' && data.full_url ? `<img src="${data.full_url}" alt="${data.name}">` : data.icon
         let description = ''
-        let useClipboard = false
         Helpers.forEach(data, (val, index) => {
             if (Helpers.inArray(_self.onlyFields, index) && val) {
                 if (!Helpers.inArray(['mime_type'], index)) {
@@ -35,22 +33,28 @@ export class MediaDetails {
                         .replace(/__url__/gi,
                         val
                             ? index === 'full_url'
-                                ? `<div class="input-group">
+                                ? `<div class="input-group pe-1">
                                         <input type="text" id="file_details_url" class="form-control" value="${val}" />
-                                        <button class="input-group-text btn btn-default js-btn-copy-to-clipboard" type="button" data-clipboard-target="#file_details_url">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-clipboard me-0" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                        <button class="input-group-text btn btn-default js-btn-copy-to-clipboard" type="button"
+                                                data-bb-toggle="clipboard"
+                                                data-clipboard-action="copy"
+                                                data-clipboard-message="Copied"
+                                                data-clipboard-target="#file_details_url"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-clipboard me-0" data-clipboard-icon="true" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                                                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                                                <path d="M9 5h-2a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-12a2 2 0 0 0 -2 -2h-2"></path>
                                                <path d="M9 3m0 2a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v0a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2z"></path>
+                                            </svg>
+                                            <svg class="icon text-success me-0 d-none" data-clipboard-success-icon="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                              <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                              <path d="M5 12l5 5l10 -10"></path>
                                             </svg>
                                         </button>
                                     </div>`
                                 : `<span title="${val}">${val}</span>`
                             : ''
                     )
-                    if (index === 'full_url') {
-                        useClipboard = true
-                    }
                 }
             }
         })
@@ -58,17 +62,6 @@ export class MediaDetails {
         _self.$detailsWrapper.find('.rv-media-thumbnail').html(thumb)
         _self.$detailsWrapper.find('.rv-media-thumbnail').css('color', data.color)
         _self.$detailsWrapper.find('.rv-media-description').html(description)
-        if (useClipboard) {
-            new Clipboard('.js-btn-copy-to-clipboard')
-            $('.js-btn-copy-to-clipboard')
-                .tooltip()
-                .on('mouseenter', (event) => {
-                    $(event.currentTarget).tooltip('hide')
-                })
-                .on('mouseleave', (event) => {
-                    $(event.currentTarget).tooltip('hide')
-                })
-        }
 
         let dimensions = ''
 

@@ -10,7 +10,7 @@ interface ActivationInterface
 {
     public function createUser(User $user): BaseModel|Model;
 
-    public function exists(User $user, string|null $code = null): BaseModel|bool;
+    public function exists(User $user, ?string $code = null): BaseModel|bool;
 
     public function complete(User $user, string $code): bool;
 

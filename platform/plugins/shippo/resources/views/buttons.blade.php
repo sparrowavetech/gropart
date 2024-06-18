@@ -16,6 +16,8 @@
             src="{{ url('vendor/core/plugins/shippo/images/icon.svg') }}"
             alt="shippo"
             height="16"
+            class="me-1"
+            style="filter: brightness(0) invert(1);"
         >
         <span>{{ trans('plugins/shippo::shippo.transaction.view_and_create') }}</span>
     </button>

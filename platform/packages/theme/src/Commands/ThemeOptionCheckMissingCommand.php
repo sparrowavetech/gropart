@@ -4,6 +4,7 @@ namespace Botble\Theme\Commands;
 
 use Botble\Language\Facades\Language;
 use Botble\Setting\Facades\Setting;
+use Botble\Theme\Events\RenderingThemeOptionSettings;
 use Botble\Theme\Facades\ThemeOption;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
@@ -21,9 +22,11 @@ class ThemeOptionCheckMissingCommand extends Command
     {
         $isReverse = $this->option('reverse');
 
+        RenderingThemeOptionSettings::dispatch();
+
         $fields = array_map(
-            fn ($name) => ThemeOption::getOptionKey($name),
-            array_keys(Arr::get(ThemeOption::getFields(), 'theme'))
+            fn (string $name) => ThemeOption::getOptionKey($name),
+            array_keys(Arr::get(ThemeOption::getFields(), 'theme', []))
         );
 
         $existsOptionQuery = Setting::newQuery();

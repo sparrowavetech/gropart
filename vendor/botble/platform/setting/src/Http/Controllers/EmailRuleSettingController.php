@@ -48,7 +48,7 @@ class EmailRuleSettingController extends SettingController
         return $this->performUpdate($request->validated());
     }
 
-    protected function transformJsonToArray(string|null $json): array
+    protected function transformJsonToArray(?string $json): array
     {
         if (! $json || ! Str::isJson($json)) {
             return [];

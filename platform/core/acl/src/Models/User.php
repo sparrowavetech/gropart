@@ -87,16 +87,16 @@ class User extends BaseModel implements
     protected function firstName(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => ucfirst((string)$value),
-            set: fn ($value) => ucfirst((string)$value),
+            get: fn ($value) => ucfirst((string) $value),
+            set: fn ($value) => ucfirst((string) $value),
         );
     }
 
     protected function lastName(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => ucfirst((string)$value),
-            set: fn ($value) => ucfirst((string)$value),
+            get: fn ($value) => ucfirst((string) $value),
+            set: fn ($value) => ucfirst((string) $value),
         );
     }
 
@@ -187,7 +187,7 @@ class User extends BaseModel implements
         return false;
     }
 
-    public function delete(): bool|null
+    public function delete(): ?bool
     {
         if ($this->exists) {
             $this->activations()->delete();

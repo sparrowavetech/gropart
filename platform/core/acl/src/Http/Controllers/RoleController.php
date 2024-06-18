@@ -58,7 +58,7 @@ class RoleController extends BaseSystemController
         }
 
         $role->name = $request->input('name');
-        $role->permissions = $this->cleanPermission((array)$request->input('flags', []));
+        $role->permissions = $this->cleanPermission((array) $request->input('flags', []));
         $role->description = $request->input('description');
         $role->updated_by = $request->user()->getKey();
         $role->is_default = $request->input('is_default');
@@ -99,12 +99,12 @@ class RoleController extends BaseSystemController
     public function store(RoleCreateRequest $request)
     {
         if ($request->input('is_default')) {
-            Role::query()->where('id', '>', 0)->update(['is_default' => 0]);
+            Role::query()->update(['is_default' => 0]);
         }
 
         $role = Role::query()->create([
             'name' => $request->input('name'),
-            'permissions' => $this->cleanPermission((array)$request->input('flags', [])),
+            'permissions' => $this->cleanPermission((array) $request->input('flags', [])),
             'description' => $request->input('description'),
             'is_default' => $request->input('is_default'),
             'created_by' => $request->user()->getKey(),

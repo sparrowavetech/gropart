@@ -3,9 +3,12 @@
 namespace Botble\Theme\Providers;
 
 use Botble\Base\Facades\DashboardMenu;
+use Botble\Base\Facades\PanelSectionManager;
+use Botble\Base\PanelSections\PanelSectionItem;
 use Botble\Base\Supports\DashboardMenu as DashboardMenuSupport;
 use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
+use Botble\Setting\PanelSections\SettingCommonPanelSection;
 use Botble\Theme\Commands\ThemeActivateCommand;
 use Botble\Theme\Commands\ThemeAssetsPublishCommand;
 use Botble\Theme\Commands\ThemeAssetsRemoveCommand;
@@ -108,7 +111,33 @@ class ThemeServiceProvider extends ServiceProvider
                             'permissions' => ['theme.custom-html'],
                         ]);
                     }
+                )
+                ->when(
+                    $config->get('packages.theme.general.enable_robots_txt_editor'),
+                    function (DashboardMenuSupport $menu) {
+                        $menu->registerItem([
+                            'id' => 'cms-core-appearance-robots-txt',
+                            'priority' => 6,
+                            'parent_id' => 'cms-core-appearance',
+                            'name' => 'packages/theme::theme.robots_txt_editor',
+                            'icon' => null,
+                            'url' => fn () => route('theme.robots-txt'),
+                            'permissions' => ['theme.robots-text'],
+                        ]);
+                    }
                 );
+        });
+
+        PanelSectionManager::default()->beforeRendering(function () {
+            PanelSectionManager::registerItem(
+                SettingCommonPanelSection::class,
+                fn () => PanelSectionItem::make('website_tracking')
+                    ->setTitle(trans('packages/theme::theme.settings.website_tracking.title'))
+                    ->withIcon('ti ti-world')
+                    ->withDescription(trans('packages/theme::theme.settings.website_tracking.description'))
+                    ->withPriority(140)
+                    ->withRoute('settings.website-tracking'),
+            );
         });
 
         $this->app['events']->listen(RenderingAdminBar::class, function () {

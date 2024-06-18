@@ -46,7 +46,7 @@ trait HasFilters
         $columns = $this->getFilters();
         $columnKeys = array_keys($columns);
 
-        return Arr::where((array)$this->request->input('filter_columns', []), function ($item) use ($columnKeys) {
+        return Arr::where((array) $this->request->input('filter_columns', []), function ($item) use ($columnKeys) {
             return in_array($item, $columnKeys);
         });
     }
@@ -62,7 +62,7 @@ trait HasFilters
         EloquentBuilder|QueryBuilder|EloquentRelation $query,
         string $key,
         string $operator,
-        string|null $value
+        ?string $value
     ) {
         if (strpos($key, '.') !== -1) {
             $key = Arr::last(explode('.', $key));
@@ -108,7 +108,7 @@ trait HasFilters
                 }
 
                 if ($operator !== '=') {
-                    $value = (float)$value;
+                    $value = (float) $value;
                 }
 
                 $query = $query->where($column, $operator, $value);

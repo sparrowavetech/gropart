@@ -2,9 +2,11 @@
 
 namespace Botble\SeoHelper\Forms;
 
+use Botble\Base\Forms\FieldOptions\MediaImageFieldOption;
 use Botble\Base\Forms\FieldOptions\RadioFieldOption;
 use Botble\Base\Forms\FieldOptions\TextareaFieldOption;
 use Botble\Base\Forms\FieldOptions\TextFieldOption;
+use Botble\Base\Forms\Fields\MediaImageField;
 use Botble\Base\Forms\Fields\RadioField;
 use Botble\Base\Forms\Fields\TextareaField;
 use Botble\Base\Forms\Fields\TextField;
@@ -40,6 +42,14 @@ class SeoForm extends FormAbstract
                     ->allowOverLimit()
                     ->value(old('seo_meta.seo_description', $meta['seo_description']))
                     ->toArray()
+            )
+            ->add(
+                'seo_meta_image',
+                MediaImageField::class,
+                MediaImageFieldOption::make()
+                    ->label(trans('packages/seo-helper::seo-helper.seo_image'))
+                    ->value(old('seo_meta_image', $meta['seo_image']))
+                    ->toArray(),
             )
             ->add(
                 'seo_meta[index]',

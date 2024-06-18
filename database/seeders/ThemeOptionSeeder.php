@@ -31,7 +31,7 @@ class ThemeOptionSeeder extends BaseSeeder
             'homepage_id' => Page::query()->value('id'),
             'blog_page_id' => Page::query()->skip(5)->value('id'),
             'cookie_consent_message' => 'Your experience on this site will be improved by allowing cookies ',
-            'cookie_consent_learn_more_url' => 'cookie-policy',
+            'cookie_consent_learn_more_url' => '/cookie-policy',
             'cookie_consent_learn_more_text' => 'Cookie Policy',
             'number_of_products_per_page' => 40,
             'number_of_cross_sale_product' => 6,
@@ -41,76 +41,66 @@ class ThemeOptionSeeder extends BaseSeeder
             '404_page_image' => 'general/404.png',
             'social_links' => [
                 [
-                    [
-                        'key' => 'social-name',
-                        'value' => 'Facebook',
-                    ],
-                    [
-                        'key' => 'social-icon',
-                        'value' => 'general/facebook.png',
-                    ],
-                    [
-                        'key' => 'social-url',
-                        'value' => 'https://www.facebook.com/',
-                    ],
+                    ['key' => 'name', 'value' => 'Facebook'],
+                    ['key' => 'icon', 'value' => 'ti ti-brand-facebook'],
+                    ['key' => 'url', 'value' => 'https://www.facebook.com'],
+                    ['key' => 'icon_image', 'value' => null],
+                    ['key' => 'color', 'value' => '#fff'],
+                    ['key' => 'background-color', 'value' => '#3b5999'],
                 ],
                 [
-                    [
-                        'key' => 'social-name',
-                        'value' => 'Twitter',
-                    ],
-                    [
-                        'key' => 'social-icon',
-                        'value' => 'general/twitter.png',
-                    ],
-                    [
-                        'key' => 'social-url',
-                        'value' => 'https://www.twitter.com/',
-                    ],
+                    ['key' => 'name', 'value' => 'X (Twitter)'],
+                    ['key' => 'icon', 'value' => 'ti ti-brand-x'],
+                    ['key' => 'url', 'value' => 'https://x.com'],
+                    ['key' => 'icon_image', 'value' => null],
+                    ['key' => 'color', 'value' => '#fff'],
+                    ['key' => 'background-color', 'value' => '#000'],
                 ],
                 [
-                    [
-                        'key' => 'social-name',
-                        'value' => 'Instagram',
-                    ],
-                    [
-                        'key' => 'social-icon',
-                        'value' => 'general/instagram.png',
-                    ],
-                    [
-                        'key' => 'social-url',
-                        'value' => 'https://www.instagram.com/',
-                    ],
-                ],
-                [
-                    [
-                        'key' => 'social-name',
-                        'value' => 'Pinterest',
-                    ],
-                    [
-                        'key' => 'social-icon',
-                        'value' => 'general/pinterest.png',
-                    ],
-                    [
-                        'key' => 'social-url',
-                        'value' => 'https://www.pinterest.com/',
-                    ],
-                ],
-                [
-                    [
-                        'key' => 'social-name',
-                        'value' => 'Youtube',
-                    ],
-                    [
-                        'key' => 'social-icon',
-                        'value' => 'general/youtube.png',
-                    ],
-                    [
-                        'key' => 'social-url',
-                        'value' => 'https://www.youtube.com/',
-                    ],
+                    ['key' => 'name', 'value' => 'linkedin'],
+                    ['key' => 'icon', 'value' => 'ti ti-brand-linkedin'],
+                    ['key' => 'url', 'value' => 'https://www.linkedin.com'],
+                    ['key' => 'icon_image', 'value' => null],
+                    ['key' => 'color', 'value' => '#fff'],
+                    ['key' => 'background-color', 'value' => '#0a66c2'],
                 ],
             ],
+            'social_sharing' => [
+                [
+                    ['key' => 'social', 'value' => 'facebook'],
+                    ['key' => 'icon', 'value' => 'ti ti-brand-facebook'],
+                    ['key' => 'icon_image', 'value' => null],
+                    ['key' => 'color', 'value' => '#fff'],
+                    ['key' => 'background_color', 'value' => '#3b5999'],
+                ],
+                [
+                    ['key' => 'social', 'value' => 'x'],
+                    ['key' => 'icon', 'value' => 'ti ti-brand-twitter'],
+                    ['key' => 'icon_image', 'value' => null],
+                    ['key' => 'color', 'value' => '#fff'],
+                    ['key' => 'background_color', 'value' => '#55acee'],
+                ],
+                [
+                    ['key' => 'social', 'value' => 'pinterest'],
+                    ['key' => 'icon', 'value' => 'ti ti-brand-pinterest'],
+                    ['key' => 'icon_image', 'value' => null],
+                    ['key' => 'color', 'value' => '#fff'],
+                    ['key' => 'background_color', 'value' => '#b10c0c'],
+                ],
+                [
+                    ['key' => 'social', 'value' => 'linkedin'],
+                    ['key' => 'icon', 'value' => 'ti ti-brand-linkedin'],
+                    ['key' => 'icon_image', 'value' => null],
+                    ['key' => 'color', 'value' => '#fff'],
+                    ['key' => 'background_color', 'value' => '#0271ae'],
+                ],
+            ],
+            'primary_font' => 'Mulish',
+            'newsletter_popup_enable' => true,
+            'newsletter_popup_image' => $this->filePath('general/newsletter-popup.png'),
+            'newsletter_popup_title' => 'Subscribe Now',
+            'newsletter_popup_subtitle' => 'Newsletter',
+            'newsletter_popup_description' => 'Subscribe to our newsletter and get 10% off your first purchase',
         ]);
     }
 }

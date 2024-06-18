@@ -4,7 +4,7 @@ namespace Botble\Theme\Supports;
 
 class Vimeo
 {
-    public static function getVimeoID(string $url): string|null
+    public static function getVimeoID(string $url): ?string
     {
         $regExp = '/(https?:\/\/)?(www\.)?(player\.)?vimeo\.com\/([a-z]*\/)*([0-9]{6,11})[?]?.*/';
 

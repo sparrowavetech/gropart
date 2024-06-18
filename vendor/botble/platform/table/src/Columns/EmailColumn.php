@@ -17,12 +17,12 @@ class EmailColumn extends FormattedColumn implements FormattedColumnContract
             ->alignStart();
     }
 
-    public function formattedValue($value): string|null
+    public function formattedValue($value): ?string
     {
         if (! $this->isLinkable() || ! $value) {
             return null;
         }
 
-        return Html::mailto($value, $value);
+        return Html::mailto($value, $value, obfuscate: false);
     }
 }

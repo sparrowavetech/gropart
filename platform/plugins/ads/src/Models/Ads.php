@@ -25,6 +25,8 @@ class Ads extends BaseModel
         'url',
         'clicked',
         'order',
+        'ads_type',
+        'google_adsense_slot_id',
     ];
 
     protected $casts = [

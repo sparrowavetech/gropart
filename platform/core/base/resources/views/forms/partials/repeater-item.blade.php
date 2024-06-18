@@ -19,4 +19,10 @@
     {{ $hiddenField }}
 
     {!! call_user_func_array([Form::class, $field['type']], array_values($field['attributes'])) !!}
+
+    @if(! empty($field['helper']))
+        <x-core::form.helper-text>
+            {!! BaseHelper::clean($field['helper']) !!}
+        </x-core::form.helper-text>
+    @endif
 </x-core::form-group>

@@ -4,6 +4,7 @@ namespace Botble\Base\Helpers;
 
 use Botble\Base\Facades\AdminAppearance;
 use Botble\Base\Facades\Html;
+use Botble\Base\Supports\GoogleFonts;
 use Botble\Base\View\Components\BadgeComponent;
 use Botble\Icon\Facades\Icon as IconFacade;
 use Botble\Icon\View\Components\Icon;
@@ -19,7 +20,7 @@ use Throwable;
 
 class BaseHelper
 {
-    public function formatTime(CarbonInterface $timestamp, string|null $format = 'j M Y H:i'): string
+    public function formatTime(CarbonInterface $timestamp, ?string $format = 'j M Y H:i', bool $translated = false): string
     {
         $first = Carbon::create(0000, 0, 0, 00, 00, 00);
 
@@ -27,10 +28,14 @@ class BaseHelper
             return '';
         }
 
+        if ($translated) {
+            return $timestamp->translatedFormat($format);
+        }
+
         return $timestamp->format($format);
     }
 
-    public function formatDate(CarbonInterface|int|string|null $date, string|null $format = null): string|null
+    public function formatDate(CarbonInterface|int|string|null $date, ?string $format = null, bool $translated = false): ?string
     {
         if (empty($format)) {
             $format = $this->getDateFormat();
@@ -40,20 +45,20 @@ class BaseHelper
             return $date;
         }
 
-        if ($date instanceof CarbonInterface) {
-            return $this->formatTime($date, $format);
+        if (! $date instanceof CarbonInterface) {
+            $date = Carbon::parse($date);
         }
 
-        return $this->formatTime(Carbon::parse($date), $format);
+        return $this->formatTime($date, $format, $translated);
     }
 
-    public function formatDateTime(CarbonInterface|int|string|null $date, string $format = null): string|null
+    public function formatDateTime(CarbonInterface|int|string|null $date, ?string $format = null, bool $translated = false): ?string
     {
         if (empty($format)) {
             $format = $this->getDateTimeFormat();
         }
 
-        return $this->formatDate($date, $format);
+        return $this->formatDate($date, $format, $translated);
     }
 
     public function humanFilesize(float $bytes, int $precision = 2): string
@@ -165,7 +170,7 @@ class BaseHelper
         return $pageId && $homepageId && $pageId == $homepageId;
     }
 
-    public function getHomepageId(): string|null
+    public function getHomepageId(): ?string
     {
         if (! function_exists('theme_option')) {
             return null;
@@ -175,7 +180,7 @@ class BaseHelper
     }
 
     /**
-     * @param \Illuminate\Database\Query\Builder|\Illuminate\Database\Eloquent\Builder $query
+     * @param  \Illuminate\Database\Query\Builder|\Illuminate\Database\Eloquent\Builder  $query
      */
     public function isJoined($query, string $table): bool
     {
@@ -215,7 +220,7 @@ class BaseHelper
         return 'ckeditor';
     }
 
-    public function removeQueryStringVars(string|null $url, array|string $key): string|null
+    public function removeQueryStringVars(?string $url, array|string $key): ?string
     {
         if (! is_array($key)) {
             $key = [$key];
@@ -229,7 +234,7 @@ class BaseHelper
         return $url;
     }
 
-    public function cleanEditorContent(string|null $value): string
+    public function cleanEditorContent(?string $value): string
     {
         if (! $value) {
             return '';
@@ -294,7 +299,7 @@ class BaseHelper
         return $formats;
     }
 
-    public function clean(array|string|null $dirty, array|string $config = null): array|string|null
+    public function clean(array|string|null $dirty, array|string|null $config = null): array|string|null
     {
         if (config('core.base.general.enable_less_secure_web', false)) {
             return $dirty;
@@ -311,9 +316,9 @@ class BaseHelper
         return clean($dirty, $config);
     }
 
-    public function html(array|string|null $dirty, array|string $config = null): HtmlString
+    public function html(array|string|null $dirty, array|string|null $config = null): HtmlString
     {
-        return new HtmlString((string)$this->clean($dirty, $config));
+        return new HtmlString((string) $this->clean($dirty, $config));
     }
 
     public function hexToRgba(string $color, float $opacity = 1): string
@@ -365,7 +370,7 @@ class BaseHelper
         return $this;
     }
 
-    public function removeSpecialCharacters(string|null $string): array|string|null
+    public function removeSpecialCharacters(?string $string): array|string|null
     {
         $string = str_replace(' ', '-', $string); // Replaces all spaces with hyphens.
         $string = preg_replace('/[^A-Za-z0-9\-]/', '', $string); // Removes special chars.
@@ -384,7 +389,7 @@ class BaseHelper
         return $value;
     }
 
-    public function cleanShortcodes(string|null $content): string|null
+    public function cleanShortcodes(?string $content): ?string
     {
         if (! $content) {
             return $content;
@@ -401,7 +406,7 @@ class BaseHelper
         return $shortcodeCompiler->strip($content);
     }
 
-    public function stringify($content): string|null
+    public function stringify($content): ?string
     {
         if (empty($content)) {
             return null;
@@ -418,7 +423,7 @@ class BaseHelper
         return null;
     }
 
-    public function getGoogleFontsURL(string $path = null): string
+    public function getGoogleFontsURL(?string $path = null): string
     {
         $url = config('core.base.general.google_fonts_url', 'https://fonts.bunny.net');
 
@@ -463,7 +468,7 @@ class BaseHelper
     /**
      * @deprecated
      */
-    public function routeIdRegex(): string|null
+    public function routeIdRegex(): ?string
     {
         return '[0-9]+';
     }
@@ -493,7 +498,7 @@ class BaseHelper
         return implode(DIRECTORY_SEPARATOR, $paths);
     }
 
-    public function hasIcon(string|null $name): bool
+    public function hasIcon(?string $name): bool
     {
         if (! $name) {
             return false;
@@ -502,7 +507,7 @@ class BaseHelper
         return IconFacade::has($name);
     }
 
-    public function renderIcon(string $name, string $size = null, array $attributes = [], bool $safe = false): string
+    public function renderIcon(string $name, ?string $size = null, array $attributes = [], bool $safe = false): string
     {
         if ($safe && ! $this->hasIcon($name)) {
             return '';
@@ -513,10 +518,10 @@ class BaseHelper
         );
     }
 
-    public function renderBadge(string $label, string $color = 'primary', array $attributes = []): string
+    public function renderBadge(string $label, string $color = 'primary', array $attributes = [], ?string $icon = null): string
     {
         return Blade::renderComponent(
-            (new BadgeComponent($label, $color))->withAttributes($attributes)
+            (new BadgeComponent($label, $color, $icon))->withAttributes($attributes)
         );
     }
 
@@ -532,5 +537,25 @@ class BaseHelper
     public function getHomepageUrl()
     {
         return apply_filters('cms_homepage_url', rescue(fn () => route('public.index'), report: false));
+    }
+
+    public function getFonts(): array
+    {
+        $customGoogleFonts = config('core.base.general.custom_google_fonts');
+        $customFonts = config('core.base.general.custom_fonts');
+
+        if (! empty($customGoogleFonts)) {
+            $customGoogleFonts = array_filter(explode(',', $customGoogleFonts));
+        }
+
+        if (! empty($customFonts)) {
+            $customFonts = array_filter(explode(',', $customFonts));
+        }
+
+        return [
+            ...GoogleFonts::getFonts(),
+            ...(! empty($customGoogleFonts) ? $customGoogleFonts : []),
+            ...(! empty($customFonts) ? $customFonts : []),
+        ];
     }
 }

@@ -7,6 +7,7 @@ use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Base\Supports\Breadcrumb;
+use Botble\PluginManagement\Enums\PluginFilterStatus;
 use Botble\PluginManagement\Events\RenderingPluginListingPage;
 use Botble\PluginManagement\Services\MarketplaceService;
 use Botble\PluginManagement\Services\PluginService;
@@ -36,56 +37,62 @@ class PluginManagementController extends BaseController
 
         RenderingPluginListingPage::dispatch();
 
-        $plugins = [];
-
         if (File::exists(plugin_path('.DS_Store'))) {
             File::delete(plugin_path('.DS_Store'));
         }
 
-        $paths = BaseHelper::scanFolder(plugin_path());
+        $plugins = collect();
 
-        if (! empty($paths)) {
+        if (! empty($pluginsPath = BaseHelper::scanFolder(plugin_path()))) {
             $installed = get_active_plugins();
-            foreach ($paths as $path) {
+
+            foreach ($pluginsPath as $path) {
                 $pluginPath = plugin_path($path);
 
-                if (File::exists($pluginPath . '/.DS_Store')) {
-                    File::delete($pluginPath . '/.DS_Store');
+                if (File::exists($dsStore = "$pluginPath/.DS_Store")) {
+                    File::delete($dsStore);
                 }
 
-                if (! File::isDirectory($pluginPath) || ! File::exists($pluginPath . '/plugin.json')) {
+                if (
+                    ! File::isDirectory($pluginPath)
+                    || ! File::exists($pluginJson = "$pluginPath/plugin.json")
+                ) {
                     continue;
                 }
 
-                $content = BaseHelper::getFileData($pluginPath . '/plugin.json');
+                $manifest = BaseHelper::getFileData($pluginJson);
 
-                if (! empty($content)) {
-                    $content = [
-                        ...$content,
+                if (! empty($manifest)) {
+                    $manifest = [
+                        ...$manifest,
                         'status' => in_array($path, $installed),
                         'path' => $path,
                         'image' => null,
                     ];
 
-                    $screenshot = 'vendor/core/plugins/' . $path . '/screenshot.png';
+                    $screenshot = "vendor/core/plugins/$path/screenshot.png";
 
                     if (File::exists(public_path($screenshot))) {
-                        $content['image'] = asset($screenshot);
+                        $manifest['image'] = asset($screenshot);
                     } elseif (File::exists($pluginPath . '/screenshot.png')) {
-                        $content['image'] = 'data:image/png;base64,' . base64_encode(File::get($pluginPath . '/screenshot.png'));
+                        $manifest['image'] = 'data:image/png;base64,' . base64_encode(File::get($pluginPath . '/screenshot.png'));
                     }
 
-                    $plugins[] = (object) $content;
+                    $plugins->push((object) $manifest);
                 }
             }
+
+            $plugins = collect($plugins)->sortByDesc('status');
         }
 
-        return view('packages/plugin-management::index', compact('plugins'));
+        $filterStatuses = PluginFilterStatus::labels();
+
+        return view('packages/plugin-management::index', compact('plugins', 'filterStatuses'));
     }
 
     public function update(Request $request): BaseHttpResponse
     {
-        $plugin = strtolower($request->input('name'));
+        $plugin = $request->input('name');
 
         if (! $this->pluginService->validatePlugin($plugin)) {
             return $this
@@ -124,8 +131,6 @@ class PluginManagementController extends BaseController
 
     public function destroy(string $plugin): BaseHttpResponse
     {
-        $plugin = strtolower($plugin);
-
         try {
             $result = $this->pluginService->remove($plugin);
 
@@ -149,7 +154,7 @@ class PluginManagementController extends BaseController
 
     public function checkRequirement(Request $request, MarketplaceService $marketplaceService): BaseHttpResponse
     {
-        $name = strtolower($request->input('name'));
+        $name = $request->input('name');
 
         $requiredPlugins = $this->pluginService->getDependencies($name);
 

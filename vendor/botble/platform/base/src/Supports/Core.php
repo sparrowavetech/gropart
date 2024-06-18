@@ -38,11 +38,11 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
-use Illuminate\Contracts\Session\Session;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\ServiceProvider as IlluminateServiceProvider;
 use Illuminate\Support\Str;
@@ -76,7 +76,7 @@ final class Core
 
     private string $licenseKey = 'CAF4B17F6D3F656125F9';
 
-    private string $cacheLicenseKeyName = '45d0da541764682476f822028d945a46270ba404';
+    private string $cacheLicenseKeyName = '45d0da541764682476f833028d945a46270ba404';
 
     private string $skipLicenseReminderFilePath;
 
@@ -84,8 +84,7 @@ final class Core
 
     public function __construct(
         private readonly CacheRepository $cache,
-        private readonly Filesystem $files,
-        private readonly Session $session
+        private readonly Filesystem $files
     ) {
         $this->basePath = base_path();
         $this->licenseFilePath = storage_path('.license');
@@ -208,7 +207,7 @@ final class Core
             throw UnableToWriteFile::atLocation($this->licenseFilePath);
         }
 
-        $this->session->forget("license:{$this->getLicenseCacheKey()}:last_checked_date");
+        Session::forget("license:{$this->getLicenseCacheKey()}:last_checked_date");
 
         $this->clearLicenseReminder();
 
@@ -232,12 +231,12 @@ final class Core
             $cachesKey = "license:{$this->getLicenseCacheKey()}:last_checked_date";
             $lastCheckedDate = Carbon::createFromFormat(
                 $dateFormat,
-                $this->session->get($cachesKey, '01-01-1970')
+                Session::get($cachesKey, '01-01-1970')
             )->endOfDay();
             $now = Carbon::now()->addDays($this->verificationPeriod);
 
             if ($now->greaterThan($lastCheckedDate) && $verified = $this->verifyLicenseDirectly()) {
-                $this->session->put($cachesKey, $now->format($dateFormat));
+                Session::put($cachesKey, $now->format($dateFormat));
             }
 
             return $verified;
@@ -248,7 +247,7 @@ final class Core
 
     public function revokeLicense(string $license, string $client): bool
     {
-        $this->session->forget("license:{$this->getLicenseCacheKey()}:last_checked_date");
+        Session::forget("license:{$this->getLicenseCacheKey()}:last_checked_date");
 
         LicenseRevoking::dispatch($license, $client);
 
@@ -266,7 +265,7 @@ final class Core
 
     public function deactivateLicense(): bool
     {
-        $this->session->forget("license:{$this->getLicenseCacheKey()}:last_checked_date");
+        Session::forget("license:{$this->getLicenseCacheKey()}:last_checked_date");
 
         LicenseDeactivating::dispatch();
 
@@ -328,7 +327,7 @@ final class Core
     {
         $sizeUpdateResponse = $this->createRequest('get_update_size/' . $updateId, method: 'HEAD');
 
-        return (float)$sizeUpdateResponse->header('Content-Length') ?: 1;
+        return (float) $sizeUpdateResponse->header('Content-Length') ?: 1;
     }
 
     public function downloadUpdate(string $updateId, string $version): void
@@ -461,6 +460,8 @@ final class Core
     {
         $this->publishAssets(package_path());
 
+        $this->publishAssets(base_path('vendor'));
+
         SystemUpdatePublished::dispatch();
     }
 
@@ -489,10 +490,7 @@ final class Core
 
     private function publishPaths(): array
     {
-        return array_merge(
-            IlluminateServiceProvider::pathsToPublish(null, 'cms-lang'),
-            IlluminateServiceProvider::pathsToPublish(null, 'cms-public')
-        );
+        return IlluminateServiceProvider::pathsToPublish(null, 'cms-public');
     }
 
     public function publishAssets(string $path): void
@@ -511,7 +509,7 @@ final class Core
         }
     }
 
-    private function runMigrationFiles(): void
+    public function runMigrationFiles(): void
     {
         SystemUpdateDBMigrating::dispatch();
 
@@ -629,7 +627,7 @@ final class Core
         $zip->close();
     }
 
-    public function getLicenseFile(): string|null
+    public function getLicenseFile(): ?string
     {
         if (! $this->isLicenseFileExists()) {
             return null;
@@ -750,9 +748,9 @@ final class Core
                 Arr::get($data, 'update_id'),
                 Arr::get($data, 'version'),
                 Carbon::createFromFormat('Y-m-d', Arr::get($data, 'release_date')),
-                trim((string)Arr::get($data, 'summary')),
-                trim((string)Arr::get($data, 'changelog')),
-                (bool)Arr::get($data, 'has_sql')
+                trim((string) Arr::get($data, 'summary')),
+                trim((string) Arr::get($data, 'changelog')),
+                (bool) Arr::get($data, 'has_sql')
             );
         }
 

@@ -71,7 +71,7 @@ class Description implements DescriptionContract
     public function set($content)
     {
         if ($content) {
-            $this->content = trim(strip_tags(BaseHelper::cleanShortcodes((string)$content)));
+            $this->content = trim(strip_tags(BaseHelper::cleanShortcodes((string) $content)));
         }
 
         return $this;

@@ -13,10 +13,10 @@ if (! function_exists('shortcode')) {
 if (! function_exists('add_shortcode')) {
     function add_shortcode(
         string $key,
-        string|null $name,
-        string|null $description = null,
+        ?string $name,
+        ?string $description = null,
         string|null|callable|array $callback = null,
-        string|null $previewImage = ''
+        ?string $previewImage = ''
     ): Shortcode {
         return shortcode()->register($key, $name, $description, $callback, $previewImage);
     }

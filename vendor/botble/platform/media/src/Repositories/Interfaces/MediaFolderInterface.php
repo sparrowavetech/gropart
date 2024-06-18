@@ -20,7 +20,7 @@ interface MediaFolderInterface extends RepositoryInterface
 
     public function getAllChildFolders(int|string|null $parentId, array $child = []);
 
-    public function getFullPath(int|string|null $folderId, string|null $path = ''): string|null;
+    public function getFullPath(int|string|null $folderId, ?string $path = ''): ?string;
 
     public function restoreFolder(int|string|null $folderId);
 

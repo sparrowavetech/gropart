@@ -23,7 +23,7 @@ class CategoryRepository extends RepositoriesAbstract implements CategoryInterfa
         return $this->applyBeforeExecuteQuery($data)->get();
     }
 
-    public function getFeaturedCategories(int|null $limit, array $with = []): Collection
+    public function getFeaturedCategories(?int $limit, array $with = []): Collection
     {
         $data = $this->model
             ->with(array_merge(['slugable'], $with))
@@ -134,7 +134,7 @@ class CategoryRepository extends RepositoriesAbstract implements CategoryInterfa
 
         $data = $this->model->wherePublished()->orderBy($orderBy, $order);
 
-        return $this->applyBeforeExecuteQuery($data)->paginate((int)$filters['per_page']);
+        return $this->applyBeforeExecuteQuery($data)->paginate((int) $filters['per_page']);
     }
 
     public function getPopularCategories(int $limit, array $with = ['slugable'], array $withCount = ['posts']): Collection

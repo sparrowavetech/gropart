@@ -38,14 +38,14 @@ class PluginService
 
         $content = $this->getPluginInfo($plugin);
 
-        $pluginName = Arr::get($content, 'name') ?? Str::studly($plugin);
-
         if (empty($content)) {
             return [
                 'error' => true,
                 'message' => trans('packages/plugin-management::plugin.invalid_json'),
             ];
         }
+
+        $pluginName = Arr::get($content, 'name') ?? Str::studly($plugin);
 
         $minimumCoreVersion = Arr::get($content, 'minimum_core_version');
         $coreVersion = get_core_version();
@@ -153,9 +153,15 @@ class PluginService
             ];
         }
 
+        if ($this->isInBlacklist($plugin)) {
+            return [
+                'error' => true,
+                'message' => trans('packages/plugin-management::plugin.plugin_invalid'),
+            ];
+        }
+
         return [
             'error' => false,
-            'message' => trans('packages/plugin-management::plugin.plugin_invalid'),
         ];
     }
 
@@ -443,5 +449,27 @@ class PluginService
         }
 
         return $installedPlugins;
+    }
+
+    protected function isInBlacklist(string $plugin): bool
+    {
+        $blacklist = [
+            'activator',
+            'botble-activator',
+            'botble-activator-main',
+            'shaqi/botble-activator',
+        ];
+
+        if (in_array($plugin, $blacklist)) {
+            return true;
+        }
+
+        $pluginInfo = $this->getPluginInfo($plugin);
+
+        if ($pluginInfo && isset($pluginInfo['id']) && in_array($pluginInfo['id'], $blacklist)) {
+            return true;
+        }
+
+        return false;
     }
 }

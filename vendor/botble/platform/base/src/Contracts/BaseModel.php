@@ -8,7 +8,7 @@ interface BaseModel
 {
     public static function bootHasUuidsOrIntegerIds(): void;
 
-    public function newUniqueId(): string|null;
+    public function newUniqueId(): ?string;
 
     public function getKeyType(): string;
 

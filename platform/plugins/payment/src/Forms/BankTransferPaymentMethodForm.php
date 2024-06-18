@@ -28,7 +28,7 @@ class BankTransferPaymentMethodForm extends FormAbstract
                     ->toArray()
             )
             ->add(
-                sprintf('payment_%s_name', PaymentMethodEnum::BANK_TRANSFER),
+                get_payment_setting_key('name', PaymentMethodEnum::BANK_TRANSFER),
                 TextField::class,
                 TextFieldOption::make()
                     ->label(trans('plugins/payment::payment.method_name'))
@@ -41,7 +41,7 @@ class BankTransferPaymentMethodForm extends FormAbstract
                     ->toArray(),
             )
             ->add(
-                sprintf('payment_%s_description', PaymentMethodEnum::BANK_TRANSFER),
+                get_payment_setting_key('description', PaymentMethodEnum::BANK_TRANSFER),
                 EditorField::class,
                 EditorFieldOption::make()
                     ->wrapperAttributes(['style' => 'max-width: 99.8%'])
@@ -52,7 +52,7 @@ class BankTransferPaymentMethodForm extends FormAbstract
             ->addAvailableCountriesField(PaymentMethodEnum::BANK_TRANSFER)
             ->when(
                 apply_filters(PAYMENT_METHOD_SETTINGS_CONTENT, null, PaymentMethodEnum::BANK_TRANSFER),
-                function (FormAbstract $form, string|null $data) {
+                function (FormAbstract $form, ?string $data) {
                     $form->add('metabox', HtmlField::class, ['html' => $data]);
                 }
             );

@@ -13,7 +13,7 @@ interface CategoryInterface extends RepositoryInterface
 {
     public function getDataSiteMap(): Collection;
 
-    public function getFeaturedCategories(int|null $limit, array $with = []): Collection;
+    public function getFeaturedCategories(?int $limit, array $with = []): Collection;
 
     public function getAllCategories(array $condition = [], array $with = []): Collection;
 

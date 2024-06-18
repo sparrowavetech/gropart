@@ -70,7 +70,7 @@ class MenuNode extends BaseModel
                 return '/';
             }
 
-            return (string)$this->reference->url;
+            return (string) $this->reference->url;
         });
     }
 
@@ -96,10 +96,10 @@ class MenuNode extends BaseModel
     {
         return Attribute::make(
             get: function () {
-                $iconImage = $iconImage = $this->getMetaData('icon_image', true);
+                $iconImage = $this->getMetaData('icon_image', true);
 
                 if ($iconImage) {
-                    return RvMedia::image($iconImage, 'icon', attributes: ['class' => 'menu-icon-image']);
+                    return RvMedia::image($iconImage, 'icon', attributes: ['class' => 'menu-icon-image' . ($this->title ? ' me-1' : '')]);
                 }
 
                 $icon = $this->icon_font;
@@ -109,9 +109,9 @@ class MenuNode extends BaseModel
                 }
 
                 if (BaseHelper::hasIcon($icon)) {
-                    $icon = BaseHelper::renderIcon($icon);
+                    $icon = BaseHelper::renderIcon($icon, attributes: ['class' => $this->title ? ' me-1' : '']);
                 } else {
-                    $icon = sprintf('<i class="%s"></i>', $icon);
+                    $icon = sprintf('<i class="%s"></i>', $icon . ($this->title ? ' me-1' : ''));
                 }
 
                 return new HtmlString($icon);

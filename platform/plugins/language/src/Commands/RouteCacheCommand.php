@@ -91,7 +91,7 @@ class RouteCacheCommand extends BaseRouteCacheCommand
         return self::SUCCESS;
     }
 
-    protected function getFreshApplicationRoutesForLocale(string|null $locale = null, bool $force = false): RouteCollection
+    protected function getFreshApplicationRoutesForLocale(?string $locale = null, bool $force = false): RouteCollection
     {
         if (
             $locale === null ||

@@ -16,6 +16,7 @@ use Botble\PluginManagement\Commands\PluginInstallFromMarketplaceCommand;
 use Botble\PluginManagement\Commands\PluginListCommand;
 use Botble\PluginManagement\Commands\PluginRemoveAllCommand;
 use Botble\PluginManagement\Commands\PluginRemoveCommand;
+use Botble\PluginManagement\Commands\PluginUpdateVersionInfoCommand;
 use Illuminate\Foundation\Console\ClearCompiledCommand as IlluminateClearCompiledCommand;
 use Illuminate\Foundation\Console\PackageDiscoverCommand as IlluminatePackageDiscoverCommand;
 
@@ -47,6 +48,7 @@ class CommandServiceProvider extends ServiceProvider
                 PluginRemoveCommand::class,
                 PluginRemoveAllCommand::class,
                 PluginListCommand::class,
+                PluginUpdateVersionInfoCommand::class,
             ]);
         }
     }

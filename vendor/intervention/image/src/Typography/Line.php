@@ -11,10 +11,15 @@ use Intervention\Image\Interfaces\PointInterface;
 use IteratorAggregate;
 use Traversable;
 
+/**
+ * @implements IteratorAggregate<string>
+ */
 class Line implements IteratorAggregate, Countable
 {
     /**
      * Segments (usually individual words including punctuation marks) of the line
+     *
+     * @var array<string>
      */
     protected array $segments = [];
 
@@ -50,7 +55,7 @@ class Line implements IteratorAggregate, Countable
     /**
      * Returns Iterator
      *
-     * @return Traversable
+     * @return Traversable<string>
      */
     public function getIterator(): Traversable
     {
@@ -70,10 +75,10 @@ class Line implements IteratorAggregate, Countable
     /**
      * Set position of current line
      *
-     * @param Point $point
+     * @param PointInterface $point
      * @return Line
      */
-    public function setPosition(Point $point): self
+    public function setPosition(PointInterface $point): self
     {
         $this->position = $point;
 
@@ -81,13 +86,23 @@ class Line implements IteratorAggregate, Countable
     }
 
     /**
-     * Count segments of line
-     *
+     * Count segments (individual words including punctuation marks) of line
+    *
      * @return int
      */
     public function count(): int
     {
         return count($this->segments);
+    }
+
+    /**
+     * Count characters of line
+     *
+     * @return int
+     */
+    public function length(): int
+    {
+        return mb_strlen((string) $this);
     }
 
     /**

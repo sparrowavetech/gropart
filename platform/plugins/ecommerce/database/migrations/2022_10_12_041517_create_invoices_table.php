@@ -30,7 +30,7 @@ return new class () extends Migration {
             $table->string('shipping_option', 60)->nullable();
             $table->string('shipping_method', 60)->default('default');
             $table->string('coupon_code', 120)->nullable();
-            $table->string('discount_description', 255)->nullable();
+            $table->string('discount_description')->nullable();
             $table->unsignedDecimal('amount', 15);
             $table->text('description')->nullable();
             $table->foreignId('payment_id')->nullable()->index();
@@ -44,7 +44,7 @@ return new class () extends Migration {
             $table->foreignId('invoice_id');
             $table->morphs('reference');
             $table->string('name');
-            $table->string('description')->nullable();
+            $table->string('description', 400)->nullable();
             $table->string('image')->nullable();
             $table->unsignedInteger('qty');
             $table->unsignedDecimal('sub_total', 15);

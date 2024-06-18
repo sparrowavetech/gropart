@@ -7,7 +7,7 @@ use ZipArchive;
 
 class ZipRepository implements ZipperInterface
 {
-    protected ZipArchive|null $archive;
+    protected ?ZipArchive $archive;
 
     public function __construct($filePath, $create = false, $archive = null)
     {

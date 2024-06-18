@@ -19,7 +19,7 @@ abstract class StripePaymentAbstract
 {
     use PaymentErrorTrait;
 
-    protected string|null $token = null;
+    protected ?string $token = null;
 
     protected float $amount;
 
@@ -34,7 +34,7 @@ abstract class StripePaymentAbstract
         return $this->supportRefundOnline;
     }
 
-    public function execute(array $data): string|null
+    public function execute(array $data): ?string
     {
         $this->token = request()->input('stripeToken');
 
@@ -61,7 +61,7 @@ abstract class StripePaymentAbstract
         return $chargeId;
     }
 
-    abstract public function makePayment(array $data): string|null;
+    abstract public function makePayment(array $data): ?string;
 
     abstract public function afterMakePayment(string $chargeId, array $data);
 
@@ -112,7 +112,7 @@ abstract class StripePaymentAbstract
         $multiplier = StripeHelper::getStripeCurrencyMultiplier($this->currency);
 
         if ($multiplier > 1) {
-            $totalAmount = (int)(round((float)$totalAmount, 2) * $multiplier);
+            $totalAmount = (int) (round((float) $totalAmount, 2) * $multiplier);
         }
 
         try {

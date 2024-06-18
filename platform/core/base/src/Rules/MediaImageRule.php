@@ -13,8 +13,8 @@ class MediaImageRule implements ValidationRule
 {
     public function __construct(
         protected array $mimeTypes = [],
-        protected int|null $minSize = null,
-        protected int|null $maxSize = null,
+        protected ?int $minSize = null,
+        protected ?int $maxSize = null,
     ) {
         $this->mimeTypes = $mimeTypes ?: config('core.media.media.mime_types.image');
     }

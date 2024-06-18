@@ -45,6 +45,7 @@ return [
     'after_service_registration_msg' => 'After registration at :name, you will have Client ID, Client Secret',
     'enter_client_id_and_secret' => 'Enter Client ID, Secret into the box in right hand',
     'method_name' => 'Method name',
+    'method_logo' => 'Method logo',
     'please_provide_information' => 'Please provide information',
     'client_id' => 'Client ID',
     'client_secret' => 'Client Secret',

@@ -6,7 +6,7 @@ use Botble\SocialLogin\Facades\SocialService;
 
 class FacebookDataDeletionSignedRequestParser
 {
-    public function parse(string $signedRequest): array|null
+    public function parse(string $signedRequest): ?array
     {
         [$encodedSig, $payload] = explode('.', $signedRequest, 2);
 

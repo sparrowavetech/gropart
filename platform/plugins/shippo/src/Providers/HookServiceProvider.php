@@ -64,7 +64,7 @@ class HookServiceProvider extends ServiceProvider
         return $result;
     }
 
-    public function addSettings(string|null $settings): string
+    public function addSettings(?string $settings): string
     {
         $logFiles = [];
 

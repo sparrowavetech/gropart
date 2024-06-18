@@ -121,7 +121,7 @@ class HookServiceProvider extends ServiceProvider
 
             $order = $api->order->create([
                 'receipt' => $receiptId,
-                'amount' => (int)round($amount),
+                'amount' => (int) round($amount),
                 'currency' => $data['currency'],
             ]);
 

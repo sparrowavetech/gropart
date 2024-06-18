@@ -30,6 +30,7 @@ class WidgetManagement {
                         Botble.callScroll($('.list-page-select-widget'))
                         Botble.initResources()
                         Botble.initMediaIntegrate()
+                        Botble.initTreeCheckboxes()
                         Botble.showSuccess(data.message)
                     })
                     .finally(() => {

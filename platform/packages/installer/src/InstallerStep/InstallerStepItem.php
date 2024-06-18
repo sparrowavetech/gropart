@@ -8,7 +8,7 @@ class InstallerStepItem
 {
     protected Closure|string $label;
 
-    protected string|null $route = null;
+    protected ?string $route = null;
 
     protected int $priority = 0;
 
@@ -43,7 +43,7 @@ class InstallerStepItem
         return value($this->label);
     }
 
-    public function getRoute(): string|null
+    public function getRoute(): ?string
     {
         return $this->route;
     }

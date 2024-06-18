@@ -15,10 +15,10 @@ class MetaBox
         string $id,
         string $title,
         string|array|callable|Closure $callback,
-        string|null $reference = null,
+        ?string $reference = null,
         string $context = 'advanced',
         string $priority = 'default',
-        array|null $callbackArgs = null
+        ?array $callbackArgs = null
     ): void {
         if (! isset($this->metaBoxes[$reference])) {
             $this->metaBoxes[$reference] = [];
@@ -100,7 +100,7 @@ class MetaBox
                     continue;
                 }
 
-                foreach ((array)$this->metaBoxes[$reference][$context][$priority] as $box) {
+                foreach ((array) $this->metaBoxes[$reference][$context][$priority] as $box) {
                     if (! $box || ! $box['title']) {
                         continue;
                     }
@@ -115,7 +115,7 @@ class MetaBox
         echo view('core/base::elements.meta-box', compact('data', 'context'))->render();
     }
 
-    public function removeMetaBox(string $id, string|null $reference, string $context): void
+    public function removeMetaBox(string $id, ?string $reference, string $context): void
     {
         if (! isset($this->metaBoxes[$reference])) {
             $this->metaBoxes[$reference] = [];

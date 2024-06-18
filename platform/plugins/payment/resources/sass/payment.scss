@@ -221,3 +221,24 @@
         }
     }
 }
+
+.payment-method {
+    $prefix: &;
+
+    &-item {
+        position: relative;
+        padding: 0.75rem;
+
+        #{$prefix}-logo {
+            position: absolute;
+            top: 0.5rem;
+            inset-inline-end: 0.5rem;
+            width: 4rem;
+
+            img {
+                max-width: 100%;
+                height: auto;
+            }
+        }
+    }
+}

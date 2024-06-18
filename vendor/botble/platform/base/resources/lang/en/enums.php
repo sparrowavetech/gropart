@@ -5,8 +5,6 @@ return [
         'draft' => 'Draft',
         'pending' => 'Pending',
         'published' => 'Published',
-        'verified' => 'Verified',
-        'un_verified' => 'Un-Verified',
     ],
     'system_updater_steps' => [
         'download' => 'Download update files',

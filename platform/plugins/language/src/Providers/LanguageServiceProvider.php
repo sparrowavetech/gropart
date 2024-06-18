@@ -133,7 +133,7 @@ class LanguageServiceProvider extends ServiceProvider
             ! isset($data['prefix']) &&
             (! is_in_admin() || ! Language::hideDefaultLocaleInURL() || $locale !== Language::getDefaultLocale())
         ) {
-            $data['prefix'] = trim((string)$locale);
+            $data['prefix'] = trim((string) $locale);
         }
 
         $data['middleware'] = array_merge(Arr::get($data, 'middleware', []), [

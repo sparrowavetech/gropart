@@ -84,7 +84,7 @@ class ThemeManagementServiceProvider extends ServiceProvider
 
         $this->registerWidgetsFromTheme(Theme::getThemeName());
 
-        add_filter('widget_rendered', function (string|null $html, AbstractWidget $widget) {
+        add_filter('widget_rendered', function (?string $html, AbstractWidget $widget) {
             if (! setting('show_theme_guideline_link', false) || ! Auth::guard()->check() || ! Auth::guard()->user()->hasPermission('widgets.index')) {
                 return $html;
             }

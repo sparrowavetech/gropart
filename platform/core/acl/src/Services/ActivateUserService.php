@@ -26,7 +26,7 @@ class ActivateUserService
         return $this->activationRepository->complete($user, $activation->code);
     }
 
-    public function remove(User $user): bool|null
+    public function remove(User $user): ?bool
     {
         if (! $user->activated) {
             return false;

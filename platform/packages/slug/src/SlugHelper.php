@@ -16,7 +16,7 @@ class SlugHelper
     {
     }
 
-    public function registerModule(string|array $model, string|null $name = null): self
+    public function registerModule(string|array $model, ?string $name = null): self
     {
         $supported = $this->supportedModels();
 
@@ -49,7 +49,7 @@ class SlugHelper
         return config('packages.slug.general.supported', []);
     }
 
-    public function setPrefix(string $model, string|null $prefix, bool $canEmptyPrefix = false): self
+    public function setPrefix(string $model, ?string $prefix, bool $canEmptyPrefix = false): self
     {
         $prefixes = config('packages.slug.general.prefixes', []);
         $prefixes[$model] = $prefix;
@@ -112,15 +112,17 @@ class SlugHelper
 
         $slug->key = Str::slug($name ?: $model->{$this->getColumnNameToGenerateSlug($model::class)});
 
+        $slug->ensureIdCanBeCreated();
+
         $slug->saveQuietly();
 
         return $slug;
     }
 
     public function getSlug(
-        string|null $key,
-        string|null $prefix = null,
-        string|null $model = null,
+        ?string $key,
+        ?string $prefix = null,
+        ?string $model = null,
         $referenceId = null
     ) {
         $condition = [];
@@ -159,7 +161,7 @@ class SlugHelper
         return $query->first();
     }
 
-    public function getPrefix(string $model, string $default = '', bool $translate = true): string|null
+    public function getPrefix(string $model, string $default = '', bool $translate = true): ?string
     {
         $prefix = setting($this->getPermalinkSettingKey($model));
 
@@ -187,7 +189,7 @@ class SlugHelper
         );
     }
 
-    public function getHelperText(string $prefix, string|null $postfix = '', string|null $separation = ''): string
+    public function getHelperText(string $prefix, ?string $postfix = '', ?string $separation = ''): string
     {
         $url = ($prefix ? $prefix . $separation : '') . $postfix;
         $url = ltrim(str_replace('//', '/', $url), '/');
@@ -197,7 +199,7 @@ class SlugHelper
         ]);
     }
 
-    public function getColumnNameToGenerateSlug(array|string|object|null $model): string|null
+    public function getColumnNameToGenerateSlug(array|string|object|null $model): ?string
     {
         if (! $model) {
             return null;
@@ -210,7 +212,7 @@ class SlugHelper
         $config = Arr::get(config('packages.slug.general.slug_generated_columns', []), $model);
 
         if ($config !== null) {
-            return (string)$config;
+            return (string) $config;
         }
 
         return 'name';
@@ -226,7 +228,7 @@ class SlugHelper
         return setting($this->getSettingKey('slug_turn_off_automatic_url_translation_into_latin'), 0) == 1;
     }
 
-    public function getPublicSingleEndingURL(): string|null
+    public function getPublicSingleEndingURL(): ?string
     {
         $endingURL = setting($this->getSettingKey('public_single_ending_url'), config('packages.theme.general.public_single_ending_url'));
 

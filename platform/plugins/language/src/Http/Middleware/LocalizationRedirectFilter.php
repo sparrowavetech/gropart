@@ -6,6 +6,7 @@ use Botble\Language\Facades\Language;
 use Closure;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Session;
 
 class LocalizationRedirectFilter extends LaravelLocalizationMiddlewareBase
 {
@@ -27,6 +28,7 @@ class LocalizationRedirectFilter extends LaravelLocalizationMiddlewareBase
             $locales = Language::getSupportedLocales();
             $hideDefaultLocale = Language::hideDefaultLocaleInURL();
             $redirection = false;
+
             if (! empty($locales[$localeCode])) {
                 if ($localeCode === $defaultLocale && $hideDefaultLocale) {
                     $redirection = Language::getNonLocalizedURL();
@@ -36,13 +38,13 @@ class LocalizationRedirectFilter extends LaravelLocalizationMiddlewareBase
                 // The system redirect the user to the very same url "localized"
                 // we use the current locale to redirect him
                 if (! Language::getActiveLanguage(['lang_id'])->isEmpty()) {
-                    $redirection = Language::getLocalizedURL(session('language'), $request->fullUrl(), [], false);
+                    $redirection = Language::getLocalizedURL(Session::get('language'), $request->fullUrl(), [], false);
                 }
             }
 
             if ($redirection) {
                 // Save any flashed data for redirect
-                app('session')->reflash();
+                Session::reflash();
 
                 return new RedirectResponse($redirection, 302, ['Vary' => 'Accept-Language']);
             }

@@ -9,8 +9,8 @@
             "col-xxl-{$field->getColumnSpan('xxl')}" => $field->getColumnSpan('xxl'),
         ])
     >
-@endif
-    {!! $html !!}
-@if($columns && $hasColspan)
+        @endif
+        {!! $html !!}
+        @if($columns && $hasColspan)
     </div>
 @endif

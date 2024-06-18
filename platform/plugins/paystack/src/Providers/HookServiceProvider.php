@@ -142,7 +142,7 @@ class HookServiceProvider extends ServiceProvider
                 'reference' => Paystack::genTranxRef(),
                 'quantity' => 1,
                 'currency' => $paymentData['currency'],
-                'amount' => (int)$paymentData['amount'] * 100,
+                'amount' => (int) $paymentData['amount'] * 100,
                 'email' => $paymentData['address']['email'],
                 'callback_url' => route('paystack.payment.callback'),
                 'metadata' => json_encode([

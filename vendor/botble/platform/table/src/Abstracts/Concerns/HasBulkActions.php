@@ -213,10 +213,10 @@ trait HasBulkActions
             }
         }
 
-        return $bulkChanges;
+        return apply_filters('base_filter_table_bulk_changes', $bulkChanges, $this);
     }
 
-    public function saveBulkChanges(array $ids, string $inputKey, string|null $inputValue): bool
+    public function saveBulkChanges(array $ids, string $inputKey, ?string $inputValue): bool
     {
         if (! in_array($inputKey, array_keys($this->getAllBulkChanges()))) {
             return false;
@@ -245,7 +245,7 @@ trait HasBulkActions
         return $this;
     }
 
-    public function saveBulkChangeItem(Model $item, string $inputKey, string|null $inputValue): Model|bool
+    public function saveBulkChangeItem(Model $item, string $inputKey, ?string $inputValue): Model|bool
     {
         if (isset($this->onSavingBulkChangeItemCallback)) {
             $result = call_user_func_array($this->onSavingBulkChangeItemCallback, [$item, $inputKey, $inputValue]);
@@ -262,7 +262,7 @@ trait HasBulkActions
         return $item;
     }
 
-    public function prepareBulkChangeValue(string $key, string|null $value): string
+    public function prepareBulkChangeValue(string $key, ?string $value): string
     {
         if (strpos($key, '.') !== -1) {
             $key = Arr::last(explode('.', $key));
@@ -276,7 +276,7 @@ trait HasBulkActions
                 break;
         }
 
-        return (string)$value;
+        return (string) $value;
     }
 
     public function bulkChangeUrl(string $url): static
@@ -313,5 +313,19 @@ trait HasBulkActions
     public function getBulkActionDispatchUrl(): string
     {
         return $this->bulkActionDispatchUrl ?: route('table.bulk-action.dispatch');
+    }
+
+    public function removeAllBulkActions(): static
+    {
+        $this->bulkActions = [];
+
+        return $this;
+    }
+
+    public function removeAllBulkChanges(): static
+    {
+        $this->bulkChanges = [];
+
+        return $this;
     }
 }

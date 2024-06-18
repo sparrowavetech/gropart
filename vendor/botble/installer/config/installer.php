@@ -12,7 +12,6 @@ return [
             'cURL',
             'gd',
             'fileinfo',
-            'exif',
             'xml',
             'ctype',
         ],

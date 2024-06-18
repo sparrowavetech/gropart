@@ -14,9 +14,12 @@ use Botble\Theme\Facades\ThemeOption;
 use Botble\Theme\Forms\CustomCSSForm;
 use Botble\Theme\Forms\CustomHTMLForm;
 use Botble\Theme\Forms\CustomJSForm;
+use Botble\Theme\Forms\RobotsTxtEditorForm;
 use Botble\Theme\Http\Requests\CustomCssRequest;
 use Botble\Theme\Http\Requests\CustomHtmlRequest;
 use Botble\Theme\Http\Requests\CustomJsRequest;
+use Botble\Theme\Http\Requests\RobotsTxtRequest;
+use Botble\Theme\Http\Requests\UpdateOptionsRequest;
 use Botble\Theme\Services\ThemeService;
 use Exception;
 use Illuminate\Http\Request;
@@ -35,6 +38,10 @@ class ThemeController extends BaseController
 
     public function index()
     {
+        if (! config('packages.theme.general.display_theme_manager_in_admin_panel', true)) {
+            abort(404);
+        }
+
         $this->pageTitle(trans('packages/theme::theme.name'));
 
         if (File::exists(theme_path('.DS_Store'))) {
@@ -67,7 +74,7 @@ class ThemeController extends BaseController
         return view('packages/theme::options');
     }
 
-    public function postUpdate(Request $request)
+    public function postUpdate(UpdateOptionsRequest $request)
     {
         RenderingThemeOptionSettings::dispatch();
 
@@ -78,7 +85,7 @@ class ThemeController extends BaseController
                 $field = ThemeOption::getField($key);
 
                 if ($field && Arr::get($field, 'clean_tags', true)) {
-                    $value = BaseHelper::clean(strip_tags((string)$value));
+                    $value = BaseHelper::clean(strip_tags((string) $value));
                 }
             }
 
@@ -100,15 +107,10 @@ class ThemeController extends BaseController
 
         $result = $themeService->activate($request->input('theme'));
 
-        if ($result['error']) {
-            return $this
-                ->httpResponse()
-                ->setError()->setMessage($result['message']);
-        }
-
         return $this
             ->httpResponse()
-            ->setMessage(trans('packages/theme::theme.active_success'));
+            ->setError($result['error'])
+            ->setMessage($result['message']);
     }
 
     public function getCustomCss()
@@ -124,7 +126,7 @@ class ThemeController extends BaseController
 
         $file = Theme::getStyleIntegrationPath();
         $css = $request->input('custom_css');
-        $css = strip_tags((string)$css);
+        $css = strip_tags((string) $css);
 
         if (empty($css)) {
             File::delete($file);
@@ -178,19 +180,13 @@ class ThemeController extends BaseController
             try {
                 $result = $themeService->remove($theme);
 
-                if ($result['error']) {
-                    return $this
-                        ->httpResponse()
-                        ->setError()->setMessage($result['message']);
-                }
-
                 return $this
                     ->httpResponse()
-                    ->setMessage(trans('packages/theme::theme.remove_theme_success'));
+                    ->setError($result['error'])
+                    ->setMessage($result['message']);
             } catch (Exception $exception) {
                 return $this
                     ->httpResponse()
-
                     ->setError()
                     ->setMessage($exception->getMessage());
             }
@@ -226,5 +222,40 @@ class ThemeController extends BaseController
         }
 
         return $this->performUpdate($data);
+    }
+
+    public function getRobotsTxt()
+    {
+        if (! config('packages.theme.general.enable_robots_txt_editor')) {
+            abort(404);
+        }
+
+        $this->pageTitle(trans('packages/theme::theme.robots_txt_editor'));
+
+        return RobotsTxtEditorForm::create()->renderForm();
+    }
+
+    public function postRobotsTxt(RobotsTxtRequest $request)
+    {
+        if (! config('packages.theme.general.enable_robots_txt_editor')) {
+            abort(404);
+        }
+
+        $path = public_path('robots.txt');
+
+        if (! File::isWritable($path)) {
+            return $this
+                ->httpResponse()
+                ->setError()
+                ->setMessage(trans('packages/theme::theme.robots_txt_not_writable', ['path' => $path]));
+        }
+
+        File::put($path, $request->input('robots_txt_content'));
+
+        if ($request->hasFile('robots_txt_file')) {
+            $request->file('robots_txt_file')->move(public_path(), 'robots.txt');
+        }
+
+        return $this->httpResponse()->withUpdatedSuccessMessage();
     }
 }

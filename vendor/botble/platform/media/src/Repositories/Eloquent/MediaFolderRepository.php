@@ -128,7 +128,7 @@ class MediaFolderRepository extends RepositoriesAbstract implements MediaFolderI
         return $child;
     }
 
-    public function getFullPath(int|string|null $folderId, string|null $path = ''): string|null
+    public function getFullPath(int|string|null $folderId, ?string $path = ''): ?string
     {
         return MediaFolder::getFullPath($folderId, $path);
     }

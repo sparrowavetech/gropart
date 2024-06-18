@@ -23,12 +23,8 @@ class Tags extends AbstractWidget
 
     protected function data(): array|Collection
     {
-        if (! is_plugin_active('blog')) {
-            return [];
-        }
-
         return [
-            'tags' => get_popular_tags((int)$this->getConfig('number_display')),
+            'tags' => get_popular_tags((int) $this->getConfig('number_display')),
         ];
     }
 
@@ -43,5 +39,10 @@ class Tags extends AbstractWidget
                     ->label(__('Number tags to display'))
                     ->toArray()
             );
+    }
+
+    protected function requiredPlugins(): array
+    {
+        return ['blog'];
     }
 }

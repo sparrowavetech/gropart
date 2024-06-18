@@ -76,16 +76,19 @@ $(() => {
     $(document)
         .on('show.bs.modal', '#simple-slider-item-modal', (e) => {
             const modal = $(e.currentTarget)
+            const href = $(e.relatedTarget).prop('href')
 
             $httpClient
                 .make()
                 .withLoading(modal.find('.modal-content'))
-                .get($(e.relatedTarget).prop('href'))
+                .get(href)
                 .then(({ data }) => {
                     modal.find('.modal-header .modal-title').text(data.data.title)
                     modal.find('.modal-body').html(data.data.content)
 
                     Botble.initMediaIntegrate()
+
+                    Botble.initResources()
                 })
         })
 

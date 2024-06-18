@@ -6,9 +6,9 @@ use Botble\Base\Forms\FormFieldOptions;
 
 class InputFieldOption extends FormFieldOptions
 {
-    protected array|string|bool|null $value;
+    protected array|float|string|bool|null $value;
 
-    public function value(array|string|bool|null $value): static
+    public function value(array|float|string|bool|null $value): static
     {
         $this->value = $value;
 

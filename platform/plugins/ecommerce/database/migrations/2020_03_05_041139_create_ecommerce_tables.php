@@ -13,8 +13,8 @@ return new class () extends Migration {
             $table->id();
             $table->string('name');
             $table->mediumText('description')->nullable();
-            $table->string('website', 255)->nullable();
-            $table->string('logo', 255)->nullable();
+            $table->string('website')->nullable();
+            $table->string('logo')->nullable();
             $table->string('status', 60)->default('published');
             $table->tinyInteger('order')->unsigned()->default(0);
             $table->tinyInteger('is_featured')->unsigned()->default(0);
@@ -28,7 +28,7 @@ return new class () extends Migration {
             $table->mediumText('description')->nullable();
             $table->string('status', 60)->default('published');
             $table->integer('order')->unsigned()->default(0);
-            $table->string('image', 255)->nullable();
+            $table->string('image')->nullable();
             $table->tinyInteger('is_featured')->unsigned()->default(0);
             $table->timestamps();
         });
@@ -38,7 +38,7 @@ return new class () extends Migration {
             $table->string('name');
             $table->string('slug');
             $table->string('description', 400)->nullable();
-            $table->string('image', 255)->nullable();
+            $table->string('image')->nullable();
             $table->string('status', 60)->default('published');
             $table->timestamps();
         });
@@ -156,6 +156,8 @@ return new class () extends Migration {
             $table->id();
             $table->foreignId('attribute_id');
             $table->foreignId('variation_id');
+
+            $table->unique(['attribute_id', 'variation_id']);
         });
 
         Schema::create('ec_taxes', function (Blueprint $table) {
@@ -199,7 +201,7 @@ return new class () extends Migration {
             $table->decimal('discount_amount', 15)->nullable();
             $table->decimal('sub_total', 15);
             $table->boolean('is_confirmed')->default(false);
-            $table->string('discount_description', 255)->nullable();
+            $table->string('discount_description')->nullable();
             $table->boolean('is_finished')->default(0)->nullable();
             $table->string('token', 120)->nullable();
             $table->foreignId('payment_id')->nullable();
@@ -228,7 +230,7 @@ return new class () extends Migration {
             $table->string('country', 120)->nullable();
             $table->string('state', 120)->nullable();
             $table->string('city', 120)->nullable();
-            $table->string('address', 255)->nullable();
+            $table->string('address')->nullable();
             $table->foreignId('order_id');
         });
 
@@ -279,7 +281,7 @@ return new class () extends Migration {
             $table->string('name');
             $table->string('email')->unique();
             $table->string('password');
-            $table->string('avatar', 255)->nullable();
+            $table->string('avatar')->nullable();
             $table->date('dob')->nullable();
             $table->string('phone', 20)->nullable();
             $table->rememberToken();
@@ -300,7 +302,7 @@ return new class () extends Migration {
             $table->string('country', 120)->nullable();
             $table->string('state', 120)->nullable();
             $table->string('city', 120)->nullable();
-            $table->string('address', 255);
+            $table->string('address');
             $table->foreignId('customer_id');
             $table->tinyInteger('is_default')->default(0)->unsigned();
             $table->timestamps();
@@ -351,7 +353,7 @@ return new class () extends Migration {
         Schema::create('ec_order_histories', function (Blueprint $table) {
             $table->id();
             $table->string('action', 120);
-            $table->string('description', 255);
+            $table->string('description', 400)->nullable();
             $table->foreignId('user_id')->nullable();
             $table->foreignId('order_id');
             $table->text('extras')->nullable();
@@ -379,7 +381,7 @@ return new class () extends Migration {
             $table->string('name', 60);
             $table->string('email', 60)->nullable();
             $table->string('phone', 20);
-            $table->string('address', 255);
+            $table->string('address');
             $table->string('country', 120)->nullable();
             $table->string('state', 120)->nullable();
             $table->string('city', 120)->nullable();
@@ -391,7 +393,7 @@ return new class () extends Migration {
         Schema::create('ec_shipment_histories', function (Blueprint $table) {
             $table->id();
             $table->string('action', 120);
-            $table->string('description', 255);
+            $table->string('description', 400)->nullable();
             $table->foreignId('user_id')->nullable();
             $table->foreignId('shipment_id');
             $table->foreignId('order_id');

@@ -12,10 +12,10 @@ trait DeprecatedFunctions
     /**
      * @deprecated since v6.8.0, use `DeleteBulkAction::class` instead.
      */
-    protected function addDeleteAction(string $url, string|null $permission = null, array $actions = []): array
+    protected function addDeleteAction(string $url, ?string $permission = null, array $actions = []): array
     {
         return $actions + [
-                DeleteBulkAction::make()->action('DELETE')->permission((string)$permission)->dispatchUrl(
+                DeleteBulkAction::make()->action('DELETE')->permission((string) $permission)->dispatchUrl(
                     $url
                 ),
             ];
@@ -32,7 +32,7 @@ trait DeprecatedFunctions
     /**
      * @deprecated
      */
-    protected function displayThumbnail(string|null $image, array $attributes = ['width' => 50], bool $relative = false): HtmlString|string
+    protected function displayThumbnail(?string $image, array $attributes = ['width' => 50], bool $relative = false): HtmlString|string
     {
         if ($this->request()->has('action')) {
             if ($this->isExportingToCSV()) {

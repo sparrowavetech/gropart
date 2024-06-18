@@ -40,7 +40,7 @@ class SslCommerzNotification extends AbstractSslCommerz
         }
     }
 
-    public function orderValidate(array|null $postData, string $transactionId, float $amount, string $currency = 'BDT')
+    public function orderValidate(?array $postData, string $transactionId, float $amount, string $currency = 'BDT')
     {
         if ($postData == '' && $transactionId == '' && ! is_array($postData)) {
             $this->error = 'Please provide valid transaction ID and post request data';

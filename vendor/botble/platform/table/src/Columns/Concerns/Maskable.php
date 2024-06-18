@@ -13,7 +13,7 @@ trait Maskable
 
     protected int $maskIndex = 0;
 
-    protected int|null $maskLength = null;
+    protected ?int $maskLength = null;
 
     protected string $maskEncoding = 'UTF-8';
 
@@ -24,7 +24,7 @@ trait Maskable
         );
     }
 
-    public function mask(string $character = '*', int $index = 0, int|null $length = null, string $encoding = 'UTF-8'): static
+    public function mask(string $character = '*', int $index = 0, ?int $length = null, string $encoding = 'UTF-8'): static
     {
         $this->mask = true;
         $this->maskCharacter($character);
@@ -49,7 +49,7 @@ trait Maskable
         return $this;
     }
 
-    public function maskLength(int|null $length): static
+    public function maskLength(?int $length): static
     {
         $this->maskLength = $length;
 

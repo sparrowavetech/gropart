@@ -7,6 +7,7 @@ use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\MetaBox;
 use Botble\Base\Supports\ServiceProvider;
+use Botble\Media\Facades\RvMedia;
 use Botble\Page\Models\Page;
 use Botble\SeoHelper\Facades\SeoHelper;
 use Botble\SeoHelper\Forms\SeoForm;
@@ -54,6 +55,7 @@ class HookServiceProvider extends ServiceProvider
         $meta = [
             'seo_title' => null,
             'seo_description' => null,
+            'seo_image' => null,
             'index' => 'index',
         ];
 
@@ -70,7 +72,7 @@ class HookServiceProvider extends ServiceProvider
 
         $form = SeoForm::createFromArray($meta)->renderForm(showStart: false, showEnd: false);
 
-        return view('packages/seo-helper::meta-box', compact('meta', 'object', 'form'));
+        return view('packages/seo-helper::meta-box', compact('meta', 'object', 'form'))->render();
     }
 
     public function setSeoMeta(string $screen, BaseModel|Model|null $object): bool
@@ -93,9 +95,21 @@ class HookServiceProvider extends ServiceProvider
                 SeoHelper::setDescription($meta['seo_description']);
             }
 
+            if (! empty($meta['seo_image'])) {
+                SeoHelper::setImage(RvMedia::getImageUrl($meta['seo_image']));
+            }
             if (! empty($meta['index']) && $meta['index'] === 'noindex') {
                 SeoHelper::meta()->addMeta('robots', 'noindex, nofollow');
             }
+        }
+
+        $currentDescription = SeoHelper::getDescription();
+
+        if (
+            (! $currentDescription || $currentDescription === theme_option('seo_description'))
+            && ($object->description || $object->content)
+        ) {
+            SeoHelper::setDescription($object->description ?: $object->content);
         }
 
         return true;

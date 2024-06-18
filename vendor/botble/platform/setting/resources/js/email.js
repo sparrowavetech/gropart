@@ -1,4 +1,4 @@
-$(document).ready(function () {
+$(() => {
     $('[data-bb-toggle="test-email-send"]').on('click', (event) => {
         event.preventDefault()
         let _self = $(event.currentTarget)
@@ -28,6 +28,7 @@ $(document).ready(function () {
             .make()
             .post(_self.data('url'), {
                 email: _self.closest('.modal-content').find('input[name=email]').val(),
+                template: _self.closest('.modal-content').find('select[name=template]').val(),
             })
             .then(({ data }) => {
                 Botble.showSuccess(data.message)

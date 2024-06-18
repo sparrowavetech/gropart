@@ -18,6 +18,8 @@ class AdsRequest extends Request
             'order' => 'required|integer|min:0|max:127',
             'status' => Rule::in(BaseStatusEnum::values()),
             'expired_at' => 'required|date',
+            'ads_type' => 'required|in:custom_ad,google_adsense',
+            'google_adsense_slot_id' => 'nullable|string|max:255',
         ];
     }
 }

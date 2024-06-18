@@ -123,7 +123,7 @@ class BackupController extends BaseSystemController
                 }
             }
 
-            setting()->forceSet('media_random_hash', md5((string)time()))->save();
+            setting()->forceSet('media_random_hash', md5((string) time()))->save();
 
             Helper::clearCache();
 

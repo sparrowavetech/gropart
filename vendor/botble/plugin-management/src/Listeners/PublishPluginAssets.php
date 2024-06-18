@@ -24,9 +24,6 @@ class PublishPluginAssets
 
     private function publishPaths(): array
     {
-        return array_merge(
-            IlluminateServiceProvider::pathsToPublish(null, 'cms-lang'),
-            IlluminateServiceProvider::pathsToPublish(null, 'cms-public')
-        );
+        return IlluminateServiceProvider::pathsToPublish(null, 'cms-public');
     }
 }

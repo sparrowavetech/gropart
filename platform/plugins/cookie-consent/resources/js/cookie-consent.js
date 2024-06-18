@@ -8,6 +8,10 @@ $(() => {
         const COOKIE_LIFETIME = $('div[data-site-cookie-lifetime]').data('site-cookie-lifetime')
         const SESSION_SECURE = $('div[data-site-session-secure]').data('site-session-secure')
 
+        const $cookieDialog = $('.js-cookie-consent')
+
+        $cookieDialog.addClass('cookie-consent--visible')
+
         function consentWithCookies() {
             setCookie(COOKIE_NAME, COOKIE_VALUE, COOKIE_LIFETIME)
             hideCookieDialog()
@@ -18,7 +22,7 @@ $(() => {
         }
 
         function hideCookieDialog() {
-            $('.js-cookie-consent').hide()
+            $cookieDialog.hide()
         }
 
         function setCookie(name, value, expirationInDays) {

@@ -13,7 +13,7 @@ return new class () extends Migration {
 
         Schema::table('ec_customer_addresses', function (Blueprint $table) {
             $table->string('phone', 20)->nullable()->change();
-            $table->string('address', 255)->nullable()->change();
+            $table->string('address')->nullable()->change();
         });
     }
 
@@ -21,7 +21,7 @@ return new class () extends Migration {
     {
         Schema::table('ec_customer_addresses', function (Blueprint $table) {
             $table->string('phone', 20)->change();
-            $table->string('address', 255)->change();
+            $table->string('address')->change();
         });
     }
 };

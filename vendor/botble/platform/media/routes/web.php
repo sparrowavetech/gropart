@@ -4,6 +4,12 @@ use Botble\Base\Facades\AdminHelper;
 use Illuminate\Support\Facades\Route;
 
 Route::group(['namespace' => 'Botble\Media\Http\Controllers'], function () {
+    Route::get('media/files/{hash}/{id}', [
+        'as' => 'media.indirect.url',
+        'uses' => 'PublicMediaController@show',
+        'middleware' => 'throttle',
+    ]);
+
     AdminHelper::registerRoutes(function () {
         Route::group(['prefix' => 'media', 'as' => 'media.', 'permission' => 'media.index'], function () {
             Route::get('', [

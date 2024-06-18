@@ -14,7 +14,7 @@ abstract class GlobalSearchableProvider implements GlobalSearchableProviderContr
         throw new LogicException('Please implement the search() method.');
     }
 
-    protected function stringContains(string|null $haystack, string|null $needle): bool
+    protected function stringContains(?string $haystack, ?string $needle): bool
     {
         return Str::contains(Str::lower((string) $haystack), Str::lower((string) $needle));
     }

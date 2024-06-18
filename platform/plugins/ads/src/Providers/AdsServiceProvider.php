@@ -8,10 +8,13 @@ use Botble\Ads\Models\Ads;
 use Botble\Ads\Repositories\Eloquent\AdsRepository;
 use Botble\Ads\Repositories\Interfaces\AdsInterface;
 use Botble\Base\Facades\DashboardMenu;
+use Botble\Base\Facades\PanelSectionManager;
 use Botble\Base\Forms\FieldOptions\SelectFieldOption;
 use Botble\Base\Forms\Fields\SelectField;
+use Botble\Base\PanelSections\PanelSectionItem;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\LanguageAdvanced\Supports\LanguageAdvancedManager;
+use Botble\Setting\PanelSections\SettingOthersPanelSection;
 use Botble\Shortcode\Facades\Shortcode;
 use Botble\Shortcode\Forms\ShortcodeForm;
 use Illuminate\Foundation\AliasLoader;
@@ -50,9 +53,36 @@ class AdsServiceProvider extends ServiceProvider
                     'priority' => 8,
                     'icon' => 'ti ti-ad-circle',
                     'name' => 'plugins/ads::ads.name',
+                    'permissions' => ['ads.index'],
+                ])
+                ->registerItem([
+                    'id' => 'cms-plugins-ads-list',
+                    'parent_id' => 'cms-plugins-ads',
+                    'priority' => 1,
+                    'name' => 'plugins/ads::ads.name',
                     'url' => fn () => route('ads.index'),
                     'permissions' => ['ads.index'],
+                ])
+                ->registerItem([
+                    'id' => 'cms-plugins-ads-setting',
+                    'parent_id' => 'cms-plugins-ads',
+                    'priority' => 2,
+                    'name' => 'plugins/ads::ads.settings.title',
+                    'url' => fn () => route('ads.settings'),
+                    'permissions' => ['ads.index'],
                 ]);
+        });
+
+        PanelSectionManager::default()->beforeRendering(function () {
+            PanelSectionManager::registerItem(
+                SettingOthersPanelSection::class,
+                fn () => PanelSectionItem::make('ads')
+                    ->setTitle(trans('plugins/ads::ads.settings.title'))
+                    ->withIcon('ti ti-ad-circle')
+                    ->withPriority(480)
+                    ->withDescription(trans('plugins/ads::ads.settings.description'))
+                    ->withRoute('ads.settings')
+            );
         });
 
         $this->app['events']->listen(RouteMatched::class, function () {
@@ -72,6 +102,7 @@ class AdsServiceProvider extends ServiceProvider
                         ->all();
 
                     return ShortcodeForm::createFromArray($attributes)
+                        ->withLazyLoading()
                         ->add(
                             'key',
                             SelectField::class,
@@ -91,6 +122,42 @@ class AdsServiceProvider extends ServiceProvider
                 'url',
             ]);
         }
+
+        if (defined('THEME_FRONT_HEADER')) {
+            add_filter(THEME_FRONT_HEADER, function ($html) {
+                $autoAds = setting('ads_google_adsense_auto_ads');
+
+                if (! $autoAds) {
+                    return $html;
+                }
+
+                return $html . $autoAds;
+            }, 128);
+
+            add_filter(THEME_FRONT_HEADER, function ($html) {
+                $clientId = setting('ads_google_adsense_unit_client_id');
+
+                if (! $clientId) {
+                    return $html;
+                }
+
+                return $html . view('plugins/ads::partials.google-adsense.unit-ads-header', compact('clientId'))->render();
+            }, 128);
+
+            add_filter(THEME_FRONT_HEADER, function ($html) {
+                $clientId = setting('ads_google_adsense_unit_client_id');
+
+                if (! $clientId) {
+                    return $html;
+                }
+
+                return $html . view('plugins/ads::partials.google-adsense.unit-ads-footer')->render();
+            }, 128);
+        }
+
+        add_filter('ads_render', function (string $location, array $attributes = []) {
+            return AdsManager::display($location, $attributes);
+        }, 128, 2);
 
         AdsForm::beforeRendering(function () {
             add_action(BASE_ACTION_TOP_FORM_CONTENT_NOTIFICATION, function ($request, $data = null) {

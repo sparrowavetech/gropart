@@ -12,7 +12,7 @@ class Shortcode
     {
     }
 
-    public function register(string $key, string|null $name, string|null $description = null, $callback = null, string $previewImage = ''): Shortcode
+    public function register(string $key, ?string $name, ?string $description = null, $callback = null, string $previewImage = ''): Shortcode
     {
         $this->compiler->add($key, $name, $description, $callback, $previewImage);
 
@@ -52,7 +52,7 @@ class Shortcode
         return new HtmlString($html);
     }
 
-    public function strip(string|null $value): string|null
+    public function strip(?string $value): ?string
     {
         return $this->compiler->strip($value);
     }
@@ -72,14 +72,19 @@ class Shortcode
         $this->compiler->modifyAdminConfig($key, $callback);
     }
 
-    public function generateShortcode(string $name, array $attributes = []): string
+    public function generateShortcode(string $name, array $attributes = [], ?string $content = null, bool $lazy = false): string
     {
         $parsedAttributes = '';
+
+        if ($lazy) {
+            $attributes = [...$attributes, 'enable_lazy_loading' => 'yes'];
+        }
+
         foreach ($attributes as $key => $attribute) {
             $parsedAttributes .= ' ' . $key . '="' . $attribute . '"';
         }
 
-        return '[' . $name . $parsedAttributes . '][/' . $name . ']';
+        return '[' . $name . $parsedAttributes . ']' . $content . '[/' . $name . ']';
     }
 
     public function getCompiler(): ShortcodeCompiler

@@ -98,7 +98,7 @@ abstract class CacheAbstractDecorator implements RepositoryInterface
         return $this->flushCacheAndUpdateData(__FUNCTION__, func_get_args());
     }
 
-    public function delete(Model $model): bool|null
+    public function delete(Model $model): ?bool
     {
         return $this->flushCacheAndUpdateData(__FUNCTION__, func_get_args());
     }

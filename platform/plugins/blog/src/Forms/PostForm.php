@@ -68,15 +68,14 @@ class PostForm extends FormAbstract
                 SelectFieldOption::make()
                     ->label(trans('plugins/blog::posts.form.categories'))
                     ->choices(get_categories_with_children())
-                    ->when($this->getModel()->id, function (SelectFieldOption $fieldOption) {
+                    ->when($this->getModel()->getKey(), function (SelectFieldOption $fieldOption) {
                         return $fieldOption->selected($this->getModel()->categories()->pluck('category_id')->all());
-                    })
-                    ->when(! $this->getModel()->id, function (SelectFieldOption $fieldOption) {
+                    }, function (SelectFieldOption $fieldOption) {
                         return $fieldOption
                             ->selected(Category::query()
-                                ->where('is_default', 1)
-                                ->pluck('id')
-                                ->all());
+                            ->where('is_default', 1)
+                            ->pluck('id')
+                            ->all());
                     })
                     ->toArray()
             )
@@ -86,10 +85,11 @@ class PostForm extends FormAbstract
                 TagField::class,
                 TagFieldOption::make()
                     ->label(trans('plugins/blog::posts.form.tags'))
-                    ->when($this->getModel()->id, function (TagFieldOption $fieldOption) {
+                    ->when($this->getModel()->getKey(), function (TagFieldOption $fieldOption) {
                         return $fieldOption
                             ->selected(
-                                $this->getModel()
+                                $this
+                                ->getModel()
                                 ->tags()
                                 ->select('name')
                                 ->get()

@@ -20,7 +20,7 @@ class SiteMapManager
     {
     }
 
-    public function init(string|null $prefix = null, string $extension = 'xml'): self
+    public function init(?string $prefix = null, string $extension = 'xml'): self
     {
         // create new site map object
         $this->siteMap = app('sitemap');
@@ -41,7 +41,7 @@ class SiteMapManager
         return $this;
     }
 
-    public function addSitemap(string $loc, string|null $lastModified = null): self
+    public function addSitemap(string $loc, ?string $lastModified = null): self
     {
         if (! $this->isCached()) {
             $this->siteMap->addSitemap($loc, $lastModified ?: $this->defaultDate);
@@ -50,12 +50,12 @@ class SiteMapManager
         return $this;
     }
 
-    public function route(string|null $key = null): string
+    public function route(?string $key = null): string
     {
         return route('public.sitemap.index', [$key, $this->extension]);
     }
 
-    public function add(string $url, string|null $date = null, string $priority = '1.0', string $sequence = 'daily'): self
+    public function add(string $url, ?string $date = null, string $priority = '1.0', string $sequence = 'daily'): self
     {
         if (! $this->isCached()) {
             $this->siteMap->add($url, $date ?: $this->defaultDate, $priority, $sequence);
@@ -85,7 +85,7 @@ class SiteMapManager
         return $this->keys;
     }
 
-    public function registerKey(string|array $key, string|null $value = null): self
+    public function registerKey(string|array $key, ?string $value = null): self
     {
         if (is_array($key)) {
             $this->keys = array_merge($this->keys, $key);

@@ -2,6 +2,7 @@
 
 namespace Botble\Base\Rules;
 
+use Botble\Base\Facades\BaseHelper;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 
@@ -15,15 +16,7 @@ class GoogleFontsRule implements ValidationRule
             $fail($message);
         }
 
-        $googleFonts = config('core.base.general.google_fonts', []);
-
-        $customGoogleFonts = config('core.base.general.custom_google_fonts');
-
-        if ($customGoogleFonts) {
-            $googleFonts = [...$googleFonts, ...explode(',', $customGoogleFonts)];
-        }
-
-        if (! in_array($value, $googleFonts)) {
+        if (! in_array($value, BaseHelper::getFonts())) {
             $fail($message);
         }
     }

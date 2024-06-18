@@ -1,6 +1,9 @@
 @extends(BaseHelper::getAdminMasterLayoutTemplate())
 
 @section('content')
+
+    {!! $form->renderForm() !!}
+
     <x-core-setting::section
         :title="trans('core/setting::setting.email.email_templates')"
         :description="trans('core/setting::setting.email.email_templates_description')"

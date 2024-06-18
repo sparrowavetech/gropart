@@ -12,7 +12,7 @@ class CityRule implements DataAwareRule, Rule
 {
     protected array $data = [];
 
-    public function __construct(protected string|null $stateKey = '')
+    public function __construct(protected ?string $stateKey = '')
     {
     }
 

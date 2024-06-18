@@ -14,6 +14,7 @@ use Botble\Base\Supports\Builders\RenderingExtensible;
 use Botble\Table\Abstracts\Concerns\DeprecatedFunctions;
 use Botble\Table\Abstracts\Concerns\HasActions;
 use Botble\Table\Abstracts\Concerns\HasBulkActions;
+use Botble\Table\Abstracts\Concerns\HasColumnVisibility;
 use Botble\Table\Abstracts\Concerns\HasFilters;
 use Botble\Table\Abstracts\Concerns\HasHeaderActions;
 use Botble\Table\Columns\CheckboxColumn;
@@ -40,21 +41,25 @@ use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Conditionable;
 use LogicException;
+use stdClass;
 use Symfony\Component\HttpFoundation\Response;
 use Yajra\DataTables\DataTableAbstract;
 use Yajra\DataTables\DataTables;
+use Yajra\DataTables\EloquentDataTable;
+use Yajra\DataTables\QueryDataTable;
 use Yajra\DataTables\Services\DataTable;
 
 abstract class TableAbstract extends DataTable implements ExtensibleContract
 {
+    use Conditionable;
     use DeprecatedFunctions;
     use Extensible;
-    use HasHeaderActions;
     use HasActions;
     use HasBulkActions;
+    use HasColumnVisibility;
     use HasFilters;
+    use HasHeaderActions;
     use RenderingExtensible;
-    use Conditionable;
 
     public const TABLE_TYPE_ADVANCED = 'advanced';
 
@@ -77,20 +82,20 @@ abstract class TableAbstract extends DataTable implements ExtensibleContract
      */
     protected $repository;
 
-    protected BaseModelContract|null $model = null;
+    protected ?BaseModelContract $model = null;
 
     protected bool $useDefaultSorting = true;
 
     protected int $defaultSortColumn = 1;
 
-    protected bool $hasResponsive = true;
+    protected Closure $defaultSortingCallback;
 
-    protected bool $hasColumnVisibility = true;
+    protected bool $hasResponsive = true;
 
     protected string $exportClass = TableExportHandler::class;
 
     /**
-     * @var \Closure(static $table): \Illuminate\Http\JsonResponse
+     * @var \Closure(static): \Illuminate\Http\JsonResponse
      */
     protected Closure $onAjaxCallback;
 
@@ -100,12 +105,12 @@ abstract class TableAbstract extends DataTable implements ExtensibleContract
     protected array $columns = [];
 
     /**
-     * @var \Closure(\Illuminate\Contracts\Database\Eloquent\Builder $query): void
+     * @var \Closure(\Illuminate\Contracts\Database\Eloquent\Builder): void
      */
     protected Closure $queryUsingCallback;
 
     /**
-     * @var \Closure(\Illuminate\Contracts\Database\Eloquent\Builder $query): void
+     * @var \Closure(\Illuminate\Contracts\Database\Eloquent\Builder): void
      */
     protected Closure $modifyQueryUsingCallback;
 
@@ -140,7 +145,7 @@ abstract class TableAbstract extends DataTable implements ExtensibleContract
     {
     }
 
-    public function getOption(string $key): string|null
+    public function getOption(string $key): ?string
     {
         return Arr::get($this->options, $key);
     }
@@ -253,12 +258,7 @@ abstract class TableAbstract extends DataTable implements ExtensibleContract
                 ],
                 'infoFiltered' => trans('core/table::table.filtered'),
             ],
-            'aaSorting' => $this->useDefaultSorting ? [
-                [
-                    ($this->hasBulkActions() ? $this->defaultSortColumn : 0),
-                    'desc',
-                ],
-            ] : [],
+            'order' => $this->useDefaultSorting ? $this->getDefaultSorting() : [],
             'responsive' => $this->hasResponsive,
             'autoWidth' => false,
         ];
@@ -273,8 +273,29 @@ abstract class TableAbstract extends DataTable implements ExtensibleContract
             ->parameters($parameters);
     }
 
+    public function getDefaultSorting(): array
+    {
+        return isset($this->defaultSortingCallback)
+            ? call_user_func($this->defaultSortingCallback, $this)
+            : [
+                [
+                    ($this->hasBulkActions() ? $this->defaultSortColumn : 0),
+                    'desc',
+                ],
+            ];
+    }
+
+    public function defaultSortingUsing(Closure $callback): static
+    {
+        $this->useDefaultSorting = true;
+
+        $this->defaultSortingCallback = $callback;
+
+        return $this;
+    }
+
     /**
-     * @param \Closure(static $table): \Illuminate\Http\JsonResponse $onAjaxCallback
+     * @param  \Closure(static $table): \Illuminate\Http\JsonResponse  $onAjaxCallback
      */
     public function onAjax(Closure $onAjaxCallback): static
     {
@@ -314,7 +335,7 @@ abstract class TableAbstract extends DataTable implements ExtensibleContract
             }
         }
 
-        $columns = apply_filters(BASE_FILTER_TABLE_HEADINGS, $columns, $this->getModel());
+        $columns = apply_filters(BASE_FILTER_TABLE_HEADINGS, $columns, $this->getModel(), $this);
 
         // TODO: Will be removed after operations removed.
         if ($this->hasOperations()) {
@@ -333,11 +354,11 @@ abstract class TableAbstract extends DataTable implements ExtensibleContract
             }
         }
 
-        return $columns;
+        return $this->applyFilterVisibleColumns($columns);
     }
 
     /**
-     * @param BaseModel|class-string<BaseModel> $model
+     * @param  BaseModel|class-string<BaseModel>  $model
      */
     public function model(BaseModelContract|string $model): static
     {
@@ -382,7 +403,7 @@ abstract class TableAbstract extends DataTable implements ExtensibleContract
     }
 
     /**
-     * @param \Botble\Table\Columns\Column[] $columns
+     * @param  \Botble\Table\Columns\Column[]  $columns
      */
     public function addColumns(array $columns): static
     {
@@ -436,7 +457,7 @@ abstract class TableAbstract extends DataTable implements ExtensibleContract
         return $this;
     }
 
-    protected function getDom(): string|null
+    protected function getDom(): ?string
     {
         if ($this->isSimpleTable()) {
             $this->dom = $this->simpleDom();
@@ -561,21 +582,19 @@ abstract class TableAbstract extends DataTable implements ExtensibleContract
             $buttons[] = 'export';
         }
 
-        $this->hasColumnVisibility = (bool) setting('datatables_default_show_column_visibility');
-
-        if ($this->hasColumnVisibility) {
+        if ($this->hasColumnVisibilityEnabled()) {
             $buttons[] = 'visibility';
         }
 
         return $buttons;
     }
 
-    public function htmlInitComplete(): string|null
+    public function htmlInitComplete(): ?string
     {
         return 'function () {' . $this->htmlInitCompleteFunction() . '}';
     }
 
-    public function htmlInitCompleteFunction(): string|null
+    public function htmlInitCompleteFunction(): ?string
     {
         return '
             Botble.initResources();
@@ -588,7 +607,7 @@ abstract class TableAbstract extends DataTable implements ExtensibleContract
         ';
     }
 
-    public function htmlDrawCallback(): string|null
+    public function htmlDrawCallback(): ?string
     {
         if ($this->isSimpleTable()) {
             return null;
@@ -597,9 +616,9 @@ abstract class TableAbstract extends DataTable implements ExtensibleContract
         return 'function () {' . $this->htmlDrawCallbackFunction() . '}';
     }
 
-    public function htmlDrawCallbackFunction(): string|null
+    public function htmlDrawCallbackFunction(): ?string
     {
-        return <<<JS
+        return <<<'JS'
             var tableWrapper = $(this).closest(".dataTables_wrapper");
             var dtDataCount = this.api().data().count();
 
@@ -634,7 +653,7 @@ abstract class TableAbstract extends DataTable implements ExtensibleContract
         return $this->render($this->view, $data, $mergeData);
     }
 
-    public function render(string $view = null, array $data = [], array $mergeData = [])
+    public function render(?string $view = null, array $data = [], array $mergeData = [])
     {
         Assets::addScripts(['datatables', 'moment', 'datepicker'])
             ->addStyles(['datatables', 'datepicker'])
@@ -704,10 +723,14 @@ abstract class TableAbstract extends DataTable implements ExtensibleContract
             }
         }
 
-        return parent::applyScopes(apply_filters(BASE_FILTER_TABLE_QUERY, $query));
+        return parent::applyScopes(
+            $query instanceof EloquentBuilder
+                ? apply_filters(BASE_FILTER_TABLE_QUERY, $query, $this)
+                : $query
+        );
     }
 
-    public function getValueInput(string|null $title, string|null $value, string|null $type, array $data = []): array
+    public function getValueInput(?string $title, ?string $value, ?string $type, array $data = []): array
     {
         $inputName = 'value';
 
@@ -781,7 +804,7 @@ abstract class TableAbstract extends DataTable implements ExtensibleContract
         return apply_filters('base_filter_table_filters', $this->getAllBulkChanges(), $this);
     }
 
-    protected function addCreateButton(string $url, string|null $permission = null, array $buttons = []): array
+    protected function addCreateButton(string $url, ?string $permission = null, array $buttons = []): array
     {
         if (! $permission || $this->hasPermission($permission)) {
             $queryString = http_build_query(Request::query());
@@ -814,7 +837,7 @@ abstract class TableAbstract extends DataTable implements ExtensibleContract
                     break;
 
                 case $column instanceof Column && $column instanceof FormattedColumn:
-                    $table->editColumn($column->name, function (BaseModelContract|array $item) use ($column) {
+                    $table->editColumn($column->name, function (BaseModelContract|stdClass|array $item) use ($column) {
                         return $column->renderCell($item, $this);
                     });
 
@@ -831,7 +854,13 @@ abstract class TableAbstract extends DataTable implements ExtensibleContract
 
         $this->dispatchBeforeRendering();
 
-        $data = apply_filters(BASE_FILTER_GET_LIST_DATA, $data, $this->getModel());
+        $data = match (true) {
+            $data instanceof EloquentDataTable
+                => apply_filters(BASE_FILTER_GET_LIST_DATA, $data, $this->getModel(), $this),
+            $data instanceof QueryDataTable
+                => apply_filters(BASE_FILTER_GET_LIST_DATA_FOR_QUERY_TABLE, $data, $this),
+            default => apply_filters(BASE_FILTER_GET_LIST_DATA, $data, new BaseModel(), $this),
+        };
 
         return tap(
             $data
@@ -882,7 +911,7 @@ abstract class TableAbstract extends DataTable implements ExtensibleContract
     }
 
     /**
-     * @param \Closure|callable(\Illuminate\Contracts\Database\Eloquent\Builder $query): void $queryUsingCallback
+     * @param  \Closure|callable(\Illuminate\Contracts\Database\Eloquent\Builder $query): void  $queryUsingCallback
      */
     public function queryUsing(Closure|callable $queryUsingCallback): static
     {
@@ -892,7 +921,7 @@ abstract class TableAbstract extends DataTable implements ExtensibleContract
     }
 
     /**
-     * @param \Closure|callable(\Illuminate\Contracts\Database\Eloquent\Builder $query): void $modifyQueryCallback
+     * @param  \Closure|callable(\Illuminate\Contracts\Database\Eloquent\Builder $query): void  $modifyQueryCallback
      */
     public function modifyQueryUsing(Closure|callable $modifyQueryCallback): static
     {

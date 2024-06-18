@@ -1,28 +1,46 @@
 class Role {
     init() {
-        $('#auto-checkboxes li').tree({
-            onCheck: {
-                node: 'expand',
-            },
-            onUncheck: {
-                node: 'expand',
-            },
-            dnd: false,
-            selectable: false,
-        })
 
-        $('#mainNode .checker').change((event) => {
-            let _self = $(event.currentTarget)
-            let set = _self.attr('data-set')
-            let checked = _self.is(':checked')
-            $(set).each((index, el) => {
-                if (checked) {
-                    $(el).attr('checked', true)
-                } else {
-                    $(el).attr('checked', false)
-                }
+        let $checkboxes = $('.has-children')
+        if ($checkboxes.length) {
+            $checkboxes.map((index, value) => {
+                $(value).treeview({
+                    collapsed: true,
+                    animated: "medium",
+                    control:"#sidetreecontrol",
+                    persist: "location"
+                });
             })
-        })
+        }
+
+        $('#allTreeChecked:checkbox').on('click', function (event){
+            event.stopPropagation();
+            let _self = $(event.currentTarget);
+            let checked = _self.is(':checked');
+            if($('#checkboxes-permisstions').length){
+                var parent_uls = $('#checkboxes-permisstions').find(':checkbox').prop('checked', checked);
+                parent_uls.each(function(){
+                    var parent_ul = $(this),
+                    parent_state = (parent_ul.find(':checkbox').length == parent_ul.find(':checked').length); 
+                    parent_ul.siblings(':checkbox').prop('checked', parent_state);
+                });
+            }
+            
+         });
+
+         $('#checkboxes-permisstions :checkbox').on('click', function (event){
+            event.stopPropagation();
+            let _self = $(event.currentTarget);
+            let checked = _self.is(':checked'),
+            parent_li = _self.closest('li'),
+            parent_uls = parent_li.parents('ul');
+            parent_li.find(':checkbox').prop('checked', checked);
+            parent_uls.each(function(){
+                let parent_ul = $(this),
+                parent_state = (parent_ul.find(':checkbox').length == parent_ul.find(':checked').length); 
+                parent_ul.siblings(':checkbox').prop('checked', parent_state);
+            });
+         });
     }
 }
 

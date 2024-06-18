@@ -4,6 +4,9 @@ namespace Botble\SeoHelper\Contracts\Entities;
 
 use Botble\SeoHelper\Contracts\RenderableContract;
 
+/**
+ * @deprecated since 7.3.0 use ThemeSupport::renderGoogleTagManagerScript() instead.
+ */
 interface AnalyticsContract extends RenderableContract
 {
     /**

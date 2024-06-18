@@ -108,7 +108,7 @@ class TableExportHandler extends DataTablesExportHandler implements WithEvents
         return $letter;
     }
 
-    protected function getImageResourceFromURL(string|null $imageUrl)
+    protected function getImageResourceFromURL(?string $imageUrl)
     {
         if (! $imageUrl) {
             return null;

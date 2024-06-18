@@ -28,6 +28,8 @@
                 @if ($width)
                     width="{{ $width }}"
                 @endif
+
+                title="Video"
             ></iframe>
         </div>
         @break

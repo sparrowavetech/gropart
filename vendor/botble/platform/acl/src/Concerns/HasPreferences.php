@@ -32,11 +32,10 @@ trait HasPreferences
 
         $meta = $this->metaValues
             ->where('key', $key)
-            ->select('value')
             ->first();
 
         if (! empty($meta)) {
-            return $meta['value'];
+            return $meta->value;
         }
 
         return $default;

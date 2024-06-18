@@ -46,9 +46,9 @@ class InitShippoCommand extends Command implements PromptsForMissingInput
         }
 
         if ($city) {
-            $countryId = (string)$city->country_id;
-            $stateId = (string)$city->state_id;
-            $cityId = (string)$city->id;
+            $countryId = (string) $city->country_id;
+            $stateId = (string) $city->state_id;
+            $cityId = (string) $city->id;
             $zipCode = '94117';
             $address = '215 Clayton St.';
             $phone = '+1 555 341 9393';

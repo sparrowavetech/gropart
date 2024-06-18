@@ -2,9 +2,7 @@
 
 namespace Botble\Base\Forms\Fields;
 
-use Botble\Base\Forms\FormField;
-
-class EmailField extends FormField
+class EmailField extends TextField
 {
     protected function getTemplate(): string
     {

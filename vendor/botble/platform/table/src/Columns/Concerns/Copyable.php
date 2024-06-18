@@ -119,6 +119,6 @@ trait Copyable
             'copyableMessage' => $this->copyableMessage,
             'copyableAction' => $this->copyableAction,
             'copyablePositionClass' => $this->copyablePosition === CopyablePosition::Start ? 'me-1' : 'ms-1',
-        ]);
+        ])->render();
     }
 }

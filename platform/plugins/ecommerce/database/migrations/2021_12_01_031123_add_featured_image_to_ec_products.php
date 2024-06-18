@@ -11,7 +11,7 @@ return new class () extends Migration {
     {
         if (! Schema::hasColumn('ec_products', 'image')) {
             Schema::table('ec_products', function (Blueprint $table) {
-                $table->string('image', 255)->nullable();
+                $table->string('image')->nullable();
             });
 
             foreach (Product::query()->where('is_variation', 0)->get() as $product) {

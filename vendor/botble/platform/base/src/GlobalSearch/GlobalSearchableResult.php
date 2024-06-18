@@ -43,6 +43,11 @@ class GlobalSearchableResult implements GlobalSearchableResultContract, JsonSeri
         return $this->parents;
     }
 
+    public function getUniqueId(): string
+    {
+        return "{$this->getTitle()}-{$this->getUrl()}";
+    }
+
     public function toArray(): array
     {
         return [

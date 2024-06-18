@@ -3,6 +3,7 @@
 namespace Botble\ACL\Http\Controllers\Auth;
 
 use Botble\ACL\Forms\Auth\LoginForm;
+use Botble\ACL\Http\Requests\LoginRequest;
 use Botble\ACL\Models\User;
 use Botble\ACL\Traits\AuthenticatesUsers;
 use Botble\Base\Http\Controllers\BaseController;
@@ -32,7 +33,7 @@ class LoginController extends BaseController
         return LoginForm::create()->renderForm();
     }
 
-    public function login(Request $request)
+    public function login(LoginRequest $request)
     {
         $request->merge([$this->username() => $request->input('username')]);
 

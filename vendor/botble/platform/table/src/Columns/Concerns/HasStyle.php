@@ -11,17 +11,26 @@ trait HasStyle
 
     public function alignStart(): static
     {
-        return $this->addClass('text-start');
+        return $this
+            ->removeClass('text-center')
+            ->removeClass('text-end')
+            ->addClass('text-start');
     }
 
     public function alignCenter(): static
     {
-        return $this->addClass('text-center');
+        return $this
+            ->removeClass('text-start')
+            ->removeClass('text-end')
+            ->addClass('text-center');
     }
 
     public function alignEnd(): static
     {
-        return $this->addClass('text-end');
+        return $this
+            ->removeClass('text-start')
+            ->removeClass('text-center')
+            ->addClass('text-end');
     }
 
     public function nowrap(): static
