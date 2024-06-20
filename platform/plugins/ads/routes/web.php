@@ -36,7 +36,7 @@ Route::group(['namespace' => 'Botble\Ads\Http\Controllers'], function () {
                 'uses' => 'PublicController@getAdsClickAlternative',
             ]);
 
-            Route::get('ac-{randomHash}/{adsKey}/{size}/{hashName}', [
+            Route::get('ac-{randomHash}/{adsKey}/{size}/{hashName}.jpg', [
                 'as' => 'public.ads-click.image',
                 'uses' => 'PublicController@getAdsImage',
             ]);

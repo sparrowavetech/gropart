@@ -9,7 +9,7 @@ return new class () extends Migration {
     {
         Schema::table('mp_stores', function (Blueprint $table) {
             $table->string('zip_code', 20)->nullable();
-            $table->string('company', 255)->nullable();
+            $table->string('company')->nullable();
         });
     }
 

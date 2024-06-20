@@ -4,6 +4,7 @@ namespace Botble\Ads\Models;
 
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Models\BaseModel;
+use Botble\Media\Facades\RvMedia;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -49,6 +50,10 @@ class Ads extends BaseModel
     {
         return Attribute::get(
             function (): string {
+                if (config('plugins.ads.general.use_real_image_url')) {
+                    return RvMedia::getImageUrl($this->image);
+                }
+
                 return $this->parseImageUrl();
             }
         );
@@ -58,6 +63,10 @@ class Ads extends BaseModel
     {
         return Attribute::get(
             function (): string {
+                if (config('plugins.ads.general.use_real_image_url')) {
+                    return RvMedia::getImageUrl($this->tablet_image ?: $this->image);
+                }
+
                 return $this->parseImageUrl('tablet');
             }
         );
@@ -67,6 +76,10 @@ class Ads extends BaseModel
     {
         return Attribute::get(
             function (): string {
+                if (config('plugins.ads.general.use_real_image_url')) {
+                    return RvMedia::getImageUrl(($this->mobile_image ?: $this->tablet_image) ?: $this->image);
+                }
+
                 return $this->parseImageUrl('mobile');
             }
         );

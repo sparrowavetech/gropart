@@ -26,6 +26,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rules\File as ValidationFile;
 use Intervention\Image\Drivers\Gd\Driver as GdDriver;
 use Intervention\Image\Drivers\Imagick\Driver as ImagickDriver;
 use Intervention\Image\Encoders\AutoEncoder;
@@ -434,7 +435,7 @@ class RvMedia
         if (! $this->isChunkUploadEnabled()) {
             if (! $skipValidation) {
                 $validator = Validator::make(['uploaded_file' => $fileUpload], [
-                    'uploaded_file' => 'required|mimes:' . $allowedMimeTypes,
+                    'uploaded_file' => ['required', ValidationFile::types(explode(',', $allowedMimeTypes))],
                 ]);
 
                 if ($validator->fails()) {
@@ -690,7 +691,7 @@ class RvMedia
         );
 
         // Resize watermark width keep height auto
-        $watermark->resize($watermarkSize, $watermarkSize);
+        $watermark->scale($watermarkSize);
 
         $imageSource->place(
             $watermark,
@@ -997,7 +998,7 @@ class RvMedia
                 'bucket' => $config['bucket'],
                 'url' => $config['url'],
                 'endpoint' => $config['endpoint'],
-                'use_path_style_endpoint' => $config['use_path_style_endpoint'],
+                'use_path_style_endpoint' => (bool) $config['use_path_style_endpoint'],
             ],
         ]);
     }
@@ -1024,7 +1025,7 @@ class RvMedia
                 'bucket' => $config['bucket'],
                 'url' => $config['url'],
                 'endpoint' => $config['endpoint'],
-                'use_path_style_endpoint' => true,
+                'use_path_style_endpoint' => (bool) $config['use_path_style_endpoint'],
             ],
         ]);
     }
@@ -1051,6 +1052,7 @@ class RvMedia
                 'region' => $config['region'],
                 'bucket' => $config['bucket'],
                 'endpoint' => $config['endpoint'],
+                'use_path_style_endpoint' => (bool) $config['use_path_style_endpoint'],
             ],
         ]);
     }

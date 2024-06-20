@@ -55,7 +55,7 @@ class GeneralSettingController extends SettingController
     {
         if ($request->expectsJson() && ! $core->checkConnection()) {
             return response()->json([
-                'message' => sprintf('Your IP (%s) has been blocked or your server is not connected to the internet.', Helper::getIpFromThirdParty()),
+                'message' => sprintf('Could not connect to the license server. Please try again later. Your site IP: %s', Helper::getIpFromThirdParty()),
             ], 400);
         }
 

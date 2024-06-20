@@ -2,6 +2,7 @@
 
 use Botble\Table\Http\Controllers\TableBulkActionController;
 use Botble\Table\Http\Controllers\TableBulkChangeController;
+use Botble\Table\Http\Controllers\TableColumnVisibilityController;
 use Botble\Table\Http\Controllers\TableFilterController;
 use Illuminate\Support\Facades\Route;
 
@@ -17,5 +18,9 @@ Route::group(['prefix' => 'tables', 'permission' => false, 'as' => 'table.'], fu
 
     Route::group(['prefix' => 'filters', 'as' => 'filter.'], function () {
         Route::get('/', [TableFilterController::class, '__invoke'])->name('input');
+    });
+
+    Route::group(['middleware' => 'preventDemo', 'prefix' => 'columns-visibility'], function () {
+        Route::put('/', [TableColumnVisibilityController::class, 'update'])->name('update-columns-visibility');
     });
 });

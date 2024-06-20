@@ -129,8 +129,12 @@ class DashboardController extends BaseController
                 'user_id' => $request->user()->getKey(),
             ]);
 
+            $maxOrder = DashboardWidgetSetting::query()->max('order');
+
+            $maxOrder = $maxOrder < 125 ? $maxOrder : 10;
+
             $widgetSetting->status = 0;
-            $widgetSetting->order = DashboardWidgetSetting::query()->max('order') + 1;
+            $widgetSetting->order = $maxOrder + 1;
             $widgetSetting->save();
         }
 
@@ -155,8 +159,12 @@ class DashboardController extends BaseController
             ) {
                 $widgetSetting->status = 1;
             } else {
+                $maxOrder = DashboardWidgetSetting::query()->max('order');
+
+                $maxOrder = $maxOrder < 125 ? $maxOrder : 10;
+
                 $widgetSetting->status = 0;
-                $widgetSetting->order = DashboardWidgetSetting::query()->max('order') + 1;
+                $widgetSetting->order = $maxOrder + 1;
             }
 
             $widgetSetting->save();

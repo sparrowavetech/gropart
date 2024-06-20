@@ -221,7 +221,6 @@
                     position: relative;
 
                     img {
-                        width: 155px;
                         display: inline-block;
                         vertical-align: middle;
                     }
@@ -261,7 +260,7 @@
                         padding-right: 30px;
                         padding-left: 15px;
                         border-right: none;
-                        color: #000;
+                        color: var(--middle-header-text-color);
                         position: relative;
                         height: 100%;
                         white-space: nowrap;
@@ -303,7 +302,7 @@
                     border-bottom-width: 0;
                     padding: 12px 23px;
                     font-size: 13px;
-                    color: #999;
+                    color: var(--middle-header-text-color);;
                     background-color: #f7f7f7;
                     border-right: none;
                     border-left: none;
@@ -350,7 +349,7 @@
                         font-weight: 700;
                         line-height: 22px;
                         margin-bottom: 5px;
-                        color: $header-text-color;
+                        color: var(--middle-header-text-color);
                     }
 
                     p {
@@ -398,7 +397,7 @@
 
                     .cart-price-total {
                         .cart-amount {
-                            color: $header-text-color;
+                            color: var(--middle-header-text-color);
                             font-weight: 700;
                             font-size: 16px;
                             line-height: 1;
@@ -414,7 +413,7 @@
                 }
 
                 .svg-icon, i {
-                    color: $header-text-color;
+                    color: var(--middle-header-text-color);
                     font-size: 24px;
                     padding: 0 0 0 3px;
                 }
@@ -495,7 +494,7 @@
         top: -6px;
         display: block;
         text-align: center;
-        background-color: $color-primary;
+        background-color: var(--primary-button-background-color);
         border-radius: 3px;
         font-size: 10px;
         font-weight: 700;
@@ -742,14 +741,6 @@
                 line-height: 1;
                 margin-left: 20px;
                 font-size: 18px;
-            }
-        }
-
-        .panel--search-result {
-            text-align: initial;
-
-            .panel__content {
-                max-height: calc(100vh - 135px);
             }
         }
     }

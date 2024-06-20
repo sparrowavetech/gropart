@@ -39,7 +39,7 @@ class AdsServiceProvider extends ServiceProvider
     {
         $this
             ->setNamespace('plugins/ads')
-            ->loadAndPublishConfigurations(['permissions'])
+            ->loadAndPublishConfigurations(['permissions', 'general'])
             ->loadMigrations()
             ->loadAndPublishTranslations()
             ->loadRoutes()

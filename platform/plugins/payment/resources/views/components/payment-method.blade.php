@@ -21,7 +21,7 @@
         @checked($isSelected)
     >
     <label for="{{ $id }}">
-        {{ $label ?: get_payment_setting('name', $name, trans('plugins/payment::payment.payment_via_card')) }}
+        {{ $label ?: get_payment_setting('name', $name) }}
     </label>
 
     <div @class(['payment_collapse_wrap collapse mt-1', 'show' => $isSelected])>

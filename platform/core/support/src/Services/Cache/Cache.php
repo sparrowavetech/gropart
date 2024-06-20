@@ -135,4 +135,9 @@ class Cache implements CacheInterface
 
         return true;
     }
+
+    public function generateCacheKeyFromInput(): string
+    {
+        return serialize(request()->input()) . serialize(url()->current());
+    }
 }

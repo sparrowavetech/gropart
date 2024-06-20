@@ -2,6 +2,7 @@
 
 namespace Botble\Table\Http\Controllers;
 
+use Botble\ACL\Models\User;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Rules\OnOffRule;
 use Illuminate\Http\Request;
@@ -22,7 +23,9 @@ class TableColumnVisibilityController extends BaseController
             return $this->httpResponse()->setError();
         }
 
-        /** @var \Botble\ACL\Models\User $user */
+        /**
+         * @var User $user
+         */
         $user = $request->user();
 
         $userVisibility = $user->getMeta('datatable_columns_visibility');

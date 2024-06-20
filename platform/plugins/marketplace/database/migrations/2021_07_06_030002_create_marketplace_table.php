@@ -48,15 +48,15 @@ return new class () extends Migration {
 
         Schema::create('mp_stores', function (Blueprint $table) {
             $table->id();
-            $table->string('name', 255);
+            $table->string('name');
             $table->string('email', 60)->nullable();
             $table->string('phone', 20)->nullable();
-            $table->string('address', 255)->nullable();
+            $table->string('address')->nullable();
             $table->string('country', 120)->nullable();
             $table->string('state', 120)->nullable();
             $table->string('city', 120)->nullable();
             $table->foreignId('customer_id')->nullable();
-            $table->string('logo', 255)->nullable();
+            $table->string('logo')->nullable();
             $table->string('description', 400)->nullable();
             $table->longText('content')->nullable();
             $table->string('status', 60)->default('published');
@@ -74,7 +74,7 @@ return new class () extends Migration {
             $table->decimal('balance', 15)->default(0);
             $table->decimal('total_fee', 15)->default(0);
             $table->decimal('total_revenue', 15)->default(0);
-            $table->string('signature', 255)->nullable();
+            $table->string('signature')->nullable();
             $table->text('bank_info')->nullable();
             $table->timestamps();
         });

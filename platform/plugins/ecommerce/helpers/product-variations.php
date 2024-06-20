@@ -1,6 +1,7 @@
 <?php
 
 use Botble\Base\Facades\Html;
+use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Models\ProductAttributeSet;
 use Botble\Ecommerce\Models\ProductVariation;
@@ -22,7 +23,7 @@ if (! function_exists('render_product_swatches')) {
 
         $params = array_merge([
             'selected' => $selected,
-            'view' => 'plugins/ecommerce::themes.attributes.swatches-renderer',
+            'view' => EcommerceHelper::viewPath('attributes.swatches-renderer'),
         ], $params);
 
         $support = app(RenderProductSwatchesSupport::class);

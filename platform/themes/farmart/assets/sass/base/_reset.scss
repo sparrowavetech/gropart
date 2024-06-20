@@ -345,7 +345,7 @@ textarea {
     transition: 0.5s;
     outline: 0;
     padding: 0.8rem .5rem;
-    background-color: $color-primary;
+    background-color: var(--primary-button-background-color);
     color: $primary-button-color;
     box-shadow: none !important;
 

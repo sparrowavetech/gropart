@@ -9,7 +9,7 @@ class ContactReplyRequest extends Request
     public function rules(): array
     {
         return [
-            'message' => 'required|string|max:1500',
+            'message' => ['required', 'string', 'max:10000'],
         ];
     }
 }

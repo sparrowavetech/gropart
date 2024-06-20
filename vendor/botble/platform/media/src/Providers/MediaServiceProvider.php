@@ -145,7 +145,7 @@ class MediaServiceProvider extends ServiceProvider
                     'bucket' => $setting->get('media_aws_bucket', $config->get('filesystems.disks.s3.bucket')),
                     'url' => $setting->get('media_aws_url', $config->get('filesystems.disks.s3.url')),
                     'endpoint' => $setting->get('media_aws_endpoint', $config->get('filesystems.disks.s3.endpoint')) ?: null,
-                    'use_path_style_endpoint' => $setting->get('media_aws_use_path_style_endpoint', $config->get('filesystems.disks.s3.use_path_style_endpoint')),
+                    'use_path_style_endpoint' => (bool) $setting->get('media_aws_use_path_style_endpoint', $config->get('filesystems.disks.s3.use_path_style_endpoint')),
                 ]);
 
                 break;
@@ -156,7 +156,7 @@ class MediaServiceProvider extends ServiceProvider
                     'bucket' => $setting->get('media_r2_bucket'),
                     'url' => $setting->get('media_r2_url'),
                     'endpoint' => $setting->get('media_r2_endpoint') ?: null,
-                    'use_path_style_endpoint' => $setting->get('media_r2_use_path_style_endpoint', false),
+                    'use_path_style_endpoint' => (bool) $setting->get('media_r2_use_path_style_endpoint', true),
                 ]);
 
                 break;
@@ -188,7 +188,7 @@ class MediaServiceProvider extends ServiceProvider
                     'region' => $setting->get('media_do_spaces_default_region'),
                     'bucket' => $setting->get('media_do_spaces_bucket'),
                     'endpoint' => $setting->get('media_do_spaces_endpoint'),
-                    'use_path_style_endpoint' => $setting->get('media_do_use_path_style_endpoint', false),
+                    'use_path_style_endpoint' => (bool) $setting->get('media_do_use_path_style_endpoint', false),
                 ]);
 
                 break;

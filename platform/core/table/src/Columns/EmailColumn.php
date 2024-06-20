@@ -23,6 +23,6 @@ class EmailColumn extends FormattedColumn implements FormattedColumnContract
             return null;
         }
 
-        return Html::mailto($value, $value, obfuscate: false);
+        return Html::mailto($value, $value, [], true, false);
     }
 }

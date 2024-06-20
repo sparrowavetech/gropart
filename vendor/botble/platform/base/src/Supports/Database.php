@@ -4,6 +4,8 @@ namespace Botble\Base\Supports;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Symfony\Component\Process\Process;
+use Throwable;
 
 class Database
 {
@@ -13,9 +15,27 @@ class Database
             return;
         }
 
-        DB::purge($connection);
-        DB::connection()->setDatabaseName(DB::getDatabaseName());
-        DB::getSchemaBuilder()->dropAllTables();
-        DB::unprepared(file_get_contents($pathToSqlFile));
+        try {
+            DB::purge($connection);
+            DB::connection()->setDatabaseName(DB::getDatabaseName());
+            DB::getSchemaBuilder()->dropAllTables();
+            DB::unprepared(file_get_contents($pathToSqlFile));
+        } catch (Throwable) {
+            $config = DB::getConfig();
+
+            $command = 'mysql --user="%s" --password="%s" --host="%s" --port="%s" "%s" < "%s"';
+
+            $sql = sprintf(
+                $command,
+                $config['username'],
+                $config['password'],
+                $config['host'],
+                $config['port'],
+                $config['database'],
+                $pathToSqlFile
+            );
+
+            Process::fromShellCommandline($sql)->mustRun();
+        }
     }
 }

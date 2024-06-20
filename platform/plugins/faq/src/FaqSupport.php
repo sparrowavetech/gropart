@@ -18,13 +18,19 @@ class FaqSupport implements FaqContract
 {
     public function registerSchema(FaqCollection $faqs): void
     {
+        $faqs = $faqs->toArray();
+
+        if (empty($faqs)) {
+            return;
+        }
+
         $schema = [
             '@context' => 'https://schema.org',
             '@type' => 'FAQPage',
             'mainEntity' => [],
         ];
 
-        foreach ($faqs->toArray() as $faq) {
+        foreach ($faqs as $faq) {
             $schema['mainEntity'][] = [
                 '@type' => 'Question',
                 'name' => $faq->getQuestion(),

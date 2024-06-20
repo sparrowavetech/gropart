@@ -61,6 +61,8 @@
                     <div class="table-search-input">
                         <label>
                             <input type="search" class="form-control input-sm" placeholder="{{ trans('core/table::table.search') }}" style="min-width: 120px">
+                            <button type="button" title="Search" class="search-icon"><x-core::icon name="ti ti-search" /></button>
+                            <button type="button" title="Clear" class="search-reset-icon"><x-core::icon name="ti ti-x" /></button>
                         </label>
                     </div>
                 </div>

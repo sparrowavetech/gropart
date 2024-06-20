@@ -632,6 +632,7 @@ return array(
     'Botble\\Base\\Events\\UpdatedContentEvent' => $vendorDir . '/botble/platform/base/src/Events/UpdatedContentEvent.php',
     'Botble\\Base\\Events\\UpdatedEvent' => $vendorDir . '/botble/platform/base/src/Events/UpdatedEvent.php',
     'Botble\\Base\\Events\\UpdatingEvent' => $vendorDir . '/botble/platform/base/src/Events/UpdatingEvent.php',
+    'Botble\\Base\\Exceptions\\CouldNotConnectToLicenseServerException' => $vendorDir . '/botble/platform/base/src/Exceptions/CouldNotConnectToLicenseServerException.php',
     'Botble\\Base\\Exceptions\\DisabledInDemoModeException' => $vendorDir . '/botble/platform/base/src/Exceptions/DisabledInDemoModeException.php',
     'Botble\\Base\\Exceptions\\FileNotWritableException' => $vendorDir . '/botble/platform/base/src/Exceptions/FileNotWritableException.php',
     'Botble\\Base\\Exceptions\\Handler' => $vendorDir . '/botble/platform/base/src/Exceptions/Handler.php',

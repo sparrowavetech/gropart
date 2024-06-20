@@ -61,7 +61,7 @@ if (! function_exists('get_primary_store_locator')) {
 }
 
 if (! function_exists('ecommerce_convert_weight')) {
-    function ecommerce_convert_weight(float|null $weight): float
+    function ecommerce_convert_weight(?float $weight): float
     {
         switch (get_ecommerce_setting('store_weight_unit', 'g')) {
             case 'g':
@@ -72,12 +72,12 @@ if (! function_exists('ecommerce_convert_weight')) {
                 break;
         }
 
-        return (float)$weight;
+        return (float) $weight;
     }
 }
 
 if (! function_exists('ecommerce_convert_width_height')) {
-    function ecommerce_convert_width_height(float|null $data): float
+    function ecommerce_convert_width_height(?float $data): float
     {
         switch (get_ecommerce_setting('store_width_height_unit', 'cm')) {
             case 'cm':
@@ -88,14 +88,14 @@ if (! function_exists('ecommerce_convert_width_height')) {
                 break;
         }
 
-        return (float)$data;
+        return (float) $data;
     }
 }
 
 if (! function_exists('ecommerce_weight_unit')) {
     function ecommerce_weight_unit(bool $full = false): string
     {
-        $unit = (string)get_ecommerce_setting('store_weight_unit', 'g');
+        $unit = (string) get_ecommerce_setting('store_weight_unit', 'g');
 
         if (! $full) {
             return $unit;
@@ -119,7 +119,7 @@ if (! function_exists('ecommerce_weight_unit')) {
 if (! function_exists('ecommerce_width_height_unit')) {
     function ecommerce_width_height_unit(bool $full = false): string
     {
-        $unit = (string)get_ecommerce_setting('store_width_height_unit', 'cm');
+        $unit = (string) get_ecommerce_setting('store_width_height_unit', 'cm');
 
         if (! $full) {
             return $unit;

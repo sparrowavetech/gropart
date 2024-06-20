@@ -50,6 +50,10 @@ class ClearExpiredCacheCommand extends Command
     {
         $files = $this->disk->allFiles();
 
+        if (empty($files)) {
+            return;
+        }
+
         $progress = progress(
             label: 'Removing expired cache files',
             steps: count($files),

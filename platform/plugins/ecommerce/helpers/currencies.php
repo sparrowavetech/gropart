@@ -45,11 +45,11 @@ if (! function_exists('format_price')) {
         }
 
         if ($withoutCurrency) {
-            return (string)$price;
+            return (string) $price;
         }
 
         if ($useSymbol && $currency->is_prefix_symbol) {
-            $space = (int)get_ecommerce_setting('add_space_between_price_and_currency', 0) == 1 ? ' ' : null;
+            $space = (int) get_ecommerce_setting('add_space_between_price_and_currency', 0) == 1 ? ' ' : null;
 
             return $currency->symbol . $space . human_price_text($price, $currency);
         }
@@ -59,7 +59,7 @@ if (! function_exists('format_price')) {
 }
 
 if (! function_exists('human_price_text')) {
-    function human_price_text(float|null|string $price, Currency|null|string $currency, string|null $priceUnit = ''): string
+    function human_price_text(float|null|string $price, Currency|null|string $currency, ?string $priceUnit = ''): string
     {
         $numberAfterDot = ($currency instanceof Currency) ? $currency->decimals : 0;
 
@@ -67,16 +67,16 @@ if (! function_exists('human_price_text')) {
             if ($price >= 1000000 && $price < 1000000000) {
                 $price = round($price / 1000000, 2) + 0;
                 $priceUnit = __('million') . ' ' . $priceUnit;
-                $numberAfterDot = strlen(substr(strrchr((string)$price, '.'), 1));
+                $numberAfterDot = strlen(substr(strrchr((string) $price, '.'), 1));
             } elseif ($price >= 1000000000) {
                 $price = round($price / 1000000000, 2) + 0;
                 $priceUnit = __('billion') . ' ' . $priceUnit;
-                $numberAfterDot = strlen(substr(strrchr((string)$price, '.'), 1));
+                $numberAfterDot = strlen(substr(strrchr((string) $price, '.'), 1));
             }
         }
 
         if (is_numeric($price)) {
-            $price = preg_replace('/[^0-9,.]/s', '', (string)$price);
+            $price = preg_replace('/[^0-9,.]/s', '', (string) $price);
         }
 
         $decimalSeparator = get_ecommerce_setting('decimal_separator', '.');
@@ -92,13 +92,13 @@ if (! function_exists('human_price_text')) {
         }
 
         $price = number_format(
-            (float)$price,
-            (int)$numberAfterDot,
+            (float) $price,
+            (int) $numberAfterDot,
             $decimalSeparator,
             $thousandSeparator
         );
 
-        $space = (int)get_ecommerce_setting('add_space_between_price_and_currency', 0) == 1 || $convertNumberToText ? ' ' : null;
+        $space = (int) get_ecommerce_setting('add_space_between_price_and_currency', 0) == 1 || $convertNumberToText ? ' ' : null;
 
         return $price . $space . ($priceUnit ?: '');
     }

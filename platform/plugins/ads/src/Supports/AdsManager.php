@@ -79,7 +79,7 @@ class AdsManager
             ->where('key', $key)
             ->first();
 
-        if (! $ads || ! $ads->image) {
+        if (! $ads) {
             return null;
         }
 
@@ -114,10 +114,10 @@ class AdsManager
 
     public function getLocations(): array
     {
-        return $this->locations;
+        return apply_filters('ads_locations', $this->locations);
     }
 
-    public function getAds(string $key): Ads|null
+    public function getAds(string $key): ?Ads
     {
         if (! $key) {
             return null;

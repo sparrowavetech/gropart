@@ -25,6 +25,7 @@ use Botble\Base\Events\SystemUpdateExtractedFiles;
 use Botble\Base\Events\SystemUpdatePublished;
 use Botble\Base\Events\SystemUpdatePublishing;
 use Botble\Base\Events\SystemUpdateUnavailable;
+use Botble\Base\Exceptions\CouldNotConnectToLicenseServerException;
 use Botble\Base\Exceptions\LicenseInvalidException;
 use Botble\Base\Exceptions\LicenseIsAlreadyActivatedException;
 use Botble\Base\Exceptions\MissingCURLExtensionException;
@@ -39,6 +40,7 @@ use Exception;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Filesystem\Filesystem;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
@@ -672,24 +674,28 @@ final class Core
             throw new MissingCURLExtensionException();
         }
 
-        $request = Http::baseUrl(ltrim($this->licenseUrl, '/') . '/api')
-            ->withHeaders([
-                'LB-API-KEY' => $this->licenseKey,
-                'LB-URL' => rtrim(url(''), '/'),
-                'LB-IP' => $this->getClientIpAddress(),
-                'LB-LANG' => 'english',
-            ])
-            ->asJson()
-            ->acceptJson()
-            ->withoutVerifying()
-            ->connectTimeout(100)
-            ->timeout(300);
+        try {
+            $request = Http::baseUrl(ltrim($this->licenseUrl, '/') . '/api')
+                ->withHeaders([
+                    'LB-API-KEY' => $this->licenseKey,
+                    'LB-URL' => rtrim(url(''), '/'),
+                    'LB-IP' => $this->getClientIpAddress(),
+                    'LB-LANG' => 'english',
+                ])
+                ->asJson()
+                ->acceptJson()
+                ->withoutVerifying()
+                ->connectTimeout(100)
+                ->timeout(300);
 
-        return match (Str::upper($method)) {
-            'GET' => $request->get($path, $data),
-            'HEAD' => $request->head($path),
-            default => $request->post($path, $data)
-        };
+            return match (Str::upper($method)) {
+                'GET' => $request->get($path, $data),
+                'HEAD' => $request->head($path),
+                default => $request->post($path, $data)
+            };
+        } catch (ConnectionException) {
+            throw new CouldNotConnectToLicenseServerException('Could not connect to the license server. Please try again later.');
+        }
     }
 
     private function createDeactivateRequest(array $data): bool

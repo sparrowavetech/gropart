@@ -156,7 +156,7 @@
             padding: 0.9rem 1.1rem;
             font-weight: 700;
             line-height: 20px;
-            color: $header-text-color;
+            color: var(--bottom-header-text-color);
 
             &:hover {
                 color: $color-primary;
@@ -262,7 +262,7 @@
 .menu--product-categories {
     position: relative;
     cursor: pointer;
-    background-color: $color-primary;
+    background-color: var(--primary-button-background-color);
     transition: .5s;
     padding: 13px 24px 13px 21px;
     margin: 0;
@@ -422,7 +422,7 @@
 
     .menu-item-has-children {
         &.active {
-            .sub-menu {
+            > .sub-menu {
                 display: block;
             }
         }

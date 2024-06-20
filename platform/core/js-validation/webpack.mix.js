@@ -19,5 +19,5 @@ mix.combine([
 ], `${dist}/js/js-validation.js`)
 
 if (mix.inProduction()) {
-    mix.copy(`${dist}/js/js-validation.js`, `${source}/public/js`)
+    // mix.copy(`${dist}/js/js-validation.js`, `${source}/public/js`)
 }

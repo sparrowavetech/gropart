@@ -104,5 +104,32 @@ return [
                 'store' => 'Store',
             ],
         ],
+        'welcome-vendor' => [
+            'title' => 'Welcome vendor',
+            'description' => 'Send email to vendor after registered',
+            'subject' => 'Welcome to {{ site_title }}!',
+            'can_off' => true,
+            'enabled' => false,
+            'variables' => [
+                'vendor_name' => 'plugins/marketplace::marketplace.vendor_name',
+                'store_name' => 'plugins/marketplace::marketplace.store_name',
+            ],
+        ],
+        'contact-store' => [
+            'title' => 'Contact Store',
+            'description' => 'Notify stores of new contact messages from customers',
+            'subject' => 'New Customer Contact Message',
+            'can_off' => true,
+            'enabled' => true,
+            'variables' => [
+                'store_name' => 'Store name',
+                'store_phone' => 'Store phone',
+                'store_address' => 'Store address',
+                'store_url' => 'Store URL',
+                'customer_message' => 'Customer message',
+                'customer_name' => 'Customer name',
+                'customer_email' => 'Customer email',
+            ],
+        ],
     ],
 ];

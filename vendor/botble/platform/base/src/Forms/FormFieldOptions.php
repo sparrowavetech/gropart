@@ -34,6 +34,8 @@ class FormFieldOptions implements Arrayable
 
     protected array|bool|string|int|null $defaultValue;
 
+    protected bool $labelShow = true;
+
     public static function make(): static
     {
         return app(static::class);
@@ -153,6 +155,10 @@ class FormFieldOptions implements Arrayable
             $data['label_attr'] = $this->getLabelAttributes();
         }
 
+        if ($this->getLabel()) {
+            $data['label_show'] = $this->isLabelShow();
+        }
+
         if ($this->wrapperAttributes || $this->wrapperAttributes === false) {
             $data['wrapper'] = $this->getWrapperAttributes();
         }
@@ -170,5 +176,17 @@ class FormFieldOptions implements Arrayable
         }
 
         return $data;
+    }
+
+    public function isLabelShow(): bool
+    {
+        return $this->labelShow;
+    }
+
+    public function labelShow(bool $labelShow): static
+    {
+        $this->labelShow = $labelShow;
+
+        return $this;
     }
 }

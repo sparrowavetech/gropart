@@ -111,7 +111,7 @@ class MenuNode extends BaseModel
                 if (BaseHelper::hasIcon($icon)) {
                     $icon = BaseHelper::renderIcon($icon, attributes: ['class' => $this->title ? ' me-1' : '']);
                 } else {
-                    $icon = sprintf('<i class="%s"></i>', $icon . ($this->title ? ' me-1' : ''));
+                    $icon = BaseHelper::clean(sprintf('<i class="%s"></i>', $icon . ($this->title ? ' me-1' : '')));
                 }
 
                 return new HtmlString($icon);

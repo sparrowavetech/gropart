@@ -641,8 +641,14 @@ abstract class TableAbstract extends DataTable implements ExtensibleContract
 
                 if (searchInputWrapper.val()) {
                     searchInputWrapper.addClass('border-primary bg-info-subtle')
+
+                    searchInputWrapper.closest('label').find('.search-reset-icon').show()
+                    searchInputWrapper.closest('label').find('.search-icon').hide()
                 } else {
                     searchInputWrapper.removeClass('border-primary bg-info-subtle')
+
+                    searchInputWrapper.closest('label').find('.search-reset-icon').hide()
+                    searchInputWrapper.closest('label').find('.search-icon').show()
                 }
             }, 200);
         JS . $this->htmlInitCompleteFunction();

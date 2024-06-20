@@ -2,6 +2,7 @@
 
 namespace Botble\Contact\Http\Requests;
 
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Rules\EmailRule;
 use Botble\Base\Rules\OnOffRule;
 use Botble\Base\Rules\PhoneNumberRule;
@@ -9,6 +10,7 @@ use Botble\Contact\Enums\CustomFieldType;
 use Botble\Contact\Models\CustomField;
 use Botble\Support\Http\Requests\Request;
 use Illuminate\Database\Eloquent\Collection;
+use Throwable;
 
 class ContactRequest extends Request
 {
@@ -39,13 +41,21 @@ class ContactRequest extends Request
         $rules = [
             'name' => ['required', 'string', 'max:40'],
             'email' => ['nullable', new EmailRule(), 'max:80'],
-            'content' => ['required', 'string', 'max:1000'],
+            'content' => ['required', 'string', 'max:10000'],
             'phone' => ['nullable', new PhoneNumberRule()],
             'address' => ['nullable', 'string', 'max:500'],
             'subject' => ['nullable', 'string', 'max:500'],
         ];
 
-        $rules = $this->applyRules($rules, $this->request->getString('display_fields'), $this->request->getString('required_fields'));
+        try {
+            $rules = $this->applyRules(
+                $rules,
+                $this->request->getString('display_fields'),
+                $this->request->getString('required_fields')
+            );
+        } catch (Throwable $exception) {
+            BaseHelper::logError($exception);
+        }
 
         $customFields = $this->getCustomFields();
 

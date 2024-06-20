@@ -97,7 +97,7 @@ class SocialLink
         if (BaseHelper::hasIcon($this->icon)) {
             $icon = BaseHelper::renderIcon($this->icon, attributes: $attributes);
         } else {
-            $icon = sprintf('<i class="%s"></i>', $this->icon);
+            $icon = BaseHelper::clean(sprintf('<i class="%s"></i>', $this->icon));
         }
 
         return new HtmlString($icon);

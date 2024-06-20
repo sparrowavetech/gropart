@@ -86,15 +86,32 @@ class CaptchaServiceProvider extends ServiceProvider
 
             $fieldKey = 'submit';
 
+            $attributes = [
+                'colspan' => $form->getColumns('lg'),
+            ];
+
             if ($form instanceof FormFront) {
                 $fieldKey = $form->getFormEndKey() ?: ($form->has($fieldKey) ? $fieldKey : array_key_last($form->getFields()));
+
+                if ($form->getFormInputWrapperClass()) {
+                    $attributes['wrapper'] = ['class' => $form->getFormInputWrapperClass()];
+                }
+
+                if ($form->getFormLabelClass()) {
+                    $attributes['label_attr'] = ['class' => $form->getFormLabelClass()];
+                }
+
+                if ($form->getFormInputClass()) {
+                    $attributes['attr'] = ['class' => $form->getFormInputClass()];
+                }
             }
 
             if (CaptchaFacade::reCaptchaEnabled() && ! $form->has('recaptcha') && CaptchaFacade::formSetting($form::class, 'enable_recaptcha')) {
                 $form->addBefore(
                     $fieldKey,
                     'recaptcha',
-                    ReCaptchaField::class
+                    ReCaptchaField::class,
+                    $attributes
                 );
             }
 
@@ -102,7 +119,8 @@ class CaptchaServiceProvider extends ServiceProvider
                 $form->addBefore(
                     $fieldKey,
                     'math_captcha',
-                    MathCaptchaField::class
+                    MathCaptchaField::class,
+                    $attributes
                 );
             }
         });

@@ -2,7 +2,7 @@
     isset($options['choices'])
     && (is_array($options['choices']) || $options['choices'] instanceof \Illuminate\Support\Collection)
 )
-    @if(count($options['choices']) < 20)
+    @if(count($options['choices']) < 50)
         <div data-bb-toggle="tree-checkboxes">
             @include('core/base::forms.partials.tree-categories-checkbox-options', [
                 'categories' => $options['choices'],
@@ -16,6 +16,7 @@
             :multiple="true"
             :name="$name"
             data-bb-toggle="tree-categories-select"
+            :data-placeholder="trans('core/base::forms.select_placeholder')"
         >
             @include('core/base::forms.partials.tree-categories-select-options', [
                 'categories' => $options['choices'],

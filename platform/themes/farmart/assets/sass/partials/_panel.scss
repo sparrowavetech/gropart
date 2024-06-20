@@ -86,34 +86,3 @@
     background-color: rgba(0, 0, 0, .25);
     display: none;
 }
-
-.panel--search-result {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    width: 100%;
-    z-index: 999;
-    background-color: #fff;
-    border: 1px solid #eaeaea;
-    transition: all 0.4s ease;
-    opacity: 0;
-    visibility: hidden;
-    @include transform(scale3d(1, 1, 0));
-
-    .panel__content {
-        max-height: 400px;
-        overflow-y: auto;
-    }
-
-    .panel__footer {
-        padding: 10px 0;
-        text-align: center;
-        border-top: 1px solid #eaeaea;
-    }
-
-    &.active {
-        @include transform(scale3d(1, 1, 1));
-        opacity: 1;
-        visibility: visible;
-    }
-}

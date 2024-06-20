@@ -104,7 +104,7 @@ class HookServiceProvider extends ServiceProvider
         if (! in_array($currency, $supportedCurrencies)) {
             $notSupportCurrency = true;
 
-            if (! $currencyModel->where('title', 'USD')->exists()) {
+            if (! $currencyModel->query()->where('title', 'USD')->exists()) {
                 $data['error'] = true;
                 $data['message'] = __(
                     ":name doesn't support :currency. List of currencies supported by :name: :currencies.",
@@ -122,7 +122,7 @@ class HookServiceProvider extends ServiceProvider
         $paymentData = apply_filters(PAYMENT_FILTER_PAYMENT_DATA, [], $request);
 
         if ($notSupportCurrency) {
-            $usdCurrency = $currencyModel->where('title', 'USD')->first();
+            $usdCurrency = $currencyModel->query()->where('title', 'USD')->first();
 
             $paymentData['currency'] = 'USD';
             if ($currentCurrency->is_default) {

@@ -760,8 +760,26 @@
                 const $searchInput = $(event.currentTarget)
 
                 setTimeout(() => {
-                    $searchInput.closest('.table-wrapper').find('table').DataTable().search($searchInput.val()).draw()
+                    const searchValue = $searchInput.val()
+
+                    if (searchValue) {
+                        $searchInput.closest('label').find('.search-icon').hide()
+                        $searchInput.closest('label').find('.search-reset-icon').show()
+                    } else {
+                        $searchInput.closest('label').find('.search-icon').show()
+                        $searchInput.closest('label').find('.search-reset-icon').hide()
+                    }
+
+                    $searchInput.closest('.table-wrapper').find('table').DataTable().search(searchValue).draw()
                 }, 200)
+            })
+
+            $(document).on('click', '.table-search-input .search-reset-icon', (event) => {
+                const $searchInput = $(event.currentTarget).closest('.table-search-input').find('input[type=search]')
+
+                $searchInput.val('')
+
+                $searchInput.closest('.table-wrapper').find('table').DataTable().search('').draw()
             })
 
             $(document).on('click', '[data-bb-toggle="dt-buttons"]', (event) => {
@@ -785,12 +803,12 @@
                 _downloadFromUrl(url, params)
             })
 
-            const $columsVisibleDropdowns = document.querySelectorAll('[data-bb-toggle="dt-columns-visibility-dropdown"]')
+            const $columnsVisibleDropdowns = document.querySelectorAll('[data-bb-toggle="dt-columns-visibility-dropdown"]')
 
             let $formDirty = {}
 
-            if ($columsVisibleDropdowns.length) {
-                for (const $dropdown of $columsVisibleDropdowns) {
+            if ($columnsVisibleDropdowns.length) {
+                for (const $dropdown of $columnsVisibleDropdowns) {
                     $dropdown.addEventListener('hidden.bs.dropdown', function (event) {
                         const target = $(event.currentTarget)
                         const tableId = target.attr('aria-controls')

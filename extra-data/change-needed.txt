@@ -7,7 +7,8 @@ Shop type required condition not working while register as vendor
 2. Remove button is not working in coupon codes
 3. Need pop up to come automatically the first time when visiting home page only for language change,
     with all language list default, then this pop up should not come again, should only come when first time visiting site
-4. 3 images wala shortcode hindi version me nahi aa raha
-5. 3 images wala shortcode ka mobile and tablet version update nahi ho rha hai
-6. Tax Rule Create issue - fixed
-7. Frequently Bought Together Functionality
+4. 3 images wala shortcode ka mobile and tablet version update nahi ho rha hai - botble author issue
+5. Frequently Bought Together Functionality
+
+
+8. http://localhost/gropart/public/admin/tools/data-synchronize/import/products (Issue)

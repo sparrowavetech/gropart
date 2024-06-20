@@ -27,6 +27,7 @@ use Botble\Theme\FormFront;
 use Closure;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
+use Throwable;
 
 class ContactForm extends FormFront
 {
@@ -45,8 +46,17 @@ class ContactForm extends FormFront
     {
         $data = $this->getModel();
 
-        $displayFields = array_filter(explode(',', (string) Arr::get($data, 'display_fields'))) ?: ['phone', 'email', 'address', 'subject'];
-        $mandatoryFields = array_filter(explode(',', (string) Arr::get($data, 'mandatory_fields'))) ?: ['email'];
+        try {
+            $displayFields = array_filter(explode(',', (string) Arr::get($data, 'display_fields'))) ?: ['phone', 'email', 'address', 'subject'];
+        } catch (Throwable) {
+            $displayFields = ['phone', 'email', 'address', 'subject'];
+        }
+
+        try {
+            $mandatoryFields = array_filter(explode(',', (string) Arr::get($data, 'mandatory_fields'))) ?: ['email'];
+        } catch (Throwable) {
+            $mandatoryFields = ['email'];
+        }
 
         $this
             ->contentOnly()

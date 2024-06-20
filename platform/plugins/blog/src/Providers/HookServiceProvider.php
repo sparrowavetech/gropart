@@ -148,11 +148,11 @@ class HookServiceProvider extends ServiceProvider
                             'name' => theme_option('site_title'),
                             'logo' => [
                                 '@type' => 'ImageObject',
-                                'url' => RvMedia::getImageUrl(theme_option('logo')),
+                                'url' => RvMedia::getImageUrl(Theme::getLogo()),
                             ],
                         ],
-                        'datePublished' => $post->created_at->toDateString(),
-                        'dateModified' => $post->updated_at->toDateString(),
+                        'datePublished' => $post->created_at->toIso8601String(),
+                        'dateModified' => $post->updated_at->toIso8601String(),
                     ];
 
                     return $html . Html::tag('script', json_encode($schema, JSON_UNESCAPED_UNICODE), ['type' => 'application/ld+json'])

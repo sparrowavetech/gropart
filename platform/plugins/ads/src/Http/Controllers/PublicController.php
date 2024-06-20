@@ -34,14 +34,10 @@ class PublicController extends BaseController
 
         abort_if($randomHash !== $ads->random_hash, 404);
 
-        abort_if(! Str::of(
-            $ads->parseImageUrl($size)
-        )->endsWith($hashName), 404);
-
         if ($size === 'tablet') {
             $image = $ads->tablet_image ?: $ads->image;
         } elseif ($size === 'mobile') {
-            $image = ($ads->mobile_image ?: $ads->mobile_image) ?: $ads->image;
+            $image = ($ads->mobile_image ?: $ads->tablet_image) ?: $ads->image;
         } else {
             $image = $ads->image;
         }
@@ -52,6 +48,10 @@ class PublicController extends BaseController
 
         $realPath = RvMedia::getRealPath($image);
 
+        abort_if(! Str::of(
+            $ads->parseImageUrl($size)
+        )->endsWith($hashName . '.jpg'), 404);
+
         if (Str::startsWith($realPath, ['http://', 'https://'])) {
             return $response->setNextUrl($realPath);
         }
@@ -60,7 +60,9 @@ class PublicController extends BaseController
             abort(404);
         }
 
-        return response()->file($realPath);
+        return response()->file($realPath, [
+            'Content-Type' => File::mimeType($realPath),
+        ]);
     }
 
     public function getAdsClickAlternative(string $randomHash, string $adsKey)

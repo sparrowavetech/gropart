@@ -72,8 +72,6 @@
 </x-core-setting::form-group>
 
 <div>
-    <p class="text-danger">Note: Your site IP will be added to blacklist after 5 failed attempts.</p>
-
     <p>
         A purchase code (license) is only valid for One Domain. Are you using this theme on a new domain?
         Purchase a

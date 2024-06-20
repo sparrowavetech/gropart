@@ -13,7 +13,7 @@ if (! function_exists('get_order_code')) {
         $prefix = get_ecommerce_setting('store_order_prefix') ? get_ecommerce_setting('store_order_prefix') . '-' : '';
         $suffix = get_ecommerce_setting('store_order_suffix') ? '-' . get_ecommerce_setting('store_order_suffix') : '';
 
-        return '#' . $prefix . ((int)config('plugins.ecommerce.order.default_order_start_number') + $orderId) . $suffix;
+        return '#' . $prefix . ((int) config('plugins.ecommerce.order.default_order_start_number') + $orderId) . $suffix;
     }
 }
 
@@ -29,6 +29,6 @@ if (! function_exists('get_order_id_from_order_code')) {
             $orderId = substr($orderId, 0, strrpos($orderId, $suffix));
         }
 
-        return (int)$orderId - (int)config('plugins.ecommerce.order.default_order_start_number');
+        return (int) $orderId - (int) config('plugins.ecommerce.order.default_order_start_number');
     }
 }

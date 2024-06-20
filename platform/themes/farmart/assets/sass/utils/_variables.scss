@@ -3,7 +3,7 @@ $body-font-size: 14px;
 $color-heading: var(--heading-color);
 $color-text: var(--text-color);
 $color-primary: var(--primary-color);
-;
+
 $header-text-color: var(--header-text-color);
 $footer-text-color: var(--footer-text-color);
 $footer-heading-color: var(--footer-heading-color);
@@ -33,7 +33,7 @@ $instagram-color: #125688;
 $flickr-color: #ff0084;
 
 :root {
-    --bs-primary: #fab528;
-    --bs-bg-primary: #fab528;
-    --bs-primary-rgb: 250, 181, 40;
+    --bs-primary: var(--primary-color);
+    --bs-bg-primary: var(--primary-color);
+    --bs-primary-rgb: var(--primary-color-rgb);
 }

@@ -54,7 +54,13 @@ class SystemController extends BaseSystemController
         $response
             ->setData(['has_new_version' => false]);
 
-        $updateData = $core->checkUpdate();
+        try {
+            $updateData = $core->checkUpdate();
+        } catch (Throwable $exception) {
+            return $this
+                ->httpResponse()
+                ->setMessage($exception->getMessage());
+        }
 
         if ($updateData) {
             $response
