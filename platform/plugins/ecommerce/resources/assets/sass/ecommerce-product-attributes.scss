@@ -9,7 +9,7 @@
                 line-height: 2rem;
                 background: var(--bb-bg-surface-tertiary);
                 color: var(--bb-secondary);
-                font-size: .625rem;
+                font-size: 0.625rem;
                 font-weight: var(--bb-font-weight-bold);
             }
         }
@@ -41,7 +41,7 @@
                     width: 3rem !important;
                 }
 
-                > a[data-bb-toggle="image-picker-choose"] {
+                > a[data-bb-toggle='image-picker-choose'] {
                     display: none;
                 }
             }

@@ -2,7 +2,8 @@ $(() => {
     const toggleReviewStatus = (url, button) => {
         Botble.showButtonLoading(button)
 
-        $httpClient.make()
+        $httpClient
+            .make()
             .post(url)
             .then(({ data }) => {
                 if (data.error) {
@@ -37,7 +38,8 @@ $(() => {
             const _self = $(event.currentTarget)
             const url = _self.data('target')
 
-            $httpClient.make()
+            $httpClient
+                .make()
                 .withButtonLoading(_self)
                 .delete(url)
                 .then(({ data }) => {

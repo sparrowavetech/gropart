@@ -18,7 +18,8 @@ class PaymentMethodManagement {
                 $('#confirm-disable-payment-method-button').on('click', (event) => {
                     event.preventDefault()
 
-                    $httpClient.make()
+                    $httpClient
+                        .make()
                         .withButtonLoading($(event.currentTarget))
                         .post($('div[data-disable-payment-url]').data('disable-payment-url'), {
                             type: _self.closest('form').find('.payment_type').val(),
@@ -46,9 +47,13 @@ class PaymentMethodManagement {
                 event.preventDefault()
                 const _self = $(event.currentTarget)
 
-                $httpClient.make()
+                $httpClient
+                    .make()
                     .withButtonLoading(_self)
-                    .post($('div[data-update-payment-url]').data('update-payment-url'), _self.closest('form').serialize())
+                    .post(
+                        $('div[data-update-payment-url]').data('update-payment-url'),
+                        _self.closest('form').serialize()
+                    )
                     .then(({ data }) => {
                         if (!data.error) {
                             _self.closest('tbody').find('.payment-name-label-group').removeClass('hidden')

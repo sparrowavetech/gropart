@@ -1,7 +1,7 @@
 class EcommerceProductAttribute {
     constructor() {
         this.template = $('#product_attribute_template').html()
-        this.totalItem = 0
+        this.totalItem = $('.swatches-container .swatches-list tr').length
         this.deletedItems = []
 
         this.handleForm()

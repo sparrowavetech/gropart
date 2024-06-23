@@ -11,6 +11,8 @@ $(() => {
             .get(url)
             .then(({ data }) => {
                 Botble.showSuccess(data.message)
+
+                window.LaravelDataTables['botble-ecommerce-tables-invoice-table'].draw()
             })
     })
 })

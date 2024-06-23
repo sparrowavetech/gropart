@@ -124,7 +124,8 @@
 }
 
 .step-item:not(.user-action) {
-    &:after, &:before {
+    &:after,
+    &:before {
         background: var(--bb-steps-inactive-color) !important;
     }
 }
@@ -271,7 +272,7 @@
 
 .discount {
     padding: 3px;
-    background: #4da9c1;
+    background: var(--bb-primary);
     border-radius: 3px;
     position: relative;
 
@@ -550,6 +551,8 @@ Product option
     .order-products-table {
         td {
             width: 100% !important;
+            display: block;
+            text-align: center;
         }
     }
 }

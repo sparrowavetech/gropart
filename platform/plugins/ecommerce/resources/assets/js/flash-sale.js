@@ -57,7 +57,7 @@ $(() => {
                 },
                 complete: () => {
                     Botble.hideLoading($formBody)
-                }
+                },
             })
         }
     })
@@ -83,14 +83,16 @@ $(() => {
                 },
                 complete: () => {
                     Botble.hideLoading($formBody)
-                }
+                },
             })
         }, 500)
     })
 
     $(document).on('click', '.box-search-advance .page-link', (event) => {
         event.preventDefault()
-        const $searchBox = $(event.currentTarget).closest('.box-search-advance').find('[data-bb-toggle="product-search-advanced"]')
+        const $searchBox = $(event.currentTarget)
+            .closest('.box-search-advance')
+            .find('[data-bb-toggle="product-search-advanced"]')
         if (!$searchBox.closest('.page-item').hasClass('disabled') && $searchBox.data('bb-target')) {
             const $formBody = $searchBox.closest('.box-search-advance').find('.card')
             Botble.showLoading($formBody)
@@ -110,7 +112,7 @@ $(() => {
                 },
                 complete: () => {
                     Botble.hideLoading($formBody)
-                }
+                },
             })
         }
     })
