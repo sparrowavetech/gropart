@@ -14,6 +14,8 @@ class ProductSettingRequest extends Request
             'show_number_of_products' => $onOffRule = new OnOffRule(),
             'show_out_of_stock_products' => $onOffRule,
             'is_enabled_product_options' => $onOffRule,
+            'is_enabled_related_products' => $onOffRule,
+            'is_enabled_cross_sale_products' => $onOffRule,
             'auto_generate_product_sku' => $onOffRule,
             'product_sku_format' => ['nullable', 'string', 'max:120'],
         ];

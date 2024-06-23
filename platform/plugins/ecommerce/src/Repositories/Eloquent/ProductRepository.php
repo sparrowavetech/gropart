@@ -6,6 +6,7 @@ use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Models\BaseModel;
 use Botble\Base\Models\BaseQueryBuilder;
 use Botble\Ecommerce\Enums\OrderStatusEnum;
+use Botble\Ecommerce\Enums\StockStatusEnum;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Models\ProductAttribute;
@@ -22,7 +23,7 @@ use Illuminate\Support\Facades\DB;
 
 class ProductRepository extends RepositoriesAbstract implements ProductInterface
 {
-    public function getSearch(string|null $keyword, int $paginate = 10)
+    public function getSearch(?string $keyword, int $paginate = 10)
     {
         return $this->filterProducts([
             'keyword' => $keyword,
@@ -252,7 +253,7 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
             ],
         ], $params);
 
-        $filters = ['brands' => (array)$params['brand_id']];
+        $filters = ['brands' => (array) $params['brand_id']];
 
         Arr::forget($params, 'brand_id');
 
@@ -338,11 +339,11 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
         $currentExchangeRate = get_current_exchange_rate();
 
         if ($filters['min_price'] && ! $isUsingDefaultCurrency) {
-            $filters['min_price'] = (float)$filters['min_price'] / $currentExchangeRate;
+            $filters['min_price'] = (float) $filters['min_price'] / $currentExchangeRate;
         }
 
         if ($filters['max_price'] && ! $isUsingDefaultCurrency) {
-            $filters['max_price'] = (float)$filters['max_price'] / $currentExchangeRate;
+            $filters['max_price'] = (float) $filters['max_price'] / $currentExchangeRate;
         }
 
         $priceRanges = $filters['price_ranges'];
@@ -431,7 +432,7 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
 
         if ($keyword = $filters['keyword']) {
             $searchProductsBy = EcommerceHelper::getProductsSearchBy();
-            $isPartial = (int)get_ecommerce_setting('search_for_an_exact_phrase', 0) != 1;
+            $isPartial = (int) get_ecommerce_setting('search_for_an_exact_phrase', 0) != 1;
 
             if (is_plugin_active('language') && is_plugin_active('language-advanced') && Language::getCurrentLocale() != Language::getDefaultLocale()) {
                 $this->model = $this->model
@@ -560,8 +561,8 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
         if ($filters['min_price'] !== null || $filters['max_price'] !== null) {
             $this->model = $this->model
                 ->where(function (EloquentBuilder $query) use ($filters) {
-                    $priceMin = (float)Arr::get($filters, 'min_price');
-                    $priceMax = (float)Arr::get($filters, 'max_price');
+                    $priceMin = (float) Arr::get($filters, 'min_price');
+                    $priceMax = (float) Arr::get($filters, 'max_price');
 
                     if ($priceMin != null) {
                         $query = $query->where('products_with_final_price.final_price', '>=', $priceMin);
@@ -647,6 +648,20 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
                                 ->join('ec_product_variation_items', 'ec_product_variation_items.variation_id', 'ec_product_variations.id')
                                 ->join('ec_product_attributes', 'ec_product_attributes.id', 'ec_product_variation_items.attribute_id')
                                 ->join('ec_product_attribute_sets', 'ec_product_attribute_sets.id', 'ec_product_attributes.attribute_set_id')
+                                ->join('ec_products as product_children', 'product_children.id', 'ec_product_variations.product_id')
+                                ->where(function (Builder $query) {
+                                    $query
+                                        ->where(function ($query) {
+                                            $query
+                                                ->where('product_children.with_storehouse_management', 0)
+                                                ->whereNot('product_children.stock_status', StockStatusEnum::OUT_OF_STOCK);
+                                        })
+                                        ->orWhere(function ($query) {
+                                            $query
+                                                ->where('product_children.with_storehouse_management', 1)
+                                                ->where('product_children.quantity', '>', 0);
+                                        });
+                                })
                                 ->where('ec_product_attribute_sets.slug', $attributeSet)
                                 ->whereIn('ec_product_attributes.id', $attributeIds);
                         });

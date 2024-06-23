@@ -8,6 +8,7 @@ use Botble\Ecommerce\Enums\OrderReturnStatusEnum;
 use Botble\Ecommerce\Enums\OrderStatusEnum;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class OrderReturn extends BaseModel
 {
@@ -31,12 +32,11 @@ class OrderReturn extends BaseModel
     protected static function booted(): void
     {
         static::deleted(function (OrderReturn $orderReturn) {
+            $orderReturn->histories()->delete();
             $orderReturn->items()->delete();
         });
 
-        static::creating(function (OrderReturn $orderReturn) {
-            $orderReturn->code = static::generateUniqueCode();
-        });
+        static::creating(fn (OrderReturn $orderReturn) => $orderReturn->code = static::generateUniqueCode());
     }
 
     public function order(): BelongsTo
@@ -52,6 +52,16 @@ class OrderReturn extends BaseModel
     public function items(): HasMany
     {
         return $this->hasMany(OrderReturnItem::class, 'order_return_id');
+    }
+
+    public function histories(): HasMany
+    {
+        return $this->hasMany(OrderReturnHistory::class, 'order_return_id');
+    }
+
+    public function latestHistory(): HasOne
+    {
+        return $this->hasOne(OrderReturnHistory::class, 'order_return_id')->latest();
     }
 
     public static function generateUniqueCode(): string

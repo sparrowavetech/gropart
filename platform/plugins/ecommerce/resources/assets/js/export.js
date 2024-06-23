@@ -12,7 +12,7 @@ $(() => {
             .withLoading(_self.closest('.card'))
             .withResponseType('blob')
             .post(_self.attr('href'))
-            .then(({data}) => {
+            .then(({ data }) => {
                 let a = document.createElement('a')
                 let url = window.URL.createObjectURL(data)
                 a.href = url

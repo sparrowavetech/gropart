@@ -11,10 +11,10 @@ class FlashSaleRequest extends Request
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:250',
-            'end_date' => 'required|date',
-            'products_extra.*.price' => 'required|numeric',
-            'products_extra.*.quantity' => 'required|numeric',
+            'name' => ['required', 'string', 'max:250'],
+            'end_date' => ['required', 'date'],
+            'products_extra.*.price' => ['required', 'numeric'],
+            'products_extra.*.quantity' => ['required', 'numeric'],
             'status' => Rule::in(BaseStatusEnum::values()),
         ];
     }

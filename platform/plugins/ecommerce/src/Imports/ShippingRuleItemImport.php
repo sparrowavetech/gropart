@@ -156,7 +156,7 @@ class ShippingRuleItemImport implements
         return $shippingRuleItem;
     }
 
-    public function getShippingRule(string $name, string|null $country, string|null $type): ShippingRule|null
+    public function getShippingRule(string $name, ?string $country, ?string $type): ?ShippingRule
     {
         return ShippingRule::query()
             ->where([
@@ -169,7 +169,7 @@ class ShippingRuleItemImport implements
             ->first();
     }
 
-    public function getShipping(string|null $country): Shipping|null
+    public function getShipping(?string $country): ?Shipping
     {
         return Shipping::query()->where('country', $country)->first();
     }
@@ -316,12 +316,12 @@ class ShippingRuleItemImport implements
 
     public function mapLocalization(array $row): array
     {
-        $row['import_type'] = (string)Arr::get($row, 'import_type');
+        $row['import_type'] = (string) Arr::get($row, 'import_type');
         if (! in_array($row['import_type'], ['overwrite', 'add_new', 'skip'])) {
             $row['import_type'] = 'overwrite';
         }
 
-        $row['type'] = (string)Arr::get($row, 'type');
+        $row['type'] = (string) Arr::get($row, 'type');
         if (! in_array($row['type'], ShippingRuleTypeEnum::keysAllowRuleItems())) {
             $row['type'] = ShippingRuleTypeEnum::BASED_ON_ZIPCODE;
         }

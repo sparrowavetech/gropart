@@ -26,12 +26,6 @@ class Revenue extends BaseModel
         'description',
         'user_id',
         'type',
-        'seller_inv_code',
-        'shipping_cost',
-        'platform_fee',
-        'commission_fee',
-        'fee_tax_rate',
-        'seller_state_code',
     ];
 
     protected $casts = [

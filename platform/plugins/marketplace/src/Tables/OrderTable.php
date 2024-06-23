@@ -6,12 +6,14 @@ use Botble\Base\Facades\BaseHelper;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Models\Order;
 use Botble\Ecommerce\Tables\Formatters\PriceFormatter;
+use Botble\Marketplace\Facades\MarketplaceHelper;
 use Botble\Marketplace\Tables\Traits\ForVendor;
 use Botble\Table\Abstracts\TableAbstract;
 use Botble\Table\Actions\DeleteAction;
 use Botble\Table\Actions\EditAction;
 use Botble\Table\Columns\Column;
 use Botble\Table\Columns\CreatedAtColumn;
+use Botble\Table\Columns\FormattedColumn;
 use Botble\Table\Columns\IdColumn;
 use Botble\Table\Columns\StatusColumn;
 use Illuminate\Database\Eloquent\Builder;
@@ -27,10 +29,12 @@ class OrderTable extends TableAbstract
     {
         $this
             ->model(Order::class)
-            ->addActions([
+            ->addActions(array_filter([
                 EditAction::make()->route('marketplace.vendor.orders.edit'),
-                DeleteAction::make()->route('marketplace.vendor.orders.destroy'),
-            ]);
+                MarketplaceHelper::allowVendorDeleteTheirOrders()
+                    ? DeleteAction::make()->route('marketplace.vendor.orders.destroy')
+                    : null,
+            ]));
     }
 
     public function ajax(): JsonResponse
@@ -54,16 +58,35 @@ class OrderTable extends TableAbstract
                 return BaseHelper::clean($item->payment->payment_channel->label() ?: '&mdash;');
             })
             ->formatColumn('amount', PriceFormatter::class)
-            ->formatColumn('shipping_amount', PriceFormatter::class)
-            ->editColumn('user_id', function ($item) {
-                return BaseHelper::clean($item->user->name ?: $item->address->name);
-            });
+            ->formatColumn('shipping_amount', PriceFormatter::class);
 
         if (EcommerceHelper::isTaxEnabled()) {
             $data = $data->editColumn('tax_amount', function ($item) {
                 return format_price($item->tax_amount);
             });
         }
+
+        $data = $data
+            ->filter(function ($query) {
+                if ($keyword = $this->request->input('search.value')) {
+                    return $query
+                        ->whereHas('address', function ($subQuery) use ($keyword) {
+                            return $subQuery
+                                ->where('name', 'LIKE', '%' . $keyword . '%')
+                                ->orWhere('email', 'LIKE', '%' . $keyword . '%')
+                                ->orWhere('phone', 'LIKE', '%' . $keyword . '%');
+                        })
+                        ->orWhereHas('user', function ($subQuery) use ($keyword) {
+                            return $subQuery
+                                ->where('name', 'LIKE', '%' . $keyword . '%')
+                                ->orWhere('email', 'LIKE', '%' . $keyword . '%')
+                                ->orWhere('phone', 'LIKE', '%' . $keyword . '%');
+                        })
+                        ->orWhere('code', 'LIKE', '%' . $keyword . '%');
+                }
+
+                return $query;
+            });
 
         return $this->toJson($data);
     }
@@ -100,10 +123,21 @@ class OrderTable extends TableAbstract
     {
         $columns = [
             IdColumn::make(),
-            Column::make('user_id')
-                ->title(trans('plugins/ecommerce::order.customer_label'))
-                ->alignStart(),
-            Column::make('amount')
+            FormattedColumn::make('user_id')
+                ->title(trans('plugins/ecommerce::order.email'))
+                ->alignStart()
+                ->orderable(false)
+                ->renderUsing(function (FormattedColumn $column) {
+                    $item = $column->getItem();
+
+                    return sprintf(
+                        '%s <br> %s <br> %s',
+                        $item->user->name ?: $item->address->name,
+                        $item->user->email ?: $item->address->email,
+                        $item->user->phone ?: $item->address->phone
+                    );
+                }),
+            Column::formatted('amount')
                 ->title(trans('plugins/ecommerce::order.amount')),
         ];
 

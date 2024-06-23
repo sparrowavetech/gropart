@@ -4,7 +4,9 @@ namespace Botble\Ecommerce\Forms;
 
 use Botble\Base\Facades\Assets;
 use Botble\Base\Forms\FieldOptions\SelectFieldOption;
+use Botble\Base\Forms\FieldOptions\SortOrderFieldOption;
 use Botble\Base\Forms\FieldOptions\StatusFieldOption;
+use Botble\Base\Forms\Fields\NumberField;
 use Botble\Base\Forms\Fields\SelectField;
 use Botble\Base\Forms\Fields\TreeCategoryField;
 use Botble\Base\Forms\FormAbstract;
@@ -70,13 +72,7 @@ class ProductAttributeSetForm extends FormAbstract
                 'label' => trans('plugins/ecommerce::product-attribute-sets.use_in_product_listing'),
                 'default_value' => false,
             ])
-            ->add('order', 'number', [
-                'label' => trans('core/base::forms.order'),
-                'attr' => [
-                    'placeholder' => trans('core/base::forms.order_by_placeholder'),
-                ],
-                'default_value' => 0,
-            ])
+            ->add('order', NumberField::class, SortOrderFieldOption::make()->toArray())
             ->add(
                 'categories[]',
                 TreeCategoryField::class,

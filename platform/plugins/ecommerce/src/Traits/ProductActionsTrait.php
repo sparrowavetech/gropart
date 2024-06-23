@@ -7,6 +7,7 @@ use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Events\ProductQuantityUpdatedEvent;
+use Botble\Ecommerce\Events\ProductVariationCreated;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Http\Requests\AddAttributesToProductRequest;
 use Botble\Ecommerce\Http\Requests\CreateProductWhenCreatingOrderRequest;
@@ -60,7 +61,7 @@ trait ProductActionsTrait
                     $isNew = true;
                 }
 
-                $version['images'] = array_values(array_filter((array)Arr::get($version, 'images', []) ?: []));
+                $version['images'] = array_values(array_filter((array) Arr::get($version, 'images', []) ?: []));
 
                 $productRelatedToVariation->fill($version);
 
@@ -68,6 +69,8 @@ trait ProductActionsTrait
                 $productRelatedToVariation->status = $product->status;
                 $productRelatedToVariation->brand_id = $product->brand_id;
                 $productRelatedToVariation->is_variation = 1;
+                $productRelatedToVariation->minimum_order_quantity = $product->minimum_order_quantity;
+                $productRelatedToVariation->maximum_order_quantity = $product->maximum_order_quantity;
 
                 $productRelatedToVariation->sku = Arr::get($version, 'sku');
                 if (! $productRelatedToVariation->sku && Arr::get($version, 'auto_generate_sku')) {
@@ -76,7 +79,8 @@ trait ProductActionsTrait
                         foreach ($version['attribute_sets'] as $attributeId) {
                             $attribute = ProductAttribute::query()->find($attributeId);
                             if ($attribute) {
-                                $productRelatedToVariation->sku = ($productRelatedToVariation->sku ?: $product->getKey()) . '-' . Str::upper(
+                                $productRelatedToVariation->sku = ($productRelatedToVariation->sku ?: $product->getKey(
+                                )) . '-' . Str::upper(
                                     $attribute->slug
                                 );
                             }
@@ -92,7 +96,7 @@ trait ProductActionsTrait
                 $productRelatedToVariation->height = Arr::get($version, 'height', $product->height);
                 $productRelatedToVariation->weight = Arr::get($version, 'weight', $product->weight);
 
-                $productRelatedToVariation->sale_type = (int)Arr::get($version, 'sale_type', $product->sale_type);
+                $productRelatedToVariation->sale_type = (int) Arr::get($version, 'sale_type', $product->sale_type);
 
                 if ($productRelatedToVariation->sale_type == 0) {
                     $productRelatedToVariation->start_date = null;
@@ -137,12 +141,16 @@ trait ProductActionsTrait
 
                 event(new ProductQuantityUpdatedEvent($variation->product));
 
+                ProductVariationCreated::dispatch($productRelatedToVariation);
+
                 $variation->product_id = $productRelatedToVariation->id;
             }
 
             $variation->is_default = Arr::get($version, 'variation_default_id', 0) == $variation->id;
 
             $variation->save();
+
+            new UpdatedContentEvent(PRODUCT_VARIATIONS_MODULE_SCREEN_NAME, request(), $variation);
 
             if (isset($version['attribute_sets']) && is_array($version['attribute_sets'])) {
                 $variation->productAttributes()->sync($version['attribute_sets']);
@@ -160,8 +168,8 @@ trait ProductActionsTrait
     ): BaseHttpResponse {
         $product = Product::query()->findOrFail($id);
 
-        $addedAttributes = array_filter((array)$request->input('added_attributes', []));
-        $addedAttributeSets = array_filter((array)$request->input('added_attribute_sets', []));
+        $addedAttributes = array_filter((array) $request->input('added_attributes', []));
+        $addedAttributeSets = array_filter((array) $request->input('added_attribute_sets', []));
 
         if ($addedAttributes && $addedAttributeSets) {
             try {
@@ -232,7 +240,7 @@ trait ProductActionsTrait
         DeleteProductVariationsRequest $request,
         BaseHttpResponse $response
     ): BaseHttpResponse {
-        $ids = (array)$request->input('ids');
+        $ids = (array) $request->input('ids');
 
         if (empty($ids)) {
             return $response
@@ -430,7 +438,7 @@ trait ProductActionsTrait
              * @var Collection $variation
              */
             $data = $variation->toArray();
-            if ((int)$variation->is_default === 1) {
+            if ((int) $variation->is_default === 1) {
                 $data['variation_default_id'] = $variation->id;
             }
 
@@ -505,13 +513,30 @@ trait ProductActionsTrait
 
     public function getRelationBoxes(int|string|null $id, BaseHttpResponse $response): BaseHttpResponse
     {
+        if (! EcommerceHelper::isEnabledCrossSaleProducts() && ! EcommerceHelper::isEnabledRelatedProducts()) {
+            return $response->setData('');
+        }
+
         $product = null;
 
         if ($id) {
-            $product = Product::query()->with(['products', 'crossSales'])->find($id);
+            $with = [];
+
+            if (EcommerceHelper::isEnabledCrossSaleProducts()) {
+                $with[] = 'crossSales';
+            }
+
+            if (EcommerceHelper::isEnabledRelatedProducts()) {
+                $with[] = 'products';
+            }
+
+            $product = Product::query()->with($with)->find($id);
         }
 
-        $dataUrl = route('products.get-list-product-for-search', ['product_id' => $product ? $product->getKey() : null]);
+        $dataUrl = route(
+            'products.get-list-product-for-search',
+            ['product_id' => $product?->getKey()]
+        );
 
         return $response->setData(
             view(
@@ -632,7 +657,7 @@ trait ProductActionsTrait
                 });
             });
 
-        if (is_plugin_active('marketplace') && $selectedProducts->count()) {
+        if (is_plugin_active('marketplace') && $selectedProducts->isNotEmpty()) {
             $selectedProducts = $selectedProducts->map(function ($item) {
                 if ($item->is_variation) {
                     $item->store_id = $item->original_product->store_id;
@@ -644,8 +669,18 @@ trait ProductActionsTrait
 
                 return $item;
             });
+
             $storeIds = array_unique($selectedProducts->pluck('store_id')->all());
-            $availableProducts = $availableProducts->whereIn('store_id', $storeIds)->with(['store']);
+
+            if ($storeIds = array_filter($storeIds)) {
+                $availableProducts = $availableProducts
+                    ->where(function ($query) use ($storeIds) {
+                        $query
+                            ->whereNull('store_id')
+                            ->orWhereIn('store_id', $storeIds);
+                    })
+                    ->with(['store']);
+            }
         }
 
         $availableProducts = $availableProducts->simplePaginate(10);

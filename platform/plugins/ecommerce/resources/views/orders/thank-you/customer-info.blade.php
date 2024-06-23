@@ -28,7 +28,7 @@
             </p>
         @endif
 
-        @if ($order->full_address)
+        @if ($order->full_address && in_array('address', EcommerceHelper::getHiddenFieldsAtCheckout()))
             <p>
                 <span class="d-inline-block">{{ __('Address') }}:</span>
                 <span class="order-customer-info-meta">{{ $order->full_address }}</span>

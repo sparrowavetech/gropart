@@ -12,10 +12,15 @@
                     {{ trans('plugins/ecommerce::shipping.order_number') }}
                 </dt>
                 <dd class="col-auto">
-                    <a href="{{ $orderEditRouteName ? route($orderEditRouteName, $shipment->order->id) : '' }}" target="_blank">
+                    @if ($orderEditRouteName)
+                        <a href="{{ route($orderEditRouteName, $shipment->order->id) }}" target="_blank">
+                            {{ $shipment->order->code }}
+                            <x-core::icon name="ti ti-external-link" />
+                        </a>
+                    @else
                         {{ $shipment->order->code }}
-                        <x-core::icon name="ti ti-external-link" />
-                    </a>
+                    @endif
+
                 </dd>
             </div>
             <div class="row">

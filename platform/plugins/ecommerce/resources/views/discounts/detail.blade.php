@@ -7,6 +7,7 @@
             @if ($isCoupon)
                 <span class="text-uppercase">{{ trans('plugins/ecommerce::discount.coupon_code') }}</span>:
                 <b>{{ $item->code }}</b>
+                <x-core::copy :copyableState="$item->code" class="text-white"/>
             @else
                 <span class="text-uppercase">{{ trans('plugins/ecommerce::discount.discount_promotion') }}</span>:
                 {{ $item->title }}

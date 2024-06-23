@@ -59,7 +59,11 @@ class ReviewTable extends TableAbstract
             })
             ->editColumn('customer_id', function (Review $item) {
                 if (! $item->user->id) {
-                    return null;
+                    if (! $item->customer_email && ! $item->customer_name) {
+                        return null;
+                    }
+
+                    return sprintf('%s (%s)', BaseHelper::clean($item->customer_name), $item->customer_email);
                 }
 
                 return Html::link(
@@ -102,6 +106,8 @@ class ReviewTable extends TableAbstract
                 'comment',
                 'product_id',
                 'customer_id',
+                'customer_name',
+                'customer_email',
                 'status',
                 'created_at',
                 'images',

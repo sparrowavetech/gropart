@@ -9,7 +9,7 @@
                     @php
                         $price = 0;
                         if (!empty($value->affect_price) && doubleval($value->affect_price) > 0) {
-                            $price = $value->affect_type == 0 ? $value->affect_price : (floatval($value->affect_price) * $product->front_sale_price_with_taxes) / 100;
+                            $price = $value->affect_type == 0 ? $value->affect_price : (floatval($value->affect_price) * $product->price()->getPrice()) / 100;
                         }
                     @endphp
                     <div class="product-option-item-label">

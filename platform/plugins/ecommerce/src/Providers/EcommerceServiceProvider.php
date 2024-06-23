@@ -6,8 +6,13 @@ use Botble\Api\Facades\ApiHelper;
 use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Facades\EmailHandler;
 use Botble\Base\Facades\PanelSectionManager;
+use Botble\Base\PanelSections\PanelSectionItem;
 use Botble\Base\Supports\DashboardMenu as DashboardMenuSupport;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
+use Botble\DataSynchronize\PanelSections\ExportPanelSection;
+use Botble\DataSynchronize\PanelSections\ImportPanelSection;
+use Botble\Ecommerce\AdsTracking\FacebookPixel;
+use Botble\Ecommerce\AdsTracking\GoogleTagManager;
 use Botble\Ecommerce\Facades\Cart;
 use Botble\Ecommerce\Facades\Currency as CurrencyFacade;
 use Botble\Ecommerce\Facades\EcommerceHelper;
@@ -16,10 +21,18 @@ use Botble\Ecommerce\Facades\InvoiceHelper;
 use Botble\Ecommerce\Facades\OrderHelper;
 use Botble\Ecommerce\Facades\OrderReturnHelper;
 use Botble\Ecommerce\Facades\ProductCategoryHelper;
+use Botble\Ecommerce\Forms\Fronts\Auth\ForgotPasswordForm;
+use Botble\Ecommerce\Forms\Fronts\Auth\LoginForm;
+use Botble\Ecommerce\Forms\Fronts\Auth\RegisterForm;
+use Botble\Ecommerce\Forms\Fronts\Auth\ResetPasswordForm;
 use Botble\Ecommerce\Http\Middleware\CaptureCouponMiddleware;
 use Botble\Ecommerce\Http\Middleware\CaptureFootprintsMiddleware;
 use Botble\Ecommerce\Http\Middleware\RedirectIfCustomer;
 use Botble\Ecommerce\Http\Middleware\RedirectIfNotCustomer;
+use Botble\Ecommerce\Http\Requests\Fronts\Auth\ForgotPasswordRequest;
+use Botble\Ecommerce\Http\Requests\Fronts\Auth\ResetPasswordRequest;
+use Botble\Ecommerce\Http\Requests\LoginRequest;
+use Botble\Ecommerce\Http\Requests\RegisterRequest;
 use Botble\Ecommerce\Models\Address;
 use Botble\Ecommerce\Models\Brand;
 use Botble\Ecommerce\Models\Currency;
@@ -141,6 +154,7 @@ use Botble\Slug\Facades\SlugHelper;
 use Botble\SocialLogin\Facades\SocialService;
 use Botble\Theme\Events\ThemeRoutingBeforeEvent;
 use Botble\Theme\Facades\SiteMapManager;
+use Botble\Theme\FormFrontManager;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Events\RouteMatched;
@@ -326,6 +340,9 @@ class EcommerceServiceProvider extends ServiceProvider
 
         $this->app->singleton(ProductCrossSalePriceService::class);
 
+        $this->app->singleton(GoogleTagManager::class);
+        $this->app->singleton(FacebookPixel::class);
+
         Request::macro('footprint', function () {
             return app(FootprinterInterface::class)->footprint(app()->make('request'));
         });
@@ -368,6 +385,8 @@ class EcommerceServiceProvider extends ServiceProvider
             ->loadRoutes([
                 'base',
                 'product',
+                'product-inventory',
+                'product-price',
                 'tax',
                 'review',
                 'shipping',
@@ -663,20 +682,9 @@ class EcommerceServiceProvider extends ServiceProvider
                     'url' => fn () => route('ecommerce.report.index'),
                     'permissions' => ['ecommerce.report.index'],
                 ])
-                ->when(FlashSaleFacade::isEnabled(), function (DashboardMenuSupport $dashboardMenu) {
-                    $dashboardMenu->registerItem([
-                        'id' => 'cms-plugins-flash-sale',
-                        'priority' => 0,
-                        'parent_id' => 'cms-plugins-ecommerce',
-                        'name' => 'plugins/ecommerce::flash-sale.name',
-                        'icon' => 'ti ti-bolt',
-                        'url' => fn () => route('flash-sale.index'),
-                        'permissions' => ['flash-sale.index'],
-                    ]);
-                })
                 ->registerItem([
                     'id' => 'cms-plugins-ecommerce-order',
-                    'priority' => 1,
+                    'priority' => 10,
                     'parent_id' => 'cms-plugins-ecommerce',
                     'name' => 'plugins/ecommerce::order.menu',
                     'icon' => 'ti ti-truck-delivery',
@@ -684,17 +692,8 @@ class EcommerceServiceProvider extends ServiceProvider
                     'permissions' => ['orders.index'],
                 ])
                 ->registerItem([
-                    'id' => 'cms-plugins-ecommerce-invoice',
-                    'priority' => 2,
-                    'parent_id' => 'cms-plugins-ecommerce',
-                    'name' => 'plugins/ecommerce::invoice.name',
-                    'icon' => 'ti ti-file-invoice',
-                    'url' => fn () => route('ecommerce.invoice.index'),
-                    'permissions' => ['ecommerce.invoice.index'],
-                ])
-                ->registerItem([
                     'id' => 'cms-plugins-ecommerce-incomplete-order',
-                    'priority' => 2,
+                    'priority' => 20,
                     'parent_id' => 'cms-plugins-ecommerce',
                     'name' => 'plugins/ecommerce::order.incomplete_order',
                     'icon' => 'ti ti-basket-cancel',
@@ -703,7 +702,7 @@ class EcommerceServiceProvider extends ServiceProvider
                 ])
                 ->registerItem([
                     'id' => 'cms-plugins-ecommerce-order-return',
-                    'priority' => 3,
+                    'priority' => 30,
                     'parent_id' => 'cms-plugins-ecommerce',
                     'name' => 'plugins/ecommerce::order.order_return',
                     'icon' => 'ti ti-basket-down',
@@ -711,17 +710,53 @@ class EcommerceServiceProvider extends ServiceProvider
                     'permissions' => ['orders.edit'],
                 ])
                 ->registerItem([
-                    'id' => 'cms-plugins-ecommerce.product',
-                    'priority' => 3,
+                    'id' => 'cms-plugins-ecommerce-shipping-shipments',
+                    'priority' => 40,
+                    'parent_id' => 'cms-plugins-ecommerce',
+                    'name' => 'plugins/ecommerce::shipping.shipments',
+                    'icon' => 'ti ti-truck-loading',
+                    'url' => fn () => route('ecommerce.shipments.index'),
+                    'permissions' => ['ecommerce.shipments.index'],
+                ])
+                ->registerItem([
+                    'id' => 'cms-plugins-ecommerce-invoice',
+                    'priority' => 50,
+                    'parent_id' => 'cms-plugins-ecommerce',
+                    'name' => 'plugins/ecommerce::invoice.name',
+                    'icon' => 'ti ti-file-invoice',
+                    'url' => fn () => route('ecommerce.invoice.index'),
+                    'permissions' => ['ecommerce.invoice.index'],
+                ])
+                ->registerItem([
+                    'id' => 'cms-plugins-ecommerce-product',
+                    'priority' => 60,
                     'parent_id' => 'cms-plugins-ecommerce',
                     'name' => 'plugins/ecommerce::products.name',
-                    'icon' => 'ti ti-camera',
+                    'icon' => 'ti ti-package',
                     'url' => fn () => route('products.index'),
                     'permissions' => ['products.index'],
                 ])
                 ->registerItem([
+                    'id' => 'cms-plugins-ecommerce-product-price',
+                    'priority' => 70,
+                    'parent_id' => 'cms-plugins-ecommerce',
+                    'name' => 'plugins/ecommerce::product-prices.name',
+                    'icon' => 'ti ti-currency-dollar',
+                    'url' => fn () => route('ecommerce.product-prices.index'),
+                    'permissions' => ['ecommerce.product-prices.index'],
+                ])
+                ->registerItem([
+                    'id' => 'cms-plugins-ecommerce-product-inventory',
+                    'priority' => 80,
+                    'parent_id' => 'cms-plugins-ecommerce',
+                    'name' => 'plugins/ecommerce::product-inventory.name',
+                    'icon' => 'ti ti-home-check',
+                    'url' => fn () => route('ecommerce.product-inventory.index'),
+                    'permissions' => ['ecommerce.product-inventory.index'],
+                ])
+                ->registerItem([
                     'id' => 'cms-plugins-product-categories',
-                    'priority' => 4,
+                    'priority' => 90,
                     'parent_id' => 'cms-plugins-ecommerce',
                     'name' => 'plugins/ecommerce::product-categories.name',
                     'icon' => 'ti ti-archive',
@@ -730,7 +765,7 @@ class EcommerceServiceProvider extends ServiceProvider
                 ])
                 ->registerItem([
                     'id' => 'cms-plugins-product-tag',
-                    'priority' => 4,
+                    'priority' => 100,
                     'parent_id' => 'cms-plugins-ecommerce',
                     'name' => 'plugins/ecommerce::product-tag.name',
                     'icon' => 'ti ti-tag',
@@ -739,7 +774,7 @@ class EcommerceServiceProvider extends ServiceProvider
                 ])
                 ->registerItem([
                     'id' => 'cms-plugins-product-attribute',
-                    'priority' => 5,
+                    'priority' => 110,
                     'parent_id' => 'cms-plugins-ecommerce',
                     'name' => 'plugins/ecommerce::product-attributes.name',
                     'icon' => 'ti ti-album',
@@ -748,7 +783,7 @@ class EcommerceServiceProvider extends ServiceProvider
                 ])
                 ->registerItem([
                     'id' => 'cms-plugins-ecommerce-global-options',
-                    'priority' => 3,
+                    'priority' => 120,
                     'parent_id' => 'cms-plugins-ecommerce',
                     'name' => 'plugins/ecommerce::product-option.name',
                     'icon' => 'ti ti-database',
@@ -756,17 +791,8 @@ class EcommerceServiceProvider extends ServiceProvider
                     'permissions' => ['global-option.index'],
                 ])
                 ->registerItem([
-                    'id' => 'cms-plugins-brands',
-                    'priority' => 6,
-                    'parent_id' => 'cms-plugins-ecommerce',
-                    'name' => 'plugins/ecommerce::brands.name',
-                    'icon' => 'ti ti-registered',
-                    'url' => fn () => route('brands.index'),
-                    'permissions' => ['brands.index'],
-                ])
-                ->registerItem([
                     'id' => 'cms-plugins-product-collections',
-                    'priority' => 7,
+                    'priority' => 130,
                     'parent_id' => 'cms-plugins-ecommerce',
                     'name' => 'plugins/ecommerce::product-collections.name',
                     'icon' => 'ti ti-album',
@@ -775,7 +801,7 @@ class EcommerceServiceProvider extends ServiceProvider
                 ])
                 ->registerItem([
                     'id' => 'cms-plugins-product-label',
-                    'priority' => 8,
+                    'priority' => 140,
                     'parent_id' => 'cms-plugins-ecommerce',
                     'name' => 'plugins/ecommerce::product-label.name',
                     'icon' => 'ti ti-tags',
@@ -783,26 +809,37 @@ class EcommerceServiceProvider extends ServiceProvider
                     'permissions' => ['product-label.index'],
                 ])
                 ->registerItem([
+                    'id' => 'cms-plugins-brands',
+                    'priority' => 150,
+                    'parent_id' => 'cms-plugins-ecommerce',
+                    'name' => 'plugins/ecommerce::brands.name',
+                    'icon' => 'ti ti-registered',
+                    'url' => fn () => route('brands.index'),
+                    'permissions' => ['brands.index'],
+                ])
+                ->registerItem([
                     'id' => 'cms-ecommerce-review',
-                    'priority' => 9,
+                    'priority' => 160,
                     'parent_id' => 'cms-plugins-ecommerce',
                     'name' => 'plugins/ecommerce::review.name',
                     'icon' => 'ti ti-star',
                     'url' => fn () => route('reviews.index'),
                     'permissions' => ['reviews.index'],
                 ])
-                ->registerItem([
-                    'id' => 'cms-plugins-ecommerce-shipping-shipments',
-                    'priority' => 11,
-                    'parent_id' => 'cms-plugins-ecommerce',
-                    'name' => 'plugins/ecommerce::shipping.shipments',
-                    'icon' => 'ti ti-truck-loading',
-                    'url' => fn () => route('ecommerce.shipments.index'),
-                    'permissions' => ['orders.edit'],
-                ])
+                ->when(FlashSaleFacade::isEnabled(), function (DashboardMenuSupport $dashboardMenu) {
+                    $dashboardMenu->registerItem([
+                        'id' => 'cms-plugins-flash-sale',
+                        'priority' => 170,
+                        'parent_id' => 'cms-plugins-ecommerce',
+                        'name' => 'plugins/ecommerce::flash-sale.name',
+                        'icon' => 'ti ti-bolt',
+                        'url' => fn () => route('flash-sale.index'),
+                        'permissions' => ['flash-sale.index'],
+                    ]);
+                })
                 ->registerItem([
                     'id' => 'cms-plugins-ecommerce-discount',
-                    'priority' => 12,
+                    'priority' => 180,
                     'parent_id' => 'cms-plugins-ecommerce',
                     'name' => 'plugins/ecommerce::discount.name',
                     'icon' => 'ti ti-discount',
@@ -811,7 +848,7 @@ class EcommerceServiceProvider extends ServiceProvider
                 ])
                 ->registerItem([
                     'id' => 'cms-plugins-ecommerce-customer',
-                    'priority' => 13,
+                    'priority' => 190,
                     'parent_id' => 'cms-plugins-ecommerce',
                     'name' => 'plugins/ecommerce::customer.name',
                     'icon' => 'ti ti-users',
@@ -828,13 +865,6 @@ class EcommerceServiceProvider extends ServiceProvider
                     'name' => __('Overview'),
                     'url' => fn () => route('customer.overview'),
                     'icon' => 'ti ti-home',
-                ])
-                ->registerItem([
-                    'id' => 'cms-customer-edit-account',
-                    'priority' => 20,
-                    'name' => __('Profile'),
-                    'url' => fn () => route('customer.edit-account'),
-                    'icon' => 'ti ti-user',
                 ])
                 ->registerItem([
                     'id' => 'cms-customer-orders',
@@ -878,11 +908,11 @@ class EcommerceServiceProvider extends ServiceProvider
                     'icon' => 'ti ti-book',
                 ])
                 ->registerItem([
-                    'id' => 'cms-customer-change-password',
+                    'id' => 'cms-customer-edit-account',
                     'priority' => 70,
-                    'name' => __('Change Password'),
-                    'url' => fn () => route('customer.change-password'),
-                    'icon' => 'ti ti-key',
+                    'name' => __('Account Settings'),
+                    'url' => fn () => route('customer.edit-account'),
+                    'icon' => 'ti ti-settings',
                 ])
                 ->registerItem([
                     'id' => 'cms-customer-logout',
@@ -898,6 +928,42 @@ class EcommerceServiceProvider extends ServiceProvider
         PanelSectionManager::beforeRendering(function () {
             PanelSectionManager::default()
                 ->register(SettingEcommercePanelSection::class);
+        });
+
+        PanelSectionManager::setGroupId('data-synchronize')->beforeRendering(function () {
+            PanelSectionManager::default()
+                ->registerItem(
+                    ExportPanelSection::class,
+                    fn () => PanelSectionItem::make('products')
+                        ->setTitle(trans('plugins/ecommerce::products.name'))
+                        ->withDescription(trans('plugins/ecommerce::products.export.description'))
+                        ->withPriority(110)
+                        ->withRoute('tools.data-synchronize.export.products.index')
+                )
+                ->registerItem(
+                    ImportPanelSection::class,
+                    fn () => PanelSectionItem::make('products')
+                        ->setTitle(trans('plugins/ecommerce::products.name'))
+                        ->withDescription(trans('plugins/ecommerce::products.import.description'))
+                        ->withPriority(90)
+                        ->withRoute('tools.data-synchronize.import.products.index')
+                )
+                ->registerItem(
+                    ImportPanelSection::class,
+                    fn () => PanelSectionItem::make('product-prices')
+                        ->setTitle(trans('plugins/ecommerce::product-prices.name'))
+                        ->withDescription(trans('plugins/ecommerce::product-prices.import.description'))
+                        ->withPriority(100)
+                        ->withRoute('ecommerce.product-prices.import.index')
+                )
+                ->registerItem(
+                    ImportPanelSection::class,
+                    fn () => PanelSectionItem::make('product-inventory')
+                        ->setTitle(trans('plugins/ecommerce::product-inventory.name'))
+                        ->withDescription(trans('plugins/ecommerce::product-inventory.import.description'))
+                        ->withPriority(110)
+                        ->withRoute('ecommerce.product-inventory.import.index')
+                );
         });
 
         $this->app->booted(function () {
@@ -926,6 +992,11 @@ class EcommerceServiceProvider extends ServiceProvider
                     'redirect_url' => route('public.index'),
                 ]);
             }
+
+            FormFrontManager::register(LoginForm::class, LoginRequest::class);
+            FormFrontManager::register(RegisterForm::class, RegisterRequest::class);
+            FormFrontManager::register(ForgotPasswordForm::class, ForgotPasswordRequest::class);
+            FormFrontManager::register(ResetPasswordForm::class, ResetPasswordRequest::class);
         });
 
         $this->app->register(EventServiceProvider::class);

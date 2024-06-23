@@ -35,7 +35,7 @@ class UnverifiedVendorTable extends TableAbstract
     {
         $data = $this->table
             ->eloquent($this->query())
-            ->editColumn('avatar', function ($item) {
+            ->editColumn('avatar', function (Customer $item) {
                 if ($this->request()->input('action') == 'excel' ||
                     $this->request()->input('action') == 'csv') {
                     return $item->avatar_url;
@@ -43,11 +43,11 @@ class UnverifiedVendorTable extends TableAbstract
 
                 return Html::tag('img', '', ['src' => $item->avatar_url, 'alt' => BaseHelper::clean($item->name), 'width' => 50]);
             })
-            ->editColumn('store_name', function ($item) {
-                return BaseHelper::clean($item->store->name);
+            ->editColumn('store_name', function (Customer $item) {
+                return $item->store->name ? BaseHelper::clean($item->store->name) : '&mdash;';
             })
-            ->editColumn('store_phone', function ($item) {
-                return BaseHelper::clean($item->store->phone);
+            ->editColumn('store_phone', function (Customer $item) {
+                return $item->store->phone ? BaseHelper::clean($item->store->phone) : '&mdash;';
             });
 
         return $this->toJson($data);

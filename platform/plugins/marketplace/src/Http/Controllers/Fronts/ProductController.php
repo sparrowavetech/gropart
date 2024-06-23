@@ -3,6 +3,7 @@
 namespace Botble\Marketplace\Http\Controllers\Fronts;
 
 use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Facades\EmailHandler;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Ecommerce\Enums\ProductTypeEnum;
@@ -96,6 +97,8 @@ class ProductController extends BaseController
                 'configurable_product_id' => $product->getKey(),
             ]);
 
+            new CreatedContentEvent(PRODUCT_VARIATIONS_MODULE_SCREEN_NAME, request(), $variation);
+
             foreach ($addedAttributes as $attribute) {
                 ProductVariationItem::query()->create([
                     'attribute_id' => $attribute,
@@ -139,7 +142,6 @@ class ProductController extends BaseController
 
         return $this
             ->httpResponse()
-
             ->setPreviousUrl(route('marketplace.vendor.products.index'))
             ->setNextUrl(route('marketplace.vendor.products.edit', $product->getKey()))
             ->withCreatedSuccessMessage();
@@ -245,7 +247,7 @@ class ProductController extends BaseController
 
         $request->merge([
             'content' => $shortcodeCompiler->strip($request->input('content'), $shortcodeCompiler->whitelistShortcodes()),
-            'images' => array_filter((array)$request->input('images', [])),
+            'images' => array_filter((array) $request->input('images', [])),
         ]);
 
         $except = [
@@ -285,7 +287,7 @@ class ProductController extends BaseController
         int|string $id
     ) {
         $request->merge([
-            'images' => array_filter((array)$request->input('images', [])),
+            'images' => array_filter((array) $request->input('images', [])),
         ]);
 
         return $this->basePostAddVersion($request, $id, $this->httpResponse());
@@ -296,7 +298,7 @@ class ProductController extends BaseController
         $id
     ) {
         $request->merge([
-            'images' => array_filter((array)$request->input('images', [])),
+            'images' => array_filter((array) $request->input('images', [])),
         ]);
 
         return $this->basePostUpdateVersion($request, $id, $this->httpResponse());
@@ -352,7 +354,7 @@ class ProductController extends BaseController
     public function deleteVersions(
         DeleteProductVariationsRequest $request
     ) {
-        $ids = (array)$request->input('ids');
+        $ids = (array) $request->input('ids');
 
         if (empty($ids)) {
             return $this

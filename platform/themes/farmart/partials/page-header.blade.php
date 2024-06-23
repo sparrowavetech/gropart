@@ -12,7 +12,7 @@
 
     @if (!empty($withTitle) && !Theme::get('titleRendered', false))
         <div class="page-title text-center">
-            <div class="container-fluid pt-5">
+            <div class="container py-2 my-4">
                 <h1>{{ $title ?? SeoHelper::getTitle() }}</h1>
             </div>
         </div>

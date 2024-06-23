@@ -2,12 +2,18 @@
 
 namespace Botble\Ecommerce\Forms;
 
+use Botble\Base\Forms\FieldOptions\DescriptionFieldOption;
+use Botble\Base\Forms\FieldOptions\MediaImageFieldOption;
 use Botble\Base\Forms\FieldOptions\NameFieldOption;
 use Botble\Base\Forms\FieldOptions\OnOffFieldOption;
 use Botble\Base\Forms\FieldOptions\SelectFieldOption;
+use Botble\Base\Forms\FieldOptions\SortOrderFieldOption;
 use Botble\Base\Forms\FieldOptions\StatusFieldOption;
+use Botble\Base\Forms\Fields\MediaImageField;
+use Botble\Base\Forms\Fields\NumberField;
 use Botble\Base\Forms\Fields\OnOffField;
 use Botble\Base\Forms\Fields\SelectField;
+use Botble\Base\Forms\Fields\TextareaField;
 use Botble\Base\Forms\Fields\TextField;
 use Botble\Base\Forms\Fields\TreeCategoryField;
 use Botble\Base\Forms\FormAbstract;
@@ -23,14 +29,7 @@ class BrandForm extends FormAbstract
             ->setupModel(new Brand())
             ->setValidatorClass(BrandRequest::class)
             ->add('name', TextField::class, NameFieldOption::make()->toArray())
-            ->add('description', 'editor', [
-                'label' => trans('core/base::forms.description'),
-                'attr' => [
-                    'rows' => 4,
-                    'placeholder' => trans('plugins/ecommerce::products.form.description'),
-                    'data-counter' => 400,
-                ],
-            ])
+            ->add('description', TextareaField::class, DescriptionFieldOption::make()->toArray())
             ->add('website', 'text', [
                 'label' => trans('plugins/ecommerce::brands.form.website'),
                 'attr' => [
@@ -38,17 +37,9 @@ class BrandForm extends FormAbstract
                     'data-counter' => 120,
                 ],
             ])
-            ->add('order', 'number', [
-                'label' => trans('core/base::forms.order'),
-                'attr' => [
-                    'placeholder' => trans('core/base::forms.order_by_placeholder'),
-                ],
-                'default_value' => 0,
-            ])
+            ->add('order', NumberField::class, SortOrderFieldOption::make()->toArray())
             ->add('status', SelectField::class, StatusFieldOption::make()->toArray())
-            ->add('logo', 'mediaImage', [
-                'label' => trans('plugins/ecommerce::brands.logo'),
-            ])
+            ->add('logo', MediaImageField::class, MediaImageFieldOption::make()->label(trans('plugins/ecommerce::brands.logo'))->toArray())
             ->add(
                 'is_featured',
                 OnOffField::class,
@@ -63,7 +54,7 @@ class BrandForm extends FormAbstract
                 SelectFieldOption::make()
                     ->label(trans('plugins/ecommerce::products.form.categories'))
                     ->choices(ProductCategoryHelper::getActiveTreeCategories())
-                    ->selected($this->getModel()->id ? $this->getModel()->categories->pluck('id')->all() : [])
+                    ->selected($this->getModel()->getKey() ? $this->getModel()->categories->pluck('id')->all() : [])
                     ->addAttribute('card-body-class', 'p-0')
                     ->toArray()
             )

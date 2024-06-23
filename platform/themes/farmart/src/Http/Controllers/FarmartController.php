@@ -2,14 +2,12 @@
 
 namespace Theme\Farmart\Http\Controllers;
 
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\EmailHandler;
 use Botble\Base\Http\Responses\BaseHttpResponse;
-use Botble\Ecommerce\Concerns\Http\Ajax\HasSearchProducts;
 use Botble\Ecommerce\Facades\Cart;
 use Botble\Ecommerce\Facades\EcommerceHelper;
-use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Models\ProductCategory;
-use Botble\Ecommerce\Models\Wishlist as WishlistModel;
 use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
 use Botble\Marketplace\Models\Store;
 use Botble\Theme\Facades\Theme;
@@ -21,19 +19,16 @@ use Theme\Farmart\Supports\Wishlist;
 
 class FarmartController extends PublicController
 {
-    use HasSearchProducts;
-
-    public function __construct(protected BaseHttpResponse $httpResponse)
+    public function __construct()
     {
         $this->middleware(function ($request, $next) {
             if (! $request->ajax()) {
-                return $this->httpResponse->setNextUrl(route('public.index'));
+                return $this->httpResponse()->setNextUrl(BaseHelper::getHomepageUrl());
             }
 
             return $next($request);
         })->only([
             'ajaxCart',
-            'ajaxGetQuickView',
             'ajaxAddProductToWishlist',
             'ajaxSearchProducts',
             'ajaxGetRecentlyViewedProducts',
@@ -45,85 +40,11 @@ class FarmartController extends PublicController
 
     public function ajaxCart()
     {
-        return $this->httpResponse->setData([
+        return $this->httpResponse()->setData([
             'count' => Cart::instance('cart')->count(),
             'total_price' => format_price(Cart::instance('cart')->rawSubTotal() + Cart::instance('cart')->rawTax()),
             'html' => Theme::partial('cart-mini.list'),
         ]);
-    }
-
-    public function ajaxAddProductToWishlist(Request $request, $productId = null)
-    {
-        if (! EcommerceHelper::isWishlistEnabled()) {
-            abort(404);
-        }
-
-        if (! $productId) {
-            $productId = $request->input('product_id');
-        }
-
-        if (! $productId) {
-            return $this->httpResponse->setError()->setMessage(__('This product is not available.'));
-        }
-
-        $product = Product::query()->findOrFail($productId);
-
-        $messageAdded = __('Added product :product successfully!', ['product' => $product->name]);
-        $messageRemoved = __('Removed product :product from wishlist successfully!', ['product' => $product->name]);
-
-        if (! auth('customer')->check()) {
-            $duplicates = Cart::instance('wishlist')->search(function ($cartItem) use ($productId) {
-                return $cartItem->id == $productId;
-            });
-
-            if (! $duplicates->isEmpty()) {
-                $added = false;
-                Cart::instance('wishlist')->search(function ($cartItem, $rowId) use ($productId) {
-                    if ($cartItem->id == $productId) {
-                        Cart::instance('wishlist')->remove($rowId);
-
-                        return true;
-                    }
-
-                    return false;
-                });
-            } else {
-                $added = true;
-                Cart::instance('wishlist')
-                    ->add($productId, $product->name, 1, $product->front_sale_price)
-                    ->associate(Product::class);
-            }
-
-            return $this->httpResponse
-                ->setMessage($added ? $messageAdded : $messageRemoved)
-                ->setData([
-                    'count' => Cart::instance('wishlist')->count(),
-                    'added' => $added,
-                ]);
-        }
-
-        $customer = auth('customer')->user();
-
-        if (is_added_to_wishlist($productId)) {
-            $added = false;
-            WishlistModel::query()->where([
-                'product_id' => $productId,
-                'customer_id' => $customer->getKey(),
-            ])->delete();
-        } else {
-            $added = true;
-            WishlistModel::query()->create([
-                'product_id' => $productId,
-                'customer_id' => $customer->getKey(),
-            ]);
-        }
-
-        return $this->httpResponse
-            ->setMessage($added ? $messageAdded : $messageRemoved)
-            ->setData([
-                'count' => $customer->wishlist()->count(),
-                'added' => $added,
-            ]);
     }
 
     public function ajaxGetRecentlyViewedProducts(ProductInterface $productRepository)
@@ -133,9 +54,9 @@ class FarmartController extends PublicController
         }
 
         $queryParams = [
-                'with' => ['slugable'],
-                'take' => 12,
-            ] + EcommerceHelper::withReviewsParams();
+            'with' => ['slugable'],
+            'take' => 12,
+        ] + EcommerceHelper::withReviewsParams();
 
         if (auth('customer')->check()) {
             $products = $productRepository->getProductsRecentlyViewed(auth('customer')->id(), $queryParams);
@@ -153,7 +74,7 @@ class FarmartController extends PublicController
             }
         }
 
-        return $this->httpResponse
+        return $this->httpResponse()
             ->setData(Theme::partial('ecommerce.recently-viewed-products', compact('products')));
     }
 
@@ -180,7 +101,7 @@ class FarmartController extends PublicController
     public function ajaxGetProductsByCollection(int|string $id, Request $request, BaseHttpResponse $response)
     {
         if (! $request->expectsJson()) {
-            return $response->setNextUrl(route('public.index'));
+            return $response->setNextUrl(BaseHelper::getHomepageUrl());
         }
 
         $products = get_products_by_collections(array_merge([
@@ -209,7 +130,7 @@ class FarmartController extends PublicController
         ProductInterface $productRepository
     ) {
         if (! $request->expectsJson()) {
-            return $response->setNextUrl(route('public.index'));
+            return $response->setNextUrl(BaseHelper::getHomepageUrl());
         }
 
         $category = ProductCategory::query()

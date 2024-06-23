@@ -85,8 +85,7 @@ class SettingEcommercePanelSection extends PanelSection
                     ->withIcon('ti ti-list-details')
                     ->withDescription(trans('plugins/ecommerce::invoice-template.setting_description'))
                     ->withPriority(120)
-                    ->withRoute('ecommerce.settings.invoice-template')
-                    ->withPermissions(['ecommerce.settings.invoice-template.index']),
+                    ->withRoute('ecommerce.settings.invoice-template'),
                 PanelSectionItem::make('settings.ecommerce.tax_settings')
                     ->setTitle(trans('plugins/ecommerce::setting.tax.name'))
                     ->withIcon('ti ti-receipt-tax')
@@ -105,6 +104,12 @@ class SettingEcommercePanelSection extends PanelSection
                     ->withDescription(trans('plugins/ecommerce::setting.shipping.description'))
                     ->withPriority(150)
                     ->withRoute('ecommerce.settings.shipping'),
+                PanelSectionItem::make('settings.ecommerce.shipping_label_template_settings')
+                    ->setTitle(trans('plugins/ecommerce::shipping-label-template.name'))
+                    ->withIcon('ti ti-list-details')
+                    ->withDescription(trans('plugins/ecommerce::shipping-label-template.setting_description'))
+                    ->withPriority(120)
+                    ->withRoute('ecommerce.settings.shipping-label-template'),
                 PanelSectionItem::make('settings.ecommerce.webhook')
                     ->setTitle(trans('plugins/ecommerce::setting.webhook.name'))
                     ->withIcon('ti ti-webhook')

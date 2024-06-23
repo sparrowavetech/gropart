@@ -8,7 +8,6 @@ return [
     'forms' => [
         'logo' => 'Logo',
         'email' => 'Email',
-        'invoice_signature_image' => 'Upload Signature for Invoice',
         'email_placeholder' => 'Ex: name@store.com',
         'phone' => 'Phone',
         'phone_placeholder' => 'Phone',
@@ -29,15 +28,10 @@ return [
         'company_placeholder' => 'Company',
         'zip_code' => 'Zip Code',
         'zip_code_placeholder' => 'Zip Code',
-        'is_manage_shipping' => 'Vender Will Manage Shipping?',
-        'is_verified' => 'Is Verified',
-        'shop_category' => 'Shop Type',
     ],
     'store' => 'Store',
     'store_name' => 'Store name',
     'store_phone' => 'Store phone',
-    'verified' => 'Verified',
-    'un_verified' => 'Un-Verified',
     'store_link' => 'Store link',
     'store_address' => 'Store address',
     'store_url' => 'Store URL',
@@ -52,9 +46,4 @@ return [
     'vendor_information' => 'Vendor information',
     'vendor_name' => 'Name',
     'withdrawal_approval_notification' => 'This withdrawal request has been created by :vendor. Their current balance is :balance.',
-    'types'         => [
-        'manufacture'   => 'Manufacture',
-        'wholesaler'    => 'Wholesaler',
-        'retailer'      => 'Retailer',
-    ],
 ];

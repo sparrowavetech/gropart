@@ -5,11 +5,7 @@ export class CheckoutAddress {
                 $('.address-item-selected')
                     .removeClass('d-none')
                     .html(
-                        $(
-                            '.list-available-address .address-item-wrapper[data-id=' +
-                                $(event.currentTarget).val() +
-                                ']'
-                        ).html()
+                        $(`.list-available-address .address-item-wrapper[data-id=${$(event.currentTarget).val()}]`).html()
                     )
                 $('.address-form-wrapper').addClass('d-none')
             } else {

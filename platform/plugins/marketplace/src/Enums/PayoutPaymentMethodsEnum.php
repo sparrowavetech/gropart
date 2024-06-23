@@ -60,13 +60,10 @@ class PayoutPaymentMethodsEnum extends Enum
                         'title' => __('Account Number'),
                         'rules' => 'max:50',
                     ],
-                    /*'paypal_id' => [
-                        'title' => 'PayPal ID',
-                        'rules' => 'max:120',
-                    ],*/
                     'upi_id' => [
                         'title' => __('UPI ID'),
                         'rules' => 'max:120',
+                        'helper_text' => __('It is optional. If you have UPI ID, you can provide it here. Learn more: https://support.google.com/pay/india/answer/10331134?hl=en'),
                     ],
                     'description' => [
                         'title' => __('Description'),
@@ -80,7 +77,7 @@ class PayoutPaymentMethodsEnum extends Enum
                 'label' => self::PAYPAL()->label(),
                 'fields' => [
                     'paypal_id' => [
-                        'title' => 'PayPal ID',
+                        'title' => __('PayPal ID'),
                         'rules' => 'max:120',
                     ],
                 ],
@@ -88,7 +85,7 @@ class PayoutPaymentMethodsEnum extends Enum
         ];
     }
 
-    public static function getFields(string|null $channel): array
+    public static function getFields(?string $channel): array
     {
         if (! $channel || ! in_array($channel, array_keys(static::payoutMethods()))) {
             $channel = self::BANK_TRANSFER;
@@ -97,7 +94,7 @@ class PayoutPaymentMethodsEnum extends Enum
         return Arr::get(static::payoutMethods(), $channel . '.fields');
     }
 
-    public static function getRules(string|null $prefix): array
+    public static function getRules(?string $prefix): array
     {
         $payoutMethodsEnabled = static::payoutMethodsEnabled();
         $rules = [
@@ -120,7 +117,7 @@ class PayoutPaymentMethodsEnum extends Enum
         return $rules;
     }
 
-    public static function getAttributes(string|null $prefix): array
+    public static function getAttributes(?string $prefix): array
     {
         $attributes = [];
         if ($prefix) {

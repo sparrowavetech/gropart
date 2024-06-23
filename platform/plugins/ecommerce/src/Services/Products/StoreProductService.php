@@ -48,12 +48,16 @@ class StoreProductService
             ]);
         }
 
+        if ($sku = $request->input('sku')) {
+            $product->sku = $sku;
+        }
+
         $product->fill($data);
 
         $images = [];
 
         if ($imagesInput = $request->input('images', [])) {
-            $images = array_values(array_filter((array)$imagesInput));
+            $images = array_values(array_filter((array) $imagesInput));
         }
 
         $product->images = json_encode($images);
@@ -110,7 +114,10 @@ class StoreProductService
         }
 
         if ($request->has('cross_sale_products')) {
+            $product->crossSales()->detach();
+
             $crossSaleProducts = $request->input('cross_sale_products', []);
+
             $crossSaleProducts = array_map(function ($item) {
                 unset($item['id']);
 
@@ -135,7 +142,7 @@ class StoreProductService
         }
 
         if (EcommerceHelper::isEnabledProductOptions() && $request->input('has_product_options')) {
-            $this->saveProductOptions((array)$request->input('options', []), $product);
+            $this->saveProductOptions((array) $request->input('options', []), $product);
         }
 
         event(new ProductQuantityUpdatedEvent($product));
@@ -194,19 +201,29 @@ class StoreProductService
 
     public function saveProductFile(UploadedFile $file): array
     {
-        $folderPath = 'product-files';
+        $folderPath = Product::getDigitalProductFilesDirectory();
+
         $fileExtension = $file->getClientOriginalExtension();
         $content = File::get($file->getRealPath());
         $name = File::name($file->getClientOriginalName());
+
+        $storageDisk = Storage::disk('local');
+
         $fileName = MediaFile::createSlug(
             $name,
             $fileExtension,
-            Storage::path($folderPath)
+            $storageDisk->path($folderPath)
         );
 
+        $uploadManager = app(UploadsManager::class);
+
         $filePath = $folderPath . '/' . $fileName;
-        app(UploadsManager::class)->saveFile($filePath, $content, $file);
-        $data = app(UploadsManager::class)->fileDetails($filePath);
+
+        $storageDisk->put($filePath, $content);
+
+        $data = $uploadManager->fileDetails($filePath);
+        $data['size'] = $file->getSize();
+
         $data['name'] = $name;
         $data['extension'] = $fileExtension;
 
@@ -222,13 +239,16 @@ class StoreProductService
 
         try {
             foreach ($options as $opt) {
+                /**
+                 * @var Option $option
+                 */
                 $option = $product->options()->find($opt['id']);
 
                 if (! $option) {
                     $option = new Option();
                 }
 
-                $opt['required'] = isset($opt['required']) && $opt['required'] === 'on';
+                $opt['required'] = isset($opt['required']) && $opt['required'] == 1;
                 $option->fill($opt);
                 $option->product_id = $product->getKey();
                 $option->save();
@@ -248,7 +268,7 @@ class StoreProductService
                     $option->values()->saveMany($optionValues);
                 }
 
-                $optionIds[] = $option->id;
+                $optionIds[] = $option->getKey();
             }
 
             $product->options()->whereNotIn('id', $optionIds)->get()->each(function (Option $deletedOption) {

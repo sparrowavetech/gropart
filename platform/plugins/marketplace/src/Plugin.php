@@ -11,6 +11,7 @@ class Plugin extends PluginOperationAbstract
 {
     public static function remove(): void
     {
+        Schema::dropIfExists('mp_messages');
         Schema::dropIfExists('mp_vendor_info');
         Schema::dropIfExists('mp_customer_revenues');
         Schema::dropIfExists('mp_customer_withdrawals');
@@ -60,9 +61,6 @@ class Plugin extends PluginOperationAbstract
             'marketplace_hide_store_email',
             'marketplace_allow_vendor_manage_shipping',
             'marketplace_fee_per_order',
-            'marketplace_default_platform_fee',
-            'marketplace_default_fee_tax',
-            'marketplace_authorised_signature_image',
             'marketplace_fee_withdrawal',
             'marketplace_payout_methods',
         ]);

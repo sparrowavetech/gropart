@@ -17,7 +17,7 @@ class StoreProductTagService
 
         $tags = $product->tags->pluck('name')->all();
 
-        $tagsInput = collect(json_decode((string)$request->input('tag'), true))->pluck('value')->all();
+        $tagsInput = collect(json_decode((string) $request->input('tag'), true))->pluck('value')->all();
 
         if (count($tags) != count($tagsInput) || count(array_diff($tags, $tagsInput)) > 0) {
             $product->tags()->detach();

@@ -8,6 +8,7 @@ use Botble\Base\Forms\FieldOptions\DescriptionFieldOption;
 use Botble\Base\Forms\FieldOptions\NameFieldOption;
 use Botble\Base\Forms\FieldOptions\OnOffFieldOption;
 use Botble\Base\Forms\FieldOptions\StatusFieldOption;
+use Botble\Base\Forms\Fields\MediaImageField;
 use Botble\Base\Forms\Fields\OnOffField;
 use Botble\Base\Forms\Fields\SelectField;
 use Botble\Base\Forms\Fields\TextareaField;
@@ -53,7 +54,7 @@ class ProductCollectionForm extends FormAbstract
                     ->defaultValue(false)
                     ->toArray()
             )
-            ->add('image', 'mediaImage')
+            ->add('image', MediaImageField::class)
             ->setBreakFieldPoint('status');
 
         if ($productCollectionId = $this->getModel()->id) {

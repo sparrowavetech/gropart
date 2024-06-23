@@ -83,5 +83,9 @@
         </x-core::button>
     @endif
 
+    <x-core::button tag="a" :href="route('marketplace.vendor.shipments.print', $shipment)" target="_blank" icon="ti ti-printer">
+        {{ trans('plugins/ecommerce::shipping.shipping_label.print_shipping_label') }}
+    </x-core::button>
+
     {!! apply_filters('shipment_buttons_detail_order', null, $shipment) !!}
 </x-core::card.footer>

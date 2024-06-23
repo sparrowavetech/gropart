@@ -55,7 +55,7 @@
 
     <x-core::modal
         id="edit-product-variation-modal"
-        :title="trans('plugins/ecommerce::products.add_new_variation')"
+        :title="trans('plugins/ecommerce::products.edit_variation')"
         size="xl"
     >
         <x-core::loading />

@@ -6,6 +6,7 @@ use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Models\BaseQueryBuilder;
+use Botble\Ecommerce\AdsTracking\GoogleTagManager;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Forms\Fronts\OrderTrackingForm;
 use Botble\Ecommerce\Http\Requests\Fronts\OrderTrackingRequest;
@@ -54,8 +55,7 @@ class PublicProductController extends BaseController
             )->render();
         }
 
-        Theme::breadcrumb()
-            ->add(__('Products'), route('public.products'));
+        Theme::breadcrumb()->add(__('Products'), route('public.products'));
 
         $products = $productService->getProduct($request, null, null, $with);
 
@@ -66,6 +66,8 @@ class PublicProductController extends BaseController
         SeoHelper::setTitle(__('Products'))->setDescription(__('Products'));
 
         do_action(PRODUCT_MODULE_SCREEN_NAME);
+
+        app(GoogleTagManager::class)->viewItemList($products->all(), 'Product List');
 
         return Theme::scope(
             'ecommerce.products',
@@ -155,13 +157,11 @@ class PublicProductController extends BaseController
                 if (get_ecommerce_setting(
                     'how_to_display_product_variation_images'
                 ) == 'variation_images_and_main_product_images') {
-                    $originalImages = array_merge(
-                        $originalImages,
-                        is_array($product->original_images) ? $product->original_images : json_decode(
-                            $product->original_images,
-                            true
-                        )
-                    );
+                    $parentImages = is_array($product->original_images) ? $product->original_images : (array) json_decode($product->original_images, true);
+
+                    if ($parentImages && is_array($parentImages)) {
+                        $originalImages = array_merge($originalImages, $parentImages);
+                    }
                 }
             } else {
                 $originalImages = $product->original_images ?: $product->original_product->images;
@@ -314,7 +314,6 @@ class PublicProductController extends BaseController
 
         if ($request->validated()) {
             $code = $request->input('order_id');
-            $email = $request->input('email');
 
             $query = Order::query()
                 ->where(function (Builder $query) use ($code) {
@@ -322,29 +321,19 @@ class PublicProductController extends BaseController
                         ->where('ec_orders.code', $code)
                         ->orWhere('ec_orders.code', '#' . $code);
                 })
-                ->where(function (Builder $query) use ($email) {
-                    $query
-                        ->whereHas('address', function ($subQuery) use ($email) {
-                            return $subQuery->where('email', $email);
-                        })
-                        ->orWhereHas('user', function ($subQuery) use ($email) {
-                            return $subQuery->where('email', $email);
-                        });
-                })
                 ->with(['address', 'products'])
                 ->select('ec_orders.*')
-                ->when(request()->input('phone'), function (BaseQueryBuilder $query, string $phone) {
-                    $query->orWhere(function (BaseQueryBuilder $query) use ($phone) {
+                ->when(EcommerceHelper::isLoginUsingPhone(), function (BaseQueryBuilder $query) use ($request) {
+                    $query->where(function (BaseQueryBuilder $query) use ($request) {
                         $query
-                            ->where(function (BaseQueryBuilder $query) {
-                                $code = request()->input('order_id');
-
-                                $query
-                                    ->where('ec_orders.code', $code)
-                                    ->orWhere('ec_orders.code', '#' . $code);
-                            })
-                            ->whereHas('address', fn ($subQuery) => $subQuery->where('phone', $phone))
-                            ->orWhereHas('user', fn ($subQuery) => $subQuery->where('phone', $phone));
+                            ->whereHas('address', fn ($subQuery) => $subQuery->where('phone', $request->input('phone')))
+                            ->orWhereHas('user', fn ($subQuery) => $subQuery->where('phone', $request->input('phone')));
+                    });
+                }, function (BaseQueryBuilder $query) use ($request) {
+                    $query->where(function (Builder $query) use ($request) {
+                        $query
+                            ->whereHas('address', fn ($subQuery) => $subQuery->where('email', $request->input('email')))
+                            ->orWhereHas('user', fn ($subQuery) => $subQuery->where('email', $request->input('email')));
                     });
                 });
 

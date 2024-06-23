@@ -52,7 +52,7 @@ class ShipmentTable extends TableAbstract
                 return format_price($item->price);
             })
             ->editColumn('cod_status', function ($item) {
-                if (! (float)$item->cod_amount) {
+                if (! (float) $item->cod_amount) {
                     return Html::tag(
                         'span',
                         trans('plugins/ecommerce::shipping.not_available'),

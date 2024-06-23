@@ -25,7 +25,7 @@
                         @endif
                     </x-core::card.header>
 
-                    <x-core::table :hover="false" :striped="false">
+                    <x-core::table :hover="false" :striped="false" class="order-products-table">
                         <x-core::table.body>
                             @foreach ($order->products as $orderProduct)
                                 @php
@@ -66,7 +66,7 @@
                                         @endif
 
                                         @include(
-                                            'plugins/ecommerce::themes.includes.cart-item-options-extras',
+                                            EcommerceHelper::viewPath('includes.cart-item-options-extras'),
                                             ['options' => $orderProduct->options]
                                         )
 
@@ -127,7 +127,7 @@
                                 <x-core::table :hover="false" :striped="false" class="table-borderless text-end">
                                     <x-core::table.body>
                                         <x-core::table.body.row>
-                                            <x-core::table.body.cell>{{ trans('plugins/ecommerce::order.total_quantity') }}</x-core::table.body.cell>
+                                            <x-core::table.body.cell>{{ trans('plugins/ecommerce::order.quantity') }}</x-core::table.body.cell>
                                             <x-core::table.body.cell>
                                                 {{ number_format($order->products->sum('qty')) }}
                                             </x-core::table.body.cell>
@@ -139,31 +139,21 @@
                                                 {{ format_price($order->sub_total) }}
                                             </x-core::table.body.cell>
                                         </x-core::table.body.row>
-                                        @if (EcommerceHelper::isTaxEnabled())
-                                            <x-core::table.body.row>
-                                                <x-core::table.body.cell>
-                                                    {{ trans('plugins/ecommerce::order.tax') }}
-                                                </x-core::table.body.cell>
-                                                <x-core::table.body.cell>
-                                                    <span class="text-success">(+) {{ format_price($order->tax_amount) }}</span>
-                                                </x-core::table.body.cell>
-                                            </x-core::table.body.row>
-                                        @endif
                                         <x-core::table.body.row>
                                             <x-core::table.body.cell>
                                                 {{ trans('plugins/ecommerce::order.discount') }}
                                                 @if ($order->coupon_code)
-                                                    <p class="mb-0 text-success fw-bold">
+                                                    <p class="mb-0">
                                                         {!! trans('plugins/ecommerce::order.coupon_code', [
                                                             'code' => Html::tag('strong', $order->coupon_code)->toHtml(),
                                                         ]) !!}
                                                     </p>
                                                 @elseif ($order->discount_description)
-                                                    <p class="mb-0 text-success"><em>{{ $order->discount_description }}</em></p>
+                                                    <p class="mb-0">{{ $order->discount_description }}</p>
                                                 @endif
                                             </x-core::table.body.cell>
                                             <x-core::table.body.cell>
-                                                <span class="text-danger">(-) {{ format_price($order->discount_amount) }}</span>
+                                                {{ format_price($order->discount_amount) }}
                                             </x-core::table.body.cell>
                                         </x-core::table.body.row>
                                         <x-core::table.body.row>
@@ -173,9 +163,19 @@
                                                 <span class="small d-block">{{ $weight }} {{ ecommerce_weight_unit(true) }}</span>
                                             </x-core::table.body.cell>
                                             <x-core::table.body.cell>
-                                                <span class="text-success">(+) {{ format_price($order->shipping_amount) }}</span>
+                                                {{ format_price($order->shipping_amount) }}
                                             </x-core::table.body.cell>
                                         </x-core::table.body.row>
+                                        @if (EcommerceHelper::isTaxEnabled())
+                                            <x-core::table.body.row>
+                                                <x-core::table.body.cell>
+                                                    {{ trans('plugins/ecommerce::order.tax') }}
+                                                </x-core::table.body.cell>
+                                                <x-core::table.body.cell>
+                                                    {{ format_price($order->tax_amount) }}
+                                                </x-core::table.body.cell>
+                                            </x-core::table.body.row>
+                                        @endif
                                         <x-core::table.body.row>
                                             <x-core::table.body.cell>
                                                 {{ trans('plugins/ecommerce::order.total_amount') }}
@@ -276,25 +276,6 @@
                                 </x-core::table>
 
                                 <div class="btn-list justify-content-end my-3">
-                                    @if(is_plugin_active('marketplace') && $order->shipment->status == 'delivered')
-                                        @php
-                                            $revenueId = Botble\Marketplace\Models\Revenue::where('order_id', $order->id)->value('id');
-                                            $url = '';
-                                            if (is_in_admin(true)) {
-                                                $url = route('marketplace.generate-seller-invoice', $revenueId);
-                                            } else {
-                                                $url = route('marketplace.revenue.generate-seller-invoice', $revenueId);
-                                            }
-                                        @endphp
-                                        <x-core::button
-                                            tag="a"
-                                            href="{{ $url }}"
-                                            target="_blank"
-                                            icon="ti ti-download"
-                                        >
-                                            {{ trans('plugins/marketplace::revenue.seller_inv_code') }}
-                                        </x-core::button>
-                                    @endif
                                     @if ($order->isInvoiceAvailable())
                                         <x-core::button
                                             tag="a"
@@ -365,9 +346,17 @@
                         @if ($order->status == Botble\Ecommerce\Enums\OrderStatusEnum::CANCELED || is_plugin_active('payment') && $order->payment->id)
                             <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
                                 @if ($order->status == Botble\Ecommerce\Enums\OrderStatusEnum::CANCELED)
-                                    <div class="text-uppercase">
+                                    <div class="d-flex align-items-start gap-1">
                                         <x-core::icon name="ti ti-circle-off" />
-                                        <span>{{ trans('plugins/ecommerce::order.order_was_canceled') }}</span>
+                                        <div>
+                                            <span class="text-uppercase">{{ trans('plugins/ecommerce::order.order_was_canceled') }}</span>
+
+                                            @if($order->cancellation_reason)
+                                                <div class="text-muted small">
+                                                    {{ trans('plugins/ecommerce::order.cancellation_reason', ['reason' => $order->cancellation_reason_message]) }}
+                                                </div>
+                                            @endif
+                                        </div>
                                     </div>
                                 @elseif (is_plugin_active('payment') && $order->payment->id)
                                     <div class="text-uppercase">
@@ -672,13 +661,13 @@
                             </div>
 
                             @php
-                                $userInfo = $order->address->id ? $order->address : $order->user;
+                                $userInfo = $order->user;
                             @endphp
 
                             @if ($userInfo->id)
                                 <p class="mb-1">
                                     <x-core::icon name="ti ti-inbox" />
-                                    {{ $order->user->orders()->count() }}
+                                    {{ $userInfo->orders()->count() }}
                                     {{ trans('plugins/ecommerce::order.orders') }}
                                 </p>
                             @endif
@@ -749,6 +738,8 @@
                                 && $order->billingAddress->id
                                 && $order->billingAddress->id != $order->shippingAddress->id
                             )
+                                <div class="hr my-1"></div>
+
                                 <div class="p-3">
                                     <div class="d-flex justify-content-between align-items-center">
                                         <h4>{{ trans('plugins/ecommerce::order.billing_address') }}</h4>
@@ -775,10 +766,10 @@
                                             <a
                                                 class="btn-trigger-update-tax-information"
                                                 href="#"
-                                                    data-placement="top"
-                                                    data-bs-toggle="tooltip"
-                                                    data-bs-original-title="{{ trans('plugins/ecommerce::order.tax_info.update') }}"
-                                                >
+                                                data-placement="top"
+                                                data-bs-toggle="tooltip"
+                                                data-bs-original-title="{{ trans('plugins/ecommerce::order.tax_info.update') }}"
+                                            >
                                                 <x-core::icon name="ti ti-pencil" />
                                             </a>
                                         </div>
@@ -793,7 +784,7 @@
                             </div>
                         @endif
 
-                        @if ($order->referral()->count())
+                        @if ($order->referral->exists())
                             <div class="hr my-1"></div>
 
                             <div class="p-3">
@@ -816,10 +807,6 @@
                             <div class="p-3">
                                 <h4 class="mb-2">{{ trans('plugins/marketplace::store.store') }}</h4>
                                 <a href="{{ $order->store->url }}" target="_blank">{{ $order->store->name }}</a>
-                                @if($order->store->is_verified)
-                                    <img class="verified-store-main" style="width: 20px;" src="{{ asset('/storage/stores/verified.png')}}"alt="Verified">
-                                @endif
-                                <small class="badge bg-warning text-white">{{ $order->store->shop_category->label() }}</small>
                             </div>
                         @endif
                     </x-core::card.body>

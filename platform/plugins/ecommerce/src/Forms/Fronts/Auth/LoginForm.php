@@ -18,6 +18,11 @@ use Botble\Ecommerce\Models\Customer;
 
 class LoginForm extends AuthForm
 {
+    public static function formTitle(): string
+    {
+        return __('Customer login form');
+    }
+
     public function setup(): void
     {
         parent::setup();
@@ -32,17 +37,19 @@ class LoginForm extends AuthForm
                 theme_option('login_background'),
                 fn (AuthForm $form, string $background) => $form->banner($background)
             )
-            ->when(EcommerceHelper::isLoginUsingPhone(), function (LoginForm $form) {
+            ->when(EcommerceHelper::getLoginOption() === 'phone', function (LoginForm $form) {
                 $form->add(
-                    'phone',
+                    'email',
                     PhoneNumberField::class,
                     TextFieldOption::make()
                         ->label(__('Phone'))
                         ->placeholder(__('Phone number'))
                         ->icon('ti ti-phone')
+                        ->addAttribute('autocomplete', 'tel')
                         ->toArray()
                 );
-            }, function (LoginForm $form) {
+            })
+            ->when(EcommerceHelper::getLoginOption() === 'email', function (LoginForm $form) {
                 $form->add(
                     'email',
                     EmailField::class,
@@ -50,6 +57,18 @@ class LoginForm extends AuthForm
                         ->label(__('Email'))
                         ->placeholder(__('Email address'))
                         ->icon('ti ti-mail')
+                        ->toArray()
+                );
+            })
+            ->when(EcommerceHelper::getLoginOption() === 'email_or_phone', function (LoginForm $form) {
+                $form->add(
+                    'email',
+                    EmailField::class,
+                    EmailFieldOption::make()
+                        ->label(__('Email or phone'))
+                        ->placeholder(__('Email or Phone number'))
+                        ->addAttribute('autocomplete', 'email')
+                        ->icon('ti ti-user')
                         ->toArray()
                 );
             })

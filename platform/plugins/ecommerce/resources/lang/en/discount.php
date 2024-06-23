@@ -41,6 +41,7 @@ return [
             'product-variant' => 'Product variant',
             'group-products' => 'Product collections',
             'specific-product' => 'Specific product',
+            'products-by-category' => 'Products by category',
         ],
     ],
     'discount' => 'Discount',

@@ -6,8 +6,8 @@ use Botble\Slug\Facades\SlugHelper;
 use Botble\Theme\Facades\Theme;
 use Illuminate\Support\Facades\Route;
 
-Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers'], function () {
-    AdminHelper::registerRoutes(function () {
+AdminHelper::registerRoutes(function () {
+    Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'prefix' => 'ecommerce'], function () {
         Route::group(['prefix' => 'reviews', 'as' => 'reviews.'], function () {
             Route::match(['GET', 'POST'], '/', [
                 'as' => 'index',

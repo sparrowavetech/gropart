@@ -89,6 +89,7 @@ class WithdrawalController extends BaseController
         return $this
             ->httpResponse()
             ->setPreviousUrl(route('marketplace.vendor.withdrawals.index'))
+            ->setNextUrl(route('marketplace.vendor.withdrawals.show', $withdrawal->getKey()))
             ->withCreatedSuccessMessage();
     }
 
@@ -102,9 +103,11 @@ class WithdrawalController extends BaseController
             ])
             ->firstOrFail();
 
-        $this->pageTitle(__('Update withdrawal request #' . $id));
+        $this->pageTitle(__('Update withdrawal request #:id', ['id' => $id]));
 
-        return VendorWithdrawalForm::createFromModel($withdrawal)->renderForm();
+        return VendorWithdrawalForm::createFromModel($withdrawal)
+            ->setUrl(route('marketplace.vendor.withdrawals.edit', $withdrawal->getKey()))
+            ->renderForm();
     }
 
     public function update(int|string $id, VendorEditWithdrawalRequest $request)
@@ -120,9 +123,6 @@ class WithdrawalController extends BaseController
         $status = WithdrawalStatusEnum::PENDING;
         if ($request->input('cancel')) {
             $status = WithdrawalStatusEnum::CANCELED;
-            $this
-                ->httpResponse()
-                ->setNextUrl(route('marketplace.vendor.withdrawals.show', $withdrawal->id));
         }
 
         $withdrawal->fill([
@@ -131,6 +131,14 @@ class WithdrawalController extends BaseController
         ]);
 
         $withdrawal->save();
+
+        if ($status === WithdrawalStatusEnum::CANCELED) {
+            return $this
+                ->httpResponse()
+                ->setPreviousUrl(route('marketplace.vendor.withdrawals.index'))
+                ->setNextUrl(route('marketplace.vendor.withdrawals.show', $withdrawal->getKey()))
+                ->withUpdatedSuccessMessage();
+        }
 
         return $this
             ->httpResponse()
@@ -143,11 +151,12 @@ class WithdrawalController extends BaseController
         $withdrawal = Withdrawal::query()
             ->where('id', $id)
             ->where('customer_id', auth('customer')->id())
-            ->where('status', '!=', WithdrawalStatusEnum::PENDING)
             ->firstOrFail();
 
-        $this->pageTitle(__('View withdrawal request #' . $id));
+        $this->pageTitle(__('View withdrawal request #:id', ['id' => $id]));
 
-        return VendorWithdrawalForm::createFromModel($withdrawal)->renderForm();
+        return VendorWithdrawalForm::createFromModel($withdrawal)
+            ->setUrl(route('marketplace.vendor.withdrawals.edit', $withdrawal->getKey()))
+            ->renderForm();
     }
 }

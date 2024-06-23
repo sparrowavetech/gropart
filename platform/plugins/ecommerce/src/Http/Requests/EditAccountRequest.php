@@ -10,9 +10,9 @@ class EditAccountRequest extends Request
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:255',
+            'name' => ['required', 'string', 'max:255'],
             'phone' => 'sometimes|' . BaseHelper::getPhoneValidationRule(),
-            'dob' => 'date|max:20|sometimes',
+            'dob' => ['date_format:' . BaseHelper::getDateFormat(), 'max:20', 'sometimes'],
         ];
     }
 }

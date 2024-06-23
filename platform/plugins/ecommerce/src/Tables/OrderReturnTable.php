@@ -152,12 +152,10 @@ class OrderReturnTable extends TableAbstract
         ];
     }
 
-    public function saveBulkChangeItem(Model|OrderReturn $item, string $inputKey, string|null $inputValue): Model|bool
+    public function saveBulkChangeItem(Model|OrderReturn $item, string $inputKey, ?string $inputValue): Model|bool
     {
         if ($inputKey === 'status' && $inputValue == OrderReturnStatusEnum::CANCELED) {
-            /**
-             * @var OrderReturn $item
-             */
+            /** @var OrderReturn $item */
             OrderReturnHelper::cancelReturnOrder($item);
 
             return $item;

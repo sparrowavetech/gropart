@@ -13,24 +13,27 @@
                 alt="{{ $product->name }}"
             >
         </div>
-        @if ($product->isOutOfStock())
-            <div class="ribbons">
+        <span class="ribbons">
+            @if ($product->isOutOfStock())
                 <span class="ribbon out-stock">{{ __('Out Of Stock') }}</span>
-            </div>
-        @else
-            @if ($product->productLabels->isNotEmpty())
-                <div class="ribbons product-lable">
+            @else
+                @if ($product->productLabels->isNotEmpty())
                     @foreach ($product->productLabels as $label)
-                        <span class="ribbon" @if ($label->color) style="background-color: {{ $label->color }}" @endif><i class="lable-prop" @if ($label->color) style="border-color: transparent transparent transparent {{ $label->color }}" @endif></i>{{ $label->name }}</span>
+                        <span
+                            class="ribbon"
+                            @if ($label->color) style="background-color: {{ $label->color }}" @endif
+                        >{{ $label->name }}</span>
                     @endforeach
-                </div>
+                @else
+                    @if ($product->front_sale_price !== $product->price)
+                        <div
+                            class="featured ribbon"
+                            dir="ltr"
+                        >{{ get_sale_percentage($product->price, $product->front_sale_price) }}</div>
+                    @endif
+                @endif
             @endif
-            @if ($product->front_sale_price !== $product->price)
-                <div class="ribbons sale-ribbon">
-                    <span class="featured ribbon" dir="ltr">{{ get_sale_percentage($product->price, $product->front_sale_price) }}</span>
-                </div>
-            @endif
-        @endif
+        </span>
     </a>
     {!! Theme::partial(
         'ecommerce.product-loop-buttons',
@@ -41,11 +44,10 @@
     <div class="product-content-box">
         @if (is_plugin_active('marketplace') && $product->store->id)
             <div class="sold-by-meta">
-                <a href="{{ $product->store->url }}" tabindex="0">{{ $product->store->name }}</a>
-                @if($product->store->is_verified)
-                    <img class="verified-store" src="{{ asset('/storage/stores/verified.png')}}"alt="Verified">
-                @endif
-                <small class="badge bg-warning text-dark">{{ $product->store->shop_category->label() }}</small>
+                <a
+                    href="{{ $product->store->url }}"
+                    tabindex="0"
+                >{{ $product->store->name }}</a>
             </div>
         @endif
         <h3 class="product__title">
@@ -89,8 +91,8 @@
                 </div>
             </div>
         @endisset
-    </div>
-    <div class="product-bottom-box">
-        {!! Theme::partial('ecommerce.product-cart-form', compact('product')) !!}
-    </div>
+</div>
+<div class="product-bottom-box">
+    {!! Theme::partial('ecommerce.product-cart-form', compact('product')) !!}
+</div>
 </div>

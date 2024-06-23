@@ -33,4 +33,7 @@ return [
         'title' => 'Delete reply',
         'description' => 'Are you sure you want to delete this reply? This action cannot be undone!',
     ],
+    'choose_customer_help' => 'Choose a customer to leave a review as them. If you want to enter the customer details manually, leave empty this field and fill the customer name and email fields below.',
+    'choose_existing_customer' => 'Choose from existing customers',
+    'or_enter_manually' => 'Or enter manually customer details:',
 ];

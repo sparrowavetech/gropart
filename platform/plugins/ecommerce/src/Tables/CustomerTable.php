@@ -28,6 +28,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Validation\Rule;
 use Symfony\Component\HttpFoundation\Response;
 
 class CustomerTable extends TableAbstract
@@ -125,7 +126,9 @@ class CustomerTable extends TableAbstract
         return [
             NameBulkChange::make(),
             EmailBulkChange::make(),
-            StatusBulkChange::make()->choices(CustomerStatusEnum::labels()),
+            StatusBulkChange::make()
+                ->choices(CustomerStatusEnum::labels())
+                ->validate(['required', Rule::in(CustomerStatusEnum::values())]),
             CreatedAtColumn::make(),
         ];
     }

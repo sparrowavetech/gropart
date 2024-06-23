@@ -23,7 +23,7 @@
                     </div>
 
                     <div class="entry-meta mb-2">
-                        @if ($post->author)
+                        @if ($post->author && theme_option('blog_show_author_name', 'yes') == 'yes')
                             <div class="entry-meta-author">
                                 <span class="d-inline-block">{{ __('By') }}</span> <span
                                     class="d-inline-block author-name"
@@ -32,7 +32,7 @@
                         @endif
                         @if ($post->categories->isNotEmpty())
                             <div class="entry-meta-categories">
-                                <span class="d-inline-block">{{ __('in') }}</span>
+                                <span class="d-inline-block">{{ ($post->author && theme_option('blog_show_author_name', 'yes') == 'yes') ? __('in') : ucfirst(__('in')) }}</span>
                                 @foreach ($post->categories as $category)
                                     <a href="{{ $category->url }}">{{ $category->name }}</a>
                                     @if (!$loop->last)
@@ -47,7 +47,7 @@
                         </div>
                     </div>
                     <div class="entry-description">
-                        <p>{{ Str::limit($post->description, 280) }}</p>
+                        <p>{{ Str::limit($post->description, 120) }}</p>
                     </div>
                 </div>
             </div>

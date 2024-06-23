@@ -188,6 +188,7 @@
                                         id="required-__index__"
                                         name="options[__index__][required]"
                                         class="option-required"
+                                        value="1"
                                         __checked__=""
                                     />
                                 </div>

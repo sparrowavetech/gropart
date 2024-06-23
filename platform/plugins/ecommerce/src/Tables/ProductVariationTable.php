@@ -203,7 +203,8 @@ class ProductVariationTable extends TableAbstract
             ->query()
             ->whereHas('configurableProduct', function (Builder $query) {
                 $query->where('configurable_product_id', $this->productId);
-            });
+            })
+            ->whereNot('product_id');
     }
 
     public function getProductAttributeSets(): Collection
@@ -242,7 +243,9 @@ class ProductVariationTable extends TableAbstract
     {
         $columns = [
             CheckboxColumn::make(),
-            IdColumn::make(),
+            IdColumn::make()->getValueUsing(function (IdColumn $column) {
+                return $column->getItem()->product->id;
+            }),
             ImageColumn::make()
                 ->orderable(false)
                 ->searchable(false),
@@ -288,14 +291,14 @@ class ProductVariationTable extends TableAbstract
         ]);
     }
 
-    public function htmlInitComplete(): string|null
+    public function htmlInitComplete(): ?string
     {
         return 'function (settings, json) {
             EcommerceProduct.tableInitComplete(this.api(), settings, json);
         ' . $this->htmlInitCompleteFunction() . '}';
     }
 
-    protected function getDom(): string|null
+    protected function getDom(): ?string
     {
         return $this->simpleDom();
     }

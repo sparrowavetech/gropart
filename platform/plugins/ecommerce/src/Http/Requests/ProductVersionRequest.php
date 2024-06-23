@@ -2,6 +2,7 @@
 
 namespace Botble\Ecommerce\Http\Requests;
 
+use Botble\Media\Facades\RvMedia;
 use Botble\Support\Http\Requests\Request;
 use Carbon\Carbon;
 use Illuminate\Validation\Rule;
@@ -19,25 +20,36 @@ class ProductVersionRequest extends Request
                     return 'gt:sale_price';
                 }),
             ],
-            'sale_price' => 'numeric|nullable|min:0',
-            'start_date' => 'date|nullable|required_if:sale_type,1',
+            'sale_price' => ['numeric', 'nullable', 'min:0'],
+            'start_date' => ['date', 'nullable', 'required_if:sale_type,1'],
             'end_date' => 'date|nullable|after:' . ($this->input('start_date') ?? Carbon::now()->toDateTimeString()),
-            'product_files_input' => 'array',
-            'product_files_input.*' => 'nullable|file|mimes:' . config('plugins.ecommerce.general.digital_products.allowed_mime_types'),
-            'product_files_external' => 'nullable|array',
-            'product_files_external.*.name' => 'nullable|string|max:120',
-            'product_files_external.*.link' => 'required|url|max:400',
-            'product_files_external.*.size' => 'nullable|numeric|min:0|max:100000000',
+            'wide' => ['numeric', 'nullable', 'min:0', 'max:100000000'],
+            'height' => ['numeric', 'nullable', 'min:0', 'max:100000000'],
+            'weight' => ['numeric', 'nullable', 'min:0', 'max:100000000'],
+            'length' => ['numeric', 'nullable', 'min:0', 'max:100000000'],
+            'images' => ['sometimes', 'array'],
+            'images.*' => ['nullable', 'string'],
+            'quantity' => ['numeric', 'nullable', 'min:0', 'max:100000000'],
+            'product_files_input' => ['array'],
+            'product_files_input.*' => 'nullable|file|mimes:' . (config('plugins.ecommerce.general.digital_products.allowed_mime_types') ?: RvMedia::getConfig('allowed_mime_types')),
+            'product_files_external' => ['nullable', 'array'],
+            'product_files_external.*.name' => ['nullable', 'string', 'max:120'],
+            'product_files_external.*.link' => ['required', 'url', 'max:400'],
+            'product_files_external.*.size' => ['nullable', 'numeric', 'min:0', 'max:100000000'],
             'barcode' => [
                 'nullable',
-                'max:50',
                 'string',
-                //Rule::unique('ec_products')->ignore($this->route('product.id')),
+                'max:150',
+            ],
+            'sku' => [
+                'nullable',
+                'string',
+                'max:150',
             ],
             'cost_per_item' => 'nullable|numeric|min:0|max:' . $this->input('price'),
-            'attribute_sets' => 'nullable|array',
-            'attribute_sets.*' => 'required',
-            'general_license_code' => 'nullable|in:0,1',
+            'attribute_sets' => ['nullable', 'array'],
+            'attribute_sets.*' => ['required'],
+            'general_license_code' => ['nullable', 'in:0,1'],
         ];
     }
 

@@ -42,12 +42,12 @@ class HandleApplyPromotionsService
             ->reject(fn (DiscountModel $item) => in_array($item->target, [
                 DiscountTargetEnum::SPECIFIC_PRODUCT,
                 DiscountTargetEnum::PRODUCT_VARIANT,
-            ]) || ($item->qty <= 1 && $item->target !== DiscountTargetEnum::MINIMUM_ORDER_AMOUNT));
+            ]) || ($item->product_quantity <= 1 && $item->target !== DiscountTargetEnum::MINIMUM_ORDER_AMOUNT));
 
         foreach ($productItems as $product) {
             $promotion = Discount::promotionForProduct([$product->id]);
 
-            if ($promotion && $promotion->qty > 1 && $availablePromotions->doesntContain($promotion)) {
+            if ($promotion && $promotion->product_quantity > 1 && $availablePromotions->doesntContain($promotion)) {
                 $availablePromotions = $availablePromotions->push($promotion);
             }
         }

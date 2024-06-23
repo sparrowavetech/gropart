@@ -11,9 +11,9 @@ class UpdateCartRequest extends Request
         $rules = [];
         foreach (array_keys($this->input('items', [])) as $rowId) {
             $rules = [
-                'items.' . $rowId . '.rowId' => 'required|min:6',
-                'items.' . $rowId . '.values' => 'required',
-                'items.' . $rowId . '.values.qty' => 'required|integer|min:1',
+                'items.' . $rowId . '.rowId' => ['required', 'min:6'],
+                'items.' . $rowId . '.values' => ['required'],
+                'items.' . $rowId . '.values.qty' => ['required', 'integer', 'min:1'],
             ];
         }
 

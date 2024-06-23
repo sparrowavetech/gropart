@@ -1,10 +1,9 @@
 @extends(EcommerceHelper::viewPath('customers.master'))
 
+@section('title', __('Change avatar'))
+
 @section('content')
     <div class="panel panel-default">
-        <div class="panel-heading">
-            <h2 class="customer-page-title mb-4">{{ __('Change avatar') }}</h2>
-        </div>
         <div class="panel-body">
 
             {!! Form::open(['route' => 'customer.change-avatar', 'files' => true]) !!}

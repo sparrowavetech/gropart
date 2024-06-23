@@ -4,7 +4,12 @@
 @endphp
 
 <div class="bb-shop-sidebar">
-    <form action="{{ route('public.products') }}" method="GET" class="bb-product-form-filter">
+    <form action="{{ URL::current() }}" data-action="route('public.products')" method="GET" class="bb-product-form-filter">
+        <input type="hidden" name="sort-by" value="{{ BaseHelper::stringify(request()->query('sort-by')) }}">
+        <input type="hidden" name="per-page" value="{{ BaseHelper::stringify(request()->query('per-page')) }}">
+        <input type="hidden" name="layout" value="{{ BaseHelper::stringify(request()->query('layout')) }}">
+        <input type="hidden" name="page" value="{{ BaseHelper::stringify(request()->query('page')) }}">
+
         {!! apply_filters('theme_ecommerce_products_filter_before', null, $dataForFilter) !!}
 
         @include(EcommerceHelper::viewPath('includes.filters.price'))

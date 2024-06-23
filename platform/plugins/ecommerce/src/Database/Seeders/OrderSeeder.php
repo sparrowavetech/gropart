@@ -3,6 +3,7 @@
 namespace Botble\Ecommerce\Database\Seeders;
 
 use Botble\Base\Supports\BaseSeeder;
+use Botble\Ecommerce\Enums\OrderHistoryActionEnum;
 use Botble\Ecommerce\Enums\OrderStatusEnum;
 use Botble\Ecommerce\Enums\ShippingCodStatusEnum;
 use Botble\Ecommerce\Enums\ShippingMethodEnum;
@@ -72,7 +73,7 @@ class OrderSeeder extends BaseSeeder
             $customer = $customers->random();
             $address = $customer->addresses->first();
 
-            if (! $address) {
+            if (! $address || $products->isEmpty()) {
                 continue;
             }
 
@@ -148,7 +149,6 @@ class OrderSeeder extends BaseSeeder
                         'tax_amount' => $groupedProduct->tax_amount,
                         'options' => [
                             'sku' => $groupedProduct->sku,
-                            'barcode' => $groupedProduct->barcode,
                             'attributes' => $groupedProduct->is_variation ? $groupedProduct->variation_attributes : '',
                         ],
                         'product_type' => $groupedProduct->product_type,
@@ -170,7 +170,7 @@ class OrderSeeder extends BaseSeeder
                 ]);
 
                 OrderHistory::query()->create([
-                    'action' => 'create_order_from_seeder',
+                    'action' => OrderHistoryActionEnum::CREATE_ORDER_FROM_SEEDER,
                     'description' => __('Order is created from the checkout page'),
                     'order_id' => $order->id,
                     'created_at' => $time,
@@ -178,7 +178,7 @@ class OrderSeeder extends BaseSeeder
                 ]);
 
                 OrderHistory::query()->create([
-                    'action' => 'confirm_order',
+                    'action' => OrderHistoryActionEnum::CONFIRM_ORDER,
                     'description' => trans('plugins/ecommerce::order.order_was_verified_by'),
                     'order_id' => $order->id,
                     'user_id' => 0,
@@ -208,7 +208,7 @@ class OrderSeeder extends BaseSeeder
 
                 if ($paymentStatus == PaymentStatusEnum::COMPLETED) {
                     OrderHistory::query()->create([
-                        'action' => 'confirm_payment',
+                        'action' => OrderHistoryActionEnum::CONFIRM_PAYMENT,
                         'description' => trans('plugins/ecommerce::order.payment_was_confirmed_by', [
                             'money' => format_price($order->amount),
                         ]),
@@ -252,7 +252,7 @@ class OrderSeeder extends BaseSeeder
                     ]);
 
                     OrderHistory::query()->create([
-                        'action' => 'create_shipment',
+                        'action' => OrderHistoryActionEnum::CREATE_SHIPMENT,
                         'description' => __('Created shipment for order'),
                         'order_id' => $order->id,
                         'user_id' => 0,
@@ -325,7 +325,7 @@ class OrderSeeder extends BaseSeeder
                 $order->save();
 
                 OrderHistory::query()->create([
-                    'action' => 'update_status',
+                    'action' => OrderHistoryActionEnum::UPDATE_STATUS,
                     'description' => trans('plugins/ecommerce::shipping.order_confirmed_by'),
                     'order_id' => $order->id,
                     'user_id' => 0,
@@ -337,16 +337,7 @@ class OrderSeeder extends BaseSeeder
 
                     if ($vendorInfo->id) {
                         $fee = $this->calculatorCommissionFeeByProduct($order->products);
-                        //$amount = $order->amount - $fee;
-
-                        $vendorShippingAllow = Store::where('customer_id', $order->store->customer->id)->value('is_manage_shipping');
-
-                        if(setting('marketplace_allow_vendor_manage_shipping') == 1 && $vendorShippingAllow == 1) {
-                            $amount = ($order->amount) - $fee;
-                        } else {
-                            $amount = ($order->amount) - $order->shipping_amount - $fee;
-                        }
-
+                        $amount = $order->amount - $fee;
                         $currentBalance = $customer->balance;
 
                         $amountByCurrency = $amount;
@@ -400,7 +391,7 @@ class OrderSeeder extends BaseSeeder
             $vendorInfo = $vendor->vendorInfo;
             $rand = rand(1, 3);
             for ($i = 0; $i <= $rand; $i++) {
-                $amount = rand(1, (int)($vendorInfo->balance / 3) - 10);
+                $amount = rand(1, (int) ($vendorInfo->balance / 3) - 10);
 
                 if ($amount - $fee > 0) {
                     Withdrawal::query()->create([
@@ -442,20 +433,10 @@ class OrderSeeder extends BaseSeeder
                 'desc'
             )->first();
             $commissionFeePercentage = MarketplaceHelper::getSetting('fee_per_order', 0);
-            $platformFeePercentage = MarketplaceHelper::getSetting('default_platform_fee', 0);
-            $FeeTaxPercentage = MarketplaceHelper::getSetting('default_fee_tax', 0);
-
-            $totalSystemFees = $platformFeePercentage + $commissionFeePercentage;
-
             if (! empty($commissionSetting)) {
-                $totalSystemFees = $commissionSetting->commission_percentage + $platformFeePercentage;
+                $commissionFeePercentage = $commissionSetting->commission_percentage;
             }
-
-            $totalFeeAmount = $orderProduct->price * $totalSystemFees / 100;
-
-            $FeeTax = $totalFeeAmount * ($FeeTaxPercentage / 100);
-
-            $totalFee += $totalFeeAmount + $FeeTax;
+            $totalFee += $orderProduct->price * $commissionFeePercentage / 100;
         }
 
         return $totalFee;
@@ -495,7 +476,7 @@ class OrderSeeder extends BaseSeeder
         $order->save();
 
         OrderHistory::query()->create([
-            'action' => 'update_status',
+            'action' => OrderHistoryActionEnum::UPDATE_STATUS,
             'description' => trans('plugins/ecommerce::shipping.changed_shipping_status', [
                 'status' => ShippingStatusEnum::getLabel($shipmentStatus),
             ]),

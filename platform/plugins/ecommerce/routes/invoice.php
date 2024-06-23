@@ -3,9 +3,9 @@
 use Botble\Base\Facades\AdminHelper;
 use Illuminate\Support\Facades\Route;
 
-Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers'], function () {
-    AdminHelper::registerRoutes(function () {
-        Route::group(['prefix' => 'ecommerce/invoices', 'as' => 'ecommerce.invoice.'], function () {
+AdminHelper::registerRoutes(function () {
+    Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'prefix' => 'ecommerce'], function () {
+        Route::group(['prefix' => 'invoices', 'as' => 'ecommerce.invoice.'], function () {
             Route::resource('', 'InvoiceController')
                 ->parameters(['' => 'invoice'])
                 ->except(['create', 'store', 'update']);

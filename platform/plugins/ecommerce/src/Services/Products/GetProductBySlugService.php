@@ -8,7 +8,7 @@ use Botble\Slug\Facades\SlugHelper;
 
 class GetProductBySlugService
 {
-    public function handle(string $slug, array $params = []): Product|null
+    public function handle(string $slug, array $params = []): ?Product
     {
         $slug = SlugHelper::getSlug($slug, model: Product::class);
 

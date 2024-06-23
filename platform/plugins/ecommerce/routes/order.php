@@ -1,11 +1,12 @@
 <?php
 
 use Botble\Base\Facades\AdminHelper;
+use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Theme\Facades\Theme;
 use Illuminate\Support\Facades\Route;
 
-Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers'], function () {
-    AdminHelper::registerRoutes(function () {
+AdminHelper::registerRoutes(function () {
+    Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'prefix' => 'ecommerce'], function () {
         Route::group(['prefix' => 'orders', 'as' => 'orders.'], function () {
             Route::resource('', 'OrderController')->parameters(['' => 'order']);
 
@@ -145,38 +146,43 @@ Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers'], function () {
         });
 
         Route::group(['prefix' => 'order-returns', 'as' => 'order_returns.'], function () {
-            Route::resource('', 'OrderReturnController')->parameters(['' => 'order_return'])->except(['create', 'store']);
+            Route::resource('', 'OrderReturnController')->parameters(['' => 'order_return'])->except(
+                ['create', 'store']
+            );
         });
     });
 });
 
-Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers\Fronts'], function () {
-    Theme::registerRoutes(function () {
-        Route::group(['prefix' => 'checkout/{token}', 'as' => 'public.checkout.'], function () {
-            Route::get('/', [
-                'as' => 'information',
-                'uses' => 'PublicCheckoutController@getCheckout',
-            ]);
+Theme::registerRoutes(function () {
+    Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers\Fronts'], function () {
+        Route::group(
+            ['prefix' => sprintf('%s/{token}', EcommerceHelper::getPageSlug('checkout')), 'as' => 'public.checkout.'],
+            function () {
+                Route::get('/', [
+                    'as' => 'information',
+                    'uses' => 'PublicCheckoutController@getCheckout',
+                ]);
 
-            Route::post('information', [
-                'as' => 'save-information',
-                'uses' => 'PublicCheckoutController@postSaveInformation',
-            ]);
+                Route::post('information', [
+                    'as' => 'save-information',
+                    'uses' => 'PublicCheckoutController@postSaveInformation',
+                ]);
 
-            Route::post('process', [
-                'as' => 'process',
-                'uses' => 'PublicCheckoutController@postCheckout',
-            ]);
+                Route::post('process', [
+                    'as' => 'process',
+                    'uses' => 'PublicCheckoutController@postCheckout',
+                ]);
 
-            Route::get('success', [
-                'as' => 'success',
-                'uses' => 'PublicCheckoutController@getCheckoutSuccess',
-            ]);
+                Route::get('success', [
+                    'as' => 'success',
+                    'uses' => 'PublicCheckoutController@getCheckoutSuccess',
+                ]);
 
-            Route::get('recover', [
-                'as' => 'recover',
-                'uses' => 'PublicCheckoutController@getCheckoutRecover',
-            ]);
-        });
+                Route::get('recover', [
+                    'as' => 'recover',
+                    'uses' => 'PublicCheckoutController@getCheckoutRecover',
+                ]);
+            }
+        );
     });
 });

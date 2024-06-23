@@ -32,14 +32,14 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
     }
 
     function subMenuToggle() {
-        $('.menu-item-has-children > a > .sub-toggle').on('click', function (e) {
+        $(document).on('click', '.menu-item-has-children > a > .sub-toggle', function (e) {
             e.preventDefault()
             const $this = $(this)
             const $parent = $this.closest('.menu-item-has-children')
             $parent.toggleClass('active')
         })
 
-        $('.mega-menu__column > a > .sub-toggle').on('click', function (e) {
+        $(document).on('click', '.mega-menu__column > a > .sub-toggle', function (e) {
             e.preventDefault()
             const $this = $(this)
             const $parent = $this.closest('.mega-menu__column')
@@ -90,6 +90,10 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
         basicEvents()
         subMenuToggle()
         siteToggleAction()
+
+        window.addEventListener('ecommerce.categories-dropdown.loaded', function () {
+            subMenuToggle()
+        })
     })
 
     MartApp.init = function () {
@@ -115,7 +119,6 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
         this.filterSlider()
         this.toolbarOrderingProducts()
         this.productsFilter()
-        this.searchProducts()
         this.ajaxUpdateCart()
         this.removeCartItem()
         this.removeWishlistItem()
@@ -175,9 +178,11 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
                 success: (res) => {
                     if (!res.error) {
                         $modal.find('.product-modal-content').html(res.data)
-                        MartApp.productGallery(true, $modal.find('.product-modal-content .product-gallery'))
-                        MartApp.lightBox()
-                        MartApp.lazyLoad($modal[0])
+                        setTimeout(function() {
+                            MartApp.productGallery(true, $modal.find('.product-modal-content .product-gallery'))
+                            MartApp.lightBox()
+                            MartApp.lazyLoad($modal[0])
+                        }, 100)
                     }
                 },
                 error: () => {},
@@ -520,13 +525,10 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
                         let url = window.location.href
                         url = url.substring(0, url.indexOf('?'))
 
-                        $('.cart-page-content').load(
-                            url + '?applied_coupon=1 .cart-page-content > *',
-                            function () {
-                                _self.prop('disabled', false).removeClass('loading')
-                                MartApp.showSuccess(res.message)
-                            }
-                        )
+                        $('.cart-page-content').load(url + '?applied_coupon=1 .cart-page-content > *', function () {
+                            _self.prop('disabled', false).removeClass('loading')
+                            MartApp.showSuccess(res.message)
+                        })
                     } else {
                         MartApp.showError(res.message)
                     }
@@ -668,7 +670,7 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
                     MartApp.$widgetProductCategories.find('.show-all-product-categories').addClass('d-none')
                 }
                 MartApp.$widgetProductCategories
-                    .find('.widget-layered-nav-list li.category-filter')
+                    .find('.widget-layered-nav-list li.category-filter:not(.opened)')
                     .removeClass('opened')
 
                 $categories.map(function (e, i) {
@@ -901,73 +903,6 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
         return params
     }
 
-    MartApp.searchProducts = function () {
-        $('body').on('click', function (e) {
-            if (!$(e.target).closest('.form--quick-search').length) {
-                $('.panel--search-result').removeClass('active')
-            }
-        })
-
-        let currentRequest = null
-        $('.form--quick-search .input-search-product').on('keyup', function () {
-            const $form = $(this).closest('form')
-            ajaxSearchProduct($form)
-        })
-
-        $('.form--quick-search .product-category-select').on('change', function () {
-            const $form = $(this).closest('form')
-            ajaxSearchProduct($form)
-        })
-
-        $('.form--quick-search').on('click', '.loadmore', function (e) {
-            e.preventDefault()
-            const $form = $(this).closest('form')
-            $(this).addClass('loading')
-            ajaxSearchProduct($form, $(this).attr('href'))
-        })
-
-        function ajaxSearchProduct($form, url = null) {
-            const $panel = $form.find('.panel--search-result')
-            const k = $form.find('.input-search-product').val()
-            if (!k) {
-                $panel.html('').removeClass('active')
-                return
-            }
-            const $button = $form.find('button[type=submit]')
-
-            currentRequest = $.ajax({
-                type: 'GET',
-                url: url || $form.data('ajax-url'),
-                data: url ? [] : $form.serialize(),
-                beforeSend: function () {
-                    if (currentRequest != null) {
-                        currentRequest.abort()
-                    }
-
-                    $button.addClass('loading')
-                },
-                success: (res) => {
-                    if (!res.error) {
-                        if (url) {
-                            const $content = $('<div>' + res.data + '</div>')
-                            $panel.find('.panel__content').find('.loadmore-container').remove()
-                            $panel.find('.panel__content').append($content.find('.panel__content').contents())
-                        } else {
-                            $panel.html(res.data).addClass('active')
-                        }
-                    } else {
-                        $panel.html('').removeClass('active')
-                    }
-
-                    $button.removeClass('loading')
-                },
-                error: () => {
-                    $button.removeClass('loading')
-                },
-            })
-        }
-    }
-
     MartApp.processUpdateCart = function ($this) {
         const $form = $('.cart-page-content').find('.form--shopping-cart')
 
@@ -1165,7 +1100,7 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
                 let nodes = [$wrapper.find('.slider__min'), $wrapper.find('.slider__max')]
 
                 element.noUiSlider.on('update', function (values, handle) {
-                    nodes[handle].html(MartApp.numberFormat(values[handle]))
+                    nodes[handle].html(EcommerceApp.formatPrice(Math.round(values[handle])))
                 })
 
                 element.noUiSlider.on('change', function (values, handle) {
@@ -1175,29 +1110,6 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
                         .trigger('change')
                 })
             })
-    }
-
-    MartApp.numberFormat = function (number, decimals, dec_point, thousands_sep) {
-        let n = !isFinite(+number) ? 0 : +number,
-            prec = !isFinite(+decimals) ? 0 : Math.abs(decimals),
-            sep = typeof thousands_sep === 'undefined' ? ',' : thousands_sep,
-            dec = typeof dec_point === 'undefined' ? '.' : dec_point,
-            toFixedFix = function (n, prec) {
-                // Fix for IE parseFloat(0.55).toFixed(0) = 0;
-                let k = Math.pow(10, prec)
-                return Math.round(n * k) / k
-            },
-            s = (prec ? toFixedFix(n, prec) : Math.round(n)).toString().split('.')
-
-        if (s[0].length > 3) {
-            s[0] = s[0].replace(/\B(?=(?:\d{3})+(?!\d))/g, sep)
-        }
-
-        if ((s[1] || '').length < prec) {
-            s[1] = s[1] || ''
-            s[1] += new Array(prec - s[1].length + 1).join('0')
-        }
-        return s.join(dec)
     }
 
     MartApp.customerDashboard = function () {
@@ -1390,7 +1302,7 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
     }
 
     MartApp.showError = function (message) {
-        Theme.showError( message)
+        Theme.showError(message)
     }
 
     MartApp.showSuccess = function (message) {
@@ -1720,23 +1632,23 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
 
             $('#store-short-description').fadeOut()
 
-            $(this).hide()
+            $(this).addClass('d-none')
 
-            $('#store-content').slideDown(500)
+            $('#store-content').removeClass('d-none').slideDown(500)
 
-            $('.toggle-show-less').show()
+            $('.toggle-show-less').removeClass('d-none')
         })
 
         $(document).on('click', '.toggle-show-less', function (event) {
             event.preventDefault()
 
-            $(this).hide()
+            $(this).addClass('d-none')
 
-            $('#store-content').slideUp(500)
+            $('#store-content').slideUp(500).addClass('d-none')
 
             $('#store-short-description').fadeIn()
 
-            $('.toggle-show-more').show()
+            $('.toggle-show-more').removeClass('d-none')
         })
 
         let collapseBreadcrumb = function () {
@@ -1777,192 +1689,6 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
                 },
                 0
             )
-        })
-
-        /* --- SwiperJS --- */
-        $('.swiper-group-6').each(function () {
-            const $this = $(this);
-            const $box = $(this).closest('.box-swiper');
-
-            new Swiper($this[0], {
-                spaceBetween: 30,
-                slidesPerView: 6,
-                slidesPerGroup: 2,
-                loop: true,
-                navigation: {
-                    nextEl: $box.find('.swiper-button-next')[0],
-                    prevEl: $box.find('.swiper-button-prev')[0],
-                },
-                autoplay: {
-                    delay: 10000,
-                },
-                breakpoints: {
-                    1199: {
-                        slidesPerView: 6,
-                    },
-                    800: {
-                        slidesPerView: 4,
-                    },
-                    400: {
-                        slidesPerView: 2,
-                    },
-                    350: {
-                        slidesPerView: 2,
-                        slidesPerGroup: 1,
-                        spaceBetween: 15,
-                    },
-                },
-            });
-        })
-
-        $('.swiper-group-4').each(function () {
-            const $this = $(this);
-            const $box = $(this).closest('.box-swiper');
-
-            new Swiper($this[0], {
-                spaceBetween: 20,
-                slidesPerView: 4,
-                slidesPerGroup: 1,
-                loop: true,
-                navigation: {
-                    nextEl: $box.find('.swiper-button-next')[0],
-                    prevEl: $box.find('.swiper-button-prev')[0],
-                },
-                autoplay: {
-                    delay: 10000,
-                },
-                breakpoints: {
-                    1299: {
-                        slidesPerView: 4,
-                    },
-                    1150: {
-                        slidesPerView: 4,
-                    },
-                    750: {
-                        slidesPerView: 2,
-                    },
-                    600: {
-                        slidesPerView: 1,
-                    },
-                    550: {
-                        slidesPerView: 1,
-                    },
-                    300: {
-                        slidesPerView: 1,
-                    },
-                    200: {
-                        slidesPerView: 1,
-                    },
-                },
-            });
-        })
-
-        $('.swiper-group-3').each(function () {
-            const $this = $(this);
-            const $box = $(this).closest('.box-swiper');
-
-            new Swiper($this[0], {
-                spaceBetween: 30,
-                slidesPerView: 3,
-                slidesPerGroup: 1,
-                loop: true,
-                navigation: {
-                    nextEl: $box.find('.swiper-button-next')[0],
-                    prevEl: $box.find('.swiper-button-prev')[0],
-                },
-                pagination: {
-                    el: '.swiper-pagination',
-                    type: 'bullets',
-                    bulletActiveClass: 'swiper-pagination-customs-active',
-                    bulletClass: 'swiper-pagination-customs',
-                    clickable: true,
-                },
-                autoplay: {
-                    delay: 10000,
-                },
-                breakpoints: {
-                    1199: {
-                        slidesPerView: 3,
-                    },
-                    800: {
-                        slidesPerView: 2,
-                    },
-                    600: {
-                        slidesPerView: 1,
-                    },
-                    350: {
-                        slidesPerView: 1,
-                    },
-                    310: {
-                        slidesPerView: 1,
-                    },
-                    200: {
-                        slidesPerView: 1,
-                    },
-                },
-            });
-        })
-
-        $('.swiper-group-2').each(function () {
-            const $this = $(this);
-            const $box = $(this).closest('.box-swiper');
-
-            new Swiper($this[0], {
-                spaceBetween: 30,
-                slidesPerView: 2,
-                slidesPerGroup: 1,
-                loop: true,
-                navigation: {
-                    nextEl: $box.find('.swiper-button-next')[0],
-                    prevEl: $box.find('.swiper-button-prev')[0],
-                },
-                pagination: {
-                    el: '.swiper-pagination',
-                    type: 'bullets',
-                    bulletActiveClass: 'swiper-pagination-customs-active',
-                    bulletClass: 'swiper-pagination-customs',
-                    clickable: true,
-                },
-                autoplay: {
-                    delay: 10000,
-                },
-                breakpoints: {
-                    1199: {
-                        slidesPerView: 2,
-                    },
-                    800: {
-                        slidesPerView: 1,
-                    },
-                    600: {
-                        slidesPerView: 1,
-                    },
-                    400: {
-                        slidesPerView: 1,
-                    },
-                    350: {
-                        slidesPerView: 1,
-                    },
-                },
-            });
-        })
-
-        $('.swiper-group-1').each(function () {
-            const $this = $(this);
-            const $box = $(this).closest('.box-swiper');
-
-            new Swiper($this[0], {
-                spaceBetween: 0,
-                slidesPerView: 1,
-                slidesPerGroup: 1,
-                loop: true,
-                navigation: {
-                    nextEl: $box.find('.swiper-button-next')[0],
-                    prevEl: $box.find('.swiper-button-prev')[0],
-                },
-                autoplay: {
-                    delay: 10000,
-                },
-            });
         })
 
         $(document).on('click', '#sticky-add-to-cart .add-to-cart-button', (e) => {

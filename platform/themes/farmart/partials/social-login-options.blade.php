@@ -21,7 +21,7 @@
                             </span>
                         </div>
                         <div class="sl-button-label-container">
-                            <span>{!! BaseHelper::clean(__('Continue with <strong>:Provider</strong>', ['provider' => $item])) !!}</span>
+                            <span>{!! BaseHelper::clean(__('Continue with <strong>:provider</strong>', ['provider' => $item])) !!}</span>
                         </div>
                     </a>
                 @endif

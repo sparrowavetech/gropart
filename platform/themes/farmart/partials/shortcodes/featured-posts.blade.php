@@ -34,16 +34,16 @@
 @endphp
 
 <div
-    class="widget-blog py-3 lazyload"
+    class="widget-blog py-5 lazyload"
     @if ($shortcode->bg) data-bg="{{ RvMedia::getImageUrl($shortcode->bg) }}" @endif
 >
     <div class="container-xxxl">
         <div class="row">
-            <div class="@if ($shortcode->app_enabled) col-lg-8 @else col-12 @endif py-1 py-lg-0">
+            <div class="@if ($shortcode->app_enabled) col-lg-8 @else col-12 @endif py-4 py-lg-0">
                 <div class="row justify-content-between align-items-center widget-header ms-0 me-0">
-                    <h2 class="col-auto mb-0 py-2">{{ $shortcode->title }}</h2>
+                    <h2 class="col-auto mb-0 py-2 ps-0">{{ $shortcode->title }}</h2>
                     <a
-                        class="col-auto"
+                        class="col-auto pe-0"
                         href="{{ get_blog_page_url() }}"
                     >
                         <span class="link-text">{{ __('All Articles') }}
@@ -85,7 +85,7 @@
                                     <div class="col-md-8 post-item__content">
                                         <div>
                                             <div class="entry-meta">
-                                                @if ($post->author)
+                                                @if ($post->author && theme_option('blog_show_author_name', 'yes') == 'yes')
                                                     <div class="entry-meta-author">
                                                         <span>{{ __('By') }}</span>
                                                         <strong>{{ $post->author->name }}</strong>
@@ -93,7 +93,7 @@
                                                 @endif
                                                 @if ($post->categories->isNotEmpty())
                                                     <div class="entry-meta-categories">
-                                                        <span>{{ __('in') }}</span>
+                                                        <span>{{ ($post->author && theme_option('blog_show_author_name', 'yes') == 'yes') ? __('in') : ucfirst(__('in')) }}</span>
                                                         <a
                                                             href="{{ $post->firstCategory->url }}">{{ $post->firstCategory->name }}</a>
                                                     </div>

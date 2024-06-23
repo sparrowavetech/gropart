@@ -1,5 +1,5 @@
 @php
-    $groupedCategories = $categories->groupBy('parent_id');
+    $groupedCategories = ProductCategoryHelper::getProductCategoriesWithUrl()->groupBy('parent_id');
 
     $currentCategories = $groupedCategories->get(0);
 @endphp

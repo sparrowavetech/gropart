@@ -59,7 +59,7 @@ class TrackingFilter implements TrackingFilterInterface
         return false;
     }
 
-    protected function disabledLandingPages(string|null $landingPage = null): bool|array
+    protected function disabledLandingPages(?string $landingPage = null): bool|array
     {
         $blacklist = [];
 

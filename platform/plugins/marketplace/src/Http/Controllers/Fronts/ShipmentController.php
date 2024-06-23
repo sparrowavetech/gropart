@@ -4,6 +4,7 @@ namespace Botble\Marketplace\Http\Controllers\Fronts;
 
 use Botble\Base\Facades\Assets;
 use Botble\Base\Http\Controllers\BaseController;
+use Botble\Ecommerce\Enums\OrderHistoryActionEnum;
 use Botble\Ecommerce\Enums\ShippingCodStatusEnum;
 use Botble\Ecommerce\Enums\ShippingStatusEnum;
 use Botble\Ecommerce\Events\ShippingStatusChanged;
@@ -90,7 +91,7 @@ class ShipmentController extends BaseController
 
             case ShippingStatusEnum::CANCELED:
                 OrderHistory::query()->create([
-                    'action' => 'cancel_shipment',
+                    'action' => OrderHistoryActionEnum::CANCEL_SHIPMENT,
                     'description' => trans('plugins/ecommerce::shipping.shipping_canceled_by'),
                     'order_id' => $shipment->order_id,
                     'user_id' => 0,

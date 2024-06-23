@@ -55,7 +55,7 @@ class FlashSale extends BaseModel
 
     protected function saleCountLeftLabel(): Attribute
     {
-        return Attribute::get(function (): string|null {
+        return Attribute::get(function (): ?string {
             if (! $this->pivot) {
                 return null;
             }

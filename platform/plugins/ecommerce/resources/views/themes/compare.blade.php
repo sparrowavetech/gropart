@@ -1,143 +1,120 @@
-<section class="mt-60 mb-60">
+<section class="compare-area pt-50 pb-50">
     <div class="container">
-        <div class="row">
-            <div class="col-12">
-                @if ($products->count())
-                    <div class="table-responsive table__compare">
-                        <table class="table text-center">
-                            <tbody>
-                                <tr class="pr_image">
-                                    <td class="text-muted font-md fw-600">{{ __('Preview') }}</td>
-                                    @foreach ($products as $product)
-                                        <td class="row_img">
-                                            <a href="{{ $product->original_product->url }}"><img
-                                                    src="{{ RvMedia::getImageUrl($product->image, 'thumb', false, RvMedia::getDefaultImage()) }}"
-                                                    alt="{{ $product->name }}"
-                                                ></a>
-                                        </td>
-                                    @endforeach
-                                </tr>
-                                <tr class="pr_title">
-                                    <td class="text-muted font-md fw-600">{{ __('Name') }}</td>
+        @if ($products->isNotEmpty())
+            <div class="compare-table table-responsive text-center">
+                <table class="table table-bordered">
+                    <tbody>
+                    <tr>
+                        <th>{{ __('Product') }}</th>
+                        @foreach ($products as $product)
+                            <td>
+                                <div class="compare-thumb">
+                                    {{ RvMedia::image($product->image, $product->name, 'thumb') }}
+                                    <h4 class="compare-product-title">
+                                        <a href="{{ $product->url }}">{{ $product->name }}</a>
+                                    </h4>
 
-                                    @foreach ($products as $product)
-                                        <td class="product_name">
-                                            <h5>
-                                                <a href="{{ $product->original_product->url }}">{{ $product->name }}</a>
-                                            </h5>
+                                    <span @class(['text-danger' => $product->isOutOfStock(), 'text-success' => ! $product->isOutOfStock()])>
+                                        @if ($product->isOutOfStock())
+                                            ({{ __('Out of stock') }})
+                                        @else
+                                            ({{ __('In stock') }})
+                                        @endif
+                                    </span>
+                                </div>
+                            </td>
+                        @endforeach
+                    </tr>
+                    <tr>
+                        <th>{{ __('Description') }}</th>
+                        @foreach ($products as $product)
+                            <td>
+                                <div class="compare-desc">
+                                    {!! BaseHelper::clean($product->description) !!}
+                                </div>
+                            </td>
+                        @endforeach
+                    </tr>
+                    <tr>
+                        <th>{{ __('Price') }}</th>
+                        @foreach ($products as $product)
+                            <td>
+                                @include(EcommerceHelper::viewPath('includes.product-price'), [
+                                    'priceWrapperClassName' => 'compare-price',
+                                    'priceClassName' => '',
+                                    'priceOriginalWrapperClassName' => '',
+                                    'priceOriginalClassName' => 'old-price',
+                                ])
+                            </td>
+                        @endforeach
+                    </tr>
+                    <tr>
+                        <th>{{ __('SKU') }}</th>
+                        @foreach ($products as $product)
+                            <td>{{ $product->sku ? '#' . $product->sku : '' }}</td>
+                        @endforeach
+                    </tr>
+                    @foreach ($attributeSets as $attributeSet)
+                        @continue(! $attributeSet->is_comparable)
 
-                                            @if (is_plugin_active('marketplace') && $product->original_product->store->id)
-                                                <p class="d-block mb-0">
-                                                    <small>
-                                                        <span>{{ __('Sold by') }}: </span>
-                                                        <a href="{{ $product->original_product->store->url }}">{{ $product->original_product->store->name }}</a>
-                                                    </small>
-                                                </p>
-                                            @endif
-                                        </td>
-                                    @endforeach
-                                </tr>
-                                <tr class="pr_price">
-                                    <td class="text-muted font-md fw-600">{{ __('Price') }}</td>
+                        <tr>
+                            <th>{{ $attributeSet->title }}</th>
 
-                                    @foreach ($products as $product)
-                                        <td class="product_price">
-                                            <span
-                                                class="price">{{ format_price($product->front_sale_price_with_taxes) }}</span>
-                                            @if ($product->front_sale_price !== $product->price)
-                                                <del>{{ format_price($product->price_with_taxes) }} </del>
-                                                <small>({{ get_sale_percentage($product->price, $product->front_sale_price) }})</small>
-                                            @endif
-                                        </td>
-                                    @endforeach
-                                </tr>
-                                @if (EcommerceHelper::isReviewEnabled())
-                                    <tr class="pr_rating">
-                                        <td class="text-muted font-md fw-600">{{ __('Rating') }}</td>
-                                        @foreach ($products as $product)
-                                            <td>
-                                                <div class="rating_wrap">
-                                                    <div class="rating">
-                                                        <div
-                                                            class="product_rate"
-                                                            style="width: {{ $product->reviews_avg * 20 }}%"
-                                                        ></div>
-                                                    </div>
-                                                    <span class="rating_num">({{ $product->reviews_count }})</span>
-                                                </div>
-                                            </td>
-                                        @endforeach
-                                    </tr>
-                                @endif
-
-                                <tr class="description">
-                                    <td class="text-muted font-md fw-600">{{ __('Description') }}</td>
-                                    @foreach ($products as $product)
-                                        <td class="row_text font-xs">
-                                            <p>
-                                                {!! BaseHelper::clean($product->description) !!}
-                                            </p>
-                                        </td>
-                                    @endforeach
-                                </tr>
-
-                                @foreach ($attributeSets as $attributeSet)
-                                    @if ($attributeSet->is_comparable)
-                                        <tr>
-                                            <td class="text-muted font-md fw-600">
-                                                {{ $attributeSet->title }}
-                                            </td>
-
-                                            @foreach ($products as $product)
-                                                <td>
-                                                    {{ render_product_attributes_view_only($product, $attributeSet) }}
-                                                </td>
-                                            @endforeach
-                                        </tr>
-                                    @endif
-                                @endforeach
-
-                                @if (EcommerceHelper::isCartEnabled())
-                                    <tr class="pr_add_to_cart">
-                                        <td class="text-muted font-md fw-600">{{ __('Buy now') }}</td>
-                                        @foreach ($products as $product)
-                                            <td class="row_btn">
-                                                <a
-                                                    class="btn btn-rounded btn-sm add-to-cart-button"
-                                                    data-id="{{ $product->id }}"
-                                                    data-url="{{ route('public.cart.add-to-cart') }}"
-                                                    href="#"
-                                                >
-                                                    <x-core::icon name="ti ti-shopping-cart" class="me-1" /> {{ __('Add To Cart') }}
-                                                </a>
-                                            </td>
-                                        @endforeach
-                                    </tr>
-                                @endif
-
-                                <tr class="pr_remove text-muted">
-                                    <td class="text-muted font-md fw-600">&nbsp;</td>
-                                    @foreach ($products as $product)
-                                        <td class="row_remove">
-                                            <a
-                                                class="js-remove-from-compare-button"
-                                                data-url="{{ route('public.compare.remove', $product->id) }}"
-                                                href="#"
-                                            >
-                                                <x-core::icon name="ti ti-trash" class="me-1" />
-                                                <span>{{ __('Remove') }}</span>
-                                            </a>
-                                        </td>
-                                    @endforeach
-                                </tr>
-
-                            </tbody>
-                        </table>
-                    </div>
+                            @foreach ($products as $product)
+                                <td>
+                                    {{ render_product_attributes_view_only($product, $attributeSet) }}
+                                </td>
+                            @endforeach
+                        </tr>
+                    @endforeach
+                    <tr>
+                        <th>{{ __('Add to cart') }}</th>
+                        @foreach ($products as $product)
+                            <td>
+                                <div class="compare-add-to-cart d-flex justify-content-center">
+                                    <button
+                                        title="{{ __('Add to Cart') }}"
+                                        type="submit"
+                                        class="btn btn-primary bb-btn-product-actions-icon"
+                                        data-bb-toggle="add-to-cart"
+                                        data-url="{{ route('public.cart.add-to-cart') }}"
+                                        data-id="{{ $product->original_product->id }}"
+                                        {!! EcommerceHelper::jsAttributes('add-to-cart', $product) !!}
+                                    >
+                                        <x-core::icon name="ti ti-shopping-cart"/>
+                                        {{ __('Add to Cart') }}
+                                    </button>
+                                </div>
+                            </td>
+                        @endforeach
+                    </tr>
+                    <tr>
+                        <th>{{ __('Rating') }}</th>
+                        @foreach ($products as $product)
+                            <td>
+                                <div class="compare-rating d-flex justify-content-center">
+                                    @include(EcommerceHelper::viewPath('includes.rating-star'), ['avg' => $product->reviews_avg, 'size' => 80])
+                                </div>
+                            </td>
+                        @endforeach
+                    </tr>
+                    <tr>
+                        <th>{{ __('Remove') }}</th>
+                        @foreach ($products as $product)
+                            <td>
+                                <div class="compare-remove">
+                                    <button class="btn btn-icon" data-bb-toggle="remove-from-compare" data-url="{{ route('public.compare.remove', $product->id) }}">
+                                        <x-core::icon name="ti ti-trash" />
+                                    </button>
+                                </div>
+                            </td>
+                        @endforeach
+                    </tr>
+                    </tbody>
+                </table>
             </div>
         @else
-            <p class="text-center">{{ __('No products in compare list!') }}</p>
-            @endif
-        </div>
+            @include(EcommerceHelper::viewPath('includes.empty-state'), ['title' => __('Your compare list is empty')])
+        @endif
     </div>
 </section>

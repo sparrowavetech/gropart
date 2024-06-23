@@ -4,10 +4,10 @@ namespace Botble\Ecommerce\Forms\Fronts\Auth;
 
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Forms\Fields\HtmlField;
-use Botble\Base\Forms\FormAbstract;
 use Botble\Theme\Facades\Theme;
+use Botble\Theme\FormFront;
 
-abstract class AuthForm extends FormAbstract
+abstract class AuthForm extends FormFront
 {
     public function setup(): void
     {
@@ -60,5 +60,17 @@ abstract class AuthForm extends FormAbstract
     public function description(string $description): static
     {
         return $this->setFormOption('description', $description);
+    }
+
+    public function ignoreBaseTemplate(): static
+    {
+        $this
+            ->banner('')
+            ->icon('')
+            ->heading('')
+            ->description('')
+            ->contentOnly();
+
+        return $this;
     }
 }

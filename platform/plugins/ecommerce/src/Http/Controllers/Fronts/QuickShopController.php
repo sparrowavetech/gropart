@@ -7,6 +7,7 @@ use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Services\Products\GetProductBySlugService;
 use Botble\Ecommerce\Services\Products\GetProductWithCrossSalesBySlugService;
 use Botble\Ecommerce\Services\Products\ProductCrossSalePriceService;
+use Botble\Theme\Facades\Theme;
 use Illuminate\Http\Request;
 
 class QuickShopController extends BaseController
@@ -31,7 +32,7 @@ class QuickShopController extends BaseController
             ],
         ]);
 
-        abort_unless($product->exists, 404);
+        abort_unless($product && $product->exists, 404);
 
         $referenceProduct = null;
 
@@ -44,13 +45,35 @@ class QuickShopController extends BaseController
 
         [$productImages, $productVariation, $selectedAttrs] = EcommerceHelper::getProductVariationInfo($product);
 
+        $data = apply_filters('ecommerce_quick_shop_data', [
+            'product' => $product,
+            'productImages' => $productImages,
+            'productVariation' => $productVariation,
+            'selectedAttrs' => $selectedAttrs,
+            'referenceProduct' => $referenceProduct,
+        ]);
+
+        $view = apply_filters('ecommerce_quick_shop_template', $this->getQuickShopTemplate());
+
         return $this
             ->httpResponse()
-            ->setData(
-                view(
-                    EcommerceHelper::viewPath('includes.quick-shop'),
-                    compact('product', 'productImages', 'productVariation', 'selectedAttrs', 'referenceProduct')
-                )->render()
-            );
+            ->setData(view($view, $data)->render());
+    }
+
+    protected function getQuickShopTemplate(): string
+    {
+        if (view()->exists($view = Theme::getThemeNamespace('views.ecommerce.quick-shop'))) {
+            return $view;
+        }
+
+        if (view()->exists($view = Theme::getThemeNamespace('partials.ecommerce.quick-shop'))) {
+            return $view;
+        }
+
+        if (view()->exists($view = Theme::getThemeNamespace('partials.quick-shop'))) {
+            return $view;
+        }
+
+        return EcommerceHelper::viewPath('includes.quick-shop');
     }
 }

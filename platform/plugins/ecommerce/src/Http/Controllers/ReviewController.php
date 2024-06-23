@@ -43,19 +43,46 @@ class ReviewController extends BaseController
 
     public function store(ReviewRequest $request)
     {
+        if (
+            ! ($request->filled('customer_id') || $request->filled('customer_name') || $request->filled('customer_email'))
+            && ! $request->filled('customer_id')
+        ) {
+            return $this
+                ->httpResponse()
+                ->setError()
+                ->withInput()
+                ->setMessage(trans('plugins/ecommerce::review.choose_customer_help'));
+        }
+
+        if ($request->filled('customer_id')) {
+            $request->merge([
+                'customer_name' => null,
+                'customer_email' => null,
+            ]);
+        } else {
+            $request->merge([
+                'customer_id' => null,
+            ]);
+        }
+
         $review = Review::query()
-            ->where('customer_id', $request->input('customer_id'))
             ->where('product_id', $request->input('product_id'))
+            ->where(function (Builder $query) use ($request) {
+                $query
+                    ->whereNotNull('customer_id')
+                    ->where('customer_id', $request->input('customer_id'));
+            })
             ->exists();
 
         if ($review) {
             return $this
                 ->httpResponse()
                 ->setError()
+                ->withInput()
                 ->setMessage(trans('plugins/ecommerce::review.review_already_exists'));
         }
 
-        $review = Review::query()->create($request->validated());
+        $review = Review::query()->forceCreate($request->validated());
 
         event(new CreatedContentEvent('review', $request, $review));
 
@@ -79,7 +106,7 @@ class ReviewController extends BaseController
                 ->withAvg('reviews', 'star'),
         ]);
 
-        $this->pageTitle(trans('plugins/ecommerce::review.view', ['name' => $review->user->name]));
+        $this->pageTitle(trans('plugins/ecommerce::review.view', ['name' => $review->user->name ?: $review->customer_name]));
 
         return view('plugins/ecommerce::reviews.show', compact('review'));
     }
@@ -93,9 +120,11 @@ class ReviewController extends BaseController
     {
         $customers = Customer::query()
             ->where(function (Builder $query) use ($request) {
+                $keyword = "%{$request->input('search')}%";
+
                 $query
-                    ->where('name', 'LIKE', "%{$request->input('search')}%")
-                    ->orWhere('email', 'LIKE', "%{$request->input('search')}%");
+                    ->where('name', 'LIKE', $keyword)
+                    ->orWhere('email', 'LIKE', $keyword);
             })
             ->select('id', 'name')
             ->paginate();

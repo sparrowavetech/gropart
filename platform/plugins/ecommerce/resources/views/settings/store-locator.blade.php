@@ -105,7 +105,9 @@
         :title="trans('plugins/ecommerce::setting.store_locator.form.add_location')"
         size="md"
     >
-        @include('plugins/ecommerce::settings.store-locator-item', ['locator' => null])
+
+        <x-core::loading />
+
         <x-slot:footer>
             <x-core::button
                 data-bs-dismiss="modal"
@@ -128,7 +130,8 @@
         :title="trans('plugins/ecommerce::setting.store_locator.form.edit_location')"
         size="md"
     >
-        @include('plugins/ecommerce::settings.store-locator-item', ['locator' => null])
+        <x-core::loading />
+
         <x-slot:footer>
             <x-core::button
                 data-bs-dismiss="modal"
@@ -165,7 +168,7 @@
                 color="danger"
                 id="delete-store-locator-button"
             >
-                {{ trans('plugins/ecommerce::ecommerce.accept') }}
+                {{ trans('core/base::tables.delete') }}
             </x-core::button>
         </x-slot:footer>
     </x-core::modal>
@@ -191,7 +194,7 @@
                     color="primary"
                     id="change-primary-store-locator-button"
                 >
-                    {{ trans('plugins/ecommerce::ecommerce.accept') }}
+                    {{ trans('plugins/ecommerce::ecommerce.update') }}
                 </x-core::button>
             </x-slot:footer>
         </x-core::modal>

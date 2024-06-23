@@ -40,13 +40,13 @@ class ReportGeneralHtml extends Html
         $count['revenues'] = [
             [
                 'label' => PaymentStatusEnum::COMPLETED()->label(),
-                'value' => $revenueCompleted ? (int)$revenueCompleted->revenue : 0,
+                'value' => $revenueCompleted ? (int) $revenueCompleted->revenue : 0,
                 'status' => true,
                 'color' => '#80bc00',
             ],
             [
                 'label' => PaymentStatusEnum::PENDING()->label(),
-                'value' => $revenuePending ? (int)$revenuePending->revenue : 0,
+                'value' => $revenuePending ? (int) $revenuePending->revenue : 0,
                 'status' => false,
                 'color' => '#E91E63',
             ],

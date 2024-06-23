@@ -10,6 +10,19 @@
                     <span>{{ __('Order ID') }}: </span>
                     <strong>{{ $orderReturn->order->code }}</strong>
                 </p>
+
+                @if($orderReturn->latestHistory)
+                    @if($orderReturn->latestHistory->reason)
+                        <p>
+                            <span>{{ __("Moderator's note") }}: </span>
+                            <strong>{{ $orderReturn->latestHistory->reason }}</strong>
+                        </p>
+                    @endif
+                    <p>
+                        <span>{{ __('Last update') }}: </span>
+                        <strong>{{ $orderReturn->latestHistory->created_at->translatedFormat('M d, Y h:m') }}</strong>
+                    </p>
+                @endif
             </div>
             <div class="col-md-6">
                 <p>
@@ -35,57 +48,57 @@
                 <div class="table-responsive">
                     <table class="table table-bordered table-striped table-hover align-middle">
                         <thead>
-                            <tr>
-                                <th class="text-center">#</th>
-                                <th class="text-center">{{ __('Image') }}</th>
-                                <th>{{ __('Product') }}</th>
-                                <th class="text-center">{{ __('Quantity') }}</th>
-                                <th class="text-center">{{ __('Refund amount') }}</th>
-                                @if (EcommerceHelper::allowPartialReturn())
-                                    <th class="text-center">{{ __('Reason') }}</th>
-                                @endif
-                            </tr>
+                        <tr>
+                            <th class="text-center">#</th>
+                            <th class="text-center">{{ __('Image') }}</th>
+                            <th>{{ __('Product') }}</th>
+                            <th class="text-center">{{ __('Quantity') }}</th>
+                            <th class="text-center">{{ __('Refund amount') }}</th>
+                            @if (EcommerceHelper::allowPartialReturn())
+                                <th class="text-center">{{ __('Reason') }}</th>
+                            @endif
+                        </tr>
                         </thead>
                         <tbody>
-                            @foreach ($orderReturn->items as $item)
-                                @php
-                                    $orderProduct = $item->orderProduct;
-                                @endphp
-                                <tr>
-                                    <td class="text-center">{{ $loop->iteration }}</td>
-                                    <td class="text-center">
-                                        <img
-                                            src="{{ RvMedia::getImageUrl($item->product_image, 'thumb', false, RvMedia::getDefaultImage()) }}"
-                                            alt="{{ $item->product_name }}"
-                                            width="50"
-                                        >
-                                    </td>
-                                    <td>
-                                        {{ $item->product_name }}
-                                        @if ($orderProduct)
-                                            @if ($sku = Arr::get($orderProduct->options, 'sku'))
-                                                ({{ $sku }})
-                                            @endif
-                                            @if ($attributes = Arr::get($orderProduct->options, 'attributes'))
-                                                <p>
-                                                    <small>{{ $attributes }}</small>
-                                                </p>
-                                            @endif
+                        @foreach ($orderReturn->items as $item)
+                            @php
+                                $orderProduct = $item->orderProduct;
+                            @endphp
+                            <tr>
+                                <td class="text-center">{{ $loop->iteration }}</td>
+                                <td class="text-center">
+                                    <img
+                                        src="{{ RvMedia::getImageUrl($item->product_image, 'thumb', false, RvMedia::getDefaultImage()) }}"
+                                        alt="{{ $item->product_name }}"
+                                        width="50"
+                                    >
+                                </td>
+                                <td>
+                                    {{ $item->product_name }}
+                                    @if ($orderProduct)
+                                        @if ($sku = Arr::get($orderProduct->options, 'sku'))
+                                            ({{ $sku }})
                                         @endif
-                                    </td>
-                                    <td class="text-center">
-                                        <strong class="text-info">{{ number_format($item->qty) }}</strong>
-                                    </td>
-                                    <td class="text-center">
-                                        <strong class="text-info">{{ format_price($item->refund_amount) }}</strong>
-                                    </td>
-                                    @if (EcommerceHelper::allowPartialReturn())
-                                        <td class="text-center">
-                                            <span class="text-warning">{{ $item->reason->label() }}</span>
-                                        </td>
+                                        @if ($attributes = Arr::get($orderProduct->options, 'attributes'))
+                                            <p>
+                                                <small>{{ $attributes }}</small>
+                                            </p>
+                                        @endif
                                     @endif
-                                </tr>
-                            @endforeach
+                                </td>
+                                <td class="text-center">
+                                    <strong class="text-info">{{ number_format($item->qty) }}</strong>
+                                </td>
+                                <td class="text-center">
+                                    <strong class="text-info">{{ format_price($item->refund_amount) }}</strong>
+                                </td>
+                                @if (EcommerceHelper::allowPartialReturn())
+                                    <td class="text-center">
+                                        <span class="text-warning">{{ $item->reason->label() }}</span>
+                                    </td>
+                                @endif
+                            </tr>
+                        @endforeach
                         </tbody>
                     </table>
                 </div>

@@ -12,11 +12,15 @@ class OrderReturnRequest extends Request
     public function rules(): array
     {
         $rules = [
-            'order_id' => 'required|integer|exists:ec_orders,id|unique:ec_order_returns,order_id',
-            'return_items' => 'required|array',
-            'return_items.*.is_return' => 'sometimes',
-            'return_items.*.order_item_id' => 'required_with:return_items.*.is_return,checked|numeric|exists:ec_order_product,id',
-            'return_items.*.qty' => 'nullable|numeric|min:1',
+            'order_id' => ['required', 'integer', 'exists:ec_orders,id', 'unique:ec_order_returns,order_id'],
+            'return_items' => ['required', 'array'],
+            'return_items.*.is_return' => ['sometimes'],
+            'return_items.*.order_item_id' => [
+                'required_with:return_items.*.is_return,checked',
+                'numeric',
+                'exists:ec_order_product,id',
+            ],
+            'return_items.*.qty' => ['nullable', 'numeric', 'min:1'],
         ];
 
         if (! EcommerceHelper::allowPartialReturn()) {
@@ -43,7 +47,7 @@ class OrderReturnRequest extends Request
     public function messages(): array
     {
         return [
-            'unique' => __('plugins/ecommerce::order.return_order_unique'),
+            'unique' => trans('plugins/ecommerce::order.return_order_unique'),
         ];
     }
 }

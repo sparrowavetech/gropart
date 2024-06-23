@@ -2,8 +2,10 @@
 
 namespace Botble\Ecommerce\Http\Controllers;
 
+use Botble\Base\Http\Actions\DeleteResourceAction;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Ecommerce\Facades\EcommerceHelper;
+use Botble\Ecommerce\Forms\StoreLocatorForm;
 use Botble\Ecommerce\Http\Requests\StoreLocatorRequest;
 use Botble\Ecommerce\Models\StoreLocator;
 use Botble\Setting\Supports\SettingStore;
@@ -24,11 +26,15 @@ class StoreLocatorController extends BaseController
 
     public function edit(int|string|null $id = null)
     {
-        $locator = $id ? StoreLocator::query()->findOrFail($id) : null;
+        $locator = $id ? StoreLocator::query()->findOrFail($id) : new StoreLocator();
+
+        $form = StoreLocatorForm::createFromModel($locator)
+            ->setUrl($locator->exists ? route('ecommerce.store-locators.edit.post', $locator->getKey()) : route('ecommerce.store-locators.create'))
+            ->renderForm();
 
         return $this
             ->httpResponse()
-            ->setData(view('plugins/ecommerce::settings.store-locator-item', compact('locator'))->render());
+            ->setData($form);
     }
 
     public function update(StoreLocator $locator, StoreLocatorRequest $request, SettingStore $settingStore)
@@ -54,12 +60,8 @@ class StoreLocatorController extends BaseController
             ->withUpdatedSuccessMessage();
     }
 
-    public function destory(StoreLocator $locator)
+    public function destroy(StoreLocator $locator)
     {
-        $locator->delete();
-
-        return $this
-            ->httpResponse()
-            ->setMessage(trans('core/base::notices.delete_success_message'));
+        return DeleteResourceAction::make($locator);
     }
 }

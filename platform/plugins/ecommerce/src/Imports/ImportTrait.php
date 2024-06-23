@@ -49,7 +49,7 @@ trait ImportTrait
         }
     }
 
-    public function getDate($value, $format = 'Y-m-d H:i:s', $default = null): string|null
+    public function getDate($value, $format = 'Y-m-d H:i:s', $default = null): ?string
     {
         try {
             $date = DateTime::createFromFormat('!' . $format, $value);

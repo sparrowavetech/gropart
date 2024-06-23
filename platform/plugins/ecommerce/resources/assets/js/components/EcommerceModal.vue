@@ -51,7 +51,12 @@ export default defineComponent({
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn" data-bs-dismiss="modal" v-text="cancelTitle" />
-                    <button type="button" class="btn btn-primary ms-auto" @click="$emit('ok', $event)" v-text="okTitle" />
+                    <button
+                        type="button"
+                        class="btn btn-primary ms-auto"
+                        @click="$emit('ok', $event)"
+                        v-text="okTitle"
+                    />
                 </div>
             </div>
         </div>

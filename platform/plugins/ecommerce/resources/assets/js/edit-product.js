@@ -653,7 +653,7 @@ class EcommerceProduct {
     }
 
     static tableInitComplete = (table, settings) => {
-        if (! settings.oInit.paging) {
+        if (!settings.oInit.paging) {
             return
         }
 
@@ -698,7 +698,10 @@ class EcommerceProduct {
             const th = $(document.createElement('th')).appendTo($(tr))
 
             if (setting.searchable) {
-                if (setting?.search_data?.type == 'customSelect' && typeof window.CustomDataApdapterSelect2 !== 'undefined') {
+                if (
+                    setting?.search_data?.type == 'customSelect' &&
+                    typeof window.CustomDataApdapterSelect2 !== 'undefined'
+                ) {
                     let select = $(
                         `<div><select class='form-select input-sm' data-placeholder='${
                             setting.search_data.placeholder || 'Select'
@@ -763,7 +766,7 @@ class EcommerceProduct {
     }
 
     handleCalculateDiscountPercents() {
-        $(document).on('keyup', 'input[name="price"], input[name="sale_price"]', function() {
+        $(document).on('keyup', 'input[name="price"], input[name="sale_price"]', function () {
             const $salePriceInput = $('input[name="sale_price"]')
 
             let price = $('input[name="price"]').val()
@@ -840,9 +843,11 @@ $(() => {
             let $el = $(el)
             let value = $el.prop('value')
             if (value !== $el.closest('select').val()) {
-                if ($(
-                    `.list-product-attribute-items-wrap .product-attribute-set-item select.product-select-attribute-item[data-set-id=${value}]`
-                ).length === 0) {
+                if (
+                    $(
+                        `.list-product-attribute-items-wrap .product-attribute-set-item select.product-select-attribute-item[data-set-id=${value}]`
+                    ).length === 0
+                ) {
                     $el.prop('disabled', false)
                 } else {
                     $el.prop('disabled', true)
@@ -1060,7 +1065,7 @@ $(() => {
                 },
                 complete: () => {
                     Botble.hideLoading($formBody)
-                }
+                },
             })
         }
     })
@@ -1193,7 +1198,7 @@ $(() => {
                 },
                 complete: () => {
                     Botble.hideLoading($wrapBody)
-                }
+                },
             })
         }
     }

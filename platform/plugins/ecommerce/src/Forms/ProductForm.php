@@ -8,12 +8,15 @@ use Botble\Base\Forms\FieldOptions\ContentFieldOption;
 use Botble\Base\Forms\FieldOptions\EditorFieldOption;
 use Botble\Base\Forms\FieldOptions\MediaImageFieldOption;
 use Botble\Base\Forms\FieldOptions\NameFieldOption;
+use Botble\Base\Forms\FieldOptions\NumberFieldOption;
 use Botble\Base\Forms\FieldOptions\OnOffFieldOption;
 use Botble\Base\Forms\FieldOptions\SelectFieldOption;
 use Botble\Base\Forms\FieldOptions\StatusFieldOption;
 use Botble\Base\Forms\Fields\EditorField;
 use Botble\Base\Forms\Fields\MediaImageField;
+use Botble\Base\Forms\Fields\MediaImagesField;
 use Botble\Base\Forms\Fields\MultiCheckListField;
+use Botble\Base\Forms\Fields\NumberField;
 use Botble\Base\Forms\Fields\OnOffField;
 use Botble\Base\Forms\Fields\SelectField;
 use Botble\Base\Forms\Fields\TagField;
@@ -24,6 +27,7 @@ use Botble\Ecommerce\Enums\GlobalOptionEnum;
 use Botble\Ecommerce\Enums\ProductTypeEnum;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Facades\ProductCategoryHelper;
+use Botble\Ecommerce\Forms\Fronts\Auth\FieldOptions\TextFieldOption;
 use Botble\Ecommerce\Http\Requests\ProductRequest;
 use Botble\Ecommerce\Models\Brand;
 use Botble\Ecommerce\Models\GlobalOption;
@@ -67,9 +71,15 @@ class ProductForm extends FormAbstract
             ->setValidatorClass(ProductRequest::class)
             ->setFormOption('files', true)
             ->add('name', TextField::class, NameFieldOption::make()->required()->toArray())
-            ->add('description', EditorField::class, EditorFieldOption::make()->placeholder(trans('core/base::forms.description_placeholder'))->toArray())
+            ->add(
+                'description',
+                EditorField::class,
+                EditorFieldOption::make()
+                    ->label(trans('core/base::forms.description'))
+                    ->placeholder(trans('core/base::forms.description_placeholder'))->toArray()
+            )
             ->add('content', EditorField::class, ContentFieldOption::make()->allowedShortcodes()->toArray())
-            ->add('images[]', 'mediaImages', [
+            ->add('images[]', MediaImagesField::class, [
                 'label' => trans('plugins/ecommerce::products.form.image'),
                 'values' => $productId ? $this->getModel()->images : [],
             ])
@@ -113,8 +123,7 @@ class ProductForm extends FormAbstract
                         SelectField::class,
                         SelectFieldOption::make()
                             ->label(trans('plugins/ecommerce::products.form.brand'))
-                            //->choices($brands)
-                            ->choices([0 => trans('plugins/ecommerce::brands.select_brand')] + $brands)
+                            ->choices($brands)
                             ->searchable()
                             ->emptyValue(trans('plugins/ecommerce::brands.select_brand'))
                             ->allowClear()
@@ -131,7 +140,7 @@ class ProductForm extends FormAbstract
             ->when($productCollections, function () use ($productCollections) {
                 $selectedProductCollections = [];
 
-                if ($this->getModel() && $this->getModel()->id) {
+                if ($this->getModel() && $this->getModel()->getKey()) {
                     $selectedProductCollections = $this->getModel()
                         ->productCollections()
                         ->pluck('product_collection_id')
@@ -148,7 +157,7 @@ class ProductForm extends FormAbstract
             ->when($productLabels, function () use ($productLabels) {
                 $selectedProductLabels = [];
 
-                if ($this->getModel() && $this->getModel()->id) {
+                if ($this->getModel() && $this->getModel()->getKey()) {
                     $selectedProductLabels = $this->getModel()->productLabels()->pluck('product_label_id')->all();
                 }
 
@@ -164,7 +173,7 @@ class ProductForm extends FormAbstract
 
                 if ($taxes) {
                     $selectedTaxes = [];
-                    if ($this->getModel() && $this->getModel()->id) {
+                    if ($this->getModel() && $this->getModel()->getKey()) {
                         $selectedTaxes = $this->getModel()->taxes()->pluck('tax_id')->all();
                     } elseif ($defaultTaxRate = get_ecommerce_setting('default_tax_rate')) {
                         $selectedTaxes = [$defaultTaxRate];
@@ -176,6 +185,27 @@ class ProductForm extends FormAbstract
                         'value' => old('taxes', $selectedTaxes),
                     ]);
                 }
+            })
+            ->when(EcommerceHelper::isCartEnabled(), function (ProductForm $form) {
+                $form
+                    ->add(
+                        'minimum_order_quantity',
+                        NumberField::class,
+                        NumberFieldOption::make()
+                            ->label(trans('plugins/ecommerce::products.form.minimum_order_quantity'))
+                            ->helperText(trans('plugins/ecommerce::products.form.minimum_order_quantity_helper'))
+                            ->defaultValue(0)
+                            ->toArray()
+                    )
+                    ->add(
+                        'maximum_order_quantity',
+                        NumberField::class,
+                        NumberFieldOption::make()
+                            ->label(trans('plugins/ecommerce::products.form.maximum_order_quantity'))
+                            ->helperText(trans('plugins/ecommerce::products.form.maximum_order_quantity_helper'))
+                            ->defaultValue(0)
+                            ->toArray()
+                    );
             })
             ->add('tag', TagField::class, [
                 'label' => trans('plugins/ecommerce::products.form.tags'),
@@ -279,7 +309,8 @@ class ProductForm extends FormAbstract
                         'priority' => 3,
                         'render' => false,
                     ],
-                ]);
+                ])
+                ->addAfter('brand_id', 'sku', TextField::class, TextFieldOption::make()->label(trans('plugins/ecommerce::products.sku')));
         }
 
         if ($productId && is_in_admin(true)) {

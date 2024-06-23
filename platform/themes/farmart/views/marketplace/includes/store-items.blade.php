@@ -23,10 +23,6 @@
                                 <div class="store-title d-flex align-items-center">
                                     <h2 class="h5 mb-0">
                                         <a href="{{ $store->url }}">{{ $store->name }}</a>
-                                        @if($store->is_verified)
-                                            <img class="verified-store-main" src="{{ asset('/storage/stores/verified.png')}}"alt="Verified">
-                                        @endif
-                                        <small class="badge bg-warning text-white">{{ $store->shop_category->label() }}</small>
                                     </h2>
                                 </div>
                                 @if (EcommerceHelper::isReviewEnabled())
@@ -37,7 +33,7 @@
                                         ]) !!}
                                     </div>
                                 @endif
-                                @if ($store->full_address)
+                                @if (! MarketplaceHelper::hideStoreAddress() && $store->full_address)
                                     <div class="vendor-store-address mt-3 mb-1">
                                         <i class="icon icon-map-marker me-1"></i>
                                         {{ $store->full_address }}

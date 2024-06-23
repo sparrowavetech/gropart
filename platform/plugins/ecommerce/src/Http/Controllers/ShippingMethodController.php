@@ -5,10 +5,8 @@ namespace Botble\Ecommerce\Http\Controllers;
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
-use Botble\Base\Facades\Assets;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Ecommerce\Enums\ShippingRuleTypeEnum;
-use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Http\Requests\AddShippingRegionRequest;
 use Botble\Ecommerce\Http\Requests\ShippingRuleRequest;
 use Botble\Ecommerce\Models\Shipping;
@@ -19,29 +17,6 @@ use Illuminate\Support\Arr;
 
 class ShippingMethodController extends BaseController
 {
-    public function index()
-    {
-        $this->pageTitle(trans('plugins/ecommerce::shipping.shipping_methods'));
-
-        if (EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation()) {
-            Assets::addScriptsDirectly('vendor/core/plugins/location/js/location.js');
-        }
-
-        Assets::addStylesDirectly(['vendor/core/plugins/ecommerce/css/ecommerce.css'])
-            ->addScriptsDirectly(['vendor/core/plugins/ecommerce/js/shipping.js'])
-            ->addScripts(['input-mask']);
-
-        $shipping = Shipping::query()
-            ->with([
-                'rules' => function ($query) {
-                    $query->withCount(['items']);
-                },
-            ])
-            ->get();
-
-        return view('plugins/ecommerce::shipping.methods', compact('shipping'));
-    }
-
     public function postCreateRegion(AddShippingRegionRequest $request)
     {
         $country = $request->input('region');

@@ -11,7 +11,7 @@ interface ProductInterface extends RepositoryInterface
     /**
      * @deprecated
      */
-    public function getSearch(string|null $keyword, int $paginate = 10);
+    public function getSearch(?string $keyword, int $paginate = 10);
 
     public function getRelatedProductAttributes(Product $product): Collection;
 

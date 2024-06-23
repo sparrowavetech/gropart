@@ -171,16 +171,6 @@ app('events')->listen(RenderingThemeOptionSettings::class, function () {
             'icon' => 'ti ti-brush',
         ])
         ->setField([
-            'id' => 'primary_font',
-            'section_id' => 'opt-text-subsection-style',
-            'type' => 'googleFonts',
-            'label' => __('Primary font'),
-            'attributes' => [
-                'name' => 'primary_font',
-                'value' => 'Muli',
-            ],
-        ])
-        ->setField([
             'id' => 'primary_color',
             'section_id' => 'opt-text-subsection-style',
             'type' => 'customColor',
@@ -221,6 +211,16 @@ app('events')->listen(RenderingThemeOptionSettings::class, function () {
             ],
         ])
         ->setField([
+            'id' => 'primary_button_background_color',
+            'section_id' => 'opt-text-subsection-style',
+            'type' => 'customColor',
+            'label' => __('Primary button background color'),
+            'attributes' => [
+                'name' => 'primary_button_background_color',
+                'value' => '#fab528',
+            ],
+        ])
+        ->setField([
             'id' => 'top_header_background_color',
             'section_id' => 'opt-text-subsection-style',
             'type' => 'customColor',
@@ -228,6 +228,16 @@ app('events')->listen(RenderingThemeOptionSettings::class, function () {
             'attributes' => [
                 'name' => 'top_header_background_color',
                 'value' => '#f7f7f7',
+            ],
+        ])
+        ->setField([
+            'id' => 'top_header_text_color',
+            'section_id' => 'opt-text-subsection-style',
+            'type' => 'customColor',
+            'label' => __('Top header text color'),
+            'attributes' => [
+                'name' => 'top_header_text_color',
+                'value' => '#000',
             ],
         ])
         ->setField([
@@ -241,6 +251,16 @@ app('events')->listen(RenderingThemeOptionSettings::class, function () {
             ],
         ])
         ->setField([
+            'id' => 'middle_header_text_color',
+            'section_id' => 'opt-text-subsection-style',
+            'type' => 'customColor',
+            'label' => __('Middle header text color'),
+            'attributes' => [
+                'name' => 'middle_header_text_color',
+                'value' => '#000',
+            ],
+        ])
+        ->setField([
             'id' => 'bottom_header_background_color',
             'section_id' => 'opt-text-subsection-style',
             'type' => 'customColor',
@@ -251,12 +271,12 @@ app('events')->listen(RenderingThemeOptionSettings::class, function () {
             ],
         ])
         ->setField([
-            'id' => 'header_text_color',
+            'id' => 'bottom_header_text_color',
             'section_id' => 'opt-text-subsection-style',
             'type' => 'customColor',
-            'label' => __('Header text color'),
+            'label' => __('Bottom header text color'),
             'attributes' => [
-                'name' => 'header_text_color',
+                'name' => 'bottom_header_text_color',
                 'value' => '#000',
             ],
         ])
@@ -315,51 +335,6 @@ app('events')->listen(RenderingThemeOptionSettings::class, function () {
             'id' => 'opt-text-subsection-social-links',
             'subsection' => true,
             'icon' => 'ti ti-share',
-        ])
-        ->setField([
-            'id' => 'social_links',
-            'section_id' => 'opt-text-subsection-social-links',
-            'type' => 'repeater',
-            'label' => __('Social links'),
-            'attributes' => [
-                'name' => 'social_links',
-                'value' => null,
-                'fields' => [
-                    [
-                        'type' => 'text',
-                        'label' => __('Name'),
-                        'attributes' => [
-                            'name' => 'social-name',
-                            'value' => null,
-                            'options' => [
-                                'class' => 'form-control',
-                            ],
-                        ],
-                    ],
-                    [
-                        'type' => 'mediaImage',
-                        'label' => __('Icon Image'),
-                        'attributes' => [
-                            'name' => 'social-icon',
-                            'value' => null,
-                            'options' => [
-                                'class' => 'form-control',
-                            ],
-                        ],
-                    ],
-                    [
-                        'type' => 'text',
-                        'label' => __('URL'),
-                        'attributes' => [
-                            'name' => 'social-url',
-                            'value' => null,
-                            'options' => [
-                                'class' => 'form-control',
-                            ],
-                        ],
-                    ],
-                ],
-            ],
         ])
         ->setField([
             'id' => '404_page_image',
@@ -448,12 +423,28 @@ app('events')->listen(RenderingThemeOptionSettings::class, function () {
             ],
         ])
         ->setField([
-            'id' => 'enabled_product_categories_sidebar_on_header',
-            'section_id' => 'opt-text-subsection-ecommerce',
-            'type' => 'customSelect',
-            'label' => __('Enable categories with sidebar on header?'),
+            'id' => 'logo_height',
+            'section_id' => 'opt-text-subsection-logo',
+            'type' => 'number',
+            'label' => __('Logo height (px)'),
             'attributes' => [
-                'name' => 'enabled_product_categories_sidebar_on_header',
+                'name' => 'logo_height',
+                'value' => 45,
+                'options' => [
+                    'class' => 'form-control',
+                    'min' => 0,
+                    'max' => 150,
+                ],
+            ],
+            'helper' => __('Set the height of the logo in pixels. The default value is 45px.'),
+        ])
+        ->setField([
+            'id' => 'blog_show_author_name',
+            'section_id' => 'opt-text-subsection-blog',
+            'type' => 'customSelect',
+            'label' => __('Show author name?'),
+            'attributes' => [
+                'name' => 'blog_show_author_name',
                 'list' => [
                     'yes' => trans('core/base::base.yes'),
                     'no' => trans('core/base::base.no'),

@@ -1,10 +1,10 @@
 @extends(EcommerceHelper::viewPath('customers.master'))
 
-@section('content')
-    <h2 class="customer-page-title mb-4">{{ __('Order information') }}</h2>
+@section('title', __('Order information'))
 
+@section('content')
     <div class="customer-order-detail">
-        @include('plugins/ecommerce::themes.includes.order-tracking-detail')
+        @include(EcommerceHelper::viewPath('includes.order-tracking-detail'))
 
         @if ($order->canBeCanceled())
             <x-core::form method="post" :files="true" class="bg-body-tertiary p-3 my-3 customer-order-upload-receipt" :url="route('customer.orders.upload-proof', $order)">
@@ -44,8 +44,8 @@
                         {{ __('Download invoice') }}
                     </a>
                 @endif
-                @if ($order->canBeCanceled())
-                    <a class="btn btn-danger" href="{{ route('customer.orders.cancel', $order->id) }}">
+                    @if ($order->canBeCanceled())
+                    <a class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modal-cancel-order">
                         {{ __('Cancel order') }}
                     </a>
                 @endif
@@ -56,4 +56,28 @@
                 @endif
             </div>
         </div>
-    @endsection
+    </div>
+
+    @if ($order->canBeCanceled())
+        <div class="modal fade" id="modal-cancel-order" tabindex="-1" aria-labelledby="modalCancelOrderLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header align-items-start">
+                        <div>
+                            <h4 class="modal-title fs-5" id="modalCancelOrderLabel">{{ __('Cancel Order') }}</h4>
+                            <p class="text-muted mb-0">{{ __('Please provide a reason for the cancellation.') }}</p>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        {!! $cancelOrderForm->renderForm() !!}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('Close') }}</button>
+                        <button type="submit" class="btn btn-primary" form="cancel-order-form">{{ __('Submit') }}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+@stop

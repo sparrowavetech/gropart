@@ -18,19 +18,20 @@
                 @php
                     $price = 0;
                     if (!empty($value->affect_price) && doubleval($value->affect_price) > 0) {
-                        $price = $value->affect_type == 0 ? $value->affect_price : (floatval($value->affect_price) * $product->front_sale_price_with_taxes) / 100;
+                        $price = $value->affect_type == 0 ? $value->affect_price : (floatval($value->affect_price) * $product->price()->getPrice()) / 100;
                     }
                 @endphp
-                <div class="form-radio">
+                <div class="{{ $wrapperClass ?? 'form-radio' }}">
                     <input
                         id="option-{{ $option->id }}-value-{{ Str::slug($value->option_value) }}"
                         name="options[{{ $option->id }}][values]"
                         data-extra-price="{{ $price }}"
                         type="radio"
                         value="{{ $value->option_value }}"
+                        @if (isset($inputClass)) class="{{ $inputClass }}" @endif
                         @if ($option->required && $loop->first) checked @endif
                     >
-                    <label for="option-{{ $option->id }}-value-{{ Str::slug($value->option_value) }}">
+                    <label for="option-{{ $option->id }}-value-{{ Str::slug($value->option_value) }}" @if (isset($labelClass)) class="{{ $labelClass }}" @endif>
                         &nbsp;{{ $value->option_value }}
                         @if ($price > 0)
                             <strong class="extra-price">+ {{ format_price($price) }}</strong>

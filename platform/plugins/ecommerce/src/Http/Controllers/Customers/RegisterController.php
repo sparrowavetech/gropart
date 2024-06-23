@@ -45,7 +45,7 @@ class RegisterController extends BaseController
         Theme::asset()
             ->container('footer')
             ->usePath(false)
-            ->add('js-validation', 'vendor/core/core/js-validation/js/js-validation.js', ['jquery']);
+            ->add('js-validation', 'vendor/core/core/js-validation/js/js-validation.js', ['jquery'], version: '1.0.1');
 
         add_filter(THEME_FRONT_FOOTER, function ($html) {
             return $html . JsValidator::formRequest(RegisterRequest::class)->render();
@@ -58,7 +58,7 @@ class RegisterController extends BaseController
         )->render();
     }
 
-    public function register(Request $request)
+    public function register(RegisterRequest $request)
     {
         $this->validator($request->input())->validate();
 
@@ -71,12 +71,10 @@ class RegisterController extends BaseController
         if (EcommerceHelper::isEnableEmailVerification()) {
             $this->registered($request, $customer);
 
-            $message = __('We have sent you an email to verify your email. Please check and confirm your email address!');
-
             return $this
                 ->httpResponse()
                 ->setNextUrl(route('customer.login'))
-                ->setMessage($message);
+                ->setMessage(__('We have sent you an email to verify your email. Please check and confirm your email address!'));
         }
 
         $customer->confirmed_at = Carbon::now();
@@ -143,10 +141,8 @@ class RegisterController extends BaseController
 
         $customer->sendEmailVerificationNotification();
 
-        $message = __('We sent you another confirmation email. You should receive it shortly.');
-
         return $this
             ->httpResponse()
-            ->setMessage($message);
+            ->setMessage(__('We sent you another confirmation email. You should receive it shortly.'));
     }
 }

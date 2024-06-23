@@ -6,7 +6,7 @@
             <ul class="bb-product-filter-items filter-checkbox">
                 @foreach ($brands as $brand)
                     <li class="bb-product-filter-item">
-                        <input id="attribute-brand-{{ $brand->id }}" type="checkbox" name="brands[]" value="{{ $brand->id }}" @checked(in_array($brand->id, request()->input('brands', []))) />
+                        <input id="attribute-brand-{{ $brand->id }}" type="checkbox" name="brands[]" value="{{ $brand->id }}" @checked(in_array($brand->id, (array)request()->input('brands', []))) />
                         <label for="attribute-brand-{{ $brand->id }}">{{ $brand->name }}</label>
                     </li>
                 @endforeach

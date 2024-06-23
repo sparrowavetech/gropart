@@ -16,7 +16,7 @@ class ProductPriceService
 
     public function __construct(
         protected float $finalPrice = 0,
-        protected Product|null $product = null
+        protected ?Product $product = null
     ) {
     }
 

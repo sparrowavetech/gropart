@@ -9,7 +9,7 @@ class CreateShipmentRequest extends Request
     public function rules(): array
     {
         return [
-            'method' => 'required|string',
+            'method' => ['required', 'string'],
         ];
     }
 }

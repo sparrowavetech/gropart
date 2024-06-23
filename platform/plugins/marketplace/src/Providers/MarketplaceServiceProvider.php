@@ -2,7 +2,6 @@
 
 namespace Botble\Marketplace\Providers;
 
-use Illuminate\Support\Facades\Auth;
 use Botble\ACL\Models\User;
 use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Facades\EmailHandler;
@@ -101,6 +100,7 @@ class MarketplaceServiceProvider extends ServiceProvider
                 'content',
                 'address',
                 'company',
+                'cover_image',
             ]);
         }
 
@@ -169,11 +169,6 @@ class MarketplaceServiceProvider extends ServiceProvider
         });
 
         DashboardMenu::for('vendor')->beforeRetrieving(function () {
-            $customerID = Auth::guard('customer')->user()->id;
-            $isManageShippingEnabled = Store::where('customer_id', $customerID)->value('is_manage_shipping');
-            $VendorStatusData = MarketplaceHelper::isVendorProfileComplete($customerID);
-            $isVendorStatus = isset($VendorStatusData['status']) ? $VendorStatusData['status'] : null;
-
             DashboardMenu::make()
                 ->registerItem([
                     'id' => 'marketplace.vendor.dashboard',
@@ -182,37 +177,20 @@ class MarketplaceServiceProvider extends ServiceProvider
                     'url' => fn () => route('marketplace.vendor.dashboard'),
                     'icon' => 'ti ti-home',
                 ])
-                ->when($isVendorStatus, function (DashboardMenuSupport $dashboardMenu) {
-                    return $dashboardMenu
-                        ->registerItem([
-                            'id' => 'marketplace.vendor.products',
-                            'priority' => 2,
-                            'name' => __('Products'),
-                            'url' => fn () => route('marketplace.vendor.products.index'),
-                            'icon' => 'ti ti-package',
-                        ])
-                        ->registerItem([
-                            'id' => 'marketplace.vendor.orders',
-                            'priority' => 3,
-                            'name' => __('Orders'),
-                            'url' => fn () => route('marketplace.vendor.orders.index'),
-                            'icon' => 'ti ti-shopping-cart',
-                        ])
-                        ->registerItem([
-                            'id' => 'marketplace.vendor.withdrawals',
-                            'priority' => 5,
-                            'name' => __('Withdrawals'),
-                            'url' => fn () => route('marketplace.vendor.withdrawals.index'),
-                            'icon' => 'ti ti-cash',
-                        ])
-                        ->registerItem([
-                            'id' => 'marketplace.vendor.revenues',
-                            'priority' => 6,
-                            'name' => __('Revenues'),
-                            'url' => fn () => route('marketplace.vendor.revenues.index'),
-                            'icon' => 'ti ti-wallet',
-                        ]);
-                })
+                ->registerItem([
+                    'id' => 'marketplace.vendor.products',
+                    'priority' => 2,
+                    'name' => __('Products'),
+                    'url' => fn () => route('marketplace.vendor.products.index'),
+                    'icon' => 'ti ti-package',
+                ])
+                ->registerItem([
+                    'id' => 'marketplace.vendor.orders',
+                    'priority' => 3,
+                    'name' => __('Orders'),
+                    'url' => fn () => route('marketplace.vendor.orders.index'),
+                    'icon' => 'ti ti-shopping-cart',
+                ])
                 ->registerItem([
                     'id' => 'marketplace.vendor.discounts',
                     'priority' => 4,
@@ -221,12 +199,35 @@ class MarketplaceServiceProvider extends ServiceProvider
                     'icon' => 'ti ti-tag',
                 ])
                 ->registerItem([
+                    'id' => 'marketplace.vendor.withdrawals',
+                    'priority' => 5,
+                    'name' => __('Withdrawals'),
+                    'url' => fn () => route('marketplace.vendor.withdrawals.index'),
+                    'icon' => 'ti ti-cash',
+                ])
+                ->registerItem([
+                    'id' => 'marketplace.vendor.revenues',
+                    'priority' => 6,
+                    'name' => __('Revenues'),
+                    'url' => fn () => route('marketplace.vendor.revenues.index'),
+                    'icon' => 'ti ti-wallet',
+                ])
+                ->registerItem([
                     'id' => 'marketplace.vendor.settings',
                     'priority' => 7,
                     'name' => __('Settings'),
                     'url' => fn () => route('marketplace.vendor.settings'),
                     'icon' => 'ti ti-settings',
                 ])
+                ->when(MarketplaceHelper::isEnabledMessagingSystem(), function (DashboardMenuSupport $dashboardMenu) {
+                    return $dashboardMenu->registerItem([
+                        'id' => 'marketplace.vendor.messages',
+                        'priority' => 8,
+                        'name' => __('Messages'),
+                        'url' => fn () => route('marketplace.vendor.messages.index'),
+                        'icon' => 'ti ti-messages',
+                    ]);
+                })
                 ->registerItem([
                     'id' => 'customer.overview',
                     'priority' => 8,
@@ -234,7 +235,7 @@ class MarketplaceServiceProvider extends ServiceProvider
                     'url' => fn () => route('customer.overview'),
                     'icon' => 'ti ti-user',
                 ])
-                ->when(EcommerceHelper::isReviewEnabled() && $isVendorStatus, function (DashboardMenuSupport $dashboardMenu) {
+                ->when(EcommerceHelper::isReviewEnabled(), function (DashboardMenuSupport $dashboardMenu) {
                     return $dashboardMenu->registerItem([
                         'id' => 'marketplace.vendor.reviews',
                         'priority' => 5,
@@ -243,7 +244,7 @@ class MarketplaceServiceProvider extends ServiceProvider
                         'icon' => 'ti ti-star',
                     ]);
                 })
-                ->when(EcommerceHelper::isOrderReturnEnabled() && $isVendorStatus, function (DashboardMenuSupport $dashboardMenu) {
+                ->when(EcommerceHelper::isOrderReturnEnabled(), function (DashboardMenuSupport $dashboardMenu) {
                     return $dashboardMenu->registerItem([
                         'id' => 'marketplace.vendor.order-returns',
                         'priority' => 3,
@@ -252,7 +253,7 @@ class MarketplaceServiceProvider extends ServiceProvider
                         'icon' => 'ti ti-reload',
                     ]);
                 })
-                ->when(MarketplaceHelper::allowVendorManageShipping() && $isManageShippingEnabled && $isVendorStatus, function (DashboardMenuSupport $dashboardMenu) {
+                ->when(MarketplaceHelper::allowVendorManageShipping(), function (DashboardMenuSupport $dashboardMenu) {
                     return $dashboardMenu->registerItem([
                         'id' => 'marketplace.vendor.shipments',
                         'priority' => 3,
@@ -268,25 +269,28 @@ class MarketplaceServiceProvider extends ServiceProvider
                 ->when(auth('customer')->user()->is_vendor, function () {
                     return DashboardMenu::make()
                         ->registerItem([
-                            'id' => 'marketplace-vendor-dashboard',
+                            'id' => 'marketplace.vendor.dashboard',
                             'priority' => 990,
                             'name' => __('Vendor Dashboard'),
                             'url' => fn () => route('marketplace.vendor.dashboard'),
-                            'class' => 'vendor-dashboard-link',
                             'icon' => 'ti ti-building-store',
                         ]);
                 }, function () {
                     DashboardMenu::make()
-                        ->when(MarketplaceHelper::isVendorRegistrationEnabled(), function () {
-                            return DashboardMenu::make()
-                                ->registerItem([
-                                    'id' => 'marketplace-vendor-dashboard',
-                                    'priority' => 991,
-                                    'name' => __('Become A Vendor'),
-                                    'url' => fn () => route('marketplace.vendor.become-vendor'),
-                                    'icon' => 'ti ti-building-store',
-                                ]);
-                        });
+                        ->when(
+                            MarketplaceHelper::isVendorRegistrationEnabled()
+                            && ! MarketplaceHelper::getSetting('hide_become_vendor_menu_in_customer_dashboard', false),
+                            function () {
+                                return DashboardMenu::make()
+                                    ->registerItem([
+                                        'id' => 'marketplace.vendor.become-vendor',
+                                        'priority' => 991,
+                                        'name' => __('Become A Vendor'),
+                                        'url' => fn () => route('marketplace.vendor.become-vendor'),
+                                        'icon' => 'ti ti-building-store',
+                                    ]);
+                            }
+                        );
                 });
         });
 

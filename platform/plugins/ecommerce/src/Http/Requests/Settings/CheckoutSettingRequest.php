@@ -15,6 +15,8 @@ class CheckoutSettingRequest extends Request
         return [
             'enable_guest_checkout' => $onOffRule = new OnOffRule(),
             'minimum_order_amount' => ['nullable', 'numeric', 'min:0'],
+            'minimum_order_quantity' => ['nullable', 'integer', 'min:0'],
+            'maximum_order_quantity' => ['nullable', 'integer', 'min:0'],
             'mandatory_form_fields_at_checkout' => ['sometimes', 'array'],
             'mandatory_form_fields_at_checkout.*' => ['nullable', Rule::in(array_keys(EcommerceHelper::getMandatoryFieldsAtCheckout()))],
             'hide_form_fields_at_checkout' => ['sometimes', 'array'],

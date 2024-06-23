@@ -10,7 +10,7 @@ class GetProductWithCrossSalesBySlugService
     {
     }
 
-    public function handle(string $slug, array $params = []): Product|null
+    public function handle(string $slug, array $params = []): ?Product
     {
         return $this->getProductBySlugService->handle($slug, [
             ...$params,

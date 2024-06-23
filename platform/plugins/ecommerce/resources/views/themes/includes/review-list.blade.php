@@ -3,16 +3,28 @@
 
     <div @class(['row pb-3 mb-3 review-item', 'border-bottom' => ! $loop->last, 'opacity-50' => ! $review->is_approved])>
         <div class="col-auto">
-            <img class="rounded-circle" src="{{ $review->user->avatar_url }}" alt="{{ $review->user->name }}" width="60">
+            <img class="rounded-circle" src="{{ $review->customer_avatar_url }}" alt="{{ $review->user->name ?: $review->customer_name }}" width="60">
         </div>
         <div class="col">
             <div class="d-flex flex-wrap align-items-center gap-2 mb-2 review-item__header">
                 <div class="fw-medium">
-                    @if (get_ecommerce_setting('show_customer_full_name', true))
-                        {{ $review->user->name }}
-                    @else
-                        {{ Str::mask($review->user->name, '*', 1, -1) }}
-                    @endif
+                    @php
+                        $customerName = $review->user->name ?: $review->customer_name;
+
+                        if (! get_ecommerce_setting('show_customer_full_name', true)) {
+                            $customerNameCharCount = strlen($customerName);
+
+                            if ($customerNameCharCount > 7) {
+                                $customerName = Str::mask($customerName, '*', $customerNameCharCount - 5, 5);
+                            } elseif ($customerNameCharCount > 3) {
+                                $customerName = Str::mask($customerName, '*', $customerNameCharCount - 3, 3);
+                            } else {
+                                $customerName = Str::mask($customerName, '*', 1, -1);
+                            }
+                        }
+                    @endphp
+
+                    {{ $customerName }}
                 </div>
                 <time class="text-muted small" datetime="{{ $review->created_at->translatedFormat('Y-m-d\TH:i:sP') }}">
                     {{ $review->created_at->diffForHumans() }}
@@ -26,9 +38,7 @@
             </div>
 
             <div class="mb-2 review-item__rating">
-                <div class="bb-product-rating">
-                    <span style="width: {{ $review->star * 20 }}%"></span>
-                </div>
+                @include(EcommerceHelper::viewPath('includes.rating-star'), ['avg' => $review->star, 'size' => 80])
             </div>
 
             <div class="review-item__body">

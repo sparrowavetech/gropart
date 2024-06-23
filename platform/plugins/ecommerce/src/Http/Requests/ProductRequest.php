@@ -7,6 +7,8 @@ use Botble\Ecommerce\Enums\CrossSellPriceType;
 use Botble\Ecommerce\Enums\GlobalOptionEnum;
 use Botble\Ecommerce\Enums\ProductTypeEnum;
 use Botble\Ecommerce\Facades\EcommerceHelper;
+use Botble\Ecommerce\Models\Product;
+use Botble\Media\Facades\RvMedia;
 use Botble\Support\Http\Requests\Request;
 use Carbon\Carbon;
 use Illuminate\Validation\Rule;
@@ -39,43 +41,59 @@ class ProductRequest extends Request
     public function rules(): array
     {
         $rules = [
-            'name' => 'required|string|max:250',
-            'price' => 'numeric|nullable|min:0|max:100000000000',
-            'sale_price' => 'numeric|nullable|min:0|max:100000000000',
-            'start_date' => 'date|nullable|required_if:sale_type,1',
+            'name' => ['required', 'string', 'max:250'],
+            'description' => ['nullable', 'string', 'max:300000'],
+            'content' => ['nullable', 'string', 'max:300000'],
+            'price' => [
+                'numeric',
+                'nullable',
+                'min:0',
+                Rule::when($this->input('sale_price'), function () {
+                    return 'gt:sale_price';
+                }),
+            ],
+            'sale_price' => ['numeric', 'nullable', 'min:0'],
+            'start_date' => ['date', 'nullable', 'required_if:sale_type,1'],
             'end_date' => 'date|nullable|after:' . ($this->input('start_date') ?? Carbon::now()->toDateTimeString()),
-            'wide' => 'numeric|nullable|min:0|max:100000000',
-            'height' => 'numeric|nullable|min:0|max:100000000',
-            'weight' => 'numeric|nullable|min:0|max:100000000',
-            'length' => 'numeric|nullable|min:0|max:100000000',
-            'images' => 'sometimes|array',
-            'images.*' => 'nullable|string',
+            'wide' => ['numeric', 'nullable', 'min:0', 'max:100000000'],
+            'height' => ['numeric', 'nullable', 'min:0', 'max:100000000'],
+            'weight' => ['numeric', 'nullable', 'min:0', 'max:100000000'],
+            'length' => ['numeric', 'nullable', 'min:0', 'max:100000000'],
+            'images' => ['sometimes', 'array'],
+            'images.*' => ['nullable', 'string'],
+            'quantity' => ['numeric', 'nullable', 'min:0', 'max:100000000'],
             'status' => Rule::in(BaseStatusEnum::values()),
-            'quantity' => 'numeric|nullable|min:0|max:100000000',
             'product_type' => Rule::in(ProductTypeEnum::values()),
-            'product_files_input' => 'nullable|array',
-            'product_files_input.*' => 'nullable|file|mimes:' . config('plugins.ecommerce.general.digital_products.allowed_mime_types'),
-            'product_files_external' => 'nullable|array',
-            'product_files_external.*.name' => 'nullable|string|max:120',
-            'product_files_external.*.link' => 'required|url|max:400',
-            'product_files_external.*.size' => 'nullable|numeric|min:0|max:100000000',
-            'taxes' => 'nullable|array',
-            'cost_per_item' => 'numeric|nullable|min:0|max:100000000000',
+            'product_files_input' => ['nullable', 'array'],
+            'product_files_input.*' => 'nullable|file|mimes:' . (config('plugins.ecommerce.general.digital_products.allowed_mime_types') ?: RvMedia::getConfig('allowed_mime_types')),
+            'product_files_external' => ['nullable', 'array'],
+            'product_files_external.*.name' => ['nullable', 'string', 'max:120'],
+            'product_files_external.*.link' => ['required', 'url', 'max:400'],
+            'product_files_external.*.size' => ['nullable', 'numeric', 'min:0', 'max:100000000'],
+            'taxes' => ['nullable', 'array'],
             'barcode' => [
                 'nullable',
                 'string',
-                'max:50',
-                //Rule::unique('ec_products')->ignore($this->route('product.id')),
+                'max:150',
+                Rule::unique((new Product())->getTable())->ignore($this->route('product.id')),
             ],
-            'general_license_code' => 'nullable|in:0,1',
-            'categories' => 'nullable|array',
-            'categories.*' => 'nullable|exists:ec_product_categories,id',
-            'product_collections' => 'nullable|array',
-            'product_collections.*' => 'nullable|exists:ec_product_collections,id',
+            'sku' => [
+                'nullable',
+                'string',
+                'max:150',
+            ],
+            'cost_per_item' => ['nullable', 'numeric', 'min:0'],
+            'general_license_code' => ['nullable', 'in:0,1'],
+            'categories' => ['nullable', 'array'],
+            'categories.*' => ['nullable', 'exists:ec_product_categories,id'],
+            'product_collections' => ['nullable', 'array'],
+            'product_collections.*' => ['nullable', 'exists:ec_product_collections,id'],
             'cross_sale_products' => ['nullable', 'array'],
             'cross_sale_products.*.id' => ['nullable', 'string', 'exists:ec_products,id'],
             'cross_sale_products.*.price' => ['nullable', 'numeric', 'min:0', 'max:100000000000'],
             'cross_sale_products.*.price_type' => ['nullable', 'string', Rule::in(CrossSellPriceType::values())],
+            'minimum_order_quantity' => ['nullable', 'numeric', 'min:0'],
+            'maximum_order_quantity' => ['nullable', 'numeric', 'min:0'],
         ];
 
         if (EcommerceHelper::isEnabledProductOptions()) {

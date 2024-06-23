@@ -11,9 +11,9 @@ class TaxRequest extends Request
     public function rules(): array
     {
         return [
-            'title' => 'required|string|max:255',
-            'percentage' => 'required|numeric|between:0,99.99',
-            'priority' => 'required|integer|min:0',
+            'title' => ['required', 'string', 'max:255'],
+            'percentage' => ['required', 'numeric', 'between:0,99.99'],
+            'priority' => ['required', 'integer', 'min:0'],
             'status' => 'required|' . Rule::in(BaseStatusEnum::values()),
         ];
     }

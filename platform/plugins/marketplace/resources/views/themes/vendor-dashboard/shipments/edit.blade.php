@@ -29,10 +29,12 @@
     @if(!$shipment->isCancelled)
         @include('plugins/ecommerce::shipments.partials.update-cod-status', [
             'shipment' => $shipment,
+            'updateCodStatusUrl' => route('marketplace.vendor.shipments.update-cod-status', $shipment->id),
         ])
 
         @include('plugins/ecommerce::shipments.partials.update-status-modal', [
             'shipment' => $shipment,
+            'updateShippingStatusUrl' => route('marketplace.vendor.orders.update-shipping-status', $shipment->id),
         ])
     @endif
 @endpush

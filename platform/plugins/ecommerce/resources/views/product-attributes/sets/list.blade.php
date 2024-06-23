@@ -7,6 +7,7 @@
                     value="__position__"
                     __checked__
                     :single="true"
+                    :checked="false"
                 />
             </x-core::table.body.cell>
 

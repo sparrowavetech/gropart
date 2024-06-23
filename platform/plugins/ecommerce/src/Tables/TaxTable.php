@@ -35,7 +35,7 @@ class TaxTable extends TableAbstract
         $data = $this->table
             ->eloquent($this->query())
             ->editColumn('percentage', function (Tax $item) {
-                return $item->percentage . '%';
+                return ($item->percentage + 0) . '%';
             });
 
         return $this->toJson($data);

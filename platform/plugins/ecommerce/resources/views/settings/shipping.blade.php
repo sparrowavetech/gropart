@@ -15,6 +15,24 @@
             </x-core::button>
         </x-slot:extra-description>
 
+        @if(! EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation())
+            <div class="px-3">
+                <x-core::alert
+                    type="info">
+                    {{ trans('plugins/ecommerce::shipping.shipping_based_on_location_instruction', ['link_text' => trans('plugins/ecommerce::setting.checkout.form.load_countries_states_cities_from_location_plugin') ]) }}
+                </x-core::alert>
+            </div>
+        @endif
+
+        @if(! EcommerceHelper::isZipCodeEnabled())
+            <div class="px-3">
+                <x-core::alert
+                    type="info">
+                    {{ trans('plugins/ecommerce::shipping.shipping_based_on_zip_code_instruction', ['link_text' => trans('plugins/ecommerce::setting.checkout.form.zip_code_enabled') ]) }}
+                </x-core::alert>
+            </div>
+        @endif
+
         @if (! empty($shipping))
             @foreach ($shipping as $shippingItem)
                 <div class="p-3 wrap-table-shipping-{{ $shippingItem->id }}">

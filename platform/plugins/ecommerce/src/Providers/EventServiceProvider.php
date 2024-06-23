@@ -13,6 +13,7 @@ use Botble\Ecommerce\Events\OrderPaymentConfirmedEvent;
 use Botble\Ecommerce\Events\OrderPlacedEvent;
 use Botble\Ecommerce\Events\OrderReturnedEvent;
 use Botble\Ecommerce\Events\ProductQuantityUpdatedEvent;
+use Botble\Ecommerce\Events\ProductVariationCreated;
 use Botble\Ecommerce\Events\ProductViewed;
 use Botble\Ecommerce\Events\ShippingStatusChanged;
 use Botble\Ecommerce\Facades\Cart;
@@ -32,7 +33,10 @@ use Botble\Ecommerce\Listeners\SendMailsAfterCustomerRegistered;
 use Botble\Ecommerce\Listeners\SendProductReviewsMailAfterOrderCompleted;
 use Botble\Ecommerce\Listeners\SendShippingStatusChangedNotification;
 use Botble\Ecommerce\Listeners\SendWebhookWhenOrderPlaced;
+use Botble\Ecommerce\Listeners\UpdateInvoiceAndShippingWhenOrderCancelled;
+use Botble\Ecommerce\Listeners\UpdateInvoiceWhenOrderCompleted;
 use Botble\Ecommerce\Listeners\UpdateProductStockStatus;
+use Botble\Ecommerce\Listeners\UpdateProductVariationInfo;
 use Botble\Ecommerce\Listeners\UpdateProductView;
 use Botble\Ecommerce\Services\HandleApplyCouponService;
 use Botble\Ecommerce\Services\HandleApplyProductCrossSaleService;
@@ -81,6 +85,7 @@ class EventServiceProvider extends ServiceProvider
         OrderCompletedEvent::class => [
             SendProductReviewsMailAfterOrderCompleted::class,
             GenerateLicenseCodeAfterOrderCompleted::class,
+            UpdateInvoiceWhenOrderCompleted::class,
         ],
         ProductViewed::class => [
             UpdateProductView::class,
@@ -96,12 +101,16 @@ class EventServiceProvider extends ServiceProvider
         ],
         OrderCancelledEvent::class => [
             OrderCancelledNotification::class,
+            UpdateInvoiceAndShippingWhenOrderCancelled::class,
         ],
         OrderReturnedEvent::class => [
             OrderReturnedNotification::class,
         ],
         RenderingPaymentMethods::class => [
             RegisterCodPaymentMethod::class,
+        ],
+        ProductVariationCreated::class => [
+            UpdateProductVariationInfo::class,
         ],
     ];
 

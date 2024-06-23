@@ -1,34 +1,23 @@
-<div class="container">
-    <img
-        src="{{ $store->logo_url }}"
-        alt="{{ $store->name }}"
-    >
+@php
+    $categories = ProductCategoryHelper::getProductCategoriesWithUrl();
+    $categoriesRequest = (array) request()->input('categories', []);
+    $categoryId = Arr::get($categoriesRequest, 0);
+    $coverImage = $store->getMetaData('background', true);
+@endphp
 
-    <h3 class="text-white">{{ $store->name }}</h3>
+<div class="bb-shop-detail">
+    <div class="container">
+        @include(MarketplaceHelper::viewPath('includes.store-detail-banner'))
 
-    @if (EcommerceHelper::isReviewEnabled())
-        <p>{{ $store->reviews()->count() }} reviews</p>
-    @endif
-
-    @if ($store->full_address)
-        <p>{{ $store->full_address }}</p>
-    @endif
-    @if (!MarketplaceHelper::hideStorePhoneNumber() && $store->phone)
-        <p>{{ $store->phone }}</p>
-    @endif
-    @if (!MarketplaceHelper::hideStoreEmail() && $store->email)
-        <p><a href="mailto:{{ $store->email }}">{{ $store->email }}</a></p>
-    @endif
-
-    <h3>{{ __('Products') }}</h3>
-
-    @if ($products->isNotEmpty())
         <div class="row">
-            @foreach ($products as $product)
-                @include(Theme::getThemeNamespace('views.ecommerce.includes.product-item'))
-            @endforeach
+            <div class="col-xl-3 col-lg-4">
+                @include(MarketplaceHelper::viewPath('includes.store-filters'))
+            </div>
+            <div class="col-xl-9 col-lg-8">
+                <div class="bb-product-items-wrapper">
+                    @include(MarketplaceHelper::viewPath('stores.items'))
+                </div>
+            </div>
         </div>
-    @endif
-
-    {!! $products->withQueryString()->links() !!}
+    </div>
 </div>

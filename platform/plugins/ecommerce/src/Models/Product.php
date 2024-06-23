@@ -8,13 +8,9 @@ use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Models\BaseModel;
 use Botble\Ecommerce\Enums\DiscountTargetEnum;
 use Botble\Ecommerce\Enums\DiscountTypeEnum;
-use Botble\Ecommerce\Enums\DiscountTypeOptionEnum;
 use Botble\Ecommerce\Enums\ProductTypeEnum;
 use Botble\Ecommerce\Enums\StockStatusEnum;
-use Botble\Ecommerce\Facades\Discount as DiscountFacade;
 use Botble\Ecommerce\Facades\EcommerceHelper;
-use Botble\Ecommerce\Facades\FlashSale as FlashSaleFacade;
-use Botble\Ecommerce\Services\Products\ProductPriceService;
 use Botble\Ecommerce\Services\Products\UpdateDefaultProductService;
 use Botble\Faq\Models\Faq;
 use Carbon\Carbon;
@@ -26,8 +22,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 /**
@@ -35,6 +34,8 @@ use Illuminate\Support\Str;
  */
 class Product extends BaseModel
 {
+    use Concerns\ProductPrices;
+
     protected $table = 'ec_products';
 
     protected $fillable = [
@@ -66,6 +67,8 @@ class Product extends BaseModel
         'barcode',
         'cost_per_item',
         'generate_license_code',
+        'minimum_order_quantity',
+        'maximum_order_quantity',
     ];
 
     protected $appends = [
@@ -85,11 +88,9 @@ class Product extends BaseModel
         'sale_type' => 'int',
         'start_date' => 'datetime',
         'end_date' => 'datetime',
+        'minimum_order_quantity' => 'int',
+        'maximum_order_quantity' => 'int',
     ];
-
-    protected float $originalPrice = 0;
-
-    protected float $finalPrice = 0;
 
     protected static function booted(): void
     {
@@ -118,7 +119,7 @@ class Product extends BaseModel
         });
 
         static::updated(function (Product $product) {
-            if ($product->is_variation && $product->original_product->defaultVariation->product_id == $product->id) {
+            if ($product->is_variation && $product->original_product->defaultVariation->product_id == $product->getKey()) {
                 app(UpdateDefaultProductService::class)->execute($product);
             }
 
@@ -126,7 +127,11 @@ class Product extends BaseModel
                 Product::query()
                     ->whereIn('id', $product->variations()->pluck('product_id')->all())
                     ->where('is_variation', 1)
-                    ->update(['name' => $product->name]);
+                    ->update([
+                        'name' => $product->name,
+                        'minimum_order_quantity' => $product->minimum_order_quantity,
+                        'maximum_order_quantity' => $product->maximum_order_quantity,
+                    ]);
             }
 
             EcommerceHelper::clearProductMaxPriceCache();
@@ -302,13 +307,13 @@ class Product extends BaseModel
     protected function images(): Attribute
     {
         return Attribute::make(
-            get: function (string|null $value): array {
+            get: function (?string $value): array {
                 try {
                     if ($value === '[null]') {
                         return [];
                     }
 
-                    $images = json_decode((string)$value, true);
+                    $images = json_decode((string) $value, true);
 
                     if (is_array($images)) {
                         $images = array_filter($images);
@@ -325,7 +330,7 @@ class Product extends BaseModel
     protected function image(): Attribute
     {
         return Attribute::make(
-            get: function (string|null $value) {
+            get: function (?string $value) {
                 $firstImage = Arr::first($this->images) ?: null;
 
                 if ($this->is_variation) {
@@ -337,24 +342,10 @@ class Product extends BaseModel
         );
     }
 
-    protected function frontSalePrice(): Attribute
-    {
-        return Attribute::get(
-            fn () => app(ProductPriceService::class)->getPrice($this)
-        );
-    }
-
-    protected function originalPrice(): Attribute
-    {
-        return Attribute::get(
-            fn () => app(ProductPriceService::class)->getOriginalPrice($this)
-        );
-    }
-
     protected function stockStatusLabel(): Attribute
     {
         return Attribute::make(
-            get: function (): string|null {
+            get: function (): ?string {
                 if ($this->with_storehouse_management) {
                     return $this->isOutOfStock() ? StockStatusEnum::OUT_OF_STOCK()->label() : StockStatusEnum::IN_STOCK()
                         ->label();
@@ -368,7 +359,7 @@ class Product extends BaseModel
     protected function stockStatusHtml(): Attribute
     {
         return Attribute::make(
-            get: function (): string|null {
+            get: function (): ?string {
                 if ($this->with_storehouse_management) {
                     return $this->isOutOfStock() ? StockStatusEnum::OUT_OF_STOCK()->toHtml() : StockStatusEnum::IN_STOCK()
                         ->toHtml();
@@ -392,53 +383,13 @@ class Product extends BaseModel
         );
     }
 
-    public function getFlashSalePrice(): float|false|null
+    protected function hasVariations(): Attribute
     {
-        if (! FlashSaleFacade::isEnabled()) {
-            return 0;
-        }
-
-        $flashSale = FlashSaleFacade::getFacadeRoot()->flashSaleForProduct($this);
-
-        if ($flashSale && $flashSale->pivot->quantity > $flashSale->pivot->sold) {
-            return $flashSale->pivot->price;
-        }
-
-        return $this->price;
-    }
-
-    public function getDiscountPrice(): float|int|null
-    {
-        $promotion = DiscountFacade::getFacadeRoot()
-            ->promotionForProduct([$this->id, $this->original_product->id]);
-
-        if (! $promotion) {
-            return $this->price;
-        }
-
-        $price = $this->price;
-        switch ($promotion->type_option) {
-            case DiscountTypeOptionEnum::SAME_PRICE:
-                $price = $promotion->value;
-
-                break;
-            case DiscountTypeOptionEnum::AMOUNT:
-                $price = $price - $promotion->value;
-                if ($price < 0) {
-                    $price = 0;
-                }
-
-                break;
-            case DiscountTypeOptionEnum::PERCENTAGE:
-                $price = $price - ($price * $promotion->value / 100);
-                if ($price < 0) {
-                    $price = 0;
-                }
-
-                break;
-        }
-
-        return $price;
+        return Attribute::make(
+            get: function () {
+                return (bool) $this->defaultVariation->id;
+            }
+        );
     }
 
     public function isOutOfStock(): bool
@@ -507,28 +458,6 @@ class Product extends BaseModel
             ->latest();
     }
 
-    protected function frontSalePriceWithTaxes(): Attribute
-    {
-        return Attribute::get(function (): float|null {
-            if (! EcommerceHelper::isDisplayProductIncludingTaxes()) {
-                return $this->front_sale_price;
-            }
-
-            return $this->front_sale_price + $this->front_sale_price * ($this->total_taxes_percentage / 100);
-        });
-    }
-
-    protected function priceWithTaxes(): Attribute
-    {
-        return Attribute::get(function (): float|null {
-            if (! EcommerceHelper::isDisplayProductIncludingTaxes()) {
-                return $this->price;
-            }
-
-            return $this->price + $this->price * ($this->total_taxes_percentage / 100);
-        });
-    }
-
     protected function totalTaxesPercentage(): Attribute
     {
         return Attribute::get(fn () => $this->taxes
@@ -578,19 +507,6 @@ class Product extends BaseModel
         });
     }
 
-    protected function priceInTable(): Attribute
-    {
-        return Attribute::get(function () {
-            $price = format_price($this->front_sale_price);
-
-            if ($this->front_sale_price != $this->price) {
-                $price .= sprintf(' <del class="text-danger">%s</del>', format_price($this->price));
-            }
-
-            return $price;
-        });
-    }
-
     public function createdBy(): MorphTo
     {
         return $this->morphTo()->withDefault();
@@ -601,7 +517,7 @@ class Product extends BaseModel
         return Attribute::get(function () {
             $this->loadMissing('metadata');
 
-            $faqs = (array)$this->getMetaData('faq_schema_config', true);
+            $faqs = (array) $this->getMetaData('faq_schema_config', true);
 
             if (is_plugin_active('faq')) {
                 $selectedExistingFaqs = $this->getMetaData('faq_ids', true);
@@ -651,7 +567,7 @@ class Product extends BaseModel
     protected function reviewImages(): Attribute
     {
         return Attribute::get(fn () => $this->reviews->sortByDesc('created_at')->reduce(function ($carry, $item) {
-            return array_merge($carry, (array)$item->images);
+            return array_merge($carry, (array) $item->images);
         }, []));
     }
 
@@ -678,21 +594,6 @@ class Product extends BaseModel
     protected function productFileInternalCount(): Attribute
     {
         return Attribute::get(fn () => $this->productFiles->filter(fn (ProductFile $file) => ! $file->is_external_link)->count());
-    }
-
-    protected function salePercent(): Attribute
-    {
-        return Attribute::get(function (): int {
-            if ($this->front_sale_price == 0 && $this->price !== 0) {
-                return 100;
-            }
-
-            if (! $this->front_sale_price || ! $this->price) {
-                return 0;
-            }
-
-            return (int) round(($this->price - $this->front_sale_price) / $this->price * 100);
-        });
     }
 
     public function scopeNotOutOfStock(Builder $query): Builder
@@ -727,12 +628,7 @@ class Product extends BaseModel
         return $this->hasMany(Option::class)->orderBy('order');
     }
 
-    public function isOnSale(): bool
-    {
-        return $this->front_sale_price !== $this->price;
-    }
-
-    public function generateSku(): string|null
+    public function generateSku(): float|string|null
     {
         if (
             ! get_ecommerce_setting('auto_generate_product_sku', true) ||
@@ -753,7 +649,7 @@ class Product extends BaseModel
 
         $sku = str_replace(
             ['[%d]', '[%D]'],
-            mt_rand(10000, 99999),
+            (string) mt_rand(10000, 99999),
             $sku
         );
 
@@ -762,7 +658,7 @@ class Product extends BaseModel
         }
 
         foreach (explode('%d', $sku) as $ignored) {
-            $sku = preg_replace('/%d/i', mt_rand(0, 9), $sku, 1);
+            $sku = preg_replace('/%d/i', (string) mt_rand(0, 9), $sku, 1);
         }
 
         if (Product::query()->where('sku', $sku)->exists()) {
@@ -772,27 +668,41 @@ class Product extends BaseModel
         return $sku;
     }
 
-    public function getOriginalPrice(): float
+    public static function getGroupedVariationQuery(): QueryBuilder
     {
-        return $this->originalPrice;
+        return self::query()
+            ->toBase()
+            ->select([
+                'ec_products.id',
+                'ec_products.name',
+                'ec_products.image',
+                'ec_products.images',
+                'ec_products.sku',
+                'ec_products.is_variation',
+                'ec_product_variations.configurable_product_id as parent_product_id',
+                'variation_attributes' => DB::table('ec_product_variations')
+                    ->selectRaw("GROUP_CONCAT(ec_product_attribute_sets.title, ': ', ec_product_attributes.title SEPARATOR ', ')")
+                    ->whereColumn('ec_products.id', 'ec_product_variations.product_id')
+                    ->leftJoin('ec_product_variation_items', 'ec_product_variation_items.variation_id', '=', 'ec_product_variations.id')
+                    ->leftJoin('ec_product_attributes', 'ec_product_attributes.id', '=', 'ec_product_variation_items.attribute_id')
+                    ->leftJoin('ec_product_attribute_sets', 'ec_product_attribute_sets.id', '=', 'ec_product_attributes.attribute_set_id')
+                    ->groupBy('product_id'),
+                'variations_count' => DB::table('ec_product_variations')
+                    ->selectRaw('COUNT(*)')
+                    ->whereColumn('ec_products.id', 'ec_product_variations.configurable_product_id')
+                    ->groupBy('configurable_product_id'),
+            ])
+            ->leftJoin('ec_product_variations', function (JoinClause $join) {
+                $join
+                    ->on('ec_products.id', '=', 'ec_product_variations.product_id')
+                    ->where('ec_products.is_variation', 1);
+            })
+            ->orderBy('name')
+            ->orderBy('parent_product_id');
     }
 
-    public function setOriginalPrice(float|null $price): static
+    public static function getDigitalProductFilesDirectory(): string
     {
-        $this->originalPrice = (float) $price;
-
-        return $this;
-    }
-
-    public function getFinalPrice(): float
-    {
-        return $this->finalPrice;
-    }
-
-    public function setFinalPrice(float|null $price): static
-    {
-        $this->finalPrice = (float) $price;
-
-        return $this;
+        return 'ecommerce/digital-product-files';
     }
 }

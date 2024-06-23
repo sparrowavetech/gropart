@@ -2,7 +2,7 @@
     <p class="font-weight-bold mb-0">{{ __('Product(s)') }}:</p>
 </div>
 
-<div class="checkout-products-marketplace" id="shipping-method-wrapper">
+<div class="checkout-products-marketplace shipping-method-wrapper">
     @foreach ($groupedProducts as $grouped)
         @php
             $cartItems = $grouped['products']->pluck('cartItem');
@@ -32,7 +32,7 @@
             <div class="p-2" style="background: antiquewhite;">
                 <img
                     class="img-fluid rounded"
-                    src="{{ RvMedia::getImageUrl($store->logo, 'small', false, RvMedia::getDefaultImage()) }}"
+                    src="{{ RvMedia::getImageUrl($store->logo, null, false, RvMedia::getDefaultImage()) }}"
                     alt="{{ $store->name }}"
                     width="30"
                 >
@@ -59,15 +59,14 @@
                 <div class="shipping-method-wrapper p-3">
                     @if (!empty($shipping))
                         <div class="payment-checkout-form">
-                            <div class="mx-0">
-                                <h6>{{ __('Shipping method') }}:</h6>
-                            </div>
+                            <h6>{{ __('Shipping method') }}:</h6>
 
                             <input
                                 name="shipping_option[{{ $storeId }}]"
                                 type="hidden"
-                                value="{{ old("shipping_option.$storeId", $defaultShippingOption) }}"
+                                value="{{ old("shipping_option.$storeId", $defaultShippingOption ?: array_key_first(Arr::first($shipping))) }}"
                             >
+
                             <div id="shipping-method-{{ $storeId }}">
                                 <ul class="list-group list_payment_method">
                                     @foreach ($shipping as $shippingKey => $shippingItems)
@@ -75,20 +74,10 @@
                                             @include('plugins/ecommerce::orders.partials.shipping-option', [
                                                 'shippingItem' => $shippingItem,
                                                 'attributes' => [
-                                                    'id' =>
-                                                        'shipping-method-' .
-                                                        $storeId .
-                                                        '-' .
-                                                        $shippingKey .
-                                                        '-' .
-                                                        $shippingOption,
-                                                    'name' => 'shipping_method[' . $storeId . ']',
+                                                    'id' => "shipping-method-$storeId-$shippingKey-$shippingOption",
+                                                    'name' => "shipping_method[$storeId]",
                                                     'class' => 'magic-radio shipping_method_input',
-                                                    'checked' =>
-                                                        old('shipping_method.' . $storeId, $shippingKey) ==
-                                                            $defaultShippingMethod &&
-                                                        old('shipping_option.' . $storeId, $shippingOption) ==
-                                                            $defaultShippingOption,
+                                                    'checked' => (!$defaultShippingMethod || !$defaultShippingOption) && $loop->first || (old("shipping_method.$storeId", $shippingKey) == $defaultShippingMethod) && (old("shipping_option.$storeId", $shippingOption) == $defaultShippingOption),
                                                     'disabled' => Arr::get($shippingItem, 'disabled'),
                                                     'data-id' => $storeId,
                                                     'data-option' => $shippingOption,
@@ -102,6 +91,8 @@
                     @else
                         <p>{{ __('No shipping methods available!') }}</p>
                     @endif
+
+                    <div class="payment-info-loading loading-spinner" style="display: none;"></div>
                 </div>
             @endif
 

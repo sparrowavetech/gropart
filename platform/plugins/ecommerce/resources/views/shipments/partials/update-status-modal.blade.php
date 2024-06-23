@@ -4,7 +4,7 @@
     button-id="confirm-update-shipping-status-button"
     :button-label="trans('plugins/ecommerce::order.update')"
 >
-    <x-core::form :url="route('ecommerce.shipments.update-status', $shipment->id)">
+    <x-core::form :url="$updateShippingStatusUrl ?? route('ecommerce.shipments.update-status', $shipment->id)">
         <x-core::form.select
             :label="trans('plugins/ecommerce::shipping.status')"
             name="status"

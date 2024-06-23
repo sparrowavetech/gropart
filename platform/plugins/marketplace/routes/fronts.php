@@ -1,6 +1,11 @@
 <?php
 
+use Botble\Base\Http\Middleware\RequiresJsonRequestMiddleware;
 use Botble\Ecommerce\Facades\EcommerceHelper;
+use Botble\Ecommerce\Http\Controllers\PrintShippingLabelController;
+use Botble\Marketplace\Http\Controllers\Fronts\ContactStoreController;
+use Botble\Marketplace\Http\Controllers\Fronts\MessageController;
+use Botble\Marketplace\Http\Controllers\Fronts\PublicStoreController;
 use Botble\Marketplace\Models\Store;
 use Botble\Slug\Facades\SlugHelper;
 use Botble\Theme\Facades\Theme;
@@ -10,20 +15,18 @@ Route::group([
     'namespace' => 'Botble\Marketplace\Http\Controllers\Fronts',
 ], function () {
     Theme::registerRoutes(function () {
-        Route::get(SlugHelper::getPrefix(Store::class, 'stores'), [
-            'as' => 'public.stores',
-            'uses' => 'PublicStoreController@getStores',
-        ]);
+        $slugPrefix = SlugHelper::getPrefix(Store::class, 'stores');
 
-        Route::get(SlugHelper::getPrefix(Store::class, 'stores') . '/{slug}', [
-            'uses' => 'PublicStoreController@getStore',
-            'as' => 'public.store',
-        ]);
+        Route::get($slugPrefix, [PublicStoreController::class, 'getStores'])->name('public.stores');
+        Route::get("$slugPrefix/{slug}", [PublicStoreController::class, 'getStore'])->name('public.store');
 
-        Route::post('ajax/stores/check-store-url', [
-            'as' => 'public.ajax.check-store-url',
-            'uses' => 'PublicStoreController@checkStoreUrl',
-        ]);
+        Route::prefix('ajax/stores')
+            ->name('public.ajax.')
+            ->middleware(RequiresJsonRequestMiddleware::class)
+            ->group(function () {
+                Route::post('check-store-url', [PublicStoreController::class, 'checkStoreUrl'])->name('check-store-url');
+                Route::post('{id}/contact', [ContactStoreController::class, 'store'])->name('stores.contact');
+            });
 
         Route::group([
             'prefix' => 'vendor',
@@ -97,6 +100,10 @@ Route::group([
                     'uses' => 'WithdrawalController@show',
                 ])->wherePrimaryKey();
             });
+
+            Route::match(['GET', 'POST'], 'messages', [MessageController::class, 'index'])->name('messages.index');
+            Route::get('messages/{message}', [MessageController::class, 'show'])->name('messages.show');
+            Route::delete('messages/{message}', [MessageController::class, 'destroy'])->name('messages.destroy');
 
             if (EcommerceHelper::isReviewEnabled()) {
                 Route::resource('reviews', 'ReviewController')
@@ -246,6 +253,9 @@ Route::group([
                     'as' => 'update-cod-status',
                     'uses' => 'ShipmentController@postUpdateCodStatus',
                 ])->wherePrimaryKey();
+
+                Route::get('shipments/{shipment}/print', [PrintShippingLabelController::class, '__invoke'])
+                    ->name('print');
             });
 
             Route::group(['prefix' => 'coupons', 'as' => 'discounts.'], function () {

@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 trait LocationTrait
 {
-    public function getCountryNameAttribute(): string|null
+    public function getCountryNameAttribute(): ?string
     {
         $value = $this->country;
 
@@ -48,7 +48,7 @@ trait LocationTrait
         return $this->belongsTo(City::class, 'city')->withDefault();
     }
 
-    public function getStateNameAttribute(): string|null
+    public function getStateNameAttribute(): ?string
     {
         $value = $this->state;
 
@@ -67,7 +67,7 @@ trait LocationTrait
         return $value;
     }
 
-    public function getCityNameAttribute(): string|null
+    public function getCityNameAttribute(): ?string
     {
         $value = $this->city;
 

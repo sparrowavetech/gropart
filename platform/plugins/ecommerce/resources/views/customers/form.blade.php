@@ -8,15 +8,11 @@
         form-method="POST"
         size="md"
     >
-        <input
-            name="customer_id"
-            type="hidden"
-            value="{{ $form->getModel()->id }}"
-        >
-
-        @include('plugins/ecommerce::customers.addresses.form', [
-            'address' => new Botble\Ecommerce\Models\Address(),
-        ])
+        {!!
+            \Botble\Ecommerce\Forms\Fronts\Customer\AddressForm::create()
+                ->add('customer_id', 'hidden', ['value' => $form->getModel()->id])
+                ->renderForm()
+        !!}
 
         <x-slot:footer>
             <x-core::button

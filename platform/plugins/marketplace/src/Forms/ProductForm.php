@@ -2,9 +2,16 @@
 
 namespace Botble\Marketplace\Forms;
 
+use Botble\Base\Forms\FieldOptions\ContentFieldOption;
+use Botble\Base\Forms\FieldOptions\EditorFieldOption;
+use Botble\Base\Forms\FieldOptions\NameFieldOption;
+use Botble\Base\Forms\FieldOptions\NumberFieldOption;
 use Botble\Base\Forms\FieldOptions\SelectFieldOption;
 use Botble\Base\Forms\Fields\MultiCheckListField;
+use Botble\Base\Forms\Fields\NumberField;
+use Botble\Base\Forms\Fields\SelectField;
 use Botble\Base\Forms\Fields\TagField;
+use Botble\Base\Forms\Fields\TextField;
 use Botble\Base\Forms\Fields\TreeCategoryField;
 use Botble\Ecommerce\Enums\GlobalOptionEnum;
 use Botble\Ecommerce\Enums\ProductTypeEnum;
@@ -17,7 +24,6 @@ use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Models\ProductAttributeSet;
 use Botble\Ecommerce\Models\ProductCollection;
 use Botble\Ecommerce\Models\ProductLabel;
-use Botble\Ecommerce\Models\ProductTag;
 use Botble\Ecommerce\Models\ProductVariation;
 use Botble\Ecommerce\Models\Tax;
 use Botble\Marketplace\Facades\MarketplaceHelper;
@@ -32,70 +38,42 @@ class ProductForm extends BaseProductForm
     {
         $this->addAssets();
 
-        $selectedCategories = [];
-
         $brands = Brand::query()->pluck('name', 'id')->all();
-        $brands = [0 => trans('plugins/ecommerce::brands.no_brand')] + $brands;
 
         $productCollections = ProductCollection::query()->pluck('name', 'id')->all();
 
         $productLabels = ProductLabel::query()->pluck('name', 'id')->all();
 
-        $selectedProductCollections = [];
-        $selectedProductLabels = [];
         $productId = null;
-        $totalProductVariations = 0;
+        $selectedCategories = [];
         $tags = null;
+        $totalProductVariations = 0;
 
         if ($this->getModel()) {
-            $selectedCategories = $this->getModel()->categories()->pluck('category_id')->all();
             $productId = $this->getModel()->id;
-            $selectedProductCollections = $this->getModel()->productCollections()->pluck('product_collection_id')
-                ->all();
 
-            $selectedProductLabels = $this->getModel()->productLabels()->pluck('product_label_id')->all();
+            $selectedCategories = $this->getModel()->categories()->pluck('category_id')->all();
 
-            $totalProductVariations = ProductVariation::query()
-                ->where('configurable_product_id', $productId)
-                ->count();
+            $totalProductVariations = ProductVariation::query()->where('configurable_product_id', $productId)->count();
 
-            $tags = $this->getModel()
-                ->tags()
-                ->select('name')
-                ->get()
-                ->map(fn (ProductTag $item) => $item->name)
-                ->implode(',');
+            $tags = $this->getModel()->tags()->pluck('name')->implode(',');
         }
-
-        $productAttributeSets = ProductAttributeSet::getAllWithSelected($productId, []);
 
         $this
             ->model(Product::class)
             ->template(MarketplaceHelper::viewPath('vendor-dashboard.forms.base'))
-            ->setFormOption('enctype', 'multipart/form-data')
+            ->hasFiles()
             ->setValidatorClass(ProductRequest::class)
-            ->add('name', 'text', [
-                'label' => trans('plugins/ecommerce::products.form.name'),
-                'required' => true,
-                'attr' => [
-                    'placeholder' => trans('core/base::forms.name_placeholder'),
-                    'data-counter' => 250,
-                ],
-            ])
-            ->add('description', CustomEditorField::class, [
-                'label' => trans('core/base::forms.description'),
-                'attr' => [
-                    'rows' => 2,
-                    'placeholder' => trans('core/base::forms.description_placeholder'),
-                    'data-counter' => 1000,
-                ],
-            ])
-            ->add('content', CustomEditorField::class, [
-                'label' => trans('core/base::forms.content'),
-                'attr' => [
-                    'rows' => 4,
-                ],
-            ])
+
+            ->add('name', TextField::class, NameFieldOption::make()->required()->toArray())
+            ->add(
+                'description',
+                CustomEditorField::class,
+                EditorFieldOption::make()
+                    ->label(trans('core/base::forms.description'))
+                    ->placeholder(trans('core/base::forms.description_placeholder'))->toArray()
+            )
+            ->add('content', CustomEditorField::class, ContentFieldOption::make()->allowedShortcodes()->toArray())
             ->add('images', CustomImagesField::class, [
                 'label' => trans('plugins/ecommerce::products.form.image'),
                 'values' => $productId ? $this->getModel()->images : [],
@@ -124,39 +102,90 @@ class ProductForm extends BaseProductForm
                     ->addAttribute('card-body-class', 'p-0')
                     ->toArray()
             )
-            ->add('brand_id', 'customSelect', [
-                'label' => trans('plugins/ecommerce::products.form.brand'),
-                'choices' => $brands,
-            ])
-            ->add('product_collections[]', MultiCheckListField::class, [
-                'label' => trans('plugins/ecommerce::products.form.collections'),
-                'choices' => $productCollections,
-                'value' => old('product_collections', $selectedProductCollections),
-            ])
-            ->add('product_labels[]', MultiCheckListField::class, [
-                'label' => trans('plugins/ecommerce::products.form.labels'),
-                'choices' => $productLabels,
-                'value' => old('product_labels', $selectedProductLabels),
-            ]);
+            ->when($brands, function () use ($brands) {
+                $this
+                    ->add(
+                        'brand_id',
+                        SelectField::class,
+                        SelectFieldOption::make()
+                            ->label(trans('plugins/ecommerce::products.form.brand'))
+                            ->choices($brands)
+                            ->searchable()
+                            ->emptyValue(trans('plugins/ecommerce::brands.select_brand'))
+                            ->allowClear()
+                            ->toArray()
+                    );
+            })
+            ->when($productCollections, function () use ($productCollections) {
+                $selectedProductCollections = [];
 
-        if (EcommerceHelper::isTaxEnabled()) {
-            $taxes = Tax::query()->get()->pluck('title_with_percentage', 'id');
+                if ($this->getModel() && $this->getModel()->getKey()) {
+                    $selectedProductCollections = $this->getModel()
+                        ->productCollections()
+                        ->pluck('product_collection_id')
+                        ->all();
+                }
 
-            $selectedTaxes = [];
-            if ($this->getModel() && $this->getModel()->id) {
-                $selectedTaxes = $this->getModel()->taxes()->pluck('tax_id')->all();
-            } elseif ($defaultTaxRate = get_ecommerce_setting('default_tax_rate')) {
-                $selectedTaxes = [$defaultTaxRate];
-            }
+                $this
+                    ->add('product_collections[]', MultiCheckListField::class, [
+                        'label' => trans('plugins/ecommerce::products.form.collections'),
+                        'choices' => $productCollections,
+                        'value' => old('product_collections', $selectedProductCollections),
+                    ]);
+            })
+            ->when($productLabels, function () use ($productLabels) {
+                $selectedProductLabels = [];
 
-            $this->add('taxes[]', MultiCheckListField::class, [
-                'label' => trans('plugins/ecommerce::products.form.taxes'),
-                'choices' => $taxes,
-                'value' => old('taxes', $selectedTaxes),
-            ]);
-        }
+                if ($this->getModel() && $this->getModel()->getKey()) {
+                    $selectedProductLabels = $this->getModel()->productLabels()->pluck('product_label_id')->all();
+                }
 
-        $this
+                $this
+                    ->add('product_labels[]', MultiCheckListField::class, [
+                        'label' => trans('plugins/ecommerce::products.form.labels'),
+                        'choices' => $productLabels,
+                        'value' => old('product_labels', $selectedProductLabels),
+                    ]);
+            })
+            ->when(EcommerceHelper::isTaxEnabled(), function () {
+                $taxes = Tax::query()->orderBy('percentage')->get()->pluck('title_with_percentage', 'id')->all();
+
+                if ($taxes) {
+                    $selectedTaxes = [];
+                    if ($this->getModel() && $this->getModel()->getKey()) {
+                        $selectedTaxes = $this->getModel()->taxes()->pluck('tax_id')->all();
+                    } elseif ($defaultTaxRate = get_ecommerce_setting('default_tax_rate')) {
+                        $selectedTaxes = [$defaultTaxRate];
+                    }
+
+                    $this->add('taxes[]', MultiCheckListField::class, [
+                        'label' => trans('plugins/ecommerce::products.form.taxes'),
+                        'choices' => $taxes,
+                        'value' => old('taxes', $selectedTaxes),
+                    ]);
+                }
+            })
+            ->when(EcommerceHelper::isCartEnabled(), function (ProductForm $form) {
+                $form
+                    ->add(
+                        'minimum_order_quantity',
+                        NumberField::class,
+                        NumberFieldOption::make()
+                            ->label(trans('plugins/ecommerce::products.form.minimum_order_quantity'))
+                            ->helperText(trans('plugins/ecommerce::products.form.minimum_order_quantity_helper'))
+                            ->defaultValue(0)
+                            ->toArray()
+                    )
+                    ->add(
+                        'maximum_order_quantity',
+                        NumberField::class,
+                        NumberFieldOption::make()
+                            ->label(trans('plugins/ecommerce::products.form.maximum_order_quantity'))
+                            ->helperText(trans('plugins/ecommerce::products.form.maximum_order_quantity_helper'))
+                            ->defaultValue(0)
+                            ->toArray()
+                    );
+            })
             ->add('tag', TagField::class, [
                 'label' => trans('plugins/ecommerce::products.form.tags'),
                 'value' => $tags,
@@ -184,6 +213,8 @@ class ProductForm extends BaseProductForm
                     ],
                 ]);
         }
+
+        $productAttributeSets = ProductAttributeSet::getAllWithSelected($productId, []);
 
         $this
             ->addMetaBoxes([

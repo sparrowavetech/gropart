@@ -84,7 +84,7 @@
                                                 name="brands[]"
                                                 type="checkbox"
                                                 value="{{ $brand->id }}"
-                                                @checked(in_array($brand->id, request()->input('brands', [])))
+                                                @checked(in_array($brand->id, (array)request()->input('brands', [])))
                                             >
                                             <label
                                                 class="form-check-label"
@@ -117,7 +117,7 @@
                                                 name="tags[]"
                                                 type="checkbox"
                                                 value="{{ $tag->id }}"
-                                                @checked(in_array($tag->id, request()->input('tags', [])))
+                                                @checked(in_array($tag->id, (array)request()->input('tags', [])))
                                             >
                                             <label
                                                 class="form-check-label"
@@ -161,12 +161,10 @@
                             >
                             <span class="slider__value me-2">
                                 <span class="slider__min me-1"></span>
-                                <span>{{ $currencyTitle = get_application_currency()->title }}</span>
                             </span>
                             <span>-</span>
                             <span class="slider__value ms-2">
                                 <span class="slider__max me-1"></span>
-                                <span>{{ $currencyTitle }}</span>
                             </span>
                         </div>
                     </div>

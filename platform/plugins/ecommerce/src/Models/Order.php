@@ -4,6 +4,7 @@ namespace Botble\Ecommerce\Models;
 
 use Botble\Base\Models\BaseModel;
 use Botble\Ecommerce\Enums\OrderAddressTypeEnum;
+use Botble\Ecommerce\Enums\OrderCancellationReasonEnum;
 use Botble\Ecommerce\Enums\OrderStatusEnum;
 use Botble\Ecommerce\Enums\ShippingMethodEnum;
 use Botble\Ecommerce\Enums\ShippingStatusEnum;
@@ -18,6 +19,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Collection as IlluminateCollection;
 use Illuminate\Support\Facades\DB;
 
 class Order extends BaseModel
@@ -39,6 +41,8 @@ class Order extends BaseModel
         'is_confirmed',
         'discount_description',
         'is_finished',
+        'cancellation_reason',
+        'cancellation_reason_description',
         'token',
         'completed_at',
         'proof_file',
@@ -64,9 +68,7 @@ class Order extends BaseModel
             }
         });
 
-        static::creating(function (Order $order) {
-            $order->code = static::generateUniqueCode();
-        });
+        static::creating(fn (Order $order) => $order->code = static::generateUniqueCode());
     }
 
     public function user(): BelongsTo
@@ -76,22 +78,18 @@ class Order extends BaseModel
 
     protected function userName(): Attribute
     {
-        return Attribute::make(
-            get: fn () => $this->user->name
-        );
+        return Attribute::get(fn () => $this->user->name);
     }
 
     protected function fullAddress(): Attribute
     {
-        return Attribute::make(
-            get: fn () => $this->shippingAddress->full_address
-        );
+        return Attribute::get(fn () => $this->shippingAddress->full_address);
     }
 
     protected function shippingMethodName(): Attribute
     {
-        return Attribute::make(
-            get: fn () => OrderHelper::getShippingMethod(
+        return Attribute::get(
+            fn () => OrderHelper::getShippingMethod(
                 $this->attributes['shipping_method'],
                 $this->attributes['shipping_option']
             )
@@ -100,21 +98,21 @@ class Order extends BaseModel
 
     public function address(): HasOne
     {
-        return $this->hasOne(OrderAddress::class, 'order_id')
-            ->where('type', OrderAddressTypeEnum::SHIPPING)
-            ->withDefault();
+        return $this->shippingAddress();
     }
 
     public function shippingAddress(): HasOne
     {
-        return $this->hasOne(OrderAddress::class, 'order_id')
+        return $this
+            ->hasOne(OrderAddress::class, 'order_id')
             ->where('type', OrderAddressTypeEnum::SHIPPING)
             ->withDefault();
     }
 
     public function billingAddress(): HasOne
     {
-        return $this->hasOne(OrderAddress::class, 'order_id')
+        return $this
+            ->hasOne(OrderAddress::class, 'order_id')
             ->where('type', OrderAddressTypeEnum::BILLING)
             ->withDefault();
     }
@@ -211,8 +209,9 @@ class Order extends BaseModel
 
     public function isInvoiceAvailable(): bool
     {
-        return $this->invoice()->exists() && (! EcommerceHelper::disableOrderInvoiceUntilOrderConfirmed(
-        ) || $this->is_confirmed);
+        return $this->invoice()->exists()
+            && (! EcommerceHelper::disableOrderInvoiceUntilOrderConfirmed() || $this->is_confirmed)
+            && $this->status != OrderStatusEnum::CANCELED;
     }
 
     public function getProductsWeightAttribute(): float|int
@@ -243,9 +242,9 @@ class Order extends BaseModel
             return false;
         }
 
-        $shipmentDayCount = Carbon::now()->diffInDays($this->completed_at);
+        $overReturnDate = Carbon::now()->subDays(EcommerceHelper::getReturnableDays())->gt($this->completed_at);
 
-        if ($shipmentDayCount > EcommerceHelper::getReturnableDays()) {
+        if ($overReturnDate) {
             return false;
         }
 
@@ -307,5 +306,50 @@ class Order extends BaseModel
             ->groupBy('date')
             ->select($select)
             ->get();
+    }
+
+    protected function cancellationReasonMessage(): Attribute
+    {
+        return Attribute::get(function () {
+            $reason = OrderCancellationReasonEnum::getLabel($this->cancellation_reason);
+
+            if ($this->cancellation_reason_description) {
+                return sprintf('%s (%s)', $reason, $this->cancellation_reason_description);
+            }
+
+            return $reason;
+        });
+    }
+
+    public function getOrderProducts(): IlluminateCollection
+    {
+        $productsIds = $this->products->pluck('product_id')->all();
+
+        if (empty($productsIds)) {
+            return collect();
+        }
+
+        return get_products([
+            'condition' => [
+                ['ec_products.id', 'IN', $productsIds],
+            ],
+            'select' => [
+                'ec_products.id',
+                'ec_products.images',
+                'ec_products.name',
+                'ec_products.price',
+                'ec_products.sale_price',
+                'ec_products.sale_type',
+                'ec_products.start_date',
+                'ec_products.end_date',
+                'ec_products.sku',
+                'ec_products.order',
+                'ec_products.created_at',
+                'ec_products.is_variation',
+            ],
+            'with' => [
+                'variationProductAttributes',
+            ],
+        ]);
     }
 }

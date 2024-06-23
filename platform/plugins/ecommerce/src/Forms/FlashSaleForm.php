@@ -42,7 +42,7 @@ class FlashSaleForm extends FormAbstract
                     'title' => trans('plugins/ecommerce::flash-sale.products'),
                     'content' => view('plugins/ecommerce::flash-sales.products', [
                         'flashSale' => $this->getModel(),
-                        'products' => $this->getModel()->id ? $this->getModel()->products : collect(),
+                        'products' => $this->getModel()->getKey() ? $this->getModel()->products : collect(),
                     ]),
                     'priority' => 0,
                 ],

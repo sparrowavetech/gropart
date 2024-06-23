@@ -8,7 +8,9 @@
                     {!! Theme::partial('post-item', compact('post')) !!}
                 @endforeach
             </div>
-            {!! $posts->withQueryString()->links() !!}
+            <div class="d-flex align-items-center justify-content-center">
+                {!! $posts->withQueryString()->links() !!}
+            </div>
         </div>
         <div class="col-md-3">
             <div class="primary-sidebar">

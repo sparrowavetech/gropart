@@ -17,7 +17,7 @@ class OrderTrackingRequest extends Request
         ];
 
         if (EcommerceHelper::isLoginUsingPhone()) {
-            $rules['phone'] = 'nullable|' . BaseHelper::getPhoneValidationRule();
+            $rules['phone'] = ['nullable', ...BaseHelper::getPhoneValidationRule(true)];
         }
 
         return $rules;

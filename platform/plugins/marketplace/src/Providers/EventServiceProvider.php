@@ -9,6 +9,7 @@ use Botble\Marketplace\Listeners\OrderCreatedEmailNotification;
 use Botble\Marketplace\Listeners\RegisterMarketplaceWidget;
 use Botble\Marketplace\Listeners\RenderingSiteMapListener;
 use Botble\Marketplace\Listeners\SaveVendorInformationListener;
+use Botble\Marketplace\Listeners\SendMailAfterVendorRegistered;
 use Botble\Marketplace\Listeners\WithdrawalRequestedNotification;
 use Botble\Theme\Events\RenderingSiteMapEvent;
 use Illuminate\Auth\Events\Registered;
@@ -19,6 +20,7 @@ class EventServiceProvider extends ServiceProvider
     protected $listen = [
         Registered::class => [
             SaveVendorInformationListener::class,
+            SendMailAfterVendorRegistered::class,
         ],
         RenderingSiteMapEvent::class => [
             RenderingSiteMapListener::class,

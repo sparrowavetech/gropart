@@ -9,8 +9,8 @@ class AddAttributesToProductRequest extends Request
     public function rules(): array
     {
         return [
-            'added_attributes' => 'sometimes|array',
-            'added_attribute_sets' => 'sometimes|array',
+            'added_attributes' => ['sometimes', 'array'],
+            'added_attribute_sets' => ['sometimes', 'array'],
         ];
     }
 }

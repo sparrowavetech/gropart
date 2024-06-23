@@ -10,7 +10,7 @@
             </div>
 
             <div class="col-md-4">
-                @if ($count['revenues']->count())
+                @if ($count['revenues']->isNotEmpty())
                     <div class="rp-card-chart position-relative mb-3">
                         <div id="revenue-earnings-chart"></div>
                         <div class="rp-card-information">

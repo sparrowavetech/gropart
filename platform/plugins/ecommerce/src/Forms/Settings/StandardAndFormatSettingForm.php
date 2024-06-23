@@ -69,7 +69,7 @@ class StandardAndFormatSettingForm extends SettingForm
             ])
             ->add('store_width_height_unit', 'customSelect', [
                 'label' => trans('plugins/ecommerce::setting.standard_and_format.form.height_unit'),
-                'value' => get_ecommerce_setting('store_width_height_unit', 'cm'),
+                'selected' => get_ecommerce_setting('store_width_height_unit', 'cm'),
                 'choices' => [
                     'cm' => trans('plugins/ecommerce::setting.standard_and_format.form.height_unit_cm'),
                     'm' => trans('plugins/ecommerce::setting.standard_and_format.form.height_unit_m'),

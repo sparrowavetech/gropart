@@ -5,6 +5,8 @@ namespace Botble\Ecommerce\Supports;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Ecommerce\Models\ProductCategory;
 use Botble\Language\Facades\Language;
+use Botble\Support\Services\Cache\Cache;
+use Carbon\Carbon;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Arr;
@@ -106,7 +108,7 @@ class ProductCategoryHelper
         return $this->treeCategories;
     }
 
-    public function getTreeCategoriesOptions(array|Collection $categories, array $options = [], string $indent = null): array
+    public function getTreeCategoriesOptions(array|Collection $categories, array $options = [], ?string $indent = null): array
     {
         if (! $categories instanceof Collection) {
             foreach ($categories as $category) {
@@ -135,20 +137,30 @@ class ProductCategoryHelper
         return $options;
     }
 
-    public function renderProductCategoriesSelect(int|string $selected = null): string
+    public function renderProductCategoriesSelect(int|string|null $selected = null): string
     {
-        $query = ProductCategory::query()
-            ->toBase()
-            ->where('status', BaseStatusEnum::PUBLISHED)
-            ->select([
-                'ec_product_categories.id',
-                'ec_product_categories.name',
-                'parent_id',
-            ])
-            ->orderBy('order')
-            ->orderByDesc('created_at');
+        $cache = new Cache(app('cache'), ProductCategory::class);
 
-        $categories = $this->applyQuery($query)->get();
+        $cacheKey = 'ecommerce_categories_for_rendering_select' . md5($cache->generateCacheKeyFromInput() . serialize(func_get_args()));
+
+        if ($cache->has($cacheKey)) {
+            $categories = $cache->get($cacheKey);
+        } else {
+            $query = ProductCategory::query()
+                ->toBase()
+                ->where('status', BaseStatusEnum::PUBLISHED)
+                ->select([
+                    'ec_product_categories.id',
+                    'ec_product_categories.name',
+                    'parent_id',
+                ])
+                ->orderBy('order')
+                ->orderByDesc('created_at');
+
+            $categories = $this->applyQuery($query)->get();
+
+            $cache->put($cacheKey, $categories, Carbon::now()->addHours(2));
+        }
 
         return view('core/base::forms.partials.nested-select-option', [
             'options' => $categories,
@@ -157,16 +169,25 @@ class ProductCategoryHelper
         ])->render();
     }
 
-    public function getProductCategoriesWithUrl(array $categoryIds = [], array $condition = [], int $limit = null): Collection
+    public function getProductCategoriesWithUrl(array $categoryIds = [], array $condition = [], ?int $limit = null): Collection
     {
+        $cache = new Cache(app('cache'), ProductCategory::class);
+
+        $cacheKey = 'ecommerce_categories_for_widgets_' . md5($cache->generateCacheKeyFromInput() . serialize(func_get_args()));
+
+        if ($cache->has($cacheKey)) {
+            return $cache->get($cacheKey);
+        }
+
         $query = ProductCategory::query()
             ->toBase()
             ->where('status', BaseStatusEnum::PUBLISHED)
             ->select([
                 'ec_product_categories.id',
                 'ec_product_categories.name',
+                'ec_product_categories.order',
                 'parent_id',
-                DB::raw('CONCAT(slugs.prefix, "/", slugs.key) as url'),
+                DB::raw("CONCAT(slugs.prefix, '/', slugs.key) as url"),
                 'icon',
                 'image',
                 'icon_image',
@@ -185,12 +206,11 @@ class ProductCategoryHelper
                     })
                     ->addSelect(
                         DB::raw(
-                            'IF(st.key IS NOT NULL, CONCAT(st.prefix, "/", st.key), CONCAT(slugs.prefix, "/", slugs.key)) as url'
+                            "IF(st.key IS NOT NULL, CONCAT(st.prefix, '/', st.key), CONCAT(slugs.prefix, '/', slugs.key)) as url"
                         )
                     );
             })
             ->orderBy('ec_product_categories.order')
-            ->orderByDesc('ec_product_categories.created_at')
             ->when(
                 ! empty($categoryIds),
                 fn (Builder $query) => $query->whereIn('ec_product_categories.id', $categoryIds)
@@ -200,7 +220,11 @@ class ProductCategoryHelper
 
         $query = $this->applyQuery($query);
 
-        return $query->get()->unique('id');
+        $categories = $query->get()->unique('id');
+
+        $cache->put($cacheKey, $categories, Carbon::now()->addHours(2));
+
+        return $categories;
     }
 
     public function applyQuery(Builder $query): Builder

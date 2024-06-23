@@ -11,22 +11,22 @@ use Botble\Marketplace\Forms\StoreForm;
 use Botble\Marketplace\Forms\VendorStoreForm;
 use Botble\Media\Facades\RvMedia;
 use Botble\Menu\Facades\Menu;
+use Botble\Newsletter\Facades\Newsletter;
 use Botble\SocialLogin\Facades\SocialService;
 use Botble\Theme\Facades\Theme;
+use Botble\Theme\Supports\ThemeSupport;
+use Botble\Theme\Typography\TypographyItem;
 use Illuminate\Routing\Events\RouteMatched;
 use Theme\Farmart\Supports\Wishlist;
 
 register_page_template([
     'default' => __('Default'),
-    'default-sidebar' => __('Default with Sidebar'),
     'homepage' => __('Homepage'),
     'full-width' => __('Full Width'),
     'coming-soon' => __('Coming Soon'),
-    'blog-right-sidebar' => __('Blog with Sidebar'),
 ]);
 
-RvMedia::setUploadPathAndURLToPublic()
-    ->addSize('small', 300, 300);
+RvMedia::addSize('small', 300, 300);
 
 Menu::addMenuLocation('header-navigation', __('Header Navigation'));
 
@@ -36,93 +36,94 @@ function available_socials_store(): array
         'facebook' => 'Facebook',
         'twitter' => 'Twitter',
         'instagram' => 'Instagram',
-        'youtube' => 'Youtube',
+        'youtube' => 'YouTube',
         'linkedin' => 'Linkedin',
     ];
 }
 
-register_sidebar([
-    'id' => 'pre_footer_sidebar',
-    'name' => __('Top footer sidebar'),
-    'description' => __('Widgets in the blog page'),
-]);
-
-register_sidebar([
-    'id' => 'footer_sidebar',
-    'name' => __('Footer sidebar'),
-    'description' => __('Widgets in footer sidebar'),
-]);
-
-register_sidebar([
-    'id' => 'default_page_sidebar',
-    'name' => __('Default Page sidebar'),
-    'description' => __('Widgets in Default Page sidebar'),
-]);
-
-register_sidebar([
-    'id' => 'blog-right-sidebar',
-    'name' => __('Blog with Sidebar'),
-    'description' => __('Blogs with sidebar'),
-]);
-
-register_sidebar([
-    'id' => 'bottom_footer_sidebar',
-    'name' => __('Bottom footer sidebar'),
-    'description' => __('Widgets in bottom footer sidebar'),
-]);
-
-if (is_plugin_active('ecommerce')) {
-    register_sidebar([
-        'id' => 'products_list_sidebar',
-        'name' => __('Products list sidebar'),
-        'description' => __('Widgets on header products list page'),
-    ]);
-
-    register_sidebar([
-        'id' => 'product_detail_sidebar',
-        'name' => __('Product detail sidebar'),
-        'description' => __('Widgets in the product detail page'),
-    ]);
-
-    add_filter('ecommerce_quick_view_data', function (array $data): array {
-        return [
-            ...$data,
-            'wishlistIds' => Wishlist::getWishlistIds([$data['product']->getKey()]),
-        ];
-    });
-}
-
 app()->booted(function () {
+    ThemeSupport::registerSocialLinks();
+    ThemeSupport::registerSocialSharing();
+
+    if (is_plugin_active('newsletter')) {
+        Newsletter::registerNewsletterPopup();
+    }
+
+    Theme::typography()
+        ->registerFontFamily(new TypographyItem('primary', __('Primary'), 'Mulish'));
+
+    register_sidebar([
+        'id' => 'pre_footer_sidebar',
+        'name' => __('Top footer sidebar'),
+        'description' => __('Widgets in the blog page'),
+    ]);
+
+    register_sidebar([
+        'id' => 'footer_sidebar',
+        'name' => __('Footer sidebar'),
+        'description' => __('Widgets in footer sidebar'),
+    ]);
+
+    register_sidebar([
+        'id' => 'bottom_footer_sidebar',
+        'name' => __('Bottom footer sidebar'),
+        'description' => __('Widgets in bottom footer sidebar'),
+    ]);
+
+    if (is_plugin_active('ecommerce')) {
+        register_sidebar([
+            'id' => 'products_list_sidebar',
+            'name' => __('Products list sidebar'),
+            'description' => __('Widgets on header products list page'),
+        ]);
+
+        register_sidebar([
+            'id' => 'product_detail_sidebar',
+            'name' => __('Product detail sidebar'),
+            'description' => __('Widgets in the product detail page'),
+        ]);
+
+        add_filter('ecommerce_quick_view_data', function (array $data): array {
+            return [
+                ...$data,
+                'wishlistIds' => Wishlist::getWishlistIds([$data['product']->getKey()]),
+            ];
+        });
+    }
+
     if (method_exists(FlashSaleSupport::class, 'addShowSaleCountLeftSetting')) {
         FlashSale::addShowSaleCountLeftSetting();
     }
 
     if (is_plugin_active('marketplace')) {
         StoreForm::extend(function (StoreForm $form) {
-            $form->addAfter('logo', 'background', MediaImageField::class, [
+            $form->addAfter('cover_image', 'background', MediaImageField::class, [
                 'label' => __('Background'),
                 'metadata' => true,
+                'colspan' => 2,
             ]);
         });
 
         VendorStoreForm::extend(function (VendorStoreForm $form) {
-            $store = $form->getModel();
-
-            $background = $store->getMetaData('background', true);
-            $socials = [];
-            $availableSocials = [];
-
-            if (! MarketplaceHelper::hideStoreSocialLinks()) {
-                $socials = $store->getMetaData('socials', true);
-                $availableSocials = available_socials_store();
-            }
-
-            $view = Theme::getThemeNamespace() . '::views.marketplace.includes.extended-info-content';
-
             $form
-                ->addBefore('submit', 'extended_info_content', HtmlField::class, [
-                    'html' => view($view, compact('background', 'socials', 'availableSocials'))->render(),
-                ]);
+                ->addAfter('cover_image', 'background', MediaImageField::class, [
+                    'label' => __('Background'),
+                    'metadata' => true,
+                    'colspan' => 2,
+                ])
+                ->when(! MarketplaceHelper::hideStoreSocialLinks(), function (VendorStoreForm $form) {
+                    $store = $form->getModel();
+
+                    $background = $store->getMetaData('background', true);
+                    $socials = $store->getMetaData('socials', true);
+                    $availableSocials = available_socials_store();
+
+                    $view = Theme::getThemeNamespace() . '::views.marketplace.includes.extended-info-content';
+
+                    $form->addBefore('submit', 'extended_info_content', HtmlField::class, [
+                        'html' => view($view, compact('background', 'socials', 'availableSocials'))->render(),
+                    ]);
+                });
         });
 
         VendorStoreForm::afterSaving(function (VendorStoreForm $form) {
@@ -143,7 +144,7 @@ app()->booted(function () {
 
             if (! MarketplaceHelper::hideStoreSocialLinks() && $request->has('socials')) {
                 $availableSocials = available_socials_store();
-                $socials = collect((array)$request->input('socials', []))->filter(
+                $socials = collect((array) $request->input('socials', []))->filter(
                     function ($value, $key) use ($availableSocials) {
                         return filter_var($value, FILTER_VALIDATE_URL) && in_array($key, array_keys($availableSocials));
                     }

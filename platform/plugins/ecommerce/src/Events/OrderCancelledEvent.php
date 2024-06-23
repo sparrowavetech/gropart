@@ -10,7 +10,10 @@ class OrderCancelledEvent extends Event
 {
     use SerializesModels;
 
-    public function __construct(public Order $order)
-    {
+    public function __construct(
+        public Order $order,
+        public ?string $reason = null,
+        public ?string $reasonDescription = null
+    ) {
     }
 }

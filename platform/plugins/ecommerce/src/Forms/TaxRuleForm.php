@@ -3,16 +3,16 @@
 namespace Botble\Ecommerce\Forms;
 
 use Botble\Base\Forms\FormAbstract;
-use Botble\Ecommerce\Facades\EcommerceHelper;
+use Botble\Ecommerce\Forms\Concerns\HasLocationFields;
 use Botble\Ecommerce\Forms\Concerns\HasSubmitButton;
 use Botble\Ecommerce\Http\Requests\TaxRuleRequest;
 use Botble\Ecommerce\Models\Tax;
 use Botble\Ecommerce\Models\TaxRule;
-use Botble\Location\Fields\SelectLocationField;
 use Illuminate\Support\Facades\Request;
 
 class TaxRuleForm extends FormAbstract
 {
+    use HasLocationFields;
     use HasSubmitButton;
 
     public function setup(): void
@@ -31,10 +31,7 @@ class TaxRuleForm extends FormAbstract
                     $taxId = request()->input('tax_id'),
                     fn (FormAbstract $form) => $form->add('tax_id', 'hidden', [
                         'value' => $taxId,
-                    ])
-                )
-                ->when(
-                    ! $taxId,
+                    ]),
                     function (FormAbstract $form) {
                         $taxes = Tax::query()->pluck('title', 'id')->toArray();
                         $form
@@ -46,52 +43,15 @@ class TaxRuleForm extends FormAbstract
                 );
         }
 
-        if (EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation()) {
-            $this->add(
-                'location',
-                SelectLocationField::class,
-                [
-                    'locationKeys' => [
-                        'country' => 'country',
-                        'state' => 'state',
-                        'city' => 'city',
-                    ],
-                ]
-            );
-        } else {
-            $this
-                ->add('country', 'customSelect', [
-                    'label' => trans('plugins/ecommerce::tax.state'),
-                    'attr' => [
-                        'data-type' => 'country',
-                    ],
-                    'choices' => EcommerceHelper::getAvailableCountries(),
-                ])
-                ->add('state', 'text', [
-                    'label' => trans('plugins/ecommerce::tax.state'),
-                    'attr' => [
-                        'placeholder' => trans('plugins/ecommerce::tax.state'),
-                    ],
-                ])
-                ->add('city', 'text', [
-                    'label' => trans('plugins/ecommerce::tax.city'),
-                    'attr' => [
-                        'placeholder' => trans('plugins/ecommerce::tax.city'),
+        $this
+            ->addLocationFields()
+            ->remove('address')
+            ->when($this->request->ajax(), function (TaxRuleForm $form) {
+                $form->addSubmitButton(trans('core/base::forms.save'), 'ti ti-device-floppy', [
+                    'wrapper' => [
+                        'class' => 'd-grid gap-2',
                     ],
                 ]);
-        }
-
-        if (EcommerceHelper::isZipCodeEnabled()) {
-            $this
-                ->add('zip_code', 'text', [
-                    'label' => trans('plugins/ecommerce::tax.zip_code'),
-                ]);
-        }
-
-        $this->addSubmitButton(trans('core/base::forms.save'), 'ti ti-device-floppy', [
-            'wrapper' => [
-                'class' => 'd-grid gap-2',
-            ],
-        ]);
+            });
     }
 }

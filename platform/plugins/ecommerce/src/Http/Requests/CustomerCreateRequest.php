@@ -2,7 +2,10 @@
 
 namespace Botble\Ecommerce\Http\Requests;
 
+use Botble\Base\Rules\EmailRule;
+use Botble\Ecommerce\Models\Customer;
 use Botble\Support\Http\Requests\Request;
+use Illuminate\Validation\Rule;
 
 class CustomerCreateRequest extends Request
 {
@@ -10,7 +13,7 @@ class CustomerCreateRequest extends Request
     {
         return [
             'name' => ['required', 'string', 'min:2', 'max:120'],
-            'email' => ['required', 'min:6', 'max:60', 'email', 'unique:ec_customers'],
+            'email' => ['required', new EmailRule(), Rule::unique((new Customer())->getTable(), 'email')],
             'password' => ['required', 'string', 'min:6', 'confirmed'],
             'private_notes' => ['nullable', 'string', 'max:1000'],
         ];

@@ -40,7 +40,7 @@
                     icon="ti ti-arrow-back-up"
                     data-bb-toggle="reset-default"
                 >
-                    {{ trans('core/setting::setting.email.reset_to_default') }}
+                    {{ trans('plugins/ecommerce::invoice-template.reset_to_default') }}
                 </x-core::button>
 
                 <x-core::button
@@ -58,10 +58,10 @@
     <x-core::modal.action
         type="warning"
         id="reset-template-to-default-modal"
-        :title="trans('core/setting::setting.email.confirm_reset')"
-        :submit-button-label="trans('core/setting::setting.email.continue')"
+        :title="trans('plugins/ecommerce::invoice-template.confirm_reset')"
+        :submit-button-label="trans('plugins/ecommerce::invoice-template.continue')"
         :submit-button-attrs="['id' => 'reset-template-to-default-button', 'data-target' => route('ecommerce.settings.invoice-template.reset')]"
     >
-        {!! trans('core/setting::setting.email.confirm_message') !!}
+        {!! trans('plugins/ecommerce::invoice-template.confirm_message') !!}
     </x-core::modal.action>
 @endsection

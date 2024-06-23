@@ -14,9 +14,8 @@ class GlobalOptionForm extends FormAbstract
 {
     public function setup(): void
     {
-        Assets::addScripts(['jquery-ui'])->addScriptsDirectly([
-            'vendor/core/plugins/ecommerce/js/global-option.js',
-        ]);
+        Assets::addScripts(['jquery-ui'])
+            ->addScriptsDirectly('vendor/core/plugins/ecommerce/js/global-option.js');
 
         $this
             ->setupModel(new GlobalOption())

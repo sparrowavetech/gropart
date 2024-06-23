@@ -1,4 +1,4 @@
-@if (!$productVariations->isEmpty())
+@if ($productVariations->isNotEmpty())
     <table class="table table-hover-variants">
         <thead>
             <tr>

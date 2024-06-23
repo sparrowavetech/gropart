@@ -402,5 +402,13 @@
                 <path fill="#FBB563" d="M176.652 243.646a.994.994 0 0 1-.995-.994V226.31a.994.994 0 1 1 1.99 0v16.342c0 .55-.446.994-.995.994z"></path>
             </svg>
         </x-slot:icon>
+
+        @if (Auth::user()->hasPermission('ecommerce.import.products.index'))
+            <x-slot:extra>
+                <div class="mt-3">
+                    <a href="{{ route('tools.data-synchronize.import.products.index') }}">{{ trans('plugins/ecommerce::products.import_products_intro') }}</a>
+                </div>
+            </x-slot:extra>
+        @endif
     </x-plugins-ecommerce::intro>
 @stop

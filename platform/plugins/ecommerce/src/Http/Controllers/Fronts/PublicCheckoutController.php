@@ -4,7 +4,11 @@ namespace Botble\Ecommerce\Http\Controllers\Fronts;
 
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Http\Controllers\BaseController;
+use Botble\Base\Rules\EmailRule;
+use Botble\Ecommerce\AdsTracking\FacebookPixel;
+use Botble\Ecommerce\AdsTracking\GoogleTagManager;
 use Botble\Ecommerce\Enums\DiscountTypeEnum;
+use Botble\Ecommerce\Enums\OrderHistoryActionEnum;
 use Botble\Ecommerce\Enums\OrderStatusEnum;
 use Botble\Ecommerce\Enums\ShippingCodStatusEnum;
 use Botble\Ecommerce\Enums\ShippingMethodEnum;
@@ -27,10 +31,10 @@ use Botble\Ecommerce\Models\Shipment;
 use Botble\Ecommerce\Services\Footprints\FootprinterInterface;
 use Botble\Ecommerce\Services\HandleApplyCouponService;
 use Botble\Ecommerce\Services\HandleApplyPromotionsService;
+use Botble\Ecommerce\Services\HandleCheckoutOrderData;
 use Botble\Ecommerce\Services\HandleRemoveCouponService;
 use Botble\Ecommerce\Services\HandleShippingFeeService;
 use Botble\Ecommerce\Services\HandleTaxService;
-use Botble\Location\Models\Country;
 use Botble\Optimize\Facades\OptimizerHelper;
 use Botble\Payment\Enums\PaymentStatusEnum;
 use Botble\Payment\Supports\PaymentHelper;
@@ -40,23 +44,24 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
+use Throwable;
 
 class PublicCheckoutController extends BaseController
 {
     public function __construct()
     {
-        OptimizerHelper::disable();
+        if (class_exists(OptimizerHelper::class)) {
+            OptimizerHelper::disable();
+        }
     }
 
     public function getCheckout(
         string $token,
         Request $request,
-        HandleShippingFeeService $shippingFeeService,
-        HandleApplyCouponService $applyCouponService,
-        HandleRemoveCouponService $removeCouponService,
-        HandleApplyPromotionsService $applyPromotionsService,
-        HandleTaxService $handleTaxService
+        HandleTaxService $handleTaxService,
+        HandleCheckoutOrderData $handleCheckoutOrderData,
     ) {
         if (! EcommerceHelper::isCartEnabled()) {
             abort(404);
@@ -89,7 +94,7 @@ class PublicCheckoutController extends BaseController
         $sessionCheckoutData = OrderHelper::getOrderSessionData($token);
 
         $products = Cart::instance('cart')->products();
-        if (! $products->count()) {
+        if ($products->isEmpty()) {
             return $this
                 ->httpResponse()
                 ->setNextUrl(route('public.cart'));
@@ -107,9 +112,10 @@ class PublicCheckoutController extends BaseController
             }
         }
 
-        if (EcommerceHelper::isEnabledSupportDigitalProducts() && ! EcommerceHelper::canCheckoutForDigitalProducts(
-            $products
-        )) {
+        if (
+            EcommerceHelper::isEnabledSupportDigitalProducts()
+            && ! EcommerceHelper::canCheckoutForDigitalProducts($products)
+        ) {
             return $this
                 ->httpResponse()
                 ->setError()
@@ -121,145 +127,21 @@ class PublicCheckoutController extends BaseController
 
         $sessionCheckoutData = $this->processOrderData($token, $sessionCheckoutData, $request);
 
-        $paymentMethod = null;
-
-        if (is_plugin_active('payment')) {
-            $paymentMethod = $request->input(
-                'payment_method',
-                session('selected_payment_method') ?: PaymentHelper::defaultPaymentMethod()
-            );
-        }
-
-        if ($paymentMethod) {
-            session()->put('selected_payment_method', $paymentMethod);
-        }
-
-        add_filter('payment_checkout_country', function ($default) use ($sessionCheckoutData) {
-            if ($country = Arr::get($sessionCheckoutData, 'country')) {
-                if (EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation()) {
-                    $country = Country::query()
-                        ->where('id', $country)
-                        ->value('code');
-                }
-
-                return $country;
-            }
-
-            return $default;
-        }, 999);
-
-        if (is_plugin_active('marketplace')) {
-            [
-                $sessionCheckoutData,
-                $shipping,
-                $defaultShippingMethod,
-                $defaultShippingOption,
-                $shippingAmount,
-                $promotionDiscountAmount,
-                $couponDiscountAmount,
-            ] = apply_filters(PROCESS_CHECKOUT_ORDER_DATA_ECOMMERCE, $products, $token, $sessionCheckoutData, $request);
-        } else {
-            $promotionDiscountAmount = $applyPromotionsService->execute($token);
-
-            $sessionCheckoutData['promotion_discount_amount'] = $promotionDiscountAmount;
-
-            $couponDiscountAmount = 0;
-            if (session()->has('applied_coupon_code')) {
-                $couponDiscountAmount = Arr::get($sessionCheckoutData, 'coupon_discount_amount', 0);
-            }
-
-            $orderTotal = Cart::instance('cart')->rawTotal() - $promotionDiscountAmount - $couponDiscountAmount;
-            $orderTotal = max($orderTotal, 0);
-
-            $isAvailableShipping = EcommerceHelper::isAvailableShipping($products);
-
-            $shipping = [];
-            $defaultShippingMethod = $request->input(
-                'shipping_method',
-                Arr::get($sessionCheckoutData, 'shipping_method', ShippingMethodEnum::DEFAULT)
-            );
-            $defaultShippingOption = $request->input(
-                'shipping_option',
-                Arr::get($sessionCheckoutData, 'shipping_option')
-            );
-            $shippingAmount = 0;
-
-            if ($isAvailableShipping) {
-                $origin = EcommerceHelper::getOriginAddress();
-                $shippingData = EcommerceHelper::getShippingData(
-                    $products,
-                    $sessionCheckoutData,
-                    $origin,
-                    $orderTotal,
-                    $paymentMethod
-                );
-
-                $shipping = $shippingFeeService->execute($shippingData);
-
-                foreach ($shipping as $key => &$shipItem) {
-                    if (get_shipping_setting('free_ship', $key)) {
-                        foreach ($shipItem as &$subShippingItem) {
-                            Arr::set($subShippingItem, 'price', 0);
-                        }
-                    }
-                }
-
-                if ($shipping) {
-                    if (! $defaultShippingMethod) {
-                        $defaultShippingMethod = old(
-                            'shipping_method',
-                            Arr::get($sessionCheckoutData, 'shipping_method', Arr::first(array_keys($shipping)))
-                        );
-                    }
-                    if (! $defaultShippingOption) {
-                        $defaultShippingOption = old(
-                            'shipping_option',
-                            Arr::get($sessionCheckoutData, 'shipping_option', $defaultShippingOption)
-                        );
-
-                        if (! $defaultShippingOption) {
-                            $defaultShippingOption = Arr::first(array_keys(Arr::first($shipping)));
-                        }
-                    }
-                }
-
-                $shippingAmount = Arr::get(
-                    $shipping,
-                    $defaultShippingMethod . '.' . $defaultShippingOption . '.price',
-                    0
-                );
-
-                Arr::set($sessionCheckoutData, 'shipping_method', $defaultShippingMethod);
-                Arr::set($sessionCheckoutData, 'shipping_option', $defaultShippingOption);
-                Arr::set($sessionCheckoutData, 'shipping_amount', $shippingAmount);
-
-                OrderHelper::setOrderSessionData($token, $sessionCheckoutData);
-            }
-
-            if (session()->has('applied_coupon_code')) {
-                if (! $request->input('applied_coupon')) {
-                    $discount = $applyCouponService->getCouponData(
-                        session('applied_coupon_code'),
-                        $sessionCheckoutData
-                    );
-                    if (empty($discount)) {
-                        $removeCouponService->execute();
-                    } else {
-                        $shippingAmount = Arr::get($sessionCheckoutData, 'is_free_shipping') ? 0 : $shippingAmount;
-                    }
-                } else {
-                    $shippingAmount = Arr::get($sessionCheckoutData, 'is_free_shipping') ? 0 : $shippingAmount;
-                }
-            }
-
-            $sessionCheckoutData['is_available_shipping'] = $isAvailableShipping;
-
-            if (! $sessionCheckoutData['is_available_shipping']) {
-                $shippingAmount = 0;
-            }
-        }
-
         $isShowAddressForm = EcommerceHelper::isSaveOrderShippingAddress($products);
+
+        $checkoutOrderData = $handleCheckoutOrderData->execute(
+            $request,
+            $products,
+            $token,
+            $sessionCheckoutData
+        );
+
+        $shipping = $checkoutOrderData->shipping;
+        $defaultShippingMethod = $checkoutOrderData->defaultShippingMethod;
+        $defaultShippingOption = $checkoutOrderData->defaultShippingOption;
+        $promotionDiscountAmount = $checkoutOrderData->promotionDiscountAmount;
+        $couponDiscountAmount = $checkoutOrderData->couponDiscountAmount;
+        $shippingAmount = $checkoutOrderData->shippingAmount;
 
         $data = compact(
             'token',
@@ -303,7 +185,18 @@ class PublicCheckoutController extends BaseController
 
         $discounts = apply_filters('ecommerce_checkout_discounts_query', $discountsQuery, $products)->get();
 
-        $data = [...$data, 'discounts' => $discounts];
+        $rawTotal = Cart::instance('cart')->rawTotal();
+        $orderAmount = max($rawTotal - $promotionDiscountAmount - $couponDiscountAmount, 0);
+        $orderAmount += (float) $shippingAmount;
+
+        $data = [...$data, 'discounts' => $discounts, 'rawTotal' => $rawTotal, 'orderAmount' => $orderAmount];
+
+        app(GoogleTagManager::class)->beginCheckout(
+            $products->all(),
+            $orderAmount,
+            isset($discount) ? $discount->code : null
+        );
+        app(FacebookPixel::class)->checkout($products->all(), $orderAmount);
 
         $checkoutView = Theme::getThemeNamespace('views.ecommerce.orders.checkout');
 
@@ -337,39 +230,53 @@ class PublicCheckoutController extends BaseController
         if ($request->input('address', [])) {
             if (! isset($sessionData['created_account']) && $request->input('create_account') == 1) {
                 $validator = Validator::make($request->input(), [
-                    'password' => 'required|min:6',
-                    'password_confirmation' => 'required|same:password',
-                    'address.email' => 'required|max:60|min:6|email|unique:ec_customers,email',
-                    'address.name' => 'required|min:3|max:120',
+                    'password' => ['required', 'min:6'],
+                    'password_confirmation' => ['required', 'same:password'],
+                    'address.email' => ['required', new EmailRule(), Rule::unique((new Customer())->getTable(), 'email')],
+                    'address.name' => ['required', 'min:3', 'max:120'],
                 ]);
 
-                if (! $validator->fails()) {
-                    $customer = Customer::query()->create([
-                        'name' => BaseHelper::clean($request->input('address.name')),
-                        'email' => BaseHelper::clean($request->input('address.email')),
-                        'phone' => BaseHelper::clean($request->input('address.phone')),
-                        'password' => Hash::make($request->input('password')),
-                    ]);
+                if ($validator->passes()) {
+                    $customerId = null;
 
-                    auth('customer')->attempt([
-                        'email' => $request->input('address.email'),
-                        'password' => $request->input('password'),
-                    ], true);
+                    try {
+                        /**
+                         * @var Customer $customer
+                         */
+                        $customer = Customer::query()->create([
+                            'name' => $request->input('address.name'),
+                            'email' => $request->input('address.email'),
+                            'phone' => $request->input('address.phone'),
+                            'password' => Hash::make($request->input('password')),
+                        ]);
 
-                    event(new Registered($customer));
+                        $customerId = $customer->getKey();
 
-                    $sessionData['created_account'] = true;
+                        auth('customer')->loginUsingId($customer->getKey(), true);
 
-                    $address = Address::query()
-                        ->create(
-                            array_merge($request->input('address'), [
-                                'customer_id' => $customer->id,
-                                'is_default' => true,
-                            ])
-                        );
+                        event(new Registered($customer));
 
-                    $request->merge(['address.address_id' => $address->id]);
-                    $sessionData['address_id'] = $address->id;
+                        $sessionData['created_account'] = true;
+                    } catch (Throwable $exception) {
+                        BaseHelper::logError($exception);
+                    }
+
+                    if (! $customerId && auth('customer')->check()) {
+                        $customerId = auth('customer')->id();
+                    }
+
+                    if ($customerId) {
+                        $address = Address::query()
+                            ->create(
+                                array_merge($request->input('address'), [
+                                    'customer_id' => $customerId,
+                                    'is_default' => true,
+                                ])
+                            );
+
+                        $request->merge(['address.address_id' => $address->getKey()]);
+                        $sessionData['address_id'] = $address->getKey();
+                    }
                 }
             }
 
@@ -429,7 +336,7 @@ class PublicCheckoutController extends BaseController
                 'zip_code' => $address->zip_code,
                 'address_id' => $address->id,
             ];
-        } elseif ($addressFromInput = (array)$request->input('address', [])) {
+        } elseif ($addressFromInput = (array) $request->input('address', [])) {
             $addressData = $addressFromInput;
         }
 
@@ -486,10 +393,10 @@ class PublicCheckoutController extends BaseController
 
         if (! empty($address)) {
             $addressData['order_id'] = $sessionData['created_order_id'];
-        } elseif ((array)$request->input('address', [])) {
+        } elseif ((array) $request->input('address', [])) {
             $addressData = array_merge(
                 ['order_id' => $sessionData['created_order_id']],
-                (array)$request->input('address', [])
+                (array) $request->input('address', [])
             );
         }
 
@@ -626,6 +533,33 @@ class PublicCheckoutController extends BaseController
                 ->setMessage(__('Your shopping cart has digital product(s), so you need to sign in to continue!'));
         }
 
+        $totalQuality = Cart::instance('cart')->rawTotalQuantity();
+
+        if (($minimumQuantity = EcommerceHelper::getMinimumOrderQuantity()) > 0
+            && $totalQuality < $minimumQuantity) {
+            return $this
+                ->httpResponse()
+                ->setError()
+                ->setMessage(
+                    __('Minimum order quantity is :qty, you need to buy more :more to place an order!', [
+                        'qty' => $totalQuality,
+                        'more' => $minimumQuantity - $totalQuality,
+                    ])
+                );
+        }
+
+        if (($maximumQuantity = EcommerceHelper::getMaximumOrderQuantity()) > 0
+            && $totalQuality > $maximumQuantity) {
+            return $this
+                ->httpResponse()
+                ->setError()
+                ->setMessage(
+                    __('Maximum order quantity is :qty, please check your cart and retry again!', [
+                        'qty' => $maximumQuantity,
+                    ])
+                );
+        }
+
         if (EcommerceHelper::getMinimumOrderAmount() > Cart::instance('cart')->rawSubTotal()) {
             return $this
                 ->httpResponse()
@@ -652,6 +586,33 @@ class PublicCheckoutController extends BaseController
                     ->setError()
                     ->setMessage(
                         __('Product :product is out of stock!', ['product' => $product->original_product->name])
+                    );
+            }
+
+            $quantityOfProduct = Cart::instance('cart')->rawQuantityByItemId($product->id);
+
+            if ($product->minimum_order_quantity > 0 && $quantityOfProduct < $product->minimum_order_quantity) {
+                return $this
+                    ->httpResponse()
+                    ->setError()
+                    ->setMessage(
+                        __('Minimum order quantity of product :product is :quantity, you need to buy more :more to place an order! ', [
+                            'product' => BaseHelper::clean($product->original_product->name),
+                            'quantity' => $product->minimum_order_quantity,
+                            'more' => $product->minimum_order_quantity - $quantityOfProduct,
+                        ])
+                    );
+            }
+
+            if ($product->maximum_order_quantity > 0 && $quantityOfProduct > $product->maximum_order_quantity) {
+                return $this
+                    ->httpResponse()
+                    ->setError()
+                    ->setMessage(
+                        __('Maximum order quantity of product :product is :quantity! ', [
+                            'product' => $product->original_product->name,
+                            'quantity' => $product->minimum_order_quantity,
+                        ])
                     );
             }
         }
@@ -734,7 +695,7 @@ class PublicCheckoutController extends BaseController
             $currentUserId = auth('customer')->id();
         }
 
-        $orderAmount += (float)$shippingAmount;
+        $orderAmount += (float) $shippingAmount;
 
         $request->merge([
             'amount' => $orderAmount ?: 0,
@@ -742,7 +703,7 @@ class PublicCheckoutController extends BaseController
             'user_id' => $currentUserId,
             'shipping_method' => $isAvailableShipping ? $shippingMethodInput : '',
             'shipping_option' => $isAvailableShipping ? $request->input('shipping_option') : null,
-            'shipping_amount' => (float)$shippingAmount,
+            'shipping_amount' => (float) $shippingAmount,
             'tax_amount' => Cart::instance('cart')->rawTax(),
             'sub_total' => Cart::instance('cart')->rawSubTotal(),
             'coupon_code' => session('applied_coupon_code'),
@@ -756,7 +717,7 @@ class PublicCheckoutController extends BaseController
         $order = $this->createOrderFromData($request->input(), $order);
 
         OrderHistory::query()->create([
-            'action' => 'create_order_from_payment_page',
+            'action' => OrderHistoryActionEnum::CREATE_ORDER_FROM_PAYMENT_PAGE,
             'description' => __('Order was created from checkout page'),
             'order_id' => $order->getKey(),
         ]);
@@ -834,7 +795,7 @@ class PublicCheckoutController extends BaseController
         $paymentData = [
             'error' => false,
             'message' => false,
-            'amount' => (float)format_price($order->amount, null, true),
+            'amount' => (float) format_price($order->amount, null, true),
             'currency' => strtoupper(get_application_currency()->title),
             'type' => $request->input('payment_method'),
             'charge_id' => null,
@@ -883,7 +844,7 @@ class PublicCheckoutController extends BaseController
             abort(404);
         }
 
-        if (is_plugin_active('payment') && (float)$order->amount && ! $order->payment_id) {
+        if (is_plugin_active('payment') && (float) $order->amount && ! $order->payment_id) {
             return $this
                 ->httpResponse()
                 ->setError()
@@ -891,41 +852,18 @@ class PublicCheckoutController extends BaseController
                 ->setMessage(__('Payment failed!'));
         }
 
+        if (session('tracked_start_checkout')) {
+            app(GoogleTagManager::class)->purchase($order);
+            app(FacebookPixel::class)->purchase($order);
+        }
+
         if (is_plugin_active('marketplace')) {
             return apply_filters(PROCESS_GET_CHECKOUT_SUCCESS_IN_ORDER, $token, $this->httpResponse());
         }
 
+        $products = $order->getOrderProducts();
+
         OrderHelper::clearSessions($token);
-
-        $products = collect();
-
-        $productsIds = $order->products->pluck('product_id')->all();
-
-        if (! empty($productsIds)) {
-            $products = get_products([
-                'condition' => [
-                    ['ec_products.id', 'IN', $productsIds],
-                ],
-                'select' => [
-                    'ec_products.id',
-                    'ec_products.images',
-                    'ec_products.name',
-                    'ec_products.price',
-                    'ec_products.sale_price',
-                    'ec_products.sale_type',
-                    'ec_products.start_date',
-                    'ec_products.end_date',
-                    'ec_products.sku',
-                    'ec_products.barcode',
-                    'ec_products.order',
-                    'ec_products.created_at',
-                    'ec_products.is_variation',
-                ],
-                'with' => [
-                    'variationProductAttributes',
-                ],
-            ]);
-        }
 
         return view('plugins/ecommerce::orders.thank-you', compact('order', 'products'));
     }
@@ -1071,7 +1009,17 @@ class PublicCheckoutController extends BaseController
             $referrals = app(FootprinterInterface::class)->getFootprints();
 
             if ($referrals) {
-                $order->referral()->create($referrals);
+                try {
+                    $order->referral()->create($referrals);
+                } catch (Throwable) {
+                    $referrals = array_map(function (?string $item) {
+                        return is_string($item) ? substr($item, 0, 190) : $item;
+                    }, $referrals);
+
+                    rescue(function () use ($order, $referrals) {
+                        $order->referral()->create($referrals);
+                    }, report: false);
+                }
             }
         }
 

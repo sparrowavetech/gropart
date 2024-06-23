@@ -5,7 +5,9 @@ return [
     'customer_new_order_description' => 'Send email confirmation to customer when an order placed',
 
     'order_cancellation_title' => 'Order cancellation',
-    'order_cancellation_description' => 'Send to custom when they cancelled order',
+    'customer_order_cancellation_description' => 'Send to customer when they cancels an order',
+    'admin_order_cancellation_title' => 'Order cancellation (by Admin)',
+    'admin_order_cancellation_description' => 'Send to customer when admin cancels an order',
 
     'delivery_confirmation_title' => 'Delivering confirmation',
     'delivery_confirmation_description' => 'Send to customer when order is delivering',

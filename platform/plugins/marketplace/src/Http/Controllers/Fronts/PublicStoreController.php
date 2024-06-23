@@ -8,6 +8,7 @@ use Botble\Base\Http\Controllers\BaseController;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Services\Products\GetProductService;
 use Botble\Marketplace\Facades\MarketplaceHelper;
+use Botble\Marketplace\Forms\ContactStoreForm;
 use Botble\Marketplace\Http\Requests\Fronts\CheckStoreUrlRequest;
 use Botble\Marketplace\Models\Store;
 use Botble\Media\Facades\RvMedia;
@@ -130,7 +131,13 @@ class PublicStoreController extends BaseController
                 ->setMessage($message);
         }
 
-        return Theme::scope('marketplace.store', compact('store', 'products'), MarketplaceHelper::viewPath('store', false))->render();
+        $contactForm = ContactStoreForm::createFromArray(['id' => $store->getKey()]);
+
+        return Theme::scope(
+            'marketplace.store',
+            compact('store', 'products', 'contactForm'),
+            MarketplaceHelper::viewPath('store', false)
+        )->render();
     }
 
     public function checkStoreUrl(CheckStoreUrlRequest $request)

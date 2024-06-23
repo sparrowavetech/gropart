@@ -3,7 +3,7 @@
         <div class="col-md-6">
             {!! $form->renderForm() !!}
 
-            @include('plugins/ecommerce::themes.includes.order-tracking-detail')
+            @include(EcommerceHelper::viewPath('includes.order-tracking-detail'))
         </div>
     </div>
 </section>

@@ -9,7 +9,7 @@ class UpdateOrderRequest extends Request
     public function rules(): array
     {
         return [
-            'description' => 'nullable|string',
+            'description' => ['nullable', 'string', 'max:400'],
         ];
     }
 }

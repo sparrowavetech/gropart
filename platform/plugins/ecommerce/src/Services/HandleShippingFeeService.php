@@ -34,7 +34,7 @@ class HandleShippingFeeService
         $this->useCache = true;
     }
 
-    public function execute(array $data, string|null $method = null, string|null $option = null): array
+    public function execute(array $data, ?string $method = null, ?string $option = null): array
     {
         $result = [];
 
@@ -75,7 +75,7 @@ class HandleShippingFeeService
 
             foreach ($result as $item) {
                 foreach ($item as $option) {
-                    if ((float)$option['price'] == 0) {
+                    if ((float) $option['price'] == 0) {
                         $hasFreeShipping = true;
 
                         break;
@@ -86,7 +86,7 @@ class HandleShippingFeeService
             if ($hasFreeShipping) {
                 foreach ($result as $itemKey => $item) {
                     foreach ($item as $optionKey => $option) {
-                        if ((float)$option['price'] > 0) {
+                        if ((float) $option['price'] > 0) {
                             Arr::forget($result, $itemKey . '.' . $optionKey);
                         }
                     }
@@ -97,7 +97,7 @@ class HandleShippingFeeService
         return $result;
     }
 
-    protected function getShippingFee(array $data, string $method, string|null $option = null): array
+    protected function getShippingFee(array $data, string $method, ?string $option = null): array
     {
         $weight = EcommerceHelper::validateOrderWeight(Arr::get($data, 'weight'));
 

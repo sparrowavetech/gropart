@@ -137,14 +137,14 @@ AdminHelper::registerRoutes(function () {
                     'middleware' => 'preventDemo',
                 ]);
 
-                Route::post('reset', [
+                Route::post('invoice-template/reset', [
                     'as' => 'ecommerce.settings.invoice-template.reset',
                     'uses' => 'InvoiceTemplateSettingController@reset',
                     'permission' => 'ecommerce.invoice-template.index',
                     'middleware' => 'preventDemo',
                 ]);
 
-                Route::get('preview', [
+                Route::get('invoice-template/preview', [
                     'as' => 'ecommerce.settings.invoice-template.preview',
                     'uses' => 'InvoiceTemplateSettingController@preview',
                     'permission' => 'ecommerce.invoice-template.index',
@@ -181,6 +181,32 @@ AdminHelper::registerRoutes(function () {
                     'as' => 'ecommerce.settings.shipping.update',
                     'uses' => 'ShippingSettingController@update',
                     'permission' => 'ecommerce.settings.shipping',
+                ]);
+
+                Route::get('shipping-label-template', [
+                    'as' => 'ecommerce.settings.shipping-label-template',
+                    'uses' => 'ShippingLabelTemplateSettingController@edit',
+                    'permission' => 'ecommerce.shipping-label-template.index',
+                ]);
+
+                Route::put('shipping-label-template', [
+                    'as' => 'ecommerce.settings.shipping-label-template.update',
+                    'uses' => 'ShippingLabelTemplateSettingController@update',
+                    'permission' => 'ecommerce.shipping-label-template.index',
+                    'middleware' => 'preventDemo',
+                ]);
+
+                Route::post('shipping-label-template/reset', [
+                    'as' => 'ecommerce.settings.shipping-label-template.reset',
+                    'uses' => 'ShippingLabelTemplateSettingController@reset',
+                    'permission' => 'ecommerce.shipping-label-template.index',
+                    'middleware' => 'preventDemo',
+                ]);
+
+                Route::get('shipping-label-template/preview', [
+                    'as' => 'ecommerce.settings.shipping-label-template.preview',
+                    'uses' => 'ShippingLabelTemplateSettingController@preview',
+                    'permission' => 'ecommerce.shipping-label-template.index',
                 ]);
 
                 Route::get('webhook', [

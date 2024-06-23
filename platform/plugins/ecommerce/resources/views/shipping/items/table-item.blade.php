@@ -37,7 +37,7 @@
                     data-url="{{ route('ecommerce.shipping-rule-items.edit', $item->id) }}"
                     type="button"
                 >
-                    <i class="fa fa-edit small"></i>
+                    <x-core::icon name="ti ti-pencil" />
                 </button>
             @endif
 
@@ -48,7 +48,7 @@
                     data-name="{{ $item->name_item }}"
                     type="button"
                 >
-                    <i class="fa fa-trash small"></i>
+                    <x-core::icon name="ti ti-trash" />
                 </button>
             @endif
         </td>

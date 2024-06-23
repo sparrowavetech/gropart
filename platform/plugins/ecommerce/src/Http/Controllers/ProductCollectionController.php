@@ -113,7 +113,7 @@ class ProductCollectionController extends BaseController
             ->setData($productCollections);
     }
 
-    public function getProductCollection(ProductCollection|null $productCollection)
+    public function getProductCollection(?ProductCollection $productCollection)
     {
         $productCollection->load(['products']);
 

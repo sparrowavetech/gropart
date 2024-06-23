@@ -62,6 +62,7 @@
                     class="form-control"
                     id="billing-address-name"
                     name="billing_address[name]"
+                    autocomplete="family-name"
                     type="text"
                     value="{{ old('billing_address.name', Arr::get($sessionCheckoutData, 'billing_address.name')) ?: (auth('customer')->check() ? auth('customer')->user()->name : null) }}"
                 >
@@ -78,6 +79,7 @@
                             class="form-control"
                             id="billing-address-email"
                             name="billing_address[email]"
+                            autocomplete="email"
                             type="email"
                             value="{{ old('billing_address.email', Arr::get($sessionCheckoutData, 'billing_address.email')) ?: (auth('customer')->check() ? auth('customer')->user()->email : null) }}"
                         >
@@ -95,7 +97,7 @@
                             (auth('customer')->check()
                                 ? auth('customer')->user()->phone
                                 : null),
-                            ['id' => 'billing-address-phone', 'class' => 'form-control'],
+                            ['id' => 'billing-address-phone', 'class' => 'form-control', 'autocomplete' => 'phone'],
                         ) !!}
                         <label>{{ __('Phone') }}</label>
                     </div>
@@ -113,6 +115,7 @@
                         name="billing_address[country]"
                         data-form-parent=".customer-billing-address-form"
                         data-type="country"
+                        autocomplete="country"
                     >
                         @foreach (EcommerceHelper::getAvailableCountries() as $countryCode => $countryName)
                             <option
@@ -146,6 +149,7 @@
                                 name="billing_address[state]"
                                 data-form-parent=".customer-billing-address-form"
                                 data-type="state"
+                                autocomplete="state"
                                 data-url="{{ route('ajax.states-by-country') }}"
                             >
                                 <option value="">{{ __('Select state...') }}</option>
@@ -169,6 +173,7 @@
                                 id="billing-address-state"
                                 name="billing_address[state]"
                                 type="text"
+                                autocomplete="state"
                                 value="{{ old('billing_address.state', Arr::get($sessionCheckoutData, 'billing_address.state')) }}"
                             >
                             <label for='billing-address-state'>{{ __('State') }}</label>
@@ -187,6 +192,7 @@
                                 id="billing-address-city"
                                 name="billing_address[city]"
                                 type="text"
+                                autocomplete="city"
                                 value="{{ old('billing_address.city', Arr::get($sessionCheckoutData, 'billing_address.city')) }}"
                             >
                             <label for='billing-address-city'>{{ __('City') }}</label>
@@ -198,6 +204,7 @@
                                 id="billing-address-city"
                                 name="billing_address[city]"
                                 data-type="city"
+                                autocomplete="city"
                                 data-using-select2="false"
                                 data-url="{{ route('ajax.cities-by-state') }}"
                             >
@@ -226,6 +233,7 @@
                     class="form-control"
                     id="billing-address-address"
                     name="billing_address[address]"
+                    autocomplete="address"
                     type="text"
                     value="{{ old('billing_address.address', Arr::get($sessionCheckoutData, 'billing_address.address')) }}"
                 >
@@ -241,6 +249,7 @@
                         class="form-control"
                         id="billing-address-zip-code"
                         name="billing_address[zip_code]"
+                        autocomplete="postal-code"
                         type="text"
                         value="{{ old('billing_address.zip_code', Arr::get($sessionCheckoutData, 'billing_address.zip_code')) }}"
                     >

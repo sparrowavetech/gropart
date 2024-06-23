@@ -12,6 +12,7 @@ use Botble\Ecommerce\Http\Requests\UpdateOrderReturnRequest;
 use Botble\Ecommerce\Models\OrderReturn;
 use Botble\Ecommerce\Tables\OrderReturnTable;
 use Exception;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Http\Request;
 
 class OrderReturnController extends BaseController
@@ -31,12 +32,12 @@ class OrderReturnController extends BaseController
 
     public function edit(OrderReturn $orderReturn)
     {
-        Assets::addStylesDirectly(['vendor/core/plugins/ecommerce/css/ecommerce.css'])
+        Assets::addStylesDirectly('vendor/core/plugins/ecommerce/css/ecommerce.css')
             ->addScriptsDirectly([
                 'vendor/core/plugins/ecommerce/libraries/jquery.textarea_autosize.js',
                 'vendor/core/plugins/ecommerce/js/order.js',
             ])
-            ->addScripts(['input-mask']);
+            ->addScripts('input-mask');
 
         if (EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation()) {
             Assets::addScriptsDirectly('vendor/core/plugins/location/js/location.js');
@@ -46,21 +47,24 @@ class OrderReturnController extends BaseController
 
         $defaultStore = get_primary_store_locator();
 
-        return view('plugins/ecommerce::order-returns.edit', ['returnRequest' => $orderReturn, 'defaultStore' => $defaultStore]);
+        $orderReturn->loadMissing(['histories' => fn (HasMany $query) => $query->latest()]);
+
+        return view(
+            'plugins/ecommerce::order-returns.edit',
+            ['returnRequest' => $orderReturn, 'defaultStore' => $defaultStore]
+        );
     }
 
     public function update(OrderReturn $orderReturn, UpdateOrderReturnRequest $request)
     {
-        $data['return_status'] = $request->input('return_status');
-
-        if (in_array($orderReturn->return_status, [$data['return_status'], OrderReturnStatusEnum::CANCELED, OrderReturnStatusEnum::COMPLETED])) {
+        if (in_array($orderReturn->return_status, [$request->input('return_status'), OrderReturnStatusEnum::CANCELED, OrderReturnStatusEnum::COMPLETED])) {
             return $this
                 ->httpResponse()
                 ->setError()
                 ->setMessage(trans('plugins/ecommerce::order.notices.update_return_order_status_error'));
         }
 
-        [$status, $orderReturn] = OrderReturnHelper::updateReturnOrder($orderReturn, $data);
+        [$status, $orderReturn] = OrderReturnHelper::updateReturnOrder($orderReturn, $request->validated());
 
         if (! $status) {
             return $this

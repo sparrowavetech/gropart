@@ -9,6 +9,7 @@ use Botble\Base\Models\BaseModel;
 use Botble\Base\Traits\HasTreeCategory;
 use Botble\Ecommerce\Tables\ProductTable;
 use Botble\Media\Facades\RvMedia;
+use Botble\Support\Services\Cache\Cache as CacheService;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -50,6 +51,10 @@ class ProductCategory extends BaseModel implements HasTreeCategoryContract
             $category->brands()->detach();
             $category->productAttributeSets()->detach();
         });
+
+        static::saved(function () {
+            (new CacheService(app('cache'), ProductCategory::class))->flush();
+        });
     }
 
     public function products(): BelongsToMany
@@ -66,12 +71,17 @@ class ProductCategory extends BaseModel implements HasTreeCategoryContract
 
     public function parent(): BelongsTo
     {
-        return $this->belongsTo(ProductCategory::class, 'parent_id')->withDefault();
+        return $this
+            ->belongsTo(ProductCategory::class, 'parent_id')
+            ->whereNot('parent_id', $this->getKey())
+            ->withDefault();
     }
 
     public function children(): HasMany
     {
-        return $this->hasMany(ProductCategory::class, 'parent_id');
+        return $this
+            ->hasMany(ProductCategory::class, 'parent_id')
+            ->whereNot('id', $this->getKey());
     }
 
     public function activeChildren(): HasMany
@@ -129,7 +139,7 @@ class ProductCategory extends BaseModel implements HasTreeCategoryContract
 
     protected function iconHtml(): Attribute
     {
-        return Attribute::get(function (): HtmlString|null {
+        return Attribute::get(function (): ?HtmlString {
             if ($this->icon_image) {
                 return RvMedia::image($this->icon_image, attributes: ['alt' => $this->name]);
             }

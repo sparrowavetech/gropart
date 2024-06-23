@@ -14,8 +14,8 @@
 
                         <div class="d-flex flex-wrap align-items-center gap-1 mt-2">
                             <div>
-                                {{ $review->user->name }}
-                                (<a href="mailto:{{ $review->user->email }}">{{ $review->user->email }}</a>)
+                                {{ $review->user->name ?: $review->customer_name }}
+                                (<a href="mailto:{{ $review->user->email ?: $review->customer_email }}">{{ $review->user->email ?: $review->customer_email }}</a>)
                             </div>
                             <span class="d-flex align-items-center gap-1 text-muted">
                                 <x-core::icon name="ti ti-clock" size="sm" />

@@ -9,8 +9,8 @@ class CartRequest extends Request
     public function rules(): array
     {
         return [
-            'id' => 'required|min:1',
-            'qty' => 'integer|min:1',
+            'id' => ['required', 'min:1'],
+            'qty' => ['integer', 'min:1'],
         ];
     }
 

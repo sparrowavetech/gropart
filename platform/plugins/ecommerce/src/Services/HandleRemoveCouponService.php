@@ -10,7 +10,7 @@ use Illuminate\Support\Arr;
 
 class HandleRemoveCouponService
 {
-    public function execute(string|null $prefix = '', bool $isForget = true): array
+    public function execute(?string $prefix = '', bool $isForget = true): array
     {
         if (! session()->has('applied_coupon_code')) {
             return [

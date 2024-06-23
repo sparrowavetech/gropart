@@ -4,18 +4,22 @@ namespace Botble\Ecommerce\Supports;
 
 use Barryvdh\DomPDF\PDF as PDFHelper;
 use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Base\Facades\AdminHelper;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\EmailHandler;
 use Botble\Base\Facades\Html;
 use Botble\Base\Supports\EmailHandler as EmailHandlerSupport;
 use Botble\Ecommerce\Enums\OrderAddressTypeEnum;
+use Botble\Ecommerce\Enums\OrderHistoryActionEnum;
 use Botble\Ecommerce\Enums\OrderStatusEnum;
 use Botble\Ecommerce\Enums\ShippingMethodEnum;
 use Botble\Ecommerce\Events\OrderCancelledEvent;
 use Botble\Ecommerce\Events\OrderCompletedEvent;
+use Botble\Ecommerce\Events\OrderConfirmedEvent;
 use Botble\Ecommerce\Events\OrderPaymentConfirmedEvent;
 use Botble\Ecommerce\Events\OrderPlacedEvent;
 use Botble\Ecommerce\Events\ProductQuantityUpdatedEvent;
+use Botble\Ecommerce\Exceptions\ProductIsNotActivatedYetException;
 use Botble\Ecommerce\Facades\Cart;
 use Botble\Ecommerce\Facades\Discount;
 use Botble\Ecommerce\Facades\EcommerceHelper;
@@ -57,9 +61,9 @@ use Throwable;
 
 class OrderHelper
 {
-    public function processOrder(string|array|null $orderIds, string|null $chargeId = null): bool|Collection|array|Model
+    public function processOrder(string|array|null $orderIds, ?string $chargeId = null): bool|Collection|array|Model
     {
-        $orderIds = (array)$orderIds;
+        $orderIds = (array) $orderIds;
 
         $orders = Order::query()->whereIn('id', $orderIds)->get();
 
@@ -86,7 +90,7 @@ class OrderHelper
 
         foreach ($orders as $order) {
             if (
-                (float)$order->amount
+                (float) $order->amount
                 && (is_plugin_active('payment') && ! empty(PaymentMethods::methods()) && ! $order->payment_id)
             ) {
                 continue;
@@ -94,24 +98,14 @@ class OrderHelper
 
             event(new OrderPlacedEvent($order));
 
-            $order->is_finished = true;
-
             if (EcommerceHelper::isOrderAutoConfirmedEnabled()) {
-                $order->is_confirmed = true;
+                $this->confirmOrder($order);
             }
 
+            $order->is_finished = true;
             $order->save();
 
             $this->decreaseProductQuantity($order);
-
-            if (EcommerceHelper::isOrderAutoConfirmedEnabled()) {
-                OrderHistory::query()->create([
-                    'action' => 'confirm_order',
-                    'description' => trans('plugins/ecommerce::order.order_was_verified_by'),
-                    'order_id' => $order->id,
-                    'user_id' => 0,
-                ]);
-            }
         }
 
         Cart::instance('cart')->destroy();
@@ -136,7 +130,7 @@ class OrderHelper
 
         foreach ($orders as $order) {
             OrderHistory::query()->create([
-                'action' => 'create_order',
+                'action' => OrderHistoryActionEnum::CREATE_ORDER,
                 'description' => trans('plugins/ecommerce::order.new_order_from', [
                     'order_id' => $order->code,
                     'customer' => BaseHelper::clean($order->user->name ?: $order->address->name),
@@ -171,8 +165,8 @@ class OrderHelper
                     $flashSale->products()->attach([
                         $product->id => [
                             'price' => $flashSale->pivot->price,
-                            'quantity' => (int)$flashSale->pivot->quantity,
-                            'sold' => (int)$flashSale->pivot->sold + $orderProduct->qty,
+                            'quantity' => (int) $flashSale->pivot->quantity,
+                            'sold' => (int) $flashSale->pivot->sold + $orderProduct->qty,
                         ],
                     ]);
                 }
@@ -220,6 +214,21 @@ class OrderHelper
             }
         }
 
+        $digitalProducts = [];
+
+        if (EcommerceHelperFacade::isEnabledSupportDigitalProducts()) {
+            foreach ($order->digitalProducts() as $digitalProduct) {
+                $digitalProducts[] = [
+                    'product_name' => $digitalProduct->product_name,
+                    'product_image_url' => $digitalProduct->product_image_url,
+                    'product_file_internal_count' => $digitalProduct->product_file_internal_count,
+                    'download_hash_url' => $digitalProduct->download_hash_url,
+                    'product_file_external_count' => $digitalProduct->product_file_external_count,
+                    'download_external_url' => $digitalProduct->download_external_url,
+                ];
+            }
+        }
+
         return apply_filters('ecommerce_order_email_variables', [
             'store_address' => get_ecommerce_setting('store_address'),
             'store_phone' => get_ecommerce_setting('store_phone'),
@@ -247,6 +256,8 @@ class OrderHelper
             'shipment' => $order->shipment ? $order->shipment->toArray() : [],
             'address' => $order->address->toArray(),
             'products' => $order->products->toArray(),
+            'digital_products' => $digitalProducts,
+            'cancellation_reason' => $order->cancellation_reason_message,
         ], $order);
     }
 
@@ -265,7 +276,7 @@ class OrderHelper
 
                 if ($saveHistory) {
                     OrderHistory::query()->create([
-                        'action' => 'send_order_confirmation_email',
+                        'action' => OrderHistoryActionEnum::SEND_ORDER_CONFIRMATION_EMAIL,
                         'description' => trans('plugins/ecommerce::order.confirmation_email_was_sent_to_customer'),
                         'order_id' => $order->getKey(),
                     ]);
@@ -311,7 +322,7 @@ class OrderHelper
         do_action(ACTION_AFTER_ORDER_STATUS_COMPLETED_ECOMMERCE, $order, $request);
 
         OrderHistory::query()->create([
-            'action' => 'mark_order_as_completed',
+            'action' => OrderHistoryActionEnum::MARK_ORDER_AS_COMPLETED,
             'description' => trans('plugins/ecommerce::order.mark_as_completed.history', [
                 'admin' => Auth::check() ? Auth::user()->name : 'system',
                 'time' => Carbon::now(),
@@ -377,7 +388,7 @@ class OrderHelper
         return $name ?: $method;
     }
 
-    public function processHistoryVariables(OrderHistory|ShipmentHistory $history): string|null
+    public function processHistoryVariables(OrderHistory|ShipmentHistory $history): ?string
     {
         $variables = [
             'order_id' => Html::link(
@@ -409,7 +420,7 @@ class OrderHelper
         return $content;
     }
 
-    public function setOrderSessionData(string|null $token, string|array $data): array
+    public function setOrderSessionData(?string $token, string|array $data): array
     {
         if (! $token) {
             $token = $this->getOrderSessionToken();
@@ -436,7 +447,7 @@ class OrderHelper
         return $token;
     }
 
-    public function getOrderSessionData(string|null $token = null): array
+    public function getOrderSessionData(?string $token = null): array
     {
         if (! $token) {
             $token = $this->getOrderSessionToken();
@@ -464,7 +475,7 @@ class OrderHelper
         return $data;
     }
 
-    public function mergeOrderSessionData(string|null $token, string|array $data): array
+    public function mergeOrderSessionData(?string $token, string|array $data): array
     {
         if (! $token) {
             $token = $this->getOrderSessionToken();
@@ -477,7 +488,7 @@ class OrderHelper
         return $this->cleanData($data);
     }
 
-    public function clearSessions(string|null $token): void
+    public function clearSessions(?string $token): void
     {
         Cart::instance('cart')->destroy();
         session()->forget('applied_coupon_code');
@@ -489,7 +500,7 @@ class OrderHelper
     public function handleAddCart(Product $product, Request $request): array
     {
         if ($product->status != BaseStatusEnum::PUBLISHED) {
-            throw new Exception(__('Product is not published yet.'));
+            throw new ProductIsNotActivatedYetException();
         }
 
         $parentProduct = $product->original_product;
@@ -507,7 +518,7 @@ class OrderHelper
             $product->getKey(),
             BaseHelper::clean($parentProduct->name ?: $product->name),
             $request->input('qty', 1),
-            $product->front_sale_price,
+            $product->price()->getPrice(false),
             [
                 'image' => $image,
                 'attributes' => $product->is_variation ? $product->variation_attributes : '',
@@ -516,7 +527,6 @@ class OrderHelper
                 'options' => $options,
                 'extras' => $request->input('extras', []),
                 'sku' => $product->sku,
-                'barcode' => $product->barcode,
                 'weight' => $product->weight,
             ]
         );
@@ -612,10 +622,10 @@ class OrderHelper
                 'zip_code' => $address->zip_code,
                 'order_id' => Arr::get($sessionData, 'created_order_id', 0),
             ];
-        } elseif ((array)$request->input('address', [])) {
+        } elseif ((array) $request->input('address', [])) {
             $addressData = array_merge(
                 ['order_id' => Arr::get($sessionData, 'created_order_id', 0)],
-                (array)$request->input('address', [])
+                (array) $request->input('address', [])
             );
         } else {
             $addressData = [
@@ -714,7 +724,6 @@ class OrderHelper
 
                 $orderBillingAddress->fill($billingAddressData);
                 $orderBillingAddress->save();
-
             } else {
                 OrderAddress::query()
                     ->where([
@@ -790,11 +799,7 @@ class OrderHelper
             $productIds = [];
             foreach ($cartItems as $cartItem) {
                 $productByCartItem = $products['products']->firstWhere('id', $cartItem->id);
-                if(setting('ecommerce_display_product_price_including_taxes') == 1){
-                    $price =  $cartItem->price - $cartItem->tax;
-                }else{
-                    $price = $cartItem->price;
-                }
+
                 $data = [
                     'order_id' => $sessionData['created_order_id'],
                     'product_id' => $cartItem->id,
@@ -802,7 +807,7 @@ class OrderHelper
                     'product_image' => $productByCartItem->original_product->image,
                     'qty' => $cartItem->qty,
                     'weight' => $productByCartItem->weight * $cartItem->qty,
-                    'price' => $price,
+                    'price' => $cartItem->price,
                     'tax_amount' => $cartItem->tax,
                     'options' => [],
                     'product_type' => $productByCartItem->product_type,
@@ -945,7 +950,7 @@ class OrderHelper
         }
 
         OrderHistory::query()->create([
-            'action' => 'confirm_payment',
+            'action' => OrderHistoryActionEnum::CONFIRM_PAYMENT,
             'description' => trans('plugins/ecommerce::order.payment_was_confirmed_by', [
                 'money' => format_price($order->amount),
             ]),
@@ -958,13 +963,19 @@ class OrderHelper
         return true;
     }
 
-    public function cancelOrder(Order $order): Order
+    public function cancelOrder(Order $order, ?string $reason = null, ?string $reasonDescription = null): Order
     {
         $order->status = OrderStatusEnum::CANCELED;
         $order->is_confirmed = true;
+
+        if ($reason) {
+            $order->cancellation_reason = $reason;
+            $order->cancellation_reason_description = $reasonDescription;
+        }
+
         $order->save();
 
-        event(new OrderCancelledEvent($order));
+        event(new OrderCancelledEvent($order, $reason, $reasonDescription));
 
         foreach ($order->products as $orderProduct) {
             $product = $orderProduct->product;
@@ -996,6 +1007,14 @@ class OrderHelper
             );
         }
 
+        if (AdminHelper::isInAdmin() && Auth::check() && $mailer->templateEnabled('admin_cancel_order')) {
+            $this->setEmailVariables($order);
+            $mailer->sendUsingTemplate(
+                'admin_cancel_order',
+                $order->user->email ?: $order->address->email
+            );
+        }
+
         return $order;
     }
 
@@ -1004,7 +1023,7 @@ class OrderHelper
         return $this->setOrderCompleted($shipment->order_id, $request, $userId);
     }
 
-    public function getOrderBankInfo(Order|EloquentCollection $orders): string|null
+    public function getOrderBankInfo(Order|EloquentCollection $orders): ?string
     {
         if (! is_plugin_active('payment')) {
             return null;
@@ -1048,6 +1067,42 @@ class OrderHelper
             return apply_filters('ecommerce_order_bank_info', $bankInfo, $orders);
         } catch (Throwable) {
             return null;
+        }
+    }
+
+    public function confirmOrder(Order $order): void
+    {
+        if ($order->is_confirmed) {
+            return;
+        }
+
+        $order->is_confirmed = 1;
+        if ($order->status == OrderStatusEnum::PENDING) {
+            $order->status = OrderStatusEnum::PROCESSING;
+        }
+
+        $order->save();
+
+        $payment = Payment::query()->where('order_id', $order->getKey())->first();
+
+        if ($payment && Auth::check()) {
+            $payment->user_id = Auth::id();
+            $payment->save();
+        }
+
+        event(new OrderConfirmedEvent($order, EcommerceHelperFacade::isOrderAutoConfirmedEnabled() ? null : Auth::user()));
+
+        OrderHistory::query()->create([
+            'action' => OrderHistoryActionEnum::CONFIRM_ORDER,
+            'description' => trans('plugins/ecommerce::order.order_was_verified_by'),
+            'order_id' => $order->getKey(),
+            'user_id' => Auth::id() ?: 0,
+        ]);
+
+        $mailer = EmailHandler::setModule(ECOMMERCE_MODULE_SCREEN_NAME);
+        if ($mailer->templateEnabled('order_confirm')) {
+            $this->setEmailVariables($order);
+            $mailer->sendUsingTemplate('order_confirm', $order->user->email ?: $order->address->email);
         }
     }
 }

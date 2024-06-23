@@ -18,7 +18,7 @@ use Illuminate\Support\Arr;
 
 class HandleApplyCouponService
 {
-    public function execute(string $coupon, array $sessionData = [], array $cartData = [], string|null $prefix = ''): array
+    public function execute(string $coupon, array $sessionData = [], array $cartData = [], ?string $prefix = ''): array
     {
         $token = OrderHelper::getOrderSessionToken();
 
@@ -231,14 +231,14 @@ class HandleApplyCouponService
             }
         }
 
-        if (! $discount->can_use_with_promotion && (float)Arr::get($sessionData, 'promotion_discount_amount')) {
+        if (! $discount->can_use_with_promotion && (float) Arr::get($sessionData, 'promotion_discount_amount')) {
             return [
                 'error' => true,
                 'message' => trans('plugins/ecommerce::discount.cannot_use_same_time_with_other_discount_program'),
             ];
         }
 
-        $rawTotal = (float)Arr::get($sessionData, 'raw_total');
+        $rawTotal = (float) Arr::get($sessionData, 'raw_total');
 
         if (
             in_array($discount->type_option, [DiscountTypeOptionEnum::AMOUNT, DiscountTypeOptionEnum::PERCENTAGE])
@@ -284,6 +284,7 @@ class HandleApplyCouponService
             case DiscountTypeOptionEnum::AMOUNT:
                 switch ($discount->target) {
                     case DiscountTargetEnum::MINIMUM_ORDER_AMOUNT:
+                    case DiscountTargetEnum::ONCE_PER_CUSTOMER:
                     case DiscountTargetEnum::ALL_ORDERS:
                         $couponDiscountAmount += min($discountValue, $rawTotal);
 
@@ -419,6 +420,8 @@ class HandleApplyCouponService
                             }
                         }
 
+                        break;
+
                     default:
                         if ($countCart >= $discount->product_quantity) {
                             $couponDiscountAmount += min($discountValue, $rawTotal);
@@ -431,6 +434,7 @@ class HandleApplyCouponService
             case DiscountTypeOptionEnum::PERCENTAGE:
                 switch ($discount->target) {
                     case DiscountTargetEnum::MINIMUM_ORDER_AMOUNT:
+                    case DiscountTargetEnum::ONCE_PER_CUSTOMER:
                     case DiscountTargetEnum::ALL_ORDERS:
                         $couponDiscountAmount = $rawTotal * $discountValue / 100;
 
@@ -544,6 +548,13 @@ class HandleApplyCouponService
 
                         foreach ($validCartItems as $cartItem) {
                             $couponDiscountAmount += $cartItem->total * $discountValue / 100;
+                        }
+
+                        break;
+
+                    default:
+                        if ($countCart >= $discount->product_quantity) {
+                            $couponDiscountAmount = $rawTotal * $discountValue / 100;
                         }
 
                         break;

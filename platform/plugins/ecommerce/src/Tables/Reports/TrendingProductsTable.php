@@ -31,7 +31,7 @@ class TrendingProductsTable extends TableAbstract
                 return Html::link($product->url, $product->name, ['target' => '_blank']);
             })
             ->editColumn('views', function (Product $product) {
-                return number_format((float)$product->views_count);
+                return number_format((float) $product->views_count);
             });
 
         return $this->toJson($data);

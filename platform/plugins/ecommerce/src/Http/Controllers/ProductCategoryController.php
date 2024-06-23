@@ -70,6 +70,9 @@ class ProductCategoryController extends BaseController
         $response = $this->httpResponse();
 
         if ($request->ajax()) {
+            /**
+             * @var ProductCategory $productCategory
+             */
             $productCategory = ProductCategory::query()->findOrFail($productCategory->id);
 
             if ($response->isSaving()) {
@@ -201,7 +204,7 @@ class ProductCategoryController extends BaseController
 
     public function getSearch(Request $request)
     {
-        $term = $request->input('search');
+        $term = $request->input('search') ?: $request->input('q');
 
         $categories = ProductCategory::query()
             ->select(['id', 'name'])
@@ -235,9 +238,9 @@ class ProductCategoryController extends BaseController
 
     protected function buildTree(
         Collection $categories,
-        Collection $tree = null,
+        ?Collection $tree = null,
         int|string $parentId = 0,
-        string $indent = null
+        ?string $indent = null
     ): Collection {
         if ($tree === null) {
             $tree = collect();

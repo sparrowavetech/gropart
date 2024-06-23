@@ -10,11 +10,9 @@ use Botble\Ecommerce\Enums\CustomerStatusEnum;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Forms\Fronts\Auth\LoginForm;
 use Botble\Ecommerce\Http\Requests\LoginRequest;
-use Botble\JsValidation\Facades\JsValidator;
 use Botble\SeoHelper\Facades\SeoHelper;
 use Botble\Theme\Facades\Theme;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
 class LoginController extends BaseController
@@ -42,15 +40,6 @@ class LoginController extends BaseController
             session(['url.intended' => url()->previous()]);
         }
 
-        Theme::asset()
-            ->container('footer')
-            ->usePath(false)
-            ->add('js-validation', 'vendor/core/core/js-validation/js/js-validation.js', ['jquery']);
-
-        add_filter(THEME_FRONT_FOOTER, function ($html) {
-            return $html . JsValidator::formRequest(LoginRequest::class)->render();
-        });
-
         return Theme::scope(
             'ecommerce.customers.login',
             ['form' => LoginForm::create()],
@@ -63,15 +52,8 @@ class LoginController extends BaseController
         return auth('customer');
     }
 
-    protected function validator(array $data)
+    public function login(LoginRequest $request)
     {
-        return Validator::make($data, (new LoginRequest())->rules());
-    }
-
-    public function login(Request $request)
-    {
-        $this->validateLogin($request);
-
         // If the class is using the ThrottlesLogins trait, we can automatically throttle
         // the login attempts for this application. We'll key this by the username and
         // the IP address of the client making these requests into this application.
@@ -102,7 +84,7 @@ class LoginController extends BaseController
         return redirect()->to(BaseHelper::getHomepageUrl());
     }
 
-    protected function attemptLogin(Request $request)
+    protected function attemptLogin(LoginRequest $request)
     {
         if ($this->guard()->validate($this->credentials($request))) {
             $customer = $this->guard()->getLastAttempted();
@@ -134,8 +116,17 @@ class LoginController extends BaseController
         return false;
     }
 
-    public function username(): string
+    public function credentials(LoginRequest $request): array
     {
-        return EcommerceHelper::isLoginUsingPhone() ? 'phone' : 'email';
+        $usernameKey = match (EcommerceHelper::getLoginOption()) {
+            'phone' => 'phone',
+            'email_or_phone' => $request->isEmail($request->input($this->username())) ? 'email' : 'phone',
+            default => 'email',
+        };
+
+        return [
+            $usernameKey => $request->input($this->username()),
+            'password' => $request->input('password'),
+        ];
     }
 }

@@ -3,18 +3,23 @@
 namespace Botble\Ecommerce\Http\Controllers;
 
 use Botble\Base\Events\CreatedContentEvent;
-use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
-use Botble\Base\Http\Controllers\BaseController;
+use Botble\Base\Http\Actions\DeleteResourceAction;
+use Botble\Base\Supports\Breadcrumb;
 use Botble\Ecommerce\Forms\TaxForm;
+use Botble\Ecommerce\Http\Controllers\Settings\SettingController;
 use Botble\Ecommerce\Http\Requests\TaxRequest;
 use Botble\Ecommerce\Models\Tax;
 use Botble\Ecommerce\Tables\TaxTable;
-use Exception;
-use Illuminate\Http\Request;
 
-class TaxController extends BaseController
+class TaxController extends SettingController
 {
+    protected function breadcrumb(): Breadcrumb
+    {
+        return parent::breadcrumb()
+            ->add(trans('plugins/ecommerce::tax.name'), route('ecommerce.settings.taxes'));
+    }
+
     public function index(TaxTable $dataTable)
     {
         $this->pageTitle(trans('plugins/ecommerce::tax.name'));
@@ -44,7 +49,7 @@ class TaxController extends BaseController
 
     public function edit(Tax $tax)
     {
-        $this->pageTitle(trans('plugins/ecommerce::tax.edit', ['title' => $tax->title]));
+        $this->pageTitle(trans('core/base::forms.edit_item', ['name' => $tax->title]));
 
         return TaxForm::createFromModel($tax)->renderForm();
     }
@@ -62,19 +67,8 @@ class TaxController extends BaseController
             ->withUpdatedSuccessMessage();
     }
 
-    public function destroy(Tax $tax, Request $request)
+    public function destroy(Tax $tax)
     {
-        try {
-            $tax->delete();
-            event(new DeletedContentEvent(TAX_MODULE_SCREEN_NAME, $request, $tax));
-
-            return $this
-                ->httpResponse()->setMessage(trans('core/base::notices.delete_success_message'));
-        } catch (Exception $exception) {
-            return $this
-                ->httpResponse()
-                ->setError()
-                ->setMessage($exception->getMessage());
-        }
+        return DeleteResourceAction::make($tax);
     }
 }

@@ -5,7 +5,7 @@
             {!! BaseHelper::clean(
                 trans('plugins/ecommerce::products.product_price_flash_sale_warning', [
                     'name' => $flashSale->name,
-                    'price' => format_price($data->front_sale_price),
+                    'price' => $data->price()->displayAsText(),
                 ]),
             ) !!}
         </x-core::alert>

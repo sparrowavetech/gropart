@@ -4,12 +4,14 @@ namespace Botble\Ecommerce\Http\Controllers\Customers;
 
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Http\Controllers\BaseController;
+use Botble\Ecommerce\Enums\OrderHistoryActionEnum;
 use Botble\Ecommerce\Enums\OrderStatusEnum;
 use Botble\Ecommerce\Enums\ProductTypeEnum;
 use Botble\Ecommerce\Facades\EcommerceHelper;
-use Botble\Ecommerce\Facades\InvoiceHelper;
-use Botble\Ecommerce\Facades\OrderHelper;
 use Botble\Ecommerce\Facades\OrderReturnHelper;
+use Botble\Ecommerce\Forms\Fronts\Auth\ChangePasswordForm;
+use Botble\Ecommerce\Forms\Fronts\Customer\AddressForm;
+use Botble\Ecommerce\Forms\Fronts\Customer\CustomerForm;
 use Botble\Ecommerce\Http\Requests\AddressRequest;
 use Botble\Ecommerce\Http\Requests\AvatarRequest;
 use Botble\Ecommerce\Http\Requests\EditAccountRequest;
@@ -21,10 +23,10 @@ use Botble\Ecommerce\Models\Order;
 use Botble\Ecommerce\Models\OrderHistory;
 use Botble\Ecommerce\Models\OrderProduct;
 use Botble\Ecommerce\Models\OrderReturn;
+use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Models\Review;
 use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
 use Botble\Media\Facades\RvMedia;
-use Botble\Media\Services\ThumbnailService;
 use Botble\Media\Supports\Zipper;
 use Botble\Payment\Enums\PaymentStatusEnum;
 use Botble\SeoHelper\Facades\SeoHelper;
@@ -37,6 +39,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class PublicController extends BaseController
@@ -51,12 +54,6 @@ class PublicController extends BaseController
             ->add('ecommerce-utilities-js', 'vendor/core/plugins/ecommerce/js/utilities.js', ['jquery'])
             ->add('cropper-js', 'vendor/core/plugins/ecommerce/libraries/cropper.js', ['jquery'])
             ->add('avatar-js', 'vendor/core/plugins/ecommerce/js/avatar.js', ['jquery']);
-
-        if (EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation()) {
-            Theme::asset()
-                ->container('footer')
-                ->add('location-js', 'vendor/core/plugins/location/js/location.js', ['jquery']);
-        }
     }
 
     public function getOverview()
@@ -97,7 +94,15 @@ class PublicController extends BaseController
         Theme::breadcrumb()
             ->add(__('Profile'), route('customer.edit-account'));
 
-        return Theme::scope('ecommerce.customers.edit-account', [], 'plugins/ecommerce::themes.customers.edit-account')
+        $customer = auth('customer')->user();
+
+        $form = CustomerForm::createFromModel($customer);
+
+        return Theme::scope(
+            'ecommerce.customers.edit-account',
+            compact('form'),
+            'plugins/ecommerce::themes.customers.edit-account'
+        )
             ->render();
     }
 
@@ -107,11 +112,21 @@ class PublicController extends BaseController
          * @var Customer $customer
          */
         $customer = auth('customer')->user();
-        $customer->fill($request->except('email'));
-        $customer->dob = Carbon::parse($request->input('dob'));
-        $customer->save();
 
-        do_action(HANDLE_CUSTOMER_UPDATED_ECOMMERCE, $customer, $request);
+        CustomerForm::createFromModel($customer)
+            ->setRequest($request)
+            ->saving(function (CustomerForm $form) {
+                $model = $form->getModel();
+                $request = $form->getRequest();
+
+                $model->fill($request->except(['email']));
+
+                $model->dob = Carbon::createFromFormat(BaseHelper::getDateFormat(), $request->input('dob'));
+
+                $model->save();
+
+                do_action(HANDLE_CUSTOMER_UPDATED_ECOMMERCE, $model, $request);
+            });
 
         return $this
             ->httpResponse()
@@ -126,9 +141,11 @@ class PublicController extends BaseController
         Theme::breadcrumb()
             ->add(__('Change Password'), route('customer.change-password'));
 
+        $form = ChangePasswordForm::create();
+
         return Theme::scope(
             'ecommerce.customers.change-password',
-            [],
+            compact('form'),
             'plugins/ecommerce::themes.customers.change-password'
         )->render();
     }
@@ -137,91 +154,20 @@ class PublicController extends BaseController
     {
         $user = Auth::guard('customer')->user();
 
-        $user->update([
-            'password' => Hash::make($request->input('password')),
-        ]);
+        ChangePasswordForm::createFromModel($user)
+            ->setRequest($request)
+            ->saving(function (ChangePasswordForm $form) {
+                $model = $form->getModel();
+                $request = $form->getRequest();
+
+                $model->update([
+                    'password' => Hash::make($request->input('password')),
+                ]);
+            });
 
         return $this
             ->httpResponse()
-            ->setMessage(trans('acl::users.password_update_success'));
-    }
-
-    public function getListOrders()
-    {
-        SeoHelper::setTitle(__('Orders'));
-
-        $orders = Order::query()
-            ->where([
-                'user_id' => auth('customer')->id(),
-                'is_finished' => 1,
-            ])
-            ->withCount(['products'])
-            ->orderByDesc('created_at')
-            ->paginate(10);
-
-        Theme::breadcrumb()
-            ->add(__('Orders'), route('customer.orders'));
-
-        return Theme::scope(
-            'ecommerce.customers.orders.list',
-            compact('orders'),
-            'plugins/ecommerce::themes.customers.orders.list'
-        )->render();
-    }
-
-    public function getViewOrder(int|string $id)
-    {
-        $order = Order::query()
-            ->where([
-                'id' => $id,
-                'user_id' => auth('customer')->id(),
-            ])
-            ->with(['address', 'products'])
-            ->firstOrFail();
-
-        SeoHelper::setTitle(__('Order detail :id', ['id' => $order->code]));
-
-        Theme::breadcrumb()
-            ->add(
-                __('Order detail :id', ['id' => $order->code]),
-                route('customer.orders.view', $id)
-            );
-
-        return Theme::scope(
-            'ecommerce.customers.orders.view',
-            compact('order'),
-            'plugins/ecommerce::themes.customers.orders.view'
-        )->render();
-    }
-
-    public function getCancelOrder(int|string $id)
-    {
-        $order = Order::query()
-            ->where([
-                'id' => $id,
-                'user_id' => auth('customer')->id(),
-            ])
-            ->with(['address', 'products'])
-            ->firstOrFail();
-
-        if (! $order->canBeCanceled()) {
-            return $this
-                ->httpResponse()
-                ->setError()
-                ->setMessage(trans('plugins/ecommerce::order.cancel_error'));
-        }
-
-        OrderHelper::cancelOrder($order);
-
-        OrderHistory::query()->create([
-            'action' => 'cancel_order',
-            'description' => __('Order was cancelled by custom :customer', ['customer' => $order->address->name]),
-            'order_id' => $order->getKey(),
-        ]);
-
-        return $this
-            ->httpResponse()
-            ->setMessage(trans('plugins/ecommerce::order.cancel_success'));
+            ->setMessage(trans('core/acl::users.password_update_success'));
     }
 
     public function getListAddresses()
@@ -252,35 +198,47 @@ class PublicController extends BaseController
             ->add(__('Address books'), route('customer.address'))
             ->add(__('Create Address'), route('customer.address.create'));
 
+        $form = AddressForm::create();
+
         return Theme::scope(
             'ecommerce.customers.address.create',
-            [],
+            compact('form'),
             'plugins/ecommerce::themes.customers.address.create'
         )->render();
     }
 
     public function postCreateAddress(AddressRequest $request)
     {
-        if ($request->input('is_default') == 1) {
-            Address::query()
-                ->where([
-                    'is_default' => 1,
-                    'customer_id' => auth('customer')->id(),
-                ])
-                ->update(['is_default' => 0]);
-        }
+        $form = AddressForm::create();
 
-        $request->merge([
-            'customer_id' => auth('customer')->id(),
-            'is_default' => $request->input('is_default', 0),
-        ]);
+        $form->setRequest($request)->saving(function (AddressForm $form) {
+            $model = $form->getModel();
+            $request = $form->getRequest();
 
-        $address = Address::query()->create($request->input());
+            if ($request->input('is_default') == 1) {
+                Address::query()
+                    ->where([
+                        'is_default' => 1,
+                        'customer_id' => auth('customer')->id(),
+                    ])
+                    ->update(['is_default' => 0]);
+            }
+
+            $request->merge([
+                'customer_id' => auth('customer')->id(),
+                'is_default' => $request->input('is_default', 0),
+            ]);
+
+            $model->fill($request->input());
+            $model->save();
+        });
+
+        $address = $form->getModel();
 
         return $this
             ->httpResponse()
             ->setData([
-                'id' => $address->id,
+                'id' => $address->getKey(),
                 'html' => view(
                     'plugins/ecommerce::orders.partials.address-item',
                     compact('address')
@@ -292,7 +250,7 @@ class PublicController extends BaseController
 
     public function getEditAddress(int|string $id)
     {
-        SeoHelper::setTitle(__('Edit Address #:id', ['id' => $id]));
+        SeoHelper::setTitle(__('Edit Address #:id', compact('id')));
 
         $address = Address::query()
             ->where([
@@ -302,11 +260,13 @@ class PublicController extends BaseController
             ->firstOrFail();
 
         Theme::breadcrumb()
-            ->add(__('Edit Address #:id', ['id' => $id]), route('customer.address.edit', $id));
+            ->add(__('Edit Address #:id', compact('id')), route('customer.address.edit', $id));
+
+        $form = AddressForm::createFromModel($address);
 
         return Theme::scope(
             'ecommerce.customers.address.edit',
-            compact('address'),
+            compact('form', 'address'),
             'plugins/ecommerce::themes.customers.address.edit'
         )->render();
     }
@@ -335,19 +295,32 @@ class PublicController extends BaseController
             ])
             ->firstOrFail();
 
-        if ($request->input('is_default') == 1) {
-            Address::query()
-                ->where([
-                    'is_default' => 1,
-                    'customer_id' => auth('customer')->id(),
-                ])
-                ->update(['is_default' => 0]);
+        $form = AddressForm::createFromModel($address)->setRequest($request);
 
-            $address->is_default = 1;
-        }
+        $form->saving(function (AddressForm $form) {
+            $model = $form->getModel();
+            $request = $form->getRequest();
 
-        $address->fill($request->input());
-        $address->save();
+            if ($request->input('is_default') == 1) {
+                Address::query()
+                    ->where([
+                        'is_default' => 1,
+                        'customer_id' => auth('customer')->id(),
+                    ])
+                    ->update(['is_default' => 0]);
+
+                $model->is_default = 1;
+            }
+
+            $request->merge([
+                'is_default' => $request->input('is_default', 0),
+            ]);
+
+            $model->fill($request->input());
+            $model->save();
+        });
+
+        $address = $form->getModel();
 
         return $this
             ->httpResponse()
@@ -359,27 +332,7 @@ class PublicController extends BaseController
             ->withUpdatedSuccessMessage();
     }
 
-    public function getPrintOrder(int|string $id, Request $request)
-    {
-        $order = Order::query()
-            ->where([
-                'id' => $id,
-                'user_id' => auth('customer')->id(),
-            ])
-            ->firstOrFail();
-
-        if (! $order->isInvoiceAvailable()) {
-            abort(404);
-        }
-
-        if ($request->input('type') == 'print') {
-            return InvoiceHelper::streamInvoice($order->invoice);
-        }
-
-        return InvoiceHelper::downloadInvoice($order->invoice);
-    }
-
-    public function postAvatar(AvatarRequest $request, ThumbnailService $thumbnailService)
+    public function postAvatar(AvatarRequest $request)
     {
         try {
             $account = auth('customer')->user();
@@ -476,9 +429,10 @@ class PublicController extends BaseController
             $orderReturnData['reason'] = $reason;
         }
 
-        $orderReturnData['items'] = Arr::where($request->input('return_items'), function ($value) {
-            return isset($value['is_return']);
-        });
+        $orderReturnData['items'] = Arr::where(
+            $request->input('return_items'),
+            fn ($value) => isset($value['is_return'])
+        );
 
         if (empty($orderReturnData['items'])) {
             return $this
@@ -505,7 +459,7 @@ class PublicController extends BaseController
             }
             $qty = $orderProduct->qty;
             if (EcommerceHelper::allowPartialReturn()) {
-                $qty = (int)Arr::get($item, 'qty') ?: $qty;
+                $qty = (int) Arr::get($item, 'qty') ?: $qty;
                 $qty = min($qty, $orderProduct->qty);
             }
             $item['qty'] = $qty;
@@ -523,7 +477,7 @@ class PublicController extends BaseController
         }
 
         OrderHistory::query()->create([
-            'action' => 'return_order',
+            'action' => OrderHistoryActionEnum::RETURN_ORDER,
             'description' => __(':customer has requested return product(s)', ['customer' => $order->address->name]),
             'order_id' => $order->getKey(),
         ]);
@@ -571,6 +525,7 @@ class PublicController extends BaseController
                 'id' => $id,
                 'user_id' => auth('customer')->id(),
             ])
+            ->with('latestHistory')
             ->firstOrFail();
 
         Theme::breadcrumb()
@@ -682,7 +637,7 @@ class PublicController extends BaseController
         $product = $orderProduct->product;
         $productFiles = $product->id ? $product->productFiles : $orderProduct->productFiles;
 
-        if (! $productFiles->count()) {
+        if ($productFiles->isEmpty()) {
             return $this
                 ->httpResponse()
                 ->setError()
@@ -714,7 +669,7 @@ class PublicController extends BaseController
         }
 
         $internalProductFiles = $productFiles->filter(fn ($productFile) => ! $productFile->is_external_link);
-        if (! $internalProductFiles->count()) {
+        if ($internalProductFiles->isEmpty()) {
             return $this
                 ->httpResponse()
                 ->setError()
@@ -724,11 +679,25 @@ class PublicController extends BaseController
         $zipName = Str::slug($orderProduct->product_name) . Str::random(5) . '-' . Carbon::now()->format(
             'Y-m-d-h-i-s'
         ) . '.zip';
-        $fileName = RvMedia::getRealPath($zipName);
+
+        $storageDisk = Storage::disk('local');
+
+        $fileName = $storageDisk->path($zipName);
+
         $zip = new Zipper();
         $zip->make($fileName);
 
         foreach ($internalProductFiles as $file) {
+            if (Str::startsWith($file->url, Product::getDigitalProductFilesDirectory())) {
+                $filePath = $storageDisk->path($file->url);
+
+                if (File::exists($filePath)) {
+                    $zip->add($filePath);
+                }
+
+                continue;
+            }
+
             $filePath = RvMedia::getRealPath($file->url);
             if (! RvMedia::isUsingCloud()) {
                 if (File::exists($filePath)) {
@@ -736,7 +705,7 @@ class PublicController extends BaseController
                 }
             } else {
                 $zip->addString(
-                    $file->file_name,
+                    $file->base_name,
                     file_get_contents(str_replace('https://', 'http://', $filePath))
                 );
             }

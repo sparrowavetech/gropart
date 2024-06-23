@@ -11,13 +11,13 @@ class BrandRequest extends Request
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:250',
-            'slug' => 'nullable|string|max:250',
-            'description' => 'nullable|string|max:400',
-            'order' => 'required|integer|min:0|max:127',
-            'website' => 'nullable|string',
+            'name' => ['required', 'string', 'max:250'],
+            'slug' => ['nullable', 'string', 'max:250'],
+            'description' => ['nullable', 'string', 'max:400'],
+            'order' => ['required', 'integer', 'min:0', 'max:127'],
+            'website' => ['nullable', 'string'],
             'status' => Rule::in(BaseStatusEnum::values()),
-            'categories' => 'nullable|array',
+            'categories' => ['nullable', 'array'],
         ];
     }
 

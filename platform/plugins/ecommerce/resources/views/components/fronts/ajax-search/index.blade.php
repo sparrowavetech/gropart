@@ -4,6 +4,7 @@
     'data-ajax-url' => route('public.ajax.search-products'),
     'method' => 'GET',
     'class' => 'bb-form-quick-search',
+    'id' => 'bb-form-quick-search',
 ]) }}>
     {{ $slot }}
 

@@ -11,8 +11,8 @@ class ProductLabelRequest extends Request
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:250',
-            'color' => 'required|string',
+            'name' => ['required', 'string', 'max:250'],
+            'color' => ['required', 'string'],
             'status' => Rule::in(BaseStatusEnum::values()),
         ];
     }

@@ -11,7 +11,7 @@ class UpdateShipmentCodStatusRequest extends Request
     public function rules(): array
     {
         return [
-            'status' => 'required|' . Rule::in(ShippingCodStatusEnum::values()),
+            'status' => ['required', Rule::in(ShippingCodStatusEnum::values())],
         ];
     }
 }

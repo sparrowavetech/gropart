@@ -21,17 +21,14 @@ class AddShippingRegionForm extends FormAbstract
             }
         }
 
-        $countries = ['' => trans('plugins/ecommerce::shipping.all')] + EcommerceHelper::getAvailableCountries();
+        $countries = ['' => trans('plugins/ecommerce::shipping.all_countries')] + EcommerceHelper::getAvailableCountries();
 
         $countries = array_diff_key($countries, array_flip($existedCountries));
 
         $this
             ->setupModel(new Shipping())
             ->contentOnly()
-            ->setFormOptions([
-                'url' => route('shipping_methods.region.create'),
-            ])
-            ->contentOnly()
+            ->setUrl(route('shipping_methods.region.create'))
             ->setTitle(trans('plugins/ecommerce::shipping.add_shipping_region'))
             ->setValidatorClass(AddShippingRegionRequest::class)
             ->add(

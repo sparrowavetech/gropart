@@ -84,6 +84,7 @@
                     class="form-control"
                     id="address_name"
                     name="address[name]"
+                    autocomplete="family-name"
                     type="text"
                     value="{{ old('address.name', Arr::get($sessionCheckoutData, 'name')) ?: (auth('customer')->check() ? auth('customer')->user()->name : null) }}"
                     required
@@ -107,6 +108,7 @@
                                 class="form-control"
                                 id="address_email"
                                 name="address[email]"
+                                autocomplete="email"
                                 type="email"
                                 value="{{ old('address.email', Arr::get($sessionCheckoutData, 'email')) ?: (auth('customer')->check() ? auth('customer')->user()->email : null) }}"
                                 required
@@ -130,6 +132,7 @@
                                 class="form-control"
                                 id="address_phone"
                                 name="address[phone]"
+                                autocomplete="phone"
                                 type="tel"
                                 value="{{ old('address.phone', Arr::get($sessionCheckoutData, 'phone')) ?: (auth('customer')->check() ? auth('customer')->user()->phone : null) }}"
                             >
@@ -150,6 +153,7 @@
                         class="form-control"
                         id="address_country"
                         name="address[country]"
+                        autocomplete="country"
                         data-form-parent=".customer-address-payment-form"
                         data-type="country"
                         required
@@ -185,6 +189,7 @@
                                     class="form-control"
                                     id="address_state"
                                     name="address[state]"
+                                    autocomplete="state"
                                     data-form-parent=".customer-address-payment-form"
                                     data-type="state"
                                     data-url="{{ route('ajax.states-by-country') }}"
@@ -209,6 +214,7 @@
                                     class="form-control"
                                     id="address_state"
                                     name="address[state]"
+                                    autocomplete="state"
                                     type="text"
                                     value="{{ old('address.state', Arr::get($sessionCheckoutData, 'state')) }}"
                                     required
@@ -230,6 +236,7 @@
                                     class="form-control"
                                     id="address_city"
                                     name="address[city]"
+                                    autocomplete="city"
                                     type="text"
                                     value="{{ old('address.city', Arr::get($sessionCheckoutData, 'city')) }}"
                                     required
@@ -242,6 +249,7 @@
                                     class="form-control"
                                     id="address_city"
                                     name="address[city]"
+                                    autocomplete="city"
                                     data-type="city"
                                     data-using-select2="false"
                                     data-url="{{ route('ajax.cities-by-state') }}"
@@ -249,7 +257,7 @@
                                 >
                                     <option value="">{{ __('Select city...') }}</option>
                                     @if (old('address.state', Arr::get($sessionCheckoutData, 'state')) || in_array('state', EcommerceHelper::getHiddenFieldsAtCheckout()))
-                                        @foreach (EcommerceHelper::getAvailableCitiesByState(old('address.state', Arr::get($sessionCheckoutData, 'state')), old('address.country', Arr::get($sessionCheckoutData, 'country', EcommerceHelper::getFirstCountryId()))) as $cityId => $cityName)
+                                        @foreach (EcommerceHelper::getAvailableCitiesByState(old('address.state', Arr::get($sessionCheckoutData, 'state')), old('address.country', Arr::get($sessionCheckoutData, 'country'))) as $cityId => $cityName)
                                             <option
                                                 value="{{ $cityId }}"
                                                 @if (old('address.city', Arr::get($sessionCheckoutData, 'city')) == $cityId) selected @endif
@@ -274,6 +282,7 @@
                         class="form-control"
                         id="address_address"
                         name="address[address]"
+                        autocomplete="address"
                         type="text"
                         value="{{ old('address.address', Arr::get($sessionCheckoutData, 'address')) }}"
                         required
@@ -291,6 +300,7 @@
                         class="form-control"
                         id="address_zip_code"
                         name="address[zip_code]"
+                        autocomplete="postal-code"
                         type="text"
                         value="{{ old('address.zip_code', Arr::get($sessionCheckoutData, 'zip_code')) }}"
                         required
@@ -303,51 +313,53 @@
     </div>
 
     @if (!auth('customer')->check())
-        <div class="mb-3 form-group">
-            <input
-                id="create_account"
-                name="create_account"
-                type="checkbox"
-                value="1"
-                @if (old('create_account') == 1) checked @endif
-            >
-            <label
-                class="form-label"
-                for="create_account"
-            >{{ __('Register an account with above information?') }}</label>
-        </div>
+        <div id="register-an-account-wrapper">
+            <div class="mb-3 form-group">
+                <input
+                    id="create_account"
+                    name="create_account"
+                    type="checkbox"
+                    value="1"
+                    @if (old('create_account') == 1) checked @endif
+                >
+                <label
+                    class="form-label"
+                    for="create_account"
+                >{{ __('Register an account with above information?') }}</label>
+            </div>
 
-        <div class="password-group @if (!$errors->has('password') && !$errors->has('password_confirmation')) d-none @endif">
-            <div class="row">
-                <div class="col-md-6 col-12">
-                    <div class="form-group  @error('password') has-error @enderror">
-                        <div class="form-input-wrapper">
-                            <input
-                                class="form-control"
-                                id="password"
-                                name="password"
-                                type="password"
-                                autocomplete="password"
-                            >
-                            <label for="password">{{ __('Password') }}</label>
+            <div class="password-group @if (!$errors->has('password') && !$errors->has('password_confirmation')) d-none @endif">
+                <div class="row">
+                    <div class="col-md-6 col-12">
+                        <div class="form-group  @error('password') has-error @enderror">
+                            <div class="form-input-wrapper">
+                                <input
+                                    class="form-control"
+                                    id="password"
+                                    name="password"
+                                    type="password"
+                                    autocomplete="new-password"
+                                >
+                                <label for="password">{{ __('Password') }}</label>
+                            </div>
+                            {!! Form::error('password', $errors) !!}
                         </div>
-                        {!! Form::error('password', $errors) !!}
                     </div>
-                </div>
 
-                <div class="col-md-6 col-12">
-                    <div class="form-group @error('password_confirmation') has-error @enderror">
-                        <div class="form-input-wrapper">
-                            <input
-                                class="form-control"
-                                id="password-confirm"
-                                name="password_confirmation"
-                                type="password"
-                                autocomplete="password-confirmation"
-                            >
-                            <label for="password-confirm">{{ __('Password confirmation') }}</label>
+                    <div class="col-md-6 col-12">
+                        <div class="form-group @error('password_confirmation') has-error @enderror">
+                            <div class="form-input-wrapper">
+                                <input
+                                    class="form-control"
+                                    id="password-confirm"
+                                    name="password_confirmation"
+                                    type="password"
+                                    autocomplete="password-confirmation"
+                                >
+                                <label for="password-confirm">{{ __('Password confirmation') }}</label>
+                            </div>
+                            {!! Form::error('password_confirmation', $errors) !!}
                         </div>
-                        {!! Form::error('password_confirmation', $errors) !!}
                     </div>
                 </div>
             </div>

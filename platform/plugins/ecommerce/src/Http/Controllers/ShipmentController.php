@@ -5,6 +5,7 @@ namespace Botble\Ecommerce\Http\Controllers;
 use Botble\Base\Facades\Assets;
 use Botble\Base\Http\Actions\DeleteResourceAction;
 use Botble\Base\Supports\Breadcrumb;
+use Botble\Ecommerce\Enums\OrderHistoryActionEnum;
 use Botble\Ecommerce\Enums\ShippingCodStatusEnum;
 use Botble\Ecommerce\Enums\ShippingStatusEnum;
 use Botble\Ecommerce\Events\ShippingStatusChanged;
@@ -63,7 +64,7 @@ class ShipmentController extends BaseController
         ]);
 
         OrderHistory::query()->create([
-            'action' => 'update_shipping_status',
+            'action' => OrderHistoryActionEnum::UPDATE_SHIPPING_STATUS,
             'description' => trans('plugins/ecommerce::shipping.changed_shipping_status', [
                 'status' => $shipment->status->label(),
             ]),
@@ -82,7 +83,7 @@ class ShipmentController extends BaseController
 
             case ShippingStatusEnum::CANCELED:
                 OrderHistory::query()->create([
-                    'action' => 'cancel_shipment',
+                    'action' => OrderHistoryActionEnum::CANCEL_SHIPMENT,
                     'description' => trans('plugins/ecommerce::shipping.shipping_canceled_by'),
                     'order_id' => $shipment->order_id,
                     'user_id' => Auth::id(),
@@ -118,7 +119,7 @@ class ShipmentController extends BaseController
         ]);
 
         OrderHistory::query()->create([
-            'action' => 'update_cod_status',
+            'action' => OrderHistoryActionEnum::UPDATE_COD_STATUS,
             'description' => trans('plugins/ecommerce::shipping.updated_cod_status_by', [
                 'status' => $shipment->cod_status->label(),
             ]),

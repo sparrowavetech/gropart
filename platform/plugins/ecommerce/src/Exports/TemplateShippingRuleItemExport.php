@@ -271,10 +271,10 @@ class TemplateShippingRuleItemExport implements
         $validation->setPromptTitle(trans('plugins/ecommerce::bulk-import.export.template.allowed_input'));
 
         if ($min != null) {
-            $validation->setFormula1((string)$min);
+            $validation->setFormula1((string) $min);
         }
         if ($max != null) {
-            $validation->setFormula2((string)$max);
+            $validation->setFormula2((string) $max);
         }
 
         if (! ($min == null && $max == null)) {

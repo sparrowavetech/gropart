@@ -93,10 +93,11 @@
         </div>
     </x-core::card.body>
 </x-core::card>
-@if (
-    $returnRequest->return_status != Botble\Ecommerce\Enums\OrderReturnStatusEnum::COMPLETED
-    || $returnRequest->return_status != Botble\Ecommerce\Enums\OrderReturnStatusEnum::CANCELED
-)
+
+@if (! in_array($returnRequest->return_status, [
+    Botble\Ecommerce\Enums\OrderReturnStatusEnum::COMPLETED,
+    Botble\Ecommerce\Enums\OrderReturnStatusEnum::CANCELED,
+]))
     <x-core::card>
         <x-core::card.header>
             <x-core::card.title>
@@ -104,25 +105,118 @@
             </x-core::card.title>
         </x-core::card.header>
         <x-core::card.body>
-            <x-core::form
-                :url="route($orderReturnEditRouteName, $returnRequest->id)"
-                method="post"
-            >
-                <x-core::form.select
-                    :label="trans('plugins/ecommerce::order.status')"
-                    name="return_status"
-                    :options="Botble\Ecommerce\Enums\OrderReturnStatusEnum::labels()"
-                    :value="$returnRequest->return_status"
-                />
-                <div class="text-end">
-                    <x-core::button
-                        color="primary"
-                        class="btn-update-order"
-                    >
-                        {{ trans('plugins/ecommerce::order.update') }}
-                    </x-core::button>
-                </div>
-            </x-core::form>
+            @if ($returnRequest->return_status != Botble\Ecommerce\Enums\OrderReturnStatusEnum::PROCESSING)
+                <x-core::button
+                    type="button"
+                    color="primary"
+                    icon="ti ti-circle-check"
+                    data-bs-toggle="modal"
+                    data-bs-target="#approve-order-return-modal"
+                >
+                    {{ trans('plugins/ecommerce::order.order_return_moderation.approve_button') }}
+                </x-core::button>
+
+                <x-core::button
+                    type="button"
+                    color="danger"
+                    :outlined="true"
+                    icon="ti ti-x"
+                    data-bs-toggle="modal"
+                    data-bs-target="#reject-order-return-modal"
+                >
+                    {{ trans('plugins/ecommerce::order.order_return_moderation.reject_button') }}
+                </x-core::button>
+            @else
+                <x-core::button
+                    type="button"
+                    color="success"
+                    icon="ti ti-circle-check"
+                    data-bs-toggle="modal"
+                    data-bs-target="#mark-as-completed-order-return-modal"
+                >
+                    {{ trans('plugins/ecommerce::order.order_return_moderation.mark_as_completed_button') }}
+                </x-core::button>
+            @endif
         </x-core::card.body>
     </x-core::card>
+
+    <x-core::modal
+        id="approve-order-return-modal"
+        :title="trans('plugins/ecommerce::order.order_return_moderation.approve_confirmation_title')"
+        type="success"
+    >
+        <p class="text-secondary">
+            {{ trans('plugins/ecommerce::order.order_return_moderation.approve_confirmation_description') }}
+        </p>
+
+        {!!
+            \Botble\Ecommerce\Forms\ModerateOrderReturnForm::create()
+                ->setUrl(route($orderReturnEditRouteName, $returnRequest->getKey()))
+                ->addHiddenStatus(Botble\Ecommerce\Enums\OrderReturnStatusEnum::PROCESSING)
+                ->addSubmitButton(trans('plugins/ecommerce::order.order_return_moderation.approve_button'), 'primary')
+                ->renderForm()
+        !!}
+    </x-core::modal>
+
+    <x-core::modal
+        id="reject-order-return-modal"
+        :title="trans('plugins/ecommerce::order.order_return_moderation.reject_confirmation_title')"
+        type="danger"
+    >
+        <p class="text-secondary">
+            {{ trans('plugins/ecommerce::order.order_return_moderation.reject_confirmation_description') }}
+        </p>
+
+        {!!
+            \Botble\Ecommerce\Forms\ModerateOrderReturnForm::create()
+                ->setUrl(route($orderReturnEditRouteName, $returnRequest->getKey()))
+                ->addHiddenStatus(Botble\Ecommerce\Enums\OrderReturnStatusEnum::CANCELED)
+                ->addSubmitButton(trans('plugins/ecommerce::order.order_return_moderation.reject_button'), 'danger')
+                ->renderForm()
+        !!}
+    </x-core::modal>
+
+    <x-core::modal
+        id="mark-as-completed-order-return-modal"
+        :title="trans('plugins/ecommerce::order.order_return_moderation.mark_as_completed_confirmation_title')"
+        type="success"
+    >
+        <p class="text-secondary">
+            {{ trans('plugins/ecommerce::order.order_return_moderation.mark_as_completed_confirmation_description') }}
+        </p>
+
+            {!!
+                \Botble\Ecommerce\Forms\ModerateOrderReturnForm::create()
+                    ->setUrl(route($orderReturnEditRouteName, $returnRequest->getKey()))
+                    ->addHiddenStatus(Botble\Ecommerce\Enums\OrderReturnStatusEnum::COMPLETED)
+                    ->addSubmitButton(trans('plugins/ecommerce::order.order_return_moderation.mark_as_completed_button'), 'success')
+                    ->renderForm()
+            !!}
+    </x-core::modal>
 @endif
+
+<x-core::card>
+    <x-core::card.header>
+        <x-core::card.title>
+            {{ trans('plugins/ecommerce::order.history') }}
+        </x-core::card.title>
+    </x-core::card.header>
+
+    <x-core::card.body>
+        <ul class="steps steps-vertical">
+            @foreach($returnRequest->histories as $history)
+                <li @class(['step-item', 'user-action' => $loop->first])>
+                    <div class="h4 m-0">{{ $history->description }}</div>
+                    <div class="d-flex justify-content-between">
+                        <div class="text-secondary">
+                            @if($history->reason)
+                                {{ trans('plugins/ecommerce::order.cancellation_reason', ['reason' => $history->reason]) }}
+                            @endif
+                        </div>
+                        <div class="text-secondary">{{ $history->created_at }}</div>
+                    </div>
+                </li>
+            @endforeach
+        </ul>
+    </x-core::card.body>
+</x-core::card>

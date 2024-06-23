@@ -13,7 +13,7 @@
     @endphp
 
     <div class="d-flex flex-column gap-5 product-review-container">
-        <div class="row">
+        <div class="row g-3">
             @if ($showAvgRating)
                 <div class="col-12 col-md-4">
                     <div class="product-review-number">
@@ -26,9 +26,7 @@
                                 </span>
                             </div>
                             <div class="product-review-summary-rating">
-                                <div class="bb-product-rating">
-                                    <span style="width: {{ $product->reviews_avg * 20 }}%"></span>
-                                </div>
+                                @include(EcommerceHelper::viewPath('includes.rating-star'), ['avg' => $product->reviews_avg, 'size' => 80])
                                 <p>
                                     @if ($product->reviews_count === 1)
                                         ({{ __('1 Review') }})
@@ -69,7 +67,7 @@
                 </div>
             @endif
 
-            @include($reviewFormView ?? 'plugins/ecommerce::themes.includes.review-form')
+            @include($reviewFormView ?? EcommerceHelper::viewPath('includes.review-form'))
         </div>
 
         @if (($reviewImagesCount = count($product->review_images)) > 0)

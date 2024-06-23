@@ -2,7 +2,6 @@
 
 namespace Botble\Marketplace\Tables;
 
-use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\Html;
 use Botble\Ecommerce\Enums\ProductTypeEnum;
@@ -14,6 +13,10 @@ use Botble\Table\Abstracts\TableAbstract;
 use Botble\Table\Actions\DeleteAction;
 use Botble\Table\Actions\EditAction;
 use Botble\Table\BulkActions\DeleteBulkAction;
+use Botble\Table\BulkChanges\CreatedAtBulkChange;
+use Botble\Table\BulkChanges\NameBulkChange;
+use Botble\Table\BulkChanges\NumberBulkChange;
+use Botble\Table\BulkChanges\StatusBulkChange;
 use Botble\Table\Columns\Column;
 use Botble\Table\Columns\CreatedAtColumn;
 use Botble\Table\Columns\IdColumn;
@@ -152,26 +155,12 @@ class ProductTable extends TableAbstract
     public function getBulkChanges(): array
     {
         return [
-            'name' => [
-                'title' => trans('core/base::tables.name'),
-                'type' => 'text',
-                'validate' => 'required|max:120',
-            ],
-            'order' => [
-                'title' => trans('core/base::tables.order'),
-                'type' => 'number',
-                'validate' => 'required|min:0',
-            ],
-            'status' => [
-                'title' => trans('core/base::tables.status'),
-                'type' => 'select',
-                'choices' => BaseStatusEnum::labels(),
-                'validate' => 'required|in:' . implode(',', BaseStatusEnum::values()),
-            ],
-            'created_at' => [
-                'title' => trans('core/base::tables.created_at'),
-                'type' => 'datePicker',
-            ],
+            NameBulkChange::make(),
+            NumberBulkChange::make()
+                ->name('order')
+                ->title(trans('core/base::tables.order')),
+            StatusBulkChange::make(),
+            CreatedAtBulkChange::make(),
         ];
     }
 

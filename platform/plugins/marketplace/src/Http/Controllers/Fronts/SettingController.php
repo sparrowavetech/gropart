@@ -4,8 +4,8 @@ namespace Botble\Marketplace\Http\Controllers\Fronts;
 
 use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Base\Facades\Assets;
-use Botble\Base\Facades\MetaBox;
 use Botble\Base\Http\Controllers\BaseController;
+use Botble\Base\Rules\MediaImageRule;
 use Botble\Marketplace\Facades\MarketplaceHelper;
 use Botble\Marketplace\Forms\PayoutInformationForm;
 use Botble\Marketplace\Forms\TaxInformationForm;
@@ -60,6 +60,11 @@ class SettingController extends BaseController
                 return $this->httpResponse()->setError()->setMessage(__('Shop URL is existing. Please choose another one!'));
             }
 
+            $request->validate([
+                'logo_input' => ['nullable', new MediaImageRule()],
+                'cover_image_input' => ['nullable', new MediaImageRule()],
+            ]);
+
             if ($request->hasFile('logo_input')) {
                 $result = RvMedia::handleUpload($request->file('logo_input'), 0, $store->upload_folder);
                 if (! $result['error']) {
@@ -70,19 +75,19 @@ class SettingController extends BaseController
 
             if ($request->hasFile('cover_image_input')) {
                 $result = RvMedia::handleUpload($request->file('cover_image_input'), 0, 'stores');
+
                 if (! $result['error']) {
-                    MetaBox::saveMetaBoxData($store, 'cover_image', $result['data']->url);
+                    $file = $result['data'];
+                    $request->merge(['cover_image' => $file->url]);
                 }
-            } elseif ($request->input('cover_image')) {
-                MetaBox::saveMetaBoxData($store, 'cover_image', $request->input('cover_image'));
-            } elseif ($request->has('cover_image')) {
-                MetaBox::deleteMetaData($store, 'cover_image');
             }
 
             $store->fill($request->input());
             $store->save();
 
             $request->merge(['is_slug_editable' => 1]);
+
+            return $form;
         });
 
         return $this

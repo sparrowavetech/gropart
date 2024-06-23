@@ -1,1 +1,1 @@
-@include(Theme::getThemenamespace('partials.ecommerce.quick-view'))
+@include(Theme::getThemeNamespace('partials.ecommerce.quick-view'))

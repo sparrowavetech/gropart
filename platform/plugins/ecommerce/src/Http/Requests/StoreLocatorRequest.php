@@ -11,13 +11,14 @@ class StoreLocatorRequest extends Request
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:220',
-            'email' => 'email|nullable|max:60',
-            'phone' => 'required|' . BaseHelper::getPhoneValidationRule(),
-            'country' => 'required|max:120',
-            'state' => 'required|max:120',
-            'city' => 'required|max:120',
-            'address' => 'required|max:120',
+            'name' => ['required', 'string', 'max:120'],
+            'email' => ['nullable', 'email', 'max:60'],
+            'phone' => ['required', ...BaseHelper::getPhoneValidationRule(true)],
+            'country' => ['required', 'string', 'max:120'],
+            'state' => ['required', 'string', 'max:120'],
+            'city' => ['required', 'string', 'max:120'],
+            'address' => ['required', 'string', 'max:120'],
+            'zip_code' => ['nullable', 'string', 'min:4', 'max:9'],
             'is_shipping_location' => [new OnOffRule()],
         ];
     }

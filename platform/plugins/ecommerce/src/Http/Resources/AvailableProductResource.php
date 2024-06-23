@@ -18,16 +18,7 @@ class AvailableProductResource extends JsonResource
         if (is_plugin_active('marketplace') && $this->original_product->store_id && $this->original_product->store->name) {
             $name .= ' (' . $this->original_product->store->name . ')';
         }
-
-        if(setting('ecommerce_display_product_price_including_taxes') == 1){
-            $withoutTaxPrice = ($this->front_sale_price * 100) / (100 + $this->total_taxes_percentage);
-            $taxPrice = $this->front_sale_price - $withoutTaxPrice;
-            $finalPrice = $this->front_sale_price;
-        } else {
-            $withoutTaxPrice = $this->front_sale_price;
-            $taxPrice = $this->front_sale_price * $this->total_taxes_percentage / 100;
-            $finalPrice = $this->front_sale_price + $taxPrice;
-        }
+        $taxPrice = $this->front_sale_price * $this->total_taxes_percentage / 100;
 
         return [
             'id' => $this->id,
@@ -40,9 +31,9 @@ class AvailableProductResource extends JsonResource
             'is_out_of_stock' => $this->isOutOfStock(),
             'stock_status_label' => $this->stock_status_label,
             'stock_status_html' => $this->stock_status_html,
-            'price' => $withoutTaxPrice,
+            'price' => $this->front_sale_price,
             'formatted_price' => format_price($this->front_sale_price),
-            'final_price' => $finalPrice,
+            'final_price' => $this->front_sale_price + $taxPrice,
             'original_price' => $this->original_price,
             'tax_price' => $taxPrice,
             'total_taxes_percentage' => $this->total_taxes_percentage,

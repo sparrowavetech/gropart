@@ -9,12 +9,12 @@ class RefundRequest extends Request
     public function rules(): array
     {
         $rules = [
-            'refund_amount' => 'numeric|min:0',
+            'refund_amount' => ['numeric', 'min:0'],
         ];
 
         foreach ($this->input('products', []) as $key => $item) {
             $rules[] = [
-                'products.' . $key => 'numeric|min:0',
+                'products.' . $key => ['numeric', 'min:0'],
             ];
         }
 

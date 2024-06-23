@@ -23,7 +23,7 @@ class ShippingRuleTypeEnum extends Enum
     public const BASED_ON_ZIPCODE = 'based_on_zipcode';
     public const BASED_ON_LOCATION = 'based_on_location';
 
-    public static $langPath = 'plugins/ecommerce::shipping.rule.types';
+    public static $langPath = 'plugins/ecommerce::shipping.rule.enum_types';
 
     public function toHtml(): HtmlString|string
     {
@@ -40,7 +40,7 @@ class ShippingRuleTypeEnum extends Enum
         };
     }
 
-    public static function getLabel(string|null $value): string|null
+    public static function getLabel(?string $value): ?string
     {
         $key = sprintf(
             '%s.%s',
@@ -67,12 +67,12 @@ class ShippingRuleTypeEnum extends Enum
         return apply_filters(BASE_FILTER_ENUM_LABEL, $label, get_called_class());
     }
 
-    public function label(): string|null
+    public function label(): ?string
     {
         return self::getLabel($this->getValue());
     }
 
-    public function toUnit(): string|null
+    public function toUnit(): ?string
     {
         return match ($this->value) {
             self::BASED_ON_PRICE => get_application_currency()->symbol,
@@ -126,7 +126,7 @@ class ShippingRuleTypeEnum extends Enum
         ];
     }
 
-    public static function availableLabels(Shipping|null $shipping = null): array
+    public static function availableLabels(?Shipping $shipping = null): array
     {
         $labels = parent::labels();
 

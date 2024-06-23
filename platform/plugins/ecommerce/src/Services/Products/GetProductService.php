@@ -27,19 +27,19 @@ class GetProductService
         $shows = EcommerceHelper::getShowParams();
 
         if (! array_key_exists($num, $shows)) {
-            $num = (int)theme_option('number_of_products_per_page', 12);
+            $num = (int) theme_option('number_of_products_per_page', 12);
         }
 
         $queryVar = [
             'keyword' => BaseHelper::stringify($request->input('q')),
-            'brands' => (array)$request->input('brands', []),
-            'categories' => (array)$request->input('categories', []),
-            'tags' => (array)$request->input('tags', []),
-            'collections' => (array)$request->input('collections', []),
-            'attributes' => (array)$request->input('attributes', []),
+            'brands' => (array) $request->input('brands', []),
+            'categories' => (array) $request->input('categories', []),
+            'tags' => (array) $request->input('tags', []),
+            'collections' => (array) $request->input('collections', []),
+            'attributes' => (array) $request->input('attributes', []),
             'max_price' => $request->input('max_price'),
             'min_price' => $request->input('min_price'),
-            'price_ranges' => (array)$request->input('price_ranges', []),
+            'price_ranges' => (array) $request->input('price_ranges', []),
             'sort_by' => $request->input('sort-by'),
             'num' => $num,
         ];

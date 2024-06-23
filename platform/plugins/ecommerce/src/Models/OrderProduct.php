@@ -4,6 +4,7 @@ namespace Botble\Ecommerce\Models;
 
 use Botble\Base\Models\BaseModel;
 use Botble\Ecommerce\Enums\ProductTypeEnum;
+use Botble\Media\Facades\RvMedia;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -53,6 +54,11 @@ class OrderProduct extends BaseModel
     public function totalFormat(): Attribute
     {
         return Attribute::get(fn () => format_price($this->price * $this->qty));
+    }
+
+    public function productImageUrl(): Attribute
+    {
+        return Attribute::get(fn () => RvMedia::getImageUrl($this->product_image, 'thumb', default: RvMedia::getDefaultImage()));
     }
 
     protected function amountFormat(): Attribute

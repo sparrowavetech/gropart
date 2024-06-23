@@ -52,14 +52,15 @@
                         <p>{{ __('Hello') }}, {{ auth('customer')->user()->name }}</p>
                         <small>{{ __('Joined on :date', ['date' => auth('customer')->user()->created_at->translatedFormat('M d, Y')]) }}</small>
                     </div>
-                    <div class="ps-block__action bg-danger p-1" style="border-radius:2px">
-                        <a class="text-white fw-bold" href="{{ route('customer.logout') }}">
+                    <div class="ps-block__action">
+                        <a href="{{ route('customer.logout') }}">
                             <x-core::icon name="ti ti-logout" />
                         </a>
                     </div>
                 </div>
-                <div class="ps-block--earning-count"><small>{{ __('Earnings') }}</small>
-                    <h3>{{ format_price(auth('customer')->user()->balance) }}</h3>
+                <div class="ps-block--earning-count">
+                    <small>{{ __('Balance') }}</small>
+                    <h3 class="mt-1">{{ format_price(auth('customer')->user()->balance) }}</h3>
                 </div>
             </div>
             <div class="ps-sidebar__content">
@@ -78,7 +79,7 @@
                                 >
                             </a>
                         @endif
-                        <p>{!! BaseHelper::clean(str_replace('%Y', date('Y'), theme_option('copyright'))) !!}</p>
+                        <p>{!! BaseHelper::clean(str_replace('%Y', Carbon\Carbon::now()->year, theme_option('copyright'))) !!}</p>
                     </div>
                 </div>
             </div>
@@ -89,25 +90,27 @@
         id="vendor-dashboard"
     >
         <header class="d-flex justify-content-between align-items-center mb-3">
-            <h3 class="fs-1">{{ page_title()->getTitle(false) }}</h3>
+            <h3 class="fs-1 mb-0 text-truncate me-3">{{ page_title()->getTitle(false) }}</h3>
             <div class="d-flex align-items-center gap-4">
                 @if (is_plugin_active('language'))
-                    @include(MarketplaceHelper::viewPath('vendor-dashboard.partials.language-switcher'))
+                    {!! apply_filters('marketplace_vendor_dashboard_language_switcher', view(MarketplaceHelper::viewPath('vendor-dashboard.partials.language-switcher'))->render()) !!}
                 @endif
 
                 @php($customer = auth('customer')->user())
 
-                @if ($customer?->store)
-                    <a href="{{ $customer->store->url }}" target="_blank" class="text-uppercase">
-                        <x-core::icon name="ti ti-building-store" />
-                        {{ __('View your store') }}
-                    </a>
-                @endif
+                <div class="d-none d-md-inline-block">
+                    @if ($customer?->store)
+                        <a href="{{ $customer->store->url }}" target="_blank" class="text-uppercase">
+                            <x-core::icon name="ti ti-building-store" />
+                            {{ __('View your store') }}
+                        </a>
+                    @endif
 
-                <a href="{{ BaseHelper::getHomepageUrl() }}" target="_blank" class="text-uppercase">
-                    {{ __('Go to homepage') }}
-                    <x-core::icon name="ti ti-arrow-right" />
-                </a>
+                    <a href="{{ BaseHelper::getHomepageUrl() }}" target="_blank" class="text-uppercase">
+                        <span>{{ __('Go to homepage') }}</span>
+                        <x-core::icon name="ti ti-arrow-right" />
+                    </a>
+                </div>
             </div>
         </header>
 

@@ -48,7 +48,7 @@ class HandleTaxService
         return $products;
     }
 
-    public function taxRate(Product $product, string|null $country = null, string|null $state = null, string|null $city = null, string|null $zipCode = null): float
+    public function taxRate(Product $product, ?string $country = null, ?string $state = null, ?string $city = null, ?string $zipCode = null): float
     {
         $taxRate = 0;
         $taxes = $product->taxes->where('status', BaseStatusEnum::PUBLISHED);

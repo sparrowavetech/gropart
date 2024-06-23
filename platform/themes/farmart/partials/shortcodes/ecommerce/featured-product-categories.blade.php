@@ -8,45 +8,38 @@
         'infinite' => $shortcode->infinite == 'yes' || $shortcode->is_infinite == 'yes',
         'autoplaySpeed' => in_array($shortcode->autoplay_speed, theme_get_autoplay_speed_options()) ? $shortcode->autoplay_speed : 3000,
         'speed' => 800,
-        'slidesToShow' => 6,
+        'slidesToShow' => 8,
         'slidesToScroll' => 1,
-        'swipeToSlide' => true,
         'responsive' => [
             [
-                'breakpoint' => 1800,
+                'breakpoint' => 1700,
+                'settings' => [
+                    'slidesToShow' => 7,
+                ],
+            ],
+            [
+                'breakpoint' => 1500,
                 'settings' => [
                     'slidesToShow' => 6,
                 ],
             ],
             [
-                'breakpoint' => 1601,
+                'breakpoint' => 1199,
                 'settings' => [
                     'slidesToShow' => 5,
                 ],
             ],
             [
-                'breakpoint' => 1025,
+                'breakpoint' => 1024,
                 'settings' => [
-                    'arrows' => true,
-                    'dots' => false,
                     'slidesToShow' => 4,
-                    'slidesToScroll' => 4,
                 ],
             ],
             [
-                'breakpoint' => 769,
+                'breakpoint' => 767,
                 'settings' => [
-                    'arrows' => true,
-                    'dots' => false,
-                    'slidesToShow' => 3,
-                    'slidesToScroll' => 3,
-                ],
-            ],
-            [
-                'breakpoint' => 440,
-                'settings' => [
-                    'arrows' => true,
-                    'dots' => false,
+                    'arrows' => false,
+                    'dots' => true,
                     'slidesToShow' => 2,
                     'slidesToScroll' => 2,
                 ],
@@ -55,17 +48,12 @@
     ];
 @endphp
 @if ($categories->isNotEmpty())
-    <div class="widget-product-categories pt-4 pb-2">
+    <div class="widget-product-categories pt-5 pb-2">
         <div class="container-xxxl">
             <div class="row">
                 <div class="col-12">
                     <div class="row align-items-center mb-2 widget-header">
                         <h2 class="col-auto mb-0 py-2">{{ $shortcode->title }}</h2>
-                        <div class="ps-4 col-auto py-2 d-md-block">
-                            <a href="{{ __('all_categories_url') }}">
-                                <span class="link-text">{{ __('View All Categories') }} <span class="svg-icon"><svg><use href="#svg-icon-chevron-right" xlink:href="#svg-icon-chevron-right"></use></svg></span></span>
-                            </a>
-                        </div>
                     </div>
                     <div class="product-categories-body pb-4 arrows-top-right">
                         <div
@@ -83,14 +71,14 @@
                                                 <div class="img-fluid-eq__dummy"></div>
                                                 <div class="img-fluid-eq__wrap">
                                                     <img
-                                                        class="lazyload mx-auto"
-                                                        data-src="{{ RvMedia::getImageUrl($item->image, 'small', false, RvMedia::getDefaultImage()) }}"
+                                                        class="mx-auto"
+                                                        src="{{ RvMedia::getImageUrl($item->image, 'small', false, RvMedia::getDefaultImage()) }}"
                                                         alt="icon {{ $item->name }}"
                                                     />
                                                 </div>
                                             </div>
-                                            <div class="category__text text-center py-3 text-truncate">
-                                                <h6 class="category__name">{{ $item->name }}</h6>
+                                            <div class="category__text text-center py-2 text-truncate">
+                                                <span class="category__name">{{ $item->name }}</span>
                                             </div>
                                         </a>
                                     </div>

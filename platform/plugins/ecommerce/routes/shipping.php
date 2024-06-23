@@ -4,17 +4,12 @@ use Botble\Base\Facades\AdminHelper;
 use Illuminate\Support\Facades\Route;
 
 AdminHelper::registerRoutes(function () {
-    Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers'], function () {
+    Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'prefix' => 'ecommerce'], function () {
         Route::group([
             'prefix' => 'shipping-methods',
-            'permission' => 'shipping_methods.index',
+            'permission' => 'settings.index.shipping',
             'as' => 'shipping_methods.',
         ], function () {
-            Route::get('', [
-                'as' => 'index',
-                'uses' => 'ShippingMethodController@index',
-            ]);
-
             Route::post('region/create', [
                 'as' => 'region.create',
                 'uses' => 'ShippingMethodController@postCreateRegion',
@@ -49,23 +44,22 @@ AdminHelper::registerRoutes(function () {
             });
         });
 
-        Route::group(['prefix' => 'ecommerce', 'as' => 'ecommerce.'], function () {
+        Route::group(['as' => 'ecommerce.'], function () {
             Route::group([
                 'prefix' => 'shipping-rule-items',
                 'as' => 'shipping-rule-items.',
+                'permission' => 'settings.index.shipping',
             ], function () {
                 Route::resource('', 'ShippingRuleItemController')->parameters(['' => 'item']);
 
                 Route::get('items/{rule_id}', [
                     'as' => 'items',
                     'uses' => 'ShippingRuleItemController@items',
-                    'permission' => 'ecommerce.shipping-rule-items.index',
                 ])->wherePrimaryKey('rule_id');
 
                 Route::group([
                     'as' => 'bulk-import.',
                     'prefix' => 'bulk-import',
-                    'permission' => 'ecommerce.shipping-rule-items.bulk-import',
                 ], function () {
                     Route::get('/', [
                         'as' => 'index',

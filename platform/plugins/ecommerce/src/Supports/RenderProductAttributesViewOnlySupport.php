@@ -2,6 +2,7 @@
 
 namespace Botble\Ecommerce\Supports;
 
+use Botble\Ecommerce\Facades\EcommerceHelper as EcommerceHelperFacade;
 use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Models\ProductAttributeSet;
 use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
@@ -21,15 +22,13 @@ class RenderProductAttributesViewOnlySupport
         $product = $this->product;
         $attributeSet = $this->productAttributeSet;
 
-        $view = 'plugins/ecommerce::themes.attributes.attributes-view-only';
+        $view = EcommerceHelperFacade::viewPath('attributes.attributes-view-only');
 
         $options = apply_filters('ecommerce_render_product_attributes_view_only_options_before', $options);
 
         if (isset($options['view'])) {
             $view = $options['view'];
         }
-
-        $options = apply_filters('ecommerce_render_product_attributes_view_only_options_after', $options);
 
         $attributes = $this
             ->productRepository

@@ -42,10 +42,10 @@ class ReturnSettingForm extends SettingForm
             ])
             ->add('returnable_days', 'number', [
                 'label' => trans('plugins/ecommerce::setting.return.form.returnable_days'),
-                'value' => get_ecommerce_setting('returnable_days'),
+                'value' => EcommerceHelper::getReturnableDays(),
                 'attr' => [
                     'placeholder' => trans('plugins/ecommerce::setting.return.form.returnable_days'),
-                    'min' => 0,
+                    'min' => 1,
                 ],
                 'help_block' => [
                     'text' => trans('plugins/ecommerce::setting.return.form.return_settings_helper'),

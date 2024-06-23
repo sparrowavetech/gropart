@@ -2,11 +2,12 @@
 
 namespace Botble\Marketplace\Http\Controllers\Fronts;
 
-use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\EmailHandler;
+use Botble\Base\Http\Actions\DeleteResourceAction;
 use Botble\Base\Http\Controllers\BaseController;
+use Botble\Ecommerce\Enums\OrderHistoryActionEnum;
 use Botble\Ecommerce\Enums\OrderStatusEnum;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Facades\InvoiceHelper;
@@ -19,7 +20,6 @@ use Botble\Ecommerce\Models\OrderHistory;
 use Botble\Marketplace\Facades\MarketplaceHelper;
 use Botble\Marketplace\Tables\OrderTable;
 use Botble\Payment\Models\Payment;
-use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 
@@ -72,23 +72,15 @@ class OrderController extends BaseController
             ->withUpdatedSuccessMessage();
     }
 
-    public function destroy(int|string $id, Request $request)
+    public function destroy(int|string $id)
     {
+        if (! MarketplaceHelper::allowVendorDeleteTheirOrders()) {
+            abort(403);
+        }
+
         $order = $this->findOrFail($id);
 
-        try {
-            $order->delete();
-            event(new DeletedContentEvent(ORDER_MODULE_SCREEN_NAME, $request, $order));
-
-            return $this
-                ->httpResponse()
-                ->setMessage(trans('core/base::notices.delete_success_message'));
-        } catch (Exception $exception) {
-            return $this
-                ->httpResponse()
-                ->setError()
-                ->setMessage($exception->getMessage());
-        }
+        return DeleteResourceAction::make($order);
     }
 
     public function getGenerateInvoice(int|string $orderId)
@@ -110,7 +102,7 @@ class OrderController extends BaseController
         $order->save();
 
         OrderHistory::query()->create([
-            'action' => 'confirm_order',
+            'action' => OrderHistoryActionEnum::CONFIRM_ORDER,
             'description' => trans('plugins/ecommerce::order.order_was_verified_by'),
             'order_id' => $order->getKey(),
             'user_id' => 0,
@@ -209,7 +201,7 @@ class OrderController extends BaseController
         OrderHelper::cancelOrder($order);
 
         OrderHistory::query()->create([
-            'action' => 'cancel_order',
+            'action' => OrderHistoryActionEnum::CANCEL_ORDER,
             'description' => trans('plugins/ecommerce::order.order_was_canceled_by'),
             'order_id' => $order->id,
             'user_id' => 0,

@@ -46,7 +46,7 @@ class TrackingLogger implements TrackingLoggerInterface
             $this->getCustomParameter()
         );
 
-        return array_map(function (string|null $item) {
+        return array_map(function (?string $item) {
             return is_string($item) ? substr($item, 0, 255) : $item;
         }, $attributes);
     }
@@ -56,7 +56,7 @@ class TrackingLogger implements TrackingLoggerInterface
         return [];
     }
 
-    protected function captureIp(): string|null
+    protected function captureIp(): ?string
     {
         return $this->request->ip();
     }
@@ -71,7 +71,7 @@ class TrackingLogger implements TrackingLoggerInterface
         return $this->request->path();
     }
 
-    protected function captureLandingParams(): string|null
+    protected function captureLandingParams(): ?string
     {
         return $this->request->getQueryString();
     }
@@ -108,17 +108,17 @@ class TrackingLogger implements TrackingLoggerInterface
         return $referrer;
     }
 
-    protected function captureGCLID(): string|null
+    protected function captureGCLID(): ?string
     {
         return $this->request->input('gclid');
     }
 
-    protected function captureFCLID(): string|null
+    protected function captureFCLID(): ?string
     {
         return $this->request->input('fbclid');
     }
 
-    protected function captureReferral(): string|null
+    protected function captureReferral(): ?string
     {
         return $this->request->input('ref');
     }

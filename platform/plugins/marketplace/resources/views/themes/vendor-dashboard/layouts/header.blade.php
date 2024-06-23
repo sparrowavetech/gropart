@@ -1,4 +1,6 @@
-@include('core/base::components.layouts.header')
+{!! SeoHelper::render() !!}
+
+@include(MarketplaceHelper::viewPath('vendor-dashboard.layouts.header-meta'))
 
 <link
     href="{{ asset('vendor/core/plugins/marketplace/fonts/linearicons/linearicons.css') }}?v={{ MarketplaceHelper::getAssetVersion() }}"
@@ -10,6 +12,8 @@
 >
 
 @if (BaseHelper::isRtlEnabled())
+    <link href="{{ asset('vendor/core/core/base/css/core.rtl.css') }}" rel="stylesheet">
+
     <link
         href="{{ asset('vendor/core/plugins/marketplace/css/marketplace-rtl.css') }}?v={{ MarketplaceHelper::getAssetVersion() }}"
         rel="stylesheet"

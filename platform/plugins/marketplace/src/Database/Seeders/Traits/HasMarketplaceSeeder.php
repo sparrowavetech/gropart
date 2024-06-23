@@ -18,7 +18,7 @@ trait HasMarketplaceSeeder
 
         $faker = $this->fake();
 
-        foreach (Customer::query()->get() as $customer) {
+        foreach (Customer::query()->whereNot('email', 'customer@botble.com')->get() as $customer) {
             $customer->is_vendor = $customer->id < 9;
             $customer->vendor_verified_at = $customer->is_vendor ? $this->now() : null;
             $customer->save();
@@ -49,13 +49,15 @@ trait HasMarketplaceSeeder
             $item['city'] = $faker->city();
             $item['address'] = $faker->streetAddress();
             $item['description'] = $faker->text(400);
-            $item['customer_id'] = $vendorIds->random();
+            $item['customer_id'] = $item['customer_id'] ?? $vendorIds->random();
 
             $store = Store::query()->create($item);
 
             $stores[] = $store;
 
             SlugHelper::createSlug($store);
+
+            $this->createMetadata($store, $item);
         }
 
         $storeIds = Store::query()->pluck('id');

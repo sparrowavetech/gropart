@@ -3,13 +3,19 @@
 namespace Botble\Ecommerce\Forms;
 
 use Botble\Base\Forms\FieldOptions\DatePickerFieldOption;
+use Botble\Base\Forms\FieldOptions\HtmlFieldOption;
 use Botble\Base\Forms\FieldOptions\SelectFieldOption;
 use Botble\Base\Forms\FieldOptions\TextareaFieldOption;
-use Botble\Base\Forms\Fields\DatetimeField;
+use Botble\Base\Forms\Fields\DatePickerField;
+use Botble\Base\Forms\Fields\EmailField;
+use Botble\Base\Forms\Fields\HtmlField;
 use Botble\Base\Forms\Fields\MediaImagesField;
 use Botble\Base\Forms\Fields\SelectField;
 use Botble\Base\Forms\Fields\TextareaField;
+use Botble\Base\Forms\Fields\TextField;
 use Botble\Base\Forms\FormAbstract;
+use Botble\Ecommerce\Forms\Fronts\Auth\FieldOptions\EmailFieldOption;
+use Botble\Ecommerce\Forms\Fronts\Auth\FieldOptions\TextFieldOption;
 use Botble\Ecommerce\Http\Requests\ReviewRequest;
 use Botble\Ecommerce\Models\Review;
 use Carbon\Carbon;
@@ -35,10 +41,41 @@ class ReviewForm extends FormAbstract
                 'customer_id',
                 SelectField::class,
                 SelectFieldOption::make()
-                    ->label(trans('plugins/ecommerce::review.customer'))
+                    ->label(trans('plugins/ecommerce::review.choose_existing_customer'))
                     ->ajaxSearch()
-                    ->required()
                     ->ajaxUrl(route('reviews.ajax-search-customers'))
+                    ->helperText(trans('plugins/ecommerce::review.choose_customer_help'))
+                    ->toArray()
+            )
+            ->add(
+                'open_or',
+                HtmlField::class,
+                HtmlFieldOption::make()
+                    ->content(sprintf(
+                        '<div class="form-fieldset"><label class="form-label">%s</label>',
+                        trans('plugins/ecommerce::review.or_enter_manually')
+                    ))
+                    ->toArray()
+            )
+            ->add(
+                'customer_name',
+                TextField::class,
+                TextFieldOption::make()
+                    ->label(trans('plugins/ecommerce::ecommerce.customer_name'))
+                    ->toArray()
+            )
+            ->add(
+                'customer_email',
+                EmailField::class,
+                EmailFieldOption::make()
+                    ->label(trans('plugins/ecommerce::ecommerce.customer_email'))
+                    ->toArray()
+            )
+            ->add(
+                'close_or',
+                HtmlField::class,
+                HtmlFieldOption::make()
+                    ->content('</div>')
                     ->toArray()
             )
             ->add(
@@ -64,10 +101,11 @@ class ReviewForm extends FormAbstract
             ])
             ->add(
                 'created_at',
-                DatetimeField::class,
+                DatePickerField::class,
                 DatePickerFieldOption::make()
                     ->label(trans('core/base::tables.created_at'))
                     ->value(Carbon::now())
+                    ->withTimePicker()
                     ->toArray()
             )
             ->setBreakFieldPoint('created_at');

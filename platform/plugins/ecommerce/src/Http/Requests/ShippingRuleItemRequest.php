@@ -18,7 +18,7 @@ class ShippingRuleItemRequest extends Request
                     return $query->whereIn('type', ShippingRuleTypeEnum::keysAllowRuleItems());
                 }),
             ],
-            'country' => 'required',
+            'country' => ['required'],
             'state' => [
                 'sometimes',
                 Rule::requiredIf(function () {
@@ -31,9 +31,11 @@ class ShippingRuleItemRequest extends Request
                 }),
                 Rule::exists('states', 'id'),
             ],
-            'city' => 'nullable|required_without:state|exists:cities,id',
+            'city' => ['nullable', 'required_without:state', 'exists:cities,id'],
             'zip_code' => [
-                'max:20',
+                'nullable',
+                'min:4',
+                'max:9',
                 Rule::requiredIf(function () {
                     return ShippingRule::query()
                         ->where([
@@ -43,7 +45,7 @@ class ShippingRuleItemRequest extends Request
                         ->exists();
                 }),
             ],
-            'adjustment_price' => 'required|numeric|min:-100000000000|max:100000000000',
+            'adjustment_price' => ['nullable', 'numeric', 'min:-100000000000', 'max:100000000000'],
             'is_enabled' => Rule::in(['0', '1']),
         ];
     }

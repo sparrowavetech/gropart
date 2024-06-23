@@ -25,7 +25,7 @@
                         class="product-filter-item"
                     >
                     <span style="{{ $attribute->getAttributeStyle() }}"></span>
-                    <div class="bb-product-attribute-swatch-item-tooltip">{{ $attribute->title }}</span>
+                    <div class="bb-product-attribute-swatch-item-tooltip">{{ $attribute->title }}</div>
                 </label>
             </li>
         @endforeach

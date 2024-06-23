@@ -40,6 +40,18 @@ class OrderStatusEnum extends Enum
             default => 'primary',
         };
 
-        return BaseHelper::renderBadge($this->label(), $color);
+        return BaseHelper::renderBadge($this->label(), $color, icon: $this->getIcon());
+    }
+
+    public function getIcon(): string
+    {
+        return match ($this->value) {
+            self::PENDING => 'ti ti-clock',
+            self::PROCESSING => 'ti ti-refresh',
+            self::COMPLETED => 'ti ti-circle-check',
+            self::CANCELED => 'ti ti-circle-x',
+            self::PARTIAL_RETURNED, self::RETURNED => 'ti ti-reload',
+            default => 'ti ti-circle',
+        };
     }
 }

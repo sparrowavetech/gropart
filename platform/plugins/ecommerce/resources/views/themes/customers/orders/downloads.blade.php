@@ -1,8 +1,8 @@
 @extends(EcommerceHelper::viewPath('customers.master'))
 
-@section('content')
-    <h3 class="customer-page-title mb-4">{{ SeoHelper::getTitle() }}</h3>
+@section('title', SeoHelper::getTitle())
 
+@section('content')
     <div class="table-responsive">
         <table class="table table-bordered table-striped">
             <thead>
@@ -66,7 +66,7 @@
                                     <p>
                                         <small>
                                             @php $attributes = get_product_attributes($product->id) @endphp
-                                            @if (!empty($attributes))
+                                            @if ($attributes->isNotEmpty())
                                                 @foreach ($attributes as $attribute)
                                                     {{ $attribute->attribute_set_title }}: {{ $attribute->title }}@if (!$loop->last), @endif
                                                 @endforeach
@@ -76,7 +76,7 @@
                                 @endif
 
                                 @include(
-                                    'plugins/ecommerce::themes.includes.cart-item-options-extras',
+                                    EcommerceHelper::viewPath('includes.cart-item-options-extras'),
                                     ['options' => $orderProduct->options]
                                 )
 
@@ -132,4 +132,4 @@
     </div>
 
     {!! $orderProducts->links() !!}
-@endsection
+@stop

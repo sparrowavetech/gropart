@@ -3,6 +3,7 @@
 namespace Botble\Ecommerce\Http\Controllers\Customers;
 
 use Botble\Base\Http\Controllers\BaseController;
+use Botble\Ecommerce\Forms\Fronts\Customer\AddressForm;
 use Botble\Ecommerce\Http\Requests\CreateAddressFromAdminRequest;
 use Botble\Ecommerce\Models\Address;
 
@@ -34,11 +35,9 @@ class AddressController extends BaseController
             ->withCreatedSuccessMessage();
     }
 
-    public function update(int|string $id, CreateAddressFromAdminRequest $request)
+    public function update(Address $address, CreateAddressFromAdminRequest $request)
     {
-        $address = Address::query()->findOrFail($id);
-
-        if ($request->input('is_default') == 1) {
+        if ($request->boolean('is_default')) {
             Address::query()
                 ->where([
                     'is_default' => 1,
@@ -64,10 +63,8 @@ class AddressController extends BaseController
             ->withUpdatedSuccessMessage();
     }
 
-    public function destroy(int|string $id)
+    public function destroy(Address $address)
     {
-        $address = Address::query()->findOrFail($id);
-
         $address->delete();
 
         return $this
@@ -76,10 +73,11 @@ class AddressController extends BaseController
             ->setMessage(trans('core/base::notices.delete_success_message'));
     }
 
-    public function edit(int|string $id)
+    public function edit(Address $address)
     {
-        $address = Address::query()->findOrFail($id);
-
-        return view('plugins/ecommerce::customers.addresses.form-edit', compact('address'))->render();
+        return AddressForm::createFromModel($address)
+            ->setUrl(route('customers.addresses.edit.update', $address->getKey()))
+            ->add('customer_id', 'hidden', ['value' => $address->customer_id])
+            ->renderForm();
     }
 }

@@ -7,8 +7,6 @@ use Botble\Base\Supports\EmailHandler as BaseEmailHandler;
 use Botble\Ecommerce\Enums\DiscountTypeOptionEnum;
 use Botble\Ecommerce\Facades\OrderHelper;
 use Botble\Ecommerce\Models\Order as OrderModel;
-use Botble\Marketplace\Models\VendorInfo;
-use Botble\Marketplace\Models\Store;
 use Botble\Theme\Facades\Theme;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
@@ -51,74 +49,27 @@ class MarketplaceHelper
 
     public function hideStorePhoneNumber(): bool
     {
-        return (bool)$this->getSetting('hide_store_phone_number', false);
+        return (bool) $this->getSetting('hide_store_phone_number', false);
     }
 
     public function hideStoreEmail(): bool
     {
-        return (bool)$this->getSetting('hide_store_email', false);
+        return (bool) $this->getSetting('hide_store_email', false);
     }
 
     public function hideStoreSocialLinks(): bool
     {
-        return (bool)$this->getSetting('hide_store_social_links', false);
+        return (bool) $this->getSetting('hide_store_social_links', false);
+    }
+
+    public function hideStoreAddress(): bool
+    {
+        return (bool) $this->getSetting('hide_store_address', false);
     }
 
     public function allowVendorManageShipping(): bool
     {
-        return (bool)$this->getSetting('allow_vendor_manage_shipping', false);
-    }
-
-    public function isVendorProfileComplete(int $customerID)
-    {
-        $isVendorData = Store::where('customer_id', $customerID)->first();
-        $isVendorTaxData = VendorInfo::where('customer_id', $customerID)->value('tax_info');
-
-        $data['status'] = 0;
-        $data['completePercentage'] = "10";
-        $data['storeVerified'] = $isVendorData['is_verified'];
-
-        $percentageIncrease = 5;
-
-        if ($isVendorTaxData) {
-            $taxVendorSignature     = isset($isVendorTaxData['signature_image']) ? $isVendorTaxData['signature_image'] : '';
-            $taxVendorBusinessName  = isset($isVendorTaxData['business_name']) ? $isVendorTaxData['business_name'] : '';
-            $taxVendorAddress       = isset($isVendorTaxData['address']) ? $isVendorTaxData['address'] : '';
-            $taxVendorTaxNumber     = isset($isVendorTaxData['tax_id']) ? $isVendorTaxData['tax_id'] : '';
-
-            if ($taxVendorSignature && $taxVendorBusinessName && $taxVendorAddress && $taxVendorTaxNumber) {
-                $data['completePercentage'] = 80;
-                $data['status'] = 1;
-            } else {
-                // Increase percentage for each available tax data field
-                if ($taxVendorSignature) {
-                    $data['completePercentage'] += $percentageIncrease;
-                }
-                if ($taxVendorBusinessName) {
-                    $data['completePercentage'] += $percentageIncrease;
-                }
-                if ($taxVendorAddress) {
-                    $data['completePercentage'] += $percentageIncrease;
-                }
-                if ($taxVendorTaxNumber) {
-                    $data['completePercentage'] += $percentageIncrease;
-                }
-            }
-        }
-
-        $vendorDataFields = [
-            'email', 'company', 'address', 'state', 'city', 'zip_code', 'logo'
-        ];
-
-        foreach ($vendorDataFields as $field) {
-            if ($isVendorData[$field]) {
-                $data['completePercentage'] += $percentageIncrease;
-            }
-        }
-
-        $data['completePercentage'] = min($data['completePercentage'], 80);
-
-        return $data;
+        return (bool) $this->getSetting('allow_vendor_manage_shipping', false);
     }
 
     public function sendMailToVendorAfterProcessingOrder($orders)
@@ -153,7 +104,7 @@ class MarketplaceHelper
 
     public function isCommissionCategoryFeeBasedEnabled(): bool
     {
-        return (bool)$this->getSetting('enable_commission_fee_for_each_category');
+        return (bool) $this->getSetting('enable_commission_fee_for_each_category');
     }
 
     public function maxFilesizeUploadByVendor(): float
@@ -169,7 +120,7 @@ class MarketplaceHelper
 
     public function maxProductImagesUploadByVendor(): int
     {
-        return (int)$this->getSetting('max_product_images_upload_by_vendor', 20);
+        return (int) $this->getSetting('max_product_images_upload_by_vendor', 20);
     }
 
     public function isVendorRegistrationEnabled(): bool
@@ -180,5 +131,15 @@ class MarketplaceHelper
     public function getMinimumWithdrawalAmount(): float
     {
         return (float) $this->getSetting('minimum_withdrawal_amount') ?: 0;
+    }
+
+    public function allowVendorDeleteTheirOrders(): bool
+    {
+        return (bool) $this->getSetting('allow_vendor_delete_their_orders', true);
+    }
+
+    public function isEnabledMessagingSystem(): bool
+    {
+        return (bool) $this->getSetting('enabled_messaging_system', true);
     }
 }

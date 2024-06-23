@@ -2,117 +2,87 @@
 
 namespace Botble\Ecommerce\Forms\Settings;
 
-use Botble\Base\Facades\Assets;
+use Botble\Base\Forms\Fields\TextField;
 use Botble\Ecommerce\Facades\EcommerceHelper;
+use Botble\Ecommerce\Forms\Concerns\HasLocationFields;
+use Botble\Ecommerce\Forms\Fronts\Auth\FieldOptions\TextFieldOption;
 use Botble\Ecommerce\Http\Requests\Settings\GeneralSettingRequest;
 use Botble\Setting\Forms\SettingForm;
 
 class GeneralSettingForm extends SettingForm
 {
+    use HasLocationFields;
+
     public function setup(): void
     {
         parent::setup();
-
-        if (EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation()) {
-            Assets::addScriptsDirectly('vendor/core/plugins/location/js/location.js');
-        }
 
         $this
             ->setSectionTitle(trans('plugins/ecommerce::setting.general.name'))
             ->setSectionDescription(trans('plugins/ecommerce::store-locator.description'))
             ->setValidatorClass(GeneralSettingRequest::class)
-            ->columns(3)
-            ->add('store_name', 'text', [
-                'label' => trans('plugins/ecommerce::store-locator.shop_name'),
-                'value' => get_ecommerce_setting('store_name'),
-                'colspan' => 3,
-            ])
-            ->add('store_company', 'text', [
-                'label' => trans('plugins/ecommerce::ecommerce.company'),
-                'value' => get_ecommerce_setting('store_company'),
-                'colspan' => 3,
-            ])
-            ->add('store_phone', 'text', [
-                'label' => trans('plugins/ecommerce::ecommerce.phone'),
-                'value' => get_ecommerce_setting('store_phone'),
-                'colspan' => 3,
-            ])
-            ->add('store_email', 'text', [
-                'label' => trans('plugins/ecommerce::ecommerce.email'),
-                'value' => get_ecommerce_setting('store_email'),
-                'colspan' => 3,
-            ])
-            ->add('store_address', 'text', [
-                'label' => trans('plugins/ecommerce::ecommerce.address'),
-                'value' => get_ecommerce_setting('store_address'),
-                'colspan' => 3,
-            ])
-            ->add('store_country', 'customSelect', [
-                'label' => trans('plugins/location::city.country'),
-                'selected' => get_ecommerce_setting('store_country'),
-                'choices' => EcommerceHelper::getAvailableCountries(),
-                'attr' => [
-                    'data-type' => 'country',
-                    'searchable' => true,
+            ->columns(6)
+            ->add(
+                'store_name',
+                TextField::class,
+                TextFieldOption::make()
+                    ->label(trans('plugins/ecommerce::store-locator.shop_name'))
+                    ->value(get_ecommerce_setting('store_name'))
+                    ->colspan(3)
+            )
+            ->add(
+                'store_company',
+                TextField::class,
+                TextFieldOption::make()
+                    ->label(trans('plugins/ecommerce::ecommerce.company'))
+                    ->value(get_ecommerce_setting('store_company'))
+                    ->colspan(3)
+            )
+            ->add(
+                'store_phone',
+                TextField::class,
+                TextFieldOption::make()
+                    ->label(trans('plugins/ecommerce::ecommerce.phone'))
+                    ->value(get_ecommerce_setting('store_phone'))
+                    ->colspan(3)
+            )
+            ->add(
+                'store_email',
+                TextField::class,
+                TextFieldOption::make()
+                    ->label(trans('plugins/ecommerce::ecommerce.email'))
+                    ->value(get_ecommerce_setting('store_email'))
+                    ->colspan(3)
+            )
+            ->addLocationFields(
+                countryAttributes: [
+                    'name' => 'store_country',
+                    'value' => get_ecommerce_setting('store_country'),
                 ],
-                'colspan' => 1,
-            ]);
-
-        if (EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation()) {
-            $this->add('store_state', 'customSelect', [
-                'label' => trans('plugins/location::city.state'),
-                'selected' => get_ecommerce_setting('store_state'),
-                'choices' => get_ecommerce_setting('store_state') || ! EcommerceHelper::isUsingInMultipleCountries()
-                    ? EcommerceHelper::getAvailableStatesByCountry(get_ecommerce_setting('store_country'))
-                    : [],
-                'attr' => [
-                    'data-type' => 'state',
-                    'data-url' => route('ajax.states-by-country'),
+                stateAttributes: [
+                    'name' => 'store_state',
+                    'value' => get_ecommerce_setting('store_state'),
                 ],
-                'colspan' => 1,
-            ]);
-        } else {
-            $this->add('store_state', 'text', [
-                'label' => trans('plugins/location::city.state'),
-                'value' => get_ecommerce_setting('store_state'),
-                'colspan' => 1,
-            ]);
-        }
-
-        if (EcommerceHelper::useCityFieldAsTextField()) {
-            $this->add('store_city', 'text', [
-                'label' => trans('plugins/location::city.city'),
-                'value' => get_ecommerce_setting('store_city'),
-                'colspan' => 1,
-            ]);
-        } else {
-            $this->add('store_city', 'customSelect', [
-                'label' => trans('plugins/location::city.city'),
-                'selected' => get_ecommerce_setting('store_city'),
-                'choices' => get_ecommerce_setting('store_city')
-                    ? EcommerceHelper::getAvailableCitiesByState(get_ecommerce_setting('store_state'))
-                    : [],
-                'attr' => [
-                    'data-type' => 'city',
-                    'data-url' => route('ajax.cities-by-state'),
-                    'data-using-select2' => false,
+                cityAttributes: [
+                    'name' => 'store_city',
+                    'value' => get_ecommerce_setting('store_city'),
                 ],
-                'colspan' => 1,
-            ]);
-        }
-
-        if (EcommerceHelper::isZipCodeEnabled()) {
-            $this->add('store_zip_code', 'text', [
-                'label' => trans('plugins/ecommerce::store-locator.zip_code'),
-                'value' => get_ecommerce_setting('store_zip_code'),
-                'colspan' => 3,
-            ]);
-        }
-
-        $this->add('store_vat_number', 'text', [
-            'label' => trans('plugins/ecommerce::ecommerce.tax_id'),
-            'value' => get_ecommerce_setting('store_vat_number'),
-            'colspan' => 3,
-        ]);
+                addressAttributes: [
+                    'name' => 'store_address',
+                    'value' => get_ecommerce_setting('store_address'),
+                ],
+                zipCodeAttributes: [
+                    'name' => 'store_zip_code',
+                    'value' => get_ecommerce_setting('store_zip_code'),
+                ]
+            )
+            ->add(
+                'store_vat_number',
+                TextField::class,
+                TextFieldOption::make()
+                    ->label(trans('plugins/ecommerce::ecommerce.tax_id'))
+                    ->value(get_ecommerce_setting('store_vat_number'))
+                    ->colspan(EcommerceHelper::isUsingInMultipleCountries() && EcommerceHelper::isZipCodeEnabled() ? 3 : 2)
+            );
     }
 }

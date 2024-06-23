@@ -47,7 +47,7 @@ class WithdrawalController extends BaseController
         $withdrawal = Withdrawal::query()->findOrFail($id);
 
         $data = [
-            'images' => array_filter((array)$request->input('images', [])),
+            'images' => array_filter((array) $request->input('images', [])),
             'user_id' => Auth::id(),
             'description' => $request->input('description'),
             'payment_channel' => $request->input('payment_channel'),

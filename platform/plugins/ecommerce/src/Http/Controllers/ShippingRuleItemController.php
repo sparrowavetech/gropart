@@ -17,6 +17,7 @@ use Botble\Ecommerce\Imports\ShippingRuleItemImport;
 use Botble\Ecommerce\Imports\ValidateShippingRuleItemImport;
 use Botble\Ecommerce\Models\ShippingRule;
 use Botble\Ecommerce\Models\ShippingRuleItem;
+use Botble\Ecommerce\Services\HandleShippingFeeService;
 use Botble\Ecommerce\Tables\ShippingRuleItemTable;
 use Exception;
 use Illuminate\Http\Request;
@@ -58,7 +59,7 @@ class ShippingRuleItemController extends BaseController
         return ShippingRuleItemForm::create()->renderForm();
     }
 
-    public function store(ShippingRuleItemRequest $request)
+    public function store(ShippingRuleItemRequest $request, HandleShippingFeeService $handleShippingFeeService)
     {
         $ruleId = $request->input('shipping_rule_id');
         $rule = ShippingRule::query()->findOrFail($ruleId);
@@ -67,6 +68,8 @@ class ShippingRuleItemController extends BaseController
         ]);
 
         $item = ShippingRuleItem::query()->create($request->input());
+
+        $handleShippingFeeService->clearCache();
 
         event(new CreatedContentEvent(SHIPPING_RULE_ITEM_MODULE_SCREEN_NAME, $request, $item));
 
@@ -107,7 +110,7 @@ class ShippingRuleItemController extends BaseController
         return ShippingRuleItemForm::createFromModel($item)->renderForm();
     }
 
-    public function update(int|string $id, ShippingRuleItemRequest $request)
+    public function update(int|string $id, ShippingRuleItemRequest $request, HandleShippingFeeService $handleShippingFeeService)
     {
         $item = ShippingRuleItem::query()->findOrFail($id);
 
@@ -117,6 +120,8 @@ class ShippingRuleItemController extends BaseController
 
         $item->fill($request->input());
         $item->save();
+
+        $handleShippingFeeService->clearCache();
 
         event(new UpdatedContentEvent(SHIPPING_RULE_ITEM_MODULE_SCREEN_NAME, $request, $item));
 

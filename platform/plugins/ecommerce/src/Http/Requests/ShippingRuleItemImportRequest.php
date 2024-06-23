@@ -12,7 +12,7 @@ class ShippingRuleItemImportRequest extends Request
 
         return [
             'file' => 'required|file|mimetypes:' . $mimeType,
-            'type' => 'required|in:overwrite,add_new,skip',
+            'type' => ['required', 'in:overwrite,add_new,skip'],
         ];
     }
 }

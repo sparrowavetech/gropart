@@ -2,9 +2,11 @@
 
 namespace Botble\Ecommerce\Http\Requests;
 
+use Botble\Base\Rules\EmailRule;
 use Botble\Ecommerce\Enums\ShippingMethodEnum;
 use Botble\Ecommerce\Facades\Cart;
 use Botble\Ecommerce\Facades\EcommerceHelper;
+use Botble\Ecommerce\Models\Customer;
 use Botble\Payment\Enums\PaymentMethodEnum;
 use Botble\Support\Http\Requests\Request;
 use Illuminate\Support\Arr;
@@ -15,12 +17,16 @@ class CheckoutRequest extends Request
     public function rules(): array
     {
         $rules = [
-            'amount' => 'required|min:0',
+            'amount' => ['required', 'min:0'],
         ];
+
+        if (theme_option('ecommerce_term_and_privacy_policy_url')) {
+            $rules['agree_terms_and_policy'] = 'sometimes|accepted:1';
+        }
 
         if (is_plugin_active('payment') && Cart::instance('cart')->rawTotal()) {
             $paymentMethods = Arr::where(PaymentMethodEnum::values(), function ($value) {
-                return get_payment_setting('status', $value) == 1;
+                return (int) get_payment_setting('status', $value) == 1;
             });
 
             $rules['payment_method'] = 'sometimes|' . Rule::in($paymentMethods);
@@ -55,12 +61,36 @@ class CheckoutRequest extends Request
 
         if (EcommerceHelper::isDisplayTaxFieldsAtCheckoutPage()) {
             $rules = array_merge($rules, [
-                'with_tax_information' => 'nullable|bool',
-                'tax_information' => 'array',
-                'tax_information.company_tax_code' => 'required_if:with_tax_information,1|nullable|string|min:3|max:20',
-                'tax_information.company_name' => 'required_if:with_tax_information,1|nullable|string|min:3|max:120',
-                'tax_information.company_address' => 'required_if:with_tax_information,1|nullable|string|min:3|max:255',
-                'tax_information.company_email' => 'required_if:with_tax_information,1|nullable|email|min:6|max:60',
+                'with_tax_information' => ['nullable', 'bool'],
+                'tax_information' => ['array'],
+                'tax_information.company_tax_code' => [
+                    'required_if:with_tax_information,1',
+                    'nullable',
+                    'string',
+                    'min:3',
+                    'max:20',
+                ],
+                'tax_information.company_name' => [
+                    'required_if:with_tax_information,1',
+                    'nullable',
+                    'string',
+                    'min:3',
+                    'max:120',
+                ],
+                'tax_information.company_address' => [
+                    'required_if:with_tax_information,1',
+                    'nullable',
+                    'string',
+                    'min:3',
+                    'max:255',
+                ],
+                'tax_information.company_email' => [
+                    'required_if:with_tax_information,1',
+                    'nullable',
+                    'email',
+                    'min:6',
+                    'max:60',
+                ],
             ]);
         }
 
@@ -83,7 +113,7 @@ class CheckoutRequest extends Request
         if ($isCreateAccount) {
             $rules['password'] = 'required|min:6';
             $rules['password_confirmation'] = 'required|same:password';
-            $rules['address.email'] = 'required|max:60|min:6|email|unique:ec_customers,email';
+            $rules['address.email'] = ['required', new EmailRule(), Rule::unique((new Customer())->getTable(), 'email')];
             $rules['address.name'] = 'required|min:3|max:120';
         }
 
@@ -143,6 +173,7 @@ class CheckoutRequest extends Request
         if (! is_array($keys)) {
             $keys = [$keys];
         }
+
         foreach ($keys as $key) {
             if (! empty($rules[$key])) {
                 $values = $rules[$key];

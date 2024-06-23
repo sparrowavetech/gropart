@@ -52,13 +52,15 @@
         </x-core::table.body>
     </x-core::table>
 
-    <x-core::card.footer class="text-center py-2">
-        <a
-            href="{{ $orderEditRouteName ? route($orderEditRouteName, $shipment->order_id) : '#' }}"
-            target="_blank"
-        >
-            {{ trans('plugins/ecommerce::shipping.view_order', ['order_id' => $shipment->order->code]) }}
-            <x-core::icon name="ti ti-external-link" />
-        </a>
-    </x-core::card.footer>
+    @if ($orderEditRouteName)
+        <x-core::card.footer class="text-center py-2">
+            <a
+                href="{{ route($orderEditRouteName, $shipment->order_id) }}"
+                target="_blank"
+            >
+                {{ trans('plugins/ecommerce::shipping.view_order', ['order_id' => $shipment->order->code]) }}
+                <x-core::icon name="ti ti-external-link" />
+            </a>
+        </x-core::card.footer>
+    @endif
 </x-core::card>

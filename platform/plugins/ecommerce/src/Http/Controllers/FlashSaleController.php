@@ -72,7 +72,7 @@ class FlashSaleController extends BaseController
         $flashSale->products()->detach();
 
         foreach ($products as $index => $productId) {
-            if (! (int)$productId) {
+            if (! (int) $productId) {
                 continue;
             }
 
@@ -82,11 +82,11 @@ class FlashSaleController extends BaseController
                 continue;
             }
 
-            $extra['price'] = (float)$extra['price'];
-            $extra['quantity'] = (int)$extra['quantity'];
+            $extra['price'] = (float) $extra['price'];
+            $extra['quantity'] = (int) $extra['quantity'];
 
             if ($flashSale->products()->where('id', $productId)->count()) {
-                $flashSale->products()->sync([(int)$productId => $extra]);
+                $flashSale->products()->sync([(int) $productId => $extra]);
             } else {
                 $flashSale->products()->attach($productId, $extra);
             }

@@ -54,13 +54,7 @@ if (! function_exists('render_product_options_info')) {
             return '';
         }
 
-        $view = Theme::getThemeNamespace('views.ecommerce.options.render-options-info');
-
-        if (! view()->exists($view)) {
-            $view = 'plugins/ecommerce::themes.options.render-options-info';
-        }
-
-        return view($view, compact('productOptions', 'product', 'displayBasePrice'))->render();
+        return view(EcommerceHelper::viewPath('options.render-options-info'), compact('productOptions', 'product', 'displayBasePrice'))->render();
     }
 }
 
@@ -71,12 +65,6 @@ if (! function_exists('render_product_options_html')) {
             return '';
         }
 
-        $view = Theme::getThemeNamespace('views.ecommerce.options.render-options-html');
-
-        if (! view()->exists($view)) {
-            $view = 'plugins/ecommerce::themes.options.render-options-html';
-        }
-
-        return view($view, compact('productOptions', 'displayBasePrice', 'basePrice'))->render();
+        return view(EcommerceHelper::viewPath('options.render-options-html'), compact('productOptions', 'displayBasePrice', 'basePrice'))->render();
     }
 }

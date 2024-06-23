@@ -14,32 +14,24 @@ class ConfirmEmailNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    /**
-     * Get the notification's delivery channels.
-     *
-     * @param mixed $notifiable
-     */
-    public function via($notifiable)
+    public function via($notifiable): array
     {
         return ['mail'];
     }
 
-    /**
-     * Get the mail representation of the notification.
-     *
-     * @param mixed $notifiable
-     * @return MailMessage
-     */
-    public function toMail($notifiable)
+    public function toMail($notifiable): MailMessage
     {
-        EmailHandler::setModule(ECOMMERCE_MODULE_SCREEN_NAME)
-            ->setVariableValue('verify_link', URL::signedRoute('customer.confirm', ['user' => $notifiable->id]));
-
-        $template = 'confirm-email';
-        $content = EmailHandler::prepareData(EmailHandler::getTemplateContent($template));
+        $emailHandler = EmailHandler::setModule(ECOMMERCE_MODULE_SCREEN_NAME)
+            ->setType('plugins')
+            ->setTemplate('confirm-email')
+            ->addTemplateSettings(ECOMMERCE_MODULE_SCREEN_NAME, config('plugins.ecommerce.email', []))
+            ->setVariableValues([
+                'verify_link' => URL::signedRoute('customer.confirm', ['user' => $notifiable->id]),
+                'customer_name' => $notifiable->name,
+            ]);
 
         return (new MailMessage())
-            ->view(['html' => new HtmlString($content)])
-            ->subject(EmailHandler::getTemplateSubject($template));
+            ->view(['html' => new HtmlString($emailHandler->getContent())])
+            ->subject($emailHandler->getSubject());
     }
 }

@@ -1,9 +1,13 @@
-<div class="widget-products-with-category py-5 pt-3 bg-light">
+<div class="widget-products-with-category py-5 bg-light">
     <div class="container-xxxl">
         <div class="row">
             <div class="col-12">
                 <div class="row align-items-center mb-2 widget-header">
-                    <h2 class="col-auto mt-3 mb-3 py-2">{{ $shortcode->title ?: $category->name }}</h2>
+                    <a href="{{ $category->url }}">
+                        <div class="row align-items-center mb-2 widget-header">
+                            <h2 class="col-auto mb-0 py-2">{{ $shortcode->title ?: $category->name }} </h2>
+                        </div>
+                    </a>
                 </div>
                 <div class="product-deals-day__body arrows-top-right">
                     <div
@@ -24,37 +28,25 @@
                             'swipeToSlide' => true,
                             'responsive' => [
                                 [
-                                    'breakpoint' => 1800,
-                                    'settings' => [
-                                        'slidesToShow' => 6,
-                                    ],
-                                ],
-                                [
-                                    'breakpoint' => 1601,
+                                    'breakpoint' => 1400,
                                     'settings' => [
                                         'slidesToShow' => 5,
                                     ],
                                 ],
                                 [
-                                    'breakpoint' => 1025,
+                                    'breakpoint' => 1199,
                                     'settings' => [
-                                        'arrows' => true,
-                                        'dots' => false,
                                         'slidesToShow' => 4,
-                                        'slidesToScroll' => 4,
                                     ],
                                 ],
                                 [
-                                    'breakpoint' => 769,
+                                    'breakpoint' => 1024,
                                     'settings' => [
-                                        'arrows' => true,
-                                        'dots' => false,
                                         'slidesToShow' => 3,
-                                        'slidesToScroll' => 3,
                                     ],
                                 ],
                                 [
-                                    'breakpoint' => 440,
+                                    'breakpoint' => 767,
                                     'settings' => [
                                         'arrows' => true,
                                         'dots' => false,

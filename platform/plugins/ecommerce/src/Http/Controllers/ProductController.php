@@ -3,6 +3,7 @@
 namespace Botble\Ecommerce\Http\Controllers;
 
 use Botble\Base\Events\BeforeEditContentEvent;
+use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Facades\Assets;
 use Botble\Base\Supports\Breadcrumb;
 use Botble\Ecommerce\Enums\ProductTypeEnum;
@@ -99,6 +100,8 @@ class ProductController extends BaseController
                 'configurable_product_id' => $product->getKey(),
             ]);
 
+            new CreatedContentEvent(PRODUCT_VARIATIONS_MODULE_SCREEN_NAME, request(), $variation);
+
             foreach ($addedAttributes as $attribute) {
                 ProductVariationItem::query()->create([
                     'attribute_id' => $attribute,
@@ -113,7 +116,7 @@ class ProductController extends BaseController
             $variation['sku'] = $product->sku;
             $variation['auto_generate_sku'] = true;
 
-            $variation['images'] = array_filter((array)$request->input('images', []));
+            $variation['images'] = array_filter((array) $request->input('images', []));
 
             $this->postSaveAllVersions(
                 [$variation['id'] => $variation],
@@ -158,6 +161,7 @@ class ProductController extends BaseController
                 ->update(['is_default' => 0]);
 
             $defaultVariation = ProductVariation::query()->find($request->input('variation_default_id'));
+
             if ($defaultVariation) {
                 $defaultVariation->is_default = true;
                 $defaultVariation->save();

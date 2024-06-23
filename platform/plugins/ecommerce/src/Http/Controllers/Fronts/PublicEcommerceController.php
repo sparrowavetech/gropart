@@ -11,7 +11,7 @@ use Illuminate\Support\Str;
 
 class PublicEcommerceController extends BaseController
 {
-    public function changeCurrency(Request $request, string|null $title = null)
+    public function changeCurrency(Request $request, ?string $title = null)
     {
         if (empty($title)) {
             $title = $request->input('currency');

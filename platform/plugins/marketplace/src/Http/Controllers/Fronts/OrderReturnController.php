@@ -14,6 +14,7 @@ use Botble\Marketplace\Facades\MarketplaceHelper;
 use Botble\Marketplace\Tables\OrderReturnTable;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Http\Request;
 
 class OrderReturnController extends BaseController
@@ -58,7 +59,12 @@ class OrderReturnController extends BaseController
 
         $defaultStore = get_primary_store_locator();
 
-        return MarketplaceHelper::view('vendor-dashboard.order-returns.edit', compact('returnRequest', 'defaultStore'));
+        $returnRequest->loadMissing(['histories' => fn (HasMany $query) => $query->latest()]);
+
+        return MarketplaceHelper::view(
+            'vendor-dashboard.order-returns.edit',
+            compact('returnRequest', 'defaultStore')
+        );
     }
 
     public function update(int|string $id, UpdateOrderReturnRequest $request)

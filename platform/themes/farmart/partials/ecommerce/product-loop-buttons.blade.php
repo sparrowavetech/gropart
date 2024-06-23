@@ -24,7 +24,7 @@
         <div class="wishlist-button product-wishlist-button product-loop_button">
             <a
                 class="wishlist product-loop_action @if (!empty($wishlistIds) && in_array($product->id, $wishlistIds)) added-to-wishlist @endif"
-                data-url="{{ route('public.ajax.add-to-wishlist', ['product_id' => $product->id]) }}"
+                data-url="{{ route('public.wishlist.add', $product->id) }}"
                 href="#"
                 title="{{ __('Wishlist') }}"
             >
@@ -72,12 +72,4 @@
             </a>
         </div>
     @endif
-    <div class="product-loop_button bulk-order-button">
-        <a class="product-loop_action" target="_BLANK" href="{{ __('bulk_enq_form_url') }}?pid={{($product->is_variation || !$product->defaultVariation->product_id) ? $product->id : $product->defaultVariation->product_id}}" title="{{ __('Bulk Order') }}" data-bs-toggle="tooltip">
-            <div class="product-loop_icon">
-                <i class="icon-server"></i>
-            </div>
-            <span class="text">{{ __('Bulk Order') }}</span>
-        </a>
-    </div>
 </div>

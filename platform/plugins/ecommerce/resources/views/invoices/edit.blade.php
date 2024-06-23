@@ -170,16 +170,14 @@
                                                             $attributes = get_product_attributes($product->id);
                                                         @endphp
 
-                                                        @if (!empty($attributes))
-                                                            @foreach ($attributes as $attribute)
-                                                                {{ $attribute->attribute_set_title }}: {{ $attribute->title }}@if (!$loop->last), @endif
-                                                            @endforeach
-                                                        @endif
+                                                        @foreach ($attributes as $attribute)
+                                                            {{ $attribute->attribute_set_title }}: {{ $attribute->title }}@if (!$loop->last), @endif
+                                                        @endforeach
                                                     </p>
                                                 @endif
 
                                                 @include(
-                                                    'plugins/ecommerce::themes.includes.cart-item-options-extras',
+                                                    EcommerceHelper::viewPath('includes.cart-item-options-extras'),
                                                     ['options' => $invoiceItem->options]
                                                 )
 

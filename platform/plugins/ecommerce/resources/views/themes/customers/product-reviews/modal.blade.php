@@ -18,7 +18,7 @@
                 ></button>
             </div>
             <div class="modal-body modal-dialog-scrollable">
-                @include('plugins/ecommerce::themes.customers.product-reviews.form', ['product' => null])
+                @include(EcommerceHelper::viewPath('customers.product-reviews.form'), ['product' => null])
             </div>
         </div>
     </div>

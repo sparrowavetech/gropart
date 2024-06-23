@@ -3,7 +3,6 @@
 namespace Botble\Ecommerce\Tables;
 
 use Botble\Base\Facades\Assets;
-use Botble\Base\Facades\Html;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Models\Tax;
 use Botble\Ecommerce\Models\TaxRule;
@@ -15,6 +14,7 @@ use Botble\Table\Columns\Column;
 use Botble\Table\Columns\CreatedAtColumn;
 use Botble\Table\Columns\FormattedColumn;
 use Botble\Table\Columns\IdColumn;
+use Botble\Table\HeaderActions\CreateHeaderAction;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
@@ -94,16 +94,14 @@ class TaxRuleTable extends TableAbstract
 
     public function getButtons(): array
     {
-        $data = parent::getButtons();
-        $data[] = [
-            'className' => 'create-tax-rule-item btn-primary',
-            'text' => Html::tag('span', view('core/table::partials.create')->render(), [
-                'data-href' => route('tax.rule.create', ['tax_id' => $this->tax->getKey()]),
-                'data-action' => 'create',
-            ])->toHtml(),
+        return [
+            ...parent::getButtons(),
+            CreateHeaderAction::make()
+                ->addAttribute('class', 'create-tax-rule-item')
+                ->withDefaultAction(false)
+                ->route('tax.rule.create', ['tax_id' => $this->tax->getKey()])
+                ->toArray(),
         ];
-
-        return $data;
     }
 
     public function bulkActions(): array

@@ -70,14 +70,14 @@ return [
     ],
 
     [
-        'name' => 'Settings',
-        'flag' => 'marketplace.settings',
+        'name' => 'Reports',
+        'flag' => 'marketplace.reports',
         'parent_flag' => 'marketplace.index',
     ],
 
     [
-        'name' => 'Reports',
-        'flag' => 'marketplace.reports',
-        'parent_flag' => 'marketplace.index',
+        'name' => 'Settings',
+        'flag' => 'marketplace.settings',
+        'parent_flag' => 'ecommerce.settings',
     ],
 ];

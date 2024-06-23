@@ -27,7 +27,7 @@ class ReviewReplyController extends BaseController
         }
 
         $review->reply()->create([
-            'user_id' => $request->user()->id,
+            'user_id' => $userId,
             'message' => $request->input('message'),
         ]);
 

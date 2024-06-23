@@ -21,7 +21,7 @@ class WishlistController extends BaseController
 
         $queryParams = [
             'paginate' => [
-                'per_page' => 10,
+                'per_page' => 100,
                 'current_paged' => $request->integer('page', 1) ?: 1,
             ],
             'with' => ['slugable'],
@@ -33,9 +33,11 @@ class WishlistController extends BaseController
         } else {
             $products = new LengthAwarePaginator([], 0, 10);
 
-            $itemIds = collect(Cart::instance('wishlist')->content())
+            $itemIds = Cart::instance('wishlist')
+                ->content()
                 ->sortBy([['updated_at', 'desc']])
                 ->pluck('id')
+                ->unique('id')
                 ->all();
 
             if ($itemIds) {

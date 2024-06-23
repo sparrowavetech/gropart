@@ -11,7 +11,7 @@
                     ['class' => 'approve-product-for-selling-button'],
                 ),
             ]),
-        ) !!}<
+        ) !!}
     </x-core::alert>
 @else
     <x-core::alert type="info" class="approved-product-info">

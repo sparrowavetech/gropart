@@ -14,13 +14,13 @@
 
     {!! BaseHelper::googleFonts(
         'https://fonts.googleapis.com/css2?family=' .
-            urlencode(theme_option('primary_font', 'Muli')) .
+            urlencode(theme_option('primary_font', 'Mulish')) .
             ':wght@400;600;700&display=swap',
     ) !!}
 
     <style>
         :root {
-            --primary-font: '{{ theme_option('primary_font', 'Muli') }}', sans-serif;
+            --primary-font: '{{ theme_option('primary_font', 'Mulish') }}', sans-serif;
             --primary-color: {{ theme_option('primary_color', '#fab528') }};
             --heading-color: {{ theme_option('heading_color', '#000') }};
             --text-color: {{ theme_option('text_color', '#000') }};
@@ -64,19 +64,6 @@
                 "seconds": "{{ __('secs') }}"
             }
         };
-    </script>
-    <script>
-        function goBackOrClose() {
-            if (window.history.length > 1) {
-            window.history.back();
-            } else {
-            window.close();
-            }
-        }
-        document.addEventListener("DOMContentLoaded", function() {
-            var goBackButton = document.getElementById('goBackButton');
-            goBackButton.addEventListener('click', goBackOrClose);
-        });
     </script>
 
     {!! Theme::footer() !!}

@@ -9,8 +9,8 @@ class DeleteProductVariationsRequest extends Request
     public function rules(): array
     {
         return [
-            'ids' => 'sometimes|array',
-            'ids.*' => 'required',
+            'ids' => ['sometimes', 'array'],
+            'ids.*' => ['required'],
         ];
     }
 }

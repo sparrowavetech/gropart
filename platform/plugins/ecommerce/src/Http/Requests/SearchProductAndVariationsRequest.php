@@ -9,8 +9,8 @@ class SearchProductAndVariationsRequest extends Request
     public function rules(): array
     {
         return [
-            'product_ids' => 'sometimes|array',
-            'keyword' => 'nullable|string|max:220',
+            'product_ids' => ['sometimes', 'array'],
+            'keyword' => ['nullable', 'string', 'max:220'],
         ];
     }
 }

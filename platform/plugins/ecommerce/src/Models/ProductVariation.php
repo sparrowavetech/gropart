@@ -2,6 +2,7 @@
 
 namespace Botble\Ecommerce\Models;
 
+use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Models\BaseModel;
 use Botble\Ecommerce\Services\Products\UpdateDefaultProductService;
@@ -93,6 +94,8 @@ class ProductVariation extends BaseModel
                 'configurable_product_id' => $configurableProductId,
             ]);
 
+            new CreatedContentEvent(PRODUCT_VARIATIONS_MODULE_SCREEN_NAME, request(), $variation);
+
             foreach ($attributes as $attribute) {
                 ProductVariationItem::query()->create([
                     'attribute_id' => $attribute,
@@ -144,7 +147,7 @@ class ProductVariation extends BaseModel
         return ProductVariationItem::query()->whereIn('id', $items)->delete();
     }
 
-    public static function getParentOfVariation(int|string $variationId, array $with = []): Product|null
+    public static function getParentOfVariation(int|string $variationId, array $with = []): ?Product
     {
         $variation = self::query()
             ->where('product_id', $variationId);

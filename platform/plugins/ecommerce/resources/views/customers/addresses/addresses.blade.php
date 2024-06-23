@@ -7,9 +7,11 @@
             <x-core::table.header.cell>
                 {{ trans('plugins/ecommerce::addresses.address') }}
             </x-core::table.header.cell>
-            <x-core::table.header.cell>
-                {{ trans('plugins/ecommerce::addresses.zip') }}
-            </x-core::table.header.cell>
+            @if (EcommerceHelper::isZipCodeEnabled())
+                <x-core::table.header.cell>
+                    {{ trans('plugins/ecommerce::addresses.zip') }}
+                </x-core::table.header.cell>
+            @endif
             <x-core::table.header.cell>
                 {{ trans('plugins/ecommerce::addresses.country') }}
             </x-core::table.header.cell>
@@ -33,9 +35,11 @@
                 <x-core::table.body.cell class="text-start">
                     {{ $address->address }}
                 </x-core::table.body.cell>
-                <x-core::table.body.cell>
-                    {{ $address->zip_code }}
-                </x-core::table.body.cell>
+                @if (EcommerceHelper::isZipCodeEnabled())
+                    <x-core::table.body.cell>
+                        {{ $address->zip_code }}
+                    </x-core::table.body.cell>
+                @endif
                 <x-core::table.body.cell>
                     {{ $address->country_name }}
                 </x-core::table.body.cell>

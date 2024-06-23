@@ -1,5 +1,6 @@
 <?php
 
+use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Http\Controllers\Fronts\PublicCartController;
 use Botble\Ecommerce\Http\Middleware\CheckCartEnabledMiddleware;
 use Botble\Theme\Facades\Theme;
@@ -8,7 +9,7 @@ use Illuminate\Support\Facades\Route;
 Theme::registerRoutes(function () {
     Route::middleware(CheckCartEnabledMiddleware::class)
         ->controller(PublicCartController::class)
-        ->prefix('cart')
+        ->prefix(EcommerceHelper::getPageSlug('cart'))
         ->name('public.')
         ->group(function () {
             Route::get('/', 'index')->name('cart');

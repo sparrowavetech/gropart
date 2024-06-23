@@ -3,6 +3,7 @@
 namespace Botble\Ecommerce\Supports;
 
 use Botble\Base\Facades\EmailHandler;
+use Botble\Ecommerce\Enums\OrderReturnHistoryActionEnum;
 use Botble\Ecommerce\Enums\OrderReturnStatusEnum;
 use Botble\Ecommerce\Events\OrderReturnedEvent;
 use Botble\Ecommerce\Facades\OrderHelper as OrderHelperFacade;
@@ -65,6 +66,11 @@ class OrderReturnHelper
 
             OrderReturnItem::query()->insert($orderReturnItemData);
 
+            $orderReturn->histories()->create([
+                'action' => OrderReturnHistoryActionEnum::CREATED,
+                'description' => __('Request return order with reason: :reason', ['reason' => $orderReturn->reason->label()]),
+            ]);
+
             event(new OrderReturnedEvent($orderReturn));
 
             $mailer = EmailHandler::setModule(ECOMMERCE_MODULE_SCREEN_NAME);
@@ -107,10 +113,18 @@ class OrderReturnHelper
         }
     }
 
-    public function cancelReturnOrder(OrderReturn $orderReturn): array
+    public function cancelReturnOrder(OrderReturn $orderReturn, ?string $reason = null): array
     {
-        $orderReturn->return_status = OrderReturnStatusEnum::CANCELED;
-        $orderReturn->save();
+        $orderReturn->update([
+            'return_status' => OrderReturnStatusEnum::CANCELED,
+        ]);
+
+        $orderReturn->histories()->create([
+            'user_id' => auth()->id(),
+            'action' => OrderReturnHistoryActionEnum::REJECTED,
+            'description' => __('Cancel return order with reason: :reason', ['reason' => $reason]),
+            'reason' => $reason,
+        ]);
 
         return [true, $orderReturn];
     }
@@ -120,8 +134,7 @@ class OrderReturnHelper
         try {
             DB::beginTransaction();
 
-            $orderReturn->return_status = $data['return_status'];
-            $orderReturn->save();
+            $orderReturn->update($data);
 
             if ($orderReturn->return_status == OrderReturnStatusEnum::COMPLETED) {
                 foreach ($orderReturn->items as $item) {
@@ -142,6 +155,28 @@ class OrderReturnHelper
 
                 do_action(ACTION_AFTER_ORDER_RETURN_STATUS_COMPLETED, $orderReturn, $data);
             }
+
+            $orderReturn->histories()->create([
+                'user_id' => auth()->id(),
+                'action' => match ($orderReturn->return_status->getValue()) {
+                    OrderReturnStatusEnum::COMPLETED => OrderReturnHistoryActionEnum::MARK_AS_COMPLETED,
+                    OrderReturnStatusEnum::PROCESSING => OrderReturnHistoryActionEnum::APPROVED,
+                    default => OrderReturnHistoryActionEnum::REJECTED,
+                },
+                'description' => __('Update return order status to: :status', ['status' => $orderReturn->return_status->label()]),
+                'reason' => $data['description'] ?? null,
+            ]);
+
+            $customer = $orderReturn->customer;
+
+            EmailHandler::setModule(ECOMMERCE_MODULE_SCREEN_NAME)
+                ->setVariableValues([
+                    'customer_name' => $customer->name,
+                    'order_id' => $orderReturn->order->code,
+                    'description' => $data['description'] ?? null,
+                    'status' => $orderReturn->return_status->label(),
+                ])
+                ->sendUsingTemplate('order-return-status-updated', $customer->email);
 
             DB::commit();
 

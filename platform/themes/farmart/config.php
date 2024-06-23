@@ -1,6 +1,7 @@
 <?php
 
 use Botble\Base\Facades\BaseHelper;
+use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Shortcode\View\View;
 use Botble\Theme\Theme;
 use Illuminate\Support\Arr;
@@ -52,14 +53,14 @@ return [
             });
 
             // You may use this event to set up your assets.
-            $version = get_cms_version();
+            $version = get_cms_version() . '.2';
 
             $useCDN = theme_option('use_source_assets_from', 'cdn') == 'cdn';
 
             $assets = [
                 'bootstrap-css' => [
                     'cdn' => [
-                        'source' => '//cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css',
+                        'source' => '//cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css',
                         'attributes' => [
                             'integrity' => 'sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN',
                             'crossorigin' => 'anonymous',
@@ -114,12 +115,6 @@ return [
                         'version' => $version,
                     ],
                 ],
-                'swiper-css' => [
-                    'local' => [
-                        'source' => 'plugins/swiper-bundle.min.css',
-                        'version' => $version,
-                    ],
-                ],
                 'jquery' => [
                     'cdn' => [
                         'source' => '//ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js',
@@ -131,7 +126,7 @@ return [
                 ],
                 'popper-js' => [
                     'cdn' => [
-                        'source' => '//cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js',
+                        'source' => '//cdnjs.cloudflare.com/ajax/libs/popper.js/2.10.2/umd/popper.min.js',
                         'attributes' => [
                             'integrity' => 'sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB',
                             'crossorigin' => 'anonymous',
@@ -144,7 +139,7 @@ return [
                 ],
                 'bootstrap-js' => [
                     'cdn' => [
-                        'source' => '//cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js',
+                        'source' => '//cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.min.js',
                         'attributes' => [
                             'integrity' => 'sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+',
                             'crossorigin' => 'anonymous',
@@ -196,7 +191,7 @@ return [
                 ],
                 'lazyload-js' => [
                     'cdn' => [
-                        'source' => '//cdn.jsdelivr.net/npm/vanilla-lazyload@17.8.3/dist/lazyload.min.js',
+                        'source' => '//cdnjs.cloudflare.com/ajax/libs/vanilla-lazyload/17.8.3/lazyload.min.js',
                         'dependencies' => ['jquery'],
                     ],
                     'local' => [
@@ -222,15 +217,8 @@ return [
                 'main-js' => [
                     'local' => [
                         'source' => 'js/main.js',
-                        'dependencies' => ['jquery'],
+                        'dependencies' => ['jquery', 'front-ecommerce-js'],
                         'version' => $version,
-                    ],
-                    'container' => 'footer',
-                ],
-                'swiper-js' => [
-                    'local' => [
-                        'source' => 'js/swiper-bundle.min.js',
-                        'dependencies' => ['jquery'],
                     ],
                     'container' => 'footer',
                 ],
@@ -239,7 +227,7 @@ return [
             if (BaseHelper::isRtlEnabled()) {
                 $assets['bootstrap-css'] = [
                     'cdn' => [
-                        'source' => '//cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css',
+                        'source' => '//cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.rtl.min.css',
                         'attributes' => [
                             'integrity' => 'sha384-nU14brUcp6StFntEOOEBvcJm4huWjB0OcIeQ3fltAfSmuZFrkAif0T+UtNGlKKQv',
                             'crossorigin' => 'anonymous',
@@ -285,6 +273,10 @@ return [
                 ], function (View $view) {
                     $view->withShortcodes();
                 });
+            }
+
+            if (is_plugin_active('ecommerce')) {
+                EcommerceHelper::registerThemeAssets();
             }
         },
 

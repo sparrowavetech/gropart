@@ -5,6 +5,8 @@ namespace Botble\Ecommerce\Services;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Base\Supports\Helper;
+use Botble\Ecommerce\AdsTracking\FacebookPixel;
+use Botble\Ecommerce\AdsTracking\GoogleTagManager;
 use Botble\Ecommerce\Events\ProductViewed;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Models\Brand;
@@ -105,9 +107,7 @@ class HandleFrontPages
                 $card->addMeta('label1', 'Price');
                 $card->addMeta(
                     'data1',
-                    format_price($product->front_sale_price_with_taxes) . ' ' . strtoupper(
-                        get_application_currency()->title
-                    )
+                    $product->price()->displayAsText() . ' ' . strtoupper(get_application_currency()->title)
                 );
                 $card->addMeta('label2', 'Website');
                 $card->addMeta('data2', SeoHelper::openGraph()->getProperty('site_name'));
@@ -150,6 +150,9 @@ class HandleFrontPages
                 }
 
                 do_action(BASE_ACTION_PUBLIC_RENDER_SINGLE, PRODUCT_MODULE_SCREEN_NAME, $product);
+
+                app(GoogleTagManager::class)->viewItem($product);
+                app(FacebookPixel::class)->view($product);
 
                 [$productImages, $productVariation, $selectedAttrs] = EcommerceHelper::getProductVariationInfo(
                     $product,
@@ -201,9 +204,9 @@ class HandleFrontPages
                     }
                 }
 
-                if (! $request->input('categories')) {
-                    $request->merge(['categories' => $categoryIds]);
-                }
+                $requestCategories = (array) $request->input('categories', []) ?: [];
+
+                $request->merge(['categories' => [...$categoryIds, ...$requestCategories]]);
 
                 $products = app(GetProductService::class)->getProduct($request, null, null, $with);
 
@@ -271,7 +274,7 @@ class HandleFrontPages
                     $request = request();
                 }
 
-                $request->merge(['brands' => array_merge((array)request()->input('brands', []), [$brand->getKey()])]);
+                $request->merge(['brands' => array_merge((array) request()->input('brands', []), [$brand->getKey()])]);
 
                 $products = app(GetProductService::class)->getProduct(
                     $request,
@@ -399,13 +402,7 @@ class HandleFrontPages
             compact('total')
         );
 
-        $productsView = Theme::getThemeNamespace('views.ecommerce.includes.product-items');
-
-        if (! view()->exists($productsView)) {
-            $productsView = 'plugins/ecommerce::themes.includes.product-items';
-        }
-
-        $data = view($productsView, compact('products'))->render();
+        $data = view(EcommerceHelper::viewPath('includes.product-items'), compact('products'))->render();
 
         $breadcrumbView = Theme::getThemeNamespace('partials.breadcrumbs');
 

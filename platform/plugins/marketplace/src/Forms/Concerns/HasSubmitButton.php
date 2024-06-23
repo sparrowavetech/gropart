@@ -6,7 +6,7 @@ use Botble\Base\Facades\BaseHelper;
 
 trait HasSubmitButton
 {
-    public function addSubmitButton(string $label, string|null $icon = null, array $attributes = []): static
+    public function addSubmitButton(string $label, ?string $icon = null, array $attributes = []): static
     {
         $this->add('submit', 'submit', [
             'label' => ($icon ? BaseHelper::renderIcon($icon) . ' ' : '') . $label,

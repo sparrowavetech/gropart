@@ -32,9 +32,9 @@
                                             class="entry-date"
                                             datetime="{{ $post->created_at }}"
                                         >{{ $post->created_at->translatedFormat('M d, Y') }}</time>
-                                        @if ($post->author)
-                                            <span class="d-inline-block">{{ __('by') }}</span> <span
-                                                class="d-inline-block author-name"
+                                        @if ($post->author && theme_option('blog_show_author_name', 'yes') == 'yes')
+                                            <span class="d-inline-block ms-1">{{ __('by') }}</span> <span
+                                                class="d-inline-block author-name ms-1"
                                             >{{ $post->author->name }}</span>
                                         @endif
                                     </div>

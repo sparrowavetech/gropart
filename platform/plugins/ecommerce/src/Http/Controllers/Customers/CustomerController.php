@@ -61,7 +61,7 @@ class CustomerController extends BaseController
         return $this
             ->httpResponse()
             ->setPreviousUrl(route('customers.index'))
-            ->setNextUrl(route('customers.edit', $customer->id))
+            ->setNextUrl(route('customers.edit', $customer->getKey()))
             ->withCreatedSuccessMessage();
     }
 
@@ -139,7 +139,7 @@ class CustomerController extends BaseController
             ->simplePaginate(5);
 
         foreach ($customers as &$customer) {
-            $customer->avatar_url = (string)$customer->avatar_url;
+            $customer->avatar_url = (string) $customer->avatar_url;
         }
 
         return $this
@@ -186,7 +186,7 @@ class CustomerController extends BaseController
     {
         $request->merge(['password' => Hash::make(Str::random(36))]);
         $customer = Customer::query()->create($request->input());
-        $customer->avatar = (string)$customer->avatar_url;
+        $customer->avatar = (string) $customer->avatar_url;
 
         event(new CreatedContentEvent(CUSTOMER_MODULE_SCREEN_NAME, $request, $customer));
 

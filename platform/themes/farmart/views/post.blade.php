@@ -5,14 +5,14 @@
         <h1 class="h2">{{ $post->name }}</h1>
         <div class="post-item__inner pb-4 my-3 border-bottom">
             <div class="entry-meta">
-                @if ($post->author)
+                @if ($post->author && theme_option('blog_show_author_name', 'yes') == 'yes')
                     <div class="entry-meta-author">
                         <span>{{ __('By :name', ['name' => $post->author->name]) }}</span>
                     </div>
                 @endif
                 @if ($post->categories->isNotEmpty())
                     <div class="entry-meta-categories">
-                        <span>{{ __('in') }}</span>
+                        <span>{{ ($post->author && theme_option('blog_show_author_name', 'yes') == 'yes') ? __('in') : ucfirst(__('in')) }}</span>
                         @foreach ($post->categories as $category)
                             <a href="{{ $category->url }}">{{ $category->name }}</a>
                             @if (!$loop->last)

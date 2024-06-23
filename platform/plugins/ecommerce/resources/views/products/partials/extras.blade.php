@@ -40,7 +40,7 @@
     <x-core::card.body>
         @php
             $crossSaleProducts = $product ? $product->crossSales : collect();
-            $products = $product ? $product->crossSaleProducts : collect();
+            $products = $product ? $product->crossSaleProducts->where('is_variation', 0) : collect();
         @endphp
 
         <x-plugins-ecommerce::box-search-advanced

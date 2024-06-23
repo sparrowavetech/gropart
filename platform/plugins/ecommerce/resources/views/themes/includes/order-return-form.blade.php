@@ -43,7 +43,7 @@
                 >
                     <strong>{{ __('Return Reason') }}:</strong>
                 </label>
-                {!! Form::select('reason', Botble\Ecommerce\Enums\OrderReturnReasonEnum::labels(), old('reason'), [
+                {!! Form::select('reason', array_filter(Botble\Ecommerce\Enums\OrderReturnReasonEnum::labels()), old('reason'), [
                     'class' => 'order-return-reason-select form-select',
                     'placeholder' => __('Choose Reason'),
                 ]) !!}
@@ -149,7 +149,7 @@
                                     <td class="text-center">
                                         {!! Form::select(
                                             'return_items[' . $key . '][reason]',
-                                            Botble\Ecommerce\Enums\OrderReturnReasonEnum::labels(),
+                                            array_filter(Botble\Ecommerce\Enums\OrderReturnReasonEnum::labels()),
                                             old('return_items.' . $key . '.reason'),
                                             [
                                                 'class' => 'form-control form-select',

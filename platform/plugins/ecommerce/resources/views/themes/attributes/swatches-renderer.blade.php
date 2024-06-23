@@ -22,7 +22,7 @@
         @if (view()->exists($layout = "plugins/ecommerce::themes.attributes._layouts.$set->display_layout"))
             @include($layout)
         @else
-            @include('plugins/ecommerce::themes.attributes._layouts.dropdown')
+            @include(EcommerceHelper::viewPath('attributes._layouts.dropdown'))
         @endif
         @php
             [$variationNextIds] = handle_next_attributes_in_product($attributes->where('attribute_set_id', $set->id), $productVariationsInfo, $set->id, $selected->pluck('id')->toArray(), $loop->index, $variationNextIds);

@@ -23,6 +23,7 @@ use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\Access\Authorizable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\File;
@@ -50,7 +51,6 @@ class Customer extends BaseModel implements
         'password',
         'avatar',
         'phone',
-        'dob',
         'status',
         'private_notes',
     ];
@@ -163,6 +163,11 @@ class Customer extends BaseModel implements
     public function usedCoupons(): BelongsToMany
     {
         return $this->belongsToMany(Discount::class, 'ec_customer_used_coupons');
+    }
+
+    public function deletionRequest(): HasOne
+    {
+        return $this->hasOne(CustomerDeletionRequest::class, 'customer_id');
     }
 
     protected function avatarUrl(): Attribute

@@ -17,10 +17,10 @@ class ShippingRuleRequest extends Request
         }
 
         $ruleItems = [
-            'name' => 'required|string|max:120',
-            'from' => 'required|numeric',
-            'to' => 'nullable|numeric|gt:from',
-            'price' => 'required|numeric',
+            'name' => ['required', 'string', 'max:120'],
+            'from' => ['required', 'numeric'],
+            'to' => ['nullable', 'numeric', 'gt:from'],
+            'price' => ['required', 'numeric'],
             'type' => Rule::in(array_keys(ShippingRuleTypeEnum::availableLabels())),
         ] + $ruleItems;
 

@@ -3,7 +3,7 @@
         <div class="card-body">
             <div class="customer-order-detail">
                 <div class="row">
-                    <div class="col-md-6">
+                    <div @class(['col-12' => ! $order->address->name, 'col-md-6' => $order->address->name])>
                         <p>
                             <span class="d-inline-block me-1">{{ __('Order number') }}: </span>
                             <strong>{{ $order->code }}</strong>
@@ -16,6 +16,12 @@
                             <span class="d-inline-block me-1">{{ __('Order status') }}: </span>
                             <strong class="text-info">{{ $order->status->label() }}</strong>
                         </p>
+                        @if($order->cancellation_reason)
+                            <p>
+                                <span class="d-inline-block me-1">{{ __('Cancellation Reason') }}: </span>
+                                <strong class="text-warning">{{ $order->cancellation_reason_message }}</strong>
+                            </p>
+                        @endif
                         @if (is_plugin_active('payment') && $order->payment->id)
                             <p>
                                 <span class="d-inline-block me-1">{{ __('Payment method') }}: </span>
@@ -112,7 +118,7 @@
                                             @endif
 
                                             @include(
-                                                'plugins/ecommerce::themes.includes.cart-item-options-extras',
+                                                EcommerceHelper::viewPath('includes.cart-item-options-extras'),
                                                 ['options' => $orderProduct->options]
                                             )
 
@@ -125,10 +131,6 @@
                                                     <small>{{ __('Sold by') }}: <a
                                                             href="{{ $product->original_product->store->url }}"
                                                             class="text-primary">{{ $product->original_product->store->name }}</a>
-                                                            @if($product->store->is_verified)
-                                                            <img class="verified-store-main" src="{{ asset('/storage/stores/verified.png')}}" alt="Verified">
-                                                            @endif
-                                                            <small class="badge bg-warning text-dark">{{ $product->store->shop_category->label() }}</small>
                                                     </small>
                                                 </p>
                                             @endif
@@ -146,27 +148,29 @@
                         </table>
                     </div>
 
-                    @if (EcommerceHelper::isTaxEnabled())
+                    @if (EcommerceHelper::isTaxEnabled() && (float)$order->tax_amount)
                         <p>
                             <span class="d-inline-block me-1">{{ __('Tax') }}:</span>
                             <strong class="order-detail-value"> {{ format_price($order->tax_amount) }} </strong>
                         </p>
                     @endif
 
-                    <p>
-                        <span class="d-inline-block me-1">{{ __('Discount') }}:</span>
-                        <strong class="order-detail-value"> {{ format_price($order->discount_amount) }}
-                            @if ($order->discount_amount)
-                                @if ($order->coupon_code)
-                                    ({!! BaseHelper::html(__('Coupon code: ":code"', ['code' => Html::tag('strong', $order->coupon_code)->toHtml()])) !!})
-                                @elseif ($order->discount_description)
-                                    ({{ $order->discount_description }})
+                    @if ((float)$order->discount_amount)
+                        <p>
+                            <span class="d-inline-block me-1">{{ __('Discount') }}:</span>
+                            <strong class="order-detail-value"> {{ format_price($order->discount_amount) }}
+                                @if ($order->discount_amount)
+                                    @if ($order->coupon_code)
+                                        ({!! BaseHelper::html(__('Coupon code: ":code"', ['code' => Html::tag('strong', $order->coupon_code)->toHtml()])) !!})
+                                    @elseif ($order->discount_description)
+                                        ({{ $order->discount_description }})
+                                    @endif
                                 @endif
-                            @endif
-                        </strong>
-                    </p>
+                            </strong>
+                        </p>
+                    @endif
 
-                    @if (EcommerceHelper::countDigitalProducts($order->products) != $order->products->count())
+                    @if ((float)$order->shipping_amount && EcommerceHelper::countDigitalProducts($order->products) != $order->products->count())
                         <p>
                             <span class="d-inline-block me-1">{{ __('Shipping fee') }}: </span>
                             <strong>{{ format_price($order->shipping_amount) }}</strong>
