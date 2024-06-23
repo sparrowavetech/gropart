@@ -109,15 +109,13 @@ class Currencies {
             const _self = $(event.currentTarget)
             const form = $('.currency-setting-form')
 
-            $httpClient
-                .make()
+            $httpClient.make()
                 .post(form.prop('action'), form.serialize())
                 .then(({ data }) => {
                     if (data.error) {
                         Botble.showError(data.message)
                     } else {
-                        $httpClient
-                            .make()
+                        $httpClient.make()
                             .withButtonLoading(_self)
                             .withLoading(form.find('.swatches-container'))
                             .post(_self.data('url'))
@@ -130,14 +128,8 @@ class Currencies {
                                         html += template
                                             .replace(/__id__/gi, item.id)
                                             .replace(/__position__/gi, item.order)
-                                            .replace(
-                                                /__isPrefixSymbolChecked__/gi,
-                                                item.is_prefix_symbol == 1 ? 'selected' : ''
-                                            )
-                                            .replace(
-                                                /__notIsPrefixSymbolChecked__/gi,
-                                                item.is_prefix_symbol == 0 ? 'selected' : ''
-                                            )
+                                            .replace(/__isPrefixSymbolChecked__/gi, item.is_prefix_symbol == 1 ? 'selected' : '')
+                                            .replace(/__notIsPrefixSymbolChecked__/gi, item.is_prefix_symbol == 0 ? 'selected' : '')
                                             .replace(/__isDefaultChecked__/gi, item.is_default == 1 ? 'checked' : '')
                                             .replace(/__title__/gi, item.title)
                                             .replace(/__decimals__/gi, item.decimals)
@@ -162,8 +154,7 @@ class Currencies {
 
             const _self = $(event.currentTarget)
 
-            $httpClient
-                .make()
+            $httpClient.make()
                 .withButtonLoading(_self)
                 .post(_self.data('url'))
                 .then(({ data }) => {

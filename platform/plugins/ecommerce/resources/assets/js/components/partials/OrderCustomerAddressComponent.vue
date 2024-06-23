@@ -10,25 +10,25 @@
         <div class="row">
             <div class="col-md-6 mb-3 position-relative">
                 <label class="form-label">{{ __('order.name') }}</label>
-                <input type="text" class="form-control" v-model="address.name" />
+                <input type="text" class="form-control" v-model="child_customer_address.name" />
             </div>
             <div class="col-md-6 mb-3 position-relative">
                 <label class="form-label">{{ __('order.phone') }}</label>
-                <input type="text" class="form-control" v-model="address.phone" />
+                <input type="text" class="form-control" v-model="child_customer_address.phone" />
             </div>
             <div class="col-md-6 mb-3 position-relative">
                 <label class="form-label">{{ __('order.address') }}</label>
-                <input type="text" class="form-control" v-model="address.address" />
+                <input type="text" class="form-control" v-model="child_customer_address.address" />
             </div>
             <div class="col-md-6 mb-3 position-relative">
                 <label class="form-label">{{ __('order.email') }}</label>
-                <input type="email" class="form-control" v-model="address.email" />
+                <input type="text" class="form-control" v-model="child_customer_address.email" />
             </div>
             <div class="col-12 mb-3 position-relative">
                 <label class="form-label">{{ __('order.country') }}</label>
                 <select
                     class="form-select"
-                    v-model="address.country"
+                    v-model="child_customer_address.country"
                     @change="loadStates($event)"
                 >
                     <option
@@ -44,7 +44,7 @@
                 <label class="form-label">{{ __('order.state') }}</label>
                 <select
                     v-if="use_location_data"
-                    v-model="address.state"
+                    v-model="child_customer_address.state"
                     @change="loadCities($event)"
                     class="form-select customer-address-state"
                 >
@@ -56,14 +56,14 @@
                     type="text"
                     class="form-control customer-address-state"
                     v-else
-                    v-model="address.state"
+                    v-model="child_customer_address.state"
                 />
             </div>
             <div class="col-md-6 mb-3 position-relative">
                 <label class="form-label">{{ __('order.city') }}</label>
                 <select
                     v-if="use_location_data"
-                    v-model="address.city"
+                    v-model="child_customer_address.city"
                     class="form-select customer-address-city"
                 >
                     <option v-for="city in cities" :value="city.id" v-bind:key="city.id">
@@ -74,12 +74,12 @@
                     type="text"
                     class="form-control customer-address-city"
                     v-else
-                    v-model="address.city"
+                    v-model="child_customer_address.city"
                 />
             </div>
             <div class="col-md-6 mb-3 position-relative" v-if="zip_code_enabled">
                 <label class="form-label">{{ __('order.zip_code') }}</label>
-                <input type="text" class="form-control" v-model="address.zip_code" />
+                <input type="text" class="form-control" v-model="child_customer_address.zip_code" />
             </div>
         </div>
     </ec-modal>
@@ -93,7 +93,7 @@
     >
         <div class="mb-3 position-relative">
             <label class="form-label">{{ __('order.email') }}</label>
-            <input class="form-control" v-model="customer.email" />
+            <input class="form-control" v-model="child_customer_address.email" />
         </div>
     </ec-modal>
 
@@ -111,7 +111,7 @@
                 <input
                     type="text"
                     class="form-control customer-address-name"
-                    v-model="address.name"
+                    v-model="child_customer_address.name"
                 />
             </div>
             <div class="col-md-6 mb-3 position-relative">
@@ -119,7 +119,7 @@
                 <input
                     type="text"
                     class="form-control customer-address-phone"
-                    v-model="address.phone"
+                    v-model="child_customer_address.phone"
                 />
             </div>
             <div class="col-md-6 mb-3 position-relative">
@@ -127,7 +127,7 @@
                 <input
                     type="text"
                     class="form-control customer-address-address"
-                    v-model="address.address"
+                    v-model="child_customer_address.address"
                 />
             </div>
             <div class="col-md-6 mb-3 position-relative">
@@ -135,19 +135,19 @@
                 <input
                     type="text"
                     class="form-control customer-address-email"
-                    v-model="address.email"
+                    v-model="child_customer_address.email"
                 />
             </div>
             <div class="col-12 mb-3 position-relative">
                 <label class="form-label">{{ __('order.country') }}</label>
                 <select
                     class="form-select customer-address-country"
-                    v-model="address.country"
+                    v-model="child_customer_address.country"
                     @change="loadStates($event)"
                 >
                     <option
                         v-for="(countryName, countryCode) in countries"
-                        :selected="address.country === countryCode"
+                        :selected="child_customer_address.country == countryCode"
                         :value="countryCode"
                         v-bind:key="countryCode"
                     >
@@ -160,12 +160,12 @@
                 <select
                     v-if="use_location_data"
                     class="form-select customer-address-state"
-                    v-model="address.state"
+                    v-model="child_customer_address.state"
                     @change="loadCities($event)"
                 >
                     <option
                         v-for="state in states"
-                        :selected="address.state === state.id"
+                        :selected="child_customer_address.state == state.id"
                         :value="state.id"
                         v-bind:key="state.id"
                     >
@@ -177,14 +177,14 @@
                     type="text"
                     class="form-control customer-address-state"
                     v-else
-                    v-model="address.state"
+                    v-model="child_customer_address.state"
                 />
             </div>
             <div class="col-md-6 mb-3 position-relative">
                 <label class="form-label">{{ __('order.city') }}</label>
                 <select
                     v-if="use_location_data"
-                    v-model="address.city"
+                    v-model="child_customer_address.city"
                     class="form-select customer-address-city"
                 >
                     <option v-for="city in cities" :value="city.id" v-bind:key="city.id">
@@ -195,7 +195,7 @@
                     type="text"
                     class="form-control customer-address-city"
                     v-else
-                    v-model="address.city"
+                    v-model="child_customer_address.city"
                 />
             </div>
             <div class="col-md-6 mb-3 position-relative" v-if="zip_code_enabled">
@@ -203,7 +203,7 @@
                 <input
                     type="text"
                     class="form-control customer-address-zip-code"
-                    v-model="address.zip_code"
+                    v-model="child_customer_address.zip_code"
                 />
             </div>
         </div>
@@ -213,11 +213,7 @@
 <script>
 export default {
     props: {
-        customer: {
-            type: Object,
-            default: {},
-        },
-        address: {
+        child_customer_address: {
             type: Object,
             default: {},
         },
@@ -237,16 +233,17 @@ export default {
             cities: [],
         }
     },
+    components: {},
     methods: {
         shownEditAddress: function ($event) {
             this.loadCountries($event)
 
-            if (this.address.country) {
-                this.loadStates($event, this.address.country)
+            if (this.child_customer_address.country) {
+                this.loadStates($event, this.child_customer_address.country)
             }
 
-            if (this.address.state) {
-                this.loadCities($event, this.address.state)
+            if (this.child_customer_address.state) {
+                this.loadCities($event, this.child_customer_address.state)
             }
         },
         loadCountries: function () {

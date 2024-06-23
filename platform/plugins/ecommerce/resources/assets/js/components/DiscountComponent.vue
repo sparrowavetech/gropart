@@ -24,15 +24,15 @@
                         </label>
 
                         <div v-show="!is_promotion" class="input-group input-group-flat">
-                            <input type="text" class="form-control coupon-code-input" name="code" v-model="code" />
+                            <input
+                                type="text"
+                                class="form-control coupon-code-input"
+                                name="code"
+                                v-model="code"
+                            />
 
                             <span class="input-group-text">
-                                <a
-                                    href="javascript:void(0)"
-                                    @click="generateCouponCode($event)"
-                                    class="input-group-link"
-                                    >{{ __('discount.generate_coupon_code') }}</a
-                                >
+                                <a href="javascript:void(0)" @click="generateCouponCode($event)" class="input-group-link">{{ __('discount.generate_coupon_code') }}</a>
                             </span>
                         </div>
 
@@ -52,13 +52,7 @@
                     <template v-if="!is_promotion">
                         <div class="mb-3 position-relative">
                             <label class="form-check">
-                                <input
-                                    class="form-check-input"
-                                    type="checkbox"
-                                    name="can_use_with_promotion"
-                                    v-model="can_use_with_promotion"
-                                    value="1"
-                                />
+                                <input class="form-check-input" type="checkbox" name="can_use_with_promotion" v-model="can_use_with_promotion" value="1">
                                 <span class="form-check-label">
                                     {{ __('discount.can_be_used_with_promotion') }}
                                 </span>
@@ -67,13 +61,7 @@
 
                         <div class="mb-3 position-relative">
                             <label class="form-check">
-                                <input
-                                    class="form-check-input"
-                                    type="checkbox"
-                                    name="is_unlimited"
-                                    v-model="is_unlimited"
-                                    value="1"
-                                />
+                                <input class="form-check-input" type="checkbox" name="is_unlimited" v-model="is_unlimited" value="1">
                                 <span class="form-check-label">
                                     {{ __('discount.unlimited_coupon') }}
                                 </span>
@@ -93,31 +81,16 @@
                         </div>
                         <div class="mb-3 position-relative">
                             <label class="form-check">
-                                <input
-                                    class="form-check-input"
-                                    type="checkbox"
-                                    name="apply_via_url"
-                                    v-model="apply_via_url"
-                                    value="1"
-                                />
+                                <input class="form-check-input" type="checkbox" name="apply_via_url" v-model="apply_via_url" value="1">
                                 <span class="form-check-label">
                                     {{ __('discount.apply_via_url') }}
                                 </span>
-                                <span
-                                    class="form-check-description"
-                                    v-html="__('discount.apply_via_url_description')"
-                                ></span>
+                                <span class="form-check-description" v-html="__('discount.apply_via_url_description')"></span>
                             </label>
                         </div>
                         <div class="mb-3 position-relative">
                             <label class="form-check">
-                                <input
-                                    class="form-check-input"
-                                    type="checkbox"
-                                    name="display_at_checkout"
-                                    v-model="display_at_checkout"
-                                    value="1"
-                                />
+                                <input class="form-check-input" type="checkbox" name="display_at_checkout" v-model="display_at_checkout" value="1">
                                 <span class="form-check-label">
                                     {{ __('discount.display_at_checkout') }}
                                 </span>
@@ -129,13 +102,7 @@
 
                         <div class="mb-3 position-relative" v-show="!is_promotion && display_at_checkout">
                             <label for="description" class="form-label">{{ __('discount.description') }}</label>
-                            <textarea
-                                name="description"
-                                id="description"
-                                class="form-control"
-                                v-model="description"
-                                :placeholder="__('discount.description_placeholder')"
-                            ></textarea>
+                            <textarea name="description" id="description" class="form-control" v-model="description" :placeholder="__('discount.description_placeholder')"></textarea>
                         </div>
                     </template>
 
@@ -160,13 +127,7 @@
                                 </select>
                             </div>
 
-                            <div
-                                class="mb-3"
-                                :class="{
-                                    'col-md-4': type_option !== 'shipping',
-                                    'col-md-8': type_option === 'shipping',
-                                }"
-                            >
+                            <div class="col-md-4 mb-3">
                                 <div class="input-group input-group-flat">
                                     <span class="input-group-text">{{ value_label }}</span>
                                     <input
@@ -189,12 +150,7 @@
                                         {{ __('discount.apply_for') }}
                                     </span>
 
-                                    <select
-                                        id="select-offers"
-                                        class="form-control form-select"
-                                        name="target"
-                                        v-model="target"
-                                    >
+                                    <select id="select-offers" class="form-control form-select" name="target" v-model="target">
                                         <option value="all-orders" v-if="type_option !== 'same-price'">
                                             {{ __('discount.all_orders') }}
                                         </option>
@@ -202,9 +158,7 @@
                                             {{ __('discount.order_amount_from') }}
                                         </option>
                                         <option value="group-products">{{ __('discount.product_collection') }}</option>
-                                        <option value="products-by-category">
-                                            {{ __('discount.product_category') }}
-                                        </option>
+                                        <option value="products-by-category">{{ __('discount.product_category') }}</option>
                                         <option value="specific-product">{{ __('discount.product') }}</option>
                                         <option value="customer" v-if="type_option !== 'same-price'">
                                             {{ __('discount.customer') }}
@@ -221,7 +175,11 @@
                             </div>
 
                             <div class="col-md-4 mb-3" v-if="target === 'group-products' && type_option !== 'shipping'">
-                                <select name="product_collections" class="form-select" v-model="product_collection_id">
+                                <select
+                                    name="product_collections"
+                                    class="form-select"
+                                    v-model="product_collection_id"
+                                >
                                     <option
                                         v-for="product_collection in product_collections"
                                         :value="product_collection.id"
@@ -231,23 +189,18 @@
                                 </select>
                             </div>
 
-                            <div
-                                class="col-md-4 mb-3"
-                                v-if="target === 'products-by-category' && type_option !== 'shipping'"
-                            >
+                            <div class="col-md-4 mb-3" v-if="target === 'products-by-category' && type_option !== 'shipping'">
                                 <select name="product_categories" class="form-select" v-model="product_category_id">
                                     <option
                                         v-for="productCategory in product_categories"
                                         :value="productCategory.id"
                                         v-html="productCategory.name"
-                                    ></option>
+                                    >
+                                    </option>
                                 </select>
                             </div>
 
-                            <div
-                                class="col-md-4 mb-3"
-                                v-if="target === 'specific-product' && type_option !== 'shipping'"
-                            >
+                            <div class="col-md-4 mb-3" v-if="target === 'specific-product' && type_option !== 'shipping'">
                                 <div class="position-relative box-search-advance product">
                                     <input
                                         type="text"
@@ -263,11 +216,7 @@
                                         :style="[loading ? { minHeight: '10rem' } : {}]"
                                     >
                                         <div v-if="loading" class="loading-spinner"></div>
-                                        <div
-                                            v-else
-                                            class="list-group list-group-flush overflow-auto"
-                                            style="max-height: 25rem"
-                                        >
+                                        <div v-else class="list-group list-group-flush overflow-auto" style="max-height: 25rem">
                                             <a
                                                 class="list-group-item list-group-item-action"
                                                 v-for="product in products.data"
@@ -276,12 +225,7 @@
                                             >
                                                 <div class="row align-items-center">
                                                     <div class="col-auto">
-                                                        <span
-                                                            class="avatar"
-                                                            :style="{
-                                                                backgroundImage: 'url(' + product.image_url + ')',
-                                                            }"
-                                                        ></span>
+                                                        <span class="avatar" :style="{ backgroundImage: 'url(' + product.image_url + ')' }"></span>
                                                     </div>
                                                     <div class="col text-truncate">
                                                         <div class="text-body d-block">{{ product.name }}</div>
@@ -289,9 +233,7 @@
                                                 </div>
                                             </a>
                                             <div class="p-3" v-if="products.data.length === 0">
-                                                <p class="text-muted text-center mb-0">
-                                                    {{ __('discount.no_products_found') }}
-                                                </p>
+                                                <p class="text-muted text-center mb-0">{{ __('discount.no_products_found') }}</p>
                                             </div>
                                         </div>
                                         <div
@@ -300,24 +242,16 @@
                                         >
                                             <discount-search-box-pagination
                                                 :resource="products"
-                                                @on-prev="
-                                                    loadListProductsForSearch(
-                                                        0,
-                                                        products.prev_page_url
-                                                            ? products.current_page - 1
-                                                            : products.current_page,
-                                                        true
-                                                    )
-                                                "
-                                                @on-next="
-                                                    loadListProductsForSearch(
-                                                        0,
-                                                        products.next_page_url
-                                                            ? products.current_page + 1
-                                                            : products.current_page,
-                                                        true
-                                                    )
-                                                "
+                                                @on-prev="loadListProductsForSearch(
+                                                    0,
+                                                    products.prev_page_url ? products.current_page - 1 : products.current_page,
+                                                    true
+                                                )"
+                                                @on-next="loadListProductsForSearch(
+                                                    0,
+                                                    products.next_page_url ? products.current_page + 1 : products.current_page,
+                                                    true
+                                                )"
                                             />
                                         </div>
                                     </div>
@@ -340,11 +274,7 @@
                                         :style="[loading ? { minHeight: '10rem' } : {}]"
                                     >
                                         <div v-if="loading" class="loading-spinner"></div>
-                                        <div
-                                            v-else
-                                            class="list-group list-group-flush overflow-auto"
-                                            style="max-height: 25rem"
-                                        >
+                                        <div v-else class="list-group list-group-flush overflow-auto" style="max-height: 25rem">
                                             <a
                                                 class="list-group-item list-group-item-action"
                                                 v-for="customer in customers.data"
@@ -353,27 +283,16 @@
                                             >
                                                 <div class="row align-items-center">
                                                     <div class="col-auto">
-                                                        <span
-                                                            class="avatar"
-                                                            :style="{
-                                                                backgroundImage: 'url(' + customer.avatar_url + ')',
-                                                            }"
-                                                        ></span>
+                                                        <span class="avatar" :style="{ backgroundImage: 'url(' + customer.avatar_url + ')' }"></span>
                                                     </div>
                                                     <div class="col text-truncate">
                                                         <div class="text-body d-block">{{ customer.name }}</div>
-                                                        <a
-                                                            :href="`mailto:${customer.email}`"
-                                                            class="text-secondary text-truncate mt-n1"
-                                                            >{{ customer.email }}</a
-                                                        >
+                                                        <a :href="`mailto:${customer.email}`" class="text-secondary text-truncate mt-n1">{{ customer.email }}</a>
                                                     </div>
                                                 </div>
                                             </a>
                                             <div class="p-3" v-if="customers.data.length === 0">
-                                                <p class="text-muted text-center mb-0">
-                                                    {{ __('discount.no_customer_found') }}
-                                                </p>
+                                                <p class="text-muted text-center mb-0">{{ __('discount.no_customer_found') }}</p>
                                             </div>
                                         </div>
 
@@ -383,32 +302,21 @@
                                         >
                                             <discount-search-box-pagination
                                                 :resource="customers"
-                                                @on-prev="
-                                                    loadListCustomersForSearch(
-                                                        customers.prev_page_url
-                                                            ? customers.current_page - 1
-                                                            : customers.current_page,
-                                                        true
-                                                    )
-                                                "
-                                                @on-next="
-                                                    loadListCustomersForSearch(
-                                                        customers.next_page_url
-                                                            ? customers.current_page + 1
-                                                            : customers.current_page,
-                                                        true
-                                                    )
-                                                "
+                                                @on-prev="loadListCustomersForSearch(
+                                                    customers.prev_page_url ? customers.current_page - 1 : customers.current_page,
+                                                    true
+                                                )"
+                                                @on-next="loadListCustomersForSearch(
+                                                    customers.next_page_url ? customers.current_page + 1 : customers.current_page,
+                                                    true
+                                                )"
                                             />
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div
-                                class="col-md-4 mb-3"
-                                v-if="target === 'product-variant' && type_option !== 'shipping'"
-                            >
+                            <div class="col-md-4 mb-3" v-if="target === 'product-variant' && type_option !== 'shipping'">
                                 <div class="position-relative box-search-advance product">
                                     <input
                                         type="text"
@@ -424,11 +332,7 @@
                                         :style="[loading ? { minHeight: '10rem' } : {}]"
                                     >
                                         <div v-if="loading" class="loading-spinner"></div>
-                                        <div
-                                            v-else
-                                            class="list-group list-group-flush overflow-auto"
-                                            style="max-height: 25rem"
-                                        >
+                                        <div v-else class="list-group list-group-flush overflow-auto" style="max-height: 25rem">
                                             <a
                                                 v-for="product_variant in variants.data"
                                                 class="list-group-item list-group-item-action"
@@ -437,41 +341,19 @@
                                                 <template v-if="product_variant.variations.length">
                                                     <div class="row align-items-start">
                                                         <div class="col-auto">
-                                                            <span
-                                                                class="avatar"
-                                                                :style="{
-                                                                    backgroundImage:
-                                                                        'url(' + product_variant.image_url + ')',
-                                                                }"
-                                                            ></span>
+                                                            <span class="avatar" :style="{ backgroundImage: 'url(' + product_variant.image_url + ')' }"></span>
                                                         </div>
                                                         <div class="col text-truncate">
-                                                            <div class="text-body d-block">
-                                                                {{ product_variant.name }}
-                                                            </div>
+                                                            <div class="text-body d-block">{{ product_variant.name }}</div>
                                                             <div class="list-group list-group-flush">
                                                                 <a
                                                                     v-for="variation in product_variant.variations"
-                                                                    @click="
-                                                                        handleSelectVariants(product_variant, variation)
-                                                                    "
+                                                                    @click="handleSelectVariants(product_variant, variation)"
                                                                     class="list-group-item list-group-item-action small p-2 border-0"
                                                                 >
-                                                                    <span
-                                                                        v-for="(
-                                                                            variantItem, index
-                                                                        ) in variation.variation_items"
-                                                                        class="text-primary"
-                                                                    >
+                                                                    <span v-for="(variantItem, index) in variation.variation_items"  class="text-primary">
                                                                         {{ variantItem.attribute_title }}
-                                                                        <span
-                                                                            v-if="
-                                                                                index !==
-                                                                                variation.variation_items.length - 1
-                                                                            "
-                                                                        >
-                                                                            /
-                                                                        </span>
+                                                                        <span v-if="index !== variation.variation_items.length - 1"> / </span>
                                                                     </span>
                                                                 </a>
                                                             </div>
@@ -490,41 +372,27 @@
                                         >
                                             <discount-search-box-pagination
                                                 :resource="variants"
-                                                @on-prev="
-                                                    loadListProductsForSearch(
-                                                        1,
-                                                        variants.prev_page_url
-                                                            ? variants.current_page - 1
-                                                            : variants.current_page,
-                                                        true
-                                                    )
-                                                "
-                                                @on-next="
-                                                    loadListProductsForSearch(
-                                                        1,
-                                                        variants.next_page_url
-                                                            ? variants.current_page + 1
-                                                            : variants.current_page,
-                                                        true
-                                                    )
-                                                "
+                                                @on-prev="loadListProductsForSearch(
+                                                    1,
+                                                    variants.prev_page_url
+                                                        ? variants.current_page - 1
+                                                        : variants.current_page,
+                                                    true
+                                                )"
+                                                @on-next="loadListProductsForSearch(
+                                                    1,
+                                                    variants.next_page_url
+                                                        ? variants.current_page + 1
+                                                        : variants.current_page,
+                                                    true
+                                                )"
                                             />
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div
-                                class="col-md-4 mb-3"
-                                v-if="
-                                    !is_promotion &&
-                                    (target === 'group-products' ||
-                                        target === 'products-by-category' ||
-                                        target === 'specific-product' ||
-                                        target === 'product-variant') &&
-                                    type_option === 'amount'
-                                "
-                            >
+                            <div class="col-md-4 mb-3" v-if="!is_promotion && (target === 'group-products' || target === 'products-by-category' ||  target === 'specific-product' || target === 'product-variant') && type_option === 'amount'">
                                 <select class="form-select" name="discount_on" v-model="discount_on">
                                     <option value="per-order">{{ __('discount.one_time_per_order') }}</option>
                                     <option value="per-every-item">
@@ -533,10 +401,7 @@
                                 </select>
                             </div>
 
-                            <div
-                                class="col-md-4 mb-3"
-                                v-if="target === 'amount-minimum-order' && type_option !== 'shipping'"
-                            >
+                            <div class="col-md-4 mb-3" v-if="target === 'amount-minimum-order' && type_option !== 'shipping'">
                                 <div class="input-group input-group-flat">
                                     <input
                                         type="number"
@@ -570,13 +435,13 @@
 
                             <h4>{{ __('discount.selected_products') }}</h4>
 
-                            <div v-for="variant in selected_variants" class="list-group-item">
+                            <div
+                                v-for="variant in selected_variants"
+                                class="list-group-item"
+                            >
                                 <div class="row align-items-center">
                                     <div class="col-auto">
-                                        <span
-                                            class="avatar"
-                                            :style="{ backgroundImage: 'url(' + variant.image_url + ')' }"
-                                        ></span>
+                                        <span class="avatar" :style="{ backgroundImage: 'url(' + variant.image_url + ')' }"></span>
                                     </div>
                                     <div class="col text-truncate">
                                         <a :href="variant.product_link" target="_blank" class="text-body d-block">
@@ -591,9 +456,7 @@
                                         </div>
                                     </div>
                                     <div class="col-auto">
-                                        <discount-list-item-remove-icon-button
-                                            @click="handleRemoveVariant($event, variant)"
-                                        />
+                                        <discount-list-item-remove-icon-button @click="handleRemoveVariant($event, variant)" />
                                     </div>
                                 </div>
                             </div>
@@ -610,20 +473,13 @@
                             <div class="list-group-item" v-for="product in selected_products">
                                 <div class="row align-items-center">
                                     <div class="col-auto">
-                                        <span
-                                            class="avatar"
-                                            :style="{ backgroundImage: 'url(' + product.image_url + ')' }"
-                                        ></span>
+                                        <span class="avatar" :style="{ backgroundImage: 'url(' + product.image_url + ')' }"></span>
                                     </div>
                                     <div class="col text-truncate">
-                                        <a :href="product.product_link" class="text-body d-block" target="_blank">{{
-                                            product.name
-                                        }}</a>
+                                        <a :href="product.product_link" class="text-body d-block" target="_blank">{{ product.name }}</a>
                                     </div>
                                     <div class="col-auto">
-                                        <discount-list-item-remove-icon-button
-                                            @click="handleRemoveProduct($event, product)"
-                                        />
+                                        <discount-list-item-remove-icon-button @click="handleRemoveProduct($event, product)" />
                                     </div>
                                 </div>
                             </div>
@@ -640,21 +496,14 @@
                             <div class="list-group-item" v-for="customer in selected_customers">
                                 <div class="row align-items-center">
                                     <div class="col-auto">
-                                        <span
-                                            class="avatar"
-                                            :style="{ backgroundImage: 'url(' + customer.avatar_url + ')' }"
-                                        ></span>
+                                        <span class="avatar" :style="{ backgroundImage: 'url(' + customer.avatar_url + ')' }"></span>
                                     </div>
                                     <div class="col text-truncate">
-                                        <a :href="customer.customer_link" class="text-body d-block" target="_blank">{{
-                                            customer.name
-                                        }}</a>
+                                        <a :href="customer.customer_link" class="text-body d-block" target="_blank">{{ customer.name }}</a>
                                         <div class="text-secondary text-truncate">{{ customer.email }}</div>
                                     </div>
                                     <div class="col-auto">
-                                        <discount-list-item-remove-icon-button
-                                            @click="handleRemoveCustomer($event, customer)"
-                                        />
+                                        <discount-list-item-remove-icon-button @click="handleRemoveCustomer($event, customer)" />
                                     </div>
                                 </div>
                             </div>
@@ -684,28 +533,7 @@
                                     data-input
                                 />
                                 <span class="input-icon-addon">
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        class="icon"
-                                        width="24"
-                                        height="24"
-                                        viewBox="0 0 24 24"
-                                        stroke-width="2"
-                                        stroke="currentColor"
-                                        fill="none"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                    >
-                                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                        <path
-                                            d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12z"
-                                        />
-                                        <path d="M16 3v4" />
-                                        <path d="M8 3v4" />
-                                        <path d="M4 11h16" />
-                                        <path d="M11 15h1" />
-                                        <path d="M12 15v3" />
-                                    </svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12z" /><path d="M16 3v4" /><path d="M8 3v4" /><path d="M4 11h16" /><path d="M11 15h1" /><path d="M12 15v3" /></svg>
                                 </span>
                             </div>
                             <div class="input-icon">
@@ -717,22 +545,7 @@
                                     class="form-control rounded-start-0 timepicker timepicker-24"
                                 />
                                 <span class="input-icon-addon">
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        class="icon icon-tabler icon-tabler-clock"
-                                        width="24"
-                                        height="24"
-                                        viewBox="0 0 24 24"
-                                        stroke-width="2"
-                                        stroke="currentColor"
-                                        fill="none"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                    >
-                                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                        <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" />
-                                        <path d="M12 7v5l3 3" />
-                                    </svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" /><path d="M12 7v5l3 3" /></svg>
                                 </span>
                             </div>
                         </div>
@@ -753,28 +566,7 @@
                                     data-input
                                 />
                                 <span class="input-icon-addon">
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        class="icon"
-                                        width="24"
-                                        height="24"
-                                        viewBox="0 0 24 24"
-                                        stroke-width="2"
-                                        stroke="currentColor"
-                                        fill="none"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                    >
-                                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                        <path
-                                            d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12z"
-                                        />
-                                        <path d="M16 3v4" />
-                                        <path d="M8 3v4" />
-                                        <path d="M4 11h16" />
-                                        <path d="M11 15h1" />
-                                        <path d="M12 15v3" />
-                                    </svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12z" /><path d="M16 3v4" /><path d="M8 3v4" /><path d="M4 11h16" /><path d="M11 15h1" /><path d="M12 15v3" /></svg>
                                 </span>
                             </div>
                             <div class="input-icon">
@@ -787,35 +579,14 @@
                                     :disabled="unlimited_time"
                                 />
                                 <span class="input-icon-addon">
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        class="icon icon-tabler icon-tabler-clock"
-                                        width="24"
-                                        height="24"
-                                        viewBox="0 0 24 24"
-                                        stroke-width="2"
-                                        stroke="currentColor"
-                                        fill="none"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                    >
-                                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                        <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" />
-                                        <path d="M12 7v5l3 3" />
-                                    </svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" /><path d="M12 7v5l3 3" /></svg>
                                 </span>
                             </div>
                         </div>
                     </div>
                     <div class="position-relative">
                         <label class="form-check">
-                            <input
-                                class="form-check-input"
-                                type="checkbox"
-                                name="unlimited_time"
-                                v-model="unlimited_time"
-                                value="1"
-                            />
+                            <input class="form-check-input" type="checkbox" name="unlimited_time" v-model="unlimited_time" value="1">
                             <span class="form-check-label">{{ __('discount.never_expired') }}</span>
                         </label>
                     </div>
@@ -841,8 +612,8 @@
 </style>
 
 <script>
-import DiscountSearchBoxPagination from './partials/DiscountSearchBoxPagination.vue'
-import DiscountListItemRemoveIconButton from './partials/DiscountListItemRemoveIconButton.vue'
+import DiscountSearchBoxPagination from "./partials/DiscountSearchBoxPagination.vue";
+import DiscountListItemRemoveIconButton from "./partials/DiscountListItemRemoveIconButton.vue";
 
 const moment = require('moment')
 
@@ -1031,7 +802,6 @@ export default {
                     break
                 case 'shipping':
                     context.value_label = context.__('discount.when_shipping_fee_less_than')
-                    context.target = 'all-orders'
                     break
                 case 'same-price':
                     context.target = 'group-products'

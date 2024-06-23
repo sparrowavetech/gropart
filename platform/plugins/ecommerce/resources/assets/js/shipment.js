@@ -14,8 +14,7 @@ class ShipmentManagement {
             const _self = $(event.currentTarget)
             const form = _self.closest('.modal-dialog').find('form')
 
-            $httpClient
-                .make()
+            $httpClient.make()
                 .withButtonLoading(_self)
                 .post(form.prop('action'), form.serialize())
                 .then(({ data }) => {

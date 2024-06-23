@@ -91,8 +91,7 @@ $(() => {
         $message.html('')
         $listing.html('')
 
-        $httpClient
-            .make()
+        $httpClient.make()
             .withButtonLoading($button)
             .withLoading($form)
             .post($form.attr('action'), formData)

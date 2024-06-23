@@ -1,11 +1,7 @@
 $(() => {
     if ($.fn.datepicker) {
-        const $datePicker = $('#date_of_birth')
-
-        console.log($datePicker.data('date-format'))
-
-        $datePicker.datepicker({
-            format: $datePicker.data('date-format') || 'yyyy-mm-dd',
+        $('#date_of_birth').datepicker({
+            format: 'yyyy-mm-dd',
             orientation: 'bottom',
         })
     }

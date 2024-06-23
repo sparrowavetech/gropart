@@ -18,34 +18,29 @@ export class DiscountManagement {
 
         $(document).on('click', '.apply-coupon-code', (event) => {
             event.preventDefault()
-
-            const currentTarget = $(event.currentTarget)
+            let _self = $(event.currentTarget)
+            _self.find('i').remove()
+            _self.html('<i class="fa fa-spin fa-spinner"></i> ' + _self.html())
 
             $.ajax({
-                url: currentTarget.data('url'),
+                url: _self.data('url'),
                 type: 'POST',
                 data: {
-                    coupon_code: currentTarget.closest('.coupon-wrapper').find('.coupon-code').val(),
+                    coupon_code: _self.closest('.coupon-wrapper').find('.coupon-code').val(),
                     token: $('#checkout-token').val(),
                 },
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
                 },
-                beforeSend: () => {
-                    currentTarget.find('i').remove()
-                    currentTarget.html(`<i class="fa fa-spin fa-spinner"></i> ${currentTarget.html()}`)
-                },
-                success: ({ error, message }) => {
-                    if (!error) {
-                        $(target).load(`${window.location.href}?applied_coupon=1 ${target} > *`, () => currentTarget.find('i').remove())
+                success: (res) => {
+                    if (!res.error) {
+                        $(target).load(window.location.href + '?applied_coupon=1 ' + target + ' > *', function () {
+                            _self.find('i').remove()
+                        })
                     } else {
-                        $('.coupon-error-msg .text-danger').text(message)
-                        currentTarget.find('i').remove()
+                        $('.coupon-error-msg .text-danger').text(res.message)
+                        _self.find('i').remove()
                     }
-
-                    $('html, body').animate({
-                        scrollTop: $('.coupon-wrapper').offset().top
-                    });
                 },
                 error: (data) => {
                     if (typeof data.responseJSON !== 'undefined') {
@@ -61,7 +56,7 @@ export class DiscountManagement {
                     } else {
                         $('.coupon-error-msg .text-danger').text(data.status.text)
                     }
-                    currentTarget.find('i').remove()
+                    _self.find('i').remove()
                 },
             })
         })
@@ -115,7 +110,7 @@ export class DiscountManagement {
             e.preventDefault();
 
             $(this).find('i').remove();
-            $(this).html(`<i class="fa fa-spin fa-spinner"></i> ${$(this).html()}`);
+            $(this).html('<i class="fa fa-spin fa-spinner"></i> ' + $(this).html());
 
             if ($(document).find('.remove-coupon-code').length) {
                 $(document).find('.remove-coupon-code').trigger('click');
@@ -126,9 +121,34 @@ export class DiscountManagement {
             $(document).find('.coupon-wrapper').show();
             $('.coupon-wrapper .coupon-code').val(discountCode);
 
+            await new Promise(resolve => setTimeout(resolve, 200));
+
             $('.apply-coupon-code').trigger('click');
 
             $(this).find('i').remove();
         });
+
+        const navigateDiscounts = (direction) => {
+            const couponList = document.querySelector('.checkout__coupon-list');
+            const scrollStep = 300;
+
+            if (direction === 'prev') {
+                couponList.scrollLeft -= scrollStep;
+            } else if (direction === 'next') {
+                couponList.scrollLeft += scrollStep;
+            }
+        }
+
+        $(document).on('click', '.checkout__coupon-prev', function (e) {
+            e.preventDefault()
+
+            navigateDiscounts('prev')
+        })
+
+        $(document).on('click', '.checkout__coupon-next', function (e) {
+            e.preventDefault()
+
+            navigateDiscounts('next')
+        })
     }
 }

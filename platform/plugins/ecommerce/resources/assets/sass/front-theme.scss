@@ -1,11 +1,5 @@
 @import '~bootstrap/scss/bootstrap';
 
-:root {
-    --bs-font-sans-serif: var(--primary-font), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-    --bs-primary: var(--primary-color);
-    --bs-link-color-rgb: var(--primary-color-rgb);
-}
-
 html,
 body,
 .container,
@@ -66,7 +60,7 @@ input[type='checkbox'] {
         z-index: 1;
         width: 10px;
         height: 5px;
-        border: 2px solid var(--bs-primary);
+        border: 2px solid #58b3f0;
         border-top-style: none;
         border-right-style: none;
     }
@@ -94,7 +88,7 @@ input[type='checkbox'] {
         }
 
         &:after {
-            border-color: var(--bs-primary);
+            border-color: #58b3f0;
         }
     }
 }
@@ -122,7 +116,7 @@ input[type='checkbox'] {
     border: 1px dashed #bfbfbf;
 
     &.is-default {
-        border: 1px dashed var(--bs-primary);
+        border: 1px dashed #009900;
 
         .default {
             position: absolute;
@@ -130,7 +124,7 @@ input[type='checkbox'] {
             right: 15px;
             display: block;
             font-size: 11px;
-            color: var(--bs-primary);
+            color: #009900;
         }
     }
 
@@ -166,7 +160,7 @@ label {
     border: 1px solid #dcdcdc;
 
     &:focus {
-        border: 2px solid var(--bs-primary);
+        border: 2px solid #058db8;
     }
 }
 
@@ -196,15 +190,13 @@ select.form-control {
 
 .payment-checkout-btn,
 .payment-checkout-btn-step {
-    background-color: var(--bs-primary);
+    background-color: #1fa4d1;
     color: #ffffff;
     padding: 15px 15px;
-    transition: all ease-in-out 300ms;
 
     &:hover {
-        filter: brightness(85%);
-        color: #ffffff;
-        background-color: var(--bs-primary);
+        background-color: #0f7091 !important;
+        color: #ffffff !important;
     }
 }
 
@@ -297,21 +289,17 @@ select.form-control {
 /** for thank-you page */
 .thank-you {
     margin-bottom: 30px;
-    display: flex;
-    align-items: center;
 
-    svg {
-        width: 80px;
-        height: 80px;
-        color: var(--bs-primary);
-        padding-inline-end: 10px;
+    i {
+        font-size: 5em;
+        color: #71bed7;
+        padding-right: 10px;
     }
 
     h3.thank-you-sentence {
         font-size: 20px;
         font-weight: normal;
         color: #000000;
-        margin-top: 10px;
     }
 
     > p {
@@ -350,7 +338,7 @@ select.form-control {
 
     .order-customer-info-meta {
         padding-left: 20px;
-        color: var(--bs-primary);
+        color: #71bed7;
     }
 }
 
@@ -366,62 +354,43 @@ body,
     font-size: 14px;
 }
 
-.loading-spinner {
-    align-items: center;
-    background: hsla(0, 0%, 100%, 0.5);
-    display: flex;
-    height: 100%;
-    inset-inline-start: 0;
-    justify-content: center;
+.payment-info-loading,
+.shipping-info-loading {
+    i {
+        font-size: 40px;
+    }
+}
+
+.payment-info-loading,
+.payment-info-loading-content,
+.shipping-info-loading,
+.shipping-info-loading-content {
     position: absolute;
     top: 0;
+    right: 0;
+    bottom: 0;
     width: 100%;
-    z-index: 1;
-
-    &:after {
-        animation: loading-spinner-rotation 0.5s linear infinite;
-        border-color: var(--bs-primary) transparent var(--bs-primary) transparent;
-        border-radius: 50%;
-        border-style: solid;
-        border-width: 1px;
-        content: ' ';
-        display: block;
-        height: 40px;
-        position: absolute;
-        top: calc(50% - 20px);
-        width: 40px;
-        z-index: 1;
-    }
+    z-index: 9999;
+    text-align: center;
 }
 
-@keyframes loading-spinner-rotation {
-    0% {
-        transform: rotate(0deg);
-    }
-    100% {
-        transform: rotate(360deg);
-    }
+.payment-info-loading-content,
+.shipping-info-loading-content {
+    top: 45%;
 }
 
-@keyframes spinner-border {
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-.shipping-method-wrapper {
+#shipping-method-wrapper {
     position: relative;
 }
 
 .select--arrow {
     position: relative;
 
-    i,
-    svg {
+    i, svg {
         position: absolute;
         top: 50%;
         transform: translateY(-50%);
-        inset-inline-end: 10px;
+        right: 10px;
         color: #ccc;
         width: 16px;
     }
@@ -522,7 +491,7 @@ body,
     .form-control:not(:placeholder-shown):valid + label {
         font-size: 12px;
         top: -7px;
-        inset-inline-start: 10px;
+        left: 10px;
         background: #ffffff;
         padding: 0 5px 0 5px;
     }
@@ -536,7 +505,7 @@ body,
             padding: 14px;
             position: absolute;
             top: 0;
-            inset-inline-start: 0;
+            left: 0;
             transition: 0.2s ease all;
             -moz-transition: 0.2s ease all;
             -webkit-transition: 0.2s ease all;
@@ -560,8 +529,8 @@ body,
     &__coupon-heading {
         font-weight: 600;
         border-radius: 5px;
-        border: 1px solid var(--bs-primary);
-        color: var(--bs-primary);
+        border: 1px solid #058db8;
+        color: #058db8;
         font-size: 14px;
         margin-bottom: 0px;
         padding: 0.25rem 0.5rem;
@@ -586,7 +555,7 @@ body,
         gap: 0.75rem;
         margin-bottom: 1rem;
         overflow-y: auto;
-        border: 1px dashed var(--bs-primary);
+        border: 1px dashed #058db8;
         border-radius: 8px;
         padding: 0.75rem;
         max-height: 600px;
@@ -599,15 +568,15 @@ body,
         cursor: pointer;
         transition: all 0.2s;
         min-width: 16rem;
-        box-shadow: 0 0 4px 0 rgba(205, 205, 205, 0.75);
+        box-shadow: 0px 0px 4px 0px rgba(205, 205, 205, 0.75);
 
         &.active {
-            background-color: var(--bs-primary);
+            background: #058db8;
             color: #ffffff;
         }
 
         &:hover {
-            border-color: var(--bs-primary);
+            border-color: #058db8;
         }
 
         &-content {
@@ -621,7 +590,7 @@ body,
                 font-size: 16px;
                 font-weight: bold;
                 display: inline-block;
-                color: var(--bs-primary);
+                color: #058db8;
 
                 .checkout__coupon-item.active & {
                     color: #ffffff;
@@ -662,12 +631,11 @@ body,
             }
 
             .checkout__coupon-item.active & {
-                background: var(--bs-primary);
-                filter: brightness(85%);
+                background: #0c80a4;
             }
 
             button {
-                background: var(--bs-primary);
+                background: #058db8;
                 color: #ffffff;
                 border: none;
                 padding: 0.25rem 0.75rem;
@@ -679,168 +647,8 @@ body,
 
                 .checkout__coupon-item.active & {
                     background: #ffffff;
-                    color: var(--bs-primary);
-                    border: 1px solid var(--bs-primary);
-                }
-            }
-        }
-    }
-
-    &-form {
-
-        .magic-radio,
-        .magic-checkbox {
-            position: absolute;
-            display: none;
-
-            &:disabled {
-                cursor: not-allowed;
-            }
-        }
-
-        .magic-radio + label,
-        .magic-checkbox + label {
-            position: relative;
-            display: block;
-            padding-left: 30px;
-            cursor: pointer;
-            vertical-align: middle;
-
-            &:before {
-                position: absolute;
-                top: 0;
-                left: 0;
-                display: inline-block;
-                width: 20px;
-                height: 20px;
-                content: '';
-                border: 1px solid #c0c0c0;
-            }
-
-            &:after {
-                position: absolute;
-                display: none;
-                content: '';
-            }
-
-            &:hover {
-                &:before {
-                    animation-duration: 0.4s;
-                    animation-fill-mode: both;
-                    animation-name: hover-color;
-                }
-            }
-        }
-
-        .magic-radio[disabled] + label,
-        .magic-checkbox[disabled] + label {
-            cursor: not-allowed;
-            color: #e4e4e4;
-        }
-
-        .magic-radio[disabled] + label:hover,
-        .magic-radio[disabled] + label:before,
-        .magic-radio[disabled] + label:after,
-        .magic-checkbox[disabled] + label:hover,
-        .magic-checkbox[disabled] + label:before,
-        .magic-checkbox[disabled] + label:after {
-            cursor: not-allowed;
-        }
-
-        .magic-radio[disabled] + label:hover:before,
-        .magic-checkbox[disabled] + label:hover:before {
-            border: 1px solid #e4e4e4;
-            animation-name: none;
-        }
-
-        .magic-radio[disabled] + label:before,
-        .magic-checkbox[disabled] + label:before {
-            border-color: #e4e4e4;
-        }
-
-        .magic-radio:checked + label:before,
-        .magic-checkbox:checked + label:before {
-            animation-name: none;
-        }
-
-        .magic-radio:checked + label:after,
-        .magic-checkbox:checked + label:after {
-            display: block;
-        }
-
-        .magic-radio {
-            & + label {
-                &:before {
-                    border-radius: 50%;
-                }
-
-                &:after {
-                    top: 6px;
-                    left: 6px;
-                    width: 8px;
-                    height: 8px;
-                    border-radius: 50%;
-                    background: var(--bs-primary);
-                }
-            }
-
-            &:checked {
-                & + label {
-                    &:before {
-                        border: 1px solid var(--bs-primary);
-                    }
-                }
-            }
-
-            &:checked[disabled] {
-                & + label {
-                    &:before {
-                        border: 1px solid #c9e2f9;
-                    }
-
-                    &:after {
-                        background: #c9e2f9;
-                    }
-                }
-            }
-        }
-
-        .magic-checkbox {
-            & + label {
-                &:before {
-                    border-radius: 3px;
-                }
-
-                &:after {
-                    top: 2px;
-                    left: 7px;
-                    box-sizing: border-box;
-                    width: 6px;
-                    height: 12px;
-                    transform: rotate(45deg);
-                    border-width: 2px;
-                    border-style: solid;
-                    border-color: #ffffff;
-                    border-top: 0;
-                    border-left: 0;
-                }
-            }
-
-            &:checked {
-                & + label {
-                    &:before {
-                        border: var(--bs-primary);
-                        background: var(--bs-primary);
-                    }
-                }
-            }
-
-            &:checked[disabled] {
-                & + label {
-                    &:before {
-                        border: #c9e2f9;
-                        background: #c9e2f9;
-                    }
+                    color: #058db8;
+                    border: 1px solid #058db8;
                 }
             }
         }
@@ -853,33 +661,31 @@ body,
         border-bottom-right-radius: 0;
     }
 
-    .remove-coupon-code,
-    .apply-coupon-code {
+    .remove-coupon-code, .apply-coupon-code {
         padding: 0.25rem 0.75rem;
         cursor: pointer;
         transition: 0.2s all;
         box-sizing: border-box;
         border: none;
         outline: none;
-        white-space: nowrap;
     }
 
     .remove-coupon-code {
         border-radius: 4px;
         background: #ffffff;
-        color: var(--bs-primary);
-        border: 1px solid var(--bs-primary);
+        color: #058db8;
+        border: 1px solid #058db8;
         font-size: 0.8em;
     }
 
     .apply-coupon-code {
         border-top-right-radius: 4px;
         border-bottom-right-radius: 4px;
-        background: var(--bs-primary);
+        background: #058db8;
         color: #ffffff;
 
         &:hover {
-            filter: brightness(85%);
+            background: #0c80a4;
         }
     }
 }

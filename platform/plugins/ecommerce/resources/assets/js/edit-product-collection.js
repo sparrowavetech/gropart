@@ -5,8 +5,7 @@ $(() => {
         const $wrapBody = $('.wrap-collection-products')
 
         if ($wrapBody.length) {
-            $httpClient
-                .make()
+            $httpClient.make()
                 .withLoading($wrapBody)
                 .get($wrapBody.data('target'))
                 .then(({ data }) => {
@@ -60,8 +59,7 @@ $(() => {
         $formBody.addClass('active')
 
         if ($formBody.find('.card-body').length === 0) {
-            $httpClient
-                .make()
+            $httpClient.make()
                 .withLoading($formBody)
                 .get(_self.data('bb-target'))
                 .then(({ data }) => {
@@ -85,8 +83,7 @@ $(() => {
 
             hasAjaxSearchRequested = true
 
-            ajaxRequest = $httpClient
-                .make()
+            ajaxRequest = $httpClient.make()
                 .withLoading($formBody)
                 .get(_self.data('bb-target'), { keyword: _self.val() })
                 .then(({ data }) => {
@@ -107,14 +104,11 @@ $(() => {
 
     $(document).on('click', '.box-search-advance .page-link', (event) => {
         event.preventDefault()
-        const $searchBox = $(event.currentTarget)
-            .closest('.box-search-advance')
-            .find('[data-bb-toggle="product-search-advanced"]')
+        const $searchBox = $(event.currentTarget).closest('.box-search-advance').find('[data-bb-toggle="product-search-advanced"]')
         if (!$searchBox.closest('.page-item').hasClass('disabled') && $searchBox.data('bb-target')) {
             const $formBody = $searchBox.closest('.box-search-advance').find('.card')
 
-            $httpClient
-                .make()
+            $httpClient.make()
                 .withLoading($formBody)
                 .get($(event.currentTarget).prop('href'), { keyword: $searchBox.val() })
                 .then(({ data }) => {

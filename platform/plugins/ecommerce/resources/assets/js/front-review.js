@@ -9,10 +9,6 @@ $(() => {
     }
 
     const getReviewList = (url, successCallback) => {
-        if (!url) {
-            return
-        }
-
         $.ajax({
             url: url,
             method: 'GET',
@@ -22,10 +18,6 @@ $(() => {
             success: ({ data, message }) => {
                 $reviewListContainer.find('h4').text(message)
                 $reviewListContainer.find('.review-list').html(data)
-
-                if (typeof Theme.lazyLoadInstance !== 'undefined') {
-                    Theme.lazyLoadInstance.update()
-                }
 
                 initLightGallery($reviewListContainer.find('.review-images'))
 
@@ -87,10 +79,8 @@ $(() => {
         loadPreviewImage(input)
     }
 
-    if ($reviewListContainer.length) {
-        initLightGallery($('.review-images'))
-        getReviewList($reviewListContainer.data('ajax-url'))
-    }
+    initLightGallery($('.review-images'))
+    getReviewList($reviewListContainer.data('ajax-url'))
 
     $reviewListContainer.on('click', '.pagination a', (e) => {
         e.preventDefault()
@@ -132,7 +122,7 @@ $(() => {
                     Theme.showSuccess(message)
 
                     getReviewList($reviewListContainer.data('ajax-url'), () => {
-                        if (!$('.review-list').length) {
+                        if (! $('.review-list').length) {
                             setTimeout(() => window.location.reload(), 1000)
                         }
                     })

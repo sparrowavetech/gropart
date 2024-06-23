@@ -2,8 +2,7 @@ try {
     window.$ = window.jQuery = require('jquery')
 
     require('bootstrap')
-} catch (e) {
-}
+} catch (e) {}
 
 import { CheckoutAddress } from './partials/address'
 import { DiscountManagement } from './partials/discount'
@@ -76,14 +75,16 @@ class MainCheckout {
     }
 
     static handleValidationError(errors, $container) {
+        if (!errors.length) {
+            return
+        }
+
         $.each(errors, (index, item) => {
-            const inputName = MainCheckout.dotArrayToJs(index)
-            let $input = $(`*[name="${inputName}"]`)
-
+            let inputName = MainCheckout.dotArrayToJs(index)
+            let $input = $('*[name="' + inputName + '"]')
             if ($container) {
-                $input = $container.find(`[name="${inputName}"]`)
+                $input = $container.find('[name="' + inputName + '"]')
             }
-
             if ($input.closest('.form-group').length) {
                 $input.closest('.form-group').addClass('field-is-invalid')
             } else {
@@ -94,16 +95,14 @@ class MainCheckout {
                 $input.addClass('is-invalid')
                 if ($input.is('select') && $input.closest('.select--arrow').length) {
                     $input.closest('.select--arrow').addClass('is-invalid')
-                    $input.closest('.select--arrow').after(`<div class="invalid-feedback">${item}</div>`)
+                    $input.closest('.select--arrow').after('<div class="invalid-feedback">' + item + '</div>')
                 } else {
-                    $input.after(`<div class="invalid-feedback">${item}</div>`)
+                    $input.after('<div class="invalid-feedback">' + item + '</div>')
                 }
             }
         })
 
-        if (errors[0]) {
-            MainCheckout.showError(errors[0])
-        }
+        MainCheckout.showError(errors[0])
     }
 
     static showError(message, messageHeader = '') {
@@ -115,109 +114,176 @@ class MainCheckout {
     }
 
     init() {
-        const $checkoutForm = $('form.checkout-form')
-        const shippingForm = '#main-checkout-product-info'
-        const customerShippingAddressForm = '.customer-address-payment-form .address-form-wrapper'
-        const customerBillingAddressForm = '.customer-billing-address-form'
-        const customerTaxInformationForm = '.customer-tax-information-form'
+        let shippingForm = '#main-checkout-product-info'
+        let customerShippingAddressForm = '.customer-address-payment-form .address-form-wrapper'
+        let customerBillingAddressForm = '.customer-billing-address-form'
+        let customerTaxInformationForm = '.customer-tax-information-form'
 
-        const disablePaymentMethodsForm = () => {
+        let disablePaymentMethodsForm = () => {
             $('.payment-info-loading').show()
             $('.payment-checkout-btn').prop('disabled', true)
         }
 
-        const enablePaymentMethodsForm = () => {
+        let enablePaymentMethodsForm = () => {
             $('.payment-info-loading').hide()
             $('.payment-checkout-btn').prop('disabled', false)
 
             document.dispatchEvent(new CustomEvent('payment-form-reloaded'))
         }
 
-        const calculateShippingFee = (methods) => {
-            const formData = new FormData($checkoutForm.get(0))
+        let getBaseUrl = () => {
+            let baseUrl = window.location.href
 
-            for (let key in methods) {
-                formData.set(key, methods[key])
+            if (!baseUrl.includes('?')) {
+                baseUrl = baseUrl + '?'
+            } else {
+                baseUrl = baseUrl + '&'
             }
 
-            $.ajax({
-                url: $checkoutForm.data('update-url'),
-                method: 'POST',
-                processData: false,
-                contentType: false,
-                data: formData,
-                beforeSend: () => {
-                    disablePaymentMethodsForm()
-                    $('.shipping-info-loading').show()
-                },
-                success: ({ data }) => {
-                    $('#cart-item').html(data.amount)
-                    $('[data-bb-toggle="checkout-payment-methods-area"]').html(data.payment_methods)
-                    $('[data-bb-toggle="checkout-shipping-methods-area"]').html(data.shipping_methods)
-                },
-                complete: () => {
-                    enablePaymentMethodsForm()
-                    $('.shipping-info-loading').hide()
-                },
+            baseUrl = baseUrl + $.param($('form.checkout-form').serializeArray())
+
+            return baseUrl
+        }
+
+        let reloadAddressForm = (url) => {
+            disablePaymentMethodsForm()
+
+            $('.shipping-info-loading').show()
+            $(shippingForm).load(url, () => {
+                $('.shipping-info-loading').hide()
+                enablePaymentMethodsForm()
             })
         }
 
-        $(document).on('change', 'input.shipping_method_input', (event) => {
-            const data = {}
+        let loadShippingFeeAtTheFirstTime = () => {
+            let shippingMethod = $(document).find('input[name=shipping_method]:checked').first()
+            if (!shippingMethod.length) {
+                shippingMethod = $(document).find('input[name=shipping_method]').first()
+                shippingMethod.prop('checked', 'checked')
+            }
 
-            if ($('.checkout-products-marketplace').length) {
-                const shippingMethods = $(shippingForm).find('input.shipping_method_input')
+            if (shippingMethod.length) {
+                $('.mobile-total').text('...')
 
-                if (shippingMethods.length) {
+                let params = {
+                    shipping_method: shippingMethod.val(),
+                    shipping_option: shippingMethod.data('option'),
+                    payment_method: '',
+                }
+                let paymentMethod = $(document).find('input[name=payment_method]:checked').first()
+                if (paymentMethod) {
+                    params.payment_method = paymentMethod.val()
+                }
+
+                reloadAddressForm(getBaseUrl() + $.param(params) + ' ' + shippingForm + ' > *')
+            }
+        }
+
+        loadShippingFeeAtTheFirstTime()
+
+        let loadShippingFeeAtTheSecondTime = () => {
+            const $marketplace = $('.checkout-products-marketplace')
+
+            if (!$marketplace || !$marketplace.length) {
+                return
+            }
+
+            let shippingMethods = $(shippingForm).find('input.shipping_method_input')
+            let methods = {
+                shipping_method: {},
+                shipping_option: {},
+                payment_method: '',
+                address: {
+                    address_id: $('#address_id').val(),
+                },
+            }
+
+            if (shippingMethods.length) {
+                let storeIds = []
+
+                shippingMethods.map((i, shm) => {
+                    let val = $(shm).filter(':checked').val()
+                    let sId = $(shm).data('id')
+
+                    if (!storeIds.includes(sId)) {
+                        storeIds.push(sId)
+                    }
+
+                    if (val) {
+                        methods['shipping_method'][sId] = val
+                        methods['shipping_option'][sId] = $(shm).data('option')
+                    }
+                })
+
+                if (Object.keys(methods['shipping_method']).length !== storeIds.length) {
                     shippingMethods.map((i, shm) => {
-                        const val = $(shm).filter(':checked').val()
-                        const sId = $(shm).data('id')
-
-                        if (val) {
-                            data[`shipping_method[${sId}]`] = val
-                            data[`shipping_option[${sId}]`] = $(shm).data('option')
+                        let sId = $(shm).data('id')
+                        if (!methods['shipping_method'][sId]) {
+                            methods['shipping_method'][sId] = $(shm).val()
+                            methods['shipping_option'][sId] = $(shm).data('option')
+                            $(shm).prop('checked', true)
                         }
                     })
                 }
-            } else {
-                const $this = $(event.currentTarget)
-                $('input[name=shipping_option]').val($this.data('option'))
-
-                $('.mobile-total').text('...')
-
-                const data = {
-                    shipping_method: $this.val(),
-                    shipping_option: $this.data('option'),
-                    payment_method: '',
-                    address: {
-                        address_id: $('#address_id').val(),
-                    },
-                }
-
-                const paymentMethod = $(document).find('input[name=payment_method]:checked').first()
-                if (paymentMethod.length) {
-                    data.payment_method = paymentMethod.val()
-                }
             }
 
-            calculateShippingFee(data)
+            let paymentMethod = $(document).find('input[name=payment_method]:checked').first()
+            if (paymentMethod.length) {
+                methods.payment_method = paymentMethod.val()
+            }
+
+            reloadAddressForm(getBaseUrl() + $.param(methods) + ' ' + shippingForm + ' > *')
+        }
+
+        loadShippingFeeAtTheSecondTime()
+
+        $(document).on('change', 'input.shipping_method_input', () => {
+            loadShippingFeeAtTheSecondTime()
+        })
+
+        $(document).on('change', 'input[name=shipping_method]', (event) => {
+            // Fixed: set shipping_option value based on shipping_method change:
+            const $this = $(event.currentTarget)
+            $('input[name=shipping_option]').val($this.data('option'))
+
+            $('.mobile-total').text('...')
+
+            let params = {
+                shipping_method: $this.val(),
+                shipping_option: $this.data('option'),
+                payment_method: '',
+                address: {
+                    address_id: $('#address_id').val(),
+                },
+            }
+
+            let paymentMethod = $(document).find('input[name=payment_method]:checked').first()
+            if (paymentMethod.length) {
+                params.payment_method = paymentMethod.val()
+            }
+
+            reloadAddressForm(getBaseUrl() + $.param(params) + ' ' + shippingForm + ' > *')
         })
 
         $(document).on('change', 'input[name=payment_method]', (event) => {
-            calculateShippingFee({
-                payment_method: $(event.target).val()
-            })
+            const $this = $(event.currentTarget)
+
+            $('.mobile-total').text('...')
+
+            let params = {
+                payment_method: $this.val(),
+            }
+
+            reloadAddressForm(getBaseUrl() + $.param(params) + ' ' + shippingForm + ' > *')
         })
 
-        const validatedFormFields = () => {
-            const addressId = $('#address_id').val()
-
+        let validatedFormFields = () => {
+            let addressId = $('#address_id').val()
             if (addressId && addressId !== 'new') {
                 return true
             }
 
             let validated = true
-
             $.each($(document).find('.form-control[required]'), (index, el) => {
                 if (!$(el).val() || $(el).val() === 'null') {
                     validated = false
@@ -227,36 +293,49 @@ class MainCheckout {
             return validated
         }
 
-        if ($checkoutForm.find('.list-customer-address').length) {
-            calculateShippingFee()
+        let onChangeShippingForm = (event) => {
+            setTimeout(function () {
+                let _self = $(event.currentTarget)
+                _self.closest('.form-group').find('.text-danger').remove()
+                let $form = _self.closest('form')
+
+                if (validatedFormFields() && $form.valid && $form.valid()) {
+                    $.ajax({
+                        type: 'POST',
+                        cache: false,
+                        url: $('#save-shipping-information-url').val(),
+                        data: new FormData($form[0]),
+                        contentType: false,
+                        processData: false,
+                        success: (res) => {
+                            if (!res.error) {
+                                disablePaymentMethodsForm()
+
+                                let $wrapper = $(shippingForm)
+                                if ($wrapper.length) {
+                                    $('.shipping-info-loading').show()
+                                    $wrapper.load(window.location.href + ' ' + shippingForm + ' > *', () => {
+                                        $('.shipping-info-loading').hide()
+                                        const isChecked = $wrapper.find('input[name=shipping_method]:checked')
+                                        if (!isChecked) {
+                                            $wrapper.find('input[name=shipping_method]:first-child').trigger('click') // need to check again
+                                        }
+                                        enablePaymentMethodsForm()
+                                    })
+                                }
+
+                                loadShippingFeeAtTheSecondTime() // marketplace
+                            }
+                        },
+                        error: (res) => {
+                            MainCheckout.handleError(res, $form)
+                        },
+                    })
+                }
+            }, 1000)
         }
 
-        const onChangeShippingForm = (event) => {
-            const _self = $(event.currentTarget)
-            _self.closest('.form-group').find('.text-danger').remove()
-            const $form = _self.closest('form')
-
-            if (validatedFormFields() && $form.valid && $form.valid()) {
-                $.ajax({
-                    type: 'POST',
-                    cache: false,
-                    url: $('#save-shipping-information-url').val(),
-                    data: new FormData($form[0]),
-                    contentType: false,
-                    processData: false,
-                    success: ({ error }) => {
-                        if (!error && (/country|state|city|address/.test($(event.target).prop('name')))) {
-                            calculateShippingFee()
-                        }
-                    },
-                    error: (response) => {
-                        MainCheckout.handleError(response, $form)
-                    },
-                })
-            }
-        }
-
-        $(document).on('change', `${customerShippingAddressForm} .form-control`, (event) => {
+        $(document).on('change', customerShippingAddressForm + ' .form-control', (event) => {
             onChangeShippingForm(event)
         })
 
@@ -264,9 +343,9 @@ class MainCheckout {
             onChangeShippingForm(event)
         })
 
-        $(document).on('change', `${customerBillingAddressForm} #billing_address_same_as_shipping_address`, (event) => {
-            const _self = $(event.currentTarget)
-            const val = _self.find(':selected').val()
+        $(document).on('change', customerBillingAddressForm + ' #billing_address_same_as_shipping_address', (event) => {
+            let _self = $(event.currentTarget)
+            let val = _self.find(':selected').val()
             if (val) {
                 $('.billing-address-form-wrapper').hide()
             } else {
@@ -274,8 +353,8 @@ class MainCheckout {
             }
         })
 
-        $(document).on('change', `${customerTaxInformationForm} #with_tax_information`, (event) => {
-            const _self = $(event.currentTarget)
+        $(document).on('change', customerTaxInformationForm + ' #with_tax_information', (event) => {
+            let _self = $(event.currentTarget)
 
             $('.tax-information-form-wrapper').toggle(_self.is(':checked'))
         })

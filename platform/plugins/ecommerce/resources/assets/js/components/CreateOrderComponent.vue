@@ -7,87 +7,79 @@
                 </div>
                 <div class="card-body">
                     <div class="mb-3">
-                        <div :class="{ 'loading-skeleton': checking }" v-if="child_products.length">
+                        <div
+                            :class="{ 'loading-skeleton': checking }"
+                            v-if="child_products.length"
+                        >
                             <table class="table table-bordered table-vcenter">
                                 <thead>
-                                    <tr>
-                                        <th></th>
-                                        <th>{{ __('order.product_name') }}</th>
-                                        <th>{{ __('order.price') }}</th>
-                                        <th width="90">{{ __('order.quantity') }}</th>
-                                        <th>{{ __('order.total') }}</th>
-                                        <th>{{ __('order.action') }}</th>
-                                    </tr>
+                                <tr>
+                                    <th></th>
+                                    <th>{{ __('order.product_name') }}</th>
+                                    <th>{{ __('order.price') }}</th>
+                                    <th width="90">{{ __('order.quantity') }}</th>
+                                    <th>{{ __('order.total') }}</th>
+                                    <th>{{ __('order.action') }}</th>
+                                </tr>
                                 </thead>
                                 <tbody>
-                                    <tr v-for="(variant, vKey) in child_products" v-bind:key="`${variant.id}-${vKey}`">
-                                        <td>
-                                            <img :src="variant.image_url" :alt="variant.name" width="50" />
-                                        </td>
-                                        <td>
-                                            <a :href="variant.product_link" target="_blank">{{ variant.name }}</a>
-                                            <p v-if="variant.variation_attributes">
-                                                <small>{{ variant.variation_attributes }}</small>
-                                            </p>
-                                            <ul
-                                                v-if="
-                                                    variant.option_values && Object.keys(variant.option_values).length
-                                                "
-                                            >
-                                                <li>
-                                                    <span>{{ __('order.price') }}:</span>
-                                                    <span>{{ variant.original_price_label }}</span>
-                                                </li>
-                                                <li v-for="option in variant.option_values" v-bind:key="option.id">
-                                                    <span>{{ option.title }}:</span>
-                                                    <span v-for="value in option.values" v-bind:key="value.id">
-                                                        {{ value.value }} <strong>+{{ value.price_label }}</strong>
-                                                    </span>
-                                                </li>
-                                            </ul>
-                                        </td>
-                                        <td>
-                                            <span>{{ variant.price_label }}</span>
-                                        </td>
-                                        <td class="text-center">
-                                            <input
-                                                class="form-control form-control-sm"
-                                                :value="variant.select_qty"
-                                                type="number"
-                                                min="1"
-                                                @input="handleChangeQuantity($event, variant, vKey)"
-                                            />
-                                        </td>
-                                        <td>
-                                            {{ variant.total_price_label }}
-                                        </td>
-                                        <td class="text-center">
-                                            <a
-                                                href="javascript:void(0)"
-                                                @click="handleRemoveVariant($event, variant, vKey)"
-                                                class="text-decoration-none"
-                                            >
-                                                <span class="icon-tabler-wrapper icon-sm icon-left">
-                                                    <svg
-                                                        xmlns="http://www.w3.org/2000/svg"
-                                                        class="icon icon-tabler icon-tabler-x"
-                                                        width="24"
-                                                        height="24"
-                                                        viewBox="0 0 24 24"
-                                                        stroke-width="2"
-                                                        stroke="currentColor"
-                                                        fill="none"
-                                                        stroke-linecap="round"
-                                                        stroke-linejoin="round"
-                                                    >
-                                                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                                        <path d="M18 6l-12 12" />
-                                                        <path d="M6 6l12 12" />
-                                                    </svg>
+                                <tr v-for="(variant, vKey) in child_products" v-bind:key="`${variant.id}-${vKey}`">
+                                    <td>
+                                        <img
+                                            :src="variant.image_url"
+                                            :alt="variant.name"
+                                            width="50"
+                                        />
+                                    </td>
+                                    <td>
+                                        <a :href="variant.product_link" target="_blank">{{ variant.name }}</a>
+                                        <p v-if="variant.variation_attributes">
+                                            <small>{{ variant.variation_attributes }}</small>
+                                        </p>
+                                        <ul v-if="variant.option_values && Object.keys(variant.option_values).length">
+                                            <li>
+                                                <span>{{ __('order.price') }}:</span>
+                                                <span>{{ variant.original_price_label }}</span>
+                                            </li>
+                                            <li v-for="option in variant.option_values" v-bind:key="option.id">
+                                                <span>{{ option.title }}:</span>
+                                                <span v-for="value in option.values" v-bind:key="value.id">
+                                                    {{ value.value }} <strong>+{{ value.price_label }}</strong>
                                                 </span>
-                                            </a>
-                                        </td>
-                                    </tr>
+                                            </li>
+                                        </ul>
+                                    </td>
+                                    <td>
+                                        <span>{{ variant.price_label }}</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <input
+                                            class="form-control form-control-sm"
+                                            :value="variant.select_qty"
+                                            type="number"
+                                            min="1"
+                                            @input="handleChangeQuantity($event, variant, vKey)"
+                                        />
+                                    </td>
+                                    <td>
+                                        {{ variant.total_price_label }}
+                                    </td>
+                                    <td class="text-center">
+                                        <a
+                                            href="javascript:void(0)"
+                                            @click="handleRemoveVariant($event, variant, vKey)"
+                                            class="text-decoration-none"
+                                        >
+                                            <span class="icon-tabler-wrapper icon-sm icon-left">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M18 6l-12 12" />
+  <path d="M6 6l12 12" />
+</svg>
+    </span>
+                                        </a>
+                                    </td>
+                                </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -132,10 +124,7 @@
                                     >
                                         <div class="row align-items-start">
                                             <div class="col-auto">
-                                                <span
-                                                    class="avatar"
-                                                    :style="{ backgroundImage: 'url(' + product_item.image_url + ')' }"
-                                                ></span>
+                                                <span class="avatar" :style="{ backgroundImage: 'url(' + product_item.image_url + ')' }"></span>
                                             </div>
                                             <div class="col text-truncate">
                                                 <ProductAction
@@ -144,10 +133,7 @@
                                                     @select-product="selectProductVariant"
                                                 />
 
-                                                <div
-                                                    v-if="product_item.variations.length"
-                                                    class="list-group list-group-flush"
-                                                >
+                                                <div v-if="product_item.variations.length" class="list-group list-group-flush">
                                                     <div
                                                         class="list-group-item p-2"
                                                         v-for="variation in product_item.variations"
@@ -169,61 +155,44 @@
                                 <div
                                     class="card-footer"
                                     v-if="
-                                        ((list_products.links && list_products.links.next) ||
-                                            (list_products.links && list_products.links.prev)) &&
-                                        !loading
+                                        ((list_products.links && list_products.links.next)
+                                        || (list_products.links && list_products.links.prev))
+                                        && !loading
                                     "
                                 >
                                     <ul class="pagination my-0 d-flex justify-content-end">
-                                        <li
-                                            :class="{
-                                                'page-item': true,
-                                                disabled: list_products.meta.current_page === 1,
-                                            }"
-                                        >
-                                            <span
-                                                v-if="list_products.meta.current_page === 1"
-                                                class="page-link"
-                                                :aria-disabled="list_products.meta.current_page === 1"
-                                            >
+                                        <li :class="{'page-item': true, disabled: list_products.meta.current_page === 1}">
+                                            <span v-if="list_products.meta.current_page === 1" class="page-link" :aria-disabled="list_products.meta.current_page === 1">
                                                 <i class="icon ti ti-chevron-left"></i>
                                             </span>
                                             <a
                                                 v-else
                                                 href="javascript:void(0)"
                                                 class="page-link"
-                                                @click="
-                                                    loadListProductsAndVariations(
-                                                        list_products.links.prev
-                                                            ? list_products.meta.current_page - 1
-                                                            : list_products.meta.current_page,
-                                                        true
-                                                    )
-                                                "
+                                                @click="loadListProductsAndVariations(
+                                                    list_products.links.prev
+                                                        ? list_products.meta.current_page - 1
+                                                        : list_products.meta.current_page,
+                                                    true
+                                                )"
                                             >
                                                 <i class="icon ti ti-chevron-left"></i>
                                             </a>
                                         </li>
-                                        <li :class="{ 'page-item': true, disabled: !list_products.links.next }">
-                                            <span
-                                                v-if="!list_products.links.next"
-                                                class="page-link"
-                                                :aria-disabled="!list_products.links.next"
-                                            >
+                                        <li :class="{'page-item': true, disabled: !list_products.links.next}">
+                                            <span v-if="!list_products.links.next" class="page-link" :aria-disabled="!list_products.links.next">
                                                 <i class="icon ti ti-chevron-right"></i>
                                             </span>
                                             <a
                                                 v-else
                                                 href="javascript:void(0)"
                                                 class="page-link"
-                                                @click="
-                                                    loadListProductsAndVariations(
-                                                        list_products.links.next
-                                                            ? list_products.meta.current_page + 1
-                                                            : list_products.meta.current_page,
-                                                        true
-                                                    )
-                                                "
+                                                @click="loadListProductsAndVariations(
+                                                    list_products.links.next
+                                                        ? list_products.meta.current_page + 1
+                                                        : list_products.meta.current_page,
+                                                    true
+                                                )"
                                             >
                                                 <i class="icon ti ti-chevron-right"></i>
                                             </a>
@@ -250,139 +219,133 @@
                         <div class="col-sm-6">
                             <table class="table table-borderless text-end table-vcenter">
                                 <thead>
-                                    <tr>
-                                        <td></td>
-                                        <td width="120"></td>
-                                    </tr>
+                                <tr>
+                                    <td></td>
+                                    <td width="120"></td>
+                                </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
-                                        <td>{{ __('order.sub_amount') }}</td>
-                                        <td>
-                                            <span
-                                                v-if="checking"
-                                                class="spinner-grow spinner-grow-sm"
-                                                role="status"
-                                                aria-hidden="true"
-                                            ></span>
-                                            <span class="fw-bold">{{ child_sub_amount_label }}</span>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>{{ __('order.tax_amount') }}</td>
-                                        <td>
-                                            <span
-                                                v-if="checking"
-                                                class="spinner-grow spinner-grow-sm"
-                                                role="status"
-                                                aria-hidden="true"
-                                            ></span>
-                                            <span class="fw-bold">{{ child_tax_amount_label }}</span>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>{{ __('order.promotion_discount_amount') }}</td>
-                                        <td>
-                                            <span
-                                                v-show="checking"
-                                                class="spinner-grow spinner-grow-sm"
-                                                role="status"
-                                                aria-hidden="true"
-                                            ></span>
-                                            <span :class="{ 'fw-bold': true, 'text-success': child_promotion_amount }">
-                                                {{ child_promotion_amount_label }}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <button
-                                                type="button"
-                                                v-ec-modal.add-discounts
-                                                class="btn btn-outline-primary btn-sm mb-1"
-                                            >
-                                                <template v-if="!has_applied_discount">
-                                                    <i class="icon-sm ti ti-plus"></i>
-                                                    {{ __('order.add_discount') }}
-                                                </template>
-                                                <template v-else>{{ __('order.discount') }}</template>
-                                            </button>
-                                            <span class="d-block small fw-bold" v-if="has_applied_discount">
-                                                {{ child_coupon_code || child_discount_description }}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <span
-                                                v-show="checking"
-                                                class="spinner-grow spinner-grow-sm"
-                                                role="status"
-                                                aria-hidden="true"
-                                            ></span>
-                                            <span :class="{ 'text-success fw-bold': child_discount_amount }">
-                                                {{ child_discount_amount_label }}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                    <tr v-if="is_available_shipping">
-                                        <td>
-                                            <button
-                                                type="button"
-                                                v-ec-modal.add-shipping
-                                                class="btn btn-outline-primary btn-sm mb-1"
-                                            >
-                                                <template v-if="!child_is_selected_shipping">
-                                                    <i class="icon-sm ti ti-plus"></i>
-                                                    {{ __('order.add_shipping_fee') }}
-                                                </template>
-                                                <template v-else>{{ __('order.shipping') }}</template>
-                                            </button>
-                                            <span class="d-block small fw-bold" v-if="child_shipping_method_name">
-                                                {{ child_shipping_method_name }}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <span
-                                                v-show="checking"
-                                                class="spinner-grow spinner-grow-sm"
-                                                role="status"
-                                                aria-hidden="true"
-                                            ></span>
-                                            <span :class="{ 'fw-bold': child_shipping_amount }">
-                                                {{ child_shipping_amount_label }}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>{{ __('order.total_amount') }}</td>
-                                        <td>
-                                            <span
-                                                v-show="checking"
-                                                class="spinner-grow spinner-grow-sm"
-                                                role="status"
-                                                aria-hidden="true"
-                                            ></span>
-                                            <h4 class="d-inline-block">{{ child_total_amount_label }}</h4>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td colspan="2">
-                                            <label for="payment-method" class="form-label">{{
-                                                __('order.payment_method')
-                                            }}</label>
-                                            <select
-                                                class="form-select"
-                                                id="payment-method"
-                                                v-model="child_payment_method"
-                                            >
-                                                <option value="cod">
-                                                    {{ __('order.cash_on_delivery_cod') }}
-                                                </option>
-                                                <option value="bank_transfer">
-                                                    {{ __('order.bank_transfer') }}
-                                                </option>
-                                            </select>
-                                        </td>
-                                    </tr>
+                                <tr>
+                                    <td>{{ __('order.sub_amount') }}</td>
+                                    <td>
+                                        <span
+                                            v-if="checking"
+                                            class="spinner-grow spinner-grow-sm"
+                                            role="status"
+                                            aria-hidden="true"
+                                        ></span>
+                                        <span class="fw-bold">{{ child_sub_amount_label }}</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>{{ __('order.tax_amount') }}</td>
+                                    <td>
+                                        <span
+                                            v-if="checking"
+                                            class="spinner-grow spinner-grow-sm"
+                                            role="status"
+                                            aria-hidden="true"
+                                        ></span>
+                                        <span class="fw-bold">{{ child_tax_amount_label }}</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>{{ __('order.promotion_discount_amount') }}</td>
+                                    <td>
+                                        <span
+                                            v-show="checking"
+                                            class="spinner-grow spinner-grow-sm"
+                                            role="status"
+                                            aria-hidden="true"
+                                        ></span>
+                                        <span :class="{ 'fw-bold': true, 'text-success': child_promotion_amount }">
+                                            {{ child_promotion_amount_label }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <button
+                                            type="button"
+                                            v-ec-modal.add-discounts
+                                            class="btn btn-outline-primary btn-sm mb-1"
+                                        >
+                                            <template v-if="!has_applied_discount">
+                                                <i class="icon-sm ti ti-plus"></i>
+                                                {{ __('order.add_discount') }}
+                                            </template>
+                                            <template v-else>{{ __('order.discount') }}</template>
+                                        </button>
+                                        <span class="d-block small fw-bold" v-if="has_applied_discount">
+                                            {{ child_coupon_code || child_discount_description }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span
+                                            v-show="checking"
+                                            class="spinner-grow spinner-grow-sm"
+                                            role="status"
+                                            aria-hidden="true"
+                                        ></span>
+                                        <span :class="{ 'text-success fw-bold': child_discount_amount }">
+                                            {{ child_discount_amount_label }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr v-if="is_available_shipping">
+                                    <td>
+                                        <button
+                                            type="button"
+                                            v-ec-modal.add-shipping
+                                            class="btn btn-outline-primary btn-sm mb-1"
+                                        >
+                                            <template v-if="!child_is_selected_shipping">
+                                                <i class="icon-sm ti ti-plus"></i>
+                                                {{ __('order.add_shipping_fee') }}
+                                            </template>
+                                            <template v-else>{{ __('order.shipping') }}</template>
+                                        </button>
+                                        <span class="d-block small fw-bold" v-if="child_shipping_method_name">
+                                            {{ child_shipping_method_name }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span
+                                            v-show="checking"
+                                            class="spinner-grow spinner-grow-sm"
+                                            role="status"
+                                            aria-hidden="true"
+                                        ></span>
+                                        <span :class="{ 'fw-bold': child_shipping_amount }">
+                                            {{child_shipping_amount_label }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>{{ __('order.total_amount') }}</td>
+                                    <td>
+                                        <span
+                                            v-show="checking"
+                                            class="spinner-grow spinner-grow-sm"
+                                            role="status"
+                                            aria-hidden="true"
+                                        ></span>
+                                        <h4 class="d-inline-block">{{ child_total_amount_label }}</h4>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2">
+                                        <label for="payment-method" class="form-label">{{ __('order.payment_method') }}</label>
+                                        <select class="form-select" id="payment-method" v-model="child_payment_method">
+                                            <option value="cod">
+                                                {{ __('order.cash_on_delivery_cod') }}
+                                            </option>
+                                            <option value="bank_transfer">
+                                                {{ __('order.bank_transfer') }}
+                                            </option>
+                                        </select>
+                                    </td>
+                                </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -398,10 +361,7 @@
                             <button
                                 class="btn btn-success"
                                 v-ec-modal.make-paid
-                                :disabled="
-                                    (!child_product_ids.length || child_payment_method === 'cod') &&
-                                    child_total_amount !== 0
-                                "
+                                :disabled="(!child_product_ids.length || child_payment_method === 'cod') && child_total_amount !== 0"
                             >
                                 {{ __('order.paid') }}
                             </button>
@@ -464,14 +424,11 @@
                                         <div class="flexbox-grid-default flexbox-align-items-center">
                                             <div class="row align-items-center">
                                                 <div class="col-auto">
-                                                    <span
-                                                        class="avatar"
-                                                        :style="{ backgroundImage: 'url(' + customer.avatar_url + ')' }"
-                                                    ></span>
+                                                    <span class="avatar" :style="{ backgroundImage: 'url(' + customer.avatar_url + ')' }"></span>
                                                 </div>
                                                 <div class="col text-truncate">
                                                     <div class="text-body d-block">{{ customer.name }}</div>
-                                                    <div class="text-secondary text-truncate mt-n1" v-if="customer.email">{{ customer.email }}</div>
+                                                    <a :href="'mailto:' + customer.email" class="text-secondary text-truncate mt-n1">{{ customer.email || '-' }}</a>
                                                 </div>
                                             </div>
                                         </div>
@@ -480,55 +437,40 @@
                                         {{ __('order.no_customer_found') }}
                                     </div>
                                 </div>
-                                <div
-                                    class="card-footer"
-                                    v-if="(customers.next_page_url || customers.prev_page_url) && !loading"
-                                >
+                                <div class="card-footer" v-if="(customers.next_page_url || customers.prev_page_url) && !loading">
                                     <ul class="pagination my-0 d-flex justify-content-end">
-                                        <li :class="{ 'page-item': true, disabled: customers.current_page === 1 }">
-                                            <span
-                                                v-if="customers.current_page === 1"
-                                                class="page-link"
-                                                :aria-disabled="customers.current_page === 1"
-                                            >
+                                        <li :class="{'page-item': true, disabled: customers.current_page === 1}">
+                                            <span v-if="customers.current_page === 1" class="page-link" :aria-disabled="customers.current_page === 1">
                                                 <i class="icon ti ti-chevron-left"></i>
                                             </span>
                                             <a
                                                 v-else
                                                 href="javascript:void(0)"
                                                 class="page-link"
-                                                @click="
-                                                    loadListCustomersForSearch(
-                                                        customers.prev_page_url
-                                                            ? customers.current_page - 1
-                                                            : customers.current_page,
-                                                        true
-                                                    )
-                                                "
+                                                @click="loadListCustomersForSearch(
+                                                    customers.prev_page_url
+                                                        ? customers.current_page - 1
+                                                        : customers.current_page,
+                                                    true
+                                                )"
                                             >
                                                 <i class="icon ti ti-chevron-left"></i>
                                             </a>
                                         </li>
-                                        <li :class="{ 'page-item': true, disabled: !customers.next_page_url }">
-                                            <span
-                                                v-if="!customers.next_page_url"
-                                                class="page-link"
-                                                :aria-disabled="!customers.next_page_url"
-                                            >
+                                        <li :class="{'page-item': true, disabled: !customers.next_page_url}">
+                                            <span v-if="!customers.next_page_url" class="page-link" :aria-disabled="!customers.next_page_url">
                                                 <i class="icon ti ti-chevron-right"></i>
                                             </span>
                                             <a
                                                 v-else
                                                 href="javascript:void(0)"
                                                 class="page-link"
-                                                @click="
-                                                    loadListCustomersForSearch(
-                                                        customers.next_page_url
-                                                            ? customers.current_page + 1
-                                                            : customers.current_page,
-                                                        true
-                                                    )
-                                                "
+                                                @click="loadListCustomersForSearch(
+                                                    customers.next_page_url
+                                                        ? customers.current_page + 1
+                                                        : customers.current_page,
+                                                    true
+                                                )"
                                             >
                                                 <i class="icon ti ti-chevron-right"></i>
                                             </a>
@@ -552,47 +494,33 @@
                                 class="btn-action"
                             >
                                 <span class="icon-tabler-wrapper icon-sm icon-left">
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        class="icon icon-tabler icon-tabler-x"
-                                        width="24"
-                                        height="24"
-                                        viewBox="0 0 24 24"
-                                        stroke-width="2"
-                                        stroke="currentColor"
-                                        fill="none"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                    >
-                                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                        <path d="M18 6l-12 12" />
-                                        <path d="M6 6l12 12" />
-                                    </svg>
-                                </span>
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M18 6l-12 12" />
+  <path d="M6 6l12 12" />
+</svg>
+    </span>
                             </button>
                         </div>
                     </div>
                     <div class="card-body p-0">
                         <div class="p-3">
                             <div class="mb-3">
-                                <span
-                                    class="avatar avatar-lg avatar-rounded"
-                                    :style="{ backgroundImage: `url(${child_customer.avatar_url || child_customer.avatar})`}"
-                                ></span>
+                                <span class="avatar avatar-lg avatar-rounded" :style="[child_customer.avatar_url ? { backgroundImage: 'url(' + child_customer.avatar_url + ')' } : {}]"></span>
                             </div>
 
                             <div class="mb-1">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z" /><path d="M4 13h3l3 3h4l3 -3h3" /></svg>
+                                <i class="icon ti ti-inbox"></i>
                                 {{ child_customer_order_numbers }}
                                 {{ __('order.orders') }}
                             </div>
 
                             <div class="mb-n1">{{ child_customer.name }}</div>
 
-                            <div class="d-flex justify-content-between align-items-center" v-if="child_customer.email">
-                                <span>
-                                    {{ child_customer.email }}
-                                </span>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a :href="'mailto:' + child_customer.email">
+                                    {{ child_customer.email || '-' }}
+                                </a>
 
                                 <a
                                     href="javascript:void(0)"
@@ -602,60 +530,63 @@
                                     data-bs-original-title="Edit email"
                                     class="btn-action text-decoration-none"
                                 >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M7 7h-1a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-1" /><path d="M20.385 6.585a2.1 2.1 0 0 0 -2.97 -2.97l-8.415 8.385v3h3l8.385 -8.415z" /><path d="M16 5l3 3" /></svg>
+                                    <i class="icon ti ti-pencil" />
                                 </a>
                             </div>
                         </div>
 
-                        <template v-if="is_available_shipping">
-                            <div class="hr my-1"></div>
-                            <div class="p-3">
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <h4 class="mb-0">{{ __('order.shipping_address') }}</h4>
-                                    <button
-                                        v-ec-modal.edit-address
-                                        type="button"
-                                        class="btn-action"
-                                        data-bs-toggle="tooltip"
-                                        data-bs-title="Update address"
-                                    >
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M7 7h-1a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-1" /><path d="M20.385 6.585a2.1 2.1 0 0 0 -2.97 -2.97l-8.415 8.385v3h3l8.385 -8.415z" /><path d="M16 5l3 3" /></svg>
-                                    </button>
-                                </div>
+                        <div class="hr my-1"></div>
 
-                                <div v-if="child_customer_addresses.length > 1" class="mb-3">
-                                    <select class="form-select" @change="selectCustomerAddress($event)">
-                                        <option
-                                            v-for="address_item in child_customer_addresses"
-                                            :value="address_item.id"
-                                            :selected="address_item.id === customer_address.id"
-                                            v-bind:key="address_item.id"
-                                        >
-                                            {{ address_item.full_address }}
-                                        </option>
-                                    </select>
-                                </div>
-
-                                <dl class="row mb-0">
-                                    <dd>{{ child_customer_address.name }}</dd>
-                                    <dd>{{ child_customer_address.phone }}</dd>
-                                    <dd>{{ child_customer_address.email }}</dd>
-                                    <dd>{{ child_customer_address.address }}</dd>
-                                    <dd>{{ child_customer_address.city_name }}</dd>
-                                    <dd>{{ child_customer_address.state_name }}</dd>
-                                    <dd>{{ child_customer_address.country_name }}</dd>
-                                    <dd v-if="zip_code_enabled">{{ child_customer_address.zip_code }}</dd>
-                                    <dd v-if="child_customer_address.full_address">
-                                        <a
-                                            target="_blank"
-                                            class="hover-underline"
-                                            :href="'https://maps.google.com/?q=' + child_customer_address.full_address"
-                                        >{{ __('order.see_on_maps') }}</a
-                                        >
-                                    </dd>
-                                </dl>
+                        <div class="p-3" v-if="is_available_shipping">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h4 class="mb-0">{{ __('order.shipping_address') }}</h4>
+                                <button
+                                    v-ec-modal.edit-address
+                                    type="button"
+                                    class="btn-action"
+                                    data-bs-toggle="tooltip"
+                                    data-bs-title="Update address"
+                                >
+                                    <i class="icon ti ti-pencil" />
+                                </button>
                             </div>
-                        </template>
+
+                            <div v-if="child_customer_addresses.length > 1" class="mb-3">
+                                <select class="form-select" @change="selectCustomerAddress($event)">
+                                    <option
+                                        v-for="address_item in child_customer_addresses"
+                                        :value="address_item.id"
+                                        :selected="parseInt(address_item.id) === parseInt(customer_address.email)"
+                                        v-bind:key="address_item.id"
+                                    >
+                                        {{ address_item.full_address }}
+                                    </option>
+                                </select>
+                            </div>
+
+                            <dl class="row">
+                                <dd>{{ child_customer_address.name }}</dd>
+                                <dd>{{ child_customer_address.phone }}</dd>
+                                <dd>
+                                    <a :href="'mailto:' + child_customer_address.email">
+                                        {{child_customer_address.email }}
+                                    </a>
+                                </dd>
+                                <dd>{{ child_customer_address.address }}</dd>
+                                <dd>{{ child_customer_address.city_name }}</dd>
+                                <dd>{{ child_customer_address.state_name }}</dd>
+                                <dd>{{ child_customer_address.country_name }}</dd>
+                                <dd v-if="zip_code_enabled">{{ child_customer_address.zip_code }}</dd>
+                                <dd v-if="child_customer_address.full_address">
+                                    <a
+                                        target="_blank"
+                                        class="hover-underline"
+                                        :href="'https://maps.google.com/?q=' + child_customer_address.full_address"
+                                    >{{ __('order.see_on_maps') }}</a
+                                    >
+                                </dd>
+                            </dl>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -682,16 +613,16 @@
                                     :class="{ active: discount_type === 'amount' }"
                                     @click="changeDiscountType($event)"
                                 >
-                                    {{ currency || '$' }}
-                                </button>&nbsp;
+                                    {{ currency || '$' }}</button
+                                >&nbsp;
                                 <button
                                     value="percentage"
                                     class="btn btn-active"
                                     :class="{ active: discount_type === 'percentage' }"
                                     @click="changeDiscountType($event)"
                                 >
-                                    %
-                                </button>
+                                    %</button
+                                >
                             </div>
                             <div class="col">
                                 <div class="input-group input-group-flat">
@@ -734,9 +665,7 @@
                         </div>
                         <div>
                             <h4 class="alert-title">{{ __('order.how_to_select_configured_shipping') }}</h4>
-                            <div class="text-muted">
-                                {{ __('order.please_products_and_customer_address_to_see_the_shipping_rates') }}.
-                            </div>
+                            <div class="text-muted">{{ __('order.please_products_and_customer_address_to_see_the_shipping_rates') }}.</div>
                         </div>
                     </div>
                 </div>
@@ -767,7 +696,10 @@
                             :disabled="shipping_methods && !Object.keys(shipping_methods).length"
                         />
                         <span class="form-check-label">{{ __('order.custom') }}</span>
-                        <small class="text-warning" v-if="shipping_methods && !Object.keys(shipping_methods).length">
+                        <small
+                            class="text-warning"
+                            v-if="shipping_methods && !Object.keys(shipping_methods).length"
+                        >
                             {{ __('order.shipping_method_not_found') }}
                         </small>
                     </label>
@@ -831,8 +763,7 @@
         </ec-modal>
 
         <OrderCustomerAddress
-            :customer="child_customer"
-            :address="child_customer_address"
+            :child_customer_address="child_customer_address"
             :zip_code_enabled="zip_code_enabled"
             :use_location_data="use_location_data"
             @update-order-address="updateOrderAddress"
@@ -1341,7 +1272,7 @@ export default {
         },
         createOrder: function (event, paid = false) {
             event.preventDefault()
-            $(event.target).addClass('btn-loading')
+            $(event.target).addClass('button-loading')
 
             let formData = this.getOrderFormData()
             formData.payment_status = paid ? 'completed' : 'pending'
@@ -1369,12 +1300,12 @@ export default {
                     Botble.handleError(res.response.data)
                 })
                 .then(() => {
-                    $(event.target).removeClass('btn-loading')
+                    $(event.target).removeClass('button-loading')
                 })
         },
         createProduct: function (event, product) {
             event.preventDefault()
-            $(event.target).addClass('btn-loading')
+            $(event.target).addClass('button-loading')
             let context = this
             if (context.store && context.store.id) {
                 product.store_id = context.store.id
@@ -1411,53 +1342,51 @@ export default {
                     Botble.handleError(res.response.data)
                 })
                 .then(() => {
-                    $(event.target).removeClass('btn-loading')
+                    $(event.target).removeClass('button-loading')
                 })
         },
         updateCustomerEmail: function (event) {
             event.preventDefault()
-
-            $(event.target).addClass('btn-loading')
+            $(event.target).addClass('button-loading')
 
             let context = this
 
             axios
-                .post(route('customers.update-email', context.child_customer.id), {
-                    email: context.child_customer.email,
+                .post(route('customers.update-email', context.child_customer_address.id), {
+                    email: context.child_customer_address.email,
                 })
-                .then(({ data }) => {
-                    if (data.error) {
-                        Botble.showError(data.message)
+                .then((res) => {
+                    if (res.data.error) {
+                        Botble.showError(res.data.message)
                     } else {
-                        Botble.showSuccess(data.message)
+                        Botble.showSuccess(res.data.message)
 
                         $event.emit('ec-modal:close', 'edit-email')
                     }
                 })
-                .catch(({ response }) => {
-                    Botble.handleError(response.data)
+                .catch((res) => {
+                    Botble.handleError(res.response.data)
                 })
                 .then(() => {
-                    $(event.target).removeClass('btn-loading')
+                    $(event.target).removeClass('button-loading')
                 })
         },
         updateOrderAddress: function (event) {
             event.preventDefault()
-
             if (this.customer) {
-                $(event.target).addClass('btn-loading')
+                $(event.target).addClass('button-loading')
 
                 this.checkDataBeforeCreateOrder(
                     {},
                     () => {
                         setTimeout(() => {
-                            $(event.target).removeClass('btn-loading')
+                            $(event.target).removeClass('button-loading')
                             $event.emit('ec-modal:close', 'edit-address')
                         }, 500)
                     },
                     () => {
                         setTimeout(() => {
-                            $(event.target).removeClass('btn-loading')
+                            $(event.target).removeClass('button-loading')
                         }, 500)
                     }
                 )
@@ -1467,7 +1396,7 @@ export default {
             event.preventDefault()
             let context = this
 
-            $(event.target).addClass('btn-loading')
+            $(event.target).addClass('button-loading')
 
             axios
                 .post(route('customers.create-customer-when-creating-order'), {
@@ -1476,9 +1405,9 @@ export default {
                     email: context.child_customer_address.email,
                     phone: context.child_customer_address.phone,
                     address: context.child_customer_address.address,
-                    country: (context.child_customer_address.country ? context.child_customer_address.country.toString() : ''),
-                    state: (context.child_customer_address.state ? context.child_customer_address.state.toString() : ''),
-                    city: (context.child_customer_address.city ? context.child_customer_address.city.toString() : ''),
+                    country: context.child_customer_address.country,
+                    state: context.child_customer_address.state,
+                    city: context.child_customer_address.city,
                     zip_code: context.child_customer_address.zip_code,
                 })
                 .then((res) => {
@@ -1503,7 +1432,7 @@ export default {
                     Botble.handleError(res.response.data)
                 })
                 .then(() => {
-                    $(event.target).removeClass('btn-loading')
+                    $(event.target).removeClass('button-loading')
                 })
         },
         selectCustomerAddress: function (event) {
@@ -1546,7 +1475,7 @@ export default {
             event.preventDefault()
             let context = this
             let $button = $(event.target).find('.btn-primary')
-            $button.addClass('btn-loading')
+            $button.addClass('button-loading')
 
             context.child_is_selected_shipping = true
 
@@ -1566,13 +1495,13 @@ export default {
                 {},
                 () => {
                     setTimeout(function () {
-                        $button.removeClass('btn-loading')
+                        $button.removeClass('button-loading')
                         $event.emit('ec-modal:close', 'add-shipping')
                     }, 500)
                 },
                 () => {
                     setTimeout(function () {
-                        $button.removeClass('btn-loading')
+                        $button.removeClass('button-loading')
                     }, 500)
                 }
             )
@@ -1595,7 +1524,7 @@ export default {
 
             let $button = $target.find('.btn-primary')
 
-            $button.addClass('btn-loading').prop('disabled', true)
+            $button.addClass('button-loading').prop('disabled', true)
 
             if (context.child_coupon_code) {
                 context.discount_custom_value = 0
@@ -1613,7 +1542,7 @@ export default {
                         if (!context.child_coupon_code && !context.discount_custom_value) {
                             context.has_applied_discount = false
                         }
-                        $button.removeClass('btn-loading').prop('disabled', false)
+                        $button.removeClass('button-loading').prop('disabled', false)
                         $event.emit('ec-modal:close', 'add-discounts')
                     }, 500)
                 },
@@ -1621,7 +1550,7 @@ export default {
                     if (context.child_coupon_code) {
                         context.has_invalid_coupon = true
                     }
-                    $button.removeClass('btn-loading').prop('disabled', false)
+                    $button.removeClass('button-loading').prop('disabled', false)
                 }
             )
         },

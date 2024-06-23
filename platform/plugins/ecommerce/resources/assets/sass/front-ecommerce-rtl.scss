@@ -44,19 +44,5 @@
                 }
             }
         }
-
-        @media (max-width: 767px) {
-            &-gallery-thumbnails {
-                .slick-arrow {
-                    &.slick-prev {
-                        transform: rotate(180deg);
-                    }
-
-                    &.slick-next {
-                        transform: rotate(180deg);
-                    }
-                }
-            }
-        }
     }
 }

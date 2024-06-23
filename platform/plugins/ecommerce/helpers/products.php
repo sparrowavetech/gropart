@@ -198,7 +198,7 @@ if (! function_exists('get_products_by_collections')) {
 }
 
 if (! function_exists('get_default_product_variation')) {
-    function get_default_product_variation(int|string $configurableId): ?Product
+    function get_default_product_variation(int|string $configurableId): Product|null
     {
         return app(ProductInterface::class)
             ->getProductVariations($configurableId, [
@@ -243,10 +243,6 @@ if (! function_exists('the_product_price')) {
 if (! function_exists('get_related_products')) {
     function get_related_products(Product $product, int $limit = 4): Collection|LengthAwarePaginator|Product|null
     {
-        if (! EcommerceHelper::isEnabledRelatedProducts()) {
-            return new EloquentCollection();
-        }
-
         $params = [
             'condition' => [
                 'ec_products.is_variation' => 0,
@@ -266,16 +262,13 @@ if (! function_exists('get_related_products')) {
 
         $relatedIds = $product->products()->allRelatedIds()->toArray();
 
-        $filters = [];
-
         if (! empty($relatedIds)) {
             $params['condition'][] = ['ec_products.id', 'IN', $relatedIds];
         } else {
             $params['condition'][] = ['ec_products.id', '!=', $product->getKey()];
-            $filters = ['categories' => $product->categories()->pluck('ec_product_categories.id')->all()];
         }
 
-        return app(ProductInterface::class)->filterProducts($filters, $params);
+        return app(ProductInterface::class)->getProducts($params);
     }
 }
 
@@ -367,9 +360,9 @@ if (! function_exists('handle_next_attributes_in_product')) {
         Collection $productVariationsInfo,
         int|string|null $setId,
         array $selectedAttributes,
-        ?string $key,
+        string|null $key,
         array $variationNextIds,
-        ?Collection $variationInfo = null,
+        Collection|null $variationInfo = null,
         array $unavailableAttributeIds = []
     ): array {
         foreach ($productAttributes as $attribute) {

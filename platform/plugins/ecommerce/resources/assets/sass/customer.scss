@@ -2,10 +2,13 @@
 
 $primaryColor: var(--primary-color);
 
-.bb-customer-page {
+.customer-page {
     margin: 0;
     background-color: #ffffff;
-    box-shadow: rgba(100, 100, 111, 0.2) 0 7px 29px 0;
+
+    .customer-body {
+        padding: 50px 20px;
+    }
 
     .border-border {
         border: 1px solid #cecece;
@@ -18,12 +21,18 @@ $primaryColor: var(--primary-color);
         margin: 0 auto;
     }
 
-    .bb-profile-sidebar {
-        padding: 20px 0;
+    .profile-sidebar {
+        padding: 20px;
+        border-right: 1px solid #e2e2e2;
         color: rgb(228, 228, 228);
         height: 100%;
+        background-color: #ffffff;
+        box-shadow: 5px 5px 5px;
+        -moz-box-shadow: 5px 5px 5px;
+        -webkit-box-shadow: 5px 5px 5px;
+        -o-box-shadow: 5px 5px 5px;
 
-        .bb-profile-user-menu {
+        .profile-usermenu {
             list-style: none;
             display: block;
 
@@ -50,8 +59,7 @@ $primaryColor: var(--primary-color);
                         color: $primaryColor;
                     }
 
-                    &.active,
-                    &:active {
+                    &.active, &:active {
                         text-decoration: none;
                         color: $primaryColor;
                         font-weight: bold;
@@ -68,25 +76,18 @@ $primaryColor: var(--primary-color);
         }
     }
 
-    .bb-profile-content {
-        padding: 20px 20px 20px 7px;
-
-        .bb-profile-header {
-            border-bottom: 1px solid #cecece;
-            padding-bottom: 15px;
-            margin-bottom: 20px;
-
-            .bb-profile-header-title {
-                font-size: 28px;
-                font-weight: 500;
-            }
-        }
+    .profile-content {
+        padding: 20px 20px 20px 50px;
     }
 
     h2.customer-page-title {
         text-align: start;
         font-size: 1.4em;
         font-weight: bold;
+    }
+
+    .customer-list-order {
+        margin-top: 40px;
     }
 
     .customer-order-detail {
@@ -129,6 +130,7 @@ $primaryColor: var(--primary-color);
             }
         }
     }
+
 
     .badge {
         color: #fff;
@@ -195,9 +197,7 @@ $primaryColor: var(--primary-color);
     }
 
     table.table.table-bordered.table-striped {
-        tr,
-        td,
-        th {
+        tr, td, th {
             vertical-align: middle;
         }
     }
@@ -207,104 +207,7 @@ $primaryColor: var(--primary-color);
     }
 
     .gap-2 {
-        gap: 0.5rem !important;
-    }
-}
-
-.delete-account-section {
-    margin-top: 3rem;
-    border: 1px solid var(--bs-border-color);
-    padding: 1rem;
-}
-
-.nav-tabs {
-    padding-bottom: 15px;
-
-    .nav-item {
-        flex: none;
-
-        .nav-link {
-            background-color: #f8f8f8;
-            border-radius: 0;
-            margin: unset;
-            padding: 5px 10px;
-            color: var(--primary-color);
-            width: auto;
-
-            &.active {
-                background-color: var(--primary-color);
-                color: #fff;
-            }
-        }
-    }
-}
-
-.bb-customer-sidebar-wrapper {
-    border-radius: var(--bs-card-border-radius);
-    overflow: hidden;
-    background-color: #f7f7f9;
-
-    .bb-customer-sidebar {
-        .bb-customer-sidebar-heading {
-            padding: 0 20px 20px 20px;
-            color: #0b0b0b;
-
-            .email,
-            .name {
-                -webkit-box-orient: vertical;
-                display: -webkit-box;
-                overflow: hidden;
-                -webkit-line-clamp: 1;
-            }
-
-            .wrapper-image {
-                width: 50px;
-                height: 50px;
-                background-color: #0a53be;
-                border-radius: 50%;
-                position: relative;
-                overflow: hidden;
-                flex-shrink: 0;
-
-                img {
-                    position: absolute;
-                    inset: 0;
-                    width: 100%;
-                    height: auto;
-                }
-            }
-        }
-
-        .bb-customer-menu-item-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            padding: 10px 20px;
-            color: #0b0b0b;
-            transition: background-color 0.2s ease;
-            &.active {
-                background-color: var(--primary-color);
-                color: #ffffff;
-
-                a {
-                    color: #ffffff;
-                }
-
-                &:hover {
-                    background-color: var(--primary-color);
-                    color: #ffffff;
-                    opacity: 0.8;
-                }
-            }
-
-            &:hover {
-                background-color: white;
-            }
-
-            .bb-customer-menu-item {
-                width: 100%;
-            }
-        }
+        gap: 0.5rem!important;
     }
 }
 
@@ -315,7 +218,7 @@ svg.icon {
 
 @keyframes light-white {
     to {
-        inset-inline-start: 100%;
+        inset-inline-start: 100%
     }
 }
 
@@ -331,3 +234,4 @@ svg.icon {
         opacity: 1;
     }
 }
+

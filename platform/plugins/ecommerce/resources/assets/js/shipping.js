@@ -13,8 +13,7 @@ class ShippingManagement {
 
             const _self = $(event.currentTarget)
 
-            $httpClient
-                .make()
+            $httpClient.make()
                 .withButtonLoading(_self)
                 .post($('div[data-delete-region-item-url]').data('delete-region-item-url'), {
                     _method: 'DELETE',
@@ -49,8 +48,7 @@ class ShippingManagement {
 
             const _self = $(event.currentTarget)
 
-            $httpClient
-                .make()
+            $httpClient.make()
                 .withButtonLoading(_self)
                 .post($('div[data-delete-rule-item-url]').data('delete-rule-item-url'), {
                     _method: 'DELETE',
@@ -98,8 +96,7 @@ class ShippingManagement {
 
             formData = $.extend({}, formData)
 
-            $httpClient
-                .make()
+            $httpClient.make()
                 .withButtonLoading(_self)
                 .post($form.prop('action'), formData)
                 .then(({ data }) => {
@@ -209,8 +206,7 @@ class ShippingManagement {
                     <span class='visually-hidden'>Loading...</span>
                   </div></div>`)
 
-            $httpClient
-                .make()
+            $httpClient.make()
                 .withButtonLoading(_self)
                 .get(_self.data('url'))
                 .then(({ data }) => {
@@ -234,7 +230,7 @@ class ShippingManagement {
             const allowedMethods = ['get', 'post', 'put', 'delete']
             const method = $form.prop('method').toLowerCase()
 
-            if (!allowedMethods.includes(method)) {
+            if (! allowedMethods.includes(method)) {
                 Botble.showError('This method is not supported.')
 
                 return
@@ -244,10 +240,12 @@ class ShippingManagement {
 
             formData = Botble.unmaskInputNumber($form, formData)
 
-            $httpClient
-                .make()
+            $httpClient.make()
                 .withButtonLoading(_self)
-                [method]($form.prop('action'), formData)
+                [method](
+                    $form.prop('action'),
+                    formData
+                )
                 .then(({ data }) => {
                     if (!data.error) {
                         const $table = $(`.table-shipping-rule-${data.data.shipping_rule_id}`)
@@ -277,8 +275,7 @@ class ShippingManagement {
 
             const _self = $(event.currentTarget)
 
-            $httpClient
-                .make()
+            $httpClient.make()
                 .withButtonLoading(_self)
                 .post(_self.data('url'), {
                     _method: 'DELETE',
@@ -312,8 +309,7 @@ class ShippingManagement {
             const _self = $(event.currentTarget)
             const $form = _self.closest('.modal-content').find('form')
 
-            $httpClient
-                .make()
+            $httpClient.make()
                 .withButtonLoading(_self)
                 .post($form.prop('action'), $form.serialize())
                 .then(({ data }) => {
@@ -329,7 +325,12 @@ class ShippingManagement {
 
             const _self = $(event.currentTarget)
 
-            saveRuleItem(_self, _self.closest('.modal-content').find('form'), 'POST', _self.data('shipping-id'))
+            saveRuleItem(
+                _self,
+                _self.closest('.modal-content').find('form'),
+                'POST',
+                _self.data('shipping-id')
+            )
         })
 
         $(document).on('keyup', '.base-price-rule-item', (event) => {
@@ -420,16 +421,11 @@ class ShippingManagement {
             const perPage = $numb.val()
             orderDir = orderDir === 'ASC' ? 'DESC' : 'ASC'
 
-            loadRuleItems($table.data('url'), $table, _self, {
-                order_by: orderBy,
-                order_dir: orderDir,
-                per_page: perPage,
-            })
+            loadRuleItems($table.data('url'), $table, _self, { order_by: orderBy, order_dir: orderDir, per_page: perPage })
         })
 
         function loadRuleItems(url, $table, $button, data = {}) {
-            $httpClient
-                .make()
+            $httpClient.make()
                 .withButtonLoading($button)
                 .get(url, data)
                 .then(({ data }) => {

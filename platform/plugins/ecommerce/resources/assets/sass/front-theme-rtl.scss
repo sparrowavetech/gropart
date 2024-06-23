@@ -75,18 +75,13 @@ body[dir='rtl'] {
         left: 15px;
     }
 
+    .back-to-cart {
+        float: right;
+        margin-left: 5px;
+    }
+
     .select--arrow i {
         right: auto;
         left: 10px;
-    }
-
-    .was-validated .form-control:valid, .form-control.is-valid {
-        background-position: left calc(0.375em + 0.1875rem) center;
-        padding-left: calc(1.5em + 0.75rem);
-        padding-right: 0.75rem;
-    }
-
-    .select--arrow .form-control {
-        padding: 0 15px 0 30px;
     }
 }

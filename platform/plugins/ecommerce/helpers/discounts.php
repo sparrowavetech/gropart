@@ -31,9 +31,7 @@ if (! function_exists('get_discount_description')) {
                     $description[] = __('Free shipping for all orders');
                 }
 
-                if ($value) {
-                    $description[] = __('when shipping fee less than or equal :amount', ['amount' => format_price($value)]);
-                }
+                $description[] = __('when shipping fee less than or equal :amount', ['amount' => format_price($value)]);
 
                 break;
             case DiscountTypeOptionEnum::SAME_PRICE:

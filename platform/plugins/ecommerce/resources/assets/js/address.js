@@ -14,22 +14,18 @@ $(function () {
         const url = form.prop('action')
         const formData = form.serialize()
 
-        $httpClient
-            .make()
+        $httpClient.make()
             .post(url, formData)
             .then(({ data }) => {
                 if (!data.error) {
                     Botble.showNotice('success', data.message)
                     $('#add-address-modal').modal('hide')
                     form.get(0).reset()
-                    $('#address-histories').load(
-                        $('.page-wrapper form.js-base-form').prop('action') + ' #address-histories > *'
-                    )
+                    $('#address-histories').load($('.page-wrapper form.js-base-form').prop('action') + ' #address-histories > *')
                 } else {
                     Botble.showNotice('error', data.message)
                 }
-            })
-            .finally(() => {
+            }).finally(() => {
                 Botble.hideButtonLoading(_self)
             })
     })
@@ -49,8 +45,7 @@ $(function () {
 
         Botble.showButtonLoading(_self)
 
-        $httpClient
-            .make()
+        $httpClient.make()
             .get(_self.data('section'))
             .then(({ data }) => {
                 if (!data.error) {
@@ -59,8 +54,7 @@ $(function () {
                 } else {
                     Botble.showNotice('error', data.message)
                 }
-            })
-            .finally(() => {
+            }).finally(() => {
                 Botble.hideButtonLoading(_self)
             })
     })
@@ -75,22 +69,18 @@ $(function () {
         const url = form.prop('action')
         const formData = form.serialize()
 
-        $httpClient
-            .make()
+        $httpClient.make()
             .post(url, formData)
             .then(({ data }) => {
                 if (!data.error) {
                     Botble.showNotice('success', data.message)
                     $('#edit-address-modal').modal('hide')
                     form.get(0).reset()
-                    $('#address-histories').load(
-                        $('.page-wrapper form.js-base-form').prop('action') + ' #address-histories > *'
-                    )
+                    $('#address-histories').load($('.page-wrapper form.js-base-form').prop('action') + ' #address-histories > *')
                 } else {
                     Botble.showNotice('error', data.message)
                 }
-            })
-            .finally(() => {
+            }).finally(() => {
                 Botble.hideButtonLoading(_self)
             })
     })
@@ -108,8 +98,7 @@ $(function () {
         Botble.showButtonLoading(_self)
         const deleteURL = _self.data('section')
 
-        $httpClient
-            .make()
+        $httpClient.make()
             .post(deleteURL, { _method: 'DELETE' })
             .then(({ data }) => {
                 if (data.error) {

@@ -110,6 +110,7 @@
         > input:checked ~ label,
         &:not(:checked) > label:hover,
         &:not(:checked) > label:hover ~ label {
+
             color: #fab528;
         }
 
@@ -168,6 +169,7 @@
             > input:checked ~ label,
             &:not(:checked) > label:hover,
             &:not(:checked) > label:hover ~ label {
+
                 color: #fab528;
             }
 
@@ -327,9 +329,31 @@
             }
         }
     }
+
+    .nav-tabs {
+        padding-bottom: 15px;
+
+        .nav-item {
+            flex: none;
+
+            .nav-link {
+                background-color: #f8f8f8;
+                border-radius: 0;
+                margin: unset;
+                padding: 5px 10px;
+                color: var(--primary-color);
+                width: auto;
+
+                &.active {
+                    background-color: var(--primary-color);
+                    color: #fff;
+                }
+            }
+        }
+    }
 }
 
 .required:after {
     color: #cb4321;
-    content: ' *';
+    content: " *";
 }
