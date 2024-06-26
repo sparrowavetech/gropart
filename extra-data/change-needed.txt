@@ -9,6 +9,7 @@ Shop type required condition not working while register as vendor
     with all language list default, then this pop up should not come again, should only come when first time visiting site
 4. 3 images wala shortcode ka mobile and tablet version update nahi ho rha hai - botble author issue
 5. Frequently Bought Together Functionality
+6. COD additional charge
 
 
 8. http://localhost/gropart/public/admin/tools/data-synchronize/import/products (Issue)
