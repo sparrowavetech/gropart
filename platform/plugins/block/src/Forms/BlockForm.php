@@ -2,57 +2,40 @@
 
 namespace Botble\Block\Forms;
 
-use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Base\Forms\FieldOptions\ContentFieldOption;
+use Botble\Base\Forms\FieldOptions\DescriptionFieldOption;
+use Botble\Base\Forms\FieldOptions\NameFieldOption;
+use Botble\Base\Forms\FieldOptions\StatusFieldOption;
+use Botble\Base\Forms\FieldOptions\TextFieldOption;
+use Botble\Base\Forms\Fields\EditorField;
+use Botble\Base\Forms\Fields\SelectField;
+use Botble\Base\Forms\Fields\TextareaField;
+use Botble\Base\Forms\Fields\TextField;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Block\Http\Requests\BlockRequest;
 use Botble\Block\Models\Block;
 
 class BlockForm extends FormAbstract
 {
-    public function buildForm(): void
+    public function setup(): void
     {
         $this
-            ->setupModel(new Block())
+            ->model(Block::class)
             ->setValidatorClass(BlockRequest::class)
-            ->withCustomFields()
-            ->add('name', 'text', [
-                'label' => trans('core/base::forms.name'),
-                'label_attr' => ['class' => 'control-label required'],
-                'attr' => [
-                    'placeholder' => trans('core/base::forms.name_placeholder'),
-                    'data-counter' => 120,
-                ],
-            ])
-            ->add('alias', 'text', [
-                'label' => trans('core/base::forms.alias'),
-                'label_attr' => ['class' => 'control-label required'],
-                'attr' => [
-                    'placeholder' => trans('core/base::forms.alias_placeholder'),
-                    'data-counter' => 120,
-                ],
-            ])
-            ->add('description', 'textarea', [
-                'label' => trans('core/base::forms.description'),
-                'label_attr' => ['class' => 'control-label'],
-                'attr' => [
-                    'rows' => 4,
-                    'placeholder' => trans('core/base::forms.description_placeholder'),
-                    'data-counter' => 400,
-                ],
-            ])
-            ->add('content', 'editor', [
-                'label' => trans('core/base::forms.content'),
-                'label_attr' => ['class' => 'control-label'],
-                'attr' => [
-                    'rows' => 4,
-                    'placeholder' => trans('core/base::forms.description_placeholder'),
-                ],
-            ])
-            ->add('status', 'customSelect', [
-                'label' => trans('core/base::tables.status'),
-                'label_attr' => ['class' => 'control-label required'],
-                'choices' => BaseStatusEnum::labels(),
-            ])
+            ->add('name', TextField::class, NameFieldOption::make()->required()->toArray())
+            ->add(
+                'alias',
+                TextField::class,
+                TextFieldOption::make()
+                    ->label(trans('core/base::forms.alias'))
+                    ->placeholder(trans('core/base::forms.alias_placeholder'))
+                    ->required()
+                    ->maxLength(120)
+                    ->toArray()
+            )
+            ->add('description', TextareaField::class, DescriptionFieldOption::make()->toArray())
+            ->add('content', EditorField::class, ContentFieldOption::make()->toArray())
+            ->add('status', SelectField::class, StatusFieldOption::make()->toArray())
             ->setBreakFieldPoint('status');
     }
 }

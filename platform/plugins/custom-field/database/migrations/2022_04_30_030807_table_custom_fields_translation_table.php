@@ -9,7 +9,7 @@ return new class () extends Migration {
     {
         if (! Schema::hasTable('custom_fields_translations')) {
             Schema::create('custom_fields_translations', function (Blueprint $table) {
-                $table->string('lang_code');
+                $table->string('lang_code', 20);
                 $table->foreignId('custom_fields_id');
                 $table->text('value')->nullable();
 

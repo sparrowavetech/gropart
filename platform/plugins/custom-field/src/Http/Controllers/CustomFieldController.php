@@ -3,12 +3,10 @@
 namespace Botble\CustomField\Http\Controllers;
 
 use Botble\Base\Facades\Assets;
-use Botble\Base\Facades\PageTitle;
-use Botble\Base\Forms\FormBuilder;
+use Botble\Base\Http\Actions\DeleteResourceAction;
 use Botble\Base\Http\Controllers\BaseController;
-use Botble\Base\Http\Responses\BaseHttpResponse;
+use Botble\Base\Supports\Breadcrumb;
 use Botble\CustomField\Actions\CreateCustomFieldAction;
-use Botble\CustomField\Actions\DeleteCustomFieldAction;
 use Botble\CustomField\Actions\ExportCustomFieldsAction;
 use Botble\CustomField\Actions\ImportCustomFieldsAction;
 use Botble\CustomField\Actions\UpdateCustomFieldAction;
@@ -16,22 +14,22 @@ use Botble\CustomField\Facades\CustomField;
 use Botble\CustomField\Forms\CustomFieldForm;
 use Botble\CustomField\Http\Requests\CreateFieldGroupRequest;
 use Botble\CustomField\Http\Requests\UpdateFieldGroupRequest;
-use Botble\CustomField\Repositories\Interfaces\FieldGroupInterface;
-use Botble\CustomField\Repositories\Interfaces\FieldItemInterface;
+use Botble\CustomField\Models\FieldGroup;
 use Botble\CustomField\Tables\CustomFieldTable;
-use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 
 class CustomFieldController extends BaseController
 {
-    public function __construct(protected FieldGroupInterface $fieldGroupRepository, protected FieldItemInterface $fieldItemRepository)
+    protected function breadcrumb(): Breadcrumb
     {
+        return parent::breadcrumb()
+            ->add(trans('plugins/custom-field::base.page_title'), route('custom-fields.index'));
     }
 
     public function index(CustomFieldTable $dataTable)
     {
-        PageTitle::setTitle(trans('plugins/custom-field::base.page_title'));
+        $this->pageTitle(trans('plugins/custom-field::base.page_title'));
 
         Assets::addScriptsDirectly('vendor/core/plugins/custom-field/js/import-field-group.js')
             ->addScripts(['blockui']);
@@ -39,106 +37,63 @@ class CustomFieldController extends BaseController
         return $dataTable->renderTable();
     }
 
-    public function create(FormBuilder $formBuilder)
+    public function create()
     {
-        PageTitle::setTitle(trans('plugins/custom-field::base.form.create_field_group'));
+        $this->pageTitle(trans('plugins/custom-field::base.form.create_field_group'));
 
-        Assets::addStylesDirectly([
-            'vendor/core/plugins/custom-field/css/custom-field.css',
-            'vendor/core/plugins/custom-field/css/edit-field-group.css',
-        ])
-            ->addScriptsDirectly('vendor/core/plugins/custom-field/js/edit-field-group.js')
-            ->addScripts(['jquery-ui']);
+        $this->registerAssets();
 
-        return $formBuilder->create(CustomFieldForm::class)->renderForm();
+        return CustomFieldForm::create()->renderForm();
     }
 
-    public function store(CreateFieldGroupRequest $request, CreateCustomFieldAction $action, BaseHttpResponse $response)
+    public function store(CreateFieldGroupRequest $request, CreateCustomFieldAction $action)
     {
         $result = $action->run($request->input());
 
-        $hasError = false;
-        $message = trans('core/base::notices.create_success_message');
+        $response = $this->httpResponse()->withCreatedSuccessMessage();
+
         if ($result['error']) {
-            $hasError = true;
-            $message = Arr::first($result['messages']);
+            $response->setError()->setMessage(
+                Arr::first($result['messages'])
+            );
         }
 
         return $response
-            ->setError($hasError)
-            ->setPreviousUrl(route('custom-fields.index'))
-            ->setNextUrl(route('custom-fields.edit', $result['data']['id']))
-            ->setMessage($message);
+            ->setPreviousRoute('custom-fields.index')
+            ->setNextRoute('custom-fields.edit', $result['data']['id']);
     }
 
-    public function edit(int|string $id, FormBuilder $formBuilder)
+    public function edit(FieldGroup $customField)
     {
-        Assets::addStylesDirectly([
-            'vendor/core/plugins/custom-field/css/custom-field.css',
-            'vendor/core/plugins/custom-field/css/edit-field-group.css',
-        ])
-            ->addScriptsDirectly('vendor/core/plugins/custom-field/js/edit-field-group.js')
-            ->addScripts(['jquery-ui']);
+        $this->registerAssets();
 
-        $fieldGroup = $this->fieldGroupRepository->findOrFail($id);
+        $this->pageTitle(trans('core/base::forms.edit_item', ['name' => $customField->title]));
 
-        PageTitle::setTitle(trans('plugins/custom-field::base.form.edit_field_group') . ' "' . $fieldGroup->title . '"');
+        $customField->rules_template = CustomField::renderRules();
 
-        $fieldGroup->rules_template = CustomField::renderRules();
-
-        return $formBuilder->create(CustomFieldForm::class, ['model' => $fieldGroup])->renderForm();
+        return CustomFieldForm::createFromModel($customField)->renderForm();
     }
 
-    public function update(
-        int|string $id,
-        UpdateFieldGroupRequest $request,
-        UpdateCustomFieldAction $action,
-        BaseHttpResponse $response
-    ) {
-        $fieldGroup = $this->fieldGroupRepository->findOrFail($id);
+    public function update(FieldGroup $customField, UpdateFieldGroupRequest $request, UpdateCustomFieldAction $action)
+    {
+        $result = $action->run($customField, $request->input());
 
-        $result = $action->run($fieldGroup, $request->input());
+        $response = $this->httpResponse();
+        $response->withUpdatedSuccessMessage();
 
-        $message = trans('core/base::notices.update_success_message');
         if ($result['error']) {
-            $response->setError();
-            $message = Arr::first($result['messages']);
+            $response->setError()->setMessage(
+                Arr::first($result['messages'])
+            );
         }
 
         return $response
-            ->setPreviousUrl(route('custom-fields.index'))
-            ->setMessage($message);
+            ->setPreviousRoute('custom-fields.index');
     }
 
-    public function destroy(int|string $id, BaseHttpResponse $response, DeleteCustomFieldAction $action)
+    public function destroy(FieldGroup $customField)
     {
-        try {
-            $fieldGroup = $this->fieldGroupRepository->findOrFail($id);
-
-            $action->run($fieldGroup);
-
-            return $response->setMessage(trans('core/base::notices.delete_success_message'));
-        } catch (Exception $exception) {
-            return $response
-                ->setError()
-                ->setMessage($exception->getMessage());
-        }
-    }
-
-    public function deletes(Request $request, BaseHttpResponse $response, DeleteCustomFieldAction $action)
-    {
-        $ids = $request->input('ids');
-        if (empty($ids)) {
-            return $response
-                ->setError()
-                ->setMessage(trans('core/base::notices.no_select'));
-        }
-
-        foreach ($ids as $id) {
-            $action->run($id);
-        }
-
-        return $response->setMessage(trans('core/base::notices.delete_success_message'));
+        return DeleteResourceAction::make($customField);
     }
 
     public function getExport(ExportCustomFieldsAction $action, $id = null)
@@ -146,7 +101,7 @@ class CustomFieldController extends BaseController
         $ids = [];
 
         if (! $id) {
-            foreach ($this->fieldGroupRepository->all() as $item) {
+            foreach (FieldGroup::query()->get() as $item) {
                 $ids[] = $item->id;
             }
         } else {
@@ -166,5 +121,16 @@ class CustomFieldController extends BaseController
         $json = (array)$request->input('json_data', []);
 
         return $action->run($json);
+    }
+
+    protected function registerAssets(): void
+    {
+        Assets::getFacadeRoot()
+            ->addStylesDirectly([
+                'vendor/core/plugins/custom-field/css/custom-field.css',
+                'vendor/core/plugins/custom-field/css/edit-field-group.css',
+            ])
+            ->addScriptsDirectly('vendor/core/plugins/custom-field/js/edit-field-group.js')
+            ->addScripts(['jquery-ui']);
     }
 }

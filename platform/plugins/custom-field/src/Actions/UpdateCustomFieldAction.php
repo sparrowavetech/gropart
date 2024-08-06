@@ -2,7 +2,7 @@
 
 namespace Botble\CustomField\Actions;
 
-use Botble\Base\Events\UpdatedContentEvent;
+use Botble\CustomField\Forms\CustomFieldForm;
 use Botble\CustomField\Models\FieldGroup;
 use Botble\CustomField\Repositories\Interfaces\FieldGroupInterface;
 use Illuminate\Support\Facades\Auth;
@@ -15,18 +15,22 @@ class UpdateCustomFieldAction extends AbstractAction
 
     public function run(FieldGroup $fieldGroup, array $data): array
     {
-        $data['updated_by'] = Auth::id();
+        $form = CustomFieldForm::createFromModel($fieldGroup);
 
-        $result = $this->fieldGroupRepository->updateFieldGroup($fieldGroup->id, $data);
+        $result = null;
 
-        event(new UpdatedContentEvent(CUSTOM_FIELD_MODULE_SCREEN_NAME, request(), $result));
+        $form
+            ->saving(function () use ($fieldGroup, $data, &$result) {
+                $data['updated_by'] = Auth::guard()->id();
+                $result = $this->fieldGroupRepository->updateFieldGroup($fieldGroup->getKey(), $data);
+            });
 
         if (! $result) {
             return $this->error();
         }
 
         return $this->success(null, [
-            'id' => $fieldGroup->id,
+            'id' => $fieldGroup->getKey(),
         ]);
     }
 }

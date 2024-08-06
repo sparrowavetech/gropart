@@ -21,7 +21,7 @@ class FieldItemRepository extends RepositoriesAbstract implements FieldItemInter
                 'field_group_id' => $groupId,
                 'parent_id' => $parentId,
             ])
-            ->orderBy('order', 'ASC')
+            ->orderBy('order')
             ->get();
     }
 

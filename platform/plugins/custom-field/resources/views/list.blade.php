@@ -1,7 +1,17 @@
 @extends('core/table::table')
+
 @section('main-table')
-    {!! Form::open(['url' => route('custom-fields.import'), 'class' => 'import-field-group']) !!}
-        <input type="file" accept="application/json" class="hidden" id="import_json">
+    <x-core::form
+        :url="route('custom-fields.import')"
+        method="post"
+        class="import-field-group"
+    >
+        <input
+            type="file"
+            accept="application/json"
+            class="d-none"
+            id="import_json"
+        >
         @parent
-    {!! Form::close() !!}
-@stop
+    </x-core::form>
+@endsection

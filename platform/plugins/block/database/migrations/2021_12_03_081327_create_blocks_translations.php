@@ -12,10 +12,10 @@ return new class () extends Migration {
         }
 
         Schema::create('blocks_translations', function (Blueprint $table) {
-            $table->string('lang_code');
+            $table->string('lang_code', 20);
             $table->foreignId('blocks_id');
-            $table->string('name', 255)->nullable();
-            $table->string('description', 255)->nullable();
+            $table->string('name')->nullable();
+            $table->string('description', 400)->nullable();
             $table->longText('content')->nullable();
 
             $table->primary(['lang_code', 'blocks_id'], 'blocks_translations_primary');

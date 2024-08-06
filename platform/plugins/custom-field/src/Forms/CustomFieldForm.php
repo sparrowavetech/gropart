@@ -2,7 +2,12 @@
 
 namespace Botble\CustomField\Forms;
 
-use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Base\Forms\FieldOptions\NameFieldOption;
+use Botble\Base\Forms\FieldOptions\SortOrderFieldOption;
+use Botble\Base\Forms\FieldOptions\StatusFieldOption;
+use Botble\Base\Forms\Fields\NumberField;
+use Botble\Base\Forms\Fields\SelectField;
+use Botble\Base\Forms\Fields\TextField;
 use Botble\Base\Forms\FormAbstract;
 use Botble\CustomField\Facades\CustomField;
 use Botble\CustomField\Http\Requests\CreateFieldGroupRequest;
@@ -16,39 +21,30 @@ class CustomFieldForm extends FormAbstract
         parent::__construct();
     }
 
-    public function buildForm(): void
+    public function setup(): void
     {
+        $model = $this->getModel();
         $customFieldItems = [];
-        if ($this->getModel()) {
+
+        if ($model) {
             $customFieldItems = $this->fieldGroupRepository->getFieldGroupItems($this->getModel()->id);
-            $this->setActionButtons(view('plugins/custom-field::actions', ['object' => $this->getModel()])->render());
         }
 
+        add_filter('base_action_form_actions_extra', function (string $html) use ($model): string {
+            if (! $model) {
+                return $html;
+            }
+
+            return $html . view('plugins/custom-field::_partials.export-button', compact('model'));
+        });
+
         $this
-            ->setupModel(new FieldGroup())
+            ->model(FieldGroup::class)
             ->setValidatorClass(CreateFieldGroupRequest::class)
             ->setFormOption('class', 'form-update-field-group')
-            ->withCustomFields()
-            ->add('title', 'text', [
-                'label' => trans('core/base::forms.title'),
-                'label_attr' => ['class' => 'control-label required'],
-                'attr' => [
-                    'data-counter' => 120,
-                ],
-            ])
-            ->add('status', 'customSelect', [
-                'label' => trans('core/base::tables.status'),
-                'label_attr' => ['class' => 'control-label required'],
-                'choices' => BaseStatusEnum::labels(),
-            ])
-            ->add('order', 'number', [
-                'label' => trans('core/base::forms.order'),
-                'label_attr' => ['class' => 'control-label'],
-                'attr' => [
-                    'placeholder' => trans('core/base::forms.order_by_placeholder'),
-                ],
-                'default_value' => 0,
-            ])
+            ->add('title', TextField::class, NameFieldOption::make()->label(trans('core/base::forms.title'))->toArray())
+            ->add('status', SelectField::class, StatusFieldOption::make()->toArray())
+            ->add('order', NumberField::class, SortOrderFieldOption::make()->toArray())
             ->setBreakFieldPoint('status')
             ->addMetaBoxes([
                 'rules' => [

@@ -11,8 +11,8 @@ class BlockRequest extends Request
     public function rules(): array
     {
         return [
-            'name' => 'required|max:120',
-            'alias' => 'required|max:120',
+            'name' => ['required', 'string', 'max:250'],
+            'alias' => ['required', 'string', 'max:250'],
             'status' => Rule::in(BaseStatusEnum::values()),
         ];
     }

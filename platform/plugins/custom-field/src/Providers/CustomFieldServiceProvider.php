@@ -2,8 +2,8 @@
 
 namespace Botble\CustomField\Providers;
 
-use Botble\ACL\Repositories\Interfaces\RoleInterface;
-use Botble\ACL\Repositories\Interfaces\UserInterface;
+use Botble\ACL\Models\Role;
+use Botble\ACL\Models\User;
 use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
@@ -22,7 +22,6 @@ use Botble\CustomField\Repositories\Interfaces\FieldItemInterface;
 use Botble\CustomField\Support\CustomFieldSupport;
 use Botble\LanguageAdvanced\Supports\LanguageAdvancedManager;
 use Botble\Page\Models\Page;
-use Botble\Page\Repositories\Interfaces\PageInterface;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Routing\Events\RouteMatched;
 
@@ -61,17 +60,18 @@ class CustomFieldServiceProvider extends ServiceProvider
 
         $this->app->register(EventServiceProvider::class);
 
-        $this->app['events']->listen(RouteMatched::class, function () {
-            DashboardMenu::registerItem([
-                'id' => 'cms-plugins-custom-field',
-                'priority' => 5,
-                'parent_id' => null,
-                'name' => 'plugins/custom-field::base.admin_menu.title',
-                'icon' => 'fas fa-cubes',
-                'url' => route('custom-fields.index'),
-                'permissions' => ['custom-fields.index'],
-            ]);
+        DashboardMenu::default()->beforeRetrieving(function () {
+            DashboardMenu::make()
+                ->registerItem([
+                    'id' => 'cms-plugins-custom-field',
+                    'priority' => 400,
+                    'name' => 'plugins/custom-field::base.admin_menu.title',
+                    'icon' => 'ti ti-table-options',
+                    'route' => 'custom-fields.index',
+                ]);
+        });
 
+        $this->app['events']->listen(RouteMatched::class, function () {
             $this->registerUsersFields();
             $this->registerPagesFields();
 
@@ -98,7 +98,7 @@ class CustomFieldServiceProvider extends ServiceProvider
             trans('plugins/custom-field::rules.logged_in_user'),
             'logged_in_user',
             function () {
-                $users = $this->app->make(UserInterface::class)->all();
+                $users = User::query()->get();
                 $userArr = [];
                 foreach ($users as $user) {
                     $userArr[$user->id] = $user->username . ' - ' . $user->email;
@@ -112,7 +112,7 @@ class CustomFieldServiceProvider extends ServiceProvider
                 trans('plugins/custom-field::rules.logged_in_user_has_role'),
                 'logged_in_user_has_role',
                 function () {
-                    $roles = $this->app->make(RoleInterface::class)->all();
+                    $roles = Role::query()->get();
                     $rolesArr = [];
                     foreach ($roles as $role) {
                         $rolesArr[$role->slug] = $role->name . ' - (' . $role->slug . ')';
@@ -138,13 +138,12 @@ class CustomFieldServiceProvider extends ServiceProvider
             }
         )
             ->registerRule('basic', trans('plugins/custom-field::rules.page'), Page::class, function () {
-                return $this->app->make(PageInterface::class)
-                    ->getModel()
+                return Page::query()
                     ->select([
                         'id',
                         'name',
                     ])
-                    ->orderBy('created_at', 'DESC')
+                    ->orderByDesc('created_at')
                     ->pluck('name', 'id')
                     ->toArray();
             })

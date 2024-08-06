@@ -31,7 +31,7 @@ class FieldGroupRepository extends RepositoriesAbstract implements FieldGroupInt
     {
         return $this->model
             ->where($condition)
-            ->orderBy('order', 'ASC')
+            ->orderBy('order')
             ->get();
     }
 

@@ -34,16 +34,14 @@ class CustomField extends BaseModel
 
     protected function resolvedValue(): Attribute
     {
-        return Attribute::make(
-            get: function () {
-                $value = $this->value;
+        return Attribute::get(function () {
+            $value = $this->value;
 
-                if ($this->type === 'repeater') {
-                    $value = json_decode((string)$this->value, true);
-                }
+            if ($this->type === 'repeater') {
+                $value = json_decode((string)$this->value, true);
+            }
 
-                return $value;
-            },
-        );
+            return $value;
+        });
     }
 }

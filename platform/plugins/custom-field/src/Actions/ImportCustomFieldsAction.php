@@ -2,6 +2,8 @@
 
 namespace Botble\CustomField\Actions;
 
+use Botble\CustomField\Models\FieldGroup;
+use Botble\CustomField\Models\FieldItem;
 use Botble\CustomField\Repositories\Interfaces\FieldGroupInterface;
 use Botble\CustomField\Repositories\Interfaces\FieldItemInterface;
 use Illuminate\Support\Arr;
@@ -27,9 +29,9 @@ class ImportCustomFieldsAction extends AbstractAction
             }
 
             $validator = Validator::make($fieldGroup, [
-                'order' => 'integer|min:0|required',
-                'rules' => 'json|required',
-                'title' => 'required|max:255',
+                'order' => ['required', 'integer', 'min:0'],
+                'rules' => ['required', 'json'],
+                'title' => ['required', 'string', 'max:250'],
             ]);
 
             if (isset($fieldGroup['status']) && is_array($fieldGroup['status'])) {
@@ -42,8 +44,8 @@ class ImportCustomFieldsAction extends AbstractAction
                 return $this->error($validator->messages()->first());
             }
 
-            $fieldGroup['created_by'] = Auth::id();
-            $item = $this->fieldGroupRepository->create($fieldGroup);
+            $fieldGroup['created_by'] = Auth::guard()->id();
+            $item = FieldGroup::query()->create($fieldGroup);
             if (! $item) {
                 DB::rollBack();
 
@@ -66,24 +68,23 @@ class ImportCustomFieldsAction extends AbstractAction
     {
         foreach ($items as $item) {
             $validator = Validator::make($item, [
-                'order' => 'integer|min:0|required',
-                'title' => 'required|max:255',
-                'slug' => 'required|max:255',
-                'type' => 'required|max:100',
+                'order' => ['required', 'integer', 'min:0'],
+                'title' => ['required', 'string', 'max:250'],
+                'slug' => ['required', 'string', 'max:250'],
+                'type' => ['required', 'string', 'max:100'],
             ]);
 
             if ($validator->fails()) {
                 return [
                     'error' => true,
                     'message' => $validator->messages()->first(),
-
                 ];
             }
 
             $item['field_group_id'] = $fieldGroupId;
             $item['parent_id'] = $parentId;
-            $item['created_by'] = Auth::id();
-            $field = $this->fieldItemRepository->create($item);
+            $item['created_by'] = Auth::guard()->id();
+            $field = FieldItem::query()->create($item);
 
             if (! $field) {
                 return [

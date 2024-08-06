@@ -2,10 +2,13 @@
 
 namespace Botble\Block\Providers;
 
-use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Base\Forms\FieldOptions\SelectFieldOption;
+use Botble\Base\Forms\Fields\SelectField;
+use Botble\Base\Forms\FormAbstract;
 use Botble\Base\Supports\ServiceProvider;
 use Botble\Block\Models\Block;
 use Botble\Shortcode\Compilers\Shortcode;
+use Botble\Shortcode\Forms\ShortcodeForm;
 
 class HookServiceProvider extends ServiceProvider
 {
@@ -22,27 +25,43 @@ class HookServiceProvider extends ServiceProvider
             [$this, 'render']
         );
 
+        shortcode()->setPreviewImage(
+            'static-block',
+            asset('vendor/core/packages/shortcode/images/placeholder-code.jpg')
+        );
+
         shortcode()->setAdminConfig('static-block', [$this, 'staticBlockAdminConfig']);
     }
 
     public function render(Shortcode $shortcode): string|null
     {
+        $key = $shortcode->alias;
+
+        if (! $key) {
+            return null;
+        }
+
         return Block::query()
-            ->where([
-                'alias' => $shortcode->alias,
-                'status' => BaseStatusEnum::PUBLISHED,
-            ])
+            ->wherePublished()
+            ->where('alias', $key)
             ->value('content');
     }
 
-    public function staticBlockAdminConfig(array $attributes, string|null $content): string
+    public function staticBlockAdminConfig(array $attributes): FormAbstract
     {
         $blocks = Block::query()
-            ->where('status', BaseStatusEnum::PUBLISHED)
+            ->wherePublished()
             ->pluck('name', 'alias')
             ->all();
 
-        return view('plugins/block::partials.short-code-admin-config', compact('blocks', 'attributes', 'content'))
-            ->render();
+        return ShortcodeForm::createFromArray($attributes)
+            ->add(
+                'alias',
+                SelectField::class,
+                SelectFieldOption::make()
+                    ->label(trans('plugins/block::block.static_block_short_code_name'))
+                    ->choices($blocks)
+                    ->toArray()
+            );
     }
 }

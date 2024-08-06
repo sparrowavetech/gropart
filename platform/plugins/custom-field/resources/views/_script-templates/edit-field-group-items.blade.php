@@ -1,113 +1,103 @@
-<script id="_options-repeater_template" type="text/x-custom-template">
-    <div class="line" data-option="repeater">
+<x-core::custom-template id="_options-repeater_template">
+    <div class="line row border-bottom py-3" data-option="repeater">
         <div class="col-3">
-            <h5>{!! BaseHelper::clean(trans('plugins/custom-field::base.form.repeater_fields')) !!}</h5>
+            <x-core::form.label>{!! BaseHelper::clean(trans('plugins/custom-field::base.form.repeater_fields')) !!}</x-core::form.label>
         </div>
         <div class="col-9">
-            <h5>{!! BaseHelper::clean(trans('plugins/custom-field::base.form.repeater_fields')) !!}</h5>
+            <x-core::form.label>{!! BaseHelper::clean(trans('plugins/custom-field::base.form.repeater_fields')) !!}</x-core::form.label>
             <div class="add-new-field">
                 <ul class="row list-group field-table-header clearfix">
                     <li class="col-4 list-group-item w-bold">{{ trans('plugins/custom-field::base.form.field_label') }}</li>
                     <li class="col-4 list-group-item w-bold">{{ trans('plugins/custom-field::base.form.field_name') }}</li>
                     <li class="col-4 list-group-item w-bold">{{ trans('plugins/custom-field::base.form.field_type') }}</li>
                 </ul>
-                <div class="clearfix"></div>
-                <ul class="sortable-wrapper edit-field-group-items field-group-items">
+                <ul class="sortable-wrapper edit-field-group-items field-group-items"></ul>
 
-                </ul>
-                <div class="text-end pt10">
+                <div class="text-end">
                     <a class="btn btn-info btn-add-field" href="#">{{ trans('plugins/custom-field::base.form.add_field') }}</a>
                 </div>
             </div>
         </div>
-        <div class="clearfix"></div>
     </div>
-</script>
-
-<script id="_options-defaultvalue_template" type="text/x-custom-template">
-    <div class="line" data-option="defaultvalue">
+</x-core::custom-template>
+<x-core::custom-template id="_options-defaultvalue_template">
+    <div class="line row border-bottom py-3" data-option="defaultvalue">
         <div class="col-3">
-            <h5>{!! BaseHelper::clean(trans('plugins/custom-field::base.form.default_value')) !!}</h5>
-            <p>{!! BaseHelper::clean(trans('plugins/custom-field::base.form.default_value_helper')) !!}</p>
+            <x-core::form.label class="mb-0">{!! BaseHelper::clean(trans('plugins/custom-field::base.form.default_value')) !!}</x-core::form.label>
+            <div class="form-control-plaintext">{!! BaseHelper::clean(trans('plugins/custom-field::base.form.default_value_helper')) !!}</div>
         </div>
         <div class="col-9">
-            <h5>{!! BaseHelper::clean(trans('plugins/custom-field::base.form.default_value')) !!}</h5>
+            <x-core::form.label>{!! BaseHelper::clean(trans('plugins/custom-field::base.form.default_value')) !!}</x-core::form.label>
             <input type="text" class="form-control" placeholder="" value="">
         </div>
-        <div class="clearfix"></div>
     </div>
-</script>
+</x-core::custom-template>
 
-<script id="_options-placeholdertext_template" type="text/x-custom-template">
-    <div class="line" data-option="placeholdertext">
+<x-core::custom-template id="_options-placeholdertext_template">
+    <div class="line row py-3" data-option="placeholdertext">
         <div class="col-3">
-            <h5>{!! BaseHelper::clean(trans('plugins/custom-field::base.form.placeholder')) !!}</h5>
-            <p>{!! BaseHelper::clean(trans('plugins/custom-field::base.form.placeholder_helper')) !!}</p>
+            <x-core::form.label class="mb-0">{!! BaseHelper::clean(trans('plugins/custom-field::base.form.placeholder')) !!}</x-core::form.label>
+            <div class="form-control-plaintext">{!! BaseHelper::clean(trans('plugins/custom-field::base.form.placeholder_helper')) !!}</div>
         </div>
         <div class="col-9">
-            <h5>{!! BaseHelper::clean(trans('plugins/custom-field::base.form.placeholder')) !!}</h5>
+            <x-core::form.label>{!! BaseHelper::clean(trans('plugins/custom-field::base.form.placeholder')) !!}</x-core::form.label>
             <input type="text" class="form-control" placeholder="" value="">
         </div>
-        <div class="clearfix"></div>
     </div>
-</script>
+</x-core::custom-template>
 
-<script id="_options-defaultvaluetextarea_template" type="text/x-custom-template">
-    <div class="line" data-option="defaultvaluetextarea">
+<x-core::custom-template id="_options-defaultvaluetextarea_template">
+    <div class="line row border-bottom py-3" data-option="defaultvaluetextarea">
         <div class="col-3">
-            <h5>{!! BaseHelper::clean(trans('plugins/custom-field::base.form.default_value')) !!}</h5>
-            <p>{!! BaseHelper::clean(trans('plugins/custom-field::base.form.default_value_helper')) !!}</p>
+            <x-core::form.label class="mb-0">{!! BaseHelper::clean(trans('plugins/custom-field::base.form.default_value')) !!}</x-core::form.label>
+            <div class="form-control-plaintext">{!! BaseHelper::clean(trans('plugins/custom-field::base.form.default_value_helper')) !!}</div>
         </div>
         <div class="col-9">
-            <h5>{!! BaseHelper::clean(trans('plugins/custom-field::base.form.default_value')) !!}</h5>
+            <x-core::form.label>{!! BaseHelper::clean(trans('plugins/custom-field::base.form.default_value')) !!}</x-core::form.label>
             <textarea class="form-control" rows="5"></textarea>
         </div>
-        <div class="clearfix"></div>
     </div>
-</script>
+</x-core::custom-template>
 
-<script id="_options-rows_template" type="text/x-custom-template">
-    <div class="line" data-option="rows">
+<x-core::custom-template id="_options-rows_template">
+    <div class="line row border-bottom py-3" data-option="rows">
         <div class="col-3">
-            <h5>{!! BaseHelper::clean(trans('plugins/custom-field::base.form.rows')) !!}</h5>
-            <p>{!! BaseHelper::clean(trans('plugins/custom-field::base.form.rows_helper')) !!}</p>
+            <x-core::form.label class="mb-0">{!! BaseHelper::clean(trans('plugins/custom-field::base.form.rows')) !!}</x-core::form.label>
+            <div class="form-control-plaintext">{!! BaseHelper::clean(trans('plugins/custom-field::base.form.rows_helper')) !!}</div>
         </div>
         <div class="col-9">
-            <h5>{!! BaseHelper::clean(trans('plugins/custom-field::base.form.rows')) !!}</h5>
+            <x-core::form.label>{!! BaseHelper::clean(trans('plugins/custom-field::base.form.rows')) !!}</x-core::form.label>
             <input type="number" class="form-control" placeholder="Number" value="" min="1" max="10">
         </div>
-        <div class="clearfix"></div>
     </div>
-</script>
+</x-core::custom-template>
 
-<script id="_options-selectchoices_template" type="text/x-custom-template">
-    <div class="line" data-option="selectchoices">
+<x-core::custom-template id="_options-selectchoices_template">
+    <div class="line row border-bottom py-3" data-option="selectchoices">
         <div class="col-3">
-            <h5>{!! BaseHelper::clean(trans('plugins/custom-field::base.form.choices')) !!}</h5>
-            <p>{!! BaseHelper::clean(trans('plugins/custom-field::base.form.choices_helper')) !!}</p>
+            <x-core::form.label class="mb-0">{!! BaseHelper::clean(trans('plugins/custom-field::base.form.choices')) !!}</x-core::form.label>
+            <div class="form-control-plaintext">{!! BaseHelper::clean(trans('plugins/custom-field::base.form.choices_helper')) !!}</div>
         </div>
         <div class="col-9">
-            <h5>{!! BaseHelper::clean(trans('plugins/custom-field::base.form.choices')) !!}</h5>
+            <x-core::form.label>{!! BaseHelper::clean(trans('plugins/custom-field::base.form.choices')) !!}</x-core::form.label>
             <textarea class="form-control" rows="5"></textarea>
         </div>
-        <div class="clearfix"></div>
     </div>
-</script>
+</x-core::custom-template>
 
-<script id="_options-buttonlabel_template" type="text/x-custom-template">
-    <div class="line" data-option="buttonlabel">
+<x-core::custom-template id="_options-buttonlabel_template">
+    <div class="line row border-bottom py-3" data-option="buttonlabel">
         <div class="col-3">
-            <h5>{!! BaseHelper::clean(trans('plugins/custom-field::base.form.button_label')) !!}</h5>
+            <x-core::form.label>{!! BaseHelper::clean(trans('plugins/custom-field::base.form.button_label')) !!}</x-core::form.label>
         </div>
         <div class="col-9">
-            <h5>{!! BaseHelper::clean(trans('plugins/custom-field::base.form.button_label')) !!}</h5>
+            <x-core::form.label>{!! BaseHelper::clean(trans('plugins/custom-field::base.form.button_label')) !!}</x-core::form.label>
             <input type="text" class="form-control" placeholder="Add new" value="">
         </div>
-        <div class="clearfix"></div>
     </div>
-</script>
+</x-core::custom-template>
 
-<script id="_new-field-source_template" type="text/x-custom-template">
+<x-core::custom-template id="_new-field-source_template">
     <li class="ui-sortable-handle active">
         <div class="field-column">
             <div class="row">
@@ -116,42 +106,38 @@
                 <div class="text col-4 field-type">{!! BaseHelper::clean(trans('plugins/custom-field::base.form.types.text')) !!}</div>
             </div>
             <a class="show-item-details" title="" href="#"><i class="fa fa-angle-down"></i></a>
-            <div class="clearfix"></div>
         </div>
-        <div class="item-details">
-            <div class="line" data-option="title">
+        <div class="item-details px-3">
+            <div class="line row border-bottom py-3" data-option="title">
                 <div class="col-3">
-                    <h5>{!! BaseHelper::clean(trans('plugins/custom-field::base.form.field_label')) !!}</h5>
-                    <p>{!! BaseHelper::clean(trans('plugins/custom-field::base.form.field_label_helper')) !!}</p>
+                    <x-core::form.label class="mb-0">{!! BaseHelper::clean(trans('plugins/custom-field::base.form.field_label')) !!}</x-core::form.label>
+                    <div class="form-control-plaintext">{!! BaseHelper::clean(trans('plugins/custom-field::base.form.field_label_helper')) !!}</div>
                 </div>
                 <div class="col-9">
-                    <h5>{!! BaseHelper::clean(trans('plugins/custom-field::base.form.field_label')) !!}</h5>
+                    <x-core::form.label>{!! BaseHelper::clean(trans('plugins/custom-field::base.form.field_label')) !!}</x-core::form.label>
                     <input type="text" class="form-control" placeholder="" value="New field">
                 </div>
-                <div class="clearfix"></div>
             </div>
-            <div class="line" data-option="slug">
+            <div class="line row border-bottom py-3" data-option="slug">
                 <div class="col-3">
-                    <h5>{!! BaseHelper::clean(trans('plugins/custom-field::base.form.field_name')) !!}</h5>
-                    <p>{!! BaseHelper::clean(trans('plugins/custom-field::base.form.field_name_helper')) !!}</p>
+                    <x-core::form.label class="mb-0">{!! BaseHelper::clean(trans('plugins/custom-field::base.form.field_name')) !!}</x-core::form.label>
+                    <div class="form-control-plaintext">{!! BaseHelper::clean(trans('plugins/custom-field::base.form.field_name_helper')) !!}</div>
                 </div>
                 <div class="col-9">
-                    <h5>{!! BaseHelper::clean(trans('plugins/custom-field::base.form.field_name')) !!}</h5>
+                    <x-core::form.label>{!! BaseHelper::clean(trans('plugins/custom-field::base.form.field_name')) !!}</x-core::form.label>
                     <input type="text" class="form-control" placeholder="" value="">
                 </div>
-                <div class="clearfix"></div>
             </div>
-            <div class="line" data-option="type">
+            <div class="line row border-bottom py-3" data-option="type">
                 <div class="col-3">
-                    <h5>{!! BaseHelper::clean(trans('plugins/custom-field::base.form.field_type')) !!}</h5>
-                    <p>{!! BaseHelper::clean(trans('plugins/custom-field::base.form.field_type_helper')) !!}</p>
+                    <x-core::form.label class="mb-0">{!! BaseHelper::clean(trans('plugins/custom-field::base.form.field_type')) !!}</x-core::form.label>
+                    <div class="form-control-plaintext">{!! BaseHelper::clean(trans('plugins/custom-field::base.form.field_type_helper')) !!}</div>
                 </div>
                 <div class="col-9">
-                    <h5>{!! BaseHelper::clean(trans('plugins/custom-field::base.form.field_type')) !!}</h5>
+                    <x-core::form.label>{!! BaseHelper::clean(trans('plugins/custom-field::base.form.field_type')) !!}</x-core::form.label>
                     <select class="form-control change-field-type">
                         <optgroup label="{{ trans('plugins/custom-field::base.form.groups.basic') }}">
-                            <option value="text"
-                                    selected="selected">{{ trans('plugins/custom-field::base.form.types.text') }}</option>
+                            <option value="text" selected="selected">{{ trans('plugins/custom-field::base.form.types.text') }}</option>
                             <option value="textarea">{{ trans('plugins/custom-field::base.form.types.textarea') }}</option>
                             <option value="number">{{ trans('plugins/custom-field::base.form.types.number') }}</option>
                             <option value="email">{{ trans('plugins/custom-field::base.form.types.email') }}</option>
@@ -172,26 +158,26 @@
                         </optgroup>
                     </select>
                 </div>
-                <div class="clearfix"></div>
             </div>
-            <div class="line" data-option="instructions">
+            <div class="line row border-bottom py-3" data-option="instructions">
                 <div class="col-3">
-                    <h5>{!! BaseHelper::clean(trans('plugins/custom-field::base.form.field_instructions')) !!}</h5>
-                    <p>{!! BaseHelper::clean(trans('plugins/custom-field::base.form.field_instructions_helper')) !!}</p>
+                    <x-core::form.label class="mb-0">{!! BaseHelper::clean(trans('plugins/custom-field::base.form.field_instructions')) !!}</x-core::form.label>
+                    <div class="form-control-plaintext">{!! BaseHelper::clean(trans('plugins/custom-field::base.form.field_instructions_helper')) !!}</div>
                 </div>
                 <div class="col-9">
-                    <h5>{!! BaseHelper::clean(trans('plugins/custom-field::base.form.field_instructions')) !!}</h5>
+                    <x-core::form.label>{!! BaseHelper::clean(trans('plugins/custom-field::base.form.field_instructions')) !!}</x-core::form.label>
                     <textarea class="form-control" rows="5"></textarea>
                 </div>
-                <div class="clearfix"></div>
             </div>
             <div class="options">___options___</div>
-            <div class="text-end p10">
-                <a class="btn red btn-remove" title=""
-                   href="#">{{ trans('plugins/custom-field::base.form.remove_field') }}</a>
-                <a class="btn blue btn-close-field" title=""
-                   href="#">{{ trans('plugins/custom-field::base.form.close_field') }}</a>
+            <div class="btn-list justify-content-end m-2">
+                <x-core::button type="button" color="danger" class="btn-remove" size="sm">
+                    {{ trans('plugins/custom-field::base.form.remove_field') }}
+                </x-core::button>
+                <x-core::button type="button" color="primary" class="btn-close-field" size="sm">
+                    {{ trans('plugins/custom-field::base.form.close_field') }}
+                </x-core::button>
             </div>
         </div>
     </li>
-</script>
+</x-core::custom-template>

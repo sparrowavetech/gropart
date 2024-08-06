@@ -2,11 +2,11 @@
 
 namespace Botble\CustomField\Providers;
 
-use Botble\ACL\Repositories\Interfaces\RoleInterface;
+use Botble\ACL\Models\Role;
 use Botble\Base\Facades\Assets;
+use Botble\Base\Models\BaseModel;
 use Botble\Base\Supports\ServiceProvider;
 use Botble\Blog\Models\Post;
-use Botble\Blog\Repositories\Interfaces\PostInterface;
 use Botble\CustomField\Facades\CustomField;
 use Botble\Page\Models\Page;
 use Illuminate\Database\Eloquent\Model;
@@ -14,39 +14,43 @@ use Illuminate\Support\Facades\Auth;
 
 class HookServiceProvider extends ServiceProvider
 {
-    public function register(): void
+    public function boot(): void
     {
         add_action(BASE_ACTION_META_BOXES, [$this, 'handle'], 125, 2);
     }
 
-    public function handle(string $priority, ?Model $object = null): void
+    public function handle(string $priority, array|Model|null $object = null): void
     {
-        $reference = get_class($object);
+        if (! $object instanceof BaseModel) {
+            return;
+        }
+
+        $reference = $object::class;
         if (CustomField::isSupportedModule($reference) && $priority == 'advanced') {
             add_custom_fields_rules_to_check([
-                $reference => isset($object->id) ? $object->id : null,
+                $reference => $object->id ?? null,
                 'model_name' => $reference,
             ]);
 
             /**
              * Every model will have these rules by default
              */
-            if (Auth::check()) {
+            if (Auth::guard()->check()) {
                 add_custom_fields_rules_to_check([
-                    'logged_in_user' => Auth::id(),
-                    'logged_in_user_has_role' => $this->app->make(RoleInterface::class)->pluck('id'),
+                    'logged_in_user' => Auth::guard()->id(),
+                    'logged_in_user_has_role' => Role::query()->pluck('id')->all(),
                 ]);
             }
 
             if (defined('PAGE_MODULE_SCREEN_NAME') && $reference == Page::class) {
                 add_custom_fields_rules_to_check([
-                    'page_template' => isset($object->template) ? $object->template : '',
+                    'page_template' => $object->template ?? '',
                 ]);
             }
 
             if (defined('POST_MODULE_SCREEN_NAME')) {
-                if ($reference == Post::class && $object) {
-                    $relatedCategoryIds = $this->app->make(PostInterface::class)->getRelatedCategoryIds($object);
+                if ($object instanceof Post) {
+                    $relatedCategoryIds = $object->categories()->allRelatedIds()->toArray();
                     add_custom_fields_rules_to_check([
                         $reference . '_post_with_related_category' => $relatedCategoryIds,
                         $reference . '_post_format' => $object->format_type,
@@ -54,7 +58,7 @@ class HookServiceProvider extends ServiceProvider
                 }
             }
 
-            echo $this->render($reference, isset($object->id) ? $object->id : null);
+            echo $this->render($reference, $object->id ?? null);
         }
     }
 

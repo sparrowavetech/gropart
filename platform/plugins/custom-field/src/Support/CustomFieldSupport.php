@@ -2,15 +2,15 @@
 
 namespace Botble\CustomField\Support;
 
-use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Models\BaseModel;
-use Botble\CustomField\Repositories\Interfaces\CustomFieldInterface;
+use Botble\Base\Supports\Editor;
+use Botble\CustomField\Models\CustomField;
+use Botble\CustomField\Models\FieldGroup;
 use Botble\CustomField\Repositories\Interfaces\FieldGroupInterface;
-use Botble\CustomField\Repositories\Interfaces\FieldItemInterface;
 use Botble\Language\Facades\Language;
 use Botble\LanguageAdvanced\Supports\LanguageAdvancedManager;
 use Closure;
-use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
@@ -32,23 +32,7 @@ class CustomFieldSupport
 
     protected array $rules = [];
 
-    protected Application $app;
-
-    protected FieldGroupInterface $fieldGroupRepository;
-
-    protected CustomFieldInterface $customFieldRepository;
-
-    protected FieldItemInterface $fieldItemRepository;
-
     protected bool $isRenderedAssets = false;
-
-    public function __construct()
-    {
-        $this->app = app();
-        $this->fieldGroupRepository = $this->app->make(FieldGroupInterface::class);
-        $this->customFieldRepository = $this->app->make(CustomFieldInterface::class);
-        $this->fieldItemRepository = $this->app->make(FieldItemInterface::class);
-    }
 
     public function expandRuleGroup(string $groupName): self
     {
@@ -138,11 +122,14 @@ class CustomFieldSupport
 
     public function exportCustomFieldsData(string $morphClass, int|string|null $morphId): array
     {
-        $fieldGroups = $this->fieldGroupRepository->getFieldGroups([
-            'status' => BaseStatusEnum::PUBLISHED,
-        ]);
+        $fieldGroups = FieldGroup::query()
+            ->wherePublished()
+            ->orderBy('order')
+            ->get();
 
         $result = [];
+
+        $fieldGroupRepository = app(FieldGroupInterface::class);
 
         foreach ($fieldGroups as $row) {
             if (! $this->checkRules(json_decode((string)$row->rules, true))) {
@@ -152,7 +139,7 @@ class CustomFieldSupport
             $result[] = [
                 'id' => $row->id,
                 'title' => $row->title,
-                'items' => $this->fieldGroupRepository->getFieldGroupItems(
+                'items' => $fieldGroupRepository->getFieldGroupItems(
                     $row->id,
                     null,
                     true,
@@ -244,6 +231,8 @@ class CustomFieldSupport
 
     public function renderCustomFieldBoxes(array $boxes): string
     {
+        (new Editor())->registerAssets();
+
         return view('plugins/custom-field::custom-fields-boxes-renderer', [
             'customFieldBoxes' => json_encode($boxes),
         ])->render();
@@ -252,12 +241,14 @@ class CustomFieldSupport
     public function renderAssets(): void
     {
         if (! $this->isRenderedAssets) {
-            echo view('plugins/custom-field::_script-templates.render-custom-fields')->render();
+            add_filter(BASE_FILTER_FOOTER_LAYOUT_TEMPLATE, function (string|null $html): string {
+                return $html . view('plugins/custom-field::_script-templates.render-custom-fields')->render();
+            }, 16);
             $this->isRenderedAssets = true;
         }
     }
 
-    public function saveCustomFields(Request $request, BaseModel $data): bool
+    public function saveCustomFields(Request $request, Model $data): bool
     {
         $fields = $request->input('custom_fields');
 
@@ -268,7 +259,7 @@ class CustomFieldSupport
         $rows = $this->parseRawData($fields);
 
         foreach ($rows as $row) {
-            $this->saveCustomField(get_class($data), $data->id, $row);
+            $this->saveCustomField($data::class, $data->getKey(), $row);
         }
 
         return true;
@@ -290,12 +281,14 @@ class CustomFieldSupport
 
     protected function saveCustomField(string $reference, int|string $id, array $data): void
     {
-        $currentMeta = $this->customFieldRepository->getFirstBy([
-            'field_item_id' => $data['id'],
-            'slug' => $data['slug'],
-            'use_for' => $reference,
-            'use_for_id' => $id,
-        ]);
+        $currentMeta = CustomField::query()
+            ->where([
+                'field_item_id' => $data['id'],
+                'slug' => $data['slug'],
+                'use_for' => $reference,
+                'use_for_id' => $id,
+            ])
+            ->first();
 
         $value = $this->parseFieldValue($data);
 
@@ -305,9 +298,11 @@ class CustomFieldSupport
 
         $data['value'] = $value;
 
-        $currentLanguage = Language::getRefLang();
-
-        if (defined('LANGUAGE_MODULE_SCREEN_NAME') && $currentLanguage && $currentLanguage != Language::getDefaultLocaleCode()) {
+        if (
+            defined('LANGUAGE_MODULE_SCREEN_NAME') &&
+            ($currentLanguage = Language::getRefLang()) &&
+            $currentLanguage != Language::getDefaultLocaleCode()
+        ) {
             $request = new Request();
             $request->replace([
                 'language' => request()->input('language'),
@@ -320,18 +315,19 @@ class CustomFieldSupport
                 $data['use_for_id'] = $id;
                 $data['field_item_id'] = $data['id'];
 
-                $currentMeta = $this->customFieldRepository->create($data);
+                $currentMeta = CustomField::query()->create($data);
             }
 
             LanguageAdvancedManager::save($currentMeta, $request);
         } elseif ($currentMeta) {
-            $this->customFieldRepository->createOrUpdate($data, ['id' => $currentMeta->id]);
+            $currentMeta->fill($data);
+            $currentMeta->save();
         } else {
             $data['use_for'] = $reference;
             $data['use_for_id'] = $id;
             $data['field_item_id'] = $data['id'];
 
-            $this->customFieldRepository->create($data);
+            CustomField::query()->create($data);
         }
     }
 
@@ -371,13 +367,15 @@ class CustomFieldSupport
         return $value;
     }
 
-    public function deleteCustomFields(BaseModel|null $data): bool
+    public function deleteCustomFields(Model|null $data): bool
     {
         if ($data) {
-            $this->customFieldRepository->deleteBy([
-                'use_for' => get_class($data),
-                'use_for_id' => $data->id,
-            ]);
+            CustomField::query()
+                ->where([
+                    'use_for' => get_class($data),
+                    'use_for_id' => $data->getKey(),
+                ])
+                ->delete();
         }
 
         return false;
@@ -410,20 +408,22 @@ class CustomFieldSupport
 
     public function getField(BaseModel $data, $key = null, $default = null): string|null|array
     {
-        $customFieldRepository = app(CustomFieldInterface::class);
-
         if ($key === null || ! trim($key)) {
-            return $customFieldRepository->getFirstBy([
-                'use_for' => get_class($data),
-                'use_for_id' => $data->id,
-            ]);
+            return CustomField::query()
+                ->where([
+                    'use_for' => get_class($data),
+                    'use_for_id' => $data->getKey(),
+                ])
+                ->first();
         }
 
-        $field = $customFieldRepository->getFirstBy([
-            'use_for' => get_class($data),
-            'use_for_id' => $data->id,
-            'slug' => $key,
-        ]);
+        $field = CustomField::query()
+            ->where([
+                'use_for' => get_class($data),
+                'use_for_id' => $data->getKey(),
+                'slug' => $key,
+            ])
+            ->first();
 
         if (! $field || ! $field->resolved_value) {
             return $default;

@@ -3,6 +3,7 @@
 return [
     'admin_menu' => [
         'title' => 'Custom Fields',
+        'description' => 'View and manage Custom Fields',
     ],
 
     'page_title' => 'Custom Fields',

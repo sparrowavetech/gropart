@@ -1,15 +1,15 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 return new class () extends Migration {
     public function up(): void
     {
         Schema::create('field_groups', function (Blueprint $table) {
             $table->id();
-            $table->string('title', 255);
+            $table->string('title');
             $table->text('rules')->nullable();
             $table->integer('order')->default(0);
             $table->foreignId('created_by')->nullable()->index();
@@ -23,8 +23,8 @@ return new class () extends Migration {
             $table->foreignId('field_group_id')->index();
             $table->foreignId('parent_id')->nullable()->index();
             $table->integer('order')->default(0)->nullable();
-            $table->string('title', 255);
-            $table->string('slug', 255);
+            $table->string('title');
+            $table->string('slug');
             $table->string('type', 100);
             $table->text('instructions')->nullable();
             $table->text('options')->nullable();
@@ -32,11 +32,11 @@ return new class () extends Migration {
 
         Schema::create('custom_fields', function (Blueprint $table) {
             $table->id();
-            $table->string('use_for', 255);
+            $table->string('use_for');
             $table->foreignId('use_for_id');
             $table->foreignId('field_item_id')->index();
-            $table->string('type', 255);
-            $table->string('slug', 255);
+            $table->string('type');
+            $table->string('slug');
             $table->text('value')->nullable();
         });
     }

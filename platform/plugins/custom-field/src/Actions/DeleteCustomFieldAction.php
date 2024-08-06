@@ -16,7 +16,7 @@ class DeleteCustomFieldAction extends AbstractAction
     {
         $result = $this->fieldGroupRepository->delete($fieldGroup);
 
-        event(new DeletedContentEvent(CUSTOM_FIELD_MODULE_SCREEN_NAME, request(), $fieldGroup));
+        DeletedContentEvent::dispatch($fieldGroup::class, request(), $fieldGroup);
 
         if (! $result) {
             return $this->error();
