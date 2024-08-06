@@ -32,4 +32,7 @@ return [
     ],
     'private_notes' => 'Private notes',
     'private_notes_helper' => 'Private notes are only visible to admins.',
+    'otp_verify_success' => 'OTP verify successfully',
+    'otp_verify_error' => 'OTP Does not match',
+    'verify_otp'=>'verify OTP'
 ];

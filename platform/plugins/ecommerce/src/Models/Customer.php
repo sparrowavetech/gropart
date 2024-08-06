@@ -53,6 +53,7 @@ class Customer extends BaseModel implements
         'phone',
         'status',
         'private_notes',
+        'otp'
     ];
 
     protected $hidden = [

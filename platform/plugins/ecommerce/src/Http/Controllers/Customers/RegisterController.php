@@ -18,6 +18,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Validator;
+use Botble\Sms\Supports\SmsHandler;
+use Botble\Sms\Enums\SmsEnum;
 
 class RegisterController extends BaseController
 {
@@ -32,6 +34,7 @@ class RegisterController extends BaseController
 
     public function showRegistrationForm()
     {
+
         SeoHelper::setTitle(__('Register'));
 
         Theme::breadcrumb()->add(__('Register'), route('customer.register'));
@@ -67,8 +70,31 @@ class RegisterController extends BaseController
         $customer = $this->create($request->input());
 
         event(new Registered($customer));
+        if (is_plugin_active('sms') && setting('sms_otp_enabled')) {
+            $otp = mt_rand(000000, 999999);
+            $sms = new  SmsHandler;
+            $customer->otp  = $otp;
+            $customer->save();
+            // $this->customerRepository->createOrUpdate($customer);
+            $sms->setModule(ECOMMERCE_MODULE_SCREEN_NAME);
+            if ($sms->templateEnabled(SmsEnum::OTP())) {
+                $sms->setVariableValues([
+                    'customer_name' => $customer->name,
+                    'otp' => $otp,
+                ]);
+                $sms->sendUsingTemplate(
+                    SmsEnum::OTP(),
+                    $customer->phone
+                );
+            }
+            $this->registered($request, $customer);
 
-        if (EcommerceHelper::isEnableEmailVerification()) {
+            return $this
+                ->httpResponse()
+                 ->setNextUrl(route('customer.otp', $customer->id))
+                ->setMessage(__('We have sent you an OTP to verify your mobile. Please check and confirm your mobile No!'));
+
+        } else if (EcommerceHelper::isEnableEmailVerification()) {
             $this->registered($request, $customer);
 
             return $this

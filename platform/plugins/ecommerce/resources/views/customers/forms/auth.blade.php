@@ -9,6 +9,16 @@
     <div class="row justify-content-center py-5">
         <div class="col-xl-6 col-lg-8">
         @endif
+            @if($errors->has('confirmation'))
+                <div class="alert alert-danger">
+                    {!! $errors->first('confirmation') !!}
+                </div>
+            @endif
+            @if(session('message'))
+                <div class="alert alert-warning">
+                    {{ session('message') }}
+                </div>
+            @endif
             <div class="card bg-body-tertiary border-0 auth-card">
                 @if ($banner = Arr::get($formOptions, 'banner'))
                     {{ RvMedia::image($banner, $heading ?: '', attributes: ['class' => 'auth-card__banner card-img-top mb-3']) }}
