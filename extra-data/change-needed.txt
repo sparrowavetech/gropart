@@ -3,13 +3,15 @@ Need to fix create order total and tax calculation in admin
 Shop type required condition not working while register as vendor
 
 
-1. Need a option for minimum buy quantity in products - dynamic function
-2. Remove button is not working in coupon codes
+1. Change and Improve Vendor infor of Gropart and SB Marketing Orders
+2. Improve Pricing and Shipping Parameters of Products
 3. Need pop up to come automatically the first time when visiting home page only for language change,
     with all language list default, then this pop up should not come again, should only come when first time visiting site
-4. 3 images wala shortcode ka mobile and tablet version update nahi ho rha hai - botble author issue
-5. Frequently Bought Together Functionality
-6. COD additional charge
+4. COD additional charge
+5. whatsap notifications setting
+6. http://localhost/gropart/public/admin/tools/data-synchronize/import/products (Issue)
 
 
-8. http://localhost/gropart/public/admin/tools/data-synchronize/import/products (Issue)
+
+1. Remove button is not working in coupon codes
+2. 3 images wala shortcode ka mobile and tablet version update nahi ho rha hai - botble author issue

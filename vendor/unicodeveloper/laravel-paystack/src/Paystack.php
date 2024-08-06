@@ -426,7 +426,7 @@ class Paystack
 
             ];
         }
-        
+
         $this->setRequestOptions();
         return $this->setHttpResponse('/customer', 'POST', $data)->getResponse();
     }
@@ -699,10 +699,10 @@ class Paystack
         return $this->setHttpResponse("/subaccount/{$subaccount_code}", "PUT", array_filter($data))->getResponse();
     }
 
-    
+
     /**
      * Get a list of all supported banks and their properties
-     * @param $country - The country from which to obtain the list of supported banks, $per_page - Specifies how many records to retrieve per page , 
+     * @param $country - The country from which to obtain the list of supported banks, $per_page - Specifies how many records to retrieve per page ,
      * $use_cursor - Flag to enable cursor pagination on the endpoint
      * @return array
      */
