@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'name' => 'FOB Ticksify',
+    'name' => 'Support Ticket',
     'category' => 'Category',
     'title' => 'Title',
     'ticket' => 'Ticket',
@@ -21,19 +21,15 @@ return [
     'staff' => 'Staff',
     'menu_counter' => ':count open',
     'total' => 'Total',
-
     'tickets' => [
         'name' => 'Tickets',
     ],
-
     'categories' => [
         'name' => 'Categories',
     ],
-
     'messages' => [
         'name' => 'Messages',
     ],
-
     'enums' => [
         'statuses' => [
             'open' => 'Open',
@@ -41,7 +37,6 @@ return [
             'on_hold' => 'On Hold',
             'closed' => 'Closed',
         ],
-
         'priorities' => [
             'low' => 'Low',
             'medium' => 'Medium',
