@@ -40,6 +40,10 @@ class ShoppingSettingForm extends SettingForm
                 'label' => trans('plugins/ecommerce::setting.shopping.form.enable_quick_buy_button'),
                 'value' => EcommerceHelper::isQuickBuyButtonEnabled(),
             ])
+            ->add('enable_full_page_product_description', 'onOffCheckbox', [
+                'label' => trans('plugins/ecommerce::setting.shopping.form.enable_full_page_product_description'),
+                'value' => EcommerceHelper::isFullPageProductDescriptionEnabled(),
+            ])
             ->add('order_auto_confirmed', 'onOffCheckbox', [
                 'label' => trans('plugins/ecommerce::setting.shopping.form.enable_order_auto_confirmed'),
                 'value' => EcommerceHelper::isOrderAutoConfirmedEnabled(),

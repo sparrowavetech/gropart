@@ -85,6 +85,7 @@ trait HasLocationFields
                                 'data-type' => 'country',
                             ])
                             ->choices(EcommerceHelper::getAvailableCountries())
+                            ->searchable()
                             ->colspan(3)
                             ->toArray(),
                         ...$countryAttributes,
@@ -102,6 +103,18 @@ trait HasLocationFields
                     ]
                 );
             })
+            ->add(
+                $addressFieldName,
+                TextField::class,
+                [
+                    ...TextFieldOption::make()
+                        ->label(trans('plugins/ecommerce::addresses.address'))
+                        ->placeholder(trans('plugins/ecommerce::addresses.address_placeholder'))
+                        ->colspan($isZipcodeEnabled ? ($isMultipleCountries ? 2 : 3) : 3)
+                        ->toArray(),
+                    ...$addressAttributes,
+                ]
+            )
             ->when($loadLocationsFromPluginLocation, function (FormAbstract $form) use (
                 $countryAttributes,
                 $stateFieldName,
@@ -125,6 +138,7 @@ trait HasLocationFields
                                 'data-url' => route('ajax.states-by-country'),
                             ])
                             ->colspan($isMultipleCountries ? 2 : 3)
+                            ->searchable()
                             ->label(trans('plugins/ecommerce::addresses.state'))
                             ->toArray(),
                         ...$stateAttributes,
@@ -171,6 +185,7 @@ trait HasLocationFields
                                 'data-url' => route('ajax.cities-by-state'),
                             ])
                             ->colspan($isMultipleCountries ? 2 : 3)
+                            ->searchable()
                             ->choices(
                                 ['' => __('Select city...')] + EcommerceHelper::getAvailableCitiesByState(
                                     $stateAttributes['selected']
@@ -181,18 +196,6 @@ trait HasLocationFields
                     ]
                 );
             })
-            ->add(
-                $addressFieldName,
-                TextField::class,
-                [
-                    ...TextFieldOption::make()
-                        ->label(trans('plugins/ecommerce::addresses.address'))
-                        ->placeholder(trans('plugins/ecommerce::addresses.address_placeholder'))
-                        ->colspan($isZipcodeEnabled ? ($isMultipleCountries ? 3 : 2) : 3)
-                        ->toArray(),
-                    ...$addressAttributes,
-                ]
-            )
             ->when($isZipcodeEnabled, function (FormAbstract $form) use (
                 $isMultipleCountries,
                 $zipCodeAttributes,
@@ -205,7 +208,7 @@ trait HasLocationFields
                         ...TextFieldOption::make()
                             ->placeholder(trans('plugins/ecommerce::addresses.zip_placeholder'))
                             ->label(trans('plugins/ecommerce::addresses.zip'))
-                            ->colspan($isMultipleCountries ? 3 : 2)
+                            ->colspan($isMultipleCountries ? 2 : 3)
                             ->toArray(),
                         ...$zipCodeAttributes,
                     ]

@@ -65,6 +65,19 @@
             }
         };
     </script>
+    <script>
+        function goBackOrClose() {
+            if (window.history.length > 1) {
+            window.history.back();
+            } else {
+            window.close();
+            }
+        }
+        document.addEventListener("DOMContentLoaded", function() {
+            var goBackButton = document.getElementById('goBackButton');
+            goBackButton.addEventListener('click', goBackOrClose);
+        });
+    </script>
 
     {!! Theme::footer() !!}
 </body>

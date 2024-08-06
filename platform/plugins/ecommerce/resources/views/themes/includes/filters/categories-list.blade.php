@@ -12,7 +12,7 @@
 
 @if($currentCategories)
     <ul
-        class="bb-product-filter-items"
+        class="bb-product-filter-items filter-checkbox"
         @if(
             in_array($categoryId, $categoriesRequest)
             || isset($category) && $categoryId == $category->id
@@ -54,7 +54,7 @@
                 @endphp
 
                 @if ($hasChildren)
-                    <button data-bb-toggle="toggle-product-categories-tree">
+                    <button class="float-end" data-bb-toggle="toggle-product-categories-tree">
                         <x-core::icon name="ti ti-chevron-down" />
                     </button>
 

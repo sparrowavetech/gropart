@@ -1,26 +1,44 @@
-<div class="pt-3 mb-5">
-    <div class="align-items-center">
-        <h6 class="d-inline-block">{{ __('Order number') }}: {{ $order->code }}</h6>
+<div class="pt-3 mb-4">
+    <div class="align-items-center order-number-data">
+        <h6 class="d-block od-no">{{ __('Order number') }}: {{ $order->code }}</h6>
     </div>
 
     <div class="checkout-success-products">
-        <div id="{{ 'cart-item-' . $order->id }}">
+        <div class="row show-cart-row d-md-none p-2">
+            <div class="col-9">
+                <a
+                    class="show-cart-link"
+                    data-bs-toggle="collapse"
+                    data-bs-target="{{ '#cart-item-' . $order->id }}"
+                    href="javascript:void(0);"
+                >
+                    {{ __('Order information :order_id', ['order_id' => $order->code]) }} <i
+                        class="fa fa-angle-down"
+                        aria-hidden="true"
+                    ></i>
+                </a>
+            </div>
+            <div class="col-3">
+                <p class="text-end mobile-total"> {{ format_price($order->amount) }} </p>
+            </div>
+        </div>
+        <div class="collapse collapse-products" id="{{ 'cart-item-' . $order->id }}">
             @foreach ($order->products as $orderProduct)
                 <div class="row cart-item">
-                    <div class="col-lg-3 col-md-3">
-                        <div class="checkout-product-img-wrapper d-inline-block">
+                    <div class="col-lg-2 col-md-3 col-12">
+                        <div class="checkout-product-img-wrapper">
                             <img
-                                class="item-thumb img-thumbnail img-rounded mb-2 mb-md-0"
+                                class="item-thumb img-thumbnail img-rounded"
                                 src="{{ RvMedia::getImageUrl($orderProduct->product_image, 'thumb', false, RvMedia::getDefaultImage()) }}"
                                 alt="{{ $orderProduct->product_name }}"
                             >
                             <span class="checkout-quantity">{{ $orderProduct->qty }}</span>
                         </div>
                     </div>
-                    <div class="col-lg-5 col-md-5">
-                        <p class="mb-2 mb-md-0">{!! BaseHelper::clean($orderProduct->product_name) !!}</p>
-                        <p class="mb-2 mb-md-0">
-                            <small>{{ Arr::get($orderProduct->options, 'attributes', '') }}</small>
+                    <div class="col-lg-7 col-md-6 col-8">
+                        <p class="mb-0 fw-bold">{!! BaseHelper::clean($orderProduct->product_name) !!}</p>
+                        <p class="mb-0">
+                            <small><em>{{ Arr::get($orderProduct->options, 'attributes', '') }}</em></small>
                         </p>
                         @if (!empty($orderProduct->product_options) && is_array($orderProduct->product_options))
                             {!! render_product_options_html($orderProduct->product_options, $orderProduct->price) !!}
@@ -30,7 +48,7 @@
                             'options' => $orderProduct->options,
                         ])
                     </div>
-                    <div class="col-lg-4 col-md-4 col-4 float-md-end text-md-end">
+                    <div class="col-lg-3 col-md-3 col-4 float-end text-end">
                         <p>{{ format_price($orderProduct->price) }}</p>
                     </div>
                 </div>

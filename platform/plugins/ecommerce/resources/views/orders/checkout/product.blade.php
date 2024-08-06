@@ -1,5 +1,5 @@
 <div class="row cart-item">
-    <div class="col-3">
+    <div class="col-sm-2 col-3">
         <div class="checkout-product-img-wrapper">
             <img
                 class="item-thumb img-thumbnail img-rounded"
@@ -9,28 +9,24 @@
             <span class="checkout-quantity">{{ $cartItem->qty }}</span>
         </div>
     </div>
-    <div class="col">
+    <div class="col-sm-7 col-6">
         {!! apply_filters('ecommerce_cart_before_item_content', null, $cartItem) !!}
-
-        <p class="mb-0">{{ $product->original_product->name }} @if ($product->isOutOfStock())
-                <span class="stock-status-label">({!! $product->stock_status_html !!})</span>
-            @endif
-        </p>
+        <h6 class="mb-0">
+            <a class="fw-bold text-black" href="{{ $product->original_product->url }}" target="_BLANK" title="{{ $product->original_product->name }}">{{ $product->original_product->name }}</a>
+            @if ($product->isOutOfStock()) <span class="stock-status-label">({!! $product->stock_status_html !!})</span> @endif
+        </h6>
         <p class="mb-0">
-            <small>{{ $product->variation_attributes }}</small>
+            <small><em>{{ $product->variation_attributes }}</em></small>
         </p>
-
         @include(EcommerceHelper::viewPath('includes.cart-item-options-extras'), [
             'options' => $cartItem->options,
         ])
-
         @if (!empty($cartItem->options['options']))
             {!! render_product_options_html($cartItem->options['options'], $product->original_price) !!}
         @endif
-
         {!! apply_filters('ecommerce_cart_after_item_content', null, $cartItem) !!}
     </div>
-    <div class="col-auto text-end">
-        <p>{{ format_price($cartItem->price) }}</p>
+    <div class="col-sm-3 col-3 text-end">
+        <p class="price-text">{{ format_price($cartItem->price) }}</p>
     </div>
 </div>

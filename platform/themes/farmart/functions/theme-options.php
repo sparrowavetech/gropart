@@ -171,6 +171,16 @@ app('events')->listen(RenderingThemeOptionSettings::class, function () {
             'icon' => 'ti ti-brush',
         ])
         ->setField([
+            'id' => 'primary_font',
+            'section_id' => 'opt-text-subsection-style',
+            'type' => 'googleFonts',
+            'label' => __('Primary font'),
+            'attributes' => [
+                'name' => 'primary_font',
+                'value' => 'Muli',
+            ],
+        ])
+        ->setField([
             'id' => 'primary_color',
             'section_id' => 'opt-text-subsection-style',
             'type' => 'customColor',
@@ -337,6 +347,51 @@ app('events')->listen(RenderingThemeOptionSettings::class, function () {
             'icon' => 'ti ti-share',
         ])
         ->setField([
+            'id' => 'social_links',
+            'section_id' => 'opt-text-subsection-social-links',
+            'type' => 'repeater',
+            'label' => __('Social links'),
+            'attributes' => [
+                'name' => 'social_links',
+                'value' => null,
+                'fields' => [
+                    [
+                        'type' => 'text',
+                        'label' => __('Name'),
+                        'attributes' => [
+                            'name' => 'social-name',
+                            'value' => null,
+                            'options' => [
+                                'class' => 'form-control',
+                            ],
+                        ],
+                    ],
+                    [
+                        'type' => 'mediaImage',
+                        'label' => __('Icon Image'),
+                        'attributes' => [
+                            'name' => 'social-icon',
+                            'value' => null,
+                            'options' => [
+                                'class' => 'form-control',
+                            ],
+                        ],
+                    ],
+                    [
+                        'type' => 'text',
+                        'label' => __('URL'),
+                        'attributes' => [
+                            'name' => 'social-url',
+                            'value' => null,
+                            'options' => [
+                                'class' => 'form-control',
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ])
+        ->setField([
             'id' => '404_page_image',
             'section_id' => 'opt-text-subsection-page',
             'type' => 'mediaImage',
@@ -412,6 +467,23 @@ app('events')->listen(RenderingThemeOptionSettings::class, function () {
             'label' => __('Enable shop by categories on header?'),
             'attributes' => [
                 'name' => 'enabled_product_categories_on_header',
+                'list' => [
+                    'yes' => trans('core/base::base.yes'),
+                    'no' => trans('core/base::base.no'),
+                ],
+                'value' => 'yes',
+                'options' => [
+                    'class' => 'form-control',
+                ],
+            ],
+        ])
+        ->setField([
+            'id' => 'enabled_product_categories_sidebar_on_header',
+            'section_id' => 'opt-text-subsection-ecommerce',
+            'type' => 'customSelect',
+            'label' => __('Enable categories with sidebar on header?'),
+            'attributes' => [
+                'name' => 'enabled_product_categories_sidebar_on_header',
                 'list' => [
                     'yes' => trans('core/base::base.yes'),
                     'no' => trans('core/base::base.no'),

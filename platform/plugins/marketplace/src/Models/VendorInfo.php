@@ -19,7 +19,7 @@ class VendorInfo extends BaseModel
         'total_revenue',
         'bank_info',
         'tax_info',
-        'payout_payment_method',
+        'payout_payment_method'
     ];
 
     protected $casts = [

@@ -148,18 +148,6 @@ class OrderTable extends TableAbstract
                 ->title(trans('plugins/ecommerce::order.amount')),
         ];
 
-        if (is_plugin_active('payment')) {
-            $columns = array_merge($columns, [
-                Column::make('payment_method')
-                    ->name('payment_id')
-                    ->title(trans('plugins/ecommerce::order.payment_method'))
-                    ->alignStart(),
-                Column::make('payment_status')
-                    ->name('payment_id')
-                    ->title(trans('plugins/ecommerce::order.payment_status_label')),
-            ]);
-        }
-
         $columns[] = StatusColumn::make()->alignStart();
 
         if (EcommerceHelper::isTaxEnabled()) {
@@ -173,6 +161,18 @@ class OrderTable extends TableAbstract
             Column::formatted('shipping_amount')
                 ->title(trans('plugins/ecommerce::order.shipping_amount')),
         ]);
+
+        if (is_plugin_active('payment')) {
+            $columns = array_merge($columns, [
+                Column::make('payment_method')
+                    ->name('payment_id')
+                    ->title(trans('plugins/ecommerce::order.payment_method'))
+                    ->alignStart(),
+                Column::make('payment_status')
+                    ->name('payment_id')
+                    ->title(trans('plugins/ecommerce::order.payment_status_label')),
+            ]);
+        }
 
         return array_merge($columns, [
             CreatedAtColumn::make(),

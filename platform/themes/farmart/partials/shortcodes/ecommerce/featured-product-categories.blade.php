@@ -8,38 +8,45 @@
         'infinite' => $shortcode->infinite == 'yes' || $shortcode->is_infinite == 'yes',
         'autoplaySpeed' => in_array($shortcode->autoplay_speed, theme_get_autoplay_speed_options()) ? $shortcode->autoplay_speed : 3000,
         'speed' => 800,
-        'slidesToShow' => 8,
+        'slidesToShow' => 6,
         'slidesToScroll' => 1,
+        'swipeToSlide' => true,
         'responsive' => [
             [
-                'breakpoint' => 1700,
-                'settings' => [
-                    'slidesToShow' => 7,
-                ],
-            ],
-            [
-                'breakpoint' => 1500,
+                'breakpoint' => 1800,
                 'settings' => [
                     'slidesToShow' => 6,
                 ],
             ],
             [
-                'breakpoint' => 1199,
+                'breakpoint' => 1601,
                 'settings' => [
                     'slidesToShow' => 5,
                 ],
             ],
             [
-                'breakpoint' => 1024,
+                'breakpoint' => 1025,
                 'settings' => [
+                    'arrows' => true,
+                    'dots' => false,
                     'slidesToShow' => 4,
+                    'slidesToScroll' => 4,
                 ],
             ],
             [
-                'breakpoint' => 767,
+                'breakpoint' => 769,
                 'settings' => [
-                    'arrows' => false,
-                    'dots' => true,
+                    'arrows' => true,
+                    'dots' => false,
+                    'slidesToShow' => 3,
+                    'slidesToScroll' => 3,
+                ],
+            ],
+            [
+                'breakpoint' => 440,
+                'settings' => [
+                    'arrows' => true,
+                    'dots' => false,
                     'slidesToShow' => 2,
                     'slidesToScroll' => 2,
                 ],
@@ -48,12 +55,17 @@
     ];
 @endphp
 @if ($categories->isNotEmpty())
-    <div class="widget-product-categories pt-5 pb-2">
+    <div class="widget-product-categories pt-4 pb-2">
         <div class="container-xxxl">
             <div class="row">
                 <div class="col-12">
                     <div class="row align-items-center mb-2 widget-header">
                         <h2 class="col-auto mb-0 py-2">{{ $shortcode->title }}</h2>
+                        <div class="ps-4 col-auto py-2 d-md-block">
+                            <a href="{{ __('all_categories_url') }}">
+                                <span class="link-text">{{ __('View All Categories') }} <span class="svg-icon"><svg><use href="#svg-icon-chevron-right" xlink:href="#svg-icon-chevron-right"></use></svg></span></span>
+                            </a>
+                        </div>
                     </div>
                     <div class="product-categories-body pb-4 arrows-top-right">
                         <div
@@ -78,7 +90,7 @@
                                                 </div>
                                             </div>
                                             <div class="category__text text-center py-2 text-truncate">
-                                                <span class="category__name">{{ $item->name }}</span>
+                                                <h6 class="category__name">{{ $item->name }}</h6>
                                             </div>
                                         </a>
                                     </div>

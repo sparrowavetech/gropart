@@ -40,7 +40,7 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-xxl-2 col-lg-3">
+        <div class="col-xxl-3 col-lg-3">
             <form
                 id="products-filter-form"
                 data-action="{{ route('public.products') }}"
@@ -51,7 +51,7 @@
                 @include(Theme::getThemeNamespace('views.ecommerce.includes.filters'))
             </form>
         </div>
-        <div class="col-xxl-10 col-lg-9 products-listing position-relative">
+        <div class="col-xxl-9 col-lg-9 products-listing position-relative">
             @include(Theme::getThemeNamespace('views.ecommerce.includes.product-items'))
         </div>
     </div>

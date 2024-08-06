@@ -97,22 +97,51 @@ class SettingController extends BaseController
     }
 
     public function updateTaxInformation(TaxInformationSettingRequest $request)
-    {
-        /** @var Store $store */
-        $store = auth('customer')->user()->store;
+{
+    /** @var Store $store */
+    $store = auth('customer')->user()->store;
 
-        $customer = $store->customer;
-
-        if ($customer && $customer->getKey()) {
-            $customer->vendorInfo->update($request->validated());
+    $customer = $store->customer;
+    if ($request->hasFile('signature_image_input')) {
+        $result = RvMedia::handleUpload($request->file('signature_image_input'), 0, $store->upload_folder);
+        if (! $result['error']) {
+            $file = $result['data'];
+            $taxInfo = $request->input('tax_info');
+            $taxInfo['signature_image'] = $file->url;
+            $request->merge(['tax_info' => $taxInfo]);
         }
-
-        event(new UpdatedContentEvent(STORE_MODULE_SCREEN_NAME, $request, $store));
-
-        return $this->httpResponse()
-            ->setMessage(__('Update successfully!'))
-            ->setNextUrl(route('marketplace.vendor.settings'));
     }
+
+    // Validate the request
+    $validatedData = $request->validated();
+
+    // Ensure the 'signature_image' key is in the 'tax_info' array
+    if (isset($request->input('tax_info')['signature_image'])) {
+        $validatedData['tax_info']['signature_image'] = $request->input('tax_info')['signature_image'];
+    }
+
+    // Remove the 'signature_image_input' key if it exists
+    $requestData = $request->all();
+    if (isset($requestData['signature_image_input'])) {
+        unset($requestData['signature_image_input']);
+    }
+
+    // Replace the original request data with the modified array
+    $request->replace($requestData);
+
+   // dd($request->all(), $validatedData);
+
+    if ($customer && $customer->getKey()) {
+        $customer->vendorInfo->update($validatedData);
+    }
+
+    event(new UpdatedContentEvent(STORE_MODULE_SCREEN_NAME, $request, $store));
+
+    return $this->httpResponse()
+        ->setMessage(__('Update successfully!'))
+        ->setNextUrl(route('marketplace.vendor.settings'));
+}
+
 
     public function updatePayoutInformation(PayoutInformationSettingRequest $request)
     {

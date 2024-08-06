@@ -7,6 +7,8 @@ use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\Html;
+use Botble\Base\Supports\TwigCompiler;
+use Botble\Marketplace\Supports\TwigExtension;
 use Botble\Base\Forms\FieldOptions\HtmlFieldOption;
 use Botble\Base\Forms\FieldOptions\RadioFieldOption;
 use Botble\Base\Forms\FieldOptions\SelectFieldOption;
@@ -24,6 +26,9 @@ use Botble\Ecommerce\Forms\Fronts\Auth\RegisterForm;
 use Botble\Ecommerce\Models\Customer;
 use Botble\Ecommerce\Models\Discount;
 use Botble\Ecommerce\Models\Invoice;
+use Botble\Location\Models\State;
+use Botble\Location\Models\City;
+use Botble\Location\Models\Country;
 use Botble\Ecommerce\Models\Order;
 use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Models\Shipment;
@@ -40,6 +45,10 @@ use Botble\Marketplace\Models\Revenue;
 use Botble\Marketplace\Models\Store;
 use Botble\Marketplace\Models\VendorInfo;
 use Botble\Marketplace\Models\Withdrawal;
+use Botble\Marketplace\Repositories\Interfaces\StoreInterface;
+use Botble\Marketplace\Repositories\Interfaces\VendorInfoInterface;
+use Botble\Marketplace\Repositories\Interfaces\WithdrawalInterface;
+use Botble\Slug\Models\Slug;
 use Botble\Media\Facades\RvMedia;
 use Botble\Slug\Facades\SlugHelper;
 use Botble\Table\Abstracts\TableAbstract;
@@ -78,6 +87,14 @@ class HookServiceProvider extends ServiceProvider
             add_filter(BASE_FILTER_GET_LIST_DATA, [$this, 'addColumnToEcommerceTable'], 153, 3);
             add_filter(BASE_FILTER_TABLE_HEADINGS, [$this, 'addHeadingToEcommerceTable'], 153, 3);
             add_filter(BASE_FILTER_TABLE_QUERY, [$this, 'modifyQueryInCustomerTable'], 153, 2);
+
+            add_filter('cms_twig_compiler', function (TwigCompiler $twigCompiler) {
+                if (! array_key_exists(TwigExtension::class, $twigCompiler->getExtensions())) {
+                    $twigCompiler->addExtension(new TwigExtension());
+                }
+
+                return $twigCompiler;
+            }, 123);
 
             add_filter('base_filter_table_filters', function (array $filters, TableAbstract $table) {
                 if ($table instanceof CustomerTable) {
@@ -165,6 +182,11 @@ class HookServiceProvider extends ServiceProvider
                             'string',
                             'min:2',
                         ],
+                        'shop_category' => [
+                            'nullable',
+                            'required_if:is_vendor,1',
+                            'string',
+                        ],
                     ];
                 }, 45, 2);
 
@@ -173,6 +195,7 @@ class HookServiceProvider extends ServiceProvider
                         'shop_name' => __('Shop Name'),
                         'shop_phone' => __('Shop Phone'),
                         'shop_url' => __('Shop URL'),
+                        'shop_category' => __('Shop Category'),
                     ];
                 }, 45);
 
@@ -181,6 +204,7 @@ class HookServiceProvider extends ServiceProvider
                         'shop_name.required_if' => __('Shop Name is required.'),
                         'shop_phone.required_if' => __('Shop Phone is required.'),
                         'shop_url.required_if' => __('Shop URL is required.'),
+                        'shop_category.required_if' => __('Shop Category is required.'),
                     ];
                 }, 45);
 
@@ -231,25 +255,56 @@ class HookServiceProvider extends ServiceProvider
 
                 $store = $invoice->reference->store;
 
+                $storesCityData = City::where('id', $store->city)->first();
+                $storesStateData = State::where('id', $store->state)->first();
+                $storesCountryData = Country::where('id', $store->country)->first();
+
+                $storesCity = $storesCityData->name;
+                $storesState = $storesStateData->name;
+                $storesCountry = $storesCountryData->name;
+
+                $storesTaxInfo = VendorInfo::where('customer_id', $store->customer_id)->first();
+
+                if ($storesTaxInfo !== null && $storesTaxInfo->tax_info) {
+                    $taxInfoArray = $storesTaxInfo->tax_info;
+                    $storeTaxId = isset($taxInfoArray['tax_id']) ? $taxInfoArray['tax_id'] : null;
+                    $storeSignatureImagePath = isset($taxInfoArray['signature_image']) ? $taxInfoArray['signature_image'] : null;
+                } else {
+                    $storeTaxId = setting('ecommerce_company_tax_id_for_invoicing', 0);
+                    $storeSignatureImagePath = setting('marketplace_authorised_signature_image', 0);
+                }
+
                 if (! $store || ! $store->id) {
                     return $variables;
                 }
 
                 if ($store->logo) {
-                    $variables['logo_full_path'] = RvMedia::getRealPath($store->logo);
+                    //$variables['logo_full_path'] = RvMedia::getRealPath($store->logo);
                     $variables['company_logo_full_path'] = RvMedia::getRealPath($store->logo);
                 }
 
-                if ($store->name) {
-                    $variables['site_title'] = $store->name;
+                $storeSignatureImage = null; // Initialize with null
+
+                if ($storeSignatureImagePath !== null) {
+                    $storeSignatureImage = RvMedia::getRealPath($storeSignatureImagePath);
                 }
+
+                /*if ($store->name) {
+                    $variables['site_title'] = $store->name;
+                }*/
 
                 return array_merge($variables, [
                     'company_name' => $store->name,
                     'company_address' => $store->address,
+                    'company_state' => $storesState,
+                    'company_city' => $storesCity,
+                    'company_country' => $storesCountry,
+                    'company_zipcode' => $store->zip_code,
                     'company_phone' => $store->phone,
                     'company_email' => $store->email,
-                    'company_tax_id' => $store->tax_id,
+                    'company_signature_image' => $storeSignatureImage,
+                    //'company_tax_id' => $store->tax_id,
+                    'company_tax_id' => $storeTaxId,
                     'store' => $store->toArray(),
                 ]);
             }, 45, 2);
@@ -265,6 +320,8 @@ class HookServiceProvider extends ServiceProvider
                     ->container('footer')
                     ->add('marketplace-register', 'vendor/core/plugins/marketplace/js/customer-register.js', ['jquery']);
 
+                $shoptype = \Botble\Marketplace\Enums\ShopTypeEnum::labels();
+
                 $form
                     ->addAfter(
                         'password_confirmation',
@@ -272,9 +329,9 @@ class HookServiceProvider extends ServiceProvider
                         RadioField::class,
                         RadioFieldOption::make()
                             ->label(__('Register as'))
-                            ->choices([0 => __('I am a customer'), 1 => __('I am a vendor')])
+                            ->choices(['0' => __('I am a customer'), '1' => __('I am a vendor')])
                             ->defaultValue(0)
-                            ->wrapperAttributes(['style' => 'margin-bottom: -1rem !important;'])
+                            ->wrapperAttributes(['style' => 'margin-bottom: -5px !important;'])
                             ->toArray()
                     )
                     ->addAfter(
@@ -335,7 +392,16 @@ class HookServiceProvider extends ServiceProvider
                             ->placeholder(__('Ex: 0943243332'))
                             ->toArray()
                     )
-                    ->addAfter('shop_phone', 'closeVendorWrapper', HtmlField::class, ['html' => '</div>']);
+                    ->addAfter(
+                        'shop_phone',
+                        'shop_category',
+                        SelectField::class,
+                            SelectFieldOption::make()
+                                ->label(__('Are You A ?'))
+                                ->choices([0 => '---Select Your Type---'] + $shoptype)
+                                ->toArray()
+                    )
+                    ->addAfter('shop_category', 'closeVendorWrapper', HtmlField::class, ['html' => '</div>']);
             });
         }
 
@@ -502,7 +568,8 @@ class HookServiceProvider extends ServiceProvider
                             SelectField::class,
                             SelectFieldOption::make()
                                 ->label(trans('plugins/marketplace::store.forms.store'))
-                                ->choices($stores)
+                                //->choices($stores)
+                                ->choices([0 => trans('plugins/marketplace::store.forms.select_store')] + $stores)
                                 ->searchable()
                                 ->emptyValue(trans('plugins/marketplace::store.forms.select_store'))
                                 ->allowClear()

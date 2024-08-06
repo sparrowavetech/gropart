@@ -17,7 +17,7 @@ class RegisterRequest extends Request
             'name' => ['required', 'max:120', 'min:2'],
             'email' => [
                 'nullable',
-                Rule::requiredIf(! EcommerceHelper::isLoginUsingPhone()),
+                Rule::requiredIf(EcommerceHelper::isLoginUsingPhone()),
                 new EmailRule(),
                 Rule::unique((new Customer())->getTable()),
             ],

@@ -152,6 +152,11 @@ class EcommerceHelper
         return (bool) get_ecommerce_setting('enable_quick_buy_button', 1);
     }
 
+    public function isFullPageProductDescriptionEnabled(): bool
+    {
+        return (bool) get_ecommerce_setting('enable_full_page_product_description', 1);
+    }
+
     public function getQuickBuyButtonTarget(): string
     {
         return get_ecommerce_setting('quick_buy_target_page', 'checkout');
@@ -979,7 +984,8 @@ class EcommerceHelper
                     'name' => $product->name,
                     'description' => $product->description,
                     'qty' => $cartItem->qty,
-                    'price' => $cartItem->price,
+                    //'price' => $cartItem->price,
+                    'price' => $product->price,
                 ];
             }
         }
@@ -1309,7 +1315,7 @@ class EcommerceHelper
 
     public function isLoginUsingPhone(): bool
     {
-        return $this->getLoginOption() == 'phone';
+        return $this->getLoginOption() == 'phone' ||  $this->getLoginOption() == 'email_or_phone' || setting('sms_otp_enabled') == 1;
     }
 
     public function getLoginOption(): string

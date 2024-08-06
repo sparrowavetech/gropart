@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static bool hideStoreSocialLinks()
  * @method static bool hideStoreAddress()
  * @method static bool allowVendorManageShipping()
+ * @method static bool isVendorProfileComplete()
  * @method static mixed sendMailToVendorAfterProcessingOrder($orders)
  * @method static \Botble\Base\Supports\EmailHandler setEmailVendorVariables(\Botble\Ecommerce\Models\Order $order)
  * @method static bool isCommissionCategoryFeeBasedEnabled()

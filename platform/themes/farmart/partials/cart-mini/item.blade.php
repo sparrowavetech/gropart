@@ -44,11 +44,11 @@
                 <small>{{ Arr::get($cartItem->options, 'attributes', '') }}</small>
             </p>
             @if (EcommerceHelper::isEnabledProductOptions() && !empty($cartItem->options['options']))
-                {!! render_product_options_html($cartItem->options['options'], $product->front_sale_price_with_taxes) !!}
+                <!--{!! render_product_options_html($cartItem->options['options'], $product->front_sale_price_with_taxes) !!}-->
+                {!! render_product_options_html($cartItem->options['options'], $product->original_price) !!}
             @endif
 
-            @include(
-                EcommerceHelper::viewPath('includes.cart-item-options-extras'),
+            @include(EcommerceHelper::viewPath('includes.cart-item-options-extras'),
                 ['options' => $cartItem->options]
             )
         </div>

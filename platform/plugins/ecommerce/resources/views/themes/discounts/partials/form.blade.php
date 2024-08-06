@@ -14,7 +14,7 @@
                     <div class="checkout__coupon-item-content">
                         <div class="checkout__coupon-item-title">
                             @if ($discount->type_option !== 'shipping')
-                                <h4>{{ $discount->type_option === 'percentage' ? $discount->value . '%' : format_price($discount->value) }}</h4>
+                                <h4>{{ $discount->type_option === 'percentage' ? $discount->value . '% OFF Coupon' : format_price($discount->value) }}</h4>
                             @endif
 
                             @if($discount->quantity > 0)
@@ -33,7 +33,7 @@
                                     {{ __('Apply') }}
                                 </button>
                             @else
-                                <button type="button" class="remove-coupon-code" data-url="{{ route('public.coupon.remove') }}">
+                                <button type="button" class="remove-coupon-code btn-remove-coupon-code" data-processing-text="{{ __('Removing...') }}" data-url="{{ route('public.coupon.remove') }}">
                                     {{ __('Remove') }}
                                 </button>
                             @endif
@@ -45,22 +45,30 @@
     </div>
 @endif
 
-<div
-    class="checkout-discount-section"
-    @if (session()->has('applied_coupon_code')) style="display: none;" @endif
->
-    <a class="btn-open-coupon-form" href="#">
-        {{ __('You have a coupon code?') }}
-    </a>
-</div>
-<div
-    class="coupon-wrapper mt-2"
-    @if (!session()->has('applied_coupon_code')) style="display: none;" @endif
->
-    @if (!session()->has('applied_coupon_code'))
-        @include(EcommerceHelper::viewPath('discounts.partials.apply-coupon'))
-    @else
-        @include(EcommerceHelper::viewPath('discounts.partials.remove-coupon'))
-    @endif
-</div>
-<div class="clearfix"></div>
+@php
+    $hideSection = false;
+    $currentRoute = \Illuminate\Support\Facades\Route::currentRouteName();
+    if ($currentRoute === 'public.cart') {
+        $hideSection = true;
+    }
+@endphp
+
+@if (!$hideSection)
+    <div
+        class="checkout-discount-section"
+        @if (session()->has('applied_coupon_code')) style="display: none;" @endif>
+        <a class="btn-open-coupon-form" href="#">
+            {{ __('You have a coupon code?') }}
+        </a>
+    </div>
+    <div
+        class="coupon-wrapper mt-2"
+        @if (!session()->has('applied_coupon_code') || session()->get('applied_coupon_code') == $discount->code) style="display: none;" @endif>
+        @if (!session()->has('applied_coupon_code'))
+            @include(EcommerceHelper::viewPath('discounts.partials.apply-coupon'))
+        @else
+            @include(EcommerceHelper::viewPath('discounts.partials.remove-coupon'))
+        @endif
+    </div>
+    <div class="clearfix"></div>
+@endif

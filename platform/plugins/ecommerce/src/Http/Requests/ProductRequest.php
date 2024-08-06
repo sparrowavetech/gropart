@@ -75,7 +75,7 @@ class ProductRequest extends Request
                 'nullable',
                 'string',
                 'max:150',
-                Rule::unique((new Product())->getTable())->ignore($this->route('product.id')),
+                //Rule::unique((new Product())->getTable())->ignore($this->route('product.id')),
             ],
             'sku' => [
                 'nullable',

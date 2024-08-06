@@ -52,7 +52,7 @@ class Ecommerce {
                 this.#ajaxSearchProducts($(e.currentTarget).closest('form'))
             })
             .on('click', 'body', (e) => {
-                if (!$(e.target).closest('.bb-form-quick-s4earch').length) {
+                if (!$(e.target).closest('.bb-form-quick-search').length) {
                     $('.bb-quick-search-results').removeClass('show').html('')
                 }
             })

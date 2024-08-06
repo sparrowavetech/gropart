@@ -58,6 +58,8 @@ use Illuminate\Support\Str;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Throwable;
+use Botble\Sms\Supports\SmsHandler;
+use Botble\Sms\Enums\SmsEnum;
 
 class OrderHelper
 {
@@ -282,7 +284,17 @@ class OrderHelper
                     ]);
                 }
             }
-
+            if (is_plugin_active('sms')) {
+                $sms = new  SmsHandler;
+                $sms->setModule(ECOMMERCE_MODULE_SCREEN_NAME);
+                if ($sms->templateEnabled(SmsEnum::ORDER_CONFIRMATION())) {
+                    self::setSmsVariables($order, $sms);
+                    $sms->sendUsingTemplate(
+                        SmsEnum::ORDER_CONFIRMATION(),
+                        $order->user->phone ?: $order->address->phone
+                    );
+                }
+            }
             return true;
         } catch (Exception $exception) {
             Log::error($exception->getMessage());
@@ -330,6 +342,20 @@ class OrderHelper
             'order_id' => $orderId,
             'user_id' => $userId,
         ]);
+
+        if (is_plugin_active('sms')) {
+            $sms = new  SmsHandler;
+            $sms->setModule(ECOMMERCE_MODULE_SCREEN_NAME);
+            if ($sms->templateEnabled(SmsEnum::DELIVERING_CONFIRMATION())) {
+                //$orderHelper = new OrderHelper;
+                OrderHelper::setSmsVariables($order, $sms);
+                $sms->sendUsingTemplate(
+                    SmsEnum::DELIVERING_CONFIRMATION(),
+                    $order->user->phone ?: $order->address->phone
+                );
+            }
+        }
+
 
         return $order;
     }
@@ -527,6 +553,7 @@ class OrderHelper
                 'options' => $options,
                 'extras' => $request->input('extras', []),
                 'sku' => $product->sku,
+                'barcode' => $product->barcode,
                 'weight' => $product->weight,
             ]
         );
@@ -799,7 +826,11 @@ class OrderHelper
             $productIds = [];
             foreach ($cartItems as $cartItem) {
                 $productByCartItem = $products['products']->firstWhere('id', $cartItem->id);
-
+                if(setting('ecommerce_display_product_price_including_taxes') == 1){
+                    $price =  $cartItem->price - $cartItem->tax;
+                }else{
+                    $price = $cartItem->price;
+                }
                 $data = [
                     'order_id' => $sessionData['created_order_id'],
                     'product_id' => $cartItem->id,
@@ -807,7 +838,7 @@ class OrderHelper
                     'product_image' => $productByCartItem->original_product->image,
                     'qty' => $cartItem->qty,
                     'weight' => $productByCartItem->weight * $cartItem->qty,
-                    'price' => $cartItem->price,
+                    'price' => $price,
                     'tax_amount' => $cartItem->tax,
                     'options' => [],
                     'product_type' => $productByCartItem->product_type,
@@ -1014,7 +1045,17 @@ class OrderHelper
                 $order->user->email ?: $order->address->email
             );
         }
-
+        if (is_plugin_active('sms')) {
+            $sms = new  SmsHandler;
+            $sms->setModule(ECOMMERCE_MODULE_SCREEN_NAME);
+            if ($sms->templateEnabled(SmsEnum::ORDER_CANCELLATION())) {
+                self::setSmsVariables($order, $sms);
+                $sms->sendUsingTemplate(
+                    SmsEnum::ORDER_CANCELLATION(),
+                    $order->user->phone ?: $order->address->phone
+                );
+            }
+        }
         return $order;
     }
 

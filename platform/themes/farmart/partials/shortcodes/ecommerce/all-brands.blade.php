@@ -17,9 +17,8 @@ $brands = get_all_brands();
                                     <div class="img-fluid-eq__dummy"></div>
                                     <div class="img-fluid-eq__wrap">
                                         <img
-                                            class="lazyload mx-auto"
-                                            src="{{ image_placeholder($brand->logo) }}"
-                                            data-src="{{ RvMedia::getImageUrl($brand->logo, null, false, RvMedia::getDefaultImage()) }}"
+                                            class="mx-auto"
+                                            src="{{ RvMedia::getImageUrl($brand->logo, null, false, RvMedia::getDefaultImage()) }}"
                                             alt="{{ $brand->name }}"
                                         />
                                     </div>

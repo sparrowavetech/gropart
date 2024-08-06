@@ -176,7 +176,12 @@ class CartItem implements Arrayable, Jsonable
         $this->id = $item->getBuyableIdentifier($this->options);
         $this->name = $item->getBuyableDescription($this->options);
         $this->price = $item->getBuyablePrice($this->options);
-        $this->priceTax = $this->price + $this->tax;
+        //$this->priceTax = $this->price + $this->tax;
+        if(setting('ecommerce_display_product_price_including_taxes') == 1){
+            $this->priceTax = $this->price - $this->tax;
+        } else {
+            $this->priceTax = $this->price + $this->tax;
+        }
     }
 
     /**
@@ -191,7 +196,12 @@ class CartItem implements Arrayable, Jsonable
         $this->qty = Arr::get($attributes, 'qty', $this->qty);
         $this->name = Arr::get($attributes, 'name', $this->name);
         $this->price = Arr::get($attributes, 'price', $this->price);
-        $this->priceTax = $this->price + $this->tax;
+        //$this->priceTax = $this->price + $this->tax;
+        if(setting('ecommerce_display_product_price_including_taxes') == 1){
+            $this->priceTax = $this->price - $this->tax;
+        } else {
+            $this->priceTax = $this->price + $this->tax;
+        }
         $this->options = new CartItemOptions(Arr::get($attributes, 'options', $this->options));
 
         $this->rowId = $this->generateRowId($this->id, $this->options->all());
@@ -244,12 +254,22 @@ class CartItem implements Arrayable, Jsonable
             if (! EcommerceHelper::isTaxEnabled()) {
                 return 0;
             }
+            if(setting('ecommerce_display_product_price_including_taxes') == 1){
+                return $this->price;
+            } else {
+                return $this->price + $this->tax;
+            }
 
-            return $this->price + $this->tax;
+            //return $this->price + $this->tax;
         }
 
         if ($attribute === 'subtotal') {
-            return $this->qty * $this->price;
+            //return $this->qty * $this->price;
+            if(setting('ecommerce_display_product_price_including_taxes') == 1){
+                return $this->qty * ($this->price - $this->tax);
+            } else {
+                return $this->qty * $this->price;
+            }
         }
 
         if ($attribute === 'total') {
@@ -260,8 +280,12 @@ class CartItem implements Arrayable, Jsonable
             if (! EcommerceHelper::isTaxEnabled()) {
                 return 0;
             }
-
-            return $this->price * ($this->taxRate / 100);
+            //  return $this->price * ($this->taxRate / 100);
+            if(setting('ecommerce_display_product_price_including_taxes') == 1){
+                return $this->price - ($this->price * (100/(100 + $this->taxRate)));
+            } else {
+                return $this->price * ($this->taxRate / 100);
+            }
         }
 
         if ($attribute === 'taxTotal') {

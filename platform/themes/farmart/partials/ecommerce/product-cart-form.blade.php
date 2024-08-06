@@ -63,6 +63,12 @@
                         <span class="add-to-cart-text ms-2">{{ __('Buy Now') }}</span>
                     </button>
                 @endif
+                @if($product->minimum_order_quantity > 0)
+                 <p>Minimun Order Qty {{ $product->minimum_order_quantity}}</p>
+                @endif
+                @if($product->maximum_order_quantity > 0)
+                    <p>Maxmum Order Qty {{ $product->minimum_order_quantity}}</p>
+                @endif
             @endif
             @if (!empty($withButtons))
                 {!! Theme::partial('ecommerce.product-loop-buttons', compact('product', 'wishlistIds')) !!}
@@ -70,3 +76,4 @@
         </div>
     @endif
 </form>
+

@@ -100,6 +100,11 @@ AdminHelper::registerRoutes(function () {
                     'uses' => 'getStoreRevenues',
                 ]);
             });
+
+            Route::get('generate-seller-invoice/{id}', [
+                'as' => 'generate-seller-invoice',
+                'uses' => 'SellerInvoiceController@getGenerateInvoice',
+            ])->wherePrimaryKey('id');
         });
 
         Route::group(['prefix' => 'ecommerce/products', 'as' => 'products.'], function () {
@@ -110,4 +115,17 @@ AdminHelper::registerRoutes(function () {
             ])->wherePrimaryKey();
         });
     });
+});
+
+Route::group(['namespace' => 'Botble\Marketplace\Http\Controllers'], function () {
+    Route::group(['prefix' => 'marketplaces', 'as' => 'marketplace.'], function () {
+        Route::group(['prefix' => 'revenues', 'as' => 'revenue.'], function () {
+            Route::get('generate-seller-invoice/{id}', [
+                'as' => 'generate-seller-invoice',
+                'uses' => 'SellerInvoiceController@getGenerateInvoice',
+            ])->wherePrimaryKey('id');
+        });
+    });
+
+    // Other frontend routes can go here
 });

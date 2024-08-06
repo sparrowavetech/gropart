@@ -31,7 +31,11 @@
 
                             @if (is_plugin_active('marketplace') && $item->product->store->id)
                                 <p class="d-block mb-0 sold-by">
-                                    <small>{{ __('Sold by') }}: <a href="{{ $item->product->original_product->store->url }}" class="text-primary">{{ $item->product->store->name }}</a>
+                                    <small>{{ __('Sold by') }}:
+                                        <a href="{{ $item->product->original_product->store->url }}" class="text-primary">{{ $item->product->store->name }}</a>
+                                        @if($item->product->store->is_verified)
+                                            <img class="verified-store-main" src="{{ asset('/storage/stores/verified.png')}}"alt="Verified">
+                                        @endif
                                     </small>
                                 </p>
                             @endif

@@ -1105,6 +1105,7 @@ class OrderController extends BaseController
                 'options' => $productOptions,
                 'extras' => [],
                 'sku' => $product->sku,
+                'barcode' => $product->barcode,
                 'weight' => $product->original_product->weight,
                 'original_price' => $product->front_sale_price,
                 'product_link' => route('products.edit', $product->original_product->id),

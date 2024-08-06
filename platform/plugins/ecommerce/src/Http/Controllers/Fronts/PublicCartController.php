@@ -35,6 +35,12 @@ class PublicCartController extends BaseController
         $promotionDiscountAmount = 0;
         $couponDiscountAmount = 0;
 
+        $discountsQuery = Discount::query()
+            ->where('type', DiscountTypeEnum::COUPON)
+            ->where('display_at_checkout', true)
+            ->active()
+            ->available();
+
         $products = new Collection();
         $crossSellProducts = new Collection();
 
@@ -47,6 +53,8 @@ class PublicCartController extends BaseController
             ) ?: new Collection();
         }
 
+        $discounts = apply_filters('ecommerce_checkout_discounts_query', $discountsQuery, $products)->get();
+
         SeoHelper::setTitle(__('Shopping Cart'));
 
         Theme::breadcrumb()->add(__('Shopping Cart'), route('public.cart'));
@@ -55,13 +63,14 @@ class PublicCartController extends BaseController
 
         return Theme::scope(
             'ecommerce.cart',
-            compact('promotionDiscountAmount', 'couponDiscountAmount', 'products', 'crossSellProducts'),
+            compact('promotionDiscountAmount', 'couponDiscountAmount', 'products', 'discounts', 'crossSellProducts'),
             'plugins/ecommerce::themes.cart'
         )->render();
     }
 
     public function store(CartRequest $request)
     {
+
         $response = $this->httpResponse();
 
         $product = Product::query()->find($request->input('id'));
@@ -205,7 +214,6 @@ class PublicCartController extends BaseController
                 ->setData($responseData)
                 ->setNextUrl($nextUrl);
         }
-
         return $response
             ->setData([
                 ...$this->getDataForResponse(),

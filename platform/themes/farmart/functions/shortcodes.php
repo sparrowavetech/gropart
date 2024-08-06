@@ -1,12 +1,15 @@
 <?php
 
 use Botble\Ads\Facades\AdsManager;
+use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Facades\FlashSale as FlashSaleFacade;
 use Botble\Ecommerce\Facades\ProductCategoryHelper;
 use Botble\Ecommerce\Models\FlashSale;
 use Botble\Ecommerce\Models\ProductCategory;
 use Botble\Ecommerce\Models\ProductCollection;
+use Botble\Testimonial\Models\Testimonial;
+use Botble\Testimonial\Repositories\Interfaces\TestimonialInterface;
 use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
 use Botble\Faq\Models\FaqCategory;
 use Botble\Media\Facades\RvMedia;
@@ -16,6 +19,8 @@ use Botble\Shortcode\Forms\ShortcodeForm;
 use Botble\Theme\Facades\Theme;
 use Botble\Theme\Supports\ThemeSupport;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Query\JoinClause;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Theme\Farmart\Supports\Wishlist;
 
@@ -116,6 +121,20 @@ app()->booted(function () {
 
         shortcode()->setAdminConfig('featured-brands', function (array $attributes) {
             return Theme::partial('shortcodes.ecommerce.featured-brands-admin-config', compact('attributes'));
+        });
+
+        add_shortcode('all-brands', __('All Brands'), __('All Brands'), function(Shortcode $shortcode){
+            return Theme::partial('shortcodes.ecommerce.all-brands', compact('shortcode'));
+        });
+        shortcode()->setAdminConfig('all-brands', function (array $attributes) {
+            return Theme::partial('shortcodes.ecommerce.all-brands-admin-config', compact('attributes'));
+        });
+
+        add_shortcode('all-categories', __('All Categories'), __('All Categories'), function(Shortcode $shortcode){
+            return Theme::partial('shortcodes.ecommerce.all-categories', compact('shortcode'));
+        });
+        shortcode()->setAdminConfig('all-categories', function (array $attributes) {
+            return Theme::partial('shortcodes.ecommerce.all-categories-admin-config', compact('attributes'));
         });
 
         if (FlashSaleFacade::isEnabled()) {
@@ -254,7 +273,7 @@ app()->booted(function () {
             $request = request();
 
             $products = get_featured_products([
-                'take' => $request->integer('limit', 10),
+                'take' => $request->integer('limit', $shortcode->limit),
                 'with' => EcommerceHelper::withProductEagerLoadingRelations(),
             ] + EcommerceHelper::withReviewsParams());
 
@@ -283,6 +302,14 @@ app()->booted(function () {
 
         shortcode()->setAdminConfig('featured-posts', function (array $attributes) {
             return Theme::partial('shortcodes.featured-posts-admin-config', compact('attributes'));
+        });
+
+        add_shortcode('blog-posts-by-category', __('Blog Posts by Category'), __('Blog Posts by Category'), function (Shortcode $shortcode) {
+            return Theme::partial('shortcodes.blog-posts-by-category', compact('shortcode'));
+        });
+
+        shortcode()->setAdminConfig('blog-posts-by-category', function (array $attributes) {
+            return Theme::partial('shortcodes.blog-posts-by-category-admin-config', compact('attributes'));
         });
     }
 
@@ -322,15 +349,40 @@ app()->booted(function () {
         shortcode()->setAdminConfig('faq', function (array $attributes) {
             return Theme::partial('shortcodes.faq-admin-config', compact('attributes'));
         });
+
+        add_shortcode('faq-by-category', __('FAQs by Category'), __('FAQs by Category'), function (Shortcode $shortcode) {
+            return Theme::partial('shortcodes.faq-by-category', compact('shortcode'));
+        });
+
+        shortcode()->setAdminConfig('faq-by-category', function (array $attributes) {
+            return Theme::partial('shortcodes.faq-by-category-admin-config', compact('attributes'));
+        });
+
+        add_shortcode('faq-by-group', __('Group FAQs'), __('Group FAQs'), function (Shortcode $shortcode) {
+            return Theme::partial('shortcodes.faq-by-group', compact('shortcode'));
+        });
+
+        shortcode()->setAdminConfig('faq-by-group', function (array $attributes) {
+            return Theme::partial('shortcodes.faq-by-group-admin-config', compact('attributes'));
+        });
     }
 
-    add_shortcode('coming-soon', __('Coming Soon'), __('Coming Soon'), function (Shortcode $shortcode) {
-        return Theme::partial('shortcodes.coming-soon', compact('shortcode'));
-    });
+    if (is_plugin_active('testimonial')) {
+        add_shortcode('testimonials', __('Testimonials'), __('Testimonials'), function (Shortcode $shortcode) {
+            $testimonials = app(TestimonialInterface::class)->advancedGet([
+                'condition' => [
+                    'status' => BaseStatusEnum::PUBLISHED,
+                ],
+                'take' => (int)$shortcode->number_of_displays,
+            ]);
 
-    shortcode()->setAdminConfig('coming-soon', function (array $attributes) {
-        return Theme::partial('shortcodes.coming-soon-admin-config', compact('attributes'));
-    });
+            return Theme::partial('shortcodes.testimonials.index', compact('shortcode', 'testimonials'));
+        });
+
+        shortcode()->setAdminConfig('testimonials', function (array $attributes) {
+            return Theme::partial('shortcodes.testimonials.admin-config', compact('attributes'));
+        });
+    }
 
     add_shortcode('site-features', __('Site features'), __('Site features'), function (Shortcode $shortcode) {
         return Theme::partial('shortcodes.site-features', compact('shortcode'));
@@ -361,5 +413,29 @@ app()->booted(function () {
                 'fields' => $fields,
                 'shortcode_attributes' => $attributes,
             ]);
+    });
+
+    add_shortcode('text-image-row', __('Text Image Row'), __('Text Image Row'), function (Shortcode $shortcode) {
+        return Theme::partial('shortcodes.text-image-row', compact('shortcode'));
+    });
+
+    shortcode()->setAdminConfig('text-image-row', function (array $attributes) {
+        return Theme::partial('shortcodes.text-image-row-admin-config', compact('attributes'));
+    });
+
+    add_shortcode('newsletter-home', __('Newsletter Form'), __('Newsletter Form'), function (Shortcode $shortcode) {
+        return Theme::partial('shortcodes.newsletter-home', compact('shortcode'));
+    });
+
+    shortcode()->setAdminConfig('newsletter-home', function (array $attributes) {
+        return Theme::partial('shortcodes.newsletter-home-admin-config', compact('attributes'));
+    });
+
+    add_shortcode('coming-soon', __('Coming Soon'), __('Coming Soon'), function (Shortcode $shortcode) {
+        return Theme::partial('shortcodes.coming-soon', compact('shortcode'));
+    });
+
+    shortcode()->setAdminConfig('coming-soon', function (array $attributes) {
+        return Theme::partial('shortcodes.coming-soon-admin-config', compact('attributes'));
     });
 });

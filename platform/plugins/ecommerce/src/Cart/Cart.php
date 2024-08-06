@@ -297,8 +297,13 @@ class Cart
             if (! EcommerceHelper::isTaxEnabled()) {
                 return $total + $cartItem->qty * $cartItem->price;
             }
+            elseif(setting('ecommerce_display_product_price_including_taxes') == 1){
+                return $total + $cartItem->qty * $cartItem->price;
+            } else {
+                return $total + ($cartItem->qty * ($cartItem->priceTax == 0 ? $cartItem->price : $cartItem->priceTax));
+            }
 
-            return $total + ($cartItem->qty * ($cartItem->priceTax == 0 ? $cartItem->price : $cartItem->priceTax));
+            //return $total + ($cartItem->qty * ($cartItem->priceTax == 0 ? $cartItem->price : $cartItem->priceTax));
         }, 0);
     }
 
@@ -312,8 +317,13 @@ class Cart
             if (! EcommerceHelper::isTaxEnabled()) {
                 return $total + $cartItem->qty * $cartItem->price;
             }
+            elseif(setting('ecommerce_display_product_price_including_taxes') == 1){
+                return $total + $cartItem->qty * $cartItem->price;
+            } else {
+                return $total + ($cartItem->qty * ($cartItem->priceTax == 0 ? $cartItem->price : $cartItem->priceTax));
+            }
 
-            return $total + ($cartItem->qty * ($cartItem->priceTax == 0 ? $cartItem->price : $cartItem->priceTax));
+            //return $total + ($cartItem->qty * ($cartItem->priceTax == 0 ? $cartItem->price : $cartItem->priceTax));
         }, 0);
     }
 
@@ -333,14 +343,24 @@ class Cart
         $content = $this->getContent();
 
         return $content->reduce(function ($subTotal, CartItem $cartItem) {
-            return $subTotal + ($cartItem->qty * $cartItem->price);
+            //  return $subTotal + ($cartItem->qty * $cartItem->price);
+            if(setting('ecommerce_display_product_price_including_taxes') == 1){
+                return $subTotal + ($cartItem->qty * ($cartItem->price-$cartItem->tax));
+            } else {
+                return $subTotal + ($cartItem->qty * ($cartItem->price));
+            }
         }, 0);
     }
 
     public function rawSubTotalByItems($content): float
     {
         return $content->reduce(function ($subTotal, CartItem $cartItem) {
-            return $subTotal + ($cartItem->qty * $cartItem->price);
+            //  return $subTotal + ($cartItem->qty * $cartItem->price);
+            if(setting('ecommerce_display_product_price_including_taxes') == 1){
+                return $subTotal + ($cartItem->qty * ($cartItem->price-$cartItem->tax));
+            } else {
+                return $subTotal + ($cartItem->qty * ($cartItem->price));
+            }
         }, 0);
     }
 
