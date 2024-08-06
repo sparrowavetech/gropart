@@ -7,12 +7,7 @@ use Illuminate\Support\HtmlString;
 
 class HtmlBuilder
 {
-    /**
-     * The URL generator instance.
-     *
-     * @var UrlGenerator
-     */
-    protected $url;
+    protected UrlGenerator $url;
 
     public function __construct(UrlGenerator $urlGenerator)
     {
@@ -24,7 +19,7 @@ class HtmlBuilder
      */
     public function script(string $url, array $attributes = [], ?bool $secure = null): HtmlString
     {
-        if (! $url) {
+        if (!$url) {
             return new HtmlString();
         }
 
@@ -38,7 +33,7 @@ class HtmlBuilder
      */
     public function style(string $url, array $attributes = [], ?bool $secure = null): HtmlString
     {
-        if (! $url) {
+        if (!$url) {
             return new HtmlString();
         }
 
@@ -86,7 +81,7 @@ class HtmlBuilder
     /**
      * Build a single attribute element.
      */
-    protected function attributeElement(string $key, $value)
+    protected function attributeElement(string $key, array|bool|string|null $value)
     {
         // Treat boolean attributes as HTML properties
         if (is_bool($value) && $key !== 'value') {
@@ -97,7 +92,7 @@ class HtmlBuilder
             return 'class="' . implode(' ', $value) . '"';
         }
 
-        if (! empty($value)) {
+        if (!empty($value)) {
             return $key . '="' . e($value, false) . '"';
         }
 

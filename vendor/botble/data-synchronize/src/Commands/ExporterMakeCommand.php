@@ -134,9 +134,6 @@ class ExporterMakeCommand extends GeneratorCommand
         info($route);
     }
 
-    /**
-     *
-     */
     protected function createPanelSection(): void
     {
         $stub = <<<'PHP'

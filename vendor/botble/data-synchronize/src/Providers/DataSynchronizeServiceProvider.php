@@ -7,8 +7,12 @@ use Botble\Base\Facades\PanelSectionManager as PanelSectionManagerFacade;
 use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\DataSynchronize\Commands\ClearChunksCommand;
+use Botble\DataSynchronize\Commands\ExportCommand;
 use Botble\DataSynchronize\Commands\ExportControllerMakeCommand;
 use Botble\DataSynchronize\Commands\ExporterMakeCommand;
+use Botble\DataSynchronize\Commands\ImportCommand;
+use Botble\DataSynchronize\Commands\ImportControllerMakeCommand;
+use Botble\DataSynchronize\Commands\ImporterMakeCommand;
 use Botble\DataSynchronize\PanelSections\ExportPanelSection;
 use Botble\DataSynchronize\PanelSections\ImportPanelSection;
 use Illuminate\Console\Scheduling\Schedule;
@@ -31,9 +35,13 @@ class DataSynchronizeServiceProvider extends ServiceProvider
 
         if ($this->app->runningInConsole()) {
             $this->commands([
+                ImporterMakeCommand::class,
                 ExporterMakeCommand::class,
+                ImportControllerMakeCommand::class,
                 ExportControllerMakeCommand::class,
                 ClearChunksCommand::class,
+                ExportCommand::class,
+                ImportCommand::class,
             ]);
 
             $this->app->afterResolving(Schedule::class, function (Schedule $schedule) {
