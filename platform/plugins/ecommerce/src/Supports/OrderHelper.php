@@ -1,7 +1,7 @@
 <?php
 
 namespace Botble\Ecommerce\Supports;
-
+use Botble\Ecommerce\Models\Enquiry;
 use Barryvdh\DomPDF\PDF as PDFHelper;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Facades\AdminHelper;
@@ -267,6 +267,7 @@ class OrderHelper
     {
         try {
             $mailer = EmailHandler::setModule(ECOMMERCE_MODULE_SCREEN_NAME);
+
             if ($mailer->templateEnabled('customer_new_order')) {
                 $this->setEmailVariables($order);
 
@@ -284,6 +285,7 @@ class OrderHelper
                     ]);
                 }
             }
+
             if (is_plugin_active('sms')) {
                 $sms = new  SmsHandler;
                 $sms->setModule(ECOMMERCE_MODULE_SCREEN_NAME);
@@ -295,7 +297,9 @@ class OrderHelper
                     );
                 }
             }
+
             return true;
+
         } catch (Exception $exception) {
             Log::error($exception->getMessage());
         }
@@ -1045,6 +1049,7 @@ class OrderHelper
                 $order->user->email ?: $order->address->email
             );
         }
+
         if (is_plugin_active('sms')) {
             $sms = new  SmsHandler;
             $sms->setModule(ECOMMERCE_MODULE_SCREEN_NAME);
@@ -1056,6 +1061,7 @@ class OrderHelper
                 );
             }
         }
+
         return $order;
     }
 
@@ -1063,7 +1069,37 @@ class OrderHelper
     {
         return $this->setOrderCompleted($shipment->order_id, $request, $userId);
     }
-
+    public static function sendEnquiryMail(Enquiry $enquiry): Enquiry
+    {
+        $mailer = EmailHandler::setModule(ECOMMERCE_MODULE_SCREEN_NAME);
+        if ($mailer->templateEnabled('customer_new_enquiry')) {
+            self::setEmailVendorVariablesForEnquiry($enquiry);
+            $mailer->sendUsingTemplate(
+                'customer_new_enquiry',
+                $enquiry->email
+            );
+        }
+        if ($mailer->templateEnabled('admin_new_enquiry')) {
+            self::setEmailVendorVariablesForEnquiry($enquiry);
+            $mailer->sendUsingTemplate('admin_new_enquiry', get_admin_email()->toArray());
+        }
+        return $enquiry;
+    }
+    public static function setEmailVendorVariablesForEnquiry(Enquiry $enquiry): EmailHandlerSupport
+    {
+        return EmailHandler::setModule(ECOMMERCE_MODULE_SCREEN_NAME)
+            ->setVariableValues([
+                'customer_name'    => $enquiry->name,
+                'customer_email'   => $enquiry->email,
+                'customer_phone'   => $enquiry->phone,
+                'customer_address' => $enquiry->address.', '.$enquiry->cityName->name.', '.$enquiry->stateName->name.', '.$enquiry->zip_code,
+                'product_list'     => view('plugins/ecommerce::emails.partials.enquiry-detail', compact('enquiry'))
+                    ->render(),
+                'enquiry_id'    => $enquiry->code,
+                'enquiry_description'      => $enquiry->description,
+                'store_name'       => $enquiry->product->store->name,
+            ]);
+    }
     public function getOrderBankInfo(Order|EloquentCollection $orders): ?string
     {
         if (! is_plugin_active('payment')) {
@@ -1118,6 +1154,7 @@ class OrderHelper
         }
 
         $order->is_confirmed = 1;
+
         if ($order->status == OrderStatusEnum::PENDING) {
             $order->status = OrderStatusEnum::PROCESSING;
         }
@@ -1141,9 +1178,28 @@ class OrderHelper
         ]);
 
         $mailer = EmailHandler::setModule(ECOMMERCE_MODULE_SCREEN_NAME);
+
         if ($mailer->templateEnabled('order_confirm')) {
             $this->setEmailVariables($order);
             $mailer->sendUsingTemplate('order_confirm', $order->user->email ?: $order->address->email);
         }
+
+    }
+
+    public function setSmsVariables(Order $order, SmsHandler $sms){
+        $sms->setModule(ECOMMERCE_MODULE_SCREEN_NAME)
+        ->setVariableValues([
+            'store_address' => get_ecommerce_setting('store_address'),
+            'store_phone' => get_ecommerce_setting('store_phone'),
+            'order_id' => $order->code,
+            'order_token' => $order->token,
+            'customer_name' => BaseHelper::clean($order->user->name ?: $order->address->name),
+            'customer_email' => $order->user->email ?: $order->address->email,
+            'customer_phone' => $order->user->phone ?: $order->address->phone,
+            'customer_address' => $order->full_address,
+            'shipping_method' => $order->shipping_method_name,
+            'payment_method' => $order->payment->payment_channel->label(),
+        ]);
+
     }
 }

@@ -26,6 +26,8 @@ class RegisterRequest extends Request
                 Rule::requiredIf(EcommerceHelper::isLoginUsingPhone()),
                 ...explode('|', BaseHelper::getPhoneValidationRule()),
                 Rule::unique((new Customer())->getTable(), 'phone'),
+                'min:10',
+                'max:10',
             ],
             'password' => ['required', 'min:6', 'confirmed'],
             'agree_terms_and_policy' => ['sometimes', 'accepted:1'],

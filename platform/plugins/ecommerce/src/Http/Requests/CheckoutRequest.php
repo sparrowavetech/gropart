@@ -97,6 +97,7 @@ class CheckoutRequest extends Request
         if (! auth('customer')->check()) {
             $rules = array_merge($rules, EcommerceHelper::getCustomerAddressValidationRules('address.'));
             $rules['address.email'] = 'required|email|max:60|min:6';
+            $rules['address.phone'] = 'required|max:10|min:10';
             if (EcommerceHelper::countDigitalProducts($products) == $products->count() && ! $billingAddressSameAsShippingAddress) {
                 $rules = $this->removeRequired($rules, [
                     'address.country',

@@ -31,6 +31,8 @@ use SeoHelper;
 use Theme;
 use Illuminate\Validation\ValidationException;
 use Botble\Sms\Supports\SmsHandler;
+use Botble\Ecommerce\Facades\OrderHelper;
+use Botble\Ecommerce\Models\Order;
 use Botble\Sms\Enums\SmsEnum;
 use Auth;
 class CustomerController extends BaseController
@@ -260,10 +262,6 @@ class CustomerController extends BaseController
                         $customer->phone
                     );
                 }
-
-                return  $response
-                    ->setNextUrl(route('customer.otp', $customer->id))
-                    ->setMessage(__('We have resent you an OTP '));
             }
             return  $response
                 ->setNextUrl(route('customer.login'))
@@ -325,4 +323,9 @@ class CustomerController extends BaseController
                 ->setMessage(__('We have resent you an OTP '));
         }
     }
+    // public function smstest() {
+    //     $orders = Order::query()->where('id', 326)->first();
+    //     OrderHelper::sendOrderConfirmationEmail( $orders );
+    //     die;
+    // }
 }

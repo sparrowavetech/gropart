@@ -87,7 +87,7 @@ Theme::registerRoutes(function () {
         Route::get('resend/{id}', 'CustomerController@resend')->name('resend');
         Route::post('otp', 'CustomerController@verifyotp')->name('otp.post');
         Route::post('changePhone', 'CustomerController@changePhone')->name('otp.changePhone');
-
+        //Route::get('testsms', 'CustomerController@smstest')->name('testsms');
         Route::get(EcommerceHelper::getPageSlug('register'), 'RegisterController@showRegistrationForm')->name(
             'register'
         );

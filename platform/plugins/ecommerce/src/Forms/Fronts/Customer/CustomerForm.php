@@ -50,6 +50,7 @@ class CustomerForm extends FormAbstract
                 TextField::class,
                 TextFieldOption::make()
                     ->label(__('Phone'))
+                    ->addAttribute('maxlength', '10')
                     ->toArray()
             )
             ->add(
