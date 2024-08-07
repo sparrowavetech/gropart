@@ -323,9 +323,4 @@ class CustomerController extends BaseController
                 ->setMessage(__('We have resent you an OTP '));
         }
     }
-    // public function smstest() {
-    //     $orders = Order::query()->where('id', 326)->first();
-    //     OrderHelper::sendOrderConfirmationEmail( $orders );
-    //     die;
-    // }
 }
