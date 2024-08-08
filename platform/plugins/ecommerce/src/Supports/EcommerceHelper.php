@@ -1370,6 +1370,7 @@ class EcommerceHelper
             'cart' => 'cart',
             'checkout' => 'checkout',
             'order_tracking' => 'orders/tracking',
+            'enquiry' => 'enquiry',
             'wishlist' => 'wishlist',
             'compare' => 'compare',
             'customer_overview' => 'customer/overview',

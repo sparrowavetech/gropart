@@ -64,6 +64,7 @@ class Product extends BaseModel
         'tax_id',
         'views',
         'stock_status',
+        'is_enquiry',
         'barcode',
         'cost_per_item',
         'generate_license_code',

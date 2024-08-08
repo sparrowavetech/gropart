@@ -81,6 +81,14 @@ class ProductCategoryForm extends FormAbstract
                     ->defaultValue(false)
                     ->toArray()
             )
+            ->add(
+               'is_enquiry',
+                OnOffField::class,
+                OnOffFieldOption::make()
+                    ->label(trans('plugins/ecommerce::products.form.is_enquiry'))
+                    ->defaultValue(false)
+                    ->toArray()
+            )
             ->setBreakFieldPoint('status');
     }
 }

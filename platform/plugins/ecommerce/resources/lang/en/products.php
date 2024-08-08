@@ -97,6 +97,7 @@ return [
         'auto_generate_sku' => 'Auto generate SKU?',
         'featured_image' => 'Featured image (optional)',
         'product_id' => 'Product ID',
+        'is_enquiry' => 'Is enquiry',
         'price_sale_percent_helper' => 'Discount :percent from original price.',
         'minimum_order_quantity' => 'Minimum order quantity',
         'minimum_order_quantity_helper' => 'Minimum quantity to place an order, if the value is 0, there is no limit.',

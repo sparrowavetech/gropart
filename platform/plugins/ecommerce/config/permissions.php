@@ -561,10 +561,14 @@ return [
         'flag' => 'ecommerce.settings.return',
         'parent_flag' => 'ecommerce.settings',
     ],
-
     [
         'name' => 'Flash Sale',
         'flag' => 'ecommerce.settings.flash-sale',
         'parent_flag' => 'ecommerce.settings',
+    ],
+    [
+        'name' => 'Enquiry',
+        'flag' => 'ecommerce.enquires.index',
+        'parent_flag' => 'plugins.ecommerce',
     ],
 ];

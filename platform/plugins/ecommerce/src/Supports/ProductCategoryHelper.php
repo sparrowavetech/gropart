@@ -53,6 +53,7 @@ class ProductCategoryHelper
                 'name',
                 'status',
                 'is_featured',
+                'is_enquiry',
                 'image',
             ])) {
                 $query = $query->select($select);
@@ -191,6 +192,7 @@ class ProductCategoryHelper
                 'icon',
                 'image',
                 'icon_image',
+                'is_enquiry'
             ])
             ->leftJoin('slugs', function (JoinClause $join) {
                 $join

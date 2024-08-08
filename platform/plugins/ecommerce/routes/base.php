@@ -201,6 +201,23 @@ Theme::registerRoutes(function () {
                 'uses' => 'PublicProductController@getOrderTracking',
             ])->wherePrimaryKey();
 
+            Route::get(EcommerceHelper::getPageSlug('enquiry'), [
+                'as'   => 'public.product.enquiry',
+                'uses' => 'PublicProductController@getEnquiryProduct',
+            ]);
+            Route::get('product/enquiry/{product}', [
+                'as'   => 'public.enquiry.get',
+                'uses' => 'PublicProductController@EnquiryFrom',
+            ]);
+            Route::post('product/enquiry/', [
+                'as'   => 'public.enquiry.form',
+                'uses' => 'PublicProductController@EnquiryFromSubmit',
+            ]);
+            Route::get('product/enquiry/success/{id}', [
+                'as'   => 'public.enquiry.success',
+                'uses' => 'PublicProductController@EnquirySuccess',
+            ]);
+
             Route::get('ajax/quick-view/{id?}', [QuickViewController::class, 'show'])
                 ->middleware(RequiresJsonRequestMiddleware::class)
                 ->name('public.ajax.quick-view')
@@ -214,6 +231,35 @@ Theme::registerRoutes(function () {
             Route::post('ajax/checkout/update', [PublicUpdateCheckoutController::class, '__invoke'])
                 ->middleware(RequiresJsonRequestMiddleware::class)
                 ->name('public.ajax.checkout.update');
+        });
+    });
+});
+Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'middleware' => ['web', 'core']], function () {
+    Route::group(['prefix' => BaseHelper::getAdminPrefix(), 'middleware' => 'auth'], function () {
+        Route::group(['prefix' => 'enquires', 'as' => 'enquires.'], function () {
+            Route::resource('', 'EnquiryController')
+                ->parameters(['' => 'enquiry']);
+
+            Route::delete('items/destroy', [
+                'as'         => 'deletes',
+                'uses'       => 'EnquiryController@deletes',
+                'permission' => 'enquires.destroy',
+            ]);
+            Route::get('not_available/{id}', [
+                'as'         => 'not_available',
+                'uses'       => 'EnquiryController@not_available',
+                'permission' => 'enquires.edit',
+            ]);
+            Route::get('contacted/{id}', [
+                'as'         => 'contacted',
+                'uses'       => 'EnquiryController@contacted',
+                'permission' => 'enquires.edit',
+            ]);
+            Route::get('rejected/{id}', [
+                'as'         => 'rejected',
+                'uses'       => 'EnquiryController@rejected',
+                'permission' => 'enquires.edit',
+            ]);
         });
     });
 });

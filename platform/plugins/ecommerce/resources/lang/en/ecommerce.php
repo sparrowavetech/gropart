@@ -54,6 +54,7 @@ return [
             'customer_order_returns' => 'Customer order returns',
             'customer_orders' => 'Customer orders',
             'customer_product_reviews' => 'Customer product reviews',
+            'enquiry' => 'Enquiry',
         ],
         'number_products_per_page' => 'Number of products per page',
         'number_of_cross_sale_product' => 'Number of cross sale products in product detail page',
@@ -69,6 +70,9 @@ return [
     'general_setting_description' => 'View and update your general settings',
     'advanced_settings' => 'Advanced settings',
     'product_review_list' => 'Product review list',
+    'change_enquiry_format' => 'Edit Enquiry code format (optional)',
+    'enquiry_id' => 'Enquiry ID',
+    'enquiry_description' => 'Addition Description',
     'forms' => [
         'duplicate' => 'Duplicate',
         'duplicate_success_message' => 'Duplicate product successfully!',

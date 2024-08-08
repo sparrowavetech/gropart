@@ -107,6 +107,14 @@ class ProductForm extends FormAbstract
                     ->toArray()
             )
             ->add(
+                'is_enquiry',
+                OnOffField::class,
+                OnOffFieldOption::make()
+                    ->label(trans('plugins/ecommerce::products.form.is_enquiry'))
+                    ->defaultValue(false)
+                    ->toArray()
+            )
+            ->add(
                 'categories[]',
                 TreeCategoryField::class,
                 SelectFieldOption::make()

@@ -250,6 +250,7 @@ if (! function_exists('get_related_products')) {
         $params = [
             'condition' => [
                 'ec_products.is_variation' => 0,
+                'ec_products.is_enquiry' => 0,
             ],
             'order_by' => [
                 'ec_products.order' => 'ASC',
