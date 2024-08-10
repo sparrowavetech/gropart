@@ -1183,6 +1183,18 @@ class OrderHelper
             $this->setEmailVariables($order);
             $mailer->sendUsingTemplate('order_confirm', $order->user->email ?: $order->address->email);
         }
+        
+        if (is_plugin_active('sms')) {
+            $sms = new  SmsHandler;
+            $sms->setModule(ECOMMERCE_MODULE_SCREEN_NAME);
+            if ($sms->templateEnabled(SmsEnum::ORDER_CONFIRMATION())) {
+                self::setSmsVariables($order, $sms);
+                $sms->sendUsingTemplate(
+                    SmsEnum::ORDER_CONFIRMATION(),
+                    $order->user->phone ?: $order->address->phone
+                );
+            }
+        }
 
     }
 
