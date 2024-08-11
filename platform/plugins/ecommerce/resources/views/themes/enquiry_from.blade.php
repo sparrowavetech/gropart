@@ -6,6 +6,14 @@
 {!! Form::open(['url' =>route('public.enquiry.form'), 'class' => 'contact-form', 'method' => 'POST','enctype'=>'multipart/form-data']) !!}
 <input type="hidden" name="product_id" value="{{ $product->id}}">
 
+@php
+
+$userCountry = auth()->check() ? auth()->user()->country : '';
+$userState = auth()->check() ? auth()->user()->state : '';
+$userCity = auth()->check() ? auth()->user()->city : '';
+
+@endphp
+
 <div class="row mt-5">
     <div class="col-lg-4 product-details-content">
         <div class="card">
@@ -43,7 +51,7 @@
             <div class="row">
                 <div class="col-lg-12">
                     <div class="mb-3">
-                        <input id="name" type="text" class="form-control py-3 px-3 @if ($errors->has('name')) is-invalid @endif" name="name" value="{{ auth()->user()->name }}" placeholder="{{ __('Enter Full Name') }} *" required minlength="3" maxlength="120">
+                        <input id="name" type="text" class="form-control py-3 px-3 @if ($errors->has('name')) is-invalid @endif" name="name" value="@if(auth()->check()) {{ auth()->user()->name }} @endif" placeholder="{{ __('Enter Full Name') }} *" required minlength="3" maxlength="120">
                         @if ($errors->has('name'))
                         <div class="invalid-feedback">
                             {{ $errors->first('name') }}
@@ -56,7 +64,7 @@
             <div class="row">
                 <div class="col-lg-6">
                     <div class="mb-3">
-                        <input id="email" type="email" class="form-control py-3 px-3 @if ($errors->has('email')) is-invalid @endif" name="email" value="{{ auth()->user()->email }}" placeholder="{{ __('Enter Email') }} *" required>
+                        <input id="email" type="email" class="form-control py-3 px-3 @if ($errors->has('email')) is-invalid @endif" name="email" value="@if(auth()->check()) {{ auth()->user()->email }} @endif" placeholder="{{ __('Enter Email') }} *" required>
                         @if ($errors->has('email'))
                         <div class="invalid-feedback">
                             {{ $errors->first('email') }}
@@ -66,7 +74,7 @@
                 </div>
                 <div class="col-lg-6">
                     <div class="mb-3">
-                        <input id="phone" type="text" class="form-control py-3 px-3 @if ($errors->has('phone')) is-invalid @endif" name="phone" value="{{ auth()->user()->phone }}" placeholder="{{ __('Enter Phone') }} *" required>
+                        <input id="phone" type="text" class="form-control py-3 px-3 @if ($errors->has('phone')) is-invalid @endif" name="phone" value="@if(auth()->check()) {{ auth()->user()->phone }} @endif" placeholder="{{ __('Enter Phone') }} *" required>
                         @if ($errors->has('phone'))
                         <div class="invalid-feedback">
                             {{ $errors->first('phone') }}
@@ -77,17 +85,26 @@
             </div>
 
             <div class="row">
-                <div class="@if (EcommerceHelper::isUsingInMultipleCountries()) col-lg-4 @endif">
-                    <div class="@if (EcommerceHelper::isUsingInMultipleCountries()) mb-3 @endif">
+                <div class="@if (EcommerceHelper::isUsingInMultipleCountries()) col-lg-4 @else col-lg-12 @endif">
+                    <div class="mb-3">
                         @if (EcommerceHelper::isUsingInMultipleCountries())
+                            @if (auth()->check())
                             <select name="country" class="form-select py-3 px-3 @if ($errors->has('state')) is-invalid @endif" id="country" data-type="country" required>
                                 @foreach(EcommerceHelper::getAvailableCountries() as $countryCode => $countryName)
                                 <option value="{{ $countryCode }}" @if (auth()->user()->country == $countryCode) selected @endif>{{ $countryName }}</option>
                                 @endforeach
                             </select>
+                            @else
+                            <select name="country" class="form-select py-3 px-3 @if ($errors->has('state')) is-invalid @endif" id="country" data-type="country" required>
+                                @foreach(EcommerceHelper::getAvailableCountries() as $countryCode => $countryName)
+                                <option value="{{ $countryCode }}">{{ $countryName }}</option>
+                                @endforeach
+                            </select>
+                            @endif
                         @else
                             <input type="hidden" name="country" value="{{ EcommerceHelper::getFirstCountryId() }}">
                         @endif
+
                         @if ($errors->has('country'))
                         <div class="invalid-feedback">
                             {{ $errors->first('country') }}
@@ -101,15 +118,16 @@
                         @if (EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation())
                         <select name="state" class="form-select py-3 px-3 @if ($errors->has('state')) is-invalid @endif" id="state" data-type="state" data-placeholder="{{ __('Select state...') }}" data-url="{{ route('ajax.states-by-country') }}">
                             <option value="">{{ __('Select state...') }}</option>
-                            @if (old('country', auth()->user()->country) || !EcommerceHelper::isUsingInMultipleCountries())
-                            @foreach(EcommerceHelper::getAvailableStatesByCountry(old('country', auth()->user()->country)) as $stateId => $stateName)
-                            <option value="{{ $stateId }}" @if (old('state', auth()->user()->state) == $stateId) selected @endif>{{ $stateName }}</option>
-                            @endforeach
+                            @if (old('country', $userCountry) || !EcommerceHelper::isUsingInMultipleCountries())
+                                @foreach(EcommerceHelper::getAvailableStatesByCountry(old('country', $userCountry)) as $stateId => $stateName)
+                                <option value="{{ $stateId }}" @if ($userState == $stateId) selected @endif>{{ $stateName }}</option>
+                                @endforeach
                             @endif
                         </select>
                         @else
-                        <input id="state" type="text" class="form-control py-3 px-3 @if ($errors->has('state')) is-invalid @endif" name="state" value="{{ $address->state }}" placeholder="{{ __('Enter State') }}" required>
+                            <input id="state" type="text" class="form-control py-3 px-3 @if ($errors->has('state')) is-invalid @endif" name="state" value="{{ auth()->check() ?auth()->user()->state : '' }}" placeholder="{{ __('Enter State') }}" required>
                         @endif
+
                         @if ($errors->has('state'))
                         <div class="invalid-feedback">
                             {{ $errors->first('state') }}
@@ -118,19 +136,19 @@
                     </div>
                 </div>
 
-                <div class="@if (EcommerceHelper::isUsingInMultipleCountries()) col-lg-4 @else col-lg-6 @endif">
+                <div class="@if (EcommerceHelper::isUsingInMultipleCountries()) col-lg-12 @else col-lg-6 @endif">
                     <div class="mb-3">
                         @if (EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation())
                             <select name="city" class="form-select py-3 px-3 @if ($errors->has('city')) is-invalid @endif" id="city" data-type="city" data-placeholder="{{ __('Select city...') }} *" data-url="{{ route('ajax.cities-by-state') }}">
                                 <option value="">{{ __('Select city...') }}</option>
-                                @if (old('state', auth()->user()->state))
-                                @foreach(EcommerceHelper::getAvailableCitiesByState(old('state', auth()->user()->state)) as $cityId => $cityName)
-                                <option value="{{ $cityId }}" @if (old('city', auth()->user()->city) == $cityId) selected @endif>{{ $cityName }}</option>
-                                @endforeach
+                                @if (old('state', $userState) || !EcommerceHelper::isUsingInMultipleCountries())
+                                    @foreach(EcommerceHelper::getAvailableCitiesByState(old('state', $userState)) as $cityId => $cityName)
+                                    <option value="{{ $cityId }}" @if ($userCity == $cityId) selected @endif>{{ $cityName }}</option>
+                                    @endforeach
                                 @endif
                             </select>
                         @else
-                            <input id="city" type="text" class="form-control py-3 px-3" name="city" value="{{ auth()->user()->city }}" placeholder="{{ __('Enter City') }} *">
+                            <input id="city" type="text" class="form-control py-3 px-3" name="city" value="{{ auth()->check() ? auth()->user()->city : '' }}" placeholder="{{ __('Enter City') }} *">
                         @endif
                         @if ($errors->has('city'))
                         <div class="invalid-feedback">
@@ -144,7 +162,7 @@
             <div class="row">
                 <div class="@if (EcommerceHelper::isZipCodeEnabled()) col-lg-6 @else col-lg-12 @endif">
                     <div class="mb-3">
-                        <input id="address" type="text" class="form-control py-3 px-3 @if ($errors->has('address')) is-invalid @endif" name="address" value="{{auth()->user()->address }}" placeholder="{{ __('Address') }} (Optional)">
+                        <input id="address" type="text" class="form-control py-3 px-3 @if ($errors->has('address')) is-invalid @endif" name="address" value="@if (auth()->check()) {{auth()->user()->address }} @endif" placeholder="{{ __('Address') }} (Optional)">
                         @if ($errors->has('address'))
                         <div class="invalid-feedback">
                             {{ $errors->first('address') }}
@@ -155,7 +173,7 @@
                 @if (EcommerceHelper::isZipCodeEnabled())
                     <div class="col-lg-6">
                         <div class="mb-3">
-                            <input id="zip_code" type="text" class="form-control py-3 px-3 @if ($errors->has('zip_code')) is-invalid @endif" name="zip_code" value="{{ auth()->user()->zip_code }}" placeholder="{{ __('Enter Zip code') }} (Optional)">
+                            <input id="zip_code" type="text" class="form-control py-3 px-3 @if ($errors->has('zip_code')) is-invalid @endif" name="zip_code" value="@if (auth()->check()) {{ auth()->user()->zip_code }} @endif" placeholder="{{ __('Enter Zip code') }} (Optional)">
                             @if ($errors->has('zip_code'))
                             <div class="invalid-feedback">
                                 {{ $errors->first('zip_code') }}

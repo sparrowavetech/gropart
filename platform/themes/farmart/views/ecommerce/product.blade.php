@@ -302,8 +302,8 @@
     </div>
 </div>
 
-@if (($relatedProducts = get_related_products($product, 6)) && $relatedProducts->isNotEmpty()))
-    <div class="widget-products-with-category mt-4 pt-4 pb-5 bg-light">
+@if (($relatedProducts = get_related_products($product, 6)) && $relatedProducts->isNotEmpty())
+<div class="widget-products-with-category mt-4 pt-4 pb-5 bg-light">
     <div class="container-xxxl">
         <div class="row">
             <div class="col-12">
@@ -402,7 +402,7 @@
                                 @endif
                             </ul>
                         </div>
-                        
+
                         <div class="ps-product__shopping">
                             @if($product->is_enquiry == 1)
                             <a href="{{ route('public.enquiry.get',$product->id) }}" class="btn btn-primary btn-black mb-2 " title="{{ __('Enquiry Now') }}">
@@ -479,7 +479,7 @@
                                     </div>
                                 @endif
                             @endif
-                           
+
                         </div>
                     </div>
                 </article>
