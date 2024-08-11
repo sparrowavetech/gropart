@@ -1,6 +1,6 @@
 <template>
-    <div class="row align-items-center">
-        <div class="col">
+    <div class="row align-items-center gap-2">
+        <div class="col d-flex align-content-center" :class="{'overflow-auto': product.variation_attributes}">
             <span class="text-success" v-if="product.variation_attributes">
                 {{ product.variation_attributes }}
             </span>
@@ -9,14 +9,14 @@
                 v-if="product.is_variation || !product.variations.length"
                 :item="product"
             ></ProductAvailable>
-            <ProductOption
-                v-show="!product.is_variation"
-                :ref="'product_options_' + product.id"
-                :product="product"
-                :options="product.product_options"
-            ></ProductOption>
         </div>
-        <div class="col-auto" v-if="(product.is_variation || !product.variations.length) && !product.is_out_of_stock">
+        <ProductOption
+            v-show="!product.is_variation"
+            :ref="'product_options_' + product.id"
+            :product="product"
+            :options="product.product_options"
+        ></ProductOption>
+        <div class="w-100 w-sm-auto col-auto" v-if="(product.is_variation || !product.variations.length) && !product.is_out_of_stock">
             <button
                 class="btn btn-outline-primary btn-sm"
                 type="button"

@@ -1,7 +1,6 @@
 <?php
 
 namespace Botble\Ecommerce\Supports;
-use Botble\Ecommerce\Models\Enquiry;
 use Barryvdh\DomPDF\PDF as PDFHelper;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Facades\AdminHelper;
@@ -1069,37 +1068,7 @@ class OrderHelper
     {
         return $this->setOrderCompleted($shipment->order_id, $request, $userId);
     }
-    public static function sendEnquiryMail(Enquiry $enquiry): Enquiry
-    {
-        $mailer = EmailHandler::setModule(ECOMMERCE_MODULE_SCREEN_NAME);
-        if ($mailer->templateEnabled('customer_new_enquiry')) {
-            self::setEmailVendorVariablesForEnquiry($enquiry);
-            $mailer->sendUsingTemplate(
-                'customer_new_enquiry',
-                $enquiry->email
-            );
-        }
-        if ($mailer->templateEnabled('admin_new_enquiry')) {
-            self::setEmailVendorVariablesForEnquiry($enquiry);
-            $mailer->sendUsingTemplate('admin_new_enquiry', get_admin_email()->toArray());
-        }
-        return $enquiry;
-    }
-    public static function setEmailVendorVariablesForEnquiry(Enquiry $enquiry): EmailHandlerSupport
-    {
-        return EmailHandler::setModule(ECOMMERCE_MODULE_SCREEN_NAME)
-            ->setVariableValues([
-                'customer_name'    => $enquiry->name,
-                'customer_email'   => $enquiry->email,
-                'customer_phone'   => $enquiry->phone,
-                'customer_address' => $enquiry->address.', '.$enquiry->cityName->name.', '.$enquiry->stateName->name.', '.$enquiry->zip_code,
-                'product_list'     => view('plugins/ecommerce::emails.partials.enquiry-detail', compact('enquiry'))
-                    ->render(),
-                'enquiry_id'    => $enquiry->code,
-                'enquiry_description'      => $enquiry->description,
-                'store_name'       => $enquiry->product->store->name,
-            ]);
-    }
+
     public function getOrderBankInfo(Order|EloquentCollection $orders): ?string
     {
         if (! is_plugin_active('payment')) {
@@ -1183,7 +1152,7 @@ class OrderHelper
             $this->setEmailVariables($order);
             $mailer->sendUsingTemplate('order_confirm', $order->user->email ?: $order->address->email);
         }
-        
+
         if (is_plugin_active('sms')) {
             $sms = new  SmsHandler;
             $sms->setModule(ECOMMERCE_MODULE_SCREEN_NAME);

@@ -1,6 +1,6 @@
-class OrderIncompleteManagement {
-    init() {
-        $(document).on('click', '.btn-update-order', (event) => {
+$(() => {
+    $(document)
+        .on('click', '.btn-update-order', (event) => {
             event.preventDefault()
             let _self = $(event.currentTarget)
 
@@ -25,21 +25,12 @@ class OrderIncompleteManagement {
                 },
             })
         })
-
-        $(document).on('click', '.btn-trigger-send-order-recover-modal', (event) => {
+        .on('click', '.btn-trigger-send-order-recover-modal', (event) => {
             event.preventDefault()
             $('#confirm-send-recover-email-button').data('action', $(event.currentTarget).data('action'))
             $('#send-order-recover-email-modal').modal('show')
         })
-
-        $(document).on('click', '.btn-mark-order-as-completed-modal', (event) => {
-            event.preventDefault()
-
-            $('#confirm-mark-as-completed-button').data('action', $(event.currentTarget).data('action'))
-            $('#mark-order-as-completed-modal').modal('show')
-        })
-
-        $(document).on('click', '#confirm-send-recover-email-button', (event) => {
+        .on('click', '#confirm-send-recover-email-button', (event) => {
             event.preventDefault()
             let _self = $(event.currentTarget)
 
@@ -64,43 +55,29 @@ class OrderIncompleteManagement {
                 },
             })
         })
-
-        $(document).on('click', '#confirm-mark-as-completed-button', (event) => {
+        .on('click', '[data-bb-toggle="confirm-mark-as-completed-button"]', (event) => {
             event.preventDefault()
 
-            const button = $(event.currentTarget)
+            const $currentTarget = $(event.currentTarget)
+            const $form = $currentTarget.closest('form')
 
-            $.ajax({
-                type: 'POST',
-                cache: false,
-                url: button.data('action'),
-                beforeSend: () => {
-                    button.addClass('button-loading')
-                },
-                success: ({ error, message, data }) => {
-                    if (error) {
-                        Botble.showError(message)
+            $httpClient
+                .make()
+                .withButtonLoading($currentTarget)
+                .post($form.prop('action'), $form.serialize())
+                .then(({ data }) => {
+                    if (data.error) {
+                        Botble.showError(data.message)
                         return
                     }
 
                     $('#mark-order-as-completed-modal').modal('hide')
-                    Botble.showSuccess(message)
 
-                    if (data.next_url) {
-                        setTimeout(() => (window.location.href = data.next_url), 2000)
+                    Botble.showSuccess(data.message)
+
+                    if (data.data.next_url) {
+                        setTimeout(() => (window.location.href = data.data.next_url), 2000)
                     }
-                },
-                error: (error) => {
-                    Botble.handleError(error)
-                },
-                completed: () => {
-                    button.removeClass('button-loading')
-                },
-            })
+                })
         })
-    }
-}
-
-$(() => {
-    new OrderIncompleteManagement().init()
 })

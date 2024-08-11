@@ -279,6 +279,10 @@ class MainCheckout {
 
             $('.tax-information-form-wrapper').toggle(_self.is(':checked'))
         })
+
+        if ($('#address_id').length && $('#address_id').val() && $('#address_id').val() !== 'new') {
+            $('#address_id').trigger('change')
+        }
     }
 }
 

@@ -52,7 +52,7 @@ class Ecommerce {
                 this.#ajaxSearchProducts($(e.currentTarget).closest('form'))
             })
             .on('click', 'body', (e) => {
-                if (!$(e.target).closest('.bb-form-quick-search').length) {
+                if (!$(e.target).closest('.bb-form-quick-s4earch').length) {
                     $('.bb-quick-search-results').removeClass('show').html('')
                 }
             })
@@ -442,7 +442,9 @@ class Ecommerce {
                                 })
                             )
 
-                            setTimeout(() => { this.initProductGallery(true) }, 100)
+                            setTimeout(() => {
+                                this.initProductGallery(true)
+                            }, 100)
                         }
                     },
                     error: (error) => Theme.handleError(error),
@@ -531,15 +533,112 @@ class Ecommerce {
     }
 
     initProductGallery(onlyQuickView = false) {
-
         if (!onlyQuickView) {
-            const $gallery = $('.bb-product-gallery-images')
+            const $gallery = $(document).find('.bb-product-gallery-images')
 
             if (!$gallery.length) {
                 return
             }
 
-            const $thumbnails = $('.bb-product-gallery-thumbnails')
+            const $thumbnails = $(document).find('.bb-product-gallery-thumbnails')
+
+            function postMessageToPlayer(player, command) {
+                if (player == null || command == null) return
+                player.contentWindow.postMessage(JSON.stringify(command), '*')
+            }
+
+            function playPauseVideo(slick, control) {
+                let currentSlide, slideType, startTime, player, video
+
+                currentSlide = slick.find('.slick-current')
+                slideType = currentSlide.data('provider')
+                player = currentSlide.get(0)
+                startTime = currentSlide.data('video-start')
+
+                if (slideType === 'vimeo') {
+                    switch (control) {
+                        case 'play':
+                            if (startTime != null && startTime > 0 && !currentSlide.hasClass('started')) {
+                                currentSlide.addClass('started')
+                                postMessageToPlayer(player, {
+                                    method: 'setCurrentTime',
+                                    value: startTime,
+                                })
+                            }
+                            postMessageToPlayer(player, {
+                                method: 'play',
+                                value: 1,
+                            })
+                            break
+                        case 'pause':
+                            postMessageToPlayer(player, {
+                                method: 'pause',
+                                value: 1,
+                            })
+                            break
+                    }
+                } else if (slideType === 'youtube') {
+                    switch (control) {
+                        case 'play':
+                            postMessageToPlayer(player, {
+                                event: 'command',
+                                func: 'mute',
+                            })
+                            postMessageToPlayer(player, {
+                                event: 'command',
+                                func: 'playVideo',
+                            })
+                            break
+                        case 'pause':
+                            postMessageToPlayer(player, {
+                                event: 'command',
+                                func: 'pauseVideo',
+                            })
+                            break
+                    }
+                } else if (slideType === 'video') {
+                    video = currentSlide.children('video').get(0)
+                    if (video != null) {
+                        if (control === 'play') {
+                            video.play()
+                        } else {
+                            video.pause()
+                        }
+                    }
+                }
+            }
+
+            $gallery.on('init', function (slick) {
+                slick = $(slick.currentTarget)
+                setTimeout(function () {
+                    playPauseVideo(slick, 'play')
+                }, 1000)
+            })
+
+            $gallery.on('beforeChange', function (event, slick) {
+                slick = $(slick.$slider)
+                playPauseVideo(slick, 'pause')
+            })
+
+            $gallery.on('afterChange', function (event, slick) {
+                slick = $(slick.$slider)
+                playPauseVideo(slick, 'play')
+            })
+
+            $(document).on('click', '.bb-button-trigger-play-video', function (e) {
+                const $button = $(e.currentTarget)
+                const videoElement = document.getElementById($button.data('target'))
+
+                videoElement.play()
+
+                $button.closest('.bb-product-video').addClass('video-playing')
+
+                videoElement.addEventListener('ended', () => {
+                    $button.closest('.bb-product-video').removeClass('video-playing')
+                    videoElement.currentTime = 0;
+                    videoElement.pause();
+                });
+            })
 
             if ($gallery.length) {
                 $gallery.map((index, item) => {
@@ -631,7 +730,7 @@ class Ecommerce {
                 range: true,
                 min: $sliderRange.data('min'),
                 max: $sliderRange.data('max'),
-                values: [$minPrice.val(), $maxPrice.val()],
+                values: [$minPrice.val() || $sliderRange.data('min'), $maxPrice.val() || $sliderRange.data('max')],
                 slide: function (event, ui) {
                     $rangeLabel.find('.from').text(EcommerceApp.formatPrice(ui.values[0]))
                     $rangeLabel.find('.to').text(EcommerceApp.formatPrice(ui.values[1]))
@@ -1012,7 +1111,9 @@ class Ecommerce {
                 })
             }
 
-            $product.find('.bb-product-gallery-thumbnails').slick('unslick').html(thumbHtml)
+            const $galleryImages = $product.find('.bb-product-gallery')
+
+            $galleryImages.find('.bb-product-gallery-thumbnails').slick('unslick').html(thumbHtml)
 
             const $quickViewGalleryImages = $(document).find('.bb-quick-view-gallery-images')
 
@@ -1020,7 +1121,7 @@ class Ecommerce {
                 $quickViewGalleryImages.slick('unslick').html(imageHtml)
             }
 
-            $product.find('.bb-product-gallery-images').slick('unslick').html(imageHtml)
+            $galleryImages.find('.bb-product-gallery-images').slick('unslick').html(imageHtml)
 
             if (typeof EcommerceApp !== 'undefined') {
                 EcommerceApp.initProductGallery()
