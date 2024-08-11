@@ -7,7 +7,7 @@
                 </div>
                 <div class="card-body">
                     <div class="mb-3">
-                        <div :class="{ 'loading-skeleton': checking }" v-if="child_products.length">
+                        <div class="table-responsive" :class="{ 'loading-skeleton': checking }" v-if="child_products.length">
                             <table class="table table-bordered table-vcenter">
                                 <thead>
                                     <tr>
@@ -35,11 +35,11 @@
                                                 "
                                             >
                                                 <li>
-                                                    <span>{{ __('order.price') }}:</span>
+                                                    <span>{{ __('order.price') }}: </span>
                                                     <span>{{ variant.original_price_label }}</span>
                                                 </li>
                                                 <li v-for="option in variant.option_values" v-bind:key="option.id">
-                                                    <span>{{ option.title }}:</span>
+                                                    <span>{{ option.title }}: </span>
                                                     <span v-for="value in option.values" v-bind:key="value.id">
                                                         {{ value.value }} <strong>+{{ value.price_label }}</strong>
                                                     </span>
@@ -92,7 +92,7 @@
                             </table>
                         </div>
 
-                        <div class="position-relative box-search-advance product">
+                        <div class="position-relative box-search-advance product mt-3">
                             <input
                                 type="text"
                                 class="form-control textbox-advancesearch product"
@@ -186,7 +186,9 @@
                                                 class="page-link"
                                                 :aria-disabled="list_products.meta.current_page === 1"
                                             >
-                                                <i class="icon ti ti-chevron-left"></i>
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                                                    <path d="M15 6l-6 6l6 6" />
+                                                </svg>
                                             </span>
                                             <a
                                                 v-else
@@ -201,7 +203,9 @@
                                                     )
                                                 "
                                             >
-                                                <i class="icon ti ti-chevron-left"></i>
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                                                    <path d="M15 6l-6 6l6 6" />
+                                                </svg>
                                             </a>
                                         </li>
                                         <li :class="{ 'page-item': true, disabled: !list_products.links.next }">
@@ -210,7 +214,9 @@
                                                 class="page-link"
                                                 :aria-disabled="!list_products.links.next"
                                             >
-                                                <i class="icon ti ti-chevron-right"></i>
+                                                <svg  xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                                                    <path d="M9 6l6 6l-6 6" />
+                                                </svg>
                                             </span>
                                             <a
                                                 v-else
@@ -225,7 +231,9 @@
                                                     )
                                                 "
                                             >
-                                                <i class="icon ti ti-chevron-right"></i>
+                                                <svg  xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                                                    <path d="M9 6l6 6l-6 6" />
+                                                </svg>
                                             </a>
                                         </li>
                                     </ul>
@@ -366,21 +374,43 @@
                                     </tr>
                                     <tr>
                                         <td colspan="2">
-                                            <label for="payment-method" class="form-label">{{
-                                                __('order.payment_method')
-                                            }}</label>
+                                            <label for="payment-method" class="form-label">
+                                                {{ __('order.payment_method') }}
+                                            </label>
                                             <select
                                                 class="form-select"
                                                 id="payment-method"
                                                 v-model="child_payment_method"
                                             >
-                                                <option value="cod">
-                                                    {{ __('order.cash_on_delivery_cod') }}
-                                                </option>
-                                                <option value="bank_transfer">
-                                                    {{ __('order.bank_transfer') }}
+                                                <option v-for="(value, key) in paymentMethods" :key="key" :value="key">
+                                                    {{ value }}
                                                 </option>
                                             </select>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2">
+                                            <label for="payment-status" class="form-label">
+                                                {{ __('order.payment_status_label') }}
+                                            </label>
+                                            <select
+                                                class="form-select"
+                                                id="payment-status"
+                                                v-model="child_payment_status"
+                                            >
+                                                <option v-for="(value, key) in paymentStatuses" :key="key" :value="key">
+                                                    {{ value }}
+                                                </option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2">
+                                            <label for="payment-status" class="form-label">
+                                                {{ __('order.transaction_id') }}
+                                            </label>
+                                            <input type="text" class="form-control" v-model="child_transaction_id" />
+                                            <small class="form-hint">{{ __('order.incomplete_order_transaction_id_placeholder') }}</small>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -391,28 +421,23 @@
                 <div class="card-footer">
                     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                         <p class="mb-0 text-uppercase">
-                            <i class="icon ti ti-credit-card text-primary"></i>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                                <path d="M3 5m0 3a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v8a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3z" />
+                                <path d="M3 10l18 0" />
+                                <path d="M7 15l.01 0" />
+                                <path d="M11 15l2 0" />
+                            </svg>
                             {{ __('order.confirm_payment_and_create_order') }}
                         </p>
-                        <div class="btn-list">
-                            <button
-                                class="btn btn-success"
-                                v-ec-modal.make-paid
-                                :disabled="
-                                    (!child_product_ids.length || child_payment_method === 'cod') &&
-                                    child_total_amount !== 0
-                                "
-                            >
-                                {{ __('order.paid') }}
-                            </button>
-                            <button
-                                class="btn btn-primary"
-                                v-ec-modal.make-pending
-                                :disabled="!child_product_ids.length || child_total_amount === 0"
-                            >
-                                {{ __('order.pay_later') }}
-                            </button>
-                        </div>
+                        <button
+                            :disabled="!child_product_ids.length || !child_customer_id"
+                            type="submit"
+                            class="btn btn-primary"
+                            v-ec-modal.create-order
+                        >
+                            {{ __('order.create_order') }}
+                        </button>
                     </div>
                 </div>
             </div>
@@ -491,7 +516,9 @@
                                                 class="page-link"
                                                 :aria-disabled="customers.current_page === 1"
                                             >
-                                                <i class="icon ti ti-chevron-left"></i>
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                                                    <path d="M15 6l-6 6l6 6" />
+                                                </svg>
                                             </span>
                                             <a
                                                 v-else
@@ -506,7 +533,9 @@
                                                     )
                                                 "
                                             >
-                                                <i class="icon ti ti-chevron-left"></i>
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                                                    <path d="M15 6l-6 6l6 6" />
+                                                </svg>
                                             </a>
                                         </li>
                                         <li :class="{ 'page-item': true, disabled: !customers.next_page_url }">
@@ -515,7 +544,9 @@
                                                 class="page-link"
                                                 :aria-disabled="!customers.next_page_url"
                                             >
-                                                <i class="icon ti ti-chevron-right"></i>
+                                                <svg  xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                                                    <path d="M9 6l6 6l-6 6" />
+                                                </svg>
                                             </span>
                                             <a
                                                 v-else
@@ -530,7 +561,9 @@
                                                     )
                                                 "
                                             >
-                                                <i class="icon ti ti-chevron-right"></i>
+                                                <svg  xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                                                    <path d="M9 6l6 6l-6 6" />
+                                                </svg>
                                             </a>
                                         </li>
                                     </ul>
@@ -582,7 +615,10 @@
                             </div>
 
                             <div class="mb-1">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z" /><path d="M4 13h3l3 3h4l3 -3h3" /></svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                                    <path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z" />
+                                    <path d="M4 13h3l3 3h4l3 -3h3" />
+                                </svg>
                                 {{ child_customer_order_numbers }}
                                 {{ __('order.orders') }}
                             </div>
@@ -602,7 +638,11 @@
                                     data-bs-original-title="Edit email"
                                     class="btn-action text-decoration-none"
                                 >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M7 7h-1a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-1" /><path d="M20.385 6.585a2.1 2.1 0 0 0 -2.97 -2.97l-8.415 8.385v3h3l8.385 -8.415z" /><path d="M16 5l3 3" /></svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                                        <path d="M7 7h-1a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-1" />
+                                        <path d="M20.385 6.585a2.1 2.1 0 0 0 -2.97 -2.97l-8.415 8.385v3h3l8.385 -8.415z" />
+                                        <path d="M16 5l3 3" />
+                                    </svg>
                                 </a>
                             </div>
                         </div>
@@ -619,7 +659,11 @@
                                         data-bs-toggle="tooltip"
                                         data-bs-title="Update address"
                                     >
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M7 7h-1a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-1" /><path d="M20.385 6.585a2.1 2.1 0 0 0 -2.97 -2.97l-8.415 8.385v3h3l8.385 -8.415z" /><path d="M16 5l3 3" /></svg>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                                            <path d="M7 7h-1a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-1" />
+                                            <path d="M20.385 6.585a2.1 2.1 0 0 0 -2.97 -2.97l-8.415 8.385v3h3l8.385 -8.415z" />
+                                            <path d="M16 5l3 3" />
+                                        </svg>
                                     </button>
                                 </div>
 
@@ -789,43 +833,23 @@
         </ec-modal>
 
         <ec-modal
-            id="make-paid"
-            :title="__('order.confirm_payment_is_paid_for_this_order')"
-            :ok-title="__('order.create_order')"
-            :cancel-title="__('order.close')"
-            @ok="createOrder($event, true)"
-        >
-            <div class="alert alert-warning" role="alert">
-                {{
-                    __(
-                        'order.payment_status_of_the_order_is_paid_once_the_order_has_been_created_you_cannot_change_the_payment_method_or_status'
-                    )
-                }}.
-            </div>
-
-            <div>
-                <span>{{ __('order.paid_amount') }}:</span>
-                <h3 class="d-inline-block ms-2 mb-0">{{ child_total_amount_label }}</h3>
-            </div>
-        </ec-modal>
-
-        <ec-modal
-            id="make-pending"
-            :title="__('order.confirm_that_payment_for_this_order_will_be_paid_later')"
+            id="create-order"
+            :title="__('order.confirm_payment_title').replace(':status', paymentStatuses[child_payment_status])"
             :ok-title="__('order.create_order')"
             :cancel-title="__('order.close')"
             @ok="createOrder($event)"
         >
             <div class="alert alert-warning" role="alert">
                 {{
-                    __(
-                        'order.payment_status_of_the_order_is_pending_once_the_order_has_been_created_you_cannot_change_the_payment_method_or_status'
+                    __('order.confirm_payment_description').replace(
+                        ':status',
+                        paymentStatuses[child_payment_status]
                     )
                 }}.
             </div>
 
             <div>
-                <span>{{ __('order.pending_amount') }}:</span>
+                <span>{{ __('order.order_amount') }}:</span>
                 <h3 class="d-inline-block ms-2 mb-0">{{ child_total_amount_label }}</h3>
             </div>
         </ec-modal>
@@ -984,6 +1008,14 @@ export default {
             type: Number,
             default: () => true,
         },
+        paymentMethods: {
+            type: Object,
+            default: () => ({}),
+        },
+        paymentStatuses: {
+            type: Object,
+            default: () => ({}),
+        },
     },
     data: function () {
         return {
@@ -1032,6 +1064,8 @@ export default {
             child_shipping_method_name: this.shipping_method_name,
             child_is_selected_shipping: this.is_selected_shipping,
             child_payment_method: this.payment_method,
+            child_transaction_id: null,
+            child_payment_status: 'pending',
             productSearchRequest: null,
             timeoutProductRequest: null,
             customerSearchRequest: null,
@@ -1196,9 +1230,11 @@ export default {
             let options = []
 
             product.product_options.map((item) => {
-                options[item.id] = {
-                    option_type: item.option_type,
-                    values: productOptions[item.id],
+                if (productOptions[item.id]) {
+                    options[item.id] = {
+                        option_type: item.option_type,
+                        values: productOptions[item.id],
+                    }
                 }
             })
             context.child_products.push({ id: product.id, quantity: 1, options })
@@ -1296,6 +1332,7 @@ export default {
             return {
                 products,
                 payment_method: this.child_payment_method,
+                payment_status: this.child_payment_status,
                 shipping_method: this.child_shipping_method,
                 shipping_option: this.child_shipping_option,
                 shipping_amount: this.child_shipping_amount,
@@ -1311,6 +1348,7 @@ export default {
                 discount_type: this.discount_type,
                 discount_custom_value: this.discount_custom_value,
                 shipping_type: this.shipping_type,
+                transaction_id: this.child_transaction_id,
             }
         },
         removeCustomer: function () {
@@ -1339,26 +1377,21 @@ export default {
 
             this.checkDataBeforeCreateOrder()
         },
-        createOrder: function (event, paid = false) {
+        createOrder: function (event) {
             event.preventDefault()
+
             $(event.target).addClass('btn-loading')
 
-            let formData = this.getOrderFormData()
-            formData.payment_status = paid ? 'completed' : 'pending'
-
             axios
-                .post(route('orders.create'), formData)
+                .post(route('orders.create'), this.getOrderFormData())
                 .then((res) => {
                     let data = res.data.data
                     if (res.data.error) {
                         Botble.showError(res.data.message)
                     } else {
                         Botble.showSuccess(res.data.message)
-                        if (paid) {
-                            $event.emit('ec-modal:close', 'make-paid')
-                        } else {
-                            $event.emit('ec-modal:close', 'make-pending')
-                        }
+
+                        $event.emit('ec-modal:close', 'create-order')
 
                         setTimeout(() => {
                             window.location.href = route('orders.edit', data.id)

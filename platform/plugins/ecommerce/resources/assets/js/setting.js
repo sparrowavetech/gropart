@@ -15,19 +15,6 @@ $(() => {
         }
     })
 
-    $(document).on('change', '.check-all', (event) => {
-        let _self = $(event.currentTarget)
-        let set = _self.attr('data-set')
-        let checked = _self.find('input').prop('checked')
-        $(set).each((index, el) => {
-            if (checked) {
-                $(el).prop('checked', true)
-            } else {
-                $(el).prop('checked', false)
-            }
-        })
-    })
-
     $('.trigger-input-option').on('change', function () {
         let $settingContentContainer = $($(this).data('setting-container'))
         if ($(this).val() == '1') {

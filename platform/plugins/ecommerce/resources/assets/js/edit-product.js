@@ -402,25 +402,30 @@ class EcommerceProduct {
             $(this).find('.modal-content .variation-form-wrapper').remove()
         })
 
-        _self.$body.on('click', '#generate-all-versions-button', (event) => {
+        _self.$body.on('click', '[data-bb-toggle="generate-versions-button"]', (event) => {
             event.preventDefault()
             let $current = $(event.currentTarget)
+
+            const attributes = $current.closest('.modal-content').find('input[name="attributes[]"]:checked')
 
             $.ajax({
                 url: $current.data('target'),
                 type: 'POST',
+                data: {
+                    attributes: attributes.map((index, item) => $(item).val()).get(),
+                },
                 beforeSend: () => {
                     $current.addClass('button-loading')
                 },
-                success: (res) => {
-                    if (res.error) {
-                        Botble.showError(res.message)
+                success: ({ error, message }) => {
+                    if (error) {
+                        Botble.showError(message)
                     } else {
-                        Botble.showSuccess(res.message)
+                        Botble.showSuccess(message)
 
-                        $('#generate-all-versions-modal').modal('hide')
+                        $('#generate-versions-modal').modal('hide')
 
-                        window.LaravelDataTables[
+                          window.LaravelDataTables[
                             $('#product-variations-wrapper .dataTables_wrapper table').prop('id')
                         ].draw()
                     }
@@ -806,10 +811,10 @@ $(() => {
         $('#select-attribute-sets-modal').modal('show')
     })
 
-    $(document).on('click', '.btn-trigger-generate-all-versions', (event) => {
+    $(document).on('click', '[data-bb-toggle="btn-trigger-generate-versions"]', (event) => {
         event.preventDefault()
-        $('#generate-all-versions-button').data('target', $(event.currentTarget).data('target'))
-        $('#generate-all-versions-modal').modal('show')
+        $('[data-bb-toggle="generate-versions-button"]').data('target', $(event.currentTarget).data('target'))
+        $('#generate-versions-modal').modal('show')
     })
 
     $(document).on('click', '.btn-trigger-add-attribute', (event) => {
