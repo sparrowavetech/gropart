@@ -179,7 +179,6 @@ class ProductCategoryHelper
         if ($cache->has($cacheKey)) {
             return $cache->get($cacheKey);
         }
-
         $query = ProductCategory::query()
             ->toBase()
             ->where('status', BaseStatusEnum::PUBLISHED)

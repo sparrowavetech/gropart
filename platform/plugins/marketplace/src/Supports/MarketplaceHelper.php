@@ -12,6 +12,8 @@ use Botble\Marketplace\Models\Store;
 use Botble\Theme\Facades\Theme;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
+use Botble\Ecommerce\Models\Enquiry;
+use Botble\Sms\Supports\SmsHandler;
 
 class MarketplaceHelper
 {
@@ -112,7 +114,13 @@ class MarketplaceHelper
         }
 
         $vendorDataFields = [
-            'email', 'company', 'address', 'state', 'city', 'zip_code', 'logo'
+            'email',
+            'company',
+            'address',
+            'state',
+            'city',
+            'zip_code',
+            'logo'
         ];
 
         foreach ($vendorDataFields as $field) {
@@ -195,5 +203,84 @@ class MarketplaceHelper
     public function isEnabledMessagingSystem(): bool
     {
         return (bool) $this->getSetting('enabled_messaging_system', true);
+    }
+    /**
+     * @param Collection $orders
+     * @return Collection
+     * @throws FileNotFoundException
+     * @throws Throwable
+     */
+    public static function sendEnquiryMail($enquiry)
+    {
+        $mailer = EmailHandler::setModule(MARKETPLACE_MODULE_SCREEN_NAME);
+
+        if ($mailer->templateEnabled('store_new_enquiry')) {
+            if ($enquiry->product->store->email) {
+                self::setEmailVendorVariablesForEnquiry($enquiry);
+                $mailer->sendUsingTemplate('store_new_enquiry', $enquiry->product->store->email);
+            }
+        }
+        return $enquiry;
+    }
+
+    /**
+     * @param EnquiryrModel $order
+     * @return \Botble\Base\Supports\EmailHandler
+     * @throws Throwable
+     */
+    public static function setEmailVendorVariablesForEnquiry(Enquiry $enquiry): \Botble\Base\Supports\EmailHandler
+    {
+        return EmailHandler::setModule(MARKETPLACE_MODULE_SCREEN_NAME)
+            ->setVariableValues([
+                'enquiry_id'    => $enquiry->code,
+                'customer_name'    => $enquiry->name,
+                'customer_email'   => $enquiry->email,
+                'customer_phone'   => $enquiry->phone,
+                'customer_address' => $enquiry->address . ', ' . $enquiry->cityName->name . ', ' . $enquiry->stateName->name . ', ' . $enquiry->zip_code,
+                'product_list'     => view('plugins/ecommerce::emails.partials.enquiry-detail', compact('enquiry'))
+                    ->render(),
+                'enquiry_description'      => $enquiry->description,
+                'store_name'       => $enquiry->product->store->name,
+            ]);
+    }
+    /**
+     * @param EnquiryrModel $order
+     * @return \Botble\Base\Supports\EmailHandler
+     * @throws Throwable
+     */
+    public static function setSmsVendorVariablesForEnquiry(Enquiry $enquiry, SmsHandler $sms)
+    {
+        $sms->setModule(ECOMMERCE_MODULE_SCREEN_NAME)
+            ->setVariableValues([
+                'customer_name'    => $enquiry->name,
+                'customer_email'   => $enquiry->email,
+                'customer_phone'   => $enquiry->phone,
+                'customer_address' => $enquiry->address . ', ' . $enquiry->cityName->name . ', ' . $enquiry->stateName->name . ', ' . $enquiry->zip_code,
+                'enquiry_id'    => $enquiry->code,
+                'enquiry_description'  => $enquiry->description,
+                'store_name'       => $enquiry->product->store->name,
+            ]);
+
+        return $sms;
+    }
+
+    /**
+     * @param Order $order
+     *
+     * @return SmsHandler
+     * @throws Throwable
+     */
+    public function setSmsVariables(OrderModel $order, SmsHandler $sms)
+    {
+        $sms->setModule(ECOMMERCE_MODULE_SCREEN_NAME)
+            ->setVariableValues([
+                'customer_name' => $order->user->name ?: $order->address->name,
+                'customer_email' => $order->user->email ?: $order->address->email,
+                'customer_phone' => $order->user->phone ?: $order->address->phone,
+                'customer_address' => $order->full_address,
+                'shipping_method' => $order->shipping_method_name,
+                'payment_method' => $order->payment->payment_channel->label(),
+                'store_name' => $order->store->name,
+            ]);
     }
 }

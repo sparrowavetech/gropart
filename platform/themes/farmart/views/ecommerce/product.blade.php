@@ -402,77 +402,84 @@
                                 @endif
                             </ul>
                         </div>
+                        
                         <div class="ps-product__shopping">
-                            {!! Theme::partial('ecommerce.product-price', compact('product')) !!}
-                            @if (EcommerceHelper::isCartEnabled())
-                                <button
-                                    class="btn btn-primary ms-2 add-to-cart-button @if ($product->isOutOfStock()) disabled @endif"
-                                    name="add_to_cart"
-                                    type="button"
-                                    value="1"
-                                    title="{{ __('Add to cart') }}"
-                                    @if ($product->isOutOfStock()) disabled @endif
-                                >
-                                    <span class="svg-icon">
-                                        <svg>
-                                            <use
-                                                href="#svg-icon-cart"
-                                                xlink:href="#svg-icon-cart"
-                                            ></use>
-                                        </svg>
-                                    </span>
-                                    <span class="add-to-cart-text ms-1">{{ __('Add to cart') }}</span>
-                                </button>
-                                @if (EcommerceHelper::isQuickBuyButtonEnabled())
+                            @if($product->is_enquiry == 1)
+                            <a href="{{ route('public.enquiry.get',$product->id) }}" class="btn btn-primary btn-black mb-2 " title="{{ __('Enquiry Now') }}">
+                                <span class="add-to-cart-text ms-2">{{ __('Enquiry Now') }}</span>
+                            </a>
+                            @else
+                                @if (EcommerceHelper::isCartEnabled())
                                     <button
-                                        class="btn btn-primary btn-black ms-2 add-to-cart-button @if ($product->isOutOfStock()) disabled @endif"
-                                        name="checkout"
+                                        class="btn btn-primary ms-2 add-to-cart-button @if ($product->isOutOfStock()) disabled @endif"
+                                        name="add_to_cart"
                                         type="button"
                                         value="1"
-                                        title="{{ __('Buy Now') }}"
+                                        title="{{ __('Add to cart') }}"
                                         @if ($product->isOutOfStock()) disabled @endif
                                     >
-                                        <span class="add-to-cart-text">{{ __('Buy Now') }}</span>
+                                        <span class="svg-icon">
+                                            <svg>
+                                                <use
+                                                    href="#svg-icon-cart"
+                                                    xlink:href="#svg-icon-cart"
+                                                ></use>
+                                            </svg>
+                                        </span>
+                                        <span class="add-to-cart-text ms-1">{{ __('Add to cart') }}</span>
                                     </button>
-                                @endif
+                                    @if (EcommerceHelper::isQuickBuyButtonEnabled())
+                                        <button
+                                            class="btn btn-primary btn-black ms-2 add-to-cart-button @if ($product->isOutOfStock()) disabled @endif"
+                                            name="checkout"
+                                            type="button"
+                                            value="1"
+                                            title="{{ __('Buy Now') }}"
+                                            @if ($product->isOutOfStock()) disabled @endif
+                                        >
+                                            <span class="add-to-cart-text">{{ __('Buy Now') }}</span>
+                                        </button>
+                                    @endif
 
-                                <div class="header">
-                                    <div class="header-middle" style="border:none">
-                                        <div class="header__right" style="width: auto; padding: 0; border: none;">
-                                            <div class="header__extra cart--mini" tabindex="0" role="button">
-                                                <div class="header__extra">
-                                                    <a class="btn-shopping-cart" href="{{ route('public.cart') }}">
-                                                        <span class="svg-icon">
-                                                            <svg>
-                                                                <use href="#svg-icon-cart" xlink:href="#svg-icon-cart"></use>
-                                                            </svg>
-                                                        </span>
-                                                        <span class="header-item-counter">{{ Cart::instance('cart')->count() }}</span>
-                                                    </a>
-                                                    <span class="cart-text">
-                                                        <span class="cart-title">{{ __('Your Cart') }}</span>
-                                                        <span class="cart-price-total">
-                                                            <span class="cart-amount">
-                                                                <bdi>
-                                                                    <span>{{ format_price(Cart::instance('cart')->rawSubTotal() + Cart::instance('cart')->rawTax()) }}</span>
-                                                                </bdi>
+                                    <div class="header">
+                                        <div class="header-middle" style="border:none">
+                                            <div class="header__right" style="width: auto; padding: 0; border: none;">
+                                                <div class="header__extra cart--mini" tabindex="0" role="button">
+                                                    <div class="header__extra">
+                                                        <a class="btn-shopping-cart" href="{{ route('public.cart') }}">
+                                                            <span class="svg-icon">
+                                                                <svg>
+                                                                    <use href="#svg-icon-cart" xlink:href="#svg-icon-cart"></use>
+                                                                </svg>
+                                                            </span>
+                                                            <span class="header-item-counter">{{ Cart::instance('cart')->count() }}</span>
+                                                        </a>
+                                                        <span class="cart-text">
+                                                            <span class="cart-title">{{ __('Your Cart') }}</span>
+                                                            <span class="cart-price-total">
+                                                                <span class="cart-amount">
+                                                                    <bdi>
+                                                                        <span>{{ format_price(Cart::instance('cart')->rawSubTotal() + Cart::instance('cart')->rawTax()) }}</span>
+                                                                    </bdi>
+                                                                </span>
                                                             </span>
                                                         </span>
-                                                    </span>
-                                                </div>
-                                                <div class="cart__content" id="cart-mobile">
-                                                    <div class="backdrop"></div>
-                                                    <div class="mini-cart-content">
-                                                        <div class="widget-shopping-cart-content">
-                                                            {!! Theme::partial('cart-mini.list') !!}
+                                                    </div>
+                                                    <div class="cart__content" id="cart-mobile">
+                                                        <div class="backdrop"></div>
+                                                        <div class="mini-cart-content">
+                                                            <div class="widget-shopping-cart-content">
+                                                                {!! Theme::partial('cart-mini.list') !!}
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
+                                @endif
                             @endif
+                           
                         </div>
                     </div>
                 </article>

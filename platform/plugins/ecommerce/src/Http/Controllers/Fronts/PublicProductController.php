@@ -6,10 +6,12 @@ use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Models\BaseQueryBuilder;
+use Botble\Base\Events\CreatedContentEvent;
 use Botble\Ecommerce\AdsTracking\GoogleTagManager;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Forms\Fronts\OrderTrackingForm;
 use Botble\Ecommerce\Http\Requests\Fronts\OrderTrackingRequest;
+use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Http\Resources\ProductVariationResource;
 use Botble\Ecommerce\Models\Order;
 use Botble\Ecommerce\Models\Product;
@@ -29,6 +31,9 @@ use Botble\SeoHelper\Facades\SeoHelper;
 use Botble\Theme\Facades\Theme;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use RvMedia;
+use Botble\Marketplace\Supports\MarketplaceHelper;
+use Botble\Ecommerce\Supports\OrderHelper;
 
 class PublicProductController extends BaseController
 {
@@ -83,10 +88,7 @@ class PublicProductController extends BaseController
     {
         SeoHelper::setTitle(__('Enquiry Form'))->setDescription(__('Product Enquiry Form Description'));
 
-        Theme::breadcrumb()
-            ->add(__('Home'), route('public.index'))
-            ->add(__($product->name), route('public.product', $product->slug))
-            ->add(__('From'));
+        Theme::breadcrumb()->add(__('Products'), route('public.products'));
 
         return Theme::scope(
             'ecommerce.enquiry_from',
@@ -127,7 +129,7 @@ class PublicProductController extends BaseController
     {
         SeoHelper::setTitle(__('Enquiry Success'))->setDescription(__('Enquiry Success'));
         $enquiry_id = base64_decode($enquiry_id);
-        $enquiry = Enquiry::query()->findOrFail($enquiry_id, ['product']);
+        $enquiry = Enquiry::query()->with('product')->findOrFail($enquiry_id);
         return view('plugins/ecommerce::enquires.enquiry-thank-you', compact('enquiry'));
     }
     public function getProductVariation(
@@ -392,7 +394,7 @@ class PublicProductController extends BaseController
         $products = $productService->getProduct($request, null, null, $with, $withCount, $condition);
 
         if ($request->ajax()) {
-            return $this->ajaxFilterProductsResponse($products, $request, $response);
+            return $this->ajaxFilterProductsResponse($products);
         }
 
         Theme::breadcrumb()

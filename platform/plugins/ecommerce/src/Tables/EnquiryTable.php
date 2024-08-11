@@ -40,10 +40,6 @@ class EnquiryTable extends TableAbstract
     {
         $data = $this->table
             ->eloquent($this->query())
-            ->editColumn('product', function ($item) {
-                return Html::link(route('products.edit', $item->product_id), BaseHelper::clean($item->product->name));
-
-            })
             ->editColumn('checkbox', function ($item) {
                 return $this->getCheckbox($item->id);
             })
@@ -60,7 +56,8 @@ class EnquiryTable extends TableAbstract
                 return BaseHelper::clean($item->status->toHtml());
             })
             ->editColumn('store', function ($item) {
-                return BaseHelper::clean($item->product->store->name);
+               // return BaseHelper::clean($item->product->store->name);
+               return  BaseHelper::clean($item->name);
             })
             ->editColumn('created_at', function ($item) {
                 return BaseHelper::formatDate($item->created_at);
@@ -94,10 +91,6 @@ class EnquiryTable extends TableAbstract
                 'width' => '20px',
                 'class' => 'text-start',
             ],
-            'product'        => [
-                'title' => trans('core/base::tables.product_name'),
-                'class' => 'text-start',
-            ],
             'name'        => [
                 'title' => trans('core/base::tables.name'),
                 'class' => 'text-start',
@@ -112,10 +105,6 @@ class EnquiryTable extends TableAbstract
             ],
             'status'        => [
                 'title' => trans('core/base::tables.status'),
-                'class' => 'text-start',
-            ],
-            'store'        => [
-                'title' => trans('core/base::tables.store'),
                 'class' => 'text-start',
             ],
             'created_at'  => [
