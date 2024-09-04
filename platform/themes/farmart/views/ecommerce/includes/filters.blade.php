@@ -1,8 +1,8 @@
 @php
- if(!isset($condition)){
-    $condition['is_enquiry'] = 0;
- }
- [$categories, $brands, $tags, $rand, $categoriesRequest, $urlCurrent, $categoryId, $maxFilterPrice] = EcommerceHelper::dataForFilter($category ?? null,$condition);
+    if(!isset($condition)){
+        $condition['is_enquiry'] = 0;
+    }
+    [$categories, $brands, $tags, $rand, $categoriesRequest, $urlCurrent, $categoryId, $maxFilterPrice] = EcommerceHelper::dataForFilter($category ?? null,$condition);
     Theme::asset()
         ->usePath()
         ->add('custom-scrollbar-css', 'plugins/mcustom-scrollbar/jquery.mCustomScrollbar.css');
@@ -11,7 +11,6 @@
         ->usePath()
         ->add('custom-scrollbar-js', 'plugins/mcustom-scrollbar/jquery.mCustomScrollbar.js', ['jquery']);
 @endphp
-
 <input
     class="product-filter-item"
     name="sort-by"
@@ -138,7 +137,7 @@
                 </div>
             @endif
 
-            @if ($maxFilterPrice > 0 && $product->is_enquiry == 0)
+            @if ($maxFilterPrice > 0)
                 <div class="widget-wrapper">
                     <h4 class="widget-title">{{ __('By Price') }}</h4>
                     <div class="widget__content nonlinear-wrapper">
