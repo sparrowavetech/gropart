@@ -10,7 +10,7 @@
                                 <p class="mb-0 me-2 pe-2 text-secondary">{{ __('Brand') }}: <a href="{{ $product->brand->url }}">{{ $product->brand->name }}</a></p>
                             @endif
 
-                            @if (EcommerceHelper::isReviewEnabled())
+                            @if (EcommerceHelper::isReviewEnabled() && $product->is_enquiry == 0)
                                 <div class="col-auto">
                                     {!! Theme::partial('star-rating', ['avg' => $product->reviews_avg, 'count' => $product->reviews_count]) !!}
                                 </div>
@@ -38,9 +38,12 @@
                 @endif
 
                 {!! Theme::partial('ecommerce.product-availability', compact('product', 'productVariation')) !!}
+
+                @if($product->is_enquiry == 0)
                 <div class="mt-4">
                     {!! Theme::partial('ecommerce.product-price', compact('product')) !!}
                 </div>
+                @endif
 
                 {!! Theme::partial(
                     'ecommerce.product-cart-form',
@@ -56,6 +59,7 @@
                     <span class="meta-label d-inline-block">{{ __('SKU') }}:</span>
                     <span class="meta-value">{{ $product->sku }}</span>
                 </div>
+
                 @if ($product->categories->isNotEmpty())
                     <div class="meta-categories">
                         <span class="meta-label d-inline-block">{{ __('Categories') }}:</span>
@@ -67,6 +71,7 @@
                         @endforeach
                     </div>
                 @endif
+
                 @if ($product->tags->isNotEmpty())
                     <div class="meta-categories">
                         <span class="meta-label d-inline-block">{{ __('Tags') }}:</span>
@@ -78,6 +83,7 @@
                         @endforeach
                     </div>
                 @endif
+
                 @if (theme_option('social_share_enabled', 'yes') == 'yes')
                     <div class="mt-0">
                         {!! Theme::partial('share-socials', compact('product')) !!}

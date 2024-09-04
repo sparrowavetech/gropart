@@ -14,9 +14,11 @@
                 <a class="text-black" title="{{ $product->name }}" href="{{ $product->url }}">{{ $product->name }}</a>
             </div>
 
-            @include(EcommerceHelper::viewPath('includes.product-price'))
+            @if($product->is_enquiry == 0)
+                @include(EcommerceHelper::viewPath('includes.product-price'))
+            @endif
 
-            @if(EcommerceHelper::isReviewEnabled())
+            @if(EcommerceHelper::isReviewEnabled() && $product->is_enquiry == 0)
                 @include(EcommerceHelper::viewPath('includes.rating'))
             @endif
 

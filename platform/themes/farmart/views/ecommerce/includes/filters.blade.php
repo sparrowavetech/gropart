@@ -62,6 +62,7 @@
                     ])
                 </div>
             </div>
+
             @if ($brands->isNotEmpty())
                 <div @class(['widget-wrapper widget-product-brands'])>
                     <h4 class="widget-title">{{ __('Brands') }}</h4>
@@ -136,8 +137,8 @@
                     </div>
                 </div>
             @endif
-           
-            @if ($maxFilterPrice > 0)
+
+            @if ($maxFilterPrice > 0 && $product->is_enquiry == 0)
                 <div class="widget-wrapper">
                     <h4 class="widget-title">{{ __('By Price') }}</h4>
                     <div class="widget__content nonlinear-wrapper">

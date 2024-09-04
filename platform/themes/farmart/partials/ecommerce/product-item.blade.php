@@ -25,7 +25,7 @@
                     @endforeach
                 </div>
             @endif
-            @if ($product->front_sale_price !== $product->price)
+            @if ($product->front_sale_price !== $product->price && $product->is_enquiry == 0)
                 <div class="ribbons sale-ribbon">
                     <span class="featured ribbon" dir="ltr">{{ get_sale_percentage($product->price, $product->front_sale_price) }}</span>
                 </div>
@@ -54,41 +54,45 @@
                 tabindex="0"
             >{{ $product->name }}</a>
         </h3>
-        @if (EcommerceHelper::isReviewEnabled())
+        @if (EcommerceHelper::isReviewEnabled() && $product->is_enquiry == 0)
             {!! Theme::partial('star-rating', ['avg' => $product->reviews_avg, 'count' => $product->reviews_count]) !!}
         @endif
-        {!! Theme::partial('ecommerce.product-price', compact('product')) !!}
-        @if (!empty($isFlashSale))
-            <div class="deal-sold row mt-2">
-                @if (Botble\Ecommerce\Facades\FlashSale::isShowSaleCountLeft())
-                    <div class="deal-text col-auto">
-                        <span class="sold fw-bold">
-                            @if ($product->pivot->quantity > $product->pivot->sold)
-                                <span class="text">{{ __('Sold') }}: </span>
-                                <span class="value">{{ (int) $product->pivot->sold }} /
-                                    {{ (int) $product->pivot->quantity }}</span>
-                            @else
-                                <span class="text text-danger">{{ __('Sold out') }}</span>
-                            @endif
-                        </span>
-                    </div>
-                @endif
-                <div class="deal-progress col">
-                    <div class="progress">
-                        <div
-                            class="progress-bar"
-                            role="progressbar"
-                            aria-label="{{ __('Sold out') }}"
-                            aria-valuenow="{{ $product->pivot->quantity > 0 ? ($product->pivot->sold / $product->pivot->quantity) * 100 : 0 }}"
-                            aria-valuemin="0"
-                            aria-valuemax="100"
-                            style="width: {{ $product->pivot->quantity > 0 ? ($product->pivot->sold / $product->pivot->quantity) * 100 : 0 }}%"
-                        >
+
+        @if($product->is_enquiry == 0)
+            {!! Theme::partial('ecommerce.product-price', compact('product')) !!}
+
+            @if (!empty($isFlashSale))
+                <div class="deal-sold row mt-2">
+                    @if (Botble\Ecommerce\Facades\FlashSale::isShowSaleCountLeft())
+                        <div class="deal-text col-auto">
+                            <span class="sold fw-bold">
+                                @if ($product->pivot->quantity > $product->pivot->sold)
+                                    <span class="text">{{ __('Sold') }}: </span>
+                                    <span class="value">{{ (int) $product->pivot->sold }} /
+                                        {{ (int) $product->pivot->quantity }}</span>
+                                @else
+                                    <span class="text text-danger">{{ __('Sold out') }}</span>
+                                @endif
+                            </span>
+                        </div>
+                    @endif
+                    <div class="deal-progress col">
+                        <div class="progress">
+                            <div
+                                class="progress-bar"
+                                role="progressbar"
+                                aria-label="{{ __('Sold out') }}"
+                                aria-valuenow="{{ $product->pivot->quantity > 0 ? ($product->pivot->sold / $product->pivot->quantity) * 100 : 0 }}"
+                                aria-valuemin="0"
+                                aria-valuemax="100"
+                                style="width: {{ $product->pivot->quantity > 0 ? ($product->pivot->sold / $product->pivot->quantity) * 100 : 0 }}%"
+                            >
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        @endisset
+            @endisset
+        @endif
     </div>
     <div class="product-bottom-box">
         {!! Theme::partial('ecommerce.product-cart-form', compact('product')) !!}

@@ -20,7 +20,7 @@
             <span class="text">{{ __('Quick view') }}</span>
         </a>
     </div>
-    @if (EcommerceHelper::isWishlistEnabled())
+    @if (EcommerceHelper::isWishlistEnabled() && $product->is_enquiry == 0)
         <div class="wishlist-button product-wishlist-button product-loop_button">
             <a
                 class="wishlist product-loop_action @if (!empty($wishlistIds) && in_array($product->id, $wishlistIds)) added-to-wishlist @endif"
@@ -50,7 +50,7 @@
             </a>
         </div>
     @endif
-    @if (EcommerceHelper::isCompareEnabled())
+    @if (EcommerceHelper::isCompareEnabled() && $product->is_enquiry == 0)
         <div class="compare-button product-compare-button product-loop_button">
             <a
                 class="compare product-loop_action"
@@ -72,6 +72,7 @@
             </a>
         </div>
     @endif
+    @if($product->is_enquiry == 0)
     <div class="product-loop_button bulk-order-button">
         <a class="product-loop_action" target="_BLANK" href="{{ __('bulk_enq_form_url') }}?pid={{($product->is_variation || !$product->defaultVariation->product_id) ? $product->id : $product->defaultVariation->product_id}}" title="{{ __('Bulk Order') }}" data-bs-toggle="tooltip">
             <div class="product-loop_icon">
@@ -80,4 +81,5 @@
             <span class="text">{{ __('Bulk Order') }}</span>
         </a>
     </div>
+    @endif
 </div>

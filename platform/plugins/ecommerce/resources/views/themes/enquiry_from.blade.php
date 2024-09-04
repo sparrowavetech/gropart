@@ -74,7 +74,7 @@ $userCity = auth()->check() ? auth()->user()->city : '';
                 </div>
                 <div class="col-lg-6">
                     <div class="mb-3">
-                        <input id="phone" type="text" class="form-control py-3 px-3 @if ($errors->has('phone')) is-invalid @endif" name="phone" value="@if(auth()->check()) {{ auth()->user()->phone }} @endif" placeholder="{{ __('Enter Phone') }} *" required>
+                        <input id="phone" type="text" class="form-control py-3 px-3 @if ($errors->has('phone')) is-invalid @endif" name="phone" value="@if(auth()->check()) {{ auth()->user()->phone }} @endif" placeholder="{{ __('Phone Number') }} *" required>
                         @if ($errors->has('phone'))
                         <div class="invalid-feedback">
                             {{ $errors->first('phone') }}
