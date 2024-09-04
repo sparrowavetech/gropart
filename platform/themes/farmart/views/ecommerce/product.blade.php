@@ -11,7 +11,7 @@
                 <div class="col-lg-4 col-md-12">
                     {!! Theme::partial('ecommerce.product-gallery', compact('product', 'productImages')) !!}
                 </div>
-                <div class="col-lg-5 col-md-12 ps-4 product-details-content">
+                <div class="@if($product->is_enquiry == 0) col-lg-5 @else col-lg-8 @endif col-md-12 ps-4 product-details-content">
                     <div class="product-details js-product-content">
                         <div class="entry-product-header">
                             <div class="product-header-left">
@@ -25,7 +25,7 @@
                                     </div>
                                 @endif
                                 <div class="product-entry-meta">
-                                    @if (EcommerceHelper::isReviewEnabled())
+                                    @if (EcommerceHelper::isReviewEnabled() && $product->is_enquiry == 0)
                                         <a href="#product-reviews-tab" class="anchor-link">
                                             {!! Theme::partial('star-rating', ['avg' => $product->reviews_avg, 'count' => $product->reviews_count]) !!}
                                         </a>
@@ -38,7 +38,9 @@
                                 </div>
                             </div>
                         </div>
-                        {!! Theme::partial('ecommerce.product-price', compact('product')) !!}
+                        @if($product->is_enquiry == 0)
+                            {!! Theme::partial('ecommerce.product-price', compact('product')) !!}
+                        @endif
 
                         @if (is_plugin_active('marketplace') && $product->store_id)
                             <div class="product-meta-sold-by my-2">
@@ -65,7 +67,8 @@
                         </div>
 
                         {!! Theme::partial('ecommerce.product-availability', compact('product', 'productVariation')) !!}
-                        @if (Botble\Ecommerce\Facades\FlashSale::isEnabled() && ($flashSale = $product->latestFlashSales()->first()))
+
+                        @if (Botble\Ecommerce\Facades\FlashSale::isEnabled() && ($flashSale = $product->latestFlashSales()->first()) && $product->is_enquiry == 0)
                             <div class="deal-expire-date p-4 bg-light mb-2 mt-4">
                                 <div class="row">
                                     <div class="col-xxl-5 d-md-flex justify-content-center align-items-center">
@@ -136,9 +139,11 @@
                     </div>
                 </div>
 
-                <div class="col-lg-3 d-none d-sm-none d-md-none d-lg-block d-xl-block">
-                    {!! dynamic_sidebar('product_detail_sidebar') !!}
-                </div>
+                @if($product->is_enquiry == 0)
+                    <div class="col-lg-3 d-none d-sm-none d-md-none d-lg-block d-xl-block">
+                        {!! dynamic_sidebar('product_detail_sidebar') !!}
+                    </div>
+                @endif
             </div>
         </div>
     </div>
@@ -146,7 +151,7 @@
         @if(get_ecommerce_setting('enable_full_page_product_description'))
             <div class="row">
                 <div class="col-sm-12">
-                    @if (EcommerceHelper::isReviewEnabled() && $product->reviews_count > 0)
+                    @if (EcommerceHelper::isReviewEnabled() && $product->reviews_count > 0 && $product->is_enquiry == 0)
                         <h4 class="entry-title mt-4 pb-4 border-bottom">{{ __('Reviews') }} ({{ $product->reviews_count }})</h4>
                         <div class="mt-4">
                             @include('plugins/ecommerce::themes.includes.reviews')
@@ -197,7 +202,7 @@
                         >
                             {{ __('Description') }}
                         </a>
-                        @if (EcommerceHelper::isReviewEnabled())
+                        @if (EcommerceHelper::isReviewEnabled() && $product->is_enquiry == 0)
                             <a
                                 class="nav-link"
                                 id="product-reviews-tab"
@@ -258,7 +263,7 @@
 
                             {!! apply_filters(BASE_FILTER_PUBLIC_COMMENT_AREA, null, $product) !!}
                         </div>
-                        @if (EcommerceHelper::isReviewEnabled())
+                        @if (EcommerceHelper::isReviewEnabled() && $product->is_enquiry == 0)
                             <div
                                 class="tab-pane fade"
                                 id="product-reviews"
@@ -294,15 +299,17 @@
                 </div>
             </div>
         @endif
+        @if($product->is_enquiry == 0)
         <div class="row mt-4">
             <div class="col-lg-3 d-block d-sm-block d-md-none d-lg-none d-xl-none">
                 {!! dynamic_sidebar('product_detail_sidebar') !!}
             </div>
         </div>
+        @endif
     </div>
 </div>
 
-@if (($relatedProducts = get_related_products($product, 6)) && $relatedProducts->isNotEmpty())
+@if (($relatedProducts = get_related_products($product, 6)) && $relatedProducts->isNotEmpty() && $product->is_enquiry == 0)
 <div class="widget-products-with-category mt-4 pt-4 pb-5 bg-light">
     <div class="container-xxxl">
         <div class="row">
@@ -393,6 +400,7 @@
                     <div class="ps-product__wrapper">
                         <div class="ps-product__content">
                             <span class="ps-product__title">{!! BaseHelper::clean($product->name) !!}</span>
+                            @if($product->is_enquiry == 0)
                             <ul>
                                 <li class="active"><a href="#product-description-tab">{{ __('Description') }}</a>
                                 </li>
@@ -401,6 +409,7 @@
                                             ({{ $product->reviews_count }})</a></li>
                                 @endif
                             </ul>
+                            @endif
                         </div>
 
                         <div class="ps-product__shopping">
