@@ -13,9 +13,9 @@
         <div class="row">
             <div class="col-8">
                 <p class="price-text-label m-0">{{ __('Tax') }}:</p>
-                    @if (Cart::instance('cart')->rawTax())
+                    <!--@if (Cart::instance('cart')->rawTax())
                         (<small>{{ Cart::instance('cart')->taxClassesName() }}</small>)
-                    @endif
+                    @endif-->
             </div>
             <div class="col-4 float-end">
                 <p class="price-text tax-price-text m-0 text-success"><span>(+)</span> {{ format_price(Cart::instance('cart')->rawTax()) }}</p>

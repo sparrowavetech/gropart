@@ -13,6 +13,7 @@
     .back-to-cart-btn { font-size: 1.25rem; font-weight: 600; }
     .accepted-payments { max-width: 420px; margin: auto; }
     .btn.payment-checkout-btn-step.payment-checkout-btn:hover { background-color: #00b460!important; }
+    .list-group.list_payment_method .list-group-item.payment-method-item { border-bottom: var(--bs-list-group-border-width) solid var(--bs-list-group-border-color); }
 </style>
 @extends('plugins/ecommerce::orders.master')
 
