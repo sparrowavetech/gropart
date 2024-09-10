@@ -206,12 +206,12 @@ $userCity = auth()->check() ? auth()->user()->city : '';
                                         </div>
                                     </div>
                                 </div>
-                                <div class="loading">
+                                <!-- <div class="loading">
                                     <div class="half-circle-spinner">
                                         <div class="circle circle-1"></div>
                                         <div class="circle circle-2"></div>
                                     </div>
-                                </div>
+                                </div> -->
                             </div>
                         </div>
                     </div>

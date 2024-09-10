@@ -14,11 +14,12 @@ class PublicAjaxController extends BaseController
 {
     public function ajaxSearchProducts(Request $request, GetProductService $productService)
     {
+       
         $request->merge(['num' => 12]);
 
         $with = EcommerceHelper::withProductEagerLoadingRelations();
 
-        $products = $productService->getProduct($request, null, null, $with);
+        $products = $productService->getProduct($request, null, null, $with,[],['is_enquiry'=>0]);
 
         $queries = $request->input();
 

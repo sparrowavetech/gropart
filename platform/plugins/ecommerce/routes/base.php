@@ -200,7 +200,7 @@ Theme::registerRoutes(function () {
                 'as' => 'public.orders.tracking',
                 'uses' => 'PublicProductController@getOrderTracking',
             ])->wherePrimaryKey();
-
+                
             Route::get(EcommerceHelper::getPageSlug('enquiry'), [
                 'as'   => 'public.product.enquiry',
                 'uses' => 'PublicProductController@getEnquiryProduct',

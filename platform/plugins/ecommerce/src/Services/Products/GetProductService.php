@@ -11,9 +11,7 @@ use Illuminate\Http\Request;
 
 class GetProductService
 {
-    public function __construct(protected ProductInterface $productRepository)
-    {
-    }
+    public function __construct(protected ProductInterface $productRepository) {}
 
     public function getProduct(
         Request $request,
@@ -25,7 +23,9 @@ class GetProductService
     ): Collection|LengthAwarePaginator {
         $num = $request->integer('num') ?: $request->integer('per-page');
         $shows = EcommerceHelper::getShowParams();
-
+        if (!isset($conditions['is_enquiry'])) {
+            $conditions['is_enquiry'] = 0;
+        }
         if (! array_key_exists($num, $shows)) {
             $num = (int) theme_option('number_of_products_per_page', 12);
         }

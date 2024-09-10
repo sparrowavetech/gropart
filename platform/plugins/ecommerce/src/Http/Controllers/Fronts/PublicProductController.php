@@ -48,8 +48,7 @@ class PublicProductController extends BaseController
         $with = EcommerceHelper::withProductEagerLoadingRelations();
         $condition = ['is_enquiry' => 0];
         if (($query = BaseHelper::stringify($request->input('q'))) && ! $request->ajax()) {
-            $products = $productService->getProduct($request, null, null, $with, $condition);
-
+            $products = $productService->getProduct($request, null, null, $with,[], $condition);
             SeoHelper::setTitle(__('Search result for ":query"', compact('query')));
 
             Theme::breadcrumb()
