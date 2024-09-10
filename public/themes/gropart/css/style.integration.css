@@ -18,6 +18,7 @@ html[lang="hi"] .product-inner .product__title {
     line-height: 1.75;
   	padding-top: 2px;
 }
+.product-button.is_enquiry { justify-content: flex-start; }
 .bb-form-quick-search .bb-quick-search-item-name { font-weight: 700; }
 .checkout__coupon-item.active .checkout__coupon-item-description { color: #fff; }
 .checkout__coupon-item.active { background-color: var(--bs-primary); color: #fff; }
@@ -52,7 +53,9 @@ html[lang="hi"] .product-inner .product__title {
 .menu--mobile>li>a i { margin-right: 10px; }
 .menu--mobile .menu-item-has-children.active .sub-toggle { top: calc(50% + 5px) }
 .header .header-bottom .header-wrapper .navigation .menu>li.menu--enquiry-btn>a { padding: 10px 23px 0 20px; position: relative; transition: .5s; }
-.header .header-bottom .header-wrapper .navigation .menu>li.menu--enquiry-btn>a:after { z-index:1; color:#fff; content: "New"; position: absolute; right: -15px; top: -2px; padding: 3px 8px; background-color: #D64635; border-radius: 5px; font-size: .8rem; font-weight: 800; text-transform: capitalize; line-height: 1; animation-name: changeColorAnimation; animation-duration: 5s; animation-iteration-count: infinite; animation-direction: alternate; animation-timing-function: linear; }
+.header .header-bottom .header-wrapper .navigation .menu>li.menu--enquiry-btn>a:after,
+#menu-mobile .menu--mobile .menu--enquiry-btn>a:after { z-index:1; color:#fff; content: "New"; position: absolute; right: -15px; top: -2px; padding: 3px 8px; background-color: #D64635; border-radius: 5px; font-size: .8rem; font-weight: 800; text-transform: capitalize; line-height: 1; animation-name: changeColorAnimation; animation-duration: 5s; animation-iteration-count: infinite; animation-direction: alternate; animation-timing-function: linear; }
+#menu-mobile .menu--mobile .menu--enquiry-btn>a:after { top: 10px; right: 40px; }
 .header .header-bottom .header-wrapper .navigation .menu>li.menu-item-has-children>a:before,
 .header .header-bottom .header-wrapper .navigation .menu-item-has-children .sub-menu { top: calc(100% + 12px); padding: 10px; }
 .header .header-bottom .header-wrapper .navigation .menu>li:first-child,
@@ -425,7 +428,7 @@ a{ color: var(--primary-color); }
 .entry-product-header .fs-5.product_title.entry-title { font-weight: 700 !important; }
 .product-details .dropdown-swatches-wrapper.attribute-swatches-wrapper {margin-bottom: 15px;}
 .slick-list.draggable .product-inner .product-button .add-to-cart-button,
-.shop-products-listing .product-inner .product-button .add-to-cart-button { padding: 10px 15px; width: auto; }
+.shop-products-listing .product-inner .product-button .add-to-cart-button { padding: 10px 5px; width: auto; }
 .product-detail-container .product-loop__buttons .product-loop_button.bulk-order-button .product-loop_action { font-weight: 700; }
 .header .header-middle .header__left .logo a img { width: 250px; }
 .header .header-bottom { border-bottom: 1px solid var(--header-deliver-color); }
@@ -680,10 +683,10 @@ a{ color: var(--primary-color); }
     .product-detail-container .product-detail-tabs .nav#product-detail-tabs { position: relative; height: auto; top: auto; bottom: auto; padding-bottom: 10px; margin-bottom: 15px; }
     .product-detail-container .product-gallery.product-gallery--with-images { position: relative; height: auto; top: auto; bottom: auto; }
   	.all-brands .featured-brand-item .brand__thumb.img-fluid-eq { max-height:230px; }
-    .product-price { font-size: 18px; }
+    .product-price { font-size: 15px; }
   	.product-inner.slick-slide .product-content-box .product-price { font-size: 18px; min-height: 60px; color: #414141; font-weight: 500; }
   	.product-inner.slick-slide .product-content-box .product-price .product-price-sale.d-flex { flex-direction: column; }
-    .product-price del { font-size: 18px !important; font-weight: 500 !important; }
+    .product-price del { font-size: 14px !important; font-weight: 500 !important; }
   	.ribbons.sale-ribbon .ribbon, .ribbons.product-lable .ribbon { font-size: 10px; line-height: 20px; }
   	.product-thumbnail .ribbons.product-lable .ribbon:last-child { margin-bottom: -20px; }
   	.product-inner .product-bottom-box { padding: 15px 10px 3px; }
