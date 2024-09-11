@@ -144,9 +144,9 @@ class ProductCategoryHelper
 
         $cacheKey = 'ecommerce_categories_for_rendering_select' . md5($cache->generateCacheKeyFromInput() . serialize(func_get_args()));
 
-        if (!$cache->has($cacheKey)) {
+        if ($cache->has($cacheKey)) {
             $categories = $cache->get($cacheKey);
-        
+
         } else {
             $query = ProductCategory::query()
                 ->toBase()

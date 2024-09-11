@@ -1,7 +1,10 @@
 @php
     $groupedCategories = ProductCategoryHelper::getProductCategoriesWithUrl()->groupBy('parent_id');
 
-    $currentCategories = $groupedCategories->get(0);
+    //$currentCategories = $groupedCategories->get(0);
+    $currentCategories = $groupedCategories->get(0)->filter(function ($category) {
+        return $category->is_enquiry == 0;
+    });
 @endphp
 
 @if($currentCategories)

@@ -1190,19 +1190,20 @@ class EcommerceHelper
     {
         $rand = mt_rand();
         $categoriesRequest = (array) request()->input('categories', []);
-       
+
         $urlCurrent = URL::current();
         $categoryId = $category?->getKey() ?: 0;
         $categoryIds = array_filter($categoryId ? [$categoryId] : $categoriesRequest);
-       
+
         $brands = $tags =   collect();
         $maxFilterPrice = 0;
+
         if($condition['is_enquiry'] != 1){
             $brands = $this->brandsForFilter($categoryIds);
             $tags = $this->tagsForFilter($categoryIds);
             $maxFilterPrice = $this->getProductMaxPrice($categoryIds) * get_current_exchange_rate();
         }
-        
+
 
         if ($category) {
             $categoriesRequest = request()->input('categories', []);
@@ -1218,13 +1219,13 @@ class EcommerceHelper
                 }
             }
         }
-      
+
         if ($categoriesRequest) {
             $categories = ProductCategoryHelper::getProductCategoriesWithUrl($categoriesRequest,$condition)->sortBy('parent_id');
         } else {
             $categories = ProductCategoryHelper::getProductCategoriesWithUrl([],$condition);
         }
-        
+
         return [
             $categories,
             $brands,
