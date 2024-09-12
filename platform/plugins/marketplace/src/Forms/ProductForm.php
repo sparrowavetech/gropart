@@ -7,12 +7,14 @@ use Botble\Base\Forms\FieldOptions\EditorFieldOption;
 use Botble\Base\Forms\FieldOptions\NameFieldOption;
 use Botble\Base\Forms\FieldOptions\NumberFieldOption;
 use Botble\Base\Forms\FieldOptions\SelectFieldOption;
+use Botble\Base\Forms\FieldOptions\OnOffFieldOption;
 use Botble\Base\Forms\Fields\MultiCheckListField;
 use Botble\Base\Forms\Fields\NumberField;
 use Botble\Base\Forms\Fields\SelectField;
 use Botble\Base\Forms\Fields\TagField;
 use Botble\Base\Forms\Fields\TextField;
 use Botble\Base\Forms\Fields\TreeCategoryField;
+use Botble\Base\Forms\Fields\OnOffField;
 use Botble\Ecommerce\Enums\GlobalOptionEnum;
 use Botble\Ecommerce\Enums\ProductTypeEnum;
 use Botble\Ecommerce\Facades\EcommerceHelper;
@@ -100,6 +102,14 @@ class ProductForm extends BaseProductForm
                     ->choices(ProductCategoryHelper::getActiveTreeCategories())
                     ->selected(old('categories', $selectedCategories))
                     ->addAttribute('card-body-class', 'p-0')
+                    ->toArray()
+            )
+            ->add(
+                'is_enquiry',
+                OnOffField::class,
+                OnOffFieldOption::make()
+                    ->label(trans('plugins/ecommerce::products.form.is_enquiry'))
+                    ->defaultValue(false)
                     ->toArray()
             )
             ->when($brands, function () use ($brands) {

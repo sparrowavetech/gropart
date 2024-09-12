@@ -11,6 +11,7 @@ use Botble\Base\Traits\EnumCastable;
 use Botble\Ecommerce\Models\Customer;
 use Botble\Ecommerce\Models\Discount;
 use Botble\Ecommerce\Models\Order;
+use Botble\Ecommerce\Models\Enquiry;
 use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Models\QueryBuilders\StoreQueryBuilder;
 use Botble\Ecommerce\Traits\LocationTrait;
@@ -196,5 +197,9 @@ class Store extends BaseModel
         }
 
         return parent::getMetaData($key, $single);
+    }
+    public function enquires(): HasMany
+    {
+        return $this->hasMany(Enquiry::class);
     }
 }

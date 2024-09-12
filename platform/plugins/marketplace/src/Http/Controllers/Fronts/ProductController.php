@@ -389,6 +389,7 @@ class ProductController extends BaseController
         $availableProducts = Product::query()
             ->where('status', BaseStatusEnum::PUBLISHED)
             ->where('is_variation', 0)
+            ->where('is_enquiry', 0)
             ->where('id', '!=', $request->input('product_id', 0))
             ->where('name', 'LIKE', '%' . $request->input('keyword') . '%')
             ->where('store_id', auth('customer')->user()->store->id)

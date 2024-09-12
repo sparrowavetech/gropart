@@ -476,6 +476,7 @@ trait ProductActionsTrait
                 $query->wherePublished();
             })
             ->where('is_variation', 0)
+            ->where('is_enquiry', 0)
             ->when($productId, fn ($query) => $query->whereNot('id', $productId))
             ->when($keyword, function ($query) use ($keyword) {
                 $query->where(function ($query) use ($keyword) {
