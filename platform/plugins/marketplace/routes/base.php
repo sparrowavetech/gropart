@@ -70,11 +70,17 @@ AdminHelper::registerRoutes(function () {
                     'permission' => 'marketplace.unverified-vendors.edit',
                 ])->wherePrimaryKey();
 
-                Route::post('approve/{id}', [
+                /*Route::post('approve/{id}', [
                     'as' => 'approve-vendor',
                     'uses' => 'UnverifiedVendorController@approveVendor',
                     'permission' => 'marketplace.unverified-vendors.edit',
-                ])->wherePrimaryKey();
+                ])->wherePrimaryKey();*/
+
+                Route::match(['GET', 'POST'], 'approve/{id}', [
+                    'as' => 'approve-vendor',
+                    'uses' => 'UnverifiedVendorController@approveVendor',
+                    'permission' => 'marketplace.unverified-vendors.edit',
+                ]);
             });
 
             Route::group(['prefix' => 'vendors', 'as' => 'vendors.'], function () {
