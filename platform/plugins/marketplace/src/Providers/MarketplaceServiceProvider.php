@@ -200,6 +200,13 @@ class MarketplaceServiceProvider extends ServiceProvider
                             'icon' => 'ti ti-shopping-cart',
                         ])
                         ->registerItem([
+                            'id' => 'marketplace.vendor.enquiries',
+                            'priority' => 4,
+                            'name' => __('Enquiry'),
+                            'url' => fn () => route('marketplace.vendor.enquiries.index'),
+                            'icon' => 'ti ti-globe',
+                        ])
+                        ->registerItem([
                             'id' => 'marketplace.vendor.withdrawals',
                             'priority' => 5,
                             'name' => __('Withdrawals'),

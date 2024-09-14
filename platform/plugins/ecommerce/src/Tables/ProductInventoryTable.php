@@ -44,7 +44,7 @@ class ProductInventoryTable extends ProductBulkEditableTable
             'ec_products.quantity',
             'ec_products.with_storehouse_management',
         ]);
-
+        $query->where('ec_products.is_enquiry',0);
         return $query;
     }
 }

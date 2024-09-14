@@ -1080,6 +1080,7 @@ class OrderHelper
                 $enquiry->email
             );
         }
+      
         if ($mailer->templateEnabled('admin_new_enquiry')) {
             self::setEmailVendorVariablesForEnquiry($enquiry);
             $mailer->sendUsingTemplate('admin_new_enquiry', get_admin_email()->toArray());

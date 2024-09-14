@@ -39,12 +39,13 @@ class PublicProductController extends BaseController
 {
     public function getProducts(Request $request, GetProductService $productService)
     {
+    
         if (! EcommerceHelper::productFilterParamsValidated($request)) {
             return $this
                 ->httpResponse()
                 ->setNextUrl(route('public.products'));
         }
-
+       
         $with = EcommerceHelper::withProductEagerLoadingRelations();
         $condition = ['is_enquiry' => 0];
         if (($query = BaseHelper::stringify($request->input('q'))) && ! $request->ajax()) {
@@ -110,6 +111,7 @@ class PublicProductController extends BaseController
                 'attachment' => $result['data']->url,
             ]);
         }
+    
         $enquiry =  Enquiry::query()->create($request->input());
         event(new CreatedContentEvent(CUSTOMER_MODULE_SCREEN_NAME, $request, $enquiry));
 
@@ -358,6 +360,7 @@ class PublicProductController extends BaseController
     }
     public function getEnquiryProduct(Request $request, GetProductService $productService)
     {
+       
         if (!EcommerceHelper::productFilterParamsValidated($request)) {
             return $this
             ->httpResponse()

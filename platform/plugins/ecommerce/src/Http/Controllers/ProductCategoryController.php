@@ -19,10 +19,11 @@ use Illuminate\Support\Facades\Auth;
 
 class ProductCategoryController extends BaseController
 {
+    
     public function index(Request $request)
     {
         $this->pageTitle(trans('plugins/ecommerce::product-categories.name'));
-
+     
         $categories = ProductCategory::query()
             ->orderBy('order')
             ->orderByDesc('created_at')

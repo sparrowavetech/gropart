@@ -558,6 +558,7 @@ trait ProductActionsTrait
                 $query->wherePublished();
             })
             ->where('is_variation', '<>', 1)
+            ->where('is_enquiry', 0)
             ->when($keyword, function ($query) use ($keyword) {
                 $query->where(function ($query) use ($keyword) {
                     $keyword = '%' . trim($keyword) . '%';
@@ -641,6 +642,7 @@ trait ProductActionsTrait
         $availableProducts = Product::query()
             ->select(['ec_products.*'])
             ->where('is_variation', false)
+            ->where('is_enquiry', 0)
             ->when(! Auth::check(), function ($query) {
                 $query->wherePublished();
             })

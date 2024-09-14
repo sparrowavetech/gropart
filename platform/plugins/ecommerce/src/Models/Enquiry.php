@@ -38,7 +38,8 @@ class Enquiry extends BaseModel
         'address',
         'status',
         'description',
-        'attachment'
+        'attachment',
+        'store_id'
     ];
     protected static function boot()
     {

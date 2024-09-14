@@ -36,7 +36,7 @@ class EnquiryController extends BaseController
     {
         page_title()->setTitle(__('Enquires'));
         $enquires = auth('customer')->user()->store->enquires()->get();
-        return $table->render(MarketplaceHelper::viewPath('dashboard.table.base'), compact('enquires'));
+        return $table->render(MarketplaceHelper::viewPath('vendor-dashboard.table.base'), compact('enquires'));
     }
       /**
      * @param int $id
@@ -52,7 +52,7 @@ class EnquiryController extends BaseController
 
         page_title()->setTitle(trans('plugins/ecommerce::enquiry.edit', ['code' => $enquiry->code]));
 
-        return MarketplaceHelper::view('dashboard.enquires.edit', compact('enquiry'));
+        return MarketplaceHelper::view('vendor-dashboard.enquires.edit', compact('enquiry'));
     }
    
 }

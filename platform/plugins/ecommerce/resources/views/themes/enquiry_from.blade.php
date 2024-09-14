@@ -46,6 +46,7 @@ $userCity = auth()->check() ? auth()->user()->city : '';
             </div>
         </div>
     </div>
+    <input type="hidden" name="store_id" value="{{$product->store_id}}">
     <div class="col-lg-7">
         <div class="form-content">
             <div class="row">
@@ -206,12 +207,12 @@ $userCity = auth()->check() ? auth()->user()->city : '';
                                         </div>
                                     </div>
                                 </div>
-                                <!-- <div class="loading">
+                                <div class="loading" style="display: none;">
                                     <div class="half-circle-spinner">
                                         <div class="circle circle-1"></div>
                                         <div class="circle circle-2"></div>
                                     </div>
-                                </div> -->
+                                </div>
                             </div>
                         </div>
                     </div>

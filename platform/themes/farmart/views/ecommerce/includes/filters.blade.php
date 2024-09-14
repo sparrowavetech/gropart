@@ -57,7 +57,8 @@
                         'categories' => $categories,
                         'activeCategoryId' => $categoryId,
                         'categoriesRequest' => $categoriesRequest,
-                        'urlCurrent' => $urlCurrent
+                        'urlCurrent' => $urlCurrent,
+                        'condition'=>$condition
                     ])
                 </div>
             </div>

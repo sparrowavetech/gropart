@@ -1,5 +1,6 @@
 @extends(MarketplaceHelper::viewPath('dashboard.layouts.master'))
 
+
 @section('content')
 <div class="max-width-1200" id="main-order-content">
     <div class="ui-layout">

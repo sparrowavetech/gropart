@@ -63,7 +63,7 @@ class ProductPriceTable extends ProductBulkEditableTable
             'ec_products.sale_price',
             'ec_products.sale_type',
         ]);
-
+        $query->where('ec_products.is_enquiry',0);
         return $query;
     }
 }

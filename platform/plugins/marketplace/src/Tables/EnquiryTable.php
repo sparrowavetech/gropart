@@ -103,7 +103,7 @@ class EnquiryTable extends TableAbstract
             ])
             ->with(['product'])
             ->where('store_id', auth('customer')->user()->store->id);
-
+       
         return $this->applyScopes($query);
     }
 

@@ -275,7 +275,13 @@ class ProductTable extends TableAbstract
         $data['brand_id'] = array_merge($data['brand_id'], [
             'type' => 'select-ajax',
         ]);
-
+        
+        $data['is_enquiry'] = [
+            'title' => trans('plugins/ecommerce::products.form.is_enquiry'),
+            'type' => 'select',
+            'choices' =>[1=>'Yes',0=>'No'],
+            'validate' => 'required|in:' . implode(',', StockStatusEnum::values()),
+        ];
         $data['stock_status'] = [
             'title' => trans('plugins/ecommerce::products.form.stock_status'),
             'type' => 'select',

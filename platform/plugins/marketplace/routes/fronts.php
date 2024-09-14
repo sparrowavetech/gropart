@@ -56,7 +56,18 @@ Route::group([
                 'as' => 'dashboard',
                 'uses' => 'DashboardController@index',
             ]);
-
+            Route::get('enquires', [
+                'as' => 'enquiries.index',
+                'uses' => 'EnquiryController@index',
+            ]);
+            Route::post('enquires', [
+                'as' => 'enquiries.index',
+                'uses' => 'EnquiryController@index',
+            ]);
+            Route::get('enquires/{id}', [
+                'as' => 'enquiries.edit',
+                'uses' => 'EnquiryController@edit',
+            ]);
             Route::get('settings', [
                 'as' => 'settings',
                 'uses' => 'SettingController@index',
@@ -239,6 +250,7 @@ Route::group([
                     'uses' => 'ShipmentController@postUpdateStatus',
                 ])->wherePrimaryKey();
             });
+           
 
             Route::group(['prefix' => 'order-returns', 'as' => 'order-returns.'], function () {
                 Route::resource('', 'OrderReturnController')->parameters(['' => 'order'])->except(['create', 'store']);
