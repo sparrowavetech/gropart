@@ -39,17 +39,17 @@ class PublicProductController extends BaseController
 {
     public function getProducts(Request $request, GetProductService $productService)
     {
-    
+
         if (! EcommerceHelper::productFilterParamsValidated($request)) {
             return $this
                 ->httpResponse()
                 ->setNextUrl(route('public.products'));
         }
-       
+
         $with = EcommerceHelper::withProductEagerLoadingRelations();
         $condition = ['is_enquiry' => 0];
         if (($query = BaseHelper::stringify($request->input('q'))) && ! $request->ajax()) {
-            $products = $productService->getProduct($request, null, null, $with,[], $condition);
+            $products = $productService->getProduct($request, null, null, $with, [], $condition);
             SeoHelper::setTitle(__('Search result for ":query"', compact('query')));
 
             Theme::breadcrumb()
@@ -59,14 +59,20 @@ class PublicProductController extends BaseController
 
             return Theme::scope(
                 'ecommerce.search',
-                compact('products', 'query','condition'),
+                compact('products', 'query', 'condition'),
                 'plugins/ecommerce::themes.search'
             )->render();
         }
 
-        Theme::breadcrumb()->add(__('Products'), route('public.products'));
 
-        $products = $productService->getProduct($request, null, null, $with,$condition);
+        if ($request->query('enquiry') == 1) {
+            Theme::breadcrumb()->add(__("Equipment's Enquiry"), route('public.product.enquiry'));
+        } else {
+            Theme::breadcrumb()->add(__('Products'), route('public.products'));
+        }
+
+
+        $products = $productService->getProduct($request, null, null, $with, $condition);
 
         if ($request->ajax()) {
             return $this->ajaxFilterProductsResponse($products);
@@ -80,7 +86,62 @@ class PublicProductController extends BaseController
 
         return Theme::scope(
             'ecommerce.products',
-            compact('products','condition'),
+            compact('products', 'condition'),
+            'plugins/ecommerce::themes.products'
+        )->render();
+    }
+    public function getEnquiryProduct(Request $request, GetProductService $productService)
+    {
+
+        if (!EcommerceHelper::productFilterParamsValidated($request)) {
+            return $this
+                ->httpResponse()
+                ->setNextUrl(route('public.products'));
+        }
+
+        $query = $request->input('q');
+
+        $with = EcommerceHelper::withProductEagerLoadingRelations();
+
+        if (is_plugin_active('marketplace')) {
+            $with = array_merge($with, ['store', 'store.slugable']);
+        }
+
+        $withCount = EcommerceHelper::withReviewsCount();
+        $condition = ['is_enquiry' => 1];
+        if ($query && !$request->ajax()) {
+            $products = $productService->getProduct($request, null, null, $with, $withCount, $condition);
+
+            SeoHelper::setTitle(__('Search result for ":query"', compact('query')));
+
+            Theme::breadcrumb()
+                ->add(__('Home'), route('public.index'))
+                ->add(__('Search'), route('public.products'));
+
+            return Theme::scope(
+                'ecommerce.search',
+                compact('products', 'query'),
+                'plugins/ecommerce::themes.search'
+            )->render();
+        }
+
+        $products = $productService->getProduct($request, null, null, $with, $withCount, $condition);
+
+        if ($request->ajax()) {
+            return $this->ajaxFilterProductsResponse($products);
+        }
+
+        Theme::breadcrumb()
+            ->add(__('Home'), route('public.index'))
+            ->add(__("Equipment's Enquiry"), route('public.product.enquiry'));
+
+        SeoHelper::setTitle(__("Equipment's Enquiry"))->setDescription(__('Products'));
+
+        do_action(PRODUCT_MODULE_SCREEN_NAME);
+
+        return Theme::scope(
+            'ecommerce.products',
+            compact('products', 'condition'),
             'plugins/ecommerce::themes.products'
         )->render();
     }
@@ -111,7 +172,7 @@ class PublicProductController extends BaseController
                 'attachment' => $result['data']->url,
             ]);
         }
-    
+
         $enquiry =  Enquiry::query()->create($request->input());
         event(new CreatedContentEvent(CUSTOMER_MODULE_SCREEN_NAME, $request, $enquiry));
 
@@ -358,61 +419,7 @@ class PublicProductController extends BaseController
             ->httpResponse()
             ->setData(new ProductVariationResource($product));
     }
-    public function getEnquiryProduct(Request $request, GetProductService $productService)
-    {
-       
-        if (!EcommerceHelper::productFilterParamsValidated($request)) {
-            return $this
-            ->httpResponse()
-            ->setNextUrl(route('public.products'));
-        }
-
-        $query = $request->input('q');
-
-        $with = EcommerceHelper::withProductEagerLoadingRelations();
-
-        if (is_plugin_active('marketplace')) {
-            $with = array_merge($with, ['store', 'store.slugable']);
-        }
-
-        $withCount = EcommerceHelper::withReviewsCount();
-        $condition = ['is_enquiry' => 1];
-        if ($query && !$request->ajax()) {
-            $products = $productService->getProduct($request, null, null, $with, $withCount, $condition);
-
-            SeoHelper::setTitle(__('Search result for ":query"', compact('query')));
-
-            Theme::breadcrumb()
-                ->add(__('Home'), route('public.index'))
-                ->add(__('Search'), route('public.products'));
-
-            return Theme::scope(
-                'ecommerce.search',
-                compact('products', 'query'),
-                'plugins/ecommerce::themes.search'
-            )->render();
-        }
-
-        $products = $productService->getProduct($request, null, null, $with, $withCount, $condition);
-
-        if ($request->ajax()) {
-            return $this->ajaxFilterProductsResponse($products);
-        }
-
-        Theme::breadcrumb()
-            ->add(__('Home'), route('public.index'))
-            ->add(__('Products'), route('public.products'));
-
-        SeoHelper::setTitle(__('Products'))->setDescription(__('Products'));
-
-        do_action(PRODUCT_MODULE_SCREEN_NAME);
-
-        return Theme::scope(
-            'ecommerce.products',
-            compact('products', 'condition'),
-            'plugins/ecommerce::themes.products'
-        )->render();
-    }
+   
     public function getOrderTracking(OrderTrackingRequest $request)
     {
         if (! EcommerceHelper::isOrderTrackingEnabled()) {
@@ -437,14 +444,14 @@ class PublicProductController extends BaseController
                 ->when(EcommerceHelper::isLoginUsingPhone(), function (BaseQueryBuilder $query) use ($request) {
                     $query->where(function (BaseQueryBuilder $query) use ($request) {
                         $query
-                            ->whereHas('address', fn ($subQuery) => $subQuery->where('phone', $request->input('phone')))
-                            ->orWhereHas('user', fn ($subQuery) => $subQuery->where('phone', $request->input('phone')));
+                            ->whereHas('address', fn($subQuery) => $subQuery->where('phone', $request->input('phone')))
+                            ->orWhereHas('user', fn($subQuery) => $subQuery->where('phone', $request->input('phone')));
                     });
                 }, function (BaseQueryBuilder $query) use ($request) {
                     $query->where(function (Builder $query) use ($request) {
                         $query
-                            ->whereHas('address', fn ($subQuery) => $subQuery->where('email', $request->input('email')))
-                            ->orWhereHas('user', fn ($subQuery) => $subQuery->where('email', $request->input('email')));
+                            ->whereHas('address', fn($subQuery) => $subQuery->where('email', $request->input('email')))
+                            ->orWhereHas('user', fn($subQuery) => $subQuery->where('email', $request->input('email')));
                     });
                 });
 
