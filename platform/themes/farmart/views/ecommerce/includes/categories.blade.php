@@ -12,13 +12,14 @@ $activeCategoryId ??= 0;
 
     $currentCategories = $groupedCategories->get($parentId ?? 0);
     if($currentCategories == NULL){
-        $currentCategories = $categories;
+    $currentCategories = $categories;
     }
     @endphp
 
     @if($currentCategories)
-    @foreach ($currentCategories as $category)
-  
+
+    @forelse ($currentCategories as $category)
+
     @if (!empty($categoriesRequest) && $loop->first && !$category->parent_id)
     <li class="category-filter  mb-2">
         <a
@@ -95,6 +96,22 @@ $activeCategoryId ??= 0;
         ])
         @endif
     </li>
-    @endforeach
+    @empty
+    <li class="category-filter  mb-2">
+        <a
+            class="nav-list__item-link"
+            data-id=""
+            href="{{ $is_enquiry == 1 ? route('public.product.enquiry'):route('public.products') }}{{ $is_enquiry == 1?'?enquiry=1':''}}">
+            <span class="cat-menu-close svg-icon">
+                <svg>
+                    <use
+                        href="#svg-icon-chevron-left"
+                        xlink:href="#svg-icon-close"></use>
+                </svg>
+            </span>
+            <span>{{ __('All categories') }}</span>
+        </a>
+    </li>
+    @endforelse
     @endif
 </ul>

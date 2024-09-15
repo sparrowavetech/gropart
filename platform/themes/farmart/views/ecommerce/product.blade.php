@@ -20,7 +20,7 @@
                                     <div class="meta-categories">
                                         <span class="meta-label d-inline-block">{{ __('Categories') }}: </span>
                                         @foreach ($product->categories as $category)
-                                            <a href="{{ $category->url }}">{{ $category->name }}</a>@if (!$loop->last),@endif
+                                            <a href="{{ $category->url }}{{ $product->is_enquiry == 1?'?enquiry=1':''}}">{{ $category->name }}</a>@if (!$loop->last),@endif
                                         @endforeach
                                     </div>
                                 @endif
