@@ -22,9 +22,12 @@ class GetProductService
         array $conditions = []
     ): Collection|LengthAwarePaginator {
         $num = $request->integer('num') ?: $request->integer('per-page');
+      
         $shows = EcommerceHelper::getShowParams();
         if (!isset($conditions['is_enquiry'])) {
             $conditions['is_enquiry'] = 0;
+        }elseif($request->query('enquiry')){
+            $conditions['is_enquiry'] = $request->query('enquiry');
         }
         if (! array_key_exists($num, $shows)) {
             $num = (int) theme_option('number_of_products_per_page', 12);
