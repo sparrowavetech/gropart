@@ -12,7 +12,7 @@
         <tr>
             <td>
                 <a href="">
-                    <img src="{{ RvMedia::getImageUrl($enquiry->product->product_image, 'thumb') }}" alt="{{ $enquiry->product->name }}" class=" bb-rounded" width="50" alt="" />
+                    <img src="{{ RvMedia::getImageUrl($enquiry->product->images[0], 'thumb') }}" alt="{{ $enquiry->product->name }}" class=" bb-rounded" width="50" alt="" />
                 </a>
             </td>
             <td>

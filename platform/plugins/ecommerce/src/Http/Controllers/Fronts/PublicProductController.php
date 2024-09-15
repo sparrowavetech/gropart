@@ -70,8 +70,6 @@ class PublicProductController extends BaseController
         } else {
             Theme::breadcrumb()->add(__('Products'), route('public.products'));
         }
-
-
         $products = $productService->getProduct($request, null, null, $with, $condition);
 
         if ($request->ajax()) {
@@ -174,6 +172,7 @@ class PublicProductController extends BaseController
         }
 
         $enquiry =  Enquiry::query()->create($request->input());
+      
         event(new CreatedContentEvent(CUSTOMER_MODULE_SCREEN_NAME, $request, $enquiry));
 
         if (is_plugin_active('marketplace')) {
