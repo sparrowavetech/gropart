@@ -24,6 +24,7 @@
         @if (!empty($cartItem->options['options']))
             {!! render_product_options_html($cartItem->options['options'], $product->original_price) !!}
         @endif
+       
         {!! apply_filters('ecommerce_cart_after_item_content', null, $cartItem) !!}
     </div>
     <div class="col-sm-3 col-3 text-end">

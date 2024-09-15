@@ -859,7 +859,7 @@ class HookServiceProvider extends ServiceProvider
             if ($product->minimum_order_quantity > 0 && $quantityOfProduct < $product->minimum_order_quantity) {
                 $message = __('You need to add :quantity more items to place your order. ', [
                     'product' => BaseHelper::clean($product->original_product->name),
-                    'quantity' => $product->minimum_order_quantity,
+                    'quantity' => $product->minimum_order_quantity - $quantityOfProduct,
                     'more' => $product->minimum_order_quantity - $quantityOfProduct,
                 ]);
             }

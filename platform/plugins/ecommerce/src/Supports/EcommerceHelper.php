@@ -1031,6 +1031,17 @@ class EcommerceHelper
 
     public function isValidToProcessCheckout(): bool
     {
+        $cartItem = Cart::instance('cart')->products();
+
+        foreach ($cartItem as  $item) {
+            if($item->minimum_order_quantity > 0 || $item->maximum_order_quantity > 0){
+                $quantityOfProduct = Cart::instance('cart')->rawQuantityByItemId($item->getKey());
+                if($item->minimum_order_quantity > $quantityOfProduct ||  $item->maximum_order_quantity < $quantityOfProduct ){
+                    return false;
+                }
+            }
+            
+        }
         return Cart::instance('cart')->rawSubTotal() >= $this->getMinimumOrderAmount();
     }
 

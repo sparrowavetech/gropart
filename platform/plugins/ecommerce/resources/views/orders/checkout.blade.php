@@ -195,6 +195,7 @@
 
                                     {!! apply_filters('ecommerce_checkout_form_after_back_to_cart_link', null, $products) !!}
                                 </div>
+                               
                                 <div class="order-1 order-md-2 col-md-6">
                                     @if (EcommerceHelper::isValidToProcessCheckout())
                                         <button
