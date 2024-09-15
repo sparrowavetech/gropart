@@ -40,12 +40,12 @@ class HandleFrontPages
 
     public function handle(Slug|array $slug): array|Slug
     {
+       
         if (! $slug instanceof Slug) {
             return $slug;
         }
 
         $request = request();
-
         $response = BaseHttpResponse::make();
 
         $isPreview = Auth::guard()->check() && $request->input('preview');
@@ -120,7 +120,12 @@ class HandleFrontPages
 
                     EcommerceHelper::handleCustomerRecentlyViewedProduct($product);
                 }
-
+                
+                if ($request->query('enquiry') == 1) {
+                    Theme::breadcrumb()->add(__("Equipment's Enquiry"), route('public.product.enquiry'));
+                } else {
+                    Theme::breadcrumb()->add(__('Products'), route('public.products'));
+                }
                 Theme::breadcrumb()->add(__('Products'), route('public.products'));
 
                 $category = $product->categories->sortByDesc('id')->first();
