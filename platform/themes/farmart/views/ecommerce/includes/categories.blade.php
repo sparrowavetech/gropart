@@ -9,7 +9,7 @@ $activeCategoryId ??= 0;
     $groupedCategories = $categories->groupBy('parent_id');
     }
     $currentCategories = $groupedCategories->get($parentId ?? 0);
-
+  
     @endphp
 
     @if($currentCategories && $is_enquiry == 1)

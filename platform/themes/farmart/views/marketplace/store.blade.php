@@ -29,7 +29,14 @@
                         </a>
                     </div>
                     @php
-                        $categories = ProductCategoryHelper::getProductCategoriesWithUrl();
+                        if(!isset($condition)){
+                          $condition['is_enquiry'] = 0;
+                        }
+                        if (request()->input('enquiry') == 1){
+                            $condition['is_enquiry'] = 1;
+                        }
+                        $is_enquiry = $condition['is_enquiry'];
+                        $categories = ProductCategoryHelper::getProductCategoriesWithUrl([],$condition);
                         $categoriesRequest = (array) request()->input('categories', []);
                         $urlCurrent = URL::current();
                         $activeCategoryId = Arr::get($categoriesRequest, 0);
@@ -70,7 +77,7 @@
                                                 'categories',
                                                 'categoriesRequest',
                                                 'urlCurrent',
-                                                'activeCategoryId'))
+                                                'activeCategoryId','is_enquiry'))
                                     </div>
                                 </div>
                             </form>

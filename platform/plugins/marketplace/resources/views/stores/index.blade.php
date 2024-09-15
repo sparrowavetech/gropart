@@ -1,5 +1,6 @@
 @extends(BaseHelper::getAdminMasterLayoutTemplate())
 @section('content')
+
     <div class="row row-cards">
         <div class="col-md-3">
             <x-core::card>
