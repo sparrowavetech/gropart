@@ -18,6 +18,7 @@ html[lang="hi"] .product-inner .product__title {
     line-height: 1.75;
   	padding-top: 2px;
 }
+.widget-header h1, .widget-header h2 { font-size: 1.5rem; }
 .product-button.is_enquiry { justify-content: flex-start; }
 .bb-form-quick-search .bb-quick-search-item-name { font-weight: 700; }
 .checkout__coupon-item.active .checkout__coupon-item-description { color: #fff; }
@@ -737,7 +738,7 @@ a{ color: var(--primary-color); }
     .vendor-info-summary #store-short-description {
         text-align: justify;
     }
-    .widget-header h2 {
+    .widget-header h2, .widget-header h1 {
         font-size: 1.15rem;
     }
     .widget-header .link-text {
@@ -747,7 +748,7 @@ a{ color: var(--primary-color); }
 
 @media screen and (max-width: 425px) {
   	.arrows-wrapper .slick-arrow { font-size: 10px; height: 24px; width: 24px; }
-  	.widget-header h2 { font-size: 18px; line-height: 1.75; }
+  	.widget-header h2, .widget-header h1 { font-size: 18px; line-height: 1.75; }
   	.py-5 { padding-top: 2rem!important; padding-bottom: 2rem!important; }
     .rightFloatingBar a { padding: 8px; font-size: 22px; }
     .rightFloatingBar.open { left: 32px; }

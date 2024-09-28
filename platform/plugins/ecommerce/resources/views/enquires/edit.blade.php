@@ -9,21 +9,21 @@
             </div>
             <div class="card-body">
                 @if ($enquiry->status == \Botble\Ecommerce\Enums\EnquiryStatusEnum::REJECT)
-                @php
-                $class= "danger";
-                @endphp
+                    @php
+                        $class= "danger";
+                    @endphp
                 @elseif($enquiry->status == \Botble\Ecommerce\Enums\EnquiryStatusEnum::CONTACTED)
-                @php
-                $class= "success";
-                @endphp
+                    @php
+                        $class= "success";
+                    @endphp
                 @elseif($enquiry->status == \Botble\Ecommerce\Enums\EnquiryStatusEnum::NOTAVAILABLE)
-                @php
-                $class= "warning";
-                @endphp
+                    @php
+                        $class= "warning";
+                    @endphp
                 @else
-                @php
-                $class= "secondary";
-                @endphp
+                    @php
+                        $class= "secondary";
+                    @endphp
                 @endif
                 <span class="badge bg-{{$class}} text-{{$class}}-fg d-flex align-items-center gap-1">
 
@@ -50,7 +50,8 @@
                                 <strong class="text-capitalize">{{ $enquiry->name }}</strong>
                             </div>
                             <ul class="ws-nm text-infor-subdued">
-                                <li class="overflow-ellipsis"><span><i class="fa fa-envelope cursor-pointer mr5"></i></span><a class="hover-underline" href="mailto:{{ $enquiry->email  }}">{{ $enquiry->email  }}</a>
+                                <li class="overflow-ellipsis">
+                                    <span><i class="fa fa-envelope cursor-pointer mr5"></i></span><a class="hover-underline" href="mailto:{{ $enquiry->email  }}">{{ $enquiry->email  }}</a>
                                 </li>
                                 <li class="overflow-ellipsis"><span><i class="fa fa-phone-square cursor-pointer mr5"></i></span><a class="hover-underline" href="tel:{{ $enquiry->phone  }}">{{ $enquiry->phone  }}</a></li>
                                 <li class="overflow-ellipsis"><span><i class="fa fa-address-book cursor-pointer mr5"></i></span>Address : {{ $enquiry->address  }}</li>
@@ -63,7 +64,6 @@
                                     <a href="{{ route('enquires.contacted',$enquiry->id) }}" class="btn btn-success">{{ trans('plugins/ecommerce::enquiry.statuses.contacted') }}</a>
                                     <a href="{{ route('enquires.not_available',$enquiry->id) }}" class="btn btn-warning">{{ trans('plugins/ecommerce::enquiry.statuses.not_available') }}</a>
                                     <a href="{{ route('enquires.rejected',$enquiry->id) }}" class="btn btn-danger">{{ trans('plugins/ecommerce::enquiry.statuses.rejected') }}</a>
-
                                 </li>
                             </ul>
                         </div>
@@ -79,18 +79,18 @@
                         </div>
                     </div>
                     @if ($enquiry->product)
-                    <div class="wrapper-content bg-gray-white mb20">
-                        <div class="pd-all-20">
-                            <div class="p-b10">
-                                <strong>{{ trans('plugins/ecommerce::products.product_name') }}</strong>
-                                <ul class="p-sm-r mb-0">
-                                    <li class="ws-nm">
-                                        <a href="{{ route('products.edit', $enquiry->product_id) }}" class="ww-bw text-no-bold" target="_blank">{{ $enquiry->product->name }}</a>
-                                    </li>
-                                </ul>
+                        <div class="wrapper-content bg-gray-white mb20">
+                            <div class="pd-all-20">
+                                <div class="p-b10">
+                                    <strong>{{ trans('plugins/ecommerce::products.product_name') }}</strong>
+                                    <ul class="p-sm-r mb-0">
+                                        <li class="ws-nm">
+                                            <a href="{{ route('products.edit', $enquiry->product_id) }}" class="ww-bw text-no-bold" target="_blank">{{ $enquiry->product->name }}</a>
+                                        </li>
+                                    </ul>
+                                </div>
                             </div>
                         </div>
-                    </div>
                     @endif
                     @if (is_plugin_active('marketplace') && $enquiry->product->store->name)
                     <div class="wrapper-content bg-gray-white mb20">

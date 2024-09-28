@@ -70,6 +70,7 @@ class PublicProductController extends BaseController
         } else {
             Theme::breadcrumb()->add(__('Products'), route('public.products'));
         }
+
         $products = $productService->getProduct($request, null, null, $with, $condition);
 
         if ($request->ajax()) {
@@ -133,7 +134,7 @@ class PublicProductController extends BaseController
             ->add(__('Home'), route('public.index'))
             ->add(__("Equipment's Enquiry"), route('public.product.enquiry'));
 
-        SeoHelper::setTitle(__("Equipment's Enquiry"))->setDescription(__('Products'));
+        SeoHelper::setTitle(__("Equipment's Enquiry"))->setDescription(__('Enquiry Products'));
 
         do_action(PRODUCT_MODULE_SCREEN_NAME);
 
@@ -172,7 +173,7 @@ class PublicProductController extends BaseController
         }
 
         $enquiry =  Enquiry::query()->create($request->input());
-      
+
         event(new CreatedContentEvent(CUSTOMER_MODULE_SCREEN_NAME, $request, $enquiry));
 
         if (is_plugin_active('marketplace')) {
@@ -418,7 +419,7 @@ class PublicProductController extends BaseController
             ->httpResponse()
             ->setData(new ProductVariationResource($product));
     }
-   
+
     public function getOrderTracking(OrderTrackingRequest $request)
     {
         if (! EcommerceHelper::isOrderTrackingEnabled()) {
