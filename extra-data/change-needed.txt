@@ -1,17 +1,30 @@
-Barcode Required Condition not working as Expected
-Need to fix create order total and tax calculation in admin
-Shop type required condition not working while register as vendor
+1. Barcode Required Condition not working as Expected
+2. Shop type required condition not working while register as vendor
+3. Product Count and order count is wrong in admin panel
+4. Admin Email Order links change
+5. COD additional charge functionality
+6. Whatsap notifications setting
+7. Issue resolve for not getting tax value at checkout page - urgent***
 
 
-1. Change and Improve Vendor infor of Gropart and SB Marketing Orders
-2. Improve Pricing and Shipping Parameters of Products
-3. Need pop up to come automatically the first time when visiting home page only for language change,
+Product Enquiry Category Issue on
+Products by Brand, Product by Tags, Product By Category, Enquiry Products, Store Details Products,
+Product Details
+
+Style checkout page, minimum order quantity text
+
+1.  Change and Improve Vendor info of Gropart and SB Marketing Orders
+2.  Improve Pricing and Shipping Parameters of Products
+3.  Measurement update for shipping in products
+
+4.  Shiprocket pincode search api integrate
+5.  Sms template add for delivery information, Shipping word clickable to track url
+
+6.  Change UI of OTP Login page
+7.  COD Not Available, Only prepaid orders, Shipping Available all over India not on header
+8.  Issue in sitemap generation and blank space at top of page
+
+
+1.  Need pop up to come automatically the first time when visiting home page only for language change,
     with all language list default, then this pop up should not come again, should only come when first time visiting site
-4. COD additional charge
-5. whatsap notifications setting
-6. http://localhost/gropart/public/admin/tools/data-synchronize/import/products (Issue)
 
-
-
-1. Remove button is not working in coupon codes
-2. 3 images wala shortcode ka mobile and tablet version update nahi ho rha hai - botble author issue

@@ -44,6 +44,12 @@ class OrderIncompleteTable extends OrderTable
             ->editColumn('user_id', function (Order $item) {
                 return BaseHelper::clean($item->user->name ?: $item->address->name);
             })
+            ->editColumn('user_email', function (Order $item) {
+                return BaseHelper::clean($item->user->email ?: $item->address->email);
+            })
+            ->editColumn('user_phone', function (Order $item) {
+                return BaseHelper::clean($item->user->phone ?: $item->address->phone);
+            })
             ->filter(function ($query) {
                 if ($keyword = $this->request->input('search.value')) {
                     return $query
@@ -100,6 +106,10 @@ class OrderIncompleteTable extends OrderTable
             Column::make('user_id')
                 ->title(trans('plugins/ecommerce::order.customer_label'))
                 ->alignStart(),
+            Column::make('user_email')
+                ->title(trans('plugins/ecommerce::order.email')),
+            Column::make('user_phone')
+                ->title(trans('plugins/ecommerce::order.phone')),
             Column::formatted('amount')
                 ->title(trans('plugins/ecommerce::order.amount')),
             CreatedAtColumn::make(),

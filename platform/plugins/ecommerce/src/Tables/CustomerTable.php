@@ -90,7 +90,7 @@ class CustomerTable extends TableAbstract
             NameColumn::make()->route('customers.edit'),
         ];
 
-        if (EcommerceHelper::isLoginUsingPhone()) {
+        /*if (EcommerceHelper::isLoginUsingPhone()) {
             $columns[] = PhoneColumn::make();
         } else {
             $columns[] = EmailColumn::make();
@@ -101,6 +101,16 @@ class CustomerTable extends TableAbstract
                         ->title(trans('plugins/ecommerce::customer.email_verified')),
                 ]);
             }
+        }*/
+
+        $columns[] = PhoneColumn::make();
+        $columns[] = EmailColumn::make();
+
+        if (EcommerceHelper::isEnableEmailVerification()) {
+            $columns = array_merge($columns, [
+                YesNoColumn::make('confirmed_at')
+                    ->title(trans('plugins/ecommerce::customer.email_verified')),
+            ]);
         }
 
         return array_merge($columns, [

@@ -206,7 +206,7 @@ return [
     'total_quantity' => 'Total Quantity',
     'allow_customer_checkout_when_this_product_out_of_stock' => 'Allow customer checkout when this product out of stock?',
     'address' => 'Address',
-    'phone' => 'Phone',
+    'phone' => 'Mobile Number',
     'country' => 'Country',
     'state' => 'State',
     'city' => 'City',
