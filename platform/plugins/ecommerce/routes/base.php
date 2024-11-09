@@ -4,6 +4,7 @@ use Botble\Base\Facades\AdminHelper;
 use Botble\Base\Http\Middleware\RequiresJsonRequestMiddleware;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Http\Controllers\Fronts\PublicUpdateCheckoutController;
+use Botble\Ecommerce\Http\Controllers\Fronts\PublicUpdateTaxCheckoutController;
 use Botble\Ecommerce\Http\Controllers\Fronts\QuickShopController;
 use Botble\Ecommerce\Http\Controllers\Fronts\QuickViewController;
 use Botble\Theme\Events\ThemeRoutingBeforeEvent;
@@ -200,7 +201,7 @@ Theme::registerRoutes(function () {
                 'as' => 'public.orders.tracking',
                 'uses' => 'PublicProductController@getOrderTracking',
             ])->wherePrimaryKey();
-                
+
             Route::get(EcommerceHelper::getPageSlug('enquiry'), [
                 'as'   => 'public.product.enquiry',
                 'uses' => 'PublicProductController@getEnquiryProduct',
@@ -231,6 +232,10 @@ Theme::registerRoutes(function () {
             Route::post('ajax/checkout/update', [PublicUpdateCheckoutController::class, '__invoke'])
                 ->middleware(RequiresJsonRequestMiddleware::class)
                 ->name('public.ajax.checkout.update');
+
+            Route::post('ajax/checkout/update-tax', [PublicUpdateTaxCheckoutController::class, '__invoke'])
+                ->middleware(RequiresJsonRequestMiddleware::class)
+                ->name('public.ajax.checkout.update-tax');
         });
     });
 });

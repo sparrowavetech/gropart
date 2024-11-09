@@ -29,6 +29,15 @@
 
     @if (EcommerceHelper::isCartEnabled() || !empty($withButtons))
         {!! apply_filters(ECOMMERCE_PRODUCT_DETAIL_EXTRA_HTML, null, $product) !!}
+
+        @if($product->minimum_order_quantity > 0 && $product->maximum_order_quantity > 0)
+            <p class="alert alert-warning pt-1 pb-1 mb-2">{{ __('Please order minimum') }} {{ $product->minimum_order_quantity }} {{ __('and maximum') }} {{ $product->maximum_order_quantity }} {{ __('qty in order to buy this product') }}</p>
+        @elseif($product->minimum_order_quantity > 0)
+            <p class="alert alert-warning pt-1 pb-1 mb-2">{{ __('Please order minimum') }} {{ $product->minimum_order_quantity }} {{ __('qty in order to buy this product') }}</p>
+        @elseif($product->maximum_order_quantity > 0)
+            <p class="alert alert-warning pt-1 pb-1 mb-2">{{ __('Please order maximum') }} {{ $product->maximum_order_quantity }} {{ __('qty in order to buy this product') }}</p>
+        @endif
+
         <div class="product-button  @if ($product->is_enquiry == 1) is_enquiry @endif">
         @if($product->is_enquiry == 1)
                 <a href="{{ route('public.enquiry.get',$product->id) }}" class="btn btn-primary btn-black mb-2 " title="{{ __('Enquiry Now') }}">
@@ -68,19 +77,13 @@
                             <span class="add-to-cart-text ms-2">{{ __('Buy Now') }}</span>
                         </button>
                     @endif
-                    @if($product->minimum_order_quantity > 0)
-                    <p>Minimun Order Qty {{ $product->minimum_order_quantity}}</p>
-                    @endif
-                    @if($product->maximum_order_quantity > 0)
-                        <p>Maxmum Order Qty {{ $product->minimum_order_quantity}}</p>
-                    @endif
                 @endif
                 @if (!empty($withButtons))
                     {!! Theme::partial('ecommerce.product-loop-buttons', compact('product', 'wishlistIds')) !!}
                 @endif
             @endif
-            
-           
+
+
         </div>
     @endif
 </form>

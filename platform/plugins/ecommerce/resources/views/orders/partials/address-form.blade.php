@@ -1,4 +1,5 @@
 <div class="customer-address-payment-form">
+    <input type="hidden" name="update-tax-url" id="update-checkout-tax-url" value="{{ route('public.ajax.checkout.update-tax') }}">
     @if (EcommerceHelper::isEnabledGuestCheckout() && !auth('customer')->check())
         <div class="mb-3 form-group">
             <p>{{ __('Already have an account?') }} <a href="{{ route('customer.login') }}">{{ __('Login') }}</a></p>

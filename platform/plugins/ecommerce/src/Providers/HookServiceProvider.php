@@ -874,7 +874,7 @@ class HookServiceProvider extends ServiceProvider
                 return $html;
             }
 
-            return $html . Html::tag('p', $message, ['class' => 'text-danger small mt-2'])->toHtml();
+            return $html . Html::tag('p', $message, ['class' => 'alert alert-danger pt-1 pb-1 ps-2 pe-2 small mt-2'])->toHtml();
         }, 123, 2);
     }
 

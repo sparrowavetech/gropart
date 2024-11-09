@@ -256,6 +256,26 @@ class MainCheckout {
             }
         }
 
+        $(document).on('change', '#address_country, #address_state, #address_city, #address_zip_code', (event) => {
+            const _self = $(event.currentTarget)
+            const $form = _self.closest('form')
+
+            $.ajax({
+                type: 'POST',
+                cache: false,
+                url: $('#update-checkout-tax-url').val(),
+                data: new FormData($form[0]),
+                contentType: false,
+                processData: false,
+                success: ({ data }) => {
+                    $('#cart-item').html(data.amount)
+                },
+                error: (response) => {
+                    MainCheckout.handleError(response, $form)
+                },
+            })
+        })
+
         $(document).on('change', `${customerShippingAddressForm} .form-control`, (event) => {
             onChangeShippingForm(event)
         })
@@ -283,6 +303,61 @@ class MainCheckout {
         if ($('#address_id').length && $('#address_id').val() && $('#address_id').val() !== 'new') {
             $('#address_id').trigger('change')
         }
+
+        $(document)
+            .on('click', '[data-bb-toggle="decrease-qty"]', (e) => {
+                const $input = $(e.currentTarget).parent().find('input')
+
+                let count = parseInt($input.val()) - 1
+
+                if (count < 1) {
+                    return
+                }
+
+                count = count < 1 ? 1 : count
+                $input.val(count)
+                $input.trigger('change')
+            })
+            .on('click', '[data-bb-toggle="increase-qty"]', (e) => {
+                const $input = $(e.currentTarget).parent().find('input')
+
+                const max = $input.prop('max')
+
+                if (max && parseInt($input.val()) >= parseInt(max)) {
+                    return
+                }
+
+                $input.val(parseInt($input.val()) + 1)
+                $input.trigger('change')
+            })
+            .on('change', '[data-bb-toggle="update-cart"]', (e) => {
+                const $currentTarget = $(e.currentTarget)
+                const $parent = $currentTarget.parent()
+
+                const qtyKey = $currentTarget.prop('name')
+                const qtyValue = $currentTarget.val()
+                const rowId = $parent.data('row-id')
+
+                $.ajax({
+                    type: 'POST',
+                    url: $parent.data('url'),
+                    data: {
+                        _token: $('meta[name="csrf-token"]').prop('content'),
+                        [qtyKey]: qtyValue,
+                        [`items[${rowId}][rowId]`]: rowId,
+                    },
+                    success: ({ error, message, data }) => {
+                        if (error) {
+                            MainCheckout.showError(message)
+                        }
+
+                        calculateShippingFee()
+                    },
+                    error: (error) => {
+                        MainCheckout.handleError(error)
+                    }
+                })
+            })
     }
 }
 
