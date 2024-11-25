@@ -1,1 +1,36 @@
-null
+{
+    "Botble\\Menu\\Models\\Menu": [
+        "876a095a247b966461c4079f23f9e7ae@menu_location_6f6eb1adfc85ce5eb9394f5133c6415c",
+        "876a095a247b966461c4079f23f9e7ae@menu_location_d8038f91f9d9f0564fde9aad793e273e",
+        "876a095a247b966461c4079f23f9e7ae@menu_location_b5bd74a1658a33a3410f383af0e42390",
+        "876a095a247b966461c4079f23f9e7ae@menu_location_147ee166c9a22a82bfc0ec7860658b59",
+        "876a095a247b966461c4079f23f9e7ae@menu_location_dcc51717878df55f8f65682a71da25e5",
+        "876a095a247b966461c4079f23f9e7ae@menu_location_062c0bc39a4035cd5d71bff70be89983",
+        "876a095a247b966461c4079f23f9e7ae@menu_location_4045e3b2e9858e02c739805898e177d1",
+        "876a095a247b966461c4079f23f9e7ae@menu_location_b5810c5c80495c448f12599bcc0a6a30",
+        "876a095a247b966461c4079f23f9e7ae@menu_location_a3df5cfc5a116d1970da42b167418b60",
+        "876a095a247b966461c4079f23f9e7ae@menu_location_f284d6aef32e2d67443c1307a1977700",
+        "876a095a247b966461c4079f23f9e7ae@menu_location_bced760cf58a9ba39892a30fd7781ad6",
+        "876a095a247b966461c4079f23f9e7ae@menu_location_e425e39d01a626f06507e7cda095d60a"
+    ],
+    "Botble\\Ecommerce\\Models\\ProductCategory": [
+        "e2df835384821fa5036252a0581ba12b@ecommerce_categories_for_widgets_e11874810c4f060c92137c7057e3f291",
+        "e2df835384821fa5036252a0581ba12b@ecommerce_categories_for_widgets_ca5b8075e64122f6b23f6f38114915e1",
+        "e2df835384821fa5036252a0581ba12b@ecommerce_categories_for_widgets_8d0c775cf868c92b6534a71f0463d8c8",
+        "e2df835384821fa5036252a0581ba12b@ecommerce_categories_for_widgets_b4014b173a933d30e183de4d9e7a34df",
+        "e2df835384821fa5036252a0581ba12b@ecommerce_categories_for_widgets_1fff77a0bb5ddc6815a83c1c7030b1df",
+        "e2df835384821fa5036252a0581ba12b@ecommerce_categories_for_widgets_ab6e8f12f902804e6f2ca2938919473a",
+        "e2df835384821fa5036252a0581ba12b@ecommerce_categories_for_rendering_select4fbced1ada9b198f089901392b823742",
+        "e2df835384821fa5036252a0581ba12b@ecommerce_categories_for_widgets_4fbced1ada9b198f089901392b823742",
+        "e2df835384821fa5036252a0581ba12b@ecommerce_categories_for_widgets_cb4ada0ae0628c073f4c886fa93b949a",
+        "e2df835384821fa5036252a0581ba12b@ecommerce_categories_for_widgets_5a77def70579251758775868ce925d93",
+        "e2df835384821fa5036252a0581ba12b@ecommerce_categories_for_widgets_d3ff5fdbc945235e5f8d97a8bca6ae9e",
+        "e2df835384821fa5036252a0581ba12b@ecommerce_categories_for_widgets_4c53905313ef68da3da672c5ac2e077f"
+    ],
+    "Botble\\Ecommerce\\Services\\HandleShippingFeeService": [
+        "66d6c800acf0bbfe034c13e9e2145ba3@2c6353cde2bbea40f1a204a765dec697",
+        "66d6c800acf0bbfe034c13e9e2145ba3@196defd5e705b16fce2d120ebe590a72",
+        "66d6c800acf0bbfe034c13e9e2145ba3@ffd0cd41b3760bddb602126378af268d",
+        "66d6c800acf0bbfe034c13e9e2145ba3@89b34485bcbf95946cd13685dcfa382b"
+    ]
+}
