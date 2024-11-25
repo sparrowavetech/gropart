@@ -140,7 +140,7 @@
                                     <x-core::table.body.cell class="text-end">
                                         <p class="mb-1">{{ trans('plugins/ecommerce::order.shipping_fee') }}</p>
                                         <p class="mb-0 small">{{ $order->shipping_method_name }}</p>
-                                        <p class="mb-0 small">{{ $weight }} {{ ecommerce_weight_unit(true) }}</p>
+                                        <p class="mb-0 small">{{ number_format($weight) }} {{ ecommerce_weight_unit(true) }}</p>
                                     </x-core::table.body.cell>
                                     <x-core::table.body.cell class="text-end fw-medium">
                                         {{ format_price($order->shipping_amount) }}
@@ -156,31 +156,57 @@
                                         </x-core::table.body.cell>
                                     </x-core::table.body.row>
                                 @endif
+
                                 <x-core::table.body.row>
                                     <x-core::table.body.cell class="text-end">
                                         <p class="mb-0">{{ trans('plugins/ecommerce::order.total_amount') }}</p>
-                                        @if (is_plugin_active('payment') && $order->payment->id)
-                                            <a
-                                                href="{{ route('payment.show', $order->payment->id) }}"
-                                                target="_blank"
-                                            >
-                                                {{ $order->payment->payment_channel->label() }}
-                                            </a>
-                                        @endif
                                     </x-core::table.body.cell>
                                     <x-core::table.body.cell class="text-end fw-medium">
+                                        {{ format_price($order->amount) }}
+                                    </x-core::table.body.cell>
+                                </x-core::table.body.row>
+
+                                <x-core::table.body.row>
+                                    <x-core::table.body.cell class="text-end">
+                                        {{ trans('plugins/ecommerce::order.paid_amount') }}
+                                    </x-core::table.body.cell>
+                                    <x-core::table.body.cell class="text-end">
                                         @if (is_plugin_active('payment') && $order->payment->id)
                                             <a
                                                 href="{{ route('payment.show', $order->payment->id) }}"
                                                 target="_blank"
                                             >
-                                                {{ format_price($order->amount) }}
+                                                <span>{{ format_price($order->payment->status == Botble\Payment\Enums\PaymentStatusEnum::COMPLETED ? $order->payment->amount : 0) }}</span>
                                             </a>
                                         @else
-                                            {{ format_price($order->amount) }}
+                                            <span>{{ format_price(is_plugin_active('payment') && $order->payment->status == Botble\Payment\Enums\PaymentStatusEnum::COMPLETED ? $order->payment->amount : 0) }}</span>
                                         @endif
                                     </x-core::table.body.cell>
                                 </x-core::table.body.row>
+
+                                @if (is_plugin_active('payment') && $order->payment->id)
+                                    <x-core::table.body.row>
+                                        <x-core::table.body.cell class="text-end">
+                                            {{ trans('plugins/ecommerce::order.payment_method') }}
+                                        </x-core::table.body.cell>
+                                        <x-core::table.body.cell class="text-end">
+                                            <a href="{{ route('payment.show', $order->payment->id) }}" target="_blank">
+                                                {{ $order->payment->payment_channel->label() }}
+
+                                                <x-core::icon name="ti ti-external-link" />
+                                            </a>
+                                        </x-core::table.body.cell>
+                                    </x-core::table.body.row>
+
+                                    <x-core::table.body.row>
+                                        <x-core::table.body.cell class="text-end">
+                                            {{ trans('plugins/ecommerce::order.payment_status_label') }}
+                                        </x-core::table.body.cell>
+                                        <x-core::table.body.cell class="text-end">
+                                            {!! BaseHelper::clean($order->payment->status->toHtml()) !!}
+                                        </x-core::table.body.cell>
+                                    </x-core::table.body.row>
+                                @endif
 
                                 {!! apply_filters('ecommerce_admin_order_extra_info', null, $order) !!}
                             </x-core::table.body>
@@ -206,8 +232,8 @@
                 <x-core::card.footer class="text-end">
                     <x-core::button
                         color="primary"
-                        class="btn-mark-order-as-completed-modal"
-                        data-action="{{ route('orders.mark-as-completed', $order->id) }}"
+                        data-bs-toggle="modal"
+                        data-bs-target="#mark-order-as-completed-modal"
                         icon="ti ti-check"
                     >
                         {{ trans('plugins/ecommerce::order.mark_as_completed.name') }}
@@ -335,12 +361,38 @@
         </x-slot:description>
     </x-core::modal.action>
 
-    <x-core::modal.action
+    <x-core::modal
         id="mark-order-as-completed-modal"
         type="info"
         :title="trans('plugins/ecommerce::order.mark_as_completed.modal_title')"
         :description="trans('plugins/ecommerce::order.mark_as_completed.modal_description')"
-        :submit-button-attrs="['id' => 'confirm-mark-as-completed-button']"
-        :submit-button-label="trans('plugins/ecommerce::order.mark_as_completed.name')"
-    />
+        :form-action="route('orders.mark-as-completed', $order->id)"
+    >
+        <x-core::form.select
+            name="payment_method"
+            :label="trans('plugins/ecommerce::order.payment_method')"
+            :options="\Botble\Payment\Enums\PaymentMethodEnum::labels()"
+        />
+
+        <x-core::form.select
+            name="payment_status"
+            :label="trans('plugins/ecommerce::order.payment_status_label')"
+            :options="\Botble\Payment\Enums\PaymentStatusEnum::labels()"
+        />
+
+        <x-core::form.text-input
+            name="transaction_id"
+            :label="trans('plugins/ecommerce::order.transaction_id')"
+            :helper-text="trans('plugins/ecommerce::order.incomplete_order_transaction_id_placeholder')"
+        />
+
+        <x-slot:footer>
+            <x-core::button data-bs-dismiss="modal" type="button">
+                {{ trans('core/base::base.close') }}
+            </x-core::button>
+            <x-core::button type="submit" color="primary" class="ms-auto" data-bb-toggle="confirm-mark-as-completed-button">
+                {{ trans('plugins/ecommerce::order.mark_as_completed.name') }}
+            </x-core::button>
+        </x-slot:footer>
+    </x-core::modal>
 @endpush

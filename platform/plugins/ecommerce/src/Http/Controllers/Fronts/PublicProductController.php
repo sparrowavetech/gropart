@@ -401,6 +401,10 @@ class PublicProductController extends BaseController
             });
         } else {
             $selectedAttributes = $product->variationProductAttributes;
+
+            if ($attributes) {
+                $selectedAttributes = $selectedAttributes->whereIn('id', $attributes);
+            }
         }
 
         $product->unavailableAttributeIds = $unavailableAttributeIds;

@@ -363,4 +363,21 @@ return [
         'other' => 'Other',
     ],
     'requires_products_to_create_order' => 'Please select at least one product to create order',
+    'transaction_id' => 'Transaction ID',
+    'incomplete_order_transaction_id_placeholder' => 'You can leave this field empty if the payment method is COD or Bank transfer',
+    'digital_product_downloads' => [
+        'title' => 'Digital product downloads',
+        'download_count' => ':count download(s)',
+        'first_download' => 'First download at :time',
+        'not_downloaded_yet' => 'Not downloaded yet',
+    ],
+    'select_one' => 'Select one',
+    'confirm_delivery_error' => 'You cannot confirm delivery for this order',
+    'confirm_delivery_success' => 'Order was confirmed delivery successfully!',
+
+    'export' => [
+        'total_orders' => 'Total Orders',
+    ],
+
+    'edit_email' => 'Edit email',
 ];

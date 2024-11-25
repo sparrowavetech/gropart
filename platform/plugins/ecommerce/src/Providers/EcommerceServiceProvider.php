@@ -3,6 +3,7 @@
 namespace Botble\Ecommerce\Providers;
 
 use Botble\Api\Facades\ApiHelper;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Facades\EmailHandler;
 use Botble\Base\Facades\PanelSectionManager;
@@ -1007,7 +1008,7 @@ class EcommerceServiceProvider extends ServiceProvider
                     'guard' => 'customer',
                     'model' => Customer::class,
                     'login_url' => route('customer.login'),
-                    'redirect_url' => route('public.index'),
+                    'redirect_url' => BaseHelper::getHomepageUrl(),
                 ]);
             }
 

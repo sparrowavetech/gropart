@@ -22,7 +22,7 @@ class GetProductService
         array $conditions = []
     ): Collection|LengthAwarePaginator {
         $num = $request->integer('num') ?: $request->integer('per-page');
-      
+
         $shows = EcommerceHelper::getShowParams();
         if (!isset($conditions['is_enquiry'])) {
             $conditions['is_enquiry'] = 0;
@@ -39,6 +39,7 @@ class GetProductService
             'categories' => (array) $request->input('categories', []),
             'tags' => (array) $request->input('tags', []),
             'collections' => (array) $request->input('collections', []),
+            'collection' => $request->input('collection'),
             'attributes' => (array) $request->input('attributes', []),
             'max_price' => $request->input('max_price'),
             'min_price' => $request->input('min_price'),
@@ -140,6 +141,7 @@ class GetProductService
             'categories' => $queryVar['categories'],
             'tags' => $queryVar['tags'],
             'collections' => $queryVar['collections'],
+            'collection' => $queryVar['collection'],
             'brands' => $queryVar['brands'],
             'attributes' => $queryVar['attributes'],
             'order_by' => $orderBy,

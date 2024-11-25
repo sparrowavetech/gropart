@@ -27,6 +27,7 @@ use Botble\Ecommerce\Http\Requests\AddressRequest;
 use Botble\Ecommerce\Http\Requests\ApplyCouponRequest;
 use Botble\Ecommerce\Http\Requests\CreateOrderRequest;
 use Botble\Ecommerce\Http\Requests\CreateShipmentRequest;
+use Botble\Ecommerce\Http\Requests\MarkOrderAsCompletedRequest;
 use Botble\Ecommerce\Http\Requests\RefundRequest;
 use Botble\Ecommerce\Http\Requests\UpdateOrderRequest;
 use Botble\Ecommerce\Http\Resources\CartItemResource;
@@ -41,6 +42,7 @@ use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Models\Shipment;
 use Botble\Ecommerce\Models\ShipmentHistory;
 use Botble\Ecommerce\Models\StoreLocator;
+use Botble\Ecommerce\Services\CreatePaymentForOrderService;
 use Botble\Ecommerce\Services\HandleApplyCouponService;
 use Botble\Ecommerce\Services\HandleApplyPromotionsService;
 use Botble\Ecommerce\Services\HandleShippingFeeService;
@@ -101,7 +103,7 @@ class OrderController extends BaseController
         return view('plugins/ecommerce::orders.create');
     }
 
-    public function store(CreateOrderRequest $request)
+    public function store(CreateOrderRequest $request, CreatePaymentForOrderService $createPaymentForOrderService)
     {
         $data = $this->getDataBeforeCreateOrder($request);
         if (Arr::get($data, 'error')) {
@@ -133,6 +135,9 @@ class OrderController extends BaseController
             'status' => OrderStatusEnum::PROCESSING,
         ]);
 
+        /**
+         * @var Order $order
+         */
         $order = Order::query()->create($request->input());
 
         if ($order) {
@@ -158,41 +163,13 @@ class OrderController extends BaseController
                 'user_id' => $userId,
             ]);
 
-            if (is_plugin_active('payment')) {
-                $payment = Payment::query()->create([
-                    'amount' => $order->amount,
-                    'currency' => cms_currency()->getDefaultCurrency()->title,
-                    'payment_channel' => $request->input('payment_method'),
-                    'status' => $paymentStatus ?: PaymentStatusEnum::PENDING,
-                    'payment_type' => 'confirm',
-                    'order_id' => $order->id,
-                    'charge_id' => Str::upper(Str::random(10)),
-                    'user_id' => $userId,
-                    'customer_id' => $customerId,
-                    'customer_type' => Customer::class,
-                ]);
-
-                $order->payment_id = $payment->id;
-                $order->save();
-
-                if ($paymentStatus == PaymentStatusEnum::COMPLETED) {
-                    /**
-                     * @var User $user
-                     */
-                    $user = Auth::user();
-
-                    event(new OrderPaymentConfirmedEvent($order, $user));
-
-                    OrderHistory::query()->create([
-                        'action' => OrderHistoryActionEnum::CONFIRM_PAYMENT,
-                        'description' => trans('plugins/ecommerce::order.payment_was_confirmed_by', [
-                            'money' => format_price($order->amount),
-                        ]),
-                        'order_id' => $order->id,
-                        'user_id' => $userId,
-                    ]);
-                }
-            }
+            $createPaymentForOrderService->execute(
+                $order,
+                $request->input('payment_method'),
+                $paymentStatus,
+                $customerId,
+                $request->input('transaction_id')
+            );
 
             if ($request->input('customer_address.name')) {
                 OrderAddress::query()->create([
@@ -235,7 +212,11 @@ class OrderController extends BaseController
 
                 OrderProduct::query()->create($orderProduct);
 
+                /**
+                 * @var Product $product
+                 */
                 $product = Product::query()->find(Arr::get($productItem, 'id'));
+
                 if (! $product) {
                     continue;
                 }
@@ -266,9 +247,7 @@ class OrderController extends BaseController
                 'order_id' => $order->id,
                 'user_id' => 0,
                 'weight' => Arr::get($data, 'weight') ?: 0,
-                'cod_amount' => (is_plugin_active(
-                    'payment'
-                ) && $order->payment->id && $order->payment->status != PaymentStatusEnum::COMPLETED) ? $order->amount : 0,
+                'cod_amount' => (is_plugin_active('payment') && $order->payment->id && $order->payment->status != PaymentStatusEnum::COMPLETED) ? $order->amount : 0,
                 'cod_status' => ShippingCodStatusEnum::PENDING,
                 'type' => $order->shipping_method,
                 'status' => ShippingStatusEnum::PENDING,
@@ -315,7 +294,7 @@ class OrderController extends BaseController
 
         $this->pageTitle(trans('plugins/ecommerce::order.edit_order', ['code' => $order->code]));
 
-        $weight = number_format(EcommerceHelper::validateOrderWeight($order->products_weight));
+        $weight = EcommerceHelper::validateOrderWeight($order->products_weight);
 
         $defaultStore = get_primary_store_locator();
 
@@ -354,9 +333,7 @@ class OrderController extends BaseController
 
     public function getGenerateInvoice(Order $order, Request $request)
     {
-        if (! $order->isInvoiceAvailable()) {
-            abort(404);
-        }
+        abort_unless($order->isInvoiceAvailable(), 404);
 
         if ($request->input('type') == 'print') {
             return InvoiceHelper::streamInvoice($order->invoice);
@@ -518,9 +495,7 @@ class OrderController extends BaseController
         $address->fill($request->input());
         $address->save();
 
-        if ($address->order->status == OrderStatusEnum::CANCELED) {
-            abort(401);
-        }
+        abort_if($address->order->status == OrderStatusEnum::CANCELED, 401);
 
         return $this
             ->httpResponse()
@@ -544,9 +519,7 @@ class OrderController extends BaseController
 
         $taxInformation->update($validated);
 
-        if ($taxInformation->order->status === OrderStatusEnum::CANCELED) {
-            abort(401);
-        }
+        abort_if($taxInformation->order->status === OrderStatusEnum::CANCELED, 401);
 
         return $this
             ->httpResponse()
@@ -556,9 +529,7 @@ class OrderController extends BaseController
 
     public function postCancelOrder(Order $order)
     {
-        if (! $order->canBeCanceledByAdmin()) {
-            abort(403);
-        }
+        abort_unless($order->canBeCanceledByAdmin(), 403);
 
         OrderHelper::cancelOrder($order);
 
@@ -675,9 +646,9 @@ class OrderController extends BaseController
             $response->setData($refundData);
 
             $refundData['_data_request'] = $request->except(['_token']) + [
-                    'currency' => $payment->currency,
-                    'created_at' => Carbon::now(),
-                ];
+                'currency' => $payment->currency,
+                'created_at' => Carbon::now(),
+            ];
             $metadata = $payment->metadata;
             $refunds = Arr::get($metadata, 'refunds', []);
             $refunds[] = $refundData;
@@ -852,6 +823,9 @@ class OrderController extends BaseController
         $customerAddresses = [];
         $customerOrderNumbers = 0;
         if ($order->user_id) {
+            /**
+             * @var Customer $customer
+             */
             $customer = Customer::query()->findOrFail($order->user_id);
             $customer->avatar = (string) $customer->avatar_url;
 
@@ -904,22 +878,36 @@ class OrderController extends BaseController
 
         $order->load(['products', 'user']);
 
-        $weight = number_format(EcommerceHelper::validateOrderWeight($order->products_weight));
+        $weight = EcommerceHelper::validateOrderWeight($order->products_weight);
 
         return view('plugins/ecommerce::orders.view-incomplete-order', compact('order', 'weight'));
     }
 
-    public function markIncompleteOrderAsCompleted(Order $order)
-    {
-        DB::transaction(function () use ($order) {
+    public function markIncompleteOrderAsCompleted(
+        Order $order,
+        MarkOrderAsCompletedRequest $request,
+        CreatePaymentForOrderService $createPaymentForOrderService
+    ) {
+        DB::transaction(function () use ($order, $createPaymentForOrderService, $request): void {
+            /** @var User $user */
+            $user = Auth::user();
+
             $order->update(['is_finished' => true]);
+
+            $createPaymentForOrderService->execute(
+                $order,
+                $request->input('payment_method'),
+                $request->input('payment_status'),
+                $order->user_id != 0 ? $order->user_id : null,
+                $request->input('transaction_id')
+            );
 
             $order->histories()->create([
                 'order_id' => $order->getKey(),
-                'user_id' => Auth::user()->getKey(),
+                'user_id' => $user->getKey(),
                 'action' => OrderHistoryActionEnum::MARK_ORDER_AS_COMPLETED,
                 'description' => trans('plugins/ecommerce::order.mark_as_completed.history', [
-                    'admin' => Auth::user()->name,
+                    'admin' => $user->name,
                     'time' => Carbon::now(),
                 ]),
             ]);
@@ -985,7 +973,7 @@ class OrderController extends BaseController
             'variationInfo.configurableProduct',
             'variationProductAttributes',
         ];
-        if (is_plugin_active('marketplacce')) {
+        if (is_plugin_active('marketplace')) {
             $with = array_merge($with, ['store', 'variationInfo.configurableProduct.store']);
         }
 
@@ -1030,7 +1018,7 @@ class OrderController extends BaseController
 
             $productOptions = [];
             if ($inputOptions = Arr::get($inputProduct, 'options') ?: []) {
-                $productOptions = OrderHelper::getProductOptionData($inputOptions);
+                $productOptions = OrderHelper::getProductOptionData($inputOptions, $productId);
             }
 
             $cartItemsById = $cartItems->where('id', $productId);
@@ -1323,9 +1311,7 @@ class OrderController extends BaseController
 
     public function generateInvoice(Order $order)
     {
-        if ($order->isInvoiceAvailable()) {
-            abort(404);
-        }
+        abort_if($order->isInvoiceAvailable(), 404);
 
         InvoiceHelper::store($order);
 
@@ -1336,15 +1322,11 @@ class OrderController extends BaseController
 
     public function downloadProof(Order $order)
     {
-        if (! $order->proof_file) {
-            abort(404);
-        }
+        abort_unless($order->proof_file, 404);
 
         $storage = Storage::disk('local');
 
-        if (! $storage->exists($order->proof_file)) {
-            abort(404);
-        }
+        abort_unless($storage->exists($order->proof_file), 404);
 
         return $storage->download($order->proof_file);
     }
