@@ -13,10 +13,12 @@ use Botble\Ecommerce\Enums\OrderStatusEnum;
 use Botble\Ecommerce\Enums\ShippingCodStatusEnum;
 use Botble\Ecommerce\Enums\ShippingMethodEnum;
 use Botble\Ecommerce\Enums\ShippingStatusEnum;
+use Botble\Ecommerce\Events\OrderProductCreatedEvent;
 use Botble\Ecommerce\Facades\Cart;
 use Botble\Ecommerce\Facades\Discount;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Facades\OrderHelper;
+use Botble\Ecommerce\Forms\Fronts\CheckoutForm;
 use Botble\Ecommerce\Http\Requests\ApplyCouponRequest;
 use Botble\Ecommerce\Http\Requests\CheckoutRequest;
 use Botble\Ecommerce\Http\Requests\SaveCheckoutInformationRequest;
@@ -28,7 +30,6 @@ use Botble\Ecommerce\Models\OrderHistory;
 use Botble\Ecommerce\Models\OrderProduct;
 use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Models\Shipment;
-use Botble\Ecommerce\Services\Footprints\FootprinterInterface;
 use Botble\Ecommerce\Services\HandleApplyCouponService;
 use Botble\Ecommerce\Services\HandleApplyPromotionsService;
 use Botble\Ecommerce\Services\HandleCheckoutOrderData;
@@ -39,7 +40,9 @@ use Botble\Optimize\Facades\OptimizerHelper;
 use Botble\Payment\Enums\PaymentStatusEnum;
 use Botble\Payment\Supports\PaymentHelper;
 use Botble\Theme\Facades\Theme;
+use Exception;
 use Illuminate\Auth\Events\Registered;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Hash;
@@ -63,9 +66,7 @@ class PublicCheckoutController extends BaseController
         HandleTaxService $handleTaxService,
         HandleCheckoutOrderData $handleCheckoutOrderData,
     ) {
-        if (! EcommerceHelper::isCartEnabled()) {
-            abort(404);
-        }
+        abort_unless(EcommerceHelper::isCartEnabled(), 404);
 
         if (! EcommerceHelper::isEnabledGuestCheckout() && ! auth('customer')->check()) {
             return $this
@@ -93,6 +94,9 @@ class PublicCheckoutController extends BaseController
 
         $sessionCheckoutData = OrderHelper::getOrderSessionData($token);
 
+        /**
+         * @var Collection $products
+         */
         $products = Cart::instance('cart')->products();
         if ($products->isEmpty()) {
             return $this
@@ -101,6 +105,9 @@ class PublicCheckoutController extends BaseController
         }
 
         foreach ($products as $product) {
+            /**
+             * @var Product $product
+             */
             if ($product->isOutOfStock()) {
                 return $this
                     ->httpResponse()
@@ -191,11 +198,7 @@ class PublicCheckoutController extends BaseController
 
         $data = [...$data, 'discounts' => $discounts, 'rawTotal' => $rawTotal, 'orderAmount' => $orderAmount];
 
-        app(GoogleTagManager::class)->beginCheckout(
-            $products->all(),
-            $orderAmount,
-            isset($discount) ? $discount->code : null
-        );
+        app(GoogleTagManager::class)->beginCheckout($products->all(), $orderAmount);
         app(FacebookPixel::class)->checkout($products->all(), $orderAmount);
 
         $checkoutView = Theme::getThemeNamespace('views.ecommerce.orders.checkout');
@@ -383,6 +386,9 @@ class PublicCheckoutController extends BaseController
                 'token' => $token,
             ]);
 
+            /**
+             * @var Order $order
+             */
             $order = Order::query()->where(compact('token'))->first();
 
             $order = $this->createOrderFromData($request->input(), $order);
@@ -426,7 +432,7 @@ class PublicCheckoutController extends BaseController
                     'price' => $cartItem->price,
                     'tax_amount' => $cartItem->tax,
                     'options' => $cartItem->options,
-                    'product_type' => $product?->product_type,
+                    'product_type' => $product->product_type,
                 ];
 
                 if (isset($cartItem->options['options'])) {
@@ -450,9 +456,7 @@ class PublicCheckoutController extends BaseController
         HandleApplyCouponService $applyCouponService,
         HandleRemoveCouponService $removeCouponService
     ) {
-        if (! EcommerceHelper::isCartEnabled()) {
-            abort(404);
-        }
+        abort_unless(EcommerceHelper::isCartEnabled(), 404);
 
         if ($token !== session('tracked_start_checkout')) {
             $order = Order::query()->where(['token' => $token, 'is_finished' => false])->first();
@@ -477,6 +481,18 @@ class PublicCheckoutController extends BaseController
                 $request,
                 $token
             );
+
+            foreach ($sessionData['marketplace'] as $storeData) {
+                if (! empty($storeData['created_order_id'])) {
+                    $order = Order::query()
+                        ->where('id', $storeData['created_order_id'])
+                        ->first();
+
+                    if ($order && $order->shipping_amount != Arr::get($storeData, 'shipping_amount', 0)) {
+                        $order->update(['shipping_amount' => Arr::get($storeData, 'shipping_amount', 0)]);
+                    }
+                }
+            }
         } else {
             $sessionData = array_merge(OrderHelper::getOrderSessionData($token), $request->input('address'));
             OrderHelper::setOrderSessionData($token, $sessionData);
@@ -484,6 +500,16 @@ class PublicCheckoutController extends BaseController
                 $discount = $applyCouponService->getCouponData(session('applied_coupon_code'), $sessionData);
                 if (! $discount) {
                     $removeCouponService->execute();
+                }
+            }
+
+            if (! empty($sessionData['created_order_id'])) {
+                $order = Order::query()
+                    ->where('id', $sessionData['created_order_id'])
+                    ->first();
+
+                if ($order && $order->shipping_amount != Arr::get($sessionData, 'shipping_amount', 0)) {
+                    $order->update(['shipping_amount' => Arr::get($sessionData, 'shipping_amount', 0)]);
                 }
             }
         }
@@ -503,9 +529,7 @@ class PublicCheckoutController extends BaseController
         HandleRemoveCouponService $removeCouponService,
         HandleApplyPromotionsService $handleApplyPromotionsService
     ) {
-        if (! EcommerceHelper::isCartEnabled()) {
-            abort(404);
-        }
+        abort_unless(EcommerceHelper::isCartEnabled(), 404);
 
         if (! EcommerceHelper::isEnabledGuestCheckout() && ! auth('customer')->check()) {
             return $this
@@ -611,7 +635,7 @@ class PublicCheckoutController extends BaseController
                     ->setMessage(
                         __('Maximum order quantity of product :product is :quantity! ', [
                             'product' => $product->original_product->name,
-                            'quantity' => $product->minimum_order_quantity,
+                            'quantity' => $product->maximum_order_quantity,
                         ])
                     );
             }
@@ -623,7 +647,14 @@ class PublicCheckoutController extends BaseController
             session()->put('selected_payment_method', $paymentMethod);
         }
 
-        do_action('ecommerce_post_checkout', $products, $request, $token, $sessionData);
+        try {
+            do_action('ecommerce_post_checkout', $products, $request, $token, $sessionData);
+        } catch (Exception $e) {
+            return $this
+                ->httpResponse()
+                ->setError()
+                ->setMessage($e->getMessage());
+        }
 
         if (is_plugin_active('marketplace')) {
             return apply_filters(
@@ -636,17 +667,15 @@ class PublicCheckoutController extends BaseController
             );
         }
 
-        $isAvailableShipping = EcommerceHelper::isAvailableShipping($products);
-
-        $shippingMethodInput = $request->input('shipping_method', ShippingMethodEnum::DEFAULT);
-
         $promotionDiscountAmount = $handleApplyPromotionsService->execute($token);
         $couponDiscountAmount = Arr::get($sessionData, 'coupon_discount_amount');
         $rawTotal = Cart::instance('cart')->rawTotal();
         $orderAmount = max($rawTotal - $promotionDiscountAmount - $couponDiscountAmount, 0);
 
-        $shippingAmount = 0;
+        $isAvailableShipping = EcommerceHelper::isAvailableShipping($products);
+        $shippingMethodInput = $request->input('shipping_method', ShippingMethodEnum::DEFAULT);
 
+        $shippingAmount = 0;
         $shippingData = [];
         if ($isAvailableShipping) {
             $origin = EcommerceHelper::getOriginAddress();
@@ -712,6 +741,9 @@ class PublicCheckoutController extends BaseController
             'token' => $token,
         ]);
 
+        /**
+         * @var Order $order
+         */
         $order = Order::query()->where(compact('token'))->first();
 
         $order = $this->createOrderFromData($request->input(), $order);
@@ -770,14 +802,20 @@ class PublicCheckoutController extends BaseController
                 'price' => $cartItem->price,
                 'tax_amount' => $cartItem->tax,
                 'options' => $cartItem->options,
-                'product_type' => $product?->product_type,
+                'product_type' => $product->product_type,
             ];
 
             if (isset($cartItem->options['options'])) {
                 $data['product_options'] = $cartItem->options['options'];
             }
 
-            OrderProduct::query()->create($data);
+            /**
+             * @var OrderProduct $orderProduct
+             */
+            $orderProduct = OrderProduct::query()->create($data);
+
+            OrderProductCreatedEvent::dispatch($orderProduct);
+            do_action('ecommerce_after_each_order_product_created', $orderProduct);
         }
 
         $request->merge([
@@ -830,19 +868,16 @@ class PublicCheckoutController extends BaseController
 
     public function getCheckoutSuccess(string $token)
     {
-        if (! EcommerceHelper::isCartEnabled()) {
-            abort(404);
-        }
+        abort_unless(EcommerceHelper::isCartEnabled(), 404);
 
+        /**
+         * @var Order $order
+         */
         $order = Order::query()
             ->where('token', $token)
             ->with(['address', 'products', 'taxInformation'])
             ->orderByDesc('id')
-            ->first();
-
-        if (! $order) {
-            abort(404);
-        }
+            ->firstOrFail();
 
         if (is_plugin_active('payment') && (float) $order->amount && ! $order->payment_id) {
             return $this
@@ -870,13 +905,13 @@ class PublicCheckoutController extends BaseController
 
     public function postApplyCoupon(ApplyCouponRequest $request, HandleApplyCouponService $handleApplyCouponService)
     {
-        if (! EcommerceHelper::isCartEnabled()) {
-            abort(404);
-        }
+        abort_unless(EcommerceHelper::isCartEnabled(), 404);
+
         $result = [
             'error' => false,
             'message' => '',
         ];
+
         if (is_plugin_active('marketplace')) {
             $result = apply_filters(HANDLE_POST_APPLY_COUPON_CODE_ECOMMERCE, $result, $request);
         } else {
@@ -900,9 +935,7 @@ class PublicCheckoutController extends BaseController
 
     public function postRemoveCoupon(Request $request, HandleRemoveCouponService $removeCouponService)
     {
-        if (! EcommerceHelper::isCartEnabled()) {
-            abort(404);
-        }
+        abort_unless(EcommerceHelper::isCartEnabled(), 404);
 
         if (is_plugin_active('marketplace')) {
             $products = Cart::instance('cart')->products();
@@ -930,9 +963,7 @@ class PublicCheckoutController extends BaseController
 
     public function getCheckoutRecover(string $token, Request $request)
     {
-        if (! EcommerceHelper::isCartEnabled()) {
-            abort(404);
-        }
+        abort_unless(EcommerceHelper::isCartEnabled(), 404);
 
         if (! EcommerceHelper::isEnabledGuestCheckout() && ! auth('customer')->check()) {
             return $this
@@ -950,11 +981,7 @@ class PublicCheckoutController extends BaseController
                 'is_finished' => false,
             ])
             ->with(['products', 'address'])
-            ->first();
-
-        if (! $order) {
-            abort(404);
-        }
+            ->firstOrFail();
 
         if (session()->has('tracked_start_checkout') && session('tracked_start_checkout') == $token) {
             $sessionCheckoutData = OrderHelper::getOrderSessionData($token);
@@ -979,6 +1006,9 @@ class PublicCheckoutController extends BaseController
         foreach ($order->products as $orderProduct) {
             $request->merge(['qty' => $orderProduct->qty]);
 
+            /**
+             * @var Product $product
+             */
             $product = Product::query()->find($orderProduct->product_id);
 
             if ($product) {
@@ -996,35 +1026,6 @@ class PublicCheckoutController extends BaseController
 
     protected function createOrderFromData(array $data, ?Order $order): Order|null|false
     {
-        $data['is_finished'] = false;
-
-        if ($order) {
-            $order->fill($data);
-            $order->save();
-        } else {
-            $order = Order::query()->create($data);
-        }
-
-        if (! $order->referral()->count()) {
-            $referrals = app(FootprinterInterface::class)->getFootprints();
-
-            if ($referrals) {
-                try {
-                    $order->referral()->create($referrals);
-                } catch (Throwable) {
-                    $referrals = array_map(function (?string $item) {
-                        return is_string($item) ? substr($item, 0, 190) : $item;
-                    }, $referrals);
-
-                    rescue(function () use ($order, $referrals) {
-                        $order->referral()->create($referrals);
-                    }, report: false);
-                }
-            }
-        }
-
-        do_action('ecommerce_create_order_from_data', $data, $order);
-
-        return $order;
+        return OrderHelper::createOrUpdateIncompleteOrder($data, $order);
     }
 }
