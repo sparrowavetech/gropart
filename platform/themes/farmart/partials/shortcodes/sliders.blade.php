@@ -16,7 +16,7 @@
         @if ($shortcode->background) data-bg="{{ RvMedia::getImageUrl($shortcode->background) }}" @endif
     >
         <div class="@if($shortcode->selectlayout == 'full-width') container-fluid p-0 @else container-xxxl @endif">
-            <div class="row gx-0 gx-md-4">
+            <div class="row gx-0 @if($shortcode->selectlayout != 'full-width') gx-md-4 @endif">
                 <div class="@if (is_plugin_active('ads') && $shortcode->ads) col-md-8 col-sm-7 @elseif($shortcode->selectlayout == 'full-width') col-sm-12 @else col-md-12 @endif">
                     <div class="section-slides-wrapper @if($shortcode->selectlayout != 'full-width') my-3 @endif">
                         <div
