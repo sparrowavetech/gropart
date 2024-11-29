@@ -121,19 +121,29 @@
                                         {{ format_price($order->sub_total) }}
                                     </x-core::table.body.cell>
                                 </x-core::table.body.row>
+                                @if (EcommerceHelper::isTaxEnabled())
+                                    <x-core::table.body.row>
+                                        <x-core::table.body.cell class="text-end">
+                                            {{ trans('plugins/ecommerce::order.tax') }}
+                                        </x-core::table.body.cell>
+                                        <x-core::table.body.cell class="text-success text-end fw-medium">
+                                            (+) {{ format_price($order->tax_amount) }}
+                                        </x-core::table.body.cell>
+                                    </x-core::table.body.row>
+                                @endif
                                 <x-core::table.body.row>
                                     <x-core::table.body.cell class="text-end color-subtext mt10">
                                         <p class="mb-0">{{ trans('plugins/ecommerce::order.discount') }}</p>
                                         @if ($order->coupon_code)
-                                            <small class="mt-1">{!! BaseHelper::clean(
+                                            <small class="mt-1 text-warning">{!! BaseHelper::clean(
                                                 trans('plugins/ecommerce::order.coupon_code', ['code' => Html::tag('strong', $order->coupon_code)->toHtml()])
                                             ) !!}</small>
                                         @elseif ($order->discount_description)
-                                            <small class="mt-1">{{ $order->discount_description }}</small>
+                                            <small class="mt-1 text-warning">{{ $order->discount_description }}</small>
                                         @endif
                                     </x-core::table.body.cell>
-                                    <x-core::table.body.cell class="text-end fw-medium">
-                                        {{ format_price($order->discount_amount) }}
+                                    <x-core::table.body.cell class="text-danger text-end fw-medium">
+                                        (-) {{ format_price($order->discount_amount) }}
                                     </x-core::table.body.cell>
                                 </x-core::table.body.row>
                                 <x-core::table.body.row>
@@ -142,20 +152,10 @@
                                         <p class="mb-0 small">{{ $order->shipping_method_name }}</p>
                                         <p class="mb-0 small">{{ number_format($weight) }} {{ ecommerce_weight_unit(true) }}</p>
                                     </x-core::table.body.cell>
-                                    <x-core::table.body.cell class="text-end fw-medium">
-                                        {{ format_price($order->shipping_amount) }}
+                                    <x-core::table.body.cell class="text-success text-end fw-medium">
+                                        (+) {{ format_price($order->shipping_amount) }}
                                     </x-core::table.body.cell>
                                 </x-core::table.body.row>
-                                @if (EcommerceHelper::isTaxEnabled())
-                                    <x-core::table.body.row>
-                                        <x-core::table.body.cell class="text-end">
-                                            {{ trans('plugins/ecommerce::order.tax') }}
-                                        </x-core::table.body.cell>
-                                        <x-core::table.body.cell class="text-end fw-medium">
-                                            {{ format_price($order->tax_amount) }}
-                                        </x-core::table.body.cell>
-                                    </x-core::table.body.row>
-                                @endif
 
                                 <x-core::table.body.row>
                                     <x-core::table.body.cell class="text-end">
@@ -176,10 +176,10 @@
                                                 href="{{ route('payment.show', $order->payment->id) }}"
                                                 target="_blank"
                                             >
-                                                <span>{{ format_price($order->payment->status == Botble\Payment\Enums\PaymentStatusEnum::COMPLETED ? $order->payment->amount : 0) }}</span>
+                                                <span class="text-success">{{ format_price($order->payment->status == Botble\Payment\Enums\PaymentStatusEnum::COMPLETED ? $order->payment->amount : 0) }}</span>
                                             </a>
                                         @else
-                                            <span>{{ format_price(is_plugin_active('payment') && $order->payment->status == Botble\Payment\Enums\PaymentStatusEnum::COMPLETED ? $order->payment->amount : 0) }}</span>
+                                            <span class="text-success">{{ format_price(is_plugin_active('payment') && $order->payment->status == Botble\Payment\Enums\PaymentStatusEnum::COMPLETED ? $order->payment->amount : 0) }}</span>
                                         @endif
                                     </x-core::table.body.cell>
                                 </x-core::table.body.row>
@@ -190,7 +190,7 @@
                                             {{ trans('plugins/ecommerce::order.payment_method') }}
                                         </x-core::table.body.cell>
                                         <x-core::table.body.cell class="text-end">
-                                            <a href="{{ route('payment.show', $order->payment->id) }}" target="_blank">
+                                            <a href="{{ route('payment.show', $order->payment->id) }}" class="text-success" target="_blank">
                                                 {{ $order->payment->payment_channel->label() }}
 
                                                 <x-core::icon name="ti ti-external-link" />

@@ -27,11 +27,11 @@ use Botble\Ecommerce\Services\HandleFrontPages;
 use Botble\Ecommerce\Services\Products\GetProductService;
 use Botble\Ecommerce\Services\Products\GetProductWithCrossSalesBySlugService;
 use Botble\Ecommerce\Services\Products\ProductCrossSalePriceService;
+use Botble\Media\Facades\RvMedia;
 use Botble\SeoHelper\Facades\SeoHelper;
 use Botble\Theme\Facades\Theme;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
-use RvMedia;
 use Botble\Marketplace\Supports\MarketplaceHelper;
 use Botble\Ecommerce\Supports\OrderHelper;
 
@@ -289,16 +289,17 @@ class PublicProductController extends BaseController
                 }
             }
 
-            $product->image_with_sizes = rv_get_image_list($originalImages, [
+            $product->image_with_sizes = rv_get_image_list($originalImages, array_unique([
                 'origin',
                 'thumb',
-            ]);
+                ...array_keys(RvMedia::getSizes()),
+            ]));
 
-            if ($product->isOutOfStock()) {
+            if ($product->stock_status == 'on_backorder') {
+                $product->warningMessage = __('Warning: This product is on backorder and may take longer to ship.');
+            } elseif ($product->isOutOfStock()) {
                 $product->errorMessage = __('Out of stock');
-            }
-
-            if (! $product->with_storehouse_management || $product->quantity < 1) {
+            } elseif (! $product->with_storehouse_management || $product->quantity < 1) {
                 $product->successMessage = __('In stock');
             } elseif ($product->quantity) {
                 if (EcommerceHelper::showNumberOfProductsInProductSingle()) {
@@ -339,10 +340,11 @@ class PublicProductController extends BaseController
 
             if ($originalProduct) {
                 if ($originalProduct->images) {
-                    $originalProduct->image_with_sizes = rv_get_image_list($originalProduct->images, [
+                    $originalProduct->image_with_sizes = rv_get_image_list($originalProduct->images, array_unique([
                         'origin',
                         'thumb',
-                    ]);
+                        ...array_keys(RvMedia::getSizes()),
+                    ]));
                 }
 
                 $originalProduct->errorMessage = __('Please select attributes');
@@ -426,9 +428,7 @@ class PublicProductController extends BaseController
 
     public function getOrderTracking(OrderTrackingRequest $request)
     {
-        if (! EcommerceHelper::isOrderTrackingEnabled()) {
-            abort(404);
-        }
+        abort_unless(EcommerceHelper::isOrderTrackingEnabled(), 404);
 
         $order = null;
 
@@ -438,24 +438,24 @@ class PublicProductController extends BaseController
             $code = $request->input('order_id');
 
             $query = Order::query()
-                ->where(function (Builder $query) use ($code) {
+                ->where(function (Builder $query) use ($code): void {
                     $query
                         ->where('ec_orders.code', $code)
                         ->orWhere('ec_orders.code', '#' . $code);
                 })
                 ->with(['address', 'products'])
                 ->select('ec_orders.*')
-                ->when(EcommerceHelper::isLoginUsingPhone(), function (BaseQueryBuilder $query) use ($request) {
-                    $query->where(function (BaseQueryBuilder $query) use ($request) {
+                ->when(EcommerceHelper::isLoginUsingPhone(), function (BaseQueryBuilder $query) use ($request): void {
+                    $query->where(function (BaseQueryBuilder $query) use ($request): void {
                         $query
-                            ->whereHas('address', fn($subQuery) => $subQuery->where('phone', $request->input('phone')))
-                            ->orWhereHas('user', fn($subQuery) => $subQuery->where('phone', $request->input('phone')));
+                            ->whereHas('address', fn ($subQuery) => $subQuery->where('phone', $request->input('phone')))
+                            ->orWhereHas('user', fn ($subQuery) => $subQuery->where('phone', $request->input('phone')));
                     });
-                }, function (BaseQueryBuilder $query) use ($request) {
-                    $query->where(function (Builder $query) use ($request) {
+                }, function (BaseQueryBuilder $query) use ($request): void {
+                    $query->where(function (Builder $query) use ($request): void {
                         $query
-                            ->whereHas('address', fn($subQuery) => $subQuery->where('email', $request->input('email')))
-                            ->orWhereHas('user', fn($subQuery) => $subQuery->where('email', $request->input('email')));
+                            ->whereHas('address', fn ($subQuery) => $subQuery->where('email', $request->input('email')))
+                            ->orWhereHas('user', fn ($subQuery) => $subQuery->where('email', $request->input('email')));
                     });
                 });
 

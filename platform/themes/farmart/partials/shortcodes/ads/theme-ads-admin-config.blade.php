@@ -1,4 +1,4 @@
-@for ($i = 1; $i < 5; $i++)
+@for ($i = 1; $i < 13; $i++)
     <div class="mb-3">
         <label class="form-label">{{ __('Ad :number', ['number' => $i]) }}</label>
         <select

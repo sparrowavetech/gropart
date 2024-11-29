@@ -12,14 +12,13 @@
             'fade' => true,
         ];
     @endphp
-    <div
-        class="section-content section-content__slider lazyload"
+    <div class="section-content section-content__slider lazyload @if($shortcode->selectlayout == 'full-width') p-0 @endif"
         @if ($shortcode->background) data-bg="{{ RvMedia::getImageUrl($shortcode->background) }}" @endif
     >
-        <div class="container-xxxl">
+        <div class="@if($shortcode->selectlayout == 'full-width') container-fluid p-0 @else container-xxxl @endif">
             <div class="row gx-0 gx-md-4">
-                <div class="@if (is_plugin_active('ads') && $shortcode->ads) col-md-8 col-sm-7 @else col-md-12 @endif">
-                    <div class="section-slides-wrapper my-3">
+                <div class="@if (is_plugin_active('ads') && $shortcode->ads) col-md-8 col-sm-7 @elseif($shortcode->selectlayout == 'full-width') col-sm-12 @else col-md-12 @endif">
+                    <div class="section-slides-wrapper @if($shortcode->selectlayout != 'full-width') my-3 @endif">
                         <div
                             class="slide-body slick-slides-carousel"
                             data-slick="{{ json_encode($slick) }}"

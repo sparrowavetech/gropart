@@ -11,7 +11,7 @@
         $image = ($image = theme_option('newsletter_popup_image')) ? RvMedia::getImageUrl($image) : null;
     @endphp
 
-    <div @class(['modal-dialog', 'modal-lg' => $image])>
+    <div @class(['modal-dialog', 'modal-xl' => $image])>
         <div @class(['modal-content border-0', 'd-flex flex-md-col flex-lg-row' => $image])>
             @if ($image)
                 <div class="d-none d-md-block col-6 newsletter-popup-bg" @style(["background: url('$image') no-repeat; background-position: center; background-size: cover"])></div>

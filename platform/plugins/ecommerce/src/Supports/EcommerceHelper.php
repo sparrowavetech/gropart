@@ -437,7 +437,7 @@ class EcommerceHelper
 
         if ($product->variations->isNotEmpty()) {
             $reviews
-                ->whereHas('product.variations', function (Builder $query) use ($ids) {
+                ->whereHas('product.variations', function (Builder $query) use ($ids): void {
                     $query->whereIn('ec_product_variations.product_id', $ids);
                 });
         } else {
@@ -447,10 +447,10 @@ class EcommerceHelper
         return $reviews
             ->with([
                 'user',
-                'user.orders' => function ($query) use ($ids) {
+                'user.orders' => function ($query) use ($ids): void {
                     $query
                         ->where('ec_orders.status', OrderStatusEnum::COMPLETED)
-                        ->whereHas('products', function (Builder $query) use ($ids) {
+                        ->whereHas('products', function (Builder $query) use ($ids): void {
                             $query->where('product_id', $ids);
                         })
                         ->orderByDesc('ec_orders.created_at');
@@ -481,7 +481,7 @@ class EcommerceHelper
         if ($this->isReviewEnabled()) {
             $withCount = [
                 'reviews',
-                'reviews as reviews_avg' => function ($query) {
+                'reviews as reviews_avg' => function ($query): void {
                     $query->select(DB::raw('avg(star)'));
                 },
             ];
@@ -696,7 +696,7 @@ class EcommerceHelper
                     $content
                         ->sortBy([['updated_at', 'desc']])
                         ->skip($max)
-                        ->each(function ($cartItem) use ($instance) {
+                        ->each(function ($cartItem) use ($instance): void {
                             $instance->remove($cartItem->rowId);
                         });
                 }
@@ -765,7 +765,7 @@ class EcommerceHelper
                 );
                 $variations = collect();
                 foreach ($params as $key => $value) {
-                    $product->variations->map(function ($variation) use ($value, $key, &$variations) {
+                    $product->variations->map(function ($variation) use ($value, $key, &$variations): void {
                         $productAttribute = $variation->productAttributes->filter(
                             function ($attribute) use ($value, $key) {
                                 return $attribute->slug == $value && $attribute->productAttributeSet->slug == $key;
@@ -1040,7 +1040,7 @@ class EcommerceHelper
                     return false;
                 }
             }
-            
+
         }
         return Cart::instance('cart')->rawSubTotal() >= $this->getMinimumOrderAmount();
     }
@@ -1143,19 +1143,19 @@ class EcommerceHelper
         return Brand::query()
             ->wherePublished()
             ->with(['categories', 'slugable'])
-            ->when(count($categoryIds), function ($query) use ($categoryIds) {
-                $query->where(function ($query) use ($categoryIds) {
+            ->when(count($categoryIds), function ($query) use ($categoryIds): void {
+                $query->where(function ($query) use ($categoryIds): void {
                     $query
                         ->whereDoesntHave('categories')
-                        ->orWhereHas('categories', function ($query) use ($categoryIds) {
+                        ->orWhereHas('categories', function ($query) use ($categoryIds): void {
                             $query->whereIn('ec_product_categories.id', $categoryIds);
                         });
                 });
             })
             ->withCount([
-                'products' => function ($query) use ($categoryIds) {
+                'products' => function ($query) use ($categoryIds): void {
                     if ($categoryIds) {
-                        $query->whereHas('categories', function ($query) use ($categoryIds) {
+                        $query->whereHas('categories', function ($query) use ($categoryIds): void {
                             $query->whereIn('ec_product_categories.id', $categoryIds);
                         });
                     }
@@ -1179,9 +1179,9 @@ class EcommerceHelper
         return ProductTag::query()
             ->wherePublished()
             ->withCount([
-                'products' => function ($query) use ($categoryIds) {
+                'products' => function ($query) use ($categoryIds): void {
                     if ($categoryIds) {
-                        $query->whereHas('categories', function ($query) use ($categoryIds) {
+                        $query->whereHas('categories', function ($query) use ($categoryIds): void {
                             $query->whereIn('ec_product_categories.id', $categoryIds);
                         });
                     }
