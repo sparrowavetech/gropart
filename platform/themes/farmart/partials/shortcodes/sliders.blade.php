@@ -12,7 +12,22 @@
             'fade' => true,
         ];
     @endphp
-    <div class="section-content section-content__slider lazyload @if($shortcode->selectlayout == 'full-width') p-0 @endif"
+    <style>
+        #{{$shortcode->sliderid }}.section-content.section-content__slider .section-slides-wrapper .slide-item .slide-item__image {
+            height: {{ $shortcode->sliderdheight ?? '530px' }};
+        }
+        @media (min-width: 768px) and (max-width: 1024px) {
+            #{{$shortcode->sliderid }}.section-content.section-content__slider .section-slides-wrapper .slide-item .slide-item__image {
+                height: {{ $shortcode->slidertheight ?? '34vw' }};
+            }
+        }
+        @media (max-width: 767px) {
+            #{{$shortcode->sliderid }}.section-content.section-content__slider .section-slides-wrapper .slide-item .slide-item__image {
+                height: {{ $shortcode->slidermheight ?? '52vw' }};
+            }
+        }
+    </style>
+    <div id="{{ $shortcode->sliderid }}" class="section-content section-content__slider lazyload @if($shortcode->selectlayout == 'full-width') p-0 @endif"
         @if ($shortcode->background) data-bg="{{ RvMedia::getImageUrl($shortcode->background) }}" @endif
     >
         <div class="@if($shortcode->selectlayout == 'full-width') container-fluid p-0 @else container-xxxl @endif">
