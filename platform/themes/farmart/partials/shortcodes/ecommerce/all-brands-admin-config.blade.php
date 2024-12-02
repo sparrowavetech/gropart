@@ -3,3 +3,24 @@
     <input type="text" name="title" value="{{ Arr::get($attributes, 'title') }}" class="form-control"
            placeholder="{{ __('Title') }}">
 </div>
+<div class="mb-3">
+    <label class="form-label">{{ __('View All Brand Name') }}</label>
+    <input
+        class="form-control"
+        name="labeltitle"
+        type="text"
+        value="{{ Arr::get($attributes, 'labeltitle') }}"
+        placeholder="{{ __('View All Brand Name') }}"
+    >
+</div>
+
+<div class="mb-3">
+    <label class="form-label">{{ __('View All Brand URL') }}</label>
+    <input
+        class="form-control"
+        name="labelurl"
+        type="text"
+        value="{{ Arr::get($attributes, 'labelurl') }}"
+        placeholder="{{ __('View All Brand URL') }}"
+    >
+</div>

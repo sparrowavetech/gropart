@@ -10,13 +10,13 @@
 </div>
 
 <div class="mb-3">
-    <label class="form-label">{{ __('Limit') }}</label>
+    <label class="form-label">{{ __('View All Product Name') }}</label>
     <input
         class="form-control"
         name="limit"
         type="number"
         value="{{ Arr::get($attributes, 'limit') }}"
-        placeholder="{{ __('Limit') }}"
+        placeholder="{{ __('View All Product Name') }}"
     >
 </div>
 

@@ -8,6 +8,18 @@
         placeholder="{{ __('Title') }}"
     >
 </div>
+<div class="mb-3">
+    <label class="form-label">{{ __('View Product Collection Name') }}</label>
+    <input class="form-control" name="labeltitle" type="text" value="{{ Arr::get($attributes, 'labeltitle') }}"
+        placeholder="{{ __('View All Product Collection Name') }}">
+</div>
+
+<div class="mb-3">
+    <label class="form-label">{{ __('View Product Collection URL') }}</label>
+    <input class="form-control" name="labelurl" type="text" value="{{ Arr::get($attributes, 'labelurl') }}"
+        placeholder="{{ __('View Product Collection URL') }}">
+</div>
+
 
 <div class="mb-3">
     <label class="form-label">{{ __('Limit') }}</label>
