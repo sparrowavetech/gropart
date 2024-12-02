@@ -1,3 +1,26 @@
+
+<div class="mb-3">
+    <label class="form-label">{{ __('Product Category Label Name') }}</label>
+    <input
+        class="form-control"
+        name="labeltitle"
+        type="text"
+        value="{{ Arr::get($attributes, 'labeltitle') }}"
+        placeholder="{{ __('Product Category Label Name') }}"
+    >
+</div>
+
+<div class="mb-3">
+    <label class="form-label">{{ __('View Product Category URL') }}</label>
+    <input
+        class="form-control"
+        name="labelurl"
+        type="text"
+        value="{{ Arr::get($attributes, 'labelurl') }}"
+        placeholder="{{ __('View Product Category URL') }}"
+    >
+</div>
+
 <div class="mb-3">
     <label class="form-label">{{ __('Select category') }}</label>
     <select name="category_id" class="form-select">

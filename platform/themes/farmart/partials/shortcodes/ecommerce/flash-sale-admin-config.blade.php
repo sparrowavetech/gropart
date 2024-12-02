@@ -10,6 +10,17 @@
 </div>
 
 <div class="mb-3">
+    <label class="form-label">{{ __('View Sale URL') }}</label>
+    <input
+        class="form-control"
+        name="labelurl"
+        type="text"
+        value="{{ Arr::get($attributes, 'labelurl') }}"
+        placeholder="{{ __('View Sale URL') }}"
+    >
+</div>
+
+<div class="mb-3">
     <label class="form-label">{{ __('Select a flash sale') }}</label>
     <select
         class="form-control"

@@ -6,7 +6,11 @@
                     <a href="{{ $category->url }}">
                         <div class="row align-items-center mb-2 widget-header">
                             <h2 class="col-auto mt-3 mb-3 py-2">{{ $shortcode->title ?: $category->name }}</h2>
-                        </div>
+                      <div class="ps-4 col-auto py-2 d-md-block">
+                        <a href="{{ $shortcode->labelurl }}">
+                            <span class="link-text">{{ $shortcode->labeltitle }} <span class="svg-icon"><svg><use href="#svg-icon-chevron-right" xlink:href="#svg-icon-chevron-right"></use></svg></span></span>
+                        </a>
+                    </div>  </div>
                     </a>
                 </div>
                 <div class="product-deals-day__body arrows-top-right">

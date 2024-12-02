@@ -10,6 +10,28 @@
 </div>
 
 <div class="mb-3">
+    <label class="form-label">{{ __('Feature Label Name') }}</label>
+    <input
+        class="form-control"
+        name="labeltitle"
+        type="text"
+        value="{{ Arr::get($attributes, 'labeltitle') }}"
+        placeholder="{{ __('Feature Label Name') }}"
+    >
+</div>
+
+<div class="mb-3">
+    <label class="form-label">{{ __('View All Feature URL') }}</label>
+    <input
+        class="form-control"
+        name="labelurl"
+        type="text"
+        value="{{ Arr::get($attributes, 'labelurl') }}"
+        placeholder="{{ __('View All Feature URL') }}"
+    >
+</div>
+
+<div class="mb-3">
     <label class="form-label">{{ __('Limit') }}</label>
     <input
         class="form-control"
@@ -19,5 +41,6 @@
         placeholder="{{ __('Limit') }}"
     >
 </div>
+
 
 {!! Theme::partial('shortcodes.includes.autoplay-settings', compact('attributes')) !!}
