@@ -25,10 +25,10 @@ class GetProductService
 
         $shows = EcommerceHelper::getShowParams();
 
-        if (!isset($conditions['is_enquiry'])) {
-            $conditions['is_enquiry'] = 0;
-        }elseif($request->query('enquiry')){
+        if ($request->query('enquiry') !== null) {
             $conditions['is_enquiry'] = $request->query('enquiry');
+        } elseif (!isset($conditions['is_enquiry'])) {
+            $conditions['is_enquiry'] = 0;
         }
 
         $conditions['is_variation'] = 0;

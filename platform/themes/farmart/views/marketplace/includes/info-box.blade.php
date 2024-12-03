@@ -149,6 +149,18 @@
                     </div>
                 </div>
             @endif
+            <div class="mb-2 store-product-filter-button">
+                <div class="d-flex">
+                    <a class="btn btn-primary me-2 px-3" href="{{ $store->url }}" title="{{ __('Retail Products') }}">
+                        <span class="add-to-cart-text ms-1">{{ __('Retail Products') }}</span>
+                        <span class="fa fa-chevron-down"></span>
+                    </a>
+                    <a class="btn btn-primary btn-black px-3" href="{{ $store->url.'?enquiry=1' }}" title="{{ __('Enquiry Products') }}">
+                        <span class="add-to-cart-text ms-1">{{ __('Enquiry Products') }}</span>
+                        <span class="fa fa-chevron-down"></span>
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 </div>

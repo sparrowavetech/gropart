@@ -27,14 +27,14 @@
             </div>
         </div>
     @empty
-        <div class="col-12 w-100">
-            <div
-                class="alert alert-warning mt-4 w-100"
-                role="alert"
-            >
-                {{ __(':total Product(s) found', ['total' => 0]) }}
-            </div>
+    <div class="col-12 w-100">
+        <div
+            class="alert alert-warning mt-4 w-100"
+            role="alert"
+        >
+            {{ __(':total Product(s) found', ['total' => 0]) }}
         </div>
+    </div>
     @endforelse
 </div>
 

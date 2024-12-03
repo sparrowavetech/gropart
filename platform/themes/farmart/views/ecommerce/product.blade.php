@@ -32,7 +32,7 @@
                                     @endif
                                     @if ($product->brand_id)
                                         <p class="mb-0 me-2 pe-2 text-secondary">{{ __('Brand') }}: <a
-                                                href="{{ $product->brand->url }}"
+                                                href="{{ $product->brand->url }}{{ $product->is_enquiry == 1?'?enquiry=1':''}}"
                                             >{{ $product->brand->name }}</a></p>
                                     @endif
                                 </div>
@@ -45,7 +45,7 @@
                         @if (is_plugin_active('marketplace') && $product->store_id)
                             <div class="product-meta-sold-by my-2">
                                 <span class="d-inline-block">{{ __('Sold By') }}: </span>
-                                <a href="{{ $product->store->url }}">
+                                <a href="{{ $product->store->url }}{{ $product->is_enquiry == 1?'?enquiry=1':''}}">
                                     {{ $product->store->name }}
                                 </a>
                                 @if($product->store->is_verified)
@@ -115,7 +115,7 @@
                             <div class="meta-categories mt-4">
                                 <span class="meta-label d-inline-block">{{ __('Tags') }}: </span>
                                 @foreach ($product->tags as $tag)
-                                    <a href="{{ $tag->url }}">{{ $tag->name }}</a>@if (!$loop->last),@endif
+                                    <a href="{{ $tag->url }}{{ $product->is_enquiry == 1?'?enquiry=1':''}}">{{ $tag->name }}</a>@if (!$loop->last),@endif
                                 @endforeach
                             </div>
                         @endif

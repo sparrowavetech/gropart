@@ -47,7 +47,9 @@ class PublicProductController extends BaseController
         }
 
         $with = EcommerceHelper::withProductEagerLoadingRelations();
+
         $condition = ['is_enquiry' => 0];
+
         if (($query = BaseHelper::stringify($request->input('q'))) && ! $request->ajax()) {
             $products = $productService->getProduct($request, null, null, $with, [], $condition);
             SeoHelper::setTitle(__('Search result for ":query"', compact('query')));
@@ -63,7 +65,6 @@ class PublicProductController extends BaseController
                 'plugins/ecommerce::themes.search'
             )->render();
         }
-
 
         if ($request->query('enquiry') == 1) {
             Theme::breadcrumb()->add(__("Equipment's Enquiry"), route('public.product.enquiry'));
