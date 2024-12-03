@@ -1,6 +1,6 @@
 Urgent Issues
 --------------------------------------------------------------------------
-1.  Enquiry Product issue with filters and Breadcrumbs (Super Urgent)
+1.  Enquiry Product issue with Breadcrumbs (Super Urgent)
 2.  Enquiry Details Page Layout in backend is distorting (Super Urgent)
 3.  Mobile UI Improve for Better User Experience (Super Urgent)
 4.  Admin Email Order links change (Super Urgent)
@@ -13,8 +13,9 @@ Urgent Issues
 10. Product Count and order count is wrong in admin panel
 --------------------------------------------------------------------------
 11. Dropdown issue in backend at many places *(Will fix in theme update)
-12.  Issue in sitemap generation and blank space at top of page *(Will fix in theme update)
+12. Issue in sitemap generation and blank space at top of page *(Will fix in theme update)
 13. Issue of URL generation in admin panel *(Will fix in theme update)
+14. Issue of category URL special characters in sidebar of store details page *(Will fix in theme update)
 --------------------------------------------------------------------------
 
 
