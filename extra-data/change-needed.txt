@@ -1,30 +1,40 @@
-1. Barcode Required Condition not working as Expected
-2. Shop type required condition not working while register as vendor
-3. Product Count and order count is wrong in admin panel
-4. Admin Email Order links change
-5. COD additional charge functionality
-6. Whatsap notifications setting
-7. Issue resolve for not getting tax value at checkout page - urgent***
+Urgent Issues
+--------------------------------------------------------------------------
+1.  Enquiry Product issue with filters and Breadcrumbs (Super Urgent)
+2.  Enquiry Details Page Layout in backend is distorting (Super Urgent)
+3.  Mobile UI Improve for Better User Experience (Super Urgent)
+4.  Admin Email Order links change (Super Urgent)
+--------------------------------------------------------------------------
+5.  Check All Email templates and update its language
+6.  Shipping Label UI Update
+7.  Fix UI of OTP Login page
+8.  Barcode Required Condition not working as Expected
+9.  Shop type required condition not working while register as vendor
+10. Product Count and order count is wrong in admin panel
+--------------------------------------------------------------------------
+11. Dropdown issue in backend at many places *(Will fix in theme update)
+12.  Issue in sitemap generation and blank space at top of page *(Will fix in theme update)
+13. Issue of URL generation in admin panel *(Will fix in theme update)
+--------------------------------------------------------------------------
 
 
-Product Enquiry Category Issue on
-Products by Brand, Product by Tags, Product By Category, Enquiry Products, Store Details Products,
-Product Details
-
-Style checkout page, minimum order quantity text
-
-1.  Change and Improve Vendor info of Gropart and SB Marketing Orders
-2.  Improve Pricing and Shipping Parameters of Products
-3.  Measurement update for shipping in products
-
-4.  Shiprocket pincode search api integrate
-5.  Sms template add for delivery information, Shipping word clickable to track url
-
-6.  Change UI of OTP Login page
-7.  COD Not Available, Only prepaid orders, Shipping Available all over India not on header
-8.  Issue in sitemap generation and blank space at top of page
-
-
-1.  Need pop up to come automatically the first time when visiting home page only for language change,
+Custom Update Required (Shortcode Development or custom function)
+--------------------------------------------------------------------------
+1.  Need a option to enter whatsapp mobile number in newsletter popup (Super Urgent)
+2.  Need a Shortcode for fetch all products in a dedicated page for flash sale and product by category (Super Urgent)
+3.  COD Not Available, Only prepaid orders, Shipping Available all over India note on header (Theme Option)
+4.  Need pop up to come automatically the first time when visiting home page only for language change,
     with all language list default, then this pop up should not come again, should only come when first time visiting site
+5.  Sms template add for delivery information, Shipping word clickable to track url
+6.  Forms Shortcode to add in pages (tractorjunction)
+7.  Join Our WhatsApp Channel Button at the footer of website
 
+
+New Custom Update Required (Plugin Development)
+(https://docs.google.com/document/d/1za-AQ8i2H3hfEjJuK6rFqgGYuDvL009JRk-BVHw9kQI/edit?usp=sharing)
+--------------------------------------------------------------------------
+1.  COD additional charge functionality for each product
+2.  Instance Based Whatsap notifications setting
+3.  Shiprocket Integration Plugin to check of Availablity of delivery and integration for tracking link and push order automatically
+4.  Send Email to review product after purchase
+5.  Need Bulk Quantity Buy Option in the website
