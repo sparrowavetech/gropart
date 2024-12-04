@@ -1,9 +1,9 @@
 Urgent Issues
 --------------------------------------------------------------------------
 1.  Enquiry Product issue with Breadcrumbs (Super Urgent) - Fixed
-2.  Enquiry Details Page Layout in backend is distorting (Super Urgent)
+2.  Enquiry Details Page Layout in backend is distorting (Super Urgent) - Fixed
 3.  Mobile UI Improve for Better User Experience (Super Urgent)
-4.  Admin Email Order links change (Super Urgent) - Done
+4.  Admin Email Order links change (Super Urgent) - Fixed
 --------------------------------------------------------------------------
 5.  Check All Email templates and update its language
 6.  Shipping Label UI Update
