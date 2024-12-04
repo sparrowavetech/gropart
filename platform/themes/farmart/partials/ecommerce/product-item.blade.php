@@ -1,7 +1,7 @@
 <div class="product-thumbnail">
     <a
         class="product-loop__link img-fluid-eq"
-        href="{{ $product->url }}"
+        href="{{ $product->url. ($product->is_enquiry == 1 ? '?enquiry=1' : '') }}"
         tabindex="0"
     >
         <div class="img-fluid-eq__dummy"></div>
@@ -41,7 +41,7 @@
     <div class="product-content-box">
         @if (is_plugin_active('marketplace') && $product->store->id)
             <div class="sold-by-meta">
-                <a href="{{ $product->store->url }}" tabindex="0">{{ $product->store->name }}</a>
+                <a href="{{ $product->store->url. ($product->is_enquiry == 1 ? '?enquiry=1' : '') }}" tabindex="0">{{ $product->store->name }}</a>
                 @if($product->store->is_verified)
                     <img class="verified-store" src="{{ asset('/storage/stores/verified.png')}}"alt="Verified">
                 @endif
@@ -50,7 +50,7 @@
         @endif
         <h3 class="product__title">
             <a
-                href="{{ $product->url }}"
+                href="{{ $product->url. ($product->is_enquiry == 1 ? '?enquiry=1' : '') }}"
                 tabindex="0"
             >{{ $product->name }}</a>
         </h3>

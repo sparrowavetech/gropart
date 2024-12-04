@@ -149,7 +149,7 @@
                     </div>
                 </div>
             @endif
-            <div class="mb-2 store-product-filter-button">
+            <div class="my-2 store-product-filter-button">
                 <div class="d-flex">
                     <a class="btn btn-primary me-2 px-3" href="{{ $store->url }}" title="{{ __('Retail Products') }}">
                         <span class="add-to-cart-text ms-1">{{ __('Retail Products') }}</span>

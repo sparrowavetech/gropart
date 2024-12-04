@@ -16,7 +16,7 @@ class OrderTrackingForm extends FormAbstract
             ->contentOnly()
             ->setMethod('GET')
             ->setValidatorClass(OrderTrackingRequest::class)
-            ->setUrl(route('public.orders.tracking'))
+            ->setUrl(route('public.orders.tracking') . '#order-details')
             ->add(
                 'order_id',
                 TextField::class,

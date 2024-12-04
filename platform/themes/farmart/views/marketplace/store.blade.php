@@ -36,6 +36,10 @@
                             $condition['is_enquiry'] = 1;
                         }
                         $is_enquiry = $condition['is_enquiry'];
+                        $enqurl = "";
+                        if ($is_enquiry == 1) {
+                            $enqurl = "?enquiry=1";
+                        }
                         $categories = ProductCategoryHelper::getProductCategoriesWithUrl([],$condition);
                         $categoriesRequest = (array) request()->input('categories', []);
                         $urlCurrent = URL::current();
@@ -46,9 +50,9 @@
                         <div class="catalog-filter-sidebar-content px-3 px-md-0">
                             <form
                                 id="products-filter-form"
-                                data-action="{{ $store->url }}"
+                                data-action="{{ $store->url.$enqurl }}"
                                 data-title="{{ $store->name }}"
-                                action="{{ URL::current() }}"
+                                action="{{ URL::current().$enqurl }}"
                                 method="GET"
                             >
                                 <input
@@ -171,7 +175,7 @@
                     <div class="mb-3">
                         <form
                             class="products-filter-form-vendor"
-                            action="{{ URL::current() }}"
+                            action="{{ URL::current().$enqurl }}"
                             method="GET"
                         >
                             <div class="input-group">

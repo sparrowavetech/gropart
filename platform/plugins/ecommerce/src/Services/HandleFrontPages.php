@@ -121,8 +121,10 @@ class HandleFrontPages
                     EcommerceHelper::handleCustomerRecentlyViewedProduct($product);
                 }
 
+                $enqurl = "";
                 if ($request->query('enquiry') == 1) {
                     Theme::breadcrumb()->add(__("Equipment's Enquiry"), route('public.product.enquiry'));
+                    $enqurl = "?enquiry=1";
                 } else {
                     Theme::breadcrumb()->add(__('Products'), route('public.products'));
                 }
@@ -132,11 +134,11 @@ class HandleFrontPages
                 if ($category) {
                     if ($category->parents->count()) {
                         foreach ($category->parents->reverse() as $parentCategory) {
-                            Theme::breadcrumb()->add($parentCategory->name, $parentCategory->url);
+                            Theme::breadcrumb()->add($parentCategory->name, $parentCategory->url.$enqurl);
                         }
                     }
 
-                    Theme::breadcrumb()->add($category->name, $category->url);
+                    Theme::breadcrumb()->add($category->name, $category->url.$enqurl);
                 }
 
                 Theme::breadcrumb()->add($product->name);
@@ -242,15 +244,17 @@ class HandleFrontPages
                     );
                 }
 
+                $enqurl = "";
                 if ($request->query('enquiry') == 1) {
                     Theme::breadcrumb()->add(__("Equipment's Enquiry"), route('public.product.enquiry'));
+                    $enqurl = "?enquiry=1";
                 } else {
                     Theme::breadcrumb()->add(__('Products'), route('public.products'));
                 }
 
                 if ($category->parents->isNotEmpty()) {
                     foreach ($category->parents->reverse() as $parentCategory) {
-                        Theme::breadcrumb()->add($parentCategory->name, $parentCategory->url);
+                        Theme::breadcrumb()->add($parentCategory->name, $parentCategory->url.$enqurl);
                     }
                 }
 
