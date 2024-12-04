@@ -10,7 +10,18 @@
 </div>
 
 <div class="mb-3">
-    <label class="form-label">{{ __('View Sale URL') }}</label>
+    <label class="form-label">{{ __('View All Sale Label') }}</label>
+    <input
+        class="form-control"
+        name="labeltitle"
+        type="text"
+        value="{{ Arr::get($attributes, 'labeltitle') }}"
+        placeholder="{{ __('View All Sale URL') }}"
+    >
+</div>
+
+<div class="mb-3">
+    <label class="form-label">{{ __('View All Sale URL') }}</label>
     <input
         class="form-control"
         name="labelurl"

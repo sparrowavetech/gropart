@@ -3,29 +3,18 @@
         <div class="row">
             <div class="col-12">
                 <div class="row align-items-center mb-2 widget-header">
-                    <h2 class="col-auto mb-0 py-2">{!! $shortcode->title ? BaseHelper::clean($shortcode->title) : BaseHelper::clean($flashSale->name) !!}</h2>
-                    <div class="ps-4 col-auto py-2 d-none d-md-block">
-                        <a href="{{ $shortcode->title }}">
-                            <span class="link-text">{{ $shortcode->flash_sale_id }}
+                    <h3 class="col-auto mb-0">{!! $shortcode->title ? BaseHelper::clean($shortcode->title) : BaseHelper::clean($flashSale->name) !!}</h3>
+                    <div class="ps-4 col-auto d-md-block">
+                        <a href="{{ $shortcode->labelurl ?:'' }}">
+                            <span class="link-text">{{ $shortcode->labeltitle }}
                                 <span class="svg-icon">
                                     <svg>
-                                        <use
-                                            href="#svg-icon-chevron-right"
-                                            xlink:href="#svg-icon-chevron-right"
-                                        ></use>
+                                        <use href="#svg-icon-chevron-right" xlink:href="#svg-icon-chevron-right"></use>
                                     </svg>
                                 </span>
                             </span>
                         </a>
                     </div>
-                    <div class="ps-4 col-auto py-2 d-md-block">
-                        <a href="{{ $shortcode->labelurl }}">
-                            <span class="link-text">{{ $shortcode->labeltitle }} <span class="svg-icon"><svg>
-                                        <use href="#svg-icon-chevron-right" xlink:href="#svg-icon-chevron-right"></use>
-                                    </svg></span></span>
-                        </a>
-                    </div>
-
                     <div class="countdown-wrapper col-auto ps-md-5 py-2">
                         <div class="header-countdown row align-items-center justify-content-center gx-2">
                             <div class="ends-text col-auto">

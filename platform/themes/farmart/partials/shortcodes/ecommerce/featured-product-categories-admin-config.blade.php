@@ -10,24 +10,24 @@
 </div>
 
 <div class="mb-3">
-    <label class="form-label">{{ __('Feature Label Name') }}</label>
+    <label class="form-label">{{ __('View All Product Category Label Name') }}</label>
     <input
         class="form-control"
         name="labeltitle"
         type="text"
         value="{{ Arr::get($attributes, 'labeltitle') }}"
-        placeholder="{{ __('Feature Label Name') }}"
+        placeholder="{{ __('All Product Category Label Name') }}"
     >
 </div>
 
 <div class="mb-3">
-    <label class="form-label">{{ __('View All Feature URL') }}</label>
+    <label class="form-label">{{ __('View All Product Category URL') }}</label>
     <input
         class="form-control"
         name="labelurl"
         type="text"
         value="{{ Arr::get($attributes, 'labelurl') }}"
-        placeholder="{{ __('View All Feature URL') }}"
+        placeholder="{{ __('View All Product Category URL') }}"
     >
 </div>
 

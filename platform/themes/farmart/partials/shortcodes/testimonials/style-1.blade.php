@@ -10,7 +10,7 @@
     <div class="container mt-80">
         <div class="box-swiper">
             <div class="swiper-container swiper-group-4">
-                <div class="swiper-wrapper pb-70 pt-5">
+                <div class="swiper-wrapper pt-3">
                     @foreach ($testimonials as $testimonial)
                         <div class="swiper-slide @if ($loop->first) active @endif">
                             <div class="card-grid-style-3 hover-up bd-bg-{{ Arr::random([6, 9, 10]) }}">

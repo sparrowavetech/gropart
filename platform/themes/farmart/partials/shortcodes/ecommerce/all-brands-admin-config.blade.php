@@ -13,14 +13,3 @@
         placeholder="{{ __('View All Brand Name') }}"
     >
 </div>
-
-<div class="mb-3">
-    <label class="form-label">{{ __('View All Brand URL') }}</label>
-    <input
-        class="form-control"
-        name="labelurl"
-        type="text"
-        value="{{ Arr::get($attributes, 'labelurl') }}"
-        placeholder="{{ __('View All Brand URL') }}"
-    >
-</div>

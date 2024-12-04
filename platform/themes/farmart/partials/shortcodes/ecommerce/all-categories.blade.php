@@ -1,20 +1,14 @@
 @php
-$categories = get_product_categories_withparent([], true);
+    $categories = get_product_categories_withparent([], true)->filter(function ($category) {
+        return $category->is_enquiry == 0 && $category->status == 'published';
+    });
 @endphp
 <div class="widget-featured-brands all-brands py-5">
     <div class="container-xxxl">
         <div class="row">
             <div class="col-12">
                 <div class="row align-items-center mb-2 widget-header">
-                    <h2 class="col-auto mb-0 py-2">{!! BaseHelper::clean($shortcode->title) !!}</h2>
-                    <div class="ps-4 col-auto py-2 d-md-block">
-                        <a href="{{ $shortcode->labelurl }}">
-                            <span class="link-text">{{ $shortcode->labeltitle }} <span class="svg-icon"><svg>
-                                        <use href="#svg-icon-chevron-right" xlink:href="#svg-icon-chevron-right"></use>
-                                    </svg></span></span>
-                        </a>
-                    </div>
-
+                    <h3 class="col-auto mb-0 py-2">{!! BaseHelper::clean($shortcode->title) !!}</h3>
                 </div>
                 <div class="featured-brands__body arrows-top-right row row-cols-xl-6 row-cols-lg-3 row-cols-md-3 row-cols-3 g-0">
                 @foreach ($categories as $category)

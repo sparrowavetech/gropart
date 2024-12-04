@@ -1,17 +1,14 @@
 @php
-$brands = get_all_brands();
+    $brands = get_all_brands()->filter(function ($brand) {
+        return $brand->status == 'published';
+    });
 @endphp
 <div class="widget-featured-brands all-brands py-5">
     <div class="container-xxxl">
         <div class="row">
             <div class="col-12">
                 <div class="row align-items-center mb-2 widget-header">
-                    <h2 class="col-auto mb-0 py-2">{!! BaseHelper::clean($shortcode->title) !!}</h2>
-                     <div class="ps-4 col-auto py-2 d-md-block">
-                        <a href="{{ $shortcode->labelurl }}">
-                            <span class="link-text">{{ $shortcode->labeltitle }} <span class="svg-icon"><svg><use href="#svg-icon-chevron-right" xlink:href="#svg-icon-chevron-right"></use></svg></span></span>
-                        </a>
-                    </div> 
+                    <h3 class="col-auto mb-0 py-2">{!! BaseHelper::clean($shortcode->title) !!}</h3>
                 </div>
                 <div class="featured-brands__body arrows-top-right row row-cols-xl-4 row-cols-lg-3 row-cols-md-2 row-cols-2 g-0">
                 @foreach ($brands as $brand)

@@ -10,13 +10,35 @@
 </div>
 
 <div class="mb-3">
-    <label class="form-label">{{ __('View All Product Name') }}</label>
+    <label class="form-label">{{ __('View All Products Label Name') }}</label>
+    <input
+        class="form-control"
+        name="labeltitle"
+        type="text"
+        value="{{ Arr::get($attributes, 'labeltitle') }}"
+        placeholder="{{ __('All Product Category Label Name') }}"
+    >
+</div>
+
+<div class="mb-3">
+    <label class="form-label">{{ __('View All Products URL') }}</label>
+    <input
+        class="form-control"
+        name="labelurl"
+        type="text"
+        value="{{ Arr::get($attributes, 'labelurl') }}"
+        placeholder="{{ __('View All Product Category URL') }}"
+    >
+</div>
+
+<div class="mb-3">
+    <label class="form-label">{{ __('Limit') }}</label>
     <input
         class="form-control"
         name="limit"
         type="number"
         value="{{ Arr::get($attributes, 'limit') }}"
-        placeholder="{{ __('View All Product Name') }}"
+        placeholder="{{ __('Limit') }}"
     >
 </div>
 

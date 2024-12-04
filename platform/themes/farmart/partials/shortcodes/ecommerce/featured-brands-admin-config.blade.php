@@ -16,7 +16,7 @@
         name="labeltitle"
         type="text"
         value="{{ Arr::get($attributes, 'labeltitle') }}"
-        placeholder="{{ __('View All Brands Label Name') }}"
+        placeholder="{{ __('View All Brands') }}"
     >
 </div>
 
