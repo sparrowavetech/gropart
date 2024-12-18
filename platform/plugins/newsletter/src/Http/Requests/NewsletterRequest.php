@@ -22,6 +22,16 @@ class NewsletterRequest extends Request
                     $query->where('status', NewsletterStatusEnum::SUBSCRIBED);
                 }),
             ],
+            'whatsapp' => [
+                'required',
+                'string',
+                'max:15',
+                'regex:/^[0-9]+$/',
+                Rule::unique((new Newsletter())->getTable())->where(function (Builder $query) {
+                    $query->where('status', NewsletterStatusEnum::SUBSCRIBED);
+                }),
+            ],
+
             'status' => Rule::in(NewsletterStatusEnum::values()),
         ];
     }

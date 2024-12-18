@@ -2,6 +2,7 @@
 
 return [
     'name' => 'Newsletters',
+    'whatsapp' => 'whatsapp',
     'newsletter_form' => 'Newsletters form',
     'description' => 'View and delete newsletter subscribers',
     'settings' => [

@@ -11,8 +11,9 @@ return new class () extends Migration {
             $table->id();
             $table->string('email', 120);
             $table->string('name', 120)->nullable();
+            $table->string('whatsapp', 20)->nullable();
             $table->string('status', 60)->default('subscribed');
-            $table->timestamps();
+            $table->timestampss();
         });
     }
 

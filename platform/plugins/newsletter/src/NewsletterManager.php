@@ -7,7 +7,9 @@ use Botble\Base\Forms\FieldOptions\CheckboxFieldOption;
 use Botble\Base\Forms\FieldOptions\EmailFieldOption;
 use Botble\Base\Forms\Fields\CheckboxField;
 use Botble\Base\Forms\Fields\EmailField;
+use Botble\Base\Forms\FieldOptions\TextFieldOption;
 use Botble\Newsletter\Contracts\Factory;
+use Botble\Base\Forms\Fields\TextField;
 use Botble\Newsletter\Drivers\MailChimp;
 use Botble\Newsletter\Drivers\SendGrid;
 use Botble\Newsletter\Forms\Fronts\NewsletterForm;
@@ -124,8 +126,8 @@ class NewsletterManager extends Manager implements Factory
         if (
             is_plugin_active('newsletter')
             && theme_option('newsletter_popup_enable', false)
-            && ($keepHtmlDomOnClose || ! isset($_COOKIE['newsletter_popup']))
-            && ! AdminHelper::isInAdmin()
+            && ($keepHtmlDomOnClose || !isset($_COOKIE['newsletter_popup']))
+            && !AdminHelper::isInAdmin()
         ) {
 
             $ignoredBots = [
@@ -158,6 +160,18 @@ class NewsletterManager extends Manager implements Factory
                             ->label(__('Email Address'))
                             ->maxLength(-1)
                             ->placeholder(__('Enter Your Email'))
+                            ->required()
+                            ->toArray()
+                    )
+
+                    ->addBefore(
+                        'submit',
+                        'whatsapp',
+                        TextField::class,
+                        TextFieldOption::make()
+                            ->label(__('WhatsApp Number'))
+                            ->maxLength(15)
+                            ->placeholder(__('Enter Your WhatsApp Number'))
                             ->required()
                             ->toArray()
                     )

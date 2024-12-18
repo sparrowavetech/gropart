@@ -36,8 +36,8 @@ class PublicController extends BaseController
             ], [
                 ...$form->getRequestData(),
                 'status' => NewsletterStatusEnum::SUBSCRIBED,
+                'whatsapp' => '91' . $request->input('whatsapp'),
             ]);
-
             $newsletter->save();
 
             SubscribeNewsletterEvent::dispatch($newsletter);
@@ -50,7 +50,7 @@ class PublicController extends BaseController
 
     public function getUnsubscribe(int|string $id, Request $request)
     {
-        if (! URL::hasValidSignature($request)) {
+        if (!URL::hasValidSignature($request)) {
             abort(404);
         }
 
