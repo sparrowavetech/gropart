@@ -1,16 +1,19 @@
-Urgent Issues
+Urgent Updates
 --------------------------------------------------------------------------
-1.  Enquiry Product issue with Breadcrumbs (Super Urgent) - Fixed
-2.  Enquiry Details Page Layout in backend is distorting (Super Urgent) - Fixed
-3.  Mobile UI Improve for Better User Experience (Super Urgent)
-4.  Admin Email Order links change (Super Urgent) - Fixed
---------------------------------------------------------------------------
-5.  Check All Email templates and update its language
-6.  Shipping Label UI Update
-7.  Fix UI of OTP Login page
-8.  Barcode Required Condition not working as Expected
-9.  Shop type required condition not working while register as vendor
-10. Product Count and order count is wrong in admin panel
+1.  Mobile UI Improve for Better User Experience (Super Urgent) - Kanishka
+2.  Need a Shortcode for fetch all products in a dedicated page for flash sale and product by category (Super Urgent)
+3.  COD Not Available, Only prepaid orders, Shipping Available all over India note on header (Theme Option)
+4.  Need a option to enter whatsapp mobile number in newsletter popup (Solved)
+
+
+Issue Pending At Last
+----------------------------------------------------------------------------
+5.  Shipping Label UI Update - Deepak
+6.  Fix UI of OTP Login page - Deepak
+7.  Check All Email templates and update its language - Deepak
+8.  Barcode Required Condition not working as Expected - Kanishka
+9.  Shop type required condition not working while register as vendor - Kanishka
+10. Product Count and order count is wrong in admin panel - Kanishka
 --------------------------------------------------------------------------
 11. Dropdown issue in backend at many places *(Will fix in theme update)
 12. Issue in sitemap generation and blank space at top of page *(Will fix in theme update)
@@ -19,19 +22,16 @@ Urgent Issues
 --------------------------------------------------------------------------
 
 
-Custom Update Required (Shortcode Development or custom function)
+Custom Update Required (Phase 4)
 --------------------------------------------------------------------------
-1.  Need a option to enter whatsapp mobile number in newsletter popup (Super Urgent)
-2.  Need a Shortcode for fetch all products in a dedicated page for flash sale and product by category (Super Urgent)
-3.  COD Not Available, Only prepaid orders, Shipping Available all over India note on header (Theme Option)
-4.  Need pop up to come automatically the first time when visiting home page only for language change,
+1.  Sms template add for delivery information, Shipping word clickable to track url (Super Urgent)
+2.  Need pop up to come automatically the first time when visiting home page only for language change,
     with all language list default, then this pop up should not come again, should only come when first time visiting site
-5.  Sms template add for delivery information, Shipping word clickable to track url
-6.  Forms Shortcode to add in pages (tractorjunction)
-7.  Join Our WhatsApp Channel Button at the footer of website
+3.  Forms Shortcode to add in pages (tractorjunction)
+4.  Join Our WhatsApp Channel Button at the footer of website
 
 
-New Custom Update Required (Plugin Development)
+New Custom Update Required (Plugin Development) - (Phase 4)
 (https://docs.google.com/document/d/1za-AQ8i2H3hfEjJuK6rFqgGYuDvL009JRk-BVHw9kQI/edit?usp=sharing)
 --------------------------------------------------------------------------
 1.  COD additional charge functionality for each product
