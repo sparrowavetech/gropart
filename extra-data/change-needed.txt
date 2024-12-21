@@ -4,7 +4,9 @@ Urgent Updates
 2.  Need a Shortcode for fetch all products in a dedicated page for flash sale and product by category (Super Urgent)
 3.  COD Not Available, Only prepaid orders, Shipping Available all over India note on header (Theme Option)
 4.  Need a option to enter whatsapp mobile number in newsletter popup (Solved)
-
+5.  Incomplete Order List Showing Wrong Calculation, Not calculating Shipping charge in total - bug fix
+6.  Get WhatsApp Numbers of all customers who signed up for newsletter using email marketing
+7.  Free shipping Functionality - New functionality
 
 Issue Pending At Last
 ----------------------------------------------------------------------------
