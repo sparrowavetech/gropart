@@ -32,6 +32,7 @@ class PublicController extends BaseController
              * @var Newsletter $newsletter
              */
             $newsletter = $form->getModel()->newQuery()->firstOrNew([
+                'name' => $request->input('name'),
                 'email' => $request->input('email'),
             ], [
                 ...$form->getRequestData(),
