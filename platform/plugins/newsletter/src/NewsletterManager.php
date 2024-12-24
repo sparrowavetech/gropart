@@ -152,17 +152,7 @@ class NewsletterManager extends Manager implements Factory
             add_filter(THEME_FRONT_BODY, function (?string $html): string {
                 $newsletterForm = NewsletterForm::create()
                     ->remove(['wrapper_before', 'wrapper_after', 'email'])
-                    ->addBefore(
-                        'submit',
-                        'name',
-                        TextField::class,
-                        TextFieldOption::make()
-                            ->label(__('Name'))
-                            ->maxLength(-1)
-                            ->placeholder(__('Enter Your Name'))
-                            ->required()
-                            ->toArray()
-                    )
+
                     ->addBefore(
                         'submit',
                         'email',

@@ -10,6 +10,7 @@
                         <form class="subscribe-form" method="POST" action="{{ route('public.newsletter.subscribe') }}">
                             <div class="form-subscribe d-flex">
                                 <input type="email" name="email" placeholder="{{ __('Your email...') }}">
+                                 <input type="text" name="whatsapp" placeholder="{{ __('Your whatsapp number...') }}">
                                 <button class="btn" type="submit">{{ __('Subscribe') }}</button>
                             </div>
                             <div class="col-auto">
