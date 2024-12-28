@@ -10,7 +10,7 @@ use Botble\Ecommerce\Models\DiscountProduct;
 use Botble\Ecommerce\Models\DiscountProductCollection;
 use Botble\Ecommerce\Models\Product;
 
-if (! function_exists('get_discount_description')) {
+if (!function_exists('get_discount_description')) {
     function get_discount_description(Discount $discount): string
     {
         $type = $discount->type_option;
@@ -37,7 +37,7 @@ if (! function_exists('get_discount_description')) {
 
                 break;
             case DiscountTypeOptionEnum::SAME_PRICE:
-                $description[] = __('Same fee :amount', ['amount' => format_price($value)]);
+                $description[] = __('Same fee :amount', ['amount' => format_price($value) . "<br>"]);
                 switch ($target) {
                     case DiscountTargetEnum::PRODUCT_COLLECTIONS:
                         $collections = DiscountProductCollection::query()->where('discount_id', $discount->getKey())
@@ -88,7 +88,8 @@ if (! function_exists('get_discount_description')) {
                             }
                         }
 
-                        $description[] = __('for product(s) :products', ['products' => implode(', ', $productLinks)]);
+                        $description[] = __('for product(s):<br>:products', ['products' => implode('<br>', $productLinks)]
+);
 
                         break;
                     case DiscountTargetEnum::CUSTOMER:
@@ -149,8 +150,9 @@ if (! function_exists('get_discount_description')) {
                             }
                         }
 
-                        $description[] = __('for product variant(s) :variants', ['variants' => implode(', ', $productLinks)]);
 
+                        $description[] = __('for product variant(s) :variants', ['variants' => implode(', ', $productLinks)]);
+                      
                         break;
                     case DiscountTargetEnum::ONCE_PER_CUSTOMER:
                         $description[] = __('limited to use coupon code per customer. This coupon can only be used once per customer!');
@@ -170,6 +172,7 @@ if (! function_exists('get_discount_description')) {
                                 $categoryLinks[] = '<strong>' . $categoryName . '</strong>';
                             }
                         }
+
 
                         $description[] = __('for all products in category :categories', ['categories' => implode(', ', $categoryLinks)]);
 
