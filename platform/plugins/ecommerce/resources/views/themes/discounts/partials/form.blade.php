@@ -13,7 +13,7 @@
                     <div class="checkout__coupon-item-content">
                         <div class="checkout__coupon-item-title">
                             @if ($discount->type_option !== 'shipping')
-                                <h4>{{ $discount->type_option === 'percentage' ? $discount->value . '% OFF Coupon' : format_price($discount->value) }}
+                                <h4>{{ $discount->type_option === 'percentage' ? $discount->value . '% OFF Coupon' : format_price($discount->value) . 'OFF Coupon' }}
                                 </h4>
                             @endif
 
@@ -23,7 +23,7 @@
                                 </span>
                             @endif
                         </div>
-                        <div class="checkout__coupon-item-description">
+                        <div class="checkout__coupon-item-description {{ $discount->code }}">
                             {!! BaseHelper::clean($discount->description ?: get_discount_description($discount)) !!}
                         </div>
                         <div class="checkout__coupon-item-code">
@@ -45,9 +45,9 @@
         </div>
 
         <!-- Buttons for Show More and Show Less -->
-        <div>
-            <button class="btn btn-success" id="show-more" type="button">Show More</button>
-            <button class="btn btn-success" id="show-less" type="button" style="display: none;">Show Less</button>
+        <div class="text-right">
+            <button class="btn btn-default text-success mb-2 fw-bold p-0" id="show-more" type="button">Show More <i class="fa fa-chevron-down"></i></button>
+            <button class="btn btn-default text-success mb-2 fw-bold p-0" id="show-less" type="button" style="display: none;">Show Less <i class="fa fa-chevron-up"></i></button>
         </div>
 
     </div>
@@ -101,6 +101,33 @@
             });
             showMoreButton.style.display = 'inline-block';
             showLessButton.style.display = 'none';
+        });
+
+        const showMoreTextLinks = document.querySelectorAll('.show-more-text');
+        const showLessTextLinks = document.querySelectorAll('.show-less-text');
+
+        showMoreTextLinks.forEach(link => {
+            link.addEventListener('click', function () {
+                const couponItem = this.closest('.checkout__coupon-item');
+                const textPreview = couponItem.querySelector('.text-preview');
+                const textFull = couponItem.querySelector('.text-full');
+                textPreview.classList.add('d-none');
+                textFull.classList.remove('d-none');
+                this.classList.add('d-none');
+                couponItem.querySelector('.show-less-text').classList.remove('d-none');
+            });
+        });
+
+        showLessTextLinks.forEach(link => {
+            link.addEventListener('click', function () {
+                const couponItem = this.closest('.checkout__coupon-item');
+                const textPreview = couponItem.querySelector('.text-preview');
+                const textFull = couponItem.querySelector('.text-full');
+                textFull.classList.add('d-none');
+                textPreview.classList.remove('d-none');
+                this.classList.add('d-none');
+                couponItem.querySelector('.show-more-text').classList.remove('d-none');
+            });
         });
     });
 </script>

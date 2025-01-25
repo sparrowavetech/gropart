@@ -50,7 +50,16 @@ if (!function_exists('get_discount_description')) {
                             ->pluck('ec_product_collections.name')
                             ->all();
 
-                        $description[] = __('for all product in collection :collections', ['collections' => implode(', ', $collections)]);
+                        //$description[] = __('for all product in collection:<br> :collections', ['collections' => implode(', <br>', $collections)]);
+
+                        $collectionLinksString = implode(', <br>', $collections);
+                        $descriptions[] = __(':collections', ['collections' => $collectionLinksString]);
+                        $description[] = __('for all product in collection:<br> <div class="text-preview">')
+                                        . Str::limit(end($descriptions), 50) .
+                                        '<a href="javascript:void(0)" class="show-more-text">...show more</a></div>'
+                                        . '<div class="text-full d-none"><ul class="m-0">' .
+                                        end($descriptions)
+                                        . '</ul><a href="javascript:void(0)" class="show-less-text fw-bold"> show less</a></div>';
 
                         break;
                     default:
@@ -84,12 +93,19 @@ if (!function_exists('get_discount_description')) {
                             if ($isAdmin) {
                                 $productLinks[] = Html::link(route('products.edit', $productId), $productName, ['target' => '_blank'])->toHtml();
                             } else {
-                                $productLinks[] = '<strong>' . $productName . '</strong>';
+                                $productLinks[] = '<li><strong>' . $productName . '</strong></li>';
                             }
                         }
 
-                        $description[] = __('for product(s):<br>:products', ['products' => implode('<br>', $productLinks)]
-);
+                        //$description[] = __(':products', ['products' => implode(', <br>', $productLinks)]);
+                        $productLinksString = implode(', <br>', $productLinks);
+                        $descriptions[] = __(':products', ['products' => $productLinksString]);
+                        $description[] = __('for product(s):<br> <div class="text-preview">')
+                                        . Str::limit(end($descriptions), 50) .
+                                        '<a href="javascript:void(0)" class="show-more-text">...show more</a></div>'
+                                        . '<div class="text-full d-none"><ul class="m-0">' .
+                                        end($descriptions)
+                                        . '</ul><a href="javascript:void(0)" class="show-less-text fw-bold"> show less</a></div>';
 
                         break;
                     case DiscountTargetEnum::CUSTOMER:
@@ -107,7 +123,16 @@ if (!function_exists('get_discount_description')) {
                             }
                         }
 
-                        $description[] = __('for customer(s) :customers', ['customers' => implode(', ', $customerLinks)]);
+                        //$description[] = __('for customer(s) :customers', ['customers' => implode(', <br>', $customerLinks)]);
+
+                        $customerLinksString = implode(', <br>', $customerLinks);
+                        $descriptions[] = __(':customers', ['customers' => $customerLinksString]);
+                        $description[] = __('for customer(s):<br> <div class="text-preview">')
+                                        . Str::limit(end($descriptions), 50) .
+                                        '<a href="javascript:void(0)" class="show-more-text">...show more</a></div>'
+                                        . '<div class="text-full d-none"><ul class="m-0">' .
+                                        end($descriptions)
+                                        . '</ul><a href="javascript:void(0)" class="show-less-text fw-bold"> show less</a></div>';
 
                         break;
                     case DiscountTargetEnum::PRODUCT_COLLECTIONS:
@@ -130,7 +155,15 @@ if (!function_exists('get_discount_description')) {
                             }
                         }
 
-                        $description[] = __('for all products in collection :collections', ['collections' => implode(', ', $collectionLinks)]);
+                        //$description[] = __('for all products in collection:<br> :collections', ['collections' => implode(', <br>', $collectionLinks)]);
+                        $collectionLinksString = implode(', <br>', $collectionLinks);
+                        $descriptions[] = __(':collections', ['collections' => $collectionLinksString]);
+                        $description[] = __('for all products in collection:<br> <div class="text-preview">')
+                                        . Str::limit(end($descriptions), 50) .
+                                        '<a href="javascript:void(0)" class="show-more-text">...show more</a></div>'
+                                        . '<div class="text-full d-none"><ul class="m-0">' .
+                                        end($descriptions)
+                                        . '</ul><a href="javascript:void(0)" class="show-less-text fw-bold"> show less</a></div>';
 
                         break;
                     case DiscountTargetEnum::PRODUCT_VARIANT:
@@ -151,8 +184,16 @@ if (!function_exists('get_discount_description')) {
                         }
 
 
-                        $description[] = __('for product variant(s) :variants', ['variants' => implode(', ', $productLinks)]);
-                      
+                        //$description[] = __('for product variant(s) :variants', ['variants' => implode(', <br>', $productLinks)]);
+                        $productLinksString = implode(', <br>', $productLinks);
+                        $descriptions[] = __(':variants', ['variants' => $productLinksString]);
+                        $description[] = __('for product variant(s):<br> <div class="text-preview">')
+                                        . Str::limit(end($descriptions), 50) .
+                                        '<a href="javascript:void(0)" class="show-more-text">...show more</a></div>'
+                                        . '<div class="text-full d-none"><ul class="m-0">' .
+                                        end($descriptions)
+                                        . '</ul><a href="javascript:void(0)" class="show-less-text fw-bold"> show less</a></div>';
+
                         break;
                     case DiscountTargetEnum::ONCE_PER_CUSTOMER:
                         $description[] = __('limited to use coupon code per customer. This coupon can only be used once per customer!');
@@ -174,7 +215,15 @@ if (!function_exists('get_discount_description')) {
                         }
 
 
-                        $description[] = __('for all products in category :categories', ['categories' => implode(', ', $categoryLinks)]);
+                        //$description[] = __('for all products in category :categories', ['categories' => implode(', <br>', $categoryLinks)]);
+                        $categoryLinksString = implode(', <br>', $categoryLinks);
+                        $descriptions[] = __(':categories', ['categories' => $categoryLinksString]);
+                        $description[] = __('for all products in category:<br> <div class="text-preview">')
+                                        . Str::limit(end($descriptions), 50) .
+                                        '<a href="javascript:void(0)" class="show-more-text">...show more</a></div>'
+                                        . '<div class="text-full d-none"><ul class="m-0">' .
+                                        end($descriptions)
+                                        . '</ul><a href="javascript:void(0)" class="show-less-text fw-bold"> show less</a></div>';
 
                         break;
                     default:

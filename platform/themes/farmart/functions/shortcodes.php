@@ -74,7 +74,7 @@ app()->booted(function () {
             $ads = [];
             $attributes = $shortcode->toArray();
 
-            for ($i = 1; $i < 5; $i++) {
+            for ($i = 1; $i < 13; $i++) {
                 if (isset($attributes['key_' . $i]) && ! empty($attributes['key_' . $i])) {
                     $ad = display_ads_advanced((string) $attributes['key_' . $i]);
                     if ($ad) {
