@@ -69,10 +69,10 @@
 
     <div class="row">
         <div class="col-8">
-            <p class="price-text-label m-0"><strong>{{ __('Total') }}</strong>:</p>
+            <p class="total-text-label price-text-label m-0"><strong>{{ __('Total') }}</strong>:</p>
         </div>
         <div class="col-4 float-end">
-            <p class="total-text raw-total-text" data-price="{{ format_price($rawTotal, null, true) }}">
+            <p class="total-text raw-total-text m-0" data-price="{{ format_price($rawTotal, null, true) }}">
                 {{ format_price($orderAmount) }}
             </p>
         </div>

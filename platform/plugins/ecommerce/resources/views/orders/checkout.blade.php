@@ -1,11 +1,27 @@
 <style type="text/css">
     @media screen and (max-width: 768px) {
         .container, .left, .page-wrap, .right, body, html { height: auto !important; min-height: auto !important; }
-        #main-checkout-product-info .coupon-wrapper, .accepted-payments { margin-bottom: 15px !important; }
+        #main-checkout-product-info .coupon-wrapper, .accepted-payments { margin-bottom: 30px !important; }
         #main-checkout-product-info .checkout-discount-section { text-align: center; }
         .checkout-logo { text-align: center; }
         .back-to-cart-button-group { margin-bottom: 20px !important; }
-        .checkout-form, .checkout-content-wrap { margin:0 !important; }
+        #checkout-form, .checkout-content-wrap { margin:0; }
+        #main-checkout-product-info .total-text,
+        #main-checkout-product-info .pricing-data .price-text-label.total-text-label { font-size: 1.25em; }
+        #main-checkout-product-info .pricing-data .price-text-label,
+        #main-checkout-product-info .pricing-data .price-text { font-size: 16px; }
+        .list_payment_method .payment-method-item label { font-weight: 600; }
+        .customer-tax-information-form .form-check { display: inline-flex; }
+        .checkout-products-marketplace .cart-item h6,
+        .list_payment_method .payment-method-item .payment_collapse_wrap,
+        .customer-tax-information-form .form-check .form-check-label { font-size: 12px; }
+        #checkout-form .magic-checkbox+label,
+        #checkout-form .magic-radio+label {font-size: 13px; padding-left: 25px; line-height: 1; }
+        #checkout-form .magic-checkbox+label:before,
+        #checkout-form .magic-radio+label:before { height: 15px; width: 15px; }
+        #checkout-form .magic-radio+label:after { height: 7px; left: 4px; top: 4px; width: 7px; }
+        #main-checkout-product-info .btn.payment-checkout-btn-step.payment-checkout-btn,
+        #main-checkout-product-info .back-to-cart-btn { font-size: 1rem; }
     }
     .form-group .iti.iti--allow-dropdown { width: 100%; }
     .text-right { text-align: right; }
@@ -195,7 +211,7 @@
 
                                     {!! apply_filters('ecommerce_checkout_form_after_back_to_cart_link', null, $products) !!}
                                 </div>
-                               
+
                                 <div class="order-1 order-md-2 col-md-6">
                                     @if (EcommerceHelper::isValidToProcessCheckout())
                                         <button

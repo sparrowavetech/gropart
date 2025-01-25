@@ -9,7 +9,7 @@
             <span class="checkout-quantity">{{ $cartItem->qty }}</span>
         </div>
     </div>
-    <div class="col-sm-7 col-6">
+    <div class="col-sm-7 col-5">
         {!! apply_filters('ecommerce_cart_before_item_content', null, $cartItem) !!}
         <h6 class="mb-0">
             <a class="fw-bold text-black" href="{{ $product->original_product->url }}" target="_BLANK" title="{{ $product->original_product->name }}">{{ $product->original_product->name }}</a>
@@ -24,10 +24,10 @@
         @if (!empty($cartItem->options['options']))
             {!! render_product_options_html($cartItem->options['options'], $product->original_price) !!}
         @endif
-       
+
         {!! apply_filters('ecommerce_cart_after_item_content', null, $cartItem) !!}
     </div>
-    <div class="col-sm-3 col-3 text-end">
+    <div class="col-sm-3 col-4 text-end">
         <p class="price-text">{{ format_price($cartItem->price) }}</p>
     </div>
 </div>
