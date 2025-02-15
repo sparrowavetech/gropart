@@ -956,14 +956,20 @@ class OrderHelper
 
         $lastUpdatedAt = Cart::instance('cart')->getLastUpdatedAt();
 
+        $shippingAmt = Arr::get($sessionData, 'shipping_amount', 0);
+
         $data = array_merge([
-            'amount' => Cart::instance('cart')->rawTotalByItems($cartItems),
-            'shipping_method' => $request->input('shipping_method', ShippingMethodEnum::DEFAULT),
-            'shipping_option' => $request->input('shipping_option'),
+            'amount' => Cart::instance('cart')->rawTotalByItems($cartItems) + $shippingAmt,
+            //'shipping_method' => $request->input('shipping_method', ShippingMethodEnum::DEFAULT),
+            //'shipping_option' => $request->input('shipping_option'),
+            'shipping_method' => Arr::get($sessionData, 'shipping_method', ShippingMethodEnum::DEFAULT),
+            'shipping_amount' => $shippingAmt,
             'tax_amount' => Cart::instance('cart')->rawTaxByItems($cartItems),
             'sub_total' => Cart::instance('cart')->rawSubTotalByItems($cartItems),
             'coupon_code' => session()->get('applied_coupon_code'),
         ], $generalData);
+
+        $data['shipping_option'] = Arr::get($sessionData, 'shipping_option', 0);
 
         if ($createdOrder && $createdOrderId) {
             if ($order && (is_string($createdOrder) || ! $createdOrder->eq($lastUpdatedAt))) {
@@ -973,7 +979,7 @@ class OrderHelper
 
         if (! $order) {
             $data = array_merge($data, [
-                'shipping_amount' => 0,
+                //'shipping_amount' => 0,
                 'discount_amount' => 0,
                 'status' => OrderStatusEnum::PENDING,
                 'is_finished' => false,
