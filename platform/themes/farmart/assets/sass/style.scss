@@ -1415,7 +1415,17 @@ body.show-admin-bar {
         }
     }
 }
-
+@media (max-width: 768px) {
+    .sl-button-label-container {
+            padding:4px 0;
+            font-size: 12px;
+            line-height: 15px;
+            letter-spacing: 0.25px;
+        }
+    .sl-button-svg-container{
+        padding: 3px;
+    }
+}
 .footer-widgets {
     .widget.widget-custom-menu {
         ul {
@@ -1444,7 +1454,7 @@ body.show-admin-bar {
     }
 }
 
-@media (max-width: 768px) {
+@media (max-width:768px) {
     .blog-page-content {
         .post-item__image {
             margin-bottom: 20px;

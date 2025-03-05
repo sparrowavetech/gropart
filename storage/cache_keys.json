@@ -11,7 +11,10 @@
         "e2df835384821fa5036252a0581ba12b@ecommerce_categories_for_widgets_cc669b7e9b706f5d3ac70ff62485b37a",
         "e2df835384821fa5036252a0581ba12b@ecommerce_categories_for_widgets_d5848367d5ce118a39d0721720b205ca",
         "e2df835384821fa5036252a0581ba12b@ecommerce_categories_for_widgets_b4141e7c978b2fee429a848f2014ff03",
-        "e2df835384821fa5036252a0581ba12b@ecommerce_categories_for_widgets_0db97d39ff4bc059b68921da0bfeba4c"
+        "e2df835384821fa5036252a0581ba12b@ecommerce_categories_for_widgets_0db97d39ff4bc059b68921da0bfeba4c",
+        "e2df835384821fa5036252a0581ba12b@ecommerce_categories_for_widgets_78c63ea9013cc3afdef44ec14a7ca20a",
+        "e2df835384821fa5036252a0581ba12b@ecommerce_categories_for_widgets_dece7e0f9d6cec9a2634c42d33820e48",
+        "e2df835384821fa5036252a0581ba12b@ecommerce_categories_for_widgets_ae0b216d9afa5420d1e523344153f5c0"
     ],
     "Botble\\Menu\\Models\\Menu": [
         "876a095a247b966461c4079f23f9e7ae@menu_location_535efc666e6f97cb36498e1cd8bba74f",
@@ -25,7 +28,11 @@
         "876a095a247b966461c4079f23f9e7ae@menu_location_f9f22e4acaf313ef4b4344ab1999e04d",
         "876a095a247b966461c4079f23f9e7ae@menu_location_5a8587b447c013df8e7e295e2278d54a",
         "876a095a247b966461c4079f23f9e7ae@menu_location_138ec3e0db54569d3af2df5058c49e33",
-        "876a095a247b966461c4079f23f9e7ae@menu_location_3a73c7d56116d28c9592ab71da42b08f"
+        "876a095a247b966461c4079f23f9e7ae@menu_location_3a73c7d56116d28c9592ab71da42b08f",
+        "876a095a247b966461c4079f23f9e7ae@menu_location_c87b90d20731eb26a654ebdfdcc56f28",
+        "876a095a247b966461c4079f23f9e7ae@menu_location_fca97098929a3cfe3b0474494a79b78c",
+        "876a095a247b966461c4079f23f9e7ae@menu_location_4eb8c29cdb91cf84fb96c048d3780c21",
+        "876a095a247b966461c4079f23f9e7ae@menu_location_0cd0bc99d1c663f19c6ffda736a85426"
     ],
     "Botble\\EditLock\\Supports\\EditLock": [
         "8dec79f4f9a41c4523197a63aa465e31@5d9bfe46484e71726816a6e852d2666c"
