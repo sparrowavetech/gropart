@@ -1,43 +1,37 @@
-Urgent Updates
+Urgent Updates - Kanishka (Paid)
 --------------------------------------------------------------------------
-1.  Mobile UI Improve for Better User Experience (Super Urgent) - Kanishka
-2.  Need a Shortcode for fetch all products in a dedicated page for flash sale and product by category (Super Urgent)
-3.  COD Not Available, Only prepaid orders, Shipping Available all over India note on header (Theme Option)
-4.  Need a option to enter whatsapp mobile number in newsletter popup (Solved)
-5.  Incomplete Order List Showing Wrong Calculation, Not calculating Shipping charge in total - bug fix
-6.  Get WhatsApp Numbers of all customers who signed up for newsletter using email marketing
-7.  Free shipping Functionality - New functionality
+1.  Free shipping Functionality - New functionality (Urgent) - 7-14 hours
+2.  Need Bulk Quantity Buy Option in the website*
+3.  Send Email to review product after purchase
+4.  COD Not Available, Only prepaid orders, Shipping Available all over India note on header (Theme Option) - 1 hour
+5.  Shiprocket Integration Plugin to check of Availablity of delivery and integration for tracking link and push order automatically - Plugin
+    70 hours
+6.  Instance Based Whatsap notifications setting - Plugin (20-25 Hour)
 
-Issue Pending At Last
+
+Issue Pending At Last - Kanishka
 ----------------------------------------------------------------------------
-5.  Shipping Label UI Update - Deepak
-6.  Fix UI of OTP Login page - Deepak
-7.  Check All Email templates and update its language - Deepak
-8.  Barcode Required Condition not working as Expected - Kanishka
-9.  Shop type required condition not working while register as vendor - Kanishka
-10. Product Count and order count is wrong in admin panel - Kanishka
---------------------------------------------------------------------------
-11. Dropdown issue in backend at many places *(Will fix in theme update)
-12. Issue in sitemap generation and blank space at top of page *(Will fix in theme update)
-13. Issue of URL generation in admin panel *(Will fix in theme update)
-14. Issue of category URL special characters in sidebar of store details page *(Will fix in theme update)
----------------------------------------------------11-----------------------
+1.  Mobile UI Improve for Better User Experience (Super Urgent)
+2.  Query Parameter is not passing in "View All results" link in search popup
+3.  Fix UI of OTP Login page
 
 
-Custom Update Required (Phase 4)
---------------------------------------------------------------------------
-1.  Sms template add for delivery information, Shipping word clickable to track url (Super Urgent)
-2.  Need pop up to come automatically the first time when visiting home page only for language change,
-    with all language list default, then this pop up should not come again, should only come when first time visiting site
-3.  Forms Shortcode to add in pages (tractorjunction)
-4.  Join Our WhatsApp Channel Button at the footer of website
-
+Issue Pending At Last - Deepak
+----------------------------------------------------------------------------
+0.  Sms template add for delivery information, Shipping word clickable to track url (Super Urgent)
+1.  Shipping Label UI Update - Deepak
+2.  Check All Email templates and update its language - Deepak
+3.  Barcode Required Condition not working as Expected
+4.  Shop type required condition not working while register as vendor
+5.  Product Count is wrong in admin panel - Kanishka
+6.  Dropdown issue in backend at many places *(Will fix in theme update)
+7.  Issue in sitemap generation and blank space at top of page *(Will fix in theme update)
+8.  Issue of URL generation in admin panel *(Will fix in theme update)
+9.  Issue of category URL special characters in sidebar of store details page *(Will fix in theme update)
+10. Checkout Pending Issue in some orders - critical *(Will fix in theme update)
+11. Tractorjunction like UI Pages Create
+12. Join Our WhatsApp Channel Button at the footer of website and WhatsApp Bot
 
 New Custom Update Required (Plugin Development) - (Phase 4)
 (https://docs.google.com/document/d/1za-AQ8i2H3hfEjJuK6rFqgGYuDvL009JRk-BVHw9kQI/edit?usp=sharing)
---------------------------------------------------------------------------
-1.  COD additional charge functionality for each product
-2.  Instance Based Whatsap notifications setting
-3.  Shiprocket Integration Plugin to check of Availablity of delivery and integration for tracking link and push order automatically
-4.  Send Email to review product after purchase
-5.  Need Bulk Quantity Buy Option in the website
+
