@@ -227,6 +227,49 @@ app()->booted(function () {
         });
 
         add_shortcode(
+            'product-collections-full',
+            __('Product Collections Full Page'),
+            __('All Products in product collections in a full page'),
+            function (Shortcode $shortcode) {
+                if ($shortcode->collection_id) {
+                    $collectionIds = [$shortcode->collection_id];
+                } else {
+                    $collectionIds = ProductCollection::query()
+                        ->wherePublished()
+                        ->pluck('id')
+                        ->all();
+                }
+
+                $products = get_products_by_collections(array_merge([
+                    'collections' => [
+                        'by' => 'id',
+                        'value_in' => $collectionIds,
+                    ],
+                    'with' => EcommerceHelper::withProductEagerLoadingRelations(),
+                ], EcommerceHelper::withReviewsParams()));
+
+                if ($products->isEmpty()) {
+                    return null;
+                }
+
+                $wishlistIds = Wishlist::getWishlistIds($products->pluck('id')->all());
+
+                return Theme::partial('shortcodes.ecommerce.product-collections-full', [
+                    'title' => $shortcode->title,
+                    'shortcode' => $shortcode,
+                    'products' => $products,
+                    'wishlistIds' => $wishlistIds,
+                ]);
+            }
+        );
+
+        shortcode()->setAdminConfig('product-collections-full', function (array $attributes) {
+            $productCollectionsFull = get_product_collections(select: ['id', 'name', 'slug']);
+
+            return Theme::partial('shortcodes.ecommerce.product-collections-full-admin-config', compact('attributes', 'productCollectionsFull'));
+        });
+
+        add_shortcode(
             'product-category-products',
             __('Product category products'),
             __('Product category products'),
@@ -269,6 +312,46 @@ app()->booted(function () {
             return Theme::partial('shortcodes.ecommerce.product-category-products-admin-config', compact('attributes'));
         });
 
+        add_shortcode(
+            'product-category-products-full',
+            __('Product category products Full'),
+            __('All Product category products on full page'),
+            function (Shortcode $shortcode) {
+                $category = ProductCategory::query()
+                    ->wherePublished()
+                    ->where('id', (int) $shortcode->category_id)
+                    ->with([
+                        'activeChildren' => function (HasMany $query) {
+                            return $query->limit(3);
+                        },
+                    ])
+                    ->first();
+
+                if (! $category) {
+                    return null;
+                }
+
+                $products = app(ProductInterface::class)->getProductsByCategories(array_merge([
+                    'categories' => [
+                        'by' => 'id',
+                        'value_in' => array_merge([$category->id], $category->activeChildren->pluck('id')->all()),
+                    ],
+                ], EcommerceHelper::withReviewsParams()));
+
+                if ($products->isEmpty()) {
+                    return null;
+                }
+
+                $wishlistIds = Wishlist::getWishlistIds($products->pluck('id')->all());
+
+                return Theme::partial('shortcodes.ecommerce.product-category-products-full', compact('category', 'products', 'shortcode', 'wishlistIds'));
+            }
+        );
+
+        shortcode()->setAdminConfig('product-category-products-full', function (array $attributes) {
+            return Theme::partial('shortcodes.ecommerce.product-category-products-full-admin-config', compact('attributes'));
+        });
+
         add_shortcode('featured-products', __('Featured products'), __('Featured products'), function (Shortcode $shortcode) {
             $request = request();
 
@@ -292,6 +375,31 @@ app()->booted(function () {
 
         shortcode()->setAdminConfig('featured-products', function (array $attributes) {
             return Theme::partial('shortcodes.ecommerce.featured-products-admin-config', compact('attributes'));
+        });
+
+        add_shortcode('featured-products-full', __('Featured products Full'), __('All featured products in a full page'), function (Shortcode $shortcode) {
+            $request = request();
+
+            $products = get_featured_products([
+                //'take' => $request->integer('limit', $shortcode->limit),
+                'with' => EcommerceHelper::withProductEagerLoadingRelations(),
+            ] + EcommerceHelper::withReviewsParams());
+
+            if ($products->isEmpty()) {
+                return null;
+            }
+
+            $wishlistIds = Wishlist::getWishlistIds(collect($products->toArray())->pluck('id')->all());
+
+            return Theme::partial('shortcodes.ecommerce.featured-products-full', [
+                'shortcode' => $shortcode,
+                'products' => $products,
+                'wishlistIds' => $wishlistIds,
+            ]);
+        });
+
+        shortcode()->setAdminConfig('featured-products-full', function (array $attributes) {
+            return Theme::partial('shortcodes.ecommerce.featured-products-full-admin-config', compact('attributes'));
         });
     }
 
