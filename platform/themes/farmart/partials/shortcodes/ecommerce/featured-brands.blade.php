@@ -55,7 +55,7 @@
     ];
     $brands = get_featured_brands();
 @endphp
-<div class="widget-featured-brands pt-5 pb-0">
+<div class="widget-featured-brands pt-5 pb-5">
     <div class="container-xxxl">
         <div class="row">
             <div class="col-12">
@@ -93,9 +93,10 @@
                                             <h4 class="h6 fw-bold text-secondary text-uppercase brand__name">
                                                 {{ $brand->name }}
                                             </h4>
+                                            <!--
                                             <div class="h5 fw-bold brand__desc">
                                                 {!! BaseHelper::clean(Str::limit($brand->description, 150)) !!}
-                                            </div>
+                                            </div>-->
                                         </div>
                                     </a>
                                 </div>

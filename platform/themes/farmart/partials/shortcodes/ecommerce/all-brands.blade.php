@@ -29,11 +29,11 @@
                                     <h4 class="h6 fw-bold text-secondary brand__name">
                                         {{ $brand->name }}
                                     </h4>
-                                    <div class="fw-bold brand__desc">
+                                    <!--<div class="fw-bold brand__desc">
                                         <div>
                                             {{ BaseHelper::clean(Str::limit($brand->description, 150)) }}
                                         </div>
-                                    </div>
+                                    </div>-->
                                 </div>
                             </a>
                         </div>
