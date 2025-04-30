@@ -50,6 +50,7 @@ class Product extends BaseModel
         'allow_checkout_when_out_of_stock',
         'with_storehouse_management',
         'is_featured',
+        'product_free_shipping',
         'brand_id',
         'is_variation',
         'sale_type',

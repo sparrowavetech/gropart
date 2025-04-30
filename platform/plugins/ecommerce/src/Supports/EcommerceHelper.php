@@ -975,7 +975,12 @@ class EcommerceHelper
         foreach ($products as $product) {
             if (! $product->isTypeDigital()) {
                 $cartItem = $product->cartItem;
-                $weight += $product->weight * $cartItem->qty;
+                //$weight += $product->weight * $cartItem->qty;
+                if($product->product_free_shipping == 1){
+                    $weight += 0;
+                } else {
+                    $weight += $product->weight * $cartItem->qty;
+                }
                 $items[$cartItem->id] = [
                     'weight' => $product->weight,
                     'length' => $product->length,
@@ -986,6 +991,7 @@ class EcommerceHelper
                     'qty' => $cartItem->qty,
                     //'price' => $cartItem->price,
                     'price' => $product->price,
+                    'product_free_shipping' => $product->product_free_shipping,
                 ];
             }
         }

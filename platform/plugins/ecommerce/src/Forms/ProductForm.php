@@ -115,6 +115,14 @@ class ProductForm extends FormAbstract
                     ->toArray()
             )
             ->add(
+                'product_free_shipping',
+                OnOffField::class,
+                OnOffFieldOption::make()
+                    ->label(trans('plugins/ecommerce::products.form.product_free_shipping'))
+                    ->defaultValue(false)
+                    ->toArray()
+            )
+            ->add(
                 'categories[]',
                 TreeCategoryField::class,
                 SelectFieldOption::make()

@@ -112,6 +112,14 @@ class ProductForm extends BaseProductForm
                     ->defaultValue(false)
                     ->toArray()
             )
+            ->add(
+                'product_free_shipping',
+                OnOffField::class,
+                OnOffFieldOption::make()
+                    ->label(trans('plugins/ecommerce::products.form.product_free_shipping'))
+                    ->defaultValue(false)
+                    ->toArray()
+            )
             ->when($brands, function () use ($brands) {
                 $this
                     ->add(
