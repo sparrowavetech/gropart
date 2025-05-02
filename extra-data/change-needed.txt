@@ -1,13 +1,14 @@
 Urgent Updates - Kanishka (Paid)
 --------------------------------------------------------------------------
 1.  Free shipping Functionality - New functionality (Urgent) - Done
-2.  Query Parameter is not passing in "View All results" link in search popup
-3.  Shiprocket Integration for pincode check
-4.  COD Not Available, Only prepaid orders, Shipping Available all over India note on header (Theme Option) - 1 hour
+2.  Query Parameter is not passing in "View All results" link in search popup - Done
+3.  Shiprocket Integration for pincode check - Done
+4.  COD Not Available, Only prepaid orders, Shipping Available all over India note on header (Theme Option) - Done
 
 5.  Mobile UI Improve for Better User Experience (Super Urgent)
 6.  Fix UI of OTP Login page
 7.  Theme Update New Version
+
 8.  Shiprocket Integration Plugin to check of Availablity of delivery and integration for tracking link and push order automatically - Plugin
     70 hours
 9.  Instance Based Whatsap notifications setting - Plugin (20-25 Hour)
