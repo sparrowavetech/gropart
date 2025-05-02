@@ -24,3 +24,4 @@
         @endif
     @endif
 </div>
+{!! Theme::partial('ecommerce.product-pincode-form', compact('product')) !!}

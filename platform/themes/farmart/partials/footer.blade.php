@@ -247,7 +247,7 @@
     >
         <div class="panel__header">
             @if (is_plugin_active('ecommerce'))
-                <x-plugins-ecommerce::fronts.ajax-search class="form--quick-search bb-form-quick-search w-100">
+                <x-plugins-ecommerce::fronts.ajax-search class="form--quick-search w-100">
                     <div class="search-inner-content">
                         <div class="text-search">
                             <div class="search-wrapper">
@@ -401,6 +401,40 @@
             window.siteConfig.ajaxCart = "{{ route('public.ajax.cart') }}";
             window.siteConfig.cartUrl = "{{ route('public.cart') }}";
         @endif
+
+        function checkPincode(fromPincode) {
+            var toPincode = $('#topincode').val();
+            var productWeight = $('#product_weight').val();
+
+            if (toPincode.length != 6) {
+                $('.pincodetext').html("Please enter a valid 6-digit pincode.").css("color", "red").show();
+                return;
+            }
+
+            $.ajax({
+                url: "/ajax/check-pincode-shiprocket", // backend route
+                method: "POST",
+                data: {
+                    from_pincode: fromPincode,
+                    to_pincode: toPincode,
+                    product_weight: productWeight,
+                    _token: "{{ csrf_token() }}"
+                },
+                beforeSend: function () {
+                    $('.pincodetext').html("Checking...").css("color", "blue").show();
+                },
+                success: function (response) {
+                    if (response.serviceable) {
+                        $('.pincodetext').html(`Delivery available. Expected on <strong>${response.estimated_delivery_days}.</strong>`).css("color", "green").show();
+                    } else {
+                        $('.pincodetext').html("Sorry! Delivery not available for this pincode.").css("color", "red").show();
+                    }
+                },
+                error: function () {
+                    $('.pincodetext').html("Error checking pincode. Please try making order directly.").css("color", "orange").show();
+                }
+            });
+        }
     </script>
 
     {!! Theme::footer() !!}

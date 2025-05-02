@@ -9,12 +9,13 @@ use Botble\Ecommerce\Services\Products\GetProductService;
 use Botble\Theme\Facades\Theme;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Http;
 
 class PublicAjaxController extends BaseController
 {
     public function ajaxSearchProducts(Request $request, GetProductService $productService)
     {
-       
+
         $request->merge(['num' => 12]);
 
         $with = EcommerceHelper::withProductEagerLoadingRelations();
@@ -49,5 +50,50 @@ class PublicAjaxController extends BaseController
                     ? view($categoriesDropdownView)->render()
                     : null,
             ]);
+    }
+
+    public function ajaxCheckPincodeShiprocket(Request $request) {
+        $fromPincode = $request->input('from_pincode');
+        $toPincode = $request->input('to_pincode');
+
+        $apiEmail = config('plugins.ecommerce.general.shiprocket.email');
+        $apiPassword = config('plugins.ecommerce.general.shiprocket.password');
+
+        $loginResponse = Http::post('https://apiv2.shiprocket.in/v1/external/auth/login', [
+            'email' => $apiEmail,
+            'password' => $apiPassword
+        ]);
+
+        if (!$loginResponse->ok()) {
+            return response()->json(['serviceable' => false, 'message' => 'Login failed'], 500);
+        }
+
+        $token = $loginResponse['token'];
+
+        $checkResponse = Http::withToken($token)->get('https://apiv2.shiprocket.in/v1/external/courier/serviceability/', [
+            'pickup_postcode'    => $fromPincode,
+            'delivery_postcode'  => $toPincode,
+            'cod'                => 0,
+            'weight'             => $request->input('product_weight'),
+            'declared_value'     => 500,  // Some carriers need this
+            'mode'               => 'Surface', // Optional, but more accurate
+            'qc_check'           => 1
+        ]);
+
+        if (!$checkResponse->ok()) {
+            return response()->json(['serviceable' => false, 'message' => 'Unauthorized! You do not have the required permissions.'], 500);
+        }
+
+        $data = $checkResponse->json();
+
+        if (isset($data['data']['available_courier_companies']) && count($data['data']['available_courier_companies']) > 0) {
+            $etd = $data['data']['available_courier_companies'][0]['etd'] ?? 'N/A';
+            return response()->json([
+                'serviceable' => true,
+                'estimated_delivery_days' => $etd
+            ]);
+        } else {
+            return response()->json(['serviceable' => false, 'message' => 'No courier available']);
+        }
     }
 }

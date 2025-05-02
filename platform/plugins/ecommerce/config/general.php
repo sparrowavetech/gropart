@@ -23,4 +23,8 @@ return [
     'digital_products' => [
         'allowed_mime_types' => env('DIGITAL_PRODUCT_ALLOWED_MIME_TYPES', []),
     ],
+    'shiprocket' => [
+        'email' => env('SHIPROCKET_EMAIL'),
+        'password' => env('SHIPROCKET_PASSWORD'),
+    ],
 ];

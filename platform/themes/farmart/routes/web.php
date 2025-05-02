@@ -14,6 +14,7 @@ Theme::registerRoutes(function () {
             if (is_plugin_active('ecommerce')) {
                 Route::get('search-products', [PublicAjaxController::class, 'ajaxSearchProducts'])->name('search-products');
                 Route::get('categories-dropdown', [PublicAjaxController::class, 'ajaxGetCategoriesDropdown'])->name('categories-dropdown');
+                Route::post('check-pincode-shiprocket', [PublicAjaxController::class, 'ajaxCheckPincodeShiprocket'])->name('check-pincode-shiprocket');
             }
 
             Route::group(['controller' => FarmartController::class], function () {
