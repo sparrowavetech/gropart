@@ -435,6 +435,18 @@
                 }
             });
         }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            // Check if user already dismissed it in this session
+            if (sessionStorage.getItem("topHeaderDismissed") === "true") {
+                document.querySelector(".header-upper-top").classList.add("d-none");
+            }
+
+            document.getElementById("top-dismiss").addEventListener("click", function() {
+                document.querySelector(".header-upper-top").classList.add("d-none");
+                sessionStorage.setItem("topHeaderDismissed", "true");
+            });
+        });
     </script>
 
     {!! Theme::footer() !!}

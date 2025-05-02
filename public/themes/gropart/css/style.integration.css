@@ -18,6 +18,8 @@ html[lang="hi"] .product-inner .product__title {
     line-height: 1.75;
   	padding-top: 2px;
 }
+.header-upper-top { position:relative; padding: 10px 0; background: linear-gradient(to right, #a395f7, #e1b7f8, #ffc58f); }
+.header-upper-top .top-dismiss { position: absolute; right: 40px; top: 7px; font-size: 20px; color: #bd9676; cursor: pointer; }
 #search-mobile.panel--sidebar.panel--sidebar__right .bb-form-quick-search .bb-quick-search-item-info { width: 75% }
 #search-mobile.panel--sidebar.panel--sidebar__right .bb-form-quick-search .bb-quick-search-item-image { width: 25% }
 .newsletter-popup .modal-dialog .modal-content form input#whatsapp,
@@ -1132,4 +1134,7 @@ body[dir="rtl"] .box-slider-3 .block-slider-bottom-banner .swiper-button-prev {
     .card-grid-style-2 {
         padding: 24px 20px;
     }
+}
+@media (max-width: 426px) {
+	.header-upper-top p { padding: 0 60px; line-height: 1; font-size: 12px; }
 }

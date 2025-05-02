@@ -88,6 +88,18 @@
         class="header header-js-handler"
         data-sticky="{{ theme_option('sticky_header_enabled', 'yes') == 'yes' ? 'true' : 'false' }}"
     >
+        @if (theme_option('top_upper_header_text'))
+            <div class="header-upper-top">
+                <div class="container-xxxl">
+                    <div class="row align-items-center">
+                        <div class="col-md-12 text-center">
+                            <p class="m-0">{!! theme_option('top_upper_header_text') !!}</p>
+                            <span class="top-dismiss" id="top-dismiss">X</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
         <div @class([
             'header-top d-none d-lg-block',
             'header-content-sticky' =>
