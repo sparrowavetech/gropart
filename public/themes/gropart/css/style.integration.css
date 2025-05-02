@@ -18,7 +18,15 @@ html[lang="hi"] .product-inner .product__title {
     line-height: 1.75;
   	padding-top: 2px;
 }
-.widget-header h1, .widget-header h2, .widget-header h3 { font-size: 1.5rem; }
+#search-mobile.panel--sidebar.panel--sidebar__right .bb-form-quick-search .bb-quick-search-item-info { width: 75% }
+#search-mobile.panel--sidebar.panel--sidebar__right .bb-form-quick-search .bb-quick-search-item-image { width: 25% }
+.newsletter-popup .modal-dialog .modal-content form input#whatsapp,
+.newsletter-popup .modal-dialog .modal-content form input#name {
+    height: 50px;
+    padding: 0 16px;
+}
+.h2.catalog-header__title { font-size: 1.5rem; }
+.widget-header h1, .widget-header h2 { font-size: 1.5rem; }
 .product-button.is_enquiry { justify-content: flex-start; }
 .bb-form-quick-search .bb-quick-search-item-name { font-weight: 700; }
 .checkout__coupon-item.active .checkout__coupon-item-description { color: #fff; }

@@ -30,8 +30,11 @@
         </div>
     </div>
 
-    <div class="bb-quick-search-view-all">
+    <div class="bb-quick-search-view-all d-none d-sm-block">
         <a href="#" onclick="event.preventDefault(); document.getElementById('bb-form-quick-search').submit();">{{ __('View all results') }}</a>
+    </div>
+    <div class="bb-quick-search-view-all d-block d-sm-none">
+        <a href="#" onclick="event.preventDefault(); document.querySelector('#search-mobile #bb-form-quick-search').submit();">{{ __('View all results') }}</a>
     </div>
 @else
     <div class="bb-quick-search-empty">
