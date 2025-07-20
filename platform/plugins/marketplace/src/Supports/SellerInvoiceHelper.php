@@ -161,9 +161,9 @@ class SellerInvoiceHelper
 
         $data = [
             'invoice' => $revenue->toArray(),
-            'toState' => $revenue->state ? $revenue->state : null,
+            'toState' => $revenue->seller_state_code ? $revenue->seller_state_code : null,
             'fromState'=> $companyState,
-            'isIgst' => $revenue->state !== $companyStateId ? true : false,
+            'isIgst' => $revenue->seller_state_code !== $companyStateId ? true : false,
             'logo' => $logo,
             'site_title' => theme_option('site_title'),
             'company_logo_full_path' => RvMedia::getRealPath($logo),
