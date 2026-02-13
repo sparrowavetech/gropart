@@ -4,297 +4,27 @@
     <div id="main-order-content">
         @include('plugins/ecommerce::orders.partials.canceled-alert', compact('order'))
 
+        {!! apply_filters('ecommerce_order_detail_top', null, $order) !!}
+
         <div class="row row-cards">
             <div class="col-md-9">
                 <x-core::card class="mb-3">
-                    <x-core::card.header class="justify-content-between">
-                        <x-core::card.title>
-                            {{ trans('plugins/ecommerce::order.order_information') }} {{ $order->code }}
-                        </x-core::card.title>
+                    @include('plugins/ecommerce::orders.edit.order-header')
 
-                        @if ($order->completed_at)
-                            <x-core::badge color="info" class="d-flex align-items-center gap-1">
-                                <x-core::icon name="ti ti-shopping-cart-check"></x-core::icon>
-                                {{ trans('plugins/ecommerce::order.completed') }}
-                            </x-core::badge>
-                        @else
-                            <x-core::badge color="warning" class="d-flex align-items-center gap-1">
-                                <x-core::icon name="ti ti-shopping-cart"></x-core::icon>
-                                {{ trans('plugins/ecommerce::order.uncompleted') }}
-                            </x-core::badge>
-                        @endif
-                    </x-core::card.header>
-
-                    <x-core::table :hover="false" :striped="false" class="order-products-table">
-                        <x-core::table.body>
-                            @foreach ($order->products as $orderProduct)
-                                @php
-                                    $product = $orderProduct->product->original_product;
-                                @endphp
-
-                                <x-core::table.body.row>
-                                    <x-core::table.body.cell style="width: 80px">
-                                        <img
-                                            src="{{ RvMedia::getImageUrl($orderProduct->product_image, 'thumb', false, RvMedia::getDefaultImage()) }}"
-                                            alt="{{ $orderProduct->product_name }}"
-                                        >
-                                    </x-core::table.body.cell>
-                                    <x-core::table.body.cell style="width: 45%">
-                                        <div class="d-flex align-items-center flex-wrap">
-                                            <a
-                                                href="{{ $product && $product->id && Auth::user()->hasPermission('products.edit') ? route('products.edit', $product->id) : '#' }}"
-                                                title="{{ $orderProduct->product_name }}"
-                                                target="_blank"
-                                                class="me-2"
-                                            >
-                                                {{ $orderProduct->product_name }}
-                                            </a>
-
-                                            @if ($sku = Arr::get($orderProduct->options, 'sku') ?: ($product && $product->sku ? $product->sku : null))
-                                                <p class="mb-0">({{ trans('plugins/ecommerce::order.sku') }}: <strong>{{ $sku }}</strong>)</p>
-                                            @endif
-                                        </div>
-
-                                        @if ($attributes = Arr::get($orderProduct->options, 'attributes'))
-                                            <div>
-                                                <small>{{ $attributes }}</small>
-                                            </div>
-                                        @endif
-
-                                        @if (!empty($orderProduct->product_options) && is_array($orderProduct->product_options))
-                                            {!! render_product_options_html($orderProduct->product_options, $orderProduct->price) !!}
-                                        @endif
-
-                                        @include(
-                                            EcommerceHelper::viewPath('includes.cart-item-options-extras'),
-                                            ['options' => $orderProduct->options]
-                                        )
-
-                                        {!! apply_filters(ECOMMERCE_ORDER_DETAIL_EXTRA_HTML, null) !!}
-
-                                        @if ($order->shipment->id)
-                                            <p class="text-muted mb-1">
-                                                {{ $orderProduct->qty }}
-                                                {{ trans('plugins/ecommerce::order.completed') }}
-                                            </p>
-                                            <ul class="list-unstyled ms-1 small">
-                                                <li>
-                                                    <span class="bull">↳</span>
-                                                    <span class="black">{{ trans('plugins/ecommerce::order.shipping') }}</span>
-                                                    <a
-                                                        class="text-underline bold-light"
-                                                        href="{{ route('ecommerce.shipments.edit', $order->shipment->id) }}"
-                                                        title="{{ $order->shipping_method_name }}"
-                                                        target="_blank"
-                                                    >{{ $order->shipping_method_name }}</a>
-                                                </li>
-
-                                                @if (is_plugin_active('marketplace') && $order->store->name)
-                                                    <li class="ws-nm">
-                                                        <span class="bull">↳</span>
-                                                        <span
-                                                            class="black">{{ trans('plugins/marketplace::store.store') }}</span>
-                                                        <a
-                                                            class="fw-semibold text-decoration-underline"
-                                                            href="{{ $order->store->url }}"
-                                                            target="_blank"
-                                                        >{{ $order->store->name }}</a>
-                                                    </li>
-                                                @endif
-                                            </ul>
-                                        @endif
-                                    </x-core::table.body.cell>
-                                    <x-core::table.body.cell>
-                                        {{ format_price($orderProduct->price) }}
-                                    </x-core::table.body.cell>
-                                    <x-core::table.body.cell>
-                                        x
-                                    </x-core::table.body.cell>
-                                    <x-core::table.body.cell>
-                                        {{ $orderProduct->qty }}
-                                    </x-core::table.body.cell>
-                                    <x-core::table.body.cell>
-                                        {{ format_price($orderProduct->price * $orderProduct->qty) }}
-                                    </x-core::table.body.cell>
-                                </x-core::table.body.row>
-                            @endforeach
-                        </x-core::table.body>
-                    </x-core::table>
+                    @include('plugins/ecommerce::orders.edit.order-products', [
+                        'editProductRoute' => Auth::user()->hasPermission('products.edit') ? 'products.edit' : null,
+                        'isInAdmin' => true,
+                    ])
 
                     <x-core::card.body>
                         <div class="row">
                             <div class="col-md-6 offset-md-6">
-                                <x-core::table :hover="false" :striped="false" class="table-borderless text-end">
-                                    <x-core::table.body>
-                                        <x-core::table.body.row>
-                                            <x-core::table.body.cell>{{ trans('plugins/ecommerce::order.quantity') }}</x-core::table.body.cell>
-                                            <x-core::table.body.cell>
-                                                {{ number_format($order->products->sum('qty')) }}
-                                            </x-core::table.body.cell>
-                                        </x-core::table.body.row>
-                                        <x-core::table.body.row>
-                                            <x-core::table.body.cell>
-                                                {{ trans('plugins/ecommerce::order.sub_amount') }}</x-core::table.body.cell>
-                                            <x-core::table.body.cell>
-                                                {{ format_price($order->sub_total) }}
-                                            </x-core::table.body.cell>
-                                        </x-core::table.body.row>
-                                        @if (EcommerceHelper::isTaxEnabled())
-                                            <x-core::table.body.row>
-                                                <x-core::table.body.cell>
-                                                    {{ trans('plugins/ecommerce::order.tax') }}
-                                                </x-core::table.body.cell>
-                                                <x-core::table.body.cell>
-                                                    <span class="text-success">(+) {{ format_price($order->tax_amount) }}</span>
-                                                </x-core::table.body.cell>
-                                            </x-core::table.body.row>
-                                        @endif
-                                        <x-core::table.body.row>
-                                            <x-core::table.body.cell>
-                                                {{ trans('plugins/ecommerce::order.discount') }}
-                                                @if ($order->coupon_code)
-                                                    <p class="mb-0 text-success fw-bold">
-                                                        {!! trans('plugins/ecommerce::order.coupon_code', [
-                                                            'code' => Html::tag('strong', $order->coupon_code)->toHtml(),
-                                                        ]) !!}
-                                                    </p>
-                                                @elseif ($order->discount_description)
-                                                    <p class="mb-0 text-success"><em>{{ $order->discount_description }}</em></p>
-                                                @endif
-                                            </x-core::table.body.cell>
-                                            <x-core::table.body.cell>
-                                                <span class="text-danger">(-) {{ format_price($order->discount_amount) }}</span>
-                                            </x-core::table.body.cell>
-                                        </x-core::table.body.row>
-                                        <x-core::table.body.row>
-                                            <x-core::table.body.cell>
-                                                <p class="mb-1">{{ trans('plugins/ecommerce::order.shipping_fee') }}</p>
-                                                <span class="small d-block">{{ $order->shipping_method_name }}</span>
-                                                <span class="small d-block">{{ $weight }} {{ ecommerce_weight_unit(true) }}</span>
-                                            </x-core::table.body.cell>
-                                            <x-core::table.body.cell>
-                                                <span class="text-success">(+) {{ format_price($order->shipping_amount) }}</span>
-                                            </x-core::table.body.cell>
-                                        </x-core::table.body.row>
-                                        <x-core::table.body.row>
-                                            <x-core::table.body.cell>
-                                                {{ trans('plugins/ecommerce::order.total_amount') }}
-                                            </x-core::table.body.cell>
-                                            <x-core::table.body.cell>
-                                                @if (is_plugin_active('payment') && $order->payment->id)
-                                                    <span @class(['text-warning' => $order->payment->status != Botble\Payment\Enums\PaymentStatusEnum::COMPLETED]) class="text-warning">
-                                                        {{ format_price($order->amount) }}
-                                                    </span>
-                                                @else
-                                                    {{ format_price($order->amount) }}
-                                                @endif
-                                            </x-core::table.body.cell>
-                                        </x-core::table.body.row>
-
-                                        <x-core::table.body.row>
-                                            <x-core::table.body.cell>
-                                                {{ trans('plugins/ecommerce::order.paid_amount') }}
-                                            </x-core::table.body.cell>
-                                            <x-core::table.body.cell>
-                                                @if (is_plugin_active('payment') && $order->payment->id)
-                                                    <a
-                                                        href="{{ route('payment.show', $order->payment->id) }}"
-                                                        target="_blank"
-                                                    >
-                                                        <span>{{ format_price($order->payment->status == Botble\Payment\Enums\PaymentStatusEnum::COMPLETED ? $order->payment->amount : 0) }}</span>
-                                                    </a>
-                                                @else
-                                                    <span>{{ format_price(is_plugin_active('payment') && $order->payment->status == Botble\Payment\Enums\PaymentStatusEnum::COMPLETED ? $order->payment->amount : 0) }}</span>
-                                                @endif
-                                            </x-core::table.body.cell>
-                                        </x-core::table.body.row>
-
-                                        @if (is_plugin_active('payment') && $order->payment->id)
-                                            <x-core::table.body.row>
-                                                <x-core::table.body.cell>
-                                                    {{ trans('plugins/ecommerce::order.payment_method') }}
-                                                </x-core::table.body.cell>
-                                                <x-core::table.body.cell>
-                                                    <a href="{{ route('payment.show', $order->payment->id) }}" target="_blank">
-                                                        {{ $order->payment->payment_channel->label() }}
-
-                                                        <x-core::icon name="ti ti-external-link" />
-                                                    </a>
-                                                </x-core::table.body.cell>
-                                            </x-core::table.body.row>
-
-                                            <x-core::table.body.row>
-                                                <x-core::table.body.cell>
-                                                    {{ trans('plugins/ecommerce::order.payment_status_label') }}
-                                                </x-core::table.body.cell>
-                                                <x-core::table.body.cell>
-                                                    {!! BaseHelper::clean($order->payment->status->toHtml()) !!}
-                                                </x-core::table.body.cell>
-                                            </x-core::table.body.row>
-                                        @endif
-
-                                        @if ($order->proof_file && Storage::disk('local')->exists($order->proof_file))
-                                            <x-core::table.body.row>
-                                                <x-core::table.body.cell>
-                                                    {{ trans('plugins/ecommerce::order.payment_proof') }}
-                                                </x-core::table.body.cell>
-                                                <x-core::table.body.cell>
-                                                    <a href="{{ route('orders.download-proof', $order->id) }}" target="_blank">
-                                                        {{ $order->proof_file }}
-                                                    </a>
-                                                </x-core::table.body.cell>
-                                            </x-core::table.body.row>
-                                        @endif
-
-                                        {!! apply_filters('ecommerce_admin_order_extra_info', null, $order) !!}
-
-                                        <x-core::table.body.row>
-                                            <td colspan="2">
-                                                <hr class="my-0">
-                                            </td>
-                                        </x-core::table.body.row>
-
-                                        @if (is_plugin_active('payment') && $order->payment->status == Botble\Payment\Enums\PaymentStatusEnum::REFUNDED)
-                                            <x-core::table.body.row class="hidden">
-                                                <x-core::table.body.cell>
-                                                    {{ trans('plugins/ecommerce::order.refunded_amount') }}
-                                                </x-core::table.body.cell>
-                                                <x-core::table.body.cell>
-                                                    <span>{{ format_price($order->payment->amount) }}</span>
-                                                </x-core::table.body.cell>
-                                            </x-core::table.body.row>
-                                        @endif
-                                        <x-core::table.body.row class="hidden">
-                                            <x-core::table.body.cell>
-                                                {{ trans('plugins/ecommerce::order.amount_received') }}
-                                            </x-core::table.body.cell>
-                                            <x-core::table.body.cell>
-                                                {{ format_price(is_plugin_active('payment') && $order->payment->status == Botble\Payment\Enums\PaymentStatusEnum::COMPLETED ? $order->amount : 0) }}
-                                            </x-core::table.body.cell>
-                                        </x-core::table.body.row>
-                                    </x-core::table.body>
-                                </x-core::table>
+                                @include('plugins/ecommerce::orders.edit.order-info', [
+                                    'isInAdmin' => true,
+                                    'proofDownloadUrl' => route('orders.download-proof', $order->id),
+                                ])
 
                                 <div class="btn-list justify-content-end my-3">
-                                    @if(is_plugin_active('marketplace') && $order->shipment->status == 'delivered')
-                                        @php
-                                            $revenueId = Botble\Marketplace\Models\Revenue::where('order_id', $order->id)->value('id');
-                                            $url = '';
-                                            if (is_in_admin(true)) {
-                                                $url = route('marketplace.generate-seller-invoice', $revenueId);
-                                            } else {
-                                                $url = route('marketplace.revenue.generate-seller-invoice', $revenueId);
-                                            }
-                                        @endphp
-                                        <x-core::button
-                                            tag="a"
-                                            href="{{ $url }}"
-                                            target="_blank"
-                                            icon="ti ti-download"
-                                        >
-                                            {{ trans('plugins/marketplace::revenue.seller_inv_code') }}
-                                        </x-core::button>
-                                    @endif
                                     @if ($order->isInvoiceAvailable())
                                         <x-core::button
                                             tag="a"
@@ -312,7 +42,7 @@
                                         >
                                             {{ trans('plugins/ecommerce::order.download_invoice') }}
                                         </x-core::button>
-                                    @else
+                                    @elseif ($order->status != \Botble\Ecommerce\Enums\OrderStatusEnum::CANCELED)
                                         <x-core::button
                                             tag="a"
                                             :href="route('orders.invoice.generate', $order->id)"
@@ -324,19 +54,7 @@
                                     @endif
                                 </div>
 
-                                <form action="{{ route('orders.edit', $order->id) }}">
-                                    <x-core::form.textarea
-                                        :label="trans('plugins/ecommerce::order.note')"
-                                        name="description"
-                                        :placeholder="trans('plugins/ecommerce::order.add_note')"
-                                        :value="$order->description"
-                                        class="textarea-auto-height"
-                                    />
-
-                                    <x-core::button type="button" class="btn-update-order">
-                                        {{ trans('plugins/ecommerce::order.save') }}
-                                    </x-core::button>
-                                </form>
+                                @include('plugins/ecommerce::orders.edit.form-edit', ['route' => 'orders.edit'])
                             </div>
                         </div>
                     </x-core::card.body>
@@ -377,7 +95,9 @@
                                             @endif
                                         </div>
                                     </div>
-                                @elseif (is_plugin_active('payment') && $order->payment->id)
+                                @endif
+
+                                @if (is_plugin_active('payment') && $order->payment->id && $order->payment->status != \Botble\Payment\Enums\PaymentStatusEnum::REFUNDED)
                                     <div class="text-uppercase">
                                         @if (!$order->payment->status || $order->payment->status == Botble\Payment\Enums\PaymentStatusEnum::PENDING)
                                             <x-core::icon name="ti ti-credit-card" />
@@ -398,7 +118,7 @@
                                     </div>
 
                                     <div class="btn-list">
-                                        @if (!$order->payment->status || in_array($order->payment->status, [Botble\Payment\Enums\PaymentStatusEnum::PENDING]))
+                                        @if (!$order->payment->status || $order->payment->status == Botble\Payment\Enums\PaymentStatusEnum::PENDING)
                                             <x-core::button
                                                 type="button"
                                                 color="info"
@@ -421,10 +141,83 @@
                                         @endif
                                     </div>
                                 @endif
+
+                                @if (is_plugin_active('payment') && $order->payment->id && $order->payment->status == \Botble\Payment\Enums\PaymentStatusEnum::REFUNDED)
+                                    <div class="text-uppercase">
+                                        <x-core::icon name="ti ti-receipt-refund" class="text-warning" />
+                                        {{ trans('plugins/ecommerce::order.payment_was_refunded') }}
+                                    </div>
+
+                                    <div class="mt-2">
+                                        <p class="mb-1">
+                                            <strong>{{ trans('plugins/ecommerce::order.refunded_amount') }}:</strong>
+                                            {{ format_price($order->payment->refunded_amount) }}
+                                        </p>
+
+                                        @if ($order->payment->refund_note)
+                                            <p class="mb-1">
+                                                <strong>{{ trans('plugins/ecommerce::order.refund_note') }}:</strong>
+                                                {{ $order->payment->refund_note }}
+                                            </p>
+                                        @endif
+
+                                        @php
+                                            $refunds = $order->payment->metadata['refunds'] ?? [];
+                                        @endphp
+
+                                        @if (count($refunds) === 1)
+                                            @php
+                                                $refund = $refunds[0];
+                                                $refundDate = isset($refund['_data_request']['created_at']) ? \Carbon\Carbon::parse($refund['_data_request']['created_at'])->format('Y-m-d H:i:s') : '-';
+                                                $refundAmount = isset($refund['refunded_amount_in_currency']) ? format_price($refund['refunded_amount_in_currency']) : (isset($refund['amount']) ? format_price($refund['amount'] / 100) : '-');
+                                                $refundStatus = $refund['status'] ?? '-';
+                                            @endphp
+
+                                            <p class="mb-1">
+                                                <strong>{{ trans('plugins/ecommerce::order.created_at') }}:</strong>
+                                                {{ $refundDate }}
+                                            </p>
+                                            <p class="mb-1">
+                                                <strong>{{ trans('plugins/ecommerce::order.status') }}:</strong>
+                                                <span class="badge text-white bg-{{ $refundStatus == 'succeeded' ? 'success' : 'secondary' }}">
+                                                    {{ $refundStatus }}
+                                                </span>
+                                            </p>
+                                        @elseif (count($refunds) > 1)
+                                            <div class="mt-2">
+                                                <strong>{{ trans('plugins/ecommerce::order.refund_transactions') }}:</strong>
+                                                <div class="table-responsive mt-1">
+                                                    <table class="table table-sm">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>{{ trans('plugins/ecommerce::order.created_at') }}</th>
+                                                                <th>{{ trans('plugins/ecommerce::order.amount') }}</th>
+                                                                <th>{{ trans('plugins/ecommerce::order.status') }}</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            @foreach ($refunds as $refund)
+                                                                <tr>
+                                                                    <td>{{ isset($refund['_data_request']['created_at']) ? \Carbon\Carbon::parse($refund['_data_request']['created_at'])->format('Y-m-d H:i:s') : '-' }}</td>
+                                                                    <td>{{ isset($refund['refunded_amount_in_currency']) ? format_price($refund['refunded_amount_in_currency']) : (isset($refund['amount']) ? format_price($refund['amount'] / 100) : '-') }}</td>
+                                                                    <td>
+                                                                        <span class="badge text-white bg-{{ isset($refund['status']) && $refund['status'] == 'succeeded' ? 'success' : 'secondary' }}">
+                                                                            {{ $refund['status'] ?? '-' }}
+                                                                        </span>
+                                                                    </td>
+                                                                </tr>
+                                                            @endforeach
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        @endif
+                                    </div>
+                                @endif
                             </div>
                         @endif
 
-                        @if (EcommerceHelper::countDigitalProducts($order->products) != $order->products->count())
+                        @if (EcommerceHelper::countDigitalProducts($order->products) != $order->products->count() && ! EcommerceHelper::isDisabledPhysicalProduct())
                             <div class="p-3 d-flex justify-content-between align-items-center">
                                 @if ($order->status == Botble\Ecommerce\Enums\OrderStatusEnum::CANCELED && !$order->shipment->id)
                                     <div class="text-uppercase">
@@ -432,7 +225,7 @@
                                         <span>{{ trans('plugins/ecommerce::order.all_products_are_not_delivered') }}</span>
                                     </div>
                                 @else
-                                    @if ($order->shipment->id)
+                                    @if (! EcommerceHelper::isDisabledPhysicalProduct() && $order->shipment->id)
                                         <div class="text-uppercase">
                                             <x-core::icon name="ti ti-check" class="text-success" />
                                             <span>{{ trans('plugins/ecommerce::order.delivery') }}</span>
@@ -455,18 +248,23 @@
                                 @endif
                             </div>
 
-                            @if (! $order->shipment->id)
-                                <div class="shipment-create-wrap" style="display: none;"></div>
-                            @else
-                                @include('plugins/ecommerce::orders.shipment-detail', [
-                                    'shipment' => $order->shipment,
-                                ])
+                            @if(! EcommerceHelper::isDisabledPhysicalProduct())
+                                @if (! $order->shipment->id)
+                                    <div class="p-3 shipment-create-wrap" style="display: none;"></div>
+                                @else
+                                    @include('plugins/ecommerce::orders.shipment-detail', [
+                                        'shipment' => $order->shipment,
+                                    ])
+                                @endif
                             @endif
                         @endif
                     </div>
                 </x-core::card>
 
-                <x-core::card>
+                @include('plugins/ecommerce::orders.partials.digital-product-downloads-info', compact('order'))
+
+                @if ($order->histories()->exists())
+                    <x-core::card>
                     <x-core::card.header>
                         <x-core::card.title>
                             {{ trans('plugins/ecommerce::order.history') }}
@@ -474,7 +272,7 @@
                     </x-core::card.header>
 
                     <x-core::card.body>
-                        <ul class="steps steps-vertical" id="order-history-wrapper">
+                        <ul class="steps steps-vertical border-0 p-0 m-0" id="order-history-wrapper">
                             @foreach ($order->histories()->orderByDesc('id')->get() as $history)
                                 <li @class(['step-item', 'user-action' => $history->user_id])>
                                     <div class="h4 m-0">
@@ -484,10 +282,10 @@
                                                 data-target="#history-line-{{ $history->id }}"
                                                 href="javascript:void(0)"
                                             >
-                                                {{ OrderHelper::processHistoryVariables($history) }}
+                                                {!! OrderHelper::processHistoryVariables($history) !!}
                                             </a>
                                         @else
-                                            {{ OrderHelper::processHistoryVariables($history) }}
+                                            {!! OrderHelper::processHistoryVariables($history) !!}
                                         @endif
                                     </div>
                                     <div class="text-secondary">{{ BaseHelper::formatDateTime($history->created_at) }}</div>
@@ -517,7 +315,7 @@
                                                             {{ trans('plugins/ecommerce::order.description') }}
                                                         </x-core::table.body.cell>
                                                         <x-core::table.body.cell>
-                                                            {{ $history->description . ' ' . trans('plugins/ecommerce::order.from') . ' ' . $order->payment->payment_channel->label() }}
+                                                            {{ $history->description . ' ' . trans('plugins/ecommerce::order.from') . ' ' . $order->payment->payment_channel->displayName() }}
                                                         </x-core::table.body.cell>
                                                     </x-core::table.body.row>
                                                     <x-core::table.body.row>
@@ -561,6 +359,16 @@
                                                             {{ BaseHelper::formatDateTime($history->created_at) }}
                                                         </x-core::table.body.cell>
                                                     </x-core::table.body.row>
+                                                    @if (Arr::get($history->extras, 'refund_note'))
+                                                        <x-core::table.body.row>
+                                                            <x-core::table.body.cell>
+                                                                {{ trans('plugins/ecommerce::order.refund_reason') }}
+                                                            </x-core::table.body.cell>
+                                                            <x-core::table.body.cell>
+                                                                {{ Arr::get($history->extras, 'refund_note') }}
+                                                            </x-core::table.body.cell>
+                                                        </x-core::table.body.row>
+                                                    @endif
                                                 </x-core::table.body>
                                             </x-core::table>
                                         </div>
@@ -589,9 +397,9 @@
                                                     <x-core::table.body.cell>
                                                         {{ trans('plugins/ecommerce::order.description') }}
                                                     </x-core::table.body.cell>
-                                                    <x-core::table.body.cell>{!! trans('plugins/ecommerce::order.mark_payment_as_confirmed', [
-                                                                'method' => $order->payment->payment_channel->label(),
-                                                            ]) !!}
+                                                    <x-core::table.body.cell>{!! BaseHelper::clean(trans('plugins/ecommerce::order.mark_payment_as_confirmed', [
+                                                                'method' => $order->payment->payment_channel->displayName(),
+                                                            ])) !!}
                                                     </x-core::table.body.cell>
                                                 </x-core::table.body.row>
                                                 <x-core::table.body.row>
@@ -607,7 +415,7 @@
                                                         {{ trans('plugins/ecommerce::order.payment_gateway') }}
                                                     </x-core::table.body.cell>
                                                     <x-core::table.body.cell>
-                                                        {{ $order->payment->payment_channel->label() }}
+                                                        {{ $order->payment->payment_channel->displayName() }}
                                                     </x-core::table.body.cell>
                                                 </x-core::table.body.row>
                                                 <x-core::table.body.row>
@@ -652,7 +460,7 @@
                                             type="button"
                                             color="primary"
                                             :outlined="true"
-                                            class="btn-trigger-resend-order-confirmation-modal position-absolute top-0 end-0 d-print-none"
+                                            class="btn-trigger-resend-order-confirmation-modal position-absolute top-0 end-0 d-print-none me-3"
                                             :data-action="route('orders.send-order-confirmation-email', $history->order_id)"
                                         >
                                             {{ trans('plugins/ecommerce::order.resend') }}
@@ -663,9 +471,12 @@
                         </ul>
                     </x-core::card.body>
                 </x-core::card>
+                @endif
             </div>
 
             <div class="col-md-3">
+                {!! apply_filters('ecommerce_order_detail_sidebar_top', null, $order) !!}
+
                 <x-core::card>
                     <x-core::card.header>
                         <x-core::card.title>
@@ -686,7 +497,7 @@
                             @if ($userInfo->id)
                                 <p class="mb-1">
                                     <x-core::icon name="ti ti-inbox" />
-                                    {{ $userInfo->orders()->count() }}
+                                    {{ $userInfo->completedOrders()->count() }}
                                     {{ trans('plugins/ecommerce::order.orders') }}
                                 </p>
                             @endif
@@ -717,12 +528,13 @@
                         </div>
 
                         @if (
-                            $order->shippingAddress->country
+                            ! EcommerceHelper::isDisabledPhysicalProduct()
+                            && ($order->shippingAddress->country
                             || $order->shippingAddress->state
                             || $order->shippingAddress->city
                             || $order->shippingAddress->address
                             || $order->shippingAddress->email
-                            || $order->shippingAddress->phone
+                            || $order->shippingAddress->phone)
                         )
                             @if (EcommerceHelper::countDigitalProducts($order->products) != $order->products->count())
                                 <div class="hr my-1"></div>
@@ -820,18 +632,7 @@
                             </div>
                         @endif
 
-                        @if (is_plugin_active('marketplace') && $order->store->name)
-                            <div class="hr my-1"></div>
-
-                            <div class="p-3">
-                                <h4 class="mb-2">{{ trans('plugins/marketplace::store.store') }}</h4>
-                                <a href="{{ $order->store->url }}" target="_blank">{{ $order->store->name }}</a>
-                                @if($order->store->is_verified)
-                                    <img class="verified-store-main" style="width: 20px;" src="{{ asset('/storage/stores/verified.png')}}"alt="Verified">
-                                @endif
-                                <small class="badge bg-warning text-white">{{ $order->store->shop_category->label() }}</small>
-                            </div>
-                        @endif
+                        {!! apply_filters('ecommerce_order_detail_extra_info', '', $order) !!}
                     </x-core::card.body>
 
                     <x-core::card.footer>
@@ -854,21 +655,19 @@
                         </div>
                     </x-core::card.footer>
                 </x-core::card>
+
+                {!! apply_filters('ecommerce_order_detail_sidebar_bottom', null, $order) !!}
             </div>
         </div>
+
+        {!! apply_filters('ecommerce_order_detail_bottom', null, $order) !!}
     </div>
 @endsection
 
 @pushif($order->status != Botble\Ecommerce\Enums\OrderStatusEnum::CANCELED, 'footer')
-    <x-core::modal.action
-        id="resend-order-confirmation-email-modal"
-        :title="trans('plugins/ecommerce::order.resend_order_confirmation')"
-        :description="trans('plugins/ecommerce::order.resend_order_confirmation_description', [
-            'email' => $order->user->email ?: $order->address->email,
-        ])"
-        :submit-button-attrs="['id' => 'confirm-resend-confirmation-email-button']"
-        :submit-button-label="trans('plugins/ecommerce::order.send')"
-    />
+    @include('plugins/ecommerce::orders.edit.modal', [
+        'updateShippingAddressRoute' => 'orders.update-shipping-address',
+    ])
 
     <x-core::modal.action
         id="cancel-shipment-modal"
@@ -878,20 +677,6 @@
         :submit-button-attrs="['id' => 'confirm-cancel-shipment-button']"
         :submit-button-label="trans('plugins/ecommerce::order.confirm')"
     />
-
-    <x-core::modal
-        id="update-shipping-address-modal"
-        :title="trans('plugins/ecommerce::order.update_address')"
-        button-id="confirm-update-shipping-address-button"
-        :button-label="trans('plugins/ecommerce::order.update')"
-        size="md"
-    >
-        @include('plugins/ecommerce::orders.shipping-address.form', [
-            'address' => $order->address,
-            'orderId' => $order->id,
-            'url' => route('orders.update-shipping-address', $order->address->id ?? 0),
-        ])
-    </x-core::modal>
 
     @if ($order->taxInformation)
         <x-core::modal
@@ -908,46 +693,38 @@
         </x-core::modal>
     @endif
 
-    <x-core::modal.action
-        id="cancel-order-modal"
-        type="warning"
-        :title="trans('plugins/ecommerce::order.cancel_order_confirmation')"
-        :description="trans('plugins/ecommerce::order.cancel_order_confirmation_description')"
-        :submit-button-attrs="['id' => 'confirm-cancel-order-button']"
-        :submit-button-label="trans('plugins/ecommerce::order.cancel_order')"
-    />
-
-    @if (is_plugin_active('payment'))
-        <x-core::modal.action
-            id="confirm-payment-modal"
-            type="info"
-            :title="trans('plugins/ecommerce::order.confirm_payment')"
-            :description="trans('plugins/ecommerce::order.confirm_payment_confirmation_description', [
-                'method' => $order->payment->payment_channel->label(),
-            ])"
-            :submit-button-attrs="['id' => 'confirm-payment-order-button']"
-            :submit-button-label="trans('plugins/ecommerce::order.confirm_payment')"
-        />
-
-        <x-core::modal
-            id="confirm-refund-modal"
-            :title="trans('plugins/ecommerce::order.refund')"
-            button-id="confirm-refund-payment-button"
-            size="lg"
-        >
-            <x-slot:button-label>
-                {{ trans('plugins/ecommerce::order.confirm_payment') }}
-                <span class="refund-amount-text ms-1">{{ format_price($order->payment->amount - $order->payment->refunded_amount) }}</span>
-            </x-slot:button-label>
-            @include('plugins/ecommerce::orders.refund.modal', [
-                'order' => $order,
-                'url' => route('orders.refund', $order->id),
-            ])
-        </x-core::modal>
-    @endif
-    @if ($order->shipment && $order->shipment->id)
+    @if (! EcommerceHelper::isDisabledPhysicalProduct() && $order->shipment && $order->shipment->id)
         @include('plugins/ecommerce::shipments.partials.update-status-modal', [
             'shipment' => $order->shipment,
         ])
     @endif
+@endpushif
+
+@pushif(is_plugin_active('payment') && $order->payment->id && $order->payment->status != \Botble\Payment\Enums\PaymentStatusEnum::REFUNDED, 'footer')
+    <x-core::modal.action
+        id="confirm-payment-modal"
+        type="info"
+        :title="trans('plugins/ecommerce::order.confirm_payment')"
+        :description="trans('plugins/ecommerce::order.confirm_payment_confirmation_description', [
+            'method' => $order->payment->payment_channel->displayName(),
+        ])"
+        :submit-button-attrs="['id' => 'confirm-payment-order-button']"
+        :submit-button-label="trans('plugins/ecommerce::order.confirm_payment')"
+    />
+
+    <x-core::modal
+        id="confirm-refund-modal"
+        :title="trans('plugins/ecommerce::order.refund')"
+        button-id="confirm-refund-payment-button"
+        size="lg"
+    >
+        <x-slot:button-label>
+            {{ trans('plugins/ecommerce::order.confirm_payment') }}
+            <span class="refund-amount-text ms-1">{{ format_price($order->payment->amount - $order->payment->refunded_amount) }}</span>
+        </x-slot:button-label>
+        @include('plugins/ecommerce::orders.refund.modal', [
+            'order' => $order,
+            'url' => route('orders.refund', $order->id),
+        ])
+    </x-core::modal>
 @endpushif

@@ -8,7 +8,9 @@
 
         <x-core::offcanvas
             id="rv-media-aside"
-            @class(['d-md-none' => RvMedia::getConfig('sidebar_display') !== 'vertical'])
+            @class([
+                'd-md-none' => RvMedia::getConfig('sidebar_display') !== 'vertical',
+            ])
             style="--bb-offcanvas-width: 85%"
         >
             <x-core::offcanvas.header>
@@ -119,7 +121,8 @@
 
         <div class="rv-media-main-wrapper">
             <x-core::card.header class="flex-column rv-media-header p-0">
-                <div class="w-100 p-2 rv-media-top-header flex-wrap gap-3 d-flex justify-content-between align-items-start border-bottom bg-body">
+                <div
+                    class="w-100 p-2 rv-media-top-header flex-wrap gap-3 d-flex justify-content-between align-items-start border-bottom bg-body">
                     <div class="d-flex gap-2 justify-content-between w-100 w-md-auto rv-media-actions">
                         <x:core::button
                             class="d-flex d-md-none"
@@ -306,11 +309,12 @@
                         </form>
                     </div>
                 </div>
-                <div class="w-100 d-flex flex-wrap gap-3 p-2">
-                    <div class="d-flex w-100 w-md-auto align-items-center rv-media-breadcrumb">
+                <div class="row w-100 p-2">
+                    <div class="col p-2 d-flex align-items-center rv-media-breadcrumb">
                         <ul class="breadcrumb"></ul>
                     </div>
-                    <div class="d-flex justify-content-between justify-content-md-end align-items-center rv-media-tools w-100 w-md-auto">
+                    <div
+                        class="col-md-auto d-flex justify-content-between justify-content-md-end align-items-center rv-media-tools">
                         <div
                             class="btn-list"
                             role="group"
@@ -357,7 +361,7 @@
                         <x-core::button
                             tag="label"
                             for="media_details_collapse"
-                            class="collapse-panel ms-2 d-none d-sm-flex"
+                            class="collapse-panel ms-2 d-none d-lg-flex"
                             icon="ti ti-arrow-bar-right"
                             :icon-only="true"
                         />
@@ -367,7 +371,10 @@
 
             <main class="rv-media-main">
                 <div class="rv-media-items"></div>
-                <div class="rv-media-details" style="display: none">
+                <div
+                    class="rv-media-details"
+                    style="display: none"
+                >
                     <div class="rv-media-thumbnail">
                         <x-core::icon name="ti ti-photo" />
                     </div>
@@ -392,9 +399,7 @@
             <x-core::card>
                 <x-core::card.header class="position-relative">
                     <h3 class="panel-title mb-0">{{ trans('core/media::media.upload_progress') }}</h3>
-                    <x-core::button
-                        class="close-pane position-absolute top-50 bg-primary text-white text-center p-0"
-                    >
+                    <x-core::button class="close-pane position-absolute top-50 bg-primary text-white text-center p-0">
                         <x-core::icon
                             class="m-0"
                             name="ti ti-x"
@@ -450,7 +455,10 @@
         <x-core::button data-bs-dismiss="modal">
             {{ trans('core/media::media.close') }}
         </x-core::button>
-        <x-core::button type="submit" color="primary">
+        <x-core::button
+            type="submit"
+            color="primary"
+        >
             {{ trans('core/media::media.save_changes') }}
         </x-core::button>
     </x-slot:footer>
@@ -469,7 +477,10 @@
         <x-core::button data-bs-dismiss="modal">
             {{ trans('core/media::media.close') }}
         </x-core::button>
-        <x-core::button type="submit" color="primary">
+        <x-core::button
+            type="submit"
+            color="primary"
+        >
             {{ trans('core/media::media.save_changes') }}
         </x-core::button>
     </x-slot:footer>
@@ -482,6 +493,15 @@
     :form-attrs="['class' => 'form-delete-items']"
 >
     <p>{{ trans('core/media::media.confirm_trash') }}</p>
+
+    <x-core::form.checkbox
+        :label="trans('core/media::media.skip_trash')"
+        :helper_text="trans('core/media::media.skip_trash_description')"
+        name="skip_trash"
+        :checked="false"
+        id="skip_trash"
+    />
+
     <div class="modal-notice"></div>
 
     <x-slot:footer>
@@ -573,12 +593,12 @@
                 <form class="rv-form form-download-url">
                     <div id="download-form-wrapper">
                         <div class="mb-3">
-                        <textarea
-                            rows="4"
-                            name="urls"
-                            class="form-control"
-                            placeholder="http://example.com/image1.jpg&#10;http://example.com/image2.jpg&#10;http://example.com/image3.jpg&#10;..."
-                        ></textarea>
+                            <textarea
+                                rows="4"
+                                name="urls"
+                                class="form-control"
+                                placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.jpg&#10;https://example.com/image3.jpg&#10;..."
+                            ></textarea>
 
                             <x-core::form.helper-text>
                                 {{ trans('core/media::media.download_explain') }}
@@ -586,7 +606,11 @@
                         </div>
                     </div>
 
-                    <x-core::button type="submit" color="primary" class="w-100">
+                    <x-core::button
+                        type="submit"
+                        color="primary"
+                        class="w-100"
+                    >
                         {{ trans('core/media::media.download_link') }}
                     </x-core::button>
                 </form>
@@ -661,7 +685,10 @@
     id="modal-properties"
     :title="trans('core/media::media.properties.name')"
 >
-    <input type="hidden" name="selected">
+    <input
+        type="hidden"
+        name="selected"
+    >
 
     <x-core::form.color-selector
         :label="trans('core/media::media.properties.color_label')"
@@ -692,18 +719,26 @@
             {!! Form::label('media-share-type', trans('core/media::media.share_type'), [
                 'class' => 'form-label',
             ]) !!}
-            {!! Form::customSelect('share_type', [
+            {!! Form::customSelect(
+                'share_type',
+                [
                     'url' => trans('core/media::media.share_as_url'),
                     'indirect_url' => trans('core/media::media.share_as_indirect_url'),
                     'html' => trans('core/media::media.share_as_html'),
                     'markdown' => trans('core/media::media.share_as_markdown'),
-                ], null, [
-                'id' => 'media-share-type',
-                'data-bb-value' => 'share-type',
-            ]) !!}
+                ],
+                null,
+                [
+                    'id' => 'media-share-type',
+                    'data-bb-value' => 'share-type',
+                ],
+            ) !!}
         </div>
 
-        <div class="mb-3" data-bb-value="results">
+        <div
+            class="mb-3"
+            data-bb-value="results"
+        >
             {!! Form::label('media-share-results', trans('core/media::media.share_results'), [
                 'class' => 'form-label',
             ]) !!}
@@ -722,11 +757,62 @@
                 data-clipboard-parent="#modal_share_items .share-items"
                 data-clipboard-target="[data-bb-value='share-result']"
             >
-                <x-core::icon name="ti ti-clipboard" data-clipboard-icon="true" />
-                <x-core::icon name="ti ti-check" data-clipboard-success-icon="true" class="text-success d-none" />
+                <x-core::icon
+                    name="ti ti-clipboard"
+                    data-clipboard-icon="true"
+                />
+                <x-core::icon
+                    name="ti ti-check"
+                    data-clipboard-success-icon="true"
+                    class="text-success d-none"
+                />
             </x-core::button>
         </div>
     </div>
+</x-core::modal>
+
+<x-core::modal
+    id="modal_move_items"
+    :title="trans('core/media::media.move_items')"
+    size="md"
+>
+    <div class="move-items-container">
+        <div class="move-folder-tree-header mb-2">
+            <span class="text-muted small">{{ trans('core/media::media.select_destination_folder') }}</span>
+        </div>
+
+        <div class="move-folder-list-wrapper">
+            <ul class="list-group list-group-flush" id="move-folder-list">
+                <li class="list-group-item text-center text-muted py-4">
+                    <div class="spinner-border spinner-border-sm" role="status">
+                        <span class="visually-hidden">{{ trans('core/base::base.loading') }}</span>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="mt-3 pt-2 border-top">
+            <x-core::form.checkbox
+                :label="trans('core/media::media.move_to_root')"
+                name="move_to_root"
+                id="move_to_root"
+            />
+        </div>
+    </div>
+
+    <x-slot:footer>
+        <x-core::button data-bs-dismiss="modal">
+            {{ trans('core/media::media.close') }}
+        </x-core::button>
+        <x-core::button
+            type="button"
+            color="primary"
+            id="btn-confirm-move"
+            icon="ti ti-folder-share"
+        >
+            {{ trans('core/media::media.move_here') }}
+        </x-core::button>
+    </x-slot:footer>
 </x-core::modal>
 
 <button class="d-none js-rv-clipboard-temp"></button>
@@ -752,7 +838,10 @@
                 <h3>Drop files and folders here</h3>
                 <p>Or use the upload button above.</p>
             </li>
-            <li class="rv-media-list-title up-one-level js-up-one-level" title="{{ trans('core/media::media.up_level') }}">
+            <li
+                class="rv-media-list-title up-one-level js-up-one-level"
+                title="{{ trans('core/media::media.up_level') }}"
+            >
                 <div class="custom-checkbox"></div>
                 <div class="rv-media-file-name">
                     <x-core::icon name="ti ti-corner-up-left" />
@@ -765,7 +854,10 @@
     </div>
 </x-core::custom-template>
 
-<x-core::custom-template id="rv_media_items_tiles" class="hidden">
+<x-core::custom-template
+    id="rv_media_items_tiles"
+    class="hidden"
+>
     <div class="rv-media-grid">
         <ul>
             <li class="no-items">
@@ -774,9 +866,16 @@
                 <p>__noItemMessage__</p>
             </li>
             <li class="rv-media-list-title up-one-level js-up-one-level">
-                <div class="rv-media-item" data-context="__type__" title="{{ trans('core/media::media.up_level') }}">
+                <div
+                    class="rv-media-item"
+                    data-context="__type__"
+                    title="{{ trans('core/media::media.up_level') }}"
+                >
                     <div class="rv-media-thumbnail">
-                        <x-core::icon name="ti ti-corner-up-left" size="lg" />
+                        <x-core::icon
+                            name="ti ti-corner-up-left"
+                            size="lg"
+                        />
                     </div>
                     <div class="rv-media-description">
                         <div class="title">...</div>
@@ -788,7 +887,12 @@
 </x-core::custom-template>
 
 <x-core::custom-template id="rv_media_items_list_element">
-    <li class="rv-media-list-title js-media-list-title js-context-menu" data-context="__type__" title="__name__" data-id="__id__">
+    <li
+        class="rv-media-list-title js-media-list-title js-context-menu"
+        data-context="__type__"
+        title="__name__"
+        data-id="__id__"
+    >
         <div class="custom-checkbox">
             <label>
                 <input type="checkbox">
@@ -805,11 +909,24 @@
 </x-core::custom-template>
 
 <x-core::custom-template id="rv_media_items_tiles_element">
-    <li class="rv-media-list-title js-media-list-title js-context-menu" data-context="__type__" data-id="__id__">
-        <input type="checkbox" class="hidden">
-        <div class="rv-media-item" title="__name__">
+    <li
+        class="rv-media-list-title js-media-list-title js-context-menu"
+        data-context="__type__"
+        data-id="__id__"
+    >
+        <input
+            type="checkbox"
+            class="hidden"
+        >
+        <div
+            class="rv-media-item"
+            title="__name__"
+        >
             <span class="media-item-selected">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 512 512"
+                >
                     <path d="M186.301 339.893L96 249.461l-32 30.507L186.301 402 448 140.506 416 110z"></path>
                 </svg>
             </span>
@@ -834,13 +951,18 @@
         </x-core::table.body.cell>
         <x-core::table.body.cell>
             <span class="file-status text-__status__">__message__</span>
+            <span class="progress-percent"></span>
         </x-core::table.body.cell>
     </x-core::table.body.row>
 </x-core::custom-template>
 
 <x-core::custom-template id="rv_media_breadcrumb_item">
     <li>
-        <a href="#" data-folder="__folderId__" class="text-decoration-none js-change-folder">
+        <a
+            href="#"
+            data-folder="__folderId__"
+            class="text-decoration-none js-change-folder"
+        >
             __icon__
             __name__
         </a>
@@ -851,7 +973,11 @@
     <div class="mb-3">
         <div class="input-group">
             <div class="input-group-text">__icon__</div>
-            <input class="form-control" placeholder="__placeholder__" value="__value__">
+            <input
+                class="form-control"
+                placeholder="__placeholder__"
+                value="__value__"
+            >
         </div>
     </div>
 
@@ -864,7 +990,11 @@
         data-bb-target=".rename-physical-file-warning"
     />
 
-    <x-core::alert type="warning" class="rename-physical-file-warning" style="display: none">
+    <x-core::alert
+        type="warning"
+        class="rename-physical-file-warning"
+        style="display: none"
+    >
         {{ trans('core/media::media.rename_physical_file_warning') }}
     </x-core::alert>
 </x-core::custom-template>
@@ -875,15 +1005,25 @@
             <div class="input-group-text">
                 __icon__
             </div>
-            <input class="form-control" placeholder="__placeholder__" value="__value__">
+            <input
+                class="form-control"
+                placeholder="__placeholder__"
+                value="__value__"
+            >
         </div>
     </div>
 </x-core::custom-template>
 
 <x-core::custom-template id="rv_media_crop_image">
-    <img src="__src__" style="display: block;max-width: 100%">
+    <img
+        src="__src__"
+        style="display: block;max-width: 100%"
+    >
 </x-core::custom-template>
 
-<div class="media-download-popup" style="display: none">
+<div
+    class="media-download-popup"
+    style="display: none"
+>
     <x-core::alert type="success">{{ trans('core/media::media.prepare_file_to_download') }}</x-core::alert>
 </div>

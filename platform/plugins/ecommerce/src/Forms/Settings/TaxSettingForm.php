@@ -5,10 +5,8 @@ namespace Botble\Ecommerce\Forms\Settings;
 use Botble\Base\Forms\FieldOptions\OnOffFieldOption;
 use Botble\Base\Forms\Fields\HtmlField;
 use Botble\Base\Forms\Fields\OnOffCheckboxField;
-use Botble\Base\Forms\Fields\SelectField;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Http\Requests\Settings\TaxSettingRequest;
-use Botble\Ecommerce\Models\Tax;
 use Botble\Setting\Forms\SettingForm;
 
 class TaxSettingForm extends SettingForm
@@ -39,14 +37,16 @@ class TaxSettingForm extends SettingForm
                     EcommerceHelper::isTaxEnabled() ? 'block' : 'none'
                 ),
             ])
-            ->add('default_tax_rate', SelectField::class, [
-                'label' => trans('plugins/ecommerce::setting.tax.form.default_tax_rate'),
-                'selected' => get_ecommerce_setting('default_tax_rate'),
-                'choices' => [0 => trans('plugins/ecommerce::setting.tax.form.select_tax')] +
-                    app(Tax::class)->pluck('title', 'id')->all(),
-                'help_block' => [
-                    'text' => trans('plugins/ecommerce::setting.tax.form.default_tax_rate_description'),
-                ],
+            ->add('tax_management_info', HtmlField::class, [
+                'html' => sprintf(
+                    '<div class="alert alert-info d-flex align-items-center mb-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon alert-icon me-2" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" /><path d="M12 9h.01" /><path d="M11 12h1v4h1" /></svg>
+                        <div>%s <a href="%s" class="alert-link">%s</a></div>
+                    </div>',
+                    trans('plugins/ecommerce::setting.tax.manage_taxes_info'),
+                    route('tax.index'),
+                    trans('plugins/ecommerce::setting.tax.go_to_taxes')
+                ),
             ])
             ->add(
                 'display_product_price_including_taxes',
@@ -54,6 +54,7 @@ class TaxSettingForm extends SettingForm
                 OnOffFieldOption::make()
                     ->label(trans('plugins/ecommerce::setting.tax.form.display_product_price_including_taxes'))
                     ->value(EcommerceHelper::isDisplayProductIncludingTaxes())
+                    ->helperText(trans('plugins/ecommerce::setting.tax.form.display_product_price_including_taxes_helper'))
             )
             ->add(
                 'display_tax_fields_at_checkout_page',
@@ -63,6 +64,29 @@ class TaxSettingForm extends SettingForm
                     ->value(EcommerceHelper::isDisplayTaxFieldsAtCheckoutPage())
                     ->helperText(trans('plugins/ecommerce::setting.tax.form.display_company_invoice_information_fields_at_checkout_page_helper'))
             )
+            ->add(
+                'display_checkout_tax_information',
+                OnOffCheckboxField::class,
+                OnOffFieldOption::make()
+                    ->label(trans('plugins/ecommerce::setting.tax.form.display_checkout_tax_information'))
+                    ->value(EcommerceHelper::isDisplayCheckoutTaxInformation())
+                    ->helperText(trans('plugins/ecommerce::setting.tax.form.display_checkout_tax_information_helper'))
+            )
+            ->add(
+                'display_item_tax_at_checkout',
+                OnOffCheckboxField::class,
+                OnOffFieldOption::make()
+                    ->label(trans('plugins/ecommerce::setting.tax.form.display_item_tax_at_checkout'))
+                    ->value(EcommerceHelper::isDisplayItemTaxAtCheckout())
+                    ->helperText(trans('plugins/ecommerce::setting.tax.form.display_item_tax_at_checkout_helper'))
+            )
+            ->add('display_tax_description', 'onOffCheckbox', [
+                'label' => trans('plugins/ecommerce::setting.tax.display_tax_description'),
+                'value' => get_ecommerce_setting('display_tax_description', false),
+                'help_block' => [
+                    'text' => trans('plugins/ecommerce::setting.tax.display_tax_description_help'),
+                ],
+            ])
             ->add('close_fieldset_tax_settings', 'html', [
                 'html' => '</fieldset>',
             ]);

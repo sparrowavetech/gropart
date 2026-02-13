@@ -6,9 +6,11 @@ use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Forms\FieldOptions\AlertFieldOption;
 use Botble\Base\Forms\FieldOptions\CheckboxFieldOption;
 use Botble\Base\Forms\FieldOptions\TextFieldOption;
+use Botble\Base\Forms\FieldOptions\UiSelectorFieldOption;
 use Botble\Base\Forms\Fields\AlertField;
 use Botble\Base\Forms\Fields\OnOffCheckboxField;
 use Botble\Base\Forms\Fields\TextField;
+use Botble\Base\Forms\Fields\UiSelectorField;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Setting\Forms\SettingForm;
 use Botble\SocialLogin\Facades\SocialService;
@@ -24,9 +26,7 @@ class SocialLoginSettingForm extends SettingForm
         $this
             ->setSectionTitle(trans('plugins/social-login::social-login.settings.title'))
             ->setSectionDescription(trans('plugins/social-login::social-login.settings.description'))
-            ->setValidatorClass(SocialLoginSettingRequest::class);
-
-        $this
+            ->setValidatorClass(SocialLoginSettingRequest::class)
             ->add(
                 'social_login_enable',
                 OnOffCheckboxField::class,
@@ -60,9 +60,10 @@ class SocialLoginSettingForm extends SettingForm
                             ->label($label)
                             ->value($isDisabled ? SocialService::getDataDisable($provider . '_' . $input) : setting($key))
                             ->disabled($isDisabled)
-                            ->toArray()
                     );
             }
+
+            $callbackUrl = apply_filters('social_login_callback_url', route('auth.social.callback', $provider), $provider);
 
             $this
                 ->add(
@@ -70,11 +71,10 @@ class SocialLoginSettingForm extends SettingForm
                     AlertField::class,
                     AlertFieldOption::make()
                         ->content(BaseHelper::clean($item['label']['helper'] ?? trans('plugins/social-login::social-login.settings.' . $provider . '.helper', [
-                            'callback' => '<code class=\'text-danger\'>' . route('auth.social.callback', $provider) . '</code>',
+                            'callback' => '<code class=\'text-danger\'>' . $callbackUrl . '</code>',
                         ])))
-                        ->toArray()
                 )
-                ->when($provider === 'facebook', function (FormAbstract $form) {
+                ->when($provider === 'facebook', function (FormAbstract $form): void {
                     $form
                         ->add(
                             'social_login_facebook_data_deletion_request_callback_url',
@@ -83,13 +83,34 @@ class SocialLoginSettingForm extends SettingForm
                                 ->content(trans('plugins/social-login::social-login.settings.facebook.data_deletion_request_callback_url', [
                                     'url' => sprintf('<code class="text-danger">%s</code>', route('facebook-data-deletion-request-callback')),
                                 ]))
-                                ->toArray()
                         );
                 });
 
             $this->addCloseCollapsible($enabledKey, '1');
         }
 
-        $this->addCloseCollapsible('social_login_enable', '1');
+        $this
+            ->add(
+                'social_login_style',
+                UiSelectorField::class,
+                UiSelectorFieldOption::make()
+                    ->label(trans('plugins/social-login::social-login.settings.style'))
+                    ->choices([
+                        'default' => [
+                            'image' => asset('vendor/core/plugins/social-login/images/styles/default.png'),
+                            'label' => trans('plugins/social-login::social-login.settings.default'),
+                        ],
+                        'basic' => [
+                            'image' => asset('vendor/core/plugins/social-login/images/styles/basic.png'),
+                            'label' => trans('plugins/social-login::social-login.settings.basic'),
+                        ],
+                        'minimal' => [
+                            'image' => asset('vendor/core/plugins/social-login/images/styles/minimal.png'),
+                            'label' => trans('plugins/social-login::social-login.settings.minimal'),
+                        ],
+                    ])
+                    ->selected(setting('social_login_style', 'default'))
+            )
+            ->addCloseCollapsible('social_login_enable', '1');
     }
 }

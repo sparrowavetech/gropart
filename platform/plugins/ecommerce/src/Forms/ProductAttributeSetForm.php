@@ -40,7 +40,7 @@ class ProductAttributeSetForm extends FormAbstract
             $this->request->input('ref_lang') != Language::getDefaultLocaleCode();
 
         $this
-            ->setupModel(new ProductAttributeSet())
+            ->model(ProductAttributeSet::class)
             ->setValidatorClass(ProductAttributeSetsRequest::class)
             ->setFormOption('class', 'update-attribute-set-form')
             ->add('title', 'text', [
@@ -50,11 +50,20 @@ class ProductAttributeSetForm extends FormAbstract
                     'data-counter' => 120,
                 ],
             ])
+            ->add('slug', 'text', [
+                'label' => trans('core/base::forms.slug'),
+                'attr' => [
+                    'data-counter' => 120,
+                ],
+                'help_block' => [
+                    'text' => trans('plugins/ecommerce::product-attribute-sets.slug_help_block'),
+                ],
+            ])
             ->add('use_image_from_product_variation', 'onOff', [
                 'label' => trans('plugins/ecommerce::product-attribute-sets.use_image_from_product_variation'),
                 'default_value' => false,
             ])
-            ->add('status', SelectField::class, StatusFieldOption::make()->toArray())
+            ->add('status', SelectField::class, StatusFieldOption::make())
             ->add('display_layout', 'customSelect', [
                 'label' => trans('plugins/ecommerce::product-attribute-sets.display_layout'),
                 'required' => true,
@@ -72,7 +81,7 @@ class ProductAttributeSetForm extends FormAbstract
                 'label' => trans('plugins/ecommerce::product-attribute-sets.use_in_product_listing'),
                 'default_value' => false,
             ])
-            ->add('order', NumberField::class, SortOrderFieldOption::make()->toArray())
+            ->add('order', NumberField::class, SortOrderFieldOption::make())
             ->add(
                 'categories[]',
                 TreeCategoryField::class,
@@ -81,7 +90,6 @@ class ProductAttributeSetForm extends FormAbstract
                     ->choices(ProductCategoryHelper::getActiveTreeCategories())
                     ->selected($this->getModel()->id ? $this->getModel()->categories->pluck('id')->all() : [])
                     ->addAttribute('card-body-class', 'p-0')
-                    ->toArray()
             )
             ->setBreakFieldPoint('status')
             ->addMetaBoxes([

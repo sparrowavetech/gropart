@@ -3,9 +3,9 @@
 namespace Botble\Setting\Http\Requests;
 
 use Botble\Base\Facades\AdminAppearance;
+use Botble\Base\Facades\AdminHelper;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Rules\GoogleFontsRule;
-use Botble\Base\Supports\Language;
 use Botble\Support\Http\Requests\Request;
 use Illuminate\Validation\Rule;
 
@@ -15,13 +15,16 @@ class AdminAppearanceRequest extends Request
     {
         return [
             'admin_logo' => ['nullable', 'string'],
+            'admin_logo_max_height' => ['nullable', 'integer', 'min:10', 'max:300'],
             'admin_favicon' => ['nullable', 'string'],
+            'admin_favicon_type' => ['nullable', 'string', 'in:image/x-icon,image/png,image/svg+xml,image/gif,image/jpeg,image/webp'],
             'login_screen_backgrounds' => ['nullable', 'array'],
             'login_screen_backgrounds*' => ['string', 'required'],
             'admin_title' => ['nullable', 'string', 'max:255'],
-            'admin_appearance_locale' => ['sometimes', 'required', Rule::in(array_keys(Language::getAvailableLocales()))],
+            'admin_appearance_locale' => ['sometimes', 'required', Rule::in(array_keys(AdminHelper::getAdminLocales()))],
             'admin_appearance_locale_direction' => ['required', 'in:ltr,rtl'],
             'rich_editor' => ['required', Rule::in(array_keys(BaseHelper::availableRichEditors()))],
+            'enable_page_visual_builder' => ['nullable', 'bool'],
             'admin_appearance_layout' => ['required', 'string', Rule::in(array_keys(AdminAppearance::getLayouts()))],
             'admin_appearance_show_menu_item_icon' => ['nullable', 'bool'],
             'admin_appearance_container_width' => ['required', 'string', Rule::in(array_keys(AdminAppearance::getContainerWidths()))],

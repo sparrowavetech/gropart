@@ -8,8 +8,10 @@
 
                 errorPlacement: function(error, element) {
                     if (element.closest('[data-bb-toggle="tree-checkboxes"]').length) {
-                        error.insertAfter(element.closest('[data-bb-toggle="tree-checkboxes"]'));
-                    } else if (element.parent('.input-group').length || element.prop('type') === 'checkbox' || element.prop('type') === 'radio') {
+                        error.insertAfter(element.closest(
+                            '[data-bb-toggle="tree-checkboxes"]'));
+                    } else if (element.parent('.input-group').length || element.prop(
+                        'type') === 'checkbox' || element.prop('type') === 'radio') {
                         error.insertAfter(element.parent());
                     } else if ($(element).data('select2')) {
                         error.insertAfter(element.next('span'));
@@ -19,7 +21,8 @@
                 },
 
                 highlight: function(element) {
-                    $(element).closest('.form-control').removeClass('is-valid').addClass('is-invalid');
+                    $(element).closest('.form-control').removeClass('is-valid').addClass(
+                        'is-invalid');
                 },
 
                 @if (isset($validator['ignore']) && is_string($validator['ignore']))
@@ -27,11 +30,13 @@
                 @endif
 
                 unhighlight: function(element) {
-                    $(element).closest('.form-control').removeClass('is-invalid').addClass('is-valid');
+                    $(element).closest('.form-control').removeClass('is-invalid').addClass(
+                        'is-valid');
                 },
 
                 success: function(element) {
-                    $(element).closest('.form-control').removeClass('is-invalid').addClass('is-valid');
+                    $(element).closest('.form-control').removeClass('is-invalid').addClass(
+                        'is-valid');
                 },
 
                 focusInvalid: false,
@@ -42,8 +47,11 @@
                         }
 
                         $('html, body').animate({
-                            scrollTop: $(validator.errorList[0].element).offset().top
-                        }, {{ config('core.js-validation.js-validation.duration_animate') }});
+                                scrollTop: $(validator.errorList[0].element).offset()
+                                    .top
+                            },
+                            {{ config('core.js-validation.js-validation.duration_animate') }}
+                            );
                         $(validator.errorList[0].element).focus();
                     },
                 @endif

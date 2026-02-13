@@ -21,6 +21,8 @@ class UpdateDefaultProductService
         'quantity',
         'allow_checkout_when_out_of_stock',
         'with_storehouse_management',
+        'stock_status',
+        'price_includes_tax',
     ];
 
     public function execute(Product $product)
@@ -51,6 +53,17 @@ class UpdateDefaultProductService
 
         foreach ($data as $item) {
             if ($item === 'sku' && $parent->sku) {
+                continue;
+            }
+
+            if ($item === 'quantity' && $parent->variations()->exists()) {
+                $totalQuantity = $parent->variations()
+                    ->join('ec_products', 'ec_products.id', '=', 'ec_product_variations.product_id')
+                    ->where('ec_products.with_storehouse_management', 1)
+                    ->sum('ec_products.quantity');
+
+                $parent->quantity = $totalQuantity ?: 0;
+
                 continue;
             }
 

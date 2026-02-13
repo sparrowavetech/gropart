@@ -2,6 +2,7 @@
 
 namespace Botble\Ecommerce\Http\Requests;
 
+use Botble\Base\Facades\BaseHelper;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Models\Tax;
 use Botble\Ecommerce\Models\TaxRule;
@@ -19,6 +20,7 @@ class TaxRuleRequest extends Request
             'country' => [Rule::in(array_keys(EcommerceHelper::getAvailableCountries()))],
             'state' => ['nullable'],
             'city' => ['nullable'],
+            'percentage' => ['required', 'numeric', 'between:0,99.99'],
         ];
 
         if (EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation()) {
@@ -38,8 +40,7 @@ class TaxRuleRequest extends Request
         if (EcommerceHelper::isZipCodeEnabled()) {
             $rules['zip_code'] = [
                 'nullable',
-                'min:4',
-                'max:9',
+                ...BaseHelper::getZipcodeValidationRule(true),
                 Rule::unique(TaxRule::class, 'zip_code')->ignore($this->route('rule.id')),
             ];
         }

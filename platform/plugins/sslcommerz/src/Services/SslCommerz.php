@@ -59,9 +59,13 @@ class SslCommerz extends SslCommerzNotification
             throw new Exception('Missing store ID or password!');
         }
 
+        do_action('payment_before_making_api_request', SSLCOMMERZ_PAYMENT_METHOD_NAME, $this->data);
+
         $response = Http::get($this->getApiUrl(), [
             'query' => $this->data,
         ]);
+
+        do_action('payment_after_api_response', SSLCOMMERZ_PAYMENT_METHOD_NAME, $this->data, $response->json());
 
         $data = $response->json();
         $status = Arr::get($data, 'APIConnect');

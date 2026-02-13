@@ -27,7 +27,7 @@ class AddDefaultTranslations
                 $event->data->getTable() . '_id' => $event->data->getKey(),
             ];
 
-            $existing = DB::table($table)->where($condition)->count();
+            $existing = DB::table($table)->where($condition)->exists();
 
             if ($existing) {
                 continue;
@@ -43,6 +43,12 @@ class AddDefaultTranslations
             }
 
             $data = array_merge($data, $condition);
+
+            $data = apply_filters('language_advanced_before_save', $data, $event->data, $event->request);
+
+            $data = array_map(function ($value) {
+                return is_array($value) ? json_encode($value) : $value;
+            }, $data);
 
             DB::table($table)->insert($data);
         }

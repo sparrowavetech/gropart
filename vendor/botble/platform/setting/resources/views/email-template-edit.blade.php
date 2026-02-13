@@ -41,7 +41,11 @@
                 </x-core::form.label>
 
                 <x-core::twig-editor
-                    :variables="EmailHandler::getVariables($pluginData['type'], $pluginData['name'], $pluginData['template_file'])"
+                    :variables="EmailHandler::getVariables(
+                        $pluginData['type'],
+                        $pluginData['name'],
+                        $pluginData['template_file'],
+                    )"
                     :functions="EmailHandler::getFunctions()"
                     :value="$emailContent"
                     name="email_content"
@@ -50,11 +54,7 @@
                 </x-core::twig-editor>
             </x-core::form-group>
 
-            @if (
-                $metabox = apply_filters(
-                    'setting_email_template_meta_boxes',
-                    null,
-                    request()->route()->parameters()))
+            @if ($metabox = apply_filters('setting_email_template_meta_boxes', null, request()->route()->parameters()))
                 <x-slot:footer>
                     <div class="mt-3">
                         {!! $metabox !!}
@@ -95,22 +95,23 @@
     <x-core-setting::section class="mt-6">
         <h4>{{ trans('core/base::base.email_template.icon_variables') }}</h4>
 
-        @if (! empty($iconVariables = EmailHandler::getIconVariables()))
+        @if (!empty(($iconVariables = EmailHandler::getIconVariables())))
             <x-core::table>
                 <x-core::table.header>
                     <x-core::table.header.cell width="50">
-                        {{ trans('core/base::base.email_template.preview')  }}
+                        {{ trans('core/base::base.email_template.preview') }}
                     </x-core::table.header.cell>
 
                     <x-core::table.header.cell>
-                        {{ trans('core/base::base.email_template.variable')  }}
+                        {{ trans('core/base::base.email_template.variable') }}
                     </x-core::table.header.cell>
                 </x-core::table.header>
                 <x-core::table.body>
                     @foreach (EmailHandler::getIconVariables() as $key => $value)
                         <x-core::table.body.row>
                             <x-core::table.body.cell>
-                                <div style="background-color: #206bc4; border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center">
+                                <div
+                                    style="background-color: #206bc4; border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center">
                                     <img
                                         src="{{ $value }}"
                                         width="32"
@@ -141,31 +142,43 @@
                 </x-core::table.body>
             </x-core::table>
         @else
-            <x-core::alert type="warning" class="mt-4" :title="trans('core/base::base.email_template.missing_icons')">
+            <x-core::alert
+                type="warning"
+                class="mt-4"
+                :title="trans('core/base::base.email_template.missing_icons')"
+            >
                 <p class="mt-2">
-                    {!! BaseHelper::clean(trans('core/base::base.email_template.missing_icons_description', [
-                       'from' => Html::tag('code', 'platform/core/base/public/images/email-icons'),
-                       'to' => Html::tag('code', 'public/vendor/core/core/base/images/email-icons'),
-                    ])) !!}
+                    {!! BaseHelper::clean(
+                        trans('core/base::base.email_template.missing_icons_description', [
+                            'from' => Html::tag('code', 'platform/core/base/public/images/email-icons'),
+                            'to' => Html::tag('code', 'public/vendor/core/core/base/images/email-icons'),
+                        ]),
+                    ) !!}
                 </p>
             </x-core::alert>
         @endif
 
-        <x-core::alert class="mt-4" :title="trans('core/base::base.email_template.usage')">
+        <x-core::alert
+            class="mt-4"
+            :title="trans('core/base::base.email_template.usage')"
+        >
             <ul class="mt-2">
                 <li>
                     <p>
-                        {!! BaseHelper::clean(trans('core/base::base.email_template.icon_variable_usage_description', [
-                            'variable' => Html::tag('code', '&#123;&#123 \'example\' | icon_url &#125;&#125;'),
-                        ])) !!}
+                        {!! BaseHelper::clean(
+                            trans('core/base::base.email_template.icon_variable_usage_description', [
+                                'variable' => Html::tag('code', '&#123;&#123 \'example\' | icon_url &#125;&#125;'),
+                            ]),
+                        ) !!}
                     </p>
                     <pre><code>&lt;img src="&#123;&#123 'example' | icon_url &#125;&#125;" class="bb-va-middle" width="40" height="40" alt="Icon"&gt;</code></pre>
                 </li>
                 <li>
-                    {!! BaseHelper::clean(trans(
-                        'core/base::base.email_template.add_more_icon_description',
-                        ['path' => Html::tag('code', 'public/vendor/core/core/base/images/email-icons')]
-                    )) !!}
+                    {!! BaseHelper::clean(
+                        trans('core/base::base.email_template.add_more_icon_description', [
+                            'path' => Html::tag('code', 'public/vendor/core/core/base/images/email-icons'),
+                        ]),
+                    ) !!}
                 </li>
             </ul>
         </x-core::alert>

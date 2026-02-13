@@ -18,7 +18,7 @@ class TableBulkActionController extends TableController
             return $this
                 ->httpResponse()
                 ->setError()
-                ->setMessage(trans('core/table::invalid_bulk_action'));
+                ->setMessage(trans('core/table::table.invalid_bulk_action'));
         }
 
         try {
@@ -34,7 +34,7 @@ class TableBulkActionController extends TableController
             return $this
                 ->httpResponse()
                 ->setError()
-                ->setMessage(__('Something went wrong.'));
+                ->setMessage(trans('core/table::table.something_went_wrong'));
         }
     }
 }

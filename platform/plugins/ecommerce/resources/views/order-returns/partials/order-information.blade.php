@@ -14,8 +14,10 @@
                 @foreach ($returnRequest->items as $returnRequestItem)
                     @php
                         $orderProduct = $returnRequestItem->orderProduct;
-                        $product = $orderProduct->product;
+                        $product = $orderProduct?->product;
                     @endphp
+
+                    @continue(! $orderProduct || ! $product)
 
                     <x-core::table.body.row>
                         <x-core::table.body.cell style="width: 80px">
@@ -93,6 +95,32 @@
         </div>
     </x-core::card.body>
 </x-core::card>
+
+@if ($returnRequest->images && count($returnRequest->images))
+    <x-core::card class="mb-3">
+        <x-core::card.header>
+            <x-core::card.title>
+                {{ trans('plugins/ecommerce::order.return_images') }}
+            </x-core::card.title>
+        </x-core::card.header>
+        <x-core::card.body>
+            <div class="row g-2">
+                @foreach ($returnRequest->images as $image)
+                    <div class="col-auto">
+                        <a href="{{ RvMedia::getImageUrl($image) }}" target="_blank" class="d-block">
+                            <img
+                                src="{{ RvMedia::getImageUrl($image, 'thumb') }}"
+                                alt="{{ trans('plugins/ecommerce::order.return_image') }}"
+                                class="img-thumbnail"
+                                style="max-width: 120px; max-height: 120px; object-fit: cover;"
+                            >
+                        </a>
+                    </div>
+                @endforeach
+            </div>
+        </x-core::card.body>
+    </x-core::card>
+@endif
 
 @if (! in_array($returnRequest->return_status, [
     Botble\Ecommerce\Enums\OrderReturnStatusEnum::COMPLETED,
@@ -203,7 +231,7 @@
     </x-core::card.header>
 
     <x-core::card.body>
-        <ul class="steps steps-vertical">
+        <ul class="steps steps-vertical border-0 p-0 m-0">
             @foreach($returnRequest->histories as $history)
                 <li @class(['step-item', 'user-action' => $loop->first])>
                     <div class="h4 m-0">{{ $history->description }}</div>

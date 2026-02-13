@@ -1,12 +1,14 @@
 <?php
 
 use Botble\Base\Facades\AdminHelper;
+use Botble\Marketplace\Http\Controllers\VendorBlockedController;
+use Botble\Marketplace\Http\Controllers\WithdrawalInvoiceController;
 use Illuminate\Support\Facades\Route;
 
-AdminHelper::registerRoutes(function () {
-    Route::group(['namespace' => 'Botble\Marketplace\Http\Controllers'], function () {
-        Route::group(['prefix' => 'marketplaces', 'as' => 'marketplace.'], function () {
-            Route::group(['prefix' => 'stores', 'as' => 'store.'], function () {
+AdminHelper::registerRoutes(function (): void {
+    Route::group(['namespace' => 'Botble\Marketplace\Http\Controllers'], function (): void {
+        Route::group(['prefix' => 'marketplaces', 'as' => 'marketplace.'], function (): void {
+            Route::group(['prefix' => 'stores', 'as' => 'store.'], function (): void {
                 Route::resource('', 'StoreController')->parameters(['' => 'store']);
                 Route::post('update-tax-info/{store}', [
                     'as' => 'update-tax-info',
@@ -24,7 +26,19 @@ AdminHelper::registerRoutes(function () {
                     'uses' => 'StoreRevenueController@view',
                 ])->wherePrimaryKey();
 
-                Route::group(['prefix' => 'revenues', 'as' => 'revenue.'], function () {
+                Route::post('verify/{id}', [
+                    'as' => 'verify',
+                    'uses' => 'StoreController@verify',
+                    'permission' => 'marketplace.store.edit',
+                ])->wherePrimaryKey();
+
+                Route::post('unverify/{id}', [
+                    'as' => 'unverify',
+                    'uses' => 'StoreController@unverify',
+                    'permission' => 'marketplace.store.edit',
+                ])->wherePrimaryKey();
+
+                Route::group(['prefix' => 'revenues', 'as' => 'revenue.'], function (): void {
                     Route::match(['GET', 'POST'], 'list/{id}', [
                         'as' => 'index',
                         'uses' => 'StoreRevenueController@index',
@@ -38,13 +52,16 @@ AdminHelper::registerRoutes(function () {
                 });
             });
 
-            Route::group(['prefix' => 'withdrawals', 'as' => 'withdrawal.'], function () {
+            Route::group(['prefix' => 'withdrawals', 'as' => 'withdrawal.'], function (): void {
                 Route::resource('', 'WithdrawalController')
                     ->parameters(['' => 'withdrawal'])
                     ->except([
                         'create',
                         'store',
                     ]);
+
+                Route::get('{withdrawal}/invoice', [WithdrawalInvoiceController::class, '__invoke'])
+                    ->name('invoice');
             });
 
             Route::get('settings', [
@@ -58,7 +75,7 @@ AdminHelper::registerRoutes(function () {
                 'permission' => 'marketplace.settings',
             ]);
 
-            Route::group(['prefix' => 'unverified-vendors', 'as' => 'unverified-vendors.'], function () {
+            Route::group(['prefix' => 'unverified-vendors', 'as' => 'unverified-vendors.'], function (): void {
                 Route::match(['GET', 'POST'], '/', [
                     'as' => 'index',
                     'uses' => 'UnverifiedVendorController@index',
@@ -70,24 +87,59 @@ AdminHelper::registerRoutes(function () {
                     'permission' => 'marketplace.unverified-vendors.edit',
                 ])->wherePrimaryKey();
 
-                /*Route::post('approve/{id}', [
+                Route::post('approve/{id}', [
                     'as' => 'approve-vendor',
                     'uses' => 'UnverifiedVendorController@approveVendor',
                     'permission' => 'marketplace.unverified-vendors.edit',
-                ])->wherePrimaryKey();*/
+                ])->wherePrimaryKey();
 
-                Route::match(['GET', 'POST'], 'approve/{id}', [
-                    'as' => 'approve-vendor',
-                    'uses' => 'UnverifiedVendorController@approveVendor',
+                Route::post('reject/{id}', [
+                    'as' => 'reject-vendor',
+                    'uses' => 'UnverifiedVendorController@rejectVendor',
                     'permission' => 'marketplace.unverified-vendors.edit',
-                ]);
+                ])->wherePrimaryKey();
+
+                Route::get('download-certificate/{id}', [
+                    'as' => 'download-certificate',
+                    'uses' => 'UnverifiedVendorController@downloadCertificate',
+                    'permission' => 'marketplace.unverified-vendors.edit',
+                ])->wherePrimaryKey();
+
+                Route::get('download-government-id/{id}', [
+                    'as' => 'download-government-id',
+                    'uses' => 'UnverifiedVendorController@downloadGovernmentId',
+                    'permission' => 'marketplace.unverified-vendors.edit',
+                ])->wherePrimaryKey();
             });
 
-            Route::group(['prefix' => 'vendors', 'as' => 'vendors.'], function () {
+            Route::group(['prefix' => 'vendors', 'as' => 'vendors.'], function (): void {
                 Route::match(['GET', 'POST'], '/', [
                     'as' => 'index',
                     'uses' => 'VendorController@index',
                 ]);
+
+                Route::get('view/{id}', [
+                    'as' => 'view',
+                    'uses' => 'VendorController@view',
+                    'permission' => 'marketplace.vendors.index',
+                ])->wherePrimaryKey();
+
+                Route::get('download-certificate/{id}', [
+                    'as' => 'download-certificate',
+                    'uses' => 'VendorController@downloadCertificate',
+                    'permission' => 'marketplace.vendors.index',
+                ])->wherePrimaryKey();
+
+                Route::get('download-government-id/{id}', [
+                    'as' => 'download-government-id',
+                    'uses' => 'VendorController@downloadGovernmentId',
+                    'permission' => 'marketplace.vendors.index',
+                ])->wherePrimaryKey();
+
+                Route::group(['permission' => 'marketplace.vendors.control'], function (): void {
+                    Route::post('block/{id}', [VendorBlockedController::class, 'store'])->name('block');
+                    Route::post('unblock/{id}', [VendorBlockedController::class, 'destroy'])->name('unblock');
+                });
             });
 
             Route::group([
@@ -95,7 +147,7 @@ AdminHelper::registerRoutes(function () {
                 'as' => 'reports.',
                 'permission' => 'marketplace.reports',
                 'controller' => 'ReportController',
-            ], function () {
+            ], function (): void {
                 Route::get('', [
                     'as' => 'index',
                     'uses' => 'index',
@@ -105,15 +157,24 @@ AdminHelper::registerRoutes(function () {
                     'as' => 'store-revenues',
                     'uses' => 'getStoreRevenues',
                 ]);
+
+                Route::post('recent-withdrawals', [
+                    'as' => 'recent-withdrawals',
+                    'uses' => 'getRecentWithdrawals',
+                ]);
             });
 
-            Route::get('generate-seller-invoice/{id}', [
-                'as' => 'generate-seller-invoice',
-                'uses' => 'SellerInvoiceController@getGenerateInvoice',
-            ])->wherePrimaryKey('id');
+            Route::group(['prefix' => 'messages', 'as' => 'messages.'], function (): void {
+                Route::resource('', 'MessageController')->parameters(['' => 'message'])->only(['index', 'show', 'destroy']);
+
+                Route::get('show/{id}', [
+                    'as' => 'show',
+                    'uses' => 'MessageController@show',
+                ])->wherePrimaryKey();
+            });
         });
 
-        Route::group(['prefix' => 'ecommerce/products', 'as' => 'products.'], function () {
+        Route::group(['prefix' => 'ecommerce/products', 'as' => 'products.'], function (): void {
             Route::post('approve-product/{id}', [
                 'as' => 'approve-product',
                 'uses' => 'ProductController@approveProduct',
@@ -121,17 +182,4 @@ AdminHelper::registerRoutes(function () {
             ])->wherePrimaryKey();
         });
     });
-});
-
-Route::group(['namespace' => 'Botble\Marketplace\Http\Controllers'], function () {
-    Route::group(['prefix' => 'marketplaces', 'as' => 'marketplace.'], function () {
-        Route::group(['prefix' => 'revenues', 'as' => 'revenue.'], function () {
-            Route::get('generate-seller-invoice/{id}', [
-                'as' => 'generate-seller-invoice',
-                'uses' => 'SellerInvoiceController@getGenerateInvoice',
-            ])->wherePrimaryKey('id');
-        });
-    });
-
-    // Other frontend routes can go here
 });

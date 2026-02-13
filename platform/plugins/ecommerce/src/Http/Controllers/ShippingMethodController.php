@@ -3,8 +3,8 @@
 namespace Botble\Ecommerce\Http\Controllers;
 
 use Botble\Base\Events\CreatedContentEvent;
-use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
+use Botble\Base\Http\Actions\DeleteResourceAction;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Ecommerce\Enums\ShippingRuleTypeEnum;
 use Botble\Ecommerce\Http\Requests\AddShippingRegionRequest;
@@ -64,15 +64,12 @@ class ShippingMethodController extends BaseController
 
     public function deleteRegion(Request $request)
     {
+        /**
+         * @var Shipping $shipping
+         */
         $shipping = Shipping::query()->findOrFail($request->input('id'));
 
-        $shipping->delete();
-
-        event(new DeletedContentEvent(SHIPPING_MODULE_SCREEN_NAME, $request, $shipping));
-
-        return $this
-            ->httpResponse()
-            ->setMessage(trans('core/base::notices.delete_success_message'));
+        return DeleteResourceAction::make($shipping);
     }
 
     public function deleteRegionRule(Request $request)
@@ -83,9 +80,12 @@ class ShippingMethodController extends BaseController
         $ruleCount = ShippingRule::query()->where('shipping_id', $rule->shipping_id)->count();
 
         if ($ruleCount === 0) {
+            /**
+             * @var Shipping $shipping
+             */
             $shipping = Shipping::query()->findOrFail($rule->shipping_id);
+
             $shipping->delete();
-            event(new DeletedContentEvent(SHIPPING_MODULE_SCREEN_NAME, $request, $shipping));
         }
 
         return $this
@@ -138,7 +138,7 @@ class ShippingMethodController extends BaseController
     {
         $shipping = Shipping::query()->findOrFail($request->input('shipping_id'));
 
-        if (! $shipping->country && in_array($request->input('type'), [ShippingRuleTypeEnum::BASED_ON_ZIPCODE, ShippingRuleTypeEnum::BASED_ON_LOCATION])) {
+        if (! $shipping->country && in_array($request->input('type'), [ShippingRuleTypeEnum::BASED_ON_ZIPCODE, ShippingRuleTypeEnum::BASED_ON_ZIPCODE_AND_WEIGHT, ShippingRuleTypeEnum::BASED_ON_LOCATION])) {
             return $this
                 ->httpResponse()
                 ->setError()

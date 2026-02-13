@@ -2,8 +2,8 @@
 
 namespace Botble\Ecommerce\Http\Controllers;
 
-use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Facades\Assets;
+use Botble\Base\Http\Actions\DeleteResourceAction;
 use Botble\Base\Supports\Breadcrumb;
 use Botble\Ecommerce\Enums\OrderReturnStatusEnum;
 use Botble\Ecommerce\Facades\EcommerceHelper;
@@ -11,9 +11,7 @@ use Botble\Ecommerce\Facades\OrderReturnHelper;
 use Botble\Ecommerce\Http\Requests\UpdateOrderReturnRequest;
 use Botble\Ecommerce\Models\OrderReturn;
 use Botble\Ecommerce\Tables\OrderReturnTable;
-use Exception;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Http\Request;
 
 class OrderReturnController extends BaseController
 {
@@ -79,21 +77,8 @@ class OrderReturnController extends BaseController
             ->withUpdatedSuccessMessage();
     }
 
-    public function destroy(OrderReturn $orderReturn, Request $request)
+    public function destroy(OrderReturn $orderReturn)
     {
-        try {
-            $orderReturn->delete();
-
-            event(new DeletedContentEvent(ORDER_RETURN_MODULE_SCREEN_NAME, $request, $orderReturn));
-
-            return $this
-                ->httpResponse()
-                ->setMessage(trans('core/base::notices.delete_success_message'));
-        } catch (Exception $exception) {
-            return $this
-                ->httpResponse()
-                ->setError()
-                ->setMessage($exception->getMessage());
-        }
+        return DeleteResourceAction::make($orderReturn);
     }
 }

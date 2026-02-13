@@ -1,7 +1,8 @@
 #rv_media_body {
     display: flex;
     flex-direction: column;
-    max-height: calc(100vh - 8rem);
+    max-height: calc(100vh - 6rem);
+    min-height: 550px;
 }
 
 .navbar .dropdown-menu-right {
@@ -53,6 +54,20 @@
             .rv-dropdown-actions {
                 .dropdown-toggle:after {
                     display: none;
+                }
+                
+                .dropdown-menu {
+                    max-height: 300px;
+                    overflow-y: auto;
+                    overflow-x: hidden;
+                    
+                    @media (max-height: 600px) {
+                        max-height: 200px;
+                    }
+                    
+                    @media (max-height: 400px) {
+                        max-height: 150px;
+                    }
                 }
             }
         }
@@ -163,4 +178,8 @@
     position: absolute;
     bottom: 0;
     right: 24px;
+}
+
+li.context-menu-item.context-menu-icon-updated.media-action-trash {
+    color: rgba(var(--bb-danger-rgb), 1) !important;
 }

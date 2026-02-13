@@ -13,16 +13,6 @@ if (! function_exists('get_product_categories')) {
     }
 }
 
-if (! function_exists('get_product_categories_withparent')) {
-    /**
-     * @deprecated
-     */
-    function get_product_categories_withparent(array $params = [], bool $onlyParent = false): Collection
-    {
-        return ProductCategoryHelper::getAllProductCategories($params, $onlyParent);
-    }
-}
-
 if (! function_exists('get_product_categories_with_children')) {
     /**
      * @deprecated

@@ -4,9 +4,11 @@ namespace Botble\Location\Forms;
 
 use Botble\Base\Facades\Assets;
 use Botble\Base\Forms\FieldOptions\IsDefaultFieldOption;
+use Botble\Base\Forms\FieldOptions\MediaImageFieldOption;
 use Botble\Base\Forms\FieldOptions\NameFieldOption;
 use Botble\Base\Forms\FieldOptions\SortOrderFieldOption;
 use Botble\Base\Forms\FieldOptions\StatusFieldOption;
+use Botble\Base\Forms\FieldOptions\TextFieldOption;
 use Botble\Base\Forms\Fields\MediaImageField;
 use Botble\Base\Forms\Fields\NumberField;
 use Botble\Base\Forms\Fields\OnOffField;
@@ -33,11 +35,11 @@ class CityForm extends FormAbstract
         $this
             ->model(City::class)
             ->setValidatorClass(CityRequest::class)
-            ->add('name', TextField::class, NameFieldOption::make()->required()->toArray())
+            ->add('name', TextField::class, NameFieldOption::make()->required())
             ->add('slug', TextField::class, [
-                'label' => __('Slug'),
+                'label' => trans('plugins/location::location.slug'),
                 'attr' => [
-                    'placeholder' => __('Slug'),
+                    'placeholder' => trans('plugins/location::location.slug'),
                     'data-counter' => 120,
                 ],
             ])
@@ -67,10 +69,17 @@ class CityForm extends FormAbstract
                         :
                         [0 => trans('plugins/location::city.select_state')]) + $states,
             ])
-            ->add('order', NumberField::class, SortOrderFieldOption::make()->toArray())
-            ->add('is_default', OnOffField::class, IsDefaultFieldOption::make()->toArray())
-            ->add('status', SelectField::class, StatusFieldOption::make()->toArray())
-            ->add('image', MediaImageField::class)
+            ->add(
+                'zip_code',
+                TextField::class,
+                TextFieldOption::make()
+                    ->label(trans('plugins/location::city.zip_code'))
+                    ->helperText(trans('plugins/location::city.zip_code_helper'))
+            )
+            ->add('order', NumberField::class, SortOrderFieldOption::make())
+            ->add('is_default', OnOffField::class, IsDefaultFieldOption::make())
+            ->add('status', SelectField::class, StatusFieldOption::make())
+            ->add('image', MediaImageField::class, MediaImageFieldOption::make())
             ->setBreakFieldPoint('status');
     }
 }

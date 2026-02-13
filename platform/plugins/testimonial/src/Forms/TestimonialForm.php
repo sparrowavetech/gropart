@@ -2,52 +2,37 @@
 
 namespace Botble\Testimonial\Forms;
 
-use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Base\Forms\FieldOptions\ContentFieldOption;
+use Botble\Base\Forms\FieldOptions\MediaImageFieldOption;
+use Botble\Base\Forms\FieldOptions\NameFieldOption;
+use Botble\Base\Forms\FieldOptions\StatusFieldOption;
+use Botble\Base\Forms\FieldOptions\TextFieldOption;
+use Botble\Base\Forms\Fields\EditorField;
+use Botble\Base\Forms\Fields\MediaImageField;
+use Botble\Base\Forms\Fields\SelectField;
+use Botble\Base\Forms\Fields\TextField;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Testimonial\Http\Requests\TestimonialRequest;
 use Botble\Testimonial\Models\Testimonial;
 
 class TestimonialForm extends FormAbstract
 {
-    public function buildForm(): void
+    public function setup(): void
     {
         $this
-            ->setupModel(new Testimonial())
+            ->model(Testimonial::class)
             ->setValidatorClass(TestimonialRequest::class)
-            ->withCustomFields()
-            ->add('name', 'text', [
-                'label' => trans('core/base::forms.name'),
-                'label_attr' => ['class' => 'control-label required'],
-                'attr' => [
-                    'placeholder' => trans('core/base::forms.name_placeholder'),
-                    'data-counter' => 120,
-                ],
-            ])
-            ->add('company', 'text', [
-                'label' => trans('plugins/testimonial::testimonial.company'),
-                'label_attr' => ['class' => 'control-label'],
-                'attr' => [
-                    'placeholder' => trans('plugins/testimonial::testimonial.company'),
-                    'data-counter' => 120,
-                ],
-            ])
-            ->add('content', 'editor', [
-                'label' => trans('core/base::forms.content'),
-                'label_attr' => ['class' => 'control-label required'],
-                'attr' => [
-                    'rows' => 4,
-                    'placeholder' => trans('core/base::forms.description_placeholder'),
-                ],
-            ])
-            ->add('status', 'customSelect', [
-                'label' => trans('core/base::tables.status'),
-                'label_attr' => ['class' => 'control-label required'],
-                'choices' => BaseStatusEnum::labels(),
-            ])
-            ->add('image', 'mediaImage', [
-                'label' => trans('core/base::forms.image'),
-                'label_attr' => ['class' => 'control-label'],
-            ])
+            ->add('name', TextField::class, NameFieldOption::make()->required())
+            ->add(
+                'company',
+                TextField::class,
+                TextFieldOption::make()->label(trans('plugins/testimonial::testimonial.company'))->maxLength(
+                    120
+                )
+            )
+            ->add('content', EditorField::class, ContentFieldOption::make()->required())
+            ->add('status', SelectField::class, StatusFieldOption::make())
+            ->add('image', MediaImageField::class, MediaImageFieldOption::make())
             ->setBreakFieldPoint('status');
     }
 }

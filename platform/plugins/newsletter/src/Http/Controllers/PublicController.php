@@ -3,6 +3,10 @@
 namespace Botble\Newsletter\Http\Controllers;
 
 use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Forms\FieldOptions\CheckboxFieldOption;
+use Botble\Base\Forms\FieldOptions\EmailFieldOption;
+use Botble\Base\Forms\Fields\CheckboxField;
+use Botble\Base\Forms\Fields\EmailField;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Newsletter\Enums\NewsletterStatusEnum;
 use Botble\Newsletter\Events\SubscribeNewsletterEvent;
@@ -22,7 +26,7 @@ class PublicController extends BaseController
         $newsletterForm = NewsletterForm::create();
         $newsletterForm->setRequest($request);
 
-        $newsletterForm->onlyValidatedData()->saving(function (NewsletterForm $form) {
+        $newsletterForm->onlyValidatedData()->saving(function (NewsletterForm $form): void {
             /**
              * @var NewsletterRequest $request
              */
@@ -32,13 +36,12 @@ class PublicController extends BaseController
              * @var Newsletter $newsletter
              */
             $newsletter = $form->getModel()->newQuery()->firstOrNew([
-                'name' => $request->input('name'),
                 'email' => $request->input('email'),
             ], [
                 ...$form->getRequestData(),
                 'status' => NewsletterStatusEnum::SUBSCRIBED,
-                'whatsapp' => '91' . $request->input('whatsapp'),
             ]);
+
             $newsletter->save();
 
             SubscribeNewsletterEvent::dispatch($newsletter);
@@ -46,14 +49,12 @@ class PublicController extends BaseController
 
         return $this
             ->httpResponse()
-            ->setMessage(__('Subscribe to newsletter successfully!'));
+            ->setMessage(trans('plugins/newsletter::newsletter.subscribe_success'));
     }
 
     public function getUnsubscribe(int|string $id, Request $request)
     {
-        if (!URL::hasValidSignature($request)) {
-            abort(404);
-        }
+        abort_unless(URL::hasValidSignature($request), 404);
 
         /**
          * @var Newsletter $newsletter
@@ -73,13 +74,43 @@ class PublicController extends BaseController
             return $this
                 ->httpResponse()
                 ->setNextUrl(BaseHelper::getHomepageUrl())
-                ->setMessage(__('Unsubscribe to newsletter successfully'));
+                ->setMessage(trans('plugins/newsletter::newsletter.unsubscribe_success'));
         }
 
         return $this
             ->httpResponse()
             ->setError()
             ->setNextUrl(BaseHelper::getHomepageUrl())
-            ->setMessage(__('Your email does not exist in the system or you have unsubscribed already!'));
+            ->setMessage(trans('plugins/newsletter::newsletter.email_not_exist_or_unsubscribed'));
+    }
+
+    public function ajaxLoadPopup()
+    {
+        $newsletterForm = NewsletterForm::create()
+            ->remove(['wrapper_before', 'wrapper_after', 'email'])
+            ->addBefore(
+                'submit',
+                'email',
+                EmailField::class,
+                EmailFieldOption::make()
+                    ->label(trans('plugins/newsletter::newsletter.email_address'))
+                    ->maxLength(-1)
+                    ->placeholder(trans('plugins/newsletter::newsletter.enter_your_email'))
+                    ->required()
+            )
+            ->addAfter(
+                'submit',
+                'dont_show_again',
+                CheckboxField::class,
+                CheckboxFieldOption::make()
+                    ->label(trans('plugins/newsletter::newsletter.dont_show_popup_again'))
+                    ->value(false)
+            );
+
+        return $this
+            ->httpResponse()
+            ->setData([
+                'html' => view('plugins/newsletter::partials.popup', compact('newsletterForm'))->render(),
+            ]);
     }
 }

@@ -46,26 +46,28 @@
                                     {{ $storeLocator->is_primary ? trans('core/base::base.yes') : trans('core/base::base.no') }}
                                 </x-core::table.body.cell>
                                 <x-core::table.body.cell class="text-end">
-                                    <x-core::button
-                                        data-bb-toggle="store-locator-show"
-                                        icon="ti ti-edit"
-                                        color="primary"
-                                        data-type="update"
-                                        size="sm"
-                                        :icon-only="true"
-                                        data-load-form="{{ route('ecommerce.store-locators.form', $storeLocator->id) }}"
-                                    />
-                                    @if (!$storeLocator->is_primary && $storeLocators->count() > 1)
+                                    <div class="btn-list flex-nowrap justify-content-end">
                                         <x-core::button
-                                            type="button"
-                                            data-target="{{ route('ecommerce.store-locators.destroy', $storeLocator->id) }}"
-                                            icon="ti ti-trash"
-                                            class="btn-trigger-delete-store-locator"
-                                            color="danger"
+                                            data-bb-toggle="store-locator-show"
+                                            icon="ti ti-edit"
+                                            color="primary"
+                                            data-type="update"
                                             size="sm"
                                             :icon-only="true"
+                                            data-load-form="{{ route('ecommerce.store-locators.form', $storeLocator->id) }}"
                                         />
-                                    @endif
+                                        @if (!$storeLocator->is_primary && $storeLocators->count() > 1)
+                                            <x-core::button
+                                                type="button"
+                                                data-target="{{ route('ecommerce.store-locators.destroy', $storeLocator->id) }}"
+                                                icon="ti ti-trash"
+                                                class="btn-trigger-delete-store-locator"
+                                                color="danger"
+                                                size="sm"
+                                                :icon-only="true"
+                                            />
+                                        @endif
+                                    </div>
                                 </x-core::table.body.cell>
                             </x-core::table.body.row>
                         @endforeach
@@ -96,6 +98,15 @@
                 @endif
             </x-core::card.body>
         </x-core::card>
+
+        <x-core::alert type="info" class="mt-3">
+            <h4 class="alert-title">{{ trans('plugins/ecommerce::setting.store_locator.info.title') }}</h4>
+            <ul class="mb-0">
+                <li>{{ trans('plugins/ecommerce::setting.store_locator.info.primary_store') }}</li>
+                <li>{{ trans('plugins/ecommerce::setting.store_locator.info.shipping_location') }}</li>
+                <li>{{ trans('plugins/ecommerce::setting.store_locator.info.shipment_selection') }}</li>
+            </ul>
+        </x-core::alert>
     </x-core-setting::section>
 @endsection
 
@@ -154,7 +165,7 @@
         :title="trans('plugins/ecommerce::setting.store_locator.form.delete_location')"
         size="md"
     >
-        {!! trans('plugins/ecommerce::setting.store_locator.form.delete_location_confirmation') !!}
+        {!! BaseHelper::clean(trans('plugins/ecommerce::setting.store_locator.form.delete_location_confirmation')) !!}
         <x-slot:footer>
             <x-core::button
                 data-bs-dismiss="modal"

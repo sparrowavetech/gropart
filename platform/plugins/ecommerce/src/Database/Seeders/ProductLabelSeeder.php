@@ -15,14 +15,17 @@ class ProductLabelSeeder extends Seeder
             [
                 'name' => 'Hot',
                 'color' => '#d71e2d',
+                'text_color' => '#ffffff',
             ],
             [
                 'name' => 'New',
                 'color' => '#02856e',
+                'text_color' => '#ffffff',
             ],
             [
                 'name' => 'Sale',
                 'color' => '#fe9931',
+                'text_color' => '#ffffff',
             ],
         ];
 

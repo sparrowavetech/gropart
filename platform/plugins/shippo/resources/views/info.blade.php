@@ -101,13 +101,9 @@
         </div>
 
         @php
-            $url = route('ecommerce.shipments.shippo.transactions.create', $shipment->id);
+            $url = route(app(\Botble\Shippo\Shippo::class)->getRoutePrefixByFactor() . 'shippo.transactions.create', $shipment->id);
             $isShowButton = true;
-            if (!is_in_admin(true)) {
-                if (is_plugin_active('marketplace')) {
-                    $url = route('marketplace.vendor.orders.shippo.transactions.create', $shipment->id);
-                }
-            } elseif (Auth::check() && !Auth::user()->hasPermission('ecommerce.shipments.edit')) {
+            if (is_in_admin(true) && Auth::check() && ! Auth::user()->hasPermission('ecommerce.shipments.edit')) {
                 $isShowButton = false;
             }
         @endphp
@@ -127,13 +123,13 @@
                 <div class="col-12 my-3">
                     <div class="alert alert-warning">
                         <small>
-                            <i class="fa fa-info-circle"></i>
+                            <x-core::icon name="ti ti-info-circle" />
                             <span>{{ trans('plugins/shippo::shippo.note_5') }}</span>
                         </small>
                     </div>
                     <button
                         class="btn btn-primary get-new-rates"
-                        data-url="{{ route('ecommerce.shipments.shippo.rates', $shipment->id) }}"
+                        data-url="{{ route(app(\Botble\Shippo\Shippo::class)->getRoutePrefixByFactor() . 'shippo.rates', $shipment->id) }}"
                         type="button"
                     >
                         {{ trans('plugins/shippo::shippo.recheck_rate') }}

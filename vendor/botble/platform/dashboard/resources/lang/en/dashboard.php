@@ -13,6 +13,7 @@ return [
     'save_setting_success' => 'Save widget settings successfully!',
     'widget_not_exists' => 'Widget is not exits!',
     'manage_widgets' => 'Manage Widgets',
+    'manage_widgets_description' => 'Toggle the widgets you want to display on your dashboard.',
     'fullscreen' => 'Full screen',
     'title' => 'Dashboard',
     'predefined_ranges' => [

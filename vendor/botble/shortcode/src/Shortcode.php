@@ -3,6 +3,7 @@
 namespace Botble\Shortcode;
 
 use Botble\Shortcode\Compilers\ShortcodeCompiler;
+use Closure;
 use Illuminate\Support\Arr;
 use Illuminate\Support\HtmlString;
 
@@ -45,8 +46,12 @@ class Shortcode
         return $this;
     }
 
-    public function compile(string $value, bool $force = false): HtmlString
+    public function compile(?string $value, bool $force = false): HtmlString
     {
+        if (! $value) {
+            return new HtmlString();
+        }
+
         $html = $this->compiler->compile($value, $force);
 
         return new HtmlString($html);
@@ -62,14 +67,29 @@ class Shortcode
         return Arr::sort($this->compiler->getRegistered());
     }
 
-    public function setAdminConfig(string $key, string|null|callable|array $html): void
+    public function setAdminConfig(string $key, string|null|callable|Closure|array $html): void
     {
         $this->compiler->setAdminConfig($key, $html);
     }
 
-    public function modifyAdminConfig(string $key, callable $callback): void
+    public function modifyAdminConfig(string $key, callable|Closure $callback): void
     {
         $this->compiler->modifyAdminConfig($key, $callback);
+    }
+
+    public static function ignoreCaches(array $shortcodes): void
+    {
+        ShortcodeCompiler::ignoreCaches($shortcodes);
+    }
+
+    public static function ignoreLazyLoading(array $shortcodes): void
+    {
+        ShortcodeCompiler::ignoreLazyLoading($shortcodes);
+    }
+
+    public static function registerLoadingState(string $shortcodeName, string $view): void
+    {
+        ShortcodeCompiler::registerLoadingState($shortcodeName, $view);
     }
 
     public function generateShortcode(string $name, array $attributes = [], ?string $content = null, bool $lazy = false): string
@@ -81,10 +101,17 @@ class Shortcode
         }
 
         foreach ($attributes as $key => $attribute) {
+            $attribute = str_replace(["\r\n", "\n", "\r"], '{{NEWLINE}}', (string) $attribute);
+            $attribute = $this->escapeAttribute($attribute);
             $parsedAttributes .= ' ' . $key . '="' . $attribute . '"';
         }
 
         return '[' . $name . $parsedAttributes . ']' . $content . '[/' . $name . ']';
+    }
+
+    protected function escapeAttribute(string $value): string
+    {
+        return str_replace(['\\', '"'], ['\\\\', '\\"'], $value);
     }
 
     public function getCompiler(): ShortcodeCompiler

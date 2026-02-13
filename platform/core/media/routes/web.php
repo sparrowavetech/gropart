@@ -3,15 +3,15 @@
 use Botble\Base\Facades\AdminHelper;
 use Illuminate\Support\Facades\Route;
 
-Route::group(['namespace' => 'Botble\Media\Http\Controllers'], function () {
+Route::group(['namespace' => 'Botble\Media\Http\Controllers'], function (): void {
     Route::get('media/files/{hash}/{id}', [
         'as' => 'media.indirect.url',
         'uses' => 'PublicMediaController@show',
         'middleware' => 'throttle',
     ]);
 
-    AdminHelper::registerRoutes(function () {
-        Route::group(['prefix' => 'media', 'as' => 'media.', 'permission' => 'media.index'], function () {
+    AdminHelper::registerRoutes(function (): void {
+        Route::group(['prefix' => 'media', 'as' => 'media.', 'permission' => 'media.index'], function (): void {
             Route::get('', [
                 'as' => 'index',
                 'uses' => 'MediaController@getMedia',
@@ -32,6 +32,16 @@ Route::group(['namespace' => 'Botble\Media\Http\Controllers'], function () {
                 'uses' => 'MediaController@getBreadcrumbs',
             ]);
 
+            Route::get('folder-list', [
+                'as' => 'folder_list',
+                'uses' => 'MediaController@getFolderList',
+            ]);
+
+            Route::get('folder-tree', [
+                'as' => 'folder_tree',
+                'uses' => 'MediaController@getFolderTree',
+            ]);
+
             Route::post('global-actions', [
                 'as' => 'global_actions',
                 'uses' => 'MediaController@postGlobalActions',
@@ -42,7 +52,7 @@ Route::group(['namespace' => 'Botble\Media\Http\Controllers'], function () {
                 'uses' => 'MediaController@download',
             ]);
 
-            Route::group(['prefix' => 'files'], function () {
+            Route::group(['prefix' => 'files'], function (): void {
                 Route::post('upload', [
                     'as' => 'files.upload',
                     'uses' => 'MediaFileController@postUpload',
@@ -59,7 +69,7 @@ Route::group(['namespace' => 'Botble\Media\Http\Controllers'], function () {
                 ]);
             });
 
-            Route::group(['prefix' => 'folders'], function () {
+            Route::group(['prefix' => 'folders'], function (): void {
                 Route::post('create', [
                     'as' => 'folders.create',
                     'uses' => 'MediaFolderController@store',

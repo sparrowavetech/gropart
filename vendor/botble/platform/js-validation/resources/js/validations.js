@@ -297,7 +297,7 @@ $.extend(true, laravelValidation, {
                 return true
             }
 
-            return $.isArray(value)
+            return Array.isArray(value)
         },
 
         /**
@@ -399,7 +399,7 @@ $.extend(true, laravelValidation, {
          * @return {boolean}
          */
         In: function (value, element, params) {
-            if ($.isArray(value) && laravelValidation.helpers.hasRules(element, 'Array')) {
+            if (Array.isArray(value) && laravelValidation.helpers.hasRules(element, 'Array')) {
                 var diff = laravelValidation.helpers.arrayDiff(value, params)
                 return Object.keys(diff).length === 0
             }

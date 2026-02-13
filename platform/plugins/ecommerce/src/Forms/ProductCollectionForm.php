@@ -5,6 +5,7 @@ namespace Botble\Ecommerce\Forms;
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\Html;
 use Botble\Base\Forms\FieldOptions\DescriptionFieldOption;
+use Botble\Base\Forms\FieldOptions\MediaImageFieldOption;
 use Botble\Base\Forms\FieldOptions\NameFieldOption;
 use Botble\Base\Forms\FieldOptions\OnOffFieldOption;
 use Botble\Base\Forms\FieldOptions\StatusFieldOption;
@@ -25,17 +26,16 @@ class ProductCollectionForm extends FormAbstract
             ->addScriptsDirectly('vendor/core/plugins/ecommerce/js/edit-product-collection.js');
 
         $this
-            ->setupModel(new ProductCollection())
+            ->model(ProductCollection::class)
             ->setValidatorClass(ProductCollectionRequest::class)
             ->add(
                 'name',
                 TextField::class,
                 NameFieldOption::make()
-                    ->when($this->getModel()->slug, function (NameFieldOption $option, string $slug) {
+                    ->when($this->getModel()->slug, function (NameFieldOption $option, string $slug): void {
                         $option
                             ->helperText(trans('plugins/ecommerce::product-collections.slug_help_block', compact('slug')));
                     })
-                    ->toArray()
             )
             ->add('slug', 'text', [
                 'label' => trans('core/base::forms.slug'),
@@ -44,17 +44,16 @@ class ProductCollectionForm extends FormAbstract
                     'data-counter' => 120,
                 ],
             ])
-            ->add('description', TextareaField::class, DescriptionFieldOption::make()->toArray())
-            ->add('status', SelectField::class, StatusFieldOption::make()->toArray())
+            ->add('description', TextareaField::class, DescriptionFieldOption::make())
+            ->add('status', SelectField::class, StatusFieldOption::make())
             ->add(
                 'is_featured',
                 OnOffField::class,
                 OnOffFieldOption::make()
                     ->label(trans('core/base::forms.is_featured'))
                     ->defaultValue(false)
-                    ->toArray()
             )
-            ->add('image', MediaImageField::class)
+            ->add('image', MediaImageField::class, MediaImageFieldOption::make())
             ->setBreakFieldPoint('status');
 
         if ($productCollectionId = $this->getModel()->id) {

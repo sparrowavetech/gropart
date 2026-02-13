@@ -2,13 +2,13 @@
 
 namespace Botble\Ecommerce\Http\Controllers;
 
-use Botble\Base\Events\BeforeEditContentEvent;
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Http\Controllers\BaseController;
+use Botble\Base\Supports\Breadcrumb;
 use Botble\Ecommerce\Exports\TemplateShippingRuleItemExport;
 use Botble\Ecommerce\Forms\ShippingRuleItemForm;
 use Botble\Ecommerce\Http\Requests\ShippingRuleItemImportRequest;
@@ -23,6 +23,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Excel;
+use Throwable;
 
 class ShippingRuleItemController extends BaseController
 {
@@ -30,6 +31,12 @@ class ShippingRuleItemController extends BaseController
         protected ShippingRuleItemImport $itemImport,
         protected ValidateShippingRuleItemImport $validateItemImport
     ) {
+    }
+
+    protected function breadcrumb(): Breadcrumb
+    {
+        return parent::breadcrumb()
+            ->add(trans('plugins/ecommerce::shipping.rule.item.name'), route('ecommerce.shipping-rule-items.index'));
     }
 
     public function index(ShippingRuleItemTable $dataTable)
@@ -89,9 +96,10 @@ class ShippingRuleItemController extends BaseController
 
     public function edit(int|string $id, Request $request)
     {
+        /**
+         * @var ShippingRuleItem $item
+         */
         $item = ShippingRuleItem::query()->findOrFail($id);
-
-        event(new BeforeEditContentEvent($request, $item));
 
         $title = trans('core/base::forms.edit_item', ['name' => $item->name_item]);
 
@@ -182,9 +190,16 @@ class ShippingRuleItemController extends BaseController
 
         $file = $request->file('file');
 
-        $this->validateItemImport
-            ->setValidatorClass(new ShippingRuleItemRequest())
-            ->import($file);
+        try {
+            $this->validateItemImport
+                ->setValidatorClass(new ShippingRuleItemRequest())
+                ->import($file);
+        } catch (Throwable $exception) {
+            return $this
+                ->httpResponse()
+                ->setError()
+                ->setMessage($exception->getMessage());
+        }
 
         if ($this->validateItemImport->failures()->count()) {
             $data = [
@@ -262,9 +277,8 @@ class ShippingRuleItemController extends BaseController
             $items = $items->orderBy($orderBy, $orderDir);
         }
         if (! in_array($orderBy, ['created_at', 'id'])) {
-            $items = $items
-                ->orderByDesc('created_at')
-                ->orderByDesc('id');
+            $items = $items->latest()
+                ->latest('id');
         }
 
         $items = $items->paginate($perPage ?: 12);

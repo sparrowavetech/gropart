@@ -12,6 +12,7 @@ class ProductPriceService
         ProductFlashSalePriceService::class,
         ProductDiscountPriceService::class,
         ProductCrossSalePriceService::class,
+        ProductUpSalePriceService::class,
     ];
 
     public function __construct(
@@ -24,7 +25,7 @@ class ProductPriceService
     {
         $this->product = $product;
 
-        $this->product->setFinalPrice($product->price);
+        $this->product->setFinalPrice($product->getConvertedPrice());
 
         $this->applyPriceHandlers();
 
@@ -35,7 +36,7 @@ class ProductPriceService
     {
         $this->product = $product;
 
-        $this->product->setOriginalPrice($product->price);
+        $this->product->setOriginalPrice($product->getConvertedPrice());
 
         $this->applyPriceHandlers();
 

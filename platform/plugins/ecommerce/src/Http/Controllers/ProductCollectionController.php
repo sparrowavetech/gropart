@@ -4,14 +4,13 @@ namespace Botble\Ecommerce\Http\Controllers;
 
 use Botble\Base\Events\BeforeEditContentEvent;
 use Botble\Base\Events\CreatedContentEvent;
-use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
+use Botble\Base\Http\Actions\DeleteResourceAction;
 use Botble\Base\Supports\Breadcrumb;
 use Botble\Ecommerce\Forms\ProductCollectionForm;
 use Botble\Ecommerce\Http\Requests\ProductCollectionRequest;
 use Botble\Ecommerce\Models\ProductCollection;
 use Botble\Ecommerce\Tables\ProductCollectionTable;
-use Exception;
 use Illuminate\Http\Request;
 
 class ProductCollectionController extends BaseController
@@ -83,22 +82,9 @@ class ProductCollectionController extends BaseController
             ->withUpdatedSuccessMessage();
     }
 
-    public function destroy(ProductCollection $productCollection, Request $request)
+    public function destroy(ProductCollection $productCollection)
     {
-        try {
-            $productCollection->delete();
-
-            event(new DeletedContentEvent(PRODUCT_COLLECTION_MODULE_SCREEN_NAME, $request, $productCollection));
-
-            return $this
-                ->httpResponse()
-                ->setMessage(trans('core/base::notices.delete_success_message'));
-        } catch (Exception $exception) {
-            return $this
-                ->httpResponse()
-                ->setError()
-                ->setMessage($exception->getMessage());
-        }
+        return DeleteResourceAction::make($productCollection);
     }
 
     public function getListForSelect()
@@ -106,7 +92,7 @@ class ProductCollectionController extends BaseController
         $productCollections = ProductCollection::query()
             ->select(['id', 'name'])
             ->get()
-            ->toArray();
+            ->all();
 
         return $this
             ->httpResponse()

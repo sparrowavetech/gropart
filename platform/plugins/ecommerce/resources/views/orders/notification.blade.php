@@ -12,7 +12,7 @@
     <div class="dropdown-menu dropdown-menu-arrow dropdown-menu-end dropdown-menu-card" >
         <x-core::card>
             <x-core::card.header>
-                <h3 class="card-title">{!! trans('plugins/ecommerce::order.new_order_notice', ['count' => $orders->total()]) !!}</h3>
+                <h3 class="card-title">{!! BaseHelper::clean(trans('plugins/ecommerce::order.new_order_notice', ['count' => $orders->total()])) !!}</h3>
                 <div class="card-actions">
                     <a href="{{ route('orders.index') }}">{{ trans('plugins/ecommerce::order.view_all') }}</a>
                 </div>

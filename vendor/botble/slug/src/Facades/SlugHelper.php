@@ -6,7 +6,8 @@ use Botble\Slug\SlugHelper as BaseSlugHelper;
 use Illuminate\Support\Facades\Facade;
 
 /**
- * @method static \Botble\Slug\SlugHelper registerModule(array|string $model, string|null $name = null)
+ * @method static \Botble\Slug\SlugHelper registerModule(array|string $model, \Closure|string|null $name = null)
+ * @method static static registering(\Closure $callback)
  * @method static \Botble\Slug\SlugHelper removeModule(array|string $model)
  * @method static array supportedModels()
  * @method static \Botble\Slug\SlugHelper setPrefix(string $model, string|null $prefix, bool $canEmptyPrefix = false)

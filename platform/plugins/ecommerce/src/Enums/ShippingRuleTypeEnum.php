@@ -15,6 +15,7 @@ use Illuminate\Support\HtmlString;
  * @method static ShippingRuleTypeEnum BASED_ON_WEIGHT()
  * @method static ShippingRuleTypeEnum BASED_ON_ZIPCODE()
  * @method static ShippingRuleTypeEnum BASED_ON_LOCATION()
+ * @method static ShippingRuleTypeEnum BASED_ON_ZIPCODE_AND_WEIGHT()
  */
 class ShippingRuleTypeEnum extends Enum
 {
@@ -22,6 +23,7 @@ class ShippingRuleTypeEnum extends Enum
     public const BASED_ON_WEIGHT = 'based_on_weight';
     public const BASED_ON_ZIPCODE = 'based_on_zipcode';
     public const BASED_ON_LOCATION = 'based_on_location';
+    public const BASED_ON_ZIPCODE_AND_WEIGHT = 'based_on_zipcode_and_weight';
 
     public static $langPath = 'plugins/ecommerce::shipping.rule.enum_types';
 
@@ -35,6 +37,8 @@ class ShippingRuleTypeEnum extends Enum
             self::BASED_ON_ZIPCODE => Html::tag('span', self::BASED_ON_ZIPCODE()->label(), ['class' => 'text-dark'])
                 ->toHtml(),
             self::BASED_ON_LOCATION => Html::tag('span', self::BASED_ON_LOCATION()->label(), ['class' => 'text-success'])
+                ->toHtml(),
+            self::BASED_ON_ZIPCODE_AND_WEIGHT => Html::tag('span', self::BASED_ON_ZIPCODE_AND_WEIGHT()->label(), ['class' => 'text-warning'])
                 ->toHtml(),
             default => parent::toHtml(),
         };
@@ -50,13 +54,13 @@ class ShippingRuleTypeEnum extends Enum
 
         $replace = [];
 
-        if ($value == self::BASED_ON_WEIGHT) {
+        if ($value == self::BASED_ON_WEIGHT || $value == self::BASED_ON_ZIPCODE_AND_WEIGHT) {
             $replace['unit'] = self::BASED_ON_WEIGHT()->toUnit();
         }
 
         $label = Lang::has($key) ? trans($key, $replace) : $value;
 
-        if ($value == self::BASED_ON_ZIPCODE && ! EcommerceHelper::isZipCodeEnabled()) {
+        if (in_array($value, [self::BASED_ON_ZIPCODE, self::BASED_ON_ZIPCODE_AND_WEIGHT]) && ! EcommerceHelper::isZipCodeEnabled()) {
             $label .= ' (' . trans('plugins/ecommerce::shipping.rule.types.unavailable') . ')';
         }
 
@@ -76,7 +80,7 @@ class ShippingRuleTypeEnum extends Enum
     {
         return match ($this->value) {
             self::BASED_ON_PRICE => get_application_currency()->symbol,
-            self::BASED_ON_WEIGHT => ecommerce_weight_unit(),
+            self::BASED_ON_WEIGHT, self::BASED_ON_ZIPCODE_AND_WEIGHT => ecommerce_weight_unit(),
             default => '',
         };
     }
@@ -85,7 +89,7 @@ class ShippingRuleTypeEnum extends Enum
     {
         return match ($this->value) {
             self::BASED_ON_PRICE => format_price($value),
-            self::BASED_ON_WEIGHT => number_format($value) . ' ' . $this->toUnit(),
+            self::BASED_ON_WEIGHT, self::BASED_ON_ZIPCODE_AND_WEIGHT => number_format($value) . ' ' . $this->toUnit(),
             default => $value,
         };
     }
@@ -93,7 +97,7 @@ class ShippingRuleTypeEnum extends Enum
     public function showFromToInputs(): bool
     {
         return match ($this->value) {
-            self::BASED_ON_PRICE, self::BASED_ON_WEIGHT => true,
+            self::BASED_ON_PRICE, self::BASED_ON_WEIGHT, self::BASED_ON_ZIPCODE_AND_WEIGHT => true,
             default => false,
         };
     }
@@ -123,6 +127,7 @@ class ShippingRuleTypeEnum extends Enum
         return [
             self::BASED_ON_ZIPCODE,
             self::BASED_ON_LOCATION,
+            self::BASED_ON_ZIPCODE_AND_WEIGHT,
         ];
     }
 
@@ -133,10 +138,12 @@ class ShippingRuleTypeEnum extends Enum
         if ($shipping && ! $shipping->country) {
             Arr::forget($labels, self::BASED_ON_ZIPCODE);
             Arr::forget($labels, self::BASED_ON_LOCATION);
+            Arr::forget($labels, self::BASED_ON_ZIPCODE_AND_WEIGHT);
         }
 
         if (! EcommerceHelper::isZipCodeEnabled()) {
             Arr::forget($labels, self::BASED_ON_ZIPCODE);
+            Arr::forget($labels, self::BASED_ON_ZIPCODE_AND_WEIGHT);
         }
 
         if (! EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation()) {

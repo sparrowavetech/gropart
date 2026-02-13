@@ -24,10 +24,10 @@ class FlashSaleForm extends FormAbstract
             ->addScripts(['input-mask']);
 
         $this
-            ->setupModel(new FlashSale())
+            ->model(FlashSale::class)
             ->setValidatorClass(FlashSaleRequest::class)
-            ->add('name', TextField::class, NameFieldOption::make()->toArray())
-            ->add('status', SelectField::class, StatusFieldOption::make()->toArray())
+            ->add('name', TextField::class, NameFieldOption::make())
+            ->add('status', SelectField::class, StatusFieldOption::make())
             ->add(
                 'end_date',
                 DatePickerField::class,
@@ -35,7 +35,6 @@ class FlashSaleForm extends FormAbstract
                     ->label(__('End date'))
                     ->required()
                     ->defaultValue(BaseHelper::formatDate(Carbon::now()->addMonth()))
-                    ->toArray()
             )
             ->addMetaBoxes([
                 'products' => [

@@ -32,19 +32,23 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
 
 class OrderTable extends TableAbstract
 {
     public function setup(): void
     {
+        $actions = [
+            EditAction::make()->route('orders.edit'),
+        ];
+
+        if (EcommerceHelper::isOrderDeletionEnabled()) {
+            $actions[] = DeleteAction::make()->route('orders.destroy');
+        }
+
         $this
             ->model(Order::class)
-            ->addActions([
-                EditAction::make()->route('orders.edit'),
-                DeleteAction::make()->route('orders.destroy'),
-            ]);
+            ->addActions($actions);
     }
 
     public function ajax(): JsonResponse
@@ -65,10 +69,12 @@ class OrderTable extends TableAbstract
                     return '&mdash;';
                 }
 
-                return BaseHelper::clean($item->payment->payment_channel->label() ?: '&mdash;');
+                return BaseHelper::clean($item->payment->payment_channel->displayName() ?: '&mdash;');
             })
             ->formatColumn('amount', PriceFormatter::class)
-            ->formatColumn('shipping_amount', PriceFormatter::class);
+            ->editColumn('shipping_amount', function (Order $item) {
+                return $item->shipment->exists() ? $item->shipping_amount : '&mdash;';
+            });
 
         if (EcommerceHelper::isTaxEnabled()) {
             $data = $data->formatColumn('tax_amount', PriceFormatter::class);
@@ -76,24 +82,7 @@ class OrderTable extends TableAbstract
 
         $data = $data
             ->filter(function ($query) {
-                if ($keyword = $this->request->input('search.value')) {
-                    return $query
-                        ->whereHas('address', function ($subQuery) use ($keyword) {
-                            return $subQuery
-                                ->where('name', 'LIKE', '%' . $keyword . '%')
-                                ->orWhere('email', 'LIKE', '%' . $keyword . '%')
-                                ->orWhere('phone', 'LIKE', '%' . $keyword . '%');
-                        })
-                        ->orWhereHas('user', function ($subQuery) use ($keyword) {
-                            return $subQuery
-                                ->where('name', 'LIKE', '%' . $keyword . '%')
-                                ->orWhere('email', 'LIKE', '%' . $keyword . '%')
-                                ->orWhere('phone', 'LIKE', '%' . $keyword . '%');
-                        })
-                        ->orWhere('code', 'LIKE', '%' . $keyword . '%');
-                }
-
-                return $query;
+                return $this->filterOrders($query);
             });
 
         return $this->toJson($data);
@@ -101,7 +90,7 @@ class OrderTable extends TableAbstract
 
     public function query(): Relation|Builder|QueryBuilder
     {
-        $with = ['user'];
+        $with = ['user', 'shipment', 'address'];
 
         if (is_plugin_active('payment')) {
             $with[] = 'payment';
@@ -143,24 +132,11 @@ class OrderTable extends TableAbstract
                         Html::mailto($item->user->email ?: $item->address->email, obfuscate: false),
                         $item->user->phone ?: $item->address->phone
                     );
-                }),
+                })
+                ->responsivePriority(99),
             Column::formatted('amount')
                 ->title(trans('plugins/ecommerce::order.amount')),
         ];
-
-        $columns[] = StatusColumn::make()->alignStart();
-
-        if (EcommerceHelper::isTaxEnabled()) {
-            $columns = array_merge($columns, [
-                Column::formatted('tax_amount')
-                    ->title(trans('plugins/ecommerce::order.tax_amount')),
-            ]);
-        }
-
-        $columns = array_merge($columns, [
-            Column::formatted('shipping_amount')
-                ->title(trans('plugins/ecommerce::order.shipping_amount')),
-        ]);
 
         if (is_plugin_active('payment')) {
             $columns = array_merge($columns, [
@@ -174,6 +150,20 @@ class OrderTable extends TableAbstract
             ]);
         }
 
+        $columns[] = StatusColumn::make()->alignStart();
+
+        if (EcommerceHelper::isTaxEnabled()) {
+            $columns = array_merge($columns, [
+                Column::formatted('tax_amount')
+                    ->title(trans('plugins/ecommerce::order.tax_amount')),
+            ]);
+        }
+
+        $columns = array_merge($columns, [
+            Column::make('shipping_amount')
+                ->title(trans('plugins/ecommerce::order.shipping_amount')),
+        ]);
+
         return array_merge($columns, [
             CreatedAtColumn::make(),
         ]);
@@ -186,6 +176,10 @@ class OrderTable extends TableAbstract
 
     public function bulkActions(): array
     {
+        if (! EcommerceHelper::isOrderDeletionEnabled()) {
+            return [];
+        }
+
         return [
             DeleteBulkAction::make()->permission('orders.destroy'),
         ];
@@ -224,6 +218,14 @@ class OrderTable extends TableAbstract
                 'title' => trans('plugins/ecommerce::ecommerce.customer_phone'),
                 'type' => 'text',
             ],
+            'product_sku' => [
+                'title' => trans('plugins/ecommerce::products.sku'),
+                'type' => 'text',
+            ],
+            'product_name' => [
+                'title' => trans('plugins/ecommerce::products.product_name'),
+                'type' => 'text',
+            ],
             'amount' => [
                 'title' => trans('plugins/ecommerce::order.amount'),
                 'type' => 'number',
@@ -250,15 +252,7 @@ class OrderTable extends TableAbstract
             ]);
         }
 
-        if (is_plugin_active('marketplace')) {
-            $filters['store_id'] = [
-                'title' => trans('plugins/marketplace::store.forms.store'),
-                'type' => 'select-search',
-                'choices' => [-1 => theme_option('site_title')] + DB::table('mp_stores')->pluck('name', 'id')->all(),
-            ];
-        }
-
-        return $filters;
+        return apply_filters('ecommerce_order_table_filters', $filters, $this);
     }
 
     public function renderTable($data = [], $mergeData = []): View|Factory|Response
@@ -272,29 +266,35 @@ class OrderTable extends TableAbstract
 
     public function getDefaultButtons(): array
     {
-        return array_merge(['export'], parent::getDefaultButtons());
+        return array_unique(array_merge(['export'], parent::getDefaultButtons()));
     }
 
     public function saveBulkChangeItem(Model|Order $item, string $inputKey, ?string $inputValue): Model|bool
     {
-        if ($inputKey === 'status' && $inputValue == OrderStatusEnum::CANCELED) {
-            /**
-             * @var Order $item
-             */
-            if (! $item->canBeCanceledByAdmin()) {
-                throw new Exception(trans('plugins/ecommerce::order.order_cannot_be_canceled'));
+        if ($inputKey === 'status') {
+            if ($inputValue == OrderStatusEnum::CANCELED) {
+                /**
+                 * @var Order $item
+                 */
+                if (! $item->canBeCanceledByAdmin()) {
+                    throw new Exception(trans('plugins/ecommerce::order.order_cannot_be_canceled'));
+                }
+
+                OrderHelper::cancelOrder($item);
+
+                OrderHistory::query()->create([
+                    'action' => OrderHistoryActionEnum::CANCEL_ORDER,
+                    'description' => trans('plugins/ecommerce::order.order_was_canceled_by'),
+                    'order_id' => $item->getKey(),
+                    'user_id' => Auth::id(),
+                ]);
+
+                return $item;
+            } elseif ($inputValue == OrderStatusEnum::COMPLETED) {
+                OrderHelper::setOrderCompleted($item->getKey(), request(), Auth::id());
+
+                return $item;
             }
-
-            OrderHelper::cancelOrder($item);
-
-            OrderHistory::query()->create([
-                'action' => OrderHistoryActionEnum::CANCEL_ORDER,
-                'description' => trans('plugins/ecommerce::order.order_was_canceled_by'),
-                'order_id' => $item->getKey(),
-                'user_id' => Auth::id(),
-            ]);
-
-            return $item;
         }
 
         return parent::saveBulkChangeItem($item, $inputKey, $inputValue);
@@ -325,6 +325,18 @@ class OrderTable extends TableAbstract
                 }
 
                 return $this->filterByCustomer($query, 'phone', $operator, $value);
+            case 'product_sku':
+                if (! $value) {
+                    break;
+                }
+
+                return $this->filterByProductSku($query, $operator, $value);
+            case 'product_name':
+                if (! $value) {
+                    break;
+                }
+
+                return $this->filterByProductName($query, $operator, $value);
             case 'status':
                 if (! OrderStatusEnum::isValid($value)) {
                     return $query;
@@ -346,7 +358,7 @@ class OrderTable extends TableAbstract
                     return $query;
                 }
 
-                return $query->whereHas('payment', function ($subQuery) use ($value) {
+                return $query->whereHas('payment', function ($subQuery) use ($value): void {
                     $subQuery->where('payment_channel', $value);
                 });
 
@@ -355,7 +367,7 @@ class OrderTable extends TableAbstract
                     return $query;
                 }
 
-                return $query->whereHas('payment', function ($subQuery) use ($value) {
+                return $query->whereHas('payment', function ($subQuery) use ($value): void {
                     $subQuery->where('status', $value);
                 });
             case 'store_id':
@@ -363,7 +375,7 @@ class OrderTable extends TableAbstract
                     return $query;
                 }
                 if ($value == -1) {
-                    return $query->where(function ($subQuery) {
+                    return $query->where(function ($subQuery): void {
                         $subQuery->whereNull('store_id')
                             ->orWhere('store_id', 0);
                     });
@@ -386,14 +398,53 @@ class OrderTable extends TableAbstract
         }
 
         return $query
-            ->where(function ($query) use ($column, $operator, $value) {
+            ->where(function ($query) use ($column, $operator, $value): void {
                 $query
-                    ->whereHas('user', function ($subQuery) use ($column, $operator, $value) {
+                    ->whereHas('user', function ($subQuery) use ($column, $operator, $value): void {
                         $subQuery->where($column, $operator, $value);
                     })
-                    ->orWhereHas('address', function ($subQuery) use ($column, $operator, $value) {
+                    ->orWhereHas('address', function ($subQuery) use ($column, $operator, $value): void {
                         $subQuery->where($column, $operator, $value);
                     });
             });
+    }
+
+    protected function filterByProductSku(
+        Builder|QueryBuilder|Relation $query,
+        string $operator,
+        ?string $value
+    ): Builder|QueryBuilder|Relation {
+        if ($operator === 'like') {
+            $value = '%' . $value . '%';
+        } elseif ($operator !== '=') {
+            $operator = '=';
+        }
+
+        return $query->whereHas('products.product', function ($subQuery) use ($operator, $value): void {
+            $subQuery->where('sku', $operator, $value);
+        });
+    }
+
+    protected function filterByProductName(
+        Builder|QueryBuilder|Relation $query,
+        string $operator,
+        ?string $value
+    ): Builder|QueryBuilder|Relation {
+        if ($operator === 'like') {
+            $value = '%' . $value . '%';
+        } elseif ($operator !== '=') {
+            $operator = '=';
+        }
+
+        return $query->whereHas('products.product', function ($subQuery) use ($operator, $value): void {
+            $subQuery->where('name', $operator, $value);
+        });
+    }
+
+    protected function filterOrders($query, bool $finished = true): Builder|QueryBuilder|Relation
+    {
+        return $query
+            ->searchByKeyword($this->request->input('search.value'))
+            ->where('is_finished', $finished);
     }
 }

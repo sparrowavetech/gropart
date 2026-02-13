@@ -1,7 +1,37 @@
 @extends(BaseHelper::getAdminMasterLayoutTemplate())
 
 @section('content')
-    {!! $form->renderForm() !!}
+    @if ($form)
+        {!! $form->renderForm() !!}
+    @endif
+
+    @if (config('queue.default') !== 'sync')
+        <div class="mt-3">
+            <x-core-setting::section :card="false">
+                <x-core::alert type="warning">
+                    <h4 class="alert-heading">{{ trans('core/setting::setting.email.queue_warning_title') }}</h4>
+                    <p>{{ trans('core/setting::setting.email.queue_warning_description', ['default' => config('queue.default')]) }}
+                    </p>
+                    <p class="mb-0">{!! BaseHelper::clean(trans('core/setting::setting.email.queue_warning_action')) !!}</p>
+                </x-core::alert>
+            </x-core-setting::section>
+        </div>
+    @endif
+
+    <div class="mt-3">
+        <x-core-setting::section :card="false">
+            <x-core::alert type="info">
+                <h4 class="alert-heading">{{ trans('core/setting::setting.email.setup_tips_title') }}</h4>
+                <ul class="mb-0">
+                    <li>{{ trans('core/setting::setting.email.setup_tip_gmail') }}</li>
+                    <li>{{ trans('core/setting::setting.email.setup_tip_port') }}</li>
+                    <li>{{ trans('core/setting::setting.email.setup_tip_encryption') }}</li>
+                    <li>{{ trans('core/setting::setting.email.setup_tip_test') }}</li>
+                    <li>{{ trans('core/setting::setting.email.setup_tip_mailgun') }}</li>
+                </ul>
+            </x-core::alert>
+        </x-core-setting::section>
+    </div>
 
     <div class="mt-5">
         <x-core-setting::section
@@ -59,7 +89,7 @@
                         data-bs-dismiss="modal"
                         class="w-100"
                     >
-                        {{ __('Close') }}
+                        {{ trans('core/setting::setting.close') }}
                     </x-core::button>
                 </div>
                 <div class="col">

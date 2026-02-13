@@ -17,8 +17,8 @@ class Categories extends AbstractWidget
     public function __construct()
     {
         parent::__construct([
-            'name' => __('Blog Categories'),
-            'description' => __('Widget display blog categories'),
+            'name' => trans('plugins/blog::posts.widget_categories'),
+            'description' => trans('plugins/blog::posts.widget_categories_description'),
             'display_posts_count' => 'yes',
             'category_ids' => [],
         ]);
@@ -63,29 +63,27 @@ class Categories extends AbstractWidget
         }
 
         return WidgetForm::createFromArray($data)
-            ->add('name', TextField::class, NameFieldOption::make()->toArray())
+            ->add('name', TextField::class, NameFieldOption::make())
             ->add(
                 'category_ids',
                 SelectField::class,
                 SelectFieldOption::make()
-                    ->label(__('Choose categories'))
+                    ->label(trans('plugins/blog::base.choose_categories'))
                     ->choices($categories)
                     ->selected($categoryIds)
                     ->searchable()
                     ->multiple()
-                    ->toArray(),
             )
             ->add(
                 'display_posts_count',
                 SelectField::class,
                 SelectFieldOption::make()
-                    ->label(__('Display posts count?'))
+                    ->label(trans('plugins/blog::base.display_posts_count'))
                     ->choices([
-                        'yes' => __('Yes'),
-                        'no' => __('No'),
+                        'yes' => trans('plugins/blog::base.yes'),
+                        'no' => trans('plugins/blog::base.no'),
                     ])
                     ->selected($data['display_posts_count'])
-                    ->toArray()
             );
     }
 

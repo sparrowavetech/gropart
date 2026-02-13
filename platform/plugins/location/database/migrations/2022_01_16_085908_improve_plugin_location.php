@@ -10,19 +10,20 @@ return new class () extends Migration {
     public function up(): void
     {
         if (Schema::hasColumn('countries', 'code')) {
-            Schema::table('countries', function (Blueprint $table) {
+            Schema::table('countries', function (Blueprint $table): void {
                 $table->dropColumn('code');
             });
         }
 
-        Schema::table('countries', function (Blueprint $table) {
+        Schema::table('countries', function (Blueprint $table): void {
             $table->string('nationality', 120)->nullable()->change();
             $table->string('code', 10)->nullable();
         });
 
         foreach (DB::table('countries')->get() as $country) {
-            $country->code = Helper::getCountryCodeByName($country->name);
-            $country->save();
+            DB::table('countries')
+                ->where('id', $country->id)
+                ->update(['code' => Helper::getCountryCodeByName($country->name)]);
         }
     }
 };

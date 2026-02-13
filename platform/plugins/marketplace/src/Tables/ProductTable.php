@@ -4,14 +4,18 @@ namespace Botble\Marketplace\Tables;
 
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\Html;
+use Botble\DataSynchronize\Table\HeaderActions\ExportHeaderAction;
+use Botble\DataSynchronize\Table\HeaderActions\ImportHeaderAction;
 use Botble\Ecommerce\Enums\ProductTypeEnum;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Models\Product;
 use Botble\Marketplace\Exports\ProductExport;
+use Botble\Marketplace\Facades\MarketplaceHelper;
 use Botble\Marketplace\Tables\Traits\ForVendor;
 use Botble\Table\Abstracts\TableAbstract;
 use Botble\Table\Actions\DeleteAction;
 use Botble\Table\Actions\EditAction;
+use Botble\Table\Actions\ViewAction;
 use Botble\Table\BulkActions\DeleteBulkAction;
 use Botble\Table\BulkChanges\CreatedAtBulkChange;
 use Botble\Table\BulkChanges\NameBulkChange;
@@ -38,7 +42,12 @@ class ProductTable extends TableAbstract
 
         $this
             ->model(Product::class)
+            ->addHeaderActions([
+                ExportHeaderAction::make()->route('marketplace.vendor.export.products.index'),
+                ImportHeaderAction::make()->route('marketplace.vendor.import.products.index'),
+            ])
             ->addActions([
+                ViewAction::make()->route('marketplace.vendor.products.view'),
                 EditAction::make()->route('marketplace.vendor.products.edit'),
                 DeleteAction::make()->route('marketplace.vendor.products.destroy'),
             ]);
@@ -59,6 +68,9 @@ class ProductTable extends TableAbstract
             })
             ->editColumn('order', function ($item) {
                 return (string) $item->order;
+            })
+            ->filter(function ($query) {
+                return $query->searchByKeyword(request()->input('search.value'));
             });
 
         return $this->toJson($data);
@@ -83,9 +95,10 @@ class ProductTable extends TableAbstract
                 'quantity',
                 'with_storehouse_management',
                 'product_type',
+                'currency_code',
             ])
             ->where('is_variation', 0)
-            ->where('store_id', auth('customer')->user()->store->id);
+            ->where('store_id', auth('customer')->user()->store?->id);
 
         return $this->applyScopes($query);
     }
@@ -115,10 +128,13 @@ class ProductTable extends TableAbstract
 
     public function buttons(): array
     {
-        if (EcommerceHelper::isEnabledSupportDigitalProducts()) {
+        $buttons = [];
+
+        if (MarketplaceHelper::isVendorDigitalProductsEnabled() && ! EcommerceHelper::isDisabledPhysicalProduct()) {
             $buttons['create'] = [
                 'extend' => 'collection',
                 'text' => view('core/table::partials.create')->render(),
+                'class' => 'btn-primary',
                 'buttons' => [
                     [
                         'className' => 'action-item',
@@ -162,10 +178,5 @@ class ProductTable extends TableAbstract
             StatusBulkChange::make(),
             CreatedAtBulkChange::make(),
         ];
-    }
-
-    public function getDefaultButtons(): array
-    {
-        return array_merge(['export'], parent::getDefaultButtons());
     }
 }

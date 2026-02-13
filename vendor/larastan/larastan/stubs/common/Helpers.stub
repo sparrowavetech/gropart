@@ -128,7 +128,7 @@ function view($view = null, $data = [], $mergeData = []) {}
  * Translate the given message.
  *
  * @param  string|null  $key
- * @param  array<string, scalar>  $replace
+ * @param  array<string, scalar|null>  $replace
  * @param  string|null  $locale
  * @return ($key is null ? \Illuminate\Contracts\Translation\Translator : mixed)
  */
@@ -138,7 +138,7 @@ function trans($key = null, $replace = [], $locale = null) {}
  * Translate the given message.
  *
  * @param  string|null  $key
- * @param  array<string, scalar>  $replace
+ * @param  array<string, scalar|null>  $replace
  * @param  string|null  $locale
  * @return ($key is null ? null : mixed)
  */
@@ -154,7 +154,7 @@ function __($key = null, $replace = [], $locale = null) {}
  * @param  ?callable(TValue): TReturn  $callback
  * @return ($callback is null ? mixed : ($value is null ? null : TReturn))
  */
-function optional($value = null, callable $callback = null) {}
+function optional($value = null, ?callable $callback = null) {}
 
 /**
  * Transform the given value if it is present.
@@ -189,3 +189,14 @@ function filled($value) {}
  * @return bool
  */
 function blank($value) {}
+
+/**
+ * Gets the value of an environment variable.
+ *
+ * @template TDefault
+ *
+ * @param  string  $key
+ * @param  TDefault  $default
+ * @return bool|string|TDefault
+ */
+function env($key, $default = null) {}

@@ -14,11 +14,17 @@ use Intervention\Image\Interfaces\PointInterface;
 
 class TextModifier extends SpecializableModifier
 {
+    /**
+     * Create new modifier object
+     *
+     * @return void
+     */
     public function __construct(
         public string $text,
         public PointInterface $position,
         public FontInterface $font
     ) {
+        //
     }
 
     /**
@@ -31,7 +37,6 @@ class TextModifier extends SpecializableModifier
      *
      * @throws RuntimeException
      * @throws ColorException
-     * @return ColorInterface
      */
     protected function textColor(): ColorInterface
     {
@@ -51,7 +56,6 @@ class TextModifier extends SpecializableModifier
      *
      * @throws RuntimeException
      * @throws ColorException
-     * @return ColorInterface
      */
     protected function strokeColor(): ColorInterface
     {
@@ -69,7 +73,6 @@ class TextModifier extends SpecializableModifier
     /**
      * Return array of offset points to draw text stroke effect below the actual text
      *
-     * @param FontInterface $font
      * @return array<PointInterface>
      */
     protected function strokeOffsets(FontInterface $font): array

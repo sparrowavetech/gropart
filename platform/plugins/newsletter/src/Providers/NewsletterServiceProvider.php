@@ -6,6 +6,7 @@ use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Facades\EmailHandler;
 use Botble\Base\Facades\PanelSectionManager;
 use Botble\Base\PanelSections\PanelSectionItem;
+use Botble\Base\Supports\DashboardMenuItem;
 use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Newsletter\Contracts\Factory;
@@ -18,7 +19,6 @@ use Botble\Newsletter\Repositories\Interfaces\NewsletterInterface;
 use Botble\Setting\PanelSections\SettingOthersPanelSection;
 use Botble\Theme\FormFrontManager;
 use Illuminate\Contracts\Support\DeferrableProvider;
-use Illuminate\Routing\Events\RouteMatched;
 
 class NewsletterServiceProvider extends ServiceProvider implements DeferrableProvider
 {
@@ -40,7 +40,8 @@ class NewsletterServiceProvider extends ServiceProvider implements DeferrablePro
         $this
             ->setNamespace('plugins/newsletter')
             ->loadHelpers()
-            ->loadAndPublishConfigurations(['permissions', 'email'])
+            ->loadAndPublishConfigurations(['email'])
+            ->loadAndPublishConfigurations(['permissions'])
             ->loadAndPublishTranslations()
             ->loadRoutes()
             ->publishAssets()
@@ -49,18 +50,19 @@ class NewsletterServiceProvider extends ServiceProvider implements DeferrablePro
 
         $this->app->register(EventServiceProvider::class);
 
-        DashboardMenu::default()->beforeRetrieving(function () {
+        DashboardMenu::default()->beforeRetrieving(function (): void {
             DashboardMenu::make()
-                ->registerItem([
-                    'id' => 'cms-plugins-newsletter',
-                    'priority' => 430,
-                    'name' => 'plugins/newsletter::newsletter.name',
-                    'icon' => 'ti ti-mail',
-                    'route' => 'newsletter.index',
-                ]);
+                ->registerItem(
+                    DashboardMenuItem::make()
+                        ->id('cms-plugins-newsletter')
+                        ->priority(430)
+                        ->name('plugins/newsletter::newsletter.name')
+                        ->icon('ti ti-mail')
+                        ->route('newsletter.index')
+                );
         });
 
-        PanelSectionManager::default()->beforeRendering(function () {
+        PanelSectionManager::default()->beforeRendering(function (): void {
             PanelSectionManager::registerItem(
                 SettingOthersPanelSection::class,
                 fn () => PanelSectionItem::make('newsletter')
@@ -72,11 +74,15 @@ class NewsletterServiceProvider extends ServiceProvider implements DeferrablePro
             );
         });
 
-        $this->app['events']->listen(RouteMatched::class, function () {
+        $this->app->booted(function (): void {
             EmailHandler::addTemplateSettings(NEWSLETTER_MODULE_SCREEN_NAME, config('plugins.newsletter.email', []));
         });
 
         FormFrontManager::register(NewsletterForm::class, NewsletterRequest::class);
+
+        add_filter(THEME_FRONT_FOOTER, function (?string $html): string {
+            return $html . view('plugins/newsletter::partials.gtm-script')->render();
+        }, 998);
     }
 
     public function provides(): array

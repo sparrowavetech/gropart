@@ -1,5 +1,6 @@
 <div
-    class="form-group mb-3 option-field product-option-{{ Str::slug($option->name) }} product-option-{{ $option->id }}"
+    class="form-group mb-3 option-field product-option product-option-{{ Str::slug($option->name) }} product-option-{{ $option->id }}"
+    data-option-slug="{{ Str::slug($option->name) }}"
     style="margin-bottom: 10px"
 >
     <div class="product-option-item-wrapper">

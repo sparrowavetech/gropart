@@ -3,6 +3,7 @@
 namespace Botble\Page\Tables;
 
 use Botble\Page\Models\Page;
+use Botble\Page\Supports\Template;
 use Botble\Table\Abstracts\TableAbstract;
 use Botble\Table\Actions\DeleteAction;
 use Botble\Table\Actions\EditAction;
@@ -19,7 +20,6 @@ use Botble\Table\Columns\StatusColumn;
 use Botble\Table\HeaderActions\CreateHeaderAction;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
-use Illuminate\Validation\Rule;
 
 class PageTable extends TableAbstract
 {
@@ -41,7 +41,7 @@ class PageTable extends TableAbstract
                     ->getValueUsing(function (FormattedColumn $column) {
                         static $pageTemplates;
 
-                        $pageTemplates ??= get_page_templates();
+                        $pageTemplates ??= Template::getPageTemplates();
 
                         return Arr::get($pageTemplates, $column->getItem()->template ?: 'default');
                     }),
@@ -56,12 +56,11 @@ class PageTable extends TableAbstract
                 SelectBulkChange::make()
                     ->name('template')
                     ->title(trans('core/base::tables.template'))
-                    ->choices(fn () => get_page_templates())
-                    ->validate(['required', Rule::in(array_keys(get_page_templates()))]),
+                    ->choices(fn () => Template::getPageTemplates()),
                 StatusBulkChange::make(),
                 CreatedAtBulkChange::make(),
             ])
-            ->queryUsing(function (Builder $query) {
+            ->queryUsing(function (Builder $query): void {
                 $query->select([
                     'id',
                     'name',

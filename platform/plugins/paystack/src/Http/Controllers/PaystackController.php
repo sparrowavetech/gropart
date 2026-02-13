@@ -6,15 +6,19 @@ use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Payment\Enums\PaymentStatusEnum;
 use Botble\Payment\Supports\PaymentHelper;
+use Botble\Paystack\Services\Paystack;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
-use Paystack;
 
 class PaystackController extends BaseController
 {
-    public function getPaymentStatus(Request $request, BaseHttpResponse $response)
+    public function getPaymentStatus(Request $request, BaseHttpResponse $response, Paystack $paystack)
     {
-        $result = Paystack::getPaymentData();
+        do_action('payment_before_making_api_request', PAYSTACK_PAYMENT_METHOD_NAME, []);
+
+        $result = $paystack->getPaymentData();
+
+        do_action('payment_after_api_response', PAYSTACK_PAYMENT_METHOD_NAME, [], $result);
 
         if (! $result['status']) {
             return $response
@@ -37,6 +41,6 @@ class PaystackController extends BaseController
 
         return $response
             ->setNextUrl(PaymentHelper::getRedirectURL())
-            ->setMessage(__('Checkout successfully!'));
+            ->setMessage(trans('plugins/payment::payment.checkout_success'));
     }
 }

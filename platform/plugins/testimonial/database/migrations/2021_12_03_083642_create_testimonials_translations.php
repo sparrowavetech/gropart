@@ -8,10 +8,10 @@ return new class () extends Migration {
     public function up(): void
     {
         if (! Schema::hasTable('testimonials_translations')) {
-            Schema::create('testimonials_translations', function (Blueprint $table) {
-                $table->string('lang_code');
+            Schema::create('testimonials_translations', function (Blueprint $table): void {
+                $table->string('lang_code', 20);
                 $table->foreignId('testimonials_id');
-                $table->string('name', 255)->nullable();
+                $table->string('name')->nullable();
                 $table->text('content')->nullable();
                 $table->string('company', 120)->nullable();
 

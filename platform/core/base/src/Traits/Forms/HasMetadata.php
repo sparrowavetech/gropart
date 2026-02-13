@@ -57,7 +57,7 @@ trait HasMetadata
 
     public function saveMetadataFields(): void
     {
-        if (! $this->model instanceof  BaseModel) {
+        if (! $this->model instanceof BaseModel) {
             return;
         }
 

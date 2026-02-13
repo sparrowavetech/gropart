@@ -39,6 +39,8 @@
                         </div>
                     @endif
 
+                    @yield('export_extra_filters_before')
+
                     <div>
                         @if($exporter->allColumnsIsDisabled())
                             <x-core::form.label>
@@ -50,7 +52,7 @@
                         @else
                             <x-core::form.label>
                                 {{ trans('packages/data-synchronize::data-synchronize.export.form.columns') }}
-                                <a href="javascript:void(0)" class="ms-2 text-primary" data-bb-toggle="check-all" data-bb-target=".export-column">Check all</a>
+                                <a href="javascript:void(0)" class="ms-2 text-primary check-all-columns">{{ trans('packages/data-synchronize::data-synchronize.check_all') }}</a>
                             </x-core::form.label>
 
                             <div @class(['row row-cols-1', 'row-cols-sm-2 row-cols-lg-3' => count($exporter->getColumns()) > 6])>
@@ -80,6 +82,8 @@
                         value="csv"
                     >
                     </x-core::form.radio-list>
+
+                    @yield('export_extra_filters_after')
                 @else
                     {!! $exporter->getEmptyStateContent() !!}
                 @endif
@@ -93,4 +97,86 @@
                 @endif
         </x-core::card>
     </x-core::form>
+
+    @push('footer')
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const form = document.querySelector('.data-synchronize-export-form');
+                const storageKey = 'data-synchronize-export-form-v-1' + window.location.pathname;
+                const columnCheckboxes = form.querySelectorAll('.export-column');
+                const checkAllButton = form.querySelector('.check-all-columns');
+
+                function saveFormValues() {
+                    const formData = new FormData(form);
+                    const values = {};
+
+                    for (const [key, value] of formData.entries()) {
+                        if (key === '_token') {
+                            continue;
+                        }
+
+                        if (key === 'columns[]') {
+                            if (!values.columns) {
+                                values.columns = [];
+                            }
+                            values.columns.push(value);
+                        } else {
+                            values[key] = value;
+                        }
+                    }
+
+                    localStorage.setItem(storageKey, JSON.stringify(values));
+                }
+
+                function restoreFormValues() {
+                    const savedValues = localStorage.getItem(storageKey);
+                    if (!savedValues) return;
+
+                    const values = JSON.parse(savedValues);
+
+                    Object.entries(values).forEach(([key, value]) => {
+                        if (key === '_token') {
+                            return;
+                        }
+
+                        if (key === 'columns') {
+                            columnCheckboxes.forEach(checkbox => {
+                                checkbox.checked = value.includes(checkbox.value);
+                            });
+                        } else {
+                            const input = form.querySelector(`[name="${key}"]`);
+                            if (input) {
+                                if (input.type === 'radio') {
+                                    const radio = form.querySelector(`input[name="${key}"][value="${value}"]`);
+                                    if (radio) {
+                                        radio.checked = true;
+                                    }
+                                } else {
+                                    input.value = value;
+                                }
+                            }
+                        }
+                    });
+                }
+
+                checkAllButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const allChecked = Array.from(columnCheckboxes).every(checkbox => checkbox.checked);
+
+                    columnCheckboxes.forEach(checkbox => {
+                        if (!checkbox.disabled) {
+                            checkbox.checked = !allChecked;
+                        }
+                    });
+
+                    saveFormValues();
+                });
+
+                form.addEventListener('change', saveFormValues);
+                form.addEventListener('input', saveFormValues);
+
+                restoreFormValues();
+            });
+        </script>
+    @endpush
 @stop

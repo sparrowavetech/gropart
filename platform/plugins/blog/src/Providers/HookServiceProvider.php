@@ -14,6 +14,7 @@ use Botble\Blog\Models\Tag;
 use Botble\Blog\Services\BlogService;
 use Botble\Dashboard\Events\RenderingDashboardWidgets;
 use Botble\Dashboard\Supports\DashboardWidgetInstance;
+use Botble\LanguageAdvanced\Supports\LanguageAdvancedManager;
 use Botble\Media\Facades\RvMedia;
 use Botble\Menu\Events\RenderingMenuOptions;
 use Botble\Menu\Facades\Menu;
@@ -27,6 +28,7 @@ use Botble\Theme\Events\RenderingAdminBar;
 use Botble\Theme\Events\RenderingThemeOptionSettings;
 use Botble\Theme\Facades\AdminBar;
 use Botble\Theme\Facades\Theme;
+use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -36,28 +38,44 @@ class HookServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
+        $this->app['events']->listen(RouteMatched::class, function (): void {
+            if (is_plugin_active('language') && is_plugin_active('language-advanced')) {
+                LanguageAdvancedManager::registerTranslationImportExport(
+                    Post::class,
+                    fn () => trans('plugins/blog::posts.post_translations'),
+                    [
+                        'import' => 'post-translations.import',
+                        'export' => 'post-translations.export',
+                    ]
+                );
+            }
+        });
+
         Menu::addMenuOptionModel(Category::class);
         Menu::addMenuOptionModel(Tag::class);
 
-        $this->app['events']->listen(RenderingMenuOptions::class, function () {
+        $this->app['events']->listen(RenderingMenuOptions::class, function (): void {
             add_action(MENU_ACTION_SIDEBAR_OPTIONS, [$this, 'registerMenuOptions'], 2);
         });
 
-        $this->app['events']->listen(RenderingDashboardWidgets::class, function () {
+        $this->app['events']->listen(RenderingDashboardWidgets::class, function (): void {
             add_filter(DASHBOARD_FILTER_ADMIN_LIST, [$this, 'registerDashboardWidgets'], 21, 2);
         });
 
-        add_filter(BASE_FILTER_PUBLIC_SINGLE_DATA, [$this, 'handleSingleView'], 2);
+        if (BaseHelper::isFrontendRequest()) {
+            add_filter(BASE_FILTER_PUBLIC_SINGLE_DATA, [$this, 'handleSingleView'], 2);
+            add_filter('facebook_comment_html', [$this, 'renderBlogPostFacebookComments'], 10, 2);
 
-        if (defined('PAGE_MODULE_SCREEN_NAME')) {
-            add_filter(PAGE_FILTER_FRONT_PAGE_CONTENT, [$this, 'renderBlogPage'], 2, 2);
+            if (defined('PAGE_MODULE_SCREEN_NAME')) {
+                add_filter(PAGE_FILTER_FRONT_PAGE_CONTENT, [$this, 'renderBlogPage'], 2, 2);
+            }
         }
 
-        PageTable::beforeRendering(function () {
+        PageTable::beforeRendering(function (): void {
             add_filter(PAGE_FILTER_PAGE_NAME_IN_ADMIN_LIST, [$this, 'addAdditionNameToPageName'], 147, 2);
         });
 
-        $this->app['events']->listen(RenderingAdminBar::class, function () {
+        $this->app['events']->listen(RenderingAdminBar::class, function (): void {
             AdminBar::registerLink(
                 trans('plugins/blog::posts.post'),
                 route('posts.create'),
@@ -94,26 +112,26 @@ class HookServiceProvider extends ServiceProvider
                                 'category_ids[]',
                                 SelectField::class,
                                 SelectFieldOption::make()
-                                    ->label(__('Select categories'))
+                                    ->label(trans('plugins/blog::base.select_categories'))
                                     ->choices($categories)
-                                    ->when(Arr::get($attributes, 'category_ids'), function (SelectFieldOption $option, $categoriesIds) {
-                                        $option->selected(explode(',', $categoriesIds));
+                                    ->when(Arr::get($attributes, 'category_ids'), function (SelectFieldOption $option, $categoriesIds): void {
+                                        $selected = is_array($categoriesIds) ? $categoriesIds : explode(',', $categoriesIds);
+                                        $option->selected($selected);
                                     })
                                     ->multiple()
                                     ->searchable()
-                                    ->helperText(__('Leave categories empty if you want to show posts from all categories.'))
-                                    ->toArray()
+                                    ->helperText(trans('plugins/blog::base.leave_categories_empty'))
                             );
                     }
                 );
         }
 
-        $this->app['events']->listen(RenderingThemeOptionSettings::class, function () {
+        $this->app['events']->listen(RenderingThemeOptionSettings::class, function (): void {
             add_action(RENDERING_THEME_OPTIONS_PAGE, [$this, 'addThemeOptions'], 35);
         });
 
-        if (defined('THEME_FRONT_HEADER') && setting('blog_post_schema_enabled', 1)) {
-            add_action(BASE_ACTION_PUBLIC_RENDER_SINGLE, function ($screen, $post) {
+        if (BaseHelper::isFrontendRequest() && defined('THEME_FRONT_HEADER') && setting('blog_post_schema_enabled', 1)) {
+            add_action(BASE_ACTION_PUBLIC_RENDER_SINGLE, function ($screen, $post): void {
                 add_filter(THEME_FRONT_HEADER, function ($html) use ($post) {
                     if (! $post instanceof Post) {
                         return $html;
@@ -145,7 +163,7 @@ class HookServiceProvider extends ServiceProvider
                         ],
                         'publisher' => [
                             '@type' => 'Organization',
-                            'name' => theme_option('site_title'),
+                            'name' => Theme::getSiteTitle(),
                             'logo' => [
                                 '@type' => 'ImageObject',
                                 'url' => RvMedia::getImageUrl(Theme::getLogo()),
@@ -156,7 +174,7 @@ class HookServiceProvider extends ServiceProvider
                     ];
 
                     return $html . Html::tag('script', json_encode($schema, JSON_UNESCAPED_UNICODE), ['type' => 'application/ld+json'])
-                            ->toHtml();
+                        ->toHtml();
                 }, 35);
             }, 35, 2);
         }
@@ -258,11 +276,10 @@ class HookServiceProvider extends ServiceProvider
         $categoryIds = ShortcodeFacade::fields()->getIds('category_ids', $shortcode);
 
         $posts = Post::query()
-            ->wherePublished()
-            ->orderByDesc('created_at')
-            ->with('slugable')
-            ->when(! empty($categoryIds), function ($query) use ($categoryIds) {
-                $query->whereHas('categories', function ($query) use ($categoryIds) {
+            ->wherePublished()->latest()
+            ->with(['slugable', 'categories.slugable'])
+            ->when(! empty($categoryIds), function ($query) use ($categoryIds): void {
+                $query->whereHas('categories', function ($query) use ($categoryIds): void {
                     $query->whereIn('categories.id', $categoryIds);
                 });
             })
@@ -275,7 +292,7 @@ class HookServiceProvider extends ServiceProvider
             $view = $themeView;
         }
 
-        return view($view, compact('posts'))->render();
+        return view($view, compact('posts', 'shortcode'))->render();
     }
 
     public function renderBlogPage(?string $content, Page $page): ?string
@@ -314,5 +331,14 @@ class HookServiceProvider extends ServiceProvider
     protected function getBlogPageId(): int|string|null
     {
         return theme_option('blog_page_id', setting('blog_page_id'));
+    }
+
+    public function renderBlogPostFacebookComments(string $html, ?object $object = null): string
+    {
+        if ($object instanceof Post && theme_option('facebook_comment_enabled_in_post', 'no') === 'yes') {
+            return view('packages/theme::partials.facebook-comments')->render();
+        }
+
+        return $html;
     }
 }

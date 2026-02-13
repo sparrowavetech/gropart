@@ -17,7 +17,6 @@ use Illuminate\Support\Facades\Facade;
  * @method static bool hideStoreSocialLinks()
  * @method static bool hideStoreAddress()
  * @method static bool allowVendorManageShipping()
- * @method static bool isVendorProfileComplete()
  * @method static mixed sendMailToVendorAfterProcessingOrder($orders)
  * @method static \Botble\Base\Supports\EmailHandler setEmailVendorVariables(\Botble\Ecommerce\Models\Order $order)
  * @method static bool isCommissionCategoryFeeBasedEnabled()
@@ -27,6 +26,12 @@ use Illuminate\Support\Facades\Facade;
  * @method static float getMinimumWithdrawalAmount()
  * @method static bool allowVendorDeleteTheirOrders()
  * @method static bool isEnabledMessagingSystem()
+ * @method static array getAllowedSocialLinks()
+ * @method static bool isSingleVendorCheckout()
+ * @method static array mediaMimeTypesAllowed()
+ * @method static bool isEnabledVendorCategoriesFilter()
+ * @method static bool isChargeShippingPerVendor()
+ * @method static \Illuminate\Support\Collection getCategoriesForVendor(string|int $storeId)
  *
  * @see \Botble\Marketplace\Supports\MarketplaceHelper
  */

@@ -80,6 +80,7 @@ class PluginCreateCommand extends BaseMakeCommand implements PromptsForMissingIn
         );
 
         File::deleteDirectory(Helper::joinPaths([$location, 'src/Providers']));
+        File::deleteDirectory(Helper::joinPaths([$location, 'src/PanelSections']));
 
         $this->publishStubs(
             Helper::joinPaths([dirname(__DIR__, 2), 'stubs', 'plugin', 'src', 'Providers']),
@@ -138,6 +139,13 @@ class PluginCreateCommand extends BaseMakeCommand implements PromptsForMissingIn
         if (! in_array('routes', $componentAvailableOfPlugins)) {
             $deleteDirectories[] = 'routes';
         }
+
+        $deleteDirectories = [
+            ...$deleteDirectories,
+            'src/Http/Controllers/Settings',
+            'src/Http/Requests/Settings',
+            'src/Forms/Settings',
+        ];
 
         foreach ($deleteDirectories as $directory) {
             $path = Helper::joinPaths([$location, $directory]);
@@ -333,7 +341,7 @@ class PluginCreateCommand extends BaseMakeCommand implements PromptsForMissingIn
         $this->components->error('Plugin ID does not match the pattern: (ex: <vendor>/<name>)');
     }
 
-    protected function bootServiceProviderContent(): string|null
+    protected function bootServiceProviderContent(): ?string
     {
         $componentAvailableOfPlugins = $this->componentAvailableOfPlugins;
 
@@ -344,7 +352,7 @@ class PluginCreateCommand extends BaseMakeCommand implements PromptsForMissingIn
         }
 
         if (in_array('permissions', $componentAvailableOfPlugins)) {
-            $bootServiceProviderMethods[] = 'loadAndPublishConfigurations(["permissions"])';
+            $bootServiceProviderMethods[] = 'loadAndPublishConfigurations([\'permissions\'])';
         }
 
         if (in_array('translations', $componentAvailableOfPlugins)) {
@@ -376,7 +384,7 @@ class PluginCreateCommand extends BaseMakeCommand implements PromptsForMissingIn
             ->toString();
     }
 
-    protected function registerAdvancedLanguage(): string|null
+    protected function registerAdvancedLanguage(): ?string
     {
         if (! $this->hasCrud) {
             return null;
@@ -389,7 +397,7 @@ class PluginCreateCommand extends BaseMakeCommand implements PromptsForMissingIn
             }", Str::studly($this->argument('name')));
     }
 
-    protected function registerDashboardMenuContent(): string|null
+    protected function registerDashboardMenuContent(): ?string
     {
         if (! $this->hasCrud) {
             return null;
@@ -401,7 +409,7 @@ class PluginCreateCommand extends BaseMakeCommand implements PromptsForMissingIn
                     'priority' => 5,
                     'parent_id' => null,
                     'name' => 'plugins/{-name}::{-name}.name',
-                    'icon' => 'fa fa-list',
+                    'icon' => 'ti ti-box',
                     'url' => route('{-name}.index'),
                     'permissions' => ['{-name}.index'],
                 ]);
@@ -410,7 +418,7 @@ class PluginCreateCommand extends BaseMakeCommand implements PromptsForMissingIn
         return PHP_EOL . str_repeat(' ', 12) . str_replace('{-name}', strtolower($this->argument('name')), $rawContent);
     }
 
-    protected function importsServiceProvider(): string|null
+    protected function importsServiceProvider(): ?string
     {
         if (! $this->hasCrud) {
             return null;

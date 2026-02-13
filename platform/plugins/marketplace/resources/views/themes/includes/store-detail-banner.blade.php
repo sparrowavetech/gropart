@@ -4,21 +4,26 @@
         {{ RvMedia::image($store->logo, $store->name, useDefaultImage: true, attributes: ['class' => 'bb-shop-banner-logo']) }}
 
         <div class="bb-shop-banner-info">
-            <h2 class="bb-shop-banner-name">{{ $store->name }}</h2>
+            <h2 class="bb-shop-banner-name">
+                {{ $store->name }}
+                {!! $store->badge !!}
+            </h2>
 
-            @if (EcommerceHelper::isReviewEnabled())
+            @if (EcommerceHelper::isReviewEnabled() && (!EcommerceHelper::hideRatingWhenNoReviews() || $store->reviews->count() > 0))
                 <div class="bb-shop-banner-rating">
                     @include(EcommerceHelper::viewPath('includes.rating-star'), ['avg' => $store->reviews()->avg('star'), 'size' => 80])
-                    <small>{{ __('(:count reviews)', ['count' => number_format($store->reviews->count())]) }}</small>
+                    <small>{{ trans('plugins/ecommerce::review.count_reviews', ['count' => number_format($store->reviews->count())]) }}</small>
                 </div>
             @endif
 
             @if ($store->full_address || $store->phone || $store->email)
                 <div class="bb-shop-banner-contact">
-                    <div class="bb-shop-banner-address d-flex gap-1">
-                        <x-core::icon name="ti ti-map-pin" />
-                        {{ $store->full_address }}
-                    </div>
+                    @if (!MarketplaceHelper::hideStoreAddress() && $store->full_address)
+                        <div class="bb-shop-banner-address d-flex gap-1">
+                            <x-core::icon name="ti ti-map-pin" />
+                            {{ $store->full_address }}
+                        </div>
+                    @endif
 
                     @if (!MarketplaceHelper::hideStorePhoneNumber() && $store->phone)
                         <div class="bb-shop-banner-phone d-flex gap-1">
@@ -37,26 +42,24 @@
             @endif
 
             @if ($store->description)
-                <div class="bb-shop-banner-description">
+                <div class="bb-shop-banner-description ck-content">
                     {!! BaseHelper::clean($store->description) !!}
                 </div>
             @endif
 
-            @if (!MarketplaceHelper::hideStoreSocialLinks() && ($socials = $store->getMetaData('socials', true)))
+            @if (!MarketplaceHelper::hideStoreSocialLinks() && ($socials = $store->getMetaData('social_links', true)))
                 <ul class="bb-shop-banner-socials">
-                    @foreach ((array) ['facebook', 'instagram', 'x', 'youtube', 'linkedin'] as $social)
-                        @continue(empty($link = Arr::get($socials, $social)))
+                    @foreach (MarketplaceHelper::getAllowedSocialLinks() as $key => $social)
+                        @continue(! Arr::get($socials, $key))
 
                         <li>
-                            <a href="{{ $link }}" target="_blank"><x-core::icon :name="'ti ti-brand-' . $social" /></a>
+                            <a href="{{ Arr::get($social, 'url') . Arr::get($socials, $key) }}" target="_blank">
+                                @if ($icon = Arr::get($social, 'icon'))
+                                    <x-core::icon :name="'ti ti-brand-' . $icon" />
+                                @endif
+                            </a>
                         </li>
                     @endforeach
-
-                    @if ($twitter = Arr::get($socials, 'twitter'))
-                        <li>
-                            <a href="{{ $twitter }}" target="_blank"><x-core::icon name="ti ti-brand-x" /></a>
-                        </li>
-                    @endif
                 </ul>
             @endif
         </div>

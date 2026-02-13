@@ -5,6 +5,9 @@ namespace Botble\Base\Forms;
 use Closure;
 use Illuminate\Contracts\Support\Arrayable;
 
+/**
+ * @phpstan-consistent-constructor
+ */
 class MetaBox implements Arrayable
 {
     protected string $title;

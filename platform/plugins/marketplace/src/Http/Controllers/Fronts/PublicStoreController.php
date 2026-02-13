@@ -25,10 +25,12 @@ class PublicStoreController extends BaseController
 {
     public function getStores(Request $request)
     {
+        $title = trans('plugins/marketplace::store.stores');
         Theme::breadcrumb()
-            ->add(__('Stores'), route('public.stores'));
+            ->add($title, route('public.stores'));
 
-        SeoHelper::setTitle(__('Stores'))->setDescription(__('Stores'));
+        SeoHelper::setTitle(theme_option('marketplace_stores_seo_title') ?: $title)
+            ->setDescription(theme_option('marketplace_stores_seo_description') ?: $title);
 
         $condition = [];
 
@@ -39,7 +41,7 @@ class PublicStoreController extends BaseController
 
         $with = ['slugable'];
         if (EcommerceHelper::isReviewEnabled()) {
-            $with['reviews'] = function ($query) {
+            $with['reviews'] = function ($query): void {
                 $query->where([
                     'ec_products.status' => BaseStatusEnum::PUBLISHED,
                     'ec_reviews.status' => BaseStatusEnum::PUBLISHED,
@@ -52,11 +54,12 @@ class PublicStoreController extends BaseController
             ->where($condition)
             ->with($with)
             ->withCount([
-                'products' => function ($query) {
-                    $query->wherePublished();
+                'products' => function ($query): void {
+                    $query
+                        ->where('is_variation', 0)
+                        ->wherePublished();
                 },
-            ])
-            ->orderByDesc('created_at')
+            ])->latest()
             ->paginate(12);
 
         return Theme::scope('marketplace.stores', compact('stores'), MarketplaceHelper::viewPath('stores', false))->render();
@@ -69,9 +72,7 @@ class PublicStoreController extends BaseController
     ) {
         $slug = SlugHelper::getSlug($key, SlugHelper::getPrefix(Store::class));
 
-        if (! $slug) {
-            abort(404);
-        }
+        abort_unless($slug, 404);
 
         $condition = [
             'mp_stores.id' => $slug->reference_id,
@@ -95,6 +96,7 @@ class PublicStoreController extends BaseController
         SeoHelper::setTitle($store->name)->setDescription($store->description);
 
         $meta = new SeoOpenGraph();
+
         if ($store->logo) {
             $meta->setImage(RvMedia::getImageUrl($store->logo));
         }
@@ -105,17 +107,24 @@ class PublicStoreController extends BaseController
         SeoHelper::setSeoOpenGraph($meta);
 
         Theme::breadcrumb()
-            ->add(__('Stores'), route('public.stores'))
+            ->add(trans('plugins/marketplace::store.stores'), route('public.stores'))
             ->add($store->name, $store->url);
 
         $with = EcommerceHelper::withProductEagerLoadingRelations();
 
-        $products = $productService->getProduct($request, null, null, $with, [], ['store_id' => $store->id]);
+        $products = $productService->getProduct(
+            $request,
+            null,
+            null,
+            $with,
+            [],
+            ['is_variation' => 0, 'store_id' => $store->getKey()]
+        );
 
         if ($request->ajax()) {
             $total = $products->total();
-            $message = $total > 1 ? __(':total Products found', compact('total')) : __(
-                ':total Product found',
+            $message = $total > 1 ? trans('plugins/ecommerce::products.total_products_found', compact('total')) : trans(
+                'plugins/ecommerce::products.total_product_found',
                 compact('total')
             );
 
@@ -131,6 +140,16 @@ class PublicStoreController extends BaseController
                 ->setMessage($message);
         }
 
+        if (function_exists('admin_bar')) {
+            admin_bar()
+                ->registerLink(
+                    trans('plugins/marketplace::store.edit_this_store'),
+                    route('marketplace.store.edit', $store->getKey()),
+                    null,
+                    'marketplace.store.edit'
+                );
+        }
+
         $contactForm = ContactStoreForm::createFromArray(['id' => $store->getKey()]);
 
         return Theme::scope(
@@ -142,9 +161,7 @@ class PublicStoreController extends BaseController
 
     public function checkStoreUrl(CheckStoreUrlRequest $request)
     {
-        if (! $request->ajax()) {
-            abort(404);
-        }
+        abort_unless($request->ajax(), 404);
 
         $slug = $request->input('url');
         $slug = Str::slug($slug, '-', ! SlugHelper::turnOffAutomaticUrlTranslationIntoLatin() ? 'en' : false);
@@ -156,9 +173,9 @@ class PublicStoreController extends BaseController
         if ($existing && $existing->reference_id != $request->input('reference_id')) {
             return $this->httpResponse()
                 ->setError()
-                ->setMessage(__('Not Available'));
+                ->setMessage(trans('plugins/marketplace::store.forms.not_available'));
         }
 
-        return $this->httpResponse()->setMessage(__('Available'));
+        return $this->httpResponse()->setMessage(trans('plugins/marketplace::store.forms.available'));
     }
 }

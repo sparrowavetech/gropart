@@ -14,7 +14,7 @@ export class DownloadService {
     async download(urls, onProgress, onCompleted) {
         let _self = this
 
-        urls = $.trim(urls).split(/\r?\n/)
+        urls = urls.trim().split(/\r?\n/)
 
         let index = 0
         let hasError = false

@@ -26,11 +26,11 @@
             <x-core::button
                 class="payment-checkout-btn"
                 color="primary w-100"
-                data-processing-text="{{ __('Processing. Please wait...') }}"
-                data-error-header="{{ __('Error') }}"
+                data-processing-text="{{ trans('plugins/payment::payment.processing_please_wait') }}"
+                data-error-header="{{ trans('plugins/payment::payment.error') }}"
                 icon="ti ti-credit-card"
             >
-                {{ __('Checkout') }}
+                {{ trans('plugins/payment::payment.checkout') }}
             </x-core::button>
         </x-core::form>
     </div>

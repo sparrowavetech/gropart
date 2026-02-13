@@ -6,6 +6,7 @@ use Botble\Base\Casts\SafeContent;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Models\BaseModel;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Cache;
 
 class Country extends BaseModel
 {
@@ -18,6 +19,7 @@ class Country extends BaseModel
         'order',
         'is_default',
         'status',
+        'image',
     ];
 
     protected $casts = [
@@ -31,10 +33,17 @@ class Country extends BaseModel
 
     protected static function booted(): void
     {
-        static::deleted(function (Country $country) {
+        static::deleted(function (Country $country): void {
             $country->states()->delete();
             $country->cities()->delete();
         });
+
+        $clearCache = function (self $model): void {
+            Cache::forget('location_countries_default');
+        };
+
+        static::saved($clearCache);
+        static::deleted($clearCache);
     }
 
     public function states(): HasMany

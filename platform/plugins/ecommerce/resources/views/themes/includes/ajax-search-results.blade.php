@@ -11,7 +11,7 @@
                             {{ $product->name }}
                         </div>
 
-                        @if (EcommerceHelper::isReviewEnabled())
+                        @if (EcommerceHelper::isReviewEnabled() && (!EcommerceHelper::hideRatingWhenNoReviews() || $product->reviews_count > 0))
                             <div class="bb-quick-search-item-rating">
                                 @include(EcommerceHelper::viewPath('includes.rating-star'), ['avg' => $product->reviews_avg])
                                 <span>({{ $product->reviews_count }})</span>
@@ -30,14 +30,11 @@
         </div>
     </div>
 
-    <div class="bb-quick-search-view-all d-none d-sm-block">
-        <a href="#" onclick="event.preventDefault(); document.getElementById('bb-form-quick-search').submit();">{{ __('View all results') }}</a>
-    </div>
-    <div class="bb-quick-search-view-all d-block d-sm-none">
-        <a href="#" onclick="event.preventDefault(); document.querySelector('#search-mobile #bb-form-quick-search').submit();">{{ __('View all results') }}</a>
+    <div class="bb-quick-search-view-all">
+        <a href="#" onclick="event.preventDefault(); this.closest('.bb-form-quick-search').submit();">{{ trans('plugins/ecommerce::ecommerce.view_all_results') }}</a>
     </div>
 @else
     <div class="bb-quick-search-empty">
-        {{ __('No results found!') }}
+        {{ trans('plugins/ecommerce::ecommerce.no_results_found') }}
     </div>
 @endif

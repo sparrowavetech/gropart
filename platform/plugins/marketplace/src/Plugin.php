@@ -15,14 +15,16 @@ class Plugin extends PluginOperationAbstract
         Schema::dropIfExists('mp_vendor_info');
         Schema::dropIfExists('mp_customer_revenues');
         Schema::dropIfExists('mp_customer_withdrawals');
+        Schema::dropIfExists('mp_category_sale_commissions');
+        Schema::dropIfExists('mp_stores_translations');
 
-        Schema::table('ec_orders', function (Blueprint $table) {
+        Schema::table('ec_orders', function (Blueprint $table): void {
             if (Schema::hasColumn('ec_orders', 'store_id')) {
                 $table->dropColumn('store_id');
             }
         });
 
-        Schema::table('ec_products', function (Blueprint $table) {
+        Schema::table('ec_products', function (Blueprint $table): void {
             if (Schema::hasColumn('ec_products', 'store_id')) {
                 $table->dropColumn('store_id');
             }
@@ -32,7 +34,7 @@ class Plugin extends PluginOperationAbstract
             }
         });
 
-        Schema::table('ec_customers', function (Blueprint $table) {
+        Schema::table('ec_customers', function (Blueprint $table): void {
             if (Schema::hasColumn('ec_customers', 'is_vendor')) {
                 $table->dropColumn('is_vendor');
             }
@@ -61,9 +63,6 @@ class Plugin extends PluginOperationAbstract
             'marketplace_hide_store_email',
             'marketplace_allow_vendor_manage_shipping',
             'marketplace_fee_per_order',
-            'marketplace_default_platform_fee',
-            'marketplace_default_fee_tax',
-            'marketplace_authorised_signature_image',
             'marketplace_fee_withdrawal',
             'marketplace_payout_methods',
         ]);

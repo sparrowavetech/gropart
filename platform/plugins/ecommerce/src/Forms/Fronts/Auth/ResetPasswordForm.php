@@ -30,7 +30,6 @@ class ResetPasswordForm extends AuthForm
                 'hidden',
                 TextFieldOption::make()
                     ->value($this->request->route('token'))
-                    ->toArray()
             )
             ->add(
                 'email',
@@ -39,7 +38,6 @@ class ResetPasswordForm extends AuthForm
                     ->label(__('Email address'))
                     ->value($this->request->input('email'))
                     ->icon('ti ti-mail')
-                    ->toArray()
             )
             ->add(
                 'password',
@@ -48,7 +46,6 @@ class ResetPasswordForm extends AuthForm
                     ->label(__('Password'))
                     ->placeholder(__('Password'))
                     ->icon('ti ti-lock')
-                    ->toArray()
             )
             ->add(
                 'password_confirmation',
@@ -57,7 +54,6 @@ class ResetPasswordForm extends AuthForm
                     ->label(__('Password confirmation'))
                     ->placeholder(__('Password confirmation'))
                     ->icon('ti ti-lock')
-                    ->toArray()
             )
             ->submitButton(__('Reset Password'))
             ->add('back_to_login', HtmlField::class, [

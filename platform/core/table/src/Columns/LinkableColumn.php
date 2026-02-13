@@ -71,7 +71,13 @@ class LinkableColumn extends FormattedColumn implements FormattedColumnContract
             );
         }
 
-        return $this->url ?? $value;
+        $url = $this->url ?? $value;
+
+        if (filter_var($url, FILTER_VALIDATE_URL) === false) {
+            return null;
+        }
+
+        return $url;
     }
 
     public function permission(string $permission): static
@@ -117,6 +123,10 @@ class LinkableColumn extends FormattedColumn implements FormattedColumnContract
         if ($this->externalLink) {
             $attributes['target'] = '_blank';
             $valueTruncated = $valueTruncated . $this->renderExternalLinkIcon();
+        }
+
+        if ($this->hasColor()) {
+            $attributes['class'] = 'text-' . $this->color;
         }
 
         if ($url = $this->getUrl($value)) {

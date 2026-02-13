@@ -18,7 +18,10 @@
                     type="button"
                     class="btn-action"
                 >
-                    <x-core::icon name="ti ti-chevron-down" size="sm" />
+                    <x-core::icon
+                        name="ti ti-chevron-down"
+                        size="sm"
+                    />
                 </button>
             </a>
         </x-core::card.header>

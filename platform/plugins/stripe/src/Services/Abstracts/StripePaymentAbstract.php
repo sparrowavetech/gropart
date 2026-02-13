@@ -109,10 +109,33 @@ abstract class StripePaymentAbstract
             ];
         }
 
+        try {
+            $charge = Charge::retrieve($paymentId);
+            $actualChargedAmount = $charge->amount;
+            $actualRefundedAmount = $charge->amount_refunded;
+            $maxRefundableAmount = $actualChargedAmount - $actualRefundedAmount;
+        } catch (Exception $exception) {
+            return [
+                'error' => true,
+                'message' => trans('plugins/payment::payment.could_not_get_stripe_payment_details') . ': ' . $exception->getMessage(),
+            ];
+        }
+
         $multiplier = StripeHelper::getStripeCurrencyMultiplier($this->currency);
 
         if ($multiplier > 1) {
             $totalAmount = (int) (round((float) $totalAmount, 2) * $multiplier);
+        }
+
+        if ($totalAmount > $maxRefundableAmount) {
+            $totalAmount = $maxRefundableAmount;
+        }
+
+        if ($totalAmount <= 0) {
+            return [
+                'error' => true,
+                'message' => trans('plugins/payment::payment.refund_amount_is_invalid'),
+            ];
         }
 
         try {
@@ -123,10 +146,19 @@ abstract class StripePaymentAbstract
             ]);
 
             if ($response->status == 'succeeded') {
+                $refundData = $response->toArray();
+
+                $actualRefundedAmount = $response->amount;
+                if ($multiplier > 1) {
+                    $actualRefundedAmount = $actualRefundedAmount / $multiplier;
+                }
+
+                $refundData['refunded_amount_in_currency'] = $actualRefundedAmount;
+
                 return [
                     'error' => false,
                     'message' => $response->status,
-                    'data' => (array) $response,
+                    'data' => $refundData,
                 ];
             }
 

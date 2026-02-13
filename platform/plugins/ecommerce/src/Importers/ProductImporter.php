@@ -3,13 +3,15 @@
 namespace Botble\Ecommerce\Importers;
 
 use Botble\Base\Enums\BaseStatusEnum;
-use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Facades\BaseHelper;
 use Botble\DataSynchronize\Contracts\Importer\WithMapping;
 use Botble\DataSynchronize\Importer\ImportColumn;
 use Botble\DataSynchronize\Importer\Importer;
 use Botble\Ecommerce\Enums\ProductTypeEnum;
 use Botble\Ecommerce\Enums\StockStatusEnum;
+use Botble\Ecommerce\Events\ProductQuantityUpdatedEvent;
+use Botble\Ecommerce\Events\ProductVariationCreated;
+use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Imports\ImportTrait;
 use Botble\Ecommerce\Models\Brand;
 use Botble\Ecommerce\Models\Product;
@@ -66,7 +68,13 @@ class ProductImporter extends Importer implements WithMapping
 
     protected array $supportedLocales = [];
 
-    protected string $defaultLanguage;
+    protected ?string $defaultLanguage = null;
+
+    protected bool $updateExisting = false;
+
+    protected bool $isMarketplaceActive;
+
+    protected bool $isEnabledDigital;
 
     public function __construct()
     {
@@ -82,10 +90,15 @@ class ProductImporter extends Importer implements WithMapping
         $this->allTaxes = Tax::query()->get();
         $this->barcodes = collect();
 
-        if (defined('LANGUAGE_MODULE_SCREEN_NAME')) {
-            $this->defaultLanguage = Language::getDefaultLanguage(['lang_code'])->lang_code;
+        if (defined('LANGUAGE_MODULE_SCREEN_NAME') && defined('LANGUAGE_ADVANCED_MODULE_SCREEN_NAME')) {
+            $this->defaultLanguage = Language::getDefaultLanguage(['lang_code'])?->lang_code;
             $this->supportedLocales = Language::getSupportedLocales();
         }
+
+        $this->updateExisting = request()->boolean('update_existing_products');
+
+        $this->isMarketplaceActive = is_plugin_active('marketplace');
+        $this->isEnabledDigital = EcommerceHelper::isEnabledSupportDigitalProducts();
     }
 
     public function setImportType(string $importType): self
@@ -100,6 +113,13 @@ class ProductImporter extends Importer implements WithMapping
         return $this->importType;
     }
 
+    public function setUpdateExisting(bool $updateExisting): self
+    {
+        $this->updateExisting = $updateExisting;
+
+        return $this;
+    }
+
     public function label(): string
     {
         return trans('plugins/ecommerce::products.name');
@@ -110,9 +130,33 @@ class ProductImporter extends Importer implements WithMapping
         return 10;
     }
 
+    public function getDoneMessage(int $count): string
+    {
+        return $this->updateExisting ? trans('plugins/ecommerce::products.import.updated_message', [
+            'count' => number_format($count),
+        ]) : trans('packages/data-synchronize::data-synchronize.import.done_message', [
+            'count' => number_format($count),
+            'label' => strtolower($this->getLabel()),
+        ]);
+    }
+
+    protected function getBarcodeValidationRules(): array
+    {
+        $rules = ['nullable', 'string', 'max:150'];
+
+        if (! $this->updateExisting) {
+            $rules[] = 'unique:ec_products,barcode';
+        }
+
+        return $rules;
+    }
+
     public function columns(): array
     {
         $columns = [
+            ImportColumn::make('id')
+                ->label('ID')
+                ->rules(['nullable', 'string'], trans('plugins/ecommerce::products.import.rules.nullable_string', ['attribute' => 'ID'])),
             ImportColumn::make('name')
                 ->rules(['required', 'string', 'max:250'], trans('plugins/ecommerce::products.import.rules.required_string_max', ['attribute' => 'Name', 'max' => 250])),
             ImportColumn::make('description')
@@ -174,11 +218,20 @@ class ProductImporter extends Importer implements WithMapping
             ImportColumn::make('cost_per_item')
                 ->rules(['nullable', 'numeric', 'min:0'], trans('plugins/ecommerce::products.import.rules.nullable_numeric_min', ['attribute' => 'Cost per item'])),
             ImportColumn::make('barcode')
-                ->rules(['nullable', 'string', 'unique:ec_products,barcode', 'max:50'], trans('plugins/ecommerce::products.import.rules.nullable_string_max', ['attribute' => 'Barcode', 'max' => 50])),
+                ->rules($this->getBarcodeValidationRules(), trans('plugins/ecommerce::products.import.rules.nullable_string_max', ['attribute' => 'Barcode', 'max' => 150])),
             ImportColumn::make('content')
                 ->rules(['nullable', 'string'], trans('plugins/ecommerce::products.import.rules.nullable_string', ['attribute' => 'Content'])),
             ImportColumn::make('tags')
                 ->rules(['nullable', 'array'], trans('plugins/ecommerce::products.import.rules.nullable_array', ['attribute' => 'Tags'])),
+            ImportColumn::make('seo_title')
+                ->label('SEO Title')
+                ->rules(['nullable', 'string', 'max:250'], trans('plugins/ecommerce::products.import.rules.nullable_string_max', ['attribute' => 'SEO Title', 'max' => 250])),
+            ImportColumn::make('seo_description')
+                ->label('SEO Description')
+                ->rules(['nullable', 'string', 'max:500'], trans('plugins/ecommerce::products.import.rules.nullable_string_max', ['attribute' => 'SEO Description', 'max' => 500])),
+            ImportColumn::make('seo_index')
+                ->label('SEO Index')
+                ->rules(['nullable', Rule::in(['index', 'noindex'])], trans('plugins/ecommerce::products.import.rules.in', ['attribute' => 'SEO Index', 'values' => 'index, noindex'])),
             ImportColumn::make('product_type')
                 ->rules([Rule::in(ProductTypeEnum::values())], trans('plugins/ecommerce::products.import.rules.in', ['attribute' => 'Product type', 'values' => implode(', ', ProductTypeEnum::values())])),
             ImportColumn::make('auto_generate_sku')
@@ -189,6 +242,8 @@ class ProductImporter extends Importer implements WithMapping
                 ->rules(['nullable', 'numeric', 'min:0'], trans('plugins/ecommerce::products.import.rules.nullable_numeric_min', ['attribute' => 'Minimum order quantity'])),
             ImportColumn::make('maximum_order_quantity')
                 ->rules(['nullable', 'numeric', 'min:0'], trans('plugins/ecommerce::products.import.rules.nullable_numeric_min', ['attribute' => 'Maximum order quantity'])),
+            ImportColumn::make('order')
+                ->rules(['nullable', 'integer', 'min:0'], trans('plugins/ecommerce::products.import.rules.nullable_numeric_min', ['attribute' => 'Order'])),
         ];
 
         if (is_plugin_active('marketplace')) {
@@ -198,15 +253,17 @@ class ProductImporter extends Importer implements WithMapping
 
         foreach ($this->supportedLocales as $properties) {
             if ($properties['lang_code'] != $this->defaultLanguage) {
-                $columns[] = ImportColumn::make("name_({$properties['lang_code']})")
-                    ->label('Name (' . strtoupper($properties['lang_code']) . ')')
-                    ->rules(['nullable', 'string', 'max:250'], trans('plugins/ecommerce::products.import.rules.nullable_string_max', ['attribute' => 'Name (' . strtoupper($properties['lang_code']) . ')', 'max' => 250]));
-                $columns[] = ImportColumn::make("description_({$properties['lang_code']})")
-                    ->label('Description (' . strtoupper($properties['lang_code']) . ')')
-                    ->rules(['nullable', 'string'], trans('plugins/ecommerce::products.import.rules.nullable_string', ['attribute' => 'Description (' . strtoupper($properties['lang_code']) . ')']));
-                $columns[] = ImportColumn::make("content_({$properties['lang_code']})")
-                    ->label('Content (' . strtoupper($properties['lang_code']) . ')')
-                    ->rules(['nullable', 'string'], trans('plugins/ecommerce::products.import.rules.nullable_string', ['attribute' => 'Content (' . strtoupper($properties['lang_code']) . ')']));
+                $langCode = strtolower($properties['lang_code']);
+
+                $columns[] = ImportColumn::make("name_({$langCode})")
+                    ->label('Name (' . strtoupper($langCode) . ')')
+                    ->rules(['nullable', 'string', 'max:250'], trans('plugins/ecommerce::products.import.rules.nullable_string_max', ['attribute' => 'Name (' . strtoupper($langCode) . ')', 'max' => 250]));
+                $columns[] = ImportColumn::make("description_({$langCode})")
+                    ->label('Description (' . strtoupper($langCode) . ')')
+                    ->rules(['nullable', 'string'], trans('plugins/ecommerce::products.import.rules.nullable_string', ['attribute' => 'Description (' . strtoupper($langCode) . ')']));
+                $columns[] = ImportColumn::make("content_({$langCode})")
+                    ->label('Content (' . strtoupper($langCode) . ')')
+                    ->rules(['nullable', 'string'], trans('plugins/ecommerce::products.import.rules.nullable_string', ['attribute' => 'Content (' . strtoupper($langCode) . ')']));
             }
         }
 
@@ -215,53 +272,43 @@ class ProductImporter extends Importer implements WithMapping
 
     public function examples(): array
     {
-        $products = Product::query()
+        $with = [
+            'categories',
+            'slugable',
+            'brand',
+            'taxes',
+            'productLabels',
+            'productCollections',
+            'variations',
+            'variations.product',
+            'variations.configurableProduct',
+            'variations.productAttributes.productAttributeSet',
+            'tags',
+            'productAttributeSets',
+            'metadata',
+        ];
+
+        if ($this->isMarketplaceActive) {
+            $with[] = 'store';
+        }
+
+        if (count($this->supportedLocales)) {
+            $with[] = 'translations';
+        }
+
+        $products = $this->getProductQuery()
             ->where('is_variation', false)
+            ->with($with)
             ->take(5)
-            ->get()
-            ->map(function (Product $product) {
-                $product = [
-                    ...$product->toArray(),
-                    'url' => $product->url,
-                    'slug' => $product->slug,
-                    'brand' => $product->brand?->name,
-                    'import_type' => 'product',
-                    'is_variation_default' => true,
-                    'auto_generate_sku' => true,
-                    'description' => Str::limit($product->description),
-                    'content' => Str::limit($product->content),
-                    'categories' => $product->categories?->pluck('name')->join(','),
-                    'product_collections' => $product->productCollections?->pluck('name')->join(','),
-                    'labels' => $product->labels?->pluck('name')->join(','),
-                    'taxes' => $product->taxes?->pluck('name')->join(','),
-                    'images' => collect($product->images)->map(fn ($image) => RvMedia::getImageUrl($image))->join(','),
-                    'product_attributes' => $product->productAttributes?->pluck('name')->join(','),
-                    'tags' => $product->tags?->pluck('name')->join(','),
-                ];
-
-                if (is_plugin_active('marketplace')) {
-                    $stores = DB::table('mp_stores')->pluck('name', 'id');
-
-                    $product['vendor'] = $stores->count() ? $stores->random() : null;
-                }
-
-                foreach ($this->supportedLocales as $properties) {
-                    if ($properties['lang_code'] != $this->defaultLanguage) {
-                        $product['name_' . $properties['lang_code']] = $product['name'] . ' (' . strtoupper($properties['lang_code']) . ')';
-                        $product['description_' . $properties['lang_code']] = $product['description'] . ' (' . strtoupper($properties['lang_code']) . ')';
-                        $product['content_' . $properties['lang_code']] = $product['content'] . ' (' . strtoupper($properties['lang_code']) . ')';
-                    }
-                }
-
-                return $product;
-            });
+            ->get();
 
         if ($products->isNotEmpty()) {
-            return $products->all();
+            return $this->productResults($products);
         }
 
         $examples = [
             [
+                'id' => null,
                 'name' => 'Product name',
                 'description' => 'Product description',
                 'slug' => 'product-slug',
@@ -294,24 +341,201 @@ class ProductImporter extends Importer implements WithMapping
                 'barcode' => 'product-barcode',
                 'content' => 'product-content',
                 'tags' => 'tag1,tag2',
+                'seo_title' => 'Product SEO Title',
+                'seo_description' => 'Product SEO meta description for search engines',
+                'seo_index' => 'index',
                 'product_type' => 'physical',
                 'vendor' => 'vendor-name',
                 'auto_generate_sku' => 1,
                 'generate_license_code' => 1,
                 'minimum_order_quantity' => 1,
                 'maximum_order_quantity' => 10,
+                'order' => 0,
             ],
         ];
 
         foreach ($this->supportedLocales as $properties) {
             if ($properties['lang_code'] != $this->defaultLanguage) {
-                $examples[0]['name_' . $properties['lang_code']] = 'Product name (' . strtoupper($properties['lang_code']) . ')';
-                $examples[0]['description_' . $properties['lang_code']] = 'Product description (' . strtoupper($properties['lang_code']) . ')';
-                $examples[0]['content_' . $properties['lang_code']] = 'Product content (' . strtoupper($properties['lang_code']) . ')';
+                $langCode = strtolower($properties['lang_code']);
+
+                $examples[0]['name_(' . $langCode . ')'] = 'Product name (' . strtoupper($langCode) . ')';
+                $examples[0]['description_(' . $langCode . ')'] = 'Product description (' . strtoupper($langCode) . ')';
+                $examples[0]['content_(' . $langCode . ')'] = 'Product content (' . strtoupper($langCode) . ')';
             }
         }
 
         return $examples;
+    }
+
+    public function productResults(Collection $products): array
+    {
+        $results = [];
+
+        foreach ($products as $product) {
+            $productAttributes = [];
+
+            if (! $product->is_variation) {
+                $productAttributes = $product->productAttributeSets->pluck('title')->all();
+            }
+
+            $result = [
+                'id' => '',
+                'name' => $product->name,
+                'description' => Str::limit($product->description),
+                'content' => Str::limit($product->content),
+                'slug' => $product->slug,
+                'url' => $product->url,
+                'sku' => $product->sku,
+                'categories' => implode(',', $product->categories->pluck('name')->all()),
+                'status' => $product->status->getValue(),
+                'is_featured' => $product->is_featured,
+                'brand' => $product->brand->name,
+                'product_collections' => implode(',', $product->productCollections->pluck('name')->all()),
+                'labels' => implode(',', $product->productLabels->pluck('name')->all()),
+                'taxes' => implode(',', $product->taxes->pluck('title')->all()),
+                'image' => RvMedia::getImageUrl($product->image),
+                'images' => collect($product->images)->map(fn ($value) => RvMedia::getImageUrl($value))->implode(','),
+                'price' => $product->price,
+                'product_attributes' => implode(',', $productAttributes),
+                'import_type' => 'product',
+                'auto_generate_sku' => true,
+                'is_variation_default' => $product->is_variation_default,
+                'stock_status' => $product->stock_status->getValue(),
+                'with_storehouse_management' => $product->with_storehouse_management,
+                'quantity' => $product->quantity,
+                'allow_checkout_when_out_of_stock' => $product->allow_checkout_when_out_of_stock,
+                'sale_price' => $product->sale_price,
+                'start_date' => $product->start_date,
+                'end_date' => $product->end_date,
+                'weight' => $product->weight,
+                'length' => $product->length,
+                'wide' => $product->wide,
+                'height' => $product->height,
+                'cost_per_item' => $product->cost_per_item,
+                'barcode' => $product->barcode,
+                'tags' => implode(',', $product->tags->pluck('name')->all()),
+                'generate_license_code' => $product->generate_license_code,
+                'minimum_order_quantity' => $product->minimum_order_quantity,
+                'maximum_order_quantity' => $product->maximum_order_quantity,
+                'order' => (int) $product->order ?: 0,
+            ];
+
+            $seoMeta = $product->getMetaData('seo_meta', true);
+            $result['seo_title'] = is_array($seoMeta) ? ($seoMeta['seo_title'] ?? '') : '';
+            $result['seo_description'] = is_array($seoMeta) ? ($seoMeta['seo_description'] ?? '') : '';
+            $result['seo_index'] = is_array($seoMeta) ? ($seoMeta['index'] ?? 'index') : 'index';
+
+            if ($this->isEnabledDigital) {
+                $result['product_type'] = $product->product_type;
+            }
+
+            if ($this->isMarketplaceActive) {
+                $result['vendor'] = $product->store?->id ? $product->store->name : null;
+            }
+
+            foreach ($this->supportedLocales as $properties) {
+                if ($properties['lang_code'] != $this->defaultLanguage) {
+                    $translation = $product->translations->where('lang_code', $properties['lang_code'])->first();
+
+                    $langCode = strtolower($properties['lang_code']);
+
+                    $result['name_(' . $langCode . ')'] = $translation ? $translation->name : '';
+                    $result['description_(' . $langCode . ')'] = $translation ? $translation->description : '';
+                    $result['content_(' . $langCode . ')'] = $translation ? $translation->content : '';
+                }
+            }
+
+            $results[] = $result;
+
+            if ($product->variations->count()) {
+                foreach ($product->variations as $variation) {
+                    $productAttributes = $this->getProductAttributes($variation);
+
+                    $data = [
+                        'id' => '',
+                        'name' => $variation->product->name,
+                        'description' => '',
+                        'slug' => '',
+                        'url' => '',
+                        'sku' => $variation->product->sku,
+                        'categories' => '',
+                        'status' => $variation->product->status->getValue(),
+                        'is_featured' => '',
+                        'brand' => '',
+                        'product_collections' => '',
+                        'labels' => '',
+                        'taxes' => '',
+                        'image' => RvMedia::getImageUrl($variation->product->image),
+                        'images' => collect($variation->product->images)->map(fn ($value) => RvMedia::getImageUrl($value))->implode(','),
+                        'price' => $variation->product->price,
+                        'product_attributes' => implode(',', $productAttributes),
+                        'import_type' => 'variation',
+                        'auto_generate_sku' => true,
+                        'is_variation_default' => $variation->is_default,
+                        'stock_status' => $variation->product->stock_status->getValue(),
+                        'with_storehouse_management' => $variation->product->with_storehouse_management,
+                        'quantity' => $variation->product->quantity,
+                        'allow_checkout_when_out_of_stock' => $variation->product->allow_checkout_when_out_of_stock,
+                        'sale_price' => $variation->product->sale_price,
+                        'start_date' => $variation->product->start_date,
+                        'end_date' => $variation->product->end_date,
+                        'weight' => $variation->product->weight,
+                        'length' => $variation->product->length,
+                        'wide' => $variation->product->wide,
+                        'height' => $variation->product->height,
+                        'cost_per_item' => $variation->product->cost_per_item,
+                        'barcode' => $variation->product->barcode,
+                        'content' => '',
+                        'tags' => '',
+                        'generate_license_code' => $variation->product->generate_license_code,
+                        'minimum_order_quantity' => $variation->product->minimum_order_quantity,
+                        'maximum_order_quantity' => $variation->product->maximum_order_quantity,
+                        'order' => (int) $variation->product->order ?: 0,
+                    ];
+
+                    $data['seo_title'] = '';
+                    $data['seo_description'] = '';
+                    $data['seo_index'] = '';
+
+                    if ($this->isEnabledDigital) {
+                        $data['product_type'] = ProductTypeEnum::PHYSICAL;
+                    }
+
+                    if ($this->isMarketplaceActive) {
+                        $data['vendor'] = '';
+                    }
+
+                    foreach ($this->supportedLocales as $properties) {
+                        if ($properties['lang_code'] != $this->defaultLanguage) {
+                            $translation = $variation->product->translations->where('lang_code', $properties['lang_code'])->first();
+
+                            $langCode = strtolower($properties['lang_code']);
+
+                            $data['name_' . '(' . $langCode . ')'] = $translation ? $translation->name : '';
+                            $data['description_' . '(' . $langCode . ')'] = $translation ? $translation->description : '';
+                            $data['content_' . '(' . $langCode . ')'] = '';
+                        }
+                    }
+
+                    $results[] = $data;
+                }
+            }
+        }
+
+        return $results;
+    }
+
+    public function getProductAttributes(Product|ProductVariation $product): array
+    {
+        $productAttributes = [];
+
+        foreach ($product->productAttributes as $productAttribute) {
+            if ($productAttribute->productAttributeSet) {
+                $productAttributes[] = $productAttribute->productAttributeSet->title . ':' . $productAttribute->title;
+            }
+        }
+
+        return $productAttributes;
     }
 
     public function getValidateUrl(): string
@@ -385,11 +609,13 @@ class ProductImporter extends Importer implements WithMapping
 
     protected function getProduct(string $name, ?string $slug): Model|Builder|null
     {
+        $product = null;
+
         if ($slug) {
             $slug = SlugHelper::getSlug($slug, SlugHelper::getPrefix(Product::class), Product::class);
 
             if ($slug) {
-                return Product::query()
+                $product = $this->getProductQuery()
                     ->where([
                         'id' => $slug->reference_id,
                         'is_variation' => 0,
@@ -398,8 +624,12 @@ class ProductImporter extends Importer implements WithMapping
             }
         }
 
-        return Product::query()
-            ->where(function ($query) use ($name) {
+        if ($product) {
+            return $product;
+        }
+
+        return $this->getProductQuery()
+            ->where(function ($query) use ($name): void {
                 $query
                     ->where('name', $name)
                     ->orWhere('id', $name);
@@ -426,212 +656,29 @@ class ProductImporter extends Importer implements WithMapping
         $request = new Request();
         $request->merge($row);
 
-        if (
-            ($sku = $request->input('sku')) &&
-            $existingProduct = Product::query()->where('sku', $sku)->first()
-        ) {
+        $existingProduct = null;
+
+        if (Arr::get($row, 'id')) {
+            $existingProduct = $this->getProductQuery()
+                ->where('id', $row['id'])
+                ->first();
+        }
+
+        if (! $existingProduct && ($sku = $request->input('sku'))) {
+            $existingProduct = $this->getProductQuery()
+                ->where('sku', $sku)
+                ->first();
+        }
+
+        if ($existingProduct) {
+            if ($this->updateExisting) {
+                return $this->updateProduct($existingProduct, $row, $request);
+            }
+
             return $existingProduct;
         }
 
-        $product = new Product();
-
-        $images = $this->getImageURLs((array) $request->input('images', []));
-
-        $request->merge(['images' => $images]);
-
-        $image = Arr::first($images);
-
-        if ($request->input('image')) {
-            $imageFromRequest = $this->getImageURLs([$request->input('image')]);
-
-            if ($imageFromRequest) {
-                $image = Arr::first($imageFromRequest);
-            }
-        }
-
-        $request->merge(['image' => $image]);
-
-        if ($description = $request->input('description')) {
-            $request->merge(['description' => BaseHelper::clean($description)]);
-        }
-
-        if ($content = $request->input('content')) {
-            $request->merge(['content' => BaseHelper::clean($content)]);
-        }
-
-        $product->status = strtolower($request->input('status'));
-
-        $product = (new StoreProductService())->execute($request, $product);
-
-        $this->createTranslations($product, $row);
-
-        $tagsInput = (array) $request->input('tags', []);
-        if ($tagsInput) {
-            $tags = [];
-            foreach ($tagsInput as $tag) {
-                $tags[] = ['value' => $tag];
-            }
-            $request->merge(['tag' => json_encode($tags)]);
-            app(StoreProductTagService::class)->execute($request, $product);
-        }
-
-        $attributeSets = $request->input('attribute_sets', []);
-
-        $product->productAttributeSets()->sync($attributeSets);
-
-        $this->onSuccess([
-            'name' => $product->name,
-            'slug' => $request->input('slug'),
-            'import_type' => 'product',
-            'attribute_sets' => $attributeSets,
-            'model' => $product,
-        ]);
-
-        return $product;
-    }
-
-    protected function createTranslations(Product $product, array $row): void
-    {
-        if (! defined('LANGUAGE_MODULE_SCREEN_NAME')) {
-            return;
-        }
-
-        /** @var \Botble\Language\Models\Language $language */
-        $languages = Language::getActiveLanguage(['lang_code', 'lang_is_default']);
-
-        foreach ($languages as $language) {
-            if ($language->lang_is_default) {
-                continue;
-            }
-
-            $translation = DB::table('ec_products_translations')->where([
-                'lang_code' => $language->lang_code,
-                'ec_products_id' => $product->getKey(),
-            ]);
-
-            if ($translation->exists()) {
-                $translation->update([
-                    'name' => $row["name_({$language->lang_code})"] ?? $row['name'],
-                    'description' => $row["description_({$language->lang_code})"] ?? $row['description'],
-                    'content' => $row["content_({$language->lang_code})"] ?? $row['content'],
-                ]);
-            }
-        }
-    }
-
-    public function mapLocalization(array $row): array
-    {
-        $row['generate_license_code'] = (bool) Arr::get($row, 'generate_license_code', false);
-        $row['minimum_order_quantity'] = (int) Arr::get($row, 'minimum_order_quantity', 0);
-        $row['maximum_order_quantity'] = (int) Arr::get($row, 'maximum_order_quantity', 0);
-        $row['stock_status'] = (string) Arr::get($row, 'stock_status');
-        if (! in_array($row['stock_status'], StockStatusEnum::toArray())) {
-            $row['stock_status'] = StockStatusEnum::IN_STOCK;
-        }
-
-        $row['status'] = Arr::get($row, 'status');
-        if (! in_array($row['status'], BaseStatusEnum::toArray())) {
-            $row['status'] = BaseStatusEnum::PENDING;
-        }
-
-        $row['product_type'] = Arr::get($row, 'product_type');
-        if (! in_array($row['product_type'], ProductTypeEnum::toArray())) {
-            $row['product_type'] = ProductTypeEnum::PHYSICAL;
-        }
-
-        $row['import_type'] = Arr::get($row, 'import_type');
-        if ($row['import_type'] != 'variation') {
-            $row['import_type'] = 'product';
-        }
-
-        $row['is_slug_editable'] = true;
-
-        $row['barcode'] = (string) Arr::get($row, 'barcode');
-
-        $this->setValues($row, [
-            ['key' => 'slug', 'type' => 'string', 'default' => 'name'],
-            ['key' => 'sku', 'type' => 'string'],
-            ['key' => 'price', 'type' => 'number'],
-            ['key' => 'weight', 'type' => 'number'],
-            ['key' => 'length', 'type' => 'number'],
-            ['key' => 'wide', 'type' => 'number'],
-            ['key' => 'height', 'type' => 'number'],
-            ['key' => 'cost_per_item', 'type' => 'number'],
-            ['key' => 'barcode', 'type' => 'string'],
-            ['key' => 'is_featured', 'type' => 'bool'],
-            ['key' => 'product_labels', 'type' => 'array'],
-            ['key' => 'labels', 'type' => 'array'],
-            ['key' => 'images', 'type' => 'array'],
-            ['key' => 'categories', 'type' => 'array'],
-            ['key' => 'product_collections', 'type' => 'array'],
-            ['key' => 'product_attributes', 'type' => 'array'],
-            ['key' => 'is_variation_default', 'type' => 'bool'],
-            ['key' => 'auto_generate_sku', 'type' => 'bool'],
-            ['key' => 'with_storehouse_management', 'type' => 'bool'],
-            ['key' => 'allow_checkout_when_out_of_stock', 'type' => 'bool'],
-            ['key' => 'quantity', 'type' => 'number'],
-            ['key' => 'sale_price', 'type' => 'number'],
-            ['key' => 'start_date', 'type' => 'datetime'],
-            ['key' => 'end_date', 'type' => 'datetime'],
-            ['key' => 'tags', 'type' => 'array'],
-            ['key' => 'taxes', 'type' => 'array'],
-        ]);
-
-        $row['product_labels'] = $row['labels'];
-
-        if ($row['import_type'] == 'product' && ! $row['sku'] && $row['auto_generate_sku']) {
-            $row['sku'] = (new Product())->generateSKU();
-        }
-
-        $row['sale_type'] = 0;
-        if ($row['start_date'] || $row['end_date']) {
-            $row['sale_type'] = 1;
-        }
-
-        if (! $row['with_storehouse_management']) {
-            $row['quantity'] = null;
-            $row['allow_checkout_when_out_of_stock'] = false;
-        }
-
-        $attributeSets = Arr::get($row, 'product_attributes');
-        $row['attribute_sets'] = [];
-        $row['product_attributes'] = [];
-
-        if ($row['import_type'] == 'variation') {
-            foreach ($attributeSets as $attrSet) {
-                $attrSet = explode(':', $attrSet);
-                $title = Arr::get($attrSet, 0);
-                $valueX = Arr::get($attrSet, 1);
-
-                $attribute = $this->productAttributeSets->filter(function ($value) use ($title) {
-                    return $value['title'] == $title;
-                })->first();
-
-                if ($attribute) {
-                    $attr = $attribute->attributes->filter(function ($value) use ($valueX) {
-                        return $value['title'] == $valueX;
-                    })->first();
-
-                    if ($attr) {
-                        $row['attribute_sets'][$attribute->id] = $attr->id;
-                    }
-                }
-            }
-        }
-
-        if ($row['import_type'] == 'product') {
-            foreach ($attributeSets as $attrSet) {
-                $attribute = $this->productAttributeSets->filter(function ($value) use ($attrSet) {
-                    return $value['title'] == $attrSet;
-                })->first();
-
-                if ($attribute) {
-                    $row['attribute_sets'][] = $attribute->id;
-                }
-            }
-        }
-
-        return $row;
+        return $this->updateProduct(new Product(), $row, $request);
     }
 
     public function storeVariant(array $row, ?Product $product): ProductVariation|Model|null
@@ -651,32 +698,63 @@ class ProductImporter extends Importer implements WithMapping
 
         $addedAttributes = $request->input('attribute_sets', []);
 
-        $result = ProductVariation::getVariationByAttributesOrCreate($product->getKey(), $addedAttributes);
+        $existingVariationProduct = null;
+        $existingVariation = null;
 
-        if (! $result['created']) {
-            $this->onFailure(
-                $this->currentRow,
-                'variation',
-                [
-                    trans('plugins/ecommerce::products.form.variation_existed') . ' ' . trans(
-                        'plugins/ecommerce::products.form.product_id'
-                    ) . ': ' . $product->getKey(),
-                ],
-            );
+        if ($sku = $request->input('sku')) {
+            $existingVariationProduct = $this->getProductQuery()
+                ->where('is_variation', true)
+                ->where('sku', $sku)
+                ->first();
 
-            return null;
+            if ($existingVariationProduct) {
+                $existingVariation = ProductVariation::query()
+                    ->where('product_id', $existingVariationProduct->id)
+                    ->first();
+
+                if ($existingVariation && $existingVariation->configurable_product_id != $product->getKey()) {
+                    $this->onFailure(
+                        $this->currentRow,
+                        'SKU',
+                        [__('SKU ":sku" already exists for a variation of another product', ['sku' => $sku])]
+                    );
+
+                    return null;
+                }
+            }
         }
 
-        $variation = $result['variation'];
-
-        $version = array_merge($variation->toArray(), $request->toArray());
-
-        if (
-            ($sku = Arr::get($version, 'sku')) &&
-            $existingVariation = Product::query()->where('is_variation', true)->where('sku', $sku)->first()
-        ) {
+        if ($existingVariation && ! $this->updateExisting) {
             return $existingVariation;
         }
+
+        $existingVariationByAttributes = ProductVariation::getVariationByAttributes($product->getKey(), $addedAttributes);
+
+        if ($existingVariation && $this->updateExisting) {
+            if ($existingVariationByAttributes && $existingVariationByAttributes->id !== $existingVariation->id) {
+                $this->onFailure(
+                    $this->currentRow,
+                    'SKU/Attributes',
+                    [__('SKU ":sku" belongs to a different variation than the one with matching attributes', ['sku' => $request->input('sku')])]
+                );
+
+                return null;
+            }
+            $variation = $existingVariation;
+            $result = ['variation' => $variation, 'created' => false];
+        } elseif ($existingVariationByAttributes) {
+            if ($this->updateExisting) {
+                $variation = $existingVariationByAttributes;
+                $result = ['variation' => $variation, 'created' => false];
+            } else {
+                return $existingVariationByAttributes;
+            }
+        } else {
+            $result = ProductVariation::getVariationByAttributesOrCreate($product->getKey(), $addedAttributes);
+            $variation = $result['variation'];
+        }
+
+        $version = array_merge($variation->toArray(), $request->toArray());
 
         $version['variation_default_id'] = Arr::get($version, 'is_variation_default') ? $version['id'] : null;
         $version['attribute_sets'] = $addedAttributes;
@@ -689,8 +767,49 @@ class ProductImporter extends Importer implements WithMapping
             $version['content'] = BaseHelper::clean($version['content']);
         }
 
-        $productRelatedToVariation = new Product();
-        $productRelatedToVariation->fill($version);
+        if ($existingVariationProduct && $this->updateExisting) {
+            $productRelatedToVariation = $existingVariationProduct;
+            $allowedFields = [
+                'price', 'sale_price', 'quantity', 'weight', 'length', 'wide', 'height',
+                'cost_per_item', 'stock_status', 'with_storehouse_management',
+                'allow_checkout_when_out_of_stock', 'sale_type', 'start_date', 'end_date',
+                'description', 'content', 'images',
+            ];
+
+            if (isset($version['barcode']) && $version['barcode'] !== $productRelatedToVariation->barcode) {
+                $allowedFields[] = 'barcode';
+            }
+
+            $productRelatedToVariation->fill(array_filter($version, function ($key) use ($allowedFields) {
+                return in_array($key, $allowedFields);
+            }, ARRAY_FILTER_USE_KEY));
+        } elseif ($variation->product_id) {
+            $productRelatedToVariation = Product::query()->find($variation->product_id);
+            if ($productRelatedToVariation && $this->updateExisting) {
+                $allowedFields = [
+                    'price', 'sale_price', 'quantity', 'weight', 'length', 'wide', 'height',
+                    'cost_per_item', 'stock_status', 'with_storehouse_management',
+                    'allow_checkout_when_out_of_stock', 'sale_type', 'start_date', 'end_date',
+                    'description', 'content', 'images',
+                ];
+
+                if (isset($version['barcode']) && $version['barcode'] !== $productRelatedToVariation->barcode) {
+                    $allowedFields[] = 'barcode';
+                }
+
+                $productRelatedToVariation->fill(array_filter($version, function ($key) use ($allowedFields) {
+                    return in_array($key, $allowedFields);
+                }, ARRAY_FILTER_USE_KEY));
+            } elseif ($productRelatedToVariation && ! $this->updateExisting) {
+                return $variation;
+            } else {
+                $productRelatedToVariation = new Product();
+                $productRelatedToVariation->fill($version);
+            }
+        } else {
+            $productRelatedToVariation = new Product();
+            $productRelatedToVariation->fill($version);
+        }
 
         $productRelatedToVariation->name = $product->name;
         $productRelatedToVariation->status = $product->status;
@@ -750,11 +869,28 @@ class ProductImporter extends Importer implements WithMapping
         $productRelatedToVariation->product_type = $product->product_type;
         $productRelatedToVariation->save();
 
-        event(new CreatedContentEvent(PRODUCT_MODULE_SCREEN_NAME, $request, $productRelatedToVariation));
+        if ($variation->product) {
+            event(new ProductQuantityUpdatedEvent($variation->product));
+        }
+
+        ProductVariationCreated::dispatch($productRelatedToVariation);
 
         $variation->product_id = $productRelatedToVariation->getKey();
 
-        $variation->is_default = Arr::get($version, 'variation_default_id', 0) == $variation->id;
+        $isVariationDefault = (bool) Arr::get($version, 'is_variation_default', false);
+
+        if ($isVariationDefault) {
+            ProductVariation::query()
+                ->where('configurable_product_id', $product->getKey())
+                ->where('id', '!=', $variation->id)
+                ->update(['is_default' => false]);
+
+            $variation->is_default = true;
+        } else {
+            if ($this->updateExisting || ! $result['created']) {
+                $variation->is_default = false;
+            }
+        }
 
         $variation->save();
 
@@ -773,6 +909,288 @@ class ProductImporter extends Importer implements WithMapping
         ]);
 
         return $variation;
+    }
+
+    protected function updateProduct(Product $product, array $row, Request $request): Product
+    {
+        $images = $this->getImageURLs((array) $request->input('images', []));
+
+        $request->merge(['images' => $images]);
+
+        $image = Arr::first($images);
+
+        if ($request->input('image')) {
+            $imageFromRequest = $this->getImageURLs([$request->input('image')]);
+
+            if ($imageFromRequest) {
+                $image = Arr::first($imageFromRequest);
+            }
+        }
+
+        $request->merge(['image' => $image]);
+
+        if ($description = $request->input('description')) {
+            $request->merge(['description' => BaseHelper::clean($description)]);
+        }
+
+        if ($content = $request->input('content')) {
+            $request->merge(['content' => BaseHelper::clean($content)]);
+        }
+
+        $prevStatus = $product->status;
+        $prevStockStatus = $product->stock_status;
+        $product->status = strtolower($request->input('status'));
+
+        if (! $product->exists && $request->input('name')) {
+            $product->name = $request->input('name');
+        }
+
+        $product = $this->assignProductData($request, $product);
+
+        $product = (new StoreProductService())->execute($request, $product);
+
+        $this->createTranslations($product, $row);
+
+        $tagsInput = (array) $request->input('tags', []);
+        if ($tagsInput) {
+            $tags = [];
+            foreach ($tagsInput as $tag) {
+                $tags[] = ['value' => $tag];
+            }
+            $request->merge(['tag' => json_encode($tags)]);
+            app(StoreProductTagService::class)->execute($request, $product);
+        }
+
+        $attributeSets = $request->input('attribute_sets', []);
+        $preserveVariationAttributes = $request->input('preserve_variation_attributes', false);
+
+        // For products with variations, preserve attribute sets that are used by variations
+        // when the CSV doesn't specify any attributes or explicitly wants to preserve them
+        if ($product->exists && $product->has_variation && (empty($attributeSets) || $preserveVariationAttributes)) {
+            // Get all attribute sets used by variations
+            $variationAttributeSetIds = [];
+            foreach ($product->variations as $variation) {
+                $variationAttributes = $variation->productAttributes()->with('productAttributeSet')->get();
+                foreach ($variationAttributes as $attr) {
+                    if ($attr->productAttributeSet) {
+                        $variationAttributeSetIds[] = $attr->productAttributeSet->id;
+                    }
+                }
+            }
+
+            if (! empty($variationAttributeSetIds)) {
+                // Merge with any explicitly provided attribute sets
+                $attributeSets = array_unique(array_merge($attributeSets, $variationAttributeSetIds));
+            }
+        }
+
+        $product->productAttributeSets()->sync($attributeSets);
+
+        $product->refresh();
+
+        if ($product->wasChanged($product->getFillable()) && ($prevStatus != $product->status || $prevStockStatus != $product->stock_status)) {
+            $this->onSuccess([
+                'name' => $product->name,
+                'slug' => $request->input('slug'),
+                'import_type' => 'product',
+                'attribute_sets' => $attributeSets,
+                'model' => $product,
+            ]);
+        }
+
+        return $product;
+    }
+
+    protected function createTranslations(Product $product, array $row): void
+    {
+        if (! defined('LANGUAGE_MODULE_SCREEN_NAME')) {
+            return;
+        }
+
+        foreach ($this->supportedLocales as $language) {
+            if ($language['lang_is_default']) {
+                continue;
+            }
+
+            $translation = DB::table('ec_products_translations')->where([
+                'lang_code' => $language['lang_code'],
+                'ec_products_id' => $product->getKey(),
+            ]);
+
+            $languageCode = strtolower($language['lang_code']);
+
+            $translationData = [
+                'name' => $row["name_({$languageCode})"] ?? $row['name'],
+                'description' => $row["description_({$languageCode})"] ?? $row['description'],
+                'content' => $row["content_({$languageCode})"] ?? $row['content'],
+            ];
+
+            foreach ($translationData as $key => $translationItem) {
+                $translationData[$key] = mb_convert_encoding($translationItem, 'UTF-8');
+            }
+
+            if ($translation->exists()) {
+                $translation->update($translationData);
+            } else {
+                $translationData['ec_products_id'] = $product->getKey();
+                $translationData['lang_code'] = $language['lang_code'];
+
+                DB::table('ec_products_translations')->insert($translationData);
+            }
+        }
+    }
+
+    public function mapLocalization(array $row): array
+    {
+        $row['generate_license_code'] = (bool) Arr::get($row, 'generate_license_code', false);
+        $row['minimum_order_quantity'] = (int) Arr::get($row, 'minimum_order_quantity', 0);
+        $row['maximum_order_quantity'] = (int) Arr::get($row, 'maximum_order_quantity', 0);
+        $row['stock_status'] = (string) Arr::get($row, 'stock_status');
+        if (! in_array($row['stock_status'], StockStatusEnum::toArray())) {
+            $row['stock_status'] = StockStatusEnum::IN_STOCK;
+        }
+
+        $row['status'] = Arr::get($row, 'status');
+        if (! in_array($row['status'], BaseStatusEnum::toArray())) {
+            $row['status'] = BaseStatusEnum::PENDING;
+        }
+
+        $row['product_type'] = Arr::get($row, 'product_type');
+        if (! in_array($row['product_type'], ProductTypeEnum::toArray())) {
+            $row['product_type'] = ProductTypeEnum::PHYSICAL;
+        }
+
+        $row['import_type'] = Arr::get($row, 'import_type');
+        if ($row['import_type'] != 'variation') {
+            $row['import_type'] = 'product';
+        }
+
+        $row['is_slug_editable'] = true;
+
+        $row['barcode'] = (string) Arr::get($row, 'barcode');
+
+        if (Arr::get($row, 'id')) {
+            $row['id'] = (string) Arr::get($row, 'id');
+        }
+
+        $this->setValues($row, [
+            ['key' => 'slug', 'type' => 'string', 'default' => 'name'],
+            ['key' => 'sku', 'type' => 'string'],
+            ['key' => 'price', 'type' => 'number'],
+            ['key' => 'weight', 'type' => 'number'],
+            ['key' => 'length', 'type' => 'number'],
+            ['key' => 'wide', 'type' => 'number'],
+            ['key' => 'height', 'type' => 'number'],
+            ['key' => 'cost_per_item', 'type' => 'number'],
+            ['key' => 'barcode', 'type' => 'string'],
+            ['key' => 'is_featured', 'type' => 'bool'],
+            ['key' => 'product_labels', 'type' => 'array'],
+            ['key' => 'labels', 'type' => 'array'],
+            ['key' => 'images', 'type' => 'array'],
+            ['key' => 'categories', 'type' => 'array'],
+            ['key' => 'product_collections', 'type' => 'array'],
+            ['key' => 'product_attributes', 'type' => 'array'],
+            ['key' => 'is_variation_default', 'type' => 'bool'],
+            ['key' => 'auto_generate_sku', 'type' => 'bool'],
+            ['key' => 'with_storehouse_management', 'type' => 'bool'],
+            ['key' => 'allow_checkout_when_out_of_stock', 'type' => 'bool'],
+            ['key' => 'quantity', 'type' => 'number'],
+            ['key' => 'sale_price', 'type' => 'number'],
+            ['key' => 'start_date', 'type' => 'datetime'],
+            ['key' => 'end_date', 'type' => 'datetime'],
+            ['key' => 'tags', 'type' => 'array'],
+            ['key' => 'taxes', 'type' => 'array'],
+            ['key' => 'order', 'type' => 'number'],
+        ]);
+
+        $row['product_labels'] = $row['labels'];
+
+        $seoTitle = Arr::get($row, 'seo_title');
+        $seoDescription = Arr::get($row, 'seo_description');
+        $seoIndex = Arr::get($row, 'seo_index', 'index');
+
+        if ($seoTitle || $seoDescription || ($seoIndex && $seoIndex !== 'index')) {
+            $row['seo_meta'] = array_filter([
+                'seo_title' => $seoTitle ?: null,
+                'seo_description' => $seoDescription ?: null,
+                'index' => $seoIndex ?: null,
+            ]);
+        }
+
+        if ($row['import_type'] == 'product' && ! $row['sku'] && $row['auto_generate_sku']) {
+            $row['sku'] = (new Product())->generateSKU();
+        }
+
+        $row['sale_type'] = 0;
+        if ($row['start_date'] || $row['end_date']) {
+            $row['sale_type'] = 1;
+        }
+
+        if (! $row['with_storehouse_management']) {
+            $row['quantity'] = null;
+            $row['allow_checkout_when_out_of_stock'] = false;
+        }
+
+        $attributeSets = Arr::get($row, 'product_attributes');
+        $row['attribute_sets'] = [];
+        $row['product_attributes'] = [];
+
+        if ($row['import_type'] == 'variation') {
+            foreach ($attributeSets as $attrSet) {
+                $attrSet = explode(':', $attrSet);
+                $title = Arr::get($attrSet, 0);
+                $valueX = Arr::get($attrSet, 1);
+
+                $attribute = $this->productAttributeSets->filter(function ($value) use ($title) {
+                    return strtolower($value['title']) == strtolower($title);
+                })->first();
+
+                if ($attribute) {
+                    $attr = $attribute->attributes->filter(function ($value) use ($valueX) {
+                        return strtolower($value['title']) == strtolower($valueX);
+                    })->first();
+
+                    if (! $attr) {
+                        $attr = $attribute->attributes()->create([
+                            'title' => $valueX,
+                            'slug' => Str::slug($valueX),
+                        ]);
+                    }
+
+                    if ($attr) {
+                        $row['attribute_sets'][$attribute->id] = $attr->id;
+                    }
+                }
+            }
+        }
+
+        if ($row['import_type'] == 'product') {
+            if (! empty($attributeSets)) {
+                foreach ($attributeSets as $attrSet) {
+                    $attribute = $this->productAttributeSets->filter(function ($value) use ($attrSet) {
+                        return strtolower($value['title']) == strtolower($attrSet);
+                    })->first();
+
+                    if (! $attribute) {
+                        $attribute = ProductAttributeSet::query()->create([
+                            'title' => $attrSet,
+                            'slug' => Str::slug($attrSet),
+                        ]);
+                    }
+
+                    if ($attribute) {
+                        $row['attribute_sets'][] = $attribute->id;
+                    }
+                }
+            } else {
+                // Mark that attributes were empty in CSV so we know to preserve variation attributes
+                $row['preserve_variation_attributes'] = true;
+            }
+        }
+
+        $row['order'] = (int) Arr::get($row, 'order');
+
+        return $row;
     }
 
     protected function setBrandToRow(array $row): array
@@ -991,25 +1409,34 @@ class ProductImporter extends Importer implements WithMapping
                 $value = is_numeric($value) ? $value : null;
 
                 break;
+
+            case 'string':
+                if ($value !== null) {
+                    $value = (string) $value;
+                }
+
+                break;
         }
 
         Arr::set($row, $key, $value);
 
         if ($value && $key == 'barcode') {
-            if ($barcode = $this->barcodes->firstWhere('value', $value)) {
-                $this->onFailure(
-                    $this->currentRow,
-                    'Barcode',
-                    [
-                        __(
-                            'Barcode ":value" has been duplicated on row #:row',
-                            ['value' => $value, 'row' => Arr::get($barcode, 'row')]
-                        ),
-                    ],
-                    [$value]
-                );
-            } else {
-                $this->barcodes->push(['row' => $this->currentRow, 'value' => $value]);
+            if (! $this->updateExisting) {
+                if ($barcode = $this->barcodes->firstWhere('value', $value)) {
+                    $this->onFailure(
+                        $this->currentRow,
+                        'Barcode',
+                        [
+                            __(
+                                'Barcode ":value" has been duplicated on row #:row',
+                                ['value' => $value, 'row' => Arr::get($barcode, 'row')]
+                            ),
+                        ],
+                        [$value]
+                    );
+                } else {
+                    $this->barcodes->push(['row' => $this->currentRow, 'value' => $value]);
+                }
             }
         }
 
@@ -1042,5 +1469,15 @@ class ProductImporter extends Importer implements WithMapping
         }
 
         return $url;
+    }
+
+    protected function getProductQuery(): Builder
+    {
+        return Product::query();
+    }
+
+    protected function assignProductData(Request $request, Product $product): Product
+    {
+        return $product;
     }
 }

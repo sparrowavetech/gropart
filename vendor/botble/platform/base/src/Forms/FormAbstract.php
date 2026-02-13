@@ -11,6 +11,7 @@ use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\FormRendering;
 use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Base\Facades\Assets;
+use Botble\Base\Forms\FieldOptions\HtmlFieldOption;
 use Botble\Base\Forms\Fields\AutocompleteField;
 use Botble\Base\Forms\Fields\ColorField;
 use Botble\Base\Forms\Fields\DatePickerField;
@@ -28,21 +29,22 @@ use Botble\Base\Forms\Fields\RepeaterField;
 use Botble\Base\Forms\Fields\SelectField;
 use Botble\Base\Forms\Fields\TagField;
 use Botble\Base\Forms\Fields\TimeField;
+use Botble\Base\Forms\Fields\TimePickerField;
 use Botble\Base\Models\BaseModel as BaseModelInstance;
 use Botble\Base\Supports\Builders\Extensible;
 use Botble\Base\Supports\Builders\RenderingExtensible;
 use Botble\Base\Traits\Forms\HasCollapsible;
 use Botble\Base\Traits\Forms\HasColumns;
 use Botble\Base\Traits\Forms\HasFieldset;
+use Botble\Base\Traits\Forms\HasMetaBoxes;
 use Botble\Base\Traits\Forms\HasMetadata;
+use Botble\Base\Traits\Forms\HasTabs;
 use Botble\JsValidation\Facades\JsValidator;
 use Botble\JsValidation\Javascript\JavascriptValidator;
 use Closure;
 use Illuminate\Contracts\Support\Arrayable;
-use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Conditionable;
 use Illuminate\Support\Traits\Tappable;
@@ -51,21 +53,21 @@ use Kris\LaravelFormBuilder\Fields\FormField;
 abstract class FormAbstract extends Form implements ExtensibleContract
 {
     use Conditionable;
-    use Tappable;
     use Extensible;
+    use HasCollapsible;
     use HasColumns;
     use HasFieldset;
+    use HasMetaBoxes;
     use HasMetadata;
+    use HasTabs;
     use RenderingExtensible;
-    use HasCollapsible;
+    use Tappable;
 
     protected array $options = [];
 
     protected string $title = '';
 
     protected string $validatorClass = '';
-
-    protected array $metaBoxes = [];
 
     protected string $actionButtons = '';
 
@@ -78,6 +80,8 @@ abstract class FormAbstract extends Form implements ExtensibleContract
     protected bool $onlyValidatedData = false;
 
     protected bool $withoutActionButtons = false;
+
+    protected bool $disabledPermalinkField = false;
 
     public function __construct()
     {
@@ -124,71 +128,6 @@ abstract class FormAbstract extends Form implements ExtensibleContract
     public function setTitle(string $title): static
     {
         $this->title = $title;
-
-        return $this;
-    }
-
-    public function getMetaBoxes(): array
-    {
-        uasort($this->metaBoxes, function ($before, $after) {
-            if (Arr::get($before, 'priority', 0) > Arr::get($after, 'priority', 0)) {
-                return 1;
-            } elseif (Arr::get($before, 'priority', 0) < Arr::get($after, 'priority', 0)) {
-                return -1;
-            }
-
-            return 0;
-        });
-
-        return $this->metaBoxes;
-    }
-
-    public function getMetaBox(string $name): string|View
-    {
-        if (! Arr::get($this->metaBoxes, $name)) {
-            return '';
-        }
-
-        $metaBox = $this->metaBoxes[$name];
-
-        if ($metaBox instanceof MetaBox) {
-            $metaBox = $metaBox->toArray();
-        }
-
-        if (isset($metaBox['content']) && $metaBox['content'] instanceof Closure) {
-            $metaBox['content'] = call_user_func($metaBox['content'], $this->getModel());
-        }
-
-        $view = view('core/base::forms.partials.meta-box', compact('metaBox'));
-
-        if (Arr::get($metaBox, 'render') === false) {
-            return $view;
-        }
-
-        return $view->render();
-    }
-
-    public function addMetaBoxes(array|string $boxes): static
-    {
-        if (! is_array($boxes)) {
-            $boxes = [$boxes];
-        }
-
-        $this->metaBoxes = array_merge($this->metaBoxes, $boxes);
-
-        return $this;
-    }
-
-    public function addMetaBox(MetaBox $metaBox): static
-    {
-        $this->metaBoxes[$metaBox->getId()] = $metaBox;
-
-        return $this;
-    }
-
-    public function removeMetaBox(string $name): static
-    {
-        Arr::forget($this->metaBoxes, $name);
 
         return $this;
     }
@@ -278,6 +217,7 @@ abstract class FormAbstract extends Form implements ExtensibleContract
             'customColor' => ColorField::class,
             'time' => TimeField::class,
             'datePicker' => DatePickerField::class,
+            'timePicker' => TimePickerField::class,
             'datetime' => DatetimeField::class,
             'autocomplete' => AutocompleteField::class,
             'html' => HtmlField::class,
@@ -302,13 +242,6 @@ abstract class FormAbstract extends Form implements ExtensibleContract
         if (! $this->formHelper->hasCustomField($name)) {
             $this->formHelper->addCustomField($name, $class);
         }
-
-        return $this;
-    }
-
-    public function hasTabs(): static
-    {
-        $this->template('core/base::forms.form-tabs');
 
         return $this;
     }
@@ -384,14 +317,12 @@ abstract class FormAbstract extends Form implements ExtensibleContract
             }
         }
 
-        $form = tap(
+        apply_filters(BASE_FILTER_AFTER_RENDER_FORM, $this, $this->getModel());
+
+        return tap(
             parent::renderForm($options, $showStart, $showFields, $showEnd),
             fn ($rendered) => $this->dispatchAfterRendering($rendered)
         );
-
-        apply_filters(BASE_FILTER_AFTER_RENDER_FORM, $this, $this->getModel());
-
-        return $form;
     }
 
     public function renderValidatorJs(): string|JavascriptValidator
@@ -531,14 +462,18 @@ abstract class FormAbstract extends Form implements ExtensibleContract
         add_action(static::getFilterPrefix() . '_after_saving', $callback, $priority, 2);
     }
 
-    public function save(): void
+    public function save(): static
     {
-        $this->saving(function (FormAbstract $form) {
-            $form
-                ->getModel()
-                ->fill($form->getRequestData())
+        $this->saving(function (FormAbstract $form): void {
+            $model = $form->getModel();
+
+            $model->fill($form->getRequestData())
                 ->save();
+
+            $form->setModel($model);
         });
+
+        return $this;
     }
 
     public function saveOnlyValidatedData(): void
@@ -546,7 +481,7 @@ abstract class FormAbstract extends Form implements ExtensibleContract
         $this->onlyValidatedData()->save();
     }
 
-    public function saving(callable|Closure $callback): void
+    public function saving(callable|Closure $callback, bool $withoutEvents = false): void
     {
         $model = $this->getModel();
         $request = $this->request;
@@ -559,17 +494,21 @@ abstract class FormAbstract extends Form implements ExtensibleContract
             }
         }
 
-        $this->dispatchBeforeSaving();
+        if (! $withoutEvents) {
+            $this->dispatchBeforeSaving();
+        }
 
         call_user_func($callback, $this);
 
         $this->saveMetadataFields();
 
-        $this->dispatchAfterSaving();
+        if (! $withoutEvents) {
+            $this->dispatchAfterSaving();
+        }
 
         $model = $this->getModel();
 
-        if ($model instanceof Model && $model->exists) {
+        if ($model instanceof Model && $model->exists && ! $withoutEvents) {
             $this->fireModelEvents($model);
         }
     }
@@ -633,7 +572,7 @@ abstract class FormAbstract extends Form implements ExtensibleContract
         return BASE_FILTER_AFTER_RENDER_FORM;
     }
 
-    public static function create(array $options = [], array $data = []): static
+    public static function create(array $options = [], array $data = [])
     {
         return app(FormBuilder::class)->create(static::class, $options, $data);
     }
@@ -666,5 +605,28 @@ abstract class FormAbstract extends Form implements ExtensibleContract
         $this->setFormOption('class', $this->getFormOption('class') . ' ' . $class);
 
         return $this;
+    }
+
+    public function addHtml(Closure|string $html): static
+    {
+        return $this
+            ->add(
+                'html_' . Str::random(10),
+                HtmlField::class,
+                HtmlFieldOption::make()
+                    ->content($html)
+            );
+    }
+
+    public function disablePermalinkField(bool $disabled = true): static
+    {
+        $this->disabledPermalinkField = $disabled;
+
+        return $this;
+    }
+
+    public function isDisabledPermalinkField(): bool
+    {
+        return $this->disabledPermalinkField;
     }
 }

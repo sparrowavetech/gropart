@@ -81,12 +81,12 @@
                                         {{ $invoice->created_at->translatedFormat('j F, Y') }}
                                     </x-core::datagrid.item>
                                 @endif
-                                @if (is_plugin_active('payment') && $invoice->payment->payment_channel->label())
+                                @if (is_plugin_active('payment') && $invoice->payment->payment_channel->displayName())
                                     <x-core::datagrid.item>
                                         <x-slot:title>
                                             {{ trans('plugins/ecommerce::invoice.payment_method') }}
                                         </x-slot:title>
-                                        {{ $invoice->payment->payment_channel->label() }}
+                                        {{ $invoice->payment->payment_channel->displayName() }}
                                     </x-core::datagrid.item>
                                 @endif
                             </x-core::datagrid>
@@ -176,12 +176,11 @@
                                                     </p>
                                                 @endif
 
-                                                @include(
-                                                    EcommerceHelper::viewPath('includes.cart-item-options-extras'),
-                                                    ['options' => $invoiceItem->options]
-                                                )
+                                                <p class="mb-0 small">
+                                                    {!! $invoiceItem->product_options_implode !!}
+                                                </p>
 
-                                                @if (is_plugin_active('marketplace') && ($product = $invoiceItem->reference) && $product->original_product->store->id)
+                                                @if (is_plugin_active('marketplace') && ($product = $invoiceItem->reference) && $product->original_product->store?->id)
                                                     <p class="mb-0 small">
                                                         {{ __('Sold by') }}
                                                         <a href="{{ $product->original_product->store->url }}" class="text-primary">
@@ -224,6 +223,7 @@
                                         {{ format_price($invoice->sub_total) }}
                                     </x-core::table.body.cell>
                                 </x-core::table.body.row>
+                                {!! apply_filters('ecommerce_admin_invoice_after_subtotal', null, $invoice) !!}
                                 @if ($invoice->tax_amount > 0)
                                     <x-core::table.body.row>
                                         <x-core::table.body.cell colspan="4"></x-core::table.body.cell>

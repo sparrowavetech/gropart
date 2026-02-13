@@ -10,7 +10,7 @@
 <x-core::form.fieldset
     data-bb-value="1"
     class="optimize-settings mt-3"
-    @style(['display: none;' => ! setting('optimize_page_speed_enable', false)])
+    @style(['display: none;' => !setting('optimize_page_speed_enable', false)])
 >
     <x-core::form.on-off.checkbox
         name="optimize_collapse_white_space"

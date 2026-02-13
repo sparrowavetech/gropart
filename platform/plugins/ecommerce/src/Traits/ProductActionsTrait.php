@@ -6,6 +6,7 @@ use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Base\Http\Responses\BaseHttpResponse;
+use Botble\Ecommerce\Enums\OrderStatusEnum;
 use Botble\Ecommerce\Events\ProductQuantityUpdatedEvent;
 use Botble\Ecommerce\Events\ProductVariationCreated;
 use Botble\Ecommerce\Facades\EcommerceHelper;
@@ -17,19 +18,22 @@ use Botble\Ecommerce\Http\Requests\ProductUpdateOrderByRequest;
 use Botble\Ecommerce\Http\Requests\ProductVersionRequest;
 use Botble\Ecommerce\Http\Requests\SearchProductAndVariationsRequest;
 use Botble\Ecommerce\Http\Resources\AvailableProductResource;
+use Botble\Ecommerce\Models\OrderProduct;
 use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Models\ProductAttribute;
 use Botble\Ecommerce\Models\ProductAttributeSet;
+use Botble\Ecommerce\Models\ProductFile;
 use Botble\Ecommerce\Models\ProductVariation;
 use Botble\Ecommerce\Models\ProductVariationItem;
+use Botble\Ecommerce\Models\ProductView;
 use Botble\Ecommerce\Services\Products\CreateProductVariationsService;
 use Botble\Ecommerce\Services\Products\StoreAttributesOfProductService;
 use Botble\Ecommerce\Services\Products\StoreProductService;
 use Botble\Media\Facades\RvMedia;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -117,14 +121,23 @@ trait ProductActionsTrait
 
                 $productRelatedToVariation->save();
 
+                /**
+                 * @var Product $productRelatedToVariation
+                 */
                 if (EcommerceHelper::isEnabledSupportDigitalProducts()) {
-                    if ($isNew && $product->productFiles->count()) {
+                    if ($isNew && $product->productFiles->isNotEmpty()) {
                         foreach ($product->productFiles as $productFile) {
+                            /**
+                             * @var ProductFile $productFile
+                             */
                             $productRelatedToVariation->productFiles()->create($productFile->toArray());
                         }
                     } else {
                         app(StoreProductService::class)->saveProductFiles(request(), $productRelatedToVariation);
                     }
+
+                    // Save license codes for digital products (including variations)
+                    app(StoreProductService::class)->saveLicenseCodes(request(), $productRelatedToVariation);
                 }
 
                 if (! $productRelatedToVariation->is_variation) {
@@ -139,7 +152,7 @@ trait ProductActionsTrait
                     }
                 }
 
-                event(new ProductQuantityUpdatedEvent($variation->product));
+                ProductQuantityUpdatedEvent::dispatch($variation->product);
 
                 ProductVariationCreated::dispatch($productRelatedToVariation);
 
@@ -148,6 +161,9 @@ trait ProductActionsTrait
 
             $variation->is_default = Arr::get($version, 'variation_default_id', 0) == $variation->id;
 
+            /**
+             * @var ProductVariation $variation
+             */
             $variation->save();
 
             new UpdatedContentEvent(PRODUCT_VARIATIONS_MODULE_SCREEN_NAME, request(), $variation);
@@ -166,6 +182,9 @@ trait ProductActionsTrait
         BaseHttpResponse $response,
         StoreAttributesOfProductService $storeAttributesOfProductService
     ): BaseHttpResponse {
+        /**
+         * @var Product $product
+         */
         $product = Product::query()->findOrFail($id);
 
         $addedAttributes = array_filter((array) $request->input('added_attributes', []));
@@ -233,7 +252,7 @@ trait ProductActionsTrait
 
         return $response
             ->setError()
-            ->setMessage(trans('core/base::notices.delete_error_message'));
+            ->setMessage(trans('plugins/ecommerce::ecommerce.notices.delete_error_message'));
     }
 
     public function deleteVersions(
@@ -261,6 +280,10 @@ trait ProductActionsTrait
         }
 
         $variation = $variations->first();
+
+        /**
+         * @var Product $originProduct
+         */
         $originProduct = Product::query()->find($variation->configurable_product_id);
 
         return $response
@@ -329,6 +352,33 @@ trait ProductActionsTrait
                     );
             }
 
+            if ($barcode = $request->input('barcode')) {
+
+                $variation = $result['variation'];
+
+                $originalProductId = $variation->configurable_product_id;
+
+                $existing = Product::query()
+                    ->where(function ($query) use ($originalProductId, $barcode) {
+                        return $query
+                            ->where('barcode', $barcode)
+                            ->where('is_variation', false)
+                            ->whereNot('id', $originalProductId);
+                    })
+                    ->orWhere(function ($query) use ($barcode) {
+                        return $query
+                            ->where('barcode', $barcode)
+                            ->where('is_variation', true);
+                    })
+                    ->exists();
+
+                if ($existing) {
+                    return $response
+                        ->setError()
+                        ->setMessage(trans('plugins/ecommerce::products.form.barcode_existed'));
+                }
+            }
+
             $this->postSaveAllVersions(
                 [$result['variation']->id => $request->input()],
                 $id,
@@ -383,6 +433,34 @@ trait ProductActionsTrait
     {
         $variation = ProductVariation::query()->findOrFail($id);
 
+        if ($barcode = $request->input('barcode')) {
+
+            $originalProductId = $variation->configurable_product_id;
+
+            $currentProductId = $variation->product_id;
+
+            $existing = Product::query()
+                ->where(function ($query) use ($originalProductId, $barcode) {
+                    return $query
+                        ->where('barcode', $barcode)
+                        ->where('is_variation', false)
+                        ->whereNot('id', $originalProductId);
+                })
+                ->orWhere(function ($query) use ($currentProductId, $barcode) {
+                    return $query
+                        ->where('barcode', $barcode)
+                        ->where('is_variation', true)
+                        ->whereNot('id', $currentProductId);
+                })
+                ->exists();
+
+            if ($existing) {
+                return $response
+                    ->setError()
+                    ->setMessage(trans('plugins/ecommerce::products.form.barcode_existed'));
+            }
+        }
+
         $addedAttributes = $request->input('attribute_sets', []);
 
         if (! empty($addedAttributes) && is_array($addedAttributes)) {
@@ -423,23 +501,35 @@ trait ProductActionsTrait
     }
 
     public function postGenerateAllVersions(
+        Request $request,
         CreateProductVariationsService $service,
         int|string $id,
         BaseHttpResponse $response
     ): BaseHttpResponse {
+        $request->validate([
+            'attributes' => ['required', 'array', 'exists:ec_product_attributes,id'],
+        ]);
+
+        /**
+         * @var Product $product
+         */
         $product = Product::query()->findOrFail($id);
 
-        $variations = $service->execute($product);
+        $variations = $service->execute($product, $request->input('attributes', []));
 
         $variationInfo = [];
 
         foreach ($variations as $variation) {
             /**
-             * @var Collection $variation
+             * @var ProductVariation $variation
              */
             $data = $variation->toArray();
             if ((int) $variation->is_default === 1) {
                 $data['variation_default_id'] = $variation->id;
+            }
+
+            if ($product->sku) {
+                $data['auto_generate_sku'] = true;
             }
 
             $variationInfo[$variation->id] = $data;
@@ -456,6 +546,9 @@ trait ProductActionsTrait
         int|string $id,
         BaseHttpResponse $response
     ): BaseHttpResponse {
+        /**
+         * @var Product $product
+         */
         $product = Product::query()->findOrFail($id);
 
         $attributeSets = $request->input('attribute_sets', []);
@@ -472,20 +565,19 @@ trait ProductActionsTrait
         $keyword = $request->input('keyword');
 
         $availableProducts = Product::query()
-            ->when(! Auth::check(), function ($query) {
+            ->when(! Auth::check(), function ($query): void {
                 $query->wherePublished();
             })
             ->where('is_variation', 0)
-            ->where('is_enquiry', 0)
             ->when($productId, fn ($query) => $query->whereNot('id', $productId))
-            ->when($keyword, function ($query) use ($keyword) {
-                $query->where(function ($query) use ($keyword) {
+            ->when($keyword, function ($query) use ($keyword): void {
+                $query->where(function ($query) use ($keyword): void {
                     $keyword = '%' . trim($keyword) . '%';
 
                     $query
                         ->where('name', 'LIKE', $keyword)
                         ->orWhere('sku', 'LIKE', $keyword)
-                        ->orWhereHas('variations.product', function ($query) use ($keyword) {
+                        ->orWhereHas('variations.product', function ($query) use ($keyword): void {
                             $query->where('sku', 'LIKE', $keyword);
                         });
                 });
@@ -527,6 +619,10 @@ trait ProductActionsTrait
                 $with[] = 'crossSales';
             }
 
+            if (EcommerceHelper::isEnabledUpSaleProducts()) {
+                $with[] = 'upSales';
+            }
+
             if (EcommerceHelper::isEnabledRelatedProducts()) {
                 $with[] = 'products';
             }
@@ -554,19 +650,18 @@ trait ProductActionsTrait
         $includeVariation = $request->input('include_variation');
 
         $availableProducts = Product::query()
-            ->when(! Auth::check(), function ($query) {
+            ->when(! Auth::check(), function ($query): void {
                 $query->wherePublished();
             })
             ->where('is_variation', '<>', 1)
-            ->where('is_enquiry', 0)
-            ->when($keyword, function ($query) use ($keyword) {
-                $query->where(function ($query) use ($keyword) {
+            ->when($keyword, function ($query) use ($keyword): void {
+                $query->where(function ($query) use ($keyword): void {
                     $keyword = '%' . trim($keyword) . '%';
 
                     $query
                         ->where('name', 'LIKE', $keyword)
                         ->orWhere('sku', 'LIKE', $keyword)
-                        ->orWhereHas('variations.product', function ($query) use ($keyword) {
+                        ->orWhereHas('variations.product', function ($query) use ($keyword): void {
                             $query->where('sku', 'LIKE', $keyword);
                         });
                 });
@@ -575,7 +670,7 @@ trait ProductActionsTrait
                 'ec_products.*',
             ])
             ->distinct('ec_products.id')
-            ->when($includeVariation, function ($query) {
+            ->when($includeVariation, function ($query): void {
                 $query
                     ->join(
                         'ec_product_variations',
@@ -613,7 +708,10 @@ trait ProductActionsTrait
         CreateProductWhenCreatingOrderRequest $request,
         BaseHttpResponse $response
     ): BaseHttpResponse {
-        $product = Product::query()->create($request->input());
+        $product = new Product();
+        $product->fill($request->input());
+        $product->status = $request->input('status');
+        $product->save();
 
         event(new CreatedContentEvent(PRODUCT_MODULE_SCREEN_NAME, $request, $product));
 
@@ -629,7 +727,7 @@ trait ProductActionsTrait
         $selectedProducts = collect();
         if ($productIds = $request->input('product_ids', [])) {
             $selectedProducts = Product::query()
-                ->when(! Auth::check(), function ($query) {
+                ->when(! Auth::check(), function ($query): void {
                     $query->wherePublished();
                 })
                 ->whereIn('id', $productIds)
@@ -642,19 +740,18 @@ trait ProductActionsTrait
         $availableProducts = Product::query()
             ->select(['ec_products.*'])
             ->where('is_variation', false)
-            ->where('is_enquiry', 0)
-            ->when(! Auth::check(), function ($query) {
+            ->when(! Auth::check(), function ($query): void {
                 $query->wherePublished();
             })
             ->with(['variationInfo.configurableProduct'])
-            ->when($keyword, function ($query) use ($keyword) {
-                $query->where(function ($query) use ($keyword) {
+            ->when($keyword, function ($query) use ($keyword): void {
+                $query->where(function ($query) use ($keyword): void {
                     $keyword = '%' . trim($keyword) . '%';
 
                     $query
                         ->where('name', 'LIKE', $keyword)
                         ->orWhere('sku', 'LIKE', $keyword)
-                        ->orWhereHas('variations.product', function ($query) use ($keyword) {
+                        ->orWhereHas('variations.product', function ($query) use ($keyword): void {
                             $query->where('sku', 'LIKE', $keyword);
                         });
                 });
@@ -677,7 +774,7 @@ trait ProductActionsTrait
 
             if ($storeIds = array_filter($storeIds)) {
                 $availableProducts = $availableProducts
-                    ->where(function ($query) use ($storeIds) {
+                    ->where(function ($query) use ($storeIds): void {
                         $query
                             ->whereNull('store_id')
                             ->orWhereIn('store_id', $storeIds);
@@ -705,14 +802,81 @@ trait ProductActionsTrait
     public function getProductAttributeSets(BaseHttpResponse $response, int|string|null $id = null): BaseHttpResponse
     {
         $with = [
-            'attributes' => function ($query) {
+            'attributes' => function ($query): void {
                 $query->select(['id', 'slug', 'title', 'attribute_set_id']);
             },
         ];
 
-        $productAttributeSets = ProductAttributeSet::getAllWithSelected($id, $with);
+        $productAttributeSets = ProductAttributeSet::getAllWithSelected($id, $with)
+            ->transform(fn ($item) => $item->only(['attributes', 'id', 'title'])); // @phpstan-ignore-line
 
         return $response
-            ->setData($productAttributeSets->transform(fn ($item) => $item->only(['attributes', 'id', 'title'])));
+            ->setData($productAttributeSets);
+    }
+
+    protected function getProductViewData(Product $product): array
+    {
+        $productIds = [$product->id];
+        $variantIds = $product->variations()->pluck('product_id')->toArray();
+        if (! empty($variantIds)) {
+            $productIds = array_merge($productIds, $variantIds);
+        }
+
+        $totalViews = ProductView::query()
+            ->whereIn('product_id', $productIds)
+            ->sum('views');
+
+        $viewsByDate = ProductView::query()
+            ->whereIn('product_id', $productIds)
+            ->where('date', '>=', Carbon::now()->subDays(30))
+            ->select('date', DB::raw('SUM(views) as views'))
+            ->groupBy('date')
+            ->orderByDesc('date')
+            ->get();
+
+        $completedOrderProductsQuery = OrderProduct::query()
+            ->whereIn('ec_order_product.product_id', $productIds)
+            ->join('ec_orders', 'ec_orders.id', '=', 'ec_order_product.order_id')
+            ->where('ec_orders.status', OrderStatusEnum::COMPLETED);
+
+        $totalOrders = (clone $completedOrderProductsQuery)->count();
+        $totalSold = (clone $completedOrderProductsQuery)->sum('ec_order_product.qty');
+        $totalRevenue = (clone $completedOrderProductsQuery)->sum(DB::raw('ec_order_product.price * ec_order_product.qty'));
+
+        $pendingOrderProductsQuery = OrderProduct::query()
+            ->whereIn('ec_order_product.product_id', $productIds)
+            ->join('ec_orders', 'ec_orders.id', '=', 'ec_order_product.order_id')
+            ->where('ec_orders.is_finished', true)
+            ->whereIn('ec_orders.status', [OrderStatusEnum::PENDING, OrderStatusEnum::PROCESSING]);
+
+        $pendingOrders = (clone $pendingOrderProductsQuery)->count();
+        $pendingRevenue = (clone $pendingOrderProductsQuery)->sum(DB::raw('ec_order_product.price * ec_order_product.qty'));
+
+        $recentOrders = OrderProduct::query()
+            ->whereIn('product_id', $productIds)
+            ->with('order')
+            ->latest()
+            ->limit(10)
+            ->get();
+
+        $conversionRate = $totalViews > 0 ? ($totalOrders / $totalViews) * 100 : 0;
+
+        $totalReviews = $product->reviews_count ?? 0;
+        $averageRating = $product->reviews_avg ?? 0;
+
+        return compact(
+            'product',
+            'totalViews',
+            'viewsByDate',
+            'totalOrders',
+            'totalSold',
+            'totalRevenue',
+            'pendingOrders',
+            'pendingRevenue',
+            'conversionRate',
+            'recentOrders',
+            'totalReviews',
+            'averageRating'
+        );
     }
 }

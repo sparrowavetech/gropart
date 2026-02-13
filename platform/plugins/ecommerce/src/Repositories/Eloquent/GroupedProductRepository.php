@@ -13,8 +13,8 @@ class GroupedProductRepository extends RepositoriesAbstract implements GroupedPr
         return GroupedProduct::getChildren($groupedProductId);
     }
 
-    public function createGroupedProducts($groupedProductId, array $childItems)
+    public function createGroupedProducts($groupedProductId, array $childItems): void
     {
-        return GroupedProduct::createGroupedProducts($groupedProductId, $childItems);
+        GroupedProduct::createGroupedProducts($groupedProductId, $childItems);
     }
 }

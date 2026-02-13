@@ -1,5 +1,5 @@
 <div class="simple-slider-assets mt-3">
-        <pre class="mb-2">
+    <pre class="mb-2">
 /vendor/core/plugins/simple-slider/libraries/owl-carousel/owl.carousel.css
 /vendor/core/plugins/simple-slider/css/simple-slider.css
 /vendor/core/plugins/simple-slider/libraries/owl-carousel/owl.carousel.js

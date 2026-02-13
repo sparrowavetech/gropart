@@ -28,7 +28,7 @@
                     <li>
                         <a class="mr10 btn-trigger-remove-gallery-image" data-bs-toggle="tooltip" data-placement="bottom"
                            data-bs-original-title="{{ trans('core/base::base.delete_image') }}">
-                            <i class="fa fa-trash"></i>
+                            <x-core::icon name="ti ti-trash" />
                         </a>
                     </li>
                 </ul>

@@ -5,20 +5,21 @@ namespace Botble\Base\Http\Controllers;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Setting\Facades\Setting;
 use Carbon\Carbon;
-use Illuminate\Console\Application;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\ProcessUtils;
+use Symfony\Component\Process\PhpExecutableFinder;
 
 class CronjobSettingController extends BaseSystemController
 {
     public function index(): View
     {
-        $this->pageTitle(trans('core/setting::setting.cronjob.name'));
+        $this->pageTitle(trans('core/setting::cronjob.name'));
+
+        $phpPath = (new PhpExecutableFinder())->find(false);
 
         $command = sprintf(
-            '* * * * * cd %s && %s >> /dev/null 2>&1',
-            BaseHelper::hasDemoModeEnabled() ? 'path-to-your-project' : ProcessUtils::escapeArgument(base_path()),
-            Application::formatCommandString('schedule:run')
+            '* * * * * %s %s/artisan schedule:run >> /dev/null 2>&1',
+            $phpPath ?: 'php',
+            BaseHelper::hasDemoModeEnabled() ? 'path-to-your-project' : base_path()
         );
 
         $lastRunAt = Setting::get('cronjob_last_run_at');

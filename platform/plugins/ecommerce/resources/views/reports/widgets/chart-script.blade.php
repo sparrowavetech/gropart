@@ -57,13 +57,7 @@
             },
             colors: @json($salesReport['colors']),
             xaxis: {
-                type: 'datetime',
                 categories: @json($salesReport['dates'])
-            },
-            tooltip: {
-                x: {
-                    format: 'dd/MM/yy'
-                }
             },
             noData: {
                 text: '{{ trans('core/base::tables.no_data') }}',

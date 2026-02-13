@@ -4,6 +4,7 @@ namespace Botble\Ecommerce\PanelSections;
 
 use Botble\Base\PanelSections\PanelSection;
 use Botble\Base\PanelSections\PanelSectionItem;
+use Botble\Ecommerce\Facades\EcommerceHelper;
 
 class SettingEcommercePanelSection extends PanelSection
 {
@@ -98,18 +99,20 @@ class SettingEcommercePanelSection extends PanelSection
                     ->withDescription(trans('plugins/ecommerce::setting.customer.description'))
                     ->withPriority(140)
                     ->withRoute('ecommerce.settings.customers'),
-                PanelSectionItem::make('settings.ecommerce.shipping')
-                    ->setTitle(trans('plugins/ecommerce::setting.shipping.name'))
-                    ->withIcon('ti ti-cube-send')
-                    ->withDescription(trans('plugins/ecommerce::setting.shipping.description'))
-                    ->withPriority(150)
-                    ->withRoute('ecommerce.settings.shipping'),
-                PanelSectionItem::make('settings.ecommerce.shipping_label_template_settings')
-                    ->setTitle(trans('plugins/ecommerce::shipping-label-template.name'))
-                    ->withIcon('ti ti-list-details')
-                    ->withDescription(trans('plugins/ecommerce::shipping-label-template.setting_description'))
-                    ->withPriority(120)
-                    ->withRoute('ecommerce.settings.shipping-label-template'),
+                ...(! EcommerceHelper::isDisabledPhysicalProduct() ? [
+                    PanelSectionItem::make('settings.ecommerce.shipping')
+                        ->setTitle(trans('plugins/ecommerce::setting.shipping.name'))
+                        ->withIcon('ti ti-cube-send')
+                        ->withDescription(trans('plugins/ecommerce::setting.shipping.description'))
+                        ->withPriority(150)
+                        ->withRoute('ecommerce.settings.shipping'),
+                    PanelSectionItem::make('settings.ecommerce.shipping_label_template_settings')
+                        ->setTitle(trans('plugins/ecommerce::shipping-label-template.name'))
+                        ->withIcon('ti ti-list-details')
+                        ->withDescription(trans('plugins/ecommerce::shipping-label-template.setting_description'))
+                        ->withPriority(120)
+                        ->withRoute('ecommerce.settings.shipping-label-template'),
+                ] : []),
                 PanelSectionItem::make('settings.ecommerce.webhook')
                     ->setTitle(trans('plugins/ecommerce::setting.webhook.name'))
                     ->withIcon('ti ti-webhook')
@@ -121,7 +124,7 @@ class SettingEcommercePanelSection extends PanelSection
                     ->withIcon('ti ti-robot-face')
                     ->withDescription(trans('plugins/ecommerce::setting.tracking.description'))
                     ->withPriority(170)
-                    ->withRoute('ecommerce.settings.tracking'),
+                    ->withRoute('settings.website-tracking'),
                 PanelSectionItem::make('settings.ecommerce.standard_and_format')
                     ->setTitle(trans('plugins/ecommerce::setting.standard_and_format.name'))
                     ->withIcon('ti ti-checklist')
@@ -134,6 +137,12 @@ class SettingEcommercePanelSection extends PanelSection
                     ->withDescription(trans('plugins/ecommerce::setting.flash_sale.description'))
                     ->withPriority(190)
                     ->withRoute('ecommerce.settings.flash-sale'),
+                PanelSectionItem::make('settings.ecommerce.abandoned_carts')
+                    ->setTitle(trans('plugins/ecommerce::setting.abandoned_cart.name'))
+                    ->withIcon('ti ti-shopping-cart-x')
+                    ->withDescription(trans('plugins/ecommerce::setting.abandoned_cart.panel_description'))
+                    ->withPriority(200)
+                    ->withRoute('ecommerce.settings.abandoned-carts'),
             ]);
     }
 }

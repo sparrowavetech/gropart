@@ -1,20 +1,19 @@
 <?php
 
 namespace Botble\Marketplace\Models;
-use Botble\Base\Facades\BaseHelper;
+
+use Botble\ACL\Models\User;
 use Botble\Base\Casts\SafeContent;
 use Botble\Base\Enums\BaseStatusEnum;
-use Botble\Marketplace\Enums\ShopTypeEnum;
 use Botble\Base\Models\BaseModel;
 use Botble\Base\Supports\Avatar;
-use Botble\Base\Traits\EnumCastable;
 use Botble\Ecommerce\Models\Customer;
 use Botble\Ecommerce\Models\Discount;
 use Botble\Ecommerce\Models\Order;
-use Botble\Ecommerce\Models\Enquiry;
 use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Models\QueryBuilders\StoreQueryBuilder;
 use Botble\Ecommerce\Traits\LocationTrait;
+use Botble\Marketplace\Enums\StoreStatusEnum;
 use Botble\Media\Facades\RvMedia;
 use Exception;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -40,29 +39,39 @@ class Store extends BaseModel
         'city',
         'customer_id',
         'logo',
+        'logo_square',
         'cover_image',
         'description',
         'content',
         'status',
         'company',
         'zip_code',
-        'is_manage_shipping',
+        'certificate_file',
+        'government_id_file',
+        'tax_id',
+        'tax_country',
+        'tax_state',
         'is_verified',
-        'shop_category'
+        'verified_at',
+        'verified_by',
+        'verification_note',
     ];
 
     protected $casts = [
-        'status' => BaseStatusEnum::class,
-        'shop_category' => ShopTypeEnum::class,
+        'status' => StoreStatusEnum::class,
         'name' => SafeContent::class,
         'description' => SafeContent::class,
         'content' => SafeContent::class,
         'address' => SafeContent::class,
+        'company' => SafeContent::class,
+        'is_verified' => 'boolean',
+        'verified_at' => 'datetime',
+        'verification_note' => SafeContent::class,
     ];
 
     protected static function booted(): void
     {
-        static::deleted(function (Store $store) {
+        static::deleted(function (Store $store): void {
             $store->products()->each(fn (Product $product) => $product->delete());
             $store->discounts()->delete();
             $store->orders()->update(['store_id' => null]);
@@ -71,20 +80,41 @@ class Store extends BaseModel
             if (File::isDirectory($folder) && Str::endsWith($store->upload_folder, '/' . ($store->slug ?: $store->id))) {
                 File::deleteDirectory($folder);
             }
+
+            cache()->forget('marketplace_stores_for_filter');
         });
 
-        static::updating(function (Store $store) {
+        static::updating(function (Store $store): void {
             if ($store->getOriginal('status') != $store->status) {
                 $status = $store->status;
 
-                $store->products()->update(['status' => $status]);
+                if ($status == StoreStatusEnum::BLOCKED) {
+                    $store
+                        ->products()
+                        ->where('status', BaseStatusEnum::PUBLISHED)
+                        ->update(['status' => $status]);
+                } elseif ($status == StoreStatusEnum::PUBLISHED) {
+                    $store
+                        ->products()
+                        ->where('status', 'blocked')
+                        ->update(['status' => $status]);
+                }
             }
+        });
+
+        static::saved(function (): void {
+            cache()->forget('marketplace_stores_for_filter');
         });
     }
 
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class)->withDefault();
+    }
+
+    public function verifiedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'verified_by');
     }
 
     public function products(): HasMany
@@ -129,6 +159,19 @@ class Store extends BaseModel
                 $folder = $this->id ? 'stores/' . ($this->slug ?: $this->id) : 'stores';
 
                 return apply_filters('marketplace_store_upload_folder', $folder, $this);
+            }
+        );
+    }
+
+    protected function badge(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                if (! $this->is_verified) {
+                    return '';
+                }
+
+                return view('plugins/marketplace::partials.verified-badge', ['size' => 'sm'])->render();
             }
         );
     }
@@ -197,9 +240,5 @@ class Store extends BaseModel
         }
 
         return parent::getMetaData($key, $single);
-    }
-    public function enquires(): HasMany
-    {
-        return $this->hasMany(Enquiry::class);
     }
 }

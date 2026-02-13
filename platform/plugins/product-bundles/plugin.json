@@ -1,0 +1,11 @@
+{
+  "id":"botble/product-bundles",
+  "name": "Product Bundles",
+  "namespace": "Botble\\ProductBundles\\",
+  "provider": "Botble\\ProductBundles\\Providers\\ProductBundlesServiceProvider",
+  "author": "Phung Huy",
+  "url": "https://www.facebook.com/am.hyu",
+  "version": "1.1.0",
+  "description": "Create fixed and mix-and-match product bundles (combos) with pricing rules and a bundle add-to-cart flow.",
+  "minimum_core_version": "7.5.0"
+}

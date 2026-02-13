@@ -14,9 +14,7 @@ class ContactStoreController extends BaseController
 {
     public function store(string $id, ContactStoreRequest $request): BaseHttpResponse
     {
-        if (! MarketplaceHelper::isEnabledMessagingSystem()) {
-            abort(404);
-        }
+        abort_unless(MarketplaceHelper::isEnabledMessagingSystem(), 404);
 
         $store = Store::query()
             ->wherePublished()
@@ -37,7 +35,7 @@ class ContactStoreController extends BaseController
                 return $this
                     ->httpResponse()
                     ->setError()
-                    ->setMessage(__('You cannot send a message to your own store.'));
+                    ->setMessage(trans('plugins/marketplace::message.cannot_send_to_own_store'));
             }
 
             $emailVariables = [
@@ -67,6 +65,6 @@ class ContactStoreController extends BaseController
 
         return $this
             ->httpResponse()
-            ->setMessage(__('Send message successfully!'));
+            ->setMessage(trans('plugins/marketplace::message.send_message_successfully'));
     }
 }

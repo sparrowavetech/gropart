@@ -8,5 +8,5 @@ interface GroupedProductInterface extends RepositoryInterface
 {
     public function getChildren($groupedProductId, array $params);
 
-    public function createGroupedProducts($groupedProductId, array $childItems);
+    public function createGroupedProducts($groupedProductId, array $childItems): void;
 }

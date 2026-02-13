@@ -22,6 +22,7 @@ class Discount extends BaseModel
         'value',
         'type',
         'can_use_with_promotion',
+        'can_use_with_flash_sale',
         'type_option',
         'target',
         'min_order_price',
@@ -36,13 +37,14 @@ class Discount extends BaseModel
         'start_date' => 'datetime',
         'end_date' => 'datetime',
         'can_use_with_promotion' => 'bool',
+        'can_use_with_flash_sale' => 'bool',
         'apply_via_url' => 'bool',
         'display_at_checkout' => 'bool',
     ];
 
     protected static function booted(): void
     {
-        static::deleted(function (Discount $discount) {
+        static::deleted(function (Discount $discount): void {
             $discount->productCollections()->detach();
             $discount->productCategories()->detach();
             $discount->customers()->detach();

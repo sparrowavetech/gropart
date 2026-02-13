@@ -26,5 +26,5 @@
 @endif
 
 @pushif($form->getValidatorClass(), 'footer')
-    {!! $form->renderValidatorJs() !!}
+{!! $form->renderValidatorJs() !!}
 @endpushif

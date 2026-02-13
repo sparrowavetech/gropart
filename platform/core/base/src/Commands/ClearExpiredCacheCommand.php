@@ -17,8 +17,6 @@ class ClearExpiredCacheCommand extends Command
 {
     protected int $expiredFileCount = 0;
 
-    protected float $expiredFileSize = 0;
-
     protected int $activeFileCount = 0;
 
     protected float $activeFileSize = 0;
@@ -54,32 +52,36 @@ class ClearExpiredCacheCommand extends Command
             return;
         }
 
-        $progress = progress(
-            label: 'Removing expired cache files',
-            steps: count($files),
-        );
+        $isInteractive = $this->output && $this->output->isDecorated();
 
-        $progress->start();
+        if ($isInteractive) {
+            $progress = progress(
+                label: 'Removing expired cache files',
+                steps: count($files),
+            );
 
-        // Loop the files and get rid of any that have expired
+            $progress->start();
+        }
+
+        $now = time();
+
         foreach ($files as $cacheFile) {
-            // Ignore files that named with dot(.) at the beginning e.g: .gitignore
             if (str_starts_with($cacheFile, '.')) {
                 continue;
             }
 
-            // Get the full path of the file
             $fullPath = $this->disk->path($cacheFile);
 
-            // Get the expiration time
             $handle = fopen($fullPath, 'r');
+
+            if (! $handle) {
+                continue;
+            }
+
             $expire = fread($handle, 10);
             fclose($handle);
 
-            // See if we have expired
-            if (time() >= $expire) {
-                // Delete the file
-                $this->expiredFileSize += $this->disk->size($cacheFile);
+            if ($now >= $expire) {
                 $this->disk->delete($cacheFile);
                 $this->expiredFileCount++;
             } else {
@@ -87,10 +89,14 @@ class ClearExpiredCacheCommand extends Command
                 $this->activeFileSize += $this->disk->size($cacheFile);
             }
 
-            $progress->advance();
+            if ($isInteractive) {
+                $progress->advance();
+            }
         }
 
-        $progress->finish();
+        if ($isInteractive) {
+            $progress->finish();
+        }
     }
 
     protected function deleteEmptyFolders(): void
@@ -107,12 +113,10 @@ class ClearExpiredCacheCommand extends Command
 
     public function showResults(): void
     {
-        $expiredFileSize = BaseHelper::humanFilesize($this->expiredFileSize);
         $activeFileSize = BaseHelper::humanFilesize($this->activeFileSize);
 
         if ($this->expiredFileCount) {
             info("✔ $this->expiredFileCount expired cache files removed");
-            info("✔ $expiredFileSize disk cleared");
         } else {
             info('✔ No expired cache file found!');
         }

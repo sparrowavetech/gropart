@@ -51,6 +51,7 @@ class User extends BaseModel implements
     protected $fillable = [
         'username',
         'email',
+        'phone',
         'first_name',
         'last_name',
         'password',
@@ -70,6 +71,8 @@ class User extends BaseModel implements
         'username' => SafeContent::class,
         'first_name' => SafeContent::class,
         'last_name' => SafeContent::class,
+        'last_login' => 'datetime',
+        'sessions_invalidated_at' => 'datetime',
     ];
 
     public function avatar(): BelongsTo
@@ -103,7 +106,7 @@ class User extends BaseModel implements
     protected function name(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->first_name . ' ' . $this->last_name,
+            get: fn () => trim($this->first_name . ' ' . $this->last_name),
         );
     }
 

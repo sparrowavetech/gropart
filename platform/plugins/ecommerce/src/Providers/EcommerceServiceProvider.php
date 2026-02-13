@@ -26,19 +26,24 @@ use Botble\Ecommerce\Forms\Fronts\Auth\ForgotPasswordForm;
 use Botble\Ecommerce\Forms\Fronts\Auth\LoginForm;
 use Botble\Ecommerce\Forms\Fronts\Auth\RegisterForm;
 use Botble\Ecommerce\Forms\Fronts\Auth\ResetPasswordForm;
+use Botble\Ecommerce\Http\Middleware\ApiCurrencyMiddleware;
+use Botble\Ecommerce\Http\Middleware\ApiLanguageMiddleware;
 use Botble\Ecommerce\Http\Middleware\CaptureCouponMiddleware;
 use Botble\Ecommerce\Http\Middleware\CaptureFootprintsMiddleware;
+use Botble\Ecommerce\Http\Middleware\OptionalApiAuthentication;
 use Botble\Ecommerce\Http\Middleware\RedirectIfCustomer;
 use Botble\Ecommerce\Http\Middleware\RedirectIfNotCustomer;
+use Botble\Ecommerce\Http\Middleware\RestoreCustomerCartMiddleware;
+use Botble\Ecommerce\Http\Middleware\TrackAbandonedCart;
 use Botble\Ecommerce\Http\Requests\Fronts\Auth\ForgotPasswordRequest;
 use Botble\Ecommerce\Http\Requests\Fronts\Auth\ResetPasswordRequest;
 use Botble\Ecommerce\Http\Requests\LoginRequest;
 use Botble\Ecommerce\Http\Requests\RegisterRequest;
+use Botble\Ecommerce\Listeners\StoreTaxComponentsListener;
 use Botble\Ecommerce\Models\Address;
 use Botble\Ecommerce\Models\Brand;
 use Botble\Ecommerce\Models\Currency;
 use Botble\Ecommerce\Models\Customer;
-use Botble\Ecommerce\Models\Enquiry;
 use Botble\Ecommerce\Models\Discount;
 use Botble\Ecommerce\Models\FlashSale;
 use Botble\Ecommerce\Models\GlobalOption;
@@ -59,6 +64,7 @@ use Botble\Ecommerce\Models\ProductAttributeSet;
 use Botble\Ecommerce\Models\ProductCategory;
 use Botble\Ecommerce\Models\ProductCollection;
 use Botble\Ecommerce\Models\ProductLabel;
+use Botble\Ecommerce\Models\ProductSpecificationAttributeTranslation;
 use Botble\Ecommerce\Models\ProductTag;
 use Botble\Ecommerce\Models\ProductVariation;
 use Botble\Ecommerce\Models\ProductVariationItem;
@@ -68,15 +74,18 @@ use Botble\Ecommerce\Models\ShipmentHistory;
 use Botble\Ecommerce\Models\Shipping;
 use Botble\Ecommerce\Models\ShippingRule;
 use Botble\Ecommerce\Models\ShippingRuleItem;
+use Botble\Ecommerce\Models\SpecificationAttribute;
+use Botble\Ecommerce\Models\SpecificationGroup;
+use Botble\Ecommerce\Models\SpecificationTable;
 use Botble\Ecommerce\Models\StoreLocator;
 use Botble\Ecommerce\Models\Tax;
 use Botble\Ecommerce\Models\Wishlist;
+use Botble\Ecommerce\Observers\DiscountObserver;
 use Botble\Ecommerce\PanelSections\SettingEcommercePanelSection;
 use Botble\Ecommerce\Repositories\Eloquent\AddressRepository;
 use Botble\Ecommerce\Repositories\Eloquent\BrandRepository;
 use Botble\Ecommerce\Repositories\Eloquent\CurrencyRepository;
 use Botble\Ecommerce\Repositories\Eloquent\CustomerRepository;
-use Botble\Ecommerce\Repositories\Eloquent\EnquiryRepository;
 use Botble\Ecommerce\Repositories\Eloquent\DiscountRepository;
 use Botble\Ecommerce\Repositories\Eloquent\FlashSaleRepository;
 use Botble\Ecommerce\Repositories\Eloquent\GlobalOptionRepository;
@@ -110,7 +119,6 @@ use Botble\Ecommerce\Repositories\Interfaces\AddressInterface;
 use Botble\Ecommerce\Repositories\Interfaces\BrandInterface;
 use Botble\Ecommerce\Repositories\Interfaces\CurrencyInterface;
 use Botble\Ecommerce\Repositories\Interfaces\CustomerInterface;
-use Botble\Ecommerce\Repositories\Interfaces\EnquiryInterface;
 use Botble\Ecommerce\Repositories\Interfaces\DiscountInterface;
 use Botble\Ecommerce\Repositories\Interfaces\FlashSaleInterface;
 use Botble\Ecommerce\Repositories\Interfaces\GlobalOptionInterface;
@@ -140,6 +148,7 @@ use Botble\Ecommerce\Repositories\Interfaces\ShippingRuleItemInterface;
 use Botble\Ecommerce\Repositories\Interfaces\StoreLocatorInterface;
 use Botble\Ecommerce\Repositories\Interfaces\TaxInterface;
 use Botble\Ecommerce\Repositories\Interfaces\WishlistInterface;
+use Botble\Ecommerce\Services\AbandonedCartService;
 use Botble\Ecommerce\Services\ExchangeRates\ApiLayerExchangeRateService;
 use Botble\Ecommerce\Services\ExchangeRates\ExchangeRateInterface;
 use Botble\Ecommerce\Services\ExchangeRates\OpenExchangeRatesService;
@@ -151,6 +160,12 @@ use Botble\Ecommerce\Services\Footprints\TrackingLogger;
 use Botble\Ecommerce\Services\Footprints\TrackingLoggerInterface;
 use Botble\Ecommerce\Services\Products\ProductCrossSalePriceService;
 use Botble\Ecommerce\Services\Products\ProductPriceService;
+use Botble\Ecommerce\Services\Products\ProductUpSalePriceService;
+use Botble\Ecommerce\Supports\CartBundleHelper;
+use Botble\Ecommerce\Tax\Contracts\TaxZoneResolverInterface;
+use Botble\Ecommerce\Tax\DefaultTaxCalculator;
+use Botble\Ecommerce\Tax\TaxEngineManager;
+use Botble\Ecommerce\Tax\TaxZoneResolver;
 use Botble\LanguageAdvanced\Supports\LanguageAdvancedManager;
 use Botble\Payment\Models\Payment;
 use Botble\SeoHelper\Facades\SeoHelper;
@@ -237,29 +252,38 @@ class EcommerceServiceProvider extends ServiceProvider
             return new TaxRepository(new Tax());
         });
 
+        $this->app->singleton(TaxEngineManager::class);
+
+        $this->app->singleton(
+            TaxZoneResolverInterface::class,
+            TaxZoneResolver::class
+        );
+
         $this->app->bind(ReviewInterface::class, function () {
             return new ReviewRepository(new Review());
         });
 
-        $this->app->bind(ShippingInterface::class, function () {
-            return new ShippingRepository(new Shipping());
-        });
+        if (! setting('ecommerce_disable_physical_product')) {
+            $this->app->bind(ShippingInterface::class, function () {
+                return new ShippingRepository(new Shipping());
+            });
 
-        $this->app->bind(ShippingRuleInterface::class, function () {
-            return new ShippingRuleRepository(new ShippingRule());
-        });
+            $this->app->bind(ShippingRuleInterface::class, function () {
+                return new ShippingRuleRepository(new ShippingRule());
+            });
 
-        $this->app->bind(ShippingRuleItemInterface::class, function () {
-            return new ShippingRuleItemRepository(new ShippingRuleItem());
-        });
+            $this->app->bind(ShippingRuleItemInterface::class, function () {
+                return new ShippingRuleItemRepository(new ShippingRuleItem());
+            });
 
-        $this->app->bind(ShipmentInterface::class, function () {
-            return new ShipmentRepository(new Shipment());
-        });
+            $this->app->bind(ShipmentInterface::class, function () {
+                return new ShipmentRepository(new Shipment());
+            });
 
-        $this->app->bind(ShipmentHistoryInterface::class, function () {
-            return new ShipmentHistoryRepository(new ShipmentHistory());
-        });
+            $this->app->bind(ShipmentHistoryInterface::class, function () {
+                return new ShipmentHistoryRepository(new ShipmentHistory());
+            });
+        }
 
         $this->app->bind(OrderInterface::class, function () {
             return new OrderRepository(new Order());
@@ -298,10 +322,6 @@ class EcommerceServiceProvider extends ServiceProvider
         });
         $this->app->bind(CustomerInterface::class, function () {
             return new CustomerRepository(new Customer());
-        });
-
-        $this->app->bind(EnquiryInterface::class, function () {
-            return new EnquiryRepository(new Enquiry());
         });
 
         $this->app->bind(GroupedProductInterface::class, function () {
@@ -348,6 +368,12 @@ class EcommerceServiceProvider extends ServiceProvider
 
         $this->app->singleton(ProductCrossSalePriceService::class);
 
+        $this->app->singleton(ProductUpSalePriceService::class);
+
+        $this->app->singleton(CartBundleHelper::class);
+
+        $this->app->singleton(AbandonedCartService::class);
+
         $this->app->singleton(GoogleTagManager::class);
         $this->app->singleton(FacebookPixel::class);
 
@@ -369,26 +395,6 @@ class EcommerceServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        SlugHelper::registerModule(Product::class, 'Products');
-        SlugHelper::registerModule(Brand::class, 'Brands');
-        SlugHelper::registerModule(ProductCategory::class, 'Product Categories');
-        SlugHelper::registerModule(ProductTag::class, 'Product Tags');
-        SlugHelper::registerModule(Enquiry::class, 'Enquiry Product');
-        SlugHelper::setPrefix(Product::class, 'products', true);
-        SlugHelper::setPrefix(Brand::class, 'brands', true);
-        SlugHelper::setPrefix(ProductTag::class, 'product-tags', true);
-        SlugHelper::setPrefix(ProductCategory::class, 'product-categories', true);
-        SlugHelper::setPrefix(Enquiry::class, 'enquiry-product');
-
-        $this->app['events']->listen(ThemeRoutingBeforeEvent::class, function () {
-            SiteMapManager::registerKey([
-                'product-categories',
-                'product-tags',
-                'product-brands',
-                'products-((?:19|20|21|22)\d{2})-(0?[1-9]|1[012])',
-            ]);
-        });
-
         $this
             ->loadAndPublishConfigurations(['permissions'])
             ->loadAndPublishTranslations()
@@ -403,12 +409,16 @@ class EcommerceServiceProvider extends ServiceProvider
                 'order',
                 'discount',
                 'customer',
+                'customer-cart',
                 'cart',
                 'shipment',
                 'wishlist',
                 'compare',
                 'invoice',
                 'setting',
+                'product-specification',
+                'api',
+                'ajax',
             ])
             ->loadAndPublishConfigurations([
                 'general',
@@ -422,18 +432,47 @@ class EcommerceServiceProvider extends ServiceProvider
             ->loadAnonymousComponents()
             ->publishAssets();
 
+        $this->registerTaxEngine();
+
+        Discount::observe(DiscountObserver::class);
+
         if (class_exists('ApiHelper') && ApiHelper::enabled()) {
             ApiHelper::setConfig([
                 'model' => Customer::class,
                 'guard' => 'customer',
                 'password_broker' => 'customers',
-                'verify_email' => true,
+                'verify_email' => EcommerceHelper::isEnableEmailVerification(),
             ]);
         }
+
+        SlugHelper::registering(function (): void {
+            SlugHelper::registerModule(Product::class, fn () => trans('plugins/ecommerce::products.products'));
+            SlugHelper::registerModule(Brand::class, fn () => trans('plugins/ecommerce::brands.brands'));
+            SlugHelper::registerModule(ProductCategory::class, fn () => trans('plugins/ecommerce::product-categories.product_categories'));
+            SlugHelper::registerModule(ProductTag::class, fn () => trans('plugins/ecommerce::product-tag.product_tags'));
+            SlugHelper::registerModule(ProductCollection::class, fn () => trans('plugins/ecommerce::product-collections.product_collections'));
+            SlugHelper::setPrefix(Product::class, 'products', true);
+            SlugHelper::setPrefix(Brand::class, 'brands', true);
+            SlugHelper::setPrefix(ProductTag::class, 'product-tags', true);
+            SlugHelper::setPrefix(ProductCategory::class, 'product-categories', true);
+            SlugHelper::setPrefix(ProductCollection::class, 'collections', true);
+        });
 
         if (File::exists(storage_path('app/invoices/template.blade.php'))) {
             $this->loadViewsFrom(storage_path('app/invoices'), 'plugins/ecommerce/invoice');
         }
+
+        $this->app['events']->listen(ThemeRoutingBeforeEvent::class, function (): void {
+            SiteMapManager::registerKey([
+                'product-categories',
+                'product-tags',
+                'product-brands',
+                'products',
+            ]);
+
+            // Register monthly archive sitemaps for products
+            SiteMapManager::registerMonthlyArchives('products');
+        });
 
         if (defined('LANGUAGE_MODULE_SCREEN_NAME') && defined('LANGUAGE_ADVANCED_MODULE_SCREEN_NAME')) {
             LanguageAdvancedManager::registerModule(Product::class, [
@@ -441,6 +480,24 @@ class EcommerceServiceProvider extends ServiceProvider
                 'description',
                 'content',
             ]);
+
+            LanguageAdvancedManager::registerModule(SpecificationAttribute::class, [
+                'name',
+                'options',
+                'default_value',
+            ]);
+
+            LanguageAdvancedManager::registerModule(SpecificationGroup::class, [
+                'name',
+                'description',
+            ]);
+
+            LanguageAdvancedManager::registerModule(SpecificationTable::class, [
+                'name',
+                'description',
+            ]);
+
+            LanguageAdvancedManager::addTranslatableMetaBox('specification-attribute-options');
 
             if (config('plugins.ecommerce.general.enable_faq_in_product_details', false)) {
                 LanguageAdvancedManager::addTranslatableMetaBox('faq_schema_config_wrapper');
@@ -503,6 +560,10 @@ class EcommerceServiceProvider extends ServiceProvider
                 'name',
             ]);
 
+            LanguageAdvancedManager::registerModule(Tax::class, [
+                'title',
+            ]);
+
             LanguageAdvancedManager::registerModule(GlobalOption::class, [
                 'name',
             ]);
@@ -520,8 +581,9 @@ class EcommerceServiceProvider extends ServiceProvider
             ]);
 
             LanguageAdvancedManager::addTranslatableMetaBox('product_options_box');
+            LanguageAdvancedManager::addTranslatableMetaBox('product-specification-table');
 
-            add_action(LANGUAGE_ADVANCED_ACTION_SAVED, function ($data, $request) {
+            add_action(LANGUAGE_ADVANCED_ACTION_SAVED, function ($data, $request): void {
                 switch ($data::class) {
                     case Product::class:
                         $variations = $data->variations()->get();
@@ -532,6 +594,31 @@ class EcommerceServiceProvider extends ServiceProvider
                             }
 
                             LanguageAdvancedManager::save($variation->product, $request);
+                        }
+
+                        $specificationAttributes = $request->input('specification_attributes', []);
+
+                        $langCode = $request->input('language');
+
+                        if ($specificationAttributes && $langCode) {
+                            foreach ($specificationAttributes as $attributeId => $attributeData) {
+                                if (isset($attributeData['value'])) {
+                                    $attribute = SpecificationAttribute::query()->find($attributeId);
+
+                                    if ($attribute) {
+                                        ProductSpecificationAttributeTranslation::query()->updateOrCreate(
+                                            [
+                                                'product_id' => $data->getKey(),
+                                                'attribute_id' => $attributeId,
+                                                'lang_code' => $langCode,
+                                            ],
+                                            [
+                                                'value' => $attributeData['value'],
+                                            ]
+                                        );
+                                    }
+                                }
+                            }
                         }
 
                         $options = $request->input('options', []) ?: [];
@@ -652,18 +739,26 @@ class EcommerceServiceProvider extends ServiceProvider
 
         $this->app->register(HookServiceProvider::class);
 
-        $this->app['events']->listen(RouteMatched::class, function () {
+        $this->app['events']->listen(RouteMatched::class, function (): void {
             $router = $this->app['router'];
 
             $router->aliasMiddleware('customer', RedirectIfNotCustomer::class);
             $router->aliasMiddleware('customer.guest', RedirectIfCustomer::class);
+            $router->aliasMiddleware('api.currency', ApiCurrencyMiddleware::class);
+            $router->aliasMiddleware('api.language.ecommerce', ApiLanguageMiddleware::class);
+            $router->aliasMiddleware('api.optional.auth', OptionalApiAuthentication::class);
             $router->pushMiddlewareToGroup('web', CaptureFootprintsMiddleware::class);
             $router->pushMiddlewareToGroup('web', CaptureCouponMiddleware::class);
+            $router->pushMiddlewareToGroup('web', TrackAbandonedCart::class);
+            $router->pushMiddlewareToGroup('web', RestoreCustomerCartMiddleware::class);
+        });
 
+        $this->app->booted(function (): void {
             $emailConfig = config('plugins.ecommerce.email', []);
 
             if (! EcommerceHelper::isEnabledSupportDigitalProducts()) {
                 Arr::forget($emailConfig, 'templates.download_digital_products');
+                Arr::forget($emailConfig, 'templates.digital_product_license_codes');
             }
 
             if (! EcommerceHelper::isReviewEnabled()) {
@@ -673,7 +768,7 @@ class EcommerceServiceProvider extends ServiceProvider
             EmailHandler::addTemplateSettings(ECOMMERCE_MODULE_SCREEN_NAME, $emailConfig);
         });
 
-        DashboardMenu::beforeRetrieving(function () {
+        DashboardMenu::beforeRetrieving(function (): void {
             DashboardMenu::make()
                 ->registerItem([
                     'id' => 'cms-plugins-ecommerce',
@@ -719,24 +814,17 @@ class EcommerceServiceProvider extends ServiceProvider
                     'url' => fn () => route('order_returns.index'),
                     'permissions' => ['orders.edit'],
                 ])
-                ->registerItem([
-                    'id' => 'cms-plugins-ecommerce-shipping-shipments',
-                    'priority' => 40,
-                    'parent_id' => 'cms-plugins-ecommerce',
-                    'name' => 'plugins/ecommerce::shipping.shipments',
-                    'icon' => 'ti ti-truck-loading',
-                    'url' => fn () => route('ecommerce.shipments.index'),
-                    'permissions' => ['ecommerce.shipments.index'],
-                ])
-                ->registerItem([
-                    'id'          => 'cms-plugins-ecommerce-enquiry',
-                    'priority'    => 1,
-                    'parent_id'   => 'cms-plugins-ecommerce',
-                    'name'        => 'plugins/ecommerce::enquiry.name',
-                    'icon'        => 'fa fa-question-circle',
-                    'url'         => route('enquires.index'),
-                    'permissions' => ['enquires.index'],
-                ])
+                ->when(! EcommerceHelper::isDisabledPhysicalProduct(), function (DashboardMenuSupport $dashboardMenu): void {
+                    $dashboardMenu->registerItem([
+                        'id' => 'cms-plugins-ecommerce-shipping-shipments',
+                        'priority' => 40,
+                        'parent_id' => 'cms-plugins-ecommerce',
+                        'name' => 'plugins/ecommerce::shipping.shipments',
+                        'icon' => 'ti ti-truck-loading',
+                        'url' => fn () => route('ecommerce.shipments.index'),
+                        'permissions' => ['ecommerce.shipments.index'],
+                    ]);
+                })
                 ->registerItem([
                     'id' => 'cms-plugins-ecommerce-invoice',
                     'priority' => 50,
@@ -845,7 +933,7 @@ class EcommerceServiceProvider extends ServiceProvider
                     'url' => fn () => route('reviews.index'),
                     'permissions' => ['reviews.index'],
                 ])
-                ->when(FlashSaleFacade::isEnabled(), function (DashboardMenuSupport $dashboardMenu) {
+                ->when(FlashSaleFacade::isEnabled(), function (DashboardMenuSupport $dashboardMenu): void {
                     $dashboardMenu->registerItem([
                         'id' => 'cms-plugins-flash-sale',
                         'priority' => 170,
@@ -865,6 +953,17 @@ class EcommerceServiceProvider extends ServiceProvider
                     'url' => fn () => route('discounts.index'),
                     'permissions' => ['discounts.index'],
                 ])
+                ->when(EcommerceHelper::isTaxEnabled(), function (DashboardMenuSupport $dashboardMenu): void {
+                    $dashboardMenu->registerItem([
+                        'id' => 'cms-plugins-ecommerce-tax',
+                        'priority' => 185,
+                        'parent_id' => 'cms-plugins-ecommerce',
+                        'name' => 'plugins/ecommerce::tax.name',
+                        'icon' => 'ti ti-receipt-tax',
+                        'url' => fn () => route('tax.index'),
+                        'permissions' => ['tax.index'],
+                    ]);
+                })
                 ->registerItem([
                     'id' => 'cms-plugins-ecommerce-customer',
                     'priority' => 190,
@@ -873,10 +972,56 @@ class EcommerceServiceProvider extends ServiceProvider
                     'icon' => 'ti ti-users',
                     'url' => fn () => route('customers.index'),
                     'permissions' => ['customers.index'],
-                ]);
+                ])
+                ->registerItem([
+                    'id' => 'cms-plugins-ecommerce-customer-carts',
+                    'priority' => 195,
+                    'parent_id' => 'cms-plugins-ecommerce',
+                    'name' => 'plugins/ecommerce::cart.customer_carts',
+                    'icon' => 'ti ti-shopping-cart',
+                    'url' => fn () => route('ecommerce.customer-carts.index'),
+                    'permissions' => ['ecommerce.customer-carts.index'],
+                ])
+                ->when(EcommerceHelper::isProductSpecificationEnabled(), function (DashboardMenuSupport $dashboardMenu): void {
+                    $dashboardMenu
+                        ->registerItem([
+                            'id' => 'cms-plugins-product-specification',
+                            'priority' => 0,
+                            'name' => 'plugins/ecommerce::product-specification.product_specification',
+                            'icon' => 'ti ti-table-options',
+                            'permissions' => ['ecommerce.product-specification.index'],
+                        ])
+                        ->registerItem([
+                            'id' => 'cms-plugins-product-specification-groups',
+                            'parent_id' => 'cms-plugins-product-specification',
+                            'priority' => 0,
+                            'name' => 'plugins/ecommerce::product-specification.specification_groups.menu_name',
+                            'icon' => 'ti ti-folder',
+                            'url' => fn () => route('ecommerce.specification-groups.index'),
+                            'permissions' => ['ecommerce.specification-groups.index'],
+                        ])
+                        ->registerItem([
+                            'id' => 'cms-plugins-product-specification-attributes',
+                            'parent_id' => 'cms-plugins-product-specification',
+                            'priority' => 10,
+                            'name' => 'plugins/ecommerce::product-specification.specification_attributes.menu_name',
+                            'icon' => 'ti ti-list-details',
+                            'url' => fn () => route('ecommerce.specification-attributes.index'),
+                            'permissions' => ['ecommerce.specification-attributes.index'],
+                        ])
+                        ->registerItem([
+                            'id' => 'cms-plugins-product-specification-tables',
+                            'parent_id' => 'cms-plugins-product-specification',
+                            'priority' => 20,
+                            'name' => 'plugins/ecommerce::product-specification.specification_tables.menu_name',
+                            'icon' => 'ti ti-table',
+                            'url' => fn () => route('ecommerce.specification-tables.index'),
+                            'permissions' => ['ecommerce.specification-tables.index'],
+                        ]);
+                });
         });
 
-        DashboardMenu::for('customer')->beforeRetrieving(function () {
+        DashboardMenu::for('customer')->beforeRetrieving(function (): void {
             DashboardMenu::make()
                 ->registerItem([
                     'id' => 'cms-customer-overview',
@@ -892,7 +1037,14 @@ class EcommerceServiceProvider extends ServiceProvider
                     'url' => fn () => route('customer.orders'),
                     'icon' => 'ti ti-shopping-cart',
                 ])
-                ->when(EcommerceHelper::isReviewEnabled(), function (DashboardMenuSupport $dashboardMenu) {
+                ->registerItem([
+                    'id' => 'cms-customer-invoices',
+                    'priority' => 35,
+                    'name' => __('Invoices'),
+                    'url' => fn () => route('customer.invoices.index'),
+                    'icon' => 'ti ti-file-invoice',
+                ])
+                ->when(EcommerceHelper::isReviewEnabled(), function (DashboardMenuSupport $dashboardMenu): void {
                     $dashboardMenu->registerItem([
                         'id' => 'cms-customer-product-reviews',
                         'priority' => 40,
@@ -901,7 +1053,7 @@ class EcommerceServiceProvider extends ServiceProvider
                         'icon' => 'ti ti-star',
                     ]);
                 })
-                ->when(EcommerceHelper::isEnabledSupportDigitalProducts(), function (DashboardMenuSupport $dashboardMenu) {
+                ->when(EcommerceHelper::isEnabledSupportDigitalProducts(), function (DashboardMenuSupport $dashboardMenu): void {
                     $dashboardMenu->registerItem([
                         'id' => 'cms-customer-downloads',
                         'priority' => 50,
@@ -910,7 +1062,7 @@ class EcommerceServiceProvider extends ServiceProvider
                         'icon' => 'ti ti-download',
                     ]);
                 })
-                ->when(EcommerceHelper::isOrderReturnEnabled(), function (DashboardMenuSupport $dashboardMenu) {
+                ->when(EcommerceHelper::isOrderReturnEnabled(), function (DashboardMenuSupport $dashboardMenu): void {
                     $dashboardMenu->registerItem([
                         'id' => 'cms-customer-order-returns',
                         'priority' => 50,
@@ -944,12 +1096,12 @@ class EcommerceServiceProvider extends ServiceProvider
 
         DashboardMenu::default();
 
-        PanelSectionManager::beforeRendering(function () {
+        PanelSectionManager::beforeRendering(function (): void {
             PanelSectionManager::default()
                 ->register(SettingEcommercePanelSection::class);
         });
 
-        PanelSectionManager::setGroupId('data-synchronize')->beforeRendering(function () {
+        PanelSectionManager::setGroupId('data-synchronize')->beforeRendering(function (): void {
             PanelSectionManager::default()
                 ->registerItem(
                     ExportPanelSection::class,
@@ -958,6 +1110,33 @@ class EcommerceServiceProvider extends ServiceProvider
                         ->withDescription(trans('plugins/ecommerce::products.export.description'))
                         ->withPriority(110)
                         ->withRoute('tools.data-synchronize.export.products.index')
+                )
+                ->registerItem(
+                    ExportPanelSection::class,
+                    fn () => PanelSectionItem::make('product-categories')
+                        ->setTitle(trans('plugins/ecommerce::product-categories.name'))
+                        ->withDescription(trans('plugins/ecommerce::product-categories.export.description'))
+                        ->withPriority(120)
+                        ->withPermission('product-categories.export')
+                        ->withRoute('tools.data-synchronize.export.product-categories.index')
+                )
+                ->registerItem(
+                    ExportPanelSection::class,
+                    fn () => PanelSectionItem::make('orders')
+                        ->setTitle(trans('plugins/ecommerce::order.export_title'))
+                        ->withDescription(trans('plugins/ecommerce::order.export_description'))
+                        ->withPriority(999)
+                        ->withPermission('orders.export')
+                        ->withRoute('tools.data-synchronize.export.orders.index')
+                )
+                ->registerItem(
+                    ExportPanelSection::class,
+                    fn () => PanelSectionItem::make('customers')
+                        ->setTitle(trans('plugins/ecommerce::customer.name'))
+                        ->withDescription(trans('plugins/ecommerce::customer.export.description'))
+                        ->withPriority(130)
+                        ->withPermission('ecommerce.customers.export')
+                        ->withRoute('ecommerce.customers.export.index')
                 )
                 ->registerItem(
                     ImportPanelSection::class,
@@ -982,10 +1161,50 @@ class EcommerceServiceProvider extends ServiceProvider
                         ->withDescription(trans('plugins/ecommerce::product-inventory.import.description'))
                         ->withPriority(110)
                         ->withRoute('ecommerce.product-inventory.import.index')
+                )
+                ->registerItem(
+                    ImportPanelSection::class,
+                    fn () => PanelSectionItem::make('product-categories')
+                        ->setTitle(trans('plugins/ecommerce::product-categories.name'))
+                        ->withDescription(trans('plugins/ecommerce::product-categories.import.description'))
+                        ->withPriority(120)
+                        ->withPermission('product-categories.import')
+                        ->withRoute('tools.data-synchronize.import.product-categories.index')
+                )
+                ->registerItem(
+                    ImportPanelSection::class,
+                    fn () => PanelSectionItem::make('customers')
+                        ->setTitle(trans('plugins/ecommerce::customer.name'))
+                        ->withDescription(trans('plugins/ecommerce::customer.import.description'))
+                        ->withPriority(130)
+                        ->withPermission('ecommerce.customers.import')
+                        ->withRoute('ecommerce.customers.import.index')
                 );
+
+            if (EcommerceHelper::isProductSpecificationEnabled()) {
+                PanelSectionManager::default()
+                    ->registerItem(
+                        ImportPanelSection::class,
+                        fn () => PanelSectionItem::make('product-specifications')
+                            ->setTitle(trans('plugins/ecommerce::product-specification.name'))
+                            ->withDescription(trans('plugins/ecommerce::product-specification.import.description'))
+                            ->withPriority(95)
+                            ->withPermission('ecommerce.product-specifications.import')
+                            ->withRoute('ecommerce.product-specifications.import.index')
+                    )
+                    ->registerItem(
+                        ExportPanelSection::class,
+                        fn () => PanelSectionItem::make('product-specifications')
+                            ->setTitle(trans('plugins/ecommerce::product-specification.name'))
+                            ->withDescription(trans('plugins/ecommerce::product-specification.export.description'))
+                            ->withPriority(115)
+                            ->withPermission('ecommerce.product-specifications.export')
+                            ->withRoute('ecommerce.product-specifications.export.index')
+                    );
+            }
         });
 
-        $this->app->booted(function () {
+        $this->app->booted(function (): void {
             SeoHelper::registerModule([
                 Product::class,
                 Brand::class,
@@ -1020,5 +1239,18 @@ class EcommerceServiceProvider extends ServiceProvider
 
         $this->app->register(EventServiceProvider::class);
         $this->app->register(CommandServiceProvider::class);
+    }
+
+    protected function registerTaxEngine(): void
+    {
+        $manager = $this->app->make(TaxEngineManager::class);
+
+        $manager->register('default', new DefaultTaxCalculator(), priority: 0);
+
+        do_action('ecommerce_tax_engine_registered', $manager);
+
+        add_action('ecommerce_after_each_order_product_created', function ($orderProduct): void {
+            $this->app->make(StoreTaxComponentsListener::class)->handle($orderProduct);
+        }, 20);
     }
 }

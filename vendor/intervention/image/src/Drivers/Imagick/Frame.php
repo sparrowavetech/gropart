@@ -5,7 +5,10 @@ declare(strict_types=1);
 namespace Intervention\Image\Drivers\Imagick;
 
 use Imagick;
+use ImagickException;
 use ImagickPixel;
+use Intervention\Image\Drivers\AbstractFrame;
+use Intervention\Image\Exceptions\InputException;
 use Intervention\Image\Geometry\Rectangle;
 use Intervention\Image\Image;
 use Intervention\Image\Interfaces\DriverInterface;
@@ -13,8 +16,14 @@ use Intervention\Image\Interfaces\FrameInterface;
 use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\SizeInterface;
 
-class Frame implements FrameInterface
+class Frame extends AbstractFrame implements FrameInterface
 {
+    /**
+     * Create new frame object
+     *
+     * @throws ImagickException
+     * @return void
+     */
     public function __construct(protected Imagick $native)
     {
         $background = new ImagickPixel('rgba(255, 255, 255, 0)');
@@ -37,7 +46,7 @@ class Frame implements FrameInterface
      *
      * @see DriverInterface::setNative()
      */
-    public function setNative($native): FrameInterface
+    public function setNative(mixed $native): FrameInterface
     {
         $this->native = $native;
 
@@ -103,9 +112,15 @@ class Frame implements FrameInterface
      * {@inheritdoc}
      *
      * @see DriverInterface::setDispose()
+     *
+     * @throws InputException
      */
     public function setDispose(int $dispose): FrameInterface
     {
+        if (!in_array($dispose, [0, 1, 2, 3])) {
+            throw new InputException('Value for argument $dispose must be 0, 1, 2 or 3.');
+        }
+
         $this->native->setImageDispose($dispose);
 
         return $this;

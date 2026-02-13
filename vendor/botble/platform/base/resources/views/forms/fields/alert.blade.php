@@ -10,7 +10,8 @@
 >
     <x-core::alert
         :attributes="new Illuminate\View\ComponentAttributeBag((array) $options['attr'])"
-        :type="$options['type']">
+        :type="$options['type']"
+    >
         {!! $options['html'] !!}
     </x-core::alert>
 </x-core::form.field>

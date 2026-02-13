@@ -4,17 +4,18 @@ namespace Botble\Marketplace\Forms;
 
 use Botble\Base\Forms\FieldOptions\ContentFieldOption;
 use Botble\Base\Forms\FieldOptions\EditorFieldOption;
+use Botble\Base\Forms\FieldOptions\MediaImageFieldOption;
 use Botble\Base\Forms\FieldOptions\NameFieldOption;
 use Botble\Base\Forms\FieldOptions\NumberFieldOption;
 use Botble\Base\Forms\FieldOptions\SelectFieldOption;
-use Botble\Base\Forms\FieldOptions\OnOffFieldOption;
+use Botble\Base\Forms\Fields\MediaImageField;
 use Botble\Base\Forms\Fields\MultiCheckListField;
 use Botble\Base\Forms\Fields\NumberField;
 use Botble\Base\Forms\Fields\SelectField;
 use Botble\Base\Forms\Fields\TagField;
 use Botble\Base\Forms\Fields\TextField;
 use Botble\Base\Forms\Fields\TreeCategoryField;
-use Botble\Base\Forms\Fields\OnOffField;
+use Botble\Base\Forms\MetaBox;
 use Botble\Ecommerce\Enums\GlobalOptionEnum;
 use Botble\Ecommerce\Enums\ProductTypeEnum;
 use Botble\Ecommerce\Facades\EcommerceHelper;
@@ -27,6 +28,7 @@ use Botble\Ecommerce\Models\ProductAttributeSet;
 use Botble\Ecommerce\Models\ProductCollection;
 use Botble\Ecommerce\Models\ProductLabel;
 use Botble\Ecommerce\Models\ProductVariation;
+use Botble\Ecommerce\Models\SpecificationTable;
 use Botble\Ecommerce\Models\Tax;
 use Botble\Marketplace\Facades\MarketplaceHelper;
 use Botble\Marketplace\Forms\Fields\CustomEditorField;
@@ -52,13 +54,18 @@ class ProductForm extends BaseProductForm
         $totalProductVariations = 0;
 
         if ($this->getModel()) {
-            $productId = $this->getModel()->id;
+            /**
+             * @var Product $product
+             */
+            $product = $this->getModel();
 
-            $selectedCategories = $this->getModel()->categories()->pluck('category_id')->all();
+            $productId = $product->id;
+
+            $selectedCategories = $product->categories()->pluck('category_id')->all();
 
             $totalProductVariations = ProductVariation::query()->where('configurable_product_id', $productId)->count();
 
-            $tags = $this->getModel()->tags()->pluck('name')->implode(',');
+            $tags = $product->tags()->pluck('name')->implode(',');
         }
 
         $this
@@ -66,16 +73,15 @@ class ProductForm extends BaseProductForm
             ->template(MarketplaceHelper::viewPath('vendor-dashboard.forms.base'))
             ->hasFiles()
             ->setValidatorClass(ProductRequest::class)
-
-            ->add('name', TextField::class, NameFieldOption::make()->required()->toArray())
+            ->add('name', TextField::class, NameFieldOption::make()->required())
             ->add(
                 'description',
                 CustomEditorField::class,
                 EditorFieldOption::make()
                     ->label(trans('core/base::forms.description'))
-                    ->placeholder(trans('core/base::forms.description_placeholder'))->toArray()
+                    ->placeholder(trans('core/base::forms.description_placeholder'))
             )
-            ->add('content', CustomEditorField::class, ContentFieldOption::make()->allowedShortcodes()->toArray())
+            ->add('content', CustomEditorField::class, ContentFieldOption::make()->allowedShortcodes())
             ->add('images', CustomImagesField::class, [
                 'label' => trans('plugins/ecommerce::products.form.image'),
                 'values' => $productId ? $this->getModel()->images : [],
@@ -91,9 +97,11 @@ class ProductForm extends BaseProductForm
                     'priority' => 9999,
                 ],
             ])
-            ->add('product_type', 'hidden', [
-                'value' => request()->input('product_type') ?: ProductTypeEnum::PHYSICAL,
-            ])
+            ->when(MarketplaceHelper::isVendorDigitalProductsEnabled() && ! EcommerceHelper::isDisabledPhysicalProduct(), function (): void {
+                $this->add('product_type', 'hidden', [
+                    'value' => request()->input('product_type') ?: ProductTypeEnum::PHYSICAL,
+                ]);
+            })
             ->add(
                 'categories[]',
                 TreeCategoryField::class,
@@ -102,25 +110,8 @@ class ProductForm extends BaseProductForm
                     ->choices(ProductCategoryHelper::getActiveTreeCategories())
                     ->selected(old('categories', $selectedCategories))
                     ->addAttribute('card-body-class', 'p-0')
-                    ->toArray()
             )
-            ->add(
-                'is_enquiry',
-                OnOffField::class,
-                OnOffFieldOption::make()
-                    ->label(trans('plugins/ecommerce::products.form.is_enquiry'))
-                    ->defaultValue(false)
-                    ->toArray()
-            )
-            ->add(
-                'product_free_shipping',
-                OnOffField::class,
-                OnOffFieldOption::make()
-                    ->label(trans('plugins/ecommerce::products.form.product_free_shipping'))
-                    ->defaultValue(false)
-                    ->toArray()
-            )
-            ->when($brands, function () use ($brands) {
+            ->when($brands, function () use ($brands): void {
                 $this
                     ->add(
                         'brand_id',
@@ -131,14 +122,24 @@ class ProductForm extends BaseProductForm
                             ->searchable()
                             ->emptyValue(trans('plugins/ecommerce::brands.select_brand'))
                             ->allowClear()
-                            ->toArray()
                     );
             })
-            ->when($productCollections, function () use ($productCollections) {
+            ->add(
+                'image',
+                MediaImageField::class,
+                MediaImageFieldOption::make()
+                    ->label(trans('plugins/ecommerce::products.form.featured_image'))
+            )
+            ->when($productCollections, function () use ($productCollections): void {
                 $selectedProductCollections = [];
 
-                if ($this->getModel() && $this->getModel()->getKey()) {
-                    $selectedProductCollections = $this->getModel()
+                /**
+                 * @var Product $product
+                 */
+                $product = $this->getModel();
+
+                if ($product && $product->getKey()) {
+                    $selectedProductCollections = $product
                         ->productCollections()
                         ->pluck('product_collection_id')
                         ->all();
@@ -151,11 +152,16 @@ class ProductForm extends BaseProductForm
                         'value' => old('product_collections', $selectedProductCollections),
                     ]);
             })
-            ->when($productLabels, function () use ($productLabels) {
+            ->when($productLabels, function () use ($productLabels): void {
                 $selectedProductLabels = [];
 
-                if ($this->getModel() && $this->getModel()->getKey()) {
-                    $selectedProductLabels = $this->getModel()->productLabels()->pluck('product_label_id')->all();
+                /**
+                 * @var Product $product
+                 */
+                $product = $this->getModel();
+
+                if ($product && $product->getKey()) {
+                    $selectedProductLabels = $product->productLabels()->pluck('product_label_id')->all();
                 }
 
                 $this
@@ -165,13 +171,19 @@ class ProductForm extends BaseProductForm
                         'value' => old('product_labels', $selectedProductLabels),
                     ]);
             })
-            ->when(EcommerceHelper::isTaxEnabled(), function () {
-                $taxes = Tax::query()->orderBy('percentage')->get()->pluck('title_with_percentage', 'id')->all();
+            ->when(EcommerceHelper::isTaxEnabled(), function (): void {
+                $taxes = Tax::query()->oldest('percentage')->get()->pluck('title_with_percentage', 'id')->all();
 
                 if ($taxes) {
                     $selectedTaxes = [];
-                    if ($this->getModel() && $this->getModel()->getKey()) {
-                        $selectedTaxes = $this->getModel()->taxes()->pluck('tax_id')->all();
+
+                    /**
+                     * @var Product $product
+                     */
+                    $product = $this->getModel();
+
+                    if ($product && $product->getKey()) {
+                        $selectedTaxes = $product->taxes()->pluck('tax_id')->all();
                     } elseif ($defaultTaxRate = get_ecommerce_setting('default_tax_rate')) {
                         $selectedTaxes = [$defaultTaxRate];
                     }
@@ -183,7 +195,7 @@ class ProductForm extends BaseProductForm
                     ]);
                 }
             })
-            ->when(EcommerceHelper::isCartEnabled(), function (ProductForm $form) {
+            ->when(EcommerceHelper::isCartEnabled(), function (ProductForm $form): void {
                 $form
                     ->add(
                         'minimum_order_quantity',
@@ -192,7 +204,6 @@ class ProductForm extends BaseProductForm
                             ->label(trans('plugins/ecommerce::products.form.minimum_order_quantity'))
                             ->helperText(trans('plugins/ecommerce::products.form.minimum_order_quantity_helper'))
                             ->defaultValue(0)
-                            ->toArray()
                     )
                     ->add(
                         'maximum_order_quantity',
@@ -201,7 +212,6 @@ class ProductForm extends BaseProductForm
                             ->label(trans('plugins/ecommerce::products.form.maximum_order_quantity'))
                             ->helperText(trans('plugins/ecommerce::products.form.maximum_order_quantity_helper'))
                             ->defaultValue(0)
-                            ->toArray()
                     );
             })
             ->add('tag', TagField::class, [
@@ -213,6 +223,24 @@ class ProductForm extends BaseProductForm
                 ],
             ])
             ->setBreakFieldPoint('categories[]');
+
+        if (EcommerceHelper::isProductSpecificationEnabled()) {
+            $this->addMetaBox(
+                MetaBox::make('product-specification-table')
+                    ->title(trans('plugins/ecommerce::product-specification.specification_tables.title'))
+                    ->hasTable()
+                    ->attributes(['class' => 'product-specification-table'])
+                    ->headerActionContent(view('plugins/ecommerce::products.partials.specification-table.header', [
+                        'model' => $this->getModel(),
+                        'tables' => SpecificationTable::query()
+                            ->pluck('name', 'id'),
+                    ])->render())
+                    ->content(view('plugins/ecommerce::products.partials.specification-table.content', [
+                        'model' => $this->getModel(),
+                        'getTableUrl' => route('marketplace.vendor.specification-tables.index'),
+                    ])->render())
+            );
+        }
 
         if (EcommerceHelper::isEnabledProductOptions()) {
             $this
@@ -244,6 +272,9 @@ class ProductForm extends BaseProductForm
                 ],
             ]);
 
+        $isDigitalProduct = (! $this->getModel() && request()->input('product_type') == ProductTypeEnum::DIGITAL)
+            || ($this->getModel() && $this->getModel()->isTypeDigital());
+
         if (! $totalProductVariations) {
             $this
                 ->removeMetaBox('variations')
@@ -261,28 +292,46 @@ class ProductForm extends BaseProductForm
                         'before_wrapper' => '<div id="main-manage-product-type">',
                         'priority' => 2,
                     ],
-                    'attributes' => [
-                        'title' => trans('plugins/ecommerce::products.attributes'),
-                        'content' => view('plugins/ecommerce::products.partials.add-product-attributes', [
-                            'product' => $this->getModel(),
-                            'productAttributeSets' => $productAttributeSets,
-                            'addAttributeToProductUrl' => $this->getModel()->id
-                                ? route('marketplace.vendor.products.add-attribute-to-product', $this->getModel()->id)
-                                : null,
-                        ]),
-                        'header_actions' => $productAttributeSets->isNotEmpty()
-                            ? view('plugins/ecommerce::products.partials.product-attribute-actions')
-                            : null,
-                        'after_wrapper' => '</div>',
-                        'priority' => 3,
+                    ...($productAttributeSets->isNotEmpty() ? [
+                        'attributes' => [
+                            'title' => trans('plugins/ecommerce::products.attributes'),
+                            'content' => view('plugins/ecommerce::products.partials.add-product-attributes', [
+                                'product' => $this->getModel(),
+                                'productAttributeSets' => $productAttributeSets,
+                                'addAttributeToProductUrl' => $this->getModel()->id
+                                    ? route('marketplace.vendor.products.add-attribute-to-product', $this->getModel()->id)
+                                    : null,
+                            ]),
+                            'header_actions' => view('plugins/ecommerce::products.partials.product-attribute-actions'),
+                            'after_wrapper' => '</div>',
+                            'priority' => 3,
+                        ],
+                    ] : []),
+                ]);
+
+            if (MarketplaceHelper::isVendorDigitalProductsEnabled() && $isDigitalProduct) {
+                $this->addMetaBoxes([
+                    'digital-attachments' => [
+                        'title' => trans('plugins/ecommerce::products.digital_attachments.title'),
+                        'content' => view(
+                            MarketplaceHelper::viewPath('vendor-dashboard.products.partials.digital-attachments'),
+                            ['product' => $productId ? $this->getModel() : null]
+                        ),
+                        'priority' => 4,
                     ],
                 ]);
+            }
         } elseif ($productId) {
             $productVariationTable = app(ProductVariationTable::class)
                 ->setProductId($productId)
                 ->setProductAttributeSets($productAttributeSets);
 
-            if ($this->getModel()->isTypeDigital()) {
+            /**
+             * @var Product $product
+             */
+            $product = $this->getModel();
+
+            if ($product->isTypeDigital()) {
                 $productVariationTable->isDigitalProduct();
             }
 
@@ -307,6 +356,19 @@ class ProductForm extends BaseProductForm
                         'render' => false,
                     ],
                 ]);
+
+            if (MarketplaceHelper::isVendorDigitalProductsEnabled() && $isDigitalProduct) {
+                $this->addMetaBoxes([
+                    'digital-attachments' => [
+                        'title' => trans('plugins/ecommerce::products.digital_attachments.title'),
+                        'content' => view(
+                            MarketplaceHelper::viewPath('vendor-dashboard.products.partials.digital-attachments'),
+                            ['product' => $this->getModel()]
+                        ),
+                        'priority' => 4,
+                    ],
+                ]);
+            }
         }
     }
 }

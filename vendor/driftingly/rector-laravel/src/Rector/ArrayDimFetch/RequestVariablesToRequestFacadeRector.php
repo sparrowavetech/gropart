@@ -1,0 +1,269 @@
+<?php
+
+namespace RectorLaravel\Rector\ArrayDimFetch;
+
+use PhpParser\Node;
+use PhpParser\Node\Arg;
+use PhpParser\Node\Expr;
+use PhpParser\Node\Expr\ArrayDimFetch;
+use PhpParser\Node\Expr\BinaryOp\NotIdentical;
+use PhpParser\Node\Expr\Isset_;
+use PhpParser\Node\Expr\StaticCall;
+use PhpParser\Node\Expr\Variable;
+use PhpParser\Node\Scalar;
+use PhpParser\Node\Scalar\String_;
+use PHPStan\Analyser\Scope;
+use Rector\NodeTypeResolver\Node\AttributeKey;
+use RectorLaravel\AbstractRector;
+use RectorLaravel\ValueObject\ReplaceRequestKeyAndMethodValue;
+use Symplify\RuleDocGenerator\ValueObject\CodeSample\CodeSample;
+use Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
+
+/**
+ * @see \RectorLaravel\Tests\Rector\ArrayDimFetch\RequestVariablesToRequestFacadeRector\RequestVariablesToRequestFacadeRectorTest
+ */
+class RequestVariablesToRequestFacadeRector extends AbstractRector
+{
+    /**
+     * @var string
+     */
+    private const IS_INSIDE_ARRAY_DIM_FETCH_WITH_DIM_NOT_SCALAR = 'is_inside_array_dim_fetch_with_dim_not_scalar';
+
+    public function getRuleDefinition(): RuleDefinition
+    {
+        return new RuleDefinition(
+            'Change request variable definition in Facade',
+            [
+                new CodeSample(
+                    <<<'CODE_SAMPLE'
+$_GET['value'];
+$_POST['value'];
+$_REQUEST['value'];
+$_POST;
+$_GET;
+$_REQUEST;
+isset($_GET['value']);
+isset($_POST['value']);
+isset($_REQUEST['value']);
+CODE_SAMPLE,
+                    <<<'CODE_SAMPLE'
+\Illuminate\Support\Facades\Request::query('value');
+\Illuminate\Support\Facades\Request::post('value');
+\Illuminate\Support\Facades\Request::input('value');
+\Illuminate\Support\Facades\Request::query();
+\Illuminate\Support\Facades\Request::post();
+\Illuminate\Support\Facades\Request::all();
+\Illuminate\Support\Facades\Request::query('value') !== null;
+\Illuminate\Support\Facades\Request::post('value') !== null;
+\Illuminate\Support\Facades\Request::exists('value');
+CODE_SAMPLE
+                ),
+            ]
+        );
+    }
+
+    public function getNodeTypes(): array
+    {
+        return [Node::class, ArrayDimFetch::class, Variable::class, Isset_::class];
+    }
+
+    /**
+     * @return \PhpParser\Node\Expr\StaticCall|\PhpParser\Node\Expr\BinaryOp\NotIdentical|null
+     */
+    public function refactor(Node $node)
+    {
+        if (! $node instanceof ArrayDimFetch && ! $node instanceof Variable && ! $node instanceof Isset_) {
+            $scope = $node->getAttribute(AttributeKey::SCOPE);
+            if ($scope instanceof Scope && $scope->isInFirstLevelStatement()) {
+                $this->traverseNodesWithCallable($node, function (Node $subNode) {
+                    if ($subNode instanceof ArrayDimFetch) {
+
+                        if ($subNode->dim instanceof Scalar) {
+                            return null;
+                        }
+
+                        $this->traverseNodesWithCallable($subNode, function (Node $subSubNode) {
+                            if ($subSubNode instanceof Variable) {
+                                $subSubNode->setAttribute(self::IS_INSIDE_ARRAY_DIM_FETCH_WITH_DIM_NOT_SCALAR, true);
+
+                                return $subSubNode;
+                            }
+
+                            return null;
+                        });
+                    }
+                });
+            }
+
+            return null;
+        }
+
+        if ($node instanceof Variable) {
+            if ($node->getAttribute(self::IS_INSIDE_ARRAY_DIM_FETCH_WITH_DIM_NOT_SCALAR) === true) {
+                return null;
+            }
+
+            return $this->processVariable($node);
+        }
+
+        if ($node instanceof Isset_) {
+            return $this->processIsset($node);
+        }
+
+        $replaceValue = $this->findAllKeys($node);
+
+        if ($replaceValue instanceof ReplaceRequestKeyAndMethodValue) {
+            return $this->nodeFactory->createStaticCall(
+                'Illuminate\Support\Facades\Request',
+                $replaceValue->getMethod(),
+                [new Arg(new String_($replaceValue->getKey()))]
+            );
+        }
+
+        return $replaceValue;
+    }
+
+    public function findAllKeys(ArrayDimFetch $arrayDimFetch): ?ReplaceRequestKeyAndMethodValue
+    {
+        if (! $arrayDimFetch->dim instanceof Scalar) {
+            return null;
+        }
+
+        $value = $this->getType($arrayDimFetch->dim)->getConstantScalarValues()[0] ?? null;
+
+        if ($value === null) {
+            return null;
+        }
+
+        if ($arrayDimFetch->var instanceof ArrayDimFetch) {
+            $replaceValue = $this->findAllKeys($arrayDimFetch->var);
+
+            if (! $replaceValue instanceof ReplaceRequestKeyAndMethodValue) {
+                return $replaceValue;
+            }
+
+            return new ReplaceRequestKeyAndMethodValue(implode('.', [$replaceValue->getKey(), $value]), $replaceValue->getMethod());
+        }
+
+        if ($this->isNames($arrayDimFetch->var, ['_GET', '_POST', '_REQUEST'])) {
+            if (! $arrayDimFetch->var instanceof Variable) {
+                return null;
+            }
+
+            switch ($arrayDimFetch->var->name) {
+                case '_GET':
+                    $method = 'query';
+                    break;
+                case '_POST':
+                    $method = 'post';
+                    break;
+                case '_REQUEST':
+                    $method = 'input';
+                    break;
+                default:
+                    $method = null;
+                    break;
+            }
+            if ($method === null) {
+                return null;
+            }
+
+            return new ReplaceRequestKeyAndMethodValue((string) $value, $method);
+        }
+
+        return null;
+    }
+
+    private function getGetterMethodName(Variable $variable): ?string
+    {
+        switch ($variable->name) {
+            case '_GET':
+                return 'query';
+            case '_POST':
+                return 'post';
+            case '_REQUEST':
+                return 'input';
+            default:
+                return null;
+        }
+    }
+
+    /**
+     * @return \PhpParser\Node\Expr\StaticCall|\PhpParser\Node\Expr\BinaryOp\NotIdentical|null
+     */
+    private function processIsset(Isset_ $isset)
+    {
+        if (count($isset->vars) < 1) {
+            return null;
+        }
+
+        $var = $isset->vars[0];
+
+        if (! $var instanceof ArrayDimFetch) {
+            return null;
+        }
+
+        if (! $var->var instanceof Variable) {
+            return null;
+        }
+
+        $method = $this->getGetterMethodName($var->var);
+        if ($method === null) {
+            return null;
+        }
+
+        if (! $var->dim instanceof Expr) {
+            return null;
+        }
+
+        $replaceValue = $this->findAllKeys($var);
+        if (! $replaceValue instanceof ReplaceRequestKeyAndMethodValue) {
+            return $replaceValue;
+        }
+
+        $args = [new Arg(new String_($replaceValue->getKey()))];
+
+        if ($method === 'input') {
+            return $this->nodeFactory->createStaticCall(
+                'Illuminate\Support\Facades\Request',
+                'exists',
+                $args,
+            );
+        }
+
+        return new NotIdentical(
+            $this->nodeFactory->createStaticCall(
+                'Illuminate\Support\Facades\Request',
+                $method,
+                $args,
+            ),
+            $this->nodeFactory->createNull(),
+        );
+    }
+
+    private function processVariable(Variable $variable): ?StaticCall
+    {
+        switch ($variable->name) {
+            case '_GET':
+                $method = 'query';
+                break;
+            case '_POST':
+                $method = 'post';
+                break;
+            case '_REQUEST':
+                $method = 'all';
+                break;
+            default:
+                $method = null;
+                break;
+        }
+        if ($method === null) {
+            return null;
+        }
+
+        return $this->nodeFactory->createStaticCall(
+            'Illuminate\Support\Facades\Request',
+            $method,
+        );
+    }
+}

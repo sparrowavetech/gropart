@@ -24,12 +24,12 @@ class FlashSaleSettingForm extends SettingForm
                 OnOffCheckboxField::class,
                 CheckboxFieldOption::make()
                     ->label(trans('plugins/ecommerce::setting.flash_sale.enable'))
+                    ->helperText(trans('plugins/ecommerce::setting.flash_sale.enable_helper'))
                     ->value(FlashSale::isEnabled())
                     ->attributes([
                         'data-bb-toggle' => 'collapse',
                         'data-bb-target' => '#flash-sale-settings',
-                    ])
-                    ->toArray(),
+                    ]),
             )
             ->add('open_wrapper', HtmlField::class, [
                 'html' => sprintf('<div id="flash-sale-settings" style="display: %s">', get_ecommerce_setting('flash_sale_enabled', true) ? 'block' : 'none'),

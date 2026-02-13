@@ -1,6 +1,6 @@
 @php
     Arr::set($attributes, 'class', Arr::get($attributes, 'class') . ' icon-select');
-    Arr::set($attributes, 'data-empty-value', __('-- None --'));
+    Arr::set($attributes, 'data-empty-value', trans('packages/theme::theme.common.none'));
     Arr::set($attributes, 'data-check-initialized', true);
 @endphp
 

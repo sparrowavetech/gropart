@@ -36,7 +36,7 @@ $.extend(true, laravelValidation, {
          */
         selector: function (names) {
             var selector = []
-            if (!$.isArray(names)) {
+            if (!Array.isArray(names)) {
                 names = [names]
             }
             for (var i = 0; i < names.length; i++) {
@@ -116,7 +116,7 @@ $.extend(true, laravelValidation, {
         getSize: function getSize(obj, element, value) {
             if (this.hasNumericRules(element) && this.is_numeric(value)) {
                 return parseFloat(value)
-            } else if ($.isArray(value)) {
+            } else if (Array.isArray(value)) {
                 return parseFloat(value.length)
             } else if (element.type === 'file') {
                 return parseFloat(Math.floor(this.fileinfo(element).size))
@@ -162,7 +162,7 @@ $.extend(true, laravelValidation, {
                 return value
             }
 
-            if ($.type(format) === 'object') {
+            if (typeof format === 'object' && format !== null) {
                 var dateRule = this.getLaravelValidation('DateFormat', format)
                 if (dateRule !== undefined) {
                     format = dateRule[1][0]
@@ -241,7 +241,7 @@ $.extend(true, laravelValidation, {
          * @returns {*}
          */
         arrayEquals: function (arr1, arr2) {
-            if (!$.isArray(arr1) || !$.isArray(arr2)) {
+            if (!Array.isArray(arr1) || !Array.isArray(arr2)) {
                 return false
             }
 
@@ -295,7 +295,7 @@ $.extend(true, laravelValidation, {
             var newResponse = ['Whoops, looks like something went wrong.']
             if ('responseText' in response) {
                 var errorMsg = response.responseText.match(/<h1\s*>(.*)<\/h1\s*>/i)
-                if ($.isArray(errorMsg)) {
+                if (Array.isArray(errorMsg)) {
                     newResponse = [errorMsg[1]]
                 }
             }

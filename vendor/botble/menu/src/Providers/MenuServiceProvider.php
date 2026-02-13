@@ -3,8 +3,10 @@
 namespace Botble\Menu\Providers;
 
 use Botble\Base\Facades\DashboardMenu;
+use Botble\Base\Supports\DashboardMenuItem;
 use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
+use Botble\Menu\Facades\Menu;
 use Botble\Menu\Models\Menu as MenuModel;
 use Botble\Menu\Models\MenuLocation;
 use Botble\Menu\Models\MenuNode;
@@ -40,7 +42,7 @@ class MenuServiceProvider extends ServiceProvider
     {
         $this
             ->setNamespace('packages/menu')
-            ->loadAndPublishConfigurations(['permissions', 'general'])
+            ->loadAndPublishConfigurations(['permissions'])
             ->loadHelpers()
             ->loadRoutes()
             ->loadAndPublishViews()
@@ -48,24 +50,33 @@ class MenuServiceProvider extends ServiceProvider
             ->loadMigrations()
             ->publishAssets();
 
-        DashboardMenu::default()->beforeRetrieving(function () {
-            DashboardMenu::make()
-                ->registerItem([
-                    'id' => 'cms-core-menu',
-                    'priority' => 2,
-                    'parent_id' => 'cms-core-appearance',
-                    'name' => 'packages/menu::menu.name',
-                    'route' => 'menus.index',
-                ]);
-        });
+        if (! $this->app['config']->get('core.base.general.disable_front_theme')) {
+            DashboardMenu::default()->beforeRetrieving(function (): void {
+                DashboardMenu::make()
+                    ->registerItem(
+                        DashboardMenuItem::make()
+                            ->id('cms-core-menu')
+                            ->parentId('cms-core-appearance')
+                            ->priority(2)
+                            ->name('packages/menu::menu.name')
+                            ->icon('ti ti-tournament')
+                            ->route('menus.index')
+                            ->permissions('menus.index')
+                    );
+            });
 
-        $this->app['events']->listen(RenderingAdminBar::class, function () {
-            AdminBar::registerLink(
-                trans('packages/menu::menu.name'),
-                route('menus.index'),
-                'appearance',
-                'menus.index'
-            );
+            $this->app['events']->listen(RenderingAdminBar::class, function (): void {
+                AdminBar::registerLink(
+                    trans('packages/menu::menu.name'),
+                    route('menus.index'),
+                    'appearance',
+                    'menus.index'
+                );
+            });
+        }
+
+        $this->app['events']->listen('cms.menu::registering-locations', function (): void {
+            Menu::addMenuLocation('main-menu', trans('packages/menu::menu.main_navigation'));
         });
 
         $this->app->register(EventServiceProvider::class);

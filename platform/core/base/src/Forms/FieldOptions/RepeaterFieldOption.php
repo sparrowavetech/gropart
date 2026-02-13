@@ -30,7 +30,7 @@ class RepeaterFieldOption extends FormFieldOptions
             return [];
         }
 
-        $items = json_decode($data);
+        $items = json_decode($data, true);
 
         if (! is_array($items)) {
             return [];

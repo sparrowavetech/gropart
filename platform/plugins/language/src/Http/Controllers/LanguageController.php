@@ -8,6 +8,7 @@ use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Http\Actions\DeleteResourceAction;
 use Botble\Base\Supports\Language;
+use Botble\Language\Events\LanguageCreated;
 use Botble\Language\Facades\Language as LanguageFacade;
 use Botble\Language\Forms\Settings\LanguageSettingForm;
 use Botble\Language\Http\Requests\LanguageRequest;
@@ -39,7 +40,7 @@ class LanguageController extends SettingController
         $flags = Language::getListLanguageFlags();
         $languageCodes = Language::getLanguageCodes();
         $localeKeys = Language::getLocaleKeys();
-        $activeLanguages = LanguageModel::query()->orderBy('lang_order')->get();
+        $activeLanguages = LanguageModel::query()->oldest('lang_order')->get();
 
         $languageSettingForm = LanguageSettingForm::create();
 
@@ -80,34 +81,17 @@ class LanguageController extends SettingController
 
             $locale = $request->input('lang_locale');
 
-            if (! File::isDirectory(lang_path($locale))) {
-                $importedLocale = false;
-
-                if (is_plugin_active('translation')) {
-                    $result = app(Manager::class)->downloadRemoteLocale($locale);
-
-                    $importedLocale = ! $result['error'];
-                }
-
-                if (! $importedLocale) {
-                    $defaultLocale = lang_path('en');
-                    if (File::exists($defaultLocale)) {
-                        File::copyDirectory($defaultLocale, lang_path($locale));
-                    }
-
-                    $this->createLocaleInPath(lang_path('vendor/core'), $locale);
-                    $this->createLocaleInPath(lang_path('vendor/packages'), $locale);
-                    $this->createLocaleInPath(lang_path('vendor/plugins'), $locale);
-
-                    $this->copyThemeLangFiles($locale);
-                }
-            }
+            $this->importLocaleIfMissing($locale);
 
             $language = LanguageModel::query()->create($request->except('lang_id'));
 
             $this->clearRoutesCache();
 
+            LanguageFacade::clearCache();
+
             event(new CreatedContentEvent(LANGUAGE_MODULE_SCREEN_NAME, $request, $language));
+
+            LanguageCreated::dispatch($language);
 
             try {
                 $models = $languageManager->supportedModels();
@@ -118,7 +102,8 @@ class LanguageController extends SettingController
                             continue;
                         }
 
-                        $ids = LanguageMeta::query()->where('reference_type', $model)
+                        $ids = LanguageMeta::query()
+                            ->where('reference_type', $model)
                             ->pluck('reference_id')
                             ->all();
 
@@ -161,18 +146,52 @@ class LanguageController extends SettingController
         }
     }
 
+    protected function importLocaleIfMissing(string $locale): bool
+    {
+        if (File::isDirectory(lang_path($locale))) {
+            return false;
+        }
+
+        $importedLocale = false;
+
+        if (is_plugin_active('translation')) {
+            $result = app(Manager::class)->downloadRemoteLocale($locale);
+
+            $importedLocale = ! $result['error'];
+        }
+
+        if (! $importedLocale) {
+            $defaultLocale = lang_path('en');
+            if (File::exists($defaultLocale)) {
+                File::copyDirectory($defaultLocale, lang_path($locale));
+            }
+
+            $this->createLocaleInPath(lang_path('vendor/core'), $locale);
+            $this->createLocaleInPath(lang_path('vendor/packages'), $locale);
+            $this->createLocaleInPath(lang_path('vendor/plugins'), $locale);
+
+            $this->copyThemeLangFiles($locale);
+        }
+
+        return $importedLocale;
+    }
+
     public function update(Request $request)
     {
         try {
             $language = LanguageModel::query()->where('lang_id', $request->input('lang_id'))->first();
-            if (empty($language)) {
-                abort(404);
-            }
+            abort_if(empty($language), 404);
 
             $language->fill($request->input());
             $language->save();
 
+            $locale = $request->input('lang_locale');
+
+            $this->importLocaleIfMissing($locale);
+
             $this->clearRoutesCache();
+
+            LanguageFacade::clearCache();
 
             event(new UpdatedContentEvent(LANGUAGE_MODULE_SCREEN_NAME, $request, $language));
 
@@ -248,7 +267,7 @@ class LanguageController extends SettingController
         $language = LanguageModel::query()->where('lang_id', $id)->first();
 
         return DeleteResourceAction::make($language)
-            ->afterDeleting(function (DeleteResourceAction $action) {
+            ->afterDeleting(function (DeleteResourceAction $action): void {
                 $defaultLanguageId = false;
 
                 if ($action->getModel()->lang_is_default) {
@@ -261,6 +280,8 @@ class LanguageController extends SettingController
 
                 $this->clearRoutesCache();
 
+                LanguageFacade::clearCache();
+
                 $this->httpResponse()->setData($defaultLanguageId);
             });
     }
@@ -269,11 +290,7 @@ class LanguageController extends SettingController
     {
         $newLanguageId = $request->input('lang_id');
 
-        $newLanguage = LanguageModel::query()->where('lang_id', $newLanguageId)->first();
-
-        if (! $newLanguage) {
-            abort(404);
-        }
+        $newLanguage = LanguageModel::query()->where('lang_id', $newLanguageId)->firstOrFail();
 
         $newLanguageCode = $newLanguage->lang_code;
 
@@ -385,6 +402,8 @@ class LanguageController extends SettingController
         $newLanguage->save();
 
         $this->clearRoutesCache();
+
+        LanguageFacade::clearCache();
 
         event(new UpdatedContentEvent(LANGUAGE_MODULE_SCREEN_NAME, $request, $newLanguage));
 

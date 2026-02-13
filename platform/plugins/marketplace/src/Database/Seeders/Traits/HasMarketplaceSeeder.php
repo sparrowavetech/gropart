@@ -18,12 +18,18 @@ trait HasMarketplaceSeeder
 
         $faker = $this->fake();
 
-        foreach (Customer::query()->whereNot('email', 'customer@botble.com')->get() as $customer) {
-            $customer->is_vendor = $customer->id < 9;
+        $customers = Customer::query()->whereNot('email', 'customer@botble.com')->get();
+        $vendorCount = 0;
+        $maxVendors = 8;
+
+        foreach ($customers as $customer) {
+            $customer->is_vendor = $vendorCount < $maxVendors;
             $customer->vendor_verified_at = $customer->is_vendor ? $this->now() : null;
             $customer->save();
 
             if ($customer->is_vendor) {
+                $vendorCount++;
+
                 $vendorInfo = new VendorInfo();
                 $vendorInfo->bank_info = [
                     'name' => $faker->name(),
@@ -41,7 +47,7 @@ trait HasMarketplaceSeeder
 
         $stores = [];
 
-        foreach ($data as $item) {
+        foreach ($data as $key => $item) {
             $item['email'] = $faker->safeEmail();
             $item['phone'] = $faker->e164PhoneNumber();
             $item['country'] = $faker->countryCode();
@@ -49,8 +55,22 @@ trait HasMarketplaceSeeder
             $item['city'] = $faker->city();
             $item['address'] = $faker->streetAddress();
             $item['description'] = $faker->text(400);
-            $item['customer_id'] = $item['customer_id'] ?? $vendorIds->random();
 
+            $customerId = $item['customer_id'] ?? ($vendorIds->count() > 0 ? $vendorIds->random() : null);
+
+            if ($key == 0) {
+                $customerId = Customer::query()->where('email', 'vendor@botble.com')->value('id');
+            }
+
+            if (! $customerId) {
+                continue;
+            }
+
+            $item['customer_id'] = $customerId;
+
+            /**
+             * @var Store $store
+             */
             $store = Store::query()->create($item);
 
             $stores[] = $store;
@@ -62,9 +82,11 @@ trait HasMarketplaceSeeder
 
         $storeIds = Store::query()->pluck('id');
 
-        foreach (Product::query()->where('is_variation', 0)->get() as $product) {
-            $product->store_id = $storeIds->random();
-            $product->save();
+        if ($storeIds->count() > 0) {
+            foreach (Product::query()->where('is_variation', 0)->get() as $product) {
+                $product->store_id = $storeIds->random();
+                $product->save();
+            }
         }
 
         return $stores;

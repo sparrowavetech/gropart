@@ -5,38 +5,48 @@ declare(strict_types=1);
 namespace Intervention\Gif;
 
 use ArrayIterator;
+use GdImage;
+use Intervention\Gif\Exceptions\EncoderException;
 use IteratorAggregate;
 use Traversable;
 
+/**
+ * @implements IteratorAggregate<GifDataStream>
+ */
 class Splitter implements IteratorAggregate
 {
     /**
-     * Single frames
+     * Single frames resolved to GifDataStream
      *
-     * @var array
+     * @var array<GifDataStream>
      */
     protected array $frames = [];
 
     /**
      * Delays of each frame
      *
-     * @var array
+     * @var array<int>
      */
     protected array $delays = [];
 
     /**
      * Create new instance
-     *
-     * @param GifDataStream $stream
      */
     public function __construct(protected GifDataStream $stream)
     {
+        //
+    }
+
+    /**
+     * Static constructor method
+     */
+    public static function create(GifDataStream $stream): self
+    {
+        return new self($stream);
     }
 
     /**
      * Iterator
-     *
-     * @return Traversable
      */
     public function getIterator(): Traversable
     {
@@ -46,7 +56,7 @@ class Splitter implements IteratorAggregate
     /**
      * Get frames
      *
-     * @return array
+     * @return array<GifDataStream>
      */
     public function getFrames(): array
     {
@@ -56,7 +66,7 @@ class Splitter implements IteratorAggregate
     /**
      * Get delays
      *
-     * @return array
+     * @return array<int>
      */
     public function getDelays(): array
     {
@@ -65,8 +75,6 @@ class Splitter implements IteratorAggregate
 
     /**
      * Set stream of instance
-     *
-     * @param GifDataStream $stream
      */
     public function setStream(GifDataStream $stream): self
     {
@@ -76,20 +84,7 @@ class Splitter implements IteratorAggregate
     }
 
     /**
-     * Static constructor method
-     *
-     * @param GifDataStream $stream
-     * @return Splitter
-     */
-    public static function create(GifDataStream $stream): self
-    {
-        return new self($stream);
-    }
-
-    /**
      * Split current stream into array of seperate streams for each frame
-     *
-     * @return Splitter
      */
     public function split(): self
     {
@@ -144,19 +139,22 @@ class Splitter implements IteratorAggregate
     /**
      * Return array of GD library resources for each frame
      *
-     * @return array
+     * @throws EncoderException
+     * @return array<GdImage>
      */
     public function toResources(): array
     {
         $resources = [];
 
         foreach ($this->frames as $frame) {
-            if (is_a($frame, GifDataStream::class)) {
-                $resource = imagecreatefromstring($frame->encode());
-                imagepalettetotruecolor($resource);
-                imagesavealpha($resource, true);
-                $resources[] = $resource;
+            $resource = imagecreatefromstring($frame->encode());
+            if ($resource === false) {
+                throw new EncoderException('Unable to extract animation frames.');
             }
+
+            imagepalettetotruecolor($resource);
+            imagesavealpha($resource, true);
+            $resources[] = $resource;
         }
 
         return $resources;
@@ -165,7 +163,8 @@ class Splitter implements IteratorAggregate
     /**
      * Return array of coalesced GD library resources for each frame
      *
-     * @return array
+     * @throws EncoderException
+     * @return array<GdImage>
      */
     public function coalesceToResources(): array
     {
@@ -197,6 +196,10 @@ class Splitter implements IteratorAggregate
                         $transparent = imagecolortransparent($resource);
                     } else {
                         $transparent = imagecolorallocatealpha($resource, 255, 0, 255, 127);
+                    }
+
+                    if (!is_int($transparent)) {
+                        throw new EncoderException('Animation frames cannot be converted into resources.');
                     }
 
                     // fill with transparent
@@ -240,6 +243,10 @@ class Splitter implements IteratorAggregate
                     $transparent = imagecolorallocatealpha($resource, 255, 0, 255, 127);
                 }
 
+                if (!is_int($transparent)) {
+                    throw new EncoderException('Animation frames cannot be converted into resources.');
+                }
+
                 // fill with transparent
                 imagefill($canvas, 0, 0, $transparent);
                 imagecolortransparent($canvas, $transparent);
@@ -266,9 +273,6 @@ class Splitter implements IteratorAggregate
 
     /**
      * Find and return disposal method of given gif data stream
-     *
-     * @param GifDataStream $gif
-     * @return DisposalMethod
      */
     private function getDisposalMethod(GifDataStream $gif): DisposalMethod
     {

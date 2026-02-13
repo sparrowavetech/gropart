@@ -2,9 +2,9 @@
     <div class="section__content">
         <section class="section--auth">
             <div class="form__header">
-                <h3>{{ __('Download product ":name" with external links', ['name' => $orderProduct->product_name]) }}
+                <h3>{{ trans('plugins/ecommerce::products.download_product_with_external_links', ['name' => $orderProduct->product_name]) }}
                 </h3>
-                <p>{{ __('You can now download it by clicking the links below') }}</p>
+                <p>{{ trans('plugins/ecommerce::ecommerce.you_can_now_download_it_by_clicking_the_links_belo') }}</p>
             </div>
             <ol class="list-group list-group-numbered list-group-flush">
                 @foreach ($externalProductFiles as $productFile)
@@ -15,7 +15,7 @@
                         >{{ $productFile->file_name ?: $productFile->url }}</a>
                     </li>
                 @endforeach
-                </ul>
+            </ol>
         </section>
     </div>
 </section>

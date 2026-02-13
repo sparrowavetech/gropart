@@ -24,8 +24,7 @@ class ShippingMethodSettingController extends BaseController
 
         $settingStore->save();
 
-        $cache = new Cache(app('cache'), HandleShippingFeeService::class);
-        $cache->flush();
+        Cache::make(HandleShippingFeeService::class)->flush();
 
         return $this
             ->httpResponse()

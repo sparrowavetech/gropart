@@ -2,10 +2,8 @@
 
 namespace Botble\Blog\Tables;
 
-use Botble\ACL\Models\User;
 use Botble\Base\Facades\Html;
 use Botble\Base\Models\BaseQueryBuilder;
-use Botble\Blog\Exports\PostExport;
 use Botble\Blog\Models\Category;
 use Botble\Blog\Models\Post;
 use Botble\Table\Abstracts\TableAbstract;
@@ -13,6 +11,7 @@ use Botble\Table\Actions\DeleteAction;
 use Botble\Table\Actions\EditAction;
 use Botble\Table\BulkActions\DeleteBulkAction;
 use Botble\Table\BulkChanges\CreatedAtBulkChange;
+use Botble\Table\BulkChanges\IsFeaturedBulkChange;
 use Botble\Table\BulkChanges\NameBulkChange;
 use Botble\Table\BulkChanges\SelectBulkChange;
 use Botble\Table\BulkChanges\StatusBulkChange;
@@ -31,12 +30,10 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
 
 class PostTable extends TableAbstract
 {
-    protected string $exportClass = PostExport::class;
-
-    protected int $defaultSortColumn = 6;
-
     public function setup(): void
     {
+        $this->defaultSortColumnName = 'created_at';
+
         $this
             ->model(Post::class)
             ->addHeaderAction(CreateHeaderAction::make()->route('posts.create'))
@@ -72,34 +69,25 @@ class PostTable extends TableAbstract
                     ->orderable(false)
                     ->searchable(false)
                     ->getValueUsing(function (FormattedColumn $column) {
-                        $post = $column->getItem();
-
-                        if (! class_exists($post->author_type)) {
-                            return null;
-                        }
-
-                        return $post->author?->name;
+                        return $column->getItem()->author_name;
                     })
                     ->renderUsing(function (FormattedColumn $column) {
-                        $post = $column->getItem();
+                        $url = $column->getItem()->author_url;
 
-                        if (! class_exists($post->author_type)) {
+                        if (! $url) {
                             return null;
                         }
 
-                        $author = $post->author;
-
-                        if (! $author->getKey()) {
-                            return null;
-                        }
-
-                        if ($post->author_id && $post->author_type === User::class) {
-                            return Html::link($author->url, $author->name, ['target' => '_blank']);
-                        }
-
-                        return null;
+                        return Html::link($url, $column->getItem()->author_name, ['target' => '_blank']);
                     })
                     ->withEmptyState(),
+                FormattedColumn::make('views')
+                    ->title(trans('plugins/blog::posts.views'))
+                    ->width(80)
+                    ->alignCenter()
+                    ->getValueUsing(function (FormattedColumn $column) {
+                        return number_format($column->getItem()->views);
+                    }),
                 CreatedAtColumn::make(),
                 StatusColumn::make(),
             ])
@@ -115,13 +103,15 @@ class PostTable extends TableAbstract
                     ->title(trans('plugins/blog::posts.category'))
                     ->searchable()
                     ->choices(fn () => Category::query()->pluck('name', 'id')->all()),
+                IsFeaturedBulkChange::make(),
             ])
             ->queryUsing(function (Builder $query) {
                 return $query
                     ->with([
-                        'categories' => function (BelongsToMany $query) {
+                        'categories' => function (BelongsToMany $query): void {
                             $query->select(['categories.id', 'categories.name']);
                         },
+                        'author',
                     ])
                     ->select([
                         'id',
@@ -132,9 +122,10 @@ class PostTable extends TableAbstract
                         'updated_at',
                         'author_id',
                         'author_type',
+                        'views',
                     ]);
             })
-            ->onAjax(function (PostTable $table) {
+            ->onAjax(function (self $table) {
                 return $table->toJson(
                     $table
                         ->table

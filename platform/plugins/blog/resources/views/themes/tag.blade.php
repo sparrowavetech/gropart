@@ -35,7 +35,7 @@
         </div>
     @else
         <div>
-            <p>{{ __('There is no data to display!') }}</p>
+            <p>{{ trans('plugins/blog::base.no_data_to_display') }}</p>
         </div>
     @endif
 </div>

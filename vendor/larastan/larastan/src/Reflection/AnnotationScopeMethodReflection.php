@@ -18,7 +18,7 @@ final class AnnotationScopeMethodReflection implements MethodReflection
     /** @var FunctionVariant[]|null */
     private array|null $variants = null;
 
-    /** @param  AnnotationScopeMethodParameterReflection[] $parameters */
+    /** @param  list<AnnotationScopeMethodParameterReflection> $parameters */
     public function __construct(private string $name, private ClassReflection $declaringClass, private Type $returnType, private array $parameters, private bool $isStatic, private bool $isVariadic)
     {
     }

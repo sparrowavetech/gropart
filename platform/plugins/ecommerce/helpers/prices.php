@@ -52,7 +52,7 @@ if (! function_exists('get_product_price')) {
 }
 
 if (! function_exists('get_sale_percentage')) {
-    function get_sale_percentage(?float $price, ?float $salePrice, bool $abs = false, bool $appendSymbol = true): string|int
+    function get_sale_percentage(?float $price, ?float $salePrice, bool $abs = false, bool $appendSymbol = true): string
     {
         $symbol = $appendSymbol ? '%' : '';
 

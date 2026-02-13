@@ -6,7 +6,9 @@ use Botble\Ecommerce\Enums\ShippingMethodEnum;
 use Botble\Ecommerce\Facades\Cart;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Facades\OrderHelper;
+use Botble\Ecommerce\Models\Order;
 use Botble\Ecommerce\ValueObjects\CheckoutOrderData;
+use Botble\Payment\Supports\PaymentFeeHelper;
 use Botble\Payment\Supports\PaymentHelper;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
@@ -50,6 +52,27 @@ class HandleCheckoutOrderData
                 $promotionDiscountAmount,
                 $couponDiscountAmount,
             ] = apply_filters(PROCESS_CHECKOUT_ORDER_DATA_ECOMMERCE, $products, $token, $sessionCheckoutData, $request);
+
+            foreach (Arr::get($sessionCheckoutData, 'marketplace', []) as $storeData) {
+                if (! empty($storeData['created_order_id'])) {
+                    $order = Order::query()
+                        ->where('id', $storeData['created_order_id'])
+                        ->first();
+
+                    if ($order && isset($storeData['shipping_amount'])) {
+                        $shippingAmount = $storeData['shipping_amount'];
+                        $newAmount = max($order->sub_total - $order->discount_amount + $order->tax_amount + $shippingAmount + ($order->payment_fee ?? 0), 0);
+
+                        if ($order->shipping_amount != $shippingAmount || $order->amount != $newAmount) {
+                            $order->update([
+                                'shipping_amount' => $shippingAmount,
+                                'shipping_option' => Arr::get($storeData, 'shipping_option'),
+                                'amount' => $newAmount,
+                            ]);
+                        }
+                    }
+                }
+            }
         } else {
             $promotionDiscountAmount = $this->applyPromotionsService->execute($token);
 
@@ -65,19 +88,18 @@ class HandleCheckoutOrderData
 
             $shipping = [];
 
-            $defaultShippingMethod = $request->input(
-                'shipping_method',
-                Arr::get($sessionCheckoutData, 'shipping_method', ShippingMethodEnum::DEFAULT)
-            );
-
-            $defaultShippingOption = $request->input(
-                'shipping_option',
-                Arr::get($sessionCheckoutData, 'shipping_option')
-            );
-
-            $defaultShippingOption = is_string($defaultShippingOption) ? $defaultShippingOption : null;
-
             $shippingAmount = 0;
+            $defaultShippingMethod = $request->input('shipping_method') ?: Arr::get($sessionCheckoutData, 'shipping_method', ShippingMethodEnum::DEFAULT);
+
+            if (is_array($defaultShippingMethod)) {
+                $defaultShippingMethod = Arr::get($defaultShippingMethod, 'value', Arr::first($defaultShippingMethod)) ?: ShippingMethodEnum::DEFAULT;
+            }
+
+            if (! is_string($defaultShippingMethod)) {
+                $defaultShippingMethod = (string) $defaultShippingMethod;
+            }
+
+            $defaultShippingOption = null;
 
             if ($isAvailableShipping = EcommerceHelper::isAvailableShipping($products)) {
                 $origin = EcommerceHelper::getOriginAddress();
@@ -100,6 +122,11 @@ class HandleCheckoutOrderData
                 }
 
                 if ($shipping) {
+                    $defaultShippingMethod = $request->input(
+                        'shipping_method',
+                        Arr::get($sessionCheckoutData, 'shipping_method', ShippingMethodEnum::DEFAULT)
+                    );
+
                     if (! $defaultShippingMethod) {
                         $defaultShippingMethod = old(
                             'shipping_method',
@@ -107,14 +134,36 @@ class HandleCheckoutOrderData
                         );
                     }
 
-                    if (! $defaultShippingOption) {
-                        $defaultShippingOption = old(
+                    if (is_array($defaultShippingMethod)) {
+                        $defaultShippingMethod = Arr::get($defaultShippingMethod, 'value', Arr::first($defaultShippingMethod)) ?: ShippingMethodEnum::DEFAULT;
+                    }
+
+                    if (! is_string($defaultShippingMethod)) {
+                        $defaultShippingMethod = (string) $defaultShippingMethod;
+                    }
+
+                    $defaultShippingOption = Arr::first(array_keys(Arr::first($shipping)));
+
+                    if ($optionRequest = $request->input('shipping_option', old('shipping_option'))) {
+                        if (
+                            (is_string($optionRequest) || is_int($optionRequest))
+                            && array_key_exists($optionRequest, Arr::get($shipping, $defaultShippingMethod, []))
+                        ) {
+                            $defaultShippingOption = $optionRequest;
+                        }
+                    } else {
+                        $defaultShippingOptionFromSession = Arr::get(
+                            $sessionCheckoutData,
                             'shipping_option',
-                            Arr::get($sessionCheckoutData, 'shipping_option', $defaultShippingOption)
+                            $defaultShippingOption
                         );
 
-                        if (! $defaultShippingOption) {
-                            $defaultShippingOption = Arr::first(array_keys(Arr::first($shipping)));
+                        if (
+                            (is_string($defaultShippingOptionFromSession) || is_int($defaultShippingOptionFromSession))
+                            && is_string($defaultShippingMethod)
+                            && isset($shipping[$defaultShippingMethod][$defaultShippingOptionFromSession])
+                        ) {
+                            $defaultShippingOption = $defaultShippingOptionFromSession;
                         }
                     }
 
@@ -128,6 +177,24 @@ class HandleCheckoutOrderData
                 Arr::set($sessionCheckoutData, 'shipping_method', $defaultShippingMethod);
                 Arr::set($sessionCheckoutData, 'shipping_option', $defaultShippingOption);
                 Arr::set($sessionCheckoutData, 'shipping_amount', $shippingAmount);
+
+                if (! empty($sessionCheckoutData['created_order_id'])) {
+                    $order = Order::query()
+                        ->where('id', $sessionCheckoutData['created_order_id'])
+                        ->first();
+
+                    if ($order) {
+                        $newAmount = max($order->sub_total - $order->discount_amount + $order->tax_amount + $shippingAmount + ($order->payment_fee ?? 0), 0);
+
+                        if ($order->shipping_amount != $shippingAmount || $order->amount != $newAmount) {
+                            $order->update([
+                                'shipping_amount' => $shippingAmount,
+                                'shipping_option' => $defaultShippingOption,
+                                'amount' => $newAmount,
+                            ]);
+                        }
+                    }
+                }
 
                 OrderHelper::setOrderSessionData($token, $sessionCheckoutData);
             }
@@ -159,6 +226,14 @@ class HandleCheckoutOrderData
         $orderAmount = max($rawTotal - $promotionDiscountAmount - $couponDiscountAmount, 0);
         $orderAmount += (float) $shippingAmount;
 
+        $paymentFee = 0;
+        if ($paymentMethod && is_plugin_active('payment')) {
+            $paymentFee = PaymentFeeHelper::calculateFee($paymentMethod, $orderAmount);
+            $orderAmount += $paymentFee;
+        }
+
+        Arr::set($sessionCheckoutData, 'payment_fee', $paymentFee);
+
         return new CheckoutOrderData(
             shipping: $shipping,
             sessionCheckoutData: $sessionCheckoutData,
@@ -168,7 +243,8 @@ class HandleCheckoutOrderData
             promotionDiscountAmount: $promotionDiscountAmount,
             couponDiscountAmount: $couponDiscountAmount,
             defaultShippingMethod: $defaultShippingMethod,
-            defaultShippingOption: $defaultShippingOption
+            defaultShippingOption: $defaultShippingOption,
+            paymentFee: $paymentFee
         );
     }
 }

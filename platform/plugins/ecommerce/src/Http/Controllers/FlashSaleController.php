@@ -4,8 +4,8 @@ namespace Botble\Ecommerce\Http\Controllers;
 
 use Botble\Base\Events\BeforeEditContentEvent;
 use Botble\Base\Events\CreatedContentEvent;
-use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
+use Botble\Base\Http\Actions\DeleteResourceAction;
 use Botble\Base\Supports\Breadcrumb;
 use Botble\Ecommerce\Facades\FlashSale as FlashSaleFacade;
 use Botble\Ecommerce\Forms\FlashSaleForm;
@@ -13,7 +13,6 @@ use Botble\Ecommerce\Http\Requests\FlashSaleRequest;
 use Botble\Ecommerce\Models\FlashSale;
 use Botble\Ecommerce\Tables\FlashSaleTable;
 use Closure;
-use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 
@@ -22,9 +21,7 @@ class FlashSaleController extends BaseController
     public function __construct()
     {
         $this->middleware(function (Request $request, Closure $next) {
-            if (! FlashSaleFacade::isEnabled()) {
-                abort(404);
-            }
+            abort_unless(FlashSaleFacade::isEnabled(), 404);
 
             return $next($request);
         });
@@ -52,6 +49,9 @@ class FlashSaleController extends BaseController
 
     public function store(FlashSaleRequest $request)
     {
+        /**
+         * @var FlashSale $flashSale
+         */
         $flashSale = FlashSale::query()->create($request->input());
 
         event(new CreatedContentEvent(FLASH_SALE_MODULE_SCREEN_NAME, $request, $flashSale));
@@ -119,21 +119,8 @@ class FlashSaleController extends BaseController
             ->withUpdatedSuccessMessage();
     }
 
-    public function destroy(FlashSale $flashSale, Request $request)
+    public function destroy(FlashSale $flashSale)
     {
-        try {
-            $flashSale->delete();
-
-            event(new DeletedContentEvent(FLASH_SALE_MODULE_SCREEN_NAME, $request, $flashSale));
-
-            return $this
-                ->httpResponse()
-                ->setMessage(trans('core/base::notices.delete_success_message'));
-        } catch (Exception $exception) {
-            return $this
-                ->httpResponse()
-                ->setError()
-                ->setMessage($exception->getMessage());
-        }
+        return DeleteResourceAction::make($flashSale);
     }
 }

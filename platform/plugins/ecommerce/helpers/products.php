@@ -5,8 +5,11 @@ use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Models\ProductCategory;
 use Botble\Ecommerce\Models\ProductCollection;
+use Botble\Ecommerce\Models\ProductView;
 use Botble\Ecommerce\Models\Review;
 use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
+use Botble\Ecommerce\Services\ProductCacheService;
+use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
@@ -15,12 +18,17 @@ use Illuminate\Support\Facades\DB;
 if (! function_exists('get_product_by_id')) {
     function get_product_by_id(int|string $productId): ?Product
     {
-        return Product::query()->find($productId);
+        /**
+         * @var ?Product $product
+         */
+        $product = Product::query()->find($productId);
+
+        return $product;
     }
 }
 
 if (! function_exists('get_products')) {
-    function get_products(array $params = []): Collection|LengthAwarePaginator|Product|null
+    function get_products(array $params = [], array $filters = []): Collection|LengthAwarePaginator|Product|null
     {
         $params = [
             'condition' => [
@@ -38,13 +46,13 @@ if (! function_exists('get_products')) {
             'select' => [
                 'ec_products.*',
             ],
-            'with' => ['slugable'],
+            'with' => EcommerceHelper::withProductEagerLoadingRelations(),
             'withCount' => [],
             'withAvg' => [],
             ...$params,
         ];
 
-        return app(ProductInterface::class)->getProducts($params);
+        return app(ProductInterface::class)->getProducts($params, $filters);
     }
 }
 
@@ -67,9 +75,9 @@ if (! function_exists('get_products_on_sale')) {
             'select' => [
                 'ec_products.*',
             ],
-            'with' => [],
+            'with' => EcommerceHelper::withProductEagerLoadingRelations(),
             'withCount' => [],
-        ], $params + EcommerceHelper::withReviewsParams());
+        ], $params);
 
         return app(ProductInterface::class)->getOnSaleProducts($params);
     }
@@ -89,8 +97,8 @@ if (! function_exists('get_featured_products')) {
                 'ec_products.created_at' => 'DESC',
             ],
             'select' => ['ec_products.*'],
-            'with' => [],
-        ], $params + EcommerceHelper::withReviewsParams());
+            'with' => EcommerceHelper::withProductEagerLoadingRelations(),
+        ], $params);
 
         return app(ProductInterface::class)->getProducts($params);
     }
@@ -105,7 +113,9 @@ if (! function_exists('get_top_rated_products')) {
 
         $topProductIds = get_top_rated_product_ids($limit);
 
-        return get_products(array_merge([
+        $with = empty($with) ? EcommerceHelper::withProductEagerLoadingRelations() : $with;
+
+        return get_products([
                 'condition' => [
                     ['ec_products.id', 'IN', $topProductIds],
                     'ec_products.is_variation' => 0,
@@ -125,7 +135,7 @@ if (! function_exists('get_top_rated_products')) {
                 ],
                 'with' => $with,
                 'withCount' => $withCount,
-            ], EcommerceHelper::withReviewsParams()));
+            ]);
     }
 }
 
@@ -136,40 +146,95 @@ if (! function_exists('get_top_rated_product_ids')) {
             ->wherePublished()
             ->selectRaw('product_id, avg(star) AS star')
             ->groupBy('product_id')
-            ->orderByDesc('star')
+            ->latest('star')
             ->limit($limit)
             ->pluck('product_id')
             ->all();
     }
 }
 
-if (! function_exists('get_trending_products')) {
-    function get_trending_products(array $params = []): Collection|LengthAwarePaginator|Product|null
+if (! function_exists('get_trending_product_ids')) {
+    function get_trending_product_ids(int $limit = 10, int $days = 7): array
     {
-        $params = array_merge([
-            'condition' => [
-                'ec_products.is_variation' => 0,
-            ],
-            'take' => 10,
-            'order_by' => [
-                'ec_products.views' => 'DESC',
-            ],
-            'select' => ['ec_products.*'],
-            'with' => [],
-        ], $params + EcommerceHelper::withReviewsParams());
+        $startDate = Carbon::now()->subDays($days)->startOfDay();
+        $endDate = Carbon::now()->endOfDay();
 
-        return app(ProductInterface::class)->getProducts($params);
+        return ProductView::query()
+            ->select('product_id')
+            ->selectRaw('SUM(views) as total_views')
+            ->whereDate('date', '>=', $startDate)
+            ->whereDate('date', '<=', $endDate)
+            ->groupBy('product_id')
+            ->latest('total_views')
+            ->limit($limit)
+            ->pluck('product_id')
+            ->toArray();
+    }
+}
+
+if (! function_exists('get_trending_products')) {
+    function get_trending_products(array $params = [], ?int $days = null): Collection|LengthAwarePaginator|Product|null
+    {
+        if ($days === null) {
+            $days = (int) get_ecommerce_setting('trending_products_period_days', 7);
+        }
+
+        $limit = $params['take'] ?? 10;
+        $cacheKey = 'trending_products_' . $limit . '_' . $days . '_' . app()->getLocale();
+        $cacheService = app(ProductCacheService::class);
+        $cacheTtl = 3600;
+
+        return $cacheService->remember($cacheKey, $cacheTtl, function () use ($params, $days) {
+            $trendingIds = get_trending_product_ids($params['take'] ?? 10, $days);
+
+            if (empty($trendingIds)) {
+                $params = array_merge([
+                    'condition' => [
+                        'ec_products.is_variation' => 0,
+                    ],
+                    'take' => 10,
+                    'order_by' => [
+                        'ec_products.views' => 'DESC',
+                    ],
+                    'select' => ['ec_products.*'],
+                    'with' => EcommerceHelper::withProductEagerLoadingRelations(),
+                ], $params);
+
+                return app(ProductInterface::class)->getProducts($params);
+            }
+
+            $params = array_merge([
+                'condition' => [
+                    ['ec_products.id', 'IN', $trendingIds],
+                    'ec_products.is_variation' => 0,
+                ],
+                'take' => null,
+                'select' => ['ec_products.*'],
+                'with' => EcommerceHelper::withProductEagerLoadingRelations(),
+            ], $params);
+
+            $products = app(ProductInterface::class)->getProducts($params);
+
+            if ($products instanceof Collection) {
+                $sortedProducts = collect($trendingIds)->map(function ($id) use ($products) {
+                    return $products->firstWhere('id', $id);
+                })->filter()->values();
+
+                return $sortedProducts;
+            }
+
+            return $products;
+        });
     }
 }
 
 if (! function_exists('get_featured_product_categories')) {
-    function get_featured_product_categories(): Collection|LengthAwarePaginator|Product|null
+    function get_featured_product_categories(): Collection|LengthAwarePaginator
     {
         return ProductCategory::query()
             ->where('is_featured', true)
             ->wherePublished()
-            ->orderBy('order')
-            ->orderByDesc('created_at')
+            ->oldest('order')->latest()
             ->with('slugable')
             ->get();
     }
@@ -231,71 +296,89 @@ if (! function_exists('the_product_price')) {
             'close_wrap_sale' => '</ins>',
         ], $htmlWrap);
 
-        if ($product->front_sale_price !== $product->price) {
-            return $htmlWrapParams['open_wrap_price'] . format_price($product->price) . $htmlWrapParams['close_wrap_price'] .
+        if ($product->front_sale_price !== $product->display_price) {
+            return $htmlWrapParams['open_wrap_price'] . format_price($product->display_price) . $htmlWrapParams['close_wrap_price'] .
                 $htmlWrapParams['open_wrap_sale'] . format_price($product->front_sale_price) . $htmlWrapParams['close_wrap_sale'];
         }
 
-        return $htmlWrapParams['open_wrap_sale'] . $product->price . $htmlWrapParams['close_wrap_sale'];
+        return $htmlWrapParams['open_wrap_sale'] . format_price($product->display_price) . $htmlWrapParams['close_wrap_sale'];
     }
 }
 
 if (! function_exists('get_related_products')) {
-    function get_related_products(Product $product, int $limit = 4): Collection|LengthAwarePaginator|Product|null
+    function get_related_products(Product $product, ?int $limit = null): Collection|LengthAwarePaginator|Product|null
     {
         if (! EcommerceHelper::isEnabledRelatedProducts()) {
             return new EloquentCollection();
         }
 
-        $params = [
-            'condition' => [
-                'ec_products.is_variation' => 0,
-                'ec_products.is_enquiry' => 0,
-            ],
-            'order_by' => [
-                'ec_products.order' => 'ASC',
-                'ec_products.created_at' => 'DESC',
-            ],
-            'take' => $limit,
-            'select' => [
-                'ec_products.*',
-            ],
-            'with' => EcommerceHelper::withProductEagerLoadingRelations(),
-        ];
+        $limit = $limit ?: theme_option('number_of_related_product', 4);
 
-        $params = array_merge($params, EcommerceHelper::withReviewsParams());
+        $cacheKey = 'related_products_' . $product->getKey() . '_' . $limit . '_' . app()->getLocale();
+        $cacheService = app(ProductCacheService::class);
 
-        $relatedIds = $product->products()->allRelatedIds()->toArray();
+        return $cacheService->remember($cacheKey, 1800, function () use ($product, $limit) {
+            $params = [
+                'condition' => [
+                    'ec_products.is_variation' => 0,
+                ],
+                'order_by' => [
+                    'ec_products.order' => 'ASC',
+                    'ec_products.created_at' => 'DESC',
+                ],
+                'take' => (int) $limit,
+                'select' => [
+                    'ec_products.*',
+                ],
+                'with' => EcommerceHelper::withProductEagerLoadingRelations(),
+            ];
 
-        $filters = [];
+            $relatedIds = $product->products()->allRelatedIds()->toArray();
 
-        if (! empty($relatedIds)) {
-            $params['condition'][] = ['ec_products.id', 'IN', $relatedIds];
-        } else {
-            $params['condition'][] = ['ec_products.id', '!=', $product->getKey()];
-            $filters = ['categories' => $product->categories()->pluck('ec_product_categories.id')->all()];
-        }
+            $filters = [];
 
-        return app(ProductInterface::class)->filterProducts($filters, $params);
+            if (! empty($relatedIds)) {
+                $params['condition'][] = ['ec_products.id', 'IN', $relatedIds];
+            } else {
+                $params['condition'][] = ['ec_products.id', '!=', $product->getKey()];
+
+                $relatedProductsSource = get_ecommerce_setting('related_products_source', 'category');
+
+                if ($relatedProductsSource === 'brand' && $product->brand_id) {
+                    $filters = ['brands' => [$product->brand_id]];
+                } else {
+                    $filters = ['categories' => $product->categories()->pluck('ec_product_categories.id')->all()];
+                }
+            }
+
+            return app(ProductInterface::class)->filterProducts($filters, $params);
+        });
     }
 }
 
 if (! function_exists('get_cross_sale_products')) {
-    function get_cross_sale_products(Product $product, int $limit = 4, array $with = []): EloquentCollection
+    function get_cross_sale_products(Product $product, ?int $limit = null, array $with = []): EloquentCollection
     {
-        $with = array_merge(EcommerceHelper::withProductEagerLoadingRelations(), $with);
+        $limit = $limit ?: theme_option('number_of_cross_sale_product', 4);
 
-        $reviewParams = EcommerceHelper::withReviewsParams();
+        $cacheKey = 'cross_sale_products_' . $product->getKey() . '_' . $limit . '_' . md5(json_encode($with)) . '_' . app()->getLocale();
+        $cacheService = app(ProductCacheService::class);
 
-        return $product
-            ->crossSales()
-            ->limit($limit)
-            ->with($with)
-            ->wherePublished()
-            ->notOutOfStock()
-            ->withCount($reviewParams['withCount'])
-            ->withAvg($reviewParams['withAvg'][0], $reviewParams['withAvg'][1])
-            ->get();
+        return $cacheService->remember($cacheKey, 1800, function () use ($product, $limit, $with) {
+            $with = array_merge(EcommerceHelper::withProductEagerLoadingRelations(), $with);
+
+            /**
+             * @phpstan-ignore-next-line
+             */
+            return $product
+                ->crossSales()
+                ->where('ec_products.is_variation', 0)
+                ->limit((int) $limit)
+                ->with($with)
+                ->wherePublished()
+                ->notOutOfStock()
+                ->get();
+        });
     }
 }
 
@@ -304,13 +387,16 @@ if (! function_exists('get_up_sale_products')) {
     {
         $with = array_merge(EcommerceHelper::withProductEagerLoadingRelations(), $with);
 
+        /**
+         * @phpstan-ignore-next-line
+         */
         return $product
             ->upSales()
+            ->where('ec_products.is_variation', 0)
             ->limit($limit)
             ->with($with)
             ->wherePublished()
             ->notOutOfStock()
-            ->withCount(EcommerceHelper::withReviewsParams()['withCount'])
             ->get();
     }
 }
@@ -338,8 +424,6 @@ if (! function_exists('get_cart_cross_sale_products')) {
             ],
             'with' => array_merge(EcommerceHelper::withProductEagerLoadingRelations(), $with),
         ];
-
-        $params = array_merge($params, EcommerceHelper::withReviewsParams());
 
         return app(ProductInterface::class)->getProducts($params);
     }
@@ -374,9 +458,10 @@ if (! function_exists('handle_next_attributes_in_product')) {
         array $unavailableAttributeIds = []
     ): array {
         foreach ($productAttributes as $attribute) {
-            if ($variationInfo != null && ! $variationInfo->where('id', $attribute->id)->count()) {
+            if ($variationInfo != null && $variationInfo->where('id', $attribute->id)->isEmpty()) {
                 $unavailableAttributeIds[] = $attribute->id;
             }
+
             if (in_array($attribute->id, $selectedAttributes)) {
                 $variationIds = $productVariationsInfo
                     ->where('attribute_set_id', $setId)

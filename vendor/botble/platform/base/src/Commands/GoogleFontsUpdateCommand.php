@@ -35,11 +35,12 @@ class GoogleFontsUpdateCommand extends Command
 
         $this->components->info('Fetching Google Fonts...');
 
-        $response = Http::get('https://www.googleapis.com/webfonts/v1/webfonts', [
-            'key' => $apiKey,
-        ]);
+        $response = Http::withoutVerifying()
+            ->get('https://www.googleapis.com/webfonts/v1/webfonts', [
+                'key' => $apiKey,
+            ]);
 
-        if (! $response->ok()) {
+        if ($response->failed()) {
             $this->components->error($response->reason() ?: 'Failed to fetch Google Fonts.');
 
             return self::FAILURE;

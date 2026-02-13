@@ -3,6 +3,11 @@
 
     window.trans = window.trans || {};
 
+    window.trans['core/base::forms'] = {
+        save_and_continue: @json(trans('core/base::forms.save_and_continue')),
+        save: @json(trans('core/base::forms.save')),
+    };
+
     window.trans.discount = {
         select_type_of_discount: '{{ trans('plugins/ecommerce::discount.select_type_of_discount') }}',
         coupon_code: '{{ trans('plugins/ecommerce::discount.coupon_code') }}',
@@ -13,6 +18,8 @@
         enter_promotion_name: '{{ trans('plugins/ecommerce::discount.enter_promotion_name') }}',
         customers_will_enter_this_coupon_code_when_they_checkout: '{{ trans('plugins/ecommerce::discount.customers_will_enter_this_coupon_code_when_they_checkout') }}',
         can_be_used_with_promotion: '{{ trans('plugins/ecommerce::discount.can_be_used_with_promotion') }}',
+        can_be_used_with_flash_sale: '{{ trans('plugins/ecommerce::discount.can_be_used_with_flash_sale') }}',
+        can_be_used_with_flash_sale_help: '{{ trans('plugins/ecommerce::discount.can_be_used_with_flash_sale_help') }}',
         unlimited_coupon: '{{ trans('plugins/ecommerce::discount.unlimited_coupon') }}',
         enter_number: '{{ trans('plugins/ecommerce::discount.enter_number') }}',
         apply_via_url: '{{ trans('plugins/ecommerce::discount.apply_via_url') }}',
@@ -22,10 +29,12 @@
         description: '{{ trans('plugins/ecommerce::discount.description') }}',
         description_placeholder: '{{ trans('plugins/ecommerce::discount.description_placeholder') }}',
         coupon_type: '{{ trans('plugins/ecommerce::discount.coupon_type') }}',
+        discount_type: '{{ trans('plugins/ecommerce::discount.discount_type') }}',
         percentage_discount: '{{ trans('plugins/ecommerce::discount.percentage_discount') }}',
         free_shipping: '{{ trans('plugins/ecommerce::discount.free_shipping') }}',
         same_price: '{{ trans('plugins/ecommerce::discount.same_price') }}',
         apply_for: '{{ trans('plugins/ecommerce::discount.apply_for') }}',
+        apply_to: '{{ trans('plugins/ecommerce::discount.apply_to') }}',
         all_orders: '{{ trans('plugins/ecommerce::discount.all_orders') }}',
         order_amount_from: '{{ trans('plugins/ecommerce::discount.order_amount_from') }}',
         product_collection: '{{ trans('plugins/ecommerce::discount.product_collection') }}',

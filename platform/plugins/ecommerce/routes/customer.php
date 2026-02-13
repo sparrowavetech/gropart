@@ -3,25 +3,33 @@
 use Botble\Base\Facades\AdminHelper;
 use Botble\Base\Http\Middleware\DisableInDemoModeMiddleware;
 use Botble\Ecommerce\Facades\EcommerceHelper;
+use Botble\Ecommerce\Http\Controllers\Customers\ExportCustomerController;
+use Botble\Ecommerce\Http\Controllers\Customers\ImportCustomerController;
+use Botble\Ecommerce\Http\Controllers\Customers\OrderController;
+use Botble\Ecommerce\Http\Controllers\Customers\UploadProofController;
 use Botble\Ecommerce\Http\Controllers\Fronts\AccountDeletionController;
 use Botble\Theme\Facades\Theme;
 use Illuminate\Support\Facades\Route;
 
 AdminHelper::registerRoutes(
-    function () {
-        Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers\Customers'], function () {
-            Route::group(['prefix' => 'customers', 'as' => 'customers.'], function () {
+    function (): void {
+        Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers\Customers'], function (): void {
+            Route::group(['prefix' => 'customers', 'as' => 'customers.'], function (): void {
                 Route::resource('', 'CustomerController')->parameters(['' => 'customer']);
+
+                Route::get('view/{id}', [
+                    'as' => 'view',
+                    'uses' => 'CustomerController@view',
+                    'permission' => 'customers.index',
+                ])->wherePrimaryKey();
 
                 Route::group(
                     ['prefix' => 'addresses', 'as' => 'addresses.', 'permission' => 'customers.edit'],
-                    function () {
+                    function (): void {
                         Route::resource('', 'AddressController')->parameters(['' => 'address'])->except(['index']);
                     }
                 );
-            });
 
-            Route::group(['prefix' => 'customers', 'as' => 'customers.'], function () {
                 Route::get('get-list-customers-for-select', [
                     'as' => 'get-list-customers-for-select',
                     'uses' => 'CustomerController@getListCustomerForSelect',
@@ -64,6 +72,12 @@ AdminHelper::registerRoutes(
                     'permission' => 'customers.index',
                 ])->wherePrimaryKey();
 
+                Route::post('resend-verification-email/{id}', [
+                    'as' => 'resend-verification-email',
+                    'uses' => 'CustomerController@resendVerificationEmail',
+                    'permission' => 'customers.edit',
+                ])->wherePrimaryKey();
+
                 Route::post('reviews/{id}', [
                     'as' => 'ajax.reviews',
                     'uses' => 'CustomerController@ajaxReviews',
@@ -71,27 +85,36 @@ AdminHelper::registerRoutes(
                 ])->wherePrimaryKey();
             });
         });
+
+        Route::group(['prefix' => 'tools/data-synchronize/import/customers', 'as' => 'ecommerce.customers.import.', 'permission' => 'ecommerce.customers.import'], function (): void {
+            Route::get('/', [ImportCustomerController::class, 'index'])->name('index');
+            Route::post('validate', [ImportCustomerController::class, 'validateData'])->name('validate');
+            Route::post('import', [ImportCustomerController::class, 'import'])->name('store');
+            Route::post('download-example', [ImportCustomerController::class, 'downloadExample'])->name('download-example');
+        });
+
+        Route::group(['prefix' => 'tools/data-synchronize/export/customers', 'as' => 'ecommerce.customers.export.', 'permission' => 'ecommerce.customers.export'], function (): void {
+            Route::get('/', [ExportCustomerController::class, 'index'])->name('index');
+            Route::post('/', [ExportCustomerController::class, 'store'])->name('store');
+        });
     }
 );
 
-Theme::registerRoutes(function () {
+Theme::registerRoutes(function (): void {
     Route::group([
         'namespace' => 'Botble\Ecommerce\Http\Controllers\Customers',
         'middleware' => ['customer.guest'],
         'as' => 'customer.',
-    ], function () {
+    ], function (): void {
         Route::get(EcommerceHelper::getPageSlug('login'), 'LoginController@showLoginForm')->name('login');
         Route::post('login', 'LoginController@login')->name('login.post');
 
-        Route::get('otp/{id}', 'CustomerController@otp')->name('otp');
-        Route::get('resend/{id}', 'CustomerController@resend')->name('resend');
-        Route::post('otp', 'CustomerController@verifyotp')->name('otp.post');
-        Route::post('changePhone', 'CustomerController@changePhone')->name('otp.changePhone');
-        //Route::get('testsms', 'CustomerController@smstest')->name('testsms');
-        Route::get(EcommerceHelper::getPageSlug('register'), 'RegisterController@showRegistrationForm')->name(
-            'register'
-        );
-        Route::post('register', 'RegisterController@register')->name('register.post');
+        if (EcommerceHelper::isCustomerRegistrationEnabled()) {
+            Route::get(EcommerceHelper::getPageSlug('register'), 'RegisterController@showRegistrationForm')->name(
+                'register'
+            );
+            Route::post('register', 'RegisterController@register')->name('register.post');
+        }
 
         Route::post('password/email', 'ForgotPasswordController@sendResetLinkEmail')->name('password.request');
         Route::post('password/reset', 'ResetPasswordController@reset')->name('password.reset.post');
@@ -111,7 +134,7 @@ Theme::registerRoutes(function () {
             EcommerceHelper::isEnableEmailVerification() ? 'customer' : 'customer.guest',
         ],
         'as' => 'customer.',
-    ], function () {
+    ], function (): void {
         Route::get('register/confirm/resend', 'RegisterController@resendConfirmation')
             ->name('resend_confirmation');
         Route::get('register/confirm/{user}', 'RegisterController@confirm')
@@ -121,10 +144,10 @@ Theme::registerRoutes(function () {
     Route::middleware('customer')
         ->namespace('Botble\Ecommerce\Http\Controllers\Customers')
         ->name('customer.')
-        ->group(function () {
+        ->group(function (): void {
             Route::get('logout', 'LoginController@logout')->name('logout');
 
-            Route::prefix('customer')->group(function () {
+            Route::prefix('customer')->group(function (): void {
                 Route::post('avatar', [
                     'as' => 'avatar',
                     'uses' => 'PublicController@postAvatar',
@@ -133,7 +156,7 @@ Theme::registerRoutes(function () {
                 Route::group([
                     'prefix' => 'invoices',
                     'as' => 'invoices.',
-                ], function () {
+                ], function (): void {
                     Route::resource('', 'InvoiceController')
                         ->only('index')
                         ->parameters('invoices');
@@ -149,7 +172,7 @@ Theme::registerRoutes(function () {
                 'uses' => 'PublicController@getOverview',
             ]);
 
-            Route::prefix(EcommerceHelper::getPageSlug('customer_edit_account'))->group(function () {
+            Route::prefix(EcommerceHelper::getPageSlug('customer_edit_account'))->group(function (): void {
                 Route::get('/', [
                     'as' => 'edit-account',
                     'uses' => 'PublicController@getEditAccount',
@@ -161,7 +184,7 @@ Theme::registerRoutes(function () {
                 ]);
             });
 
-            Route::prefix(EcommerceHelper::getPageSlug('customer_change_password'))->group(function () {
+            Route::prefix(EcommerceHelper::getPageSlug('customer_change_password'))->group(function (): void {
                 Route::get('/', [
                     'as' => 'change-password',
                     'uses' => 'PublicController@getChangePassword',
@@ -173,7 +196,7 @@ Theme::registerRoutes(function () {
                 ]);
             });
 
-            Route::prefix('delete-account')->name('delete-account.')->group(function () {
+            Route::prefix('delete-account')->name('delete-account.')->group(function (): void {
                 Route::post('/', [AccountDeletionController::class, 'store'])
                     ->middleware(DisableInDemoModeMiddleware::class)
                     ->name('store');
@@ -182,44 +205,18 @@ Theme::registerRoutes(function () {
                     ->name('confirm');
             });
 
-            Route::prefix(EcommerceHelper::getPageSlug('customer_orders'))->group(function () {
-                Route::get('/', [
-                    'as' => 'orders',
-                    'uses' => 'OrderController@index',
-                ]);
-
-                Route::get('view/{id}', [
-                    'as' => 'orders.view',
-                    'uses' => 'OrderController@show',
-                ])->wherePrimaryKey();
-
-                Route::post('cancel/{id}', [
-                    'as' => 'orders.cancel.post',
-                    'uses' => 'OrderController@destroy',
-                ])->wherePrimaryKey();
-
-                Route::get('cancel/{id}', [
-                    'as' => 'orders.cancel',
-                    'uses' => 'OrderController@getCancelOrder',
-                ])->wherePrimaryKey();
-
-                Route::get('print/{id}', [
-                    'as' => 'print-order',
-                    'uses' => 'OrderController@print',
-                ])->wherePrimaryKey();
-
-                Route::post('{id}/upload-proof', [
-                    'as' => 'orders.upload-proof',
-                    'uses' => 'UploadProofController@upload',
-                ])->wherePrimaryKey();
-
-                Route::get('{id}/download-proof', [
-                    'as' => 'orders.download-proof',
-                    'uses' => 'UploadProofController@download',
-                ])->wherePrimaryKey();
+            Route::prefix(EcommerceHelper::getPageSlug('customer_orders'))->group(function (): void {
+                Route::get('/', [OrderController::class, 'index'])->name('orders');
+                Route::get('view/{id}', [OrderController::class, 'show'])->name('orders.view')->wherePrimaryKey();
+                Route::get('cancel/{id}', [OrderController::class, 'getCancelOrder'])->name('orders.cancel')->wherePrimaryKey();
+                Route::post('cancel/{id}', [OrderController::class, 'destroy'])->name('orders.cancel.post')->wherePrimaryKey();
+                Route::get('print/{id}', [OrderController::class, 'print'])->name('print-order')->wherePrimaryKey();
+                Route::post('{id}/upload-proof', [UploadProofController::class, 'upload'])->name('orders.upload-proof')->wherePrimaryKey();
+                Route::get('{id}/download-proof', [UploadProofController::class, 'download'])->name('orders.download-proof')->wherePrimaryKey();
+                Route::post('{id}/confirm-delivery', [OrderController::class, 'confirmDelivery'])->name('orders.confirm-delivery')->wherePrimaryKey();
             });
 
-            Route::prefix(EcommerceHelper::getPageSlug('customer_address'))->group(function () {
+            Route::prefix(EcommerceHelper::getPageSlug('customer_address'))->group(function (): void {
                 Route::get('/', [
                     'as' => 'address',
                     'uses' => 'PublicController@getListAddresses',
@@ -251,7 +248,7 @@ Theme::registerRoutes(function () {
                 ])->wherePrimaryKey();
             });
 
-            Route::prefix(EcommerceHelper::getPageSlug('customer_order_returns'))->group(function () {
+            Route::prefix(EcommerceHelper::getPageSlug('customer_order_returns'))->group(function (): void {
                 Route::get('/', [
                     'as' => 'order_returns',
                     'uses' => 'PublicController@getListReturnOrders',
@@ -273,7 +270,7 @@ Theme::registerRoutes(function () {
                 ]);
             });
 
-            Route::prefix(EcommerceHelper::getPageSlug('customer_downloads'))->group(function () {
+            Route::prefix(EcommerceHelper::getPageSlug('customer_downloads'))->group(function (): void {
                 Route::get('/', [
                     'as' => 'downloads',
                     'uses' => 'PublicController@getDownloads',
@@ -291,7 +288,7 @@ Theme::registerRoutes(function () {
             ]);
         });
 
-    Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers\Customers', 'as' => 'public.'], function () {
+    Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers\Customers', 'as' => 'public.'], function (): void {
         Route::get('digital-products/download/{id}', [
             'as' => 'digital-products.download',
             'uses' => 'PublicController@getDownload',

@@ -5,10 +5,12 @@
         {{ trans('plugins/translation::translation.theme_translations_instruction') }}
 
         <p class="mt-3 mb-0">
-            {!! trans(
-                'plugins/translation::translation.re_import_alert',
-                ['here' => Html::link('#', trans('plugins/translation::translation.here'), ['data-bs-toggle' => 'modal', 'data-bs-target' => '#confirm-re-import-modal'])]
-            ) !!}
+            {!! BaseHelper::clean(trans('plugins/translation::translation.re_import_alert', [
+                'here' => Html::link('#', trans('plugins/translation::translation.here'), [
+                    'data-bs-toggle' => 'modal',
+                    'data-bs-target' => '#confirm-re-import-modal',
+                ]),
+            ])) !!}
         </p>
     </x-core::alert>
 
@@ -23,10 +25,11 @@
             </div>
             <div class="col-md-6">
                 <div class="text-end">
-                    @include(
-                        'plugins/translation::partials.list-theme-languages-to-translate',
-                        ['groups' => $groups, 'group' => $group, 'route' => 'translations.theme-translations']
-                    )
+                    @include('plugins/translation::partials.list-theme-languages-to-translate', [
+                        'groups' => $groups,
+                        'group' => $group,
+                        'route' => 'translations.theme-translations',
+                    ])
                 </div>
             </div>
         </div>

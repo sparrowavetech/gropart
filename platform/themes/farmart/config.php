@@ -40,29 +40,29 @@ return [
         // Before event inherit from package config and the theme that call before,
         // you can use this event to set meta, breadcrumb template or anything
         // you want inheriting.
-        'before' => function (Theme $theme) {
+        'before' => function (Theme $theme): void {
             // You can remove this line anytime.
         },
 
         // Listen on event before render a theme,
         // this event should call to assign some assets,
         // breadcrumb template.
-        'beforeRenderTheme' => function (Theme $theme) {
-            $theme->partialComposer(['header', 'footer'], function (IlluminateView $view) {
+        'beforeRenderTheme' => function (Theme $theme): void {
+            $theme->partialComposer(['header', 'footer'], function (IlluminateView $view): void {
                 $view->with('currencies', is_plugin_active('ecommerce') ? get_all_currencies() : collect());
             });
 
             // You may use this event to set up your assets.
-            $version = get_cms_version() . '.2';
+            $version = get_cms_version();
 
             $useCDN = theme_option('use_source_assets_from', 'cdn') == 'cdn';
 
             $assets = [
                 'bootstrap-css' => [
                     'cdn' => [
-                        'source' => '//cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css',
+                        'source' => '//cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.7/css/bootstrap.min.css',
                         'attributes' => [
-                            'integrity' => 'sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN',
+                            'integrity' => 'sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr',
                             'crossorigin' => 'anonymous',
                         ],
                     ],
@@ -115,18 +115,12 @@ return [
                         'version' => $version,
                     ],
                 ],
-                'swiper-css' => [
-                    'local' => [
-                        'source' => 'plugins/swiper-bundle.min.css',
-                        'version' => $version,
-                    ],
-                ],
                 'jquery' => [
                     'cdn' => [
-                        'source' => '//ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js',
+                        'source' => '//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js',
                     ],
                     'local' => [
-                        'source' => 'plugins/jquery-3.6.4.min.js',
+                        'source' => 'plugins/jquery-3.7.1.min.js',
                     ],
                     'container' => 'footer',
                 ],
@@ -145,9 +139,9 @@ return [
                 ],
                 'bootstrap-js' => [
                     'cdn' => [
-                        'source' => '//cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.min.js',
+                        'source' => '//cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.7/js/bootstrap.min.js',
                         'attributes' => [
-                            'integrity' => 'sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+',
+                            'integrity' => 'sha384-7qAoOXltbVP82dhxHAUje59V5r2YsVfBafyUDxEdApLPmcdhBPg1DKg1ERo0BZlK',
                             'crossorigin' => 'anonymous',
                         ],
                     ],
@@ -213,6 +207,13 @@ return [
                     ],
                     'container' => 'footer',
                 ],
+                'masonry-js' => [
+                    'local' => [
+                        'source' => 'plugins/masonry.pkgd.min.js',
+                        'dependencies' => ['jquery'],
+                    ],
+                    'container' => 'footer',
+                ],
                 'scrollbar-js' => [
                     'local' => [
                         'source' => 'plugins/scrollbar.js',
@@ -223,15 +224,8 @@ return [
                 'main-js' => [
                     'local' => [
                         'source' => 'js/main.js',
-                        'dependencies' => ['jquery', 'front-ecommerce-js'],
+                        'dependencies' => ['jquery', 'bootstrap-js', 'front-ecommerce-js', 'scrollbar-js'],
                         'version' => $version,
-                    ],
-                    'container' => 'footer',
-                ],
-                'swiper-js' => [
-                    'local' => [
-                        'source' => 'js/swiper-bundle.min.js',
-                        'dependencies' => ['jquery'],
                     ],
                     'container' => 'footer',
                 ],
@@ -240,9 +234,9 @@ return [
             if (BaseHelper::isRtlEnabled()) {
                 $assets['bootstrap-css'] = [
                     'cdn' => [
-                        'source' => '//cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.rtl.min.css',
+                        'source' => '//cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.7/css/bootstrap.rtl.min.css',
                         'attributes' => [
-                            'integrity' => 'sha384-nU14brUcp6StFntEOOEBvcJm4huWjB0OcIeQ3fltAfSmuZFrkAif0T+UtNGlKKQv',
+                            'integrity' => 'sha384-Xbg45MqvDIk1e563NLpGEulpX6AvL404DP+/iCgW9eFa2BqztiwTexswJo2jLMue',
                             'crossorigin' => 'anonymous',
                         ],
                     ],
@@ -283,7 +277,9 @@ return [
                     'ecommerce.brand',
                     'ecommerce.search',
                     'ecommerce.cart',
-                ], function (View $view) {
+                    'marketplace.stores',
+                    'marketplace.store',
+                ], function (View $view): void {
                     $view->withShortcodes();
                 });
             }
@@ -297,7 +293,7 @@ return [
         // this should call to assign style, script for a layout.
         'beforeRenderLayout' => [
 
-            'default' => function (Theme $theme) {
+            'default' => function (Theme $theme): void {
                 // $theme->asset()->usePath()->add('ipad', 'css/layouts/ipad.css');
             },
         ],

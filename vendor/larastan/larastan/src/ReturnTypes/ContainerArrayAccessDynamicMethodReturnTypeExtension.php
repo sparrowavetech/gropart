@@ -21,6 +21,7 @@ class ContainerArrayAccessDynamicMethodReturnTypeExtension implements DynamicMet
 {
     use HasContainer;
 
+    /** @param class-string $className */
     public function __construct(private string $className)
     {
     }

@@ -2,12 +2,14 @@
     'name',
     'value',
     'defaultImage' => RvMedia::getDefaultImage(),
-    'allowAddFromUrl' => $isInAdmin = is_in_admin(true) && auth()->guard()->check(),
+    'allowAddFromUrl' => ($isInAdmin = is_in_admin(true) && auth()->guard()->check()),
 ])
 
 @php
     $value = BaseHelper::stringify($value);
     $allowThumb = $attributes->get('allow_thumb', $attributes->get('allow-thumb', true));
+
+    $defaultImage = $attributes->get('preview_image') ?: RvMedia::getDefaultImage();
 @endphp
 
 <div {{ $attributes->merge(['class' => "image-box image-box-$name"]) }}>
@@ -19,7 +21,11 @@
         {{ $attributes->except('action') }}
     />
 
-    @if (! $isInAdmin)
+    @if (!$isInAdmin)
+        @php
+            $name = str_replace(['[', ']'], ['___', ''], $name);
+        @endphp
+
         <input
             class="media-image-input"
             type="file"
@@ -34,7 +40,7 @@
         style="width: 8rem"
         @class([
             'preview-image-wrapper mb-1',
-            'preview-image-wrapper-not-allow-thumb' => ! $allowThumb
+            'preview-image-wrapper-not-allow-thumb' => !$allowThumb,
         ])
     >
         <div class="preview-image-inner">
@@ -79,7 +85,7 @@
         {{ trans('core/base::forms.choose_image') }}
     </a>
 
-    @if($allowAddFromUrl)
+    @if ($allowAddFromUrl)
         <div data-bb-toggle="upload-from-url">
             <span class="text-muted">{{ trans('core/media::media.or') }}</span>
             <a

@@ -7,7 +7,7 @@
     id="{{ $id }}-upload"
 >
     <div class="dz-message needsclick">
-        {{ __('Drop files here or click to upload.') }}<br>
+        {{ trans('plugins/marketplace::marketplace.forms.drop_files_here_or_click_to_upload') }}<br>
     </div>
 </div>
 
@@ -40,7 +40,7 @@
                     xmlns:xlink="http://www.w3.org/1999/xlink"
                     xmlns:sketch="http://www.bohemiancoding.com/sketch/ns"
                 >
-                    <title>{{ __('Check') }}</title>
+                    <title>{{ trans('plugins/marketplace::marketplace.forms.check') }}</title>
                     <defs></defs>
                     <g
                         id="Page-1"
@@ -72,7 +72,7 @@
                     xmlns:xlink="http://www.w3.org/1999/xlink"
                     xmlns:sketch="http://www.bohemiancoding.com/sketch/ns"
                 >
-                    <title>{{ __('error') }}</title>
+                    <title>{{ trans('plugins/marketplace::marketplace.forms.error') }}</title>
                     <defs></defs>
                     <g
                         id="Page-1"

@@ -37,4 +37,6 @@ class OrderHistoryActionEnum extends Enum
     public const UPDATE_SHIPPING_STATUS = 'update_shipping_status';
 
     public const UPDATE_STATUS = 'update_status';
+
+    public const CONFIRM_DELIVERY = 'confirm_delivery';
 }

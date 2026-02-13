@@ -27,8 +27,10 @@ trait TypedValue
             $this->cursorPosition = mb_strlen($this->typedValue);
         }
 
-        $this->on('key', function ($key) use ($submit, $ignore, $allowNewLine) {
-            if ($key[0] === "\e" || in_array($key, [Key::CTRL_B, Key::CTRL_F, Key::CTRL_A, Key::CTRL_E])) {
+        $this->on('key', function (string $key) use ($submit, $ignore, $allowNewLine): void {
+            if ($key !== '' &&
+                ($key[0] === "\e" || in_array($key, [Key::CTRL_B, Key::CTRL_F, Key::CTRL_A, Key::CTRL_E]))
+            ) {
                 if ($ignore !== null && $ignore($key)) {
                     return;
                 }
@@ -69,7 +71,7 @@ trait TypedValue
 
                     $this->typedValue = mb_substr($this->typedValue, 0, $this->cursorPosition - 1).mb_substr($this->typedValue, $this->cursorPosition);
                     $this->cursorPosition--;
-                } elseif (ord($key) >= 32) {
+                } elseif (mb_ord($key) >= 32) {
                     $this->typedValue = mb_substr($this->typedValue, 0, $this->cursorPosition).$key.mb_substr($this->typedValue, $this->cursorPosition);
                     $this->cursorPosition++;
                 }

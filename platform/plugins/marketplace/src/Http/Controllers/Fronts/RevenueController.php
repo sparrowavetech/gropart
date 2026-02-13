@@ -17,7 +17,7 @@ class RevenueController extends BaseController
 {
     public function index(StoreRevenueTable $table)
     {
-        $this->pageTitle(__('Revenues'));
+        $this->pageTitle(trans('plugins/marketplace::revenue.name'));
 
         $table
             ->setCustomerId(auth('customer')->id())
@@ -78,7 +78,7 @@ class RevenueController extends BaseController
                 $currency
             ) : human_price_text($data['data']->sum(), null, $key);
             $earningSales[] = [
-                'text' => __('Items Earning Sales: :amount', compact('amount')),
+                'text' => trans('plugins/marketplace::revenue.items_earning_sales', compact('amount')),
                 'color' => Arr::get($colors, $earningSales->count(), Arr::first($colors)),
             ];
             $series[] = $data;

@@ -5,8 +5,6 @@ return [
         'draft' => 'Draft',
         'pending' => 'Pending',
         'published' => 'Published',
-        'verified' => 'Verified',
-        'un_verified' => 'Un-Verified',
     ],
     'system_updater_steps' => [
         'download' => 'Download update files',
@@ -16,6 +14,7 @@ return [
         'publish_packages_assets' => 'Publish packages assets',
         'clean_up' => 'Clean up system update files',
         'done' => 'System updated successfully',
+        'unknown' => 'Unknown step',
 
         'messages' => [
             'download' => 'Downloading update files...',

@@ -4,6 +4,7 @@ namespace Botble\Ecommerce\Models;
 
 use Botble\Base\Models\BaseModel;
 use Botble\Ecommerce\Enums\ShippingCodStatusEnum;
+use Botble\Ecommerce\Enums\ShippingMethodEnum;
 use Botble\Ecommerce\Enums\ShippingStatusEnum;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -32,6 +33,7 @@ class Shipment extends BaseModel
         'tracking_link',
         'estimate_date_shipped',
         'date_shipped',
+        'customer_delivered_confirmed_at',
     ];
 
     protected $casts = [
@@ -40,11 +42,12 @@ class Shipment extends BaseModel
         'metadata' => 'json',
         'estimate_date_shipped' => 'datetime',
         'date_shipped' => 'datetime',
+        'customer_delivered_confirmed_at' => 'datetime',
     ];
 
     protected static function booted(): void
     {
-        static::deleted(function (Shipment $shipment) {
+        static::deleted(function (Shipment $shipment): void {
             $shipment->histories()->delete();
         });
     }
@@ -67,5 +70,27 @@ class Shipment extends BaseModel
     protected function isCanceled(): Attribute
     {
         return Attribute::get(fn () => $this->status == ShippingStatusEnum::CANCELED);
+    }
+
+    protected function canConfirmDelivery(): Attribute
+    {
+        return Attribute::get(
+            function () {
+                if ($this->customer_delivered_confirmed_at) {
+                    return false;
+                }
+
+                return $this->status == ShippingStatusEnum::DELIVERING;
+            }
+        );
+    }
+
+    public function canPrintLabel(): bool
+    {
+        return apply_filters(
+            'ecommerce_shipment_can_print_shipping_label',
+            $this->order->shipping_method == ShippingMethodEnum::DEFAULT,
+            $this
+        );
     }
 }

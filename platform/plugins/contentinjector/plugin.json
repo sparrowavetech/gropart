@@ -1,0 +1,11 @@
+{
+    "id": "botble/contentinjector",
+    "name": "ContentInjector",
+    "namespace": "Botble\\ContentInjector\\",
+    "provider": "Botble\\ContentInjector\\Providers\\ContentInjectorServiceProvider",
+    "author": "PHPMaster",
+    "url": "https://github.com/dontknew",
+    "version": "1.0.0",
+    "description": "ContentInjector is a Botble CMS plugin that seamlessly injects dynamic values into your content, replacing variables with ease to streamline content management and ensure consistency across your website.",
+    "minimum_core_version": "7.2.4"
+}

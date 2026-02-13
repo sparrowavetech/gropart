@@ -52,6 +52,11 @@ return [
         'flag' => 'marketplace.withdrawal.destroy',
         'parent_flag' => 'marketplace.withdrawal.index',
     ],
+    [
+        'name' => 'View invoice',
+        'flag' => 'marketplace.withdrawal.invoice',
+        'parent_flag' => 'marketplace.withdrawal.index',
+    ],
 
     [
         'name' => 'Vendors',
@@ -62,6 +67,11 @@ return [
         'name' => 'Unverified vendors',
         'flag' => 'marketplace.unverified-vendors.index',
         'parent_flag' => 'marketplace.index',
+    ],
+    [
+        'name' => 'Block/Unblock',
+        'flag' => 'marketplace.vendors.control',
+        'parent_flag' => 'marketplace.vendors.index',
     ],
     [
         'name' => 'Edit',
@@ -79,5 +89,21 @@ return [
         'name' => 'Settings',
         'flag' => 'marketplace.settings',
         'parent_flag' => 'ecommerce.settings',
+    ],
+
+    [
+        'name' => 'Messages',
+        'flag' => 'marketplace.messages.index',
+        'parent_flag' => 'marketplace.index',
+    ],
+    [
+        'name' => 'Edit',
+        'flag' => 'marketplace.messages.edit',
+        'parent_flag' => 'marketplace.messages.index',
+    ],
+    [
+        'name' => 'Delete',
+        'flag' => 'marketplace.messages.destroy',
+        'parent_flag' => 'marketplace.messages.index',
     ],
 ];

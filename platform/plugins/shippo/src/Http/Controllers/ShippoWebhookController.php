@@ -7,8 +7,7 @@ use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Enums\ShippingStatusEnum;
 use Botble\Ecommerce\Facades\OrderHelper;
 use Botble\Ecommerce\Models\Shipment;
-use Botble\Ecommerce\Repositories\Interfaces\ShipmentHistoryInterface;
-use Botble\Ecommerce\Repositories\Interfaces\ShipmentInterface;
+use Botble\Ecommerce\Models\ShipmentHistory;
 use Botble\Shippo\Shippo;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -17,11 +16,8 @@ use Illuminate\Support\Str;
 
 class ShippoWebhookController extends BaseController
 {
-    public function __construct(
-        protected ShipmentInterface $shipmentRepository,
-        protected ShipmentHistoryInterface $shipmentHistoryRepository,
-        protected Shippo $shippo
-    ) {
+    public function __construct(protected Shippo $shippo)
+    {
     }
 
     public function index(Request $request, BaseHttpResponse $response)
@@ -54,7 +50,10 @@ class ShippoWebhookController extends BaseController
             'tracking_id' => $transactionId,
         ];
 
-        $shipment = $this->shipmentRepository->getFirstBy($condition);
+        /**
+         * @var Shipment $shipment
+         */
+        $shipment = Shipment::query()->where($condition)->first();
 
         if (! $shipment) {
             $this->shippo->log([__LINE__, print_r($condition, true)]);
@@ -84,7 +83,7 @@ class ShippoWebhookController extends BaseController
             $shipment->save();
         }
 
-        $this->shipmentHistoryRepository->createOrUpdate([
+        ShipmentHistory::query()->create([
             'action' => 'transaction_updated',
             'description' => trans('plugins/shippo::shippo.transaction.updated', [
                 'tracking' => Arr::get($data, 'tracking_number'),
@@ -122,7 +121,7 @@ class ShippoWebhookController extends BaseController
                 break;
         }
 
-        $this->shipmentHistoryRepository->createOrUpdate([
+        ShipmentHistory::query()->create([
             'action' => 'track_updated',
             'description' => trans('plugins/shippo::shippo.tracking.statuses.' . Str::lower($status)),
             'order_id' => $shipment->order_id,

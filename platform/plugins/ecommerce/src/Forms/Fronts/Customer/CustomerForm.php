@@ -6,20 +6,23 @@ use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Forms\FieldOptions\ButtonFieldOption;
 use Botble\Base\Forms\FieldOptions\EmailFieldOption;
 use Botble\Base\Forms\FieldOptions\InputFieldOption;
+use Botble\Base\Forms\FieldOptions\PhoneNumberFieldOption;
 use Botble\Base\Forms\FieldOptions\TextFieldOption;
 use Botble\Base\Forms\Fields\EmailField;
+use Botble\Base\Forms\Fields\PhoneNumberField;
 use Botble\Base\Forms\Fields\TextField;
-use Botble\Base\Forms\FormAbstract;
 use Botble\Ecommerce\Http\Requests\EditAccountRequest;
 use Botble\Ecommerce\Models\Customer;
+use Botble\Theme\FormFront;
+use Illuminate\Support\Facades\App;
 
-class CustomerForm extends FormAbstract
+class CustomerForm extends FormFront
 {
     public function setup(): void
     {
         $this
+            ->model(Customer::class)
             ->setUrl(route('customer.edit-account'))
-            ->setupModel(new Customer())
             ->setValidatorClass(EditAccountRequest::class)
             ->contentOnly()
             ->add(
@@ -28,13 +31,14 @@ class CustomerForm extends FormAbstract
                 TextFieldOption::make()
                     ->label(__('Full Name'))
             )
-            ->when(get_ecommerce_setting('enabled_customer_dob_field', true), function (CustomerForm $form) {
+            ->when(get_ecommerce_setting('enabled_customer_dob_field', true), function (CustomerForm $form): void {
                 $form->add(
                     'dob',
                     TextField::class,
                     InputFieldOption::make()
                         ->addAttribute('id', 'date_of_birth')
                         ->addAttribute('data-date-format', config('core.base.general.date_format.js.date'))
+                        ->addAttribute('data-locale', App::getLocale())
                         ->value($this->getModel()->dob ? BaseHelper::formatDate($this->getModel()->dob) : null)
                         ->label(__('Date of birth'))
                 );
@@ -43,15 +47,14 @@ class CustomerForm extends FormAbstract
                 'email',
                 EmailField::class,
                 EmailFieldOption::make()
-                    ->disabled()
+                    ->disabled($this->getModel()->email)
             )
             ->add(
                 'phone',
-                TextField::class,
-                TextFieldOption::make()
+                PhoneNumberField::class,
+                PhoneNumberFieldOption::make()
                     ->label(__('Phone'))
-                    ->addAttribute('maxlength', '10')
-                    ->toArray()
+                    ->withCountryCodeSelection()
             )
             ->add(
                 'submit',

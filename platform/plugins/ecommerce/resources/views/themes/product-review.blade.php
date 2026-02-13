@@ -13,7 +13,7 @@
                     <a
                         class="btn btn-secondary px-5"
                         href="{{ BaseHelper::getHomepageUrl() }}"
-                    >{{ __('Go back home') }}</a>
+                    >{{ trans('plugins/ecommerce::ecommerce.go_back_home') }}</a>
                 </div>
             </div>
         </div>

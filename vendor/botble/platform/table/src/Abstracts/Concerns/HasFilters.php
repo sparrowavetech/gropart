@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\Relation as EloquentRelation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 trait HasFilters
 {
@@ -21,6 +22,8 @@ trait HasFilters
      * @var \Closure(\Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Query\Builder|\Illuminate\Database\Eloquent\Relations\Relation $query): static
      */
     protected Closure $onFilterQueryCallback;
+
+    protected array $filters = [];
 
     /**
      * @deprecated since v6.8.0, using `hasFilters` instead.
@@ -80,6 +83,12 @@ trait HasFilters
             }
         }
 
+        if ($value) {
+            if (Str::endsWith($value, '/export')) {
+                $value = Str::beforeLast($value, '/export');
+            }
+        }
+
         switch ($key) {
             case 'created_at':
             case 'updated_at':
@@ -87,7 +96,7 @@ trait HasFilters
                     break;
                 }
 
-                $validator = Validator::make([$key => $value], [$key => 'date']);
+                $validator = Validator::make([$key => $value], [$key => ['date']]);
 
                 if (! $validator->fails()) {
                     $value = BaseHelper::formatDate($value);
@@ -171,7 +180,20 @@ trait HasFilters
 
     public function getFilters(): array
     {
-        return [];
+        return $this->filters;
+    }
+
+    public function addFilters(array|string $filters): static
+    {
+        $filters = is_array($filters) ? $filters : [$filters];
+
+        foreach ($filters as $filter) {
+            $this->filters[] = $filter;
+        }
+
+        $this->earlyTable = true;
+
+        return $this;
     }
 
     public function filterInputUrl(string $url): static

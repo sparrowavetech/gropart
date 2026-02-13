@@ -70,6 +70,10 @@ BPayment.init = function () {
             .find('.payment_collapse_wrap')
             .addClass('show')
             .addClass('active')
+
+        document.dispatchEvent(new CustomEvent('payment:method-selected', {
+            detail: { method: $(event.currentTarget).val() }
+        }))
     })
 
     $(document)
@@ -80,17 +84,23 @@ BPayment.init = function () {
             const button = $(event.currentTarget)
             const form = button.closest('form')
             const submitInitialText = button.html()
+            const paymentMethod = $('input[name=payment_method]:checked').val()
 
             if (form.valid && !form.valid()) {
+                document.dispatchEvent(new CustomEvent('payment:validation-failed'))
                 return
             }
+
+            document.dispatchEvent(new CustomEvent('payment:before-submit', {
+                detail: { method: paymentMethod }
+            }))
 
             button.prop('disabled', true)
             button.html(
                 `<span class="spinner-border spinner-border-sm me-2" role="status"></span> ${button.data('processing-text')}`
             )
 
-            if ($('input[name=payment_method]:checked').val() === 'stripe' && $('.stripe-card-wrapper').length > 0) {
+            if (paymentMethod === 'stripe' && $('.stripe-card-wrapper').length > 0) {
                 Stripe.setPublishableKey($('#payment-stripe-key').data('value'))
                 Stripe.card.createToken(form, function (status, response) {
                     if (response.error) {
@@ -101,15 +111,30 @@ BPayment.init = function () {
                         }
                         button.prop('disabled', false)
                         button.html(submitInitialText)
+
+                        document.dispatchEvent(new CustomEvent('payment:error', {
+                            detail: { method: 'stripe', error: response.error.message }
+                        }))
                     } else {
                         form.append($('<input type="hidden" name="stripeToken">').val(response.id))
+
+                        document.dispatchEvent(new CustomEvent('payment:submitting', {
+                            detail: { method: 'stripe' }
+                        }))
+
                         form.submit()
                     }
                 })
             } else {
+                document.dispatchEvent(new CustomEvent('payment:submitting', {
+                    detail: { method: paymentMethod }
+                }))
+
                 form.submit()
             }
         })
+
+    document.dispatchEvent(new CustomEvent('payment:init'))
 }
 
 $(document).ready(function () {

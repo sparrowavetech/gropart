@@ -2,6 +2,7 @@
 
 namespace Botble\Marketplace\Http\Requests\Fronts;
 
+use Botble\Base\Rules\EmailRule;
 use Botble\Support\Http\Requests\Request;
 
 class ContactStoreRequest extends Request
@@ -14,8 +15,8 @@ class ContactStoreRequest extends Request
 
         if (! auth('customer')->check()) {
             $rules += [
-                'name' => ['required', 'string', 'max:40'],
-                'email' => ['required', 'email'],
+                'name' => ['required', 'string', 'max:120'],
+                'email' => ['required', new EmailRule()],
             ];
         }
 

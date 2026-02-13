@@ -10,6 +10,11 @@ use Intervention\Image\Modifiers\AlignRotationModifier as GenericAlignRotationMo
 
 class AlignRotationModifier extends GenericAlignRotationModifier implements SpecializedInterface
 {
+    /**
+     * {@inheritdoc}
+     *
+     * @see ModifierInterface::apply()
+     */
     public function apply(ImageInterface $image): ImageInterface
     {
         $image = match ($image->exif('IFD0.Orientation')) {
@@ -30,9 +35,6 @@ class AlignRotationModifier extends GenericAlignRotationModifier implements Spec
      * Set exif data of image to top-left orientation, marking the image as
      * aligned and making sure the rotation correction process is not
      * performed again.
-     *
-     * @param ImageInterface $image
-     * @return ImageInterface
      */
     private function markAligned(ImageInterface $image): ImageInterface
     {

@@ -1,11 +1,12 @@
 <?php
 
-use App\Http\Middleware\VerifyCsrfToken;
+use Botble\Mollie\Http\Controllers\MollieController;
+use Botble\Theme\Facades\Theme;
+use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Route;
 
-Route::group(['namespace' => 'Botble\Mollie\Http\Controllers', 'middleware' => ['web', 'core']], function () {
-    Route::post('mollie/payment/callback', [
-        'as' => 'mollie.payment.callback',
-        'uses' => 'MollieController@paymentCallback',
-    ])->withoutMiddleware(VerifyCsrfToken::class);
-});
+Theme::registerRoutes(function (): void {
+    Route::post('mollie/payment/webhook/{token}', [MollieController::class, 'webhook'])
+        ->withoutMiddleware([VerifyCsrfToken::class])
+        ->name('mollie.payment.webhook');
+}, ['core']);

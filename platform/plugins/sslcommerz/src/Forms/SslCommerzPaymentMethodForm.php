@@ -7,10 +7,13 @@ use Botble\Base\Forms\FieldOptions\CheckboxFieldOption;
 use Botble\Base\Forms\FieldOptions\TextFieldOption;
 use Botble\Base\Forms\Fields\OnOffCheckboxField;
 use Botble\Base\Forms\Fields\TextField;
+use Botble\Payment\Concerns\Forms\HasAvailableCountriesField;
 use Botble\Payment\Forms\PaymentMethodForm;
 
 class SslCommerzPaymentMethodForm extends PaymentMethodForm
 {
+    use HasAvailableCountriesField;
+
     public function setup(): void
     {
         parent::setup();
@@ -18,34 +21,33 @@ class SslCommerzPaymentMethodForm extends PaymentMethodForm
         $this
             ->paymentId(SSLCOMMERZ_PAYMENT_METHOD_NAME)
             ->paymentName('SslCommerz')
-            ->paymentDescription(__('Customer can buy product and pay directly using Visa, Credit card via :name', ['name' => 'SslCommerz']))
+            ->paymentDescription(trans('plugins/sslcommerz::sslcommerz.payment_description', ['name' => 'SslCommerz']))
             ->paymentLogo(url('vendor/core/plugins/sslcommerz/images/sslcommerz.png'))
+            ->paymentFeeField(SSLCOMMERZ_PAYMENT_METHOD_NAME)
             ->paymentUrl('https://sslcommerz.com')
             ->paymentInstructions(view('plugins/sslcommerz::instructions')->render())
             ->add(
                 sprintf('payment_%s_store_id', SSLCOMMERZ_PAYMENT_METHOD_NAME),
                 TextField::class,
                 TextFieldOption::make()
-                    ->label(__('Store ID'))
+                    ->label(trans('plugins/sslcommerz::sslcommerz.store_id'))
                     ->value(BaseHelper::hasDemoModeEnabled() ? '*******************************' : get_payment_setting('store_id', SSLCOMMERZ_PAYMENT_METHOD_NAME))
                     ->attributes(['data-counter' => 400])
-                    ->toArray()
             )
             ->add(
                 sprintf('payment_%s_store_password', SSLCOMMERZ_PAYMENT_METHOD_NAME),
                 'password',
                 TextFieldOption::make()
-                    ->label(__('Store Password (API/Secret key)'))
+                    ->label(trans('plugins/sslcommerz::sslcommerz.store_password'))
                     ->value(BaseHelper::hasDemoModeEnabled() ? '*******************************' : get_payment_setting('store_password', SSLCOMMERZ_PAYMENT_METHOD_NAME))
-                    ->toArray()
             )
             ->add(
                 sprintf('payment_%s_mode', SSLCOMMERZ_PAYMENT_METHOD_NAME),
                 OnOffCheckboxField::class,
                 CheckboxFieldOption::make()
                     ->label(trans('plugins/payment::payment.live_mode'))
-                    ->value(get_payment_setting('mode', SSLCOMMERZ_PAYMENT_METHOD_NAME, true))
-                    ->toArray(),
-            );
+                    ->value(get_payment_setting('mode', SSLCOMMERZ_PAYMENT_METHOD_NAME, true)),
+            )
+            ->addAvailableCountriesField(SSLCOMMERZ_PAYMENT_METHOD_NAME);
     }
 }

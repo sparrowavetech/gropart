@@ -35,17 +35,16 @@ class UserAgent
 
         return sprintf('PayPalSDK/%s %s (%s)', 'Checkout-PHP-SDK', Version::VERSION, implode('; ', $featureList));
     }
+
     /**
-     * Gets PHP Bit version
-     *
-     * @return int|string
+     * @phpstan-ignore-next-line
      */
     private static function getPHPBit(): int|string
     {
         return match (PHP_INT_SIZE) {
             4 => '32',
             8 => '64',
-            default => PHP_INT_SIZE,
+            default => PHP_INT_SIZE, // @phpstan-ignore-line
         };
     }
 }

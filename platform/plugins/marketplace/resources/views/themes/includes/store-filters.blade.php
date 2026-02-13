@@ -1,3 +1,16 @@
+@php
+    $currentMainFilterUrl = $store->url;
+    $showCategoriesFilter = false;
+    
+    if (\Botble\Marketplace\Facades\MarketplaceHelper::isEnabledVendorCategoriesFilter()) {
+        $categories = \Botble\Marketplace\Facades\MarketplaceHelper::getCategoriesForVendor($store->id);
+        $showCategoriesFilter = $categories->isNotEmpty();
+    }
+    
+    $categoriesRequest = (array) request()->input('categories', []);
+    $categoryId = Arr::get($categoriesRequest, 0);
+@endphp
+
 <div class="bb-filter-offcanvas-area">
     <div class="bb-filter-offcanvas-wrapper">
         <div class="bb-filter-offcanvas-close">
@@ -7,20 +20,19 @@
                     <path d="M18 6l-12 12" />
                     <path d="M6 6l12 12" />
                 </svg>
-                {{ __('Close') }}
+                {{ trans('core/base::forms.close') }}
             </button>
         </div>
 
         <div class="bb-shop-sidebar">
             <form action="{{ URL::current() }}" method="GET" class="bb-product-form-filter">
-                <input type="hidden" name="sort-by" value="{{ BaseHelper::stringify(request()->query('sort-by')) }}">
-                <input type="hidden" name="per-page" value="{{ BaseHelper::stringify(request()->query('per-page')) }}">
-                <input type="hidden" name="layout" value="{{ BaseHelper::stringify(request()->query('layout')) }}">
-                <input type="hidden" name="page" value="{{ BaseHelper::stringify(request()->query('page')) }}">
+                @include(EcommerceHelper::viewPath('includes.filters.filter-hidden-fields'))
                 <input name="categories[]" type="hidden" value="{{ $categoryId }}">
 
                 @include(EcommerceHelper::viewPath('includes.filters.search'))
-                @include(EcommerceHelper::viewPath('includes.filters.categories'))
+                @if($showCategoriesFilter)
+                    @include(EcommerceHelper::viewPath('includes.filters.categories'))
+                @endif
             </form>
         </div>
     </div>

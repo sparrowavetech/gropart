@@ -7,5 +7,8 @@
         <x-core::icon name="ti ti-edit" />
     </a>
 @else
-    <x-core::icon name="ti ti-check" class="text-success" />
+    <x-core::icon
+        name="ti ti-check"
+        class="text-success"
+    />
 @endif

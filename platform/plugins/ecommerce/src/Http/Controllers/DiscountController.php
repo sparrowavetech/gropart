@@ -3,9 +3,9 @@
 namespace Botble\Ecommerce\Http\Controllers;
 
 use Botble\Base\Events\CreatedContentEvent;
-use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Base\Facades\Assets;
+use Botble\Base\Http\Actions\DeleteResourceAction;
 use Botble\Base\Supports\Breadcrumb;
 use Botble\Ecommerce\Http\Requests\DiscountRequest;
 use Botble\Ecommerce\Models\Discount;
@@ -13,9 +13,7 @@ use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Tables\DiscountTable;
 use Botble\JsValidation\Facades\JsValidator;
 use Botble\Media\Facades\RvMedia;
-use Exception;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 
@@ -53,18 +51,25 @@ class DiscountController extends BaseController
 
     public function store(DiscountRequest $request)
     {
+        /**
+         * @var Discount $discount
+         */
         $discount = Discount::query()->create($request->validated());
 
         if ($discount) {
             if ($productCollections = $request->input('product_collections')) {
                 if (! is_array($productCollections)) {
                     $productCollections = [$productCollections];
-                    $discount->productCollections()->attach($productCollections);
                 }
+
+                $discount->productCollections()->attach($productCollections);
             }
 
-            if (($productCategories = $request->input('product_categories')) && ! is_array($productCategories)) {
-                $productCategories = [$productCategories];
+            if ($productCategories = $request->input('product_categories')) {
+                if (! is_array($productCategories)) {
+                    $productCategories = [$productCategories];
+                }
+
                 $discount->productCategories()->attach($productCategories);
             }
 
@@ -78,10 +83,15 @@ class DiscountController extends BaseController
                 }
 
                 foreach ($products as $productId) {
+                    /**
+                     * @var Product $product
+                     */
                     $product = Product::query()->find($productId);
 
                     if (! $product || $product->is_variation) {
                         Arr::forget($products, $productId);
+
+                        continue;
                     }
 
                     $products = array_merge($products, $product->variations()->pluck('product_id')->all());
@@ -103,7 +113,7 @@ class DiscountController extends BaseController
                     $product = Product::query()->find($variantId);
 
                     if (! $product || ! $product->is_variation || ! $product->original_product->id) {
-                        Arr::forget($products, $product->getKey());
+                        continue;
                     }
 
                     $variants = array_merge($variants, [$product->original_product->id]);
@@ -129,7 +139,8 @@ class DiscountController extends BaseController
 
         return $this
             ->httpResponse()
-            ->setNextUrl(route('discounts.index'))
+            ->setPreviousUrl(route('discounts.index'))
+            ->setNextUrl(route('discounts.edit', $discount))
             ->withCreatedSuccessMessage();
     }
 
@@ -153,11 +164,11 @@ class DiscountController extends BaseController
             $productVariant->variationItems = $productVariant->variationInfo->variationItems;
         }
 
-        $discount->products->each(function ($product) {
+        $discount->products->each(function ($product): void {
             $product->image_url = RvMedia::getImageUrl($product->image, 'thumb', false, RvMedia::getDefaultImage());
         });
 
-        $discount->customers->each(function ($customer) {
+        $discount->customers->each(function ($customer): void {
             $customer->avatar_url = RvMedia::getImageUrl($customer->avatar, 'thumb', false, RvMedia::getDefaultImage());
         });
 
@@ -179,13 +190,21 @@ class DiscountController extends BaseController
         if ($productCollections = $request->input('product_collections')) {
             if (! is_array($productCollections)) {
                 $productCollections = [$productCollections];
-                $discount->productCollections()->sync($productCollections);
             }
+
+            $discount->productCollections()->sync($productCollections);
+        } else {
+            $discount->productCollections()->detach();
         }
 
-        if (($productCategories = $request->input('product_categories')) && ! is_array($productCategories)) {
-            $productCategories = [$productCategories];
+        if ($productCategories = $request->input('product_categories')) {
+            if (! is_array($productCategories)) {
+                $productCategories = [$productCategories];
+            }
+
             $discount->productCategories()->sync($productCategories);
+        } else {
+            $discount->productCategories()->detach();
         }
 
         if ($products = $request->input('products')) {
@@ -198,10 +217,15 @@ class DiscountController extends BaseController
             }
 
             foreach ($products as $productId) {
+                /**
+                 * @var Product $product
+                 */
                 $product = Product::query()->find($productId);
 
                 if (! $product || $product->is_variation) {
                     Arr::forget($products, $productId);
+
+                    continue;
                 }
 
                 $products = array_merge($products, $product->variations()->pluck('product_id')->all());
@@ -225,7 +249,7 @@ class DiscountController extends BaseController
                 $product = Product::query()->find($variantId);
 
                 if (! $product || ! $product->is_variation || ! $product->original_product->id) {
-                    Arr::forget($products, $product->id);
+                    continue;
                 }
 
                 $variants = array_merge($variants, [$product->original_product->id]);
@@ -252,26 +276,14 @@ class DiscountController extends BaseController
 
         return $this
             ->httpResponse()
+            ->setPreviousUrl(route('discounts.index'))
             ->setNextUrl(route('discounts.edit', $discount))
             ->withUpdatedSuccessMessage();
     }
 
-    public function destroy(Discount $discount, Request $request)
+    public function destroy(Discount $discount)
     {
-        try {
-            $discount->delete();
-
-            event(new DeletedContentEvent(DISCOUNT_MODULE_SCREEN_NAME, $request, $discount));
-
-            return $this
-                ->httpResponse()
-                ->setMessage(trans('core/base::notices.delete_success_message'));
-        } catch (Exception $exception) {
-            return $this
-                ->httpResponse()
-                ->setError()
-                ->setMessage($exception->getMessage());
-        }
+        return DeleteResourceAction::make($discount);
     }
 
     public function postGenerateCoupon()

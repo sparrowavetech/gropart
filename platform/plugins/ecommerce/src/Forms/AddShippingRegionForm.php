@@ -26,7 +26,7 @@ class AddShippingRegionForm extends FormAbstract
         $countries = array_diff_key($countries, array_flip($existedCountries));
 
         $this
-            ->setupModel(new Shipping())
+            ->model(Shipping::class)
             ->contentOnly()
             ->setUrl(route('shipping_methods.region.create'))
             ->setTitle(trans('plugins/ecommerce::shipping.add_shipping_region'))
@@ -39,7 +39,6 @@ class AddShippingRegionForm extends FormAbstract
                     ->required()
                     ->searchable()
                     ->choices($countries)
-                    ->toArray()
             );
     }
 }

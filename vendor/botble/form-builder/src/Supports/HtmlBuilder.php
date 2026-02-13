@@ -17,11 +17,11 @@ class HtmlBuilder
         Componentable::__call as componentCall;
     }
 
-    protected ?UrlGenerator $url;
+    protected UrlGenerator $url;
 
     protected Factory $view;
 
-    public function __construct(UrlGenerator $url = null, Factory $view)
+    public function __construct(UrlGenerator $url, Factory $view)
     {
         $this->url = $url;
         $this->view = $view;
@@ -114,7 +114,7 @@ class HtmlBuilder
 
     public function favicon($url, $attributes = [], $secure = null): HtmlString
     {
-        $defaults = ['rel' => 'shortcut icon', 'type' => 'image/x-icon'];
+        $defaults = ['rel' => 'icon', 'type' => 'image/x-icon'];
 
         $attributes = array_merge($defaults, $attributes);
 

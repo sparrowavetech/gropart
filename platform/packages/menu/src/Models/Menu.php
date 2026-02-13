@@ -28,19 +28,23 @@ class Menu extends BaseModel
 
     protected static function booted(): void
     {
-        static::deleted(function (self $model) {
+        static::deleted(function (self $model): void {
             $model->menuNodes()->delete();
             $model->locations()->delete();
         });
 
-        static::saving(function (self $model) {
+        static::saving(function (self $model): void {
             if (! $model->slug) {
                 $model->slug = self::createSlug($model->name, $model->getKey());
             }
         });
 
-        static::saved(function () {
-            (new Cache(app('cache'), static::class))->flush();
+        static::saved(function (): void {
+            Cache::make(static::class)->flush();
+        });
+
+        static::deleted(function (): void {
+            Cache::make(static::class)->flush();
         });
     }
 

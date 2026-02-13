@@ -19,6 +19,14 @@ class ProductController extends BaseController
 
         $product->save();
 
+        $variationProductIds = $product->variations()->pluck('product_id')->all();
+
+        if ($variationProductIds) {
+            Product::query()
+                ->whereIn('id', $variationProductIds)
+                ->update(['status' => BaseStatusEnum::PUBLISHED]);
+        }
+
         if (MarketplaceHelper::getSetting('enable_product_approval', 1)) {
             $store = $product->store;
 

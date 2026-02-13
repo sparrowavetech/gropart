@@ -15,7 +15,11 @@ class EmailSettingController extends SettingController
 
         Assets::addScriptsDirectly('vendor/core/core/setting/js/email-template.js');
 
-        $form = EmailSettingForm::create();
+        $form = null;
+
+        if (config('core.base.general.enable_email_configuration_from_admin_panel', true)) {
+            $form = EmailSettingForm::create();
+        }
 
         return view('core/setting::email', compact('form'));
     }

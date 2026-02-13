@@ -4,12 +4,12 @@ namespace Botble\Ecommerce\Services\Products;
 
 use Botble\Base\Facades\MetaBox;
 use Botble\Ecommerce\Facades\EcommerceHelper;
-use Botble\Ecommerce\Models\Option;
 use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Models\ProductVariation;
 use Botble\Slug\Facades\SlugHelper;
 use Botble\Slug\Models\Slug;
 use Carbon\Carbon;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Str;
 
 class DuplicateProductService
@@ -22,9 +22,16 @@ class DuplicateProductService
             $product->sku = $product->sku . '-' . Str::random(5);
         }
 
-        $product->views = 0;
+        $product->setAttribute('views', 0);
         $product->created_at = Carbon::now();
         $product->updated_at = Carbon::now();
+
+        $attributesToKeep = array_intersect_key(
+            $product->getAttributes(),
+            array_flip($product->getFillable())
+        );
+
+        $product->setRawAttributes($attributesToKeep);
 
         $product->save();
 
@@ -83,7 +90,9 @@ class DuplicateProductService
                     continue;
                 }
 
-                /** @var Option $productOptions */
+                /**
+                 * @var Builder $productOptions
+                 */
                 $productOptions
                     ->where('name', $option->name)
                     ->first()
@@ -93,6 +102,7 @@ class DuplicateProductService
         }
 
         if ($variations = $model->variations()->with('product')->get()) {
+            /** @var ProductVariation $variation */
             foreach ($variations as $variation) {
                 $productVariation = $variation->product->replicate();
 
@@ -100,20 +110,27 @@ class DuplicateProductService
                     $productVariation->sku = $productVariation->sku . '-' . Str::random(5);
                 }
 
-                $productVariation->views = 0;
+                $productVariation->setAttribute('views', 0);
+
+                $variationAttributesToKeep = array_intersect_key(
+                    $productVariation->getAttributes(),
+                    array_flip($productVariation->getFillable())
+                );
+
+                $productVariation->setRawAttributes($variationAttributesToKeep);
 
                 $productVariation->save();
 
-                /**
-                 * @var ProductVariation $productVariationRelation
-                 */
+                /** @var ProductVariation $productVariationRelation */
                 $productVariationRelation = $product->variations()->create([
                     'product_id' => $productVariation->getKey(),
                     'configurable_product_id' => $product->getKey(),
                     'is_default' => $variation->is_default,
                 ]);
 
-                $productVariationRelation->productAttributes()->attach($variation->productAttributes()->pluck('attribute_id')->all());
+                if ($productVariationRelation instanceof ProductVariation) {
+                    $productVariationRelation->productAttributes()->attach($variation->productAttributes()->pluck('attribute_id')->all());
+                }
             }
         }
 

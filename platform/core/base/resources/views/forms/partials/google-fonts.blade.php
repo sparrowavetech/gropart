@@ -4,14 +4,14 @@
 
 {!! Form::customSelect(
     $name,
-    ['' => __('-- Select --')] + array_combine($field['options'], $field['options']),
+    ['' => trans('core/base::forms.select')] + array_combine($field['options'], $field['options']),
     $selected,
     ['data-bb-toggle' => 'google-font-selector'],
 ) !!}
 
 @once
     @push('footer')
-        @foreach(array_chunk($field['options'], 200) as $fonts)
+        @foreach (array_chunk($field['options'], 200) as $fonts)
             {!! Html::style(
                 BaseHelper::getGoogleFontsURL() .
                     '/css?family=' .

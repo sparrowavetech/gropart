@@ -7,8 +7,9 @@ use Botble\Base\Forms\Fields\TextField;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Http\Requests\Fronts\OrderTrackingRequest;
+use Botble\Theme\FormFront;
 
-class OrderTrackingForm extends FormAbstract
+class OrderTrackingForm extends FormFront
 {
     public function setup(): void
     {
@@ -16,7 +17,7 @@ class OrderTrackingForm extends FormAbstract
             ->contentOnly()
             ->setMethod('GET')
             ->setValidatorClass(OrderTrackingRequest::class)
-            ->setUrl(route('public.orders.tracking') . '#order-details')
+            ->setUrl(route('public.orders.tracking'))
             ->add(
                 'order_id',
                 TextField::class,
@@ -24,9 +25,8 @@ class OrderTrackingForm extends FormAbstract
                     ->label(__('Order ID'))
                     ->required()
                     ->placeholder(__('Enter the order ID'))
-                    ->toArray()
             )
-            ->when(EcommerceHelper::isLoginUsingPhone(), function (FormAbstract $form) {
+            ->when(EcommerceHelper::isOrderTrackingUsingPhone(), function (FormAbstract $form): void {
                 $form->add(
                     'phone',
                     'tel',
@@ -34,9 +34,8 @@ class OrderTrackingForm extends FormAbstract
                         ->label(__('Phone number'))
                         ->placeholder(__('Enter your phone number'))
                         ->required()
-                        ->toArray()
                 );
-            }, function (FormAbstract $form) {
+            }, function (FormAbstract $form): void {
                 $form->add(
                     'email',
                     TextField::class,
@@ -44,7 +43,6 @@ class OrderTrackingForm extends FormAbstract
                         ->label(__('Email'))
                         ->required()
                         ->placeholder(__('Enter your email'))
-                        ->toArray()
                 );
             })
             ->add('submit', 'button', [

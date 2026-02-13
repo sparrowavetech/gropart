@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+
 <head>
     <meta charset="UTF-8">
     <meta
@@ -18,16 +19,19 @@
         >
     @endif
 
-    @if (setting('admin_favicon') || config('core.base.general.favicon'))
-        <link
-            href="{{ $favicon = setting('admin_favicon') ? RvMedia::getImageUrl(setting('admin_favicon')) : url(config('core.base.general.favicon')) }}"
-            rel="icon shortcut"
-        >
-        <meta
-            property="og:image"
-            content="{{ $favicon }}"
-        >
-    @endif
+    @php
+        $faviconUrl = AdminHelper::getAdminFaviconUrl();
+        $faviconType = setting('admin_favicon_type', 'image/x-icon');
+    @endphp
+    <link
+        href="{{ $faviconUrl }}"
+        rel="icon shortcut"
+        type="{{ $faviconType }}"
+    >
+    <meta
+        property="og:image"
+        content="{{ $faviconUrl }}"
+    >
 
     <meta
         name="description"
@@ -47,7 +51,9 @@
 
         @if (Auth::check())
             window.siteEditorLocale = "{{ apply_filters('cms_site_editor_locale', App::getLocale()) }}";
+            window.ckEditorFontFamilies = "{{ config('core.base.general.editor.ckeditor.font_families') }}";
             window.siteAuthorizedUrl = "{{ rescue(fn() => route('settings.license.verify.index')) }}";
+            window.licenseCheckUrl = "{{ rescue(fn() => route('license.check')) }}";
             window.isAuthenticated = {{ Auth::check() ? 'true' : 'false' }};
         @endif
     </script>
@@ -68,9 +74,7 @@
     style="@yield('body-style', $bodyStyle ?? null)"
     @if (BaseHelper::adminLanguageDirection() === 'rtl') dir="rtl" @endif
     {!! Html::attributes($bodyAttributes ?? []) !!}
-    @if(AdminHelper::themeMode() === 'dark')
-        data-bs-theme="dark"
-    @endif
+    @if (AdminHelper::themeMode() === 'dark') data-bs-theme="dark" @endif
 >
     {!! AdminAppearance::getCustomJs('body') !!}
 

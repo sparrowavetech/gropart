@@ -3,6 +3,7 @@
 namespace Botble\Shippo;
 
 use Botble\Base\Facades\BaseHelper;
+use Botble\Ecommerce\Enums\OrderStatusEnum;
 use Botble\Ecommerce\Enums\ShippingStatusEnum;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Models\Shipment;
@@ -84,21 +85,21 @@ class Shippo
         $this->currency = get_application_currency()->title;
 
         $this->statuses = [
-            'PRE_TRANSIT' => __('Shipping Label Created'),
-            'TRANSIT' => __('In Transit'),
-            'DELIVERED' => __('Delivered'),
-            'RETURNED' => __('Returned to Sender'),
-            'FAILURE' => __('Exception'),
-            'UNKNOWN' => __('Shipping Label Created'),
+            'PRE_TRANSIT' => trans('plugins/shippo::shippo.status.shipping_label_created'),
+            'TRANSIT' => trans('plugins/shippo::shippo.status.in_transit'),
+            'DELIVERED' => trans('plugins/shippo::shippo.status.delivered'),
+            'RETURNED' => trans('plugins/shippo::shippo.status.returned_to_sender'),
+            'FAILURE' => trans('plugins/shippo::shippo.status.exception'),
+            'UNKNOWN' => trans('plugins/shippo::shippo.status.shipping_label_created'),
         ];
 
         $this->contentTypes = [
-            'MERCHANDISE' => __('Merchandise'),
-            'DOCUMENTS' => __('Documents'),
-            'GIFT' => __('Gift'),
-            'RETURN_MERCHANDISE' => __('Returned Goods'),
-            'HUMANITARIAN_DONATION' => __('Humanitarian Donation'),
-            'OTHER' => __('Other'),
+            'MERCHANDISE' => trans('plugins/shippo::shippo.content_type.merchandise'),
+            'DOCUMENTS' => trans('plugins/shippo::shippo.content_type.documents'),
+            'GIFT' => trans('plugins/shippo::shippo.content_type.gift'),
+            'RETURN_MERCHANDISE' => trans('plugins/shippo::shippo.content_type.returned_goods'),
+            'HUMANITARIAN_DONATION' => trans('plugins/shippo::shippo.content_type.humanitarian_donation'),
+            'OTHER' => trans('plugins/shippo::shippo.content_type.other'),
         ];
 
         $this->insurance = false;
@@ -107,8 +108,8 @@ class Shippo
         $this->defaultTariff = '';
         $this->origin = $this->mergeAddress(EcommerceHelper::getOriginAddress());
 
-        $this->distanceUnit = ecommerce_width_height_unit();
-        $this->massUnit = ecommerce_weight_unit();
+        $this->distanceUnit = 'cm';
+        $this->massUnit = 'g';
 
         $this->packageTypes = config('plugins.shippo.general.package_types', []);
         $this->serviceLevels = config('plugins.shippo.general.service_levels', []);
@@ -117,7 +118,7 @@ class Shippo
 
         $this->logging = setting('shipping_shippo_logging', 1);
 
-        $this->cache = new Cache(app('cache'), self::class);
+        $this->cache = Cache::make(static::class);
 
         $this->logger = Log::channel('shippo');
     }
@@ -188,7 +189,7 @@ class Shippo
             if ($rates = Arr::get($suggestResponse, 'shipment.rates', [])) {
                 foreach ($rates as &$rate) {
                     $rate['disabled'] = true;
-                    $rate['error_message'] = __('Not available in COD payment option.');
+                    $rate['error_message'] = trans('plugins/shippo::shippo.not_available_cod');
                 }
 
                 Arr::set($newResponse, 'shipment.rates', $rates);
@@ -242,6 +243,7 @@ class Shippo
                         $rates = $this->ratesByCurrency($rates);
 
                         if (! $rates) {
+                            // @phpstan-ignore-next-line
                             $ratesResponse = Shippo_Shipment::get_shipping_rates([
                                 'id' => Arr::get($response, 'object_id'),
                                 'currency' => $this->currency,
@@ -451,8 +453,16 @@ class Shippo
             $width += $item['wide'] * $item['qty'];
         }
 
+        $width = ecommerce_convert_width_height($width);
+        $length = ecommerce_convert_width_height($length);
+        $height = ecommerce_convert_width_height($height);
+
+        $weight = round(EcommerceHelper::validateOrderWeight(Arr::get($inParams, 'weight', 0)), 2);
+
+        $weight = ecommerce_convert_weight($weight);
+
         $parcel = [
-            'weight' => round(EcommerceHelper::validateOrderWeight(Arr::get($inParams, 'weight', 0)), 2) ?: 200,
+            'weight' => $weight ?: 200,
             'length' => round($length, 2) ?: 10,
             'width' => round($width, 2) ?: 10,
             'height' => round($height, 2) ?: 10,
@@ -744,7 +754,7 @@ class Shippo
 
         if ($addressTo = Arr::get($response, 'address_to')) {
             if ($this->validateAddress && empty($addressTo['is_complete'])) {
-                $validationErrors['destination'][] = __('Address appears to be incomplete');
+                $validationErrors['destination'][] = trans('plugins/shippo::shippo.address_incomplete');
 
                 $this->log([__LINE__, 'Address is incomplete']);
             }
@@ -884,8 +894,17 @@ class Shippo
     public function canCreateTransaction(Shipment $shipment): bool
     {
         $order = $shipment->order;
-        if ($order && $order->id && $order->shipping_method->getValue() == SHIPPO_SHIPPING_METHOD_NAME
-            && in_array($shipment->status->getValue(), [ShippingStatusEnum::APPROVED, ShippingStatusEnum::PENDING])) {
+        if (
+            $order
+            && $order->id
+            && $order->shipping_method->getValue() == SHIPPO_SHIPPING_METHOD_NAME
+            && $order->status != OrderStatusEnum::CANCELED
+            && ! in_array($shipment->status->getValue(), [
+                ShippingStatusEnum::CANCELED,
+                ShippingStatusEnum::DELIVERING,
+                ShippingStatusEnum::DELIVERED,
+                ShippingStatusEnum::NOT_DELIVERED,
+            ])) {
             return true;
         }
 
@@ -917,6 +936,7 @@ class Shippo
         $cacheKey = $this->getCacheKey(['function' => __FUNCTION__, 'rate_id' => $rateId]);
         $response = $this->getCacheValue($cacheKey);
         if (! $response) {
+            // @phpstan-ignore-next-line
             $response = Shippo_Rate::retrieve($rateId)->__toArray(true);
             $this->setCacheValue($cacheKey, $response);
         }
@@ -930,6 +950,7 @@ class Shippo
         $response = $this->getCacheValue($cacheKey);
         if (! $response) {
             try {
+                // @phpstan-ignore-next-line
                 $response = Shippo_Shipment::retrieve($shipmentId)->__toArray(true);
                 $this->setCacheValue($cacheKey, $response);
             } catch (Shippo_Error $ex) {
@@ -943,5 +964,14 @@ class Shippo
         }
 
         return $response;
+    }
+
+    public function getRoutePrefixByFactor(): string
+    {
+        if (is_plugin_active('marketplace') && ! is_in_admin(true)) {
+            return 'marketplace.vendor.orders.';
+        }
+
+        return 'ecommerce.shipments.';
     }
 }

@@ -5,23 +5,49 @@
         :url="route('ecommerce.settings.invoice-template.update')"
         method="PUT"
     >
+        <input type="hidden" name="template" value="{{ $currentTemplate }}">
+
         <x-core-setting::section
             :title="trans('plugins/ecommerce::invoice-template.setting')"
             :description="trans('plugins/ecommerce::invoice-template.setting_description')"
         >
+            @if(count($templates) > 1)
+                <x-core::form.select
+                    name="template"
+                    :label="trans('plugins/ecommerce::invoice-template.template')"
+                    :options="$templates"
+                    :value="$currentTemplate"
+                    onchange="window.location.href = '{{ route('ecommerce.settings.invoice-template') }}?template=' + this.value"
+                />
+            @endif
+
             <x-core::form-group>
                 <x-core::form.label for="email_content">
                     {{ trans('plugins/ecommerce::invoice-template.setting_content') }}
                 </x-core::form.label>
 
                 <x-core::twig-editor
-                    :variables="$variables"
+                    :variables="value(Arr::get($template, 'variables', []))"
                     :functions="EmailHandler::getFunctions()"
-                    :value="$content"
+                    :value="value(Arr::get($template, 'content'))"
                     name="content"
                     mode="html"
                 >
                 </x-core::twig-editor>
+            </x-core::form-group>
+
+            <x-core::form-group>
+                <x-core::form.label for="invoice_template_custom_css">
+                    {{ trans('plugins/ecommerce::invoice-template.custom_css') }}
+                </x-core::form.label>
+                <x-core::form.code-editor
+                    name="invoice_template_custom_css"
+                    mode="css"
+                    :value="setting('invoice_template_custom_css')"
+                />
+                <x-core::form.helper-text>
+                    {{ trans('plugins/ecommerce::invoice-template.custom_css_helper') }}
+                </x-core::form.helper-text>
             </x-core::form-group>
         </x-core-setting::section>
 
@@ -43,14 +69,16 @@
                     {{ trans('plugins/ecommerce::invoice-template.reset_to_default') }}
                 </x-core::button>
 
-                <x-core::button
-                    target="_blank"
-                    tag="a"
-                    href="{{ route('ecommerce.settings.invoice-template.preview') }}"
-                    icon="ti ti-eye"
-                >
-                    {{ trans('plugins/ecommerce::invoice-template.preview') }}
-                </x-core::button>
+                @if(Arr::get($template, 'preview'))
+                    <x-core::button
+                        target="_blank"
+                        tag="a"
+                        href="{{ route('ecommerce.settings.invoice-template.preview', $currentTemplate) }}"
+                        icon="ti ti-eye"
+                    >
+                        {{ trans('plugins/ecommerce::invoice-template.preview') }}
+                    </x-core::button>
+                @endif
             </div>
         </x-core-setting::section.action>
     </x-core::form>
@@ -60,8 +88,8 @@
         id="reset-template-to-default-modal"
         :title="trans('plugins/ecommerce::invoice-template.confirm_reset')"
         :submit-button-label="trans('plugins/ecommerce::invoice-template.continue')"
-        :submit-button-attrs="['id' => 'reset-template-to-default-button', 'data-target' => route('ecommerce.settings.invoice-template.reset')]"
+        :submit-button-attrs="['id' => 'reset-template-to-default-button', 'data-target' => route('ecommerce.settings.invoice-template.reset', $currentTemplate)]"
     >
-        {!! trans('plugins/ecommerce::invoice-template.confirm_message') !!}
+        {!! BaseHelper::clean(trans('plugins/ecommerce::invoice-template.confirm_message')) !!}
     </x-core::modal.action>
 @endsection

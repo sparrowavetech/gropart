@@ -14,6 +14,11 @@ use Intervention\Image\Modifiers\TrimModifier as GenericTrimModifier;
 
 class TrimModifier extends GenericTrimModifier implements SpecializedInterface
 {
+    /**
+     * {@inheritdoc}
+     *
+     * @see ModifierInterface::apply()
+     */
     public function apply(ImageInterface $image): ImageInterface
     {
         if ($image->isAnimated()) {
@@ -43,10 +48,8 @@ class TrimModifier extends GenericTrimModifier implements SpecializedInterface
     /**
      * Create an average color from the colors of the four corner points of the given image
      *
-     * @param ImageInterface $image
      * @throws RuntimeException
      * @throws AnimationException
-     * @return int
      */
     private function trimColor(ImageInterface $image): int
     {

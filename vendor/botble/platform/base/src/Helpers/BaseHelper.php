@@ -5,21 +5,27 @@ namespace Botble\Base\Helpers;
 use Botble\Base\Facades\AdminAppearance;
 use Botble\Base\Facades\Html;
 use Botble\Base\Supports\GoogleFonts;
+use Botble\Base\Supports\HTMLPurifier\URIScheme\ViberURIScheme;
 use Botble\Base\View\Components\BadgeComponent;
 use Botble\Icon\Facades\Icon as IconFacade;
 use Botble\Icon\View\Components\Icon;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
+use HTMLPurifier_URISchemeRegistry;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Request;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 use Throwable;
 
 class BaseHelper
 {
+    protected static ?bool $isAdminRequest = null;
+
     public function formatTime(CarbonInterface $timestamp, ?string $format = 'j M Y H:i', bool $translated = false): string
     {
         $first = Carbon::create(0000, 0, 0, 00, 00, 00);
@@ -61,9 +67,43 @@ class BaseHelper
         return $this->formatDate($date, $format, $translated);
     }
 
+    public function parseDate(?string $date, ?string $format = null): ?Carbon
+    {
+        if (empty($date)) {
+            return null;
+        }
+
+        if (empty($format)) {
+            $format = $this->getDateFormat();
+        }
+
+        $formats = [
+            $format,
+            str_replace(['d', 'm'], ['j', 'n'], $format),
+            'd/m/Y',
+            'j/n/Y',
+            'd-m-Y',
+            'j-n-Y',
+            'Y/m/d',
+            'Y-m-d',
+            'm/d/Y',
+            'n/j/Y',
+        ];
+
+        foreach ($formats as $tryFormat) {
+            try {
+                return Carbon::createFromFormat($tryFormat, $date);
+            } catch (Throwable) {
+                continue;
+            }
+        }
+
+        return rescue(fn () => Carbon::parse($date));
+    }
+
     public function humanFilesize(float $bytes, int $precision = 2): string
     {
-        $units = ['B', 'kB', 'MB', 'GB', 'TB'];
+        $units = ['B', 'KB', 'MB', 'GB', 'TB'];
 
         $bytes = max($bytes, 0);
         $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
@@ -74,22 +114,14 @@ class BaseHelper
         return number_format($bytes, $precision, ',', '.') . ' ' . $units[$pow];
     }
 
-    public function getFileData(string $file, bool $convertToArray = true)
+    public function getFileData(string $file, bool $convertToArray = true): mixed
     {
         $file = File::get($file);
-        if (! empty($file)) {
-            if ($convertToArray) {
-                return json_decode($file, true);
-            }
-
-            return $file;
+        if (empty($file)) {
+            return $convertToArray ? [] : null;
         }
 
-        if (! $convertToArray) {
-            return null;
-        }
-
-        return [];
+        return $convertToArray ? json_decode($file, true) : $file;
     }
 
     public function saveFileData(string $path, array|string|null $data, bool $json = true): bool
@@ -118,21 +150,25 @@ class BaseHelper
 
     public function scanFolder(string $path, array $ignoreFiles = []): array
     {
-        if (! $path) {
+        if (empty($path) || ! File::isDirectory($path)) {
             return [];
         }
 
-        if (File::isDirectory($path)) {
-            $data = array_diff(scandir($path), array_merge(['.', '..', '.DS_Store'], $ignoreFiles));
-            natsort($data);
+        $ignoreFiles = array_merge(['.', '..', '.DS_Store'], $ignoreFiles);
+        $files = [];
 
-            return $data;
+        foreach (new \DirectoryIterator($path) as $file) {
+            if (! $file->isDot() && ! in_array($file->getFilename(), $ignoreFiles)) {
+                $files[] = $file->getFilename();
+            }
         }
 
-        return [];
+        natsort($files);
+
+        return $files;
     }
 
-    public function getAdminPrefix(): string
+    public function getAdminPrefix(): ?string
     {
         $prefix = config('core.base.general.admin_dir');
 
@@ -145,7 +181,13 @@ class BaseHelper
 
     public function getAdminMasterLayoutTemplate(): string
     {
-        return apply_filters('base_filter_admin_master_layout_template', 'core/base::layouts.master');
+        $layout = 'core/base::layouts.empty';
+
+        if (Auth::check()) {
+            $layout = 'core/base::layouts.master';
+        }
+
+        return apply_filters('base_filter_admin_master_layout_template', $layout);
     }
 
     public function siteLanguageDirection(): string
@@ -249,6 +291,35 @@ class BaseHelper
     {
         $rule = config('core.base.general.phone_validation_rule');
 
+        $min = setting('phone_number_min_length', 8);
+        $max = setting('phone_number_max_length', 15);
+
+        $hasMin = preg_match('/min:\d+/', $rule);
+        $hasMax = preg_match('/max:\d+/', $rule);
+
+        if ($hasMin) {
+            $rule = preg_replace('/min:\d+/', "min:$min", $rule);
+        } else {
+            $rule = "min:$min|" . $rule;
+        }
+
+        if ($hasMax) {
+            $rule = preg_replace('/max:\d+/', "max:$max", $rule);
+        } else {
+            $rule = "max:$max|" . $rule;
+        }
+
+        if ($asArray) {
+            return explode('|', $rule);
+        }
+
+        return $rule;
+    }
+
+    public function getZipcodeValidationRule(bool $asArray = false): string|array
+    {
+        $rule = config('core.base.general.zipcode_validation_rule');
+
         if ($asArray) {
             return explode('|', $rule);
         }
@@ -312,6 +383,9 @@ class BaseHelper
         if (! is_numeric($dirty)) {
             $dirty = (string) $dirty;
         }
+
+        // Register Viber URI scheme if not already registered
+        $this->ensureViberURISchemeRegistered();
 
         return clean($dirty, $config);
     }
@@ -475,7 +549,7 @@ class BaseHelper
 
     public function hasDemoModeEnabled(): bool
     {
-        return App::environment('demo');
+        return App::environment('demo') || config('core.base.general.demo_mode_enabled', false);
     }
 
     public function logError(Throwable $throwable): void
@@ -507,8 +581,12 @@ class BaseHelper
         return IconFacade::has($name);
     }
 
-    public function renderIcon(string $name, ?string $size = null, array $attributes = [], bool $safe = false): string
+    public function renderIcon(?string $name, ?string $size = null, array $attributes = [], bool $safe = false): string
     {
+        if (! $name) {
+            return '';
+        }
+
         if ($safe && ! $this->hasIcon($name)) {
             return '';
         }
@@ -518,8 +596,12 @@ class BaseHelper
         );
     }
 
-    public function renderBadge(string $label, string $color = 'primary', array $attributes = [], ?string $icon = null): string
+    public function renderBadge(?string $label, string $color = 'primary', array $attributes = [], ?string $icon = null): string
     {
+        if (! $label) {
+            return '';
+        }
+
         return Blade::renderComponent(
             (new BadgeComponent($label, $color, $icon))->withAttributes($attributes)
         );
@@ -542,13 +624,13 @@ class BaseHelper
     public function getFonts(): array
     {
         $customGoogleFonts = config('core.base.general.custom_google_fonts');
-        $customFonts = config('core.base.general.custom_fonts');
+        $customFonts = apply_filters('cms_custom_fonts', config('core.base.general.custom_fonts', []) ?: []);
 
-        if (! empty($customGoogleFonts)) {
+        if (! empty($customGoogleFonts) && ! is_array($customGoogleFonts)) {
             $customGoogleFonts = array_filter(explode(',', $customGoogleFonts));
         }
 
-        if (! empty($customFonts)) {
+        if (! empty($customFonts) && ! is_array($customFonts)) {
             $customFonts = array_filter(explode(',', $customFonts));
         }
 
@@ -557,5 +639,61 @@ class BaseHelper
             ...(! empty($customGoogleFonts) ? $customGoogleFonts : []),
             ...(! empty($customFonts) ? $customFonts : []),
         ];
+    }
+
+    protected function ensureViberURISchemeRegistered(): void
+    {
+        static $registered = false;
+
+        if ($registered || ! class_exists(HTMLPurifier_URISchemeRegistry::class)) {
+            return;
+        }
+
+        try {
+            $registry = HTMLPurifier_URISchemeRegistry::instance();
+            $registry->register('viber', new ViberURIScheme());
+
+            $registered = true;
+        } catch (Throwable $e) {
+            $this->logError($e);
+        }
+    }
+
+    public function isAdminRequest(): bool
+    {
+        if (self::$isAdminRequest !== null) {
+            return self::$isAdminRequest;
+        }
+
+        if (App::runningInConsole()) {
+            return self::$isAdminRequest = false;
+        }
+
+        $adminPrefix = config('core.base.general.admin_dir', 'admin');
+
+        if (empty($adminPrefix)) {
+            return self::$isAdminRequest = true;
+        }
+
+        return self::$isAdminRequest = Request::is($adminPrefix . '/*') || Request::is($adminPrefix);
+    }
+
+    public function isFrontendRequest(): bool
+    {
+        if (App::runningInConsole()) {
+            return false;
+        }
+
+        return ! $this->isAdminRequest();
+    }
+
+    public function isConsoleRequest(): bool
+    {
+        return App::runningInConsole();
+    }
+
+    public static function resetAdminRequestCache(): void
+    {
+        self::$isAdminRequest = null;
     }
 }

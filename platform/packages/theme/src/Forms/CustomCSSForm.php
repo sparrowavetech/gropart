@@ -32,7 +32,7 @@ class CustomCSSForm extends FormAbstract
                     ->label(trans('packages/theme::theme.custom_css'))
                     ->value($css)
                     ->mode('css')
-                    ->toArray()
+                    ->maxLength(100000)
             );
     }
 }

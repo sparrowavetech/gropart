@@ -8,6 +8,8 @@ trait HasIcon
 {
     protected Closure|string $icon;
 
+    protected bool $iconOnly = true;
+
     /**
      * @param \Closure(\Botble\Base\Models\BaseModel $model): string|string $icon
      */
@@ -35,5 +37,17 @@ trait HasIcon
         }
 
         return $this->isRenderabeIcon() ? call_user_func($this->icon, $this) : $this->icon;
+    }
+
+    public function iconOnly(bool $iconOnly = true): static
+    {
+        $this->iconOnly = $iconOnly;
+
+        return $this;
+    }
+
+    public function isIconOnly(): bool
+    {
+        return $this->iconOnly;
     }
 }

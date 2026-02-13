@@ -4,13 +4,14 @@
     <x-core::modal
         id="add-address-modal"
         :title="trans('plugins/ecommerce::addresses.add_address')"
-        :form-action="route('customers.addresses.create.store')"
+        :form-action="route('customers.addresses.store')"
         form-method="POST"
         size="md"
     >
         {!!
             \Botble\Ecommerce\Forms\Fronts\Customer\AddressForm::create()
                 ->add('customer_id', 'hidden', ['value' => $form->getModel()->id])
+                ->remove('submit')
                 ->renderForm()
         !!}
 
@@ -86,20 +87,20 @@
             </x-core::button>
         </x-slot:footer>
     </x-core::modal>
+
+    {!! apply_filters('ecommerce_customer_form_end', null, $form) !!}
 @endsection
 
 @section('form_main_end')
     @if ($customerId = $form->getModel()->id)
-        <div class="customer-reviews-table widget meta-boxes">
-            <x-core::card>
-                <x-core::card.header>
-                    <h4 class="card-title">{{ trans('plugins/ecommerce::review.name') }}</h4>
-                </x-core::card.header>
+        <x-core::card class="mb-3">
+            <x-core::card.header>
+                <h4 class="card-title">{{ trans('plugins/ecommerce::review.name') }}</h4>
+            </x-core::card.header>
 
-                <div>
-                    {!! app(Botble\Ecommerce\Tables\CustomerReviewTable::class)->customerId($customerId)->setAjaxUrl(route('customers.ajax.reviews', $customerId))->renderTable() !!}
-                </div>
-            </x-core::card>
-        </div>
+            <div>
+                {!! app(Botble\Ecommerce\Tables\CustomerReviewTable::class)->customerId($customerId)->setAjaxUrl(route('customers.ajax.reviews', $customerId))->renderTable() !!}
+            </div>
+        </x-core::card>
     @endif
 @endsection

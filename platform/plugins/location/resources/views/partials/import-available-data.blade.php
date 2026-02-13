@@ -12,10 +12,9 @@
         >
             <x-core::alert type="warning">
                 {!! BaseHelper::clean(
-                    trans(
-                        'plugins/location::bulk-import.import_available_data_help',
-                         ['link' => Html::link(route('country.index'), trans('plugins/location::country.name'))]
-                     )
+                    trans('plugins/location::bulk-import.import_available_data_help', [
+                        'link' => Html::link(route('country.index'), trans('plugins/location::country.name')),
+                    ]),
                 ) !!}
             </x-core::alert>
             <x-core::form.select
@@ -24,10 +23,15 @@
                 :searchable="true"
                 :multiple="true"
                 :data-placeholder="trans('plugins/location::bulk-import.choose_country')"
-                :helper-text="trans('plugins/location::bulk-import.available_data_help', ['link' => Html::link('https://github.com/botble/locations', attributes: ['target' => '_blank'])])"
+                :helper-text="trans('plugins/location::bulk-import.available_data_help', [
+                    'link' => Html::link('https://github.com/botble/locations', attributes: ['target' => '_blank']),
+                ])"
             />
 
-            <x-core::button type="submit" color="primary">
+            <x-core::button
+                type="submit"
+                color="primary"
+            >
                 {{ trans('plugins/location::bulk-import.import') }}
             </x-core::button>
         </x-core::form>

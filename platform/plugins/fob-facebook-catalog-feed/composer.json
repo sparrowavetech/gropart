@@ -1,0 +1,16 @@
+{
+    "name": "friendsofbotble/fob-facebook-catalog-feed",
+    "description": "Facebook Catalog Feed plugin for Botble CMS",
+    "type": "botble-plugin",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Friends Of Botble",
+            "email": "contact@friendsofbotble.com"
+        }
+    ],
+    "require": {
+        "php": "^8.0",
+        "botble/platform": "^7.0"
+    }
+}

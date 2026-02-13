@@ -4,6 +4,7 @@ namespace Botble\Marketplace\Http\Controllers\Fronts;
 
 use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Base\Facades\Assets;
+use Botble\Base\Facades\MetaBox;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Rules\MediaImageRule;
 use Botble\Marketplace\Facades\MarketplaceHelper;
@@ -21,7 +22,7 @@ class SettingController extends BaseController
 {
     public function index()
     {
-        $this->pageTitle(__('Settings'));
+        $this->pageTitle(trans('plugins/marketplace::marketplace.settings.title'));
 
         Assets::addScriptsDirectly('vendor/core/plugins/location/js/location.js');
 
@@ -56,8 +57,8 @@ class SettingController extends BaseController
 
             $existing = SlugHelper::getSlug($request->input('slug'), SlugHelper::getPrefix(Store::class));
 
-            if ($existing && $existing->reference_id != $store->id) {
-                return $this->httpResponse()->setError()->setMessage(__('Shop URL is existing. Please choose another one!'));
+            if ($existing && $existing->reference_id != $store->getKey()) {
+                return $this->httpResponse()->setError()->setMessage(trans('plugins/marketplace::store.forms.shop_url_existing'));
             }
 
             $request->validate([
@@ -87,65 +88,48 @@ class SettingController extends BaseController
 
             $request->merge(['is_slug_editable' => 1]);
 
+            if ($request->has('social_links')) {
+                if ($socialLinks = $request->input('social_links', [])) {
+                    $socials = array_keys(MarketplaceHelper::getAllowedSocialLinks());
+                    $socialLinks = collect($socialLinks)->only($socials)->filter();
+                    MetaBox::saveMetaBoxData($store, 'social_links', $socialLinks);
+                }
+            }
+
             return $form;
         });
 
         return $this
             ->httpResponse()
             ->setNextUrl(route('marketplace.vendor.settings'))
-            ->setMessage(__('Update successfully!'));
+            ->setMessage(trans('plugins/marketplace::store.update_successfully'));
     }
 
     public function updateTaxInformation(TaxInformationSettingRequest $request)
-{
-    /** @var Store $store */
-    $store = auth('customer')->user()->store;
+    {
+        /**
+         * @var Store $store
+         */
+        $store = auth('customer')->user()->store;
 
-    $customer = $store->customer;
-    if ($request->hasFile('signature_image_input')) {
-        $result = RvMedia::handleUpload($request->file('signature_image_input'), 0, $store->upload_folder);
-        if (! $result['error']) {
-            $file = $result['data'];
-            $taxInfo = $request->input('tax_info');
-            $taxInfo['signature_image'] = $file->url;
-            $request->merge(['tax_info' => $taxInfo]);
+        $customer = $store->customer;
+
+        if ($customer && $customer->getKey()) {
+            $customer->vendorInfo->update($request->validated());
         }
+
+        event(new UpdatedContentEvent(STORE_MODULE_SCREEN_NAME, $request, $store));
+
+        return $this->httpResponse()
+            ->setMessage(trans('plugins/marketplace::store.update_successfully'))
+            ->setNextUrl(route('marketplace.vendor.settings'));
     }
-
-    // Validate the request
-    $validatedData = $request->validated();
-
-    // Ensure the 'signature_image' key is in the 'tax_info' array
-    if (isset($request->input('tax_info')['signature_image'])) {
-        $validatedData['tax_info']['signature_image'] = $request->input('tax_info')['signature_image'];
-    }
-
-    // Remove the 'signature_image_input' key if it exists
-    $requestData = $request->all();
-    if (isset($requestData['signature_image_input'])) {
-        unset($requestData['signature_image_input']);
-    }
-
-    // Replace the original request data with the modified array
-    $request->replace($requestData);
-
-   // dd($request->all(), $validatedData);
-
-    if ($customer && $customer->getKey()) {
-        $customer->vendorInfo->update($validatedData);
-    }
-
-    event(new UpdatedContentEvent(STORE_MODULE_SCREEN_NAME, $request, $store));
-
-    return $this->httpResponse()
-        ->setMessage(__('Update successfully!'))
-        ->setNextUrl(route('marketplace.vendor.settings'));
-}
-
 
     public function updatePayoutInformation(PayoutInformationSettingRequest $request)
     {
-        /** @var Store $store */
+        /**
+         * @var Store $store
+         */
         $store = auth('customer')->user()->store;
 
         $customer = $store->customer;
@@ -161,7 +145,7 @@ class SettingController extends BaseController
 
         return $this
             ->httpResponse()
-            ->setMessage(__('Update successfully!'))
+            ->setMessage(trans('plugins/marketplace::store.update_successfully'))
             ->setNextUrl(route('marketplace.vendor.settings'));
     }
 }

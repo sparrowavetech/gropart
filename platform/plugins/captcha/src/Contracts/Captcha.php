@@ -71,8 +71,8 @@ abstract class Captcha
     public function attributes(): array
     {
         return [
-            'captcha' => __('Captcha'),
-            'math-captcha' => __('Math Captcha'),
+            'captcha' => trans('plugins/captcha::captcha.captcha'),
+            'math-captcha' => trans('plugins/captcha::captcha.math_captcha'),
         ];
     }
 

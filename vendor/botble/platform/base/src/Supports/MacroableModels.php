@@ -3,12 +3,13 @@
 namespace Botble\Base\Supports;
 
 use BadMethodCallException;
-use Botble\Base\Models\BaseModel;
+use Botble\Base\Facades\BaseHelper;
 use Closure;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use InvalidArgumentException;
+use ReflectionException;
 use ReflectionFunction;
 
 class MacroableModels
@@ -27,7 +28,9 @@ class MacroableModels
         if (! isset($this->macros[$name])) {
             $this->macros[$name] = [];
         }
+
         $this->macros[$name][$model] = $closure;
+
         $this->syncMacros($name);
     }
 
@@ -44,9 +47,9 @@ class MacroableModels
 
         Builder::macro($name, function (...$args) use ($name, $models) {
             /**
-             * @var BaseModel $this
+             * @var Builder $this
              */
-            $class = get_class($this->getModel());
+            $class = $this->getModel()::class;
 
             if (! isset($models[$class])) {
                 throw new BadMethodCallException(sprintf('Call to undefined method %s::%s()', $class, $name));
@@ -104,12 +107,19 @@ class MacroableModels
         $macros = [];
 
         foreach ($this->macros as $macro => $models) {
-            if (in_array($model, array_keys($models))) {
+            if (! in_array($model, array_keys($models))) {
+                continue;
+            }
+
+            try {
                 $params = (new ReflectionFunction($this->macros[$macro][$model]))->getParameters();
+
                 $macros[$macro] = [
                     'name' => $macro,
                     'parameters' => $params,
                 ];
+            } catch (ReflectionException $exception) {
+                BaseHelper::logError($exception);
             }
         }
 

@@ -1,5 +1,5 @@
 @if (is_plugin_active('marketplace') && !auth('customer')->check())
-    <div class="row g-0">
+    <div class="row g-0 mb-4">
         <div class="col-12">
             <div class="fw-normal fs-6">
                 <span>{!! BaseHelper::clean($config['name'] ?: __('Become a Vendor?')) !!}</span>

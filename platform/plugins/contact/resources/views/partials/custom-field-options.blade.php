@@ -3,10 +3,10 @@
         <x-core::table.header.cell>
             {{ trans('plugins/contact::contact.custom_field.option.label') }}
         </x-core::table.header.cell>
-        <x-core::table.header.cell>
-            {{ trans('plugins/contact::contact.custom_field.option.value') }}
-        </x-core::table.header.cell>
-        @if($isDefaultLanguage)
+        @if ($isDefaultLanguage)
+            <x-core::table.header.cell>
+                {{ trans('plugins/contact::contact.custom_field.option.value') }}
+            </x-core::table.header.cell>
             <x-core::table.header.cell />
         @endif
     </x-core::table.header>
@@ -14,8 +14,16 @@
     <x-core::table.body class="custom-field-options">
         @forelse($options as $key => $option)
             <x-core::table.body.row>
-                <input type="hidden" name="options[{{ $key }}][id]" value="{{ $option->id }}" />
-                <input type="hidden" name="options[{{ $key }}][order]" value="{{ $option->order !== 999 ? $option->order : $key }}" />
+                <input
+                    type="hidden"
+                    name="options[{{ $key }}][id]"
+                    value="{{ $option->id }}"
+                />
+                <input
+                    type="hidden"
+                    name="options[{{ $key }}][order]"
+                    value="{{ $option->order !== 999 ? $option->order : $key }}"
+                />
 
                 <x-core::table.body.cell>
                     <input
@@ -26,16 +34,16 @@
                         data-bb-toggle="option-label"
                     />
                 </x-core::table.body.cell>
-                <x-core::table.body.cell>
-                    <input
-                        type="text"
-                        class="form-control"
-                        name="options[{{ $key }}][value]"
-                        value="{{ $option->value }}"
-                        data-bb-toggle="option-value"
-                    />
-                </x-core::table.body.cell>
-                @if($isDefaultLanguage)
+                @if ($isDefaultLanguage)
+                    <x-core::table.body.cell>
+                        <input
+                            type="text"
+                            class="form-control"
+                            name="options[{{ $key }}][value]"
+                            value="{{ $option->value }}"
+                            data-bb-toggle="option-value"
+                        />
+                    </x-core::table.body.cell>
                     <x-core::table.body.cell style="width: 7%">
                         <x-core::button
                             type="button"

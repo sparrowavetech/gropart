@@ -22,7 +22,10 @@
                 style="max-height: 35rem"
             >
                 @foreach ($contacts as $contact)
-                    <a href="{{ route('contacts.edit', $contact->id) }}" class="text-decoration-none">
+                    <a
+                        href="{{ route('contacts.edit', $contact->id) }}"
+                        class="text-decoration-none"
+                    >
                         <div class="list-group-item">
                             <div class="row">
                                 <div class="col-auto">

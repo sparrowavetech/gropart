@@ -31,7 +31,6 @@ class ForgotPasswordForm extends AuthForm
                     ->label(__('Email'))
                     ->placeholder(__('Email address'))
                     ->icon('ti ti-mail')
-                    ->toArray()
             )
             ->submitButton(__('Send Password Reset Link'))
             ->add('back_to_login', HtmlField::class, [

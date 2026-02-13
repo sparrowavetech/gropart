@@ -10,6 +10,7 @@ class ReviewReplyRequest extends Request
     {
         return [
             'message' => ['required', 'string', 'max:1000'],
+            'created_at' => ['nullable', 'date'],
         ];
     }
 }

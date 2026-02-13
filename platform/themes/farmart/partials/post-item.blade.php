@@ -43,11 +43,11 @@
                         @endif
                         <div class="entry-meta-date">
                             <span class="d-inline-block">{{ __('on') }}</span>
-                            <time>{{ $post->created_at->translatedFormat('M d, Y') }}</time>
+                            <time>{{ Theme::formatDate($post->created_at) }}</time>
                         </div>
                     </div>
                     <div class="entry-description">
-                        <p>{{ Str::limit($post->description, 280) }}</p>
+                        <p>{{ Str::limit($post->description, 120) }}</p>
                     </div>
                 </div>
             </div>

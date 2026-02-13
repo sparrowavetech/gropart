@@ -2,7 +2,9 @@
 
 namespace Botble\Sitemap;
 
+use Botble\Base\Facades\BaseHelper;
 use Carbon\Carbon;
+use Datetime;
 
 class Model
 {
@@ -85,7 +87,7 @@ class Model
 
     public function getCacheKey(): string
     {
-        return $this->cacheKey . url('/');
+        return $this->cacheKey . BaseHelper::getHomepageUrl();
     }
 
     public function getCacheDuration(): int|string
@@ -103,181 +105,128 @@ class Model
         return $this->useLimitSize;
     }
 
-    /**
-     * Returns $maxSize value.
-     *
-     * @return bool|mixed|null
-     */
-    public function getMaxSize()
+    public function getMaxSize(): bool|int|null
     {
         return $this->maxSize;
     }
 
-    /**
-     * Returns $useGzip value.
-     *
-     * @return bool|mixed
-     */
-    public function getUseGzip()
+    public function getUseGzip(): bool
     {
         return $this->useGzip;
     }
 
-    /**
-     * Sets $escaping value.
-     *
-     * @param bool $escaping
-     */
-    public function setEscaping($escaping)
+    public function setEscaping(bool $escaping): static
     {
         $this->escaping = $escaping;
+
+        return $this;
     }
 
-    /**
-     * Adds item to $items array.
-     *
-     * @param array $items
-     */
-    public function setItems($items)
+    public function setItems(array $items): static
     {
         $this->items[] = $items;
+
+        return $this;
     }
 
-    /**
-     * Adds sitemap to $sitemaps array.
-     *
-     * @param array $sitemap
-     */
-    public function setSitemaps($sitemap)
+    public function setSitemaps(array $sitemap): static
     {
         $this->sitemaps[] = $sitemap;
+
+        return $this;
     }
 
-    /**
-     * Sets $title value.
-     *
-     * @param string $title
-     */
-    public function setTitle($title)
+    public function setTitle(string $title): static
     {
         $this->title = $title;
+
+        return $this;
     }
 
-    /**
-     * Sets $link value.
-     *
-     * @param string $link
-     */
-    public function setLink($link)
+    public function setLink(string $link): static
     {
         $this->link = $link;
+
+        return $this;
     }
 
-    /**
-     * Sets $useStyles value.
-     *
-     * @param bool $useStyles
-     */
-    public function setUseStyles($useStyles)
+    public function setUseStyles(bool $useStyles): static
     {
         $this->useStyles = $useStyles;
+
+        return $this;
     }
 
-    /**
-     * Sets $sloc value.
-     *
-     * @param string $sloc
-     */
-    public function setSloc($sloc)
+    public function setSloc(string $sloc): static
     {
         $this->sloc = $sloc;
+
+        return $this;
     }
 
-    /**
-     * Sets $useLimitSize value.
-     *
-     * @param bool $useLimitSize
-     */
-    public function setUseLimitSize($useLimitSize)
+    public function setUseLimitSize(bool $useLimitSize): static
     {
         $this->useLimitSize = $useLimitSize;
+
+        return $this;
     }
 
-    /**
-     * Sets $maxSize value.
-     *
-     * @param int $maxSize
-     */
-    public function setMaxSize($maxSize)
+    public function setMaxSize(int $maxSize): static
     {
         $this->maxSize = $maxSize;
+
+        return $this;
     }
 
-    /**
-     * Sets $useGzip value.
-     *
-     * @param bool $useGzip
-     */
-    public function setUseGzip($useGzip = true)
+    public function setUseGzip(bool $useGzip = true): static
     {
         $this->useGzip = $useGzip;
+
+        return $this;
     }
 
     /**
      * Limit size of $items array to 50000 elements (1000 for google-news).
      */
-    public function limitSize($max = 50000)
+    public function limitSize(int $max = 50000): static
     {
         $this->items = array_slice($this->items, 0, $max);
+
+        return $this;
     }
 
-    /**
-     * Reset $items array.
-     *
-     * @param array $items
-     */
-    public function resetItems($items = [])
+    public function resetItems(array $items = []): static
     {
         $this->items = $items;
+
+        return $this;
     }
 
-    /**
-     * Reset $sitemaps array.
-     *
-     * @param array $sitemaps
-     */
-    public function resetSitemaps($sitemaps = [])
+    public function resetSitemaps(array $sitemaps = []): static
     {
         $this->sitemaps = $sitemaps;
+
+        return $this;
     }
 
-    /**
-     * Set use cache value.
-     *
-     * @param bool $useCache
-     */
-    public function setUseCache($useCache = true)
+    public function setUseCache(bool $useCache = true): static
     {
         $this->useCache = $useCache;
+
+        return $this;
     }
 
-    /**
-     * Set cache key value.
-     *
-     * @param string $cacheKey
-     */
-    public function setCacheKey($cacheKey)
+    public function setCacheKey(string $cacheKey): static
     {
         $this->cacheKey = $cacheKey;
+
+        return $this;
     }
 
-    /**
-     * Set cache duration value.
-     *
-     * @param Carbon|\Datetime|int $cacheDuration
-     */
-    public function setCacheDuration($cacheDuration)
+    public function setCacheDuration(Carbon|Datetime|int $cacheDuration): static
     {
         $this->cacheDuration = $cacheDuration;
+
+        return $this;
     }
 }

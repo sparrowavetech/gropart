@@ -1,4 +1,4 @@
-@if (! empty($sliders))
+@if (!empty($sliders))
     <div class="simple-slider-wrapper">
         <div
             class="owl-slider owl-carousel carousel--nav inside"

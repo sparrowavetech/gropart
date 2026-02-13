@@ -43,7 +43,7 @@ class RecentOrdersTable extends TableAbstract
                     return '&mdash;';
                 }
 
-                return BaseHelper::clean($item->payment->payment_channel->label() ?: '&mdash;');
+                return BaseHelper::clean($item->payment->payment_channel->displayName() ?: '&mdash;');
             })
             ->formatColumn('amount', PriceFormatter::class)
             ->editColumn('user_id', function (Order $item) {
@@ -76,10 +76,9 @@ class RecentOrdersTable extends TableAbstract
                 'payment_id',
             ])
             ->with($with)
-            ->where('is_finished', 1)
+            ->where('is_finished', true)
             ->whereDate('created_at', '>=', $startDate)
-            ->whereDate('created_at', '<=', $endDate)
-            ->orderByDesc('created_at')
+            ->whereDate('created_at', '<=', $endDate)->latest()
             ->limit(10);
 
         return $this->applyScopes($query);

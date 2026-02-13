@@ -2,8 +2,10 @@
 
 namespace Botble\Theme\Providers;
 
+use Botble\Base\Facades\BaseHelper;
 use Botble\Theme\Facades\Theme;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
+use Illuminate\Support\Facades\Route;
 
 class RouteServiceProvider extends ServiceProvider
 {
@@ -12,12 +14,18 @@ class RouteServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        $this->app->booted(function () {
-            if (Theme::hasInheritTheme()) {
-                $this->loadRoutesFromTheme(Theme::getInheritTheme());
+        $this->app->booted(function (): void {
+            if (config('core.base.general.disable_front_theme')) {
+                $this->registerApiModeRoutes();
+
+                return;
             }
 
             $this->loadRoutesFromTheme(Theme::getThemeName());
+
+            if (Theme::hasInheritTheme()) {
+                $this->loadRoutesFromTheme(Theme::getInheritTheme());
+            }
         });
     }
 
@@ -25,8 +33,29 @@ class RouteServiceProvider extends ServiceProvider
     {
         $routeFilePath = theme_path($theme . '/routes/web.php');
 
-        if ($this->app['files']->exists($routeFilePath)) {
+        if ($routeFilePath && $this->app['files']->exists($routeFilePath)) {
             $this->loadRoutesFrom($routeFilePath);
         }
+    }
+
+    protected function registerApiModeRoutes(): void
+    {
+        Route::middleware(['web', 'core'])->group(function (): void {
+            Route::get('/', function () {
+                if (empty(BaseHelper::getAdminPrefix())) {
+                    return redirect()->route('access.login');
+                }
+
+                return response()->view('core/base::errors.403-api-mode', [], 403);
+            })->name('public.index');
+
+            Route::fallback(function () {
+                if (empty(BaseHelper::getAdminPrefix())) {
+                    return redirect()->route('access.login');
+                }
+
+                return response()->view('core/base::errors.403-api-mode', [], 403);
+            });
+        });
     }
 }

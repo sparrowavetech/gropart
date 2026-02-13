@@ -55,7 +55,7 @@ class FormBuilder
         UrlGenerator $url,
         Factory $view,
         $csrfToken,
-        Request $request = null
+        ?Request $request = null
     ) {
         $this->url = $url;
         $this->html = $html;

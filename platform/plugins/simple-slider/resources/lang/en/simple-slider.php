@@ -21,4 +21,8 @@ return [
     'simple_slider_shortcode_description' => 'Add a simple slider',
     'select_slider' => 'Select a slider',
     'shortcode' => 'Shortcode',
+    'tablet_image' => 'Tablet Image',
+    'tablet_image_helper' => 'For devices with width from 768px to 1200px, if empty, will use the image from the desktop.',
+    'mobile_image' => 'Mobile Image',
+    'mobile_image_helper' => 'For devices with width less than 768px, if empty, will use the image from the tablet.',
 ];

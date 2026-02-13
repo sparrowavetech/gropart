@@ -4,8 +4,8 @@ namespace Botble\Ecommerce\Http\Controllers;
 
 use Botble\Base\Events\BeforeEditContentEvent;
 use Botble\Base\Events\CreatedContentEvent;
-use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
+use Botble\Base\Http\Actions\DeleteResourceAction;
 use Botble\Base\Supports\Breadcrumb;
 use Botble\Ecommerce\Enums\GlobalOptionEnum;
 use Botble\Ecommerce\Forms\GlobalOptionForm;
@@ -13,7 +13,6 @@ use Botble\Ecommerce\Http\Requests\GlobalOptionRequest;
 use Botble\Ecommerce\Models\GlobalOption;
 use Botble\Ecommerce\Models\GlobalOptionValue;
 use Botble\Ecommerce\Tables\GlobalOptionTable;
-use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 
@@ -41,6 +40,9 @@ class ProductOptionController extends BaseController
 
     public function store(GlobalOptionRequest $request)
     {
+        /**
+         * @var GlobalOption $option
+         */
         $option = GlobalOption::query()->create($request->only(['name', 'option_type', 'required']));
 
         $optionValues = $this->formatOptionValue($request->input());
@@ -53,12 +55,15 @@ class ProductOptionController extends BaseController
         return $this
             ->httpResponse()
             ->setPreviousUrl(route('global-option.index'))
-            ->setNextUrl(route('global-option.edit', $option->id))
+            ->setNextUrl(route('global-option.edit', $option->getKey()))
             ->withCreatedSuccessMessage();
     }
 
     public function edit(int|string $id, Request $request)
     {
+        /**
+         * @var GlobalOption $option
+         */
         $option = GlobalOption::query()->with(['values'])->findOrFail($id);
 
         event(new BeforeEditContentEvent($request, $option));
@@ -68,28 +73,21 @@ class ProductOptionController extends BaseController
         return GlobalOptionForm::createFromModel($option)->renderForm();
     }
 
-    public function destroy(int|string $id, Request $request)
+    public function destroy(int|string $id)
     {
-        try {
-            $option = GlobalOption::query()->findOrFail($id);
+        /**
+         * @var GlobalOption $option
+         */
+        $option = GlobalOption::query()->findOrFail($id);
 
-            $option->delete();
-
-            event(new DeletedContentEvent(GLOBAL_OPTION_MODULE_SCREEN_NAME, $request, $option));
-
-            return $this
-                ->httpResponse()
-                ->setMessage(trans('core/base::notices.delete_success_message'));
-        } catch (Exception $exception) {
-            return $this
-                ->httpResponse()
-                ->setError()
-                ->setMessage($exception->getMessage());
-        }
+        return DeleteResourceAction::make($option);
     }
 
     public function update(int|string $id, GlobalOptionRequest $request)
     {
+        /**
+         * @var GlobalOption $option
+         */
         $option = GlobalOption::query()->findOrFail($id);
 
         $option->fill($request->only(['name', 'option_type', 'required']));

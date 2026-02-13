@@ -18,6 +18,7 @@ class OrderReturn extends BaseModel
         'order_id',
         'user_id',
         'reason',
+        'images',
         'order_status',
         'return_status',
         'store_id',
@@ -27,16 +28,29 @@ class OrderReturn extends BaseModel
         'order_status' => OrderStatusEnum::class,
         'return_status' => OrderReturnStatusEnum::class,
         'reason' => OrderReturnReasonEnum::class,
+        'images' => 'array',
     ];
 
     protected static function booted(): void
     {
-        static::deleted(function (OrderReturn $orderReturn) {
+        static::deleted(function (OrderReturn $orderReturn): void {
             $orderReturn->histories()->delete();
             $orderReturn->items()->delete();
         });
 
-        static::creating(fn (OrderReturn $orderReturn) => $orderReturn->code = static::generateUniqueCode());
+        static::creating(function (OrderReturn $orderReturn): void {
+            $orderReturn->code = static::generateUniqueCode();
+
+            if (! $orderReturn->images || ! is_array($orderReturn->images) || ! count($orderReturn->images)) {
+                $orderReturn->images = null;
+            }
+        });
+
+        static::updating(function (OrderReturn $orderReturn): void {
+            if (! $orderReturn->images || ! is_array($orderReturn->images) || ! count($orderReturn->images)) {
+                $orderReturn->images = null;
+            }
+        });
     }
 
     public function order(): BelongsTo
@@ -66,7 +80,9 @@ class OrderReturn extends BaseModel
 
     public static function generateUniqueCode(): string
     {
-        $nextInsertId = static::query()->max('id') + 1;
+        $nextInsertId = BaseModel::determineIfUsingUuidsForId() ? static::query()->count() + 1 : static::query()->max(
+            'id'
+        ) + 1;
 
         do {
             $code = get_order_code($nextInsertId);

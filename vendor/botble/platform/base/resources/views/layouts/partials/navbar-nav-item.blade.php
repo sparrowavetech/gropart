@@ -1,7 +1,7 @@
 @php
     $menu = apply_filters(BASE_FILTER_DASHBOARD_MENU, $menu);
 
-    if(in_array($menu['id'], ['cms-core-settings', 'cms-core-system'], true)) {
+    if (in_array($menu['id'], ['cms-core-settings', 'cms-core-system'], true)) {
         $menu['children'] = [];
     }
 
@@ -38,45 +38,49 @@
             $alignClass,
             'show' => $menu['active'] && $autoClose === 'false',
         ])>
-                @foreach($children as $child)
-                    @php
-                        if(in_array($child['id'], ['cms-core-settings', 'cms-core-system', 'cms-core-platform-administration'], true)) {
-                            $child['children'] = [];
-                        }
+            @foreach ($children as $child)
+                @php
+                    if (
+                        in_array(
+                            $child['id'],
+                            ['cms-core-settings', 'cms-core-system', 'cms-core-platform-administration'],
+                            true,
+                        )
+                    ) {
+                        $child['children'] = [];
+                    }
 
-                        $childHasChildren = array_key_exists('children', $child) && count($child['children']);
-                    @endphp
+                    $childHasChildren = array_key_exists('children', $child) && count($child['children']);
+                @endphp
 
-                    @if($childHasChildren)
-                        <div class="dropdown">
-                    @endif
+                @if ($childHasChildren)
+                    <div class="dropdown">
+                @endif
 
-                    @include('core/base::layouts.partials.navbar-nav-item-link', [
-                        'menu' => $child,
-                        'hasChildren' => $childHasChildren,
-                        'autoClose' => $autoClose,
-                        'isNav' => false,
-                    ])
+                @include('core/base::layouts.partials.navbar-nav-item-link', [
+                    'menu' => $child,
+                    'hasChildren' => $childHasChildren,
+                    'autoClose' => $autoClose,
+                    'isNav' => false,
+                ])
 
-                    @if($childHasChildren)
-                            <div
-                                @class([
-                                    'dropdown-menu animate slideIn',
-                                    'show' => $child['active'] && $autoClose === 'false',
-                                ])
-                            >
-                                @foreach ($child['children'] as $childItem)
-                                    @include('core/base::layouts.partials.navbar-nav-item-link', [
-                                        'menu' => $childItem,
-                                        'hasChildren' => false,
-                                        'autoClose' => $autoClose,
-                                        'isNav' => false,
-                                    ])
-                                @endforeach
-                            </div>
-                        </div>
-                    @endif
-            @endforeach
+                @if ($childHasChildren)
+                    <div @class([
+                        'dropdown-menu animate slideIn',
+                        'show' => $child['active'] && $autoClose === 'false',
+                    ])>
+                        @foreach ($child['children'] as $childItem)
+                            @include('core/base::layouts.partials.navbar-nav-item-link', [
+                                'menu' => $childItem,
+                                'hasChildren' => false,
+                                'autoClose' => $autoClose,
+                                'isNav' => false,
+                            ])
+                        @endforeach
+                    </div>
         </div>
+    @endif
+    @endforeach
+    </div>
     @endif
 </li>

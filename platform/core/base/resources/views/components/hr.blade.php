@@ -12,7 +12,7 @@
             default => null,
         },
     ]);
-    
+
     $tag = $text ? 'div' : 'hr';
 @endphp
 

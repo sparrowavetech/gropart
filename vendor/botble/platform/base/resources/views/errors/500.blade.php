@@ -1,5 +1,5 @@
 @php
-    PageTitle::setTitle(__('500 Internal Server Error'));
+    PageTitle::setTitle(trans('core/base::errors.500_internal_server_error'));
 @endphp
 
 @extends('core/base::errors.master')
@@ -7,9 +7,9 @@
 @section('content')
     <div class="empty">
         <div class="empty-header">500</div>
-        <p class="empty-title">{{ __('Internal Server Error') }}</p>
+        <p class="empty-title">{{ trans('core/base::errors.500_internal_server_error_description') }}</p>
         <p class="empty-subtitle text-secondary">
-            {{ __('Something is broken. Please let us know what you were doing when this error occurred. We will fix it as soon as possible. Sorry for any inconvenience caused.') }}
+            {{ trans('core/base::errors.500_description') }}
         </p>
         <div class="empty-action">
             <x-core::button
@@ -18,7 +18,7 @@
                 color="primary"
                 icon="ti ti-arrow-left"
             >
-                {{ __('Take me home') }}
+                {{ trans('core/base::errors.take_me_home') }}
             </x-core::button>
         </div>
     </div>

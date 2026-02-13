@@ -15,6 +15,7 @@
         @include lib-css(flex-direction, row);
         padding: 15px 10px;
         cursor: pointer;
+        align-items: center;
 
         .custom-checkbox {
             width: 35px;
@@ -30,11 +31,17 @@
 
             i {
                 margin-right: 5px;
+                margin-inline-start: 5px;
 
                 &:before {
                     display: inline-block;
                     font-size: 18px;
                 }
+            }
+
+            img {
+                max-width: 40px;
+                margin-inline-start: 5px;
             }
         }
 
@@ -119,6 +126,7 @@
                 left: 50%;
                 top: 0;
                 @include lib-css(transform, translateX(-50%));
+                max-width: none;
             }
         }
 
@@ -291,4 +299,88 @@
 
 .context-menu-list {
     z-index: 21 !important;
+}
+
+[data-bs-theme='dark'] {
+    .context-menu-list {
+        background-color: var(--bb-bg-surface);
+        border-color: var(--bb-border-color);
+    }
+
+    .context-menu-item {
+        background-color: var(--bb-bg-surface);
+        color: var(--bb-body-color);
+
+        &.context-menu-hover {
+            background-color: var(--bb-primary);
+            color: #fff;
+        }
+
+        &.context-menu-disabled {
+            background-color: var(--bb-bg-surface);
+            color: var(--bb-secondary-color);
+        }
+    }
+
+    .context-menu-separator {
+        border-bottom-color: var(--bb-border-color);
+    }
+}
+
+// Drag and drop styles for main media list
+.js-media-list-title {
+    &.js-media-draggable {
+        &[draggable='true'] {
+            cursor: grab;
+
+            &:active {
+                cursor: grabbing;
+            }
+        }
+    }
+
+    // List view dragging - applies to the row
+    .rv-media-list &.rv-media-dragging {
+        opacity: 0.5;
+        background-color: var(--bb-bg-surface-secondary) !important;
+    }
+
+    // List view drag over - outline on the row itself
+    .rv-media-list &.rv-media-drag-over {
+        background-color: rgba(var(--bb-success-rgb), 0.15) !important;
+        outline: 2px solid var(--bb-success);
+        outline-offset: -2px;
+
+        .rv-media-thumbnail,
+        .rv-media-name-item,
+        .rv-media-text-name {
+            color: var(--bb-success);
+        }
+    }
+}
+
+// Grid view drag and drop - classes applied directly to .rv-media-item
+.rv-media-grid .rv-media-item {
+    &.rv-media-dragging {
+        opacity: 0.5;
+    }
+
+    &.rv-media-drag-over {
+        // Use box-shadow for the border effect to fit the card
+        box-shadow: inset 0 0 0 2px var(--bb-success);
+
+        &::after {
+            border: 2px solid var(--bb-success);
+            background-color: rgba(var(--bb-success-rgb), 0.1);
+        }
+
+        .rv-media-thumbnail {
+            color: var(--bb-success);
+        }
+
+        .rv-media-description {
+            background-color: var(--bb-success);
+            color: var(--bb-white);
+        }
+    }
 }

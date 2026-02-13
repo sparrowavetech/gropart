@@ -17,7 +17,7 @@
 @endphp
 
 <span {{ $attributes->class($classes) }}>
-    @if($icon)
+    @if ($icon)
         <x-core::icon :name="$icon" />
     @endif
 

@@ -1,15 +1,14 @@
-class="{{ $action->getCssClass() }}"
-@if($action->getType() === 'a')
+@if ($action->getType() === 'a')
     href="{{ $action->hasUrl() ? $action->getUrl() : 'javascript:void(0);' }}"
 @elseif($action->hasUrl())
     type="{{ $action->getType() }}"
     data-url="{{ $action->getUrl() }}"
 @endif
 
-@if($bsToggle = $action->getAttribute('data-bs-toggle'))
+@if ($bsToggle = $action->getAttribute('data-bs-toggle'))
     data-bs-toggle="{{ $bsToggle }}"
 @endif
-@if($bsTarget = $action->getAttribute('data-bs-target'))
+@if ($bsTarget = $action->getAttribute('data-bs-target'))
     data-bs-target="{{ $bsTarget }}"
 @endif
 
@@ -27,4 +26,4 @@ class="{{ $action->getCssClass() }}"
     target="_blank"
 @endif
 
-{!! Html::attributes($action->getAttributes()) !!}
+{!! Html::attributes($attributes ?? $action->getAttributes()) !!}

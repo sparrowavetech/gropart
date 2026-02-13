@@ -1,4 +1,4 @@
-@if (!$isRendered)
+@if (!$isRendered || request()->ajax())
     <script
         src="{{ $url }}"
         async
@@ -18,7 +18,11 @@
 
         var onloadCallback = function() {
             window.recaptchaInputs.forEach(function(item) {
-                grecaptcha.render(item);
+                if (document.getElementById(item)) {
+                    grecaptcha.render(item);
+                } else {
+                    console.warn('reCAPTCHA placeholder element not found for ID:', item);
+                }
             });
         };
     </script>

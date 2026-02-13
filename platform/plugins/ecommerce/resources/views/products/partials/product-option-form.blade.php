@@ -1,25 +1,55 @@
 @php
     Assets::addScriptsDirectly('vendor/core/plugins/ecommerce/js/product-option.js');
 
+    $refLang = request()->input('ref_lang');
+    $isDefaultLanguage = !defined('LANGUAGE_ADVANCED_MODULE_SCREEN_NAME') || !$refLang || $refLang == Language::getDefaultLocaleCode();
+
+    $withRelations = ['values'];
+
+    if (!$isDefaultLanguage) {
+        $withRelations = array_merge($withRelations, ['translations', 'values.translations']);
+    }
+
     $product = $product->loadMissing([
-        'options' => function ($query) {
-            return $query->with(['values']);
+        'options' => function ($query) use ($withRelations) {
+            return $query->with($withRelations);
         },
     ]);
     $oldOption = old('options', []) ?? [];
     $currentProductOption = $product->options;
-    foreach ($currentProductOption as $key => $option) {
-        $currentProductOption[$key]['name'] = $option->name;
-        foreach ($option['values'] as $valueKey => $value) {
-            $currentProductOption[$key]['values'][$valueKey]['option_value'] = $value->option_value;
+    if (! empty($currentProductOption) && $currentProductOption instanceof ArrayAccess) {
+        foreach ($currentProductOption as $key => $option) {
+            $optionName = $option->name;
+
+            if (!$isDefaultLanguage && $refLang) {
+                $translation = $option->translations?->firstWhere('lang_code', $refLang);
+                if ($translation && $translation->name) {
+                    $optionName = $translation->name;
+                }
+            }
+
+            $currentProductOption[$key]['name'] = $optionName;
+
+            if ($option->values && $option->values->isNotEmpty()) {
+                foreach ($option->values as $valueKey => $value) {
+                    $optionValue = $value->option_value;
+
+                    if (!$isDefaultLanguage && $refLang) {
+                        $valueTranslation = $value->translations?->firstWhere('lang_code', $refLang);
+                        if ($valueTranslation && $valueTranslation->option_value) {
+                            $optionValue = $valueTranslation->option_value;
+                        }
+                    }
+
+                    $currentProductOption[$key]['values'][$valueKey]['option_value'] = $optionValue;
+                }
+            }
         }
     }
 
-    if (!empty($oldOption)) {
+    if (! empty($oldOption)) {
         $currentProductOption = $oldOption;
     }
-
-    $isDefaultLanguage = !defined('LANGUAGE_ADVANCED_MODULE_SCREEN_NAME') || !request()->input('ref_lang') || request()->input('ref_lang') == Language::getDefaultLocaleCode();
 @endphp
 
 @push('header')
@@ -50,7 +80,7 @@
         </div>
         <div class="row">
             @if ($isDefaultLanguage)
-                <div class="col">
+                <div class="col col-12 col-md-4 mb-3 mb-md-0">
                     <x-core::button
                         type="button"
                         class="add-new-option"
@@ -60,8 +90,8 @@
                     </x-core::button>
                 </div>
                 @if (! empty($globalOptions))
-                    <div class="col ms-auto">
-                        <div class="d-flex gap-2 align-items-start justify-content-end">
+                    <div class="col ms-auto ms-md-0 col-12 col-md-8">
+                        <div class="d-flex gap-2 align-items-start justify-content-start justify-content-md-end">
                             <x-core::form.select
                                 id="global-option"
                                 :options="[0 => trans('plugins/ecommerce::product-option.select_global_option')] + $globalOptions"
@@ -75,6 +105,13 @@
                         </div>
                     </div>
                 @endif
+            @else
+                <div class="col ms-auto ms-md-0 col-12">
+                    <div class="text-muted">
+                        <x-core::icon name="ti ti-info-circle" class="me-1" />
+                        {{ trans('plugins/ecommerce::product-option.no_global_options') }}
+                    </div>
+                </div>
             @endif
         </div>
     </div>
@@ -82,77 +119,81 @@
 
 @push('footer')
     <x-core::custom-template id="template-option-values-of-field">
-        <table class="table table-bordered setting-option mt-3">
-            <thead>
-            <tr>
-                @if ($isDefaultLanguage)
-                    <th scope="col">__priceLabel__</th>
-                    <th scope="col" colspan="2">__priceTypeLabel__</th>
-                @endif
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-                <input type="hidden" name="options[__index__][values][0][id]" value="__id__" />
-                @if ($isDefaultLanguage)
-                    <td>
-                        <input type="number" name="options[__index__][values][0][affect_price]" class="form-control option-label" value="__affectPrice__" placeholder="__affectPriceLabel__"/>
-                    </td>
-                    <td>
-                        <select class="form-select" name="options[__index__][values][0][affect_type]">
-                            <option value="0" __selectedFixed__> __fixedLang__</option>
-                            <option value="1" __selectedPercent__> __percentLang__</option>
-                        </select>
-                    </td>
-                @endif
-            </tr>
-            </tbody>
-        </table>
+        <div class="table-mobile-responsive">
+            <table class="table table-bordered setting-option mt-3">
+                <thead>
+                <tr>
+                    @if ($isDefaultLanguage)
+                        <th scope="col">__priceLabel__</th>
+                        <th scope="col" colspan="2">__priceTypeLabel__</th>
+                    @endif
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <input type="hidden" name="options[__index__][values][0][id]" value="__id__" />
+                    @if ($isDefaultLanguage)
+                        <td data-content="__priceLabel__">
+                            <input type="number" name="options[__index__][values][0][affect_price]" class="form-control option-label" value="__affectPrice__" placeholder="__affectPriceLabel__"/>
+                        </td>
+                        <td data-content="__priceTypeLabel__">
+                            <select class="form-select" name="options[__index__][values][0][affect_type]">
+                                <option value="0" __selectedFixed__> __fixedLang__</option>
+                                <option value="1" __selectedPercent__> __percentLang__</option>
+                            </select>
+                        </td>
+                    @endif
+                </tr>
+                </tbody>
+            </table>
+        </div>
     </x-core::custom-template>
     <x-core::custom-template id="template-option-type-array">
-        <table class="table table-bordered setting-option mt-3">
-            <thead>
-            <tr class="option-row">
-                @if ($isDefaultLanguage)
-                    <th scope="col">#</th>
-                @endif
-                <th scope="col">__label__</th>
-                @if ($isDefaultLanguage)
-                    <th scope="col">__priceLabel__</th>
-                    <th scope="col" colspan="2">__priceTypeLabel__</th>
-                @endif
-            </tr>
-            </thead>
-            <tbody>
-            __optionValue__
-            </tbody>
-        </table>
+        <div class="table-mobile-responsive">
+            <table class="table table-bordered setting-option mt-3">
+                <thead>
+                <tr class="option-row">
+                    @if ($isDefaultLanguage)
+                        <th scope="col">#</th>
+                    @endif
+                    <th scope="col">__label__</th>
+                    @if ($isDefaultLanguage)
+                        <th scope="col">__priceLabel__</th>
+                        <th scope="col" colspan="2">__priceTypeLabel__</th>
+                    @endif
+                </tr>
+                </thead>
+                <tbody>
+                __optionValue__
+                </tbody>
+            </table>
+        </div>
     </x-core::custom-template>
 
     <x-core::custom-template id="template-option-type-value">
         <tr data-index="__key__">
             @if ($isDefaultLanguage)
-                <td>
-                    <i class="fa fa-sort"></i>
+                <td class="align-middle text-center d-none d-md-block">
+                    <x-core::icon name="ti ti-arrows-sort" />
                     <input type="hidden" class="option-value-order" value="__order__" name="options[__index__][values][__key__][order]">
                 </td>
             @endif
-            <td>
+            <td data-content="__label__">
                 <input type="hidden" class="option-value-order" value="__id__" name="options[__index__][values][__key__][id]">
                 <input type="text" name="options[__index__][values][__key__][option_value]" class="form-control option-label" value="__option_value_input__" placeholder="__labelPlaceholder__" />
             </td>
             @if ($isDefaultLanguage)
-                <td>
+                <td class="align-middle" data-content="__priceLabel__">
                     <input type="number" name="options[__index__][values][__key__][affect_price]" class="form-control affect_price" value="__affectPrice__" placeholder="__affectPriceLabel__" />
                 </td>
-                <td>
+                <td class="align-middle" data-content="__priceTypeLabel__">
                     <select class="form-select affect_type" name="options[__index__][values][__key__][affect_type]">
                         <option value="0" __selectedFixed__> __fixedLang__ </option>
                         <option value="1" __selectedPercent__> __percentLang__ </option>
                     </select>
                 </td>
-                <td style="width: 50px;">
-                    <button class="btn btn-default remove-row"><i class="fa fa-trash"></i></button>
+                <td class="align-middle" style="width: 50px;">
+                    <button class="btn btn-default remove-row" type="button"><x-core::icon name="ti ti-trash" /></button>
                 </td>
             @endif
         </tr>
@@ -170,19 +211,20 @@
             <div id="collapse-product-option-__index__" class="accordion-collapse collapse-product-option show" aria-labelledby="product-option-__id__" data-bs-parent="#accordion-product-option">
                 <div class="accordion-body">
                     <div class="row align-items-end">
-                        <div class="col">
+                        <div class="col col-12 col-md-3 mb-3 mb-md-0">
                             <x-core::form.label>__nameLabel__</x-core::form.label>
                             <input type="text" name="options[__index__][name]" class="form-control option-name" value="__option_name__" placeholder="__namePlaceHolder__">
                         </div>
                         @if ($isDefaultLanguage)
-                            <div class="col">
+                            <div class="col col-12 col-md-3 mb-3 mb-md-0">
                                 <x-core::form.label>__optionTypeLabel__</x-core::form.label>
                                 <select name="options[__index__][option_type]" id="" class="form-select option-type">
                                     __optionTypeOption__
                                 </select>
                             </div>
-                            <div class="col" style="margin-top: 38px;">
+                            <div class="col col-12 col-md-3 mb-3 mb-md-0">
                                 <div class="mb-3">
+                                    <x-core::form.label class="sr-only">__requiredLabel__</x-core::form.label>
                                     <x-core::form.checkbox
                                         label="__requiredLabel__"
                                         id="required-__index__"
@@ -193,7 +235,7 @@
                                     />
                                 </div>
                             </div>
-                            <div class="col text-end">
+                            <div class="col col-12 col-md-3 text-md-end">
                                 <x-core::button
                                     type="button"
                                     color="danger"

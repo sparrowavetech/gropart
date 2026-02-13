@@ -26,6 +26,15 @@
             {{ $shipment->order->shipping_method_name }}
         </x-core::datagrid.item>
 
+        @if ($shipment->store_id && $shipment->store->name)
+            <x-core::datagrid.item>
+                <x-slot:title>
+                    {{ trans('plugins/ecommerce::shipping.warehouse') }}
+                </x-slot:title>
+                {{ $shipment->store->name }}
+            </x-core::datagrid.item>
+        @endif
+
         <x-core::datagrid.item>
             <x-slot:title>
                 {{ trans('plugins/ecommerce::shipping.weight_unit', ['unit' => ecommerce_weight_unit()]) }}
@@ -55,6 +64,15 @@
                     {{ trans('plugins/ecommerce::shipping.delivery_note') }}
                 </x-slot:title>
                 {{ $shipment->note }}
+            </x-core::datagrid.item>
+        @endif
+
+        @if ($shipment->customer_delivered_confirmed_at)
+            <x-core::datagrid.item>
+                <x-slot:title>
+                    <span class="text-success">{{ trans('plugins/ecommerce::shipping.customer_confirmed_delivery_at') }}</span>
+                </x-slot:title>
+                <span class="text-success">{{ $shipment->customer_delivered_confirmed_at }}</span>
             </x-core::datagrid.item>
         @endif
     </x-core::datagrid>
@@ -87,9 +105,11 @@
             {{ trans('plugins/ecommerce::shipping.update_shipping_status') }}
         </x-core::button>
 
-        <x-core::button tag="a" :href="route('ecommerce.shipments.print', $shipment)" target="_blank" icon="ti ti-printer">
-            {{ trans('plugins/ecommerce::shipping.shipping_label.print_shipping_label') }}
-        </x-core::button>
+        @if ($shipment->canPrintLabel())
+            <x-core::button tag="a" :href="route('ecommerce.shipments.print', $shipment)" target="_blank" icon="ti ti-printer">
+                {{ trans('plugins/ecommerce::shipping.shipping_label.print_shipping_label') }}
+            </x-core::button>
+        @endif
 
         {!! apply_filters('shipment_buttons_detail_order', null, $shipment) !!}
     </x-core::card.footer>

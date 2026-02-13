@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="{{ Str::replace('_', '-', App::getLocale()) }}">
+
 <head>
     <meta charset="utf-8">
     <meta
@@ -20,6 +21,7 @@
     <link
         href="{{ asset('vendor/core/core/base/images/favicon.png') }}"
         rel="icon"
+        type="image/png"
     >
 
     @include('core/base::components.layouts.header')
@@ -38,14 +40,7 @@
 
     @php
         Assets::getFacadeRoot()
-            ->removeStyles([
-                'fontawesome',
-                'select2',
-                'custom-scrollbar',
-                'datepicker',
-                'spectrum',
-                'fancybox',
-            ])
+            ->removeStyles(['fontawesome', 'select2', 'custom-scrollbar', 'datepicker', 'spectrum', 'fancybox'])
             ->removeScripts([
                 'excanvas',
                 'ie8-fix',
@@ -62,7 +57,7 @@
                 'fslightbox',
             ]);
     @endphp
-    {!!  Assets::renderHeader(['core']) !!}
+    {!! Assets::renderHeader(['core']) !!}
 
     <link
         href="{{ BaseHelper::getGoogleFontsURL() }}"
@@ -77,97 +72,101 @@
 </head>
 
 <body>
-    @php
-        use Botble\Installer\InstallerStep\InstallerStep;
+@php
+    use Botble\Installer\InstallerStep\InstallerStep;
 
-        $currentStep = InstallerStep::currentStep();
-    @endphp
+    $currentStep = InstallerStep::currentStep();
+@endphp
 
-    <div class="page-wrapper justify-content-center min-h-full">
-        <div class="page-body page-content mt-8 mb-8">
-            <div class="container-xl installer-container">
-                <div class="row mb-6">
-                    <div class="col">
-                        <h3 class="h1 page-title justify-content-center text-white">
-                            {{ trans('packages/installer::installer.title') }}
-                        </h3>
-                    </div>
+<div class="page-wrapper justify-content-center min-h-full">
+    <div class="page-body page-content mt-8 mb-8">
+        <div class="container-xl installer-container">
+            <div class="row mb-6">
+                <div class="col">
+                    <h3 class="h1 page-title justify-content-center text-white">
+                        {{ trans('packages/installer::installer.title') }}
+                    </h3>
                 </div>
+            </div>
 
-                <div class="row installer-wrapper">
-                    <div class="col-md-3 p-4">
-                        <div class="steps-backdrop"></div>
-                        <x-core::step :counter="true" :vertical="true">
-                            @foreach(InstallerStep::getItems() as $step)
-                                <x-core::step.item :is-active="$currentStep === $loop->iteration">
-                                    @if($step->getRoute() && $currentStep > $loop->iteration)
-                                        <a href="{{ route($step->getRoute()) }}">{{ $step->getLabel() }}</a>
-                                    @else
-                                        {{ $step->getLabel() }}
-                                    @endif
-                                </x-core::step.item>
-                            @endforeach
-                        </x-core::step>
-                    </div>
-                    <div class="col-md-9 p-0">
-                        <x-core::card class="h-100">
-                            @hasSection('header')
-                                <x-core::card.header>
-                                    @yield('header')
-                                </x-core::card.header>
-                            @endif
+            <div class="row installer-wrapper">
+                <div class="col-md-3 p-4">
+                    <div class="steps-backdrop"></div>
+                    <x-core::step
+                        :counter="true"
+                        :vertical="true"
+                    >
+                        @foreach (InstallerStep::getItems() as $step)
+                            <x-core::step.item :is-active="$currentStep === $loop->iteration">
+                                @if ($step->getRoute() && $currentStep > $loop->iteration)
+                                    <a href="{{ route($step->getRoute()) }}">{{ $step->getLabel() }}</a>
+                                @else
+                                    {{ $step->getLabel() }}
+                                @endif
+                            </x-core::step.item>
+                        @endforeach
+                    </x-core::step>
+                </div>
+                <div class="col-md-9 p-0">
+                    <x-core::card class="h-100">
+                        @hasSection('header')
+                            <x-core::card.header>
+                                @yield('header')
+                            </x-core::card.header>
+                        @endif
 
-                            <x-core::card.body>
-                                @include('packages/installer::partials.alert')
+                        <x-core::card.body>
+                            @include('packages/installer::partials.alert')
 
-                                @yield('content')
-                            </x-core::card.body>
+                            @yield('content')
+                        </x-core::card.body>
 
-                            @hasSection('footer')
-                                <x-core::card.footer class="d-flex justify-content-end">
-                                    @yield('footer')
-                                </x-core::card.footer>
-                            @endif
-                        </x-core::card>
-                    </div>
+                        @hasSection('footer')
+                            <x-core::card.footer class="d-flex justify-content-end">
+                                @yield('footer')
+                            </x-core::card.footer>
+                        @endif
+                    </x-core::card>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    {!!  Assets::renderFooter() !!}
+{!! Assets::renderFooter() !!}
 
-    <script type="text/javascript">
-        var BotbleVariables = BotbleVariables || {
-            languages: {
-                notices_msg: {{ Js::from(trans('core/base::notices')) }},
-            },
-        };
-    </script>
+<script type="text/javascript">
+    var BotbleVariables = BotbleVariables || {
+        languages: {
+            notices_msg: {{ Js::from(trans('core/base::notices')) }},
+        },
+    }
+</script>
 
-    @push('footer')
-        @if (Session::has('success_msg') || Session::has('error_msg') || (isset($errors) && $errors->any()) || isset($error_msg))
-            <script type="text/javascript">
-                $(function() {
-                    @if (Session::has('success_msg'))
-                    Botble.showSuccess('{{ session('success_msg') }}');
-                    @endif
-                    @if (Session::has('error_msg'))
-                    Botble.showError('{{ session('error_msg') }}');
-                    @endif
-                    @if (isset($error_msg))
-                    Botble.showError('{{ $error_msg }}');
-                    @endif
-                    @if (isset($errors))
-                    @foreach ($errors->all() as $error)
-                    Botble.showError('{{ $error }}');
-                    @endforeach
-                    @endif
-                })
-            </script>
-        @endif
-    @endpush
+@push('footer')
+    @if (Session::has('success_msg') || Session::has('error_msg') || (isset($errors) && $errors->any()) || isset($error_msg))
+        <script type="text/javascript">
+            $(function() {
+                @if (Session::has('success_msg'))
+                Botble.showSuccess('{{ session('success_msg') }}')
+                @endif
+                @if (Session::has('error_msg'))
+                Botble.showError('{{ session('error_msg') }}')
+                @endif
+                @if (isset($error_msg))
+                Botble.showError('{{ $error_msg }}')
+                @endif
+                @if (isset($errors))
+                @foreach ($errors->all() as $error)
+                Botble.showError('{{ $error }}')
+                @endforeach
+                @endif
+            })
+        </script>
+    @endif
+@endpush
 
-    @yield('scripts')
+@yield('scripts')
 </body>
+
 </html>

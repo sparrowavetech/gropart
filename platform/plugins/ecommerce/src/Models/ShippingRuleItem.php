@@ -21,6 +21,8 @@ class ShippingRuleItem extends BaseModel
         'adjustment_price',
         'is_enabled',
         'zip_code',
+        'zip_code_from',
+        'zip_code_to',
     ];
 
     public function shippingRule(): BelongsTo
@@ -30,11 +32,19 @@ class ShippingRuleItem extends BaseModel
 
     protected function adjustmentPrice(): Attribute
     {
-        return Attribute::set(fn (string $value) => (float) str_replace(',', '', $value));
+        return Attribute::set(fn (?string $value) => (float) str_replace(',', '', $value));
     }
 
     protected function nameItem(): Attribute
     {
-        return Attribute::get(fn () => trim(implode(', ', array_filter([$this->state_name, $this->city_name, $this->zip_code]))));
+        return Attribute::get(function () {
+            $zipDisplay = $this->zip_code_from;
+
+            if ($this->zip_code_from && $this->zip_code_to && $this->zip_code_from !== $this->zip_code_to) {
+                $zipDisplay = $this->zip_code_from . ' - ' . $this->zip_code_to;
+            }
+
+            return trim(implode(', ', array_filter([$this->state_name, $this->city_name, $zipDisplay ?: $this->zip_code])));
+        });
     }
 }

@@ -25,7 +25,7 @@ class MathCaptcha
     {
         $label = $this->getMathLabelOnly();
 
-        return __('Please solve the following math function: :label = ?', compact('label'));
+        return trans('plugins/captcha::captcha.math_question', compact('label'));
     }
 
     public function getMathLabelOnly(): string

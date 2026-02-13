@@ -10,11 +10,17 @@ if (! function_exists('is_added_to_wishlist')) {
             return false;
         }
 
-        return auth('customer')
-            ->user()
-            ->wishlist()
-            ->where('product_id', $productId)
-            ->exists();
+        static $wishlistProductIds = null;
+
+        if ($wishlistProductIds === null) {
+            $wishlistProductIds = auth('customer')
+                ->user()
+                ->wishlist()
+                ->pluck('product_id')
+                ->all();
+        }
+
+        return in_array($productId, $wishlistProductIds, true);
     }
 }
 
@@ -37,8 +43,7 @@ if (! function_exists('get_customer_addresses')) {
         }
 
         return Address::query()
-            ->where('customer_id', auth('customer')->id())
-            ->orderByDesc('created_at')
+            ->where('customer_id', auth('customer')->id())->latest()
             ->get();
     }
 }
@@ -50,11 +55,16 @@ if (! function_exists('get_default_customer_address')) {
             return null;
         }
 
-        return Address::query()
+        /**
+         * @var Address $address
+         */
+        $address = Address::query()
             ->where([
                 'is_default' => 1,
                 'customer_id' => auth('customer')->id(),
             ])
             ->first();
+
+        return $address;
     }
 }

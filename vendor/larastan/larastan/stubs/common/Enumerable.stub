@@ -7,15 +7,16 @@ namespace Illuminate\Support;
  * @template TValue
  *
  * @extends \IteratorAggregate<TKey, TValue>
+ * @extends \Illuminate\Contracts\Support\Arrayable<TKey, TValue>
  */
-interface Enumerable extends \Countable, \IteratorAggregate, \JsonSerializable
+interface Enumerable extends \Countable, \IteratorAggregate, \JsonSerializable, \Illuminate\Contracts\Support\Arrayable
 {
     /**
      * Search the collection for a given value and return the corresponding key if successful.
      *
      * @param  TValue|callable(TValue,TKey): bool  $value
      * @param  bool  $strict
-     * @return (TKey is int ? int|bool : string|bool)
+     * @return (TKey is int ? int|false : string|false)
      */
     public function search($value, $strict = false);
 
@@ -38,4 +39,12 @@ interface Enumerable extends \Countable, \IteratorAggregate, \JsonSerializable
     * @return static<array-key, TCombineValue>
     */
    public function combine($values);
+
+   /**
+    * Chunk the collection into chunks with a callback.
+    *
+    * @param  callable(TValue, TKey, static<int, TValue>): bool  $callback
+    * @return static<int, static<TKey, TValue>>
+    */
+   public function chunkWhile(callable $callback);
 }

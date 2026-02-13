@@ -17,8 +17,8 @@ class AccessToken
         $this->createDate = time();
     }
 
-    public function isExpired()
+    public function isExpired(): bool
     {
-        return time() >= $this->createDate + $this->expiresIn;
+        return time() >= ($this->createDate + $this->expiresIn); // @phpstan-ignore-line
     }
 }

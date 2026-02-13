@@ -12,7 +12,7 @@ trait CanEncode
     /**
      * Encode current entity
      *
-     * @return string
+     * @throws EncoderException
      */
     public function encode(): string
     {
@@ -22,26 +22,22 @@ trait CanEncode
     /**
      * Get encoder object for current entity
      *
-     * @return AbstractEncoder
+     * @throws EncoderException
      */
     protected function getEncoder(): AbstractEncoder
     {
-        $classname = $this->getEncoderClassname();
+        $classname = sprintf('Intervention\Gif\Encoders\%sEncoder', $this->getShortClassname());
 
         if (!class_exists($classname)) {
             throw new EncoderException("Encoder for '" . $this::class . "' not found.");
         }
 
-        return new $classname($this);
-    }
+        $encoder = new $classname($this);
 
-    /**
-     * Get encoder classname for current entity
-     *
-     * @return string
-     */
-    protected function getEncoderClassname(): string
-    {
-        return sprintf('Intervention\Gif\Encoders\%sEncoder', $this->getShortClassname());
+        if (!($encoder instanceof AbstractEncoder)) {
+            throw new EncoderException("Encoder for '" . $this::class . "' not found.");
+        }
+
+        return $encoder;
     }
 }

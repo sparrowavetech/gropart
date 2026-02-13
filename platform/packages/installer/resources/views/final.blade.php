@@ -4,7 +4,11 @@
 
 @section('content')
     <div class="d-flex flex-column justify-content-center text-center h-100">
-        <x-core::icon size="lg" name="ti ti-circle-check" class="d-block mx-auto text-success mb-2" />
+        <x-core::icon
+            size="lg"
+            name="ti ti-circle-check"
+            class="d-block mx-auto text-success mb-2"
+        />
 
         <h3 class="fw-bold mb-2">{{ trans('packages/installer::installer.final.pageTitle') }}</h3>
 

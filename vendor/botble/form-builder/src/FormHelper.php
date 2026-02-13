@@ -75,7 +75,7 @@ class FormHelper
         }
     }
 
-    public function getConfig(string $key = null, string $default = null, array $customConfig = []): mixed
+    public function getConfig(?string $key = null, ?string $default = null, array $customConfig = []): mixed
     {
         $config = array_replace_recursive($this->config, $customConfig);
 

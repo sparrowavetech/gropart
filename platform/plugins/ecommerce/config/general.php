@@ -23,8 +23,6 @@ return [
     'digital_products' => [
         'allowed_mime_types' => env('DIGITAL_PRODUCT_ALLOWED_MIME_TYPES', []),
     ],
-    'shiprocket' => [
-        'email' => env('SHIPROCKET_EMAIL'),
-        'password' => env('SHIPROCKET_PASSWORD'),
-    ],
+
+    'verification_expire_minutes' => env('ECOMMERCE_EMAIL_VERIFICATION_EXPIRE_MINUTES', 60),
 ];

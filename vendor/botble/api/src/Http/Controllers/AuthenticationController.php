@@ -2,9 +2,9 @@
 
 namespace Botble\Api\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Models\User;
 use Botble\Api\Facades\ApiHelper;
+use Botble\Api\Http\Requests\CheckEmailRequest;
 use Botble\Api\Http\Requests\LoginRequest;
 use Botble\Api\Http\Requests\RegisterRequest;
 use Botble\Base\Http\Responses\BaseHttpResponse;
@@ -14,13 +14,12 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
-class AuthenticationController extends Controller
+class AuthenticationController extends BaseApiController
 {
     /**
      * Register
      *
-     * @bodyParam first_name string required The name of the user.
-     * @bodyParam last_name string required The name of the user.
+     * @bodyParam name string required The name of the user.
      * @bodyParam email string required The email of the user.
      * @bodyParam phone string required The phone of the user.
      * @bodyParam password string  required The password of user to create.
@@ -34,11 +33,8 @@ class AuthenticationController extends Controller
      * @response 422 {
      * "message": "The given data was invalid.",
      * "errors": {
-     *     "first_name": [
-     *         "The first name field is required."
-     *     ],
-     *     "last_name": [
-     *         "The last name field is required."
+     *     "name": [
+     *         "The name field is required."
      *     ],
      *     "email": [
      *         "The email field is required."
@@ -55,7 +51,9 @@ class AuthenticationController extends Controller
     {
         $request->merge(['password' => Hash::make($request->input('password'))]);
 
-        $request->merge(['name' => $request->input('first_name') . ' ' . $request->input('last_name')]);
+        if (! $request->has('name')) {
+            $request->merge(['name' => $request->input('first_name') . ' ' . $request->input('last_name')]);
+        }
 
         $user = ApiHelper::newModel()->create($request->only([
             'first_name',
@@ -88,7 +86,7 @@ class AuthenticationController extends Controller
     /**
      * Login
      *
-     * @bodyParam login string required The email/phone of the user.
+     * @bodyParam email string required The email of the user.
      * @bodyParam password string required The password of user to create.
      *
      * @response {
@@ -103,11 +101,16 @@ class AuthenticationController extends Controller
      */
     public function login(LoginRequest $request, BaseHttpResponse $response)
     {
-        if (Auth::guard(ApiHelper::guard())->attempt([
-            'email' => $request->input('email'),
-            'password' => $request->input('password'),
-        ])) {
-            $token = $request->user(ApiHelper::guard())->createToken($request->input('token_name', 'Personal Access Token'));
+        if (
+            Auth::guard(ApiHelper::guard())
+                ->attempt([
+                    'email' => $request->input('email'),
+                    'password' => $request->input('password'),
+                ])
+        ) {
+            $user = $request->user(ApiHelper::guard());
+
+            $token = $user->createToken($request->input('token_name', 'Personal Access Token'));
 
             return $response
                 ->setData(['token' => $token->plainTextToken]);
@@ -135,5 +138,44 @@ class AuthenticationController extends Controller
 
         return $response
             ->setMessage(__('You have been successfully logged out!'));
+    }
+
+    /**
+     * Check email existing or not
+     *
+     * @bodyParam email string required The email of the user.
+     *
+     * @response {
+     *  "error": false,
+     *  "data": {
+     *     "exists": true
+     *  },
+     *  "message": null
+     *  }
+     *
+     * @group Authentication
+     */
+    public function checkEmail(CheckEmailRequest $request, BaseHttpResponse $response)
+    {
+        $user = ApiHelper::newModel()->where('email', $request->input('email'))->first();
+
+        $data = [
+            'exists' => (bool) $user,
+        ];
+
+        if ($user) {
+            $data['user'] = [];
+
+            if ($user->first_name || $user->last_name) {
+                $data['user']['first_name'] = $user->first_name;
+                $data['user']['last_name'] = $user->last_name;
+            }
+
+            $data['user']['name'] = $user->name;
+            $data['user']['email'] = $user->email;
+        }
+
+        return $response
+            ->setData($data);
     }
 }

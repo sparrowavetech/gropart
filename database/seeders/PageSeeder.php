@@ -12,8 +12,6 @@ class PageSeeder extends BaseSeeder
 
     public function run(): void
     {
-        $faker = $this->fake();
-
         $pages = [
             [
                 'name' => 'Home',
@@ -24,21 +22,22 @@ class PageSeeder extends BaseSeeder
                     ) .
                     Html::tag(
                         'div',
-                        '[featured-product-categories title="Browse by Category"][/featured-product-categories]'
+                        '[featured-product-categories title="Browse by Category" enable_lazy_loading="yes"][/featured-product-categories]'
                     ) .
-                    Html::tag('div', '[featured-brands title="Featured Brands"][/featured-brands]') .
-                    Html::tag('div', '[flash-sale title="Top Saver Today" flash_sale_id="1"][/flash-sale]') .
+                    Html::tag('div', '[featured-brands title="Featured Brands" enable_lazy_loading="yes"][/featured-brands]') .
+                    Html::tag('div', '[flash-sale title="Top Saver Today" flash_sale_id="1" enable_lazy_loading="yes"][/flash-sale]') .
                     Html::tag(
                         'div',
-                        '[product-category-products title="Just Landing" category_id="23"][/product-category-products]'
+                        '[product-category-products title="Just Landing" category_id="23" enable_lazy_loading="yes"][/product-category-products]'
                     ) .
                     Html::tag(
                         'div',
                         '[theme-ads key_1="IZ6WU8KUALYD" key_2="ILSFJVYFGCPZ" key_3="ZDOZUZZIU7FT"][/theme-ads]'
                     ) .
-                    Html::tag('div', '[featured-products title="Featured products"][/featured-products]') .
-                    Html::tag('div', '[product-collections title="Essential Products"][/product-collections]') .
-                    Html::tag('div', '[product-category-products category_id="18"][/product-category-products]') .
+                    Html::tag('div', '[featured-products title="Featured products" enable_lazy_loading="yes"][/featured-products]') .
+                    Html::tag('div', '[product-collections title="Essential Products" enable_lazy_loading="yes"][/product-collections]') .
+                    Html::tag('div', '[product-category-products category_id="18" enable_lazy_loading="yes"][/product-category-products]') .
+                    '[testimonials title="What our Clients say" subtitle="Customers Review" testimonial_ids="1,2,3,4" enable_lazy_loading="yes"][/testimonials]' .
                     Html::tag(
                         'div',
                         '[featured-posts title="Health Daily" background="general/blog-bg.jpg"
@@ -129,6 +128,8 @@ launching soon." social_title="Connect us on social networks" image="general/com
                 'template' => 'coming-soon',
             ],
         ];
+
+        $this->truncatePages();
 
         $this->createPages($pages);
     }

@@ -29,16 +29,14 @@
                 <x-core::table.body.row>
                     <x-core::table.body.cell class="template-name w-25">
                         @php
-                            $isOn = (bool) (get_setting_email_status($type, $module, $key));
+                            $isOn = (bool) get_setting_email_status($type, $module, $key);
                         @endphp
 
                         <a
                             href="{{ route('settings.email.template.edit', [$type, $module, $key]) }}"
                             @class(['text-muted text-decoration-line-through' => !$isOn])
-                            @if (!$isOn)
-                                data-bs-toggle="tooltip"
-                                title="{{ trans('core/setting::setting.email.template_off_status_helper') }}"
-                            @endif
+                            @if (!$isOn) data-bs-toggle="tooltip"
+                                title="{{ trans('core/setting::setting.email.template_off_status_helper') }}" @endif
                         >
                             {{ trans($template['title']) }}
                         </a>

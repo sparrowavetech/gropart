@@ -66,7 +66,10 @@
             target="_blank"
             class="d-inline-block mt-2"
         > Need reset your license?
-        </a> <span class="text-body">Please log in to our <a href="{{ $licenseURL }}" target="_blank">customer license manager site</a> to reset your license.</span>
+        </a> <span class="text-body">Please log in to our <a
+                href="{{ $licenseURL }}"
+                target="_blank"
+            >customer license manager site</a> to reset your license.</span>
     </div>
 
 </x-core-setting::form-group>

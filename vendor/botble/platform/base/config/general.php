@@ -2,6 +2,7 @@
 
 return [
     'admin_dir' => env('ADMIN_DIR', 'admin'),
+    'disable_front_theme' => env('CMS_DISABLE_FRONT_THEME', false),
     'base_name' => env('APP_NAME', 'Botble Technologies'),
     'logo' => '/vendor/core/core/base/images/logo.png',
     'favicon' => '/vendor/core/core/base/images/favicon.png',
@@ -10,6 +11,7 @@ return [
             'js' => [
                 '/vendor/core/core/base/libraries/ckeditor/ckeditor.js',
             ],
+            'font_families' => env('CKEDITOR_FONT_FAMILIES', ''),
         ],
         'tinymce' => [
             'js' => [
@@ -31,6 +33,7 @@ return [
     'enable_https_support' => env('ENABLE_HTTPS_SUPPORT', false),
     'force_root_url' => env('FORCE_ROOT_URL'),
     'force_schema' => env('FORCE_SCHEMA'),
+    'enable_http_security_headers' => env('ENABLE_HTTP_SECURITY_HEADERS', true),
     'max_execution_time' => env('CMS_MAX_EXECUTION_TIME', 300),
     'memory_limit' => env('CMS_MEMORY_LIMIT'),
     'date_format' => [
@@ -41,7 +44,6 @@ return [
             'date_time' => env('CMS_JS_DATE_TIME_FORMAT', 'yyyy-mm-dd H:i:s'),
         ],
     ],
-    'locale' => env('APP_LOCALE', 'en'),
     'demo' => [
         'account' => [
             'username' => env('CMS_DEMO_ACCOUNT_USERNAME', 'admin'),
@@ -308,7 +310,8 @@ return [
     'purifier' => [
         'default' => [
             'HTML.Doctype' => 'HTML 4.01 Transitional',
-            'HTML.Allowed' => 'div,b,strong,i,em,u,a[href|title|rel|style|target|dofollow|nofollow],ul,ol,li,p[style],br,span[style],img[width|height|alt|src|style|loading],button,ins[style|data-ad-client|data-ad-slot|data-ad-format|data-full-width-responsive],video[src|type|width|height|preload|controls|autoplay|autostart|poster|id|class,muted],meta[name|content|property],link[media|type|rel|href]',
+            'HTML.Allowed' => 'div,b,strong,i,em,u,a[href|title|rel|style|target|dofollow|nofollow],ul,ol,li,p[style],br,span[style],img[width|height|alt|src|style|loading],button,ins[style|data-ad-client|data-ad-slot|data-ad-format|data-full-width-responsive],video[src|type|width|height|preload|controls|autoplay|autostart|poster|id|class,muted,loop],meta[name|content|property],link[media|type|rel|href]',
+            'URI.AllowedSchemes' => 'http,https,mailto,tel,viber,ftp,data',
             'HTML.AllowedElements' => [
                 'a',
                 'b',
@@ -337,6 +340,9 @@ return [
                 'table',
                 'tbody',
                 'td',
+                'dl',
+                'dt',
+                'dd',
                 'th',
                 'thead',
                 'tr',
@@ -369,7 +375,6 @@ return [
             'HTML.SafeIframe' => 'true',
             // Add to .env if you want to allow all.
             // CMS_IFRAME_FILTER_URL_REGEX=/^(.*)/
-            'URI.SafeIframeRegexp' => env('CMS_IFRAME_FILTER_URL_REGEX', '%^(http://|https://|//)(' . env('CMS_IFRAME_ALLOWED_URLS', 'www.youtube.com/embed/|player.vimeo.com/video/|maps.google.com/maps|www.google.com/maps|docs.google.com/|drive.google.com/|view.officeapps.live.com/op/embed.aspx|onedrive.live.com/embed') . ')%'),
             'Attr.AllowedFrameTargets' => ['_blank'],
             'CSS.AllowedProperties' => [
                 'font',
@@ -431,6 +436,8 @@ return [
             ['img', 'data-src', 'Text'],
             ['img', 'loading', 'Text'],
             ['video', 'autoplay', 'Bool'],
+            ['video', 'muted', 'Bool'],
+            ['video', 'loop', 'Bool'],
             ['meta', 'name', 'Text'],
             ['meta', 'content', 'Text'],
             ['meta', 'property', 'Text'],
@@ -441,15 +448,18 @@ return [
             ['link', 'color', 'Text'],
             ['audio', 'controls', 'Bool'],
             ['div', 'data-bs-theme', 'Text'],
+            ['div', 'data-url', 'Text'],
             ['button', 'data-bb-toggle', 'Text'],
             ['button', 'data-value', 'Text'],
         ],
     ],
     'enable_system_updater' => env('CMS_ENABLE_SYSTEM_UPDATER', true),
     'phone_validation_rule' => env('CMS_PHONE_VALIDATION_RULE', 'min:8|max:15|regex:/^([0-9\s\-\+\(\)]*)$/'),
+    'zipcode_validation_rule' => env('CMS_ZIPCODE_VALIDATION_RULE', 'string|min:4|max:9'),
     'disable_verify_csrf_token' => env('CMS_DISABLE_VERIFY_CSRF_TOKEN', false),
     'enable_less_secure_web' => env('CMS_ENABLE_LESS_SECURE_WEB', false),
     'db_strict_mode' => env('DB_STRICT', true),
+    'db_prefix' => env('DB_PREFIX', ''),
     'enable_ini_set' => env('CMS_ENABLE_INI_SET', true),
     'upgrade_php_require_disabled' => env('CMS_UPGRADE_PHP_REQUIRE_DISABLED', false),
     'enabled_cleanup_database' => env('CMS_ENABLED_CLEANUP_DATABASE', false),
@@ -463,4 +473,11 @@ return [
     'type_id' => env('CMS_USING_TYPE_ID', 'BIGINT'),
     'csv_import_input_encoding' => env('CMS_CSV_IMPORT_INPUT_ENCODING', 'UTF-8'),
     'google_fonts_key' => env('CMS_GOOGLE_FONTS_KEY'),
+    'demo_mode_enabled' => env('CMS_DEMO_MODE_ENABLED', false),
+    'enable_email_configuration_from_admin_panel' => env('CMS_ENABLE_EMAIL_CONFIGURATION_FROM_ADMIN_PANEL', true),
+    'session_cookie' => env('CMS_SESSION_COOKIE_KEY_NAME', 'botble_session'),
+    'allowed_iframe_urls' => env('CMS_IFRAME_ALLOWED_URLS', ''),
+    'iframe_regex' => env('CMS_IFRAME_FILTER_URL_REGEX', ''),
+    'static_ip' => env('CMS_STATIC_IP'),
+    'license_storage_method' => env('CMS_LICENSE_STORAGE_METHOD', 'file'), // 'file' or 'database'
 ];

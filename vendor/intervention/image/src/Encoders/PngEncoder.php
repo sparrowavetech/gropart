@@ -8,7 +8,13 @@ use Intervention\Image\Drivers\SpecializableEncoder;
 
 class PngEncoder extends SpecializableEncoder
 {
-    public function __construct(public bool $interlaced = false)
+    /**
+     * Create new encoder object
+     *
+     * @return void
+     */
+    public function __construct(public bool $interlaced = false, public bool $indexed = false)
     {
+        //
     }
 }

@@ -2,8 +2,8 @@
 
 namespace Botble\AuditLog\Listeners;
 
+use Botble\AuditLog\AuditLog;
 use Botble\AuditLog\Events\AuditHandlerEvent;
-use Botble\AuditLog\Facades\AuditLog;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Facades\BaseHelper;
 use Exception;

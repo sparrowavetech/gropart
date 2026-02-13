@@ -69,16 +69,25 @@ class SelectLocationField extends FormField
     {
         $countryKey = Arr::get($this->locationKeys, 'country');
         $countries = Country::query()
-            ->select('name', 'id')
-            ->get()
-            ->mapWithKeys(fn ($item) => [$item->getKey() => $item->name])
-            ->all();
+            ->select('name', 'id', 'is_default')
+            ->latest('is_default')
+            ->oldest('order')
+            ->oldest('name')
+            ->latest()
+            ->get();
 
         $value = Arr::get($this->getValue(), 'country');
 
-        if (! $value && count($countries)) {
-            $value = Arr::first(array_keys($countries));
+        if (! $value && $countries->isNotEmpty()) {
+            $firstCountry = $countries->first();
+            if ($firstCountry->is_default) {
+                $value = $firstCountry->getKey();
+            }
         }
+
+        $countries = $countries
+            ->mapWithKeys(fn ($item) => [$item->getKey() => $item->name])
+            ->all();
 
         $attr = array_merge($this->getOption('attr', []), [
             'id' => $countryKey,
@@ -102,22 +111,35 @@ class SelectLocationField extends FormField
         $countryId = Arr::get($this->getValue(), 'country');
 
         if (! $countryId) {
-            $countries = Country::query()->select('name', 'id')
-                ->get()
-                ->mapWithKeys(fn ($item) => [$item->getKey() => $item->name])
-                ->all();
+            $defaultCountry = Country::query()
+                ->select('id')
+                ->where('is_default', true)
+                ->first();
 
-            if (count($countries)) {
-                $countryId = Arr::first(array_keys($countries));
+            if ($defaultCountry) {
+                $countryId = $defaultCountry->id;
             }
         }
 
         $value = Arr::get($this->getValue(), 'state');
         if ($countryId) {
-            $states = State::query()
+            $statesQuery = State::query()
                 ->where('country_id', $countryId)
-                ->select('name', 'id')
-                ->get()
+                ->select('name', 'id', 'is_default')
+                ->latest('is_default')
+                ->oldest('order')
+                ->oldest('name')
+                ->latest()
+                ->get();
+
+            if (! $value && $statesQuery->isNotEmpty()) {
+                $firstState = $statesQuery->first();
+                if ($firstState->is_default) {
+                    $value = $firstState->getKey();
+                }
+            }
+
+            $states = $statesQuery
                 ->mapWithKeys(fn ($item) => [$item->getKey() => $item->name])
                 ->all();
         }
@@ -145,20 +167,62 @@ class SelectLocationField extends FormField
         $stateId = Arr::get($this->getValue(), 'state');
         $countryId = Arr::get($this->getValue(), 'country');
         $value = Arr::get($this->getValue(), 'city');
-        if ($stateId) {
-            $cities = City::query()
-                ->where('state_id', $stateId)
-                ->select('name', 'id')->get()
-                ->mapWithKeys(fn ($item) => [$item->getKey() => $item->name])
-                ->all();
-        } elseif ($countryId) {
-            $cities = City::query()
-                ->where('country_id', $countryId)
-                ->select('name', 'id')
-                ->get()
-                ->mapWithKeys(fn ($item) => [$item->getKey() => $item->name])
-                ->all();
+
+        if (! $countryId) {
+            $defaultCountry = Country::query()
+                ->select('id')
+                ->where('is_default', true)
+                ->first();
+
+            if ($defaultCountry) {
+                $countryId = $defaultCountry->id;
+            }
         }
+
+        if (! $stateId && $countryId) {
+            $defaultState = State::query()
+                ->select('id')
+                ->where('country_id', $countryId)
+                ->where('is_default', true)
+                ->first();
+
+            if ($defaultState) {
+                $stateId = $defaultState->id;
+            }
+        }
+
+        $citiesQuery = collect();
+
+        if ($stateId) {
+            $citiesQuery = City::query()
+                ->where('state_id', $stateId)
+                ->latest('is_default')
+                ->oldest('order')
+                ->oldest('name')
+                ->latest()
+                ->select('name', 'id', 'is_default')
+                ->get();
+        } elseif ($countryId) {
+            $citiesQuery = City::query()
+                ->where('country_id', $countryId)
+                ->select('name', 'id', 'is_default')
+                ->latest('is_default')
+                ->oldest('order')
+                ->oldest('name')
+                ->latest()
+                ->get();
+        }
+
+        if (! $value && $citiesQuery->isNotEmpty()) {
+            $firstCity = $citiesQuery->first();
+            if ($firstCity->is_default) {
+                $value = $firstCity->getKey();
+            }
+        }
+
+        $cities = $citiesQuery
+            ->mapWithKeys(fn ($item) => [$item->getKey() => $item->name])
+            ->all();
 
         $attr = array_merge($this->getOption('attr', []), [
             'id' => $cityKey,
@@ -201,7 +265,6 @@ class SelectLocationField extends FormField
         $data = $this->getRenderData();
 
         foreach ($this->locationKeys as $k => $v) {
-            // Override default value with value
             $options = [];
             switch ($k) {
                 case 'country':

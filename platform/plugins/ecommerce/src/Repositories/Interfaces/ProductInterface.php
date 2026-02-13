@@ -15,7 +15,7 @@ interface ProductInterface extends RepositoryInterface
 
     public function getRelatedProductAttributes(Product $product): Collection;
 
-    public function getProducts(array $params);
+    public function getProducts(array $params, array $filters = []);
 
     public function getProductsWithCategory(array $params);
 

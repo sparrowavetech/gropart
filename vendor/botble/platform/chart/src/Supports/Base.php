@@ -5,6 +5,15 @@ namespace Botble\Chart\Supports;
 use Botble\Base\Facades\Assets;
 use Illuminate\Support\Str;
 
+/**
+ * @method static Base xkey(array $value)
+ * @method static Base ykeys(array $value)
+ * @method static Base pointFillColors(array $value)
+ * @method static Base pointStrokeColors(array $value)
+ * @method static Base lineColors(array $value)
+ * @method static Base hoverCallback(string $value)
+ * @method static Base xLabels(string $value)
+ */
 class Base
 {
     /**

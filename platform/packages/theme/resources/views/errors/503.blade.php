@@ -1,6 +1,6 @@
 @extends('packages/theme::errors.master')
 
-@section('title', __('503 Service Unavailable'))
+@section('title', trans('packages/theme::theme.errors.503_service_unavailable'))
 
 @section('content')
     <div class="empty">
@@ -11,13 +11,12 @@
                 height="128"
             >
         </div>
-        <p class="empty-title">{{ __('Temporarily down for maintenance') }}</p>
-        <p class="empty-subtitle text-secondary">{{ __('Sorry, we are doing some maintenance. Please check back soon.') }}</p>
-        <p class="empty-subtitle text-secondary"><i>{!! BaseHelper::clean(__("If you are the administrator and you can't access your site after enabling maintenance mode, just need to delete file <strong>storage/framework/down</strong> to turn-off maintenance mode.")) !!}</i></p>
+        <p class="empty-title">{{ trans('packages/theme::theme.errors.temporarily_down') }}</p>
+        <p class="empty-subtitle text-secondary">{{ trans('packages/theme::theme.errors.maintenance_description') }}</p>
+        <p class="empty-subtitle text-secondary">
+            <i>{!! BaseHelper::clean(trans('packages/theme::theme.errors.maintenance_admin_note')) !!}</i></p>
         @if ($email = get_admin_email()->first())
-            <p class="empty-subtitle text-secondary">{!! BaseHelper::clean(__('If you need help, contact us at :mail.', ['mail' => Html::mailto($email)])) !!}</p>
+            <p class="empty-subtitle text-secondary">{!! BaseHelper::clean(trans('packages/theme::theme.errors.need_help_contact', ['mail' => Html::mailto($email)])) !!}</p>
         @endif
     </div>
 @endsection
-
-

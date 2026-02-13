@@ -1,7 +1,7 @@
 <div class="vendor-info-box">
     <div class="vendor-info-summary-wrapper">
         <div class="vendor-info-summary">
-            @php $coverImage = $store->getMetadata('background', true); @endphp
+            @php $coverImage = $store->getMetaData('background', true) ?: theme_option('default_vendor_cover_image'); @endphp
             <div
                 class="vendor-info"
                 @if ($coverImage) style="background-image: url({{ RvMedia::getImageUrl($coverImage) }}); background-repeat: no-repeat;
@@ -16,7 +16,7 @@
                         <div class="col-lg-7">
                             <div class="vendor-info-content px-3">
                                 <div class="vendor-store-information row align-items-center">
-                                    <div class="vendor-avatar col-12 col-sm-3">
+                                    <div class="vendor-avatar col-3">
                                         <img
                                             class="rounded-circle"
                                             src="{{ $store->logo_url }}"
@@ -24,13 +24,9 @@
                                         >
                                     </div>
                                     <div class="vendor-store-info col">
-                                        <h4 class="vendor-name d-inline">{{ $store->name }}</h4>
-                                        @if($store->is_verified)
-                                            <img class="verified-store-info" src="{{ asset('/storage/stores/verified.png')}}"alt="Verified">
-                                        @endif
-                                        <small class="badge bg-warning text-dark">{{ $store->shop_category->label() }}</small>
+                                        <h4 class="vendor-name">{{ $store->name }} {!! $store->badge !!}</h4>
                                         @if (EcommerceHelper::isReviewEnabled())
-                                            <div class="vendor-store-rating">
+                                            <div class="vendor-store-rating mb-3">
                                                 {!! Theme::partial('star-rating', [
                                                     'avg' => $store->reviews()->avg('star'),
                                                     'count' => $store->reviews()->count(),
@@ -39,19 +35,19 @@
                                         @endif
 
                                         @if (! MarketplaceHelper::hideStoreAddress() && $store->full_address)
-                                            <div class="vendor-store-address mt-3 mb-1">
+                                            <div class="vendor-store-address mb-1">
                                                 <i class="icon icon-map-marker me-1"></i>&nbsp;{{ $store->full_address }}
                                             </div>
                                         @endif
                                         @if (!MarketplaceHelper::hideStorePhoneNumber() && $store->phone)
-                                            <div class="vendor-store-phone mt-3 mb-1">
+                                            <div class="vendor-store-phone mb-1">
                                                 <i class="icon icon-telephone me-1"></i>&nbsp;<a
                                                     href="tel:{{ $store->phone }}"
                                                 >{{ $store->phone }}</a>
                                             </div>
                                         @endif
                                         @if (!MarketplaceHelper::hideStoreEmail() && $store->email)
-                                            <div class="vendor-store-email mt-3 mb-1">
+                                            <div class="vendor-store-email mb-1">
                                                 <i class="icon icon-envelope me-1"></i>&nbsp;<a
                                                     href="mailto:{{ $store->email }}"
                                                 >{{ $store->email }}</a>
@@ -63,33 +59,49 @@
                         </div>
                         <div class="col-lg-5">
                             <div class="store-social-wrapper mt-4 mt-md-0 px-3">
-                                @if (!MarketplaceHelper::hideStoreSocialLinks() && ($socials = $store->getMetaData('socials', true)))
-                                    <ul class="store-social text-lg-end">
-                                        @foreach ((array) $socials as $k => $link)
-                                            <li>
-                                                <a
-                                                    class="social-{{ $k }}"
-                                                    href="{{ $link }}"
-                                                    target="_blank"
-                                                >
-                                                    <span class="svg-icon">
-                                                        <svg>
-                                                            <use
-                                                                href="#svg-icon-{{ $k }}"
-                                                                xlink:href="#svg-icon-{{ $k }}"
-                                                            ></use>
-                                                        </svg>
-                                                    </span>
-                                                </a>
-                                            </li>
-                                        @endforeach
-                                    </ul>
+                                @if (!MarketplaceHelper::hideStoreSocialLinks())
+                                    @if ($socials = $store->getMetaData('social_links', true)))
+                                        <ul class="store-social text-lg-end">
+                                            @foreach (MarketplaceHelper::getAllowedSocialLinks() as $key => $social)
+                                                @continue(! Arr::get($socials, $key))
+
+                                                <li>
+                                                    <a href="{{ Arr::get($social, 'url') . Arr::get($socials, $key) }}" target="_blank">
+                                                        @if ($icon = Arr::get($social, 'icon'))
+                                                            <x-core::icon :name="'ti ti-brand-' . $icon" />
+                                                        @endif
+                                                    </a>
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                    @elseif ($socials = $store->getMetaData('socials', true))
+                                        <ul class="store-social text-lg-end">
+                                            @foreach ((array) $socials as $k => $link)
+                                                <li>
+                                                    <a
+                                                        class="social-{{ $k }}"
+                                                        href="{{ $link }}"
+                                                        target="_blank"
+                                                    >
+                                                        <span class="svg-icon">
+                                                            <svg>
+                                                                <use
+                                                                    href="#svg-icon-{{ $k }}"
+                                                                    xlink:href="#svg-icon-{{ $k }}"
+                                                                ></use>
+                                                            </svg>
+                                                        </span>
+                                                    </a>
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                    @endif
                                 @endif
                             </div>
                             <ul class="vendor-store-info mt-4 text-lg-end px-3">
                                 <li class="vendor-store-register-date">
                                     <span>{{ __('Started from') }}: </span>
-                                    {{ $store->created_at->translatedFormat('M d, Y') }}
+                                    {{ Theme::formatDate($store->created_at) }}
                                 </li>
                             </ul>
                         </div>
@@ -139,28 +151,16 @@
                         </div>
 
                         <a
-                            class="text-link toggle-show-more"
+                            class="text-link toggle-show-more ms-1"
                             href="#"
                         >{{ __('show more') }}</a>
                         <a
-                            class="text-link toggle-show-less d-none"
+                            class="text-link toggle-show-less ms-1 d-none"
                             href="#"
                         >{{ __('show less') }}</a>
                     </div>
                 </div>
             @endif
-            <div class="my-2 store-product-filter-button">
-                <div class="d-flex">
-                    <a class="btn btn-primary me-2 px-3" href="{{ $store->url }}" title="{{ __('Retail Products') }}">
-                        <span class="add-to-cart-text ms-1">{{ __('Retail Products') }}</span>
-                        <span class="fa fa-chevron-down"></span>
-                    </a>
-                    <a class="btn btn-primary btn-black px-3" href="{{ $store->url.'?enquiry=1' }}" title="{{ __('Enquiry Products') }}">
-                        <span class="add-to-cart-text ms-1">{{ __('Enquiry Products') }}</span>
-                        <span class="fa fa-chevron-down"></span>
-                    </a>
-                </div>
-            </div>
         </div>
     </div>
 </div>

@@ -15,9 +15,7 @@ class PublicMediaController extends BaseController
     {
         $originId = MediaFile::isUsingStringId() ? $id : hexdec($id);
 
-        if (sha1($id) !== $hash) {
-            abort(404);
-        }
+        abort_if(sha1($id) !== $hash, 404);
 
         $mediaFile = MediaFile::query()
             ->whereKey($originId)
@@ -27,18 +25,16 @@ class PublicMediaController extends BaseController
             return response()->download(Storage::disk('local')->path($mediaFile->url));
         }
 
-        $response = Http::get(RvMedia::url($mediaFile->url));
+        $response = Http::withoutVerifying()->get(RvMedia::url($mediaFile->url));
 
-        if ($response->ok()) {
-            $body = $response->toPsrResponse()->getBody();
+        abort_if($response->failed(), 403, $response->reason());
 
-            return Response::streamDownload(function () use ($body) {
-                while (! $body->eof()) {
-                    echo $body->read(1024);
-                }
-            }, headers: $response->headers());
-        }
+        $body = $response->toPsrResponse()->getBody();
 
-        abort(403);
+        return Response::streamDownload(function () use ($body): void {
+            while (! $body->eof()) {
+                echo $body->read(1024);
+            }
+        }, headers: $response->headers());
     }
 }

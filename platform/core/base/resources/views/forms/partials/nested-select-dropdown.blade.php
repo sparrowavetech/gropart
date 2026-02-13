@@ -2,7 +2,10 @@
      @php
          Arr::set($selectAttributes, 'class', Arr::get($selectAttributes, 'class') . ' ui-select');
      @endphp
-     <select name="{{ $name }}" {!! Html::attributes($selectAttributes) !!}>
+     <select
+         name="{{ $name }}"
+         {!! Html::attributes($selectAttributes) !!}
+     >
          @include('core/base::forms.partials.nested-select-option', [
              'options' => $choices,
              'indent' => null,

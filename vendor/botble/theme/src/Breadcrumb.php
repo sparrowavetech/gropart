@@ -31,7 +31,7 @@ class Breadcrumb
                 }
             }
         } else {
-            $label = trim(strip_tags($label, '<i><b><strong>'));
+            $label = trim(strip_tags($label));
             if (! preg_match('|^http(s)?|', $url)) {
                 $url = URL::to($url);
             }

@@ -53,7 +53,7 @@
 
                             @foreach ($fields as $field)
                                 @if (!in_array($field->getName(), $exclude))
-                                    @if ($field->getType() == 'hidden')
+                                    @if (in_array($field->getType(), ['hidden', \Botble\Base\Forms\Fields\HiddenField::class]))
                                         {!! $field->render() !!}
                                     @else
                                         <div class="widget meta-boxes">
@@ -74,19 +74,19 @@
                 </div>
             </div>
 
-    @if ($showEnd)
-        {!! Form::close() !!}
-    @endif
-@endsection
+            @if ($showEnd)
+                {!! Form::close() !!}
+            @endif
+        @endsection
 
-@if ($form->getValidatorClass())
-    @if ($form->isUseInlineJs())
-        {!! Assets::scriptToHtml('jquery') !!}
-        {!! Assets::scriptToHtml('form-validation') !!}
-        {!! $form->renderValidatorJs() !!}
-    @else
-        @push('footer')
-            {!! $form->renderValidatorJs() !!}
-        @endpush
-    @endif
-@endif
+        @if ($form->getValidatorClass())
+            @if ($form->isUseInlineJs())
+                {!! Assets::scriptToHtml('jquery') !!}
+                {!! Assets::scriptToHtml('form-validation') !!}
+                {!! $form->renderValidatorJs() !!}
+            @else
+                @push('footer')
+                    {!! $form->renderValidatorJs() !!}
+                @endpush
+            @endif
+        @endif

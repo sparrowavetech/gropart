@@ -1,9 +1,9 @@
 <div @class(['col-12', 'col-md-8' => $showAvgRating])>
-    <h4>{{ __('Add your review') }}</h4>
+    <h4>{{ trans('plugins/ecommerce::review.add_your_review') }}</h4>
 
     @if (isset($checkReview) && ! $checkReview['error'])
         <p>
-            {{ __('Your email address will not be published. Required fields are marked *') }}
+            {{ trans('plugins/ecommerce::ecommerce.your_email_address_will_not_be_published_required_') }}
             <span class="required"></span>
         </p>
     @endif
@@ -11,19 +11,88 @@
     @guest('customer')
         <p class="text-danger">
             {!! BaseHelper::clean(
-                __('Please <a href=":link">login</a> to write review!', ['link' => route('customer.login')]),
+                trans('plugins/ecommerce::review.please_login_to_write_review', ['link' => route('customer.login')]),
             ) !!}
         </p>
     @endguest
 
     @if (isset($checkReview) && $checkReview['error'])
-        <p class="text-warning">{{ $checkReview['message'] }}</p>
+        @php
+            $alertClass = match($checkReview['type']) {
+                'already_reviewed' => 'review-info-alert',
+                default => 'review-warning-alert'
+            };
+            $iconClass = match($checkReview['type']) {
+                'already_reviewed' => 'info-icon',
+                default => 'warning-icon'
+            };
+            $contentClass = match($checkReview['type']) {
+                'already_reviewed' => 'info-content',
+                default => 'warning-content'
+            };
+            $titleClass = match($checkReview['type']) {
+                'already_reviewed' => 'info-title',
+                default => 'warning-title'
+            };
+            $messageClass = match($checkReview['type']) {
+                'already_reviewed' => 'info-message',
+                default => 'warning-message'
+            };
+            $actionsClass = match($checkReview['type']) {
+                'already_reviewed' => 'info-actions',
+                default => 'warning-actions'
+            };
+            $buttonClass = match($checkReview['type']) {
+                'already_reviewed' => 'btn btn-outline-info btn-sm',
+                default => 'btn btn-outline-warning btn-sm'
+            };
+        @endphp
+        <div class="{{ $alertClass }} mt-4">
+            <div class="{{ $iconClass }}">
+                @if ($checkReview['type'] === 'already_reviewed')
+                    <x-core::icon name="ti ti-circle-check" />
+                @elseif ($checkReview['type'] === 'purchase_required')
+                    <x-core::icon name="ti ti-shopping-cart" />
+                @else
+                    <x-core::icon name="ti ti-alert-triangle" />
+                @endif
+            </div>
+            <div class="{{ $contentClass }}">
+                <div class="{{ $titleClass }}">
+                    @if ($checkReview['type'] === 'already_reviewed')
+                        {{ trans('plugins/ecommerce::review.thank_you_for_your_review') }}
+                    @elseif ($checkReview['type'] === 'purchase_required')
+                        {{ trans('plugins/ecommerce::ecommerce.purchase_required') }}
+                    @else
+                        {{ trans('plugins/ecommerce::review.review_not_available') }}
+                    @endif
+                </div>
+                <div class="{{ $messageClass }}">
+                    {{ $checkReview['message'] }}
+                </div>
+                @if ($checkReview['type'] === 'purchase_required')
+                    <div class="{{ $actionsClass }}">
+                        <a href="{{ route('public.products') }}" class="{{ $buttonClass }}">
+                            <x-core::icon name="ti ti-shopping-bag" />
+                            {{ trans('plugins/ecommerce::products.browse_products') }}
+                        </a>
+                    </div>
+                @elseif ($checkReview['type'] === 'already_reviewed')
+                    <div class="{{ $actionsClass }}">
+                        <a href="{{ route('customer.product-reviews') }}" class="{{ $buttonClass }}">
+                            <x-core::icon name="ti ti-star" />
+                            {{ trans('plugins/ecommerce::review.view_your_reviews') }}
+                        </a>
+                    </div>
+                @endif
+            </div>
+        </div>
     @else
         <x-core::form :url="route('public.reviews.create')" method="post" :files="true">
             <input type="hidden" name="product_id" value="{{ $product->id }}">
 
             <div class="d-flex align-items-center mb-3">
-                <label class="form-label mb-0 required" for="rating">{{ __('Your rating:') }}</label>
+                <label class="form-label mb-0 required" for="rating">{{ trans('plugins/ecommerce::review.your_rating') }}</label>
                 <div class="form-rating-stars ms-2">
                     @for ($i = 5; $i >= 1; $i--)
                         <input
@@ -43,60 +112,62 @@
 
             <div class="mb-3">
                 <label for="comment" class="form-label required">
-                    {{ __('Review') }}:
+                    {{ trans('plugins/ecommerce::review.review') }}:
                 </label>
                 <textarea
                     class="form-control"
                     name="comment"
                     required
                     rows="8"
-                    placeholder="{{ __('Write your review') }}"
+                    placeholder="{{ trans('plugins/ecommerce::review.write_your_review') }}"
                     @disabled(! auth('customer')->check())
                 ></textarea>
             </div>
 
-            <script type="text/x-custom-template" id="review-image-template">
-                <span class="image-viewer__item" data-id="__id__">
-                    <img src="{{ RvMedia::getDefaultImage() }}" alt="Preview" class="img-responsive d-block">
-                    <span class="image-viewer__icon-remove">
-                        <x-core::icon name="ti ti-x" />
+            @if (EcommerceHelper::isCustomerReviewImageUploadEnabled())
+                <script type="text/x-custom-template" id="review-image-template">
+                    <span class="image-viewer__item" data-id="__id__">
+                        <img src="{{ RvMedia::getDefaultImage() }}" alt="Preview" class="img-responsive d-block">
+                        <span class="image-viewer__icon-remove">
+                            <x-core::icon name="ti ti-x" />
+                        </span>
                     </span>
-                </span>
-            </script>
+                </script>
 
-            <div class="image-upload__viewer d-flex">
-                <div class="image-viewer__list position-relative">
-                    <div class="image-upload__uploader-container">
-                        <div class="d-table">
-                            <div class="image-upload__uploader">
-                                <x-core::icon name="ti ti-photo" />
-                                <div class="image-upload__text">{{ __('Upload photos') }}</div>
-                                <input
-                                    class="image-upload__file-input"
-                                    name="images[]"
-                                    data-max-files="{{ EcommerceHelper::reviewMaxFileNumber() }}"
-                                    data-max-size="{{ EcommerceHelper::reviewMaxFileSize(true) }}"
-                                    data-max-size-message="{{ trans('validation.max.file', ['attribute' => '__attribute__', 'max' => '__max__']) }}"
-                                    type="file"
-                                    accept="image/png,image/jpeg,image/jpg"
-                                    multiple="multiple"
-                                >
+                <div class="image-upload__viewer d-flex">
+                    <div class="image-viewer__list position-relative">
+                        <div class="image-upload__uploader-container">
+                            <div class="d-table">
+                                <div class="image-upload__uploader">
+                                    <x-core::icon name="ti ti-photo" />
+                                    <div class="image-upload__text">{{ trans('plugins/ecommerce::ecommerce.upload_photos') }}</div>
+                                    <input
+                                        class="image-upload__file-input"
+                                        name="images[]"
+                                        data-max-files="{{ EcommerceHelper::reviewMaxFileNumber() }}"
+                                        data-max-size="{{ EcommerceHelper::reviewMaxFileSize(true) }}"
+                                        data-max-size-message="{{ trans('validation.max.file', ['attribute' => '__attribute__', 'max' => '__max__']) }}"
+                                        type="file"
+                                        accept="image/png,image/jpeg,image/jpg"
+                                        multiple="multiple"
+                                    >
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div role="alert" class="image-upload-info alert alert-info p-2">
-                <div class="small d-flex align-items-center gap-1">
-                    <x-core::icon name="ti ti-info-circle" />
+                <div role="alert" class="image-upload-info alert alert-info p-2">
+                    <div class="small d-flex align-items-center gap-1">
+                        <x-core::icon name="ti ti-info-circle" />
 
-                    {{ __('You can upload up to :total photos, each photo maximum size is :max kilobytes.', [
-                        'total' => EcommerceHelper::reviewMaxFileNumber(),
-                        'max' => EcommerceHelper::reviewMaxFileSize(true),
-                    ]) }}
+                        {{ trans('plugins/ecommerce::review.upload_photos_limit', [
+                            'total' => EcommerceHelper::reviewMaxFileNumber(),
+                            'max' => EcommerceHelper::reviewMaxFileSize(),
+                        ]) }}
+                    </div>
                 </div>
-            </div>
+            @endif
 
             <button
                 type="submit"
@@ -106,7 +177,7 @@
                 ])
                 @disabled(! auth('customer')->check())
             >
-                {{ __('Submit') }}
+                {{ trans('plugins/ecommerce::ecommerce.submit') }}
             </button>
         </x-core::form>
     @endif

@@ -23,14 +23,14 @@ export class MediaDetails {
 
     renderData(data) {
         const _self = this
-        const thumb = data.type === 'image' && data.full_url ? `<img src="${data.full_url}" alt="${data.name}">` : data.icon
+        const thumb =
+            data.type === 'image' && data.full_url ? `<img src="${data.full_url}" alt="${data.name}">` : data.icon
         let description = ''
         Helpers.forEach(data, (val, index) => {
             if (Helpers.inArray(_self.onlyFields, index) && val) {
                 if (!Helpers.inArray(['mime_type'], index)) {
-                    description += _self.descriptionItemTemplate
-                        .replace(/__title__/gi, Helpers.trans(index))
-                        .replace(/__url__/gi,
+                    description += _self.descriptionItemTemplate.replace(/__title__/gi, Helpers.trans(index)).replace(
+                        /__url__/gi,
                         val
                             ? index === 'full_url'
                                 ? `<div class="input-group pe-1">

@@ -7,7 +7,7 @@
         </x-core::card.header>
 
         <x-core::card.body>
-            <ul class="steps steps-vertical" id="order-history-wrapper">
+            <ul class="steps steps-vertical border-0 p-0 m-0" id="order-history-wrapper">
                 @foreach ($shipment->histories->sortByDesc('created_at') as $history)
                     <li @class(['step-item', 'user-action' => $history->user_id])>
                         <div class="h4 m-0">

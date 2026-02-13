@@ -3,8 +3,10 @@
 namespace Botble\Ecommerce\Forms\Settings;
 
 use Botble\Base\Forms\FieldOptions\MultiChecklistFieldOption;
+use Botble\Base\Forms\FieldOptions\NumberFieldOption;
 use Botble\Base\Forms\FieldOptions\OnOffFieldOption;
 use Botble\Base\Forms\Fields\MultiCheckListField;
+use Botble\Base\Forms\Fields\NumberField;
 use Botble\Base\Forms\Fields\OnOffCheckboxField;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Http\Requests\Settings\ProductSearchSettingRequest;
@@ -40,7 +42,14 @@ class ProductSearchSettingForm extends SettingForm
                         'tag' => trans('plugins/ecommerce::products.form.tags'),
                     ])
                     ->selected(old('product_collections', EcommerceHelper::getProductsSearchBy()))
-                    ->toArray()
+            )
+            ->add(
+                'enable_filter_products_by_categories',
+                OnOffCheckboxField::class,
+                OnOffFieldOption::make()
+                    ->label(trans('plugins/ecommerce::setting.product_search.form.enable_filter_products_by_categories'))
+                    ->value(EcommerceHelper::isEnabledFilterProductsByCategories())
+                    ->defaultValue(true)
             )
             ->add(
                 'enable_filter_products_by_brands',
@@ -49,17 +58,27 @@ class ProductSearchSettingForm extends SettingForm
                     ->label(trans('plugins/ecommerce::setting.product_search.form.enable_filter_products_by_brands'))
                     ->value(EcommerceHelper::isEnabledFilterProductsByBrands())
                     ->defaultValue(true)
-                    ->toArray()
             )
             ->add(
                 'enable_filter_products_by_tags',
                 OnOffCheckboxField::class,
                 OnOffFieldOption::make()
                     ->label(trans('plugins/ecommerce::setting.product_search.form.enable_filter_products_by_tags'))
-                    ->value(EcommerceHelper::isEnabledFilterProductsByTags())
+                    ->value($enableFilterByTags = EcommerceHelper::isEnabledFilterProductsByTags())
                     ->defaultValue(true)
-                    ->toArray()
             )
+            ->addOpenCollapsible('enable_filter_products_by_tags', '1', $enableFilterByTags)
+            ->add(
+                'number_of_popular_tags_for_filter',
+                NumberField::class,
+                NumberFieldOption::make()
+                    ->label(trans('plugins/ecommerce::setting.product_search.form.number_of_popular_tags_for_filter'))
+                    ->placeholder(trans('plugins/ecommerce::setting.product_search.form.number_of_popular_tags_for_filter_placeholder'))
+                    ->helperText(trans('plugins/ecommerce::setting.product_search.form.number_of_popular_tags_for_filter_helper'))
+                    ->value(get_ecommerce_setting('number_of_popular_tags_for_filter', 10))
+                    ->defaultValue(10)
+            )
+            ->addCloseCollapsible('enable_filter_products_by_tags', '1')
             ->add(
                 'enable_filter_products_by_attributes',
                 OnOffCheckboxField::class,
@@ -69,7 +88,27 @@ class ProductSearchSettingForm extends SettingForm
                     )
                     ->value(EcommerceHelper::isEnabledFilterProductsByAttributes())
                     ->defaultValue(true)
-                    ->toArray()
-            );
+            )
+            ->add(
+                'enable_filter_products_by_price',
+                OnOffCheckboxField::class,
+                OnOffFieldOption::make()
+                    ->label(
+                        trans('plugins/ecommerce::setting.product_search.form.enable_filter_products_by_price')
+                    )
+                    ->value($enableFilterByPrice = EcommerceHelper::isEnabledFilterProductsByPrice())
+                    ->defaultValue(true)
+            )
+            ->addOpenCollapsible('enable_filter_products_by_price', '1', $enableFilterByPrice)
+            ->add(
+                'max_product_price_for_filter',
+                NumberField::class,
+                NumberFieldOption::make()
+                    ->label(trans('plugins/ecommerce::setting.product_search.form.max_product_price_for_filter'))
+                    ->placeholder(trans('plugins/ecommerce::setting.product_search.form.max_product_price_for_filter_placeholder'))
+                    ->helperText(trans('plugins/ecommerce::setting.product_search.form.max_product_price_for_filter_helper', ['price' => format_price(EcommerceHelper::getProductMaxPrice())]))
+                    ->value(get_ecommerce_setting('max_product_price_for_filter'))
+            )
+            ->addCloseCollapsible('enable_filter_products_by_price', '1');
     }
 }

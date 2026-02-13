@@ -59,8 +59,8 @@ class NoModelMakeRule implements Rule
         return [
             RuleErrorBuilder::message("Called 'Model::make()' which performs unnecessary work, use 'new Model()'.")
                 ->identifier('larastan.noModelMake')
-                ->line($node->getLine())
-                ->file($scope->getFile())
+                ->line($node->getStartLine())
+                ->file($scope->getFile(), $scope->getFileDescription())
                 ->build(),
         ];
     }
@@ -76,7 +76,7 @@ class NoModelMakeRule implements Rule
         } elseif ($class instanceof Expr) {
             $type = $scope->getType($class);
 
-            if ($type->isClassStringType()->yes() && $type->getConstantStrings() !== []) {
+            if ($type->isClassString()->yes() && $type->getConstantStrings() !== []) {
                 $type = new ObjectType($type->getConstantStrings()[0]->getValue());
             }
         } else {

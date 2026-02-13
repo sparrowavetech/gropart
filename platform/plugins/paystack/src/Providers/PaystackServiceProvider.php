@@ -3,9 +3,10 @@
 namespace Botble\Paystack\Providers;
 
 use Botble\Base\Traits\LoadAndPublishDataTrait;
+use Illuminate\Contracts\Support\DeferrableProvider;
 use Illuminate\Support\ServiceProvider;
 
-class PaystackServiceProvider extends ServiceProvider
+class PaystackServiceProvider extends ServiceProvider implements DeferrableProvider
 {
     use LoadAndPublishDataTrait;
 
@@ -19,6 +20,7 @@ class PaystackServiceProvider extends ServiceProvider
             ->loadHelpers()
             ->loadRoutes()
             ->loadAndPublishViews()
+            ->loadAndPublishTranslations()
             ->publishAssets();
 
         $this->app->register(HookServiceProvider::class);

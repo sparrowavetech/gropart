@@ -10,6 +10,7 @@ use Botble\Base\Forms\Fields\CodeEditorField;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Theme\Http\Requests\RobotsTxtRequest;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Route;
 
 class RobotsTxtEditorForm extends FormAbstract
 {
@@ -17,19 +18,31 @@ class RobotsTxtEditorForm extends FormAbstract
     {
         $isRobotsTxtWritable = File::isWritable($path = public_path('robots.txt'));
         $robotsTxtContent = $isRobotsTxtWritable && File::exists($path) ? File::get($path) : '';
+        $sitemapUrl = Route::has('public.sitemap') ? route('public.sitemap') : null;
+        $hasSitemapReference = stripos($robotsTxtContent, 'sitemap:') !== false;
 
         $this
             ->setUrl(route('theme.robots-txt.post'))
             ->setValidatorClass(RobotsTxtRequest::class)
             ->setActionButtons(view('core/base::forms.partials.form-actions', ['onlySave' => true])->render())
-            ->when(! $isRobotsTxtWritable, function (FormAbstract $form) use ($path) {
+            ->when(! $isRobotsTxtWritable, function (FormAbstract $form) use ($path): void {
                 $form->add(
                     'robots_txt_not_writable',
                     AlertField::class,
                     AlertFieldOption::make()
                         ->type('warning')
                         ->content(trans('packages/theme::theme.robots_txt_not_writable', ['path' => $path]))
-                        ->toArray()
+                );
+            })
+            ->when($sitemapUrl && ! $hasSitemapReference, function (FormAbstract $form) use ($sitemapUrl): void {
+                $form->add(
+                    'robots_txt_sitemap_suggestion',
+                    AlertField::class,
+                    AlertFieldOption::make()
+                        ->type('info')
+                        ->content(trans('packages/theme::theme.robots_txt_sitemap_suggestion', [
+                            'sitemap_url' => $sitemapUrl,
+                        ]))
                 );
             })
             ->add(
@@ -45,7 +58,6 @@ class RobotsTxtEditorForm extends FormAbstract
                             ['link' => Html::link(url('robots.txt'), attributes: ['target' => '_blank'])]
                         )
                     )
-                    ->toArray()
             )
             ->add(
                 'robots_txt_file',

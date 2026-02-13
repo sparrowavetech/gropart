@@ -4,6 +4,9 @@
     $min = Arr::get($options, 'min', 1);
     $max = Arr::get($options, 'max', 20);
     $tabKey = Arr::get($options, 'attr.tab_key');
+    $wrapperAttributes = Arr::get($options, 'wrapper', []);
+    $label = Arr::get($options, 'label');
+    $required = Arr::get($options, 'required', false);
 @endphp
 
-{!! shortcode()->fields()->tabs($fields, $attributes, $max, $min, $tabKey) !!}
+{!! shortcode()->fields()->tabs($fields, $attributes, $max, $min, $tabKey, $wrapperAttributes, $label, $required) !!}

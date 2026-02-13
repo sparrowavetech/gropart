@@ -2,9 +2,8 @@
 
 namespace Botble\Language\Listeners;
 
-use Botble\Base\Events\CreatedContentEvent;
+use Botble\Language\Events\LanguageCreated;
 use Botble\Language\Listeners\Concerns\EnsureThemePackageExists;
-use Botble\Language\Models\Language;
 use Botble\Setting\Models\Setting;
 use Botble\Theme\Events\RenderingThemeOptionSettings;
 use Botble\Theme\Facades\ThemeOption;
@@ -16,13 +15,9 @@ class CopyThemeOptions
 {
     use EnsureThemePackageExists;
 
-    public function handle(CreatedContentEvent $event): void
+    public function handle(LanguageCreated $event): void
     {
         if (! $this->determineIfThemesExists()) {
-            return;
-        }
-
-        if (! $event->data instanceof Language) {
             return;
         }
 
@@ -33,7 +28,7 @@ class CopyThemeOptions
         }
 
         $fromThemeKey = 'theme-' . $fromTheme . '-';
-        $themeKey = 'theme-' . $fromTheme . '-' . $event->data->lang_code . '-';
+        $themeKey = 'theme-' . $fromTheme . '-' . $event->language->lang_code . '-';
 
         RenderingThemeOptionSettings::dispatch();
         $existsThemeOptionKeys = array_keys(Arr::get(ThemeOption::getFields(), 'theme', []));
@@ -65,7 +60,7 @@ class CopyThemeOptions
             ];
         }
 
-        if (! empty($copiedThemeOptions)) {
+        if (count($copiedThemeOptions)) {
             Setting::query()
                 ->insertOrIgnore($copiedThemeOptions);
         }

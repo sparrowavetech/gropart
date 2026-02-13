@@ -26,7 +26,6 @@ class ResetPasswordForm extends AuthForm
                     ->value(old('email', $this->request->input('email')))
                     ->placeholder(trans('core/acl::auth.login.placeholder.email'))
                     ->required()
-                    ->toArray()
             )
             ->add(
                 'password',
@@ -35,7 +34,6 @@ class ResetPasswordForm extends AuthForm
                 ->label(trans('core/acl::auth.reset.new_password'))
                 ->required()
                 ->placeholder(trans('core/acl::auth.reset.placeholder.new_password'))
-                ->toArray()
             )
             ->add(
                 'password_confirmation',
@@ -44,7 +42,6 @@ class ResetPasswordForm extends AuthForm
                     ->label(trans('core/acl::auth.reset.password_confirmation'))
                     ->required()
                     ->placeholder(trans('core/acl::auth.reset.placeholder.new_password_confirmation'))
-                    ->toArray()
             )
             ->submitButton(trans('core/acl::auth.reset.update'));
     }

@@ -3,6 +3,7 @@
 namespace Botble\ACL\Models;
 
 use Botble\Base\Models\BaseModel;
+use Botble\Support\Services\Cache\Cache;
 use Illuminate\Support\Facades\Auth;
 
 class UserMeta extends BaseModel
@@ -48,5 +49,16 @@ class UserMeta extends BaseModel
         }
 
         return $default;
+    }
+
+    protected static function booted(): void
+    {
+        static::saved(function (): void {
+            Cache::make(static::class)->flush();
+        });
+
+        static::deleted(function (): void {
+            Cache::make(static::class)->flush();
+        });
     }
 }

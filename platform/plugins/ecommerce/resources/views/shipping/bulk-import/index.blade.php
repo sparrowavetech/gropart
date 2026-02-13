@@ -1,9 +1,10 @@
 @extends(BaseHelper::getAdminMasterLayoutTemplate())
+
 @section('content')
     {!! Form::open(['class' => 'form-import-data', 'files' => 'true']) !!}
     <div class="row justify-content-center">
         <div class="col-xxl-6 col-xl-8 col-lg-10 col-12">
-            <div class="widget meta-boxes">
+            <div class="widget meta-boxes mb-4">
                 <div class="widget-title pl-2">
                     <h4>{{ trans('plugins/ecommerce::shipping.rule.item.bulk-import.menu') }}</h4>
                 </div>
@@ -48,7 +49,7 @@
                         </label>
 
                         {!! Form::error('file', $errors) !!}
-                        <div class="mt-3 text-center p-2 border bg-light">
+                        <div class="mt-3 text-center p-2 border bg-body-tertiary">
                             <a
                                 class="download-template"
                                 data-url="{{ route('ecommerce.shipping-rule-items.bulk-import.download-template') }}"
@@ -57,7 +58,7 @@
                                 data-downloading="<i class='fas fa-spinner fa-spin'></i> {{ trans('plugins/ecommerce::bulk-import.downloading') }}"
                                 href="#"
                             >
-                                <i class="fas fa-file-csv"></i>
+                                <x-core::icon name="ti ti-file-type-csv" />
                                 {{ trans('plugins/ecommerce::bulk-import.download-csv-file') }}
                             </a> &nbsp; | &nbsp;
                             <a
@@ -68,7 +69,7 @@
                                 data-downloading="<i class='fas fa-spinner fa-spin'></i> {{ trans('plugins/ecommerce::bulk-import.downloading') }}"
                                 href="#"
                             >
-                                <i class="fas fa-file-excel"></i>
+                                <x-core::icon name="ti ti-file-excel" />
                                 {{ trans('plugins/ecommerce::bulk-import.download-excel-file') }}
                             </a>
                         </div>

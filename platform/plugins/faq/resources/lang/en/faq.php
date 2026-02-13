@@ -5,8 +5,12 @@ return [
     'create' => 'New FAQ',
     'question' => 'Question',
     'answer' => 'Answer',
+    'question_placeholder' => 'Enter your question...',
+    'answer_placeholder' => 'Enter your answer...',
     'category' => 'Category',
     'faq_schema_config' => 'FAQ schema configuration (:link)',
+    'faq_schema_config_description' => 'This configuration registers FAQ structured data for SEO purposes only. It will not be displayed in your front-end theme content. The schema is embedded in the page source and can be viewed using "View Source" or tested with Google\'s Rich Results Test tool.',
+    'schema_testing_tool' => 'Test with Google Rich Results Test',
     'learn_more' => 'Learn more',
     'settings' => [
         'title' => 'FAQs',

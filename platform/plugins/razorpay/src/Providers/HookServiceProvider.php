@@ -2,12 +2,15 @@
 
 namespace Botble\Razorpay\Providers;
 
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\Html;
+use Botble\Media\Facades\RvMedia;
 use Botble\Payment\Enums\PaymentMethodEnum;
 use Botble\Payment\Enums\PaymentStatusEnum;
 use Botble\Payment\Facades\PaymentMethods;
 use Botble\Razorpay\Forms\RazorpayPaymentMethodForm;
 use Botble\Razorpay\Services\Gateways\RazorpayPaymentService;
+use Botble\Theme\Facades\Theme;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -68,7 +71,7 @@ class HookServiceProvider extends ServiceProvider
                 $paymentDetail = $paymentService->getPaymentDetails($payment->charge_id);
 
                 if ($paymentDetail) {
-                    $data = view('plugins/razorpay::detail', ['payment' => $paymentDetail, 'paymentModel' => $payment])->render();
+                    $data .= view('plugins/razorpay::detail', ['payment' => $paymentDetail, 'paymentModel' => $payment])->render();
                 }
             }
 
@@ -112,22 +115,35 @@ class HookServiceProvider extends ServiceProvider
         $data['errorMessage'] = null;
         $data['orderId'] = null;
 
-        try {
-            $api = new Api($apiKey, $apiSecret);
+        if (get_payment_setting(
+            'payment_type',
+            RAZORPAY_PAYMENT_METHOD_NAME,
+            'hosted_checkout',
+        ) == 'website_embedded') {
+            try {
+                $api = new Api($apiKey, $apiSecret);
 
-            $receiptId = Str::random(20);
+                $receiptId = $data['checkout_token'] ?? Str::random(20);
 
-            $amount = $data['amount'] * 100;
+                $amount = $data['amount'] * 100;
 
-            $order = $api->order->create([
-                'receipt' => $receiptId,
-                'amount' => (int) round($amount),
-                'currency' => $data['currency'],
-            ]);
+                $requestData = [
+                    'receipt' => $receiptId,
+                    'amount' => (int) round($amount),
+                    'currency' => $data['currency'],
+                ];
 
-            $data['orderId'] = $order['id'];
-        } catch (Exception $exception) {
-            $data['errorMessage'] = $exception->getMessage();
+                do_action('payment_before_making_api_request', RAZORPAY_PAYMENT_METHOD_NAME, $requestData);
+
+                // @phpstan-ignore-next-line
+                $order = $api->order->create($requestData);
+
+                do_action('payment_after_api_response', RAZORPAY_PAYMENT_METHOD_NAME, $requestData, $order->toArray());
+
+                $data['orderId'] = $order['id'];
+            } catch (Exception $exception) {
+                $data['errorMessage'] = $exception->getMessage();
+            }
         }
 
         PaymentMethods::method(RAZORPAY_PAYMENT_METHOD_NAME, [
@@ -149,53 +165,116 @@ class HookServiceProvider extends ServiceProvider
 
         if (! $data['charge_id']) {
             $data['error'] = true;
-            $data['message'] = __('Payment failed!');
+            $data['message'] = trans('plugins/razorpay::razorpay.payment_failed');
         }
 
-        $amount = $paymentData['amount'];
+        $amount = (int) round($paymentData['amount'] * 100);
 
         $status = PaymentStatusEnum::PENDING;
 
-        try {
-            $api = new Api(
-                get_payment_setting('key', RAZORPAY_PAYMENT_METHOD_NAME),
-                get_payment_setting('secret', RAZORPAY_PAYMENT_METHOD_NAME)
-            );
+        $apiKey = get_payment_setting('key', RAZORPAY_PAYMENT_METHOD_NAME);
+        $apiSecret = get_payment_setting('secret', RAZORPAY_PAYMENT_METHOD_NAME);
 
-            $orderId = $request->input('razorpay_order_id');
+        $api = new Api($apiKey, $apiSecret);
 
-            $signature = $request->input('razorpay_signature');
+        if (get_payment_setting(
+            'payment_type',
+            RAZORPAY_PAYMENT_METHOD_NAME,
+            'hosted_checkout',
+        ) == 'hosted_checkout') {
+            $receiptId = $data['checkout_token'] ?? Str::random(20);
 
-            if ($orderId && $signature) {
-                $api->utility->verifyPaymentSignature([
-                    'razorpay_signature' => $signature,
-                    'razorpay_payment_id' => $data['charge_id'],
-                    'razorpay_order_id' => $orderId,
-                ]);
+            $requestData = [
+                'receipt' => $receiptId,
+                'amount' => $amount,
+                'currency' => $data['currency'],
+                'notes' => [
+                    'order_id' => is_array($paymentData['order_id']) ? implode(',', $paymentData['order_id']) : $paymentData['order_id'],
+                    'order_token' => $paymentData['checkout_token'],
+                    'customer_name' => $paymentData['address']['name'],
+                    'customer_email' => $paymentData['address']['email'],
+                    'customer_phone' => $paymentData['address']['phone'],
+                ],
+            ];
 
-                $order = $api->order->fetch($orderId);
+            do_action('payment_before_making_api_request', RAZORPAY_PAYMENT_METHOD_NAME, $requestData);
 
-                $order = $order->toArray();
+            // @phpstan-ignore-next-line
+            $order = $api->order->create($requestData);
 
-                $amount = $order['amount_paid'] / 100;
+            do_action('payment_after_api_response', RAZORPAY_PAYMENT_METHOD_NAME, $requestData, $order->toArray());
 
-                $status = $order['status'] === 'paid' ? PaymentStatusEnum::COMPLETED : $status;
+            $paymentService = new RazorpayPaymentService();
+
+            $paymentService->redirectToCheckoutPage([
+                'key_id' => $apiKey,
+                'amount' => $amount,
+                'currency' => $data['currency'],
+                'order_id' => $order['id'],
+                'name' => Theme::getSiteTitle(),
+                'description' => $paymentData['description'],
+                'image' => Theme::getLogo() ? RvMedia::getImageUrl(Theme::getLogo()) : null,
+                'callback_url' => route('payments.razorpay.callback', [
+                    'token' => $paymentData['checkout_token'],
+                    'customer_id' => $paymentData['customer_id'],
+                    'customer_type' => $paymentData['customer_type'],
+                    'order_id' => $paymentData['order_id'],
+                ]),
+                'cancel_url' => $paymentData['return_url'],
+                'prefill[name]' => $paymentData['address']['name'],
+                'prefill[email]' => $paymentData['address']['email'],
+                'prefill[contact]' => $paymentData['address']['phone'],
+                'notes[order_id]' => is_array($paymentData['order_id']) ? implode(',', $paymentData['order_id']) : $paymentData['order_id'],
+                'notes[order_token]' => $paymentData['checkout_token'],
+                'notes[customer_name]' => $paymentData['address']['name'],
+                'notes[customer_email]' => $paymentData['address']['email'],
+                'notes[customer_phone]' => $paymentData['address']['phone'],
+            ]);
+        } else {
+            try {
+                $orderId = $request->input('razorpay_order_id');
+
+                $signature = $request->input('razorpay_signature');
+
+                if ($orderId && $signature) {
+                    // @phpstan-ignore-next-line
+                    $api->utility->verifyPaymentSignature([
+                        'razorpay_signature' => $signature,
+                        'razorpay_payment_id' => $data['charge_id'],
+                        'razorpay_order_id' => $orderId,
+                    ]);
+
+                    do_action('payment_before_making_api_request', RAZORPAY_PAYMENT_METHOD_NAME, ['order_id' => $orderId]);
+
+                    // @phpstan-ignore-next-line
+                    $order = $api->order->fetch($orderId);
+
+                    $order = $order->toArray();
+
+                    do_action('payment_after_api_response', RAZORPAY_PAYMENT_METHOD_NAME, ['order_id' => $orderId], $order);
+
+                    $amount = $order['amount_paid'] / 100;
+
+                    $status = $order['status'] === 'paid' ? PaymentStatusEnum::COMPLETED : $status;
+                }
+            } catch (SignatureVerificationError $exception) {
+                BaseHelper::logError($exception);
+
+                $data['message'] = $exception->getMessage();
+                $data['error'] = true;
             }
-        } catch (SignatureVerificationError $exception) {
-            $data['message'] = $exception->getMessage();
-            $data['error'] = true;
-        }
 
-        do_action(PAYMENT_ACTION_PAYMENT_PROCESSED, [
-            'amount' => $amount,
-            'currency' => $paymentData['currency'],
-            'charge_id' => $data['charge_id'],
-            'payment_channel' => RAZORPAY_PAYMENT_METHOD_NAME,
-            'status' => $status,
-            'order_id' => $paymentData['order_id'],
-            'customer_id' => $paymentData['customer_id'],
-            'customer_type' => $paymentData['customer_type'],
-        ]);
+            do_action(PAYMENT_ACTION_PAYMENT_PROCESSED, [
+                'amount' => $amount,
+                'currency' => $paymentData['currency'],
+                'charge_id' => $data['charge_id'],
+                'payment_channel' => RAZORPAY_PAYMENT_METHOD_NAME,
+                'status' => $status,
+                'order_id' => $paymentData['order_id'],
+                'customer_id' => $paymentData['customer_id'],
+                'customer_type' => $paymentData['customer_type'],
+            ]);
+        }
 
         return $data;
     }

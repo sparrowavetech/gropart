@@ -24,7 +24,7 @@ class ShippingRuleItemForm extends FormAbstract
 
         $rules = ShippingRule::query()
             ->whereIn('type', ShippingRuleTypeEnum::keysAllowRuleItems())
-            ->whereHas('shipping', function (Builder $query) {
+            ->whereHas('shipping', function (Builder $query): void {
                 $query->whereNotNull('country');
             })
             ->get();
@@ -69,7 +69,7 @@ class ShippingRuleItemForm extends FormAbstract
         }
 
         $this
-            ->setupModel(new ShippingRuleItem())
+            ->model(ShippingRuleItem::class)
             ->setValidatorClass(ShippingRuleItemRequest::class)
             ->add('shipping_rule_id', 'customSelect', [
                 'label' => trans('plugins/ecommerce::shipping.rule.item.forms.shipping_rule'),
@@ -87,6 +87,17 @@ class ShippingRuleItemForm extends FormAbstract
                 ],
             ]);
 
+        $isZipCodeType = false;
+        if ($shippingRuleId) {
+            $currentRule = $rules->firstWhere('id', $shippingRuleId);
+            if ($currentRule) {
+                $isZipCodeType = in_array($currentRule->type->getValue(), [
+                    ShippingRuleTypeEnum::BASED_ON_ZIPCODE,
+                    ShippingRuleTypeEnum::BASED_ON_ZIPCODE_AND_WEIGHT,
+                ]);
+            }
+        }
+
         $this
             ->addLocationFields(
                 countryAttributes: [
@@ -97,6 +108,33 @@ class ShippingRuleItemForm extends FormAbstract
                 ]
             )
             ->remove('address')
+            ->add(
+                'zip_code_from',
+                TextField::class,
+                TextFieldOption::make()
+                    ->label(trans('plugins/ecommerce::shipping.rule.item.forms.zip_code_from'))
+                    ->attributes([
+                        'class' => 'form-control',
+                        'placeholder' => trans('plugins/ecommerce::shipping.rule.item.forms.zip_code_from_placeholder'),
+                    ])
+                    ->wrapperAttributes([
+                        'class' => $this->formHelper->getConfig('defaults.wrapper_class') . ($isZipCodeType ? '' : ' d-none'),
+                    ])
+            )
+            ->add(
+                'zip_code_to',
+                TextField::class,
+                TextFieldOption::make()
+                    ->label(trans('plugins/ecommerce::shipping.rule.item.forms.zip_code_to'))
+                    ->helperText(trans('plugins/ecommerce::shipping.rule.item.forms.zip_code_to_helper'))
+                    ->attributes([
+                        'class' => 'form-control',
+                        'placeholder' => trans('plugins/ecommerce::shipping.rule.item.forms.zip_code_to_placeholder'),
+                    ])
+                    ->wrapperAttributes([
+                        'class' => $this->formHelper->getConfig('defaults.wrapper_class') . ($isZipCodeType ? '' : ' d-none'),
+                    ])
+            )
             ->add(
                 'adjustment_price',
                 TextField::class,
@@ -111,7 +149,6 @@ class ShippingRuleItemForm extends FormAbstract
                         'data-placeholder' => '',
                     ])
                     ->defaultValue(0)
-                    ->toArray()
             )
             ->add('is_enabled', 'onOff', [
                 'label' => trans('plugins/ecommerce::shipping.rule.item.forms.is_enabled'),

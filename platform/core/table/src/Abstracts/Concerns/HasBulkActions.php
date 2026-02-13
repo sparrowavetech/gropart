@@ -56,9 +56,9 @@ trait HasBulkActions
     /**
      * @param \Botble\Table\Abstracts\TableBulkActionAbstract[] $bulkActions
      */
-    public function addBulkActions(array $bulkActions): static
+    public function addBulkActions(Closure|callable|array $bulkActions): static
     {
-        foreach ($bulkActions as $bulkAction) {
+        foreach (value($bulkActions) as $bulkAction) {
             $this->addBulkAction($bulkAction);
         }
 
@@ -150,7 +150,7 @@ trait HasBulkActions
         if (! $bulkAction) {
             return (new BaseHttpResponse())
                 ->setError()
-                ->setMessage(trans('core/table::invalid_bulk_action'));
+                ->setMessage(trans('core/table::table.invalid_bulk_action'));
         }
 
         if (empty($ids)) {

@@ -11,7 +11,7 @@ use Botble\Base\Forms\FormAbstract;
 use Botble\Payment\Concerns\Forms\HasAvailableCountriesField;
 use Botble\Payment\Enums\PaymentMethodEnum;
 
-class CODPaymentMethodForm extends FormAbstract
+class CODPaymentMethodForm extends PaymentMethodForm
 {
     use HasAvailableCountriesField;
 
@@ -25,7 +25,6 @@ class CODPaymentMethodForm extends FormAbstract
                 TextFieldOption::make()
                     ->value(PaymentMethodEnum::COD)
                     ->attributes(['class' => 'payment_type'])
-                    ->toArray()
             )
             ->add(
                 get_payment_setting_key('name', PaymentMethodEnum::COD),
@@ -37,8 +36,7 @@ class CODPaymentMethodForm extends FormAbstract
                         'name',
                         PaymentMethodEnum::COD,
                         PaymentMethodEnum::COD()->label(),
-                    ))
-                    ->toArray(),
+                    )),
             )
             ->add(
                 get_payment_setting_key('description', PaymentMethodEnum::COD),
@@ -47,12 +45,13 @@ class CODPaymentMethodForm extends FormAbstract
                     ->wrapperAttributes(['style' => 'max-width: 99.8%'])
                     ->label(trans('plugins/payment::payment.payment_method_description'))
                     ->value(get_payment_setting('description', PaymentMethodEnum::COD))
-                    ->toArray()
             )
+            ->paymentMethodLogoField(PaymentMethodEnum::COD)
+            ->paymentFeeField(PaymentMethodEnum::COD)
             ->addAvailableCountriesField(PaymentMethodEnum::COD)
             ->when(
                 apply_filters(PAYMENT_METHOD_SETTINGS_CONTENT, null, PaymentMethodEnum::COD),
-                function (FormAbstract $form, ?string $data) {
+                function (FormAbstract $form, ?string $data): void {
                     $form->add('metabox', HtmlField::class, ['html' => $data]);
                 }
             );

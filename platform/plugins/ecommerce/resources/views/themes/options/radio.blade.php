@@ -1,5 +1,6 @@
 <div
     class="form-group mb-3 variant-radio product-option product-option-{{ Str::slug($option->name) }} product-option-{{ $option->id }}"
+    data-option-slug="{{ Str::slug($option->name) }}"
     style="margin-bottom: 10px"
 >
     <div class="product-option-item-wrapper">
@@ -26,6 +27,7 @@
                         id="option-{{ $option->id }}-value-{{ Str::slug($value->option_value) }}"
                         name="options[{{ $option->id }}][values]"
                         data-extra-price="{{ $price }}"
+                        data-value-slug="{{ Str::slug($value->option_value) }}"
                         type="radio"
                         value="{{ $value->option_value }}"
                         @if (isset($inputClass)) class="{{ $inputClass }}" @endif

@@ -6,8 +6,10 @@ use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Installer\Events\InstallerFinished;
+use Botble\Language\Events\LanguageCreated;
 use Botble\Language\Listeners\ActivatedPluginListener;
 use Botble\Language\Listeners\AddHrefLangListener;
+use Botble\Language\Listeners\CopyMenus;
 use Botble\Language\Listeners\CopyThemeOptions;
 use Botble\Language\Listeners\CopyThemeWidgets;
 use Botble\Language\Listeners\CreatedContentListener;
@@ -28,8 +30,6 @@ class EventServiceProvider extends ServiceProvider
         ],
         CreatedContentEvent::class => [
             CreatedContentListener::class,
-            CopyThemeOptions::class,
-            CopyThemeWidgets::class,
         ],
         DeletedContentEvent::class => [
             DeletedContentListener::class,
@@ -45,6 +45,11 @@ class EventServiceProvider extends ServiceProvider
         ],
         InstallerFinished::class => [
             CreateSelectedLanguageWhenInstallationFinished::class,
+        ],
+        LanguageCreated::class => [
+            CopyThemeOptions::class,
+            CopyThemeWidgets::class,
+            CopyMenus::class,
         ],
     ];
 }

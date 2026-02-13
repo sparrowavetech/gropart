@@ -2,9 +2,9 @@
 
 namespace Botble\Ecommerce\Http\Requests;
 
-use Botble\Base\Facades\BaseHelper;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Models\Product;
+use Botble\Payment\Enums\PaymentMethodEnum;
 use Botble\Payment\Enums\PaymentStatusEnum;
 use Botble\Support\Http\Requests\Request;
 use Illuminate\Validation\Rule;
@@ -24,12 +24,19 @@ class CreateOrderRequest extends Request
             ->get();
 
         if (EcommerceHelper::isAvailableShipping($products)) {
-            $rules['customer_address.phone'] = 'required|' . BaseHelper::getPhoneValidationRule();
             $rules = [...$rules, ...EcommerceHelper::getCustomerAddressValidationRules('customer_address.')];
         }
 
         if (is_plugin_active('payment')) {
-            $rules['payment_status'] = Rule::in([PaymentStatusEnum::COMPLETED, PaymentStatusEnum::PENDING]);
+            $rules['payment_status'] = Rule::in(PaymentStatusEnum::values());
+            $rules['transaction_id'] = [Rule::when(
+                in_array(
+                    $this->input('payment_method'),
+                    [PaymentMethodEnum::COD, PaymentMethodEnum::BANK_TRANSFER]
+                ),
+                'nullable',
+                'required'
+            )];
         }
 
         return $rules;

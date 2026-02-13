@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-
+<html {!! Theme::htmlAttributes() !!}>
 <head>
     <meta charset="utf-8">
     <meta
@@ -19,11 +18,12 @@
         name="apple-mobile-web-app-capable"
         content="yes"
     >
-    @if (theme_option('favicon'))
-        <link
-            href="{{ RvMedia::getImageUrl(theme_option('favicon')) }}"
-            rel="shortcut icon"
-        >
+
+    @if ($favicon = theme_option('favicon'))
+        {{ Html::favicon(
+            RvMedia::getImageUrl($favicon),
+            ['type' => rescue(fn () => RvMedia::getMimeType($favicon), 'image/x-icon')]
+        ) }}
     @endif
 
     <meta
@@ -44,6 +44,7 @@
 
     <script>
         window.siteUrl = "{{ BaseHelper::getHomepageUrl() }}";
+        window.siteEditorLocale = "{{ apply_filters('cms_site_editor_locale', App::getLocale()) }}";
     </script>
 
     <script type="text/javascript">
@@ -56,7 +57,7 @@
             notices_msg: {!! json_encode(trans('core/base::notices'), JSON_HEX_APOS) !!},
             pagination: {!! json_encode(trans('pagination'), JSON_HEX_APOS) !!},
             system: {
-                character_remain: '{{ trans('core/base::forms.character_remain') }}'
+                character_remain: '{{ trans('plugins/marketplace::marketplace.forms.character_remain') }}'
             }
         };
 
@@ -68,7 +69,7 @@
     @stack('header')
 </head>
 
-<body @if (BaseHelper::siteLanguageDirection() == 'rtl') dir="rtl" @endif>
+<body @if (session('locale_direction', 'ltr') == 'rtl') dir="rtl" @endif>
 
 @yield('body', view(MarketplaceHelper::viewPath('vendor-dashboard.layouts.body')))
 
@@ -122,7 +123,6 @@
 
 @stack('scripts')
 @stack('footer')
-{!! apply_filters(THEME_FRONT_FOOTER, null) !!}
 </body>
 
 </html>

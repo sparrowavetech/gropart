@@ -2,12 +2,21 @@
     if (BaseHelper::hasIcon($value)) {
         $icon = BaseHelper::renderIcon($value);
     } else {
-        $icon = $value;
+        $icon = '<i class="' . $value . '"></i>';
     }
 @endphp
 
-<select name="{{ $name }}" data-bb-core-icon data-url="{{ route('core-icons') }}" data-placeholder="{{ trans('core/base::forms.select_placeholder') }}" {!! Html::attributes($attributes) !!}>
+<select
+    name="{{ $name }}"
+    data-bb-core-icon
+    data-url="{{ route('core-icons') }}"
+    data-placeholder="{{ $attributes['placeholder'] ?? ($attributes['data-placeholder'] ?? trans('core/base::forms.select_placeholder')) }}"
+    {!! Html::attributes($attributes) !!}
+>
     @if ($value)
-        <option value="{{ $value }}" selected>{{ $icon }}</option>
+        <option
+            value="{{ $value }}"
+            selected
+        >{{ $icon }}</option>
     @endif
 </select>

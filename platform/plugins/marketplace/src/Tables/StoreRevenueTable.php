@@ -4,7 +4,6 @@ namespace Botble\Marketplace\Tables;
 
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\Html;
-use Botble\Ecommerce\Models\Order;
 use Botble\Marketplace\Enums\RevenueTypeEnum;
 use Botble\Marketplace\Models\Revenue;
 use Botble\Table\Abstracts\TableAbstract;
@@ -48,9 +47,6 @@ class StoreRevenueTable extends TableAbstract
             ->editColumn('fee', function (Revenue $item) {
                 return Html::tag('span', ($item->fee < 0 ? '-' : '') . format_price($item->fee), ['class' => 'text-danger']);
             })
-            ->editColumn('shipping_cost', function (Revenue $item) {
-                return Html::tag('span', ($item->order->shipping_amount < 0 ? '-' : '') . format_price($item->shipping_cost), ['class' => 'text-warning']);
-            })
             ->editColumn('order_id', function (Revenue $item) {
                 if (! $item->order->id) {
                     return BaseHelper::clean($item->description);
@@ -67,33 +63,19 @@ class StoreRevenueTable extends TableAbstract
 
                 return $url ? Html::link($url, $item->order->code, ['target' => '_blank']) : $item->order->code;
             })
-            ->editColumn('seller_inv_code', function (Revenue $item) {
-                if (! $item->seller_inv_code) {
-                    return "NA";
-                }
-
-                $url = '';
-                if (is_in_admin(true)) {
-                    $url = route('marketplace.generate-seller-invoice', $item->id);
-                } else {
-                    $url = route('marketplace.revenue.generate-seller-invoice', $item->id);
-                }
-
-                return $url ? Html::link($url, "#" . $item->seller_inv_code, ['target' => '_blank']) : $item->id;
-            })
-            ->filterColumn('id', function (Builder $query, $keyword) {
+            ->filterColumn('id', function (Builder $query, $keyword): void {
                 if ($keyword) {
                     $query->where('id', $keyword);
                 }
             })
-            ->filterColumn('order_id', function (Builder $query, $keyword) {
+            ->filterColumn('order_id', function (Builder $query, $keyword): void {
                 if ($keyword) {
                     $query
                         ->where('order_id', $keyword)
                         ->orWhereHas('order', fn (Builder $query) => $query->where('code', 'like', '%' . $keyword));
                 }
             })
-            ->filterColumn('type', function (Builder $query, $keyword) {
+            ->filterColumn('type', function (Builder $query, $keyword): void {
                 if ($keyword && in_array($keyword, RevenueTypeEnum::values())) {
                     $query->where('type', $keyword);
                 }
@@ -102,7 +84,7 @@ class StoreRevenueTable extends TableAbstract
         if (! $this->customerId) {
             $data
                 ->editColumn('customer_id', function (Revenue $item) {
-                    if (! $item->customer->id || ! $item->customer->store->id) {
+                    if (! $item->customer->id || ! $item->customer->store?->id) {
                         return '&mdash;';
                     }
 
@@ -129,16 +111,18 @@ class StoreRevenueTable extends TableAbstract
                 'id',
                 'sub_amount',
                 'fee',
-                'shipping_cost',
                 'amount',
                 'order_id',
+                'customer_id',
                 'created_at',
                 'type',
                 'description',
-                'seller_inv_code',
             ])
-            ->with(['order:id,code,shipping_amount'])
-            ->when($this->customerId, function (Builder $query) {
+            ->with(['order:id,code'])
+            ->whereHas('order', function (Builder $query): void {
+                $query->where('is_finished', true);
+            })
+            ->when($this->customerId, function (Builder $query): void {
                 $query
                     ->where('customer_id', $this->customerId)
                     ->with([
@@ -168,24 +152,18 @@ class StoreRevenueTable extends TableAbstract
 
         return array_merge($columns, [
             Column::make('fee')
-                ->title(trans('plugins/marketplace::revenue.commision'))
+                ->title(trans('plugins/ecommerce::shipping.fee'))
                 ->alignStart(),
             Column::make('sub_amount')
-                ->title(trans('plugins/marketplace::revenue.product_cost'))
-                ->alignStart(),
-            Column::make('shipping_cost')
-                ->title(trans('plugins/marketplace::revenue.shipping_cost'))
+                ->title(trans('plugins/ecommerce::order.sub_amount'))
                 ->alignStart(),
             Column::make('amount')
-                ->title(trans('plugins/marketplace::revenue.seller_amount'))
+                ->title(trans('plugins/ecommerce::order.amount'))
                 ->alignStart(),
             EnumColumn::make('type')
                 ->title(trans('plugins/marketplace::revenue.forms.type'))
                 ->alignStart(),
             CreatedAtColumn::make(),
-            Column::make('seller_inv_code')
-                ->title(trans('plugins/marketplace::revenue.seller_inv_code'))
-                ->alignStart(),
         ]);
     }
 
@@ -199,7 +177,7 @@ class StoreRevenueTable extends TableAbstract
 
     public function getDefaultButtons(): array
     {
-        return array_merge(['export'], parent::getDefaultButtons());
+        return array_unique(array_merge(['export'], parent::getDefaultButtons()));
     }
 
     public function htmlDrawCallbackFunction(): ?string

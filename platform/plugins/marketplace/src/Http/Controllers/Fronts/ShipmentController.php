@@ -38,7 +38,7 @@ class ShipmentController extends BaseController
 
         $shipment = $this->findOrFail($id);
         $shipment->load([
-            'histories' => function ($query) {
+            'histories' => function ($query): void {
                 $query->latest();
             },
             'histories.order',
@@ -54,16 +54,15 @@ class ShipmentController extends BaseController
     {
         $status = $request->input('status');
 
-        if (
-            ! MarketplaceHelper::allowVendorManageShipping() &&
-            ! in_array($status, [
-                ShippingStatusEnum::ARRANGE_SHIPMENT,
-                ShippingStatusEnum::READY_TO_BE_SHIPPED_OUT,
-            ])
-        ) {
-            abort(404);
-        }
+        abort_if(! MarketplaceHelper::allowVendorManageShipping() &&
+        ! in_array($status, [
+            ShippingStatusEnum::ARRANGE_SHIPMENT,
+            ShippingStatusEnum::READY_TO_BE_SHIPPED_OUT,
+        ]), 404);
 
+        /**
+         * @var Shipment $shipment
+         */
         $shipment = $this->findOrFail($id);
         $previousShipment = $shipment->toArray();
         $shipment->status = $status;
@@ -166,8 +165,8 @@ class ShipmentController extends BaseController
     {
         return Shipment::query()
             ->where('id', $id)
-            ->whereHas('order', function ($query) {
-                $query->where('store_id', auth('customer')->user()->store->id);
+            ->whereHas('order', function ($query): void {
+                $query->where('store_id', auth('customer')->user()->store?->id);
             })
             ->firstOrFail();
     }

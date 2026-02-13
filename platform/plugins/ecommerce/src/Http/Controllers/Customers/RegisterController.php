@@ -5,6 +5,7 @@ namespace Botble\Ecommerce\Http\Controllers\Customers;
 use Botble\ACL\Traits\RegistersUsers;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Http\Controllers\BaseController;
+use Botble\Ecommerce\Events\CustomerEmailVerified;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Forms\Fronts\Auth\RegisterForm;
 use Botble\Ecommerce\Http\Requests\RegisterRequest;
@@ -17,9 +18,6 @@ use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\URL;
-use Illuminate\Support\Facades\Validator;
-use Botble\Sms\Supports\SmsHandler;
-use Botble\Sms\Enums\SmsEnum;
 
 class RegisterController extends BaseController
 {
@@ -34,10 +32,13 @@ class RegisterController extends BaseController
 
     public function showRegistrationForm()
     {
+        abort_unless(EcommerceHelper::isCustomerRegistrationEnabled(), 404);
 
-        SeoHelper::setTitle(__('Register'));
+        $title = __('Register');
+        SeoHelper::setTitle(theme_option('ecommerce_register_seo_title') ?: $title)
+            ->setDescription(theme_option('ecommerce_register_seo_description'));
 
-        Theme::breadcrumb()->add(__('Register'), route('customer.register'));
+        Theme::breadcrumb()->add($title, route('customer.register'));
 
         if (! session()->has('url.intended') &&
             ! in_array(url()->previous(), [route('customer.login'), route('customer.register')])
@@ -63,44 +64,32 @@ class RegisterController extends BaseController
 
     public function register(RegisterRequest $request)
     {
-        $this->validator($request->input())->validate();
+        abort_unless(EcommerceHelper::isCustomerRegistrationEnabled(), 404);
 
         do_action('customer_register_validation', $request);
 
+        /**
+         * @var Customer $customer
+         */
         $customer = $this->create($request->input());
 
         event(new Registered($customer));
-        if (is_plugin_active('sms') && setting('sms_otp_enabled')) {
-            $otp = mt_rand(000000, 999999);
-            $sms = new  SmsHandler;
-            $customer->otp  = $otp;
-            $customer->save();
-            // $this->customerRepository->createOrUpdate($customer);
-            $sms->setModule(ECOMMERCE_MODULE_SCREEN_NAME);
-            if ($sms->templateEnabled(SmsEnum::OTP())) {
-                $sms->setVariableValues([
-                    'customer_name' => $customer->name,
-                    'otp' => $otp,
-                ]);
-                $sms->sendUsingTemplate(
-                    SmsEnum::OTP(),
-                    $customer->phone
-                );
-            }
+
+        if (
+            EcommerceHelper::isEnableEmailVerification() &&
+            (! EcommerceHelper::isLoginUsingPhone() || get_ecommerce_setting('keep_email_field_in_registration_form', true))
+        ) {
             $this->registered($request, $customer);
 
-            return $this
-                ->httpResponse()
-                 ->setNextUrl(route('customer.otp', $customer->id))
-                ->setMessage(__('We have sent you an OTP to verify your mobile. Please check and confirm your mobile No!'));
+            session()->flash('ecommerce_customer_registered', true);
 
-        } else if (EcommerceHelper::isEnableEmailVerification()) {
-            $this->registered($request, $customer);
+            $message = __('We have sent you an email to verify your email. Please check and confirm your email address!');
 
             return $this
                 ->httpResponse()
                 ->setNextUrl(route('customer.login'))
-                ->setMessage(__('We have sent you an email to verify your email. Please check and confirm your email address!'));
+                ->with(['auth_warning_message' => $message])
+                ->setMessage($message);
         }
 
         $customer->confirmed_at = Carbon::now();
@@ -108,22 +97,19 @@ class RegisterController extends BaseController
 
         $this->guard()->login($customer);
 
+        session()->flash('ecommerce_customer_registered', true);
+
         return $this
             ->httpResponse()
             ->setNextUrl($this->redirectPath())
             ->setMessage(__('Registered successfully!'));
     }
 
-    protected function validator(array $data)
-    {
-        return Validator::make($data, (new RegisterRequest())->rules());
-    }
-
     protected function create(array $data)
     {
         return Customer::query()->create([
             'name' => BaseHelper::clean($data['name']),
-            'email' => BaseHelper::clean($data['email']),
+            'email' => BaseHelper::clean($data['email'] ?? null),
             'phone' => BaseHelper::clean($data['phone'] ?? null),
             'password' => Hash::make($data['password']),
         ]);
@@ -137,9 +123,16 @@ class RegisterController extends BaseController
     public function confirm(int|string $id, Request $request)
     {
         if (! URL::hasValidSignature($request)) {
-            abort(404);
+            return $this
+                ->httpResponse()
+                ->setError()
+                ->setNextUrl(route('customer.login'))
+                ->setMessage(trans('plugins/ecommerce::customer.email_verification_link_expired'));
         }
 
+        /**
+         * @var Customer $customer
+         */
         $customer = Customer::query()->findOrFail($id);
 
         $customer->confirmed_at = Carbon::now();
@@ -147,15 +140,19 @@ class RegisterController extends BaseController
 
         $this->guard()->login($customer);
 
+        CustomerEmailVerified::dispatch($customer);
+
         return $this
             ->httpResponse()
             ->setNextUrl(route('customer.overview'))
             ->setMessage(__('You successfully confirmed your email address.'));
     }
 
-    public function resendConfirmation(
-        Request $request,
-    ) {
+    public function resendConfirmation(Request $request)
+    {
+        /**
+         * @var Customer $customer
+         */
         $customer = Customer::query()->where('email', $request->input('email'))->first();
 
         if (! $customer) {

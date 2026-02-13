@@ -5,6 +5,7 @@
     "provider": "Botble\\Backup\\Providers\\BackupServiceProvider",
     "author": "Botble Technologies",
     "url": "https://botble.com",
-    "version": "2.0.2",
-    "description": "Backup & restore database, uploads folder"
+    "version": "2.0.8",
+    "description": "Backup & restore database, uploads folder",
+    "minimum_core_version": "7.3.0"
 }

@@ -29,7 +29,7 @@
                                 name="media_folders_can_add_watermark[]"
                                 value="{{ $key }}"
                                 id="media-folder-item-{{ $key }}"
-                                    :checked="empty($folderIds) || in_array($key, $folderIds)"
+                                :checked="empty($folderIds) || in_array($key, $folderIds)"
                             />
                         </x-core-setting::form-group>
                     @endforeach

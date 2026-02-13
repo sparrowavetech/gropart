@@ -3,6 +3,7 @@
 namespace Botble\Page\Providers;
 
 use Botble\Base\Facades\DashboardMenu;
+use Botble\Base\Supports\DashboardMenuItem;
 use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Page\Models\Page;
@@ -28,25 +29,32 @@ class PageServiceProvider extends ServiceProvider
 
         $this
             ->setNamespace('packages/page')
-            ->loadAndPublishConfigurations(['permissions', 'general'])
+            ->loadAndPublishConfigurations(['permissions'])
             ->loadHelpers()
             ->loadAndPublishViews()
             ->loadAndPublishTranslations()
             ->loadRoutes()
+            ->publishAssets()
             ->loadMigrations();
 
-        DashboardMenu::default()->beforeRetrieving(function () {
+        if (class_exists('ApiHelper')) {
+            $this->loadRoutes(['api']);
+        }
+
+        DashboardMenu::default()->beforeRetrieving(function (): void {
             DashboardMenu::make()
-                ->registerItem([
-                    'id' => 'cms-core-page',
-                    'priority' => 2,
-                    'name' => 'packages/page::pages.menu_name',
-                    'icon' => 'ti ti-notebook',
-                    'route' => 'pages.index',
-                ]);
+                ->registerItem(
+                    DashboardMenuItem::make()
+                        ->id('cms-core-page')
+                        ->priority(2)
+                        ->name('packages/page::pages.menu_name')
+                        ->icon('ti ti-notebook')
+                        ->route('pages.index')
+                        ->permissions('pages.index')
+                );
         });
 
-        $this->app['events']->listen(RenderingAdminBar::class, function () {
+        $this->app['events']->listen(RenderingAdminBar::class, function (): void {
             AdminBar::registerLink(
                 trans('packages/page::pages.menu_name'),
                 route('pages.create'),
@@ -56,12 +64,12 @@ class PageServiceProvider extends ServiceProvider
         });
 
         if (function_exists('shortcode')) {
-            ViewFacade::composer(['packages/page::themes.page'], function (View $view) {
+            ViewFacade::composer(['packages/page::themes.page'], function (View $view): void {
                 $view->withShortcodes();
             });
         }
 
-        $this->app->booted(function () {
+        $this->app->booted(function (): void {
             $this->app->register(HookServiceProvider::class);
         });
 

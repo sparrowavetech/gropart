@@ -10,7 +10,10 @@
 
     <div class="get-start-wrapper text-center">
         <div class="mb-5">
-            <x-core::icon name="ti ti-confetti" class="get-start-icon" />
+            <x-core::icon
+                name="ti ti-confetti"
+                class="get-start-icon"
+            />
         </div>
 
         <h4 class="lh-base">{{ trans('packages/get-started::get-started.welcome_title') }}</h4>
@@ -100,7 +103,7 @@
                             for="site-logo"
                             :label="trans('packages/get-started::get-started.logo')"
                         />
-                        {!! Form::mediaImage('logo', theme_option('logo'), ['allow_thumb' => false]) !!}
+                        {!! Form::mediaImage('logo', Theme::getLogo(), ['allow_thumb' => false]) !!}
                     </div>
                 </div>
                 <div class="col-sm-6">

@@ -11,7 +11,7 @@ class AnalyticsCredentialRule implements ValidationRule
 {
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        $message = __('This credential is invalid Google Analytics credentials.');
+        $message = trans('plugins/analytics::analytics.credential_invalid');
 
         if (! is_string($value) || ! Str::isJson($value)) {
             $fail($message);

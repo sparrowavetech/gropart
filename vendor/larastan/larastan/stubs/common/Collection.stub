@@ -57,16 +57,30 @@ class Collection implements ArrayAccess, CanBeEscapedWhenCastToString, Enumerabl
     public function shift($count = 1);
 
     /**
-     * Push all of the given items onto the collection.
+     * Group an associative array by a field or using a callback.
      *
-     * @template TConcatKey of array-key
-     * @template TConcatValue
+     * @template TGroupKey of array-key|\UnitEnum|\Stringable
      *
-     * @param  iterable<TConcatKey, TConcatValue>  $source
-     * @return static<TKey|TConcatKey, TValue|TConcatValue>
-     * TODO: this is for 9.x compatibility. Remove it when we drop 9.x support.
+     * @param  (callable(TValue, TKey): TGroupKey)|list<string|\Closure>|string  $groupBy
+     * @param  bool  $preserveKeys
+     * @return static<
+     *  ($groupBy is (array|string)
+     *      ? array-key
+     *      : (TGroupKey is \UnitEnum ? array-key : (TGroupKey is \Stringable ? string : array-key))),
+     *  static<($preserveKeys is true ? TKey : int), ($groupBy is array ? mixed : TValue)>
+     * >
      */
-    public function concat($source);
+    public function groupBy($groupBy, $preserveKeys = false);
+
+    /**
+     * Key an associative array by a field or using a callback.
+     *
+     * @template TNewKey of array-key
+     *
+     * @param  (callable(TValue, TKey): TNewKey)|list<string|\Closure>|string  $keyBy
+     * @return static<($keyBy is string ? array-key : ($keyBy is array ? array-key : TNewKey)), TValue>
+     */
+    public function keyBy($keyBy);
 }
 
 /**

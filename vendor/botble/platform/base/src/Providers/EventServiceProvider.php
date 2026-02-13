@@ -2,7 +2,6 @@
 
 namespace Botble\Base\Providers;
 
-use App\Http\Middleware\VerifyCsrfToken;
 use Botble\ACL\Events\RoleAssignmentEvent;
 use Botble\ACL\Events\RoleUpdateEvent;
 use Botble\Base\Events\AdminNotificationEvent;
@@ -20,6 +19,7 @@ use Botble\Base\Http\Middleware\AdminLocaleMiddleware;
 use Botble\Base\Http\Middleware\CoreMiddleware;
 use Botble\Base\Http\Middleware\DisableInDemoModeMiddleware;
 use Botble\Base\Http\Middleware\EnsureLicenseHasBeenActivated;
+use Botble\Base\Http\Middleware\HttpSecurityHeaders;
 use Botble\Base\Http\Middleware\HttpsProtocolMiddleware;
 use Botble\Base\Http\Middleware\LocaleMiddleware;
 use Botble\Base\Listeners\AdminNotificationListener;
@@ -32,16 +32,19 @@ use Botble\Base\Listeners\PushDashboardMenuToSystemPanel;
 use Botble\Base\Listeners\SendMailListener;
 use Botble\Base\Listeners\UpdatedContentListener;
 use Botble\Base\Models\AdminNotification;
+use Botble\Dashboard\Events\RenderingDashboardWidgets;
 use Botble\Support\Http\Middleware\BaseMiddleware;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Config\Repository;
 use Illuminate\Database\Events\MigrationsStarted;
 use Illuminate\Database\Events\QueryExecuted;
+use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
@@ -84,7 +87,7 @@ class EventServiceProvider extends ServiceProvider
     {
         $events = $this->app['events'];
 
-        $events->listen(RouteMatched::class, function () {
+        $events->listen(RouteMatched::class, function (): void {
             /**
              * @var Router $router
              */
@@ -93,6 +96,7 @@ class EventServiceProvider extends ServiceProvider
             $router->pushMiddlewareToGroup('web', LocaleMiddleware::class);
             $router->pushMiddlewareToGroup('web', AdminLocaleMiddleware::class);
             $router->pushMiddlewareToGroup('web', HttpsProtocolMiddleware::class);
+            $router->pushMiddlewareToGroup('web', HttpSecurityHeaders::class);
             $router->aliasMiddleware('preventDemo', DisableInDemoModeMiddleware::class);
             $router->middlewareGroup('core', [CoreMiddleware::class]);
 
@@ -103,8 +107,18 @@ class EventServiceProvider extends ServiceProvider
             });
 
             add_filter(BASE_FILTER_TOP_HEADER_LAYOUT, function ($options) {
+                if (! Auth::guard()->check()) {
+                    return $options;
+                }
+
                 try {
-                    $countNotificationUnread = AdminNotification::countUnread();
+                    $countNotificationUnread = cache()->remember(
+                        'admin-notifications-count-' . Auth::guard()->id(),
+                        86400,
+                        function () {
+                            return AdminNotification::countUnread();
+                        }
+                    );
                 } catch (Throwable) {
                     $countNotificationUnread = 0;
                 }
@@ -125,22 +139,27 @@ class EventServiceProvider extends ServiceProvider
             $this->disableCsrfProtection();
         });
 
-        $events->listen(MigrationsStarted::class, function () {
-            rescue(function () {
+        $events->listen(MigrationsStarted::class, function (): void {
+            rescue(function (): void {
                 if (DB::getDefaultConnection() === 'mysql') {
                     DB::statement('SET SESSION sql_require_primary_key=0');
                 }
             }, report: false);
         });
 
-        $events->listen(['cache:cleared'], function () {
-            $this->app['files']->delete(storage_path('cache_keys.json'));
+        $events->listen(['cache:cleared'], function (): void {
+            $files = $this->app['files'];
+
+            $files->delete(storage_path('cache_keys.json'));
+
+            $files->deleteDirectory(storage_path('app/chunks'));
+            $files->deleteDirectory(storage_path('app/marketplace'));
         });
 
         $events->listen(PanelSectionsRendering::class, PushDashboardMenuToSystemPanel::class);
 
         if ($this->app->isLocal()) {
-            DB::listen(function (QueryExecuted $queryExecuted) {
+            DB::listen(function (QueryExecuted $queryExecuted): void {
                 if ($queryExecuted->time < 500) {
                     return;
                 }
@@ -148,6 +167,21 @@ class EventServiceProvider extends ServiceProvider
                 Log::warning(sprintf('DB query exceeded %s ms. SQL: %s', $queryExecuted->time, $queryExecuted->sql));
             });
         }
+
+        $this->app['events']->listen(RenderingDashboardWidgets::class, function (): void {
+            add_filter(DASHBOARD_FILTER_ADMIN_NOTIFICATIONS, function (?string $html) {
+
+                $size = File::size(storage_path('framework/cache'));
+
+                if ($size < 1024 * 1024 * 100) {
+                    return $html;
+                }
+
+                $size = BaseHelper::humanFilesize($size);
+
+                return $html . view('core/base::system.partials.cache-too-large-alert', compact('size'))->render();
+            }, 5);
+        });
     }
 
     protected function disableCsrfProtection(): void
@@ -162,7 +196,7 @@ class EventServiceProvider extends ServiceProvider
             || $config->get('core.base.general.disable_verify_csrf_token', false)
             || ($this->app->environment('production') && AdminHelper::isInAdmin())
         ) {
-            $this->app->instance(VerifyCsrfToken::class, new BaseMiddleware());
+            $this->app->instance(ValidateCsrfToken::class, new BaseMiddleware());
         }
     }
 }

@@ -10,11 +10,20 @@
         name="csrf-token"
         content="{{ csrf_token() }}"
     >
+    @php
+        $description = trim((string) View::yieldContent('description')) ?: theme_option('ecommerce_checkout_seo_description');
+    @endphp
+    @if($description)
+        <meta
+            name="description"
+            content="{{ $description }}"
+        >
+    @endif
     <title> @yield('title', __('Checkout')) </title>
 
-    @if (theme_option('favicon'))
+    @if ($favicon = Theme::getFavicon())
         <link
-            href="{{ RvMedia::getImageUrl(theme_option('favicon')) }}"
+            href="{{ RvMedia::getImageUrl($favicon) }}"
             rel="shortcut icon"
         >
     @endif
@@ -25,54 +34,41 @@
         :root {
             --primary-color: {{ $primaryColor = theme_option('primary_color', '#58b3f0') }};
             --primary-color-rgb: {{ implode(',', BaseHelper::hexToRgb($primaryColor)) }};
+            --checkout-primary-color: {{ $checkoutPrimaryColor = theme_option('checkout_primary_color', '#197bbd') }};
+            --checkout-primary-color-rgb: {{ implode(',', BaseHelper::hexToRgb($checkoutPrimaryColor)) }};
         }
     </style>
 
-    {!! Html::style('vendor/core/core/base/libraries/font-awesome/css/fontawesome.min.css') !!}
-    {!! Html::style('vendor/core/core/base/libraries/ckeditor/content-styles.css?v=3.7.0') !!}
-    {!! Html::style('vendor/core/plugins/ecommerce/css/front-theme.css?v=3.7.0') !!}
-
+    {!! Html::style('vendor/core/core/base/libraries/font-awesome/css/fontawesome.min.css?v=' . ($assetsVersion = EcommerceHelper::getAssetVersion())) !!}
+    {!! Html::style('vendor/core/core/base/libraries/ckeditor/content-styles.css?v=' . $assetsVersion) !!}
     @if (BaseHelper::isRtlEnabled())
-        {!! Html::style('vendor/core/plugins/ecommerce/css/front-theme-rtl.css?v=3.7.0') !!}
+        {!! Html::style('vendor/core/plugins/ecommerce/libraries/bootstrap/bootstrap.rtl.min.css?v=' . $assetsVersion) !!}
+    @else
+        {!! Html::style('vendor/core/plugins/ecommerce/libraries/bootstrap/bootstrap.min.css?v=' . $assetsVersion) !!}
     @endif
 
-    {!! Html::style('vendor/core/core/base/libraries/toastr/toastr.min.css') !!}
+    {!! Html::style('vendor/core/plugins/ecommerce/css/front-theme.css?v=' . $assetsVersion) !!}
 
-    {!! Html::script('vendor/core/plugins/ecommerce/js/checkout.js?v=3.7.0') !!}
+    @if (BaseHelper::isRtlEnabled())
+        {!! Html::style('vendor/core/plugins/ecommerce/css/front-theme-rtl.css?v=' . $assetsVersion) !!}
+    @endif
+
+    {!! Html::style('vendor/core/core/base/libraries/toastr/toastr.min.css?v=' . $assetsVersion) !!}
+
+    {!! Html::script('vendor/core/plugins/ecommerce/js/checkout.js?v=' . $assetsVersion) !!}
 
     @if (EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation())
         <link
-            href="{{ asset('vendor/core/core/base/libraries/select2/css/select2.min.css') }}"
+            href="{{ asset('vendor/core/core/base/libraries/select2/css/select2.min.css?v=' . $assetsVersion) }}"
             rel="stylesheet"
         >
-        <script src="{{ asset('vendor/core/core/base/libraries/select2/js/select2.min.js') }}"></script>
-        <script src="{{ asset('vendor/core/plugins/location/js/location.js?v=3.7.0') }}"></script>
+        <script src="{{ asset('vendor/core/core/base/libraries/select2/js/select2.min.js?v=' . $assetsVersion) }}"></script>
+        <script src="{{ asset('vendor/core/plugins/location/js/location.js?v=' . $assetsVersion) }}"></script>
     @endif
 
     {!! apply_filters('ecommerce_checkout_header', null) !!}
 
     @stack('header')
-
-    <style type="text/css">
-        .checkout-product-img-wrapper .img-thumbnail { width: 100%; }
-        .btn.payment-checkout-btn { vertical-align: bottom; font-size: 1rem; padding: 10px 30px; font-weight: 600; text-transform: uppercase; background-color: #198754; display: block; }
-        .btn.payment-checkout-btn:hover { background-color: #00b460!important; }
-        .thank-you i { margin-bottom: 10px; color: #198754; vertical-align: middle; }
-        .thank-you .thank-you-sentence, .thank-you p { line-height: 1; margin:0 }
-        .order-customer-info .h3, .order-customer-info h3 { font-weight: 700; text-transform: uppercase; font-size: 1rem; }
-        .order-customer-info p span:first-child { min-width: 100px; font-weight: 600; text-transform: capitalize; }
-        .order-customer-info { background: #f5f5f5; margin: 0 0 10px; padding: 15px; }
-        .thank-you { margin-bottom: 20px; text-align: center; }
-        .order-customer-info p { color: #000; font-size: .75rem; margin-bottom: 3px; display: flex; }
-        .order-number-data .od-no {font-size: 1.5rem;text-transform: capitalize; text-decoration: underline; text-align: center; margin-bottom: 50px;}
-        .price-text span { vertical-align: text-bottom; }
-        .pricing-data .price-text { font-size: 18px; padding-bottom: 15px; }
-        .pricing-data .price-text-label { font-size: 18px; font-weight: 600; }
-        .pricing-data .price-text:after { content: ""; display: block; position: absolute; height: 1px; width: 95%; left: 10px; background: #ccc; margin-top: 2px; }
-        .price-text, .total-text { color: #000000; font-weight: 600; }
-        .thank-you-links { text-align: center; }
-        .thank-you-links .link-text a { line-height: 1; font-size: 1rem; color: #888; padding: 10px; border-radius: 5px; text-transform: capitalize; text-decoration: underline; font-weight: 600; border: 2px solid rgb(173 173 173); }
-    </style>
 </head>
 
 @php
@@ -83,18 +79,14 @@
 
 <body{!! Theme::bodyAttributes() !!}>
     {!! apply_filters('ecommerce_checkout_body', null) !!}
-    <div class="checkout-content-wrap">
-        <div class="container">
-            <div class="row">
-                @yield('content')
-            </div>
-        </div>
+    <div class="container my-0 my-md-3 my-lg-5 checkout-content-wrap">
+        @yield('content')
     </div>
 
     @stack('footer')
 
-    {!! Html::script('vendor/core/plugins/ecommerce/js/utilities.js?v=3.7.0') !!}
-    {!! Html::script('vendor/core/core/base/libraries/toastr/toastr.min.js') !!}
+    {!! Html::script('vendor/core/plugins/ecommerce/js/utilities.js?v=' . $assetsVersion) !!}
+    {!! Html::script('vendor/core/core/base/libraries/toastr/toastr.min.js?v=' . $assetsVersion) !!}
 
     <script type="text/javascript">
         window.messages = {
@@ -120,6 +112,46 @@
     @endif
 
     {!! apply_filters('ecommerce_checkout_footer', null) !!}
+
+    <script>
+        // Initialize floating labels for checkout forms
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add placeholder=" " to all inputs in form-input-wrapper to enable :placeholder-shown
+            document.querySelectorAll('.form-input-wrapper input.form-control').forEach(function(input) {
+                if (!input.hasAttribute('placeholder')) {
+                    input.setAttribute('placeholder', ' ');
+                }
+                
+                // Check if input has value on load (for autofilled or pre-filled fields)
+                if (input.value && input.value.trim() !== '') {
+                    input.classList.add('has-value');
+                }
+                
+                // Add/remove class on input change
+                input.addEventListener('input', function() {
+                    if (this.value && this.value.trim() !== '') {
+                        this.classList.add('has-value');
+                    } else {
+                        this.classList.remove('has-value');
+                    }
+                });
+                
+                // Handle autofill
+                input.addEventListener('change', function() {
+                    if (this.value && this.value.trim() !== '') {
+                        this.classList.add('has-value');
+                    } else {
+                        this.classList.remove('has-value');
+                    }
+                });
+            });
+            
+            // Handle select elements - they should always have floating labels
+            document.querySelectorAll('.form-input-wrapper select.form-control').forEach(function(select) {
+                select.classList.add('has-value');
+            });
+        });
+    </script>
 
 </body>
 </html>

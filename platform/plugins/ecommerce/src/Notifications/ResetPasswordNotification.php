@@ -28,7 +28,10 @@ class ResetPasswordNotification extends Notification implements ShouldQueue
             ->setType('plugins')
             ->setTemplate('password-reminder')
             ->addTemplateSettings(ECOMMERCE_MODULE_SCREEN_NAME, config('plugins.ecommerce.email', []))
-            ->setVariableValue('reset_link', route('customer.password.reset.update', ['token' => $this->token, 'email' => request()->input('email')]));
+            ->setVariableValues([
+                'reset_link' => route('customer.password.reset.update', ['token' => $this->token, 'email' => request()->input('email')]),
+                'customer_name' => $notifiable->name,
+            ]);
 
         return (new MailMessage())
             ->view(['html' => new HtmlString($emailHandler->getContent())])

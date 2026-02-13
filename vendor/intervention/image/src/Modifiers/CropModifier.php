@@ -12,6 +12,11 @@ use Intervention\Image\Interfaces\SizeInterface;
 
 class CropModifier extends SpecializableModifier
 {
+    /**
+     * Create new modifier object
+     *
+     * @return void
+     */
     public function __construct(
         public int $width,
         public int $height,
@@ -20,6 +25,7 @@ class CropModifier extends SpecializableModifier
         public mixed $background = 'ffffff',
         public string $position = 'top-left'
     ) {
+        //
     }
 
     /**

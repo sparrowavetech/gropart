@@ -20,7 +20,7 @@ class ProductCategoryRequest extends Request
                     return Rule::exists('ec_product_categories', 'id');
                 }),
             ],
-            'order' => ['nullable', 'integer', 'min:0', 'max:127'],
+            'order' => ['nullable', 'integer', 'min:0', 'max:10000'],
             'icon' => ['nullable', 'string', 'max:50'],
             'icon_image' => ['nullable', 'string', 'max:255'],
             'is_featured' => ['sometimes', 'boolean'],

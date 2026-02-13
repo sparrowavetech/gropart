@@ -26,6 +26,9 @@ class CustomerDeleteAccountJob implements ShouldQueue
 
     public function handle(): void
     {
+        /**
+         * @var Customer $customer
+         */
         $customer = Customer::query()->find($this->deletionRequest->customer_id);
 
         if (! $customer->exists) {

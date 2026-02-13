@@ -7,10 +7,12 @@ MartApp.$iconChevronLeft =
 MartApp.$iconChevronRight =
     '<span class="slick-next-arrow svg-icon"><svg><use href="#svg-icon-chevron-right" xlink:href="#svg-icon-chevron-right"></use></svg></span>'
 
-window._scrollBar = new ScrollBarHelper()
+if (typeof ScrollBarHelper !== 'undefined') {
+    window._scrollBar = new ScrollBarHelper()
+}
 
 MartApp.isRTL = $('body').prop('dir') === 'rtl'
-;(function ($) {
+;(function($) {
     $.ajaxSetup({
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
@@ -20,26 +22,26 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
     function basicEvents() {
         $('.form--quick-search .form-group--icon').show()
         let $categoryLabel = $('.product-category-label .text')
-        $(document).on('change', '.product-category-select', function () {
+        $(document).on('change', '.product-category-select', function() {
             $categoryLabel.text($.trim($(this).find('option:selected').text()))
         })
 
         $categoryLabel.text($.trim($('.product-category-select option:selected').text()))
 
-        $(document).ready(function () {
+        $(document).ready(function() {
             $('.preloader').addClass('fade-in')
         })
     }
 
     function subMenuToggle() {
-        $(document).on('click', '.menu-item-has-children > a > .sub-toggle', function (e) {
+        $(document).on('click', '.menu-item-has-children > a > .sub-toggle', function(e) {
             e.preventDefault()
             const $this = $(this)
             const $parent = $this.closest('.menu-item-has-children')
             $parent.toggleClass('active')
         })
 
-        $(document).on('click', '.mega-menu__column > a > .sub-toggle', function (e) {
+        $(document).on('click', '.mega-menu__column > a > .sub-toggle', function(e) {
             e.preventDefault()
             const $this = $(this)
             const $parent = $this.closest('.mega-menu__column')
@@ -48,7 +50,7 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
     }
 
     function siteToggleAction() {
-        $('.toggle--sidebar').on('click', function (e) {
+        $('.toggle--sidebar').on('click', function(e) {
             e.preventDefault()
 
             let url = $(this).attr('href')
@@ -62,7 +64,7 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
             _scrollBar.hide()
         })
 
-        $(document).on('click', '.close-toggle--sidebar', function (e) {
+        $(document).on('click', '.close-toggle--sidebar', function(e) {
             e.preventDefault()
             let $panel
 
@@ -78,7 +80,7 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
             _scrollBar.reset()
         })
 
-        $('body').on('click', function (e) {
+        $('body').on('click', function(e) {
             if ($(e.target).siblings('.panel--sidebar').hasClass('active')) {
                 $('.panel--sidebar').removeClass('active')
                 _scrollBar.reset()
@@ -86,26 +88,149 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
         })
     }
 
-    $(function () {
+    $(function() {
         basicEvents()
         subMenuToggle()
         siteToggleAction()
 
-        window.addEventListener('ecommerce.categories-dropdown.loaded', function () {
+        window.addEventListener('ecommerce.categories-dropdown.loaded', function() {
             subMenuToggle()
         })
     })
 
-    MartApp.init = function () {
+    MartApp.showModal = function($modal) {
+        if (typeof $.fn.modal === 'function') {
+            $modal.modal('show')
+        } else {
+            $modal.addClass('show')
+            $modal.css('display', 'block')
+            $modal.attr('aria-hidden', 'false')
+            $('body').addClass('modal-open')
+
+            if (!$('.modal-backdrop').length) {
+                $('<div class="modal-backdrop fade show"></div>').appendTo('body')
+            }
+        }
+    }
+
+    MartApp.hideModal = function($modal) {
+        if (typeof $.fn.modal === 'function') {
+            $modal.modal('hide')
+        } else {
+            $modal.removeClass('show')
+            $modal.css('display', 'none')
+            $modal.attr('aria-hidden', 'true')
+            $('body').removeClass('modal-open')
+            $('.modal-backdrop').remove()
+        }
+    }
+
+    MartApp.initQuickShopVariationListeners = function($modal) {
+        const originalSuccessCallback = window.onChangeSwatchesSuccess
+
+        const originalPushState = window.history.pushState
+        const originalReplaceState = window.history.replaceState
+
+        window.history.pushState = function() {
+            if (arguments[0] && arguments[0].product_attributes_id &&
+                $('#' + arguments[0].product_attributes_id).closest('#product-quick-shop-modal').length) {
+                return
+            }
+            return originalPushState.apply(window.history, arguments)
+        }
+
+        window.history.replaceState = function() {
+            if (arguments[0] && arguments[0].product_attributes_id &&
+                $('#' + arguments[0].product_attributes_id).closest('#product-quick-shop-modal').length) {
+                return
+            }
+            return originalReplaceState.apply(window.history, arguments)
+        }
+
+        window.onChangeSwatchesSuccess = function(res, $productAttributes) {
+            if (originalSuccessCallback && typeof originalSuccessCallback === 'function') {
+                originalSuccessCallback(res, $productAttributes)
+            }
+
+            if ($productAttributes.closest('#product-quick-shop-modal').length) {
+                const data = res.data
+                if (data) {
+                    const $availabilityStatus = $modal.find('.availability-status .status-value')
+                    const $addToCartBtn = $modal.find('.add-to-cart-button')
+                    const $quantityInput = $modal.find('input[name="qty"]')
+
+                    const inStockText = $availabilityStatus.data('in-stock-text') || 'In stock'
+                    const outOfStockText = $availabilityStatus.data('out-of-stock-text') || 'Out of stock'
+
+                    if (data.product && data.product.is_out_of_stock) {
+                        $availabilityStatus.html('<span class="text-danger">' + outOfStockText + '</span>')
+                        $addToCartBtn.addClass('disabled').prop('disabled', true)
+                        if ($quantityInput.length) {
+                            $quantityInput.prop('readonly', true)
+                        }
+                    } else if (data.product && data.product.with_storehouse_management && data.product.quantity < 1) {
+                        $availabilityStatus.html('<span class="text-danger">' + outOfStockText + '</span>')
+                        $addToCartBtn.addClass('disabled').prop('disabled', true)
+                        if ($quantityInput.length) {
+                            $quantityInput.prop('readonly', true)
+                        }
+                    } else {
+                        $availabilityStatus.html('<span class="text-success">' + inStockText + '</span>')
+                        $addToCartBtn.removeClass('disabled').prop('disabled', false)
+                        if ($quantityInput.length) {
+                            $quantityInput.prop('readonly', false)
+                        }
+                    }
+                }
+            }
+        }
+
+        $modal.on('hidden.bs.modal', function() {
+            window.onChangeSwatchesSuccess = originalSuccessCallback
+            window.history.pushState = originalPushState
+            window.history.replaceState = originalReplaceState
+        })
+    }
+
+    MartApp.updateQuickShopAvailability = function($modal) {
+        const $form = $modal.find('form.cart-form')
+        const $availabilityStatus = $modal.find('.availability-status .status-value')
+        const $addToCartBtn = $form.find('.add-to-cart-button')
+        const $quantityInput = $form.find('input[name="qty"]')
+
+        if (!$availabilityStatus.length) {
+            return
+        }
+
+        const isOutOfStock = $addToCartBtn.hasClass('disabled') || $addToCartBtn.prop('disabled')
+
+        const inStockText = $availabilityStatus.data('in-stock-text') || 'In stock'
+        const outOfStockText = $availabilityStatus.data('out-of-stock-text') || 'Out of stock'
+
+        if (isOutOfStock) {
+            $availabilityStatus.html('<span class="text-danger">' + outOfStockText + '</span>')
+            if ($quantityInput.length) {
+                $quantityInput.prop('readonly', true)
+            }
+        } else {
+            $availabilityStatus.html('<span class="text-success">' + inStockText + '</span>')
+            if ($quantityInput.length) {
+                $quantityInput.prop('readonly', false)
+            }
+        }
+    }
+
+    MartApp.init = function() {
         MartApp.$body = $(document.body)
 
-        MartApp.formSearch = '#products-filter-form'
+        MartApp.formSearch = '.bb-product-form-filter'
         MartApp.$formSearch = $(document).find(MartApp.formSearch)
         MartApp.productListing = '.products-listing'
         MartApp.$productListing = $(MartApp.productListing)
 
         this.lazyLoad(null, true)
         this.productQuickView()
+        this.productQuickShop()
         this.slickSlides()
         this.productQuantity()
         this.addProductToWishlist()
@@ -131,28 +256,32 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
         this.stickyHeader()
         this.recentlyViewedProducts()
 
-        MartApp.$body.on('click', '.catalog-sidebar .backdrop, #cart-mobile .backdrop', function (e) {
+        MartApp.$body.on('click', '.catalog-sidebar .backdrop, #cart-mobile .backdrop', function(e) {
             e.preventDefault()
             $(this).parent().removeClass('active')
             _scrollBar.reset()
         })
 
-        MartApp.$body.on('click', '.sidebar-filter-mobile', function (e) {
+        MartApp.$body.on('click', '.sidebar-filter-mobile', function(e) {
             e.preventDefault()
             MartApp.toggleSidebarFilterProducts('open', $(e.currentTarget).data('toggle'))
         })
 
-        MartApp.$body.on('submit', '.products-filter-form-vendor', function (e) {
-            if (MartApp.$formSearch.length) {
-                MartApp.$formSearch.trigger('submit')
-                return false
-            }
-            return true
+        MartApp.$body.on('click', '.ps-layout__left .ps-btn--close, .screen-darken', function(e) {
+            e.preventDefault()
+            MartApp.toggleSidebarFilterProducts('close')
         })
+
+        this.initCountdowns()
     }
 
-    MartApp.toggleSidebarFilterProducts = function (status = 'close', target = 'product-categories-primary-sidebar') {
-        const $el = $('[data-toggle-target="' + target + '"]')
+    MartApp.toggleSidebarFilterProducts = function(status = 'close', target = 'product-categories-primary-sidebar') {
+        let $el = $('[data-toggle-target="' + target + '"]')
+
+        if (!$el.length) {
+            $el = $('.ps-layout__left')
+        }
+
         if (status === 'close') {
             $el.removeClass('active')
             _scrollBar.reset()
@@ -162,10 +291,10 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
         }
     }
 
-    MartApp.productQuickView = function () {
+    MartApp.productQuickView = function() {
         const $modal = $('#product-quick-view-modal')
 
-        MartApp.$body.on('click', '.product-quick-view-button .quick-view', function (e) {
+        MartApp.$body.on('click', '.product-quick-view-button .quick-view', function(e) {
             e.preventDefault()
             const _self = $(e.currentTarget)
             _self.addClass('loading')
@@ -179,13 +308,22 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
                     if (!res.error) {
                         $modal.find('.product-modal-content').html(res.data)
                         setTimeout(function() {
-                            MartApp.productGallery(true, $modal.find('.product-modal-content .product-gallery'))
-                            MartApp.lightBox()
+                            if (typeof EcommerceApp !== 'undefined') {
+                                EcommerceApp.initProductGallery(true)
+                            }
+
                             MartApp.lazyLoad($modal[0])
                         }, 100)
+
+                        if (typeof Theme.lazyLoadInstance !== 'undefined') {
+                            Theme.lazyLoadInstance.update()
+                        }
+
+                        document.dispatchEvent(new CustomEvent('ecommerce.quick-view.initialized'))
                     }
                 },
-                error: () => {},
+                error: () => {
+                },
                 complete: () => {
                     $modal.addClass('loaded').removeClass('loading')
                     _self.removeClass('loading')
@@ -194,7 +332,131 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
         })
     }
 
-    MartApp.productGallery = function (destroy, $gallery) {
+    MartApp.productQuickShop = function() {
+        MartApp.$body.on('click', '.js-quick-shop-button, [data-bb-toggle="quick-shop"]', function(e) {
+            e.preventDefault()
+            e.stopPropagation()
+
+            const $btn = $(this)
+            const $modal = $('#product-quick-shop-modal')
+
+            if ($btn.hasClass('loading')) {
+                return
+            }
+
+            $btn.addClass('loading')
+            $modal.removeClass('loaded').addClass('loading')
+
+            MartApp.showModal($modal)
+
+            $.ajax({
+                url: $btn.data('url'),
+                type: 'GET',
+                success: (res) => {
+                    if (!res.error) {
+                        $modal.find('.product-quick-shop-content').html(res.data)
+
+                        $modal.find('form.cart-form').addClass('quick-shop-form')
+
+                        if (!$modal.find('.product-attributes').length && $modal.find('.attribute-swatches-wrapper').length) {
+                            $modal.find('.ps-product--quickshop').addClass('product-attributes')
+                        }
+
+                        if (typeof window.ChangeProductSwatches !== 'undefined') {
+                            $modal.find('.attribute-swatches-wrapper input:checked').trigger('change')
+                        }
+
+                        if (typeof MartApp.initProductQuantity === 'function') {
+                            MartApp.initProductQuantity($modal)
+                        }
+
+                        MartApp.initQuickShopVariationListeners($modal)
+                        MartApp.updateQuickShopAvailability($modal)
+                    } else {
+                        MartApp.showError(res.message)
+                        MartApp.hideModal($modal)
+                    }
+                },
+                error: (res) => {
+                    MartApp.handleError(res)
+                    $modal.modal('hide')
+                },
+                complete: () => {
+                    $modal.addClass('loaded').removeClass('loading')
+                    $btn.removeClass('loading')
+                },
+            })
+        })
+
+        MartApp.$body.on('click', '#product-quick-shop-modal .btn-close', function(e) {
+            e.preventDefault()
+            MartApp.hideModal($('#product-quick-shop-modal'))
+        })
+
+        MartApp.$body.on('click', '.modal-backdrop', function(e) {
+            e.preventDefault()
+            MartApp.hideModal($('#product-quick-shop-modal'))
+        })
+
+        MartApp.$body.on('click', '.quick-shop-form button[type=submit]', function(e) {
+            e.preventDefault()
+            e.stopPropagation()
+
+            const $btn = $(this)
+            const $form = $btn.closest('form.cart-form')
+            const $modal = $('#product-quick-shop-modal')
+
+            $btn.addClass('loading')
+
+            let data = $form.serializeArray()
+            data.push({ name: 'checkout', value: $btn.prop('name') === 'checkout' ? 1 : 0 })
+
+            $.ajax({
+                type: 'POST',
+                url: $form.prop('action'),
+                data: $.param(data),
+                success: (res) => {
+                    if (res.error) {
+                        MartApp.showError(res.message)
+                        if (res.data && res.data.next_url !== undefined) {
+                            setTimeout(() => {
+                                window.location.href = res.data.next_url
+                            }, 500)
+                        }
+                        return false
+                    }
+
+                    if (res.data && res.data.next_url !== undefined) {
+                        window.location.href = res.data.next_url
+                        return false
+                    }
+
+                    MartApp.hideModal($modal)
+                    MartApp.showSuccess(res.message)
+                    MartApp.loadAjaxCart()
+
+                    // Dispatch cart added event for other handlers (up-sale refresh, etc.)
+                    document.dispatchEvent(
+                        new CustomEvent('ecommerce.cart.added', {
+                            detail: {
+                                data: res.data,
+                                element: $btn[0],
+                                message: res.message
+                            },
+                        })
+                    )
+                },
+                error: (res) => {
+                    MartApp.handleError(res, $form)
+                },
+                complete: () => {
+                    $btn.removeClass('loading')
+                },
+            })
+        })
+    }
+
+    MartApp.productGallery = function(destroy, $gallery) {
         if (!$gallery || !$gallery.length) {
             $gallery = $('.product-gallery')
         }
@@ -256,7 +518,7 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
         }
     }
 
-    MartApp.lightBox = function () {
+    MartApp.lightBox = function() {
         let $productGallery = $('.product-gallery--with-images')
         if ($productGallery.data('lightGallery')) {
             $productGallery.data('lightGallery').destroy(true)
@@ -290,31 +552,91 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
         }
     }
 
-    MartApp.slickSlide = function (el) {
+    MartApp.slickSlide = function(el) {
         const $el = $(el)
-        if ($el.length && $el.not('.slick-initialized')) {
+        if ($el.length && !$el.hasClass('slick-initialized')) {
+            if (!$el.is(':visible') || $el.children().length === 0) {
+                return
+            }
+
             let slickOptions = $el.data('slick') || {}
             if (slickOptions.appendArrows) {
-                slickOptions.appendArrows = $el.parent().find(slickOptions.appendArrows)
+                const $arrows = $el.parent().find(slickOptions.appendArrows)
+                if ($arrows.length) {
+                    slickOptions.appendArrows = $arrows
+                }
             }
             slickOptions = Object.assign(slickOptions, {
                 rtl: MartApp.isRTL,
                 prevArrow: MartApp.$iconChevronLeft,
                 nextArrow: MartApp.$iconChevronRight,
             })
-            $el.slick(slickOptions)
+
+            try {
+                $el.slick(slickOptions)
+            } catch (error) {
+                console.warn('Failed to initialize slick slider:', error)
+            }
         }
     }
 
-    MartApp.slickSlides = function () {
+    MartApp.slickSlides = function() {
         $('.slick-slides-carousel')
             .not('.slick-initialized')
-            .map(function (i, e) {
+            .map(function(i, e) {
                 MartApp.slickSlide(e)
             })
     }
 
-    MartApp.lazyLoad = function (container, init = false) {
+    MartApp.safeSlickInit = function(selector) {
+        const $elements = $(selector).not('.slick-initialized')
+
+        $elements.each(function() {
+            const $el = $(this)
+            const $images = $el.find('img')
+
+            if ($images.length === 0 || $images.filter(function() {
+                return this.complete
+            }).length === $images.length) {
+                MartApp.slickSlide(this)
+            } else {
+                let loadedCount = 0
+                const totalImages = $images.length
+
+                $images.on('load error', function() {
+                    loadedCount++
+                    if (loadedCount === totalImages && !$el.hasClass('slick-initialized')) {
+                        MartApp.slickSlide($el[0])
+                    }
+                })
+            }
+        })
+    }
+
+    MartApp.initCountdowns = function() {
+        const $countdownElements = $('.expire-countdown').not('[data-initialized]')
+
+        if ($countdownElements.length > 0) {
+            if (typeof $.fn.expireCountdown === 'function') {
+                $countdownElements.each(function() {
+                    const $this = $(this)
+                    $this.attr('data-initialized', 'true')
+                    $this.expireCountdown()
+                })
+            } else {
+                if (typeof window.expireCountdownInit === 'undefined') {
+                    window.expireCountdownInit = true
+                    setTimeout(function() {
+                        if (typeof $.fn.expireCountdown === 'function') {
+                            MartApp.initCountdowns()
+                        }
+                    }, 500)
+                }
+            }
+        }
+    }
+
+    MartApp.lazyLoad = function(container, init = false) {
         if (init) {
             MartApp.lazyLoadInstance = new LazyLoad({
                 elements_selector: '.lazyload',
@@ -333,8 +655,8 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
         }
     }
 
-    MartApp.productQuantity = function () {
-        MartApp.$body.on('click', '.quantity .increase, .quantity .decrease', function (e) {
+    MartApp.productQuantity = function() {
+        MartApp.$body.on('click', '.quantity .increase, .quantity .decrease', function(e) {
             e.preventDefault()
             let $this = $(this),
                 $wrapperBtn = $this.closest('.product-button'),
@@ -369,7 +691,7 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
 
             MartApp.processUpdateCart($this)
         })
-        MartApp.$body.on('keyup', '.quantity .qty', function (e) {
+        MartApp.$body.on('keyup', '.quantity .qty', function(e) {
             e.preventDefault()
             let $this = $(this),
                 $wrapperBtn = $this.closest('.product-button'),
@@ -391,8 +713,8 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
         })
     }
 
-    MartApp.addProductToWishlist = function () {
-        MartApp.$body.on('click', '.wishlist-button .wishlist', function (e) {
+    MartApp.addProductToWishlist = function() {
+        MartApp.$body.on('click', '.wishlist-button .wishlist', function(e) {
             e.preventDefault()
             const $btn = $(e.currentTarget)
             $btn.addClass('loading')
@@ -410,11 +732,11 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
                     $('.btn-wishlist .header-item-counter').text(res.data.count)
                     if (res.data?.added) {
                         $('.wishlist-button .wishlist[data-url="' + $btn.data('url') + '"]').addClass(
-                            'added-to-wishlist'
+                            'added-to-wishlist',
                         )
                     } else {
                         $('.wishlist-button .wishlist[data-url="' + $btn.data('url') + '"]').removeClass(
-                            'added-to-wishlist'
+                            'added-to-wishlist',
                         )
                     }
                 },
@@ -428,8 +750,8 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
         })
     }
 
-    MartApp.addProductToCompare = function () {
-        MartApp.$body.on('click', '.compare-button .compare', function (e) {
+    MartApp.addProductToCompare = function() {
+        MartApp.$body.on('click', '.compare-button .compare', function(e) {
             e.preventDefault()
             const $btn = $(e.currentTarget)
             $btn.addClass('loading')
@@ -455,10 +777,15 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
         })
     }
 
-    MartApp.addProductToCart = function () {
-        MartApp.$body.on('click', 'form.cart-form button[type=submit]', function (e) {
+    MartApp.addProductToCart = function() {
+        MartApp.$body.on('click', 'form.cart-form button[type=submit]', function(e) {
             e.preventDefault()
             const $form = $(this).closest('form.cart-form')
+
+            if ($form.hasClass('quick-shop-form')) {
+                return
+            }
+
             const $btn = $(this)
             $btn.addClass('loading')
 
@@ -473,7 +800,9 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
                     if (res.error) {
                         MartApp.showError(res.message)
                         if (res.data && res.data.next_url !== undefined) {
-                            window.location.href = res.data.next_url
+                            setTimeout(() => {
+                                window.location.href = res.data.next_url
+                            }, 500)
                         }
 
                         return false
@@ -486,6 +815,17 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
 
                     MartApp.showSuccess(res.message)
                     MartApp.loadAjaxCart()
+
+                    // Dispatch cart added event for other handlers (up-sale refresh, etc.)
+                    document.dispatchEvent(
+                        new CustomEvent('ecommerce.cart.added', {
+                            detail: {
+                                data: res.data,
+                                element: $btn[0],
+                                message: res.message
+                            },
+                        })
+                    )
                 },
                 error: (res) => {
                     MartApp.handleError(res, $form)
@@ -497,7 +837,7 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
         })
     }
 
-    MartApp.applyCouponCode = function () {
+    MartApp.applyCouponCode = function() {
         $(document).on('keypress', '.form-coupon-wrapper .coupon-code', (e) => {
             if (e.key === 'Enter') {
                 e.preventDefault()
@@ -525,7 +865,7 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
                         let url = window.location.href
                         url = url.substring(0, url.indexOf('?'))
 
-                        $('.cart-page-content').load(url + '?applied_coupon=1 .cart-page-content > *', function () {
+                        $('.cart-page-content').load(url + '?applied_coupon=1 .cart-page-content > *', function() {
                             _self.prop('disabled', false).removeClass('loading')
                             MartApp.showSuccess(res.message)
                         })
@@ -558,7 +898,7 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
                         let url = window.location.href
                         url = url.substring(0, url.indexOf('?'))
 
-                        $('.cart-page-content').load(url + ' .cart-page-content > *', function () {
+                        $('.cart-page-content').load(url + ' .cart-page-content > *', function() {
                             _self.text(buttonText)
                         })
                     } else {
@@ -577,12 +917,12 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
         })
     }
 
-    MartApp.loadAjaxCart = function () {
+    MartApp.loadAjaxCart = function() {
         if (window.siteConfig?.ajaxCart) {
             $.ajax({
                 url: window.siteConfig.ajaxCart,
                 method: 'GET',
-                success: function (res) {
+                success: function(res) {
                     if (!res.error) {
                         $('.mini-cart-content .widget-shopping-cart-content').html(res.data.html)
                         $('.btn-shopping-cart .header-item-counter').text(res.data.count)
@@ -595,9 +935,9 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
         }
     }
 
-    MartApp.changeInputInSearchForm = function (parseParams) {
+    MartApp.changeInputInSearchForm = function(parseParams) {
         isReadySubmitTrigger = false
-        MartApp.$formSearch.find('input, select, textarea').each(function (e, i) {
+        $(document).find(MartApp.formSearch).find('input, select, textarea').each(function(e, i) {
             const $el = $(i)
             const name = $el.attr('name')
             let value = parseParams[name] || null
@@ -625,13 +965,12 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
         isReadySubmitTrigger = true
     }
 
-    MartApp.convertFromDataToArray = function (formData) {
+    MartApp.convertFromDataToArray = function(formData) {
         let data = []
-        formData.forEach(function (obj) {
+        formData.forEach(function(obj) {
             if (obj.value) {
-                // break with price
                 if (['min_price', 'max_price'].includes(obj.name)) {
-                    const dataValue = MartApp.$formSearch
+                    const dataValue = $(document).find(MartApp.formSearch)
                         .find('input[name=' + obj.name + ']')
                         .data(obj.name.substring(0, 3))
                     if (dataValue == parseInt(obj.value)) {
@@ -646,246 +985,23 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
 
     let isReadySubmitTrigger = true
 
-    MartApp.productsFilter = function () {
-        MartApp.widgetProductCategories = '.widget-product-categories'
-        MartApp.$widgetProductCategories = $(MartApp.widgetProductCategories)
-
-        $(document).on('change', '#products-filter-form .product-filter-item', function () {
-            if (isReadySubmitTrigger) {
-                $(this).closest('form').trigger('submit')
-            }
+    MartApp.productsFilter = function() {
+        $('.catalog-toolbar__ordering input[name=sort-by]').on('change', function(e) {
+            $(document).find(MartApp.formSearch).find('input[name=sort-by]').val($(e.currentTarget).val())
+            $(document).find(MartApp.formSearch).trigger('submit')
         })
 
-        function openCategoryFilter($li) {
-            if (!$li) {
-                const $categories = $('.widget-product-categories').find('li a.active')
-                if ($categories.length) {
-                    MartApp.$widgetProductCategories
-                        .find('.widget-layered-nav-list > ul > li.category-filter')
-                        .addClass('d-none')
-                } else {
-                    MartApp.$widgetProductCategories
-                        .find('.widget-layered-nav-list > ul > li.category-filter')
-                        .removeClass('d-none')
-                    MartApp.$widgetProductCategories.find('.show-all-product-categories').addClass('d-none')
-                }
-                MartApp.$widgetProductCategories
-                    .find('.widget-layered-nav-list li.category-filter:not(.opened)')
-                    .removeClass('opened')
-
-                $categories.map(function (e, i) {
-                    const $parent = $(i).closest('li.category-filter').closest('ul').closest('li.category-filter')
-                    $parent.removeClass('d-none')
-
-                    if ($parent.length) {
-                        openCategoryFilter($parent)
-                        MartApp.$widgetProductCategories.find('.show-all-product-categories').removeClass('d-none')
-                    } else {
-                        MartApp.$widgetProductCategories.find('li.category-filter').removeClass('d-none')
-                        MartApp.$widgetProductCategories.find('.show-all-product-categories').addClass('d-none')
-                    }
-                })
-            } else if ($li.length) {
-                $li.addClass('opened')
-                $li.removeClass('d-none')
-                $li.find('> .widget-layered-nav-list__item .nav-list__item-link').removeClass('active')
-
-                if ($li.closest('ul').closest('li.category-filter').length) {
-                    openCategoryFilter($li.closest('ul').closest('li.category-filter'))
-                }
-            }
-
-            MartApp.$widgetProductCategories.find('.loading-skeleton').removeClass('loading-skeleton')
-        }
-
-        openCategoryFilter()
-
-        $('.catalog-toolbar__ordering input[name=sort-by]').on('change', function (e) {
-            MartApp.$formSearch.find('input[name=sort-by]').val($(e.currentTarget).val())
-            MartApp.$formSearch.trigger('submit')
-        })
-
-        MartApp.$body.on('click', '.cat-menu-close', function (e) {
+        MartApp.$body.on('click', '.cat-menu-close', function(e) {
             e.preventDefault()
             $(this).closest('li').toggleClass('opened')
         })
-
-        $(document).on('click', MartApp.widgetProductCategories + ' li a', function (e) {
-            e.preventDefault()
-            const $this = $(e.currentTarget)
-            const activated = $this.hasClass('active')
-            const $parent = $this.closest(MartApp.widgetProductCategories)
-            $parent.find('li a').removeClass('active')
-            $this.addClass('active')
-            let categoryId = $this.data('id')
-
-            if (categoryId) {
-                let $item = $parent.find('.widget-layered-nav-list .nav-list__item-link[data-id=' + categoryId + ']')
-                $item.addClass('active')
-
-                openCategoryFilter()
-            } else {
-                $parent.find('.widget-layered-nav-list .category-filter').removeClass('opened d-none')
-                $parent.find('.show-all-product-categories').addClass('d-none')
-            }
-            const $form = $this.closest(MartApp.formSearch)
-
-            $form
-                .find(
-                    '.widget-product-brands ul li, .dropdown-swatches-wrapper, .text-swatches-wrapper, .visual-swatches-wrapper'
-                )
-                .each(function (i, el) {
-                    let $el = $(el)
-                    let categories = $el.data('categories')
-                    if (categories && Array.isArray(categories) && categories.length) {
-                        if (!categories.includes(categoryId)) {
-                            $el.addClass('d-none')
-                            $el.find('input').prop('checked', false)
-                            $el.find('select').val('')
-                        } else {
-                            $el.removeClass('d-none')
-                        }
-                    }
-                })
-
-            const $input = $parent.find("input[name='categories[]']")
-            if ($input.length) {
-                if (activated) {
-                    $this.removeClass('active')
-                    $input.val('')
-                } else {
-                    $input.val(categoryId)
-                }
-                $input.trigger('change')
-            } else {
-                let href = $this.attr('href')
-
-                MartApp.$formSearch.attr('action', href).trigger('submit')
-            }
-        })
-
-        $(document).on('submit', '#products-filter-form', function (e) {
-            e.preventDefault()
-            const $form = $(e.currentTarget)
-            const formData = $form.serializeArray()
-            let data = MartApp.convertFromDataToArray(formData)
-            let uriData = []
-
-            // Paginate
-            const $elPage = MartApp.$productListing.find('input[name=page]')
-            if ($elPage.val()) {
-                data.push({ name: 'page', value: $elPage.val() })
-            }
-
-            // Without "s" param
-            data.map(function (obj) {
-                uriData.push(encodeURIComponent(obj.name) + '=' + obj.value)
-            })
-
-            const nextHref = $form.attr('action') + (uriData && uriData.length ? '?' + uriData.join('&') : '')
-
-            // add to params get to popstate not show json
-            data.push({ name: '_', value: +new Date() })
-
-            $.ajax({
-                url: $form.attr('action'),
-                type: 'GET',
-                data: data,
-                beforeSend: function () {
-                    // Show loading before sending
-                    MartApp.$productListing.find('.loading').show()
-                    // Animation scroll to filter button
-                    $('html, body').animate({ scrollTop: MartApp.$productListing.offset().top - 200 }, 500)
-                    // Change price step;
-                    const priceStep = MartApp.$formSearch.find('.nonlinear')
-                    if (priceStep.length) {
-                        priceStep[0].noUiSlider.set([
-                            MartApp.$formSearch.find('input[name=min_price]').val(),
-                            MartApp.$formSearch.find('input[name=max_price]').val(),
-                        ])
-                    }
-                    MartApp.toggleSidebarFilterProducts()
-                },
-                success: function (res) {
-                    if (!res.error) {
-                        MartApp.$productListing.html(res.data)
-
-                        const total = res.message
-                        if (total && $('.products-found').length) {
-                            $('.products-found').html(
-                                '<span class="text-primary me-1">' +
-                                    total.substr(0, total.indexOf(' ')) +
-                                    '</span>' +
-                                    total.substr(total.indexOf(' ') + 1)
-                            )
-                        }
-
-                        MartApp.lazyLoad(MartApp.$productListing[0])
-                        let title = res.additional?.category?.name || MartApp.$formSearch.data('title')
-                        $('h1.catalog-header__title').text(title)
-                        document.title = title
-
-                        if (res.additional?.breadcrumb) {
-                            $('.page-breadcrumbs div').html(res.additional.breadcrumb)
-                        }
-
-                        if (res.additional?.filters_html) {
-                            MartApp.$formSearch.html(res.additional.filters_html)
-                            MartApp.$formSearch.find('.loading-skeleton').removeClass('loading-skeleton')
-                            MartApp.filterSlider()
-
-                            if (jQuery().mCustomScrollbar) {
-                                $(document).find('.ps-custom-scrollbar').mCustomScrollbar({
-                                    theme: 'dark',
-                                    scrollInertia: 0,
-                                })
-                            }
-                        }
-
-                        if (nextHref != window.location.href) {
-                            window.history.pushState(data, res.message, nextHref)
-                        }
-                    } else {
-                        MartApp.showError(res.message || 'Opp!')
-                    }
-                },
-                error: function (res) {
-                    MartApp.handleError(res)
-                },
-                complete: function () {
-                    MartApp.$productListing.find('.loading').hide()
-                },
-            })
-        })
-
-        if (MartApp.$formSearch.length) {
-            window.addEventListener(
-                'popstate',
-                function () {
-                    let url = window.location.origin + window.location.pathname
-                    MartApp.$formSearch.attr('action', url)
-                    const parseParams = MartApp.parseParamsSearch()
-                    MartApp.changeInputInSearchForm(parseParams)
-                    MartApp.$formSearch.trigger('submit')
-                },
-                false
-            )
-        }
-
-        $(document).on('click', MartApp.productListing + ' .pagination a', function (e) {
-            e.preventDefault()
-            let url = new URL($(e.currentTarget).attr('href'))
-            let page = url.searchParams.get('page')
-            MartApp.$productListing.find('input[name=page]').val(page)
-            MartApp.$formSearch.trigger('submit')
-        })
     }
 
-    MartApp.parseParamsSearch = function (query, includeArray = false) {
+    MartApp.parseParamsSearch = function(query, includeArray = false) {
         let pairs = query || window.location.search.substring(1)
         let re = /([^&=]+)=?([^&]*)/g
-        let decodeRE = /\+/g // Regex for replacing addition symbol with a space
-        let decode = function (str) {
+        let decodeRE = /\+/g
+        let decode = function(str) {
             return decodeURIComponent(str.replace(decodeRE, ' '))
         }
         let params = {},
@@ -903,7 +1019,7 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
         return params
     }
 
-    MartApp.processUpdateCart = function ($this) {
+    MartApp.processUpdateCart = function($this) {
         const $form = $('.cart-page-content').find('.form--shopping-cart')
 
         if (!$form.length) {
@@ -926,7 +1042,7 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
                     return false
                 }
 
-                $('.cart-page-content').load(window.siteConfig.cartUrl + ' .cart-page-content > *', function () {
+                $('.cart-page-content').load(window.siteConfig.cartUrl + ' .cart-page-content > *', function() {
                     MartApp.lazyLoad($('.cart-page-content')[0])
                 })
 
@@ -944,8 +1060,8 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
         })
     }
 
-    MartApp.ajaxUpdateCart = function (_self) {
-        $(document).on('click', '.cart-page-content .update_cart', function (e) {
+    MartApp.ajaxUpdateCart = function(_self) {
+        $(document).on('click', '.cart-page-content .update_cart', function(e) {
             e.preventDefault()
             const $this = $(e.currentTarget)
 
@@ -953,8 +1069,8 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
         })
     }
 
-    MartApp.removeCartItem = function () {
-        $(document).on('click', '.remove-cart-item', function (event) {
+    MartApp.removeCartItem = function() {
+        $(document).on('click', '.remove-cart-item', function(event) {
             event.preventDefault()
             let _self = $(this)
 
@@ -973,12 +1089,22 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
                     const $cartContent = $('.cart-page-content')
 
                     if ($cartContent.length && window.siteConfig?.cartUrl) {
-                        $cartContent.load(window.siteConfig.cartUrl + ' .cart-page-content > *', function () {
+                        $cartContent.load(window.siteConfig.cartUrl + ' .cart-page-content > *', function() {
                             MartApp.lazyLoad($cartContent[0])
                         })
                     }
 
                     MartApp.loadAjaxCart()
+
+                    // Dispatch cart removed event for other handlers (up-sale refresh, etc.)
+                    document.dispatchEvent(
+                        new CustomEvent('ecommerce.cart.removed', {
+                            detail: {
+                                data: res.data,
+                                element: _self[0]
+                            },
+                        })
+                    )
                 },
                 error: (res) => {
                     MartApp.handleError(res)
@@ -990,8 +1116,8 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
         })
     }
 
-    MartApp.removeWishlistItem = function () {
-        $(document).on('click', '.remove-wishlist-item', function (event) {
+    MartApp.removeWishlistItem = function() {
+        $(document).on('click', '.remove-wishlist-item', function(event) {
             event.preventDefault()
             let _self = $(this)
 
@@ -1023,8 +1149,8 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
         })
     }
 
-    MartApp.removeCompareItem = function () {
-        $(document).on('click', '.remove-compare-item', function (event) {
+    MartApp.removeCompareItem = function() {
+        $(document).on('click', '.remove-compare-item', function(event) {
             event.preventDefault()
             let _self = $(this)
 
@@ -1056,7 +1182,7 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
         })
     }
 
-    MartApp.handleTabBootstrap = function () {
+    MartApp.handleTabBootstrap = function() {
         let hash = window.location.hash
         if (hash) {
             let tabTriggerEl = $('a[href="' + hash + '"]')
@@ -1067,10 +1193,10 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
         }
     }
 
-    MartApp.filterSlider = function () {
+    MartApp.filterSlider = function() {
         $(document)
             .find('.nonlinear')
-            .each(function (index, element) {
+            .each(function(index, element) {
                 let $element = $(element)
                 let min = $element.data('min')
                 let max = $element.data('max')
@@ -1099,11 +1225,11 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
 
                 let nodes = [$wrapper.find('.slider__min'), $wrapper.find('.slider__max')]
 
-                element.noUiSlider.on('update', function (values, handle) {
+                element.noUiSlider.on('update', function(values, handle) {
                     nodes[handle].html(EcommerceApp.formatPrice(Math.round(values[handle])))
                 })
 
-                element.noUiSlider.on('change', function (values, handle) {
+                element.noUiSlider.on('change', function(values, handle) {
                     $wrapper
                         .find('.product-filter-item-price-' + handle)
                         .val(Math.round(values[handle]))
@@ -1112,7 +1238,7 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
             })
     }
 
-    MartApp.customerDashboard = function () {
+    MartApp.customerDashboard = function() {
         if ($.fn.datepicker) {
             $('#date_of_birth').datepicker({
                 format: 'yyyy-mm-dd',
@@ -1131,13 +1257,13 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
             }
         })
 
-        $(document).on('click', '.btn-trigger-delete-address', function (event) {
+        $(document).on('click', '.btn-trigger-delete-address', function(event) {
             event.preventDefault()
             $('.btn-confirm-delete').data('url', $(this).data('url'))
             $('#confirm-delete-modal').modal('show')
         })
 
-        $(document).on('click', '.btn-confirm-delete', function (event) {
+        $(document).on('click', '.btn-confirm-delete', function(event) {
             event.preventDefault()
             let $current = $(this)
             $.ajax({
@@ -1167,8 +1293,8 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
         })
     }
 
-    MartApp.newsletterForm = function () {
-        $(document).on('submit', 'form.subscribe-form', function (e) {
+    MartApp.newsletterForm = function() {
+        $(document).on('submit', 'form.subscribe-form', function(e) {
             e.preventDefault()
             e.stopPropagation()
             const $this = $(e.currentTarget)
@@ -1210,8 +1336,8 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
         })
     }
 
-    MartApp.contactSellerForm = function () {
-        $(document).on('click', 'form.form-contact-store button[type=submit]', function (e) {
+    MartApp.contactSellerForm = function() {
+        $(document).on('click', 'form.form-contact-store button[type=submit]', function(e) {
             e.preventDefault()
             e.stopPropagation()
             const $this = $(e.currentTarget)
@@ -1255,11 +1381,11 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
         })
     }
 
-    MartApp.recentlyViewedProducts = function () {
-        MartApp.$body.find('.header-recently-viewed').each(function () {
+    MartApp.recentlyViewedProducts = function() {
+        MartApp.$body.find('.header-recently-viewed').each(function() {
             const $el = $(this)
             let loading
-            $el.hover(function () {
+            $el.hover(function() {
                 const $recently = $el.find('.recently-viewed-products')
                 if ($el.data('loaded') || loading) {
                     return
@@ -1297,15 +1423,15 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
         })
     }
 
-    MartApp.showNotice = function (messageType, message) {
+    MartApp.showNotice = function(messageType, message) {
         Theme.showNotice(messageType, message)
     }
 
-    MartApp.showError = function (message) {
+    MartApp.showError = function(message) {
         Theme.showError(message)
     }
 
-    MartApp.showSuccess = function (message) {
+    MartApp.showSuccess = function(message) {
         Theme.showSuccess(message)
     }
 
@@ -1317,20 +1443,20 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
         Theme.handleValidationError(errors)
     }
 
-    MartApp.toggleViewProducts = function () {
-        $(document).on('click', '.store-list-filter-button', function (e) {
+    MartApp.toggleViewProducts = function() {
+        $(document).on('click', '.store-list-filter-button', function(e) {
             e.preventDefault()
             $('#store-listing-filter-form-wrap').toggle(500)
         })
 
-        MartApp.$body.on('click', '.toolbar-view__icon a', function (e) {
+        MartApp.$body.on('click', '.products-layout a', function(e) {
             e.preventDefault()
             const $this = $(e.currentTarget)
-            $this.closest('.toolbar-view__icon').find('a').removeClass('active')
-            $this.addClass('active')
+            $this.closest('.products-layout').find('li').removeClass('active')
+            $this.closest('li').addClass('active')
             $($this.data('target')).removeClass($this.data('class-remove')).addClass($this.data('class-add'))
 
-            MartApp.$formSearch.find('input[name=layout]').val($this.data('layout'))
+            $(document).find(MartApp.formSearch).find('input[name=layout]').val($this.data('layout'))
 
             const params = new URLSearchParams(window.location.search)
             params.set('layout', $this.data('layout'))
@@ -1347,8 +1473,8 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
         })
     }
 
-    MartApp.toolbarOrderingProducts = function () {
-        MartApp.$body.on('click', '.catalog-toolbar__ordering .dropdown .dropdown-menu a', function (e) {
+    MartApp.toolbarOrderingProducts = function() {
+        MartApp.$body.on('click', '.catalog-toolbar__ordering .dropdown .dropdown-menu a', function(e) {
             e.preventDefault()
             const $this = $(e.currentTarget)
             const $parent = $this.closest('.dropdown')
@@ -1363,46 +1489,64 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
         })
     }
 
-    MartApp.backToTop = function () {
+    MartApp.backToTop = function() {
         let scrollPos = 0
         let element = $('#back2top')
-        $(window).scroll(function () {
+        $(window).scroll(function() {
             let scrollCur = $(window).scrollTop()
             if (scrollCur > scrollPos) {
-                // scroll down
                 if (scrollCur > 500) {
                     element.addClass('active')
                 } else {
                     element.removeClass('active')
                 }
             } else {
-                // scroll up
                 element.removeClass('active')
             }
 
             scrollPos = scrollCur
         })
 
-        element.on('click', function () {
+        element.on('click', function() {
             $('html, body').animate(
                 {
                     scrollTop: '0px',
                 },
-                0
+                0,
             )
         })
     }
 
-    MartApp.stickyHeader = function () {
+    MartApp.initMegaMenu = function() {
+        setTimeout(function() {
+            const $megaMenu = $(document).find('.mega-menu-wrapper')
+
+            if (!$megaMenu.length) {
+                return
+            }
+
+            if ($(window).width() > 1200 && typeof $.fn.masonry !== 'undefined') {
+                $megaMenu.masonry({
+                    itemSelector: '.mega-menu__column',
+                    columnWidth: 200,
+                    originLeft: !MartApp.isRTL,
+                })
+            }
+        }, 500)
+    }
+
+    MartApp.stickyHeader = function() {
         let header = $('.header-js-handler')
         let checkpoint = header.height()
-        header.each(function () {
+        header.each(function() {
             if ($(this).data('sticky') === true) {
                 let el = $(this)
-                $(window).scroll(function () {
+                $(window).scroll(function() {
                     let currentPosition = $(this).scrollTop()
                     if (currentPosition > checkpoint) {
                         el.addClass('header--sticky')
+
+                        MartApp.initMegaMenu()
                     } else {
                         el.removeClass('header--sticky')
                     }
@@ -1411,9 +1555,369 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
         })
     }
 
-    MartApp.stickyAddToCart = function () {
+    MartApp.initBlockLazyLoading = function() {
+        // Store up-sale section refresh URL globally for cart event handling
+        window.upsellRefreshUrl = null
+
+        const $lazyElements = $(document).find('[data-bb-toggle="block-lazy-loading"]')
+
+        $lazyElements.each((index, element) => {
+            const $element = $(element)
+            const url = $element.data('url')
+
+            // Check if this is an up-sale section and store the URL globally
+            if (url && url.includes('up-sale-products')) {
+                window.upsellRefreshUrl = url
+            }
+
+            $.ajax({
+                url: url,
+                type: 'GET',
+                success: ({ data }) => {
+                    $element.replaceWith(data)
+
+                    if (typeof MartApp.lazyLoadInstance !== 'undefined') {
+                        MartApp.lazyLoadInstance.update()
+                    }
+
+                    // Initialize slick carousel for cross-sale section
+                    MartApp.slickSlides()
+
+                    // Trigger upsell bundle initialization
+                    $(document).trigger('upsell-bundle-loaded')
+                    MartApp.initUpSaleBundle()
+                },
+                error: (error) => MartApp.handleError(error),
+            })
+        })
+
+        // Refresh up-sale section when cart is updated
+        document.addEventListener('ecommerce.cart.added', MartApp.refreshUpSaleSection)
+        document.addEventListener('ecommerce.cart.removed', MartApp.refreshUpSaleSection)
+
+        // Handle cross-sale add-to-cart buttons
+        MartApp.$body.on('click', '.ec-cross-sale-add-btn[data-bb-toggle="add-to-cart"]', function(e) {
+            e.preventDefault()
+            e.stopPropagation()
+
+            const $btn = $(this)
+            const url = $btn.data('url')
+            const productId = $btn.data('id')
+
+            if ($btn.hasClass('loading')) return
+
+            $btn.addClass('loading').prop('disabled', true)
+
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: { id: productId },
+                success: (response) => {
+                    if (response.error) {
+                        MartApp.showError(response.message || 'Failed to add product to cart')
+                    } else {
+                        // Show success message
+                        if (response.message) {
+                            MartApp.showSuccess(response.message)
+                        }
+
+                        // Refresh cart
+                        MartApp.loadAjaxCart()
+
+                        // Dispatch event
+                        document.dispatchEvent(new CustomEvent('ecommerce.cart.added', {
+                            detail: { data: response.data, element: $btn[0] }
+                        }))
+                    }
+                },
+                error: (error) => MartApp.handleError(error),
+                complete: () => $btn.removeClass('loading').prop('disabled', false)
+            })
+        })
+    }
+
+    MartApp.refreshUpSaleSection = function() {
+        if (!window.upsellRefreshUrl) {
+            return
+        }
+
+        const $section = $('[data-upsale-bundle]')
+        if ($section.length === 0) {
+            return
+        }
+
+        // Add loading state
+        $section.css('opacity', '0.5')
+
+        $.ajax({
+            url: window.upsellRefreshUrl,
+            type: 'GET',
+            success: ({ data }) => {
+                $section.replaceWith(data)
+
+                if (typeof MartApp.lazyLoadInstance !== 'undefined') {
+                    MartApp.lazyLoadInstance.update()
+                }
+
+                // Re-initialize bundle
+                $(document).trigger('upsell-bundle-loaded')
+                MartApp.initUpSaleBundle()
+            },
+            error: (error) => {
+                $section.css('opacity', '1')
+                MartApp.handleError(error)
+            },
+        })
+    }
+
+    MartApp.initUpSaleBundle = function() {
+        const $section = $('[data-upsale-bundle]')
+        if ($section.length === 0) return
+
+        const $checkboxes = $section.find('[data-upsale-checkbox]')
+        const $totalPrice = $section.find('[data-upsale-total-price]')
+        const $addAllBtn = $section.find('[data-upsale-add-all]')
+
+        // Currency formatting helper
+        const formatPrice = (price) => {
+            const dataConfig = $section.data('currency-config')
+            const currencies = dataConfig || window.currencies || {}
+
+            const decimals = currencies.decimals !== undefined ? currencies.decimals : 0
+            const thousandsSep = currencies.thousands_separator || ','
+            const decimalSep = currencies.decimal_separator || '.'
+            const symbol = currencies.symbol || '$'
+            const isPrefix = currencies.is_prefix !== undefined ? currencies.is_prefix : true
+
+            const regex = '\\d(?=(\\d{3})+$)'
+            let priceArr = price.toFixed(Math.max(0, ~~decimals)).toString().split('.')
+            let formattedPrice = priceArr[0].replace(new RegExp(regex, 'g'), `$&${thousandsSep}`) +
+                (priceArr[1] ? decimalSep + priceArr[1] : '')
+
+            return isPrefix ? symbol + formattedPrice : formattedPrice + symbol
+        }
+
+        // Update total price based on checked items
+        const updateTotal = () => {
+            let total = 0
+            let selectedCount = 0
+
+            $checkboxes.filter(':checked').each(function () {
+                const price = parseFloat($(this).data('price')) || 0
+                total += price
+                selectedCount++
+            })
+
+            $totalPrice.text(formatPrice(total))
+            $addAllBtn.prop('disabled', selectedCount === 0)
+        }
+
+        // Checkbox change handler
+        $checkboxes.off('change.upsale').on('change.upsale', updateTotal)
+
+        // Initialize total
+        updateTotal()
+
+        // Add all selected items to cart
+        $addAllBtn.off('click.upsale').on('click.upsale', function () {
+            const $btn = $(this)
+            const selectedProducts = []
+            const parentProduct = $btn.data('parent-product')
+
+            $checkboxes.filter(':checked').each(function () {
+                const productId = $(this).data('id')
+                if (productId) {
+                    selectedProducts.push(productId)
+                }
+            })
+
+            if (selectedProducts.length === 0) return
+
+            // Disable button while processing
+            $btn.addClass('loading').prop('disabled', true)
+
+            let index = 0
+            let successCount = 0
+
+            const addNextProduct = () => {
+                if (index >= selectedProducts.length) {
+                    // All done - update UI
+                    $btn.removeClass('loading')
+
+                    // Uncheck all checkboxes
+                    $checkboxes.prop('checked', false)
+                    updateTotal()
+
+                    // Refresh the section
+                    MartApp.refreshUpSaleSection()
+
+                    // Refresh cart
+                    MartApp.loadAjaxCart()
+
+                    // Show success message
+                    if (successCount > 0) {
+                        MartApp.showSuccess(`Added ${successCount} item(s) to cart`)
+                    }
+                    return
+                }
+
+                const productId = selectedProducts[index]
+                $.ajax({
+                    url: $btn.data('url'),
+                    type: 'POST',
+                    data: {
+                        id: productId,
+                        reference_product_for_upsale: parentProduct,
+                    },
+                    success: () => {
+                        successCount++
+                        index++
+                        addNextProduct()
+                    },
+                    error: () => {
+                        index++
+                        addNextProduct()
+                    },
+                })
+            }
+
+            addNextProduct()
+        })
+
+        // Individual add buttons
+        $section.find('[data-upsale-add-btn]').off('click.upsale').on('click.upsale', function (e) {
+            e.preventDefault()
+            e.stopPropagation()
+
+            const $btn = $(this)
+            const $item = $btn.closest('[data-upsale-bundle-item]')
+            const $checkbox = $item.find('[data-upsale-checkbox]')
+            const parentProduct = $addAllBtn.data('parent-product') || $btn.data('parent-product')
+            // Use .attr() to get the updated DOM attribute value
+            const productId = $btn.attr('data-id')
+            const addUrl = $btn.data('url')
+
+            // Add loading state
+            $btn.addClass('loading').prop('disabled', true)
+
+            $.ajax({
+                url: addUrl,
+                type: 'POST',
+                data: {
+                    id: productId,
+                    reference_product_for_upsale: parentProduct,
+                },
+                success: (response) => {
+                    // Check for error response
+                    if (response.error) {
+                        MartApp.showError(response.message || 'Failed to add product to cart')
+                        $btn.removeClass('loading').prop('disabled', false)
+                        return
+                    }
+
+                    // Show success message
+                    if (response.message) {
+                        MartApp.showSuccess(response.message)
+                    }
+
+                    // Check the checkbox
+                    $checkbox.prop('checked', true)
+                    updateTotal()
+
+                    // Refresh cart
+                    MartApp.loadAjaxCart()
+
+                    // Dispatch event for other handlers
+                    document.dispatchEvent(
+                        new CustomEvent('ecommerce.cart.added', {
+                            detail: { data: response.data, element: $btn[0] },
+                        })
+                    )
+
+                    // Refresh section
+                    MartApp.refreshUpSaleSection()
+                },
+                error: (error) => {
+                    MartApp.handleError(error)
+                },
+                complete: () => {
+                    $btn.removeClass('loading').prop('disabled', false)
+                },
+            })
+        })
+
+        // Variation attribute change handler
+        $section.find('.ec-upsell-attributes .product-filter-item').off('change.upsale').on('change.upsale', function() {
+            // Skip if disabled
+            if ($(this).prop('disabled')) return
+
+            const $attrs = $(this).closest('.ec-upsell-attributes')
+            const $item = $attrs.closest('[data-upsale-bundle-item]')
+            const url = $attrs.data('target')
+
+            if (!url) return
+
+            // Collect attributes in the format: attributes[slug]=id
+            const data = { attributes: {} }
+            $attrs.find('.product-filter-item:checked').each(function() {
+                const slug = $(this).closest('.attribute-swatches-wrapper, .ec-upsell-attribute-group').data('slug')
+                if (slug) {
+                    data.attributes[slug] = $(this).val()
+                }
+            })
+
+            $.ajax({
+                url: url,
+                type: 'GET',
+                data: data,
+                success: (res) => {
+                    if (res.data) {
+                        const variationId = res.data.id
+                        const price = res.data.sale_price || res.data.price
+                        const errorMessage = res.data.error_message
+                        const unavailableAttrIds = res.data.unavailable_attribute_ids || []
+
+                        // Update attribute availability (like product detail page)
+                        $attrs.find('.ec-upsell-attribute-option').each(function() {
+                            const $option = $(this)
+                            const attrId = parseInt($option.data('id'))
+                            const $input = $option.find('input[type="radio"]')
+
+                            if (unavailableAttrIds.includes(attrId)) {
+                                $option.addClass('disabled').attr('title', 'Not available')
+                                $input.prop('disabled', true)
+                            } else {
+                                $option.removeClass('disabled').removeAttr('title')
+                                $input.prop('disabled', false)
+                            }
+                        })
+
+                        // Only update IDs if valid variation found
+                        if (variationId && !errorMessage) {
+                            // Update hidden variation ID
+                            $item.find('.ec-upsell-variation-id').val(variationId)
+                            // Use .attr() to update DOM attributes directly
+                            $item.find('[data-upsale-checkbox]').attr('data-id', variationId)
+                            $item.find('[data-upsale-add-btn]').attr('data-id', variationId).prop('disabled', false)
+
+                            // Update price if needed
+                            if (price) {
+                                $item.find('[data-upsale-checkbox]').attr('data-price', price)
+                                updateTotal()
+                            }
+                        } else if (errorMessage) {
+                            // Invalid combination - disable add button
+                            $item.find('[data-upsale-add-btn]').prop('disabled', true)
+                        }
+                    }
+                },
+            })
+        })
+    }
+
+    MartApp.stickyAddToCart = function() {
         let $headerProduct = $('.header--product')
-        $(window).scroll(function () {
+        $(window).scroll(function() {
             let currentPosition = $(this).scrollTop()
             if (currentPosition > 50) {
                 $headerProduct.addClass('header--sticky')
@@ -1422,7 +1926,7 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
             }
         })
 
-        $('.header--product ul li > a ').on('click', function (e) {
+        $('.header--product ul li > a ').on('click', function(e) {
             e.preventDefault()
             let target = $(this).attr('href')
             $(this).closest('li').siblings('li').removeClass('active')
@@ -1442,7 +1946,7 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
                 {
                     scrollTop: $(target).offset().top - $('.header--product .navigation').height() - 165 + 'px',
                 },
-                0
+                0,
             )
         })
 
@@ -1455,7 +1959,7 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
                 off_footer = 0,
                 ck_footer = _footer.length > 0
 
-            const stickyAddToCartToggle = function () {
+            const stickyAddToCartToggle = function() {
                 let windowScroll = $(window).scrollTop(),
                     windowHeight = $(window).height(),
                     documentHeight = $(document).height()
@@ -1481,11 +1985,16 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
         }
     }
 
-    $(function () {
+    $(function() {
         MartApp.init()
 
-        window.onBeforeChangeSwatches = function (data, $attrs) {
-            const $product = $attrs.closest('.product-details')
+        // Lazy loading for up-sale and cross-sale sections
+        MartApp.initBlockLazyLoading()
+
+        window.onBeforeChangeSwatches = function(data, $attrs) {
+            const $product = $attrs.closest('.product-details').length ?
+                $attrs.closest('.product-details') :
+                $attrs.closest('.ps-product--quickshop')
             const $form = $product.find('.cart-form')
 
             $product.find('.error-message').hide()
@@ -1499,8 +2008,10 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
             }
         }
 
-        window.onChangeSwatchesSuccess = function (res, $attrs) {
-            const $product = $attrs.closest('.product-details')
+        window.onChangeSwatchesSuccess = function(res, $attrs) {
+            const $product = $attrs.closest('.product-details').length ?
+                $attrs.closest('.product-details') :
+                $attrs.closest('.ps-product--quickshop')
             const $form = $product.find('.cart-form')
             const $footerCartForm = $('.footer-cart-form')
             $product.find('.error-message').hide()
@@ -1519,9 +2030,11 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
                     $footerCartForm.find('.hidden-product-id').val('')
                 } else {
                     const data = res.data
-                    const $price = $(document).find('.js-product-content')
-                    const $salePrice = $price.find('.product-price-sale')
-                    const $originalPrice = $price.find('.product-price-original')
+                    let $priceContainer = $product.find('.ps-product__header').length ?
+                        $product.find('.ps-product__header') :
+                        $(document).find('.js-product-content')
+                    const $salePrice = $priceContainer.find('.product-price-sale')
+                    const $originalPrice = $priceContainer.find('.product-price-original')
 
                     if (data.sale_price !== data.price) {
                         $salePrice.removeClass('d-none')
@@ -1554,68 +2067,76 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
                             .show()
                     } else if (data.success_message) {
                         $product.find('.number-items-available').html(res.data.stock_status_html).show()
+                        $product.find('.product-quantity-available').text(res.data.success_message)
+                        $product.find('.out-of-stock').removeClass('out-of-stock')
                     } else {
                         $product.find('.number-items-available').html('').hide()
                     }
 
+                    $product.find('.bb-product-attribute-swatch-item').removeClass('disabled')
+                    $product.find('.bb-product-attribute-swatch-list select option').prop('disabled', false)
+
                     const unavailableAttributeIds = data.unavailable_attribute_ids || []
-                    $product.find('.attribute-swatch-item').removeClass('disabled')
-                    $product.find('.product-filter-item option').prop('disabled', false)
-                    if (unavailableAttributeIds && unavailableAttributeIds.length) {
-                        unavailableAttributeIds.map(function (id) {
-                            let $item = $product.find('.attribute-swatch-item[data-id="' + id + '"]')
-                            if ($item.length) {
-                                $item.addClass('disabled')
-                                $item.find('input').prop('checked', false)
+
+                    if (unavailableAttributeIds.length) {
+                        unavailableAttributeIds.map((id) => {
+                            let $swatchItem = $product.find(`.bb-product-attribute-swatch-item[data-id="${id}"]`)
+
+                            if ($swatchItem.length) {
+                                $swatchItem.addClass('disabled')
+                                $swatchItem.find('input').prop('checked', false)
                             } else {
-                                $item = $product.find('.product-filter-item option[data-id="' + id + '"]')
-                                if ($item.length) {
-                                    $item.prop('disabled', 'disabled').prop('selected', false)
+                                $swatchItem = $product.find(`.bb-product-attribute-swatch-list select option[data-id="${id}"]`)
+
+                                if ($swatchItem.length) {
+                                    $swatchItem.prop('disabled', true)
                                 }
                             }
                         })
                     }
 
-                    const $gallery = $product.closest('.product-detail-container').find('.product-gallery')
+                    let imageHtml = ''
+                    let thumbHtml = ''
+
                     if (!data.image_with_sizes.origin.length) {
                         data.image_with_sizes.origin.push(siteConfig.img_placeholder)
+                    } else {
+                        data.image_with_sizes.origin.forEach(function(item) {
+                            imageHtml += `
+                    <a href='${item}'>
+                        <img src='${item}' alt='${data.name}'>
+                    </a>
+                `
+                        })
                     }
+
                     if (!data.image_with_sizes.thumb.length) {
                         data.image_with_sizes.thumb.push(siteConfig.img_placeholder)
+                    } else {
+                        data.image_with_sizes.thumb.forEach(function(item) {
+                            thumbHtml += `
+                    <div>
+                        <img src='${item}' alt='${data.name}'>
+                    </div>
+                `
+                        })
                     }
 
-                    let imageHtml = ''
-                    data.image_with_sizes.origin.forEach(function (item) {
-                        imageHtml += `<div class='product-gallery__image item'>
-                                <a class='img-fluid-eq' href='${item}'>
-                                    <div class='img-fluid-eq__dummy'></div>
-                                    <div class='img-fluid-eq__wrap'>
-                                        <img class='mx-auto' alt='${data.name}' title='${data.name}' src='${
-                                            siteConfig.img_placeholder ? siteConfig.img_placeholder : item
-                                        }' data-lazy='${item}'>
-                                    </div>
-                                </a>
-                            </div>`
-                    })
+                    const $galleryImages = $(document).find('.bb-product-gallery-wrapper')
 
-                    $gallery.find('.product-gallery__wrapper').slick('unslick').html(imageHtml)
+                    $galleryImages.find('.bb-product-gallery-thumbnails').slick('unslick').html(thumbHtml)
 
-                    let thumbHtml = ''
-                    data.image_with_sizes.thumb.forEach(function (item) {
-                        thumbHtml += `<div class='item'>
-                            <div class='border p-1 m-1'>
-                                <img class='lazyload' alt='${data.name}' title='${data.name}' src='${
-                                    siteConfig.img_placeholder ? siteConfig.img_placeholder : item
-                                }' data-src='${item}' data-lazy='${item}'>
-                            </div>
-                        </div>`
-                    })
+                    const $quickViewGalleryImages = $(document).find('.bb-quick-view-gallery-images')
 
-                    $gallery.find('.product-gallery__variants').slick('unslick').html(thumbHtml)
+                    if ($quickViewGalleryImages.length) {
+                        $quickViewGalleryImages.slick('unslick').html(imageHtml)
+                    }
 
-                    MartApp.productGallery(true, $gallery)
+                    $galleryImages.find('.bb-product-gallery-images').slick('unslick').html(imageHtml)
 
-                    MartApp.lightBox()
+                    if (typeof EcommerceApp !== 'undefined') {
+                        EcommerceApp.initProductGallery()
+                    }
                 }
             }
         }
@@ -1627,7 +2148,7 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
             })
         }
 
-        $(document).on('click', '.toggle-show-more', function (event) {
+        $(document).on('click', '.toggle-show-more', function(event) {
             event.preventDefault()
 
             $('#store-short-description').fadeOut()
@@ -1639,7 +2160,7 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
             $('.toggle-show-less').removeClass('d-none')
         })
 
-        $(document).on('click', '.toggle-show-less', function (event) {
+        $(document).on('click', '.toggle-show-less', function(event) {
             event.preventDefault()
 
             $(this).addClass('d-none')
@@ -1651,8 +2172,8 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
             $('.toggle-show-more').removeClass('d-none')
         })
 
-        let collapseBreadcrumb = function () {
-            $('.page-breadcrumbs ol li').each(function () {
+        let collapseBreadcrumb = function() {
+            $('.page-breadcrumbs ol li').each(function() {
                 let $this = $(this)
                 if (!$this.is(':first-child') && !$this.is(':nth-child(2)') && !$this.is(':last-child')) {
                     if (!$this.is(':nth-child(3)')) {
@@ -1669,11 +2190,11 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
             collapseBreadcrumb()
         }
 
-        $(window).on('resize', function () {
+        $(window).on('resize', function() {
             collapseBreadcrumb()
         })
 
-        $('.product-entry-meta .anchor-link').on('click', function (e) {
+        $('.product-entry-meta .anchor-link').on('click', function(e) {
             e.preventDefault()
             let target = $(this).attr('href')
 
@@ -1687,194 +2208,8 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
                 {
                     scrollTop: $(target).offset().top - $('.header--product .navigation').height() - 250 + 'px',
                 },
-                0
+                0,
             )
-        })
-
-        /* --- SwiperJS --- */
-        $('.swiper-group-6').each(function () {
-            const $this = $(this);
-            const $box = $(this).closest('.box-swiper');
-
-            new Swiper($this[0], {
-                spaceBetween: 30,
-                slidesPerView: 6,
-                slidesPerGroup: 2,
-                loop: true,
-                navigation: {
-                    nextEl: $box.find('.swiper-button-next')[0],
-                    prevEl: $box.find('.swiper-button-prev')[0],
-                },
-                autoplay: {
-                    delay: 10000,
-                },
-                breakpoints: {
-                    1199: {
-                        slidesPerView: 6,
-                    },
-                    800: {
-                        slidesPerView: 4,
-                    },
-                    400: {
-                        slidesPerView: 2,
-                    },
-                    350: {
-                        slidesPerView: 2,
-                        slidesPerGroup: 1,
-                        spaceBetween: 15,
-                    },
-                },
-            });
-        })
-
-        $('.swiper-group-4').each(function () {
-            const $this = $(this);
-            const $box = $(this).closest('.box-swiper');
-
-            new Swiper($this[0], {
-                spaceBetween: 20,
-                slidesPerView: 4,
-                slidesPerGroup: 1,
-                loop: true,
-                navigation: {
-                    nextEl: $box.find('.swiper-button-next')[0],
-                    prevEl: $box.find('.swiper-button-prev')[0],
-                },
-                autoplay: {
-                    delay: 10000,
-                },
-                breakpoints: {
-                    1299: {
-                        slidesPerView: 4,
-                    },
-                    1150: {
-                        slidesPerView: 4,
-                    },
-                    750: {
-                        slidesPerView: 2,
-                    },
-                    600: {
-                        slidesPerView: 1,
-                    },
-                    550: {
-                        slidesPerView: 1,
-                    },
-                    300: {
-                        slidesPerView: 1,
-                    },
-                    200: {
-                        slidesPerView: 1,
-                    },
-                },
-            });
-        })
-
-        $('.swiper-group-3').each(function () {
-            const $this = $(this);
-            const $box = $(this).closest('.box-swiper');
-
-            new Swiper($this[0], {
-                spaceBetween: 30,
-                slidesPerView: 3,
-                slidesPerGroup: 1,
-                loop: true,
-                navigation: {
-                    nextEl: $box.find('.swiper-button-next')[0],
-                    prevEl: $box.find('.swiper-button-prev')[0],
-                },
-                pagination: {
-                    el: '.swiper-pagination',
-                    type: 'bullets',
-                    bulletActiveClass: 'swiper-pagination-customs-active',
-                    bulletClass: 'swiper-pagination-customs',
-                    clickable: true,
-                },
-                autoplay: {
-                    delay: 10000,
-                },
-                breakpoints: {
-                    1199: {
-                        slidesPerView: 3,
-                    },
-                    800: {
-                        slidesPerView: 2,
-                    },
-                    600: {
-                        slidesPerView: 1,
-                    },
-                    350: {
-                        slidesPerView: 1,
-                    },
-                    310: {
-                        slidesPerView: 1,
-                    },
-                    200: {
-                        slidesPerView: 1,
-                    },
-                },
-            });
-        })
-
-        $('.swiper-group-2').each(function () {
-            const $this = $(this);
-            const $box = $(this).closest('.box-swiper');
-
-            new Swiper($this[0], {
-                spaceBetween: 30,
-                slidesPerView: 2,
-                slidesPerGroup: 1,
-                loop: true,
-                navigation: {
-                    nextEl: $box.find('.swiper-button-next')[0],
-                    prevEl: $box.find('.swiper-button-prev')[0],
-                },
-                pagination: {
-                    el: '.swiper-pagination',
-                    type: 'bullets',
-                    bulletActiveClass: 'swiper-pagination-customs-active',
-                    bulletClass: 'swiper-pagination-customs',
-                    clickable: true,
-                },
-                autoplay: {
-                    delay: 10000,
-                },
-                breakpoints: {
-                    1199: {
-                        slidesPerView: 2,
-                    },
-                    800: {
-                        slidesPerView: 1,
-                    },
-                    600: {
-                        slidesPerView: 1,
-                    },
-                    400: {
-                        slidesPerView: 1,
-                    },
-                    350: {
-                        slidesPerView: 1,
-                    },
-                },
-            });
-        })
-
-        $('.swiper-group-1').each(function () {
-            const $this = $(this);
-            const $box = $(this).closest('.box-swiper');
-
-            new Swiper($this[0], {
-                spaceBetween: 0,
-                slidesPerView: 1,
-                slidesPerGroup: 1,
-                loop: true,
-                navigation: {
-                    nextEl: $box.find('.swiper-button-next')[0],
-                    prevEl: $box.find('.swiper-button-prev')[0],
-                },
-                autoplay: {
-                    delay: 10000,
-                },
-            });
         })
 
         $(document).on('click', '#sticky-add-to-cart .add-to-cart-button', (e) => {
@@ -1885,13 +2220,77 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
 
             $this.addClass('button-loading')
 
-            setTimeout(function () {
+            setTimeout(function() {
                 let target = '.js-product-content .cart-form button[name=' + $this.prop('name') + '].add-to-cart-button'
 
                 $(document).find(target).trigger('click')
 
                 $this.removeClass('button-loading')
             }, 200)
+        })
+
+        $(document).ready(function() {
+            MartApp.initMegaMenu()
+        })
+
+        document.addEventListener('ecommerce.product-filter.before', () => {
+            MartApp.$productListing.find('.loading').show()
+        })
+
+        document.addEventListener('ecommerce.product-filter.completed', () => {
+            MartApp.lazyLoad(MartApp.$productListing[0])
+        })
+
+        document.addEventListener('ecommerce.categories-dropdown.success', () => {
+            MartApp.initMegaMenu()
+        })
+
+        document.addEventListener('ecommerce.quick-shop.completed', (e) => {
+            const { modal } = e.detail
+            if (modal && modal.length) {
+                MartApp.initQuickShopVariationListeners(modal)
+            }
+        })
+
+        document.addEventListener('shortcode.loaded', (e) => {
+            requestAnimationFrame(() => {
+                setTimeout(() => {
+                    try {
+                        if (typeof MartApp.safeSlickInit === 'function') {
+                            MartApp.safeSlickInit('.slick-slides-carousel')
+                            MartApp.safeSlickInit('.owl-slider')
+                        } else {
+                            if (typeof MartApp.slickSlides === 'function') {
+                                MartApp.slickSlides()
+                            }
+                        }
+
+                        const loadedElements = document.querySelectorAll('.shortcode-lazy-loading-loaded')
+                        if (loadedElements.length > 0) {
+                            loadedElements.forEach(container => {
+                                if (container && typeof MartApp.lazyLoad === 'function') {
+                                    MartApp.lazyLoad(container, false)
+                                }
+                                container.classList.remove('shortcode-lazy-loading-loaded')
+                            })
+                        } else {
+                            if (typeof MartApp.lazyLoadInstance !== 'undefined' && MartApp.lazyLoadInstance) {
+                                MartApp.lazyLoadInstance.update()
+                            }
+                        }
+
+                        if (typeof MartApp.slickSlides === 'function') {
+                            MartApp.slickSlides()
+                        }
+
+                        if (typeof MartApp.initCountdowns === 'function') {
+                            MartApp.initCountdowns()
+                        }
+                    } catch (error) {
+                        console.error('Error re-initializing components after shortcode load:', error)
+                    }
+                }, 300)
+            })
         })
     })
 })(jQuery)

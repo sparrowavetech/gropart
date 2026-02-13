@@ -1,9 +1,6 @@
 @if (app(Botble\Shippo\Shippo::class)->canCreateTransaction($shipment))
     @php
-        $url = route('ecommerce.shipments.shippo.show', $shipment->id);
-        if (!is_in_admin(true) && is_plugin_active('marketplace')) {
-            $url = route('marketplace.vendor.orders.shippo.show', $shipment->id);
-        }
+        $url = route(app(\Botble\Shippo\Shippo::class)->getRoutePrefixByFactor() . 'shippo.show', $shipment->id);
     @endphp
     <button
         class="btn btn-primary"
@@ -56,7 +53,7 @@
         target="_blank"
         rel="noopener noreferrer"
     >
-        <i class="fa fa-print"></i>
+        <x-core::icon name="ti ti-printer" />
         <span>{{ trans('plugins/shippo::shippo.print_label') }}</span>
     </a>
 @endif

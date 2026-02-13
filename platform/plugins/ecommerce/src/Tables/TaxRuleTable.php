@@ -3,6 +3,7 @@
 namespace Botble\Ecommerce\Tables;
 
 use Botble\Base\Facades\Assets;
+use Botble\Base\Facades\Html;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Models\Tax;
 use Botble\Ecommerce\Models\TaxRule;
@@ -34,7 +35,9 @@ class TaxRuleTable extends TableAbstract
             fn ($html) => $html . view('plugins/ecommerce::taxes.rules.form-modal')->render()
         );
 
-        /** @var Tax $tax  */
+        /**
+         * @var Tax $tax
+         */
         $tax = Route::current()->parameter('tax', new Tax());
 
         $this
@@ -70,7 +73,13 @@ class TaxRuleTable extends TableAbstract
             FormattedColumn::make('country')
                 ->title(trans('plugins/ecommerce::tax.country'))
                 ->withEmptyState()
-                ->getValueUsing(fn (FormattedColumn $column) => $column->getItem()->country_name),
+                ->getValueUsing(function (FormattedColumn $column) {
+                    $taxRule = $column->getItem();
+
+                    $country = $taxRule->country_name;
+
+                    return $country != $taxRule->country ? $country : EcommerceHelper::getCountryNameById($taxRule->country);
+                }),
             FormattedColumn::make('state')
                 ->title(trans('plugins/ecommerce::tax.state'))
                 ->withEmptyState()
@@ -82,6 +91,17 @@ class TaxRuleTable extends TableAbstract
             FormattedColumn::make('zip_code')
                 ->title(trans('plugins/ecommerce::tax.zip_code'))
                 ->withEmptyState(),
+            FormattedColumn::make('percentage')
+                ->title(trans('plugins/ecommerce::tax.percentage'))
+                ->getValueUsing(function (FormattedColumn $column) {
+                    $taxRule = $column->getItem();
+
+                    $tax = $taxRule->tax;
+
+                    $color = $taxRule->percentage > $tax->percentage ? 'text-danger' : 'text-success';
+
+                    return Html::tag('span', $taxRule->percentage . '%', ['class' => $color]);
+                }),
             CreatedAtColumn::make(),
         ];
 

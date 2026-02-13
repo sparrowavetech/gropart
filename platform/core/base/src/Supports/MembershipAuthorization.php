@@ -79,7 +79,7 @@ class MembershipAuthorization
                     'website' => $this->url,
                 ]);
 
-            if (! $response->ok()) {
+            if ($response->failed()) {
                 return true;
             }
 

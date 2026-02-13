@@ -24,7 +24,8 @@ trait HasLocationFields
         array $stateAttributes = [],
         array $cityAttributes = [],
         array $addressAttributes = [],
-        array $zipCodeAttributes = []
+        array $zipCodeAttributes = [],
+        array $hiddenFields = []
     ): static {
         $loadLocationsFromPluginLocation = EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation();
 
@@ -59,22 +60,30 @@ trait HasLocationFields
 
         $countryAttributes = Arr::except($countryAttributes, ['name']);
 
-        $countryAttributes['selected'] = old($countryFieldName, $this->getModel()->country) ?: Arr::get($countryAttributes, 'value');
+        $model = $this->getModel();
+        $modelCountry = is_array($model) ? Arr::get($model, 'country') : (is_object($model) ? ($model->country ?? null) : null);
+        $countryAttributes['selected'] = old($countryFieldName, $modelCountry) ?: Arr::get($countryAttributes, 'value');
 
         $stateAttributes = Arr::except($stateAttributes, ['name']);
 
-        $stateAttributes['selected'] = old($stateFieldName, $this->getModel()->state) ?: Arr::get($stateAttributes, 'value');
+        $modelState = is_array($model) ? Arr::get($model, 'state') : (is_object($model) ? ($model->state ?? null) : null);
+        $stateAttributes['selected'] = old($stateFieldName, $modelState) ?: Arr::get($stateAttributes, 'value');
 
         $cityAttributes = Arr::except($cityAttributes, ['name']);
 
-        $cityAttributes['selected'] = old($cityFieldName, $this->getModel()->city) ?: Arr::get($cityAttributes, 'value');
+        $modelCity = is_array($model) ? Arr::get($model, 'city') : (is_object($model) ? ($model->city ?? null) : null);
+        $cityAttributes['selected'] = old($cityFieldName, $modelCity) ?: Arr::get($cityAttributes, 'value');
 
         $addressAttributes = Arr::except($addressAttributes, ['name']);
 
         $zipCodeAttributes = Arr::except($zipCodeAttributes, ['name']);
 
+        $countryPlaceholder = Arr::pull($countryAttributes, 'empty_value', __('Select country...'));
+        $statePlaceholder = Arr::pull($stateAttributes, 'empty_value', __('Select state...'));
+        $cityPlaceholder = Arr::pull($cityAttributes, 'empty_value', __('Select city...'));
+
         $this
-            ->when($isMultipleCountries, function (FormAbstract $form) use ($countryFieldName, $countryAttributes) {
+            ->when($isMultipleCountries && ! in_array('country', $hiddenFields), function (FormAbstract $form) use ($countryFieldName, $countryAttributes, $countryPlaceholder): void {
                 $form->add(
                     $countryFieldName,
                     SelectField::class,
@@ -84,44 +93,33 @@ trait HasLocationFields
                             ->attributes([
                                 'data-type' => 'country',
                             ])
-                            ->choices(EcommerceHelper::getAvailableCountries())
-                            ->searchable()
+                            ->choices(['' => $countryPlaceholder] + EcommerceHelper::getAvailableCountries())
                             ->colspan(3)
                             ->toArray(),
                         ...$countryAttributes,
                     ]
                 );
-            }, function (FormAbstract $form) use ($countryFieldName, $countryAttributes) {
-                $form->add(
-                    $countryFieldName,
-                    'hidden',
-                    [
-                        ...InputFieldOption::make()
-                            ->value(EcommerceHelper::getFirstCountryId())
-                            ->toArray(),
-                        ...$countryAttributes,
-                    ]
-                );
+            }, function (FormAbstract $form) use ($countryFieldName, $countryAttributes, $isMultipleCountries, $hiddenFields): void {
+                if (! $isMultipleCountries || in_array('country', $hiddenFields)) {
+                    $form->add(
+                        $countryFieldName,
+                        'hidden',
+                        [
+                            ...InputFieldOption::make()
+                                ->value(EcommerceHelper::getFirstCountryId())
+                                ->toArray(),
+                            ...$countryAttributes,
+                        ]
+                    );
+                }
             })
-            ->add(
-                $addressFieldName,
-                TextField::class,
-                [
-                    ...TextFieldOption::make()
-                        ->label(trans('plugins/ecommerce::addresses.address'))
-                        ->placeholder(trans('plugins/ecommerce::addresses.address_placeholder'))
-                        ->colspan($isZipcodeEnabled ? ($isMultipleCountries ? 2 : 3) : 3)
-                        ->toArray(),
-                    ...$addressAttributes,
-                ]
-            )
-            ->when($loadLocationsFromPluginLocation, function (FormAbstract $form) use (
+            ->when($loadLocationsFromPluginLocation && ! in_array('state', $hiddenFields), function (FormAbstract $form) use (
                 $countryAttributes,
                 $stateFieldName,
                 $stateAttributes,
+                $statePlaceholder,
                 $isMultipleCountries
-            ) {
-                $model = $this->getModel();
+            ): void {
 
                 $form->add(
                     $stateFieldName,
@@ -129,7 +127,7 @@ trait HasLocationFields
                     [
                         ...SelectFieldOption::make()
                             ->choices(
-                                ['' => __('Select state...')] + EcommerceHelper::getAvailableStatesByCountry(
+                                ['' => $statePlaceholder] + EcommerceHelper::getAvailableStatesByCountry(
                                     $countryAttributes['selected']
                                 )
                             )
@@ -138,69 +136,94 @@ trait HasLocationFields
                                 'data-url' => route('ajax.states-by-country'),
                             ])
                             ->colspan($isMultipleCountries ? 2 : 3)
-                            ->searchable()
                             ->label(trans('plugins/ecommerce::addresses.state'))
                             ->toArray(),
                         ...$stateAttributes,
                     ]
                 );
-            }, function (FormAbstract $form) use ($loadLocationsFromPluginLocation, $stateFieldName, $stateAttributes) {
-                $form->add(
-                    $stateFieldName,
-                    TextField::class,
-                    [
-                        ...TextFieldOption::make()
-                            ->label(trans('plugins/ecommerce::addresses.state'))
-                            ->colspan($loadLocationsFromPluginLocation ? 2 : 3)
-                            ->toArray(),
-                        ...$stateAttributes,
-                    ]
-                );
+            }, function (FormAbstract $form) use ($loadLocationsFromPluginLocation, $stateFieldName, $stateAttributes, $statePlaceholder, $hiddenFields): void {
+                if (! in_array('state', $hiddenFields)) {
+                    $form->add(
+                        $stateFieldName,
+                        TextField::class,
+                        [
+                            ...TextFieldOption::make()
+                                ->label(trans('plugins/ecommerce::addresses.state'))
+                                ->placeholder($statePlaceholder)
+                                ->colspan($loadLocationsFromPluginLocation ? 2 : 3)
+                                ->toArray(),
+                            ...$stateAttributes,
+                        ]
+                    );
+                }
             })
-            ->when(EcommerceHelper::useCityFieldAsTextField(), function (FormAbstract $form) use (
+            ->when(EcommerceHelper::useCityFieldAsTextField() && ! in_array('city', $hiddenFields), function (FormAbstract $form) use (
                 $loadLocationsFromPluginLocation,
                 $cityFieldName,
-                $cityAttributes
-            ) {
+                $cityAttributes,
+                $cityPlaceholder
+            ): void {
                 $form->add(
                     $cityFieldName,
                     TextField::class,
                     [
                         ...TextFieldOption::make()
                             ->label(trans('plugins/ecommerce::addresses.city'))
+                            ->placeholder($cityPlaceholder)
                             ->colspan($loadLocationsFromPluginLocation ? 2 : 3)
                             ->toArray(),
                         ...$cityAttributes,
                     ]
                 );
-            }, function (FormAbstract $form) use ($stateAttributes, $cityFieldName, $cityAttributes, $isMultipleCountries) {
-                $form->add(
-                    $cityFieldName,
-                    SelectField::class,
-                    [
-                        ...SelectFieldOption::make()
-                            ->label(trans('plugins/ecommerce::addresses.city'))
-                            ->attributes([
-                                'data-type' => 'city',
-                                'data-url' => route('ajax.cities-by-state'),
-                            ])
-                            ->colspan($isMultipleCountries ? 2 : 3)
-                            ->searchable()
-                            ->choices(
-                                ['' => __('Select city...')] + EcommerceHelper::getAvailableCitiesByState(
-                                    $stateAttributes['selected']
+            }, function (FormAbstract $form) use ($stateAttributes, $cityFieldName, $cityAttributes, $cityPlaceholder, $isMultipleCountries, $hiddenFields): void {
+                if (! in_array('city', $hiddenFields)) {
+                    $form->add(
+                        $cityFieldName,
+                        SelectField::class,
+                        [
+                            ...SelectFieldOption::make()
+                                ->label(trans('plugins/ecommerce::addresses.city'))
+                                ->attributes([
+                                    'data-type' => 'city',
+                                    'data-url' => route('ajax.cities-by-state'),
+                                ])
+                                ->colspan($isMultipleCountries ? 2 : 3)
+                                ->choices(
+                                    ['' => $cityPlaceholder] + EcommerceHelper::getAvailableCitiesByState(
+                                        $stateAttributes['selected']
+                                    )
                                 )
-                            )
+                                ->toArray(),
+                            ...$cityAttributes,
+                        ]
+                    );
+                }
+            })
+            ->when(! in_array('address', $hiddenFields), function (FormAbstract $form) use (
+                $addressFieldName,
+                $addressAttributes,
+                $isZipcodeEnabled,
+                $isMultipleCountries,
+                $hiddenFields
+            ): void {
+                $form->add(
+                    $addressFieldName,
+                    TextField::class,
+                    [
+                        ...TextFieldOption::make()
+                            ->label(trans('plugins/ecommerce::addresses.address'))
+                            ->placeholder(trans('plugins/ecommerce::addresses.address_placeholder'))
+                            ->colspan($isZipcodeEnabled && ! in_array('zip_code', $hiddenFields) ? ($isMultipleCountries ? 3 : 2) : 3)
                             ->toArray(),
-                        ...$cityAttributes,
+                        ...$addressAttributes,
                     ]
                 );
             })
-            ->when($isZipcodeEnabled, function (FormAbstract $form) use (
+            ->when($isZipcodeEnabled && ! in_array('zip_code', $hiddenFields), function (FormAbstract $form) use (
                 $isMultipleCountries,
                 $zipCodeAttributes,
                 $zipCodeFieldName
-            ) {
+            ): void {
                 $form->add(
                     $zipCodeFieldName,
                     TextField::class,
@@ -208,7 +231,7 @@ trait HasLocationFields
                         ...TextFieldOption::make()
                             ->placeholder(trans('plugins/ecommerce::addresses.zip_placeholder'))
                             ->label(trans('plugins/ecommerce::addresses.zip'))
-                            ->colspan($isMultipleCountries ? 2 : 3)
+                            ->colspan($isMultipleCountries ? 3 : 2)
                             ->toArray(),
                         ...$zipCodeAttributes,
                     ]

@@ -25,7 +25,7 @@ class NewsletterSettingForm extends SettingForm
                     setting()->set(['newsletter_mailchimp_list_id' => Arr::get($contacts, 'id')])->save();
                 }
 
-                $mailchimpContactList = $contacts->pluck('name', 'id')->toArray();
+                $mailchimpContactList = $contacts->pluck('name', 'id')->all();
             } catch (Exception $exception) {
                 BaseHelper::logError($exception);
             }
@@ -41,7 +41,7 @@ class NewsletterSettingForm extends SettingForm
                     setting()->set(['newsletter_sendgrid_list_id' => Arr::get($contacts->first(), 'id')])->save();
                 }
 
-                $sendGridContactList = $contacts->pluck('name', 'id')->toArray();
+                $sendGridContactList = $contacts->pluck('name', 'id')->all();
             } catch (Exception $exception) {
                 BaseHelper::logError($exception);
             }

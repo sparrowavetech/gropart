@@ -138,7 +138,7 @@ class JsValidatorFactory
         // @phpstan-ignore-next-line
         $formRequest = $this->app->build($class, $params);
 
-        if ($request->hasSession() && $session = $request->getSession()) {
+        if ($request->hasSession() && $session = $request->session()) {
             $formRequest->setLaravelSession($session);
         }
         $formRequest->setUserResolver($request->getUserResolver());

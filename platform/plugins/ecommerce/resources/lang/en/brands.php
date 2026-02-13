@@ -2,6 +2,7 @@
 
 return [
     'name' => 'Brands',
+    'brands' => 'Brands',
     'create' => 'New brand',
     'edit' => 'Edit brand',
     'form' => [
@@ -10,6 +11,7 @@ return [
         'description' => 'Description',
         'description_placeholder' => 'Short description for brand (Maximum 400 characters)',
         'website' => 'Website',
+        'website_placeholder' => 'Ex: https://example.com',
         'logo' => 'Logo',
         'is_featured' => 'Is featured',
     ],

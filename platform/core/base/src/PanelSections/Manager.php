@@ -122,6 +122,7 @@ class Manager implements ManagerContract
 
     public function registerItem(string $section, Closure $item): static
     {
+        // @phpstan-ignore-next-line
         return $this->registerItems($section, $item);
     }
 
@@ -135,6 +136,15 @@ class Manager implements ManagerContract
     public function getItems(string $section): array
     {
         return $this->sectionItems[$this->groupId][$section] ?? [];
+    }
+
+    public function removeItem(string $section, string $id): static
+    {
+        if (isset($this->sectionItems[$this->groupId][$section])) {
+            $this->ignoreItemId($id);
+        }
+
+        return $this;
     }
 
     public function ignoreItemId(string $id): static

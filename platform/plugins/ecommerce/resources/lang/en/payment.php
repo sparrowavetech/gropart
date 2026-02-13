@@ -2,7 +2,7 @@
 
 return [
     'name' => 'Payments',
-    'description' => 'View and update your payments settings',
+    'description' => 'View payment transactions with status, amount, and refund history',
     'payment_method' => 'Payment methods',
     'view_payment' => 'View payment #',
     'charge_id' => 'Charge ID',
@@ -54,4 +54,5 @@ return [
     'no_option' => 'No option',
     'edit_payment' => 'Edit payment',
     'save' => 'Save',
+    'view_new_tab' => 'View in new tab',
 ];

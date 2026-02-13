@@ -3,13 +3,12 @@
 namespace Botble\Ecommerce\Http\Controllers;
 
 use Botble\Base\Events\BeforeEditContentEvent;
-use Botble\Base\Events\DeletedContentEvent;
+use Botble\Base\Http\Actions\DeleteResourceAction;
 use Botble\Base\Supports\Breadcrumb;
 use Botble\Ecommerce\Facades\InvoiceHelper;
 use Botble\Ecommerce\Models\Invoice;
 use Botble\Ecommerce\Models\Order;
 use Botble\Ecommerce\Tables\InvoiceTable;
-use Exception;
 use Illuminate\Http\Request;
 
 class InvoiceController extends BaseController
@@ -36,22 +35,9 @@ class InvoiceController extends BaseController
         return view('plugins/ecommerce::invoices.edit', compact('invoice'));
     }
 
-    public function destroy(Invoice $invoice, Request $request)
+    public function destroy(Invoice $invoice)
     {
-        try {
-            $invoice->delete();
-
-            event(new DeletedContentEvent(INVOICE_MODULE_SCREEN_NAME, $request, $invoice));
-
-            return $this
-                ->httpResponse()
-                ->setMessage(trans('core/base::notices.delete_success_message'));
-        } catch (Exception $exception) {
-            return $this
-                ->httpResponse()
-                ->setError()
-                ->setMessage($exception->getMessage());
-        }
+        return DeleteResourceAction::make($invoice);
     }
 
     public function getGenerateInvoice(Invoice $invoice, Request $request)
@@ -71,6 +57,9 @@ class InvoiceController extends BaseController
             ->get();
 
         foreach ($orders as $order) {
+            /**
+             * @var Order $order
+             */
             InvoiceHelper::store($order);
         }
 

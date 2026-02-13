@@ -8,6 +8,7 @@ use Botble\PluginManagement\Services\PluginService;
 use Botble\Setting\Models\Setting;
 use Botble\Setting\Supports\SettingStore;
 use Botble\Theme\Events\ThemeRemoveEvent;
+use Botble\Theme\Facades\Manager as ThemeManager;
 use Botble\Theme\Facades\Theme;
 use Botble\Theme\Facades\ThemeOption;
 use Botble\Widget\Models\Widget;
@@ -47,7 +48,7 @@ class ThemeService
         try {
             $content = BaseHelper::getFileData($this->getPath($theme, 'theme.json'));
 
-            if (! Theme::exists($inheritTheme)) {
+            if ($inheritTheme && ! Theme::exists($inheritTheme)) {
                 return [
                     'error' => true,
                     'message' => trans('packages/theme::theme.theme_inherit_not_found', ['name' => $inheritTheme]),
@@ -69,10 +70,8 @@ class ThemeService
             ];
         }
 
-        if (! empty($inheritTheme)) {
-            $this->copyThemeOptions($theme);
-            $this->copyThemeWidgets($theme);
-        }
+        $this->copyThemeOptions($theme);
+        $this->copyThemeWidgets($theme);
 
         Theme::setThemeName($theme);
 
@@ -87,6 +86,8 @@ class ThemeService
             ->save();
 
         Helper::clearCache();
+
+        ThemeManager::clearCache();
 
         return [
             'error' => false,
@@ -140,18 +141,28 @@ class ThemeService
         }
 
         $copiedWidgets = Widget::query()
-            ->where('theme', $fromTheme)
+            ->where(function ($query) use ($fromTheme): void {
+                $query->where('theme', $fromTheme)
+                    ->orWhere('theme', 'LIKE', $fromTheme . '-%');
+            })
             ->get()
             ->toArray();
 
         foreach ($copiedWidgets as $key => $widget) {
-            $copiedWidgets[$key]['theme'] = $theme;
+            $widgetTheme = $widget['theme'];
+            if ($widgetTheme === $fromTheme) {
+                $copiedWidgets[$key]['theme'] = $theme;
+            } else {
+                $copiedWidgets[$key]['theme'] = str_replace($fromTheme . '-', $theme . '-', $widgetTheme);
+            }
             $copiedWidgets[$key]['data'] = json_encode($widget['data']);
             unset($copiedWidgets[$key]['id']);
         }
 
-        Widget::query()
-            ->insertOrIgnore($copiedWidgets);
+        if (! empty($copiedWidgets)) {
+            Widget::query()
+                ->insertOrIgnore($copiedWidgets);
+        }
     }
 
     protected function validate(string $theme): array
@@ -232,6 +243,8 @@ class ThemeService
             ];
         }
 
+        ThemeManager::clearCache();
+
         return [
             'error' => false,
             'message' => trans('packages/theme::theme.published_assets_success', ['themes' => implode(', ', $themes)]),
@@ -272,6 +285,8 @@ class ThemeService
             ->delete();
 
         event(new ThemeRemoveEvent($theme));
+
+        ThemeManager::clearCache();
 
         return [
             'error' => false,

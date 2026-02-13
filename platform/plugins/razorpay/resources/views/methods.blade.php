@@ -1,12 +1,16 @@
 @if (get_payment_setting('status', RAZORPAY_PAYMENT_METHOD_NAME) == 1)
+    @php
+        $paymentService = new Botble\Razorpay\Services\Gateways\RazorpayPaymentService();
+    @endphp
+
     <x-plugins-payment::payment-method
         :name="RAZORPAY_PAYMENT_METHOD_NAME"
         paymentName="Razorpay"
-        :supportedCurrencies="(new Botble\Razorpay\Services\Gateways\RazorpayPaymentService)->supportedCurrencyCodes()"
+        :supportedCurrencies="$paymentService->supportedCurrencyCodes()"
     >
         <x-slot name="currencyNotSupportedMessage">
             <p class="mt-1 mb-0">
-                {{ __('Learn more') }}:
+                {{ trans('plugins/razorpay::razorpay.learn_more') }}:
                 {{ Html::link('https://razorpay.com/docs/payments/payments/international-payments/#supported-currencies', attributes: ['target' => '_blank', 'rel' => 'nofollow']) }}.
             </p>
         </x-slot>
@@ -17,10 +21,16 @@
             </div>
         @endif
 
-        <input id="rzp_order_id" type="hidden" value="{{ $orderId }}">
+        @if ($orderId)
+            <input id="rzp_order_id" type="hidden" value="{{ $orderId }}">
+        @endif
     </x-plugins-payment::payment-method>
 
-    @if (EcommerceHelper::isValidToProcessCheckout())
+    @if ($paymentService->isValidToProcessCheckout() && get_payment_setting(
+                'payment_type',
+                RAZORPAY_PAYMENT_METHOD_NAME,
+                'hosted_checkout',
+            ) == 'website_embedded')
         <script>
             $(document).ready(function() {
 
@@ -87,6 +97,40 @@
                                 'email': $(document).find('#address_email').val(),
                                 'contact': $(document).find('#address_phone').val()
                             },
+                            'notes' : @json($paymentService->getOrderNotes()),
+                            'config': {
+                                'display': {
+                                    'blocks': {
+                                        'utib': {
+                                            'name': 'Pay using UPI',
+                                            'instruments': [
+                                                {
+                                                    'method': 'upi'
+                                                }
+                                            ]
+                                        },
+                                        'other': {
+                                            'name': 'Other Payment modes',
+                                            'instruments': [
+                                                {
+                                                    'method': 'card',
+                                                    'issuers': ['HDFC', 'ICIC', 'SBIN', 'AXIS', 'UTIB', 'KKBK', 'YESB', 'INDB']
+                                                },
+                                                {
+                                                    'method': 'netbanking'
+                                                },
+                                                {
+                                                    'method': 'wallet'
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    'sequence': ['block.utib', 'block.other'],
+                                    'preferences': {
+                                        'show_default_blocks': false
+                                    }
+                                }
+                            }
                         });
                         window.rzpay.open();
                     });
@@ -94,6 +138,13 @@
 
                 $(document).off('click', '.payment-checkout-btn').on('click', '.payment-checkout-btn', function(event) {
                     event.preventDefault();
+
+                    let agreeTermsAndPolicy = $('#agree_terms_and_policy');
+
+                    if (agreeTermsAndPolicy.length && ! agreeTermsAndPolicy.is(':checked')) {
+                        alert('{{ trans('plugins/razorpay::razorpay.agree_terms') }}');
+                        return;
+                    }
 
                     var _self = $(this);
                     var form = _self.closest('form');
@@ -138,5 +189,7 @@
                 });
             });
         </script>
+
+        {!! apply_filters('razorpay_extra_script') !!}
     @endif
 @endif

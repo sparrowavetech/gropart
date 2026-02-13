@@ -4,20 +4,30 @@
     </div>
 @else
     <div class="list-group list-group-hoverable fw-bold">
-        @foreach($results as $item)
-            <a href="{{ $item->getUrl() }}" aria-selected="false" class="text-truncate list-group-item list-group-item-action">
+        @foreach ($results as $item)
+            <a
+                href="{{ $item->getUrl() }}"
+                aria-selected="false"
+                class="text-truncate list-group-item list-group-item-action"
+            >
                 <span class="gs-prefix text-primary me-3">#</span>
 
-                @if (! empty($parents = $item->getParents()))
-                    @foreach($parents as $parent)
-                        @if(! $loop->first)
-                            <x-core::icon name="ti ti-chevron-right" class="text-muted" />
+                @if (!empty(($parents = $item->getParents())))
+                    @foreach ($parents as $parent)
+                        @if (!$loop->first)
+                            <x-core::icon
+                                name="ti ti-chevron-right"
+                                class="text-muted"
+                            />
                         @endif
 
                         <span>{{ $parent }}</span>
                     @endforeach
 
-                    <x-core::icon name="ti ti-chevron-right" class="text-muted" />
+                    <x-core::icon
+                        name="ti ti-chevron-right"
+                        class="text-muted"
+                    />
                 @endif
 
                 <span>{{ $item->getTitle() }}</span>

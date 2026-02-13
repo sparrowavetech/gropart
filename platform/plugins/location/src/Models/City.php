@@ -7,6 +7,7 @@ use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Models\BaseModel;
 use Botble\Base\Models\Concerns\HasSlug;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Cache;
 
 class City extends BaseModel
 {
@@ -19,6 +20,7 @@ class City extends BaseModel
         'state_id',
         'country_id',
         'record_id',
+        'zip_code',
         'slug',
         'image',
         'order',
@@ -35,9 +37,22 @@ class City extends BaseModel
 
     protected static function booted(): void
     {
-        self::saving(function (self $model) {
+        self::saving(function (self $model): void {
             $model->slug = self::createSlug($model->slug ?: $model->name, $model->getKey());
         });
+
+        $clearCache = function (self $model): void {
+            Cache::forget('location_city_' . $model->getKey() . '_default');
+            if ($model->state_id) {
+                Cache::forget('location_cities_state_' . $model->state_id . '_default');
+            }
+            if ($model->country_id) {
+                Cache::forget('location_cities_country_' . $model->country_id . '_default');
+            }
+        };
+
+        self::saved($clearCache);
+        self::deleted($clearCache);
     }
 
     public function state(): BelongsTo

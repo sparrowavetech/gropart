@@ -2,22 +2,21 @@
 
 namespace Botble\Language\Listeners;
 
-use Botble\Base\Events\CreatedContentEvent;
+use Botble\Language\Events\LanguageCreated;
 use Botble\Language\Listeners\Concerns\EnsureThemePackageExists;
-use Botble\Language\Models\Language;
 use Botble\Widget\Models\Widget;
 
 class CopyThemeWidgets
 {
     use EnsureThemePackageExists;
 
-    public function handle(CreatedContentEvent $event): void
+    public function handle(LanguageCreated $event): void
     {
         if (! $this->determineIfThemesExists()) {
             return;
         }
 
-        if (! $event->data instanceof Language) {
+        if (! class_exists(Widget::class)) {
             return;
         }
 
@@ -27,21 +26,24 @@ class CopyThemeWidgets
             return;
         }
 
-        $copiedWidgets = Widget::query()
-            ->where('theme', $theme)
-            ->get()
-            ->toArray();
+        $newTheme = $theme . '-' . $event->language->lang_code;
 
-        if (empty($copiedWidgets)) {
+        $existingWidgetsCount = Widget::query()
+            ->where('theme', $newTheme)
+            ->count();
+
+        if ($existingWidgetsCount > 0) {
             return;
         }
 
-        foreach ($copiedWidgets as $key => $widget) {
-            $copiedWidgets[$key]['theme'] = $theme . '-' . $event->data->lang_code;
-            $copiedWidgets[$key]['data'] = json_encode($widget['data']);
-            unset($copiedWidgets[$key]['id']);
-        }
+        $widgets = Widget::query()
+            ->where('theme', $theme)
+            ->get();
 
-        Widget::query()->insertOrIgnore($copiedWidgets);
+        foreach ($widgets as $widget) {
+            $newWidget = $widget->replicate();
+            $newWidget->theme = $newTheme;
+            $newWidget->save();
+        }
     }
 }

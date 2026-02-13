@@ -6,7 +6,9 @@ use Botble\Base\Http\Controllers\BaseController;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Services\Products\GetProductBySlugService;
 use Botble\Ecommerce\Services\Products\GetProductWithCrossSalesBySlugService;
+use Botble\Ecommerce\Services\Products\GetProductWithUpSalesBySlugService;
 use Botble\Ecommerce\Services\Products\ProductCrossSalePriceService;
+use Botble\Ecommerce\Services\Products\ProductUpSalePriceService;
 use Botble\Theme\Facades\Theme;
 use Illuminate\Http\Request;
 
@@ -16,10 +18,12 @@ class QuickShopController extends BaseController
         string $slug,
         GetProductBySlugService $getProductBySlugService,
         GetProductWithCrossSalesBySlugService $getProductWithCrossSalesBySlugService,
+        GetProductWithUpSalesBySlugService $getProductWithUpSalesBySlugService,
         Request $request,
     ) {
         $request->validate([
             'reference_product' => ['sometimes', 'required', 'string'],
+            'sale_type' => ['sometimes', 'in:cross,up'],
         ]);
 
         $product = $getProductBySlugService->handle($slug, [
@@ -35,12 +39,22 @@ class QuickShopController extends BaseController
         abort_unless($product && $product->exists, 404);
 
         $referenceProduct = null;
+        $saleType = $request->input('sale_type', 'cross');
 
-        if (
-            $request->filled('reference_product')
-            && $referenceProduct = $getProductWithCrossSalesBySlugService->handle($request->input('reference_product'))
-        ) {
-            app(ProductCrossSalePriceService::class)->applyProduct($referenceProduct);
+        if ($request->filled('reference_product')) {
+            if ($saleType === 'up') {
+                $referenceProduct = $getProductWithUpSalesBySlugService->handle($request->input('reference_product'));
+
+                if ($referenceProduct) {
+                    app(ProductUpSalePriceService::class)->applyProduct($referenceProduct);
+                }
+            } else {
+                $referenceProduct = $getProductWithCrossSalesBySlugService->handle($request->input('reference_product'));
+
+                if ($referenceProduct) {
+                    app(ProductCrossSalePriceService::class)->applyProduct($referenceProduct);
+                }
+            }
         }
 
         [$productImages, $productVariation, $selectedAttrs] = EcommerceHelper::getProductVariationInfo($product);
@@ -51,6 +65,7 @@ class QuickShopController extends BaseController
             'productVariation' => $productVariation,
             'selectedAttrs' => $selectedAttrs,
             'referenceProduct' => $referenceProduct,
+            'saleType' => $saleType,
         ]);
 
         $view = apply_filters('ecommerce_quick_shop_template', $this->getQuickShopTemplate());

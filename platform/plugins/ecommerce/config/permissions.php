@@ -335,6 +335,27 @@ return [
         'flag' => 'customers.destroy',
         'parent_flag' => 'customers.index',
     ],
+    [
+        'name' => 'Import',
+        'flag' => 'ecommerce.customers.import',
+        'parent_flag' => 'customers.index',
+    ],
+    [
+        'name' => 'Export',
+        'flag' => 'ecommerce.customers.export',
+        'parent_flag' => 'customers.index',
+    ],
+
+    [
+        'name' => 'Customer Carts',
+        'flag' => 'ecommerce.customer-carts.index',
+        'parent_flag' => 'plugins.ecommerce',
+    ],
+    [
+        'name' => 'Delete',
+        'flag' => 'ecommerce.customer-carts.destroy',
+        'parent_flag' => 'ecommerce.customer-carts.index',
+    ],
 
     [
         'name' => 'Flash sales',
@@ -517,9 +538,9 @@ return [
         'parent_flag' => 'ecommerce.settings',
     ],
     [
-        'name' => 'Shipping Rule Items',
+        'name' => 'Shipping Rules',
         'flag' => 'ecommerce.shipping-rule-items.index',
-        'parent_flag' => 'settings.index.shipping',
+        'parent_flag' => 'ecommerce.settings',
     ],
     [
         'name' => 'Create',
@@ -561,14 +582,112 @@ return [
         'flag' => 'ecommerce.settings.return',
         'parent_flag' => 'ecommerce.settings',
     ],
+
     [
         'name' => 'Flash Sale',
         'flag' => 'ecommerce.settings.flash-sale',
         'parent_flag' => 'ecommerce.settings',
     ],
     [
-        'name' => 'Enquiry',
-        'flag' => 'ecommerce.enquires.index',
+        'name' => 'Product Specification',
+        'flag' => 'ecommerce.settings.product-specification',
+        'parent_flag' => 'ecommerce.settings',
+    ],
+
+    [
+        'name' => 'Export Product Categories',
+        'flag' => 'product-categories.export',
+        'parent_flag' => 'tools.data-synchronize',
+    ],
+    [
+        'name' => 'Import Product Categories',
+        'flag' => 'product-categories.import',
+        'parent_flag' => 'tools.data-synchronize',
+    ],
+    [
+        'name' => 'Import Product License Codes',
+        'flag' => 'product-license-codes.import',
+        'parent_flag' => 'tools.data-synchronize',
+    ],
+    [
+        'name' => 'Export Orders',
+        'flag' => 'orders.export',
+        'parent_flag' => 'tools.data-synchronize',
+    ],
+
+    [
+        'name' => 'Product Specification',
+        'flag' => 'ecommerce.product-specification.index',
         'parent_flag' => 'plugins.ecommerce',
+    ],
+    [
+        'name' => 'Specification Groups',
+        'flag' => 'ecommerce.specification-groups.index',
+        'parent_flag' => 'ecommerce.product-specification.index',
+    ],
+    [
+        'name' => 'Create',
+        'flag' => 'ecommerce.specification-groups.create',
+        'parent_flag' => 'ecommerce.specification-groups.index',
+    ],
+    [
+        'name' => 'Edit',
+        'flag' => 'ecommerce.specification-groups.edit',
+        'parent_flag' => 'ecommerce.specification-groups.index',
+    ],
+    [
+        'name' => 'Delete',
+        'flag' => 'ecommerce.specification-groups.destroy',
+        'parent_flag' => 'ecommerce.specification-groups.index',
+    ],
+    [
+        'name' => 'Specification Attributes',
+        'flag' => 'ecommerce.specification-attributes.index',
+        'parent_flag' => 'ecommerce.product-specification.index',
+    ],
+    [
+        'name' => 'Create',
+        'flag' => 'ecommerce.specification-attributes.create',
+        'parent_flag' => 'ecommerce.specification-attributes.index',
+    ],
+    [
+        'name' => 'Edit',
+        'flag' => 'ecommerce.specification-attributes.edit',
+        'parent_flag' => 'ecommerce.specification-attributes.index',
+    ],
+    [
+        'name' => 'Delete',
+        'flag' => 'ecommerce.specification-attributes.destroy',
+        'parent_flag' => 'ecommerce.specification-attributes.index',
+    ],
+    [
+        'name' => 'Specification Tables',
+        'flag' => 'ecommerce.specification-tables.index',
+        'parent_flag' => 'ecommerce.product-specification.index',
+    ],
+    [
+        'name' => 'Create',
+        'flag' => 'ecommerce.specification-tables.create',
+        'parent_flag' => 'ecommerce.specification-tables.index',
+    ],
+    [
+        'name' => 'Edit',
+        'flag' => 'ecommerce.specification-tables.edit',
+        'parent_flag' => 'ecommerce.specification-tables.index',
+    ],
+    [
+        'name' => 'Delete',
+        'flag' => 'ecommerce.specification-tables.destroy',
+        'parent_flag' => 'ecommerce.specification-tables.index',
+    ],
+    [
+        'name' => 'Import Product Specifications',
+        'flag' => 'ecommerce.product-specifications.import',
+        'parent_flag' => 'ecommerce.product-specification.index',
+    ],
+    [
+        'name' => 'Export Product Specifications',
+        'flag' => 'ecommerce.product-specifications.export',
+        'parent_flag' => 'ecommerce.product-specification.index',
     ],
 ];

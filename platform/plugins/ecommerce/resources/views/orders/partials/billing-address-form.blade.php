@@ -2,6 +2,8 @@
     @php
         $oldSessionAddressId = null;
         $billingAddressSameAsShippingAddress = old('billing_address_same_as_shipping_address', Arr::get($sessionCheckoutData, 'billing_address_same_as_shipping_address', true));
+        $showAddBillingCheckbox = ! $isShowAddressForm && ! (auth('customer')->check() && $isAvailableAddress);
+        $addBillingInfoChecked = $showAddBillingCheckbox ? old('add_billing_info', Arr::get($sessionCheckoutData, 'add_billing_info', false)) : false;
     @endphp
     <div class="mb-3 form-group">
         <input
@@ -10,22 +12,25 @@
             value="0"
         >
         @if ($isShowAddressForm)
-            <input
-                id="billing_address_same_as_shipping_address"
-                name="billing_address_same_as_shipping_address"
-                type="checkbox"
-                value="1"
-                @checked ($billingAddressSameAsShippingAddress)
-            >
-            <label
-                class="form-label"
-                for="billing_address_same_as_shipping_address"
-            >{{ __('Same as shipping information') }}</label>
+            <label class="form-check">
+                <input
+                    id="billing_address_same_as_shipping_address"
+                    name="billing_address_same_as_shipping_address"
+                    type="checkbox"
+                    value="1"
+                    class="form-check-input"
+                    @checked ($billingAddressSameAsShippingAddress)
+                >
+                <span
+                    class="form-check-label"
+                >{{ __('Same as shipping information') }}</span>
+            </label>
         @elseif (auth('customer')->check() && $isAvailableAddress)
             <input
                 name="billing_address_same_as_shipping_address"
                 type="hidden"
                 value="1"
+                id="billing_address_same_as_shipping_address_select"
             >
             @php
                 $oldSessionAddressId = old('address.address_id', $sessionAddressId);
@@ -36,7 +41,7 @@
                     id="billing_address_id"
                     name="address[address_id]"
                 >
-                    <option value="">{{ __('Select billing address...') }}</option>
+                    <option value="">{{ trans('plugins/ecommerce::order.enter_new_billing_address') }}</option>
                     @foreach ($addresses as $address)
                         <option
                             value="{{ $address->id }}"
@@ -47,6 +52,26 @@
                 <x-core::icon name="ti ti-chevron-down" />
             </div>
             <br>
+        @elseif ($showAddBillingCheckbox)
+            <input
+                name="billing_address_same_as_shipping_address"
+                type="hidden"
+                value="1"
+                id="billing_address_same_as_shipping_address_hidden"
+            >
+            <label class="form-check">
+                <input
+                    id="add_billing_info_checkbox"
+                    name="add_billing_info"
+                    type="checkbox"
+                    value="1"
+                    class="form-check-input"
+                    @checked ($addBillingInfoChecked)
+                >
+                <span
+                    class="form-check-label"
+                >{{ trans('plugins/ecommerce::order.add_billing_information') }}</span>
+            </label>
         @endif
     </div>
 
@@ -54,7 +79,8 @@
         class="billing-address-form-wrapper"
         @if (
             ($oldSessionAddressId && $oldSessionAddressId != 'new') ||
-                ($isShowAddressForm && $billingAddressSameAsShippingAddress)) style="display: none" @endif
+                ($isShowAddressForm && $billingAddressSameAsShippingAddress) ||
+                ($showAddBillingCheckbox && ! $addBillingInfoChecked)) style="display: none" @endif
     >
         <div class="form-group mb-3 @error('billing_address.name') has-error @enderror">
             <div class="form-input-wrapper">
@@ -72,7 +98,7 @@
         </div>
 
         <div class="row">
-            <div class="col-lg-8 col-12">
+            <div class="col-lg-7 col-12">
                 <div class="form-group  @error('billing_address.email') has-error @enderror">
                     <div class="form-input-wrapper">
                         <input
@@ -88,18 +114,42 @@
                     {!! Form::error('billing_address.email', $errors) !!}
                 </div>
             </div>
-            <div class="col-lg-4 col-12">
+            @php
+                $phoneCountryCodeEnabled = setting('phone_number_enable_country_code', true);
+                $billingPhoneValue = old('billing_address.phone', Arr::get($sessionCheckoutData, 'billing_address.phone')) ?: (auth('customer')->check() ? auth('customer')->user()->phone : null);
+            @endphp
+            <div class="col-lg-5 col-12">
                 <div class="form-group  @error('billing_address.phone') has-error @enderror">
-                    <div class="form-input-wrapper">
-                        {!! Form::text(
-                            'billing_address[phone]',
-                            old('billing_address.phone', Arr::get($sessionCheckoutData, 'billing_address.phone')) ?:
-                            (auth('customer')->check()
-                                ? auth('customer')->user()->phone
-                                : null),
-                            ['id' => 'billing-address-phone', 'class' => 'form-control', 'autocomplete' => 'phone'],
-                        ) !!}
-                        <label>{{ __('Phone') }}</label>
+                    <div class="phone-input-wrapper">
+                        @if ($phoneCountryCodeEnabled)
+                            <input
+                                class="form-control js-phone-number-mask"
+                                id="billing-address-phone"
+                                name="billing_address[phone_display]"
+                                autocomplete="phone"
+                                type="tel"
+                                data-country-code-selection="true"
+                                value="{{ $billingPhoneValue }}"
+                            >
+                            <input
+                                type="hidden"
+                                name="billing_address[phone]"
+                                id="billing-address-phone-full"
+                                class="js-phone-number-full"
+                                data-phone-field="billing_address[phone_display]"
+                                value="{{ $billingPhoneValue }}"
+                            >
+                        @else
+                            <input
+                                class="form-control js-phone-number-mask"
+                                id="billing-address-phone"
+                                name="billing_address[phone]"
+                                autocomplete="phone"
+                                type="tel"
+                                value="{{ $billingPhoneValue }}"
+                            >
+                        @endif
+                        <label for="billing-address-phone">{{ __('Phone') }}</label>
                     </div>
                     {!! Form::error('billing_address.phone', $errors) !!}
                 </div>
@@ -260,3 +310,7 @@
         @endif
     </div>
 </div>
+
+@once
+    @include('core/base::forms.fields.phone-number-script')
+@endonce

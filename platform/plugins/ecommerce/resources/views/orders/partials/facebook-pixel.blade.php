@@ -22,7 +22,7 @@
     fbq('track', 'PageView');
 </script>
 <noscript><img
-        src="https://www.facebook.com/tr?id=787836325559511&ev=PageView&noscript=1"
+        src="https://www.facebook.com/tr?id={{ $pixelID }}&ev=PageView&noscript=1"
         style="display:none"
         height="1"
         width="1"

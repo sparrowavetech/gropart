@@ -1,0 +1,11 @@
+{
+    "id": "shaqi/llms-optimizer",
+    "name": "LLMS Optimizer",
+    "namespace": "Shaqi\\LlmsOptimizer\\",
+    "provider": "Shaqi\\LlmsOptimizer\\Providers\\LlmsOptimizerServiceProvider",
+    "author": "Shaqi (Ishtiaq Ahmed)",
+    "url": "https://github.com/rajaishtiaq6/llms-optimizer",
+    "version": "1.1.0",
+    "description": "Automatically generates an optimized llms.txt file for AI crawlers and Large Language Models, following the official llms.txt specification. Supports dynamic content detection, smart descriptions, caching, and multiple output modes.",
+    "minimum_core_version": "7.0.0"
+}

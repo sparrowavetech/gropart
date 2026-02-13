@@ -1,12 +1,7 @@
 @extends('packages/installer::layouts.master')
 
-@section(
-    'pageTitle',
-     trans(
-         'packages/installer::installer.install_step_title',
-         ['step' => 5, 'title' => trans('packages/installer::installer.createAccount.title')]
-     )
-)
+@section('pageTitle', trans('packages/installer::installer.install_step_title', ['step' => 5, 'title' =>
+    trans('packages/installer::installer.createAccount.title')]))
 
 @section('header')
     <x-core::card.title>
@@ -18,7 +13,7 @@
     <form
         id="create-account-form"
         method="post"
-        action="{{ route('installers.accounts.createaccounts.store') }}"
+        action="{{ route('installers.accounts.store') }}"
     >
         @csrf
         <div class="row">

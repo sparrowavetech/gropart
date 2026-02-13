@@ -9,7 +9,7 @@ class OnOffRule implements ValidationRule
 {
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        $message = __('The selected :attribute is invalid.', compact('attribute'));
+        $message = trans('core/base::validation.selected_invalid', compact('attribute'));
 
         if ($value === null || $value === '') {
             $fail($message);

@@ -183,7 +183,7 @@ class PluginManagementController extends BaseController
                     'pluginName' => $content['id'],
                     'existing_plugins_on_marketplace' => $existingPluginsOnMarketplace,
                 ])
-                ->setMessage(__('packages/plugin-management::plugin.requirement_not_met', [
+                ->setMessage(trans('packages/plugin-management::plugin.requirement_not_met', [
                     'plugin' => "<strong>{$content['name']}</strong>",
                     'required_plugins' => '<strong>' . implode(', ', $requiredPlugins) . '</strong>',
                 ]));

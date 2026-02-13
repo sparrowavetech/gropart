@@ -9,10 +9,8 @@ use Botble\Ecommerce\Models\Address;
 
 class AddressController extends BaseController
 {
-
     public function store(CreateAddressFromAdminRequest $request)
     {
-
         if ($request->boolean('is_default')) {
             Address::query()
                 ->where([
@@ -26,7 +24,7 @@ class AddressController extends BaseController
 
         $request->merge([
             'customer_id' => $request->input('customer_id'),
-            'is_default' => $request->input('is_default', 0),
+            'is_default' => $request->boolean('is_default', 0),
         ]);
 
         Address::query()->create($request->input());
@@ -52,7 +50,7 @@ class AddressController extends BaseController
 
         $request->merge([
             'customer_id' => $request->input('customer_id'),
-            'is_default' => $request->input('is_default', 0),
+            'is_default' => $request->boolean('is_default', 0),
         ]);
 
         $address->fill($request->input());
@@ -77,10 +75,10 @@ class AddressController extends BaseController
 
     public function edit(Address $address)
     {
-
         return AddressForm::createFromModel($address)
-            ->setUrl(route('customers.addresses.edit.update', $address->getKey()))
+            ->setUrl(route('customers.addresses.update', $address->getKey()))
             ->add('customer_id', 'hidden', ['value' => $address->customer_id])
+            ->remove('submit')
             ->renderForm();
     }
 }

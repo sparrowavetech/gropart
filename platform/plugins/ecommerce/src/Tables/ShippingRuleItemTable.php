@@ -4,7 +4,7 @@ namespace Botble\Ecommerce\Tables;
 
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\Html;
-use Botble\Ecommerce\Models\ShippingRule;
+use Botble\Ecommerce\Models\ShippingRuleItem;
 use Botble\Table\Abstracts\TableAbstract;
 use Botble\Table\Actions\DeleteAction;
 use Botble\Table\Actions\EditAction;
@@ -21,12 +21,12 @@ use Illuminate\Support\Arr;
 
 class ShippingRuleItemTable extends TableAbstract
 {
-    protected array $countries;
+    protected array $countries = [];
 
     public function setup(): void
     {
         $this
-            ->model(ShippingRule::class)
+            ->model(ShippingRuleItem::class)
             ->addActions([
                 EditAction::make()->route('ecommerce.shipping-rule-items.edit'),
                 DeleteAction::make()->route('ecommerce.shipping-rule-items.destroy'),
@@ -37,25 +37,33 @@ class ShippingRuleItemTable extends TableAbstract
     {
         $data = $this->table
             ->eloquent($this->query())
-            ->editColumn('shipping_rule_id', function (ShippingRule $item) {
+            ->editColumn('shipping_rule_id', function (ShippingRuleItem $item) {
                 return $item->shippingRule->name;
             })
-            ->editColumn('country', function (ShippingRule $item) {
+            ->editColumn('country', function (ShippingRuleItem $item) {
                 return Arr::get(
                     $this->countries,
                     $item->shippingRule->shipping->country
                 ) ?: $item->shippingRule->shipping->country;
             })
-            ->editColumn('state', function (ShippingRule $item) {
+            ->editColumn('state', function (ShippingRuleItem $item) {
                 return $item->state_name ?: '&mdash;';
             })
-            ->editColumn('city', function (ShippingRule $item) {
+            ->editColumn('city', function (ShippingRuleItem $item) {
                 return $item->city_name ?: '&mdash;';
             })
-            ->editColumn('zip_code', function (ShippingRule $item) {
+            ->editColumn('zip_code', function (ShippingRuleItem $item) {
+                if ($item->zip_code_from) {
+                    if ($item->zip_code_to && $item->zip_code_from !== $item->zip_code_to) {
+                        return $item->zip_code_from . ' - ' . $item->zip_code_to;
+                    }
+
+                    return $item->zip_code_from;
+                }
+
                 return $item->zip_code ?: '&mdash;';
             })
-            ->editColumn('adjustment_price', function (ShippingRule $item) {
+            ->editColumn('adjustment_price', function (ShippingRuleItem $item) {
                 return ($item->adjustment_price < 0 ? '-' : '') .
                     format_price($item->adjustment_price) .
                     Html::tag(
@@ -82,6 +90,8 @@ class ShippingRuleItemTable extends TableAbstract
                 'adjustment_price',
                 'is_enabled',
                 'zip_code',
+                'zip_code_from',
+                'zip_code_to',
                 'created_at',
             ]);
 
@@ -101,7 +111,7 @@ class ShippingRuleItemTable extends TableAbstract
             Column::make('city')
                 ->title(trans('plugins/ecommerce::shipping.rule.item.tables.city')),
             Column::make('zip_code')
-                ->title(trans('plugins/ecommerce::shipping.rule.item.tables.zip_code')),
+                ->title(trans('plugins/ecommerce::shipping.rule.item.tables.zip_range')),
             Column::make('adjustment_price')
                 ->title(trans('plugins/ecommerce::shipping.rule.item.tables.adjustment_price')),
             YesNoColumn::make('is_enabled')
@@ -112,7 +122,7 @@ class ShippingRuleItemTable extends TableAbstract
 
     public function buttons(): array
     {
-        $buttons = $this->addCreateButton(route('ecommerce.shipping-rule-items.create'), 'settings.index.shipping');
+        $buttons = $this->addCreateButton(route('ecommerce.shipping-rule-items.create'), 'ecommerce.settings.shipping');
 
         if ($this->hasPermission('ecommerce.shipping-rule-items.bulk-import')) {
             $buttons['import'] = [
@@ -129,7 +139,7 @@ class ShippingRuleItemTable extends TableAbstract
     public function bulkActions(): array
     {
         return [
-            DeleteBulkAction::make()->permission('settings.index.shipping'),
+            DeleteBulkAction::make()->permission('ecommerce.settings.shipping'),
         ];
     }
 
@@ -155,12 +165,5 @@ class ShippingRuleItemTable extends TableAbstract
                 'type' => 'datePicker',
             ],
         ];
-    }
-
-    public function getDefaultButtons(): array
-    {
-        $buttons = parent::getDefaultButtons();
-
-        return array_merge($buttons, ['export']);
     }
 }

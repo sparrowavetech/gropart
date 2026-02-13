@@ -57,6 +57,7 @@ return [
                 'src' => [
                     'local' => [
                         '/vendor/core/core/base/libraries/jquery.min.js',
+                        '/vendor/core/core/base/libraries/jquery-compat/jquery4-compat.js',
                         '/vendor/core/core/base/js/app.js',
                     ],
                 ],

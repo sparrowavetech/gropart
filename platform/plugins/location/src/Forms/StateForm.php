@@ -3,6 +3,7 @@
 namespace Botble\Location\Forms;
 
 use Botble\Base\Forms\FieldOptions\IsDefaultFieldOption;
+use Botble\Base\Forms\FieldOptions\MediaImageFieldOption;
 use Botble\Base\Forms\FieldOptions\NameFieldOption;
 use Botble\Base\Forms\FieldOptions\SortOrderFieldOption;
 use Botble\Base\Forms\FieldOptions\StatusFieldOption;
@@ -25,11 +26,11 @@ class StateForm extends FormAbstract
         $this
             ->model(State::class)
             ->setValidatorClass(StateRequest::class)
-            ->add('name', TextField::class, NameFieldOption::make()->required()->toArray())
+            ->add('name', TextField::class, NameFieldOption::make()->required())
             ->add('slug', TextField::class, [
-                'label' => __('Slug'),
+                'label' => trans('plugins/location::location.slug'),
                 'attr' => [
-                    'placeholder' => __('Slug'),
+                    'placeholder' => trans('plugins/location::location.slug'),
                     'data-counter' => 120,
                 ],
             ])
@@ -48,10 +49,10 @@ class StateForm extends FormAbstract
                 ],
                 'choices' => [0 => trans('plugins/location::state.select_country')] + $countries,
             ])
-            ->add('order', NumberField::class, SortOrderFieldOption::make()->toArray())
-            ->add('is_default', OnOffField::class, IsDefaultFieldOption::make()->toArray())
-            ->add('status', SelectField::class, StatusFieldOption::make()->toArray())
-            ->add('image', MediaImageField::class)
+            ->add('order', NumberField::class, SortOrderFieldOption::make())
+            ->add('is_default', OnOffField::class, IsDefaultFieldOption::make())
+            ->add('status', SelectField::class, StatusFieldOption::make())
+            ->add('image', MediaImageField::class, MediaImageFieldOption::make())
             ->setBreakFieldPoint('status');
     }
 }

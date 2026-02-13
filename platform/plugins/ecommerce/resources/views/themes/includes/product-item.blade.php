@@ -1,5 +1,5 @@
 @php
-    $isConfigurable = $product->variations()->count() > 0;
+    $isConfigurable = $product->has_variation;
 @endphp
 
 <div class="card bb-product-item">
@@ -14,11 +14,9 @@
                 <a class="text-black" title="{{ $product->name }}" href="{{ $product->url }}">{{ $product->name }}</a>
             </div>
 
-            @if($product->is_enquiry == 0)
-                @include(EcommerceHelper::viewPath('includes.product-price'))
-            @endif
+            @include(EcommerceHelper::viewPath('includes.product-price'))
 
-            @if(EcommerceHelper::isReviewEnabled() && $product->is_enquiry == 0)
+            @if(EcommerceHelper::isReviewEnabled() && (!EcommerceHelper::hideRatingWhenNoReviews() || $product->reviews_count > 0))
                 @include(EcommerceHelper::viewPath('includes.rating'))
             @endif
 
@@ -28,10 +26,9 @@
                         type="button"
                         class="btn btn-primary bb-btn-product-actions-icon"
                         @if($isConfigurable)
-                            data-bb-toggle="quick-shop"
                             data-url="{{ route('public.ajax.quick-shop', $product->slug) }}"
+                        {!! EcommerceHelper::jsAttributes('quick-shop', $product) !!}
                         @else
-                            data-bb-toggle="add-to-cart"
                             data-url="{{ route('public.cart.add-to-cart') }}"
                             data-id="{{ $product->original_product->id }}"
                             {!! EcommerceHelper::jsAttributes('add-to-cart', $product) !!}
@@ -40,9 +37,9 @@
                         <x-core::icon name="ti ti-shopping-cart"/>
                         <span class="tp-product-tooltip tp-product-tooltip-right">
                             @if ($isConfigurable)
-                                {{ __('Select Options') }}
+                                {{ trans('plugins/ecommerce::ecommerce.select_options') }}
                             @else
-                                {{ __('Add To Cart') }}
+                                {{ trans('plugins/ecommerce::ecommerce.add_to_cart') }}
                             @endif
                 </span>
                     </button>

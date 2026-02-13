@@ -35,7 +35,6 @@ class FaqForm extends FormAbstract
                     ->label(trans('plugins/faq::faq.category'))
                     ->choices(['' => trans('plugins/faq::faq.select_category')] + $faqCategories)
                     ->required()
-                    ->toArray()
             )
             ->add(
                 'question',
@@ -44,14 +43,13 @@ class FaqForm extends FormAbstract
                     ->label(trans('plugins/faq::faq.question'))
                     ->required()
                     ->rows(4)
-                    ->toArray()
             )
             ->add(
                 'answer',
                 EditorField::class,
-                EditorFieldOption::make()->label(trans('plugins/faq::faq.answer'))->required()->rows(4)->toArray()
+                EditorFieldOption::make()->label(trans('plugins/faq::faq.answer'))->required()->rows(4)
             )
-            ->add('status', SelectField::class, StatusFieldOption::make()->toArray())
+            ->add('status', SelectField::class, StatusFieldOption::make())
             ->setBreakFieldPoint('status');
     }
 }

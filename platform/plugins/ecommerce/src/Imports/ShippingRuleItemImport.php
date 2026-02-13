@@ -3,12 +3,12 @@
 namespace Botble\Ecommerce\Imports;
 
 use Botble\Ecommerce\Enums\ShippingRuleTypeEnum;
+use Botble\Ecommerce\Exceptions\ImportShippingRulesException;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Models\Shipping;
 use Botble\Ecommerce\Models\ShippingRule;
 use Botble\Ecommerce\Models\ShippingRuleItem;
 use Botble\Location\Models\Country;
-use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
@@ -98,7 +98,7 @@ class ShippingRuleItemImport implements
                     ]);
 
                 if (! $shippingRule->getKey()) {
-                    throw new Exception(sprintf('Please create a shipping rule with name "%s" and type "%s" for country "%s" first.', $row['shipping_rule'], ShippingRuleTypeEnum::getLabel($row['type']), EcommerceHelper::getCountryNameById($row['country'])));
+                    throw new ImportShippingRulesException(sprintf('Please create a shipping rule with name "%s" and type "%s" for country "%s" first.', $row['shipping_rule'], ShippingRuleTypeEnum::getLabel($row['type']), EcommerceHelper::getCountryNameById($row['country'])));
                 }
 
                 $this->shippingRules = $this->shippingRules
@@ -106,7 +106,7 @@ class ShippingRuleItemImport implements
                         if ($value['shipping_rule'] == $row['shipping_rule'] &&
                             $value['country'] == $row['country'] &&
                             $value['shipping_rule_id'] == 0) {
-                            $value['shipping_rule_id'] = $shippingRule->id;
+                            $value['shipping_rule_id'] = $shippingRule->getKey();
                         }
 
                         return $value;
@@ -158,20 +158,32 @@ class ShippingRuleItemImport implements
 
     public function getShippingRule(string $name, ?string $country, ?string $type): ?ShippingRule
     {
-        return ShippingRule::query()
+        /**
+         * @var ShippingRule $shippingRule
+         */
+        $shippingRule = ShippingRule::query()
             ->where([
                 'name' => $name,
                 'type' => $type,
             ])
-            ->whereHas('shipping', function ($query) use ($country) {
+            ->whereHas('shipping', function ($query) use ($country): void {
                 $query->where('country', $country);
             })
             ->first();
+
+        return $shippingRule;
     }
 
     public function getShipping(?string $country): ?Shipping
     {
-        return Shipping::query()->where('country', $country)->first();
+        /**
+         * @var Shipping $shipping
+         */
+        $shipping = Shipping::query()
+            ->where('country', $country)
+            ->first();
+
+        return $shipping;
     }
 
     /**
@@ -194,7 +206,7 @@ class ShippingRuleItemImport implements
     {
         $row['country'] = trim(Arr::get($row, 'country', ''));
         if ($row['country']) {
-            $row['country'] = array_search($row['country'], $this->availableCountries);
+            $row['country'] = array_search(strtolower($row['country']), array_map('strtolower', $this->availableCountries));
         }
 
         return $row;
@@ -311,7 +323,7 @@ class ShippingRuleItemImport implements
             return $shipping->getKey();
         }
 
-        throw new Exception(sprintf('Shipping not for country "%s" found', EcommerceHelper::getCountryNameById($country)));
+        throw new ImportShippingRulesException(sprintf('Shipping not for country "%s" found', EcommerceHelper::getCountryNameById($country)));
     }
 
     public function mapLocalization(array $row): array
@@ -378,6 +390,10 @@ class ShippingRuleItemImport implements
                         $value = $this->getDate($value);
                     }
                 }
+
+                break;
+            case 'string':
+                $value = (string) $value;
 
                 break;
         }

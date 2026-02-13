@@ -10,7 +10,7 @@ $(() => {
 
         $(document)
             .find('.icon-select')
-            .each(function (index, element) {
+            .each(function(index, element) {
                 const $this = $(element)
                 if ($this.data('check-initialized') && $this.hasClass('select2-hidden-accessible')) {
                     return
@@ -22,7 +22,7 @@ $(() => {
 
                 let options = '<option value="0">' + $this.data('empty-value') + '</option>'
 
-                icons.forEach(function (value) {
+                icons.forEach(function(value) {
                     options += '<option value="' + value + '">' + value + '</option>'
                 })
 
@@ -47,7 +47,7 @@ $(() => {
 
     initIconsField()
 
-    document.addEventListener('core-init-resources', function () {
+    document.addEventListener('core-init-resources', function() {
         initIconsField()
     })
 })

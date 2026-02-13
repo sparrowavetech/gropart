@@ -41,9 +41,9 @@ class RoleForm extends FormAbstract
         $this
             ->model(Role::class)
             ->setValidatorClass(RoleCreateRequest::class)
-            ->add('name', TextField::class, NameFieldOption::make()->required()->maxLength(120)->toArray())
-            ->add('description', TextareaField::class, DescriptionFieldOption::make()->toArray())
-            ->add('is_default', OnOffField::class, IsDefaultFieldOption::make()->toArray())
+            ->add('name', TextField::class, NameFieldOption::make()->required()->maxLength(120))
+            ->add('description', TextareaField::class, DescriptionFieldOption::make())
+            ->add('is_default', OnOffField::class, IsDefaultFieldOption::make())
             ->addMetaBoxes([
                 'permissions' => [
                     'title' => trans('core/acl::permissions.permission_flags'),

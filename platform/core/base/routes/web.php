@@ -10,9 +10,9 @@ use Botble\Base\Http\Controllers\ToggleThemeModeController;
 use Botble\Base\Http\Middleware\RequiresJsonRequestMiddleware;
 use Illuminate\Support\Facades\Route;
 
-Route::group(['namespace' => 'Botble\Base\Http\Controllers'], function () {
-    AdminHelper::registerRoutes(function () {
-        Route::group(['prefix' => 'system'], function () {
+Route::group(['namespace' => 'Botble\Base\Http\Controllers'], function (): void {
+    AdminHelper::registerRoutes(function (): void {
+        Route::group(['prefix' => 'system'], function (): void {
             Route::get('', [
                 'as' => 'system.index',
                 'uses' => 'SystemController@getIndex',
@@ -20,8 +20,8 @@ Route::group(['namespace' => 'Botble\Base\Http\Controllers'], function () {
             ]);
         });
 
-        Route::group(['permission' => 'superuser'], function () {
-            Route::prefix('system/info')->group(function () {
+        Route::group(['permission' => 'superuser'], function (): void {
+            Route::prefix('system/info')->group(function (): void {
                 Route::match(['GET', 'POST'], '/', [SystemInformationController::class, 'index'])
                     ->name('system.info');
                 Route::get('get-addition-data', [SystemInformationController::class, 'getAdditionData'])
@@ -29,7 +29,7 @@ Route::group(['namespace' => 'Botble\Base\Http\Controllers'], function () {
                     ->name('system.info.get-addition-data');
             });
 
-            Route::prefix('system/cache')->group(function () {
+            Route::prefix('system/cache')->group(function (): void {
                 Route::get('', [CacheManagementController::class, 'index'])->name('system.cache');
                 Route::post('clear', [CacheManagementController::class, 'destroy'])
                     ->name('system.cache.clear')
@@ -81,10 +81,20 @@ Route::group(['namespace' => 'Botble\Base\Http\Controllers'], function () {
             'uses' => 'CronjobSettingController@index',
         ]);
 
-        Route::group(['permission' => false], function () {
+        Route::get('system/security', [
+            'as' => 'system.security',
+            'uses' => 'SecuritySettingController@index',
+        ]);
+
+        Route::group(['permission' => false], function (): void {
             Route::post('membership/authorize', [
                 'as' => 'membership.authorize',
                 'uses' => 'SystemController@postAuthorize',
+            ]);
+
+            Route::get('license/check', [
+                'as' => 'license.check',
+                'uses' => 'SystemController@checkLicense',
             ]);
 
             Route::get('menu-items-count', [
@@ -104,7 +114,7 @@ Route::group(['namespace' => 'Botble\Base\Http\Controllers'], function () {
 
             Route::group(
                 ['prefix' => 'notifications', 'as' => 'notifications.', 'controller' => NotificationController::class],
-                function () {
+                function (): void {
                     Route::get('/', [
                         'as' => 'index',
                         'uses' => 'index',

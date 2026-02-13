@@ -3,22 +3,14 @@
 namespace Botble\Marketplace\Forms;
 
 use Botble\Base\Enums\BaseStatusEnum;
-use Botble\Marketplace\Enums\ShopTypeEnum;
-use Botble\Location\Models\State;
-use Botble\Location\Repositories\Interfaces\StateInterface;
-use Botble\Ecommerce\Repositories\Interfaces\CustomerInterface;
 use Botble\Base\Facades\Assets;
 use Botble\Base\Forms\FieldOptions\ContentFieldOption;
-use Botble\Base\Forms\FieldOptions\CheckboxFieldOption;
-use Botble\Base\Forms\FieldOptions\NumberFieldOption;
-use Botble\Base\Forms\FieldOptions\OnOffFieldOption;
-use Botble\Base\Forms\Fields\NumberField;
-use Botble\Base\Forms\Fields\OnOffCheckboxField;
 use Botble\Base\Forms\FieldOptions\DescriptionFieldOption;
 use Botble\Base\Forms\FieldOptions\EmailFieldOption;
 use Botble\Base\Forms\FieldOptions\HtmlFieldOption;
 use Botble\Base\Forms\FieldOptions\MediaImageFieldOption;
 use Botble\Base\Forms\FieldOptions\NameFieldOption;
+use Botble\Base\Forms\FieldOptions\TextFieldOption;
 use Botble\Base\Forms\Fields\EditorField;
 use Botble\Base\Forms\Fields\EmailField;
 use Botble\Base\Forms\Fields\HtmlField;
@@ -28,9 +20,9 @@ use Botble\Base\Forms\Fields\TextareaField;
 use Botble\Base\Forms\Fields\TextField;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Ecommerce\Enums\CustomerStatusEnum;
-use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Forms\Concerns\HasLocationFields;
 use Botble\Ecommerce\Models\Customer;
+use Botble\Marketplace\Facades\MarketplaceHelper;
 use Botble\Marketplace\Forms\Concerns\HasSubmitButton;
 use Botble\Marketplace\Http\Requests\StoreRequest;
 use Botble\Marketplace\Models\Store;
@@ -42,42 +34,23 @@ class StoreForm extends FormAbstract
 
     public function setup(): void
     {
-        Assets::addScriptsDirectly([
-            'vendor/core/plugins/marketplace/js/store.js',
-        ]);
-
-        $isAdmin = is_in_admin(true);
+        Assets::addScriptsDirectly('vendor/core/plugins/marketplace/js/store.js');
 
         $this
-            ->setupModel(new Store())
+            ->model(Store::class)
             ->setValidatorClass(StoreRequest::class)
             ->columns(6)
-            ->contentOnly()
+            ->template('core/base::forms.form-no-wrap')
             ->hasFiles()
-            ->add('name', TextField::class, NameFieldOption::make()->required()->colspan(3)->toArray())
-            ->add('company', TextField::class, [
-                'label' => trans('plugins/marketplace::store.forms.company'),
-                'attr' => [
-                    'placeholder' => trans('plugins/marketplace::store.forms.company_placeholder'),
-                    'data-counter' => 255,
-                ],
-                'colspan' => 3,
-            ])
-            ->add('slug', HtmlField::class,
+            ->add('name', TextField::class, NameFieldOption::make()->required()->colspan(6))
+            ->add(
+                'slug',
+                HtmlField::class,
                 HtmlFieldOption::make()
                     ->content(view('plugins/marketplace::stores.partials.shop-url-field', ['store' => $this->getModel()])->render())
                     ->colspan(3)
             )
-            ->add('customer_id', SelectField::class, [
-                'label' => trans('plugins/marketplace::store.forms.store_owner'),
-                'required' => true,
-                'choices' => [0 => trans('plugins/marketplace::store.forms.select_store_owner')] + Customer::query()
-                    ->where('is_vendor', true)
-                    ->pluck('name', 'id')
-                    ->all(),
-                'colspan' => 3,
-            ])
-            ->add('email', EmailField::class, EmailFieldOption::make()->required()->colspan(3)->toArray())
+            ->add('email', EmailField::class, EmailFieldOption::make()->required()->colspan(3))
             ->add('phone', TextField::class, [
                 'label' => trans('plugins/marketplace::store.forms.phone'),
                 'required' => true,
@@ -85,18 +58,68 @@ class StoreForm extends FormAbstract
                     'placeholder' => trans('plugins/marketplace::store.forms.phone_placeholder'),
                     'data-counter' => 15,
                 ],
-                'colspan' => 3,
+                'colspan' => 6,
             ])
-            ->add('shop_category', SelectField::class, [
-                'label'      => trans('plugins/marketplace::store.forms.shop_category'),
-                'required' => true,
-                'label_attr' => ['class' => 'control-label required'],
-                'attr'       => [
-                    'class' => 'form-control',
-                ],
-                'choices'    => ShopTypeEnum::labels(),
-                'colspan' => 3,
-            ])
+            ->add('description', TextareaField::class, DescriptionFieldOption::make()->colspan(6))
+            ->add('content', EditorField::class, ContentFieldOption::make()->colspan(6))
+            ->addLocationFields()
+            ->add(
+                'company',
+                TextField::class,
+                TextFieldOption::make()
+                    ->label(trans('plugins/marketplace::store.forms.company'))
+                    ->placeholder(trans('plugins/marketplace::store.forms.company_placeholder'))
+                    ->maxLength(255)
+                    ->colspan(3)
+            )
+            ->add(
+                'tax_id',
+                TextField::class,
+                TextFieldOption::make()
+                    ->label(trans('plugins/marketplace::store.forms.tax_id'))
+                    ->colspan(3)
+                    ->maxLength(255)
+            )
+            ->add(
+                'tax_country',
+                TextField::class,
+                TextFieldOption::make()
+                    ->label(trans('plugins/marketplace::store.forms.tax_country'))
+                    ->helperText(trans('plugins/marketplace::store.forms.tax_country_helper'))
+                    ->colspan(3)
+                    ->maxLength(120)
+            )
+            ->add(
+                'tax_state',
+                TextField::class,
+                TextFieldOption::make()
+                    ->label(trans('plugins/marketplace::store.forms.tax_state'))
+                    ->helperText(trans('plugins/marketplace::store.forms.tax_state_helper'))
+                    ->colspan(3)
+                    ->maxLength(120)
+            )
+            ->add(
+                'logo',
+                MediaImageField::class,
+                MediaImageFieldOption::make()
+                    ->label(trans('plugins/marketplace::store.forms.logo'))
+                    ->colspan(2)
+            )
+            ->add(
+                'logo_square',
+                MediaImageField::class,
+                MediaImageFieldOption::make()
+                    ->label(trans('plugins/marketplace::store.forms.logo_square'))
+                    ->helperText(trans('plugins/marketplace::store.forms.logo_square_helper'))
+                    ->colspan(2)
+            )
+            ->add(
+                'cover_image',
+                MediaImageField::class,
+                MediaImageFieldOption::make()
+                    ->label(trans('plugins/marketplace::store.forms.cover_image'))
+                    ->colspan(2)
+            )
             ->add('status', SelectField::class, [
                 'label' => trans('core/base::tables.status'),
                 'required' => true,
@@ -109,40 +132,20 @@ class StoreForm extends FormAbstract
                 ],
                 'colspan' => 3,
             ])
-            ->when($isAdmin, function ($form) {
-                $form
-                    ->add('is_verified', OnOffCheckboxField::class, [
-                        'label'         => trans('plugins/marketplace::store.forms.is_verified'),
-                        'label_attr'    => ['class' => 'control-label'],
-                        'default_value' => false,
-                        'colspan' => 3,
-                    ])
-                    ->add('is_manage_shipping', OnOffCheckboxField::class, [
-                        'label'         => trans('plugins/marketplace::store.forms.is_manage_shipping'),
-                        'label_attr'    => ['class' => 'control-label'],
-                        'default_value' => false,
-                        'colspan' => 3,
+            ->add('customer_id', SelectField::class, [
+                'label' => trans('plugins/marketplace::store.forms.store_owner'),
+                'required' => true,
+                'choices' => [0 => trans('plugins/marketplace::store.forms.select_store_owner')] + Customer::query()
+                    ->where('is_vendor', true)
+                    ->pluck('name', 'id')
+                    ->all(),
+                'colspan' => 3,
+            ])
+            ->when(! MarketplaceHelper::hideStoreSocialLinks(), function (): void {
+                $this
+                    ->add('extended_info_content', HtmlField::class, [
+                        'html' => view('plugins/marketplace::partials.extra-content', ['model' => $this->getModel()]),
                     ]);
-            })
-            ->add('description', TextareaField::class, DescriptionFieldOption::make()->colspan(6)->toArray())
-            ->add('content', EditorField::class, ContentFieldOption::make()->colspan(6)->toArray())
-            ->addLocationFields()
-            ->add(
-                'logo',
-                MediaImageField::class,
-                MediaImageFieldOption::make()
-                    ->label(__('Logo'))
-                    ->colspan(3)
-                    ->toArray()
-            )
-            ->add(
-                'cover_image',
-                MediaImageField::class,
-                MediaImageFieldOption::make()
-                    ->label(__('Cover Image'))
-                    ->colspan(6)
-                    ->toArray()
-            )
-            ->addSubmitButton(trans('core/base::forms.save_and_continue'), attributes: ['colspan' => 6]);
+            });
     }
 }

@@ -8,9 +8,15 @@ use Intervention\Image\Drivers\SpecializableModifier;
 
 class QuantizeColorsModifier extends SpecializableModifier
 {
+    /**
+     * Create new modifier object
+     *
+     * @return void
+     */
     public function __construct(
         public int $limit,
         public mixed $background = 'ffffff'
     ) {
+        //
     }
 }

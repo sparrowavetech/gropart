@@ -2,6 +2,7 @@
 
 namespace Botble\Ecommerce\Http\Requests;
 
+use Botble\Base\Http\Requests\Concerns\HasPhoneFieldValidation;
 use Botble\Base\Rules\EmailRule;
 use Botble\Ecommerce\Enums\ShippingMethodEnum;
 use Botble\Ecommerce\Facades\Cart;
@@ -9,19 +10,57 @@ use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Models\Customer;
 use Botble\Payment\Enums\PaymentMethodEnum;
 use Botble\Support\Http\Requests\Request;
+use Botble\Theme\Facades\Theme;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\Rule;
 
 class CheckoutRequest extends Request
 {
+    use HasPhoneFieldValidation;
+
+    protected function prepareForValidation(): void
+    {
+        $this->preparePhoneFieldForCheckout('address');
+
+        if ($this->has('billing_address')) {
+            $this->preparePhoneFieldForCheckout('billing_address');
+        }
+    }
+
+    protected function preparePhoneFieldForCheckout(string $prefix): void
+    {
+        $data = $this->input($prefix, []);
+
+        if (! is_array($data)) {
+            $data = [];
+        }
+
+        if ((! isset($data['phone']) || ! $data['phone']) && isset($data['phone_display']) && is_string($data['phone_display']) && $data['phone_display']) {
+            $data['phone'] = $data['phone_display'];
+        }
+
+        if (isset($data['phone']) && is_string($data['phone']) && $data['phone']) {
+            $cleanedPhone = preg_replace('/[^\d+]/', '', $data['phone']);
+            if ($cleanedPhone) {
+                $data['phone'] = $cleanedPhone;
+            }
+        } elseif (isset($data['phone']) && ! is_string($data['phone'])) {
+            unset($data['phone']);
+        }
+
+        $this->merge([
+            $prefix => $data,
+        ]);
+    }
+
     public function rules(): array
     {
         $rules = [
             'amount' => ['required', 'min:0'],
         ];
 
-        if (theme_option('ecommerce_term_and_privacy_policy_url')) {
-            $rules['agree_terms_and_policy'] = 'sometimes|accepted:1';
+        if (Theme::termAndPrivacyPolicyUrl() && get_ecommerce_setting('show_terms_and_policy_checkbox', true)) {
+            $rules['agree_terms_and_policy'] = 'required|accepted:1';
         }
 
         if (is_plugin_active('payment') && Cart::instance('cart')->rawTotal()) {
@@ -35,7 +74,11 @@ class CheckoutRequest extends Request
         $addressId = $this->input('address.address_id');
 
         $products = Cart::instance('cart')->products();
-        if (EcommerceHelper::isAvailableShipping($products)) {
+        if (
+            ! EcommerceHelper::isDisabledPhysicalProduct()
+            && EcommerceHelper::isAvailableShipping($products)
+            && ! (bool) get_ecommerce_setting('disable_shipping_options', false)
+        ) {
             $rules['shipping_method'] = 'required|' . Rule::in(ShippingMethodEnum::values());
             if (auth('customer')->check()) {
                 $rules['address.address_id'] = 'required_without:address.name';
@@ -87,32 +130,26 @@ class CheckoutRequest extends Request
                 'tax_information.company_email' => [
                     'required_if:with_tax_information,1',
                     'nullable',
-                    'email',
-                    'min:6',
-                    'max:60',
+                    new EmailRule(),
                 ],
             ]);
         }
 
         if (! auth('customer')->check()) {
-            $rules = array_merge($rules, EcommerceHelper::getCustomerAddressValidationRules('address.'));
-            $rules['address.email'] = 'required|email|max:60|min:6';
-            $rules['address.phone'] = 'required|max:10|min:10';
-            if (EcommerceHelper::countDigitalProducts($products) == $products->count() && ! $billingAddressSameAsShippingAddress) {
-                $rules = $this->removeRequired($rules, [
-                    'address.country',
-                    'address.state',
-                    'address.city',
-                    'address.address',
-                    'address.phone',
-                    'address.zip_code',
-                ]);
+            $isDigitalOnly = EcommerceHelper::countDigitalProducts($products) == $products->count();
+
+            if ($isDigitalOnly) {
+                $rules['address.name'] = 'required|min:3|max:120';
+                $rules['address.email'] = 'required|email|max:60|min:6';
+            } else {
+                $rules = array_merge($rules, EcommerceHelper::getCustomerAddressValidationRules('address.'));
+                $rules['address.email'] = 'required|email|max:60|min:6';
             }
         }
 
         $isCreateAccount = ! auth('customer')->check() && $this->input('create_account') == 1;
         if ($isCreateAccount) {
-            $rules['password'] = 'required|min:6';
+            $rules['password'] = ['required', 'string', 'min:6'];
             $rules['password_confirmation'] = 'required|same:password';
             $rules['address.email'] = ['required', new EmailRule(), Rule::unique((new Customer())->getTable(), 'email')];
             $rules['address.name'] = 'required|min:3|max:120';
@@ -152,7 +189,10 @@ class CheckoutRequest extends Request
 
     public function messages(): array
     {
-        return apply_filters(PROCESS_CHECKOUT_MESSAGES_REQUEST_ECOMMERCE, []);
+        return apply_filters(PROCESS_CHECKOUT_MESSAGES_REQUEST_ECOMMERCE, [
+            'agree_terms_and_policy.required' => trans('plugins/ecommerce::ecommerce.agree_terms_and_policy_error'),
+            'agree_terms_and_policy.accepted' => trans('plugins/ecommerce::ecommerce.agree_terms_and_policy_error'),
+        ]);
     }
 
     public function attributes(): array

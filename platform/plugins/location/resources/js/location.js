@@ -1,4 +1,55 @@
 class Location {
+    // Show error message - works on both admin and frontend
+    static showError(message) {
+        if (typeof Botble !== 'undefined' && Botble.showError) {
+            Botble.showError(message)
+        } else if (typeof Theme !== 'undefined' && Theme.showError) {
+            Theme.showError(message)
+        } else if (typeof toastr !== 'undefined') {
+            toastr.error(message)
+        } else {
+            console.error(message)
+        }
+    }
+
+    // Refresh Select2 instance after options update
+    static refreshSelect2($el) {
+        if (jQuery().select2 && $el.hasClass('select-search-location') && $el.hasClass('select2-hidden-accessible')) {
+            // Destroy and reinitialize to refresh options
+            $el.select2('destroy')
+            Location.initSelect2($el)
+        }
+    }
+
+    // Initialize Select2 on a single element
+    static initSelect2($el) {
+        if (!jQuery().select2 || !$el.hasClass('select-search-location')) {
+            return
+        }
+
+        // Skip if already initialized
+        if ($el.hasClass('select2-hidden-accessible')) {
+            return
+        }
+
+        const placeholder = $el.find('option:first').text() || 'Select...'
+
+        let options = {
+            width: '100%',
+            placeholder: placeholder,
+            allowClear: false,
+            minimumResultsForSearch: 0, // Always show search box
+        }
+
+        // Find parent for dropdown positioning
+        let parent = $el.closest('div[data-select2-dropdown-parent]') || $el.closest('.modal')
+        if (parent.length) {
+            options.dropdownParent = parent
+        }
+
+        $el.select2(options)
+    }
+
     static getStates($el, countryId, $button = null) {
         $.ajax({
             url: $el.data('url'),
@@ -11,7 +62,7 @@ class Location {
             },
             success: (res) => {
                 if (res.error) {
-                    Botble.showError(res.message)
+                    Location.showError(res.message)
                 } else {
                     let options = ''
                     $.each(res.data, (index, item) => {
@@ -19,6 +70,7 @@ class Location {
                     })
 
                     $el.html(options)
+                    Location.refreshSelect2($el)
                 }
             },
             complete: () => {
@@ -40,7 +92,7 @@ class Location {
             },
             success: (res) => {
                 if (res.error) {
-                    Botble.showError(res.message)
+                    Location.showError(res.message)
                 } else {
                     let options = ''
                     $.each(res.data, (index, item) => {
@@ -48,6 +100,7 @@ class Location {
                     })
 
                     $el.html(options)
+                    Location.refreshSelect2($el)
                     $el.trigger('change')
                 }
             },
@@ -62,6 +115,20 @@ class Location {
         const state = 'select[data-type="state"]'
         const city = 'select[data-type="city"]'
 
+        // Initialize Select2 on all location selects with select-search-location class
+        function initLocationSelect2() {
+            if (!jQuery().select2) {
+                return
+            }
+
+            $(document).find('select.select-search-location[data-type]').each(function (index, el) {
+                Location.initSelect2($(el))
+            })
+        }
+
+        // Initialize on page load
+        initLocationSelect2()
+
         $(document).on('change', country, function (e) {
             e.preventDefault()
 
@@ -72,6 +139,10 @@ class Location {
 
             $state.find('option:not([value=""]):not([value="0"])').remove()
             $city.find('option:not([value=""]):not([value="0"])').remove()
+
+            // Refresh Select2 for cleared dropdowns
+            Location.refreshSelect2($state)
+            Location.refreshSelect2($city)
 
             const $button = $(e.currentTarget).closest('form').find('button[type=submit], input[type=submit]')
             const countryId = $(e.currentTarget).val()
@@ -94,6 +165,8 @@ class Location {
 
             if ($city.length) {
                 $city.find('option:not([value=""]):not([value="0"])').remove()
+                Location.refreshSelect2($city)
+
                 const stateId = $(e.currentTarget).val()
                 const $button = $(e.currentTarget).closest('form').find('button[type=submit], input[type=submit]')
 
@@ -104,61 +177,8 @@ class Location {
 
                     Location.getCities($city, null, $button, countryId)
                 }
-
-                stateFieldUsingSelect2()
             }
         })
-
-        function stateFieldUsingSelect2() {
-            if (jQuery().select2) {
-                $(document)
-                    .find('select[data-using-select2="true"]')
-                    .each(function (index, input) {
-                        let options = {
-                            width: '100%',
-                            minimumInputLength: 0,
-                            ajax: {
-                                url: $(input).data('url'),
-                                dataType: 'json',
-                                delay: 250,
-                                type: 'GET',
-                                data: function (params) {
-                                    return {
-                                        state_id: $(input).closest('form').find(state).val(),
-                                        k: params.term,
-                                        page: params.page || 1,
-                                    }
-                                },
-                                processResults: function (data, params) {
-                                    return {
-                                        results: $.map(data.data[0], function (item) {
-                                            return {
-                                                text: item.name,
-                                                id: item.id,
-                                                data: item,
-                                            }
-                                        }),
-                                        pagination: {
-                                            more: params.page * 10 < data.total,
-                                        },
-                                    }
-                                },
-                            },
-                        }
-
-                        let parent = $(input).closest('div[data-select2-dropdown-parent]') || $(input).closest('.modal')
-                        if (parent.length) {
-                            options.dropdownParent = parent
-                            options.width = '100%'
-                            options.minimumResultsForSearch = -1
-                        }
-
-                        $(input).select2(options)
-                    })
-            }
-        }
-
-        stateFieldUsingSelect2()
 
         function getParent($el) {
             let $parent = $(document)

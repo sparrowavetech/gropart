@@ -5,10 +5,13 @@
     }
 </style>
 
-{!! BaseHelper::googleFonts('https://fonts.googleapis.com/' . sprintf(
-        'css2?family=%s:wght@300;400;500;600;700&display=swap',
-        urlencode(setting('admin_primary_font', 'Inter')),
-)) !!}
+{!! BaseHelper::googleFonts(
+    'https://fonts.googleapis.com/' .
+        sprintf(
+            'css2?family=%s:wght@300;400;500;600;700&display=swap',
+            urlencode(setting('admin_primary_font', 'Inter')),
+        ),
+) !!}
 
 <style>
     :root {
@@ -28,4 +31,3 @@
 </style>
 
 {!! Assets::renderHeader(['core']) !!}
-

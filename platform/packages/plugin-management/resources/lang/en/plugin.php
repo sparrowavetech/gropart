@@ -40,6 +40,7 @@ return [
     'install' => 'Install now',
     'install_plugin' => 'Install Plugin',
     'minimum_core_version_not_met' => 'Plugin :plugin requires :minimum_core_version version of core, but your core version is :current_core_version. Please upgrade your core to use this plugin!',
+    'required_by_other_plugins' => 'Cannot deactivate plugin :plugin because it is required by other plugin(s): :required_by',
     'enums' => [
         'plugin_filter_status' => [
             'all' => 'All',
@@ -48,4 +49,7 @@ return [
             'updates-available' => 'Updates Available',
         ],
     ],
+    'install_plugin_from_marketplace' => 'Install plugin from Marketplace',
+    'accept_and_install' => 'Accept and install',
+    'cancel' => 'Cancel',
 ];

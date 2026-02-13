@@ -248,7 +248,7 @@ class AnalyticsController extends BaseController
 
     protected function handleInvalidConfigException(InvalidConfiguration $exception): BaseHttpResponse
     {
-        $message = $exception->getMessage() ?: trans('plugins/analytics::analytics.wrong_configuration');
+        $message = $exception->getMessage() ?: trans('plugins/analytics::analytics.settings.wrong_configuration');
 
         return $this
             ->httpResponse()

@@ -13,14 +13,14 @@ class PlainTextExtension extends AbstractExtension
     /**
      * Array of text
      *
-     * @var array
+     * @var array<string>
      */
     protected array $text = [];
 
     /**
      * Get current text
      *
-     * @return array
+     * @return array<string>
      */
     public function getText(): array
     {
@@ -29,8 +29,6 @@ class PlainTextExtension extends AbstractExtension
 
     /**
      * Add text
-     *
-     * @param string $text
      */
     public function addText(string $text): self
     {
@@ -42,7 +40,7 @@ class PlainTextExtension extends AbstractExtension
     /**
      * Set text array of extension
      *
-     * @param array $text
+     * @param array<string> $text
      */
     public function setText(array $text): self
     {
@@ -53,11 +51,9 @@ class PlainTextExtension extends AbstractExtension
 
     /**
      * Determine if any text is present
-     *
-     * @return bool
      */
     public function hasText(): bool
     {
-        return count($this->text) > 0;
+        return $this->text !== [];
     }
 }

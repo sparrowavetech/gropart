@@ -29,14 +29,12 @@ class CancelOrderForm extends FormAbstract
                         ...OrderCancellationReasonEnum::labels(),
                     ])
                     ->required()
-                    ->toArray()
             )
             ->add(
                 'cancellation_reason_description',
                 TextareaField::class,
                 TextareaFieldOption::make()
                     ->label(__('Description'))
-                    ->toArray()
             );
     }
 }

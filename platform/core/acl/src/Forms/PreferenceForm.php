@@ -3,30 +3,33 @@
 namespace Botble\ACL\Forms;
 
 use Botble\ACL\Http\Requests\PreferenceRequest;
+use Botble\ACL\Models\User;
 use Botble\Base\Facades\AdminAppearance;
+use Botble\Base\Facades\AdminHelper;
 use Botble\Base\Forms\FieldOptions\RadioFieldOption;
 use Botble\Base\Forms\FieldOptions\SelectFieldOption;
 use Botble\Base\Forms\Fields\RadioField;
 use Botble\Base\Forms\Fields\SelectField;
 use Botble\Base\Forms\FormAbstract;
-use Botble\Base\Supports\Language;
 
 class PreferenceForm extends FormAbstract
 {
     public function setup(): void
     {
-        $languages = collect(Language::getAvailableLocales())
-            ->pluck('name', 'locale')
-            ->map(fn ($item, $key) => $item . ' - ' . $key)
-            ->all();
+        $languages = AdminHelper::getAdminLocales();
 
-        $adminAppearance = AdminAppearance::forUser($this->getModel());
+        /**
+         * @var User $user
+         */
+        $user = $this->getModel();
+
+        $adminAppearance = AdminAppearance::forUser($user);
 
         $this
             ->template('core/base::forms.form-no-wrap')
             ->setValidatorClass(PreferenceRequest::class)
             ->setMethod('PUT')
-            ->when(count($languages) > 1, function (FormAbstract $form) use ($adminAppearance, $languages) {
+            ->when(count($languages) > 1, function (FormAbstract $form) use ($adminAppearance, $languages): void {
                 $form->add(
                     'locale',
                     SelectField::class,
@@ -34,7 +37,6 @@ class PreferenceForm extends FormAbstract
                         ->label(trans('core/setting::setting.admin_appearance.language'))
                         ->choices($languages)
                         ->selected($adminAppearance->getLocale())
-                        ->toArray()
                 );
             })
             ->add(
@@ -47,7 +49,6 @@ class PreferenceForm extends FormAbstract
                         'rtl' => trans('core/setting::setting.locale_direction_rtl'),
                     ])
                     ->selected($adminAppearance->getLocaleDirection())
-                    ->toArray()
             )
             ->add(
                 'theme_mode',
@@ -58,8 +59,7 @@ class PreferenceForm extends FormAbstract
                         'light' => trans('core/setting::setting.admin_appearance.light'),
                         'dark' => trans('core/setting::setting.admin_appearance.dark'),
                     ])
-                    ->selected($this->getModel()->getMeta('theme_mode', 'light'))
-                    ->toArray()
+                    ->selected($user->getMeta('theme_mode', 'light'))
             )
             ->setActionButtons(view('core/acl::users.profile.actions')->render());
     }

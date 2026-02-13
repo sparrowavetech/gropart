@@ -3,10 +3,18 @@
 namespace Botble\Ecommerce\Http\Requests;
 
 use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Http\Requests\Concerns\HasPhoneFieldValidation;
 use Botble\Support\Http\Requests\Request;
 
 class EditAccountRequest extends Request
 {
+    use HasPhoneFieldValidation;
+
+    protected function prepareForValidation(): void
+    {
+        $this->preparePhoneForValidation();
+    }
+
     public function rules(): array
     {
         return [

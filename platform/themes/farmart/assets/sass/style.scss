@@ -15,8 +15,9 @@
 @import 'partials/customer';
 @import 'partials/store';
 @import 'partials/dashboard';
+@import 'partials/lazy-loading';
 
-/* purgecss start ignore */
+/*! purgecss start ignore */
 
 .container-xxxl {
     margin: 0 auto;
@@ -630,6 +631,10 @@ input[type='submit'] {
 
 .lg-outer {
     z-index: 10002;
+}
+
+.lg-sub-html {
+    display: none;
 }
 
 .coming-soon-page {
@@ -1415,17 +1420,7 @@ body.show-admin-bar {
         }
     }
 }
-@media (max-width: 768px) {
-    .sl-button-label-container {
-            padding:4px 0;
-            font-size: 12px;
-            line-height: 15px;
-            letter-spacing: 0.25px;
-        }
-    .sl-button-svg-container{
-        padding: 3px;
-    }
-}
+
 .footer-widgets {
     .widget.widget-custom-menu {
         ul {
@@ -1454,7 +1449,7 @@ body.show-admin-bar {
     }
 }
 
-@media (max-width:768px) {
+@media (max-width: 768px) {
     .blog-page-content {
         .post-item__image {
             margin-bottom: 20px;
@@ -1467,6 +1462,16 @@ body.show-admin-bar {
 
     .store-toolbar__view {
         display: none !important;
+    }
+
+    .bb-product-filter {
+        background: #fff;
+        margin-bottom: 0;
+        padding: 10px 20px;
+    }
+
+    .bb-product-form-filter {
+        margin: 20px 0;
     }
 }
 
@@ -1703,9 +1708,291 @@ a.sl-button.sl-button-zalo.mt-2 {
         a {
             svg.icon {
                 color: #fff !important;
+                vertical-align: top;
+                margin-top: 2px;
             }
         }
     }
 }
 
-/* purgecss end ignore */
+.tp-product-details-additional-info {
+    table {
+        border: 1px solid #e0e2e3;
+        width: 100%;
+
+        tr:not(:last-child) {
+            border-bottom: 1px solid #eceded
+        }
+
+        td {
+            padding: 12px 34px;
+
+            &:first-child {
+                background-color: #f9f9f9;
+                color: #000;
+                font-size: 16px;
+                width: 306px
+            }
+
+            &:last-child {
+                font-size: 16px
+            }
+        }
+    }
+}
+
+.bb-product-price {
+    .bb-product-price-text {
+        color: unset;
+        font-size: unset;
+        font-weight: unset;
+    }
+
+    .bb-product-price-text-old {
+        font-size: unset;
+        font-weight: unset;
+    }
+}
+
+.form-check-input[type=checkbox] {
+    padding: 0 !important;
+}
+
+@media (max-width: 1199px) {
+    .header-mobile {
+        background-color: var(--header-mobile-background-color);
+
+        .svg-icon, .search-form--mobile .open-search-panel .svg-icon {
+            color: var(--header-mobile-icon-color);
+        }
+    }
+
+    .mega-menu {
+        .mega-menu__column {
+            margin-bottom: 0;
+            width: 100%;
+        }
+
+        .mega-menu-wrapper {
+            padding: 0;
+        }
+    }
+}
+
+.menu li a > svg, .header-info > ul li a > svg {
+    width: 18px;
+    height: 18px;
+    vertical-align: top;
+    margin-inline-end: 3px;
+}
+
+.widget-custom-menu ul li a > svg {
+    width: 20px;
+    height: 20px;
+    vertical-align: top;
+    margin-inline-end: 3px;
+}
+
+.header-info > ul li a > svg {
+    margin-top: -3px;
+}
+
+.btn-primary {
+    padding: 8px 16px;
+}
+
+.widget {
+    .form-widget {
+        .captcha-disclaimer {
+            margin-top: 15px !important;
+            padding: 8px !important;
+            font-size: 13px;
+
+            a {
+                color: var(--primary-color);
+
+                &:hover {
+                    text-decoration: underline;
+                }
+            }
+        }
+
+        .btn-primary {
+            border-top-left-radius: 3px !important;
+            border-bottom-left-radius: 3px !important;
+        }
+    }
+}
+
+.mega-menu-wrapper {
+    max-height: 100vh;
+    overflow-y: auto;
+}
+
+@media (max-width: 768px) {
+    .widget-mobile-apps {
+        background-position: top;
+        background-size: cover;
+    }
+}
+
+.widget-testimonials {
+    .grey-bg-7 {
+        background-color: #f4f5f7;
+    }
+
+    .testimonials-body {
+        margin: 0 -10px;
+    }
+
+    .testimonial-item {
+        padding: 0 10px;
+        margin-bottom: 20px;
+    }
+
+    .testimonial-item-body {
+        padding: 43px 50px 52px 50px;
+        position: relative;
+        height: 100%;
+
+        @media (max-width: 991px) {
+            padding: 43px 30px 52px 30px;
+        }
+
+        @media (max-width: 575px) {
+            padding: 30px 25px 40px 25px;
+        }
+    }
+
+    .testimonial-quote {
+        img {
+            position: absolute;
+            bottom: 50px;
+            right: 50px;
+            z-index: -1;
+            opacity: 0.7;
+
+            @media (max-width: 575px) {
+                bottom: 30px;
+                right: 30px;
+                width: 30px;
+            }
+        }
+    }
+
+    .testimonial-rating {
+        margin-bottom: 11px;
+
+        span {
+            color: #fab528;
+            font-size: 14px;
+            margin-right: 2px;
+        }
+    }
+
+    .testimonial-content {
+        p {
+            font-weight: 400;
+            font-size: 16px;
+            line-height: 1.5;
+            color: #55585b;
+            margin-bottom: 20px;
+
+            @media (max-width: 767px) {
+                font-size: 18px;
+            }
+
+            @media (max-width: 575px) {
+                font-size: 16px;
+            }
+        }
+    }
+
+    .testimonial-avatar {
+        img {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            object-fit: cover;
+            background: #d9d9d9;
+            border: 3px solid #ffffff;
+            box-shadow: 0px 1px 2px rgba(1, 15, 28, 0.3);
+        }
+    }
+
+    .testimonial-user-info {
+        h6 {
+            font-weight: 400;
+            font-size: 16px;
+            line-height: 16px;
+            margin-bottom: 5px;
+            color: #000;
+        }
+
+        span {
+            font-size: 14px;
+            line-height: 1;
+            color: #55585b;
+        }
+    }
+}
+
+.testimonials-slider {
+    .slick-dots {
+        display: flex !important;
+        justify-content: center;
+        align-items: center;
+        padding: 0;
+        margin: 0;
+        list-style: none;
+
+        li {
+            margin: 0 5px;
+
+            button {
+                width: 10px;
+                height: 10px;
+                border-radius: 50%;
+                border: 1px solid #d5dae1;
+                background-color: transparent;
+                font-size: 0;
+                padding: 0;
+                cursor: pointer;
+                transition: all 0.3s ease;
+
+                &:before {
+                    width: 10px;
+                    height: 10px;
+                }
+
+                &:hover {
+                    background-color: #d5dae1;
+                }
+            }
+
+            &.slick-active button {
+                background-color: #000;
+                border-color: #000;
+            }
+        }
+    }
+}
+
+// Testimonials slider equal height
+.testimonials-slider {
+    .slick-track {
+        display: flex !important;
+    }
+
+    .slick-slide {
+        height: inherit !important;
+        display: flex !important;
+
+        > div {
+            height: 100%;
+            width: 100%;
+        }
+    }
+}
+
+/*! purgecss end ignore */

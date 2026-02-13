@@ -2,10 +2,15 @@
 
 namespace Illuminate\Database\Eloquent\Relations;
 
+use Illuminate\Database\Eloquent\Model;
+
 /**
  * @template TRelatedModel of \Illuminate\Database\Eloquent\Model
- * @extends BelongsToMany<TRelatedModel>
+ * @template TDeclaringModel of \Illuminate\Database\Eloquent\Model
+ * @template TPivotModel of \Illuminate\Database\Eloquent\Relations\Pivot = \Illuminate\Database\Eloquent\Relations\MorphPivot
+ * @template TAccessor of string = 'pivot'
+ *
+ * @extends \Illuminate\Database\Eloquent\Relations\BelongsToMany<TRelatedModel, TDeclaringModel, TPivotModel, TAccessor>
  */
-class MorphToMany extends BelongsToMany
-{
-}
+class MorphToMany extends BelongsToMany {}
+

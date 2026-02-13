@@ -7,6 +7,7 @@ use Botble\Base\Facades\MacroableModels;
 use Botble\Base\Facades\PanelSectionManager;
 use Botble\Base\Models\BaseModel;
 use Botble\Base\PanelSections\PanelSectionItem;
+use Botble\Base\Supports\DashboardMenuItem;
 use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\DataSynchronize\PanelSections\ExportPanelSection;
@@ -53,7 +54,8 @@ class LocationServiceProvider extends ServiceProvider
         $this
             ->setNamespace('plugins/location')
             ->loadHelpers()
-            ->loadAndPublishConfigurations(['permissions', 'general'])
+            ->loadAndPublishConfigurations(['general'])
+            ->loadAndPublishConfigurations(['permissions'])
             ->loadAndPublishViews()
             ->loadMigrations()
             ->loadAndPublishTranslations()
@@ -75,53 +77,64 @@ class LocationServiceProvider extends ServiceProvider
             ]);
         }
 
-        DashboardMenu::default()->beforeRetrieving(function () {
+        DashboardMenu::default()->beforeRetrieving(function (): void {
             DashboardMenu::make()
-                ->registerItem([
-                    'id' => 'cms-plugins-location',
-                    'priority' => 900,
-                    'name' => 'plugins/location::location.name',
-                    'icon' => 'ti ti-world',
-                    'permissions' => ['country.index'],
-                ])
-                ->registerItem([
-                    'id' => 'cms-plugins-country',
-                    'priority' => 0,
-                    'parent_id' => 'cms-plugins-location',
-                    'name' => 'plugins/location::country.name',
-                    'route' => 'country.index',
-                ])
-                ->registerItem([
-                    'id' => 'cms-plugins-state',
-                    'priority' => 1,
-                    'parent_id' => 'cms-plugins-location',
-                    'name' => 'plugins/location::state.name',
-                    'route' => 'state.index',
-                ])
-                ->registerItem([
-                    'id' => 'cms-plugins-city',
-                    'priority' => 2,
-                    'parent_id' => 'cms-plugins-location',
-                    'name' => 'plugins/location::city.name',
-                    'route' => 'city.index',
-                ])
-                ->registerItem([
-                    'id' => 'cms-plugins-location-bulk-import',
-                    'priority' => 3,
-                    'parent_id' => 'cms-plugins-location',
-                    'name' => 'plugins/location::bulk-import.name',
-                    'route' => 'location.bulk-import.index',
-                ])
-                ->registerItem([
-                    'id' => 'cms-plugins-location-export',
-                    'priority' => 4,
-                    'parent_id' => 'cms-plugins-location',
-                    'name' => 'plugins/location::export.name',
-                    'route' => 'location.export.index',
-                ]);
+                ->registerItem(
+                    DashboardMenuItem::make()
+                        ->id('cms-plugins-location')
+                        ->priority(900)
+                        ->name('plugins/location::location.name')
+                        ->icon('ti ti-world')
+                        ->permissions(['country.index'])
+                )
+                ->registerItem(
+                    DashboardMenuItem::make()
+                        ->id('cms-plugins-country')
+                        ->priority(0)
+                        ->parentId('cms-plugins-location')
+                        ->name('plugins/location::country.name')
+                        ->icon('ti ti-flag')
+                        ->route('country.index')
+                )
+                ->registerItem(
+                    DashboardMenuItem::make()
+                        ->id('cms-plugins-state')
+                        ->priority(10)
+                        ->parentId('cms-plugins-location')
+                        ->name('plugins/location::state.name')
+                        ->icon('ti ti-map')
+                        ->route('state.index')
+                )
+                ->registerItem(
+                    DashboardMenuItem::make()
+                        ->id('cms-plugins-city')
+                        ->priority(20)
+                        ->parentId('cms-plugins-location')
+                        ->name('plugins/location::city.name')
+                        ->icon('ti ti-location-pin')
+                        ->route('city.index')
+                )
+                ->registerItem(
+                    DashboardMenuItem::make()
+                        ->id('cms-plugins-location-bulk-import')
+                        ->priority(30)
+                        ->parentId('cms-plugins-location')
+                        ->name('plugins/location::bulk-import.name')
+                        ->icon('ti ti-package-import')
+                        ->route('location.bulk-import.index')
+                )
+                ->registerItem(
+                    DashboardMenuItem::make()
+                        ->id('cms-plugins-location-export')
+                        ->priority(40)
+                        ->parentId('cms-plugins-location')
+                        ->name('plugins/location::export.name')
+                        ->icon('ti ti-package-export')
+                        ->route('location.export.index')
+                );
         });
 
-        PanelSectionManager::setGroupId('data-synchronize')->beforeRendering(function () {
+        PanelSectionManager::setGroupId('data-synchronize')->beforeRendering(function (): void {
             PanelSectionManager::default()
                 ->registerItem(
                     ExportPanelSection::class,
@@ -141,7 +154,7 @@ class LocationServiceProvider extends ServiceProvider
                 );
         });
 
-        $this->app->booted(function () {
+        $this->app->booted(function (): void {
             Blueprint::macro('location', function ($item = null, $keys = []) {
                 if ($item) {
                     if (class_exists($item) && Location::isSupported($item)) {

@@ -16,7 +16,7 @@ class HookServiceProvider extends ServiceProvider
     {
         add_filter(PAYMENT_FILTER_ADDITIONAL_PAYMENT_METHODS, [$this, 'registerPayPalMethod'], 2, 2);
 
-        $this->app->booted(function () {
+        $this->app->booted(function (): void {
             add_filter(PAYMENT_FILTER_AFTER_POST_CHECKOUT, [$this, 'checkoutWithPayPal'], 2, 2);
         });
 
@@ -62,7 +62,7 @@ class HookServiceProvider extends ServiceProvider
         add_filter(PAYMENT_FILTER_PAYMENT_INFO_DETAIL, function ($data, $payment) {
             if ($payment->payment_channel == PAYPAL_PAYMENT_METHOD_NAME) {
                 $paymentDetail = (new PayPalPaymentService())->getPaymentDetails($payment->charge_id);
-                $data = view('plugins/paypal::detail', ['payment' => $paymentDetail])->render();
+                $data .= view('plugins/paypal::detail', ['payment' => $paymentDetail])->render();
             }
 
             return $data;
@@ -97,7 +97,7 @@ class HookServiceProvider extends ServiceProvider
 
         $supportedCurrencies = $payPalService->supportedCurrencyCodes();
 
-        $currency = strtoupper($currentCurrency->title);
+        $currency = $currentCurrency->title;
 
         $notSupportCurrency = false;
 
@@ -106,8 +106,8 @@ class HookServiceProvider extends ServiceProvider
 
             if (! $currencyModel->query()->where('title', 'USD')->exists()) {
                 $data['error'] = true;
-                $data['message'] = __(
-                    ":name doesn't support :currency. List of currencies supported by :name: :currencies.",
+                $data['message'] = trans(
+                    'plugins/payment::payment.currency_not_supported',
                     [
                         'name' => 'PayPal',
                         'currency' => $currency,

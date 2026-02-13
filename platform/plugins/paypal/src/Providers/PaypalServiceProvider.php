@@ -19,6 +19,7 @@ class PayPalServiceProvider extends ServiceProvider
             ->loadHelpers()
             ->loadRoutes()
             ->loadAndPublishViews()
+            ->loadAndPublishTranslations()
             ->publishAssets();
 
         $this->app->register(HookServiceProvider::class);

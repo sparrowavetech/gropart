@@ -52,7 +52,7 @@ class HookServiceProvider extends ServiceProvider
                 $rates = Arr::get($results, 'shipment.rates') ?: [];
                 foreach ($rates as &$rate) {
                     $rate['disabled'] = true;
-                    $rate['error_message'] = __('Not available in COD payment option.');
+                    $rate['error_message'] = trans('plugins/shippo::shippo.not_available_cod');
                 }
 
                 Arr::set($results, 'shipment.rates', $rates);

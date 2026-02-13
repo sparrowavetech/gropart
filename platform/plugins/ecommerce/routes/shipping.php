@@ -3,13 +3,13 @@
 use Botble\Base\Facades\AdminHelper;
 use Illuminate\Support\Facades\Route;
 
-AdminHelper::registerRoutes(function () {
-    Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'prefix' => 'ecommerce'], function () {
+AdminHelper::registerRoutes(function (): void {
+    Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'prefix' => 'ecommerce'], function (): void {
         Route::group([
             'prefix' => 'shipping-methods',
-            'permission' => 'settings.index.shipping',
+            'permission' => 'ecommerce.settings.shipping',
             'as' => 'shipping_methods.',
-        ], function () {
+        ], function (): void {
             Route::post('region/create', [
                 'as' => 'region.create',
                 'uses' => 'ShippingMethodController@postCreateRegion',
@@ -35,7 +35,7 @@ AdminHelper::registerRoutes(function () {
                 'uses' => 'ShippingMethodController@postCreateRule',
             ]);
 
-            Route::group(['prefix' => 'settings', 'as' => 'settings.'], function () {
+            Route::group(['prefix' => 'settings', 'as' => 'settings.'], function (): void {
                 Route::post('update', [
                     'as' => 'update',
                     'uses' => 'ShippingMethodSettingController@update',
@@ -44,12 +44,12 @@ AdminHelper::registerRoutes(function () {
             });
         });
 
-        Route::group(['as' => 'ecommerce.'], function () {
+        Route::group(['as' => 'ecommerce.'], function (): void {
             Route::group([
                 'prefix' => 'shipping-rule-items',
                 'as' => 'shipping-rule-items.',
-                'permission' => 'settings.index.shipping',
-            ], function () {
+                'permission' => 'ecommerce.settings.shipping',
+            ], function (): void {
                 Route::resource('', 'ShippingRuleItemController')->parameters(['' => 'item']);
 
                 Route::get('items/{rule_id}', [
@@ -60,7 +60,7 @@ AdminHelper::registerRoutes(function () {
                 Route::group([
                     'as' => 'bulk-import.',
                     'prefix' => 'bulk-import',
-                ], function () {
+                ], function (): void {
                     Route::get('/', [
                         'as' => 'index',
                         'uses' => 'ShippingRuleItemController@import',

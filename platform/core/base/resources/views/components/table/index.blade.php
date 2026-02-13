@@ -5,7 +5,12 @@
 ])
 
 @php
-    $classes = Arr::toCssClasses(['table table-vcenter card-table', 'table-nowrap' => $nowrap, 'table-hover' => $hover, 'table-striped' => $striped]);
+    $classes = Arr::toCssClasses([
+        'table table-vcenter card-table',
+        'table-nowrap' => $nowrap,
+        'table-hover' => $hover,
+        'table-striped' => $striped,
+    ]);
 @endphp
 
 <table {{ $attributes->merge(['class' => $classes]) }}>

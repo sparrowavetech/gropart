@@ -4,6 +4,7 @@
     'dismissible' => false,
     'icon' => null,
     'important' => false,
+    'class' => null,
 ])
 
 @php
@@ -24,25 +25,28 @@
 
 <div
     role="alert"
-    {{ $attributes->class(['alert', $color, 'alert-dismissible' => $dismissible, 'alert-important' => $important]) }}
+    {{ $attributes->class(['alert', $color, $class, 'alert-dismissible' => $dismissible, 'alert-important' => $important]) }}
 >
     @if ($icon)
-        <div class="d-flex">
+        <div class="d-flex gap-1">
             <div>
-                <x-core::icon :name="$icon" class="alert-icon" />
+                <x-core::icon
+                    :name="$icon"
+                    class="alert-icon"
+                />
             </div>
             <div class="w-100">
     @endif
 
     @if ($title)
-        <h4 @class(['alert-title' => !$important, 'mb-0'])>{!! $title !!}</h4>
+        <h4 @class(['alert-title' => !$important, 'mb-0'])>{!! BaseHelper::clean($title) !!}</h4>
     @endif
 
     {{ $slot }}
 
     @if ($icon)
-        </div>
-    </div>
+</div>
+</div>
 @endif
 
 @if ($dismissible)

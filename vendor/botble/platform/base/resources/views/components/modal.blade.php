@@ -25,7 +25,10 @@
 
     $hasForm = $hasForm || $formAction;
 
-    $modalContentAttributes = [...$contentAttrs, 'class' => rtrim('modal-content' . ($contentClass ? ' ' . $contentClass : ''))];
+    $modalContentAttributes = [
+        ...$contentAttrs,
+        'class' => rtrim('modal-content' . ($contentClass ? ' ' . $contentClass : '')),
+    ];
 @endphp
 
 <div
@@ -50,52 +53,56 @@
                 <form
                     action="{{ $formAction }}"
                     method="{{ $formMethod }}"
-                    {!! Html::attributes($formAttrs) !!}>
+                    {!! Html::attributes($formAttrs) !!}
+                >
                     @csrf
-                    @endif
+            @endif
 
-                    @if ($title || $closeButton)
-                        <div class="modal-header">
-                            <h5 class="modal-title">{{ $title }}</h5>
-                            @if ($closeButton)
-                                <x-core::modal.close-button />
-                            @endif
-                        </div>
+            @if ($title || $closeButton)
+                <div class="modal-header">
+                    <h5 class="modal-title">{{ $title }}</h5>
+                    @if ($closeButton)
+                        <x-core::modal.close-button />
                     @endif
+                </div>
+            @endif
 
-                    @if($type)
-                        <div class="modal-status bg-{{ $type }}"></div>
-                    @endif
+            @if ($type)
+                <div class="modal-status bg-{{ $type }}"></div>
+            @endif
 
-                    @if ($slot->isNotEmpty())
-                        <div {!! Html::attributes(array_merge($bodyAttrs, ['class' => rtrim('modal-body ' . Arr::get($bodyAttrs, 'class'))])) !!}>
-                            {{ $slot }}
-                        </div>
-                    @else
-                        {{ $slot }}
-                    @endif
+            @if ($slot->isNotEmpty())
+                <div {!! Html::attributes(array_merge($bodyAttrs, ['class' => rtrim('modal-body ' . Arr::get($bodyAttrs, 'class'))])) !!}>
+                    {{ $slot }}
+                </div>
+            @else
+                {{ $slot }}
+            @endif
 
-                    @if (!empty($footer) && $footer->isNotEmpty())
-                        <div class="modal-footer">
-                            {{ $footer }}
-                        </div>
-                    @endif
+            @if (!empty($footer) && $footer->isNotEmpty())
+                <div class="modal-footer">
+                    {{ $footer }}
+                </div>
+            @endif
 
-                    @if($buttonId && $buttonLabel)
-                        <div class="modal-footer">
-                            <x-core::button type="button" data-bs-dismiss="modal">
-                                {{ trans('core/base::tables.cancel') }}
-                            </x-core::button>
-                            <x-core::button
-                                :id="$buttonId"
-                                @class(['ms-auto', $buttonClass => $buttonClass])
-                                :color="$type ?? 'primary'"
-                            >
-                                {{ $buttonLabel }}
-                            </x-core::button>
-                        </div>
-                    @endif
-                    @if ($hasForm)
+            @if ($buttonId && $buttonLabel)
+                <div class="modal-footer">
+                    <x-core::button
+                        type="button"
+                        data-bs-dismiss="modal"
+                    >
+                        {{ trans('core/base::tables.cancel') }}
+                    </x-core::button>
+                    <x-core::button
+                        :id="$buttonId"
+                        @class(['ms-auto', $buttonClass => $buttonClass])
+                        :color="$type ?? 'primary'"
+                    >
+                        {{ $buttonLabel }}
+                    </x-core::button>
+                </div>
+            @endif
+            @if ($hasForm)
                 </form>
             @endif
         </div>

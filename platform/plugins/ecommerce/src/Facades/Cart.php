@@ -31,7 +31,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static int rawQuantityByItemId($id)
  * @method static int rawTotalQuantity()
  * @method static \Illuminate\Support\Collection search(\Closure $search)
- * @method static void associate(string $rowId, \Botble\Base\Models\BaseModel $model)
+ * @method static void associate(string $rowId, \Botble\Base\Models\BaseModel|string $model)
  * @method static void setTax(string $rowId, float $taxRate)
  * @method static void store(string $identifier)
  * @method static mixed storeQuietly($identifier)

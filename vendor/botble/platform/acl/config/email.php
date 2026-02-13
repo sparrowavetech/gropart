@@ -5,12 +5,12 @@ return [
     'description' => 'core/acl::auth.settings.email.description',
     'templates' => [
         'password-reminder' => [
-            'title' => 'Reset password',
-            'description' => 'Send email to user when requesting reset password',
-            'subject' => 'Reset Password',
+            'title' => 'core/acl::auth.settings.email.templates.password_reminder.title',
+            'description' => 'core/acl::auth.settings.email.templates.password_reminder.description',
+            'subject' => 'core/acl::auth.settings.email.templates.password_reminder.subject',
             'can_off' => false,
             'variables' => [
-                'reset_link' => 'Reset password link',
+                'reset_link' => 'core/acl::auth.settings.email.templates.password_reminder.reset_link',
             ],
         ],
     ],

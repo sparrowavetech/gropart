@@ -1,14 +1,14 @@
 <?php
 
 namespace Botble\Marketplace\Tables;
-use Botble\Base\Facades\BaseHelper;
-use Botble\Base\Enums\BaseStatusEnum;
+
 use Botble\Base\Facades\Html;
+use Botble\Marketplace\Enums\StoreStatusEnum;
 use Botble\Marketplace\Models\Store;
 use Botble\Table\Abstracts\TableAbstract;
-use Botble\Table\Actions\Action;
 use Botble\Table\Actions\DeleteAction;
 use Botble\Table\Actions\EditAction;
+use Botble\Table\Actions\ViewAction;
 use Botble\Table\BulkActions\DeleteBulkAction;
 use Botble\Table\Columns\Column;
 use Botble\Table\Columns\CreatedAtColumn;
@@ -28,11 +28,9 @@ class StoreTable extends TableAbstract
         $this
             ->model(Store::class)
             ->addActions([
-                Action::make('view')
+                ViewAction::make()
                     ->route('marketplace.store.view')
-                    ->permission('marketplace.store.view')
-                    ->label(trans('plugins/marketplace::store.view'))
-                    ->icon('ti ti-eye'),
+                    ->permission('marketplace.store.view'),
                 EditAction::make()->route('marketplace.store.edit'),
                 DeleteAction::make()->route('marketplace.store.destroy'),
             ]);
@@ -42,21 +40,19 @@ class StoreTable extends TableAbstract
     {
         $data = $this->table
             ->eloquent($this->query())
+            ->editColumn('name', function ($item) {
+                $name = Html::link(route('marketplace.store.edit', $item->id), $item->name);
+                if ($item->is_verified) {
+                    $name .= ' ' . view('plugins/marketplace::partials.verified-badge', ['size' => 'sm'])->render();
+                }
+
+                return $name;
+            })
             ->editColumn('earnings', function ($item) {
                 return $item->customer->id ? format_price($item->customer->balance ?: 0) : '--';
             })
             ->editColumn('products_count', function ($item) {
                 return $item->products_count;
-            })
-            ->editColumn('shop_category', function ($item) {
-                return BaseHelper::clean($item->shop_category->toHtml());
-            })
-            ->editColumn('is_verified', function ($item) {
-                $lable = $item->is_verified == 1 ? trans('plugins/marketplace::store.verified') : trans('plugins/marketplace::store.un_verified');
-                $class = $item->is_verified == 1 ? 'success' : 'warning';
-                $class2 = $item->is_verified == 1 ? 'v-yes' : 'v-no';
-                return Html::tag('span',$lable , ['class' => $class2.' text-'.$class])
-                ->toHtml();
             })
             ->addColumn('customer_name', function ($item) {
                 if (! $item->customer->name) {
@@ -80,9 +76,8 @@ class StoreTable extends TableAbstract
                 'name',
                 'created_at',
                 'status',
-                'is_verified',
-                'shop_category',
                 'customer_id',
+                'is_verified',
             ])
             ->with(['customer', 'customer.vendorInfo'])
             ->withCount(['products']);
@@ -110,20 +105,6 @@ class StoreTable extends TableAbstract
             Column::make('customer_name')
                 ->title(trans('plugins/marketplace::marketplace.vendor'))
                 ->alignStart()
-                ->orderable(false)
-                ->searchable(false)
-                ->printable(false),
-            Column::make('shop_category')
-                ->title(trans('plugins/marketplace::store.forms.shop_category'))
-                ->alignStart()
-                ->width('100')
-                ->orderable(false)
-                ->searchable(false)
-                ->printable(false),
-            Column::make('is_verified')
-                ->title(trans('plugins/marketplace::store.forms.is_verified'))
-                ->alignStart()
-                ->width('100')
                 ->orderable(false)
                 ->searchable(false)
                 ->printable(false),
@@ -155,8 +136,17 @@ class StoreTable extends TableAbstract
             'status' => [
                 'title' => trans('core/base::tables.status'),
                 'type' => 'select',
-                'choices' => BaseStatusEnum::labels(),
-                'validate' => 'required|in:' . implode(',', BaseStatusEnum::values()),
+                'choices' => StoreStatusEnum::labels(),
+                'validate' => 'required|in:' . implode(',', StoreStatusEnum::values()),
+            ],
+            'is_verified' => [
+                'title' => trans('plugins/marketplace::store.forms.is_verified'),
+                'type' => 'select',
+                'choices' => [
+                    0 => trans('core/base::base.no'),
+                    1 => trans('core/base::base.yes'),
+                ],
+                'validate' => 'required|in:0,1',
             ],
             'created_at' => [
                 'title' => trans('core/base::tables.created_at'),

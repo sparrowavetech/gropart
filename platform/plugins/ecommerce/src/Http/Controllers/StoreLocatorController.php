@@ -42,22 +42,30 @@ class StoreLocatorController extends BaseController
         $locator->update($request->validated());
 
         if ($locator->is_primary) {
-            $prefix = EcommerceHelper::getSettingPrefix();
-
-            $settingStore
-                ->set([
-                    $prefix . 'store_phone' => $locator->phone,
-                    $prefix . 'store_address' => $locator->address,
-                    $prefix . 'store_country' => $locator->country,
-                    $prefix . 'store_state' => $locator->state,
-                    $prefix . 'store_city' => $locator->city,
-                ])
-                ->save();
+            $this->syncPrimaryStoreSettings($locator, $settingStore);
         }
 
         return $this
             ->httpResponse()
             ->withUpdatedSuccessMessage();
+    }
+
+    public function syncPrimaryStoreSettings(StoreLocator $locator, SettingStore $settingStore): void
+    {
+        $prefix = EcommerceHelper::getSettingPrefix();
+
+        $settingStore
+            ->set([
+                $prefix . 'store_name' => $locator->name,
+                $prefix . 'store_phone' => $locator->phone,
+                $prefix . 'store_email' => $locator->email,
+                $prefix . 'store_address' => $locator->address,
+                $prefix . 'store_country' => $locator->country,
+                $prefix . 'store_state' => $locator->state,
+                $prefix . 'store_city' => $locator->city,
+                $prefix . 'store_zip_code' => $locator->zip_code,
+            ])
+            ->save();
     }
 
     public function destroy(StoreLocator $locator)

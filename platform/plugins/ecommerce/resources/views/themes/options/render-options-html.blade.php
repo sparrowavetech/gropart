@@ -31,7 +31,7 @@
             @endforeach
         </span>
         @if ($price > 0)
-            <strong>+ {{ format_price($price) }}</strong>
+            <strong class="text-nowrap ps-2">+ {{ format_price($price) }}</strong>
         @endif
     </div>
 @endforeach

@@ -3,6 +3,7 @@
 namespace Botble\Mollie\Providers;
 
 use Botble\Base\Facades\Html;
+use Botble\Mollie\Forms\MolliePaymentMethodForm;
 use Botble\Mollie\Services\Gateways\MolliePaymentService;
 use Botble\Payment\Enums\PaymentMethodEnum;
 use Botble\Payment\Facades\PaymentMethods;
@@ -18,7 +19,7 @@ class HookServiceProvider extends ServiceProvider
     {
         add_filter(PAYMENT_FILTER_ADDITIONAL_PAYMENT_METHODS, [$this, 'registerMollieMethod'], 17, 2);
 
-        $this->app->booted(function () {
+        $this->app->booted(function (): void {
             add_filter(PAYMENT_FILTER_AFTER_POST_CHECKOUT, [$this, 'checkoutWithMollie'], 17, 2);
         });
 
@@ -65,9 +66,11 @@ class HookServiceProvider extends ServiceProvider
             if ($payment->payment_channel == MOLLIE_PAYMENT_METHOD_NAME) {
                 try {
                     $paymentService = (new MolliePaymentService());
+
                     $paymentDetail = $paymentService->getPaymentDetails($payment->charge_id);
+
                     if ($paymentDetail) {
-                        $data = view('plugins/mollie::detail', ['payment' => $paymentDetail])->render();
+                        $data .= view('plugins/mollie::detail', ['payment' => $paymentDetail])->render();
                     }
                 } catch (Exception) {
                     return $data;
@@ -80,7 +83,7 @@ class HookServiceProvider extends ServiceProvider
 
     public function addPaymentSettings(?string $settings): string
     {
-        return $settings . view('plugins/mollie::settings')->render();
+        return $settings . MolliePaymentMethodForm::create()->renderForm();
     }
 
     public function registerMollieMethod(?string $html, array $data): ?string
@@ -100,29 +103,30 @@ class HookServiceProvider extends ServiceProvider
 
         $paymentData = apply_filters(PAYMENT_FILTER_PAYMENT_DATA, [], $request);
 
-        $orderIds = $paymentData['order_id'];
-
-        $orderCodes = collect($orderIds)->map(function ($item) {
-            return get_order_code($item);
-        });
-
         try {
             $api = Mollie::api();
 
-            $response = $api->payments->create([
+            $requestData = [
                 'amount' => [
                     'currency' => $paymentData['currency'],
                     'value' => number_format((float) $paymentData['amount'], 2, '.', ''),
                 ],
-                'description' => 'Order(s) ' . $orderCodes->implode(', '),
-                'redirectUrl' => PaymentHelper::getRedirectURL(),
-                'webhookUrl' => route('mollie.payment.callback'),
+                'description' => $paymentData['description'],
+                'redirectUrl' => PaymentHelper::getRedirectURL($paymentData['checkout_token']),
+                'cancelUrl' => PaymentHelper::getCancelURL($paymentData['checkout_token']),
+                'webhookUrl' => route('mollie.payment.webhook', $paymentData['checkout_token']),
                 'metadata' => [
-                    'order_id' => $orderIds,
+                    'order_id' => $paymentData['order_id'],
                     'customer_id' => $paymentData['customer_id'],
                     'customer_type' => $paymentData['customer_type'],
                 ],
-            ]);
+            ];
+
+            do_action('payment_before_making_api_request', MOLLIE_PAYMENT_METHOD_NAME, $requestData);
+
+            $response = $api->payments->create($requestData);
+
+            do_action('payment_after_api_response', MOLLIE_PAYMENT_METHOD_NAME, $requestData, (array) $response);
 
             header('Location: ' . $response->getCheckoutUrl());
             exit;

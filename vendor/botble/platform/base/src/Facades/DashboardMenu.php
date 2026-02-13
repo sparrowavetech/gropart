@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static static default()
  * @method static static group(string $id, \Closure $callback)
  * @method static string getGroupId()
- * @method static static registerItem(array $options)
+ * @method static static registerItem(\Illuminate\Contracts\Support\Arrayable|array $options)
  * @method static static removeItem(array|string $id)
  * @method static bool hasItem(string $id)
  * @method static \Illuminate\Support\Collection getAll(string|null $id = null)

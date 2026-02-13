@@ -5,6 +5,7 @@
     "provider": "Botble\\Faq\\Providers\\FaqServiceProvider",
     "author": "Botble Technologies",
     "url": "https://botble.com",
-    "version": "2.0.2",
-    "description": "Frequently Asked Question(s) FAQ"
+    "version": "2.0.8",
+    "description": "Frequently Asked Question(s) FAQ",
+    "minimum_core_version": "7.3.0"
 }

@@ -3,6 +3,8 @@
 namespace Botble\Language\Providers;
 
 use Botble\Base\Supports\ServiceProvider;
+use Botble\Language\Commands\AddLanguageCommand;
+use Botble\Language\Commands\RemoveLanguageCommand;
 use Botble\Language\Commands\RouteCacheCommand;
 use Botble\Language\Commands\RouteClearCommand;
 use Botble\Language\Commands\RouteTranslationsListCommand;
@@ -19,6 +21,8 @@ class CommandServiceProvider extends ServiceProvider
 
         $this->commands([
             RouteTranslationsListCommand::class,
+            AddLanguageCommand::class,
+            RemoveLanguageCommand::class,
         ]);
 
         $this->app->extend(BaseRouteCacheCommand::class, function () {

@@ -1,3 +1,4 @@
+@php use Botble\Base\Facades\Assets; @endphp
 @props([
     'id' => null,
     'label' => null,
@@ -12,20 +13,22 @@
     $id = $id ?: $name . '_' . md5($name);
     $mode = $mode === 'html' ? 'htmlmixed' : $mode;
 
-    Assets::addStylesDirectly([
-            'vendor/core/core/base/libraries/codemirror/lib/codemirror.css',
-            'vendor/core/core/base/libraries/codemirror/addon/hint/show-hint.css'
-        ])
-        ->addScriptsDirectly([
-            'vendor/core/core/base/libraries/codemirror/lib/codemirror.js',
-            'vendor/core/core/base/libraries/codemirror/addon/hint/show-hint.js',
-            'vendor/core/core/base/libraries/codemirror/addon/hint/anyword-hint.js',
-            'vendor/core/core/base/libraries/codemirror/addon/display/autorefresh.js',
-        ]);
+    $css = [
+        'vendor/core/core/base/libraries/codemirror/lib/codemirror.css',
+        'vendor/core/core/base/libraries/codemirror/addon/hint/show-hint.css',
+    ];
+
+    $js = [
+        'vendor/core/core/base/libraries/codemirror/lib/codemirror.js',
+        'vendor/core/core/base/libraries/codemirror/addon/hint/show-hint.js',
+        'vendor/core/core/base/libraries/codemirror/addon/hint/anyword-hint.js',
+        'vendor/core/core/base/libraries/codemirror/addon/display/autorefresh.js',
+    ];
 
     switch ($mode) {
         case 'htmlmixed':
-            Assets::addScriptsDirectly([
+            $js = [
+                ...$js,
                 'vendor/core/core/base/libraries/codemirror/mode/htmlmixed.js',
                 'vendor/core/core/base/libraries/codemirror/mode/css.js',
                 'vendor/core/core/base/libraries/codemirror/mode/javascript.js',
@@ -34,23 +37,30 @@
                 'vendor/core/core/base/libraries/codemirror/addon/hint/html-hint.js',
                 'vendor/core/core/base/libraries/codemirror/addon/hint/css-hint.js',
                 'vendor/core/core/base/libraries/codemirror/addon/hint/javascript-hint.js',
-            ]);
+            ];
+
             break;
 
         case 'css':
-            Assets::addScriptsDirectly([
+            $js = [
+                ...$js,
                 'vendor/core/core/base/libraries/codemirror/mode/css.js',
                 'vendor/core/core/base/libraries/codemirror/addon/hint/css-hint.js',
-            ]);
+            ];
+
             break;
 
         case 'javascript':
-            Assets::addScriptsDirectly([
+            $js = [
+                ...$js,
                 'vendor/core/core/base/libraries/codemirror/mode/javascript.js',
                 'vendor/core/core/base/libraries/codemirror/addon/hint/javascript-hint.js',
-            ]);
+            ];
+
             break;
     }
+
+    Assets::addStylesDirectly($css)->addScriptsDirectly($js);
 @endphp
 
 <x-core::form-group>
@@ -71,3 +81,16 @@
 
     <x-core::form.error :key="$errorKey" />
 </x-core::form-group>
+
+@if (request()->ajax())
+    @foreach ($css as $cssItem)
+        <link
+            rel="stylesheet"
+            href="{{ asset($cssItem) }}"
+        >
+    @endforeach
+
+    @foreach ($js as $jsItem)
+        <script src="{{ asset($jsItem) }}"></script>
+    @endforeach
+@endif

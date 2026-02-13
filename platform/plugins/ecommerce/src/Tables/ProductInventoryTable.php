@@ -2,7 +2,11 @@
 
 namespace Botble\Ecommerce\Tables;
 
+use Botble\Ecommerce\Enums\StockStatusEnum;
 use Botble\Table\Columns\FormattedColumn;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Illuminate\Database\Eloquent\Relations\Relation as EloquentRelation;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 
 class ProductInventoryTable extends ProductBulkEditableTable
 {
@@ -20,6 +24,7 @@ class ProductInventoryTable extends ProductBulkEditableTable
                             'type' => 'storehouse_management',
                         ]);
                     })
+                    ->width(70)
                     ->nowrap()
                     ->orderable(false),
                 FormattedColumn::make('quantity')
@@ -43,8 +48,75 @@ class ProductInventoryTable extends ProductBulkEditableTable
             'ec_products.stock_status',
             'ec_products.quantity',
             'ec_products.with_storehouse_management',
+            'ec_products.allow_checkout_when_out_of_stock',
         ]);
-        $query->where('ec_products.is_enquiry',0);
+
         return $query;
+    }
+
+    public function getFilters(): array
+    {
+        return [
+            'stock_status' => [
+                'title' => trans('plugins/ecommerce::products.stock_status'),
+                'type' => 'select',
+                'choices' => StockStatusEnum::labels(),
+                'validate' => 'required|in:' . implode(',', StockStatusEnum::values()),
+            ],
+        ];
+    }
+
+    public function applyFilterCondition(
+        EloquentBuilder|QueryBuilder|EloquentRelation $query,
+        string $key,
+        string $operator,
+        ?string $value
+    ): EloquentRelation|EloquentBuilder|QueryBuilder {
+        if ($key === 'stock_status' && $value) {
+            if ($value == StockStatusEnum::ON_BACKORDER) {
+                return $query->where('ec_products.stock_status', StockStatusEnum::ON_BACKORDER);
+            }
+
+            if ($value == StockStatusEnum::OUT_OF_STOCK) {
+                return $query
+                    ->where(function ($query): void {
+                        $query
+                            ->where(function ($subQuery): void {
+                                $subQuery
+                                    ->where('ec_products.with_storehouse_management', 0)
+                                    ->where('ec_products.stock_status', StockStatusEnum::OUT_OF_STOCK);
+                            })
+                            ->orWhere(function ($subQuery): void {
+                                $subQuery
+                                    ->where('ec_products.with_storehouse_management', 1)
+                                    ->where('ec_products.allow_checkout_when_out_of_stock', 0)
+                                    ->where('ec_products.quantity', '<=', 0);
+                            });
+                    });
+            }
+
+            if ($value == StockStatusEnum::IN_STOCK) {
+                return $query
+                    ->where(function ($query) {
+                        return $query
+                            ->where(function ($subQuery): void {
+                                $subQuery
+                                    ->where('ec_products.with_storehouse_management', 0)
+                                    ->where('ec_products.stock_status', StockStatusEnum::IN_STOCK);
+                            })
+                            ->orWhere(function ($subQuery): void {
+                                $subQuery
+                                    ->where('ec_products.with_storehouse_management', 1)
+                                    ->where(function ($sub): void {
+                                        $sub
+                                            ->where('ec_products.allow_checkout_when_out_of_stock', 1)
+                                            ->orWhere('ec_products.quantity', '>', 0);
+                                    });
+                            });
+                    });
+            }
+        }
+
+        return parent::applyFilterCondition($query, $key, $operator, $value);
     }
 }

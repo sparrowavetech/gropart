@@ -329,13 +329,32 @@
 
     class TableManagement {
         constructor() {
-            this.currentTableHash = window.DATATABLES_RANDOM_HASH || ""
+            this.currentTableHash = window.DATATABLES_RANDOM_HASH || ''
             this.init()
             this.handleActionsRow()
             this.handleActionsExport()
+            this.handleDropdownOverflow()
+        }
+
+        handleDropdownOverflow() {
+            $(document).on('show.bs.dropdown', '.table-actions .dropdown', (event) => {
+                $(event.currentTarget).closest('.table-responsive').addClass('dropdown-visible')
+            })
+
+            $(document).on('hide.bs.dropdown', '.table-actions .dropdown', (event) => {
+                $(event.currentTarget).closest('.table-responsive').removeClass('dropdown-visible')
+            })
         }
 
         init() {
+            // Add error handling for DataTables AJAX requests
+            if ($.fn.dataTable) {
+                $.fn.dataTable.ext.errMode = 'none'
+                $(document).on('error.dt', (e, settings, techNote, message) => {
+                    Botble.handleDatatableError({ responseJSON: { message } })
+                })
+            }
+
             $(document).on('change', '.table-check-all', (event) => {
                 let _self = $(event.currentTarget)
                 let set = _self.attr('data-set')
@@ -407,14 +426,16 @@
         initRandomHash() {
             let localRandomHash = localStorage.getItem('DataTables_Random_Hash')
 
-            if (! localRandomHash && ! this.currentTableHash) {
-                return;
+            if (!localRandomHash && !this.currentTableHash) {
+                return
             }
 
             if (localRandomHash !== this.currentTableHash) {
-                Object.keys(localStorage).filter(key => key.startsWith('DataTables_')).forEach(key => {
-                    localStorage.removeItem(key)
-                })
+                Object.keys(localStorage)
+                    .filter((key) => key.startsWith('DataTables_'))
+                    .forEach((key) => {
+                        localStorage.removeItem(key)
+                    })
 
                 localStorage.setItem('DataTables_Random_Hash', this.currentTableHash)
 
@@ -605,6 +626,9 @@
 
                         _self.closest('.modal').modal('hide')
                     })
+                    .catch(() => {
+                        _self.closest('.modal').modal('hide')
+                    })
                     .finally(() => {
                         Botble.hideButtonLoading(_self)
                     })
@@ -678,8 +702,8 @@
 
                         typeof onSuccess === 'function' && onSuccess.apply(this, data)
                     })
-                    .catch((error) => {
-                        typeof onError === 'function' && onError.apply(this, error)
+                    .catch(() => {
+                        typeof onError === 'function' && onError.apply(this)
                     })
             }
 
@@ -803,7 +827,9 @@
                 _downloadFromUrl(url, params)
             })
 
-            const $columnsVisibleDropdowns = document.querySelectorAll('[data-bb-toggle="dt-columns-visibility-dropdown"]')
+            const $columnsVisibleDropdowns = document.querySelectorAll(
+                '[data-bb-toggle="dt-columns-visibility-dropdown"]'
+            )
 
             let $formDirty = {}
 
@@ -814,7 +840,7 @@
                         const tableId = target.attr('aria-controls')
                         const form = target.find('form[data-bb-toggle="dt-columns-visibility"]')
 
-                        if (! $formDirty[tableId]) {
+                        if (!$formDirty[tableId]) {
                             return
                         }
 

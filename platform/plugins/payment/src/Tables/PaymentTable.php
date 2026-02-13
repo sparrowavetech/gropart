@@ -9,6 +9,9 @@ use Botble\Table\Abstracts\TableAbstract;
 use Botble\Table\Actions\DeleteAction;
 use Botble\Table\Actions\EditAction;
 use Botble\Table\BulkActions\DeleteBulkAction;
+use Botble\Table\BulkChanges\CreatedAtBulkChange;
+use Botble\Table\BulkChanges\StatusBulkChange;
+use Botble\Table\BulkChanges\TextBulkChange;
 use Botble\Table\Columns\Column;
 use Botble\Table\Columns\CreatedAtColumn;
 use Botble\Table\Columns\IdColumn;
@@ -48,10 +51,10 @@ class PaymentTable extends TableAbstract
                     return $item->order->address->name;
                 }
 
-                return '&mdash;';
+                return apply_filters('payment_table_payer_name', '&mdash;', $item);
             })
             ->editColumn('payment_channel', function (Payment $item) {
-                return $item->payment_channel->label() ?: '&mdash;';
+                return $item->payment_channel->displayName() ?: '&mdash;';
             })
             ->editColumn('amount', function (Payment $item) {
                 return $item->amount . ' ' . $item->currency;
@@ -116,21 +119,12 @@ class PaymentTable extends TableAbstract
     public function getBulkChanges(): array
     {
         return [
-            'status' => [
-                'title' => trans('core/base::tables.status'),
-                'type' => 'customSelect',
-                'choices' => PaymentStatusEnum::labels(),
-                'validate' => 'required|in:' . implode(',', PaymentStatusEnum::values()),
-            ],
-            'charge_id' => [
-                'title' => trans('plugins/payment::payment.charge_id'),
-                'type' => 'text',
-                'validate' => 'required|max:120',
-            ],
-            'created_at' => [
-                'title' => trans('core/base::tables.created_at'),
-                'type' => 'datePicker',
-            ],
+            StatusBulkChange::make()->choices(PaymentStatusEnum::labels()),
+            TextBulkChange::make()
+                ->name('charge_id')
+                ->title(trans('plugins/payment::payment.charge_id'))
+                ->validate('required|max:120'),
+            CreatedAtBulkChange::make(),
         ];
     }
 

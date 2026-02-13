@@ -31,7 +31,6 @@ use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Relations\Relation as EloquentRelation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\Rule;
 
 class UserTable extends TableAbstract
 {
@@ -42,13 +41,15 @@ class UserTable extends TableAbstract
 
         $this
             ->model(User::class)
-            ->displayActionsAsDropdown(false)
             ->addColumns([
                 LinkableColumn::make('username')
                     ->urlUsing(fn (LinkableColumn $column) => $column->getItem()->url)
                     ->title(trans('core/acl::users.username'))
                     ->alignStart(),
                 EmailColumn::make()->linkable(),
+                FormattedColumn::make('phone')
+                    ->title(trans('core/acl::users.phone'))
+                    ->alignStart(),
                 FormattedColumn::make('role_name')
                     ->title(trans('core/acl::users.role'))
                     ->searchable(false)
@@ -82,17 +83,19 @@ class UserTable extends TableAbstract
                     ->width(100),
             ])
             ->addHeaderAction(CreateHeaderAction::make()->route('users.create'))
-            ->when(Auth::guard()->user()->isSuperUser(), function () {
+            ->when(Auth::guard()->user()->isSuperUser(), function (): void {
                 $this->addActions([
                     Action::make('make-super')
                         ->route('users.make-super')
+                        ->icon('ti ti-shield-check')
                         ->color('success')
                         ->label(trans('core/acl::users.make_super'))
                         ->renderUsing(fn (Action $action) => $action->getItem()->isSuperUser() ? '' : null),
                     Action::make('remove-super')
                         ->route('users.remove-super')
-                        ->label(trans('core/acl::users.remove_super'))
+                        ->icon('ti ti-shield-x')
                         ->color('warning')
+                        ->label(trans('core/acl::users.remove_super'))
                         ->renderUsing(fn (Action $action) => ! $action->getItem()->isSuperUser() ? '' : null),
                 ]);
             })
@@ -108,19 +111,15 @@ class UserTable extends TableAbstract
             ->addBulkActions([
                 DeleteBulkAction::make()
                     ->permission('users.destroy')
-                    ->beforeDispatch(function (User $user, array $ids) {
+                    ->beforeDispatch(function (User $user, array $ids): void {
                         foreach ($ids as $id) {
-                            if (Auth::guard()->id() == $id) {
-                                abort(403, trans('core/acl::users.delete_user_logged_in'));
-                            }
+                            abort_if(Auth::guard()->id() == $id, 403, trans('core/acl::users.delete_user_logged_in'));
 
                             /**
                              * @var User $user
                              */
                             $user = User::query()->findOrFail($id);
-                            if (! Auth::guard()->user()->isSuperUser() && $user->isSuperUser()) {
-                                abort(403, trans('core/acl::users.cannot_delete_super_user'));
-                            }
+                            abort_if(! Auth::guard()->user()->isSuperUser() && $user->isSuperUser(), 403, trans('core/acl::users.cannot_delete_super_user'));
                         }
                     }),
             ])
@@ -129,9 +128,7 @@ class UserTable extends TableAbstract
                     ->name('username')
                     ->title(trans('core/acl::users.username')),
                 EmailBulkChange::make(),
-                StatusBulkChange::make()
-                    ->choices(UserStatusEnum::labels())
-                    ->validate(['required', Rule::in(UserStatusEnum::values())]),
+                StatusBulkChange::make()->choices(UserStatusEnum::labels()),
                 CreatedAtBulkChange::make(),
             ])
             ->queryUsing(function (Builder $query) {
@@ -140,6 +137,7 @@ class UserTable extends TableAbstract
                         'id',
                         'username',
                         'email',
+                        'phone',
                         'updated_at',
                         'created_at',
                         'super_user',

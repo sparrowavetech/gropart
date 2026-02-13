@@ -27,7 +27,6 @@ class ShortcodeContactAdminConfigForm extends ShortcodeForm
                     ->label(trans('plugins/contact::contact.display_fields'))
                     ->choices($fields)
                     ->defaultValue(array_keys($fields))
-                    ->toArray()
             )
             ->add(
                 'mandatory_fields',
@@ -37,7 +36,6 @@ class ShortcodeContactAdminConfigForm extends ShortcodeForm
                     ->helperText(trans('plugins/contact::contact.mandatory_fields_helper_text'))
                     ->choices($fields)
                     ->defaultValue(['email'])
-                    ->toArray()
             );
     }
 }

@@ -6,6 +6,7 @@ use Botble\Ecommerce\Enums\DiscountTypeOptionEnum;
 use Botble\Ecommerce\Facades\Discount as DiscountFacade;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Facades\FlashSale as FlashSaleFacade;
+use Botble\Ecommerce\Models\Currency;
 use Botble\Ecommerce\Services\Products\ProductPriceService;
 use Botble\Ecommerce\ValueObjects\ProductPrice;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -49,19 +50,21 @@ trait ProductPrices
             return $flashSale->pivot->price;
         }
 
-        return $this->price;
+        return $this->getConvertedPrice();
     }
 
     public function getDiscountPrice(): float|int|null
     {
+        $productIds = array_unique([$this->getKey(), $this->original_product->id]);
+
         $promotion = DiscountFacade::getFacadeRoot()
-            ->promotionForProduct([$this->id, $this->original_product->id]);
+            ->promotionForProduct($productIds);
 
         if (! $promotion) {
-            return $this->price;
+            return $this->getConvertedPrice();
         }
 
-        $price = $this->price;
+        $price = $this->getConvertedPrice();
         switch ($promotion->type_option) {
             case DiscountTypeOptionEnum::SAME_PRICE:
                 $price = $promotion->value;
@@ -89,6 +92,10 @@ trait ProductPrices
     protected function frontSalePriceWithTaxes(): Attribute
     {
         return Attribute::get(function (): ?float {
+            if ($this->price_includes_tax) {
+                return $this->front_sale_price;
+            }
+
             if (! EcommerceHelper::isDisplayProductIncludingTaxes()) {
                 return $this->front_sale_price;
             }
@@ -100,11 +107,17 @@ trait ProductPrices
     protected function priceWithTaxes(): Attribute
     {
         return Attribute::get(function (): ?float {
-            if (! EcommerceHelper::isDisplayProductIncludingTaxes()) {
-                return $this->price;
+            $convertedPrice = $this->getConvertedPrice();
+
+            if ($this->price_includes_tax) {
+                return $convertedPrice;
             }
 
-            return $this->price + $this->price * ($this->total_taxes_percentage / 100);
+            if (! EcommerceHelper::isDisplayProductIncludingTaxes()) {
+                return $convertedPrice;
+            }
+
+            return $convertedPrice + $convertedPrice * ($this->total_taxes_percentage / 100);
         });
     }
 
@@ -112,9 +125,10 @@ trait ProductPrices
     {
         return Attribute::get(function () {
             $price = format_price($this->front_sale_price);
+            $convertedPrice = $this->getConvertedPrice();
 
-            if ($this->front_sale_price != $this->price) {
-                $price .= sprintf(' <del class="text-danger">%s</del>', format_price($this->price));
+            if ($this->front_sale_price != $convertedPrice) {
+                $price .= sprintf(' <del class="text-danger">%s</del>', format_price($convertedPrice));
             }
 
             return $price;
@@ -124,21 +138,23 @@ trait ProductPrices
     protected function salePercent(): Attribute
     {
         return Attribute::get(function (): int {
-            if ($this->front_sale_price == 0 && $this->price !== 0) {
+            $convertedPrice = $this->getConvertedPrice();
+
+            if ($this->front_sale_price == 0 && $convertedPrice !== 0) {
                 return 100;
             }
 
-            if (! $this->front_sale_price || ! $this->price) {
+            if (! $this->front_sale_price || ! $convertedPrice) {
                 return 0;
             }
 
-            return (int) round(($this->price - $this->front_sale_price) / $this->price * 100);
+            return (int) round(($convertedPrice - $this->front_sale_price) / $convertedPrice * 100);
         });
     }
 
     public function isOnSale(): bool
     {
-        return $this->front_sale_price !== $this->price;
+        return $this->front_sale_price !== $this->getConvertedPrice();
     }
 
     public function getOriginalPrice(): float
@@ -163,5 +179,109 @@ trait ProductPrices
         $this->finalPrice = (float) $price;
 
         return $this;
+    }
+
+    /**
+     * Convert price from product's currency to default currency.
+     */
+    protected function convertToDefaultCurrency(?float $price): ?float
+    {
+        if ($price === null || $price == 0) {
+            return $price;
+        }
+
+        $sourceCurrency = $this->getSourceCurrency();
+
+        if (! $sourceCurrency || $sourceCurrency->is_default) {
+            return $price;
+        }
+
+        if ($sourceCurrency->exchange_rate <= 0) {
+            return $price;
+        }
+
+        return $price / $sourceCurrency->exchange_rate;
+    }
+
+    /**
+     * Get product's source currency (variations inherit from parent).
+     */
+    public function getSourceCurrency(): ?Currency
+    {
+        if ($this->is_variation && $this->original_product && $this->original_product->getKey() !== $this->getKey()) {
+            return $this->original_product->getSourceCurrency();
+        }
+
+        if (! $this->currency_code) {
+            return null;
+        }
+
+        static $currencyCache = [];
+
+        if (! isset($currencyCache[$this->currency_code])) {
+            $currencyCache[$this->currency_code] = Currency::query()
+                ->where('title', $this->currency_code)
+                ->first();
+        }
+
+        return $currencyCache[$this->currency_code];
+    }
+
+    /**
+     * Get converted price (in default currency) for display.
+     */
+    public function getConvertedPrice(): float
+    {
+        return $this->convertToDefaultCurrency($this->getRawPrice()) ?? 0;
+    }
+
+    /**
+     * Get converted sale price (in default currency) for display.
+     */
+    public function getConvertedSalePrice(): ?float
+    {
+        return $this->convertToDefaultCurrency($this->getRawSalePrice());
+    }
+
+    /**
+     * Get raw price without conversion (for form display).
+     */
+    public function getRawPrice(): float
+    {
+        return (float) ($this->attributes['price'] ?? 0);
+    }
+
+    /**
+     * Get raw sale price without conversion (for form display).
+     */
+    public function getRawSalePrice(): ?float
+    {
+        return $this->attributes['sale_price'] ?? null;
+    }
+
+    /**
+     * Get raw cost per item without conversion (for form display).
+     */
+    public function getRawCostPerItem(): ?float
+    {
+        return $this->attributes['cost_per_item'] ?? null;
+    }
+
+    /**
+     * Get display price (converted to default currency).
+     * Use this in views instead of $product->price for proper currency conversion.
+     */
+    protected function displayPrice(): Attribute
+    {
+        return Attribute::get(fn () => $this->getConvertedPrice());
+    }
+
+    /**
+     * Get display sale price (converted to default currency).
+     * Use this in views instead of $product->sale_price for proper currency conversion.
+     */
+    protected function displaySalePrice(): Attribute
+    {
+        return Attribute::get(fn () => $this->getConvertedSalePrice());
     }
 }

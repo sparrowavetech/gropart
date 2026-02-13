@@ -1,9 +1,8 @@
 <?php
 
 use Botble\Theme\Events\RenderingThemeOptionSettings;
-use Carbon\Carbon;
 
-app('events')->listen(RenderingThemeOptionSettings::class, function () {
+app('events')->listen(RenderingThemeOptionSettings::class, function (): void {
     theme_option()
         ->setField([
             'id' => 'sticky_header_enabled',
@@ -119,22 +118,6 @@ app('events')->listen(RenderingThemeOptionSettings::class, function () {
             ],
         ])
         ->setField([
-            'id' => 'copyright',
-            'section_id' => 'opt-text-subsection-general',
-            'type' => 'text',
-            'label' => __('Copyright'),
-            'attributes' => [
-                'name' => 'copyright',
-                'value' => __('© :year Your Company. All right reserved.', ['year' => Carbon::now()->format('Y')]),
-                'options' => [
-                    'class' => 'form-control',
-                    'placeholder' => __('Change copyright'),
-                    'data-counter' => 250,
-                ],
-            ],
-            'helper' => __('Copyright on footer of site'),
-        ])
-        ->setField([
             'id' => 'hotline',
             'section_id' => 'opt-text-subsection-general',
             'type' => 'text',
@@ -169,16 +152,6 @@ app('events')->listen(RenderingThemeOptionSettings::class, function () {
             'id' => 'opt-text-subsection-style',
             'subsection' => true,
             'icon' => 'ti ti-brush',
-        ])
-        ->setField([
-            'id' => 'primary_font',
-            'section_id' => 'opt-text-subsection-style',
-            'type' => 'googleFonts',
-            'label' => __('Primary font'),
-            'attributes' => [
-                'name' => 'primary_font',
-                'value' => 'Muli',
-            ],
         ])
         ->setField([
             'id' => 'primary_color',
@@ -301,6 +274,26 @@ app('events')->listen(RenderingThemeOptionSettings::class, function () {
             ],
         ])
         ->setField([
+            'id' => 'header_mobile_background_color',
+            'section_id' => 'opt-text-subsection-style',
+            'type' => 'customColor',
+            'label' => __('Header mobile background color'),
+            'attributes' => [
+                'name' => 'header_mobile_background_color',
+                'value' => '#fff',
+            ],
+        ])
+        ->setField([
+            'id' => 'header_mobile_icon_color',
+            'section_id' => 'opt-text-subsection-style',
+            'type' => 'customColor',
+            'label' => __('Header mobile icon color'),
+            'attributes' => [
+                'name' => 'header_mobile_icon_color',
+                'value' => '#222',
+            ],
+        ])
+        ->setField([
             'id' => 'footer_text_color',
             'section_id' => 'opt-text-subsection-style',
             'type' => 'customColor',
@@ -341,55 +334,48 @@ app('events')->listen(RenderingThemeOptionSettings::class, function () {
             ],
         ])
         ->setSection([
+            'title' => __('Bottom Bar Menu'),
+            'id' => 'opt-text-subsection-bottom-bar-menu',
+            'subsection' => true,
+            'icon' => 'ti ti-category-2',
+        ])
+        ->setField([
+            'id' => 'bottom_bar_menu_show_text',
+            'section_id' => 'opt-text-subsection-bottom-bar-menu',
+            'type' => 'customSelect',
+            'label' => __('Show menu text'),
+            'attributes' => [
+                'name' => 'bottom_bar_menu_show_text',
+                'list' => [
+                    'yes' => trans('core/base::base.yes'),
+                    'no' => trans('core/base::base.no'),
+                ],
+                'value' => 'yes',
+                'options' => [
+                    'class' => 'form-control',
+                ],
+            ],
+        ])
+        ->setField([
+            'id' => 'bottom_bar_menu_text_font_size',
+            'section_id' => 'opt-text-subsection-bottom-bar-menu',
+            'type' => 'number',
+            'label' => __('Menu text font size (px)'),
+            'attributes' => [
+                'name' => 'bottom_bar_menu_text_font_size',
+                'value' => 11,
+                'options' => [
+                    'class' => 'form-control',
+                    'min' => 8,
+                    'max' => 20,
+                ],
+            ],
+        ])
+        ->setSection([
             'title' => __('Social links'),
             'id' => 'opt-text-subsection-social-links',
             'subsection' => true,
             'icon' => 'ti ti-share',
-        ])
-        ->setField([
-            'id' => 'social_links',
-            'section_id' => 'opt-text-subsection-social-links',
-            'type' => 'repeater',
-            'label' => __('Social links'),
-            'attributes' => [
-                'name' => 'social_links',
-                'value' => null,
-                'fields' => [
-                    [
-                        'type' => 'text',
-                        'label' => __('Name'),
-                        'attributes' => [
-                            'name' => 'social-name',
-                            'value' => null,
-                            'options' => [
-                                'class' => 'form-control',
-                            ],
-                        ],
-                    ],
-                    [
-                        'type' => 'mediaImage',
-                        'label' => __('Icon Image'),
-                        'attributes' => [
-                            'name' => 'social-icon',
-                            'value' => null,
-                            'options' => [
-                                'class' => 'form-control',
-                            ],
-                        ],
-                    ],
-                    [
-                        'type' => 'text',
-                        'label' => __('URL'),
-                        'attributes' => [
-                            'name' => 'social-url',
-                            'value' => null,
-                            'options' => [
-                                'class' => 'form-control',
-                            ],
-                        ],
-                    ],
-                ],
-            ],
         ])
         ->setField([
             'id' => '404_page_image',
@@ -433,6 +419,152 @@ app('events')->listen(RenderingThemeOptionSettings::class, function () {
             ],
         ])
         ->setField([
+            'id' => 'default_vendor_cover_image',
+            'section_id' => 'opt-text-subsection-marketplace',
+            'type' => 'mediaImage',
+            'label' => __('Default vendor cover image'),
+            'attributes' => [
+                'name' => 'default_vendor_cover_image',
+                'value' => null,
+            ],
+            'helper' => __('This image will be used as the default cover image for vendor pages when vendors have not set their own cover image.'),
+        ])
+        ->setField([
+            'id' => 'product_page_vendor_info_enabled',
+            'section_id' => 'opt-text-subsection-marketplace',
+            'type' => 'customSelect',
+            'label' => __('Show vendor contact info on product page?'),
+            'attributes' => [
+                'name' => 'product_page_vendor_info_enabled',
+                'list' => [
+                    'no' => trans('core/base::base.no'),
+                    'yes' => trans('core/base::base.yes'),
+                ],
+                'value' => 'no',
+                'options' => [
+                    'class' => 'form-control',
+                ],
+            ],
+            'helper' => __('Display vendor contact information box in the product detail page sidebar.'),
+        ])
+        ->setField([
+            'id' => 'product_page_vendor_info_title',
+            'section_id' => 'opt-text-subsection-marketplace',
+            'type' => 'text',
+            'label' => __('Vendor info box title'),
+            'attributes' => [
+                'name' => 'product_page_vendor_info_title',
+                'value' => 'Contact Seller',
+                'options' => [
+                    'class' => 'form-control',
+                    'placeholder' => __('E.g., Contact Seller'),
+                    'data-counter' => 120,
+                ],
+            ],
+        ])
+        ->setField([
+            'id' => 'product_page_vendor_info_subtitle',
+            'section_id' => 'opt-text-subsection-marketplace',
+            'type' => 'text',
+            'label' => __('Vendor info box subtitle'),
+            'attributes' => [
+                'name' => 'product_page_vendor_info_subtitle',
+                'value' => null,
+                'options' => [
+                    'class' => 'form-control',
+                    'placeholder' => __('E.g., Mon - Fri: 07AM - 06PM'),
+                    'data-counter' => 255,
+                ],
+            ],
+        ])
+        ->setField([
+            'id' => 'product_page_vendor_info_show_phone',
+            'section_id' => 'opt-text-subsection-marketplace',
+            'type' => 'customSelect',
+            'label' => __('Show vendor phone number?'),
+            'attributes' => [
+                'name' => 'product_page_vendor_info_show_phone',
+                'list' => [
+                    'yes' => trans('core/base::base.yes'),
+                    'no' => trans('core/base::base.no'),
+                ],
+                'value' => 'yes',
+                'options' => [
+                    'class' => 'form-control',
+                ],
+            ],
+        ])
+        ->setField([
+            'id' => 'product_page_vendor_info_show_email',
+            'section_id' => 'opt-text-subsection-marketplace',
+            'type' => 'customSelect',
+            'label' => __('Show vendor email?'),
+            'attributes' => [
+                'name' => 'product_page_vendor_info_show_email',
+                'list' => [
+                    'yes' => trans('core/base::base.yes'),
+                    'no' => trans('core/base::base.no'),
+                ],
+                'value' => 'yes',
+                'options' => [
+                    'class' => 'form-control',
+                ],
+            ],
+        ])
+        ->setField([
+            'id' => 'product_page_vendor_info_show_whatsapp',
+            'section_id' => 'opt-text-subsection-marketplace',
+            'type' => 'customSelect',
+            'label' => __('Show vendor WhatsApp?'),
+            'attributes' => [
+                'name' => 'product_page_vendor_info_show_whatsapp',
+                'list' => [
+                    'yes' => trans('core/base::base.yes'),
+                    'no' => trans('core/base::base.no'),
+                ],
+                'value' => 'yes',
+                'options' => [
+                    'class' => 'form-control',
+                ],
+            ],
+            'helper' => __('WhatsApp link is retrieved from vendor social links settings.'),
+        ])
+        ->setField([
+            'id' => 'product_page_vendor_info_show_address',
+            'section_id' => 'opt-text-subsection-marketplace',
+            'type' => 'customSelect',
+            'label' => __('Show vendor address?'),
+            'attributes' => [
+                'name' => 'product_page_vendor_info_show_address',
+                'list' => [
+                    'yes' => trans('core/base::base.yes'),
+                    'no' => trans('core/base::base.no'),
+                ],
+                'value' => 'no',
+                'options' => [
+                    'class' => 'form-control',
+                ],
+            ],
+        ])
+        ->setField([
+            'id' => 'product_page_vendor_info_position',
+            'section_id' => 'opt-text-subsection-marketplace',
+            'type' => 'customSelect',
+            'label' => __('Vendor info box position'),
+            'attributes' => [
+                'name' => 'product_page_vendor_info_position',
+                'list' => [
+                    'before' => __('Before other widgets'),
+                    'after' => __('After other widgets'),
+                ],
+                'value' => 'before',
+                'options' => [
+                    'class' => 'form-control',
+                ],
+            ],
+            'helper' => __('Choose whether to display the vendor info box before or after other sidebar widgets.'),
+        ])
+        ->setField([
             'id' => 'payment_methods_image',
             'section_id' => 'opt-text-subsection-general',
             'type' => 'mediaImage',
@@ -461,20 +593,6 @@ app('events')->listen(RenderingThemeOptionSettings::class, function () {
             ],
         ])
         ->setField([
-            'id' => 'top_upper_header_text',
-            'section_id' => 'opt-text-subsection-general',
-            'type' => 'text',
-            'label' => __('Top Header CTA Text'),
-            'attributes' => [
-                'name' => 'top_upper_header_text',
-                'value' => null,
-                'options' => [
-                    'class' => 'form-control',
-                    'placeholder' => 'Enter any Text line to add in top header',
-                ],
-            ],
-        ])
-        ->setField([
             'id' => 'enabled_product_categories_on_header',
             'section_id' => 'opt-text-subsection-ecommerce',
             'type' => 'customSelect',
@@ -492,37 +610,19 @@ app('events')->listen(RenderingThemeOptionSettings::class, function () {
             ],
         ])
         ->setField([
-            'id' => 'enabled_product_categories_sidebar_on_header',
+            'id' => 'hidden_product_categories_in_dropdown',
             'section_id' => 'opt-text-subsection-ecommerce',
-            'type' => 'customSelect',
-            'label' => __('Enable categories with sidebar on header?'),
+            'type' => 'text',
+            'label' => __('Hidden product categories in dropdown menu'),
             'attributes' => [
-                'name' => 'enabled_product_categories_sidebar_on_header',
-                'list' => [
-                    'yes' => trans('core/base::base.yes'),
-                    'no' => trans('core/base::base.no'),
-                ],
-                'value' => 'yes',
+                'name' => 'hidden_product_categories_in_dropdown',
+                'value' => null,
                 'options' => [
                     'class' => 'form-control',
+                    'placeholder' => __('E.g., 1,2,3'),
                 ],
             ],
-        ])
-        ->setField([
-            'id' => 'logo_height',
-            'section_id' => 'opt-text-subsection-logo',
-            'type' => 'number',
-            'label' => __('Logo height (px)'),
-            'attributes' => [
-                'name' => 'logo_height',
-                'value' => 45,
-                'options' => [
-                    'class' => 'form-control',
-                    'min' => 0,
-                    'max' => 150,
-                ],
-            ],
-            'helper' => __('Set the height of the logo in pixels. The default value is 45px.'),
+            'helper' => __('Enter product category IDs to hide from the header dropdown menu, separated by commas (e.g., 1,2,3). After saving, go to Platform Administration → Cache Management to clear cache for changes to take effect.'),
         ])
         ->setField([
             'id' => 'blog_show_author_name',

@@ -55,13 +55,13 @@
                     <td>
                         @if ($currentRelatedProduct)
                             {{ format_price($currentRelatedProduct->front_sale_price) }}
-                            @if ($currentRelatedProduct->front_sale_price != $currentRelatedProduct->price)
-                                <del class="text-danger">{{ format_price($currentRelatedProduct->price) }}</del>
+                            @if ($currentRelatedProduct->front_sale_price != $currentRelatedProduct->display_price)
+                                <del class="text-danger">{{ format_price($currentRelatedProduct->display_price) }}</del>
                             @endif
                         @else
                             {{ format_price($product->front_sale_price) }}
-                            @if ($product->front_sale_price != $product->price)
-                                <del class="text-danger">{{ format_price($product->price) }}</del>
+                            @if ($product->front_sale_price != $product->display_price)
+                                <del class="text-danger">{{ format_price($product->display_price) }}</del>
                             @endif
                         @endif
                     </td>

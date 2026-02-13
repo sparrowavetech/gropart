@@ -41,9 +41,12 @@ class HookServiceProvider extends ServiceProvider
                                 ->wherePublished()
                                 ->pluck('name', 'key')
                                 ->all())
-                            ->toArray()
-                    );
+                    )
+                    ->withCaching(false);
             });
+
+            shortcode()->ignoreLazyLoading(['simple-slider']);
+            shortcode()->ignoreCaches(['simple-slider']);
         }
     }
 
@@ -54,7 +57,7 @@ class HookServiceProvider extends ServiceProvider
             ->where('key', $shortcode->key)
             ->first();
 
-        if (empty($slider) || $slider->sliderItems->isEmpty()) {
+        if (empty($slider) || $slider->publishedSliderItems->isEmpty()) {
             return null;
         }
 
@@ -84,7 +87,7 @@ class HookServiceProvider extends ServiceProvider
         }
 
         return view(apply_filters(SIMPLE_SLIDER_VIEW_TEMPLATE, 'plugins/simple-slider::sliders'), [
-            'sliders' => $slider->sliderItems,
+            'sliders' => $slider->publishedSliderItems,
             'shortcode' => $shortcode,
             'slider' => $slider,
         ]);

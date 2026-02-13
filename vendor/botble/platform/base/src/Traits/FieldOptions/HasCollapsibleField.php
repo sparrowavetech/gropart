@@ -17,7 +17,9 @@ trait HasCollapsibleField
             Arr::get($this->getWrapperAttributes(), 'style'),
         ];
 
-        if ($value != $currentValue) {
+        $shouldDisplay = is_array($value) ? in_array($currentValue, $value) : $value == $currentValue;
+
+        if (! $shouldDisplay) {
             $styles[] = 'display: none';
         }
 
@@ -26,7 +28,7 @@ trait HasCollapsibleField
         $this->wrapperAttributes([
             'data-bb-collapse' => 'true',
             'data-bb-trigger' => Str::startsWith($target, ['.', '#']) ? $target : "[name=$target]",
-            'data-bb-value' => $value,
+            'data-bb-value' => is_array($value) ? json_encode($value) : $value,
             'style' => $styles ? implode(';', $styles) : '',
         ]);
 
@@ -36,7 +38,7 @@ trait HasCollapsibleField
     /**
      * @deprecated Use collapsible() instead.
      */
-    public function collapseTrigger(string $trigger, array|string|int $value, bool $isShow = true): static
+    public function collapseTrigger(string $trigger, array|bool|string|int $value, bool $isShow = true): static
     {
         $this->collapsible($trigger, $value, $isShow ? $value : null);
 

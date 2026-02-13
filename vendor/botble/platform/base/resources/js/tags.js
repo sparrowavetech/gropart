@@ -1,9 +1,12 @@
 class TagsManager {
     init() {
-
         $(document)
             .find('.tags')
             .each(function (index, element) {
+                if ($(element).hasClass('tagify')) {
+                    return
+                }
+
                 let tagify = new Tagify(element, {
                     keepInvalidTags:
                         $(element).data('keep-invalid-tags') !== undefined
@@ -14,7 +17,7 @@ class TagsManager {
                             ? $(element).data('enforce-whitelist')
                             : false,
                     delimiters: $(element).data('delimiters') !== undefined ? $(element).data('delimiters') : ',',
-                    whitelist: element.value.trim().split(/\s*,\s*/),
+                    whitelist: element.value ? element.value.trim().split(/\s*,\s*/) : [],
                     userInput: $(element).data('user-input') !== undefined ? $(element).data('user-input') : true,
                 })
 
@@ -26,7 +29,7 @@ class TagsManager {
                         $httpClient
                             .make()
                             .get($(element).data('url'))
-                            .then(({data}) => {
+                            .then(({ data }) => {
                                 tagify.settings.whitelist = data
                                 tagify.loading(false).dropdown.show.call(tagify, e.detail.value)
                             })
@@ -35,7 +38,7 @@ class TagsManager {
             })
 
         document.querySelectorAll('.list-tagify').forEach((element) => {
-            if (!element.dataset.list) {
+            if (!element.dataset.list || $(element).hasClass('tagify')) {
                 return
             }
 
@@ -44,14 +47,14 @@ class TagsManager {
             let whiteList = []
 
             for (const [key, value] of Object.entries(list)) {
-                whiteList.push({value: key, name: value})
+                whiteList.push({ value: key, name: value })
             }
 
             let listChosen = String(element.value).split(',')
 
             let arrayChosen = whiteList.filter((obj) => {
                 if (listChosen.includes(String(obj.value))) {
-                    return {value: obj.id, name: obj.name}
+                    return { value: obj.id, name: obj.name }
                 }
             })
 

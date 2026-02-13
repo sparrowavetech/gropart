@@ -42,12 +42,28 @@ class Action extends TableActionAbstract
             'btn-sm',
         ];
 
-        if ($this->hasIcon()) {
+        if ($this->hasIcon() && $this->isIconOnly()) {
             $classes[] = 'btn-icon';
         }
 
         $classes[] = $this->getColor();
 
         return implode(' ', $classes);
+    }
+
+    public function getAttributes(): array
+    {
+        if (! $this->getColor() && $this->color) {
+            $this->addAttribute(
+                'style',
+                sprintf('background-color: %s !important; color: %s;', $this->color, $this->colorText ?? '#fff')
+            );
+        }
+
+        if ($cssClass = $this->getCssClass()) {
+            $this->attributes['class'] = explode(' ', $cssClass);
+        }
+
+        return $this->attributes;
     }
 }

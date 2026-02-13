@@ -1,6 +1,7 @@
 let mix = require('laravel-mix');
 
-const purgeCss = require('@fullhuman/postcss-purgecss');
+const purgeCssPlugin = require('@fullhuman/postcss-purgecss');
+const purgeCss = purgeCssPlugin.default || purgeCssPlugin;
 
 const path = require('path');
 let directory = path.basename(path.resolve(__dirname));
@@ -52,7 +53,10 @@ mix
                     /seconds/,
                     /expire-countdown/,
                     /countdown-wrapper/,
-                    /header--sticky/
+                    /header--sticky/,
+                    /^ec-cross-sale/,
+                    /^ec-upsell/,
+                    /^cart-bundle-badge/,
                 ],
             })
         ])

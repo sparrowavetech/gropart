@@ -15,7 +15,7 @@
             color="primary"
             icon="ti ti-coin"
         >
-            {{ $saveTitle ?? __('Request') }}
+            {{ $saveTitle ?? trans('plugins/marketplace::withdrawal.request') }}
         </x-core::button>
     </x-core::card.body>
 </x-core::card>
@@ -48,7 +48,7 @@
                         color="primary"
                         icon="ti ti-coin"
                     >
-                        {{ $saveTitle ?? __('Request') }}
+                        {{ $saveTitle ?? trans('plugins/marketplace::withdrawal.request') }}
                     </x-core::button>
                 </div>
             </div>

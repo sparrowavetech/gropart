@@ -6,6 +6,7 @@ use Botble\Base\Http\Controllers\BaseController;
 use Botble\Ecommerce\Enums\DeletionRequestStatusEnum;
 use Botble\Ecommerce\Http\Requests\Fronts\AccountDeletionRequest;
 use Botble\Ecommerce\Jobs\CustomerDeleteAccountJob;
+use Botble\Ecommerce\Models\Customer;
 use Botble\Ecommerce\Models\CustomerDeletionRequest;
 use Botble\Ecommerce\Notifications\ConfirmDeletionRequestNotification;
 use Botble\Theme\Facades\Theme;
@@ -18,10 +19,14 @@ class AccountDeletionController extends BaseController
 {
     public function store(AccountDeletionRequest $request)
     {
-        /** @var \Illuminate\Contracts\Auth\Authenticatable $user */
+        /**
+         * @var Customer $user
+         */
         $user = $request->user('customer');
 
-        /** @var CustomerDeletionRequest $deletionRequest */
+        /**
+         * @var CustomerDeletionRequest $deletionRequest
+         */
         $deletionRequest = CustomerDeletionRequest::query()->firstOrCreate([
             'customer_id' => $user->getKey(),
         ], [
@@ -42,15 +47,15 @@ class AccountDeletionController extends BaseController
 
     public function confirm(string $token, Request $request)
     {
-        /** @var \Illuminate\Contracts\Auth\Authenticatable $user */
+        /**
+         * @var CustomerDeletionRequest $deletionRequest
+         */
         $deletionRequest = CustomerDeletionRequest::query()
             ->where('token', $token)
             ->where('status', DeletionRequestStatusEnum::WAITING_FOR_CONFIRMATION)
             ->firstOrFail();
 
-        if ($deletionRequest->customer()->isNot($request->user('customer'))) {
-            abort(403);
-        }
+        abort_if($deletionRequest->customer()->isNot($request->user('customer')), 403);
 
         $deletionRequest->update([
             'status' => DeletionRequestStatusEnum::CONFIRMED,

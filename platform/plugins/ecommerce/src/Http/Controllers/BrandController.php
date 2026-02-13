@@ -3,15 +3,14 @@
 namespace Botble\Ecommerce\Http\Controllers;
 
 use Botble\Base\Events\CreatedContentEvent;
-use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
+use Botble\Base\Http\Actions\DeleteResourceAction;
 use Botble\Base\Supports\Breadcrumb;
 use Botble\Ecommerce\Forms\BrandForm;
 use Botble\Ecommerce\Http\Requests\BrandRequest;
 use Botble\Ecommerce\Http\Resources\BrandResource;
 use Botble\Ecommerce\Models\Brand;
 use Botble\Ecommerce\Tables\BrandTable;
-use Exception;
 use Illuminate\Http\Request;
 
 class BrandController extends BaseController
@@ -80,27 +79,14 @@ class BrandController extends BaseController
             ->withUpdatedSuccessMessage();
     }
 
-    public function destroy(Brand $brand, Request $request)
+    public function destroy(Brand $brand)
     {
-        try {
-            $brand->delete();
-
-            event(new DeletedContentEvent(BRAND_MODULE_SCREEN_NAME, $request, $brand));
-
-            return $this
-                ->httpResponse()
-                ->setMessage(trans('core/base::notices.delete_success_message'));
-        } catch (Exception $exception) {
-            return $this
-                ->httpResponse()
-                ->setError()
-                ->setMessage($exception->getMessage());
-        }
+        return DeleteResourceAction::make($brand);
     }
 
     public function getSearch(Request $request)
     {
-        $term = $request->input('search');
+        $term = $request->input('search', $request->input('q'));
 
         $categories = Brand::query()
             ->select(['id', 'name'])

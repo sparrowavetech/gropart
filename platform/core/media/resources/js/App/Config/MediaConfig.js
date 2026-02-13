@@ -1,4 +1,4 @@
-let MediaConfig = $.parseJSON(localStorage.getItem('MediaConfig')) || {}
+let MediaConfig = JSON.parse(localStorage.getItem('MediaConfig')) || {}
 
 let defaultConfig = {
     app_key: RV_MEDIA_CONFIG.random_hash ? RV_MEDIA_CONFIG.random_hash : '21d06709fe1d3abdf0e35ddda89c4b282',
@@ -68,6 +68,18 @@ let defaultConfig = {
             {
                 icon: `<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                     <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                    <path d="M12 21l-8 0a2 2 0 0 1 -2 -2l0 -14a2 2 0 0 1 2 -2l4 0l3 3l7 0a2 2 0 0 1 2 2l0 3"></path>
+                    <path d="M16 19l3 -3l-3 -3"></path>
+                    <path d="M21 16l-8 0"></path>
+                </svg>`,
+                name: 'Move',
+                action: 'move',
+                order: 2,
+                class: 'rv-action-move',
+            },
+            {
+                icon: `<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                     <path d="M15 8h.01"></path>
                     <path d="M11 20h-4a3 3 0 0 1 -3 -3v-10a3 3 0 0 1 3 -3h10a3 3 0 0 1 3 3v4"></path>
                     <path d="M4 15l4 -4c.928 -.893 2.072 -.893 3 0l3 3"></path>
@@ -76,7 +88,7 @@ let defaultConfig = {
                 </svg>`,
                 name: 'Alt text',
                 action: 'alt_text',
-                order: 2,
+                order: 3,
                 class: 'rv-action-alt-text',
             },
             {
@@ -88,7 +100,7 @@ let defaultConfig = {
                 </svg>`,
                 name: 'Copy link',
                 action: 'copy_link',
-                order: 3,
+                order: 4,
                 class: 'rv-action-copy-link',
             },
             {
@@ -100,7 +112,7 @@ let defaultConfig = {
                 </svg>`,
                 name: 'Copy indirect link',
                 action: 'copy_indirect_link',
-                order: 4,
+                order: 5,
                 class: 'rv-action-copy-indirect-link',
             },
             {
@@ -114,9 +126,9 @@ let defaultConfig = {
                 </svg>`,
                 name: 'Share',
                 action: 'share',
-                order: 5,
+                order: 6,
                 class: 'rv-action-share',
-            }
+            },
         ],
         user: [
             {
@@ -205,6 +217,7 @@ if (!MediaConfig.app_key || MediaConfig.app_key !== defaultConfig.app_key) {
 
 MediaConfig.request_params.search = ''
 
-let RecentItems = $.parseJSON(localStorage.getItem('RecentItems')) || []
+// We'll use server-side storage for recent items instead of localStorage
+let RecentItems = []
 
 export { MediaConfig, RecentItems }

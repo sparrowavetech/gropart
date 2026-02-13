@@ -1,11 +1,4 @@
-@props([
-    'label',
-    'value' => 0,
-    'icon' => null,
-    'url' => null,
-    'color' => 'primary',
-    'column' => null,
-])
+@props(['label', 'value' => 0, 'icon' => null, 'url' => null, 'color' => 'primary', 'column' => null])
 
 @php
     $tag = $url ? 'a' : 'div';
@@ -33,17 +26,24 @@
                 <div class="desc fw-medium">{{ $label }}</div>
                 <div class="number fw-bolder">
                     @if (is_int($value))
-                        <span data-counter="counterup" data-value="{{ $value }}">0</span>
+                        <span
+                            data-counter="counterup"
+                            data-value="{{ $value }}"
+                        >0</span>
                     @else
                         <span>{{ $value }}</span>
                     @endif
                 </div>
             </div>
             <div class="visual ps-1 position-absolute end-0">
-                @if($icon)
-                    <x-core::icon :name="$icon" class="me-n2" style="opacity: .1; --bb-icon-size: 80px;"></x-core::icon>
+                @if ($icon)
+                    <x-core::icon
+                        :name="$icon"
+                        class="me-n2"
+                        style="opacity: .1; --bb-icon-size: 80px;"
+                    ></x-core::icon>
                 @endif
             </div>
         </div>
-    </{{ $tag }}>
+        </{{ $tag }}>
 </div>

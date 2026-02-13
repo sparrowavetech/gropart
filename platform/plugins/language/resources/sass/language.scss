@@ -29,7 +29,7 @@
 
 .dataTable {
     .language-header {
-        img {
+        .flag {
             margin-inline-end: 0.5rem;
 
             &:last-child {
@@ -39,7 +39,7 @@
 
         .language-column {
             a {
-                margin-inline-end: 0.75rem;
+                margin-inline-end: 0.5rem;
 
                 &:last-child {
                     margin-inline-end: 0;
@@ -47,6 +47,10 @@
 
                 &:hover {
                     text-decoration: none !important;
+                }
+
+                svg {
+                    max-width: none;
                 }
             }
         }

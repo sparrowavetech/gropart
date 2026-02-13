@@ -21,7 +21,6 @@ use Botble\Table\Columns\NameColumn;
 use Botble\Table\Columns\StatusColumn;
 use Botble\Table\HeaderActions\CreateHeaderAction;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Http\JsonResponse;
 
 class CityTable extends TableAbstract
 {
@@ -72,49 +71,47 @@ class CityTable extends TableAbstract
                         'created_at',
                         'status',
                     ]);
-            });
-    }
-
-    public function ajax(): JsonResponse
-    {
-        $data = $this->table
-            ->eloquent($this->query())
-            ->editColumn('state_id', function (City $item) {
-                if (! $item->state_id || ! $item->state->name) {
-                    return '&mdash;';
-                }
-
-                return Html::link(route('state.edit', $item->state_id), $item->state->name);
             })
-            ->editColumn('country_id', function (City $item) {
-                if (! $item->country_id || ! $item->country->name) {
-                    return '&mdash;';
-                }
+            ->onAjax(function () {
+                $data = $this->table
+                    ->eloquent($this->query())
+                    ->editColumn('state_id', function (City $item) {
+                        if (! $item->state_id || ! $item->state->name) {
+                            return '&mdash;';
+                        }
 
-                return Html::link(route('country.edit', $item->country_id), $item->country->name);
-            })
-            ->filter(function (Builder $query) {
-                $keyword = $this->request->input('search.value');
+                        return Html::link(route('state.edit', $item->state_id), $item->state->name);
+                    })
+                    ->editColumn('country_id', function (City $item) {
+                        if (! $item->country_id || ! $item->country->name) {
+                            return '&mdash;';
+                        }
 
-                if (! $keyword) {
-                    return $query;
-                }
+                        return Html::link(route('country.edit', $item->country_id), $item->country->name);
+                    })
+                    ->filter(function (Builder $query) {
+                        $keyword = $this->request->input('search.value');
 
-                return $query->where(function (Builder $query) use ($keyword) {
-                    $query
-                        ->where('id', $keyword)
-                        ->orWhere('name', 'LIKE', '%' . $keyword . '%')
-                        ->orWhereHas('state', function (Builder $subQuery) use ($keyword) {
-                            return $subQuery
-                                ->where('name', 'LIKE', '%' . $keyword . '%');
-                        })
-                        ->orWhereHas('country', function (Builder $subQuery) use ($keyword) {
-                            return $subQuery
-                                ->where('name', 'LIKE', '%' . $keyword . '%');
+                        if (! $keyword) {
+                            return $query;
+                        }
+
+                        return $query->where(function (Builder $query) use ($keyword): void {
+                            $query
+                                ->where('id', $keyword)
+                                ->orWhere('name', 'LIKE', '%' . $keyword . '%')
+                                ->orWhereHas('state', function (Builder $subQuery) use ($keyword) {
+                                    return $subQuery
+                                        ->where('name', 'LIKE', '%' . $keyword . '%');
+                                })
+                                ->orWhereHas('country', function (Builder $subQuery) use ($keyword) {
+                                    return $subQuery
+                                        ->where('name', 'LIKE', '%' . $keyword . '%');
+                                });
                         });
-                });
-            });
+                    });
 
-        return $this->toJson($data);
+                return $this->toJson($data);
+            });
     }
 }

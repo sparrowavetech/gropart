@@ -1,0 +1,25 @@
+{
+  "name": "hisotech/product-bundles",
+  "description": "Product bundles (combo & mix-and-match) plugin for Botble eCommerce",
+  "type": "botble-plugin",
+  "license": "MIT",
+  "require": {
+    "php": "^8.2"
+  },
+  "autoload": {
+    "psr-4": {
+      "Botble\\ProductBundles\\": "src/"
+    },
+    "files": [
+      "src/Helpers/helpers.php",
+      "src/Helpers/constants.php"
+    ]
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Botble\\ProductBundles\\Providers\\ProductBundlesServiceProvider"
+      ]
+    }
+  }
+}

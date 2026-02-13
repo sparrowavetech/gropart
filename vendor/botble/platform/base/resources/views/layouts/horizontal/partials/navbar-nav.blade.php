@@ -1,10 +1,12 @@
 @php
     $menuItems = DashboardMenu::getAll();
-    $otherItems = $menuItems->splice(match (AdminAppearance::getContainerWidth()) {
-        'container-3xl' => 8,
-        'container-fluid' => 10,
-        default => 7,
-    });
+    $otherItems = $menuItems->splice(
+        match (AdminAppearance::getContainerWidth()) {
+            'container-3xl' => 8,
+            'container-fluid' => 10,
+            default => 7,
+        },
+    );
     $otherIcon = BaseHelper::renderIcon('ti ti-dots');
 @endphp
 

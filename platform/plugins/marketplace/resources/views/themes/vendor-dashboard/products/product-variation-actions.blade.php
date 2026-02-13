@@ -20,10 +20,10 @@
 
     <x-core::button
         type="button"
-        class="btn-trigger-generate-all-versions"
+        data-bb-toggle="btn-trigger-generate-versions"
         :data-target="route('marketplace.vendor.products.generate-all-versions', $product->id)"
     >
-        {{ trans('plugins/ecommerce::products.generate_all_variations') }}
+        {{ trans('plugins/ecommerce::products.generate_variations') }}
     </x-core::button>
 
     <x-core::button

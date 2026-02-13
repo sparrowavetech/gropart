@@ -17,7 +17,7 @@ class SendEmailNotificationAboutNewSubscriberListener implements ShouldQueue
         $mailer = EmailHandler::setModule(NEWSLETTER_MODULE_SCREEN_NAME)->setVariableValues([
             'newsletter_name' => $event->newsletter->name ?? 'N/A',
             'newsletter_email' => $event->newsletter->email,
-            'newsletter_unsubscribe_link' => Html::link($unsubscribeUrl, __('here'))->toHtml(),
+            'newsletter_unsubscribe_link' => Html::link($unsubscribeUrl, trans('plugins/newsletter::newsletter.here'))->toHtml(),
             'newsletter_unsubscribe_url' => $unsubscribeUrl,
         ]);
 

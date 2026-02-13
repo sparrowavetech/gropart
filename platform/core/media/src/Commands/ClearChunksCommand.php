@@ -20,7 +20,9 @@ class ClearChunksCommand extends Command
             return self::SUCCESS;
         }
 
-        $this->components->info(sprintf('Found %d %s', $oldFiles->count(), Str::plural('file', $oldFiles->count())));
+        $filesCount = $oldFiles->count();
+
+        $this->components->info(sprintf('Found %d %s', $filesCount, Str::plural('file', $filesCount)));
         $deleted = 0;
 
         foreach ($oldFiles as $file) {

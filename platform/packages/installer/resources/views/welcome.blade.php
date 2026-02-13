@@ -1,12 +1,7 @@
 @extends('packages/installer::layouts.master')
 
-@section(
-    'pageTitle',
-     trans(
-         'packages/installer::installer.install_step_title',
-         ['step' => 1, 'title' => trans('packages/installer::installer.welcome.title')]
-     )
-)
+@section('pageTitle', trans('packages/installer::installer.install_step_title', ['step' => 1, 'title' =>
+    trans('packages/installer::installer.welcome.title')]))
 
 @section('header')
     <div>
@@ -21,7 +16,11 @@
 @endsection
 
 @section('content')
-    <form method="POST" action="{{ route('installers.welcome.next') }}" id="welcome-form">
+    <form
+        method="POST"
+        action="{{ route('installers.welcome.next') }}"
+        id="welcome-form"
+    >
         @csrf
 
         <x-core::form.select

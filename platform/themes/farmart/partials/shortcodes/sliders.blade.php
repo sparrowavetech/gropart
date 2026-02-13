@@ -12,28 +12,14 @@
             'fade' => true,
         ];
     @endphp
-    <style>
-        #{{$shortcode->sliderid }}.section-content.section-content__slider .section-slides-wrapper .slide-item .slide-item__image {
-            height: {{ $shortcode->sliderdheight ?? '530px' }};
-        }
-        @media (min-width: 768px) and (max-width: 1024px) {
-            #{{$shortcode->sliderid }}.section-content.section-content__slider .section-slides-wrapper .slide-item .slide-item__image {
-                height: {{ $shortcode->slidertheight ?? '34vw' }};
-            }
-        }
-        @media (max-width: 767px) {
-            #{{$shortcode->sliderid }}.section-content.section-content__slider .section-slides-wrapper .slide-item .slide-item__image {
-                height: {{ $shortcode->slidermheight ?? '52vw' }};
-            }
-        }
-    </style>
-    <div id="{{ $shortcode->sliderid }}" class="section-content section-content__slider lazyload @if($shortcode->selectlayout == 'full-width') p-0 @endif"
+    <div
+        class="section-content section-content__slider lazyload"
         @if ($shortcode->background) data-bg="{{ RvMedia::getImageUrl($shortcode->background) }}" @endif
     >
-        <div class="@if($shortcode->selectlayout == 'full-width') container-fluid p-0 @else container-xxxl @endif">
-            <div class="row gx-0 @if($shortcode->selectlayout != 'full-width') gx-md-4 @endif">
-                <div class="@if (is_plugin_active('ads') && $shortcode->ads) col-md-8 col-sm-7 @elseif($shortcode->selectlayout == 'full-width') col-sm-12 @else col-md-12 @endif">
-                    <div class="section-slides-wrapper @if($shortcode->selectlayout != 'full-width') my-3 @endif">
+        <div class="container-xxxl">
+            <div class="row gx-0 gx-md-4">
+                <div class="@if (is_plugin_active('ads') && $shortcode->ads) col-md-8 @else col-md-12 @endif">
+                    <div class="section-slides-wrapper my-3">
                         <div
                             class="slide-body slick-slides-carousel"
                             data-slick="{{ json_encode($slick) }}"
@@ -78,7 +64,7 @@
                     </div>
                 </div>
                 @if (is_plugin_active('ads') && $shortcode->ads)
-                    <div class="col-md-4 col-sm-5">
+                    <div class="col-md-4">
                         <div class="section-banner-wrapper my-3">
                             <div class="banner-medium">
                                 <div class="banner-item__image">

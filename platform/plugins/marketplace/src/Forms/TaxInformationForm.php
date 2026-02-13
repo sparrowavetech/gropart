@@ -6,8 +6,6 @@ use Botble\Base\Forms\FormAbstract;
 use Botble\Base\Models\BaseModel;
 use Botble\Marketplace\Forms\Concerns\HasSubmitButton;
 use Botble\Marketplace\Http\Requests\TaxInformationSettingRequest;
-use Botble\Base\Forms\FieldOptions\MediaImageFieldOption;
-use Botble\Base\Forms\Fields\MediaImageField;
 use Illuminate\Support\Arr;
 
 class TaxInformationForm extends FormAbstract
@@ -19,40 +17,30 @@ class TaxInformationForm extends FormAbstract
         $customer = $this->getModel();
 
         $this
-            ->setupModel(new BaseModel())
+            ->model(BaseModel::class)
             ->setValidatorClass(TaxInformationSettingRequest::class)
             ->contentOnly()
-            ->hasFiles()
             ->add('tax_info[business_name]', 'text', [
-                'label' => __('Business Name'),
+                'label' => trans('plugins/marketplace::marketplace.business_name'),
                 'value' => Arr::get($customer->tax_info, 'business_name'),
                 'attr' => [
-                    'placeholder' => __('Business Name'),
+                    'placeholder' => trans('plugins/marketplace::marketplace.business_name'),
                 ],
             ])
             ->add('tax_info[tax_id]', 'text', [
-                'label' => __('Tax ID'),
+                'label' => trans('plugins/marketplace::marketplace.tax_id'),
                 'value' => Arr::get($customer->tax_info, 'tax_id'),
                 'attr' => [
-                    'placeholder' => __('Tax ID'),
+                    'placeholder' => trans('plugins/marketplace::marketplace.tax_id'),
                 ],
             ])
             ->add('tax_info[address]', 'text', [
-                'label' => __('Address'),
+                'label' => trans('plugins/marketplace::marketplace.address'),
                 'value' => Arr::get($customer->tax_info, 'address'),
                 'attr' =>
-                    ['placeholder' => __('Address'),
+                    ['placeholder' => trans('plugins/marketplace::marketplace.address'),
                 ],
             ])
-            ->add(
-                'signature_image',
-                MediaImageField::class,
-                MediaImageFieldOption::make()
-                    ->label( trans('plugins/marketplace::store.forms.invoice_signature_image'))
-                    ->value(Arr::get($customer->tax_info, 'signature_image'))
-                    ->colspan(3)
-                    ->toArray()
-            )
-            ->addSubmitButton(__('Save settings'));
+            ->addSubmitButton(trans('plugins/marketplace::marketplace.save_settings'));
     }
 }

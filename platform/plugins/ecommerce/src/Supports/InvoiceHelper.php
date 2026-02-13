@@ -2,19 +2,25 @@
 
 namespace Botble\Ecommerce\Supports;
 
-use Barryvdh\DomPDF\PDF as PDFHelper;
 use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\Html;
+use Botble\Base\Supports\Language;
 use Botble\Base\Supports\Pdf;
 use Botble\Ecommerce\Enums\InvoiceStatusEnum;
 use Botble\Ecommerce\Facades\EcommerceHelper as EcommerceHelperFacade;
 use Botble\Ecommerce\Models\Invoice;
 use Botble\Ecommerce\Models\InvoiceItem;
+use Botble\Ecommerce\Models\InvoiceItemTaxComponent;
 use Botble\Ecommerce\Models\Order;
+use Botble\Ecommerce\Models\OrderProduct;
 use Botble\Ecommerce\Models\Product;
+use Botble\Location\Models\City;
+use Botble\Location\Models\State;
 use Botble\Media\Facades\RvMedia;
 use Botble\Payment\Enums\PaymentMethodEnum;
 use Botble\Payment\Enums\PaymentStatusEnum;
 use Botble\Payment\Models\Payment;
+use Botble\Theme\Facades\Theme;
 use Carbon\Carbon;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\File;
@@ -39,21 +45,27 @@ class InvoiceHelper
         $invoiceData = [
             'reference_id' => $order->getKey(),
             'reference_type' => Order::class,
-            'customer_name' => $taxInformation ? $taxInformation->company_name : ($address->name ?: $order->user->name),
             'company_name' => '',
             'company_logo' => null,
+            'customer_name' => $taxInformation ? $taxInformation->company_name : ($address->name ?: $order->user->name),
             'customer_email' => $taxInformation ? $taxInformation->company_email : ($address->email ?: $order->user->email),
             'customer_phone' => $taxInformation ? $taxInformation->company_phone : $address->phone,
             'customer_address' => $taxInformation ? $taxInformation->company_address : $address->full_address,
+            'customer_country' => $address->country_name,
+            'customer_state' => $address->state_name,
+            'customer_city' => $address->city_name,
+            'customer_zip_code' => $address->zip_code,
+            'customer_address_line' => $address->address,
             'customer_tax_id' => $taxInformation?->company_tax_code,
             'payment_id' => null,
             'status' => InvoiceStatusEnum::COMPLETED,
             'paid_at' => Carbon::now(),
-            'tax_amount' => $order->tax_amount,
-            'shipping_amount' => $order->shipping_amount,
-            'discount_amount' => $order->discount_amount,
+            'tax_amount' => $order->tax_amount ?: 0,
+            'shipping_amount' => $order->shipping_amount ?: 0,
+            'payment_fee' => $order->payment_fee,
+            'discount_amount' => $order->discount_amount ?: 0,
             'sub_total' => $order->sub_total,
-            'amount' => $order->amount,
+            'amount' => max($order->amount, 0),
             'shipping_method' => $order->shipping_method,
             'shipping_option' => $order->shipping_option,
             'coupon_code' => $order->coupon_code,
@@ -76,7 +88,7 @@ class InvoiceHelper
         $invoice->save();
 
         foreach ($order->products as $orderProduct) {
-            $invoice->items()->create([
+            $invoiceItem = $invoice->items()->create([
                 'reference_id' => $orderProduct->product_id,
                 'reference_type' => Product::class,
                 'name' => $orderProduct->product_name,
@@ -87,8 +99,7 @@ class InvoiceHelper
                 'sub_total' => $orderProduct->price * $orderProduct->qty,
                 'tax_amount' => $orderProduct->tax_amount,
                 'discount_amount' => 0,
-                //'amount' => $orderProduct->price * $orderProduct->qty + $orderProduct->tax_amount,
-                'amount' => ($orderProduct->price + $orderProduct->tax_amount) * $orderProduct->qty,
+                'amount' => $orderProduct->price * $orderProduct->qty + $orderProduct->tax_amount,
                 'options' => array_merge(
                     $orderProduct->options,
                     $orderProduct->product_options_implode ? [
@@ -99,6 +110,8 @@ class InvoiceHelper
                     ] : [],
                 ),
             ]);
+
+            $this->copyTaxComponentsToInvoiceItem($orderProduct, $invoiceItem);
         }
 
         do_action(INVOICE_PAYMENT_CREATED, $invoice);
@@ -106,7 +119,7 @@ class InvoiceHelper
         return $invoice;
     }
 
-    public function makeInvoicePDF(Invoice $invoice): PDFHelper
+    public function makeInvoicePDF(Invoice $invoice): Pdf
     {
         return (new Pdf())
             ->templatePath($this->getInvoiceTemplatePath())
@@ -117,7 +130,7 @@ class InvoiceHelper
             ->twigExtensions([
                 new TwigExtension(),
             ])
-            ->compile();
+            ->setProcessingLibrary(get_ecommerce_setting('invoice_processing_library', 'dompdf'));
     }
 
     public function generateInvoice(Invoice $invoice): string
@@ -139,24 +152,24 @@ class InvoiceHelper
         return $invoicePath;
     }
 
-    public function downloadInvoice(Invoice $invoice): Response
+    public function downloadInvoice(Invoice $invoice): Response|string|null
     {
-        //return $this->makeInvoicePDF($invoice)->download(sprintf('invoice-%s.pdf', $invoice->code));
-        $pdf = $this->makeInvoicePDF($invoice);
-
-        return response($pdf->output())
-        ->header('Content-Type', 'application/pdf')
-        ->header('Content-Disposition', sprintf('inline; filename="invoice-%s.pdf"', $invoice->code));
+        return $this->makeInvoicePDF($invoice)->download(sprintf('invoice-%s.pdf', $invoice->code));
     }
 
-    public function streamInvoice(Invoice $invoice): Response
+    public function streamInvoice(Invoice $invoice): Response|string|null
     {
-        return $this->makeInvoicePDF($invoice)->stream();
+        return $this->makeInvoicePDF($invoice)->stream(sprintf('invoice-%s.pdf', $invoice->code));
     }
 
     public function getInvoiceTemplate(): string
     {
-        return (new Pdf())->getContent($this->getInvoiceTemplatePath(), $this->getInvoiceTemplateCustomizedPath());
+        return (new Pdf())
+            ->supportLanguage($this->getLanguageSupport())
+            ->twigExtensions([
+                new TwigExtension(),
+            ])
+            ->getContent($this->getInvoiceTemplatePath(), $this->getInvoiceTemplateCustomizedPath());
     }
 
     public function getInvoiceTemplatePath(): string
@@ -173,7 +186,7 @@ class InvoiceHelper
     {
         $logo = get_ecommerce_setting('company_logo_for_invoicing') ?: (theme_option(
             'logo_in_invoices'
-        ) ?: theme_option('logo'));
+        ) ?: Theme::getLogo());
 
         $paymentDescription = null;
 
@@ -194,7 +207,16 @@ class InvoiceHelper
         $country = EcommerceHelperFacade::getCountryNameById($this->getCompanyCountry());
         $state = $this->getCompanyState();
         $city = $this->getCompanyCity();
-        $zipcode = get_ecommerce_setting('company_zipcode_for_invoicing') ?: get_ecommerce_setting('store_zip_code');
+
+        if (EcommerceHelperFacade::loadCountriesStatesCitiesFromPluginLocation()) {
+            if (is_numeric($state)) {
+                $state = State::query()->wherePublished()->where('id', $state)->value('name');
+            }
+
+            if (is_numeric($city)) {
+                $city = City::query()->wherePublished()->where('id', $city)->value('name');
+            }
+        }
 
         if (! $companyAddress) {
             $companyAddress = implode(', ', array_filter([
@@ -202,44 +224,77 @@ class InvoiceHelper
                 $city,
                 $state,
                 $country,
-                $zipcode,
             ]));
         }
 
         $companyPhone = get_ecommerce_setting('company_phone_for_invoicing') ?: get_ecommerce_setting('store_phone');
         $companyEmail = get_ecommerce_setting('company_email_for_invoicing') ?: get_ecommerce_setting('store_email');
-        $companyTaxId = get_ecommerce_setting('company_tax_id_for_invoicing') ?: get_ecommerce_setting('store_vat_number');
+        $companyTaxId = get_ecommerce_setting('company_tax_id_for_invoicing') ?: get_ecommerce_setting(
+            'store_vat_number'
+        );
 
         $invoice->loadMissing(['items', 'reference']);
 
-        $storeStateId = setting('ecommerce_store_state', 0);
+        $invoice->items = $invoice->items->map(function ($item) {
+            $item->product_options_implode = (string) $item->product_options_implode;
 
-        if ($invoice->reference && $invoice->reference->store_id) {
-            $storeStateId = $invoice->reference->store->state;
+            return $item;
+        });
+
+        $taxGroups = [];
+        $hasMultipleProducts = $invoice->items->count() > 1;
+        $hasProductOptions = false;
+
+        $taxRateGroups = [];
+
+        foreach ($invoice->items as $item) {
+            if (! $hasProductOptions && ! empty($item->options) &&
+                (! empty($item->options['attributes']) || ! empty($item->options['product_options']) || ! empty($item->options['license_code']))) {
+                $hasProductOptions = true;
+            }
+
+            if ($item->tax_amount > 0 && ! empty($item->options['taxClasses'])) {
+                foreach ($item->options['taxClasses'] as $taxName => $taxRate) {
+                    $taxKey = $taxName . ' - ' . $taxRate . '%';
+                    if (! isset($taxRateGroups[$taxKey])) {
+                        $taxRateGroups[$taxKey] = [
+                            'rate' => $taxRate,
+                            'subtotal' => 0,
+                            'name' => $taxName,
+                        ];
+                    }
+                    $taxRateGroups[$taxKey]['subtotal'] += ($item->price * $item->qty);
+                }
+            }
+        }
+
+        if ($taxRateGroups) {
+            foreach ($taxRateGroups as $taxKey => $group) {
+                $taxAmount = EcommerceHelperFacade::roundPrice($group['subtotal'] * $group['rate'] / 100);
+                $taxGroups[$taxKey] = $taxAmount;
+            }
+        } elseif ($invoice->tax_amount > 0) {
+            $taxGroups = [];
         }
 
         $data = [
             'invoice' => $invoice->toArray(),
-            'toState' => $invoice->reference && $invoice->reference->address ? $invoice->reference->address->state : null,
-            'fromState'=> $storeStateId,
-            'isIgst' => $invoice->reference && $invoice->reference->address && $invoice->reference->address->state !== $storeStateId ? true : false,
             'logo' => $logo,
             'logo_full_path' => RvMedia::getRealPath($logo),
-            'site_title' => theme_option('site_title'),
+            'site_title' => Theme::getSiteTitle(),
             'company_logo_full_path' => RvMedia::getRealPath($logo),
             'company_name' => $companyName,
             'company_address' => $companyAddress,
             'company_country' => $country,
             'company_state' => $state,
             'company_city' => $city,
-            'company_zipcode' => $zipcode,
+            'company_zipcode' => get_ecommerce_setting('company_zipcode_for_invoicing') ?: get_ecommerce_setting(
+                'store_zip_code'
+            ),
             'company_phone' => $companyPhone,
             'company_email' => $companyEmail,
             'company_tax_id' => $companyTaxId,
             'total_quantity' => $invoice->items->sum('qty'),
-            'total_price' => $invoice->items->sum('price'),
-            'total_tax' => $invoice->items->sum('tax_amount'),
-            'total_amount' => $invoice->items->sum('price') + $invoice->items->sum('tax_amount'),
             'payment_description' => $paymentDescription,
             'is_tax_enabled' => EcommerceHelperFacade::isTaxEnabled(),
             'settings' => [
@@ -256,9 +311,24 @@ class InvoiceHelper
             'ecommerce_invoice_footer' => apply_filters('ecommerce_invoice_footer', null, $invoice),
             'invoice_payment_info_filter' => apply_filters('invoice_payment_info_filter', null, $invoice),
             'tax_classes_name' => $invoice->taxClassesName,
+            'tax_groups' => $taxGroups,
+            'tax_component_summary' => apply_filters(
+                'ecommerce_invoice_tax_summary_rows',
+                $invoice->taxComponentsSummary(),
+                $invoice
+            ),
+            'tax_legal_text' => BaseHelper::clean(
+                (string) apply_filters('ecommerce_invoice_tax_legal_text', '', $invoice)
+            ),
+            'has_multiple_products' => $hasMultipleProducts,
+            'has_product_options' => $hasProductOptions,
+            'summary_colspan' => 4 + ($hasMultipleProducts ? 1 : 0),
         ];
 
         $data['settings']['font_css'] = null;
+
+        $invoiceCssPath = plugin_path('ecommerce/resources/templates/invoice.css');
+        $data['invoice_css'] = file_exists($invoiceCssPath) ? file_get_contents($invoiceCssPath) : '';
 
         if ($data['settings']['using_custom_font_for_invoice'] && $data['settings']['font_family']) {
             $data['settings']['font_css'] = BaseHelper::googleFonts(
@@ -268,9 +338,25 @@ class InvoiceHelper
             );
         }
 
-        $data['settings']['extra_css'] = apply_filters('ecommerce_invoice_extra_css', null, $invoice);
+        $extraCss = apply_filters('ecommerce_invoice_extra_css', null, $invoice);
+
+        if ($customCss = setting('invoice_template_custom_css')) {
+            $extraCss = $extraCss ? $extraCss . "\n" . $customCss : $customCss;
+        }
+
+        $data['settings']['extra_css'] = $extraCss;
 
         $data['settings']['header_html'] = apply_filters('ecommerce_invoice_header_html', null, $invoice);
+
+        $language = Language::getCurrentLocale();
+
+        $data['html_attributes'] = trim(Html::attributes([
+            'lang' => $language['locale'],
+        ]));
+
+        $data['body_attributes'] = trim(Html::attributes([
+            'dir' => $language['is_rtl'] ? 'rtl' : 'ltr',
+        ]));
 
         $order = $invoice->reference;
 
@@ -290,7 +376,7 @@ class InvoiceHelper
         if (is_plugin_active('payment')) {
             $invoice->loadMissing(['payment']);
 
-            $data['payment_method'] = $invoice->payment->payment_channel->label();
+            $data['payment_method'] = $invoice->payment->payment_channel->displayName();
             $data['payment_status'] = $invoice->payment->status->getValue();
             $data['payment_status_label'] = $invoice->payment->status->label();
         }
@@ -330,12 +416,15 @@ class InvoiceHelper
             $invoice->sub_total = $invoice->amount;
         }
 
-        $payment = new Payment([
-            'payment_channel' => PaymentMethodEnum::BANK_TRANSFER,
-            'status' => PaymentStatusEnum::PENDING,
-        ]);
+        if (is_plugin_active('payment')) {
+            $payment = new Payment([
+                'payment_channel' => PaymentMethodEnum::BANK_TRANSFER,
+                'status' => PaymentStatusEnum::PENDING,
+            ]);
 
-        $invoice->setRelation('payment', $payment);
+            $invoice->setRelation('payment', $payment);
+        }
+
         $invoice->setRelation('items', collect($items));
 
         return $invoice;
@@ -357,9 +446,20 @@ class InvoiceHelper
             'company_phone' => trans('plugins/ecommerce::invoice-template.variables.company_phone'),
             'company_email' => trans('plugins/ecommerce::invoice-template.variables.company_email'),
             'company_tax_id' => trans('plugins/ecommerce::invoice-template.variables.company_tax_id'),
+            'customer_name' => trans('plugins/ecommerce::invoice-template.variables.customer_name'),
+            'customer_email' => trans('plugins/ecommerce::invoice-template.variables.customer_email'),
+            'customer_phone' => trans('plugins/ecommerce::invoice-template.variables.customer_phone'),
+            'customer_address' => trans('plugins/ecommerce::invoice-template.variables.customer_address'),
+            'customer_country' => trans('plugins/ecommerce::invoice-template.variables.customer_country'),
+            'customer_state' => trans('plugins/ecommerce::invoice-template.variables.customer_state'),
+            'customer_city' => trans('plugins/ecommerce::invoice-template.variables.customer_city'),
+            'customer_zip_code' => trans('plugins/ecommerce::invoice-template.variables.customer_zipcode'),
+            'customer_address_line' => trans('plugins/ecommerce::invoice-template.variables.customer_address_line'),
             'payment_method' => __('Payment method'),
             'payment_status' => __('Payment status'),
             'payment_description' => __('Payment description'),
+            'html_attributes' => __('HTML attributes'),
+            'body_attributes' => __('Body attributes'),
         ];
     }
 
@@ -419,5 +519,55 @@ class InvoiceHelper
         ];
 
         return apply_filters('invoice_date_formats', $formats);
+    }
+
+    public function getDefaultInvoiceTemplatesFilter(): array
+    {
+        return [
+            'order' => [
+                'label' => trans('plugins/ecommerce::invoice-template.order_invoice_label'),
+                'content' => fn () => $this->getInvoiceTemplate(),
+                'variables' => fn () => $this->getVariables(),
+                'customized_path' => $this->getInvoiceTemplateCustomizedPath(),
+                'preview' => fn () => $this->streamInvoice($this->getDataForPreview()),
+            ],
+        ];
+    }
+
+    public function getInvoiceUrl(Invoice $invoice): string
+    {
+        return route('customer.invoices.generate_invoice', $invoice->getKey()) . '?type=print';
+    }
+
+    public function getInvoiceDownloadUrl(Invoice $invoice): string
+    {
+        return route('customer.invoices.generate_invoice', $invoice->getKey());
+    }
+
+    protected function copyTaxComponentsToInvoiceItem(OrderProduct $orderProduct, InvoiceItem $invoiceItem): void
+    {
+        $orderProduct->loadMissing('taxComponents');
+
+        if ($orderProduct->taxComponents->isEmpty()) {
+            return;
+        }
+
+        $componentsData = [];
+
+        foreach ($orderProduct->taxComponents as $component) {
+            $componentsData[] = [
+                'invoice_item_id' => $invoiceItem->id,
+                'name' => $component->name,
+                'code' => $component->code,
+                'rate' => $component->rate,
+                'amount' => $component->amount,
+                'jurisdiction' => $component->jurisdiction,
+                'metadata' => $component->metadata ? json_encode($component->metadata) : null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        }
+
+        InvoiceItemTaxComponent::query()->insert($componentsData);
     }
 }

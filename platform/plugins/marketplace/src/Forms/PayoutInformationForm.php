@@ -23,11 +23,11 @@ class PayoutInformationForm extends FormAbstract
         $payoutMethodsEnabled = PayoutPaymentMethodsEnum::payoutMethodsEnabled();
 
         $this
-            ->setupModel(new BaseModel())
+            ->model(BaseModel::class)
             ->setValidatorClass(PayoutInformationSettingRequest::class)
             ->contentOnly()
             ->add('payout_payment_method', SelectField::class, [
-                'label' => __('Payment Method'),
+                'label' => trans('plugins/marketplace::marketplace.payment_method'),
                 'selected' => $customer->vendorInfo->payout_payment_method,
                 'choices' => Arr::pluck($payoutMethodsEnabled, 'label', 'key'),
                 'attr' => [
@@ -50,8 +50,7 @@ class PayoutInformationForm extends FormAbstract
                     ->placeholder(Arr::get($field, 'placeholder', $field['title']))
                     ->when(isset($field['helper_text']), function (TextFieldOption $option) use ($field) {
                         return $option->helperText($field['helper_text']);
-                    })
-                    ->toArray();
+                    });
 
                 $this->add("bank_info[$method[key]][$key]", TextField::class, $fieldOption);
             }
@@ -61,6 +60,6 @@ class PayoutInformationForm extends FormAbstract
             ]);
         }
 
-        $this->addSubmitButton(__('Save settings'));
+        $this->addSubmitButton(trans('plugins/marketplace::marketplace.save_settings'));
     }
 }

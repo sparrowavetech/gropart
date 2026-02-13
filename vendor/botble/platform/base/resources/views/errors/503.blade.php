@@ -1,5 +1,5 @@
 @php
-    PageTitle::setTitle(__('503 Service Unavailable'));
+    PageTitle::setTitle(trans('core/base::errors.503_service_unavailable'));
 @endphp
 
 @extends('core/base::errors.master')
@@ -13,13 +13,9 @@
                 height="128"
             >
         </div>
-        <p class="empty-title">{{ __('Temporarily down for maintenance') }}</p>
+        <p class="empty-title">{{ trans('core/base::errors.503_temporarily_down') }}</p>
         <p class="empty-subtitle text-secondary">
-            {!! BaseHelper::clean(
-                __(
-                    "If you are the administrator and you can't access your site after enabling maintenance mode, just need to delete file <strong>storage/framework/down</strong> to turn-off maintenance mode.",
-                ),
-            ) !!}
+            {!! BaseHelper::clean(trans('core/base::errors.503_admin_instruction')) !!}
         </p>
     </div>
 @endsection

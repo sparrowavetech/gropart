@@ -1,19 +1,21 @@
 @php
-    Assets::addScriptsDirectly('vendor/core/packages/slug/js/slug.js')->addStylesDirectly('vendor/core/packages/slug/css/slug.css');
     $prefix = apply_filters(FILTER_SLUG_PREFIX, SlugHelper::getPrefix($model::class), $model);
     $value = $value ?: old('slug');
     $endingURL = SlugHelper::getPublicSingleEndingURL();
-    $previewURL = str_replace('--slug--', (string) $value, url($prefix) . '/' . config('packages.slug.general.pattern')) . $endingURL . (Auth::user() && $preview ? '?preview=true' : '');
+    $canBeReviewed = apply_filters('core_slug_can_be_reviewed', Auth::user() && is_in_admin(true), $model);
+
+    $previewURL =
+        str_replace('--slug--', (string) $value, url($prefix) . '/' . config('packages.slug.general.pattern')) .
+        $endingURL .
+        ($canBeReviewed && $preview ? '?preview=true' : '');
 @endphp
 
 <div
     class="slug-field-wrapper"
     data-field-name="{{ SlugHelper::getColumnNameToGenerateSlug($model) }}"
 >
-    @if (in_array(
-        Route::currentRouteName(), ['pages.create', 'pages.edit'])
-        && BaseHelper::isHomepage(Route::current()->parameter('page.id'))
-    )
+    @if (in_array(Route::currentRouteName(), ['pages.create', 'pages.edit']) &&
+            BaseHelper::isHomepage(Route::current()->parameter('page.id')))
         <x-core::form.text-input
             :label="trans('core/base::forms.permalink')"
             name="slug"
@@ -40,7 +42,7 @@
                 <span class="input-group-text slug-actions">
                     <a
                         href="#"
-                        @class(['link-secondary', 'd-none' => ! $value])
+                        @class(['link-secondary', 'd-none' => !$value])
                         data-bs-toggle="tooltip"
                         aria-label="{{ trans('packages/slug::slug.generate_url') }}"
                         data-bs-original-title="{{ trans('packages/slug::slug.generate_url') }}"
@@ -51,9 +53,12 @@
                 </span>
             </x-slot:append>
         </x-core::form.text-input>
-        @if (Auth::user() && $id && is_in_admin(true))
+        @if ($canBeReviewed)
             <x-core::form.helper-text class="mt-n2 text-truncate">
-                {{ trans('packages/slug::slug.preview') }}: <a href="{{ $previewURL }}" target="_blank">{{ $previewURL }}</a>
+                {{ trans('packages/slug::slug.preview') }}: <a
+                    href="{{ $previewURL }}"
+                    target="_blank"
+                >{{ $previewURL }}</a>
             </x-core::form.helper-text>
         @endif
         @if ($editable)

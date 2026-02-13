@@ -9,13 +9,44 @@ use Botble\Payment\Enums\PaymentMethodEnum;
 use Botble\Payment\Enums\PaymentStatusEnum;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Facades\Log;
 
 class Payment extends BaseModel
 {
     protected $table = 'payments';
 
+    protected static function booted(): void
+    {
+        static::deleting(function (Payment $payment): void {
+            if ($payment->charge_id) {
+                $logQuery = PaymentLog::query()
+                    ->where('payment_method', $payment->payment_channel)
+                    ->where(function ($query) use ($payment): void {
+                        $query->where('request', 'LIKE', '%' . $payment->charge_id . '%')
+                            ->orWhere('response', 'LIKE', '%' . $payment->charge_id . '%');
+
+                        if ($payment->order_id) {
+                            $query->orWhere('request', 'LIKE', '%' . $payment->order_id . '%')
+                                ->orWhere('response', 'LIKE', '%' . $payment->order_id . '%');
+                        }
+                    });
+
+                $deletedCount = $logQuery->delete();
+
+                if ($deletedCount > 0) {
+                    Log::info("Deleted {$deletedCount} payment logs for payment", [
+                        'payment_id' => $payment->id,
+                        'charge_id' => $payment->charge_id,
+                        'payment_method' => $payment->payment_channel->value ?? 'unknown',
+                    ]);
+                }
+            }
+        });
+    }
+
     protected $fillable = [
         'amount',
+        'payment_fee',
         'currency',
         'user_id',
         'charge_id',
@@ -50,11 +81,31 @@ class Payment extends BaseModel
     {
         $time = Html::tag('span', $this->created_at->diffForHumans(), ['class' => 'small italic']);
 
-        return __('You have created a payment #:charge_id via :channel :time : :amount', [
+        return trans('plugins/payment::payment.payment_created', [
             'charge_id' => $this->charge_id,
-            'channel' => $this->payment_channel->label(),
+            'channel' => $this->payment_channel->displayName(),
             'time' => $time,
             'amount' => number_format($this->amount, 2) . $this->currency,
         ]);
+    }
+
+    public function getPaymentLogs()
+    {
+        if (! $this->charge_id) {
+            return collect();
+        }
+
+        return PaymentLog::query()
+            ->where('payment_method', $this->payment_channel)
+            ->where(function ($query): void {
+                $query->where('request', 'LIKE', '%' . $this->charge_id . '%')
+                    ->orWhere('response', 'LIKE', '%' . $this->charge_id . '%');
+
+                if ($this->order_id) {
+                    $query->orWhere('request', 'LIKE', '%' . $this->order_id . '%')
+                        ->orWhere('response', 'LIKE', '%' . $this->order_id . '%');
+                }
+            })->latest()
+            ->get();
     }
 }

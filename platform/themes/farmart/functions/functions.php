@@ -4,33 +4,23 @@ use Botble\Base\Facades\EmailHandler;
 use Botble\Base\Facades\MetaBox;
 use Botble\Base\Forms\Fields\HtmlField;
 use Botble\Base\Forms\Fields\MediaImageField;
+use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Facades\FlashSale;
 use Botble\Ecommerce\Supports\FlashSaleSupport;
 use Botble\Marketplace\Facades\MarketplaceHelper;
 use Botble\Marketplace\Forms\StoreForm;
 use Botble\Marketplace\Forms\VendorStoreForm;
+use Botble\Marketplace\Models\Store;
 use Botble\Media\Facades\RvMedia;
 use Botble\Menu\Facades\Menu;
 use Botble\Newsletter\Facades\Newsletter;
-use Botble\SocialLogin\Facades\SocialService;
 use Botble\Theme\Facades\Theme;
 use Botble\Theme\Supports\ThemeSupport;
 use Botble\Theme\Typography\TypographyItem;
+use Botble\Widget\Events\RenderingWidgetSettings;
 use Illuminate\Routing\Events\RouteMatched;
+use Illuminate\Support\Str;
 use Theme\Farmart\Supports\Wishlist;
-
-register_page_template([
-    'default' => __('Default'),
-    'default-sidebar' => __('Default with Sidebar'),
-    'homepage' => __('Homepage'),
-    'full-width' => __('Full Width'),
-    'coming-soon' => __('Coming Soon'),
-    'blog-right-sidebar' => __('Blog with Sidebar'),
-]);
-
-RvMedia::addSize('small', 300, 300);
-
-Menu::addMenuLocation('header-navigation', __('Header Navigation'));
 
 function available_socials_store(): array
 {
@@ -43,74 +33,125 @@ function available_socials_store(): array
     ];
 }
 
-app()->booted(function () {
+function image_placeholder(?string $default = null, ?string $size = null): string
+{
+    if (theme_option('lazy_load_image_enabled', 'yes') != 'yes' && $default) {
+        if (Str::contains($default, ['https://', 'http://'])) {
+            return $default;
+        }
+
+        return RvMedia::getImageUrl($default, $size);
+    }
+
+    if ($placeholder = theme_option('image-placeholder')) {
+        return RvMedia::getImageUrl($placeholder);
+    }
+
+    return Theme::asset()->url('images/placeholder.png');
+}
+
+if (! function_exists('theme_get_autoplay_speed_options')) {
+    function theme_get_autoplay_speed_options(): array
+    {
+        $options = [2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000];
+
+        return array_combine($options, $options);
+    }
+}
+
+if (! function_exists('get_store_list_layouts')) {
+    function get_store_list_layouts(): array
+    {
+        return [
+            'grid' => __('Grid'),
+            'list' => __('List'),
+        ];
+    }
+}
+
+app()->booted(function (): void {
     ThemeSupport::registerSocialLinks();
     ThemeSupport::registerSocialSharing();
+    ThemeSupport::registerSiteLogoHeight(45);
+    ThemeSupport::registerSiteCopyright();
+    ThemeSupport::registerDateFormatOption();
+    ThemeSupport::registerToastNotification();
 
     if (is_plugin_active('newsletter')) {
         Newsletter::registerNewsletterPopup();
     }
 
+    if (is_plugin_active('ecommerce')) {
+        EcommerceHelper::registerProductVideo();
+        EcommerceHelper::registerProductGalleryOptions();
+        EcommerceHelper::registerThemeAssets();
+    }
+
+    RvMedia::addSize('small', 300, 300);
+
+    Menu::addMenuLocation('header-navigation', __('Header Navigation'));
+
+    $events = app('events');
+
+    $events->listen('core.page::registering-templates', function (): void {
+        register_page_template([
+            'default' => __('Default'),
+            'homepage' => __('Homepage'),
+            'full-width' => __('Full Width'),
+            'coming-soon' => __('Coming Soon'),
+        ]);
+    });
+
+    $events->listen([RenderingWidgetSettings::class, 'core.widget:rendering'], function (): void {
+        register_sidebar([
+            'id' => 'pre_footer_sidebar',
+            'name' => __('Top footer sidebar'),
+            'description' => __('Widgets in the blog page'),
+        ]);
+
+        register_sidebar([
+            'id' => 'footer_sidebar',
+            'name' => __('Footer sidebar'),
+            'description' => __('Widgets in footer sidebar'),
+        ]);
+
+        register_sidebar([
+            'id' => 'bottom_footer_sidebar',
+            'name' => __('Bottom footer sidebar'),
+            'description' => __('Widgets in bottom footer sidebar'),
+        ]);
+
+        if (is_plugin_active('ecommerce')) {
+            register_sidebar([
+                'id' => 'products_list_sidebar',
+                'name' => __('Products list sidebar'),
+                'description' => __('Widgets on header products list page'),
+            ]);
+
+            register_sidebar([
+                'id' => 'product_detail_sidebar',
+                'name' => __('Product detail sidebar'),
+                'description' => __('Widgets in the product detail page'),
+            ]);
+
+            add_filter('ecommerce_quick_view_data', function (array $data): array {
+                return [
+                    ...$data,
+                    'wishlistIds' => Wishlist::getWishlistIds([$data['product']->getKey()]),
+                ];
+            });
+        }
+    });
+
     Theme::typography()
         ->registerFontFamily(new TypographyItem('primary', __('Primary'), 'Mulish'));
-
-    register_sidebar([
-        'id' => 'pre_footer_sidebar',
-        'name' => __('Top footer sidebar'),
-        'description' => __('Widgets in the blog page'),
-    ]);
-
-    register_sidebar([
-        'id' => 'footer_sidebar',
-        'name' => __('Footer sidebar'),
-        'description' => __('Widgets in footer sidebar'),
-    ]);
-
-    register_sidebar([
-        'id' => 'default_page_sidebar',
-        'name' => __('Default Page sidebar'),
-        'description' => __('Widgets in Default Page sidebar'),
-    ]);
-
-    register_sidebar([
-        'id' => 'blog-right-sidebar',
-        'name' => __('Blog with Sidebar'),
-        'description' => __('Blogs with sidebar'),
-    ]);
-
-    register_sidebar([
-        'id' => 'bottom_footer_sidebar',
-        'name' => __('Bottom footer sidebar'),
-        'description' => __('Widgets in bottom footer sidebar'),
-    ]);
-
-    if (is_plugin_active('ecommerce')) {
-        register_sidebar([
-            'id' => 'products_list_sidebar',
-            'name' => __('Products list sidebar'),
-            'description' => __('Widgets on header products list page'),
-        ]);
-
-        register_sidebar([
-            'id' => 'product_detail_sidebar',
-            'name' => __('Product detail sidebar'),
-            'description' => __('Widgets in the product detail page'),
-        ]);
-
-        add_filter('ecommerce_quick_view_data', function (array $data): array {
-            return [
-                ...$data,
-                'wishlistIds' => Wishlist::getWishlistIds([$data['product']->getKey()]),
-            ];
-        });
-    }
 
     if (method_exists(FlashSaleSupport::class, 'addShowSaleCountLeftSetting')) {
         FlashSale::addShowSaleCountLeftSetting();
     }
 
-    if (is_plugin_active('marketplace')) {
-        StoreForm::extend(function (StoreForm $form) {
+    if (is_plugin_active('ecommerce') && is_plugin_active('marketplace')) {
+        StoreForm::extend(function (StoreForm $form): void {
             $form->addAfter('cover_image', 'background', MediaImageField::class, [
                 'label' => __('Background'),
                 'metadata' => true,
@@ -118,34 +159,32 @@ app()->booted(function () {
             ]);
         });
 
-        VendorStoreForm::extend(function (VendorStoreForm $form) {
+        VendorStoreForm::extend(function (VendorStoreForm $form): void {
             $form
                 ->addAfter('cover_image', 'background', MediaImageField::class, [
                     'label' => __('Background'),
                     'metadata' => true,
                     'colspan' => 2,
                 ])
-                ->when(! MarketplaceHelper::hideStoreSocialLinks(), function (VendorStoreForm $form) {
+                ->when(! MarketplaceHelper::hideStoreSocialLinks(), function (VendorStoreForm $form): void {
+                    /**
+                     * @var Store $store
+                     */
                     $store = $form->getModel();
 
                     $background = $store->getMetaData('background', true);
-                    $socials = [];
-                    $availableSocials = [];
-                    if (! MarketplaceHelper::hideStoreSocialLinks()) {
-                        $socials = $store->getMetaData('socials', true);
-                        $availableSocials = available_socials_store();
-                    }
+                    $socials = $store->getMetaData('socials', true);
+                    $availableSocials = available_socials_store();
 
                     $view = Theme::getThemeNamespace() . '::views.marketplace.includes.extended-info-content';
 
-                    $form
-                        ->addBefore('submit', 'extended_info_content', HtmlField::class, [
+                    $form->addBefore('submit', 'extended_info_content', HtmlField::class, [
                         'html' => view($view, compact('background', 'socials', 'availableSocials'))->render(),
                     ]);
                 });
         });
 
-        VendorStoreForm::afterSaving(function (VendorStoreForm $form) {
+        VendorStoreForm::afterSaving(function (VendorStoreForm $form): void {
             $request = $form->getRequest();
 
             $store = $form->getModel();
@@ -174,7 +213,7 @@ app()->booted(function () {
         }, 230);
     }
 
-    app('events')->listen(RouteMatched::class, function () {
+    app('events')->listen(RouteMatched::class, function (): void {
         EmailHandler::addTemplateSettings(Theme::getThemeName(), [
             'name' => __('Theme emails'),
             'description' => __('Config email templates for theme'),
@@ -200,32 +239,4 @@ app()->booted(function () {
             ],
         ], 'themes');
     });
-
-    if (is_plugin_active('social-login')) {
-        $data = SocialService::getModule('customer');
-        if ($data) {
-            $data['view'] = Theme::getThemeNamespace('partials.social-login-options');
-            $data['use_css'] = false;
-            SocialService::registerModule($data);
-        }
-    }
 });
-
-if (! function_exists('theme_get_autoplay_speed_options')) {
-    function theme_get_autoplay_speed_options(): array
-    {
-        $options = [2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000];
-
-        return array_combine($options, $options);
-    }
-}
-
-if (! function_exists('get_store_list_layouts')) {
-    function get_store_list_layouts(): array
-    {
-        return [
-            'grid' => __('Grid'),
-            'list' => __('List'),
-        ];
-    }
-}

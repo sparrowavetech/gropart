@@ -1,1 +1,4 @@
-<x-core::icon name="{{ $icon }}" class="{{ $positionClass }}" />
+<x-core::icon
+    name="{{ $icon }}"
+    class="{{ $positionClass }}"
+/>

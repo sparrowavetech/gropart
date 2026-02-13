@@ -1,23 +1,23 @@
 @if ($payment)
     <div
-        class="alert alert-success"
+        class="alert alert-success mt-3 d-block"
         role="alert"
     >
         <p class="mb-2">{{ trans('plugins/payment::payment.payment_id') }}: <strong>{{ $payment->id }}</strong></p>
-        <p class="mb-2">{{ trans('plugins/payment::payment.payer_name') }}: {{ $payment->billing_details->name }}</p>
+        <p class="mb-0">{{ trans('plugins/payment::payment.payer_name') }}: {{ $payment->billing_details->name }}</p>
         @if ($payment->source)
-            <p class="mb-2">{{ trans('plugins/payment::payment.card') }}: {{ $payment->source->brand }} - **** ****
+            <p class="mb-0 mt-2">{{ trans('plugins/payment::payment.card') }}: {{ $payment->source->brand }} - **** ****
                 **** {{ $payment->source->last4 }}
                 - {{ $payment->source->exp_month }}/{{ $payment->source->exp_year }}</p>
         @endif
 
         @if ($payment->billing_details->country)
-            <p class="@if (!empty($payment->billing_details->address_line1)) mb-2 @else mb-0 @endif">
+            <p class="mb-0 mt-2">
                 {{ trans('plugins/payment::payment.country') }}: {{ $payment->billing_details->country }}</p>
         @endif
 
         @if (!empty($payment->billing_details->address_line1))
-            <p class="mb-0">{{ trans('plugins/payment::payment.address') }}:
+            <p class="mb-0 mt-2">{{ trans('plugins/payment::payment.address') }}:
                 {{ $payment->billing_details->address_line1 }}</p>
         @endif
 

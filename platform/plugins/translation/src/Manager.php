@@ -4,10 +4,13 @@ namespace Botble\Translation;
 
 use ArrayAccess;
 use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Services\DeleteLocaleService;
 use Botble\Base\Services\DeleteUnusedTranslationFilesService;
 use Botble\Base\Services\DownloadLocaleService;
+use Botble\Base\Supports\Language;
 use Botble\Base\Supports\ServiceProvider;
 use Botble\Theme\Facades\Theme;
+use Exception;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Arr;
@@ -24,6 +27,8 @@ class Manager
 
     protected DownloadLocaleService $downloadLocaleService;
 
+    protected DeleteLocaleService $deleteLocaleService;
+
     protected DeleteUnusedTranslationFilesService $deleteUnusedTranslationFilesService;
 
     public function __construct(protected Application $app, protected Filesystem $files)
@@ -32,6 +37,7 @@ class Manager
 
         $this->downloadLocaleService = new DownloadLocaleService();
         $this->deleteUnusedTranslationFilesService = new DeleteUnusedTranslationFilesService();
+        $this->deleteLocaleService = new DeleteLocaleService();
     }
 
     public function publishLocales(): void
@@ -68,7 +74,9 @@ class Manager
             Arr::set($translations, $transKey, $transValue);
         }
 
-        $translations = array_merge($englishTranslations, $translations);
+        if (is_array($englishTranslations) && ! empty($englishTranslations)) {
+            $englishTranslations = array_merge($englishTranslations, $translations);
+        }
 
         $file = $locale . DIRECTORY_SEPARATOR . $group;
 
@@ -100,17 +108,17 @@ class Manager
         return $this->config[$key];
     }
 
-    public function removeUnusedThemeTranslations(): bool
+    public function removeUnusedThemeTranslations(?string $theme = null): bool
     {
         if (Theme::hasInheritTheme()) {
-            $this->removeUnusedThemeTranslationsFromTheme(
-                Theme::getInheritTheme()
-            );
+            $this->removeUnusedThemeTranslationsFromTheme(Theme::getInheritTheme());
         }
 
-        $this->removeUnusedThemeTranslationsFromTheme(
-            Theme::getThemeName()
-        );
+        if (! $theme) {
+            $theme = Theme::getThemeName();
+        }
+
+        $this->removeUnusedThemeTranslationsFromTheme($theme);
 
         return true;
     }
@@ -135,14 +143,19 @@ class Manager
 
                 $defaultEnglishFile = theme_path("$theme/lang/en.json");
 
-                if ($defaultEnglishFile) {
-                    $enTranslations = BaseHelper::getFileData($defaultEnglishFile);
-                    $translations = array_merge($enTranslations, $translations);
+                if (! File::exists($defaultEnglishFile)) {
+                    $this->updateThemeTranslations();
+                }
 
-                    $enTranslationKeys = array_keys($enTranslations);
+                if (File::exists($defaultEnglishFile)) {
+                    $enTranslations = BaseHelper::getFileData($defaultEnglishFile);
+                    $translations = [
+                        ...$enTranslations,
+                        ...$translations,
+                    ];
 
                     foreach ($translations as $key => $translation) {
-                        if (! in_array($key, $enTranslationKeys)) {
+                        if (! array_key_exists($key, $enTranslations)) {
                             Arr::forget($translations, $key);
                         }
                     }
@@ -158,6 +171,13 @@ class Manager
         }
 
         return true;
+    }
+
+    public function downloadLocaleIfMissing(string $locale): void
+    {
+        if (! array_key_exists($locale, Language::getAvailableLocales())) {
+            $this->downloadRemoteLocale($locale);
+        }
     }
 
     public function getRemoteAvailableLocales(): array
@@ -282,7 +302,11 @@ class Manager
 
             if (File::exists($themeLangPath)) {
 
-                File::ensureDirectoryExists(dirname($localeFilePath));
+                try {
+                    File::ensureDirectoryExists(dirname($localeFilePath));
+                } catch (Throwable) {
+                    throw new Exception(trans('plugins/translation::translation.folder_is_not_writeable', ['lang_path' => lang_path()]));
+                }
 
                 File::copy($themeLangPath, $localeFilePath);
             }
@@ -353,13 +377,17 @@ class Manager
         return array_unique($keys);
     }
 
-    public function updateThemeTranslations(): int
+    public function updateThemeTranslations(?string $theme = null): int
     {
-        $theme = Theme::hasInheritTheme() ? Theme::getInheritTheme() : Theme::getThemeName();
+        if (! $theme) {
+            $theme = Theme::getThemeName();
+        }
+
         $keys = $this->findJsonTranslations(core_path());
         $keys += $this->findJsonTranslations(package_path());
         $keys += $this->findJsonTranslations(plugin_path());
         $keys += $this->findJsonTranslations(theme_path($theme));
+
         ksort($keys);
 
         $data = json_encode($keys, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
@@ -367,5 +395,10 @@ class Manager
         BaseHelper::saveFileData(theme_path(sprintf('%s/lang/en.json', $theme)), $data, false);
 
         return count($keys);
+    }
+
+    public function deleteLocale(string $locale): void
+    {
+        $this->deleteLocaleService->handle($locale);
     }
 }

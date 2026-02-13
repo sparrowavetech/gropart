@@ -18,6 +18,7 @@ class TaxRule extends BaseModel
         'state',
         'city',
         'zip_code',
+        'percentage',
         'priority',
         'is_enabled',
     ];

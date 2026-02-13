@@ -17,11 +17,11 @@ class ProductTagForm extends FormAbstract
     public function setup(): void
     {
         $this
-            ->setupModel(new ProductTag())
+            ->model(ProductTag::class)
             ->setValidatorClass(ProductTagRequest::class)
-            ->add('name', TextField::class, NameFieldOption::make()->toArray())
-            ->add('description', TextareaField::class, DescriptionFieldOption::make()->toArray())
-            ->add('status', SelectField::class, StatusFieldOption::make()->toArray())
+            ->add('name', TextField::class, NameFieldOption::make())
+            ->add('description', TextareaField::class, DescriptionFieldOption::make())
+            ->add('status', SelectField::class, StatusFieldOption::make())
             ->setBreakFieldPoint('status');
     }
 }

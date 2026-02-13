@@ -10,7 +10,7 @@ class BrandRequest extends Request
     {
         return [
             'brands' => ['nullable', 'array'],
-            'brands.*' => ['nullable', 'exists:ec_product_brands,id'],
+            'brands.*' => ['nullable', 'exists:ec_brands,id'],
             'is_featured' => ['nullable', 'boolean'],
         ];
     }
@@ -19,6 +19,20 @@ class BrandRequest extends Request
     {
         return [
             'brands.*' => trans('plugins/ecommerce::brands.brands'),
+        ];
+    }
+
+    public function bodyParameters(): array
+    {
+        return [
+            'brands' => [
+                'description' => 'Array of brand IDs to filter products by',
+                'example' => [1, 2, 3],
+            ],
+            'is_featured' => [
+                'description' => 'Filter by featured status',
+                'example' => true,
+            ],
         ];
     }
 }

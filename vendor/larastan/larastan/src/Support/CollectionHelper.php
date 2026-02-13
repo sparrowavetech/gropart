@@ -9,23 +9,30 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Enumerable;
 use Iterator;
 use IteratorAggregate;
+use PhpParser\Node\Expr\ClassConstFetch;
+use PhpParser\Node\Name;
 use PHPStan\Reflection\ClassReflection;
 use PHPStan\Reflection\MissingMethodFromReflectionException;
-use PHPStan\Reflection\ParametersAcceptorSelector;
 use PHPStan\Reflection\ReflectionProvider;
 use PHPStan\ShouldNotHappenException;
 use PHPStan\Type\BenevolentUnionType;
 use PHPStan\Type\Generic\GenericObjectType;
 use PHPStan\Type\IntegerType;
+use PHPStan\Type\IntersectionType;
 use PHPStan\Type\MixedType;
 use PHPStan\Type\ObjectType;
 use PHPStan\Type\StringType;
 use PHPStan\Type\Type;
+use PHPStan\Type\TypeCombinator;
+use PHPStan\Type\TypeTraverser;
+use PHPStan\Type\UnionType;
 use PHPStan\Type\VerbosityLevel;
 use Traversable;
 
+use function array_map;
 use function array_values;
 use function count;
+use function in_array;
 
 final class CollectionHelper
 {
@@ -65,8 +72,20 @@ final class CollectionHelper
     public function determineCollectionClassName(string $modelClassName): string
     {
         try {
-            $newCollectionMethod = $this->reflectionProvider->getClass($modelClassName)->getNativeMethod('newCollection');
-            $returnType          = ParametersAcceptorSelector::selectSingle($newCollectionMethod->getVariants())->getReturnType();
+            $modelReflection = $this->reflectionProvider->getClass($modelClassName);
+
+            $attrs = $modelReflection->getNativeReflection()->getAttributes('Illuminate\Database\Eloquent\Attributes\CollectedBy'); //@phpstan-ignore argument.type (Attribute class might not exist)
+
+            if ($attrs !== []) {
+                $expr =  $attrs[0]->getArgumentsExpressions()[0];
+
+                if ($expr instanceof ClassConstFetch && $expr->class instanceof Name) {
+                    return $expr->class->toString();
+                }
+            }
+
+            $newCollectionMethod = $modelReflection->getNativeMethod('newCollection');
+            $returnType          = $newCollectionMethod->getVariants()[0]->getReturnType();
 
             $classNames = $returnType->getObjectClassNames();
 
@@ -103,13 +122,38 @@ final class CollectionHelper
         return new ObjectType($collectionClassName);
     }
 
+    public function replaceCollectionsInType(Type $type): Type
+    {
+        if (! in_array(EloquentCollection::class, $type->getReferencedClasses(), true)) {
+            return $type;
+        }
+
+        return TypeTraverser::map($type, function ($type, $traverse): Type {
+            if ($type instanceof UnionType || $type instanceof IntersectionType) {
+                return $traverse($type);
+            }
+
+            if (! (new ObjectType(EloquentCollection::class))->isSuperTypeOf($type)->yes()) {
+                return $traverse($type);
+            }
+
+            $models = $type->getTemplateType(EloquentCollection::class, 'TModel')->getObjectClassNames();
+
+            if (count($models) === 0) {
+                return $type;
+            }
+
+            return TypeCombinator::union(...array_map([$this, 'determineCollectionClass'], $models));
+        });
+    }
+
     private function getTypeFromEloquentCollection(ClassReflection $classReflection): GenericObjectType|null
     {
         $keyType = new BenevolentUnionType([new IntegerType(), new StringType()]);
 
         $innerValueType = $classReflection->getActiveTemplateTypeMap()->getType('TModel');
 
-        if ($classReflection->getName() === EloquentCollection::class || $classReflection->isSubclassOf(EloquentCollection::class)) {
+        if ($classReflection->is(EloquentCollection::class)) {
             $keyType = new IntegerType();
         }
 

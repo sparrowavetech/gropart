@@ -25,7 +25,10 @@
         </div>
 
         <div class="col-md-4">
-            <x-core::alert type="info">
+            <x-core::alert
+                type="info"
+                class="bg-white text-info"
+            >
                 {{ trans('core/base::tree-category.drag_drop_info') }}
             </x-core::alert>
 
@@ -50,9 +53,7 @@
                     <div
                         class="file-tree-wrapper"
                         data-url="{{ $indexRoute ? route($indexRoute) : '' }}"
-                        @if($updateTreeRoute)
-                            data-update-url="{{ route($updateTreeRoute) }}"
-                        @endif
+                        @if ($updateTreeRoute) data-update-url="{{ route($updateTreeRoute) }}" @endif
                     >
                         @include('core/base::forms.partials.tree-categories', compact('categories'))
                     </div>

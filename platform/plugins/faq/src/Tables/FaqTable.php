@@ -32,6 +32,7 @@ class FaqTable extends TableAbstract
                 FormattedColumn::make('category_id')
                     ->title(trans('plugins/faq::faq.category'))
                     ->alignStart()
+                    ->withEmptyState()
                     ->getValueUsing(fn (FormattedColumn $column) => $column->getItem()->category->name),
                 CreatedAtColumn::make(),
                 StatusColumn::make(),

@@ -6,6 +6,8 @@ use Botble\ACL\Database\Seeders\UserSeeder;
 use Botble\Base\Supports\BaseSeeder;
 use Botble\Contact\Database\Seeders\ContactSeeder;
 use Botble\Ecommerce\Database\Seeders\CurrencySeeder;
+use Botble\Ecommerce\Database\Seeders\DiscountSeeder;
+use Botble\Ecommerce\Database\Seeders\ProductSpecificationSeeder;
 use Botble\Ecommerce\Database\Seeders\ReviewSeeder;
 use Botble\Ecommerce\Database\Seeders\ShippingSeeder;
 use Botble\Ecommerce\Database\Seeders\TaxSeeder;
@@ -21,6 +23,7 @@ class DatabaseSeeder extends BaseSeeder
             UserSeeder::class,
             LanguageSeeder::class,
             FaqSeeder::class,
+            TestimonialSeeder::class,
             BrandSeeder::class,
             CurrencySeeder::class,
             ProductCategorySeeder::class,
@@ -34,6 +37,7 @@ class DatabaseSeeder extends BaseSeeder
             ShippingSeeder::class,
             ProductSeeder::class,
             FlashSaleSeeder::class,
+            DiscountSeeder::class,
             ReviewSeeder::class,
             StoreLocatorSeeder::class,
             MarketplaceSeeder::class,
@@ -43,6 +47,7 @@ class DatabaseSeeder extends BaseSeeder
             PageSeeder::class,
             AdsSeeder::class,
             SettingSeeder::class,
+            ProductSpecificationSeeder::class,
             MenuSeeder::class,
             ThemeOptionSeeder::class,
             WidgetSeeder::class,

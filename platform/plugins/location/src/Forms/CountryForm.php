@@ -3,9 +3,12 @@
 namespace Botble\Location\Forms;
 
 use Botble\Base\Forms\FieldOptions\IsDefaultFieldOption;
+use Botble\Base\Forms\FieldOptions\MediaImageFieldOption;
 use Botble\Base\Forms\FieldOptions\NameFieldOption;
 use Botble\Base\Forms\FieldOptions\SortOrderFieldOption;
 use Botble\Base\Forms\FieldOptions\StatusFieldOption;
+use Botble\Base\Forms\FieldOptions\TextFieldOption;
+use Botble\Base\Forms\Fields\MediaImageField;
 use Botble\Base\Forms\Fields\NumberField;
 use Botble\Base\Forms\Fields\OnOffField;
 use Botble\Base\Forms\Fields\SelectField;
@@ -21,27 +24,29 @@ class CountryForm extends FormAbstract
         $this
             ->model(Country::class)
             ->setValidatorClass(CountryRequest::class)
-            ->add('name', TextField::class, NameFieldOption::make()->required()->toArray())
-            ->add('code', TextField::class, [
-                'label' => trans('plugins/location::country.code'),
-                'attr' => [
-                    'placeholder' => trans('plugins/location::country.code_placeholder'),
-                    'data-counter' => 10,
-                ],
-                'help_block' => [
-                    'text' => trans('plugins/location::country.code_helper'),
-                ],
-            ])
-            ->add('nationality', TextField::class, [
-                'label' => trans('plugins/location::country.nationality'),
-                'attr' => [
-                    'placeholder' => trans('plugins/location::country.nationality'),
-                    'data-counter' => 120,
-                ],
-            ])
-            ->add('order', NumberField::class, SortOrderFieldOption::make()->toArray())
-            ->add('is_default', OnOffField::class, IsDefaultFieldOption::make()->toArray())
-            ->add('status', SelectField::class, StatusFieldOption::make()->toArray())
+            ->add('name', TextField::class, NameFieldOption::make()->required())
+            ->add(
+                'code',
+                TextField::class,
+                TextFieldOption::make()
+                    ->label(trans('plugins/location::country.code'))
+                    ->placeholder(trans('plugins/location::country.code_placeholder'))
+                    ->maxLength(3)
+                    ->helperText(trans('plugins/location::country.code_helper'))
+                    ->required()
+            )
+            ->add(
+                'nationality',
+                TextField::class,
+                TextFieldOption::make()
+                    ->label(trans('plugins/location::country.nationality'))
+                    ->placeholder(trans('plugins/location::country.nationality'))
+                    ->maxLength(120)
+            )
+            ->add('order', NumberField::class, SortOrderFieldOption::make())
+            ->add('is_default', OnOffField::class, IsDefaultFieldOption::make())
+            ->add('status', SelectField::class, StatusFieldOption::make())
+            ->add('image', MediaImageField::class, MediaImageFieldOption::make())
             ->setBreakFieldPoint('status');
     }
 }

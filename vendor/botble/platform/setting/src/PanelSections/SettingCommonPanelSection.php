@@ -39,6 +39,13 @@ class SettingCommonPanelSection extends PanelSection
                     ->withPriority(-9970)
                     ->withRoute('settings.email.rules')
                     ->withPermission('settings.email'),
+                PanelSectionItem::make('phone_number')
+                    ->setTitle(trans('core/setting::setting.phone_number.title'))
+                    ->withIcon('ti ti-phone')
+                    ->withDescription(trans('core/setting::setting.phone_number.description'))
+                    ->withPriority(-9960)
+                    ->withRoute('settings.phone-number.index')
+                    ->withPermission('settings.phone-number'),
                 PanelSectionItem::make('media')
                     ->setTitle(trans('core/setting::setting.panel.media'))
                     ->withIcon('ti ti-folder')

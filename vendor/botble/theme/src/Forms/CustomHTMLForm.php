@@ -24,7 +24,6 @@ class CustomHTMLForm extends FormAbstract
                     ->value(setting('custom_header_html'))
                     ->mode('html')
                     ->maxLength(2500)
-                    ->toArray()
             )
             ->add(
                 'custom_body_html',
@@ -35,7 +34,6 @@ class CustomHTMLForm extends FormAbstract
                     ->value(setting('custom_body_html'))
                     ->mode('html')
                     ->maxLength(2500)
-                    ->toArray()
             )
             ->add(
                 'custom_footer_html',
@@ -46,7 +44,6 @@ class CustomHTMLForm extends FormAbstract
                     ->value(setting('custom_footer_html'))
                     ->mode('html')
                     ->maxLength(2500)
-                    ->toArray()
             );
     }
 }

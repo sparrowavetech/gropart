@@ -6,6 +6,7 @@ use Botble\Base\Facades\EmailHandler;
 use Botble\Ecommerce\Enums\OrderReturnHistoryActionEnum;
 use Botble\Ecommerce\Enums\OrderReturnStatusEnum;
 use Botble\Ecommerce\Events\OrderReturnedEvent;
+use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Facades\OrderHelper as OrderHelperFacade;
 use Botble\Ecommerce\Models\Order;
 use Botble\Ecommerce\Models\OrderProduct;
@@ -33,6 +34,10 @@ class OrderReturnHelper
             $orderReturnData['reason'] = $data['reason'];
         }
 
+        if (! empty($data['images'])) {
+            $orderReturnData['images'] = $data['images'];
+        }
+
         try {
             DB::beginTransaction();
 
@@ -41,6 +46,8 @@ class OrderReturnHelper
             $orderReturnItemData = [];
 
             $orderProductIds = [];
+
+            $now = Carbon::now();
 
             foreach ($data['items'] as $returnItem) {
                 $orderProduct = OrderProduct::query()->find($returnItem['order_item_id']);
@@ -58,7 +65,8 @@ class OrderReturnHelper
                     'qty' => $returnItem['qty'],
                     'reason' => $returnItem['reason'] ?? null,
                     'refund_amount' => $returnItem['refund_amount'] ?? null,
-                    'created_at' => Carbon::now(),
+                    'created_at' => $now,
+                    'updated_at' => $now,
                 ];
 
                 $orderProductIds[] = $orderProduct->product_id;
@@ -66,9 +74,12 @@ class OrderReturnHelper
 
             OrderReturnItem::query()->insert($orderReturnItemData);
 
+            /**
+             * @var OrderReturn $orderReturn
+             */
             $orderReturn->histories()->create([
                 'action' => OrderReturnHistoryActionEnum::CREATED,
-                'description' => __('Request return order with reason: :reason', ['reason' => $orderReturn->reason->label()]),
+                'description' => __('Request return order with reason: :reason', ['reason' => $orderReturn->reason?->label() ?? '']),
             ]);
 
             event(new OrderReturnedEvent($orderReturn));
@@ -90,10 +101,10 @@ class OrderReturnHelper
                         'products' => $orderProducts,
                     ])
                         ->render(),
-                    'return_reason' => $orderReturn->reason->label(),
+                    'return_reason' => $orderReturn->reason?->label() ?? '',
                 ]);
 
-                $mailer->sendUsingTemplate('order-return-request', get_admin_email()->toArray());
+                $mailer->sendUsingTemplate('order-return-request', EcommerceHelper::getAdminNotificationEmails());
             }
 
             DB::commit();
@@ -151,6 +162,15 @@ class OrderReturnHelper
                             }
                         }
                     }
+
+                    // Update restock_quantity to track that this quantity has been returned
+                    if ($item->order_product_id) {
+                        $orderProduct = OrderProduct::query()->find($item->order_product_id);
+                        if ($orderProduct) {
+                            $orderProduct->restock_quantity = ($orderProduct->restock_quantity ?? 0) + $item->qty;
+                            $orderProduct->save();
+                        }
+                    }
                 }
 
                 do_action(ACTION_AFTER_ORDER_RETURN_STATUS_COMPLETED, $orderReturn, $data);
@@ -169,14 +189,16 @@ class OrderReturnHelper
 
             $customer = $orderReturn->customer;
 
-            EmailHandler::setModule(ECOMMERCE_MODULE_SCREEN_NAME)
-                ->setVariableValues([
-                    'customer_name' => $customer->name,
-                    'order_id' => $orderReturn->order->code,
-                    'description' => $data['description'] ?? null,
-                    'status' => $orderReturn->return_status->label(),
-                ])
-                ->sendUsingTemplate('order-return-status-updated', $customer->email);
+            if ($customer?->email) {
+                EmailHandler::setModule(ECOMMERCE_MODULE_SCREEN_NAME)
+                    ->setVariableValues([
+                        'customer_name' => $customer->name ?? 'Guest',
+                        'order_id' => $orderReturn->order?->code ?? '',
+                        'description' => $data['description'] ?? null,
+                        'status' => $orderReturn->return_status->label(),
+                    ])
+                    ->sendUsingTemplate('order-return-status-updated', $customer->email);
+            }
 
             DB::commit();
 

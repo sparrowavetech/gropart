@@ -7,10 +7,12 @@ use Illuminate\Support\Facades\Facade;
 
 /**
  * @method static \Illuminate\Support\Collection|\Illuminate\Database\Eloquent\Model|array|bool processOrder(array|string|null $orderIds, string|null $chargeId = null)
+ * @method static array validateAndReserveStock(array $cartItems)
  * @method static bool decreaseProductQuantity(\Botble\Ecommerce\Models\Order $order)
  * @method static \Botble\Base\Supports\EmailHandler setEmailVariables(\Botble\Ecommerce\Models\Order $order)
  * @method static array getEmailVariables(\Botble\Ecommerce\Models\Order $order)
- * @method static bool sendOrderConfirmationEmail(\Botble\Ecommerce\Models\Order $order, bool $saveHistory = false)
+ * @method static bool sendOrderConfirmationEmail(\Botble\Ecommerce\Models\Order $order, bool $saveHistory = false, bool $force = false)
+ * @method static bool sendOrderEmail(\Botble\Ecommerce\Models\Order $order, string $template, string|array|null $email = null, array $additionalVariables = [], array $args = [], bool $debug = false)
  * @method static void sendEmailForDigitalProducts(\Botble\Ecommerce\Models\Order $order)
  * @method static \Botble\Ecommerce\Models\Order setOrderCompleted(string|int $orderId, \Illuminate\Http\Request $request, string|int $userId = 0)
  * @method static array|string|null getShippingMethod(string $method, array|string|null $option = null)
@@ -22,7 +24,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static array mergeOrderSessionData(string|null $token, array|string $data)
  * @method static void clearSessions(string|null $token)
  * @method static array handleAddCart(\Botble\Ecommerce\Models\Product $product, \Illuminate\Http\Request $request)
- * @method static array getProductOptionData(array $data)
+ * @method static array getProductOptionData(array $data, string|int|null $productId = null)
  * @method static array processAddressOrder(string|int $currentUserId, array $sessionData, \Illuminate\Http\Request $request)
  * @method static array checkAndCreateOrderAddress(array $addressData, array $sessionData)
  * @method static array processOrderProductData(\Illuminate\Support\Collection|array $products, array $sessionData)
@@ -33,6 +35,8 @@ use Illuminate\Support\Facades\Facade;
  * @method static \Botble\Ecommerce\Models\Order shippingStatusDelivered(\Botble\Ecommerce\Models\Shipment $shipment, \Illuminate\Http\Request $request, string|int $userId = 0)
  * @method static string|null getOrderBankInfo(\Botble\Ecommerce\Models\Order|\Illuminate\Database\Eloquent\Collection $orders)
  * @method static void confirmOrder(\Botble\Ecommerce\Models\Order $order)
+ * @method static \Botble\Ecommerce\Models\Order|false|null createOrUpdateIncompleteOrder(array $data, \Botble\Ecommerce\Models\Order|null $order = null)
+ * @method static void captureFootprints(\Botble\Ecommerce\Models\Order $order)
  *
  * @see \Botble\Ecommerce\Supports\OrderHelper
  */

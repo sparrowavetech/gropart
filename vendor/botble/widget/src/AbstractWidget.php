@@ -5,8 +5,12 @@ namespace Botble\Widget;
 use Botble\Theme\Facades\Theme;
 use Botble\Widget\Facades\WidgetGroup as WidgetGroupFacade;
 use Botble\Widget\Forms\WidgetForm;
+use Carbon\Carbon;
+use Closure;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Str;
@@ -30,6 +34,8 @@ abstract class AbstractWidget
 
     protected ?WidgetGroup $group = null;
 
+    protected static array $ignoredCaches = [];
+
     public function __construct(array $config = [])
     {
         foreach ($config as $key => $value) {
@@ -44,7 +50,7 @@ abstract class AbstractWidget
         return File::basename(File::dirname($reflection->getFilename()));
     }
 
-    public function getConfig(string $name = null, $default = null): array|int|string|null
+    public function getConfig(?string $name = null, $default = null): array|int|string|null
     {
         if ($name) {
             return Arr::get($this->config, $name, $default);
@@ -68,13 +74,18 @@ abstract class AbstractWidget
             return '';
         }
 
+        $args = func_get_args();
+
+        return $this->renderWidget($args);
+    }
+
+    protected function renderWidget(array $args): ?string
+    {
         $widgetGroup = app('botble.widget-group-collection');
         $widgetGroup->load();
         $widgetGroupData = $widgetGroup->getData();
 
         Theme::uses(Theme::getThemeName());
-
-        $args = func_get_args();
 
         $this->group = WidgetGroupFacade::group($args[0]);
 
@@ -88,6 +99,38 @@ abstract class AbstractWidget
             $this->config = array_merge($this->config, $data->data);
         }
 
+        $widgetClass = $this->getId();
+        $sidebar = $args[0] ?? 'default';
+        $position = $args[1] ?? 0;
+        $theme = Theme::getThemeName();
+        $locale = App::getLocale();
+        $authorized = auth()->check();
+        $appUrl = url('/');
+
+        $renderedContent = $this->renderWidgetContent($args, $data);
+
+        $containsForms = $this->containsFormElements($renderedContent);
+
+        if (
+            setting('widget_cache_enabled', false)
+            && ! request()->ajax()
+            && ! $this->shouldIgnoreCache($widgetClass)
+            && (Arr::get($this->config, 'enable_caching', 'yes') !== 'no')
+            && ! $containsForms
+        ) {
+            $serializableConfig = $this->getSerializableConfig();
+            $cacheKey = 'widget_' . md5($widgetClass . $sidebar . $appUrl . $position . $theme . $locale . $authorized . serialize($serializableConfig));
+            $cacheTtl = (int) setting('widget_cache_ttl', 1800);
+            $cacheDuration = Carbon::now()->addSeconds($cacheTtl);
+
+            Cache::put($cacheKey, $renderedContent, $cacheDuration);
+        }
+
+        return $renderedContent;
+    }
+
+    protected function renderWidgetContent(array $args, $data): ?string
+    {
         $viewData = array_merge([
             'config' => $this->config,
             'sidebar' => $args[0],
@@ -144,7 +187,13 @@ abstract class AbstractWidget
 
         $settingForm = $this->settingForm();
 
-        return $settingForm instanceof WidgetForm ? $settingForm->renderForm() : $settingForm;
+        if ($settingForm instanceof WidgetForm) {
+            $settingForm->withCacheWarning($this->getId())->withCaching();
+
+            return $settingForm->renderForm();
+        }
+
+        return $settingForm;
     }
 
     protected function settingForm(): WidgetForm|string|null
@@ -220,4 +269,80 @@ abstract class AbstractWidget
             ...$config,
         ];
     }
+
+    public static function ignoreCaches(array $widgets): void
+    {
+        static::$ignoredCaches = array_merge(static::$ignoredCaches, $widgets);
+    }
+
+    public static function getIgnoredCaches(): array
+    {
+        return static::$ignoredCaches;
+    }
+
+    protected function shouldIgnoreCache(string $widgetClass): bool
+    {
+        return in_array($widgetClass, static::$ignoredCaches);
+    }
+
+    protected function containsFormElements(?string $content): bool
+    {
+        if (! $content) {
+            return false;
+        }
+
+        $patterns = [
+            '<form',
+            'csrf_token',
+            '_token',
+            'g-recaptcha',
+            'FormBuilder',
+            'renderForm()',
+            'NewsletterForm',
+            'ContactForm',
+            'CommentForm',
+            'SubscribeForm',
+            'type="submit"',
+            'method="post"',
+            'method="POST"',
+        ];
+
+        foreach ($patterns as $pattern) {
+            if (stripos($content, $pattern) !== false) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function getName(): ?string
+    {
+        $name = $this->getConfig()['name'] ?? '';
+
+        if ($name instanceof Closure) {
+            return $name();
+        }
+
+        return $name;
+    }
+
+    public function getDescription(): ?string
+    {
+        $description = $this->getConfig()['description'] ?? '';
+
+        if ($description instanceof Closure) {
+            return $description();
+        }
+
+        return $description;
+    }
+
+    protected function getSerializableConfig(): array
+    {
+        return array_filter($this->config, function ($value) {
+            return ! $value instanceof Closure;
+        });
+    }
+
 }

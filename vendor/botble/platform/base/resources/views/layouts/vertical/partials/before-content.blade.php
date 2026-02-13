@@ -2,4 +2,4 @@
 
 <div class="d-block d-lg-flex">
 
-@include('core/base::layouts.' . AdminAppearance::getCurrentLayout() . '.partials.aside')
+    @include('core/base::layouts.' . AdminAppearance::getCurrentLayout() . '.partials.aside')

@@ -11,6 +11,8 @@ use Botble\Base\Facades\Html;
 use Botble\Base\Models\BaseModel;
 use Botble\Base\Supports\Builders\Extensible;
 use Botble\Base\Supports\Builders\RenderingExtensible;
+use Botble\Support\Repositories\Caches\CacheAbstractDecorator;
+use Botble\Support\Repositories\Eloquent\RepositoriesAbstract;
 use Botble\Table\Abstracts\Concerns\DeprecatedFunctions;
 use Botble\Table\Abstracts\Concerns\HasActions;
 use Botble\Table\Abstracts\Concerns\HasBulkActions;
@@ -73,20 +75,22 @@ abstract class TableAbstract extends DataTable implements ExtensibleContract
 
     protected int $pageLength = 10;
 
-    protected $view = 'core/table::table';
+    protected ?string $view = 'core/table::table';
 
     protected array $options = [];
 
     /**
      * @deprecated since v6.8.0
      */
-    protected $repository;
+    protected RepositoriesAbstract|CacheAbstractDecorator|null $repository = null;
 
     protected ?BaseModelContract $model = null;
 
     protected bool $useDefaultSorting = true;
 
     protected int $defaultSortColumn = 1;
+
+    protected ?string $defaultSortColumnName = null;
 
     protected Closure $defaultSortingCallback;
 
@@ -114,6 +118,8 @@ abstract class TableAbstract extends DataTable implements ExtensibleContract
      */
     protected Closure $modifyQueryUsingCallback;
 
+    protected bool $earlyTable = false;
+
     protected string $dom = "fBrt<'card-footer d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2'<'d-flex justify-content-between align-items-center gap-3'l<'m-0 text-muted'i>><'d-flex justify-content-center'p>>";
 
     public function __construct(protected DataTables $table, UrlGenerator $urlGenerator)
@@ -129,6 +135,8 @@ abstract class TableAbstract extends DataTable implements ExtensibleContract
         if (! $this->getOption('class')) {
             $this->setOption('class', 'table card-table table-vcenter table-striped table-hover');
         }
+
+        $this->hasResponsive = setting('datatables_default_enable_responsive', true);
 
         $this->setup();
 
@@ -251,7 +259,7 @@ abstract class TableAbstract extends DataTable implements ExtensibleContract
                 'search' => '',
                 'searchPlaceholder' => trans('core/table::table.search'),
                 'zeroRecords' => trans('core/base::tables.no_record'),
-                'processing' => Html::image('vendor/core/core/base/images/loading-spinner-blue.gif'),
+                'processing' => '',
                 'paginate' => [
                     'next' => trans('pagination.next'),
                     'previous' => trans('pagination.previous'),
@@ -275,11 +283,25 @@ abstract class TableAbstract extends DataTable implements ExtensibleContract
 
     public function getDefaultSorting(): array
     {
+        $defaultSortColumnIndex = $this->hasBulkActions() ? $this->defaultSortColumn : 0;
+
+        if ($this->defaultSortColumnName) {
+            $columns = $this->getColumns();
+
+            foreach ($columns as $index => $column) {
+                if (Arr::get($column->toArray(), 'name') === $this->defaultSortColumnName) {
+                    $defaultSortColumnIndex = $index;
+
+                    break;
+                }
+            }
+        }
+
         return isset($this->defaultSortingCallback)
             ? call_user_func($this->defaultSortingCallback, $this)
             : [
                 [
-                    ($this->hasBulkActions() ? $this->defaultSortColumn : 0),
+                    $defaultSortColumnIndex,
                     'desc',
                 ],
             ];
@@ -300,6 +322,8 @@ abstract class TableAbstract extends DataTable implements ExtensibleContract
     public function onAjax(Closure $onAjaxCallback): static
     {
         $this->onAjaxCallback = $onAjaxCallback;
+
+        $this->earlyTable = true;
 
         return $this;
     }
@@ -358,7 +382,7 @@ abstract class TableAbstract extends DataTable implements ExtensibleContract
     }
 
     /**
-     * @param  BaseModel|class-string<BaseModel>  $model
+     * @param BaseModel|class-string<BaseModel> $model
      */
     public function model(BaseModelContract|string $model): static
     {
@@ -381,6 +405,8 @@ abstract class TableAbstract extends DataTable implements ExtensibleContract
         }
 
         $this->model = $model;
+
+        $this->earlyTable = true;
 
         return $this;
     }
@@ -405,9 +431,9 @@ abstract class TableAbstract extends DataTable implements ExtensibleContract
     /**
      * @param  \Botble\Table\Columns\Column[]  $columns
      */
-    public function addColumns(array $columns): static
+    public function addColumns(Closure|callable|array $columns): static
     {
-        foreach ($columns as $column) {
+        foreach (value($columns) as $column) {
             $this->addColumn($column);
         }
 
@@ -429,8 +455,12 @@ abstract class TableAbstract extends DataTable implements ExtensibleContract
         return $this;
     }
 
-    public function removeColumns(array $columns): static
+    public function removeColumns(array $columns = []): static
     {
+        if (! $columns) {
+            $columns = array_map(fn ($column) => $column->get('data'), $this->getColumns());
+        }
+
         foreach ($columns as $column) {
             $this->removeColumn($column);
         }
@@ -586,7 +616,7 @@ abstract class TableAbstract extends DataTable implements ExtensibleContract
             $buttons[] = 'visibility';
         }
 
-        return $buttons;
+        return apply_filters('cms_table_default_buttons', $buttons, $this);
     }
 
     public function htmlInitComplete(): ?string
@@ -755,7 +785,7 @@ abstract class TableAbstract extends DataTable implements ExtensibleContract
             case 'customSelect':
                 $attributes['class'] = str_replace('form-control ', '', $attributes['class']);
                 $attributes['placeholder'] = trans('core/table::table.select_option');
-                $html = Form::customSelect($inputName, $data, $value, $attributes)->toHtml();
+                $html = Form::customSelect($inputName, $data, $value, $attributes)->toHtml(); // @phpstan-ignore-line
 
                 break;
 
@@ -763,7 +793,7 @@ abstract class TableAbstract extends DataTable implements ExtensibleContract
                 $attributes['class'] = str_replace('form-control ', '', $attributes['class']);
                 $attributes['class'] = $attributes['class'] . ' select-search-full';
                 $attributes['placeholder'] = trans('core/table::table.select_option');
-                $html = Form::customSelect($inputName, $data, $value, $attributes)->toHtml();
+                $html = Form::customSelect($inputName, $data, $value, $attributes)->toHtml(); // @phpstan-ignore-line
 
                 break;
 
@@ -777,6 +807,7 @@ abstract class TableAbstract extends DataTable implements ExtensibleContract
                     'data-placeholder' => Arr::get($data, 'placeholder', $attributes['placeholder']),
                 ];
 
+                // @phpstan-ignore-next-line
                 $html = Form::customSelect($inputName, Arr::get($data, 'selected', []), $value, $attributes)->toHtml();
 
                 break;
@@ -792,7 +823,7 @@ abstract class TableAbstract extends DataTable implements ExtensibleContract
                 break;
 
             case 'datePicker':
-                $html = Form::datePicker($inputName, $value, $attributes)->toHtml();
+                $html = Form::datePicker($inputName, $value, $attributes)->toHtml(); // @phpstan-ignore-line
 
                 break;
 
@@ -807,7 +838,24 @@ abstract class TableAbstract extends DataTable implements ExtensibleContract
 
     public function getFilters(): array
     {
-        return apply_filters('base_filter_table_filters', $this->getAllBulkChanges(), $this);
+        $filters = $this->filters;
+
+        if (! $filters) {
+            $filters = $this->getAllBulkChanges();
+        } else {
+            foreach ($filters as $key => $filter) {
+                if ($filter instanceof TableBulkChangeAbstract) {
+                    if ($filter->getName()) {
+                        $filters[$filter->getName()] = $filter->toArray();
+                        Arr::forget($filters, $key);
+                    } else {
+                        $filters[$key] = $filter->toArray();
+                    }
+                }
+            }
+        }
+
+        return apply_filters('base_filter_table_filters', $filters, $this);
     }
 
     protected function addCreateButton(string $url, ?string $permission = null, array $buttons = []): array

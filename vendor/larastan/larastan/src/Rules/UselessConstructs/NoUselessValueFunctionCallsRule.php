@@ -47,8 +47,11 @@ class NoUselessValueFunctionCallsRule implements Rule
 
         return [
             RuleErrorBuilder::message("Calling the helper function 'value()' without a closure as the first argument simply returns the first argument without doing anything")
-                ->line($node->getLine())
+                ->line($node->getStartLine())
                 ->identifier('larastan.uselessConstructs.value')
+                ->fixNode($node, static function () use ($args) {
+                    return $args[0]->value;
+                })
                 ->build(),
         ];
     }

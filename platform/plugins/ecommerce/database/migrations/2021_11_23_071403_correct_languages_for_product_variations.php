@@ -12,7 +12,7 @@ return new class () extends Migration {
             is_plugin_active('language-advanced')
         ) {
             $records = [];
-            foreach (Product::get() as $product) {
+            foreach (Product::query()->get() as $product) {
                 foreach (Language::getActiveLanguage(['lang_code', 'lang_is_default']) as $language) {
                     if ($language->lang_is_default) {
                         continue;

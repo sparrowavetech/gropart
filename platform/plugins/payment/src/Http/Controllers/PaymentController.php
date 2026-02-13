@@ -3,17 +3,15 @@
 namespace Botble\Payment\Http\Controllers;
 
 use Botble\Base\Facades\Assets;
-use Botble\Base\Facades\PageTitle;
 use Botble\Base\Http\Actions\DeleteResourceAction;
+use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Payment\Enums\PaymentStatusEnum;
 use Botble\Payment\Forms\BankTransferPaymentMethodForm;
 use Botble\Payment\Forms\CODPaymentMethodForm;
-use Botble\Payment\Forms\Settings\PaymentMethodSettingForm;
 use Botble\Payment\Http\Requests\PaymentMethodRequest;
 use Botble\Payment\Http\Requests\Settings\PaymentMethodSettingRequest;
 use Botble\Payment\Http\Requests\UpdatePaymentRequest;
 use Botble\Payment\Models\Payment;
-use Botble\Payment\Repositories\Interfaces\PaymentInterface;
 use Botble\Payment\Tables\PaymentTable;
 use Botble\Setting\Http\Controllers\SettingController;
 use Botble\Setting\Supports\SettingStore;
@@ -22,13 +20,9 @@ use Illuminate\Support\Arr;
 
 class PaymentController extends SettingController
 {
-    public function __construct(protected PaymentInterface $paymentRepository)
-    {
-    }
-
     public function index(PaymentTable $table)
     {
-        PageTitle::setTitle(trans('plugins/payment::payment.name'));
+        $this->pageTitle(trans('plugins/payment::payment.name'));
 
         return $table->renderTable();
     }
@@ -40,7 +34,7 @@ class PaymentController extends SettingController
 
     public function show(Payment $payment)
     {
-        PageTitle::setTitle(trans('plugins/payment::payment.view_transaction', ['charge_id' => $payment->charge_id]));
+        $this->pageTitle(trans('plugins/payment::payment.view_transaction', ['charge_id' => $payment->charge_id]));
 
         $detail = apply_filters(PAYMENT_FILTER_PAYMENT_INFO_DETAIL, null, $payment);
 
@@ -57,17 +51,17 @@ class PaymentController extends SettingController
 
     public function methods()
     {
-        PageTitle::setTitle(trans('plugins/payment::payment.payment_methods'));
+        $this->pageTitle(trans('plugins/payment::payment.payment_methods'));
 
-        Assets::addScriptsDirectly('vendor/core/plugins/payment/js/payment-methods.js');
+        Assets::addScripts(['sortable'])
+            ->addScriptsDirectly('vendor/core/plugins/payment/js/payment-methods.js');
 
-        $form = PaymentMethodSettingForm::create();
         $codForm = CODPaymentMethodForm::create();
         $bankTransferForm = BankTransferPaymentMethodForm::create();
 
         return view(
             'plugins/payment::settings.index',
-            compact('form', 'codForm', 'bankTransferForm')
+            compact('codForm', 'bankTransferForm')
         );
     }
 
@@ -98,22 +92,41 @@ class PaymentController extends SettingController
 
     public function update(Payment $payment, UpdatePaymentRequest $request)
     {
-        $this->paymentRepository->update(['id' => $payment->getKey()], [
-            'status' => $request->input('status'),
-        ]);
+        $payment->status = $request->input('status');
+        $payment->save();
 
         do_action(ACTION_AFTER_UPDATE_PAYMENT, $request, $payment);
 
         return $this
             ->httpResponse()
-            ->setPreviousUrl(route('payment.show', $payment->getKey()))
+            ->setPreviousUrl(route('payment.index'))
             ->withUpdatedSuccessMessage();
+    }
+
+    public function updateSortOrder(Request $request, SettingStore $settingStore): BaseHttpResponse
+    {
+        $sortOrder = $request->input('order', []);
+
+        foreach ($sortOrder as $type => $order) {
+            $settingStore->set('payment_' . $type . '_sort_order', (int) $order);
+        }
+
+        if ($defaultMethod = $request->input('default_payment_method')) {
+            $settingStore->set('default_payment_method', $defaultMethod);
+        }
+
+        $settingStore->save();
+
+        return $this
+            ->httpResponse()
+            ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
     public function getRefundDetail(int|string $id, int|string $refundId)
     {
-        $data = [];
         $payment = Payment::query()->findOrFail($id);
+
+        $data = [];
 
         $data = apply_filters(PAYMENT_FILTER_GET_REFUND_DETAIL, $data, $payment, $refundId);
 

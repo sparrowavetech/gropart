@@ -4,10 +4,11 @@ namespace Botble\Shippo\Providers;
 
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Shippo\Http\Middleware\WebhookMiddleware;
+use Illuminate\Contracts\Support\DeferrableProvider;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\ServiceProvider;
 
-class ShippoServiceProvider extends ServiceProvider
+class ShippoServiceProvider extends ServiceProvider implements DeferrableProvider
 {
     use LoadAndPublishDataTrait;
 
@@ -33,7 +34,7 @@ class ShippoServiceProvider extends ServiceProvider
             ->loadAndPublishConfigurations(['general'])
             ->publishAssets();
 
-        $this->app['events']->listen(RouteMatched::class, function () {
+        $this->app['events']->listen(RouteMatched::class, function (): void {
             $this->app['router']->aliasMiddleware('shippo.webhook', WebhookMiddleware::class);
         });
 

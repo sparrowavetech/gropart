@@ -39,7 +39,7 @@ class ShipmentTable extends TableAbstract
             ->editColumn('order_id', function ($item) {
                 return Html::link(
                     route('marketplace.vendor.orders.edit', $item->order->id),
-                    $item->order->code . ' <i class="fa fa-external-link-alt"></i>',
+                    $item->order->code . ' ' . BaseHelper::renderIcon('ti ti-external-link'),
                     ['target' => '_blank'],
                     null,
                     false
@@ -81,8 +81,10 @@ class ShipmentTable extends TableAbstract
                 'cod_status',
                 'created_at',
             ])
-            ->whereHas('order', function ($query) {
-                $query->where('store_id', auth('customer')->user()->store->id);
+            ->whereHas('order', function ($query): void {
+                $query
+                    ->where('is_finished', 1)
+                    ->where('store_id', auth('customer')->user()->store?->id);
             })
             ->with(['order', 'order.user', 'order.address']);
 

@@ -4,30 +4,82 @@
     &-title {
         position: relative;
         z-index: 1;
-        margin-top: 20px;
-        margin-bottom: 14px;
-
-        &:after {
-            position: absolute;
-            content: "";
-            left: 0;
-            right: 0;
-            top: -7px;
-            bottom: 12px;
-            width: 100%;
-            height: 1px;
-            background-color: #E0E2E3;
-            z-index: -1;
-        }
+        border-top: 1px solid #e0e2e3;
+        padding-top: 40px;
+        padding-bottom: 15px;
+        margin-top: 40px;
+        margin-bottom: 15px;
 
         p {
             font-size: 15px;
-            color: #55585B;
+            color: #55585b;
             margin-bottom: 0;
             padding: 0 20px;
             position: relative;
             display: inline-block;
-            background-color: rgba(var(--bs-tertiary-bg-rgb), var(--bs-bg-opacity));
+        }
+    }
+
+    .social-login-basic {
+        padding: 0 50px;
+        list-style: none;
+
+        li {
+            list-style: none;
+        }
+
+        .social-login {
+            font-size: 16px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            width: 100%;
+            padding: 15px 25px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            transition: 0.3s;
+
+            img {
+                min-width: 28px;
+                max-width: 28px;
+                margin-right: 15px;
+            }
+
+            &.facebook-login {
+                background-color: #1877f2;
+                color: #fff;
+            }
+
+            &.google-login {
+                background-color: #fff;
+                color: #55585b;
+                border: 1px solid #f2f3f4;
+            }
+
+            &.apple-login {
+                background-color: #000000;
+                color: #fff;
+                margin-bottom: 0;
+            }
+
+            &.github-login {
+                background-color: #fff;
+                color: #55585b;
+                border: 1px solid #f2f3f4;
+            }
+
+            &.linkedin-login,
+            &.linkedin-openid-login {
+                background-color: #fff;
+                color: #55585b;
+                border: 1px solid #f2f3f4;
+            }
+
+            &:hover {
+                transform: translateY(-3px);
+                transition: 0.3s;
+                box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.05);
+            }
         }
     }
 
@@ -36,40 +88,100 @@
         align-items: center;
         justify-content: center;
         gap: 8px;
+        padding: 0;
+        margin: 0;
+
+        &.social-login-lg {
+            flex-direction: column;
+
+            li {
+                width: 100%;
+
+                > a {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    width: 100%;
+                    gap: 0.5rem;
+                    border-radius: var(--bs-border-radius, 8px);
+                    padding: 0.55rem 1rem;
+                    text-decoration: none;
+
+                    span {
+                        display: block;
+                    }
+                }
+            }
+        }
 
         li {
             list-style: none;
 
             > a {
                 border-radius: 2px;
-                width: 28px;
-                height: 28px;
-                display: block;
-                background-position: 0 0;
-                background-repeat: no-repeat;
+                padding: 0.25rem;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                text-decoration: none;
+
+                span {
+                    display: none;
+                }
+
+                svg {
+                    width: 1.5rem;
+                    height: 1.5rem;
+                }
             }
 
             .google {
-                background: url('../images/google.svg') no-repeat center center;
-                border-radius: 2px;
-                box-shadow: 0 3px 4px 0 rgba(0, 0, 0, 0.25);
-                border: 1px solid #4285f4;
+                background-color: #db4437;
+                color: #fff;
+
+                &:hover {
+                    background-color: #c13505;
+                }
             }
 
             .linkedin,
             .linkedin-openid {
-                background: url('../images/linkedin.png') no-repeat;
-                background-position: 0 -38px !important;
+                background-color: #0a66c2;
+                color: #fff;
+
+                &:hover {
+                    background-color: #0a5cba;
+                }
             }
 
             .facebook {
-                background: url('../images/facebook.png') no-repeat;
-                background-position: 0 -38px !important;
+                background-color: #4267b2;
+                color: #fff;
+
+                &:hover {
+                    background-color: #3a5795;
+                }
             }
 
             .github {
-                background: url('../images/github.png') no-repeat;
-                background-position: 0 -38px !important;
+                background-color: #333;
+                color: #fff;
+
+                &:hover {
+                    background-color: #222;
+                }
+            }
+        }
+    }
+}
+
+@media (max-width: 768px) {
+    .login-options {
+        .social-login-basic {
+            padding: 0;
+
+            .social-login {
+                font-size: 14px !important;
             }
         }
     }

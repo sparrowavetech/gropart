@@ -1,65 +1,110 @@
 @php
     $orders = $order;
-    $order = $order instanceof \Illuminate\Support\Collection ? $order->first() : $order;
-    $userInfo = $order->address->id ? $order->address : $order->user;
+
+    if ($orders instanceof \Illuminate\Support\Collection) {
+        $order = $orders->where('is_finished', true)->first();
+
+        if (! $order) {
+            $order = $orders->first();
+        }
+    }
+
+    $userInfo = null;
+    if ($order->address && $order->address->id) {
+        $userInfo = $order->address;
+    } elseif ($order->user && $order->user->id) {
+        $userInfo = $order->user;
+    }
+
+    $hasShippingInfo = !empty($isShowShipping) && $order->shipping_method->getValue();
+    $hasPaymentInfo = is_plugin_active('payment') && $order->payment && $order->payment->id;
 @endphp
 
-<div class="order-customer-info">
-    <h3> {{ __('Customer information') }}</h3>
-    @if ($userInfo->id)
-        @if ($userInfo->name)
-            <p>
-                <span class="d-inline-block">{{ __('Full name') }}:</span>
-                <span class="order-customer-info-meta">{{ $userInfo->name }}</span>
-            </p>
+<div class="customer-info-card">
+    <h3 class="card-section-title">{{ trans('plugins/ecommerce::order.customer_information') }}</h3>
+
+    <div class="info-grid">
+        @if ($userInfo)
+            <div class="info-block">
+                <h4 class="info-block-title">{{ trans('plugins/ecommerce::order.contact_information') }}</h4>
+                <div class="info-block-content">
+                    @if ($userInfo->email)
+                        <p class="info-item">
+                            <x-core::icon name="ti ti-mail" class="info-icon" />
+                            <span>{{ $userInfo->email }}</span>
+                        </p>
+                    @endif
+                    @if ($userInfo->phone)
+                        <p class="info-item">
+                            <x-core::icon name="ti ti-phone" class="info-icon" />
+                            <span>{{ $userInfo->phone }}</span>
+                        </p>
+                    @endif
+                </div>
+            </div>
+
+            @if ($order->full_address || ($userInfo->name && !in_array('address', EcommerceHelper::getHiddenFieldsAtCheckout())))
+                <div class="info-block">
+                    <h4 class="info-block-title">{{ $hasShippingInfo ? trans('plugins/ecommerce::order.checkout.shipping_address') : trans('plugins/ecommerce::order.customer_details') }}</h4>
+                    <div class="info-block-content">
+                        @if ($userInfo->name)
+                            <p class="info-item">{{ $userInfo->name }}</p>
+                        @endif
+                        @if ($order->full_address && !in_array('address', EcommerceHelper::getHiddenFieldsAtCheckout()))
+                            <p class="info-item address-text">{{ $order->full_address }}</p>
+                        @endif
+                    </div>
+                </div>
+            @endif
         @endif
 
-        @if ($userInfo->phone)
-            <p>
-                <span class="d-inline-block">{{ __('Phone') }}:</span>
-                <span class="order-customer-info-meta">{{ $userInfo->phone }}</span>
-            </p>
+        @if ($hasShippingInfo)
+            <div class="info-block">
+                <h4 class="info-block-title">{{ trans('plugins/ecommerce::shipping.shipping_method') }}</h4>
+                <div class="info-block-content">
+                    <p class="info-item">
+                        <x-core::icon name="ti ti-truck" class="info-icon" />
+                        <span>{{ $order->shipping_method_name }}</span>
+                    </p>
+                    @if ((float) $order->shipping_amount)
+                        <p class="info-item-secondary">{{ format_price($order->shipping_amount) }}</p>
+                    @else
+                        <p class="info-item-secondary shipping-free">{{ trans('plugins/ecommerce::ecommerce.free') }}</p>
+                    @endif
+                </div>
+            </div>
         @endif
 
-        @if ($userInfo->email)
-            <p>
-                <span class="d-inline-block">{{ __('Email') }}:</span>
-                <span class="order-customer-info-meta">{{ $userInfo->email }}</span>
-            </p>
+        @if ($hasPaymentInfo)
+            <div class="info-block">
+                <h4 class="info-block-title">{{ trans('plugins/ecommerce::order.payment_method') }}</h4>
+                <div class="info-block-content">
+                    <p class="info-item">
+                        <x-core::icon name="ti ti-credit-card" class="info-icon" />
+                        <span>{{ $order->payment->payment_channel->displayName() }}</span>
+                    </p>
+                    <p class="info-item payment-status">
+                        <span class="status-badge status-{{ $order->payment->status->getValue() }}">
+                            {{ $order->payment->status->label() }}
+                        </span>
+                    </p>
+                </div>
+            </div>
         @endif
+    </div>
 
-        @if ($order->full_address && in_array('address', EcommerceHelper::getHiddenFieldsAtCheckout()))
-            <p>
-                <span class="d-inline-block">{{ __('Address') }}:</span>
-                <span class="order-customer-info-meta">{{ $order->full_address }}</span>
-            </p>
-        @endif
-    @endif
-
-    @if (!empty($isShowShipping))
-        <p>
-            <span class="d-inline-block">{{ __('Shipping method') }}:</span>
-            <span class="order-customer-info-meta">{{ $order->shipping_method_name }} -
-                {{ format_price($order->shipping_amount) }}</span>
-        </p>
-    @endif
-
-    @if (is_plugin_active('payment') && $order->payment->id)
-        <p>
-            <span class="d-inline-block">{{ __('Payment method') }}:</span>
-            <span class="order-customer-info-meta">{{ $order->payment->payment_channel->label() }}</span>
-        </p>
-        <p>
-            <span class="d-inline-block">{{ __('Payment status') }}:</span>
-            <span
-                class="order-customer-info-meta"
-                style="text-transform: uppercase"
-            >{!! BaseHelper::clean($order->payment->status->toHtml()) !!}</span>
-        </p>
-
-        @if (setting('payment_bank_transfer_display_bank_info_at_the_checkout_success_page', false) &&
-                ($bankInfo = OrderHelper::getOrderBankInfo($orders)))
-            {!! $bankInfo !!}
+    @if ($hasPaymentInfo)
+        @if (
+            setting('payment_bank_transfer_display_bank_info_at_the_checkout_success_page', false) &&
+            ($bankInfo = OrderHelper::getOrderBankInfo($orders))
+        )
+            <div class="payment-info-full-width bank-info-block">
+                {!! $bankInfo !!}
+            </div>
+        @else
+            <div class="payment-info-full-width">
+                @include('plugins/ecommerce::orders.partials.payment-proof-upload')
+            </div>
         @endif
     @endif
 
@@ -67,26 +112,29 @@
 </div>
 
 @if ($tax = $order->taxInformation)
-    <div class="order-customer-info">
-        <h3> {{ __('Tax information') }}</h3>
-        <p>
-            <span class="d-inline-block">{{ __('Company name') }}:</span>
-            <span class="order-customer-info-meta">{{ $tax->company_name }}</span>
-        </p>
-
-        <p>
-            <span class="d-inline-block">{{ __('Company tax code') }}:</span>
-            <span class="order-customer-info-meta">{{ $tax->company_tax_code }}</span>
-        </p>
-
-        <p>
-            <span class="d-inline-block">{{ __('Company email') }}:</span>
-            <span class="order-customer-info-meta">{{ $tax->company_email }}</span>
-        </p>
-
-        <p>
-            <span class="d-inline-block">{{ __('Company address') }}:</span>
-            <span class="order-customer-info-meta">{{ $tax->company_address }}</span>
-        </p>
+    <div class="customer-info-card tax-info-card">
+        <h3 class="card-section-title">{{ trans('plugins/ecommerce::order.tax_information') }}</h3>
+        <div class="info-grid">
+            <div class="info-block info-block-full">
+                <div class="tax-info-grid">
+                    <div class="tax-info-item">
+                        <span class="tax-label">{{ trans('plugins/ecommerce::order.checkout.company_name') }}</span>
+                        <span class="tax-value">{{ $tax->company_name }}</span>
+                    </div>
+                    <div class="tax-info-item">
+                        <span class="tax-label">{{ trans('plugins/ecommerce::order.checkout.company_tax_code') }}</span>
+                        <span class="tax-value">{{ $tax->company_tax_code }}</span>
+                    </div>
+                    <div class="tax-info-item">
+                        <span class="tax-label">{{ trans('plugins/ecommerce::order.checkout.company_email') }}</span>
+                        <span class="tax-value">{{ $tax->company_email }}</span>
+                    </div>
+                    <div class="tax-info-item">
+                        <span class="tax-label">{{ trans('plugins/ecommerce::order.checkout.company_address') }}</span>
+                        <span class="tax-value">{{ $tax->company_address }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 @endif

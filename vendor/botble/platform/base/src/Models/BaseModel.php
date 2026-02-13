@@ -21,8 +21,8 @@ class BaseModel extends Model implements BaseModelContract
 
     public function __get($key)
     {
-        if (MacroableModels::modelHasMacro($this::class, $method = 'get' . Str::studly($key) . 'Attribute')) {
-            return call_user_func([$this, $method]);
+        if (MacroableModels::modelHasMacro(static::class, $method = 'get' . Str::studly($key) . 'Attribute')) {
+            return $this->{$method}();
         }
 
         return parent::__get($key);

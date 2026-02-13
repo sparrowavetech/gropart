@@ -12,11 +12,17 @@ use Intervention\Image\Interfaces\SizeInterface;
 
 class CoverModifier extends SpecializableModifier
 {
+    /**
+     * Create new modifier object
+     *
+     * @return void
+     */
     public function __construct(
         public int $width,
         public int $height,
         public string $position = 'center'
     ) {
+        //
     }
 
     /**

@@ -17,6 +17,14 @@ class DiscountSupport
 
     public int|string $customerId = 0;
 
+    protected array $productCategoriesCache = [];
+
+    protected array $productCollectionsCache = [];
+
+    protected bool $productCategoriesLoaded = false;
+
+    protected bool $productCollectionsLoaded = false;
+
     public function __construct()
     {
         if (! is_in_admin() && auth('customer')->check()) {
@@ -55,10 +63,7 @@ class DiscountSupport
                     break;
 
                 case DiscountTargetEnum::PRODUCT_COLLECTIONS:
-                    $productCollectionIds = DB::table('ec_product_collection_products')
-                        ->whereIn('product_id', $productIds)
-                        ->pluck('product_collection_id')
-                        ->all();
+                    $productCollectionIds = $this->getProductCollectionIds($productIds);
 
                     foreach ($promotion->productCollections as $productCollection) {
                         if (in_array($productCollection->id, $productCollectionIds)) {
@@ -80,15 +85,19 @@ class DiscountSupport
                     break;
 
                 case DiscountTargetEnum::PRODUCT_CATEGORIES:
-                    $productCategoriesIds = DB::table('ec_product_category_product')
-                        ->whereIn('product_id', $productIds)
-                        ->pluck('category_id')
-                        ->all();
+                    $productCategoriesIds = $this->getProductCategoryIds($productIds);
 
                     foreach ($promotion->productCategories as $productCategories) {
                         if (in_array($productCategories->id, $productCategoriesIds)) {
                             return $promotion;
                         }
+                    }
+
+                    break;
+
+                case DiscountTargetEnum::ALL_ORDERS:
+                    if ($promotion->product_quantity == 1) {
+                        return $promotion;
                     }
 
                     break;
@@ -123,7 +132,7 @@ class DiscountSupport
             ->where('code', $couponCode)
             ->where('type', DiscountTypeEnum::COUPON)
             ->where('start_date', '<=', $now)
-            ->where(function (Builder $query) use ($now) {
+            ->where(function (Builder $query) use ($now): void {
                 $query
                     ->whereNull('end_date')
                     ->orWhere('end_date', '>', $now);
@@ -138,7 +147,7 @@ class DiscountSupport
                 $customerId = auth('customer')->check() ? auth('customer')->id() : 0;
             }
 
-            if ($discount->target === DiscountTargetEnum::ONCE_PER_CUSTOMER && $customerId) {
+            if ($discount->target == DiscountTargetEnum::ONCE_PER_CUSTOMER && $customerId) {
                 $discount->usedByCustomers()->syncWithoutDetaching([$customerId]);
             }
         }
@@ -162,9 +171,70 @@ class DiscountSupport
                 $customerId = auth('customer')->check() ? auth('customer')->id() : 0;
             }
 
-            if ($discount->target === DiscountTargetEnum::ONCE_PER_CUSTOMER && $customerId) {
+            if ($discount->target == DiscountTargetEnum::ONCE_PER_CUSTOMER && $customerId) {
                 $discount->usedByCustomers()->detach($customerId);
             }
         }
+    }
+
+    protected function ensureProductRelationsLoaded(string $type = 'all'): void
+    {
+        if (in_array($type, ['categories', 'all']) && ! $this->productCategoriesLoaded) {
+            $categories = DB::table('ec_product_category_product')
+                ->select(['product_id', 'category_id'])
+                ->get();
+
+            foreach ($categories as $category) {
+                if (! isset($this->productCategoriesCache[$category->product_id])) {
+                    $this->productCategoriesCache[$category->product_id] = [];
+                }
+                $this->productCategoriesCache[$category->product_id][] = $category->category_id;
+            }
+
+            $this->productCategoriesLoaded = true;
+        }
+
+        if (in_array($type, ['collections', 'all']) && ! $this->productCollectionsLoaded) {
+            $collections = DB::table('ec_product_collection_products')
+                ->select(['product_id', 'product_collection_id'])
+                ->get();
+
+            foreach ($collections as $collection) {
+                if (! isset($this->productCollectionsCache[$collection->product_id])) {
+                    $this->productCollectionsCache[$collection->product_id] = [];
+                }
+                $this->productCollectionsCache[$collection->product_id][] = $collection->product_collection_id;
+            }
+
+            $this->productCollectionsLoaded = true;
+        }
+    }
+
+    protected function getProductCategoryIds(array $productIds): array
+    {
+        $this->ensureProductRelationsLoaded('categories');
+
+        $categoryIds = [];
+        foreach ($productIds as $productId) {
+            if (isset($this->productCategoriesCache[$productId])) {
+                $categoryIds = array_merge($categoryIds, $this->productCategoriesCache[$productId]);
+            }
+        }
+
+        return array_unique($categoryIds);
+    }
+
+    protected function getProductCollectionIds(array $productIds): array
+    {
+        $this->ensureProductRelationsLoaded('collections');
+
+        $collectionIds = [];
+        foreach ($productIds as $productId) {
+            if (isset($this->productCollectionsCache[$productId])) {
+                $collectionIds = array_merge($collectionIds, $this->productCollectionsCache[$productId]);
+            }
+        }
+
+        return array_unique($collectionIds);
     }
 }

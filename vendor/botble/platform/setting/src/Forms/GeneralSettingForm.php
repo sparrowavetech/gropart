@@ -3,8 +3,11 @@
 namespace Botble\Setting\Forms;
 
 use Botble\Base\Facades\Assets;
+use Botble\Base\Forms\FieldOptions\HtmlFieldOption;
+use Botble\Base\Forms\FieldOptions\OnOffFieldOption;
 use Botble\Base\Forms\FieldOptions\SelectFieldOption;
 use Botble\Base\Forms\Fields\HtmlField;
+use Botble\Base\Forms\Fields\OnOffField;
 use Botble\Base\Forms\Fields\SelectField;
 use Botble\Setting\Http\Requests\GeneralSettingRequest;
 use DateTimeZone;
@@ -27,9 +30,11 @@ class GeneralSettingForm extends SettingForm
             ->setSectionDescription(trans('core/setting::setting.general.description'))
             ->contentOnly()
             ->setValidatorClass(GeneralSettingRequest::class)
-            ->add('admin_email', 'html', [
-                'html' => view('core/setting::partials.admin-email-field')->render(),
-            ])
+            ->add(
+                'admin_email',
+                HtmlField::class,
+                HtmlFieldOption::make()->view('core/setting::partials.admin-email-field')
+            )
             ->add(
                 'time_zone',
                 SelectField::class,
@@ -38,19 +43,26 @@ class GeneralSettingForm extends SettingForm
                     ->choices(array_combine(DateTimeZone::listIdentifiers(), DateTimeZone::listIdentifiers()))
                     ->selected(setting('time_zone', 'UTC'))
                     ->searchable()
-                    ->toArray()
+                    ->helperText(trans('core/setting::setting.general.time_zone_helper'))
             )
-            ->add('enable_send_error_reporting_via_email', 'onOffCheckbox', [
-                'label' => trans('core/setting::setting.general.enable_send_error_reporting_via_email'),
-                'value' => setting('enable_send_error_reporting_via_email'),
-            ])
+            ->add(
+                'enable_send_error_reporting_via_email',
+                OnOffField::class,
+                OnOffFieldOption::make()
+                    ->label(trans('core/setting::setting.general.enable_send_error_reporting_via_email'))
+                    ->value(setting('enable_send_error_reporting_via_email'))
+                    ->helperText(trans('core/setting::setting.general.enable_send_error_reporting_via_email_helper'))
+            )
             ->when(
                 apply_filters(BASE_FILTER_AFTER_SETTING_CONTENT, null),
-                function (GeneralSettingForm $form, $settingContent) {
+                function (GeneralSettingForm $form, $settingContent): void {
                     $form
-                        ->add('html', HtmlField::class, [
-                            'html' => '</div></div><div class="card mt-3 overflow-hidden"><div class="card-body">' . $settingContent,
-                        ]);
+                        ->add(
+                            'html',
+                            HtmlField::class,
+                            HtmlFieldOption::make()
+                                ->content('</div></div><div class="card mt-3 overflow-hidden"><div class="card-body">' . $settingContent)
+                        );
                 }
             );
     }

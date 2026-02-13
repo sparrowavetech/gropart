@@ -25,7 +25,7 @@
                                     ? $shortcode->autoplay_speed
                                     : 3000,
                                 'speed' => 800,
-                                'slidesToShow' => 5,
+                                'slidesToShow' => 6,
                                 'slidesToScroll' => 1,
                                 'swipeToSlide' => true,
                                 'responsive' => [
@@ -36,36 +36,24 @@
                                         ],
                                     ],
                                     [
-                                        'breakpoint' => 1201,
+                                        'breakpoint' => 1199,
                                         'settings' => [
-                                            'slidesToShow' => 5,
-                                        ],
-                                    ],
-                                    [
-                                        'breakpoint' => 1025,
-                                        'settings' => [
-                                            'arrows' => true,
-                                            'dots' => false,
                                             'slidesToShow' => 4,
-                                            'slidesToScroll' => 4,
                                         ],
                                     ],
                                     [
-                                        'breakpoint' => 769,
+                                        'breakpoint' => 1024,
+                                        'settings' => [
+                                            'slidesToShow' => 3,
+                                        ],
+                                    ],
+                                    [
+                                        'breakpoint' => 767,
                                         'settings' => [
                                             'arrows' => true,
                                             'dots' => false,
-                                            'slidesToShow' => 3,
-                                            'slidesToScroll' => 3,
-                                        ],
-                                    ],
-                                    [
-                                        'breakpoint' => 440,
-                                        'settings' => [
-                                            'arrows' => false,
-                                            'dots' => true,
-                                            'slidesToShow' => 1,
-                                            'slidesToScroll' => 1,
+                                            'slidesToShow' => 2,
+                                            'slidesToScroll' => 2,
                                         ],
                                     ],
                                 ],

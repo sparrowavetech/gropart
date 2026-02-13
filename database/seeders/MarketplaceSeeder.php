@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Botble\Base\Facades\MetaBox;
 use Botble\Base\Supports\BaseSeeder;
 use Botble\Marketplace\Database\Seeders\Traits\HasMarketplaceSeeder;
+use Illuminate\Support\Arr;
 
 class MarketplaceSeeder extends BaseSeeder
 {
@@ -85,11 +86,29 @@ class MarketplaceSeeder extends BaseSeeder
 <p>&nbsp;</p>
 ';
 
-            $stores[] = [
+            $verificationNotes = [
+                'Verified business with valid documentation',
+                'Established vendor with proven track record',
+                'Successfully completed verification process',
+                'Authentic products and reliable service confirmed',
+                'Verified through official business registration',
+            ];
+
+            $isVerified = $i < 5;
+
+            $storeData = [
                 'name' => $storeNames[$i],
                 'logo' => $this->filePath('stores/' . ($i + 1) . '.png'),
                 'content' => $content,
+                'is_verified' => $isVerified,
             ];
+
+            if ($isVerified) {
+                $storeData['verified_at'] = now()->subDays(rand(1, 180));
+                $storeData['verification_note'] = Arr::random($verificationNotes);
+            }
+
+            $stores[] = $storeData;
         }
 
         $stores = $this->createStores($stores);

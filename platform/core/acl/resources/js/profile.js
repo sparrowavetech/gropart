@@ -65,7 +65,9 @@ class CropAvatar {
     }
 
     initModal() {
-        this.$avatarModal.modal('hide')
+        if (this.$avatarModal.length && typeof this.$avatarModal.modal === 'function') {
+            this.$avatarModal.modal('hide')
+        }
         this.initPreview()
     }
 
@@ -108,7 +110,9 @@ class CropAvatar {
     }
 
     click() {
-        this.$avatarModal.modal('show')
+        if (this.$avatarModal.length && typeof this.$avatarModal.modal === 'function') {
+            this.$avatarModal.modal('show')
+        }
     }
 
     change() {
@@ -224,7 +228,7 @@ class CropAvatar {
 
     submitDone(data) {
         try {
-            data = $.parseJSON(data)
+            data = JSON.parse(data)
         } catch (e) {}
 
         if (data && !data.error) {

@@ -24,15 +24,20 @@ class MenuForm extends FormAbstract
             ->model(Menu::class)
             ->setFormOption('class', 'form-save-menu')
             ->setValidatorClass(MenuRequest::class)
-            ->add('name', TextField::class, NameFieldOption::make()->required()->maxLength(120)->toArray())
-            ->add('status', SelectField::class, StatusFieldOption::make()->toArray())
+            ->add('name', TextField::class, NameFieldOption::make()->required()->maxLength(120))
+            ->add('status', SelectField::class, StatusFieldOption::make())
             ->addMetaBoxes([
                 'structure' => [
                     'wrap' => false,
                     'content' => function () {
+                        /**
+                         * @var Menu $menu
+                         */
+                        $menu = $this->getModel();
+
                         return view('packages/menu::menu-structure', [
-                            'menu' => $this->getModel(),
-                            'locations' => $this->getModel()->getKey() ? $this->getModel()->locations()->pluck('location')->all() : [],
+                            'menu' => $menu,
+                            'locations' => $menu->getKey() ? $menu->locations()->pluck('location')->all() : [],
                         ])->render();
                     },
                 ],

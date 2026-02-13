@@ -3,20 +3,42 @@ import Toastify from '../../../../core/base/resources/js/base/toast'
 const Theme = Theme || {}
 window.Theme = Theme
 
+// Get toast config with defaults
+Theme.getToastConfig = function () {
+    return window.ThemeToastConfig || {
+        position: 'bottom',
+        alignment: 'right',
+        offsetX: 15,
+        offsetY: 15,
+        timeout: 5000,
+        successIcon: '',
+        errorIcon: '',
+    }
+}
+
+// Get icon - use pre-rendered SVG from config or fallback
+Theme.getToastIcon = function (configIcon, fallbackSvg) {
+    return configIcon || fallbackSvg
+}
+
 Theme.showNotice = function (messageType, message) {
+    const config = this.getToastConfig()
     let color = '#fff'
     let icon = ''
 
+    const defaultSuccessIcon =
+        '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /><path d="M9 12l2 2l4 -4" /></svg>'
+    const defaultErrorIcon =
+        '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /><path d="M12 9v4" /><path d="M12 16v.01" /></svg>'
+
     switch (messageType) {
         case 'success':
-            color = '#51a351'
-            icon =
-                '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l5 5l10 -10" /></svg>'
+            color = '#437a43'
+            icon = this.getToastIcon(config.successIcon, defaultSuccessIcon)
             break
         case 'danger':
             color = '#bd362f'
-            icon =
-                '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /><path d="M12 9v4" /><path d="M12 16v.01" /></svg>'
+            icon = this.getToastIcon(config.errorIcon, defaultErrorIcon)
             break
         case 'warning':
             color = '#f89406'
@@ -33,15 +55,20 @@ Theme.showNotice = function (messageType, message) {
     Toastify({
         text: message,
         icon: icon,
-        duration: 5000,
+        duration: parseInt(config.timeout) || 5000,
         close: true,
-        gravity: 'bottom',
-        position: 'right',
+        gravity: config.position,
+        position: config.alignment,
+        offset: {
+            x: parseInt(config.offsetX) || 15,
+            y: parseInt(config.offsetY) || 15,
+        },
         stopOnFocus: true,
         style: {
             background: color,
         },
         escapeMarkup: false,
+        className: 'toastify-' + messageType,
     }).showToast()
 }
 

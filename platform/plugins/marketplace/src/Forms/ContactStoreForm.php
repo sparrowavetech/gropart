@@ -5,10 +5,10 @@ namespace Botble\Marketplace\Forms;
 use Botble\Base\Forms\FieldOptions\ButtonFieldOption;
 use Botble\Base\Forms\FieldOptions\EmailFieldOption;
 use Botble\Base\Forms\FieldOptions\TextareaFieldOption;
+use Botble\Base\Forms\FieldOptions\TextFieldOption;
 use Botble\Base\Forms\Fields\EmailField;
 use Botble\Base\Forms\Fields\TextareaField;
 use Botble\Base\Forms\Fields\TextField;
-use Botble\Ecommerce\Forms\Fronts\Auth\FieldOptions\TextFieldOption;
 use Botble\Marketplace\Http\Requests\Fronts\ContactStoreRequest;
 use Botble\Theme\FormFront;
 
@@ -33,7 +33,7 @@ class ContactStoreForm extends FormFront
                 TextField::class,
                 TextFieldOption::make()
                     ->label(false)
-                    ->placeholder(__('Your name'))
+                    ->placeholder(trans('plugins/marketplace::store.your_name'))
                     ->disabled((bool) $customer?->name)
                     ->value($customer?->name),
             )
@@ -42,7 +42,7 @@ class ContactStoreForm extends FormFront
                 EmailField::class,
                 EmailFieldOption::make()
                     ->label(false)
-                    ->placeholder(__('Your email address'))
+                    ->placeholder(trans('plugins/marketplace::store.your_email_address'))
                     ->disabled((bool) $customer?->email)
                     ->value($customer?->email),
             )
@@ -51,14 +51,14 @@ class ContactStoreForm extends FormFront
                 TextareaField::class,
                 TextareaFieldOption::make()
                     ->label(false)
-                    ->placeholder(__('Type your message...'))
+                    ->placeholder(trans('plugins/marketplace::store.type_your_message'))
                     ->rows(5)
             )
             ->add(
                 'submit',
                 'submit',
                 ButtonFieldOption::make()
-                    ->label(__('Send message'))
+                    ->label(trans('plugins/marketplace::store.send_message'))
                     ->attributes(['class' => 'btn btn-primary'])
             );
     }

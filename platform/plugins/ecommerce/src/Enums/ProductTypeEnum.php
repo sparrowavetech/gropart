@@ -23,7 +23,6 @@ class ProductTypeEnum extends Enum
     {
         $color = match ($this->value) {
             self::PHYSICAL => 'info',
-            self::DIGITAL => 'primary',
             default => 'primary',
         };
 

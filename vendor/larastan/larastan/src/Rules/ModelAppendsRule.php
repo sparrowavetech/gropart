@@ -49,7 +49,7 @@ class ModelAppendsRule implements Rule
 
         $classReflection = $scope->getClassReflection();
 
-        if (! $classReflection?->isSubclassOf(Model::class)) {
+        if (! $classReflection?->is(Model::class)) {
             return [];
         }
 
@@ -62,7 +62,7 @@ class ModelAppendsRule implements Rule
         $appends = $value->items;
 
         return array_reduce($appends, function ($errors, $appended) use ($classReflection, $scope) {
-            if (! $appended?->value instanceof String_) {
+            if (! $appended->value instanceof String_) {
                 return $errors;
             }
 
@@ -74,7 +74,7 @@ class ModelAppendsRule implements Rule
             if ($hasDatabaseProperty) {
                 $errors[] = RuleErrorBuilder::message(sprintf("Property '%s' is not a computed property, remove from \$appends.", $name))
                     ->identifier('rules.modelAppends')
-                    ->line($appended->getLine())
+                    ->line($appended->getStartLine())
                     ->file($scope->getFile())
                     ->build();
             }
@@ -82,7 +82,7 @@ class ModelAppendsRule implements Rule
             if (! $hasDatabaseProperty && ! $hasAccessor) {
                 $errors[] = RuleErrorBuilder::message(sprintf("Property '%s' does not exist in model.", $name))
                     ->identifier('rules.modelAppends')
-                    ->line($appended->getLine())
+                    ->line($appended->getStartLine())
                     ->file($scope->getFile())
                     ->build();
             }

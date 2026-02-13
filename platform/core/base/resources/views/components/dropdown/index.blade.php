@@ -1,4 +1,12 @@
-@props(['label', 'icon' => null, 'items' => null, 'hasArrow' => false, 'wrapperClass' => null, 'trigger' => null, 'position' => null])
+@props([
+    'label',
+    'icon' => null,
+    'items' => null,
+    'hasArrow' => false,
+    'wrapperClass' => null,
+    'trigger' => null,
+    'position' => null,
+])
 
 <div @class(['dropdown', $wrapperClass])>
     @if ($trigger)

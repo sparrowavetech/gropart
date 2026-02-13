@@ -34,6 +34,16 @@
                     @endif
                 </dd>
             </div>
+            @if ($shipment->store_id && $shipment->store->name)
+                <div class="row">
+                    <dt class="col">
+                        {{ trans('plugins/ecommerce::shipping.warehouse') }}
+                    </dt>
+                    <dd class="col-auto">
+                        {{ $shipment->store->name }}
+                    </dd>
+                </div>
+            @endif
             <div class="row">
                 <dt class="col">
                     {{ trans('plugins/ecommerce::shipping.shipping_fee') }}

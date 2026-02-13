@@ -11,6 +11,9 @@ use Botble\Base\Supports\Enum;
  * @method static CustomFieldType DROPDOWN()
  * @method static CustomFieldType CHECKBOX()
  * @method static CustomFieldType RADIO()
+ * @method static CustomFieldType DATE()
+ * @method static CustomFieldType DATETIME()
+ * @method static CustomFieldType TIME()
  */
 class CustomFieldType extends Enum
 {
@@ -25,6 +28,12 @@ class CustomFieldType extends Enum
     public const CHECKBOX = 'checkbox';
 
     public const RADIO = 'radio';
+
+    public const DATE = 'date';
+
+    public const DATETIME = 'datetime';
+
+    public const TIME = 'time';
 
     public static $langPath = 'plugins/contact::contact.custom_field.enums.types';
 }

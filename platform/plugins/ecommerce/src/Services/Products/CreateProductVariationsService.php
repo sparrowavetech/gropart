@@ -5,15 +5,17 @@ namespace Botble\Ecommerce\Services\Products;
 use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Models\ProductAttribute;
 use Botble\Ecommerce\Models\ProductVariation;
+use Illuminate\Database\Eloquent\Builder;
 
 class CreateProductVariationsService
 {
-    public function execute(Product $product): array
+    public function execute(Product $product, array $attributeIds = []): array
     {
         $attributeSets = $product->productAttributeSets()->allRelatedIds()->toArray();
 
         $attributes = ProductAttribute::query()
             ->whereIn('attribute_set_id', $attributeSets)
+            ->when($attributeIds, fn (Builder $query) => $query->whereIn('id', $attributeIds))
             ->get();
 
         $data = [];
@@ -22,7 +24,7 @@ class CreateProductVariationsService
             $data[] = $attributes
                 ->where('attribute_set_id', $attributeSet)
                 ->pluck('id')
-                ->toArray();
+                ->all();
         }
 
         $variationsInfo = $this->combinations($data);

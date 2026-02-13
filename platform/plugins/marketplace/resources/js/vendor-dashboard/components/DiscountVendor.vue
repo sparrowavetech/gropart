@@ -43,6 +43,24 @@
                         </label>
                     </div>
 
+                    <div class="mb-3 position-relative">
+                        <label class="form-check">
+                            <input
+                                class="form-check-input"
+                                type="checkbox"
+                                name="can_use_with_flash_sale"
+                                v-model="can_use_with_flash_sale"
+                                value="1"
+                            />
+                            <span class="form-check-label">
+                                    {{ __('discount.can_be_used_with_flash_sale') }}
+                                </span>
+                            <span class="form-check-description">
+                                    {{ __('discount.can_be_used_with_flash_sale_help') }}
+                                </span>
+                        </label>
+                    </div>
+
                     <div class="mb-3 position-relative" v-show="!is_unlimited">
                         <label class="form-label">{{ __('discount.enter_number') }}</label>
                         <input
@@ -53,18 +71,6 @@
                             autocomplete="off"
                             :disabled="is_unlimited"
                         />
-                    </div>
-
-                    <div class="mb-3 position-relative">
-                        <label class="form-check">
-                            <input class="form-check-input" type="checkbox" name="display_at_checkout" v-model="display_at_checkout" value="1">
-                            <span class="form-check-label">
-                                {{ __('discount.display_at_checkout') }}
-                            </span>
-                            <span class="form-check-description">
-                                {{ __('discount.display_at_checkout_description') }}
-                            </span>
-                        </label>
                     </div>
 
                     <div class="border-top">
@@ -217,6 +223,7 @@ export default {
             code: null,
             type: 'coupon',
             is_unlimited: true,
+            can_use_with_flash_sale: false,
             quantity: 0,
             unlimited_time: true,
             start_date: moment().format('Y-MM-DD'),
@@ -292,9 +299,6 @@ export default {
                 case 'percentage':
                     context.target = 'all-orders'
                     context.discountUnit = '%'
-                    break
-                case 'shipping':
-                    context.value_label = this.__('discount.when_shipping_fee_less_than')
                     break
                 case 'same-price':
                     context.target = 'group-products'

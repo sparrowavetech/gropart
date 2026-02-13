@@ -23,8 +23,6 @@ class TranslationTable extends TableAbstract
     {
         parent::setup();
 
-        $this->hasOperations = false;
-        $this->setView('core/table::base-table');
         $this->pageLength = 100;
 
         Assets::addScripts(['bootstrap-editable'])
@@ -33,9 +31,16 @@ class TranslationTable extends TableAbstract
         $this->useDefaultSorting = false;
 
         $this
+            ->setView('core/table::base-table')
             ->addHeaderActions([
                 ExportHeaderAction::make()->route('tools.data-synchronize.export.other-translations.index')->permission('other-translations.export'),
                 ImportHeaderAction::make()->route('tools.data-synchronize.import.other-translations.index')->permission('other-translations.import'),
+            ])
+            ->addFilters([
+                SelectBulkChange::make()
+                    ->name('group')
+                    ->title(trans('plugins/translation::translation.group'))
+                    ->choices((new GetGroupedTranslationsService())->getGroups()),
             ])
             ->onAjax(function () {
                 $translations = (new GetGroupedTranslationsService())->handle();
@@ -92,17 +97,6 @@ class TranslationTable extends TableAbstract
                         })
                 );
             });
-    }
-
-    public function getFilters(): array
-    {
-        return [
-            'group' => SelectBulkChange::make()
-                ->name('group')
-                ->title(trans('plugins/translation::translation.group'))
-                ->choices((new GetGroupedTranslationsService())->getGroups())
-                ->validate(['required', 'string'])->toArray(),
-        ];
     }
 
     public function columns(): array

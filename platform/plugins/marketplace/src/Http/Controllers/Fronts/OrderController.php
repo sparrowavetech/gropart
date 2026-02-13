@@ -7,12 +7,14 @@ use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\EmailHandler;
 use Botble\Base\Http\Actions\DeleteResourceAction;
 use Botble\Base\Http\Controllers\BaseController;
+use Botble\Ecommerce\Enums\OrderCancellationReasonEnum;
 use Botble\Ecommerce\Enums\OrderHistoryActionEnum;
 use Botble\Ecommerce\Enums\OrderStatusEnum;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Facades\InvoiceHelper;
 use Botble\Ecommerce\Facades\OrderHelper;
 use Botble\Ecommerce\Http\Requests\AddressRequest;
+use Botble\Ecommerce\Http\Requests\CancelOrderRequest;
 use Botble\Ecommerce\Http\Requests\UpdateOrderRequest;
 use Botble\Ecommerce\Models\Order;
 use Botble\Ecommerce\Models\OrderAddress;
@@ -22,12 +24,13 @@ use Botble\Marketplace\Tables\OrderTable;
 use Botble\Payment\Models\Payment;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class OrderController extends BaseController
 {
     public function index(OrderTable $table)
     {
-        $this->pageTitle(__('Orders'));
+        $this->pageTitle(trans('plugins/ecommerce::order.name'));
 
         return $table->renderTable();
     }
@@ -74,9 +77,7 @@ class OrderController extends BaseController
 
     public function destroy(int|string $id)
     {
-        if (! MarketplaceHelper::allowVendorDeleteTheirOrders()) {
-            abort(403);
-        }
+        abort_unless(EcommerceHelper::isOrderDeletionEnabled() && MarketplaceHelper::allowVendorDeleteTheirOrders(), 403);
 
         $order = $this->findOrFail($id);
 
@@ -99,6 +100,9 @@ class OrderController extends BaseController
             $order->status = OrderStatusEnum::PROCESSING;
         }
 
+        /**
+         * @var Order $order
+         */
         $order->save();
 
         OrderHistory::query()->create([
@@ -132,6 +136,9 @@ class OrderController extends BaseController
 
     public function postResendOrderConfirmationEmail(int|string $id)
     {
+        /**
+         * @var Order $order
+         */
         $order = $this->findOrFail($id);
 
         $result = OrderHelper::sendOrderConfirmationEmail($order);
@@ -152,17 +159,15 @@ class OrderController extends BaseController
     {
         $address = OrderAddress::query()
             ->where('id', $id)
-            ->whereHas('order', function ($query) {
-                $query->where('store_id', auth('customer')->user()->store->id);
+            ->whereHas('order', function ($query): void {
+                $query->where('store_id', auth('customer')->user()->store?->id);
             })
             ->first();
 
         if ($address) {
             $order = $address->order;
         } else {
-            if (! $orderId = $request->input('order_id')) {
-                abort(404);
-            }
+            abort_unless($orderId = $request->input('order_id'), 404);
 
             $order = $this->findOrFail($orderId);
 
@@ -174,9 +179,7 @@ class OrderController extends BaseController
             }
         }
 
-        if ($order->status == OrderStatusEnum::CANCELED) {
-            abort(401);
-        }
+        abort_if($order->status == OrderStatusEnum::CANCELED, 401);
 
         $address->fill($request->validated());
         $address->save();
@@ -190,26 +193,60 @@ class OrderController extends BaseController
             ->setMessage(trans('plugins/ecommerce::order.update_shipping_address_success'));
     }
 
-    public function postCancelOrder(int|string $id)
+    public function postCancelOrder(CancelOrderRequest $request, int|string $id)
     {
+        /**
+         * @var Order $order
+         */
         $order = $this->findOrFail($id);
 
-        if (! $order->canBeCanceledByAdmin()) {
-            abort(403);
-        }
+        abort_unless($order->canBeCanceledByAdmin(), 403);
 
-        OrderHelper::cancelOrder($order);
+        $reason = $request->input('cancellation_reason');
+        $reasonDescription = $request->input('cancellation_reason_description');
+
+        OrderHelper::cancelOrder($order, $reason, $reasonDescription);
+
+        $vendorName = auth('customer')->user()->store?->name ?? trans('plugins/ecommerce::order.vendor');
+
+        $description = match (true) {
+            $reason && $reason !== OrderCancellationReasonEnum::OTHER => trans('plugins/ecommerce::order.order_was_canceled_by_with_reason', [
+                'admin' => $vendorName,
+                'reason' => OrderCancellationReasonEnum::getLabel($reason),
+            ]),
+            $reason === OrderCancellationReasonEnum::OTHER && $reasonDescription => trans('plugins/ecommerce::order.order_was_canceled_by_with_reason', [
+                'admin' => $vendorName,
+                'reason' => $reasonDescription,
+            ]),
+            default => trans('plugins/ecommerce::order.order_was_canceled_by'),
+        };
 
         OrderHistory::query()->create([
             'action' => OrderHistoryActionEnum::CANCEL_ORDER,
-            'description' => trans('plugins/ecommerce::order.order_was_canceled_by'),
+            'description' => $description,
             'order_id' => $order->id,
             'user_id' => 0,
         ]);
 
         return $this
             ->httpResponse()
-            ->setMessage(trans('plugins/ecommerce::order.customer.messages.cancel_success'));
+            ->setMessage(trans('plugins/ecommerce::order.customer_messages.cancel_success'));
+    }
+
+    public function downloadProof(Order $order)
+    {
+        abort_unless($order->store_id === auth('customer')->user()->store?->id, 403);
+
+        $storage = Storage::disk('local');
+
+        if (! $storage->exists($order->proof_file)) {
+            return $this
+                ->httpResponse()
+                ->setError()
+                ->setMessage(trans('plugins/marketplace::marketplace.notices.file_not_found'));
+        }
+
+        return $storage->download($order->proof_file);
     }
 
     protected function findOrFail(int|string $id): Order|Model|null
@@ -218,7 +255,7 @@ class OrderController extends BaseController
             ->where([
                 'id' => $id,
                 'is_finished' => 1,
-                'store_id' => auth('customer')->user()->store->id,
+                'store_id' => auth('customer')->user()->store?->id,
             ])
             ->firstOrFail();
     }

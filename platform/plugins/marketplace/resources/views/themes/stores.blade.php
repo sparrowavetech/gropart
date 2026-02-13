@@ -1,5 +1,5 @@
 <div class="container">
-    <h3>{{ __('Our Stores') }}</h3>
+    <h3>{{ trans('plugins/marketplace::marketplace.our_stores') }}</h3>
 
     <div class="row">
         @foreach ($stores as $store)

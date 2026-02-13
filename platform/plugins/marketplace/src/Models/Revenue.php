@@ -3,6 +3,7 @@
 namespace Botble\Marketplace\Models;
 
 use Botble\ACL\Models\User;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\Html;
 use Botble\Base\Models\BaseModel;
 use Botble\Ecommerce\Models\Currency;
@@ -26,12 +27,6 @@ class Revenue extends BaseModel
         'description',
         'user_id',
         'type',
-        'seller_inv_code',
-        'shipping_cost',
-        'platform_fee',
-        'commission_fee',
-        'fee_tax_rate',
-        'seller_state_code',
     ];
 
     protected $casts = [
@@ -64,8 +59,8 @@ class Revenue extends BaseModel
             return '';
         }
 
-        return Html::tag('span', '<i class="fa fa-info-circle text-info"></i>', [
-            'class' => 'ms-1',
+        return Html::tag('span', BaseHelper::renderIcon('ti ti-info-circle'), [
+            'class' => 'ms-1 text-info',
             'data-bs-toggle' => 'tooltip',
             'data-bs-original-title' => $this->description,
             'title' => $this->description,

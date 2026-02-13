@@ -1,3 +1,3 @@
 {!! Form::open($attributes->getAttributes()) !!}
-    {{ $slot }}
+{{ $slot }}
 {!! Form::close() !!}

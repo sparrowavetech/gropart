@@ -19,7 +19,7 @@ final class EloquentBuilderMethodReflection implements MethodReflection
 {
     private Type $returnType;
 
-    /** @param  ParameterReflection[] $parameters */
+    /** @param list<ParameterReflection> $parameters */
     public function __construct(private string $methodName, private ClassReflection $classReflection, private array $parameters, Type|null $returnType = null, private bool $isVariadic = false)
     {
         $this->returnType = $returnType ?? new ObjectType(Builder::class);

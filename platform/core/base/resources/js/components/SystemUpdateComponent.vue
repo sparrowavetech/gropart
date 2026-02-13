@@ -247,11 +247,18 @@ export default {
             margin: 0 auto;
             text-align: center;
 
+            .loader {
+                margin: 0 auto;
+                &::after {
+                    display: none;
+                }
+            }
+
             .percent {
                 font-size: 86px;
                 color: #fefefe;
-                font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New',
-                    monospace;
+                font-family:
+                    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
                 margin-bottom: 24px;
             }
 

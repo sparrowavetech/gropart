@@ -3,10 +3,16 @@
 use Botble\Base\Facades\AdminHelper;
 use Illuminate\Support\Facades\Route;
 
-Route::group(['namespace' => 'Botble\Widget\Http\Controllers'], function () {
-    AdminHelper::registerRoutes(function () {
-        Route::group(['prefix' => 'widgets'], function () {
+Route::group(['namespace' => 'Botble\Widget\Http\Controllers'], function (): void {
+    AdminHelper::registerRoutes(function (): void {
+        Route::group(['prefix' => 'widgets'], function (): void {
             Route::get('load-widget', 'WidgetController@showWidget');
+
+            Route::get('get-widget-form', [
+                'as' => 'widgets.get_form',
+                'uses' => 'WidgetController@getWidgetForm',
+                'permission' => 'widgets.index',
+            ]);
 
             Route::get('', [
                 'as' => 'widgets.index',

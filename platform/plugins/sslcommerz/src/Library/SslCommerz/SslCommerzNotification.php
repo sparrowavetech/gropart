@@ -26,7 +26,7 @@ class SslCommerzNotification extends AbstractSslCommerz
     {
         $this->config = config('plugins.sslcommerz.sslcommerz');
 
-        $isSandbox = get_payment_setting('mode', SSLCOMMERZ_PAYMENT_METHOD_NAME) == 0;
+        $isSandbox = (int) get_payment_setting('mode', SSLCOMMERZ_PAYMENT_METHOD_NAME) == 0;
 
         $this->config['apiDomain'] = $isSandbox ? 'https://sandbox.sslcommerz.com' : 'https://securepay.sslcommerz.com';
         $this->config['connect_from_localhost'] = $isSandbox;
@@ -65,6 +65,16 @@ class SslCommerzNotification extends AbstractSslCommerz
                 $storePassword = urlencode($this->getStorePassword());
                 $requested_url = ($this->config['apiDomain'] . $this->config['apiUrl']['order_validate'] . '?val_id=' . $val_id . '&store_id=' . $store_id . '&store_passwd=' . $storePassword . '&v=1&format=json');
 
+                $data = [
+                    'val_id' => $val_id,
+                    'store_id' => $store_id,
+                    'store_passwd' => $storePassword,
+                    'v' => 1,
+                    'format' => 'json',
+                ];
+
+                do_action('payment_before_making_api_request', SSLCOMMERZ_PAYMENT_METHOD_NAME, $data);
+
                 $handle = curl_init();
                 curl_setopt($handle, CURLOPT_URL, $requested_url);
                 curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
@@ -80,6 +90,8 @@ class SslCommerzNotification extends AbstractSslCommerz
                 $result = curl_exec($handle);
 
                 $code = curl_getinfo($handle, CURLINFO_HTTP_CODE);
+
+                do_action('payment_after_api_response', SSLCOMMERZ_PAYMENT_METHOD_NAME, $data, (array) $result);
 
                 if ($code == 200 && ! (curl_errno($handle))) {
                     // TO CONVERT AS ARRAY
@@ -199,8 +211,12 @@ class SslCommerzNotification extends AbstractSslCommerz
         // Set the authentication information
         $this->setAuthenticationInfo();
 
+        do_action('payment_before_making_api_request', SSLCOMMERZ_PAYMENT_METHOD_NAME, $this->data);
+
         // Now, call the Gateway API
         $response = $this->callToApi($this->data, $header, $this->config['connect_from_localhost']);
+
+        do_action('payment_after_api_response', SSLCOMMERZ_PAYMENT_METHOD_NAME, $this->data, (array) $response);
 
         // Here we will define the response pattern
         $formattedResponse = $this->formatResponse($response, $type, $pattern);

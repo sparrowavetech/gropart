@@ -9,9 +9,9 @@
 
 <div class="twig-template">
     <div class="mb-3 btn-list">
-        @if (! empty($variables))
+        @if (!empty($variables))
             <x-core::dropdown
-                :label="__('Variables')"
+                :label="trans('core/base::forms.variables')"
                 icon="ti ti-code"
             >
                 @foreach ($variables as $key => $label)
@@ -25,9 +25,9 @@
             </x-core::dropdown>
         @endif
 
-        @if (! empty($functions))
+        @if (!empty($functions))
             <x-core::dropdown
-                :label="__('Functions')"
+                :label="trans('core/base::forms.functions')"
                 icon="ti ti-code"
             >
                 @foreach ($functions as $key => $function)
@@ -50,11 +50,11 @@
             :mode="$mode"
         >
             <x-slot:helper-text>
-                @if($helperText)
+                @if ($helperText)
                     {{ $helperText }}
                 @else
                     {!! BaseHelper::clean(
-                        __('Learn more about Twig template: :url', [
+                        trans('core/base::forms.learn_more_twig', [
                             'url' => Html::link('https://twig.symfony.com/doc/3.x/', null, ['target' => '_blank']),
                         ]),
                     ) !!}

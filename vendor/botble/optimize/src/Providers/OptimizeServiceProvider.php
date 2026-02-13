@@ -27,7 +27,8 @@ class OptimizeServiceProvider extends ServiceProvider
     {
         $this
             ->setNamespace('packages/optimize')
-            ->loadAndPublishConfigurations(['general', 'permissions'])
+            ->loadAndPublishConfigurations(['general'])
+            ->loadAndPublishConfigurations(['permissions'])
             ->loadRoutes()
             ->loadAndPublishTranslations()
             ->loadAndPublishViews();
@@ -36,7 +37,7 @@ class OptimizeServiceProvider extends ServiceProvider
             AliasLoader::getInstance()->alias('OptimizerHelper', OptimizerHelper::class);
         }
 
-        PanelSectionManager::default()->beforeRendering(function () {
+        PanelSectionManager::default()->beforeRendering(function (): void {
             PanelSectionManager::registerItem(
                 SettingCommonPanelSection::class,
                 fn () => PanelSectionItem::make('common')
@@ -48,7 +49,7 @@ class OptimizeServiceProvider extends ServiceProvider
             );
         });
 
-        $this->app['events']->listen(RouteMatched::class, function () {
+        $this->app['events']->listen(RouteMatched::class, function (): void {
             if (OptimizerHelper::isEnabled()) {
                 /**
                  * @var Router $router

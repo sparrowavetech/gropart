@@ -77,7 +77,7 @@ class ThemeOption
                 if (Arr::get($field, 'section_id') == $sectionId) {
                     $priority = $field['priority'];
                     while (isset($fields[$priority])) {
-                        echo $priority++;
+                        $priority++;
                     }
                     $fields[$priority] = $field;
                 }
@@ -89,7 +89,7 @@ class ThemeOption
         return $fields;
     }
 
-    public function getSection(string $id = ''): bool
+    public function getSection(string $id = ''): array|bool
     {
         $this->checkOptName();
 
@@ -191,7 +191,7 @@ class ThemeOption
             }
         }
 
-        if (! empty($this->optName) && is_array($section)) {
+        if (! empty($this->optName)) {
             if (! isset($section['title'])) {
                 $this->errors[$this->optName]['section']['missing_title'] = 'Unable to create a section due to missing id and title.';
 
@@ -232,7 +232,7 @@ class ThemeOption
      */
     public function processFieldsArray(string $sectionId = '', array $fields = []): void
     {
-        if (! empty($this->optName) && ! empty($sectionId) && is_array($fields) && ! empty($fields)) {
+        if (! empty($this->optName) && ! empty($sectionId) && ! empty($fields)) {
             foreach ($fields as $field) {
                 if ($field instanceof ThemeOptionField) {
                     $field = $field->toArray();
@@ -256,7 +256,7 @@ class ThemeOption
             $field = $field->toArray();
         }
 
-        if (! empty($this->optName) && is_array($field) && ! empty($field)) {
+        if (! empty($this->optName) && ! empty($field)) {
             if (! isset($field['priority'])) {
                 $field['priority'] = $this->getPriority('fields');
             }
@@ -385,7 +385,7 @@ class ThemeOption
     {
         $this->checkOptName();
 
-        if (! empty($this->optName) && ! empty($args) && is_array($args)) {
+        if (! empty($this->optName) && ! empty($args)) {
             if (isset($this->args[$this->optName]['clearArgs'])) {
                 $this->args[$this->optName] = [];
             }
@@ -490,7 +490,7 @@ class ThemeOption
         return setting()->has($this->getOptionKey($key, $this->getCurrentLocaleCode()));
     }
 
-    public function getOption(string $key = '', string|null|array $default = ''): ?string
+    public function getOption(string $key = '', bool|string|null|array $default = ''): ?string
     {
         if (is_array($default)) {
             $default = json_encode($default);

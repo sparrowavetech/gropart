@@ -21,6 +21,9 @@ class PublicEcommerceController extends BaseController
             return $this->httpResponse();
         }
 
+        /**
+         * @var Currency $currency
+         */
         $currency = Currency::query()->where('title', $title)->first();
 
         if ($currency) {

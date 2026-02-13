@@ -9,14 +9,16 @@ class DeleteUnusedTranslationFilesService
 {
     public function handle(): void
     {
-        if (! defined('THEME_MODULE_SCREEN_NAME') && File::isDirectory(lang_path('vendor/themes'))) {
-            File::deleteDirectory(lang_path('vendor/themes'));
+        $themeLangPath = lang_path('vendor/themes');
+
+        if (! defined('THEME_MODULE_SCREEN_NAME') && File::isDirectory($themeLangPath)) {
+            File::deleteDirectory($themeLangPath);
         }
 
-        if (File::isDirectory(lang_path('vendor/themes'))) {
-            foreach (BaseHelper::scanFolder(lang_path('vendor/themes')) as $theme) {
+        if (File::isDirectory($themeLangPath)) {
+            foreach (BaseHelper::scanFolder($themeLangPath) as $theme) {
                 if (! File::isDirectory(theme_path($theme))) {
-                    File::deleteDirectory(lang_path('vendor/themes/' . $theme));
+                    File::deleteDirectory($themeLangPath . '/' . $theme);
                 }
             }
         }

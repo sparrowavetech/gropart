@@ -4,7 +4,9 @@
 
 @once
     @if ($randomHash = setting('datatables_random_hash'))
-        <script>window.DATATABLES_RANDOM_HASH = "{{ $randomHash }}";</script>
+        <script>
+            window.DATATABLES_RANDOM_HASH = "{{ $randomHash }}";
+        </script>
     @endif
 @endonce
 
@@ -60,21 +62,43 @@
 
                     <div class="table-search-input">
                         <label>
-                            <input type="search" class="form-control input-sm" placeholder="{{ trans('core/table::table.search') }}" style="min-width: 120px">
-                            <button type="button" title="Search" class="search-icon"><x-core::icon name="ti ti-search" /></button>
-                            <button type="button" title="Clear" class="search-reset-icon"><x-core::icon name="ti ti-x" /></button>
+                            <input
+                                type="search"
+                                class="form-control input-sm"
+                                placeholder="{{ trans('core/table::table.search') }}"
+                                style="min-width: 120px"
+                            >
+                            <button
+                                type="button"
+                                title="{{ trans('core/table::table.search') }}"
+                                class="search-icon"
+                            ><x-core::icon name="ti ti-search" /></button>
+                            <button
+                                type="button"
+                                title="{{ trans('core/table::table.clear') }}"
+                                class="search-reset-icon"
+                            ><x-core::icon name="ti ti-x" /></button>
                         </label>
                     </div>
                 </div>
-                <div class="d-flex align-items-center gap-1">
-                    @foreach($table->getButtons() as $button)
+                <div
+                    class="d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center gap-1 table-action-buttons">
+                    @foreach ($table->getButtons() as $button)
                         @if (Arr::get($button, 'extend') === 'collection')
                             <div class="dropdown d-inline-block">
-                                <button class="btn buttons-collection dropdown-toggle {{ $button['className'] }}" data-bs-toggle="dropdown" tabindex="0" aria-controls="{{ $table->getOption('id') }}" type="button" aria-haspopup="dialog" aria-expanded="false">
+                                <button
+                                    class="btn buttons-collection dropdown-toggle {{ $button['className'] }}"
+                                    data-bs-toggle="dropdown"
+                                    tabindex="0"
+                                    aria-controls="{{ $table->getOption('id') }}"
+                                    type="button"
+                                    aria-haspopup="dialog"
+                                    aria-expanded="false"
+                                >
                                     {!! $button['text'] !!}
                                 </button>
                                 <div class="dropdown-menu">
-                                    @foreach($button['buttons'] as $buttonItem)
+                                    @foreach ($button['buttons'] as $buttonItem)
                                         <button class="dropdown-item {{ $buttonItem['className'] }}">
                                             {!! $buttonItem['text'] !!}
                                         </button>
@@ -82,13 +106,20 @@
                                 </div>
                             </div>
                         @else
-                            <button class="btn {{ $button['className'] }}" tabindex="0" aria-controls="{{ $table->getOption('id') }}" type="button" aria-haspopup="dialog" aria-expanded="false">
+                            <button
+                                class="btn {{ $button['className'] }}"
+                                tabindex="0"
+                                aria-controls="{{ $table->getOption('id') }}"
+                                type="button"
+                                aria-haspopup="dialog"
+                                aria-expanded="false"
+                            >
                                 {!! $button['text'] !!}
                             </button>
                         @endif
                     @endforeach
 
-                    @foreach($table->getDefaultButtons() as $defaultButton)
+                    @foreach ($table->getDefaultButtons() as $defaultButton)
                         @if (is_string($defaultButton))
                             @switch($defaultButton)
                                 @case('reload')
@@ -102,53 +133,100 @@
                                     >
                                         {{ trans('core/base::tables.reload') }}
                                     </x-core::button>
-                                    @break
+                                @break
+
                                 @case('export')
                                     <div class="dropdown">
-                                        <button title="{{ trans('core/base::tables.export') }}" class="btn buttons-collection dropdown-toggle buttons-export" data-bs-toggle="dropdown" tabindex="0" aria-controls="{{ $table->getOption('id') }}" type="button" aria-haspopup="dialog" aria-expanded="false">
+                                        <button
+                                            title="{{ trans('core/base::tables.export') }}"
+                                            class="btn buttons-collection dropdown-toggle buttons-export"
+                                            data-bs-toggle="dropdown"
+                                            tabindex="0"
+                                            aria-controls="{{ $table->getOption('id') }}"
+                                            type="button"
+                                            aria-haspopup="dialog"
+                                            aria-expanded="false"
+                                        >
                                             <span>
                                                 <x-core::icon name="ti ti-download" /> {{ trans('core/base::tables.export') }}
                                             </span>
                                         </button>
                                         <div class="dropdown-menu">
-                                            <button class="dropdown-item" data-bb-toggle="dt-exports" data-bb-target="csv" aria-controls="{{ $table->getOption('id') }}">
+                                            <button
+                                                class="dropdown-item"
+                                                data-bb-toggle="dt-exports"
+                                                data-bb-target="csv"
+                                                aria-controls="{{ $table->getOption('id') }}"
+                                            >
                                                 <span>
-                                                    <x-core::icon name="ti ti-file-type-csv" /> {{ trans('core/base::tables.csv') }}
+                                                    <x-core::icon name="ti ti-file-type-csv" />
+                                                    {{ trans('core/base::tables.csv') }}
                                                 </span>
                                             </button>
-                                            <button class="dropdown-item" data-bb-toggle="dt-exports" data-bb-target="excel" aria-controls="{{ $table->getOption('id') }}">
+                                            <button
+                                                class="dropdown-item"
+                                                data-bb-toggle="dt-exports"
+                                                data-bb-target="excel"
+                                                aria-controls="{{ $table->getOption('id') }}"
+                                            >
                                                 <span>
-                                                    <x-core::icon name="ti ti-file-type-xls" /> {{ trans('core/base::tables.excel') }}
+                                                    <x-core::icon name="ti ti-file-type-xls" />
+                                                    {{ trans('core/base::tables.excel') }}
                                                 </span>
                                             </button>
                                         </div>
                                     </div>
-                                    @break
-                                @case('visibility')
-                                    @break(! Auth::user() instanceof \Botble\ACL\Models\User || ! AdminHelper::isInAdmin(true))
+                                @break
 
-                                    <div class="dropdown" data-bb-toggle="dt-columns-visibility-dropdown" aria-controls="{{ $table->getOption('id') }}">
-                                        <button title="{{ trans('core/base::tables.toggle_columns') }}" class="btn buttons-collection dropdown-toggle buttons-visibility" data-bs-toggle="dropdown" data-bs-auto-close="outside" tabindex="0" aria-controls="{{ $table->getOption('id') }}" type="button" aria-haspopup="dialog" aria-expanded="false">
+                                @case('visibility')
+                                    @break(!Auth::user() instanceof \Botble\ACL\Models\User || !AdminHelper::isInAdmin(true))
+
+                                    <div
+                                        class="dropdown"
+                                        data-bb-toggle="dt-columns-visibility-dropdown"
+                                        aria-controls="{{ $table->getOption('id') }}"
+                                    >
+                                        <button
+                                            title="{{ trans('core/base::tables.toggle_columns') }}"
+                                            class="btn buttons-collection dropdown-toggle buttons-visibility"
+                                            data-bs-toggle="dropdown"
+                                            data-bs-auto-close="outside"
+                                            tabindex="0"
+                                            aria-controls="{{ $table->getOption('id') }}"
+                                            type="button"
+                                            aria-haspopup="dialog"
+                                            aria-expanded="false"
+                                        >
                                             <span>
                                                 <x-core::icon name="ti ti-columns-3" />
                                             </span>
                                         </button>
 
                                         <div class="dropdown-menu p-2">
-                                            <x-core::form :url="route('table.update-columns-visibility')" method="PUT" data-bb-toggle="dt-columns-visibility">
-                                                <input type="hidden" name="table" value="{{ $table::class }}" />
+                                            <x-core::form
+                                                :url="route('table.update-columns-visibility')"
+                                                method="PUT"
+                                                data-bb-toggle="dt-columns-visibility"
+                                            >
+                                                <input
+                                                    type="hidden"
+                                                    name="table"
+                                                    value="{{ $table::class }}"
+                                                />
 
-                                                @foreach($table->getColumns() as $column)
-                                                    @php /** @var \Botble\Table\Columns\Column $column */ @endphp
+                                                @foreach ($table->getColumns() as $column)
+                                                    @php
+                                                        /** @var \Botble\Table\Columns\Column $column */
+                                                    @endphp
 
-                                                    @continue(Str::contains($column->className, 'no-column-visibility') || in_array($column->name, $table->getDefaultVisibleColumns(), true))
+                                                    @continue(!$column instanceof \Botble\Table\Columns\Column || Str::contains($column->className, 'no-column-visibility') || in_array($column->name, $table->getDefaultVisibleColumns(), true))
 
                                                     {{ Form::onOffCheckbox("columns_visibility[{$column->name}]", $table->determineIfColumnIsVisible($column), ['label' => $column->titleAttr ?: $column->title, 'data-bb-toggle' => 'dt-columns-visibility-toggle']) }}
                                                 @endforeach
                                             </x-core::form>
                                         </div>
                                     </div>
-                                    @break
+                                @break
                             @endswitch
                         @endif
                     @endforeach

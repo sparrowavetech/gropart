@@ -21,6 +21,23 @@ $(() => {
     const $shortcodeListModal = $('#shortcode-list-modal')
     const $shortcodeFormModal = $('#shortcode-modal')
 
+    // Function to escape HTML entities
+    function escapeHtml(text) {
+        if (typeof text !== 'string') return text
+
+        const map = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;',
+        }
+
+        return text.replace(/[&<>"']/g, function (m) {
+            return map[m]
+        })
+    }
+
     $('[data-bb-toggle="shortcode-item-radio"]').on('change', () => {
         $('[data-bb-toggle="shortcode-use"]').prop('disabled', false).removeClass('disabled')
     })
@@ -38,8 +55,14 @@ $(() => {
             if ((!shortcodeAttribute || shortcodeAttribute !== 'content') && value) {
                 name = name.replace('[]', '')
                 if (value && typeof value === 'string') {
-                    value = value.replace(/"([^"]*)"/g, '“$1”')
-                    value = value.replace(/"/g, '“')
+                    value = value.replace(/"([^"]*)"/g, '"$1"')
+                    value = value.replace(/"/g, '"')
+                    value = value
+                        .replace(/\r\n/g, '{{NEWLINE}}')
+                        .replace(/\n/g, '{{NEWLINE}}')
+                        .replace(/\r/g, '{{NEWLINE}}')
+                        .replace(/<br\s*\/?>/gi, '{{BR}}')
+                        .replace(/&nbsp;/gi, '{{NBSP}}')
                 }
 
                 if (element.data('shortcode-attribute') !== 'content') {
@@ -59,11 +82,13 @@ $(() => {
 
         const editorInstance = $('.add_shortcode_btn_trigger').data('result')
 
-        const shortcode = '[' + $shortCodeKey + attributes + ']' + content + '[/' + $shortCodeKey + ']'
+        let shortcode = '[' + $shortCodeKey + attributes + ']' + content + '[/' + $shortCodeKey + ']'
 
         if (window.EDITOR && window.EDITOR.CKEDITOR && $('.editor-ckeditor').length > 0) {
             window.EDITOR.CKEDITOR[editorInstance].commands.execute('shortcode', shortcode)
         } else if ($('.editor-tinymce').length > 0) {
+            shortcode = '[' + $shortCodeKey + attributes + ']' + escapeHtml(content) + '[/' + $shortCodeKey + ']'
+
             tinymce.get(editorInstance).execCommand('mceInsertContent', false, shortcode)
         } else {
             const coreInsertShortCodeEvent = new CustomEvent('core-insert-shortcode', {
@@ -146,7 +171,15 @@ $(() => {
                 Botble.initMediaIntegrate()
                 Botble.initFieldCollapse()
 
-                document.dispatchEvent(new CustomEvent('core-shortcode-config-loaded'))
+                const eventDetail = {
+                    shortcode: key,
+                    name: name,
+                    description: description,
+                    update: update,
+                    element: data.data,
+                }
+
+                document.dispatchEvent(new CustomEvent('core-shortcode-config-loaded', { detail: eventDetail }))
             })
     }
 
@@ -167,9 +200,24 @@ $(() => {
     })
 
     $(document).on('ckeditor-bb-shortcode-edit', (e) => {
-        const { shortcode, name } = e.detail
+        let { shortcode, name } = e.detail
+
+        // Fallback: extract shortcode name from content if CKEditor returns null
+        if (!name && shortcode) {
+            const match = shortcode.match(/^\[([a-zA-Z0-9_-]+)/)
+            if (match) {
+                name = match[1]
+            }
+        }
+
         const $shortcodeItem = $(`[data-bb-toggle="shortcode-select"][data-key="${name}"]`)
-        const description = $shortcodeItem.length > 0 ? $shortcodeItem.data('description') : ''
+
+        if ($shortcodeItem.length === 0) {
+            const message = window.BB_SHORTCODE_MESSAGES?.shortcode_not_available?.replace(':name', name)
+                || `Shortcode "${name}" is not available or has been removed.`
+            Botble.showError(message)
+            return
+        }
 
         shortcodeCallback({
             key: name,
@@ -179,7 +227,7 @@ $(() => {
                 code: shortcode,
             },
             name: $shortcodeItem.data('name'),
-            description: description,
+            description: $shortcodeItem.data('description') || '',
             previewImage: '',
             update: true,
         })

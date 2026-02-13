@@ -8,11 +8,14 @@ use Botble\SimpleSlider\Models\SimpleSliderItem;
 use Botble\Table\Abstracts\TableAbstract;
 use Botble\Table\Actions\DeleteAction;
 use Botble\Table\Actions\EditAction;
+use Botble\Table\BulkActions\DeleteBulkAction;
+use Botble\Table\BulkChanges\StatusBulkChange;
 use Botble\Table\Columns\Column;
 use Botble\Table\Columns\CreatedAtColumn;
 use Botble\Table\Columns\FormattedColumn;
 use Botble\Table\Columns\IdColumn;
 use Botble\Table\Columns\ImageColumn;
+use Botble\Table\Columns\StatusColumn;
 use Illuminate\Database\Eloquent\Builder;
 
 class SimpleSliderItemTable extends TableAbstract
@@ -46,6 +49,7 @@ class SimpleSliderItemTable extends TableAbstract
                 Column::make('order')
                     ->title(trans('core/base::tables.order'))
                     ->className('text-start order-column'),
+                StatusColumn::make(),
                 CreatedAtColumn::make(),
             ])
             ->addActions([
@@ -60,6 +64,12 @@ class SimpleSliderItemTable extends TableAbstract
                     ->route('simple-slider-item.destroy')
                     ->permission('simple-slider-item.destroy'),
             ])
+            ->addBulkActions([
+                DeleteBulkAction::make()->permission('simple-slider-item.destroy'),
+            ])
+            ->addBulkChanges([
+                StatusBulkChange::make(),
+            ])
             ->queryUsing(function (Builder $query) {
                 return $query
                     ->select([
@@ -67,9 +77,10 @@ class SimpleSliderItemTable extends TableAbstract
                         'title',
                         'image',
                         'order',
+                        'status',
                         'created_at',
                     ])
-                    ->orderBy('order')
+                    ->oldest('order')
                     ->where('simple_slider_id', request()->route()->parameter('id'));
             });
     }

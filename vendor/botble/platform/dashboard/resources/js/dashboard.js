@@ -151,11 +151,15 @@ $(() => {
         })
         .on('change', '[data-bb-toggle="widgets-management-item"]', function (event) {
             const $this = $(event.currentTarget)
+            const $wrapper = $this.closest('[data-bb-toggle="widgets-management-item-wrapper"]')
+            const $avatar = $wrapper.find('.avatar')
 
             if ($this.prop('checked')) {
-                $this.closest('td').removeClass('text-decoration-line-through text-muted')
+                $wrapper.removeClass('text-muted')
+                $avatar.removeClass('bg-secondary-lt').addClass('bg-primary-lt')
             } else {
-                $this.closest('td').addClass('text-decoration-line-through text-muted')
+                $wrapper.addClass('text-muted')
+                $avatar.removeClass('bg-primary-lt').addClass('bg-secondary-lt')
             }
         })
 })

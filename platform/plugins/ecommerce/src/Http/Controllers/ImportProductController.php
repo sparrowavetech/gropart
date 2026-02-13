@@ -16,8 +16,13 @@ class ImportProductController extends ImportController
 
     protected function prepareImporter(Request $request): Importer
     {
-        /** @var ProductImporter $importer */
-        return parent::prepareImporter($request)
-            ->setImportType($request->input('type'));
+        /**
+         * @var ProductImporter $importer
+         */
+        $importer = parent::prepareImporter($request);
+
+        return $importer
+            ->setImportType($request->input('type'))
+            ->setUpdateExisting($request->boolean('update_existing_products'));
     }
 }

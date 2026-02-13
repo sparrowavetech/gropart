@@ -76,10 +76,10 @@ class PostImporter extends Importer implements WithMapping
             ->take(5)
             ->with(['categories', 'tags', 'slugable'])
             ->get()
-            ->map(function (Post $post) {
+            ->map(function (Post $post) { // @phpstan-ignore-line
                 return [
                     ...$post->toArray(),
-                    'slug' => $post->slugable->key,
+                    'slug' => $post->slugable?->key,
                     'description' => Str::limit($post->description, 50),
                     'content' => Str::limit($post->content),
                     'tags' => $post->tags->pluck('name')->implode(', '),

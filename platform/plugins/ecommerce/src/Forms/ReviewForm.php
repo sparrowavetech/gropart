@@ -25,7 +25,7 @@ class ReviewForm extends FormAbstract
     public function setup(): void
     {
         $this
-            ->setupModel(new Review())
+            ->model(Review::class)
             ->setValidatorClass(ReviewRequest::class)
             ->add(
                 'product_id',
@@ -35,7 +35,6 @@ class ReviewForm extends FormAbstract
                     ->ajaxSearch()
                     ->required()
                     ->ajaxUrl(route('reviews.ajax-search-products'))
-                    ->toArray()
             )
             ->add(
                 'customer_id',
@@ -45,7 +44,6 @@ class ReviewForm extends FormAbstract
                     ->ajaxSearch()
                     ->ajaxUrl(route('reviews.ajax-search-customers'))
                     ->helperText(trans('plugins/ecommerce::review.choose_customer_help'))
-                    ->toArray()
             )
             ->add(
                 'open_or',
@@ -55,28 +53,24 @@ class ReviewForm extends FormAbstract
                         '<div class="form-fieldset"><label class="form-label">%s</label>',
                         trans('plugins/ecommerce::review.or_enter_manually')
                     ))
-                    ->toArray()
             )
             ->add(
                 'customer_name',
                 TextField::class,
                 TextFieldOption::make()
                     ->label(trans('plugins/ecommerce::ecommerce.customer_name'))
-                    ->toArray()
             )
             ->add(
                 'customer_email',
                 EmailField::class,
                 EmailFieldOption::make()
                     ->label(trans('plugins/ecommerce::ecommerce.customer_email'))
-                    ->toArray()
             )
             ->add(
                 'close_or',
                 HtmlField::class,
                 HtmlFieldOption::make()
                     ->content('</div>')
-                    ->toArray()
             )
             ->add(
                 'star',
@@ -85,7 +79,6 @@ class ReviewForm extends FormAbstract
                     ->label(trans('plugins/ecommerce::review.star'))
                     ->choices(array_combine(range(1, 5), range(1, 5)))
                     ->selected(5)
-                    ->toArray()
             )
             ->add(
                 'comment',
@@ -93,7 +86,6 @@ class ReviewForm extends FormAbstract
                 TextareaFieldOption::make()
                     ->label(trans('plugins/ecommerce::review.comment'))
                     ->required()
-                    ->toArray()
             )
             ->add('images[]', MediaImagesField::class, [
                 'label' => trans('plugins/ecommerce::review.images'),
@@ -106,7 +98,6 @@ class ReviewForm extends FormAbstract
                     ->label(trans('core/base::tables.created_at'))
                     ->value(Carbon::now())
                     ->withTimePicker()
-                    ->toArray()
             )
             ->setBreakFieldPoint('created_at');
     }

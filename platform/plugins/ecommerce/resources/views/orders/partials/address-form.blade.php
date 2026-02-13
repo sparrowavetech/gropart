@@ -1,8 +1,12 @@
 <div class="customer-address-payment-form">
     <input type="hidden" name="update-tax-url" id="update-checkout-tax-url" value="{{ route('public.ajax.checkout.update-tax') }}">
-    @if (EcommerceHelper::isEnabledGuestCheckout() && !auth('customer')->check())
-        <div class="mb-3 form-group">
-            <p>{{ __('Already have an account?') }} <a href="{{ route('customer.login') }}">{{ __('Login') }}</a></p>
+    @if (!EcommerceHelper::isHideCustomerInfoAtCheckout())
+        <div class="mb-3 form-group checkout-login-prompt">
+            @if (auth('customer')->check())
+                <p>{{ __('Account') }}: <strong>{{ auth('customer')->user()->name }}</strong> - {!! Html::email(auth('customer')->user()->email) !!} (<a href="{{ route('customer.logout') }}">{{ __('Logout') }})</a></p>
+            @else
+                <p>{{ __('Already have an account?') }} <a href="{{ route('customer.login') }}">{{ __('Login') }}</a></p>
+            @endif
         </div>
     @endif
 
@@ -99,7 +103,7 @@
             @if (!in_array('email', EcommerceHelper::getHiddenFieldsAtCheckout()))
                 <div @class([
                     'col-12',
-                    'col-lg-8' => !in_array(
+                    'col-lg-7' => !in_array(
                         'phone',
                         EcommerceHelper::getHiddenFieldsAtCheckout()),
                 ])>
@@ -121,22 +125,46 @@
                 </div>
             @endif
             @if (!in_array('phone', EcommerceHelper::getHiddenFieldsAtCheckout()))
+                @php
+                    $phoneCountryCodeEnabled = setting('phone_number_enable_country_code', true);
+                    $phoneValue = old('address.phone', Arr::get($sessionCheckoutData, 'phone')) ?: (auth('customer')->check() ? auth('customer')->user()->phone : null);
+                @endphp
                 <div @class([
                     'col-12',
-                    'col-lg-4' => !in_array(
+                    'col-lg-5' => !in_array(
                         'email',
                         EcommerceHelper::getHiddenFieldsAtCheckout()),
                 ])>
                     <div class="form-group mb-3 @error('address.phone') has-error @enderror">
-                        <div class="form-input-wrapper">
-                            <input
-                                class="form-control"
-                                id="address_phone"
-                                name="address[phone]"
-                                autocomplete="phone"
-                                type="tel"
-                                value="{{ old('address.phone', Arr::get($sessionCheckoutData, 'phone')) ?: (auth('customer')->check() ? auth('customer')->user()->phone : null) }}"
-                            >
+                        <div class="phone-input-wrapper">
+                            @if ($phoneCountryCodeEnabled)
+                                <input
+                                    class="form-control js-phone-number-mask"
+                                    id="address_phone"
+                                    name="address[phone_display]"
+                                    autocomplete="phone"
+                                    type="tel"
+                                    data-country-code-selection="true"
+                                    value="{{ $phoneValue }}"
+                                >
+                                <input
+                                    type="hidden"
+                                    name="address[phone]"
+                                    id="address_phone-full"
+                                    class="js-phone-number-full"
+                                    data-phone-field="address[phone_display]"
+                                    value="{{ $phoneValue }}"
+                                >
+                            @else
+                                <input
+                                    class="form-control js-phone-number-mask"
+                                    id="address_phone"
+                                    name="address[phone]"
+                                    autocomplete="phone"
+                                    type="tel"
+                                    value="{{ $phoneValue }}"
+                                >
+                            @endif
                             <label for="address_phone">{{ __('Phone') }}</label>
                         </div>
                         {!! Form::error('address.phone', $errors) !!}
@@ -151,7 +179,7 @@
             <div class="form-group mb-3 @error('address.country') has-error @enderror">
                 <div class="select--arrow form-input-wrapper">
                     <select
-                        class="form-control"
+                        class="form-control select-search-location"
                         id="address_country"
                         name="address[country]"
                         autocomplete="country"
@@ -162,8 +190,10 @@
                         @foreach (EcommerceHelper::getAvailableCountries() as $countryCode => $countryName)
                             <option
                                 value="{{ $countryCode }}"
-                                @if (old('address.country', Arr::get($sessionCheckoutData, 'country')) == $countryCode) selected @endif
-                            >{{ $countryName }}</option>
+                                @selected(old('address.country', Arr::get($sessionCheckoutData, 'country', EcommerceHelper::getDefaultCountryId())) == $countryCode)
+                            >
+                                {{ $countryName }}
+                            </option>
                         @endforeach
                     </select>
                     <x-core::icon name="ti ti-chevron-down" />
@@ -187,7 +217,7 @@
                         @if (EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation())
                             <div class="select--arrow form-input-wrapper">
                                 <select
-                                    class="form-control"
+                                    class="form-control select-search-location"
                                     id="address_state"
                                     name="address[state]"
                                     autocomplete="state"
@@ -197,8 +227,8 @@
                                     required
                                 >
                                     <option value="">{{ __('Select state...') }}</option>
-                                    @if (old('address.country', Arr::get($sessionCheckoutData, 'country')) || !EcommerceHelper::isUsingInMultipleCountries())
-                                        @foreach (EcommerceHelper::getAvailableStatesByCountry(old('address.country', Arr::get($sessionCheckoutData, 'country'))) as $stateId => $stateName)
+                                    @if (old('address.country', Arr::get($sessionCheckoutData, 'country') ?: EcommerceHelper::getDefaultCountryId()) || !EcommerceHelper::isUsingInMultipleCountries())
+                                        @foreach (EcommerceHelper::getAvailableStatesByCountry(old('address.country', Arr::get($sessionCheckoutData, 'country') ?: EcommerceHelper::getDefaultCountryId())) as $stateId => $stateName)
                                             <option
                                                 value="{{ $stateId }}"
                                                 @if (old('address.state', Arr::get($sessionCheckoutData, 'state')) == $stateId) selected @endif
@@ -247,12 +277,12 @@
                         @else
                             <div class="select--arrow form-input-wrapper">
                                 <select
-                                    class="form-control"
+                                    class="form-control select-search-location"
                                     id="address_city"
                                     name="address[city]"
                                     autocomplete="city"
+                                    data-form-parent=".customer-address-payment-form"
                                     data-type="city"
-                                    data-using-select2="false"
                                     data-url="{{ route('ajax.cities-by-state') }}"
                                     required
                                 >
@@ -275,6 +305,8 @@
                 </div>
             @endif
         </div>
+
+        {!! apply_filters('ecommerce_checkout_address_form_after_city_field', null, $sessionCheckoutData) !!}
 
         @if (!in_array('address', EcommerceHelper::getHiddenFieldsAtCheckout()))
             <div class="form-group mb-3 @error('address.address') has-error @enderror">
@@ -315,18 +347,20 @@
 
     @if (!auth('customer')->check())
         <div id="register-an-account-wrapper">
-            <div class="mb-3 form-group">
-                <input
-                    id="create_account"
-                    name="create_account"
-                    type="checkbox"
-                    value="1"
-                    @if (old('create_account') == 1) checked @endif
-                >
-                <label
-                    class="form-label"
-                    for="create_account"
-                >{{ __('Register an account with above information?') }}</label>
+            <div class="mb-3">
+                <label class="form-check">
+                    <input
+                        id="create_account"
+                        name="create_account"
+                        type="checkbox"
+                        value="1"
+                        class="form-check-input"
+                        @if (old('create_account') == 1) checked @endif
+                    >
+                    <span
+                        class="form-check-label"
+                    >{{ __('Register an account with above information?') }}</span>
+                </label>
             </div>
 
             <div class="password-group @if (!$errors->has('password') && !$errors->has('password_confirmation')) d-none @endif">
@@ -369,3 +403,7 @@
 
     {!! apply_filters('ecommerce_checkout_address_form_after', null, $sessionCheckoutData) !!}
 </div>
+
+@once
+    @include('core/base::forms.fields.phone-number-script')
+@endonce

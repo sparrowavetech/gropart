@@ -29,15 +29,13 @@
                 <x-core::table.body.row>
                     <x-core::table.body.cell class="template-name w-25">
                         @php
-                            $isOn = (bool) (get_setting_email_status($type, $module, $key));
+                            $isOn = (bool) get_setting_email_status($type, $module, $key);
                         @endphp
 
                         <span
                             @class(['text-muted text-decoration-line-through' => !$isOn])
-                            @if (!$isOn)
-                                data-bs-toggle="tooltip"
-                                title="{{ trans('core/setting::setting.email.template_off_status_helper') }}"
-                            @endif
+                            @if (!$isOn) data-bs-toggle="tooltip"
+                                title="{{ trans('core/setting::setting.email.template_off_status_helper') }}" @endif
                         >
                             {{ trans($template['title']) }}
                         </span>
@@ -51,7 +49,9 @@
                         <x-core::table.body.cell
                             class="text-end"
                             data-bs-toggle="tooltip"
-                            :title="$isOn ? trans('core/setting::setting.email.template_turn_off') : trans('core/setting::setting.email.template_turn_on')"
+                            :title="$isOn
+                                ? trans('core/setting::setting.email.template_turn_off')
+                                : trans('core/setting::setting.email.template_turn_on')"
                         >
                             <x-core::form.toggle
                                 :name="get_setting_email_status_key($type, $module, $key)"
@@ -62,7 +62,11 @@
                             />
                         </x-core::table.body.cell>
                     @else
-                        <x-core::table.body.cell class="text-end" data-bs-toggle="tooltip" :title="trans('core/setting::setting.general.disabled_helper')">
+                        <x-core::table.body.cell
+                            class="text-end"
+                            data-bs-toggle="tooltip"
+                            :title="trans('core/setting::setting.general.disabled_helper')"
+                        >
                             <x-core::form.toggle
                                 :name="get_setting_email_status_key($type, $module, $key)"
                                 :checked="1"

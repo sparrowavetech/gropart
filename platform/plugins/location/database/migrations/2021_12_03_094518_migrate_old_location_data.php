@@ -13,13 +13,15 @@ return new class () extends Migration {
     public function up(): void
     {
         if (is_plugin_active('language')) {
+            $tablePrefix = Schema::getConnection()->getTablePrefix();
+
             Schema::dropIfExists('countries_backup');
             Schema::dropIfExists('states_backup');
             Schema::dropIfExists('cities_backup');
 
-            DB::statement('CREATE TABLE countries_backup AS SELECT * FROM countries');
-            DB::statement('CREATE TABLE states_backup AS SELECT * FROM states');
-            DB::statement('CREATE TABLE cities_backup AS SELECT * FROM cities');
+            DB::statement('CREATE TABLE ' . $tablePrefix . 'countries_backup AS SELECT * FROM ' . $tablePrefix . 'countries');
+            DB::statement('CREATE TABLE ' . $tablePrefix . 'states_backup AS SELECT * FROM ' . $tablePrefix . 'states');
+            DB::statement('CREATE TABLE ' . $tablePrefix . 'cities_backup AS SELECT * FROM ' . $tablePrefix . 'cities');
 
             $cities = LanguageMeta::query()->where('reference_type', State::class)
                 ->where('lang_meta_code', '!=', Language::getDefaultLocaleCode())
@@ -119,7 +121,7 @@ return new class () extends Migration {
                 DB::table('countries')->where('id', $originalItem->id)->delete();
             }
 
-            DB::statement('CREATE TABLE language_meta_backup AS SELECT * FROM language_meta');
+            DB::statement('CREATE TABLE ' . $tablePrefix . 'language_meta_backup AS SELECT * FROM ' . $tablePrefix . 'language_meta');
 
             DB::table('language_meta_backup')->insert(
                 LanguageMeta::query()->where('reference_type', State::class)->get()->toArray()
@@ -138,6 +140,7 @@ return new class () extends Migration {
             Schema::dropIfExists('countries_backup');
             Schema::dropIfExists('states_backup');
             Schema::dropIfExists('cities_backup');
+            Schema::dropIfExists('language_meta_backup');
         }
     }
 };

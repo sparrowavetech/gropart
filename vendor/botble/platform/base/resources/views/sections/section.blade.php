@@ -9,7 +9,7 @@
         <div>
             <x-core::card.title>{{ $title }}</x-core::card.title>
 
-            @if($description)
+            @if ($description)
                 <x-core::card.subtitle>
                     {{ $description }}
                 </x-core::card.subtitle>

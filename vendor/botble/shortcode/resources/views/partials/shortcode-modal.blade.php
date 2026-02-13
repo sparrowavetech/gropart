@@ -1,15 +1,18 @@
 @php
-    $shortcodes = Shortcode::getAll()
+    $shortcodes = Shortcode::getAll();
 @endphp
 
 <script>
-    window.BB_SHORTCODES = {!!
-        Js::from(
-            collect($shortcodes)->mapWithKeys(
-            fn( $shortcode, $key) => [$key => ! empty($shortcode['name']) ? $shortcode['name'] : (! empty($shortcode['description']) ?: $key)]
-            )->toArray()
-        )
-    !!}
+    window.BB_SHORTCODES = {!! Js::from(
+        collect($shortcodes)->mapWithKeys(
+                fn($shortcode, $key) => [
+                    $key => !empty($shortcode['name']) ? $shortcode['name'] : (!empty($shortcode['description']) ?: $key),
+                ],
+            )->toArray(),
+    ) !!}
+    window.BB_SHORTCODE_MESSAGES = {
+        shortcode_not_available: "{{ trans('packages/shortcode::shortcode.shortcode_not_available') }}"
+    }
 </script>
 
 <x-core::modal
@@ -32,7 +35,11 @@
         </x-slot:prepend>
 
         <x-slot:append>
-            <button type="button" class="input-group-text" data-bb-toggle="shortcode-clear-search">
+            <button
+                type="button"
+                class="input-group-text"
+                data-bb-toggle="shortcode-clear-search"
+            >
                 <x-core::icon name="ti ti-x" />
             </button>
         </x-slot:append>
@@ -40,7 +47,7 @@
 
     <div class="row shortcode-list">
         @foreach ($shortcodes as $key => $shortcode)
-            @continue(! isset($shortcode['name']))
+            @continue(!isset($shortcode['name']))
             <div class="col-xl-3 col-lg-4 col-sm-6 mb-3">
                 <label
                     class="shortcode-item-wrapper w-100"
@@ -52,26 +59,46 @@
                     data-key="{{ $key }}"
                     for="shortcode-item-{{ $loop->index }}"
                 >
-                    <input class="d-none shortcode-item-input" id="shortcode-item-{{ $loop->index }}" value="{{ $loop->index }}" type="radio" name="shortcode_name" data-bb-toggle="shortcode-item-radio">
+                    <input
+                        class="d-none shortcode-item-input"
+                        id="shortcode-item-{{ $loop->index }}"
+                        value="{{ $loop->index }}"
+                        type="radio"
+                        name="shortcode_name"
+                        data-bb-toggle="shortcode-item-radio"
+                    >
                     <div class="shortcode-item">
                         <x-core::card>
                             <div class="image-wrapper w-100 position-relative overflow-hidden">
-                                <img src="{{ $image = Arr::get($shortcode, 'previewImage') ?: asset('vendor/core/packages/shortcode/images/placeholder-code.jpg') }}" alt="{{ $shortcode['name'] }}"/>
+                                <img
+                                    src="{{ $image = Arr::get($shortcode, 'previewImage') ?: asset('vendor/core/packages/shortcode/images/placeholder-code.jpg') }}"
+                                    alt="{{ $shortcode['name'] }}"
+                                />
                             </div>
 
                             <x-core::card.header>
                                 <div class="w-100">
-                                    <x-core::card.title class="mb-1" title="{{ $shortcode['name'] }}">
+                                    <x-core::card.title
+                                        class="mb-1"
+                                        title="{{ $shortcode['name'] }}"
+                                    >
                                         {{ $shortcode['name'] }}
                                     </x-core::card.title>
 
                                     <div class="row align-items-center">
-                                        <x-core::card.subtitle class="col-9" title="{{ $shortcode['description'] }}">
+                                        <x-core::card.subtitle
+                                            class="col-9"
+                                            title="{{ $shortcode['description'] }}"
+                                        >
                                             {{ $shortcode['description'] }}
                                         </x-core::card.subtitle>
 
                                         <div class="col-3 text-end">
-                                            <x-core::button size="xs" class="use-button" data-bb-toggle="shortcode-button-use">
+                                            <x-core::button
+                                                size="xs"
+                                                class="use-button"
+                                                data-bb-toggle="shortcode-button-use"
+                                            >
                                                 {{ trans('packages/shortcode::shortcode.use') }}
                                             </x-core::button>
                                         </div>
@@ -93,9 +120,7 @@
 
     <x-slot:footer>
         <div class="btn-list">
-            <x-core::button
-                data-bs-dismiss="modal"
-            >
+            <x-core::button data-bs-dismiss="modal">
                 {{ trans('core/base::base.close') }}
             </x-core::button>
 
@@ -126,9 +151,7 @@
     </form>
 
     <x-slot:footer>
-        <x-core::button
-            data-bs-dismiss="modal"
-        >
+        <x-core::button data-bs-dismiss="modal">
             {{ trans('core/base::tables.cancel') }}
         </x-core::button>
         <x-core::button

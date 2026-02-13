@@ -69,4 +69,7 @@ return [
             'trans' => 'Can be empty or a string with a maximum length of :max characters if provided.',
         ],
     ],
+    'download_locale' => 'Download locale',
+    'import_available_locale_confirmation' => 'Download locale from GitHub',
+    'import_available_locale_confirmation_content' => 'Are you sure you want to download this locale? It will be downloaded into :lang_path, you can delete it later if you want.',
 ];

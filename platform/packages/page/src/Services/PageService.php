@@ -15,14 +15,14 @@ use Illuminate\Support\Facades\Auth;
 
 class PageService
 {
-    public function handleFrontRoutes(Slug|array $slug): Slug|array
+    public function handleFrontRoutes(Slug|array|null $slug): Slug|array
     {
-        if (! $slug instanceof Slug) {
+        if ($slug && (! $slug instanceof Slug || $slug->reference_type !== Page::class)) {
             return $slug;
         }
 
         $condition = [
-            'id' => $slug->reference_id,
+            'id' => $slug ? $slug->reference_id : BaseHelper::getHomepageId(),
             'status' => BaseStatusEnum::PUBLISHED,
         ];
 
@@ -30,18 +30,14 @@ class PageService
             Arr::forget($condition, 'status');
         }
 
-        if ($slug->reference_type !== Page::class) {
-            return $slug;
-        }
-
         $page = Page::query()
             ->where($condition)
-            ->with('slugable');
+            ->with(['slugable', 'metadata']);
 
         $page = RepositoryHelper::applyBeforeExecuteQuery($page, new Page(), true)->first();
 
         if (empty($page)) {
-            if ($slug->reference_id == BaseHelper::getHomepageId()) {
+            if (! $slug || $slug->reference_id == BaseHelper::getHomepageId()) {
                 return [];
             }
 
@@ -51,8 +47,10 @@ class PageService
         if (! BaseHelper::isHomepage($page->getKey())) {
             SeoHelper::setTitle($page->name)
                 ->setDescription($page->description);
+
+            Theme::breadcrumb()->add($page->name, $page->url);
         } else {
-            $siteTitle = theme_option('seo_title') ?: theme_option('site_title');
+            $siteTitle = theme_option('seo_title') ?: Theme::getSiteTitle();
             $seoDescription = theme_option('seo_description');
 
             SeoHelper::setTitle($siteTitle)
@@ -88,8 +86,6 @@ class PageService
         }
 
         do_action(BASE_ACTION_PUBLIC_RENDER_SINGLE, PAGE_MODULE_SCREEN_NAME, $page);
-
-        Theme::breadcrumb()->add($page->name, $page->url);
 
         return [
             'view' => 'page',

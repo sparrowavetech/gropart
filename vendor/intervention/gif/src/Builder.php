@@ -10,6 +10,8 @@ use Intervention\Gif\Blocks\GraphicControlExtension;
 use Intervention\Gif\Blocks\ImageDescriptor;
 use Intervention\Gif\Blocks\NetscapeApplicationExtension;
 use Intervention\Gif\Blocks\TableBasedImage;
+use Intervention\Gif\Exceptions\DecoderException;
+use Intervention\Gif\Exceptions\EncoderException;
 use Intervention\Gif\Traits\CanHandleFiles;
 
 class Builder
@@ -18,18 +20,22 @@ class Builder
 
     /**
      * Create new instance
-     *
-     * @param GifDataStream $gif
-     * @return void
      */
     public function __construct(protected GifDataStream $gif = new GifDataStream())
     {
+        //
+    }
+
+    /**
+     * Create new canvas
+     */
+    public static function canvas(int $width, int $height): self
+    {
+        return (new self())->setSize($width, $height);
     }
 
     /**
      * Get GifDataStream object we're currently building
-     *
-     * @return GifDataStream
      */
     public function getGifDataStream(): GifDataStream
     {
@@ -38,10 +44,6 @@ class Builder
 
     /**
      * Set canvas size of gif
-     *
-     * @param int $width
-     * @param int $height
-     * @return Builder
      */
     public function setSize(int $width, int $height): self
     {
@@ -51,39 +53,42 @@ class Builder
     }
 
     /**
-     * Create new canvas
-     *
-     * @param int $width
-     * @param int $height
-     * @return self
-     */
-    public static function canvas(int $width, int $height): self
-    {
-        return (new self())->setSize($width, $height);
-    }
-
-    /**
      * Set loop count
      *
-     * @param int $loops
-     * @return Builder
      * @throws Exception
      */
     public function setLoops(int $loops): self
     {
-        if (count($this->gif->getFrames()) === 0) {
+        if ($loops < 0) {
+            throw new Exception('The loop count must be equal to or greater than 0');
+        }
+
+        if ($this->gif->getFrames() === []) {
             throw new Exception('Add at least one frame before setting the loop count');
         }
 
-        if ($loops >= 0) {
-            // add frame count to existing or new netscape extension on first frame
-            if (!$this->gif->getFirstFrame()->getNetscapeExtension()) {
-                $this->gif->getFirstFrame()->addApplicationExtension(
-                    new NetscapeApplicationExtension()
-                );
-            }
-            $this->gif->getFirstFrame()->getNetscapeExtension()->setLoops($loops);
+        // with one single loop the netscape extension must be removed otherwise the
+        // gif is looped twice because the first repetition always takes place
+        if ($loops === 1) {
+            $this->gif->getFirstFrame()?->clearApplicationExtensions();
+            return $this;
         }
+
+        // make sure a netscape extension is present to store the loop count
+        if (!$this->gif->getFirstFrame()?->getNetscapeExtension()) {
+            $this->gif->getFirstFrame()?->addApplicationExtension(
+                new NetscapeApplicationExtension()
+            );
+        }
+
+        // the loop count is reduced by one because what is referred to here as
+        // the “loop count” actually means repetitions in GIF format, and thus
+        // the first repetition always takes place. A loop count of 0 howerver
+        // means infinite repetitions and remains unaltered.
+        $loops = $loops === 0 ? $loops : $loops - 1;
+
+        // add loop count to netscape extension on first frame
+        $this->gif->getFirstFrame()?->getNetscapeExtension()?->setLoops($loops);
 
         return $this;
     }
@@ -92,15 +97,10 @@ class Builder
      * Create new animation frame from given source
      * which can be path to a file or GIF image data
      *
-     * @param string $source
-     * @param float $delay time delay in seconds
-     * @param int $left position offset in pixels from left
-     * @param int $top position offset in pixels from top
-     * @param bool $interlaced
-     * @return Builder
+     * @throws DecoderException
      */
     public function addFrame(
-        string $source,
+        mixed $source,
         float $delay = 0,
         int $left = 0,
         int $top = 0,
@@ -130,11 +130,6 @@ class Builder
 
     /**
      * Build new graphic control extension with given delay & disposal method
-     *
-     * @param GifDataStream $source
-     * @param int $delay
-     * @param DisposalMethod $disposalMethod
-     * @return GraphicControlExtension
      */
     protected function buildGraphicControlExtension(
         GifDataStream $source,
@@ -158,12 +153,6 @@ class Builder
 
     /**
      * Build table based image object from given source
-     *
-     * @param GifDataStream $source
-     * @param int $left
-     * @param int $top
-     * @param bool $interlaced
-     * @return TableBasedImage
      */
     protected function buildTableBasedImage(
         GifDataStream $source,
@@ -206,7 +195,7 @@ class Builder
     /**
      * Encode the current build
      *
-     * @return string
+     * @throws EncoderException
      */
     public function encode(): string
     {

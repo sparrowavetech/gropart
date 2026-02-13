@@ -1,4 +1,7 @@
-<x-core::layouts.base body-class="d-flex flex-column" :body-attributes="['data-bs-theme' => 'dark']">
+<x-core::layouts.base
+    body-class="d-flex flex-column"
+    :body-attributes="['data-bs-theme' => 'dark']"
+>
     <x-slot:title>
         @yield('title')
     </x-slot:title>
@@ -81,8 +84,13 @@
                         >
                             @csrf
 
-                            @if($redirectUrl)
-                                <input type="hidden" name="redirect_url" value="{{ $redirectUrl}}" / >
+                            @if ($redirectUrl)
+                                <input
+                                    type="hidden"
+                                    name="redirect_url"
+                                    value="{{ $redirectUrl }}"
+                                    /
+                                >
                             @endif
 
                             <x-core::button

@@ -4,6 +4,7 @@ namespace Botble\Ecommerce\Http\Controllers\Customers;
 
 use Botble\Ecommerce\Enums\OrderCancellationReasonEnum;
 use Botble\Ecommerce\Enums\OrderHistoryActionEnum;
+use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Facades\InvoiceHelper;
 use Botble\Ecommerce\Facades\OrderHelper;
 use Botble\Ecommerce\Forms\Fronts\CancelOrderForm;
@@ -14,13 +15,18 @@ use Botble\Ecommerce\Models\OrderHistory;
 use Botble\SeoHelper\Facades\SeoHelper;
 use Botble\Theme\Facades\Theme;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 
 class OrderController extends BaseController
 {
     public function __construct()
     {
+        $version = EcommerceHelper::getAssetVersion();
+
         Theme::asset()
-            ->add('customer-style', 'vendor/core/plugins/ecommerce/css/customer.css', ['bootstrap-css']);
+            ->add('customer-style', 'vendor/core/plugins/ecommerce/css/customer.css', ['bootstrap-css'], version: $version);
+        Theme::asset()
+            ->add('front-ecommerce-css', 'vendor/core/plugins/ecommerce/css/front-ecommerce.css', version: $version);
     }
 
     public function index()
@@ -32,8 +38,7 @@ class OrderController extends BaseController
                 'user_id' => auth('customer')->id(),
                 'is_finished' => 1,
             ])
-            ->withCount(['products'])
-            ->orderByDesc('created_at')
+            ->withCount(['products'])->latest()
             ->paginate(10);
 
         Theme::breadcrumb()
@@ -80,6 +85,9 @@ class OrderController extends BaseController
 
     public function print(int|string $id, Request $request)
     {
+        /**
+         * @var Order $order
+         */
         $order = Order::query()
             ->where([
                 'id' => $id,
@@ -87,9 +95,7 @@ class OrderController extends BaseController
             ])
             ->firstOrFail();
 
-        if (! $order->isInvoiceAvailable()) {
-            abort(404);
-        }
+        abort_unless($order->isInvoiceAvailable(), 404);
 
         if ($request->input('type') == 'print') {
             return InvoiceHelper::streamInvoice($order->invoice);
@@ -103,9 +109,38 @@ class OrderController extends BaseController
         return $this->handleCancelOrder($id);
     }
 
+    public function confirmDelivery(int|string $id)
+    {
+        /** @var Order $order */
+        $order = Order::query()
+            ->where('user_id', auth('customer')->id())
+            ->findOrFail($id);
+
+        if (! $order->shipment->can_confirm_delivery) {
+            return $this
+                ->httpResponse()
+                ->setError()
+                ->setMessage(__('plugins/ecommerce::order.confirm_delivery_error'));
+        }
+
+        $order->shipment()->update([
+            'customer_delivered_confirmed_at' => Carbon::now(),
+        ]);
+
+        OrderHistory::query()->create([
+            'action' => OrderHistoryActionEnum::CONFIRM_DELIVERY,
+            'description' => __('Order was confirmed delivery by customer :customer', ['customer' => $order->address->name ?: $order->user->name]),
+            'order_id' => $order->getKey(),
+        ]);
+
+        return $this
+            ->httpResponse()
+            ->setMessage(__('plugins/ecommerce::order.confirm_delivery_success'));
+    }
+
     protected function handleCancelOrder(int|string $id, ?string $reason = null, ?string $reasonDescription = null)
     {
-        /** @var \Botble\Ecommerce\Models\Order $order */
+        /** @var Order $order */
         $order = Order::query()
             ->where([
                 'id' => $id,

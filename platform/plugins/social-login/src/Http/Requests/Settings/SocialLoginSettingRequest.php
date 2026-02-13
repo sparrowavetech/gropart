@@ -5,6 +5,7 @@ namespace Botble\SocialLogin\Http\Requests\Settings;
 use Botble\Base\Rules\OnOffRule;
 use Botble\SocialLogin\Facades\SocialService;
 use Botble\Support\Http\Requests\Request;
+use Illuminate\Validation\Rule;
 
 class SocialLoginSettingRequest extends Request
 {
@@ -12,7 +13,10 @@ class SocialLoginSettingRequest extends Request
     {
         $providers = SocialService::getProviders();
 
-        $rules = [];
+        $rules = [
+            'social_login_style' => ['required', Rule::in(['minimal', 'default', 'basic'])],
+            'social_login_google_use_google_button' => ['nullable', new OnOffRule()],
+        ];
 
         foreach (array_keys($providers) as $provider) {
             $rules = array_merge($rules, $this->generateRule($provider));
@@ -25,7 +29,7 @@ class SocialLoginSettingRequest extends Request
     {
         $enableKey = sprintf('social_login_%s_enable', $provider);
 
-        $rule = ['nullable', 'required_if:' . $enableKey . ',1' ];
+        $rule = ['nullable', 'required_if:' . $enableKey . ',1'];
 
         return [
             $enableKey => new OnOffRule(),

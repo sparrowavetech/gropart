@@ -5,35 +5,23 @@
 namespace Stripe;
 
 /**
- * Events are our way of letting you know when something interesting happens in
- * your account. When an interesting event occurs, we create a new <code>Event</code>
- * object. For example, when a charge succeeds, we create a <code>charge.succeeded</code>
- * event, and when an invoice payment attempt fails, we create an
- * <code>invoice.payment_failed</code> event. Certain API requests might create multiple
- * events. For example, if you create a new subscription for a
- * customer, you receive both a <code>customer.subscription.created</code> event and a
- * <code>charge.succeeded</code> event.
+ * Snapshot events allow you to track and react to activity in your Stripe integration. When
+ * the state of another API resource changes, Stripe creates an <code>Event</code> object that contains
+ * all the relevant information associated with that action, including the affected API
+ * resource. For example, a successful payment triggers a <code>charge.succeeded</code> event, which
+ * contains the <code>Charge</code> in the event's data property. Some actions trigger multiple events.
+ * For example, if you create a new subscription for a customer, it triggers both a
+ * <code>customer.subscription.created</code> event and a <code>charge.succeeded</code> event.
  *
- * Events occur when the state of another API resource changes. The event's data
- * field embeds the resource's state at the time of the change. For
- * example, a <code>charge.succeeded</code> event contains a charge, and an
- * <code>invoice.payment_failed</code> event contains an invoice.
+ * Configure an event destination in your account to listen for events that represent actions
+ * your integration needs to respond to. Additionally, you can retrieve an individual event or
+ * a list of events from the API.
  *
- * As with other API resources, you can use endpoints to retrieve an
- * <a href="https://stripe.com/docs/api#retrieve_event">individual event</a> or a <a href="https://stripe.com/docs/api#list_events">list of events</a>
- * from the API. We also have a separate
- * <a href="http://en.wikipedia.org/wiki/Webhook">webhooks</a> system for sending the
- * <code>Event</code> objects directly to an endpoint on your server. You can manage
- * webhooks in your
- * <a href="https://dashboard.stripe.com/account/webhooks">account settings</a>. Learn how
- * to <a href="https://docs.stripe.com/webhooks">listen for events</a>
- * so that your integration can automatically trigger reactions.
+ * <a href="https://docs.stripe.com/connect">Connect</a> platforms can also receive event notifications
+ * that occur in their connected accounts. These events include an account attribute that
+ * identifies the relevant connected account.
  *
- * When using <a href="https://docs.stripe.com/connect">Connect</a>, you can also receive event notifications
- * that occur in connected accounts. For these events, there's an
- * additional <code>account</code> attribute in the received <code>Event</code> object.
- *
- * We only guarantee access to events through the <a href="https://stripe.com/docs/api#retrieve_event">Retrieve Event API</a>
+ * You can access events through the <a href="https://docs.stripe.com/api/events#retrieve_event">Retrieve Event API</a>
  * for 30 days.
  *
  * This class includes constants for the possible string representations of
@@ -42,12 +30,13 @@ namespace Stripe;
  * @property string $id Unique identifier for the object.
  * @property string $object String representing the object's type. Objects of the same type share the same value.
  * @property null|string $account The connected account that originates the event.
- * @property null|string $api_version The Stripe API version used to render <code>data</code>. This property is populated only for events on or after October 31, 2014.
+ * @property null|string $api_version The Stripe API version used to render <code>data</code> when the event was created. The contents of <code>data</code> never change, so this value remains static regardless of the API version currently in use. This property is populated only for events created on or after October 31, 2014.
+ * @property null|string $context Authentication context needed to fetch the event or related object.
  * @property int $created Time at which the object was created. Measured in seconds since the Unix epoch.
- * @property \Stripe\StripeObject $data
+ * @property (object{object: StripeObject, previous_attributes?: StripeObject}&StripeObject) $data
  * @property bool $livemode Has the value <code>true</code> if the object exists in live mode or the value <code>false</code> if the object exists in test mode.
  * @property int $pending_webhooks Number of webhooks that haven't been successfully delivered (for example, to return a 20x response) to the URLs you specify.
- * @property null|\Stripe\StripeObject $request Information on the API request that triggers the event.
+ * @property null|(object{id: null|string, idempotency_key: null|string}&StripeObject) $request Information on the API request that triggers the event.
  * @property string $type Description of the event (for example, <code>invoice.created</code> or <code>charge.refunded</code>).
  */
 class Event extends ApiResource
@@ -64,6 +53,15 @@ class Event extends ApiResource
     const APPLICATION_FEE_REFUNDED = 'application_fee.refunded';
     const APPLICATION_FEE_REFUND_UPDATED = 'application_fee.refund.updated';
     const BALANCE_AVAILABLE = 'balance.available';
+    const BALANCE_SETTINGS_UPDATED = 'balance_settings.updated';
+    const BILLING_ALERT_TRIGGERED = 'billing.alert.triggered';
+    const BILLING_CREDIT_BALANCE_TRANSACTION_CREATED = 'billing.credit_balance_transaction.created';
+    const BILLING_CREDIT_GRANT_CREATED = 'billing.credit_grant.created';
+    const BILLING_CREDIT_GRANT_UPDATED = 'billing.credit_grant.updated';
+    const BILLING_METER_CREATED = 'billing.meter.created';
+    const BILLING_METER_DEACTIVATED = 'billing.meter.deactivated';
+    const BILLING_METER_REACTIVATED = 'billing.meter.reactivated';
+    const BILLING_METER_UPDATED = 'billing.meter.updated';
     const BILLING_PORTAL_CONFIGURATION_CREATED = 'billing_portal.configuration.created';
     const BILLING_PORTAL_CONFIGURATION_UPDATED = 'billing_portal.configuration.updated';
     const BILLING_PORTAL_SESSION_CREATED = 'billing_portal.session.created';
@@ -143,14 +141,19 @@ class Event extends ApiResource
     const INVOICE_FINALIZATION_FAILED = 'invoice.finalization_failed';
     const INVOICE_FINALIZED = 'invoice.finalized';
     const INVOICE_MARKED_UNCOLLECTIBLE = 'invoice.marked_uncollectible';
+    const INVOICE_OVERDUE = 'invoice.overdue';
+    const INVOICE_OVERPAID = 'invoice.overpaid';
     const INVOICE_PAID = 'invoice.paid';
     const INVOICE_PAYMENT_ACTION_REQUIRED = 'invoice.payment_action_required';
+    const INVOICE_PAYMENT_ATTEMPT_REQUIRED = 'invoice.payment_attempt_required';
     const INVOICE_PAYMENT_FAILED = 'invoice.payment_failed';
+    const INVOICE_PAYMENT_PAID = 'invoice_payment.paid';
     const INVOICE_PAYMENT_SUCCEEDED = 'invoice.payment_succeeded';
     const INVOICE_SENT = 'invoice.sent';
     const INVOICE_UPCOMING = 'invoice.upcoming';
     const INVOICE_UPDATED = 'invoice.updated';
     const INVOICE_VOIDED = 'invoice.voided';
+    const INVOICE_WILL_BE_DUE = 'invoice.will_be_due';
     const ISSUING_AUTHORIZATION_CREATED = 'issuing_authorization.created';
     const ISSUING_AUTHORIZATION_REQUEST = 'issuing_authorization.request';
     const ISSUING_AUTHORIZATION_UPDATED = 'issuing_authorization.updated';
@@ -161,6 +164,7 @@ class Event extends ApiResource
     const ISSUING_DISPUTE_CLOSED = 'issuing_dispute.closed';
     const ISSUING_DISPUTE_CREATED = 'issuing_dispute.created';
     const ISSUING_DISPUTE_FUNDS_REINSTATED = 'issuing_dispute.funds_reinstated';
+    const ISSUING_DISPUTE_FUNDS_RESCINDED = 'issuing_dispute.funds_rescinded';
     const ISSUING_DISPUTE_SUBMITTED = 'issuing_dispute.submitted';
     const ISSUING_DISPUTE_UPDATED = 'issuing_dispute.updated';
     const ISSUING_PERSONALIZATION_DESIGN_ACTIVATED = 'issuing_personalization_design.activated';
@@ -170,6 +174,7 @@ class Event extends ApiResource
     const ISSUING_TOKEN_CREATED = 'issuing_token.created';
     const ISSUING_TOKEN_UPDATED = 'issuing_token.updated';
     const ISSUING_TRANSACTION_CREATED = 'issuing_transaction.created';
+    const ISSUING_TRANSACTION_PURCHASE_DETAILS_RECEIPT_UPDATED = 'issuing_transaction.purchase_details_receipt_updated';
     const ISSUING_TRANSACTION_UPDATED = 'issuing_transaction.updated';
     const MANDATE_UPDATED = 'mandate.updated';
     const PAYMENT_INTENT_AMOUNT_CAPTURABLE_UPDATED = 'payment_intent.amount_capturable_updated';
@@ -213,6 +218,7 @@ class Event extends ApiResource
     const RADAR_EARLY_FRAUD_WARNING_CREATED = 'radar.early_fraud_warning.created';
     const RADAR_EARLY_FRAUD_WARNING_UPDATED = 'radar.early_fraud_warning.updated';
     const REFUND_CREATED = 'refund.created';
+    const REFUND_FAILED = 'refund.failed';
     const REFUND_UPDATED = 'refund.updated';
     const REPORTING_REPORT_RUN_FAILED = 'reporting.report_run.failed';
     const REPORTING_REPORT_RUN_SUCCEEDED = 'reporting.report_run.succeeded';
@@ -244,6 +250,7 @@ class Event extends ApiResource
     const TAX_SETTINGS_UPDATED = 'tax.settings.updated';
     const TERMINAL_READER_ACTION_FAILED = 'terminal.reader.action_failed';
     const TERMINAL_READER_ACTION_SUCCEEDED = 'terminal.reader.action_succeeded';
+    const TERMINAL_READER_ACTION_UPDATED = 'terminal.reader.action_updated';
     const TEST_HELPERS_TEST_CLOCK_ADVANCING = 'test_helpers.test_clock.advancing';
     const TEST_HELPERS_TEST_CLOCK_CREATED = 'test_helpers.test_clock.created';
     const TEST_HELPERS_TEST_CLOCK_DELETED = 'test_helpers.test_clock.deleted';
@@ -298,6 +305,15 @@ class Event extends ApiResource
     const TYPE_APPLICATION_FEE_REFUNDED = 'application_fee.refunded';
     const TYPE_APPLICATION_FEE_REFUND_UPDATED = 'application_fee.refund.updated';
     const TYPE_BALANCE_AVAILABLE = 'balance.available';
+    const TYPE_BALANCE_SETTINGS_UPDATED = 'balance_settings.updated';
+    const TYPE_BILLING_ALERT_TRIGGERED = 'billing.alert.triggered';
+    const TYPE_BILLING_CREDIT_BALANCE_TRANSACTION_CREATED = 'billing.credit_balance_transaction.created';
+    const TYPE_BILLING_CREDIT_GRANT_CREATED = 'billing.credit_grant.created';
+    const TYPE_BILLING_CREDIT_GRANT_UPDATED = 'billing.credit_grant.updated';
+    const TYPE_BILLING_METER_CREATED = 'billing.meter.created';
+    const TYPE_BILLING_METER_DEACTIVATED = 'billing.meter.deactivated';
+    const TYPE_BILLING_METER_REACTIVATED = 'billing.meter.reactivated';
+    const TYPE_BILLING_METER_UPDATED = 'billing.meter.updated';
     const TYPE_BILLING_PORTAL_CONFIGURATION_CREATED = 'billing_portal.configuration.created';
     const TYPE_BILLING_PORTAL_CONFIGURATION_UPDATED = 'billing_portal.configuration.updated';
     const TYPE_BILLING_PORTAL_SESSION_CREATED = 'billing_portal.session.created';
@@ -377,14 +393,19 @@ class Event extends ApiResource
     const TYPE_INVOICE_FINALIZATION_FAILED = 'invoice.finalization_failed';
     const TYPE_INVOICE_FINALIZED = 'invoice.finalized';
     const TYPE_INVOICE_MARKED_UNCOLLECTIBLE = 'invoice.marked_uncollectible';
+    const TYPE_INVOICE_OVERDUE = 'invoice.overdue';
+    const TYPE_INVOICE_OVERPAID = 'invoice.overpaid';
     const TYPE_INVOICE_PAID = 'invoice.paid';
     const TYPE_INVOICE_PAYMENT_ACTION_REQUIRED = 'invoice.payment_action_required';
+    const TYPE_INVOICE_PAYMENT_ATTEMPT_REQUIRED = 'invoice.payment_attempt_required';
     const TYPE_INVOICE_PAYMENT_FAILED = 'invoice.payment_failed';
+    const TYPE_INVOICE_PAYMENT_PAID = 'invoice_payment.paid';
     const TYPE_INVOICE_PAYMENT_SUCCEEDED = 'invoice.payment_succeeded';
     const TYPE_INVOICE_SENT = 'invoice.sent';
     const TYPE_INVOICE_UPCOMING = 'invoice.upcoming';
     const TYPE_INVOICE_UPDATED = 'invoice.updated';
     const TYPE_INVOICE_VOIDED = 'invoice.voided';
+    const TYPE_INVOICE_WILL_BE_DUE = 'invoice.will_be_due';
     const TYPE_ISSUING_AUTHORIZATION_CREATED = 'issuing_authorization.created';
     const TYPE_ISSUING_AUTHORIZATION_REQUEST = 'issuing_authorization.request';
     const TYPE_ISSUING_AUTHORIZATION_UPDATED = 'issuing_authorization.updated';
@@ -395,6 +416,7 @@ class Event extends ApiResource
     const TYPE_ISSUING_DISPUTE_CLOSED = 'issuing_dispute.closed';
     const TYPE_ISSUING_DISPUTE_CREATED = 'issuing_dispute.created';
     const TYPE_ISSUING_DISPUTE_FUNDS_REINSTATED = 'issuing_dispute.funds_reinstated';
+    const TYPE_ISSUING_DISPUTE_FUNDS_RESCINDED = 'issuing_dispute.funds_rescinded';
     const TYPE_ISSUING_DISPUTE_SUBMITTED = 'issuing_dispute.submitted';
     const TYPE_ISSUING_DISPUTE_UPDATED = 'issuing_dispute.updated';
     const TYPE_ISSUING_PERSONALIZATION_DESIGN_ACTIVATED = 'issuing_personalization_design.activated';
@@ -404,6 +426,7 @@ class Event extends ApiResource
     const TYPE_ISSUING_TOKEN_CREATED = 'issuing_token.created';
     const TYPE_ISSUING_TOKEN_UPDATED = 'issuing_token.updated';
     const TYPE_ISSUING_TRANSACTION_CREATED = 'issuing_transaction.created';
+    const TYPE_ISSUING_TRANSACTION_PURCHASE_DETAILS_RECEIPT_UPDATED = 'issuing_transaction.purchase_details_receipt_updated';
     const TYPE_ISSUING_TRANSACTION_UPDATED = 'issuing_transaction.updated';
     const TYPE_MANDATE_UPDATED = 'mandate.updated';
     const TYPE_PAYMENT_INTENT_AMOUNT_CAPTURABLE_UPDATED = 'payment_intent.amount_capturable_updated';
@@ -447,6 +470,7 @@ class Event extends ApiResource
     const TYPE_RADAR_EARLY_FRAUD_WARNING_CREATED = 'radar.early_fraud_warning.created';
     const TYPE_RADAR_EARLY_FRAUD_WARNING_UPDATED = 'radar.early_fraud_warning.updated';
     const TYPE_REFUND_CREATED = 'refund.created';
+    const TYPE_REFUND_FAILED = 'refund.failed';
     const TYPE_REFUND_UPDATED = 'refund.updated';
     const TYPE_REPORTING_REPORT_RUN_FAILED = 'reporting.report_run.failed';
     const TYPE_REPORTING_REPORT_RUN_SUCCEEDED = 'reporting.report_run.succeeded';
@@ -478,6 +502,7 @@ class Event extends ApiResource
     const TYPE_TAX_SETTINGS_UPDATED = 'tax.settings.updated';
     const TYPE_TERMINAL_READER_ACTION_FAILED = 'terminal.reader.action_failed';
     const TYPE_TERMINAL_READER_ACTION_SUCCEEDED = 'terminal.reader.action_succeeded';
+    const TYPE_TERMINAL_READER_ACTION_UPDATED = 'terminal.reader.action_updated';
     const TYPE_TEST_HELPERS_TEST_CLOCK_ADVANCING = 'test_helpers.test_clock.advancing';
     const TYPE_TEST_HELPERS_TEST_CLOCK_CREATED = 'test_helpers.test_clock.created';
     const TYPE_TEST_HELPERS_TEST_CLOCK_DELETED = 'test_helpers.test_clock.deleted';
@@ -529,34 +554,34 @@ class Event extends ApiResource
      * <code>api_version</code> attribute (not according to your current Stripe API
      * version or <code>Stripe-Version</code> header).
      *
-     * @param null|array $params
+     * @param null|array{created?: array|int, delivery_success?: bool, ending_before?: string, expand?: string[], limit?: int, starting_after?: string, type?: string, types?: string[]} $params
      * @param null|array|string $opts
      *
-     * @throws \Stripe\Exception\ApiErrorException if the request fails
+     * @return Collection<Event> of ApiResources
      *
-     * @return \Stripe\Collection<\Stripe\Event> of ApiResources
+     * @throws Exception\ApiErrorException if the request fails
      */
     public static function all($params = null, $opts = null)
     {
         $url = static::classUrl();
 
-        return static::_requestPage($url, \Stripe\Collection::class, $params, $opts);
+        return static::_requestPage($url, Collection::class, $params, $opts);
     }
 
     /**
-     * Retrieves the details of an event. Supply the unique identifier of the event,
-     * which you might have received in a webhook.
+     * Retrieves the details of an event if it was created in the last 30 days. Supply
+     * the unique identifier of the event, which you might have received in a webhook.
      *
      * @param array|string $id the ID of the API resource to retrieve, or an options array containing an `id` key
      * @param null|array|string $opts
      *
-     * @throws \Stripe\Exception\ApiErrorException if the request fails
+     * @return Event
      *
-     * @return \Stripe\Event
+     * @throws Exception\ApiErrorException if the request fails
      */
     public static function retrieve($id, $opts = null)
     {
-        $opts = \Stripe\Util\RequestOptions::parse($opts);
+        $opts = Util\RequestOptions::parse($opts);
         $instance = new static($id, $opts);
         $instance->refresh();
 

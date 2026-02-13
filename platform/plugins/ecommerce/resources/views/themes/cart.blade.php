@@ -8,10 +8,10 @@
                             <table data-bb-value="cart-table" class="table">
                                 <thead class="table-light">
                                 <tr>
-                                    <th colspan="2" class="cart-header-product">{{ __('Product') }}</th>
-                                    <th class="cart-header-price">{{ __('Price') }}</th>
-                                    <th class="cart-header-quantity">{{ __('Quantity') }}</th>
-                                    <th class="cart-header-total">{{ __('Total') }}</th>
+                                    <th colspan="2" class="cart-header-product">{{ trans('plugins/ecommerce::products.product') }}</th>
+                                    <th class="cart-header-price">{{ trans('plugins/ecommerce::products.price') }}</th>
+                                    <th class="cart-header-quantity">{{ trans('plugins/ecommerce::products.quantity') }}</th>
+                                    <th class="cart-header-total">{{ trans('plugins/ecommerce::ecommerce.total') }}</th>
                                     <th></th>
                                 </tr>
                                 </thead>
@@ -38,16 +38,16 @@
                                                 <a href="{{ $product->original_product->url }}" class="ms-0">{{ $product->original_product->name }}</a>
                                                 <span @class(['small', 'text-danger' => $product->isOutOfStock(), 'text-success' => ! $product->isOutOfStock()])>
                                                         @if ($product->isOutOfStock())
-                                                        ({{ __('Out of stock') }})
+                                                        ({{ trans('plugins/ecommerce::ecommerce.out_of_stock') }})
                                                     @else
-                                                        ({{ __('In stock') }})
+                                                        ({{ trans('plugins/ecommerce::ecommerce.in_stock') }})
                                                     @endif
                                                     </span>
                                             </div>
 
-                                            @if (is_plugin_active('marketplace') && $product->original_product->store->id)
+                                            @if (is_plugin_active('marketplace') && $product->original_product->store?->id)
                                                 <div class="small">
-                                                    <span>{{ __('Vendor:') }}</span>
+                                                    <span>{{ trans('plugins/ecommerce::ecommerce.vendor') }}</span>
                                                     <a href="{{ $product->original_product->store->url }}" class="fw-medium">{{ $product->original_product->store->name }}</a>
                                                 </div>
                                             @endif
@@ -102,8 +102,8 @@
                             <div class="col-lg-6">
                                 <x-core::form :url="route('public.coupon.apply')" method="post" data-bb-toggle="coupon-form" id="coupon-form">
                                     <div class="input-group mb-3 w-auto">
-                                        <input type="text" class="form-control" name="coupon_code" placeholder="{{ __('Enter Coupon Code') }}" value="{{ BaseHelper::stringify(old('coupon_code', session('applied_coupon_code'))) }}">
-                                        <button data-bb-toggle="coupon-form-btn" class="btn btn-primary" type="submit" @disabled(session('applied_coupon_code'))>{{ __('Apply') }}</button>
+                                        <input type="text" class="form-control" name="coupon_code" placeholder="{{ trans('plugins/ecommerce::ecommerce.enter_coupon_code') }}" value="{{ BaseHelper::stringify(old('coupon_code', session('applied_coupon_code'))) }}">
+                                        <button data-bb-toggle="coupon-form-btn" class="btn btn-primary" type="submit" @disabled(session('applied_coupon_code'))>{{ trans('plugins/ecommerce::ecommerce.apply') }}</button>
                                     </div>
                                 </x-core::form>
                             </div>
@@ -113,44 +113,45 @@
                 <div class="col-xl-3 col-lg-4 col-md-6">
                     <div class="card p-4">
                         <div class="cart-checkout-top d-flex align-items-center justify-content-between pb-2 border-bottom mb-2">
-                            <span class="cart-checkout-top-title fw-bold">{{ __('Subtotal') }}</span>
+                            <span class="cart-checkout-top-title fw-bold">{{ trans('plugins/ecommerce::ecommerce.subtotal') }}</span>
                             <span data-bb-value="cart-subtotal" class="cart-checkout-top-price fw-bold">{{ format_price(Cart::instance('cart')->rawSubTotal()) }}</span>
                         </div>
+                        {!! apply_filters('ecommerce_cart_after_subtotal', null, Cart::instance('cart')->products()) !!}
                         @if (EcommerceHelper::isTaxEnabled())
                             <div class="cart-checkout-tax d-flex align-items-center justify-content-between mb-2">
-                                <span class="cart-checkout-tax-title">{{ __('Tax') }}</span>
+                                <span class="cart-checkout-tax-title">{{ trans('plugins/ecommerce::ecommerce.tax') }}</span>
                                 <span data-bb-value="cart-tax" class="cart-checkout-tax-price">{{ format_price(Cart::instance('cart')->rawTax()) }}</span>
                             </div>
                         @endif
                         @if ($couponDiscountAmount > 0 && session('applied_coupon_code'))
                             <div class="d-flex align-items-center justify-content-between mb-2">
                                 <div>
-                                    {{ __('Coupon') }}
+                                    {{ trans('plugins/ecommerce::ecommerce.coupon') }}
                                     <span class="small">({{ session('applied_coupon_code') }})</span>
-                                    <a class="small btn-link text-danger lh-1" data-bb-toggle="remove-coupon" href="{{ route('public.coupon.remove') }}">{{ __('Remove') }}</a>
+                                    <a class="small btn-link text-danger lh-1" data-bb-toggle="remove-coupon" href="{{ route('public.coupon.remove') }}">{{ trans('plugins/ecommerce::ecommerce.remove') }}</a>
                                 </div>
                                 <span data-bb-value="cart-coupon-discount-amount">{{ format_price($couponDiscountAmount) }}</span>
                             </div>
                         @endif
                         @if ($promotionDiscountAmount)
                             <div class="d-flex align-items-center justify-content-between mb-2">
-                                <span>{{ __('Promotion') }}</span>
+                                <span>{{ trans('plugins/ecommerce::ecommerce.promotion') }}</span>
                                 <span data-bb-value="cart-promotion-discount-amount">{{ format_price($promotionDiscountAmount) }}</span>
                             </div>
                         @endif
                         <div class="cart-checkout-total d-flex align-items-center justify-content-between mt-3 mb-0">
-                            <span class="fw-bold mb-1">{{ __('Total') }}</span>
+                            <span class="fw-bold mb-1">{{ trans('plugins/ecommerce::ecommerce.total') }}</span>
                             <span data-bb-value="cart-total" class="fw-bold">{{ ($promotionDiscountAmount + $couponDiscountAmount) > Cart::instance('cart')->rawTotal() ? format_price(0) : format_price(Cart::instance('cart')->rawTotal() - $promotionDiscountAmount - $couponDiscountAmount) }}</span>
                         </div>
-                        <small class="small">{{ __('(Shipping fees not included)') }}</small>
+                        <small class="small">{{ trans('plugins/ecommerce::order.shipping_fees_not_included') }}</small>
                         <div class="cart-checkout-proceed mt-3">
                             <a href="{{ route('public.checkout.information', OrderHelper::getOrderSessionToken()) }}" data-bb-toggle="cart-checkout" class="cart-checkout-btn w-100 btn btn-primary">
-                                {{ __('Proceed to Checkout') }}
+                                {{ trans('plugins/ecommerce::ecommerce.proceed_to_checkout') }}
                             </a>
                         </div>
 
                         <a href="{{ route('public.products') }}" data-bb-toggle="continue-shopping" class="btn-link d-block text-center mt-3">
-                            {{ __('Continue Shopping') }}
+                            {{ trans('plugins/ecommerce::ecommerce.continue_shopping') }}
                         </a>
                     </div>
                 </div>

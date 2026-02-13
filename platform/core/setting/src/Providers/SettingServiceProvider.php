@@ -8,6 +8,7 @@ use Botble\Base\Facades\EmailHandler;
 use Botble\Base\Facades\PanelSectionManager;
 use Botble\Base\PanelSections\PanelSectionItem;
 use Botble\Base\PanelSections\System\SystemPanelSection;
+use Botble\Base\Supports\DashboardMenuItem;
 use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Setting\Commands\CronJobTestCommand;
@@ -21,14 +22,12 @@ use Botble\Setting\Repositories\Interfaces\SettingInterface;
 use Botble\Setting\Supports\DatabaseSettingStore;
 use Botble\Setting\Supports\SettingStore;
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Contracts\Support\DeferrableProvider;
 use Illuminate\Foundation\AliasLoader;
-use Illuminate\Routing\Events\RouteMatched;
 
-class SettingServiceProvider extends ServiceProvider
+class SettingServiceProvider extends ServiceProvider implements DeferrableProvider
 {
     use LoadAndPublishDataTrait;
-
-    protected bool $defer = true;
 
     public function register(): void
     {
@@ -58,29 +57,32 @@ class SettingServiceProvider extends ServiceProvider
             ->loadAndPublishViews()
             ->loadAnonymousComponents()
             ->loadAndPublishTranslations()
-            ->loadAndPublishConfigurations(['permissions', 'email'])
+            ->loadAndPublishConfigurations(['email'])
+            ->loadAndPublishConfigurations(['permissions'])
             ->loadMigrations()
             ->publishAssets();
 
-        DashboardMenu::default()->beforeRetrieving(function () {
+        DashboardMenu::default()->beforeRetrieving(function (): void {
             DashboardMenu::make()
-                ->registerItem([
-                    'id' => 'cms-core-settings',
-                    'priority' => 9999,
-                    'name' => 'core/setting::setting.title',
-                    'icon' => 'ti ti-settings',
-                    'route' => 'settings.index',
-                ]);
+                ->registerItem(
+                    DashboardMenuItem::make()
+                        ->id('cms-core-settings')
+                        ->priority(9999)
+                        ->name('core/setting::setting.title')
+                        ->icon('ti ti-settings')
+                        ->route('settings.index')
+                        ->permission('settings.index')
+                );
         });
 
         $events = $this->app['events'];
 
-        $events->listen(RouteMatched::class, function () {
+        $this->app->booted(function (): void {
             EmailHandler::addTemplateSettings('base', config('core.setting.email', []), 'core');
         });
 
         PanelSectionManager::default()
-            ->beforeRendering(function () {
+            ->beforeRendering(function (): void {
                 PanelSectionManager::setGroupName(trans('core/setting::setting.title'))
                     ->register([
                         SettingCommonPanelSection::class,
@@ -88,15 +90,25 @@ class SettingServiceProvider extends ServiceProvider
                     ]);
             });
 
-        PanelSectionManager::group('system')->beforeRendering(function () {
+        PanelSectionManager::group('system')->beforeRendering(function (): void {
             PanelSectionManager::registerItem(
                 SystemPanelSection::class,
                 fn () => PanelSectionItem::make('cronjob')
-                    ->setTitle(trans('core/setting::setting.cronjob.name'))
+                    ->setTitle(trans('core/setting::cronjob.name'))
                     ->withIcon('ti ti-calendar-event')
-                    ->withDescription(trans('core/setting::setting.cronjob.description'))
+                    ->withDescription(trans('core/setting::cronjob.description'))
                     ->withPriority(50)
                     ->withRoute('system.cronjob')
+            );
+
+            PanelSectionManager::registerItem(
+                SystemPanelSection::class,
+                fn () => PanelSectionItem::make('security')
+                    ->setTitle(trans('core/setting::setting.security.title'))
+                    ->withIcon('ti ti-shield-check')
+                    ->withDescription(trans('core/setting::setting.security.menu_description'))
+                    ->withPriority(55)
+                    ->withRoute('system.security')
             );
         });
 
@@ -107,8 +119,8 @@ class SettingServiceProvider extends ServiceProvider
                 CronJobTestCommand::class,
             ]);
 
-            $this->app->afterResolving(Schedule::class, function (Schedule $schedule) {
-                rescue(function () use ($schedule) {
+            $this->app->afterResolving(Schedule::class, function (Schedule $schedule): void {
+                rescue(function () use ($schedule): void {
                     $schedule
                         ->command(CronJobTestCommand::class)
                         ->everyMinute();

@@ -42,13 +42,13 @@
     </div>
 @elseif (is_in_admin(true) && Auth::check() && Auth::user()->hasPermission('product-attribute-sets.create'))
     <p class="text-muted mb-0">
-        {!! trans('plugins/ecommerce::products.form.create_product_variations', [
+        {!! BaseHelper::clean(trans('plugins/ecommerce::products.form.create_product_variations', [
             'link' => Html::link(
                 route('product-attribute-sets.create'),
                 trans('plugins/ecommerce::products.form.add_new_attributes'),
                 ['target' => '_blank']
             ),
-        ]) !!}
+        ])) !!}
     </p>
 @endif
 

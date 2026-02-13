@@ -31,7 +31,7 @@ class OrderTable extends TableAbstract
             ->model(Order::class)
             ->addActions(array_filter([
                 EditAction::make()->route('marketplace.vendor.orders.edit'),
-                MarketplaceHelper::allowVendorDeleteTheirOrders()
+                EcommerceHelper::isOrderDeletionEnabled() && MarketplaceHelper::allowVendorDeleteTheirOrders()
                     ? DeleteAction::make()->route('marketplace.vendor.orders.destroy')
                     : null,
             ]));
@@ -55,7 +55,7 @@ class OrderTable extends TableAbstract
                     return '&mdash;';
                 }
 
-                return BaseHelper::clean($item->payment->payment_channel->label() ?: '&mdash;');
+                return BaseHelper::clean($item->payment->payment_channel->displayName() ?: '&mdash;');
             })
             ->formatColumn('amount', PriceFormatter::class)
             ->formatColumn('shipping_amount', PriceFormatter::class);
@@ -68,24 +68,7 @@ class OrderTable extends TableAbstract
 
         $data = $data
             ->filter(function ($query) {
-                if ($keyword = $this->request->input('search.value')) {
-                    return $query
-                        ->whereHas('address', function ($subQuery) use ($keyword) {
-                            return $subQuery
-                                ->where('name', 'LIKE', '%' . $keyword . '%')
-                                ->orWhere('email', 'LIKE', '%' . $keyword . '%')
-                                ->orWhere('phone', 'LIKE', '%' . $keyword . '%');
-                        })
-                        ->orWhereHas('user', function ($subQuery) use ($keyword) {
-                            return $subQuery
-                                ->where('name', 'LIKE', '%' . $keyword . '%')
-                                ->orWhere('email', 'LIKE', '%' . $keyword . '%')
-                                ->orWhere('phone', 'LIKE', '%' . $keyword . '%');
-                        })
-                        ->orWhere('code', 'LIKE', '%' . $keyword . '%');
-                }
-
-                return $query;
+                return $query->searchByKeyword($this->request->input('search.value'));
             });
 
         return $this->toJson($data);
@@ -114,7 +97,7 @@ class OrderTable extends TableAbstract
                 'payment_id',
             ])
             ->where('is_finished', 1)
-            ->where('store_id', auth('customer')->user()->store->id);
+            ->where('store_id', auth('customer')->user()->store?->id);
 
         return $this->applyScopes($query);
     }
@@ -171,6 +154,6 @@ class OrderTable extends TableAbstract
 
     public function getDefaultButtons(): array
     {
-        return array_merge(['export'], parent::getDefaultButtons());
+        return array_unique(array_merge(['export'], parent::getDefaultButtons()));
     }
 }

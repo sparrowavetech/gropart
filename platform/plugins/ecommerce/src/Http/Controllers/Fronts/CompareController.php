@@ -3,10 +3,10 @@
 namespace Botble\Ecommerce\Http\Controllers\Fronts;
 
 use Botble\Base\Http\Controllers\BaseController;
+use Botble\Ecommerce\AdsTracking\GoogleTagManager;
 use Botble\Ecommerce\Facades\Cart;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Models\Product;
-use Botble\Ecommerce\Models\ProductAttributeSet;
 use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
 use Botble\SeoHelper\Facades\SeoHelper;
 use Botble\Theme\Facades\Theme;
@@ -19,10 +19,13 @@ class CompareController extends BaseController
 
     public function index()
     {
-        SeoHelper::setTitle(__('Compare'));
+        $title = __('Compare');
+
+        SeoHelper::setTitle(theme_option('ecommerce_compare_seo_title') ?: $title)
+            ->setDescription(theme_option('ecommerce_compare_seo_description'));
 
         Theme::breadcrumb()
-            ->add(__('Compare'), route('public.compare'));
+            ->add($title, route('public.compare'));
 
         $itemIds = collect(Cart::instance('compare')->content())
             ->sortBy([['updated_at', 'desc']])
@@ -30,14 +33,20 @@ class CompareController extends BaseController
 
         $products = collect();
         $attributeSets = collect();
-        if ($itemIds->count()) {
+        if ($itemIds->isNotEmpty()) {
+            $productIds = $itemIds->all();
+
             $products = $this->productRepository
-                ->getProductsByIds($itemIds->toArray(), array_merge([
+                ->getProductsByIds($productIds, [
                     'take' => 10,
                     'with' => EcommerceHelper::withProductEagerLoadingRelations(),
-                ], EcommerceHelper::withReviewsParams()));
+                ]);
 
-            $attributeSets = ProductAttributeSet::getAllWithSelected($itemIds);
+            $attributeSets = collect();
+
+            foreach ($products->load('productAttributeSets.attributes') as $product) {
+                $attributeSets = $attributeSets->merge($product->productAttributeSets);
+            }
         }
 
         return Theme::scope(
@@ -63,7 +72,7 @@ class CompareController extends BaseController
         if (! $duplicates->isEmpty()) {
             return $this
                 ->httpResponse()
-                ->setMessage(__(':product is already in your compare list!', ['product' => $product->name]))
+                ->setMessage(trans('plugins/ecommerce::products.compare.already_in_list', ['product' => $product->name]))
                 ->setError();
         }
 
@@ -73,8 +82,11 @@ class CompareController extends BaseController
 
         return $this
             ->httpResponse()
-            ->setMessage(__('Added product :product to compare list successfully!', ['product' => $product->name]))
-            ->setData(['count' => Cart::instance('compare')->count()]);
+            ->setMessage(trans('plugins/ecommerce::products.compare.added_success', ['product' => $product->name]))
+            ->setData([
+                'count' => Cart::instance('compare')->count(),
+                'extra_data' => app(GoogleTagManager::class)->formatProductTrackingData($product->original_product),
+            ]);
     }
 
     public function destroy(int|string $productId)
@@ -93,7 +105,10 @@ class CompareController extends BaseController
 
         return $this
             ->httpResponse()
-            ->setMessage(__('Removed product :product from compare list successfully!', ['product' => $product->name]))
-            ->setData(['count' => Cart::instance('compare')->count()]);
+            ->setMessage(trans('plugins/ecommerce::products.compare.removed_success', ['product' => $product->name]))
+            ->setData([
+                'count' => Cart::instance('compare')->count(),
+                'extra_data' => app(GoogleTagManager::class)->formatProductTrackingData($product->original_product),
+            ]);
     }
 }

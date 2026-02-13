@@ -15,7 +15,7 @@ trait LoadAndPublishDataTrait
 {
     protected ?string $namespace = null;
 
-    protected function setNamespace(string $namespace): self
+    protected function setNamespace(string $namespace): static
     {
         $this->namespace = ltrim(rtrim($namespace, '/'), '/');
 
@@ -24,7 +24,7 @@ trait LoadAndPublishDataTrait
         return $this;
     }
 
-    protected function getPath(string $path = null): string
+    protected function getPath(?string $path = null): string
     {
         $reflection = new ReflectionClass($this);
 
@@ -34,10 +34,12 @@ trait LoadAndPublishDataTrait
             $modulePath = base_path('platform/' . $this->getDashedNamespace());
         }
 
-        return $modulePath . ($path ? '/' . ltrim($path, '/') : '');
+        $modulePath = str_replace('/', DIRECTORY_SEPARATOR, $modulePath);
+
+        return $modulePath . ($path ? DIRECTORY_SEPARATOR . ltrim($path, DIRECTORY_SEPARATOR) : '');
     }
 
-    protected function loadAndPublishConfigurations(array|string $fileNames): self
+    protected function loadAndPublishConfigurations(array|string $fileNames): static
     {
         if (! is_array($fileNames)) {
             $fileNames = [$fileNames];
@@ -63,22 +65,26 @@ trait LoadAndPublishDataTrait
 
     protected function getDashedNamespace(): string
     {
-        return str_replace('.', '/', $this->namespace);
+        return str_replace('.', '/', (string) $this->namespace);
     }
 
     protected function getDotedNamespace(): string
     {
-        return str_replace('/', '.', $this->namespace);
+        return str_replace('/', '.', (string) $this->namespace);
     }
 
-    protected function loadRoutes(array|string $fileNames = ['web']): self
+    protected function loadRoutes(array|string $fileNames = ['web']): static
     {
         if (! is_array($fileNames)) {
             $fileNames = [$fileNames];
         }
 
         foreach ($fileNames as $fileName) {
-            $this->loadRoutesFrom($this->getRouteFilePath($fileName));
+            $filePath = $this->getRouteFilePath($fileName);
+
+            if ($filePath) {
+                $this->loadRoutesFrom($filePath);
+            }
         }
 
         return $this;
@@ -89,7 +95,7 @@ trait LoadAndPublishDataTrait
         return $this->getPath('routes/' . $file . '.php');
     }
 
-    protected function loadAndPublishViews(): self
+    protected function loadAndPublishViews(): static
     {
         $this->loadViewsFrom($this->getViewsPath(), $this->getDashedNamespace());
         if ($this->app->runningInConsole()) {
@@ -107,7 +113,7 @@ trait LoadAndPublishDataTrait
         return $this->getPath('/resources/views');
     }
 
-    public function loadAndPublishTranslations(): self
+    public function loadAndPublishTranslations(): static
     {
         $this->loadTranslationsFrom($this->getTranslationsPath(), $this->getDashedNamespace());
         $this->publishes(
@@ -123,7 +129,7 @@ trait LoadAndPublishDataTrait
         return $this->getPath('/resources/lang');
     }
 
-    protected function loadMigrations(): self
+    protected function loadMigrations(): static
     {
         $this->loadMigrationsFrom($this->getMigrationsPath());
 
@@ -135,11 +141,13 @@ trait LoadAndPublishDataTrait
         return $this->getPath('/database/migrations');
     }
 
-    protected function publishAssets(string $path = null): self
+    protected function publishAssets(?string $path = null): static
     {
         if (empty($path)) {
             $path = 'vendor/core/' . $this->getDashedNamespace();
         }
+
+        $path = str_replace('/', DIRECTORY_SEPARATOR, $path);
 
         $this->publishes([$this->getAssetsPath() => public_path($path)], 'cms-public');
 
@@ -151,19 +159,26 @@ trait LoadAndPublishDataTrait
         return $this->getPath('public');
     }
 
-    protected function loadHelpers(): self
+    protected function loadHelpers(): static
     {
         Helper::autoload($this->getPath('/helpers'));
 
         return $this;
     }
 
-    protected function loadAnonymousComponents(): self
+    protected function loadAnonymousComponents(): static
     {
         $this->app['blade.compiler']->anonymousComponentPath(
             $this->getViewsPath() . '/components',
-            str_replace('/', '-', $this->namespace)
+            str_replace('/', '-', (string) $this->namespace)
         );
+
+        return $this;
+    }
+
+    protected function loadPermissionsRegistration(): static
+    {
+        $this->loadAndPublishConfigurations(['permissions']);
 
         return $this;
     }

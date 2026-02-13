@@ -17,7 +17,7 @@ class SendProductReviewsMailAfterOrderCompleted
         if (EcommerceHelper::isReviewEnabled() && $mailer->templateEnabled('review_products')) {
             $order = $event->order;
 
-            if (get_class($order) == Order::class && ($customer = $order->user) && $customer->id) {
+            if ($order instanceof Order && ($customer = $order->user) && $customer->id) {
                 $products = app(ProductInterface::class)->productsNeedToReviewByCustomer($customer->id, 12, [$order->id]);
 
                 if ($products->count() && $products->loadMissing(['slugable'])) {
@@ -25,6 +25,7 @@ class SendProductReviewsMailAfterOrderCompleted
                         ->setVariableValues([
                             'customer_name' => $customer->name,
                             'product_review_list' => view('plugins/ecommerce::emails.partials.product-review-list', compact('products'))->render(),
+                            'order_id' => $order->code,
                         ])
                         ->sendUsingTemplate('review_products', $customer->email);
                 }

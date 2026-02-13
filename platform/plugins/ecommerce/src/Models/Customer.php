@@ -5,6 +5,7 @@ namespace Botble\Ecommerce\Models;
 use Botble\Base\Facades\MacroableModels;
 use Botble\Base\Models\BaseModel;
 use Botble\Base\Models\BaseQueryBuilder;
+use Botble\Base\Models\Concerns\HasPhoneNumber;
 use Botble\Base\Supports\Avatar;
 use Botble\Ecommerce\Enums\CustomerStatusEnum;
 use Botble\Ecommerce\Enums\DiscountTypeEnum;
@@ -39,8 +40,9 @@ class Customer extends BaseModel implements
     use Authenticatable;
     use Authorizable;
     use CanResetPassword;
-    use MustVerifyEmail;
     use HasApiTokens;
+    use HasPhoneNumber;
+    use MustVerifyEmail;
     use Notifiable;
 
     protected $table = 'ec_customers';
@@ -53,7 +55,8 @@ class Customer extends BaseModel implements
         'phone',
         'status',
         'private_notes',
-        'otp'
+        'tax_class',
+        'tax_id',
     ];
 
     protected $hidden = [
@@ -64,6 +67,8 @@ class Customer extends BaseModel implements
     protected $casts = [
         'status' => CustomerStatusEnum::class,
         'dob' => 'date',
+        'confirmed_at' => 'datetime',
+        'tax_id' => 'encrypted',
     ];
 
     public function sendPasswordResetNotification($token): void
@@ -81,23 +86,37 @@ class Customer extends BaseModel implements
         return $this->hasMany(Order::class, 'user_id', 'id');
     }
 
+    public function completedOrders(): HasMany
+    {
+        return $this->orders()->whereNotNull('completed_at');
+    }
+
+    public function finishedOrders(): HasMany
+    {
+        return $this->orders()->where('is_finished', true);
+    }
+
     public function addresses(): HasMany
     {
         return $this
             ->hasMany(Address::class, 'customer_id', 'id')
-            ->when(is_plugin_active('location'), function (BaseQueryBuilder $query) {
+            ->when(is_plugin_active('location'), function (HasMany|BaseQueryBuilder $query) {
                 return $query->with(['locationCountry', 'locationState', 'locationCity']);
             });
     }
 
     public function payments(): HasMany
     {
+        if (! is_plugin_active('payment')) {
+            return $this->hasMany(self::class, 'customer_id', 'id')->whereRaw('1 = 0');
+        }
+
         return $this->hasMany(Payment::class, 'customer_id', 'id');
     }
 
     public function discounts(): BelongsToMany
     {
-        return $this->belongsToMany(Discount::class, 'ec_discount_customers', 'customer_id', 'id');
+        return $this->belongsToMany(Discount::class, 'ec_discount_customers', 'customer_id', 'discount_id');
     }
 
     public function wishlist(): HasMany
@@ -105,18 +124,31 @@ class Customer extends BaseModel implements
         return $this->hasMany(Wishlist::class, 'customer_id');
     }
 
+    public function storedCarts(): HasMany
+    {
+        return $this->hasMany(Cart::class, 'customer_id');
+    }
+
+    public function activeCart(): HasOne
+    {
+        return $this->hasOne(Cart::class, 'customer_id')
+            ->where('instance', 'cart')
+            ->latest('updated_at');
+    }
+
     protected static function booted(): void
     {
-        self::deleted(function (Customer $customer) {
+        self::deleted(function (Customer $customer): void {
             $customer->discounts()->detach();
             $customer->usedCoupons()->detach();
             $customer->orders()->update(['user_id' => 0]);
             $customer->addresses()->delete();
             $customer->wishlist()->delete();
+            $customer->storedCarts()->delete();
             $customer->reviews()->each(fn (Review $review) => $review->delete());
         });
 
-        static::deleted(function (Customer $customer) {
+        static::deleted(function (Customer $customer): void {
             $folder = Storage::path($customer->upload_folder);
             if (File::isDirectory($folder) && Str::endsWith($customer->upload_folder, '/' . $customer->id)) {
                 File::deleteDirectory($folder);
@@ -176,6 +208,10 @@ class Customer extends BaseModel implements
         return Attribute::get(function () {
             if ($this->avatar) {
                 return RvMedia::getImageUrl($this->avatar, 'thumb');
+            }
+
+            if ($defaultAvatar = get_ecommerce_setting('customer_default_avatar')) {
+                return RvMedia::getImageUrl($defaultAvatar);
             }
 
             try {

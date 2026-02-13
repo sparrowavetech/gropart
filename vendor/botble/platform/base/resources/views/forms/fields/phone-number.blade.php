@@ -14,9 +14,36 @@
         @endif
     </x-slot:label>
 
-    {!! Form::text(
-        $name,
-        $options['value'],
-        array_merge_recursive($options['attr'], ['class' => 'js-phone-number-mask form-control']),
-    ) !!}
+    @php
+        $countryCodeEnabled = setting('phone_number_enable_country_code', true);
+        $withCountryCodeSelection =
+            $countryCodeEnabled &&
+            isset($options['with_country_code_selection']) &&
+            $options['with_country_code_selection'];
+        $inputName = $withCountryCodeSelection ? $name . '_display' : $name;
+        $fieldId = $options['attr']['id'] ?? 'phone-field-' . Str::random(8);
+        $inputAttributes = $options['attr'];
+        $inputAttributes['class'] = trim(($options['attr']['class'] ?? '') . ' js-phone-number-mask form-control');
+        $inputAttributes['id'] = $fieldId;
+
+        if ($withCountryCodeSelection) {
+            $inputAttributes['data-country-code-selection'] = 'true';
+        }
+    @endphp
+
+    {!! Form::text($inputName, $options['value'], $inputAttributes) !!}
+
+    @if ($withCountryCodeSelection)
+        {!! Form::hidden($name, $options['value'], [
+            'class' => 'js-phone-number-full',
+            'data-phone-field' => $inputName,
+            'id' => $fieldId . '-full',
+        ]) !!}
+    @endif
 </x-core::form.field>
+
+@if ($withCountryCodeSelection)
+    @once
+        @include('core/base::forms.fields.phone-number-script')
+    @endonce
+@endif

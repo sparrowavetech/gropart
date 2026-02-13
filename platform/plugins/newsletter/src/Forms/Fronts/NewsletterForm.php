@@ -28,7 +28,7 @@ class NewsletterForm extends FormFront
             ->setFormOption('class', 'subscribe-form')
             ->setValidatorClass(NewsletterRequest::class)
             ->model(Newsletter::class)
-            ->add('wrapper_before', HtmlField::class, HtmlFieldOption::make()->content('<div class="input-group mb-3">')->toArray())
+            ->add('wrapper_before', HtmlField::class, HtmlFieldOption::make()->content('<div class="input-group mb-3">'))
             ->add(
                 'email',
                 EmailField::class,
@@ -38,18 +38,25 @@ class NewsletterForm extends FormFront
                     ->cssClass('')
                     ->wrapperAttributes(false)
                     ->maxLength(-1)
-                    ->placeholder(__('Enter Your Email'))
+                    ->placeholder(trans('plugins/newsletter::newsletter.enter_your_email'))
                     ->addAttribute('id', 'newsletter-email')
-                    ->toArray()
             )
             ->add(
                 'submit',
                 'submit',
                 ButtonFieldOption::make()
-                    ->label(__('Subscribe'))
-                    ->cssClass('btn btn-primary')
-                    ->toArray(),
+                    ->label(trans('plugins/newsletter::newsletter.subscribe'))
+                    ->cssClass('btn btn-primary'),
             )
-            ->add('wrapper_after', HtmlField::class, HtmlFieldOption::make()->content('</div>')->toArray());
+            ->add('wrapper_after', HtmlField::class, HtmlFieldOption::make()->content('</div>'))
+            ->add(
+                'messages',
+                HtmlField::class,
+                HtmlFieldOption::make()
+                    ->content(<<<'HTML'
+                        <div class="newsletter-message newsletter-success-message" style="display: none"></div>
+                        <div class="newsletter-message newsletter-error-message" style="display: none"></div>
+                    HTML)
+            );
     }
 }

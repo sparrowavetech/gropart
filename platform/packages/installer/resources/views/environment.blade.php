@@ -1,12 +1,7 @@
 @extends('packages/installer::layouts.master')
 
-@section(
-    'pageTitle',
-     trans(
-         'packages/installer::installer.install_step_title',
-         ['step' => 3, 'title' => trans('packages/installer::installer.environment.wizard.title')]
-     )
-)
+@section('pageTitle', trans('packages/installer::installer.install_step_title', ['step' => 3, 'title' =>
+    trans('packages/installer::installer.environment.wizard.title')]))
 
 @section('header')
     <x-core::card.title>
@@ -18,7 +13,7 @@
     <form
         id="environment-form"
         method="post"
-        action="{{ route('installers.environments.createenvironments.store') }}"
+        action="{{ route('installers.environments.store') }}"
     >
         @csrf
         <div class="row">

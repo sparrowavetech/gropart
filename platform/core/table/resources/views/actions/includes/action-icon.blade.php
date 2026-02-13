@@ -2,7 +2,7 @@
     @if ($action->isRenderabeIcon())
         {!! BaseHelper::clean($action->getIcon()) !!}
     @else
-        @if($action->getLabel())
+        @if ($action->getLabel())
             <x-core::icon
                 :name="$action->getIcon()"
                 data-bs-toggle="tooltip"

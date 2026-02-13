@@ -59,4 +59,22 @@ return [
     'webhooks' => 'Webhooks?',
     'cache_response' => 'Cache response?',
     'not_available_in_cod_payment_method' => "Shippo options won't be shown if the selected payment method is COD!",
+    'not_available_cod' => 'Not available in COD payment option.',
+    'log_files' => 'Log files',
+    'status' => [
+        'shipping_label_created' => 'Shipping Label Created',
+        'in_transit' => 'In Transit',
+        'delivered' => 'Delivered',
+        'returned_to_sender' => 'Returned to Sender',
+        'exception' => 'Exception',
+    ],
+    'content_type' => [
+        'merchandise' => 'Merchandise',
+        'documents' => 'Documents',
+        'gift' => 'Gift',
+        'returned_goods' => 'Returned Goods',
+        'humanitarian_donation' => 'Humanitarian Donation',
+        'other' => 'Other',
+    ],
+    'address_incomplete' => 'Address appears to be incomplete',
 ];

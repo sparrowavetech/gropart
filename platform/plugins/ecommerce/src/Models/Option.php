@@ -5,6 +5,7 @@ namespace Botble\Ecommerce\Models;
 use Botble\Base\Models\BaseModel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\DB;
 
 class Option extends BaseModel
 {
@@ -20,8 +21,9 @@ class Option extends BaseModel
 
     protected static function booted(): void
     {
-        self::deleted(function (Option $option) {
+        self::deleted(function (Option $option): void {
             $option->values()->delete();
+            $option->translations()->delete();
         });
     }
 
@@ -29,11 +31,32 @@ class Option extends BaseModel
     {
         return $this
             ->hasMany(OptionValue::class, 'option_id')
-            ->orderBy('order');
+            ->oldest('order');
     }
 
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function translations(): HasMany
+    {
+        return $this->hasMany(OptionTranslation::class, 'ec_options_id');
+    }
+
+    public function getTranslation(string $langCode): ?OptionTranslation
+    {
+        return $this->translations->firstWhere('lang_code', $langCode);
+    }
+
+    public function saveTranslation(string $langCode, string $name): void
+    {
+        DB::table('ec_options_translations')->updateOrInsert(
+            [
+                'ec_options_id' => $this->id,
+                'lang_code' => $langCode,
+            ],
+            ['name' => $name]
+        );
     }
 }

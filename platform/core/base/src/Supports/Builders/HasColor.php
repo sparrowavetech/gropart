@@ -5,10 +5,18 @@ namespace Botble\Base\Supports\Builders;
 trait HasColor
 {
     protected string $color = '';
+    protected string $colorText = '#fff';
 
     public function color(string $color): static
     {
         $this->color = $color;
+
+        return $this;
+    }
+
+    public function colorText(string $color): static
+    {
+        $this->colorText = $color;
 
         return $this;
     }

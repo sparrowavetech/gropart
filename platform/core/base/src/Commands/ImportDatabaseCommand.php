@@ -8,7 +8,12 @@ use Botble\Base\Supports\Database;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Schema;
+
+use function Laravel\Prompts\confirm;
+
 use Symfony\Component\Console\Attribute\AsCommand;
+
 use Symfony\Component\Console\Input\InputArgument;
 
 #[AsCommand('cms:db:import', 'Import database from SQL file.')]
@@ -17,6 +22,12 @@ class ImportDatabaseCommand extends Command
     public function handle(): int
     {
         BaseHelper::maximumExecutionTimeAndMemoryLimit();
+
+        if (Schema::hasTable('settings') && confirm('Do you want to clear all tables in your database?', false)) {
+            $this->components->info('Dropping all tables...');
+
+            $this->call('db:wipe');
+        }
 
         $fileName = $this->argument('file');
 

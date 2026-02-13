@@ -44,14 +44,11 @@
         </ul>
         <ul class="admin-navbar-nav admin-navbar-nav-right">
             <li class="admin-bar-dropdown">
-                <a
-                    href="{{ Auth::guard()->user()->url }}"
-                >
+                <a href="{{ Auth::guard()->user()->url }}">
                     {{ Auth::guard()->user()->name }}
                 </a>
                 <ul class="admin-bar-dropdown-menu">
-                    <li><a
-                            href="{{ Auth::guard()->user()->url }}">{{ trans('core/base::layouts.profile') }}</a>
+                    <li><a href="{{ Auth::guard()->user()->url }}">{{ trans('core/base::layouts.profile') }}</a>
                     </li>
                     <li><a href="{{ route('access.logout') }}">{{ trans('core/base::layouts.logout') }}</a></li>
                 </ul>

@@ -17,7 +17,8 @@ class AddCustomerWhenCreateOrderRequest extends Request
         }
 
         $rules = EcommerceHelper::getCustomerAddressValidationRules();
-        $rules['email'] = ['required', new EmailRule(), Rule::unique((new Customer())->getTable(), 'email')];
+
+        $rules['email'] = ['nullable', new EmailRule(), Rule::unique((new Customer())->getTable(), 'email')];
 
         return $rules;
     }

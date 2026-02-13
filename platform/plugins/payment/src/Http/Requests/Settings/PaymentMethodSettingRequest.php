@@ -11,7 +11,7 @@ class PaymentMethodSettingRequest extends Request
     public function rules(): array
     {
         return [
-            'default_payment_method' => ['required', Rule::in(PaymentMethodEnum::values())],
+            'default_payment_method' => ['nullable', Rule::in(PaymentMethodEnum::values())],
         ];
     }
 }

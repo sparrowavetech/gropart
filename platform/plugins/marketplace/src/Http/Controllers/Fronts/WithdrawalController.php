@@ -3,12 +3,15 @@
 namespace Botble\Marketplace\Http\Controllers\Fronts;
 
 use Botble\Base\Http\Controllers\BaseController;
+use Botble\Ecommerce\Models\Customer;
+use Botble\Marketplace\Enums\WithdrawalFeeTypeEnum;
 use Botble\Marketplace\Enums\WithdrawalStatusEnum;
 use Botble\Marketplace\Events\WithdrawalRequested;
 use Botble\Marketplace\Facades\MarketplaceHelper;
 use Botble\Marketplace\Forms\VendorWithdrawalForm;
 use Botble\Marketplace\Http\Requests\Fronts\VendorEditWithdrawalRequest;
 use Botble\Marketplace\Http\Requests\Fronts\VendorWithdrawalRequest;
+use Botble\Marketplace\Models\VendorInfo;
 use Botble\Marketplace\Models\Withdrawal;
 use Botble\Marketplace\Tables\VendorWithdrawalTable;
 use Exception;
@@ -19,7 +22,7 @@ class WithdrawalController extends BaseController
 {
     public function index(VendorWithdrawalTable $table)
     {
-        $this->pageTitle(__('Withdrawals'));
+        $this->pageTitle(trans('plugins/marketplace::withdrawal.name'));
 
         return $table->renderTable();
     }
@@ -27,42 +30,62 @@ class WithdrawalController extends BaseController
     public function create()
     {
         $user = auth('customer')->user();
-        $fee = MarketplaceHelper::getSetting('fee_withdrawal', 0);
+        $fee = $this->calculateWithdrawalFee($user->balance);
+        $minimumWithdrawal = MarketplaceHelper::getMinimumWithdrawalAmount();
 
-        if ($user->balance <= $fee || ! $user->bank_info) {
+        // Calculate maximum withdrawal amount
+        $feeType = MarketplaceHelper::getSetting('withdrawal_fee_type', WithdrawalFeeTypeEnum::FIXED);
+        $feeValue = MarketplaceHelper::getSetting('fee_withdrawal', 0);
+
+        if ($feeType === WithdrawalFeeTypeEnum::PERCENTAGE) {
+            $maximum = $feeValue > 0 ? floor($user->balance / (1 + $feeValue / 100)) : $user->balance;
+        } else {
+            $maximum = $user->balance - $feeValue;
+        }
+        $maximum = max(0, $maximum);
+
+        if ($maximum < $minimumWithdrawal || ! $user->bank_info) {
             return $this
                 ->httpResponse()
                 ->setError()
                 ->setNextUrl(route('marketplace.vendor.withdrawals.index'))
-                ->setMessage(__('Insufficient balance or no bank information'));
+                ->setMessage(trans('plugins/marketplace::withdrawal.insufficient_balance_or_no_bank_info'));
         }
 
-        $this->pageTitle(__('Withdrawal request'));
+        $this->pageTitle(trans('plugins/marketplace::withdrawal.withdrawal_request'));
 
         return VendorWithdrawalForm::create()->renderForm();
     }
 
     public function store(VendorWithdrawalRequest $request)
     {
-        $fee = MarketplaceHelper::getSetting('fee_withdrawal', 0);
+        $amount = $request->input('amount');
+        $fee = $this->calculateWithdrawalFee($amount);
+        $total = $amount + $fee;
+
+        /**
+         * @var Customer $vendor
+         */
         $vendor = auth('customer')->user();
         $vendorInfo = $vendor->vendorInfo;
 
-        if ($request->input('amount') < MarketplaceHelper::getMinimumWithdrawalAmount()) {
+        // Double check if the total amount (including fee) exceeds the balance
+        if ($total > $vendorInfo->balance) {
             return $this
                 ->httpResponse()
                 ->setError()
-                ->setMessage(__('The minimum withdrawal amount is :amount', [
-                    'amount' => format_price(MarketplaceHelper::getMinimumWithdrawalAmount()),
-                ]));
+                ->setMessage(trans('plugins/marketplace::withdrawal.total_amount_exceeds_balance'));
         }
 
         try {
             DB::beginTransaction();
 
+            /**
+             * @var Withdrawal $withdrawal
+             */
             $withdrawal = Withdrawal::query()->create([
                 'fee' => $fee,
-                'amount' => $request->input('amount'),
+                'amount' => $amount,
                 'customer_id' => $vendor->getKey(),
                 'currency' => get_application_currency()->title,
                 'bank_info' => $vendorInfo->bank_info,
@@ -71,7 +94,11 @@ class WithdrawalController extends BaseController
                 'payment_channel' => $vendorInfo->payout_payment_method,
             ]);
 
-            $vendorInfo->balance -= $request->input('amount') + $fee;
+            $vendorInfo->balance -= $total;
+
+            /**
+             * @var VendorInfo $vendorInfo
+             */
             $vendorInfo->save();
 
             event(new WithdrawalRequested($vendor, $withdrawal));
@@ -88,9 +115,20 @@ class WithdrawalController extends BaseController
 
         return $this
             ->httpResponse()
-            ->setPreviousUrl(route('marketplace.vendor.withdrawals.index'))
-            ->setNextUrl(route('marketplace.vendor.withdrawals.show', $withdrawal->getKey()))
-            ->withCreatedSuccessMessage();
+            ->setNextUrl(route('marketplace.vendor.withdrawals.show', $withdrawal->id))
+            ->setMessage(trans('plugins/marketplace::withdrawal.created_success_message'));
+    }
+
+    protected function calculateWithdrawalFee(float $amount): float
+    {
+        $fee = MarketplaceHelper::getSetting('fee_withdrawal', 0);
+        $feeType = MarketplaceHelper::getSetting('withdrawal_fee_type', WithdrawalFeeTypeEnum::FIXED);
+
+        if ($feeType === WithdrawalFeeTypeEnum::PERCENTAGE) {
+            return $amount * $fee / 100;
+        }
+
+        return $fee;
     }
 
     public function edit(int|string $id)
@@ -103,7 +141,7 @@ class WithdrawalController extends BaseController
             ])
             ->firstOrFail();
 
-        $this->pageTitle(__('Update withdrawal request #:id', ['id' => $id]));
+        $this->pageTitle(trans('plugins/marketplace::withdrawal.update_withdrawal_request', ['id' => $id]));
 
         return VendorWithdrawalForm::createFromModel($withdrawal)
             ->setUrl(route('marketplace.vendor.withdrawals.edit', $withdrawal->getKey()))
@@ -153,7 +191,7 @@ class WithdrawalController extends BaseController
             ->where('customer_id', auth('customer')->id())
             ->firstOrFail();
 
-        $this->pageTitle(__('View withdrawal request #:id', ['id' => $id]));
+        $this->pageTitle(trans('plugins/marketplace::withdrawal.view_withdrawal_request', ['id' => $id]));
 
         return VendorWithdrawalForm::createFromModel($withdrawal)
             ->setUrl(route('marketplace.vendor.withdrawals.edit', $withdrawal->getKey()))

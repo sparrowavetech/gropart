@@ -4,10 +4,13 @@
         id="{{ $widget->name }}"
         data-url="{{ $widget->route }}"
     >
-        <x-core::card size="sm" @class([
-            'flex-fill',
-            'widget-load-has-callback' => $widget->hasLoadCallback,
-        ])>
+        <x-core::card
+            size="sm"
+            @class([
+                'flex-fill',
+                'widget-load-has-callback' => $widget->hasLoadCallback,
+            ])
+        >
             <x-core::card.header>
                 <x-core::card.title>
                     {{ $widget->title }}

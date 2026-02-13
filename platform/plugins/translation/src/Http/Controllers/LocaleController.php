@@ -19,7 +19,7 @@ class LocaleController extends SettingController
     protected function breadcrumb(): Breadcrumb
     {
         return parent::breadcrumb()
-            ->add(trans('plugins/translation::translation.locales'), route('translations.locales'));
+            ->add(trans('plugins/translation::translation.localization'));
     }
 
     public function index()
@@ -28,7 +28,7 @@ class LocaleController extends SettingController
 
         Assets::addScriptsDirectly('vendor/core/plugins/translation/js/locales.js');
 
-        $existingLocales = Language::getAvailableLocales();
+        $existingLocales = Language::getAvailableLocales(true);
         $flags = Language::getListLanguageFlags();
 
         $locales = Language::getLocales();

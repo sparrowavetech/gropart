@@ -5,9 +5,9 @@
                 <table class="table">
                     <thead class="table-light">
                     <tr>
-                        <th colspan="2" class="cart-header-product">{{ __('Product') }}</th>
-                        <th class="cart-header-price">{{ __('Price') }}</th>
-                        <th>{{ __('Action') }}</th>
+                        <th colspan="2" class="cart-header-product">{{ trans('plugins/ecommerce::products.product') }}</th>
+                        <th class="cart-header-price">{{ trans('plugins/ecommerce::products.price') }}</th>
+                        <th>{{ trans('plugins/ecommerce::ecommerce.action') }}</th>
                         <th></th>
                     </tr>
                     </thead>
@@ -26,24 +26,24 @@
 
                                         <span @class(['small', 'text-danger' => $product->isOutOfStock(), 'text-success' => ! $product->isOutOfStock()])>
                                             @if ($product->isOutOfStock())
-                                                ({{ __('Out of stock') }})
+                                                ({{ trans('plugins/ecommerce::ecommerce.out_of_stock') }})
                                             @else
-                                                ({{ __('In stock') }})
+                                                ({{ trans('plugins/ecommerce::ecommerce.in_stock') }})
                                             @endif
                                         </span>
                                     </a>
                                 </div>
 
-                                @if (is_plugin_active('marketplace') && $product->original_product->store->id)
+                                @if (is_plugin_active('marketplace') && $product->original_product->store?->id)
                                     <div class="small">
-                                        <span>{{ __('Vendor:') }}</span>
+                                        <span>{{ trans('plugins/ecommerce::ecommerce.vendor') }}</span>
                                         <a href="{{ $product->original_product->store->url }}" class="fw-medium">{{ $product->original_product->store->name }}</a>
                                     </div>
                                 @endif
 
                                 @if ($product->sku)
                                     <div class="small">
-                                        <span>{{ __('SKU:') }}</span>
+                                        <span>{{ trans('plugins/ecommerce::products.sku_1') }}</span>
                                         <span>{{ $product->sku }}</span>
                                     </div>
                                 @endif
@@ -54,7 +54,7 @@
 
                             <td class="cart-add-to-cart align-middle">
                                 <button
-                                    title="{{ __('Add To Cart') }}"
+                                    title="{{ trans('plugins/ecommerce::ecommerce.add_to_cart') }}"
                                     type="submit"
                                     class="btn btn-primary bb-btn-product-actions-icon"
                                     data-bb-toggle="add-to-cart"
@@ -63,7 +63,7 @@
                                     {!! EcommerceHelper::jsAttributes('add-to-cart', $product) !!}
                                 >
                                     <x-core::icon name="ti ti-shopping-cart"/>
-                                    <span>{{ __('Add To Cart') }}</span>
+                                    <span>{{ trans('plugins/ecommerce::ecommerce.add_to_cart') }}</span>
                                 </button>
                             </td>
 
@@ -83,14 +83,21 @@
                         <div class="cart-update">
                             <a href="{{ route('public.cart') }}" class="btn btn-primary bb-btn-link-icon">
                                 <x-core::icon name="ti ti-logout-2"/>
-                                {{ __('Go To Cart') }}
+                                {{ trans('plugins/ecommerce::ecommerce.go_to_cart') }}
                             </a>
                         </div>
+                        @if(EcommerceHelper::isWishlistSharingEnabled())
+                            <div>
+                                <span class="d-inline-block me-1">{{ trans('plugins/ecommerce::ecommerce.share') }}</span>
+
+                                {!! Theme::renderSocialSharing(route('public.wishlist', ['code' => EcommerceHelper::getWishlistCode()])) !!}
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>
         @else
-            @include(EcommerceHelper::viewPath('includes.empty-state'), ['title' => __('Your wishlist list is empty')])
+            @include(EcommerceHelper::viewPath('includes.empty-state'), ['title' => trans('plugins/ecommerce::ecommerce.your_wishlist_list_is_empty')])
         @endif
     </div>
 </section>

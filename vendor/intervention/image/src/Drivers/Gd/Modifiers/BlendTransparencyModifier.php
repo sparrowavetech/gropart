@@ -11,18 +11,20 @@ use Intervention\Image\Modifiers\BlendTransparencyModifier as GenericBlendTransp
 
 class BlendTransparencyModifier extends GenericBlendTransparencyModifier implements SpecializedInterface
 {
+    /**
+     * {@inheritdoc}
+     *
+     * @see ModifierInterface::apply()
+     */
     public function apply(ImageInterface $image): ImageInterface
     {
-        // decode blending color
-        $color = $this->driver()->handleInput(
-            $this->color ? $this->color : $this->driver()->config()->blendingColor
-        );
+        $blendingColor = $this->blendingColor($this->driver());
 
         foreach ($image as $frame) {
             // create new canvas with blending color as background
             $modified = Cloner::cloneBlended(
                 $frame->native(),
-                background: $color
+                background: $blendingColor
             );
 
             // set new gd image

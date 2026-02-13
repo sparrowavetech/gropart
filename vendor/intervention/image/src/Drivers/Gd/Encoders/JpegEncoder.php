@@ -12,6 +12,11 @@ use Intervention\Image\Interfaces\SpecializedInterface;
 
 class JpegEncoder extends GenericJpegEncoder implements SpecializedInterface
 {
+    /**
+     * {@inheritdoc}
+     *
+     * @see EncoderInterface::encode()
+     */
     public function encode(ImageInterface $image): EncodedImage
     {
         $blendingColor = $this->driver()->handleInput(
@@ -23,11 +28,9 @@ class JpegEncoder extends GenericJpegEncoder implements SpecializedInterface
             background: $blendingColor
         );
 
-        $data = $this->buffered(function () use ($output) {
+        return $this->createEncodedImage(function ($pointer) use ($output): void {
             imageinterlace($output, $this->progressive);
-            imagejpeg($output, null, $this->quality);
-        });
-
-        return new EncodedImage($data, 'image/jpeg');
+            imagejpeg($output, $pointer, $this->quality);
+        }, 'image/jpeg');
     }
 }

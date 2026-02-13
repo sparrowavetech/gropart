@@ -2,6 +2,8 @@
 
 namespace Botble\Marketplace\Forms;
 
+use Botble\Base\Forms\FieldOptions\HtmlFieldOption;
+use Botble\Base\Forms\Fields\HtmlField;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Marketplace\Enums\PayoutPaymentMethodsEnum;
 use Botble\Marketplace\Http\Requests\WithdrawalRequest;
@@ -14,8 +16,13 @@ class WithdrawalForm extends FormAbstract
     {
         $symbol = sprintf(' (%s)', get_application_currency()->symbol);
 
+        /**
+         * @var Withdrawal $withdrawal
+         */
+        $withdrawal = $this->getModel();
+
         $this
-            ->setupModel(new Withdrawal())
+            ->model(Withdrawal::class)
             ->setValidatorClass(WithdrawalRequest::class)
             ->add('amount', 'text', [
                 'label' => trans('plugins/marketplace::withdrawal.forms.amount') . $symbol,
@@ -51,18 +58,26 @@ class WithdrawalForm extends FormAbstract
             ])
             ->add('payoutInfo', 'html', [
                 'html' => view('plugins/marketplace::withdrawals.payout-info', [
-                    'bankInfo' => $this->getModel()->bank_info,
-                    'taxInfo' => $this->getModel()->customer->tax_info,
-                    'paymentChannel' => $this->getModel()->payment_channel,
-                    'title' => __('Payout account'),
+                    'bankInfo' => $withdrawal->bank_info,
+                    'taxInfo' => $withdrawal->customer->tax_info,
+                    'paymentChannel' => $withdrawal->payment_channel,
+                    'title' => trans('plugins/marketplace::withdrawal.payout_account'),
                 ])->render(),
             ])
             ->add('images[]', 'mediaImages', [
                 'label' => trans('plugins/ecommerce::products.form.image'),
-                'values' => $this->getModel() ? $this->getModel()->images : [],
-            ]);
+                'values' => $withdrawal ? $withdrawal->images : [],
+            ])
+            ->when(! $withdrawal->canEditStatus(), function (FormAbstract $form) use ($withdrawal): void {
+                $form->add(
+                    'download_invoice',
+                    HtmlField::class,
+                    HtmlFieldOption::make()
+                        ->content(view('plugins/marketplace::withdrawals.download-invoice', compact('withdrawal'))->render())
+                );
+            });
 
-        if ($this->getModel()->canEditStatus()) {
+        if ($withdrawal->canEditStatus()) {
             $this
                 ->add('status', 'customSelect', [
                     'label' => trans('core/base::tables.status'),
@@ -70,15 +85,15 @@ class WithdrawalForm extends FormAbstract
                     'attr' => [
                         'class' => 'form-control',
                     ],
-                    'choices' => $this->getModel()->getNextStatuses(),
+                    'choices' => $withdrawal->getNextStatuses(),
                     'help_block' => [
-                        'text' => $this->getModel()->getStatusHelper(),
+                        'text' => $withdrawal->getStatusHelper(),
                     ],
                 ]);
         } else {
             $this
                 ->add('status', 'html', [
-                    'html' => $this->getModel()->status->toHtml(),
+                    'html' => $withdrawal->status->toHtml(),
                 ]);
         }
 

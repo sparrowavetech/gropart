@@ -97,7 +97,9 @@ class SeoHelper implements SeoHelperContract
 
     public function setDescription($description): static
     {
-        $description = Str::limit(strip_tags(BaseHelper::cleanShortcodes($description)), 250);
+        if ($description) {
+            $description = Str::limit(strip_tags(BaseHelper::cleanShortcodes($description)), 250);
+        }
 
         $this->meta()->setDescription($description);
         $this->openGraph()->setDescription($description);
@@ -126,7 +128,7 @@ class SeoHelper implements SeoHelperContract
     public function saveMetaData(string $screen, Request $request, Model $object): bool
     {
         if (
-            in_array(get_class($object), config('packages.seo-helper.general.supported', [])) &&
+            in_array($object::class, config('packages.seo-helper.general.supported', [])) &&
             $request->has('seo_meta')
         ) {
             try {
@@ -165,6 +167,10 @@ class SeoHelper implements SeoHelperContract
                     Arr::forget($seoMeta, 'seo_image');
                 }
 
+                if (Arr::get($seoMeta, 'index') === 'index') {
+                    Arr::forget($seoMeta, 'index');
+                }
+
                 if (! empty($seoMeta)) {
                     MetaBox::saveMetaBoxData($object, 'seo_meta', $seoMeta);
                 } else {
@@ -183,7 +189,7 @@ class SeoHelper implements SeoHelperContract
     public function deleteMetaData(string $screen, Model $object): bool
     {
         try {
-            if (in_array(get_class($object), config('packages.seo-helper.general.supported', []))) {
+            if (in_array($object::class, config('packages.seo-helper.general.supported', []))) {
                 MetaBox::deleteMetaData($object, 'seo_meta');
             }
 

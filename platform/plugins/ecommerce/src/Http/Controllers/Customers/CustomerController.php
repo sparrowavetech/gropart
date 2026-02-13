@@ -5,36 +5,26 @@ namespace Botble\Ecommerce\Http\Controllers\Customers;
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Base\Facades\Assets;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Http\Actions\DeleteResourceAction;
 use Botble\Base\Supports\Breadcrumb;
+use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Forms\CustomerForm;
 use Botble\Ecommerce\Http\Controllers\BaseController;
 use Botble\Ecommerce\Http\Requests\AddCustomerWhenCreateOrderRequest;
 use Botble\Ecommerce\Http\Requests\CustomerCreateRequest;
 use Botble\Ecommerce\Http\Requests\CustomerEditRequest;
 use Botble\Ecommerce\Http\Requests\CustomerUpdateEmailRequest;
-use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Http\Resources\CustomerAddressResource;
 use Botble\Ecommerce\Models\Address;
 use Botble\Ecommerce\Models\Customer;
 use Botble\Ecommerce\Tables\CustomerReviewTable;
 use Botble\Ecommerce\Tables\CustomerTable;
-
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Botble\Ecommerce\Http\Requests\OTPRequest;
-use Botble\Ecommerce\Http\Requests\ChangePhoneRequest;
-
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
-use SeoHelper;
-use Theme;
-use Illuminate\Validation\ValidationException;
-use Botble\Sms\Supports\SmsHandler;
-use Botble\Ecommerce\Facades\OrderHelper;
-use Botble\Ecommerce\Models\Order;
-use Botble\Sms\Enums\SmsEnum;
-use Auth;
+
 class CustomerController extends BaseController
 {
     protected function breadcrumb(): Breadcrumb
@@ -65,7 +55,11 @@ class CustomerController extends BaseController
         $customer->fill($request->input());
         $customer->confirmed_at = Carbon::now();
         $customer->password = Hash::make($request->input('password'));
-        $customer->dob = Carbon::parse($request->input('dob'));
+
+        if ($dob = $request->input('dob')) {
+            $customer->dob = BaseHelper::parseDate($dob);
+        }
+
         $customer->save();
 
         event(new CreatedContentEvent(CUSTOMER_MODULE_SCREEN_NAME, $request, $customer));
@@ -85,7 +79,7 @@ class CustomerController extends BaseController
 
         $customer->password = null;
 
-        return CustomerForm::createFromModel($customer)->renderForm();
+        return CustomerForm::createFromModel($customer)->setValidatorClass(CustomerEditRequest::class)->renderForm();
     }
 
     public function update(Customer $customer, CustomerEditRequest $request)
@@ -96,7 +90,9 @@ class CustomerController extends BaseController
             $customer->password = Hash::make($request->input('password'));
         }
 
-        $customer->dob = Carbon::parse($request->input('dob'));
+        if ($dob = $request->input('dob')) {
+            $customer->dob = BaseHelper::parseDate($dob);
+        }
 
         $customer->save();
 
@@ -132,12 +128,30 @@ class CustomerController extends BaseController
             ->withUpdatedSuccessMessage();
     }
 
+    public function resendVerificationEmail(int|string $id)
+    {
+        $customer = Customer::query()->findOrFail($id);
+
+        if ($customer->confirmed_at) {
+            return $this
+                ->httpResponse()
+                ->setError()
+                ->setMessage(trans('plugins/ecommerce::customer.email_already_verified'));
+        }
+
+        $customer->sendEmailVerificationNotification();
+
+        return $this
+            ->httpResponse()
+            ->setMessage(trans('plugins/ecommerce::customer.verification_email_sent'));
+    }
+
     public function getListCustomerForSelect()
     {
         $customers = Customer::query()
             ->select(['id', 'name'])
             ->get()
-            ->toArray();
+            ->all();
 
         return $this
             ->httpResponse()
@@ -181,6 +195,9 @@ class CustomerController extends BaseController
 
     public function getCustomerOrderNumbers($id)
     {
+        /**
+         * @var Customer $customer
+         */
         $customer = Customer::query()->find($id);
 
         if (! $customer) {
@@ -191,7 +208,7 @@ class CustomerController extends BaseController
 
         return $this
             ->httpResponse()
-            ->setData($customer->orders()->count());
+            ->setData($customer->completedOrders()->count());
     }
 
     public function postCreateCustomerWhenCreatingOrder(AddCustomerWhenCreateOrderRequest $request)
@@ -209,9 +226,11 @@ class CustomerController extends BaseController
 
         $address = Address::query()->create($request->input());
 
-        $address->country = $address->country_name;
-        $address->state = $address->state_name;
-        $address->city = $address->city_name;
+        if (! EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation()) {
+            $address->country = $address->country_name;
+            $address->state = $address->state_name;
+            $address->city = $address->city_name;
+        }
 
         return $this
             ->httpResponse()
@@ -223,104 +242,23 @@ class CustomerController extends BaseController
     {
         return $customerReviewTable->customerId($id)->renderTable();
     }
-    public function otp($customer_id)
+
+    public function view($id)
     {
-        SeoHelper::setTitle(__('OTP'));
-        $customer =   $customer = Customer::query()->find($customer_id);
+        $customer = Customer::query()->findOrFail($id);
 
-        Theme::breadcrumb()->add(__('Home'), route('public.index'))->add(__('OTP Verify'), route('customer.register'));
+        $this->pageTitle(trans('plugins/ecommerce::customer.view', ['name' => $customer->name]));
 
-        if (!session()->has('url.intended')) {
-            if (!in_array(url()->previous(), [route('customer.login'), route('customer.register')])) {
-                session(['url.intended' => url()->previous()]);
-            }
-        }
+        Assets::addScriptsDirectly('vendor/core/plugins/ecommerce/js/customer.js');
 
-        return Theme::scope('ecommerce.customers.otp',  compact('customer_id','customer'), 'plugins/ecommerce::customer.verify_otp')
-            ->render();
-    }
-    public function verifyotp(
-        OtpRequest $request,
-        BaseHttpResponse $response
-    ) {
+        $totalSpent = $customer->completedOrders()->sum('amount');
+        $totalOrders = $customer->finishedOrders()->count();
+        $completedOrders = $customer->completedOrders()->count();
+        $totalProducts = $customer->completedOrders()
+            ->withCount('products')
+            ->get()
+            ->sum('products_count');
 
-        $customer =   $customer = Customer::query()->find($request->customer_id);
-
-        if ($customer && $customer->otp == $request->otp) {
-            $customer->confirmed_at = Carbon::now();
-            $customer->save();
-            if (is_plugin_active('sms') && setting('sms_otp_enabled')) {
-                $sms = new  SmsHandler;
-                $sms->setModule(ECOMMERCE_MODULE_SCREEN_NAME);
-                if ($sms->templateEnabled(SmsEnum::WELCOME())) {
-                    $sms->setVariableValues([
-                        'customer_name' => $customer->name,
-                        'site_title'=>'GROPART'
-                    ]);
-                    $sms->sendUsingTemplate(
-                        SmsEnum::WELCOME(),
-                        $customer->phone
-                    );
-                }
-            }
-            return  $response
-                ->setNextUrl(route('customer.login'))
-                ->setMessage(trans('plugins/ecommerce::customer.otp_verify_success'));
-        } else {
-            throw ValidationException::withMessages([
-                'confirmation' => trans('plugins/ecommerce::customer.otp_verify_error'),
-            ]);
-        }
-    }
-    public function resend( BaseHttpResponse $response,$id)
-    {
-        $customer = Customer::query()->find($id);
-        if (is_plugin_active('sms') && setting('sms_otp_enabled')) {
-            $otp = mt_rand(000000, 999999);
-            $sms = new  SmsHandler;
-            $customer->otp  = $otp;
-            $customer->save();
-            $sms->setModule(ECOMMERCE_MODULE_SCREEN_NAME);
-            if ($sms->templateEnabled(SmsEnum::OTP())) {
-                $sms->setVariableValues([
-                    'customer_name' => $customer->name,
-                    'otp' => $otp,
-                ]);
-                $sms->sendUsingTemplate(
-                    SmsEnum::OTP(),
-                    $customer->phone
-                );
-            }
-
-            return  $response
-                ->setNextUrl(route('customer.otp', $customer->id))
-                ->setMessage(__('We have resent you an OTP '));
-        }
-    }
-    public function changePhone( ChangePhoneRequest $request,BaseHttpResponse $response)
-    {
-        $customer =   $customer = Customer::query()->find($request->customer_id);
-        $customer->phone = $request->phone;
-        if (is_plugin_active('sms') && setting('sms_otp_enabled')) {
-            $otp = mt_rand(000000, 999999);
-            $sms = new  SmsHandler;
-            $customer->otp  = $otp;
-            $customer->save();
-            $sms->setModule(ECOMMERCE_MODULE_SCREEN_NAME);
-            if ($sms->templateEnabled(SmsEnum::OTP())) {
-                $sms->setVariableValues([
-                    'customer_name' => $customer->name,
-                    'otp' => $otp,
-                ]);
-                $sms->sendUsingTemplate(
-                    SmsEnum::OTP(),
-                    $customer->phone
-                );
-            }
-
-            return  $response
-                ->setNextUrl(route('customer.otp', $customer->id))
-                ->setMessage(__('We have resent you an OTP '));
-        }
+        return view('plugins/ecommerce::customers.view', compact('customer', 'totalSpent', 'totalOrders', 'completedOrders', 'totalProducts'));
     }
 }

@@ -15,24 +15,13 @@ class NewsletterRequest extends Request
     public function rules(): array
     {
         return [
-
             'email' => [
                 'required',
                 'email',
-                Rule::unique((new Newsletter())->getTable())->where(function (Builder $query) {
+                Rule::unique((new Newsletter())->getTable())->where(function (Builder $query): void {
                     $query->where('status', NewsletterStatusEnum::SUBSCRIBED);
                 }),
             ],
-            'whatsapp' => [
-                'required',
-                'string',
-                'max:15',
-                'regex:/^[0-9]+$/',
-                Rule::unique((new Newsletter())->getTable())->where(function (Builder $query) {
-                    $query->where('status', NewsletterStatusEnum::SUBSCRIBED);
-                }),
-            ],
-
             'status' => Rule::in(NewsletterStatusEnum::values()),
         ];
     }

@@ -14,8 +14,9 @@ class PublicController extends BaseController
     public function getSearch(Request $request, PostInterface $postRepository)
     {
         $query = BaseHelper::stringify($request->input('q'));
+        $escapedQuery = e($query);
 
-        $title = __('Search result for: ":query"', compact('query'));
+        $title = trans('plugins/blog::base.search_result_for', ['query' => $escapedQuery]);
 
         SeoHelper::setTitle($title)
             ->setDescription($title);

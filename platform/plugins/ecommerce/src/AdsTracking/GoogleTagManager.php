@@ -5,9 +5,12 @@ namespace Botble\Ecommerce\AdsTracking;
 use Botble\Ecommerce\Cart\CartItem;
 use Botble\Ecommerce\Facades\Cart;
 use Botble\Ecommerce\Facades\EcommerceHelper;
+use Botble\Ecommerce\Models\Brand;
 use Botble\Ecommerce\Models\Order;
 use Botble\Ecommerce\Models\Product;
+use Botble\Ecommerce\Models\ProductCategory;
 use Botble\SeoHelper\Facades\SeoHelper;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Str;
 
 class GoogleTagManager
@@ -16,11 +19,54 @@ class GoogleTagManager
 
     public function isEnabled(): bool
     {
-        $type = setting('google_tag_manager_type', 'code');
+        $enabled = get_ecommerce_setting('google_tag_manager_enabled', false);
 
-        return get_ecommerce_setting('google_tag_manager_enabled', false)
-            && ($type === 'code' && setting('google_tag_manager_code'))
-            || ($type === 'id' && setting('google_tag_manager_id'));
+        if (is_string($enabled)) {
+            $enabled = $enabled === '1' || $enabled === 'true';
+        }
+
+        if (! $enabled) {
+            return false;
+        }
+
+        $type = setting('google_tag_manager_type');
+
+        if (! $type) {
+            if (setting('gtm_container_id')) {
+                $type = 'gtm';
+            } elseif (setting('google_tag_manager_code')) {
+                $type = 'code';
+            } elseif (setting('custom_tracking_header_js') || setting('custom_tracking_body_html')) {
+                $type = 'custom';
+            } elseif (setting('google_tag_manager_id') || setting('google_analytics')) {
+                $type = 'id';
+            } else {
+                return false;
+            }
+        }
+
+        return match ($type) {
+            'gtm' => (bool) setting('gtm_container_id'),
+            'id' => (setting('google_tag_manager_id') || setting('google_analytics')),
+            'custom' => (
+                setting('custom_tracking_header_js') ||
+                setting('custom_tracking_body_html') ||
+                setting('google_tag_manager_code')
+            ),
+            'code' => (
+                setting('google_tag_manager_code') ||
+                setting('custom_tracking_header_js') ||
+                setting('custom_tracking_body_html')
+            ),
+            default => (
+                setting('gtm_container_id') ||
+                setting('google_tag_manager_id') ||
+                setting('google_analytics') ||
+                setting('google_tag_manager_code') ||
+                setting('custom_tracking_header_js') ||
+                setting('custom_tracking_body_html')
+            ),
+        };
     }
 
     public function viewItemList(array $items, string $name, array $attributes = []): self
@@ -34,11 +80,71 @@ class GoogleTagManager
         return $this;
     }
 
+    public function viewCategory(ProductCategory $category, int $productCount, array $attributes = []): self
+    {
+        if (! $this->isEnabled()) {
+            return $this;
+        }
+
+        $this->dataLayer['category_view'] = [
+            'categoryId' => (string) $category->getKey(),
+            'categoryName' => $category->name,
+            'productCount' => $productCount,
+            ...$attributes,
+        ];
+
+        return $this;
+    }
+
     public function viewItem(Product $item, array $attributes = []): self
     {
         $this->pushEvent('view_item', [$item], [
             'currency' => get_application_currency()->title,
             'value' => $item->price,
+            ...$attributes,
+        ]);
+
+        return $this;
+    }
+
+    public function selectItem(Product $item, string $listName = '', int $index = 0, array $attributes = []): self
+    {
+        $this->pushEvent('select_item', [$item], [
+            'item_list_id' => Str::snake($listName),
+            'item_list_name' => $listName,
+            'index' => $index,
+            ...$attributes,
+        ]);
+
+        return $this;
+    }
+
+    public function search(string $searchTerm, array $items = [], array $attributes = []): self
+    {
+        $this->pushEvent('search', $items, [
+            'search_term' => $searchTerm,
+            ...$attributes,
+        ]);
+
+        return $this;
+    }
+
+    public function viewPromotion(array $items, string $promotionId = '', string $promotionName = '', array $attributes = []): self
+    {
+        $this->pushEvent('view_promotion', $items, [
+            'promotion_id' => $promotionId,
+            'promotion_name' => $promotionName,
+            ...$attributes,
+        ]);
+
+        return $this;
+    }
+
+    public function selectPromotion(array $items, string $promotionId = '', string $promotionName = '', array $attributes = []): self
+    {
+        $this->pushEvent('select_promotion', $items, [
+            'promotion_id' => $promotionId,
+            'promotion_name' => $promotionName,
             ...$attributes,
         ]);
 
@@ -64,10 +170,13 @@ class GoogleTagManager
         $products = $cart->products();
 
         $items = $cart->content()->map(function ($item) use ($products) {
+            /**
+             * @var Collection $products
+             */
             $product = $products->find($item->id)->original_product;
 
             return new GoogleTagItem(
-                $item->id,
+                $item->sku ?: $item->id,
                 $item->name,
                 $item->price,
                 $item->qty,
@@ -147,10 +256,32 @@ class GoogleTagManager
         return $this;
     }
 
-    public function pushEvent(string $event, array $items, array $attributes = []): self
+    public function signUp(string $method = 'email', array $attributes = []): self
     {
         if (! $this->isEnabled()) {
             return $this;
+        }
+
+        $this->dataLayer['sign_up'] = [
+            'method' => $method,
+            ...$attributes,
+        ];
+
+        return $this;
+    }
+
+    public function pushEvent(string $event, array|\Illuminate\Support\Collection $items, array $attributes = []): self
+    {
+        if (! $this->isEnabled()) {
+            return $this;
+        }
+
+        if ($items instanceof Collection) {
+            $firstItem = $items->first();
+            if ($firstItem instanceof Product) {
+                $items->loadMissing(['brand', 'categories']);
+            }
+            $items = $items->all();
         }
 
         $items = array_map(fn (GoogleTagItem $item) => $item->toArray(), $this->formatItems($items));
@@ -172,13 +303,17 @@ class GoogleTagManager
         }
 
         $gtag = '';
+        $dataLayerPush = '';
 
         foreach ($this->dataLayer as $event => $data) {
             $gtag .= "gtag('event', '$event', " . json_encode($data) . ');';
+            $dataLayerPush .= 'window.dataLayer.push(' . json_encode(['event' => $event, ...$data]) . ');';
         }
 
         return <<<HTML
             <script>
+                window.dataLayer = window.dataLayer || [];
+                $dataLayerPush
                 if (typeof gtag !== "undefined") {
                     $gtag
                 }
@@ -201,15 +336,55 @@ class GoogleTagManager
         }, 999);
     }
 
-    public function formatItems(array $items): array
+    public function formatItems(array|\Illuminate\Support\Collection $items): array
     {
+        if ($items instanceof \Illuminate\Support\Collection) {
+            $items = $items->all();
+        }
+
+        $productsToLoad = array_filter($items, fn ($item) => ! ($item instanceof GoogleTagItem));
+
+        if (! empty($productsToLoad)) {
+            $brandIds = array_unique(array_filter(array_map(fn ($item) => $item->brand_id, $productsToLoad)));
+
+            if (! empty($brandIds)) {
+                $brands = Brand::query()
+                    ->whereIn('id', $brandIds)
+                    ->get()
+                    ->keyBy('id');
+
+                foreach ($productsToLoad as $product) {
+                    if ($product->brand_id && $brands->has($product->brand_id)) {
+                        $product->setRelation('brand', $brands->get($product->brand_id));
+                    }
+                }
+            }
+
+            $productsNeedingCategories = array_filter($productsToLoad, fn ($item) => ! $item->relationLoaded('categories'));
+            if (! empty($productsNeedingCategories)) {
+                $productIds = array_map(fn ($item) => $item->id, $productsNeedingCategories);
+                $categories = ProductCategory::query()
+                    ->join('ec_product_category_product', 'ec_product_categories.id', '=', 'ec_product_category_product.category_id')
+                    ->whereIn('ec_product_category_product.product_id', $productIds)
+                    ->select('ec_product_categories.*', 'ec_product_category_product.product_id')
+                    ->get()
+                    ->groupBy('product_id');
+
+                foreach ($productsNeedingCategories as $product) {
+                    if ($categories->has($product->id)) {
+                        $product->setRelation('categories', $categories->get($product->id));
+                    }
+                }
+            }
+        }
+
         return array_map(function ($item) {
             if ($item instanceof GoogleTagItem) {
                 return $item;
             }
 
             return new GoogleTagItem(
-                id: $item->id,
+                id: $item->sku ?: $item->id,
                 name: $item->name,
                 price: $item->price ?: 0,
                 quantity: $item->quantity ?? null,
@@ -234,5 +409,30 @@ class GoogleTagManager
         }
 
         return $attributes;
+    }
+
+    public function formatProductTrackingData(Product $product, int $quantity = 1): array
+    {
+        $product = $product->original_product;
+
+        $attributes = $this->formatItemAttributes($product);
+
+        $categories = $product->categories;
+        if ($categories && $categories->isNotEmpty()) {
+            $categoryNames = $categories->pluck('name')->toArray();
+            foreach ($categoryNames as $index => $categoryName) {
+                $key = $index === 0 ? 'item_category' : "item_category{$index}";
+                $attributes[$key] = $categoryName;
+            }
+        }
+
+        return [
+            'item_id' => $product->getKey(),
+            'item_name' => $product->name,
+            'price' => (float) $product->price,
+            'quantity' => $quantity,
+            'item_brand' => $product->brand?->name ?? '',
+            ...$attributes,
+        ];
     }
 }

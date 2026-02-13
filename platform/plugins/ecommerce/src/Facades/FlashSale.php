@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Facade;
 
 /**
  * @method static \Botble\Ecommerce\Models\Product|null flashSaleForProduct(\Botble\Ecommerce\Models\Product $product)
+ * @method static \Botble\Ecommerce\Models\FlashSale|null getFlashSaleForProduct(\Botble\Ecommerce\Models\Product $product)
  * @method static \Illuminate\Support\Collection getAvailableFlashSales()
  * @method static bool isEnabled()
  * @method static bool isShowSaleCountLeft()

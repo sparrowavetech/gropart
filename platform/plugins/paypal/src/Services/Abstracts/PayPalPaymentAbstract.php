@@ -2,13 +2,13 @@
 
 namespace Botble\PayPal\Services\Abstracts;
 
-use Botble\Ecommerce\Models\Currency;
 use Botble\Payment\Models\Payment;
 use Botble\Payment\Services\Traits\PaymentErrorTrait;
+use Botble\PayPal\Services\Core\PayPalHttpClient;
+use Botble\Theme\Facades\Theme;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
-use PayPalCheckoutSdk\Core\PayPalHttpClient;
 use PayPalCheckoutSdk\Core\ProductionEnvironment;
 use PayPalCheckoutSdk\Core\SandboxEnvironment;
 use PayPalCheckoutSdk\Orders\OrdersCaptureRequest;
@@ -183,7 +183,7 @@ abstract class PayPalPaymentAbstract
             'application_context' => [
                 'return_url' => $this->returnUrl,
                 'cancel_url' => $this->cancelUrl ?: $this->returnUrl,
-                'brand_name' => theme_option('site_title'),
+                'brand_name' => Theme::getSiteTitle(),
             ],
             'purchase_units' => [
                 0 => [
@@ -209,8 +209,13 @@ abstract class PayPalPaymentAbstract
         $paymentId = null;
 
         try {
+            do_action('payment_before_making_api_request', PAYPAL_PAYMENT_METHOD_NAME, $orderRequest);
+
             // Call API with your client and get a response for your call
             $response = $this->client->execute($orderRequest);
+
+            do_action('payment_after_api_response', PAYPAL_PAYMENT_METHOD_NAME, (array) $orderRequest, (array) $response);
+
             if ($response && $response->statusCode == 201) {
                 // @phpstan-ignore-next-line
                 $paymentId = $response->result->id;
@@ -223,6 +228,8 @@ abstract class PayPalPaymentAbstract
                 }
             }
         } catch (Exception $exception) {
+            do_action('payment_after_api_response', PAYPAL_PAYMENT_METHOD_NAME, (array) $exception);
+
             $this->setErrorMessageAndLogging($exception, 1);
 
             return false;
@@ -251,7 +258,11 @@ abstract class PayPalPaymentAbstract
             $orderRequest = new OrdersCaptureRequest($paymentId);
             $orderRequest->prefer('return=representation');
 
+            do_action('payment_before_making_api_request', PAYPAL_PAYMENT_METHOD_NAME, $orderRequest);
+
             $response = $this->client->execute($orderRequest);
+
+            do_action('payment_after_api_response', PAYPAL_PAYMENT_METHOD_NAME, (array) $orderRequest, (array) $response);
 
             // @phpstan-ignore-next-line
             if ($response && $response->statusCode == 201 && $response->result->status == 'COMPLETED') {
@@ -268,7 +279,13 @@ abstract class PayPalPaymentAbstract
     public function getPaymentDetails(string $paymentId): bool|HttpResponse
     {
         try {
-            $response = $this->client->execute(new OrdersGetRequest($paymentId));
+            $orderRequest = new OrdersGetRequest($paymentId);
+
+            do_action('payment_before_making_api_request', PAYPAL_PAYMENT_METHOD_NAME, $orderRequest);
+
+            $response = $this->client->execute($orderRequest);
+
+            do_action('payment_after_api_response', PAYPAL_PAYMENT_METHOD_NAME, (array) $orderRequest, (array) $response);
         } catch (Exception $exception) {
             $this->setErrorMessageAndLogging($exception, 1);
 
@@ -301,61 +318,65 @@ abstract class PayPalPaymentAbstract
         try {
             $detail = $this->getPaymentDetails($paymentId);
 
-            $purchaseUnits = $detail->result->purchase_units;
-            $purchaseUnit = Arr::get($purchaseUnits, 0);
-
-            $refunds = null;
-            $payments = $purchaseUnit->payments;
-            if ($payments && ! empty($payments->refunds)) {
-                $refunds = $payments->refunds;
-            }
-
-            if ($detail && ! $refunds) {
+            if ($detail) {
                 // @phpstan-ignore-next-line
-                $purchase = Arr::first($detail->result->purchase_units);
-                $capture = Arr::first($purchase->payments->captures);
+                $purchaseUnits = $detail->result->purchase_units;
+                $purchaseUnit = Arr::get($purchaseUnits, 0);
 
-                if (! $capture) {
-                    return [
-                        'error' => true,
-                        'message' => trans('plugins/payment::payment.cannot_found_capture_id'),
-                    ];
+                $refunds = null;
+                $payments = $purchaseUnit->payments;
+                if ($payments && ! empty($payments->refunds)) {
+                    $refunds = $payments->refunds;
                 }
 
-                $captureId = $capture->id;
-
-                if ($captureId && $capture->status != 'DECLINED') {
-                    $payment = Payment::query()->where('charge_id', $paymentId)->firstOrFail();
-                    $paymentCurrency = $purchase->amount->currency_code;
-
-                    if ($payment->currency !== $paymentCurrency) {
-                        $currency = Currency::query()->where('title', $paymentCurrency)->first();
-
-                        if ($currency) {
-                            $totalAmount = $totalAmount * $currency->exchange_rate;
-                            $this->paymentCurrency = $paymentCurrency;
-                        }
-                    }
-
-                    $refundRequest = new CapturesRefundRequest($captureId);
-                    $refundRequest->body = $this->buildRefundRequestBody($totalAmount);
-                    $refundRequest->prefer('return=representation');
-                    $response = $this->client->execute($refundRequest);
-
+                if ($refunds) {
                     // @phpstan-ignore-next-line
-                    if ($response && $response->statusCode == 201 && $response->result->status == 'COMPLETED') {
+                    $purchase = Arr::first($detail->result->purchase_units);
+                    $capture = Arr::first($purchase->payments->captures);
+
+                    if (! $capture) {
                         return [
-                            'error' => false, // @phpstan-ignore-next-line
-                            'status' => $response->result->status,
-                            'data' => (array) $response->result,
+                            'error' => true,
+                            'message' => trans('plugins/payment::payment.cannot_found_capture_id'),
                         ];
                     }
 
-                    return [
-                        'error' => true,
-                        'status' => $response->statusCode,
-                        'message' => trans('plugins/payment::payment.status_is_not_completed'),
-                    ];
+                    $captureId = $capture->id;
+
+                    if ($captureId && $capture->status != 'DECLINED') {
+                        $payment = Payment::query()->where('charge_id', $paymentId)->firstOrFail();
+                        $paymentCurrency = $purchase->amount->currency_code;
+
+                        if ($payment->currency !== $paymentCurrency) {
+
+                            $currency = cms_currency()->currencies()->where('title', $paymentCurrency)->first();
+
+                            if ($currency) {
+                                $totalAmount = $totalAmount * $currency->exchange_rate;
+                                $this->paymentCurrency = $paymentCurrency;
+                            }
+                        }
+
+                        $refundRequest = new CapturesRefundRequest($captureId);
+                        $refundRequest->body = $this->buildRefundRequestBody($totalAmount);
+                        $refundRequest->prefer('return=representation');
+                        $response = $this->client->execute($refundRequest);
+
+                        // @phpstan-ignore-next-line
+                        if ($response && $response->statusCode == 201 && $response->result->status == 'COMPLETED') {
+                            return [
+                                'error' => false, // @phpstan-ignore-next-line
+                                'status' => $response->result->status,
+                                'data' => (array) $response->result,
+                            ];
+                        }
+
+                        return [
+                            'error' => true,
+                            'status' => $response->statusCode,
+                            'message' => trans('plugins/payment::payment.status_is_not_completed'),
+                        ];
+                    }
                 }
             }
 

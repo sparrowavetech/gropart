@@ -3,6 +3,8 @@
 namespace Botble\Ecommerce\Models;
 
 use Botble\Base\Models\BaseModel;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Support\Facades\Cache;
 
 class Currency extends BaseModel
 {
@@ -14,13 +16,34 @@ class Currency extends BaseModel
         'is_prefix_symbol',
         'order',
         'decimals',
+        'number_format_style',
+        'space_between_price_and_currency',
         'is_default',
         'exchange_rate',
     ];
 
     protected $casts = [
         'is_prefix_symbol' => 'boolean',
+        'space_between_price_and_currency' => 'boolean',
         'is_default' => 'boolean',
         'exchange_rate' => 'double',
     ];
+
+    protected function title(): Attribute
+    {
+        return Attribute::make(
+            get: fn (?string $value) => $value ? strtoupper($value) : $value,
+        );
+    }
+
+    protected static function booted(): void
+    {
+        static::saved(function (): void {
+            Cache::forget('currencies');
+        });
+
+        static::deleted(function (): void {
+            Cache::forget('currencies');
+        });
+    }
 }

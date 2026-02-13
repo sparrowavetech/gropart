@@ -12,6 +12,7 @@ class ProductAttributeSetsRequest extends Request
     {
         return [
             'title' => ['required', 'string', 'max:255'],
+            'slug' => ['nullable', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:400'],
             'order' => ['required', 'integer', 'min:0', 'max:127'],
             'status' => Rule::in(BaseStatusEnum::values()),

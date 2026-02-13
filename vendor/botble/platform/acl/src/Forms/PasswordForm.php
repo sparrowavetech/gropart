@@ -5,6 +5,7 @@ namespace Botble\ACL\Forms;
 use Botble\ACL\Http\Requests\UpdatePasswordRequest;
 use Botble\ACL\Models\User;
 use Botble\Base\Forms\FieldOptions\TextFieldOption;
+use Botble\Base\Forms\Fields\PasswordField;
 use Botble\Base\Forms\FormAbstract;
 
 class PasswordForm extends FormAbstract
@@ -21,36 +22,33 @@ class PasswordForm extends FormAbstract
             ->when(
                 $this->getModel()->exists &&
                 $this->getRequest()->user()->is($this->getModel()),
-                function (FormAbstract $form) {
+                function (FormAbstract $form): void {
                     $form->add(
                         'old_password',
-                        'password',
+                        PasswordField::class,
                         TextFieldOption::make()
                             ->label(trans('core/acl::users.current_password'))
                             ->required()
                             ->maxLength(60)
                             ->colspan(2)
-                            ->toArray()
                     );
                 }
             )
             ->add(
                 'password',
-                'password',
+                PasswordField::class,
                 TextFieldOption::make()
                     ->label(trans('core/acl::users.new_password'))
                     ->required()
                     ->maxLength(60)
-                    ->toArray()
             )
             ->add(
                 'password_confirmation',
-                'password',
+                PasswordField::class,
                 TextFieldOption::make()
                     ->label(trans('core/acl::users.confirm_new_password'))
                     ->required()
                     ->maxLength(60)
-                    ->toArray()
             )
             ->setActionButtons(view('core/acl::users.profile.actions')->render());
     }

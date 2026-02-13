@@ -7,13 +7,12 @@ use Illuminate\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        Schema::create('newsletters', function (Blueprint $table) {
+        Schema::create('newsletters', function (Blueprint $table): void {
             $table->id();
             $table->string('email', 120);
             $table->string('name', 120)->nullable();
-            $table->string('whatsapp', 20)->nullable();
             $table->string('status', 60)->default('subscribed');
-            $table->timestampss();
+            $table->timestamps();
         });
     }
 

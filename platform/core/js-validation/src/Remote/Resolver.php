@@ -79,6 +79,10 @@ class Resolver
     public function validatorClosure()
     {
         return function ($attribute, $value, $parameters, BaseValidator $validator) {
+            if (! is_string($value)) {
+                return $attribute;
+            }
+
             $remoteValidator = new Validator($validator, $this->escape);
             $remoteValidator->validate($value, $parameters);
 

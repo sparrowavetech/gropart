@@ -54,7 +54,7 @@ class HeaderAction implements Arrayable
     {
         return sprintf(
             '%s %s %s',
-            $this->getAttribute('data-default-action', true) ? 'action-item' : '',
+            $this->getAttribute('data-default-action', 'true') ? 'action-item' : '',
             $this->getColor(),
             $this->getAttribute('class')
         );

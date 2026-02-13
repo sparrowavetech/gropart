@@ -14,7 +14,6 @@ class Newsletter extends BaseModel
         'email',
         'name',
         'status',
-        'whatsapp',
     ];
 
     protected $casts = [

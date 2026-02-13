@@ -5,6 +5,7 @@ namespace Botble\Faq\Providers;
 use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Facades\PanelSectionManager;
 use Botble\Base\PanelSections\PanelSectionItem;
+use Botble\Base\Supports\DashboardMenuItem;
 use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Faq\Contracts\Faq as FaqContract;
@@ -17,8 +18,9 @@ use Botble\Faq\Repositories\Interfaces\FaqCategoryInterface;
 use Botble\Faq\Repositories\Interfaces\FaqInterface;
 use Botble\LanguageAdvanced\Supports\LanguageAdvancedManager;
 use Botble\Setting\PanelSections\SettingOthersPanelSection;
+use Illuminate\Contracts\Support\DeferrableProvider;
 
-class FaqServiceProvider extends ServiceProvider
+class FaqServiceProvider extends ServiceProvider implements DeferrableProvider
 {
     use LoadAndPublishDataTrait;
 
@@ -40,7 +42,8 @@ class FaqServiceProvider extends ServiceProvider
         $this
             ->setNamespace('plugins/faq')
             ->loadHelpers()
-            ->loadAndPublishConfigurations(['permissions', 'general'])
+            ->loadAndPublishConfigurations(['general'])
+            ->loadAndPublishConfigurations(['permissions'])
             ->loadMigrations()
             ->loadAndPublishTranslations()
             ->loadRoutes()
@@ -66,32 +69,36 @@ class FaqServiceProvider extends ServiceProvider
             }
         }
 
-        DashboardMenu::default()->beforeRetrieving(function () {
+        DashboardMenu::default()->beforeRetrieving(function (): void {
             DashboardMenu::make()
-                ->registerItem([
-                    'id' => 'cms-plugins-faq',
-                    'priority' => 420,
-                    'name' => 'plugins/faq::faq.name',
-                    'icon' => 'ti ti-help-octagon',
-                ])
-                ->registerItem([
-                    'id' => 'cms-plugins-faq-list',
-                    'priority' => 0,
-                    'parent_id' => 'cms-plugins-faq',
-                    'name' => 'plugins/faq::faq.name',
-                    'route' => 'faq.index',
-                ])
-                ->registerItem([
-                    'id' => 'cms-packages-faq-category',
-                    'priority' => 1,
-                    'parent_id' => 'cms-plugins-faq',
-                    'name' => 'plugins/faq::faq-category.name',
-                    'icon' => null,
-                    'route' => 'faq_category.index',
-                ]);
+                ->registerItem(
+                    DashboardMenuItem::make()
+                        ->id('cms-plugins-faq')
+                        ->priority(420)
+                        ->name('plugins/faq::faq.name')
+                        ->icon('ti ti-help-octagon')
+                )
+                ->registerItem(
+                    DashboardMenuItem::make()
+                        ->id('cms-plugins-faq-list')
+                        ->priority(0)
+                        ->parentId('cms-plugins-faq')
+                        ->name('plugins/faq::faq.name')
+                        ->icon('ti ti-list-check')
+                        ->route('faq.index')
+                )
+                ->registerItem(
+                    DashboardMenuItem::make()
+                        ->id('cms-plugins-faq-category')
+                        ->priority(10)
+                        ->parentId('cms-plugins-faq')
+                        ->name('plugins/faq::faq-category.name')
+                        ->icon('ti ti-folder')
+                        ->route('faq_category.index')
+                );
         });
 
-        PanelSectionManager::default()->beforeRendering(function () {
+        PanelSectionManager::default()->beforeRendering(function (): void {
             PanelSectionManager::registerItem(
                 SettingOthersPanelSection::class,
                 fn () => PanelSectionItem::make('faqs')
@@ -105,5 +112,14 @@ class FaqServiceProvider extends ServiceProvider
 
         $this->app->register(HookServiceProvider::class);
         $this->app->register(EventServiceProvider::class);
+    }
+
+    public function provides(): array
+    {
+        return [
+            FaqCategoryInterface::class,
+            FaqInterface::class,
+            FaqContract::class,
+        ];
     }
 }

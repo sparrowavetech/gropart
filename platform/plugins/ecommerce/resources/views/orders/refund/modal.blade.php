@@ -66,10 +66,10 @@
             <x-core::form.checkbox :checked="true">
                 <x-slot:label>
                     <span>
-                        {!! trans(
+                        {!! BaseHelper::clean(trans(
                             'plugins/ecommerce::order.restock_products',
                             ['count' => '<span class="total-restock-items"">' . $order->products->sum('qty') - $order->products->sum('restock_quantity') . '</span>']
-                        )!!}
+                        )) !!}
                     </span>
                 </x-slot:label>
             </x-core::form.checkbox>
@@ -121,11 +121,11 @@
             <div class="d-flex align-items-center gap-2">
                 <x-core::icon name="ti ti-credit-card" size="md" />
                 <div>
-                    {{ $order->payment->payment_channel->label() }}
+                    {{ $order->payment->payment_channel->displayName() }}
                     @if (get_payment_is_support_refund_online($order->payment))
                         <p class="text-muted small mb-0">
                             {{ trans('plugins/ecommerce::order.payment_method_refund_automatic', [
-                                'method' => $order->payment->payment_channel->label(),
+                                'method' => $order->payment->payment_channel->displayName(),
                             ]) }}
                         </p>
                     @endif

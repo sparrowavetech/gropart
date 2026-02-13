@@ -12,13 +12,17 @@ class WidgetFactory extends AbstractWidgetFactory
 
     public function registerWidget(string $widget): WidgetFactory
     {
-        $this->widgets[] = new $widget();
+        $this->widgets[] = $widget;
 
         return $this;
     }
 
     public function getWidgets(): array
     {
+        foreach ($this->widgets as $key => $widget) {
+            $this->widgets[$key] = new $widget();
+        }
+
         return $this->widgets;
     }
 
@@ -29,7 +33,7 @@ class WidgetFactory extends AbstractWidgetFactory
         try {
             $this->instantiateWidget($args);
         } catch (InvalidWidgetClassException | Exception $exception) {
-            return app()->hasDebugModeEnabled() ? $exception->getMessage() : null;
+            return (app()->hasDebugModeEnabled() && ! app()->isProduction()) ? $exception->getMessage() : null;
         }
 
         return $this->convertToViewExpression($this->getContent());

@@ -2,7 +2,6 @@
 
 namespace Botble\AuditLog\Providers;
 
-use Botble\AuditLog\Facades\AuditLog;
 use Botble\AuditLog\Models\AuditHistory;
 use Botble\AuditLog\Repositories\Eloquent\AuditLogRepository;
 use Botble\AuditLog\Repositories\Interfaces\AuditLogInterface;
@@ -12,13 +11,10 @@ use Botble\Base\PanelSections\System\SystemPanelSection;
 use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Contracts\Support\DeferrableProvider;
 use Illuminate\Database\Console\PruneCommand;
-use Illuminate\Foundation\AliasLoader;
 
-/**
- * @since 02/07/2016 09:05 AM
- */
-class AuditLogServiceProvider extends ServiceProvider
+class AuditLogServiceProvider extends ServiceProvider implements DeferrableProvider
 {
     use LoadAndPublishDataTrait;
 
@@ -32,7 +28,10 @@ class AuditLogServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->app->register(EventServiceProvider::class);
-        $this->app->register(CommandServiceProvider::class);
+
+        if ($this->app->runningInConsole()) {
+            $this->app->register(CommandServiceProvider::class);
+        }
 
         $this
             ->setNamespace('plugins/audit-log')
@@ -44,9 +43,7 @@ class AuditLogServiceProvider extends ServiceProvider
             ->loadMigrations()
             ->publishAssets();
 
-        AliasLoader::getInstance()->alias('AuditLog', AuditLog::class);
-
-        PanelSectionManager::group('system')->beforeRendering(function () {
+        PanelSectionManager::group('system')->beforeRendering(function (): void {
             PanelSectionManager::registerItem(
                 SystemPanelSection::class,
                 fn () => PanelSectionItem::make('audit-logs')
@@ -58,16 +55,23 @@ class AuditLogServiceProvider extends ServiceProvider
             );
         });
 
-        $this->app->booted(function () {
+        $this->app->booted(function (): void {
             $this->app->register(HookServiceProvider::class);
         });
 
         if ($this->app->runningInConsole()) {
-            $this->app->afterResolving(Schedule::class, function (Schedule $schedule) {
+            $this->app->afterResolving(Schedule::class, function (Schedule $schedule): void {
                 $schedule
                     ->command(PruneCommand::class, ['--model' => AuditHistory::class])
                     ->dailyAt('00:30');
             });
         }
+    }
+
+    public function provides(): array
+    {
+        return [
+            AuditLogInterface::class,
+        ];
     }
 }

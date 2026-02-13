@@ -27,7 +27,10 @@
 
                 <x-core::card.body>
                     <x-core::tab.content>
-                        <x-core::tab.pane id="tabs-detail" :is-active="true">
+                        <x-core::tab.pane
+                            id="tabs-detail"
+                            :is-active="true"
+                        >
                             @if ($showFields)
                                 {{ $form->getOpenWrapperFormColumns() }}
 
@@ -71,7 +74,7 @@
 
             @foreach ($fields as $field)
                 @if (!in_array($field->getName(), $exclude))
-                    @if ($field->getType() === 'hidden')
+                    @if (in_array($field->getType(), ['hidden', \Botble\Base\Forms\Fields\HiddenField::class]))
                         {!! $field->render() !!}
                     @else
                         <x-core::card class="meta-boxes">

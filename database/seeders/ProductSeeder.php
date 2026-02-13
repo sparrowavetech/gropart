@@ -14,8 +14,6 @@ class ProductSeeder extends BaseSeeder
     {
         $this->uploadFiles('products');
 
-        $faker = $this->fake();
-
         $products = [
             [
                 'name' => 'Dual Camera 20MP',
@@ -35,266 +33,266 @@ class ProductSeeder extends BaseSeeder
             ],
             [
                 'name' => 'Red & Black Headphone',
-                'price' => $faker->numberBetween(500, 600),
+                'price' => rand(500, 600),
                 'is_featured' => true,
             ],
             [
                 'name' => 'Smart Watch External',
-                'price' => $faker->numberBetween(700, 900),
+                'price' => rand(700, 900),
                 'is_featured' => true,
             ],
             [
                 'name' => 'Nikon HD camera',
-                'price' => $faker->numberBetween(400, 500),
+                'price' => rand(400, 500),
                 'is_featured' => true,
             ],
             [
                 'name' => 'Audio Equipment',
-                'price' => $faker->numberBetween(500, 600),
+                'price' => rand(500, 600),
                 'is_featured' => true,
             ],
             [
                 'name' => 'Smart Televisions',
-                'price' => $faker->numberBetween(1100, 1300),
-                'sale_price' => $faker->numberBetween(800, 1000),
+                'price' => rand(1100, 1300),
+                'sale_price' => rand(800, 1000),
                 'is_featured' => true,
             ],
             [
                 'name' => 'Samsung Smart Phone',
-                'price' => $faker->numberBetween(500, 600),
+                'price' => rand(500, 600),
                 'is_featured' => true,
             ],
             [
                 'name' => 'Herschel Leather Duffle Bag In Brown Color',
-                'price' => $faker->numberBetween(1100, 1300),
-                'sale_price' => $faker->numberBetween(800, 1000),
+                'price' => rand(1100, 1300),
+                'sale_price' => rand(800, 1000),
             ],
             [
                 'name' => 'Xbox One Wireless Controller Black Color',
-                'price' => $faker->numberBetween(1100, 1300),
-                'sale_price' => $faker->numberBetween(500, 700),
+                'price' => rand(1100, 1300),
+                'sale_price' => rand(500, 700),
             ],
             [
                 'name' => 'EPSION Plaster Printer',
-                'price' => $faker->numberBetween(500, 600),
+                'price' => rand(500, 600),
             ],
             [
                 'name' => 'Sound Intone I65 Earphone White Version',
-                'price' => $faker->numberBetween(500, 600),
+                'price' => rand(500, 600),
             ],
             [
                 'name' => 'B&O Play Mini Bluetooth Speaker',
-                'price' => $faker->numberBetween(500, 600),
+                'price' => rand(500, 600),
             ],
             [
                 'name' => 'Apple MacBook Air Retina 13.3-Inch Laptop',
-                'price' => $faker->numberBetween(500, 600),
+                'price' => rand(500, 600),
             ],
             [
                 'name' => 'Apple MacBook Air Retina 12-Inch Laptop',
-                'price' => $faker->numberBetween(500, 600),
+                'price' => rand(500, 600),
             ],
             [
                 'name' => 'Samsung Gear VR Virtual Reality Headset',
-                'price' => $faker->numberBetween(500, 600),
+                'price' => rand(500, 600),
             ],
             [
                 'name' => 'Aveeno Moisturizing Body Shower 450ml',
-                'price' => $faker->numberBetween(900, 1300),
-                'sale_price' => $faker->numberBetween(200, 700),
+                'price' => rand(900, 1300),
+                'sale_price' => rand(200, 700),
             ],
             [
                 'name' => 'NYX Beauty Couton Pallete Makeup 12',
-                'price' => $faker->numberBetween(900, 1300),
-                'sale_price' => $faker->numberBetween(300, 800),
+                'price' => rand(900, 1300),
+                'sale_price' => rand(300, 800),
             ],
             [
                 'name' => 'NYX Beauty Couton Pallete Makeup 12',
-                'price' => $faker->numberBetween(700, 1000),
-                'sale_price' => $faker->numberBetween(400, 700),
+                'price' => rand(700, 1000),
+                'sale_price' => rand(400, 700),
             ],
             [
                 'name' => 'MVMTH Classical Leather Watch In Black',
-                'price' => $faker->numberBetween(600, 1000),
-                'sale_price' => $faker->numberBetween(200, 500),
+                'price' => rand(600, 1000),
+                'sale_price' => rand(200, 500),
             ],
             [
                 'name' => 'Baxter Care Hair Kit For Bearded Mens',
-                'price' => $faker->numberBetween(400, 700),
-                'sale_price' => $faker->numberBetween(100, 300),
+                'price' => rand(400, 700),
+                'sale_price' => rand(100, 300),
             ],
             [
                 'name' => 'Ciate Palemore Lipstick Bold Red Color',
-                'price' => $faker->numberBetween(500, 1300),
-                'sale_price' => $faker->numberBetween(200, 400),
+                'price' => rand(500, 1300),
+                'sale_price' => rand(200, 400),
             ],
             [
                 'name' => 'Vimto Squash Remix Apple 1.5 Litres',
-                'price' => $faker->numberBetween(500, 1300),
+                'price' => rand(500, 1300),
             ],
             [
                 'name' => 'Crock Pot Slow Cooker',
-                'price' => $faker->numberBetween(500, 1300),
+                'price' => rand(500, 1300),
             ],
             [
                 'name' => 'Taylors of Harrogate Yorkshire Coffee',
-                'price' => $faker->numberBetween(500, 1300),
+                'price' => rand(500, 1300),
             ],
             [
                 'name' => 'Soft Mochi & Galeto Ice Cream',
-                'price' => $faker->numberBetween(500, 1300),
+                'price' => rand(500, 1300),
             ],
             [
                 'name' => 'Naked Noodle Egg Noodles Singapore',
-                'price' => $faker->numberBetween(500, 1300),
+                'price' => rand(500, 1300),
             ],
             [
                 'name' => 'Saute Pan Silver',
-                'price' => $faker->numberBetween(500, 1300),
+                'price' => rand(500, 1300),
             ],
             [
                 'name' => 'Bar S – Classic Bun Length Franks',
-                'price' => $faker->numberBetween(500, 1300),
+                'price' => rand(500, 1300),
             ],
             [
                 'name' => 'Broccoli Crowns',
-                'price' => $faker->numberBetween(500, 1300),
+                'price' => rand(500, 1300),
             ],
             [
                 'name' => 'Slimming World Vegan Mac Greens',
-                'price' => $faker->numberBetween(500, 1300),
+                'price' => rand(500, 1300),
             ],
             [
                 'name' => 'Häagen-Dazs Salted Caramel',
-                'price' => $faker->numberBetween(500, 1300),
+                'price' => rand(500, 1300),
             ],
             [
                 'name' => 'Iceland 3 Solo Exotic Burst',
-                'price' => $faker->numberBetween(500, 1300),
+                'price' => rand(500, 1300),
             ],
             [
                 'name' => 'Extreme Budweiser Light Can',
-                'price' => $faker->numberBetween(500, 1300),
+                'price' => rand(500, 1300),
             ],
             [
                 'name' => 'Iceland Macaroni Cheese Traybake',
-                'price' => $faker->numberBetween(500, 1300),
+                'price' => rand(500, 1300),
             ],
             [
                 'name' => 'Dolmio Bolognese Pasta Sauce',
-                'price' => $faker->numberBetween(500, 1300),
+                'price' => rand(500, 1300),
             ],
             [
                 'name' => 'Sitema BakeIT Plastic Box',
-                'price' => $faker->numberBetween(500, 1300),
+                'price' => rand(500, 1300),
             ],
             [
                 'name' => 'Wayfair Basics Dinner Plate Storage',
-                'price' => $faker->numberBetween(500, 1300),
+                'price' => rand(500, 1300),
             ],
             [
                 'name' => 'Miko The Panda Water Bottle',
-                'price' => $faker->numberBetween(500, 1300),
+                'price' => rand(500, 1300),
             ],
             [
                 'name' => 'Sesame Seed Bread',
-                'price' => $faker->numberBetween(500, 1300),
+                'price' => rand(500, 1300),
             ],
             [
                 'name' => 'Morrisons The Best Beef',
-                'price' => $faker->numberBetween(500, 1300),
+                'price' => rand(500, 1300),
             ],
             [
                 'name' => 'Avocado, Hass Large',
-                'price' => $faker->numberBetween(500, 1300),
+                'price' => rand(500, 1300),
             ],
             [
                 'name' => 'Italia Beef Lasagne',
-                'price' => $faker->numberBetween(500, 1300),
+                'price' => rand(500, 1300),
             ],
             [
                 'name' => 'Maxwell House Classic Roast Mocha',
-                'price' => $faker->numberBetween(500, 1300),
+                'price' => rand(500, 1300),
             ],
             [
                 'name' => 'Bottled Pure Water 500ml',
-                'price' => $faker->numberBetween(500, 1300),
+                'price' => rand(500, 1300),
             ],
             [
                 'name' => 'Famart Farmhouse Soft White',
-                'price' => $faker->numberBetween(500, 1300),
+                'price' => rand(500, 1300),
             ],
             [
                 'name' => 'Coca-Cola Original Taste',
-                'price' => $faker->numberBetween(500, 1300),
+                'price' => rand(500, 1300),
             ],
             [
                 'name' => 'Casillero Diablo Cabernet Sauvignon',
-                'price' => $faker->numberBetween(500, 1300),
+                'price' => rand(500, 1300),
             ],
             [
                 'name' => 'Arla Organic Free Range Milk',
-                'price' => $faker->numberBetween(500, 1300),
+                'price' => rand(500, 1300),
             ],
             [
                 'name' => 'Aptamil Follow On Baby Milk',
-                'price' => $faker->numberBetween(500, 1300),
+                'price' => rand(500, 1300),
             ],
             [
                 'name' => 'Cuisinart Chef’S Classic Hard-Anodized',
-                'price' => $faker->numberBetween(500, 1300),
+                'price' => rand(500, 1300),
             ],
             [
                 'name' => 'Corn, Yellow Sweet',
-                'price' => $faker->numberBetween(500, 1300),
+                'price' => rand(500, 1300),
             ],
             [
                 'name' => 'Hobnobs The Nobbly Biscuit',
-                'price' => $faker->numberBetween(500, 1300),
+                'price' => rand(500, 1300),
             ],
             [
                 'name' => 'Honest Organic Still Lemonade',
-                'price' => $faker->numberBetween(500, 1300),
+                'price' => rand(500, 1300),
             ],
             [
                 'name' => 'Ice Beck’s Beer 350ml x 24 Pieces',
-                'price' => $faker->numberBetween(500, 1300),
+                'price' => rand(500, 1300),
             ],
             [
                 'name' => 'Iceland 6 Hot Cross Buns',
-                'price' => $faker->numberBetween(500, 1300),
+                'price' => rand(500, 1300),
             ],
             [
                 'name' => 'Iceland Luxury 4 Panini Rolls',
-                'price' => $faker->numberBetween(500, 1300),
+                'price' => rand(500, 1300),
             ],
             [
                 'name' => 'Iceland Soft Scoop Vanilla',
-                'price' => $faker->numberBetween(500, 1300),
+                'price' => rand(500, 1300),
             ],
             [
                 'name' => 'Iceland Spaghetti Bolognese',
-                'price' => $faker->numberBetween(500, 1300),
+                'price' => rand(500, 1300),
             ],
             [
                 'name' => 'Kellogg’s Coco Pops Cereal',
-                'price' => $faker->numberBetween(500, 1300),
+                'price' => rand(500, 1300),
             ],
             [
                 'name' => 'Kit Kat Chunky Milk Chocolate',
-                'price' => $faker->numberBetween(500, 1300),
+                'price' => rand(500, 1300),
             ],
             [
                 'name' => 'Large Green Bell Pepper',
-                'price' => $faker->numberBetween(500, 1300),
+                'price' => rand(500, 1300),
             ],
             [
                 'name' => 'Pice 94w Beasley Journal',
-                'price' => $faker->numberBetween(500, 1300),
+                'price' => rand(500, 1300),
             ],
             [
                 'name' => 'Province Piece Glass Drinking Glass',
-                'price' => $faker->numberBetween(500, 1300),
+                'price' => rand(500, 1300),
             ],
         ];
 

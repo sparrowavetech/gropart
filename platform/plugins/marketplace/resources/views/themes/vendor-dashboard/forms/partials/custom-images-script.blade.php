@@ -84,7 +84,7 @@
                 $('.dz-sortable').sortable();
             },
             removedfile: function(file) {
-                if (!confirm('{{ __('Do you want to delete this image?') }}')) {
+                if (!confirm('{{ trans('plugins/marketplace::marketplace.forms.confirm_delete_image') }}')) {
                     return false;
                 }
                 dropzone.options.maxFiles = dropzone.options.maxFiles + 1;

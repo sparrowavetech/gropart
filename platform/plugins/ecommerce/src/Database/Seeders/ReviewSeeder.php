@@ -6,6 +6,7 @@ use Botble\Base\Supports\BaseSeeder;
 use Botble\Ecommerce\Models\Customer;
 use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Models\Review;
+use Illuminate\Support\Facades\DB;
 
 class ReviewSeeder extends BaseSeeder
 {
@@ -51,18 +52,57 @@ class ReviewSeeder extends BaseSeeder
 
         $customerIds = Customer::query()->pluck('id');
 
+        if ($productIds->isEmpty() || $customerIds->isEmpty()) {
+            return;
+        }
+
         $productImages = $this->getFilesFromPath('products');
 
-        foreach (range(1, 1000) as $ignored) {
-            Review::query()->insertOrIgnore([
-                'product_id' => $productIds->random(),
-                'customer_id' => $customerIds->random(),
+        $usedCombinations = [];
+        $maxAttempts = 2000; // Allow some retries for duplicates
+        $created = 0;
+        $target = 1000;
+
+        for ($attempt = 0; $attempt < $maxAttempts && $created < $target; $attempt++) {
+            $productId = $productIds->random();
+            $customerId = $customerIds->random();
+            $combination = $productId . '-' . $customerId;
+
+            if (isset($usedCombinations[$combination])) {
+                continue;
+            }
+
+            Review::query()->create([
+                'product_id' => $productId,
+                'customer_id' => $customerId,
                 'star' => rand(1, 5),
                 'comment' => $faker->randomElement($reviews),
                 'images' => json_encode($productImages->random(rand(1, 4))->toArray()),
-                'created_at' => $now,
-                'updated_at' => $now,
             ]);
+
+            $usedCombinations[$combination] = true;
+            $created++;
         }
+
+        $this->updateProductReviewStats();
+    }
+
+    protected function updateProductReviewStats(): void
+    {
+        DB::statement('
+            UPDATE ec_products p
+            LEFT JOIN (
+                SELECT
+                    product_id,
+                    COUNT(*) as review_count,
+                    AVG(star) as review_avg
+                FROM ec_reviews
+                WHERE status = "published"
+                GROUP BY product_id
+            ) r ON p.id = r.product_id
+            SET
+                p.reviews_count = COALESCE(r.review_count, 0),
+                p.reviews_avg = COALESCE(r.review_avg, 0)
+        ');
     }
 }

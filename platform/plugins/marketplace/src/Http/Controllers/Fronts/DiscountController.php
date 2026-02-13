@@ -19,14 +19,14 @@ class DiscountController extends BaseController
 {
     public function index(DiscountTable $table)
     {
-        $this->pageTitle(__('Coupons'));
+        $this->pageTitle(trans('plugins/ecommerce::discount.name'));
 
         return $table->renderTable();
     }
 
     public function create()
     {
-        $this->pageTitle(__('Create coupon'));
+        $this->pageTitle(trans('plugins/ecommerce::discount.create'));
 
         Assets::addStylesDirectly(['vendor/core/plugins/ecommerce/css/ecommerce.css'])
             ->addScriptsDirectly([
@@ -53,6 +53,7 @@ class DiscountController extends BaseController
     {
         $request->merge([
             'can_use_with_promotion' => 0,
+            'display_at_checkout' => false,
         ]);
 
         if ($request->input('is_unlimited')) {
@@ -76,9 +77,7 @@ class DiscountController extends BaseController
 
     public function destroy(Discount $discount, Request $request)
     {
-        if ($discount->store_id !== $this->getStore()->id) {
-            abort(403);
-        }
+        abort_if($discount->store_id !== $this->getStore()->id, 403);
 
         try {
             $discount->delete();

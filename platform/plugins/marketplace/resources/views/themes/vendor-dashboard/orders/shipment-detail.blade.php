@@ -61,6 +61,15 @@
                 {{ $shipment->note }}
             </x-core::datagrid.item>
         @endif
+
+        @if ($shipment->customer_delivered_confirmed_at)
+            <x-core::datagrid.item>
+                <x-slot:title>
+                    {{ trans('plugins/ecommerce::shipping.customer_confirmed_delivery_at') }}
+                </x-slot:title>
+                {{ $shipment->customer_delivered_confirmed_at }}
+            </x-core::datagrid.item>
+        @endif
     </x-core::datagrid>
 </x-core::card.body>
 
@@ -83,9 +92,11 @@
         </x-core::button>
     @endif
 
-    <x-core::button tag="a" :href="route('marketplace.vendor.shipments.print', $shipment)" target="_blank" icon="ti ti-printer">
-        {{ trans('plugins/ecommerce::shipping.shipping_label.print_shipping_label') }}
-    </x-core::button>
+    @if ($shipment->canPrintLabel())
+        <x-core::button tag="a" :href="route('marketplace.vendor.shipments.print', $shipment)" target="_blank" icon="ti ti-printer">
+            {{ trans('plugins/ecommerce::shipping.shipping_label.print_shipping_label') }}
+        </x-core::button>
+    @endif
 
     {!! apply_filters('shipment_buttons_detail_order', null, $shipment) !!}
 </x-core::card.footer>

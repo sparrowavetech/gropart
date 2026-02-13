@@ -46,6 +46,11 @@ return [
         'parent_flag' => 'settings.common',
     ],
     [
+        'name' => 'Phone Number',
+        'flag' => 'settings.phone-number',
+        'parent_flag' => 'settings.common',
+    ],
+    [
         'name' => 'Others',
         'flag' => 'settings.others',
         'parent_flag' => 'settings.index',

@@ -2,17 +2,12 @@
 
 namespace Botble\Ecommerce\Http\Controllers;
 
-use Botble\Base\Events\BeforeEditContentEvent;
-use Botble\Base\Events\CreatedContentEvent;
-use Botble\Base\Events\DeletedContentEvent;
-use Botble\Base\Events\UpdatedContentEvent;
+use Botble\Base\Http\Actions\DeleteResourceAction;
 use Botble\Base\Supports\Breadcrumb;
 use Botble\Ecommerce\Forms\ProductTagForm;
 use Botble\Ecommerce\Http\Requests\ProductTagRequest;
 use Botble\Ecommerce\Models\ProductTag;
 use Botble\Ecommerce\Tables\ProductTagTable;
-use Exception;
-use Illuminate\Http\Request;
 
 class ProductTagController extends BaseController
 {
@@ -38,36 +33,27 @@ class ProductTagController extends BaseController
 
     public function store(ProductTagRequest $request)
     {
-        $productTag = ProductTag::query()->create($request->input());
+        $form = ProductTagForm::create();
 
-        event(new CreatedContentEvent(PRODUCT_TAG_MODULE_SCREEN_NAME, $request, $productTag));
+        $form->setRequest($request)->save();
 
         return $this
             ->httpResponse()
             ->setPreviousUrl(route('product-tag.index'))
-            ->setNextUrl(route('product-tag.edit', $productTag->id))
+            ->setNextUrl(route('product-tag.edit', $form->getModel()->id))
             ->withCreatedSuccessMessage();
     }
 
-    public function edit(int|string $id, Request $request)
+    public function edit(ProductTag $productTag)
     {
-        $productTag = ProductTag::query()->findOrFail($id);
-
-        event(new BeforeEditContentEvent($request, $productTag));
-
         $this->pageTitle(trans('core/base::forms.edit_item', ['name' => $productTag->name]));
 
         return ProductTagForm::createFromModel($productTag)->renderForm();
     }
 
-    public function update(int|string $id, ProductTagRequest $request)
+    public function update(ProductTag $productTag, ProductTagRequest $request)
     {
-        $productTag = ProductTag::query()->findOrFail($id);
-
-        $productTag->fill($request->input());
-        $productTag->save();
-
-        event(new UpdatedContentEvent(PRODUCT_TAG_MODULE_SCREEN_NAME, $request, $productTag));
+        ProductTagForm::createFromModel($productTag)->setRequest($request)->save();
 
         return $this
             ->httpResponse()
@@ -75,24 +61,9 @@ class ProductTagController extends BaseController
             ->withUpdatedSuccessMessage();
     }
 
-    public function destroy(int|string $id, Request $request)
+    public function destroy(ProductTag $productTag)
     {
-        try {
-            $productTag = ProductTag::query()->findOrFail($id);
-
-            $productTag->delete();
-
-            event(new DeletedContentEvent(PRODUCT_TAG_MODULE_SCREEN_NAME, $request, $productTag));
-
-            return $this
-                ->httpResponse()
-                ->setMessage(trans('core/base::notices.delete_success_message'));
-        } catch (Exception $exception) {
-            return $this
-                ->httpResponse()
-                ->setError()
-                ->setMessage($exception->getMessage());
-        }
+        return DeleteResourceAction::make($productTag);
     }
 
     public function getAllTags()

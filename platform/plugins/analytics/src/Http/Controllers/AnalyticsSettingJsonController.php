@@ -26,7 +26,7 @@ class AnalyticsSettingJsonController extends BaseController
         if (! Str::isJson($content)) {
             return $response
                 ->setError()
-                ->setMessage(__('This file is not a valid JSON file.'));
+                ->setMessage(trans('plugins/analytics::analytics.file_not_valid_json'));
         }
 
         $validator = Validator::make(['content' => $content], [

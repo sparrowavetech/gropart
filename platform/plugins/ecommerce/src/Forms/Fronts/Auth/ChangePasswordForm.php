@@ -14,8 +14,8 @@ class ChangePasswordForm extends FormAbstract
     public function setup(): void
     {
         $this
+            ->model(Customer::class)
             ->setUrl(route('customer.post.change-password'))
-            ->setupModel(new Customer())
             ->setValidatorClass(UpdatePasswordRequest::class)
             ->contentOnly()
             ->add(

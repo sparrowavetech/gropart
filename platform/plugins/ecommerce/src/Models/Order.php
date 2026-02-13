@@ -8,6 +8,7 @@ use Botble\Ecommerce\Enums\OrderCancellationReasonEnum;
 use Botble\Ecommerce\Enums\OrderStatusEnum;
 use Botble\Ecommerce\Enums\ShippingMethodEnum;
 use Botble\Ecommerce\Enums\ShippingStatusEnum;
+use Botble\Ecommerce\Events\ProductQuantityUpdatedEvent;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Facades\OrderHelper;
 use Botble\Payment\Enums\PaymentStatusEnum;
@@ -19,6 +20,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Support\Collection as IlluminateCollection;
 use Illuminate\Support\Facades\DB;
 
@@ -34,6 +36,7 @@ class Order extends BaseModel
         'shipping_method',
         'shipping_option',
         'shipping_amount',
+        'payment_fee',
         'description',
         'coupon_code',
         'discount_amount',
@@ -46,6 +49,7 @@ class Order extends BaseModel
         'token',
         'completed_at',
         'proof_file',
+        'private_notes',
     ];
 
     protected $casts = [
@@ -56,15 +60,50 @@ class Order extends BaseModel
 
     protected static function booted(): void
     {
-        self::deleted(function (Order $order) {
-            $order->shipment()->each(fn (Shipment $item) => $item->delete());
-            $order->histories()->delete();
-            $order->products()->delete();
-            $order->address()->delete();
-            $order->invoice()->each(fn (Invoice $item) => $item->delete());
+        self::deleted(function (Order $order): void {
+            $relations = [
+                'products',
+                'shipment',
+                'histories',
+                'address',
+                'invoice',
+                'orderMetadata',
+            ];
 
             if (is_plugin_active('payment')) {
-                $order->payment()->delete();
+                $relations[] = 'payment';
+            }
+
+            $order->loadMissing($relations);
+
+            $order->restockProductQuantities();
+
+            if ($order->relationLoaded('shipment') && $order->shipment->id) {
+                $order->shipment->delete();
+            }
+
+            if ($order->relationLoaded('histories')) {
+                $order->histories()->delete();
+            }
+
+            if ($order->relationLoaded('products')) {
+                $order->products()->delete();
+            }
+
+            if ($order->relationLoaded('address')) {
+                $order->address()->delete();
+            }
+
+            if ($order->relationLoaded('invoice') && $order->invoice->id) {
+                $order->invoice->delete();
+            }
+
+            if (is_plugin_active('payment') && $order->relationLoaded('payment') && $order->payment->id) {
+                $order->payment->delete();
+            }
+
+            if ($order->relationLoaded('orderMetadata')) {
+                $order->orderMetadata()->delete();
             }
         });
 
@@ -139,17 +178,55 @@ class Order extends BaseModel
 
     public function payment(): BelongsTo
     {
+        if (! is_plugin_active('payment')) {
+            return $this->belongsTo(self::class, 'payment_id')->whereRaw('1 = 0')->withDefault();
+        }
+
         return $this->belongsTo(Payment::class, 'payment_id')->withDefault();
     }
 
-    public function invoice(): HasOne
+    public function invoice(): MorphOne
     {
-        return $this->hasOne(Invoice::class, 'reference_id')->withDefault();
+        return $this->morphOne(Invoice::class, 'reference')->withDefault();
     }
 
     public function taxInformation(): HasOne
     {
         return $this->hasOne(OrderTaxInformation::class, 'order_id');
+    }
+
+    public function orderMetadata(): HasMany
+    {
+        return $this->hasMany(OrderMetadata::class, 'order_id');
+    }
+
+    public function scopeSearchByKeyword($query, ?string $keyword)
+    {
+        if (! $keyword) {
+            return $query;
+        }
+
+        $keyword = '%' . $keyword . '%';
+
+        return $query->where(function ($query) use ($keyword): void {
+            $query
+                ->whereHas('address', function ($subQuery) use ($keyword) {
+                    return $subQuery
+                        ->where('name', 'LIKE', $keyword)
+                        ->orWhere('email', 'LIKE', $keyword)
+                        ->orWhere('phone', 'LIKE', $keyword);
+                })
+                ->orWhereHas('user', function ($subQuery) use ($keyword) {
+                    return $subQuery
+                        ->where('name', 'LIKE', $keyword)
+                        ->orWhere('email', 'LIKE', $keyword)
+                        ->orWhere('phone', 'LIKE', $keyword);
+                })
+                ->orWhereHas('products.product', function ($subQuery) use ($keyword) {
+                    return $subQuery->where('sku', 'LIKE', $keyword);
+                })
+                ->orWhere('code', 'LIKE', $keyword);
+        });
     }
 
     public function canBeCanceled(): bool
@@ -163,6 +240,7 @@ class Order extends BaseModel
                 ShippingStatusEnum::ARRANGE_SHIPMENT,
                 ShippingStatusEnum::PENDING,
                 ShippingStatusEnum::NOT_APPROVED,
+                ShippingStatusEnum::APPROVED,
             ];
 
             return in_array($this->shipment->status, $pendingShippingStatuses);
@@ -178,6 +256,10 @@ class Order extends BaseModel
         }
 
         if ($this->shipment && $this->shipment->id) {
+            if ($this->shipment->status == ShippingStatusEnum::CANCELED) {
+                return true;
+            }
+
             $pendingShippingStatuses = [
                 ShippingStatusEnum::APPROVED,
                 ShippingStatusEnum::ARRANGE_SHIPMENT,
@@ -204,7 +286,7 @@ class Order extends BaseModel
 
     public function getDiscountAmountFormatAttribute(): string
     {
-        return format_price($this->shipping_amount);
+        return format_price($this->discount_amount);
     }
 
     public function isInvoiceAvailable(): bool
@@ -257,6 +339,31 @@ class Order extends BaseModel
         return ! $this->returnRequest()->exists();
     }
 
+    public function restockProductQuantities(bool $updateRestockQuantity = false): void
+    {
+        foreach ($this->products as $orderProduct) {
+            $product = $orderProduct->product;
+
+            if (! $product || ! $product->id) {
+                continue;
+            }
+
+            $quantityToRestore = $orderProduct->qty - ($orderProduct->restock_quantity ?? 0);
+
+            if ($product->with_storehouse_management && $quantityToRestore > 0) {
+                $product->quantity += $quantityToRestore;
+                $product->save();
+
+                if ($updateRestockQuantity) {
+                    $orderProduct->restock_quantity = $orderProduct->qty;
+                    $orderProduct->save();
+                }
+
+                event(new ProductQuantityUpdatedEvent($product));
+            }
+        }
+    }
+
     public static function generateUniqueCode(): string
     {
         $nextInsertId = BaseModel::determineIfUsingUuidsForId() ? static::query()->count() + 1 : static::query()->max(
@@ -278,11 +385,27 @@ class Order extends BaseModel
 
     public static function countRevenueByDateRange(CarbonInterface $startDate, CarbonInterface $endDate): float
     {
+        if (! is_plugin_active('payment')) {
+            return (float) self::query()
+                ->whereDate('created_at', '>=', $startDate)
+                ->whereDate('created_at', '<=', $endDate)
+                ->where('is_finished', true)
+                ->sum('amount');
+        }
+
         return self::query()
-            ->join('payments', 'payments.id', '=', 'ec_orders.payment_id')
-            ->whereDate('payments.created_at', '>=', $startDate)
-            ->whereDate('payments.created_at', '<=', $endDate)
-            ->where('payments.status', PaymentStatusEnum::COMPLETED)
+            ->leftJoin('payments', 'payments.id', '=', 'ec_orders.payment_id')
+            ->where(function ($q) use ($startDate, $endDate): void {
+                $q->where(function ($subQ) use ($startDate, $endDate): void {
+                    $subQ->whereDate('payments.created_at', '>=', $startDate)
+                        ->whereDate('payments.created_at', '<=', $endDate);
+                })->orWhereNull('ec_orders.payment_id');
+            })
+            ->where(function ($q): void {
+                $q->where('payments.status', PaymentStatusEnum::COMPLETED)
+                    ->orWhereNull('ec_orders.payment_id');
+            })
+            ->where('ec_orders.is_finished', true)
             ->sum(DB::raw('COALESCE(payments.amount, 0) - COALESCE(payments.refunded_amount, 0)'));
     }
 
@@ -291,18 +414,43 @@ class Order extends BaseModel
         CarbonInterface $endDate,
         $select = []
     ): Collection {
+        if (! is_plugin_active('payment')) {
+            return self::query()
+                ->whereDate('created_at', '>=', $startDate)
+                ->whereDate('created_at', '<=', $endDate)
+                ->where('is_finished', true)
+                ->groupBy(DB::raw('DATE(created_at)'))
+                ->select([
+                    DB::raw('DATE(created_at) AS date'),
+                    DB::raw('SUM(amount) as revenue'),
+                ])
+                ->get();
+        }
+
         if (empty($select)) {
             $select = [
-                DB::raw('DATE(payments.created_at) AS date'),
+                DB::raw('DATE(COALESCE(payments.created_at, ec_orders.created_at)) AS date'),
                 DB::raw('SUM(COALESCE(payments.amount, 0) - COALESCE(payments.refunded_amount, 0)) as revenue'),
             ];
         }
 
         return self::query()
-            ->join('payments', 'payments.id', '=', 'ec_orders.payment_id')
-            ->whereDate('payments.created_at', '>=', $startDate)
-            ->whereDate('payments.created_at', '<=', $endDate)
-            ->where('payments.status', PaymentStatusEnum::COMPLETED)
+            ->leftJoin('payments', 'payments.id', '=', 'ec_orders.payment_id')
+            ->where(function ($q) use ($startDate, $endDate): void {
+                $q->where(function ($subQ) use ($startDate, $endDate): void {
+                    $subQ->whereDate('payments.created_at', '>=', $startDate)
+                        ->whereDate('payments.created_at', '<=', $endDate);
+                })->orWhere(function ($subQ) use ($startDate, $endDate): void {
+                    $subQ->whereNull('ec_orders.payment_id')
+                        ->whereDate('ec_orders.created_at', '>=', $startDate)
+                        ->whereDate('ec_orders.created_at', '<=', $endDate);
+                });
+            })
+            ->where(function ($q): void {
+                $q->where('payments.status', PaymentStatusEnum::COMPLETED)
+                    ->orWhereNull('ec_orders.payment_id');
+            })
+            ->where('ec_orders.is_finished', true)
             ->groupBy('date')
             ->select($select)
             ->get();
@@ -346,10 +494,132 @@ class Order extends BaseModel
                 'ec_products.order',
                 'ec_products.created_at',
                 'ec_products.is_variation',
+                'ec_products.with_storehouse_management',
+                'ec_products.stock_status',
+                'ec_products.quantity',
+                'ec_products.allow_checkout_when_out_of_stock',
             ],
             'with' => [
                 'variationProductAttributes',
             ],
         ]);
+    }
+
+    public function toWebhookData(): array
+    {
+        $shippingAddress = $this->shippingAddress;
+
+        $customerData = [
+            'name' => $shippingAddress->name,
+            'email' => $shippingAddress->email,
+            'phone' => $shippingAddress->phone,
+            'address' => [
+                'address' => $shippingAddress->address,
+                'city' => $shippingAddress->city,
+                'state' => $shippingAddress->state,
+                'country' => $shippingAddress->country,
+                'zip_code' => $shippingAddress->zip_code,
+            ],
+        ];
+
+        if ($this->user_id) {
+            $customerData['id'] = $this->user_id;
+        }
+
+        $data = [
+            'id' => $this->id,
+            'status' => [
+                'value' => $this->status->getValue(),
+                'text' => $this->status->label(),
+            ],
+            'shipping_status' => $this->shipment->id ? [
+                'value' => $this->shipment->status->getValue(),
+                'text' => $this->shipment->status->label(),
+            ] : [],
+            'payment_method' => is_plugin_active('payment') && $this->payment->id ? [
+                'value' => $this->payment->payment_channel->getValue(),
+                'text' => $this->payment->payment_channel->displayName(),
+            ] : [],
+            'payment_status' => is_plugin_active('payment') && $this->payment->id ? [
+                'value' => $this->payment->status->getValue(),
+                'text' => $this->payment->status->label(),
+            ] : [],
+            'customer' => $customerData,
+            'sub_total' => $this->sub_total,
+            'tax_amount' => $this->tax_amount,
+            'shipping_method' => $this->shipping_method->getValue(),
+            'shipping_option' => $this->shipping_option,
+            'shipping_amount' => $this->shipping_amount,
+            'amount' => $this->amount,
+            'coupon_code' => $this->coupon_code,
+            'discount_amount' => $this->discount_amount,
+            'discount_description' => $this->discount_description,
+            'note' => $this->description,
+            'is_confirmed' => $this->is_confirmed,
+        ];
+
+        return apply_filters('ecommerce_order_webhook_data', $data, $this);
+    }
+
+    public function getOrderTrackingUrl(): string
+    {
+        $params = [
+            'order_id' => $this->code,
+        ];
+
+        if (EcommerceHelper::isOrderTrackingUsingPhone()) {
+            $params['phone'] = $this->user->phone ?: $this->address->phone;
+        } else {
+            $params['email'] = $this->user->email ?: $this->address->email;
+        }
+
+        return route('public.orders.tracking', $params);
+    }
+
+    public function isPaymentProofEnabled(): bool
+    {
+        if (! $this->payment || ! $this->payment->payment_channel) {
+            return false;
+        }
+
+        return EcommerceHelper::isPaymentProofEnabledForPaymentMethod($this->payment->payment_channel->getValue());
+    }
+
+    public function getOrderMetadata(string $key, $default = null)
+    {
+        $metadata = $this->orderMetadata()->where('meta_key', $key)->first();
+
+        return $metadata ? $metadata->meta_value : $default;
+    }
+
+    public function setOrderMetadata(string $key, $value): void
+    {
+        $this->orderMetadata()->updateOrCreate(
+            ['meta_key' => $key],
+            ['meta_value' => $value]
+        );
+    }
+
+    public function storeCustomerLocale(): void
+    {
+        $locale = app()->getLocale();
+
+        if ($locale) {
+            $this->setOrderMetadata('customer_locale', $locale);
+        }
+    }
+
+    public function storeCustomerCurrency(): void
+    {
+        $currency = get_application_currency();
+
+        if ($currency) {
+            $this->setOrderMetadata('customer_currency', $currency->title);
+        }
+    }
+
+    public function getCustomerCurrency(): ?string
+    {
+        return $this->getOrderMetadata('customer_currency');
     }
 }

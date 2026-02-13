@@ -31,8 +31,11 @@ return [
     ],
     'allowed_mime_types' => env(
         'RV_MEDIA_ALLOWED_MIME_TYPES',
-        'jpg,jpeg,png,gif,txt,docx,zip,mp3,bmp,csv,xls,xlsx,ppt,pptx,pdf,mp4,doc,mpga,wav,webp,webm,mov'
+        'jpg,jpeg,png,gif,txt,docx,zip,mp3,bmp,csv,xls,xlsx,ppt,pptx,pdf,mp4,m4v,doc,mpga,wav,webp,webm,mov,jfif,avif,rar,x-rar'
     ),
+    // Danger warning: When enabled, admin users can upload any file types, it leads to security issues if admin users try to hack your site.
+    // If it is disabled, admin users can only upload the file types in configure allowed types.
+    'allowed_admin_to_upload_any_file_types' => env('RV_MEDIA_ALLOWED_ADMIN_TO_UPLOAD_ANY_FILE_TYPES', false),
     'mime_types' => [
         'image' => [
             'image/png',
@@ -41,9 +44,11 @@ return [
             'image/bmp',
             'image/svg+xml',
             'image/webp',
+            'image/avif',
         ],
         'video' => [
             'video/mp4',
+            'video/m4v',
             'video/mov',
             'video/quicktime',
         ],
@@ -65,6 +70,7 @@ return [
             'application/x-zip-compressed',
             'application/x-compressed',
             'multipart/x-zip',
+            'multipart/x-rar',
         ],
         'audio' => [
             'audio/mpeg',
@@ -83,6 +89,8 @@ return [
         'x' => env('RV_MEDIA_WATERMARK_X', 10),
         'y' => env('RV_MEDIA_WATERMARK_Y', 10),
     ],
+
+    'custom_s3_path' => env('RV_MEDIA_CUSTOM_S3_PATH', ''),
 
     'chunk' => [
         'enabled' => env('RV_MEDIA_UPLOAD_CHUNK', false),
@@ -144,7 +152,7 @@ return [
         ],
     ],
     'default_upload_folder' => env('RV_MEDIA_DEFAULT_UPLOAD_FOLDER'),
-    'default_upload_url' => env('RV_MEDIA_DEFAULT_UPLOAD_URL', url('storage')),
+    'default_upload_url' => env('RV_MEDIA_DEFAULT_UPLOAD_URL'),
     'generate_thumbnails_enabled' => env('RV_MEDIA_GENERATE_THUMBNAILS_ENABLED', true),
     'generate_thumbnails_chunk_limit' => env('RV_MEDIA_GENERATE_THUMBNAILS_CHUNK_LIMIT', 50),
     'folder_colors' => [

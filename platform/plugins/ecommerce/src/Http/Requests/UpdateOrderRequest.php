@@ -10,6 +10,7 @@ class UpdateOrderRequest extends Request
     {
         return [
             'description' => ['nullable', 'string', 'max:400'],
+            'private_notes' => ['nullable', 'string', 'max:1000'],
         ];
     }
 }

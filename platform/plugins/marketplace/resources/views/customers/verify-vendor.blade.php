@@ -1,21 +1,7 @@
 @extends(BaseHelper::getAdminMasterLayoutTemplate())
 
 @section('content')
-    <x-core::alert
-        type="warning"
-    >
-        {!! BaseHelper::clean(
-            trans('plugins/marketplace::unverified-vendor.vendor_approval_notification', [
-                'approve_link' => Html::link(
-                    route('marketplace.unverified-vendors.approve-vendor', $vendor->id),
-                    trans('plugins/marketplace::store.approve_here'),
-                    ['class' => 'approve-vendor-for-selling-button'],
-                ),
-            ]),
-        ) !!}
-    </x-core::alert>
-
-    <div class="row">
+    <div class="row row-cards">
         <div class="col-md-3">
             <x-core::card>
                 <x-core::card.header>
@@ -34,8 +20,8 @@
                             />
                         </div>
 
-                        @if ($vendor->store->id)
-                            <a href="{{ route('marketplace.store.edit', $vendor->store->id) }}" target="_blank">
+                        @if ($vendor->store?->id)
+                            <a href="{{ route('marketplace.store.edit', $vendor->store?->id) }}" target="_blank">
                                 {{ $vendor->store->name }}
                                 <x-core::icon name="ti ti-external-link" />
                             </a>
@@ -94,8 +80,50 @@
                             </x-slot:title>
                             {{ BaseHelper::formatDateTime($vendor->created_at) }}
                         </x-core::datagrid.item>
+
+                        @if($vendor->store->certificate_file && Storage::disk('local')->exists($vendor->store->certificate_file))
+                            <x-core::datagrid.item>
+                                <x-slot:title>
+                                    {{ trans('plugins/marketplace::unverified-vendor.forms.certificate') }}
+                                </x-slot:title>
+                                <a href="{{ route('marketplace.unverified-vendors.download-certificate', $vendor) }}" target="_blank">
+                                    {{ trans('plugins/marketplace::unverified-vendor.view_certificate') }}
+                                </a>
+                            </x-core::datagrid.item>
+                        @endif
+
+                        @if($vendor->store->government_id_file && Storage::disk('local')->exists($vendor->store->government_id_file))
+                            <x-core::datagrid.item>
+                                <x-slot:title>
+                                    {{ trans('plugins/marketplace::unverified-vendor.forms.government_id') }}
+                                </x-slot:title>
+                                <a href="{{ route('marketplace.unverified-vendors.download-government-id', $vendor) }}" target="_blank">
+                                    {{ trans('plugins/marketplace::unverified-vendor.view_government_id') }}
+                                </a>
+                            </x-core::datagrid.item>
+                        @endif
                     </x-core::datagrid>
                 </x-core::card.body>
+
+                <x-core::card.footer class="text-end">
+                    <x-core::button
+                        type="button"
+                        data-bs-toggle="modal"
+                        data-bs-target="#reject-vendor-modal"
+                        icon="ti ti-x"
+                    >
+                        {{ trans('plugins/marketplace::unverified-vendor.reject') }}
+                    </x-core::button>
+                    <x-core::button
+                        data-bs-toggle="modal"
+                        data-bs-target="#approve-vendor-for-selling-modal"
+                        type="button"
+                        color="primary"
+                        icon="ti ti-check"
+                    >
+                        {{ trans('plugins/marketplace::unverified-vendor.approve') }}
+                    </x-core::button>
+                </x-core::card.footer>
             </x-core::card>
         </div>
     </div>
@@ -105,11 +133,24 @@
     <x-core::modal.action
         id="approve-vendor-for-selling-modal"
         type="warning"
+        :form-action="route('marketplace.unverified-vendors.approve-vendor', $vendor)"
         :title="trans('plugins/marketplace::unverified-vendor.approve_vendor_confirmation')"
         :description="trans('plugins/marketplace::unverified-vendor.approve_vendor_confirmation_description', [
             'vendor' => $vendor->name,
         ])"
-        :submit-button-attrs="['id' => 'confirm-approve-vendor-for-selling-button']"
+        :submit-button-attrs="['id' => 'confirm-vendor-button']"
         :submit-button-label="trans('plugins/marketplace::unverified-vendor.approve')"
+    />
+
+    <x-core::modal.action
+        id="reject-vendor-modal"
+        type="danger"
+        :form-action="route('marketplace.unverified-vendors.reject-vendor', $vendor)"
+        :title="trans('plugins/marketplace::unverified-vendor.reject_vendor_confirmation')"
+        :description="trans('plugins/marketplace::unverified-vendor.reject_vendor_confirmation_description', [
+            'vendor' => $vendor->name,
+        ])"
+        :submit-button-attrs="['id' => 'confirm-vendor-button']"
+        :submit-button-label="trans('plugins/marketplace::unverified-vendor.reject')"
     />
 @endpush

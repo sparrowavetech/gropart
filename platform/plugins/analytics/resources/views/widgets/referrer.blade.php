@@ -31,5 +31,5 @@
         </x-core::table>
     </div>
 @else
-    <x-core::empty-state :title="__('No results found')" />
+    <x-core::empty-state :title="trans('plugins/analytics::analytics.no_results_found')" />
 @endif

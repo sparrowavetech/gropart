@@ -4,16 +4,12 @@
     method="POST"
 >
     @csrf
-    @if (!empty($withVariations) && $product->variations()->count())
+    @if (!empty($withVariations) && $product->variations->count())
         <div class="pr_switch_wrap">
             {!! render_product_swatches($product, [
                 'selected' => $selectedAttrs,
             ]) !!}
         </div>
-        <div
-            class="number-items-available"
-            style="display: none; margin-bottom: 10px;"
-        ></div>
     @endif
 
     @if (isset($withProductOptions) && $withProductOptions)
@@ -29,28 +25,35 @@
 
     @if (EcommerceHelper::isCartEnabled() || !empty($withButtons))
         {!! apply_filters(ECOMMERCE_PRODUCT_DETAIL_EXTRA_HTML, null, $product) !!}
-
-        @if($product->minimum_order_quantity > 0 && $product->maximum_order_quantity > 0)
-            <p class="alert alert-warning pt-1 pb-1 mb-2">{{ __('Please order minimum') }} {{ $product->minimum_order_quantity }} {{ __('and maximum') }} {{ $product->maximum_order_quantity }} {{ __('qty in order to buy this product') }}</p>
-        @elseif($product->minimum_order_quantity > 0)
-            <p class="alert alert-warning pt-1 pb-1 mb-2">{{ __('Please order minimum') }} {{ $product->minimum_order_quantity }} {{ __('qty in order to buy this product') }}</p>
-        @elseif($product->maximum_order_quantity > 0)
-            <p class="alert alert-warning pt-1 pb-1 mb-2">{{ __('Please order maximum') }} {{ $product->maximum_order_quantity }} {{ __('qty in order to buy this product') }}</p>
-        @endif
-
-        <div class="product-button  @if ($product->is_enquiry == 1) is_enquiry @endif">
-        @if($product->is_enquiry == 1)
-                <a href="{{ route('public.enquiry.get',$product->id) }}" class="btn btn-primary btn-black mb-2 " title="{{ __('Enquiry Now') }}">
-                    <span class="add-to-cart-text ms-2">{{ __('Enquiry Now') }}</span>
-                </a>
-            @else
-                @if (EcommerceHelper::isCartEnabled())
-                    {!! Theme::partial('ecommerce.product-quantity', compact('product')) !!}
+        <div class="product-button">
+            @if (EcommerceHelper::isCartEnabled())
+                @if ($product->has_variation && empty($isQuickShop) && empty($withButtons))
+                    <button
+                        class="btn btn-primary mb-2 js-quick-shop-button w-100 @if ($product->isOutOfStock()) disabled @endif"
+                        type="button"
+                        data-url="{{ route('public.ajax.quick-shop', $product->slug) }}"
+                        title="{{ __('Select Options') }}"
+                        @if ($product->isOutOfStock()) disabled @endif
+                    >
+                        <span class="svg-icon">
+                            <svg>
+                                <use
+                                    href="#svg-icon-cart"
+                                    xlink:href="#svg-icon-cart"
+                                ></use>
+                            </svg>
+                        </span>
+                        <span class="add-to-cart-text ms-2">{{ __('Select Options') }}</span>
+                    </button>
+                @else
+                    @if (! empty($withButtons) || ! empty($isQuickShop))
+                        {!! Theme::partial('ecommerce.product-quantity', compact('product')) !!}
+                    @endif
                     <button
                         class="btn btn-primary mb-2 add-to-cart-button @if ($product->isOutOfStock()) disabled @endif"
                         name="add_to_cart"
                         type="submit"
-                        value="1"
+                        value="{{ $product->min_cart_quantity }}"
                         title="{{ __('Add to cart') }}"
                         @if ($product->isOutOfStock()) disabled @endif
                     >
@@ -64,27 +67,24 @@
                         </span>
                         <span class="add-to-cart-text ms-2">{{ __('Add to cart') }}</span>
                     </button>
-
-                    @if (EcommerceHelper::isQuickBuyButtonEnabled() && isset($withBuyNow) && $withBuyNow)
-                        <button
-                            class="btn btn-primary btn-black mb-2 add-to-cart-button @if ($product->isOutOfStock()) disabled @endif"
-                            name="checkout"
-                            type="submit"
-                            value="1"
-                            title="{{ __('Buy Now') }}"
-                            @if ($product->isOutOfStock()) disabled @endif
-                        >
-                            <span class="add-to-cart-text ms-2">{{ __('Buy Now') }}</span>
-                        </button>
-                    @endif
                 @endif
-                @if (!empty($withButtons))
-                    {!! Theme::partial('ecommerce.product-loop-buttons', compact('product', 'wishlistIds')) !!}
+
+                @if (EcommerceHelper::isQuickBuyButtonEnabled() && isset($withBuyNow) && $withBuyNow)
+                    <button
+                        class="btn btn-primary btn-black mb-2 add-to-cart-button @if ($product->isOutOfStock()) disabled @endif"
+                        name="checkout"
+                        type="submit"
+                        value="{{ $product->min_cart_quantity }}"
+                        title="{{ __('Buy Now') }}"
+                        @if ($product->isOutOfStock()) disabled @endif
+                    >
+                        <span class="add-to-cart-text ms-2">{{ __('Buy Now') }}</span>
+                    </button>
                 @endif
             @endif
-
-
+            @if (!empty($withButtons))
+                {!! Theme::partial('ecommerce.product-loop-buttons', compact('product', 'wishlistIds')) !!}
+            @endif
         </div>
     @endif
 </form>
-

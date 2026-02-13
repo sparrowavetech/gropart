@@ -20,7 +20,6 @@ use Botble\Table\Columns\NameColumn;
 use Botble\Table\Columns\StatusColumn;
 use Botble\Table\HeaderActions\CreateHeaderAction;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Http\JsonResponse;
 
 class StateTable extends TableAbstract
 {
@@ -62,38 +61,36 @@ class StateTable extends TableAbstract
                         'created_at',
                         'status',
                     ]);
-            });
-    }
-
-    public function ajax(): JsonResponse
-    {
-        $data = $this->table
-            ->eloquent($this->query())
-            ->editColumn('country_id', function (State $item) {
-                if (! $item->country_id && $item->country->name) {
-                    return null;
-                }
-
-                return Html::link(route('country.edit', $item->country_id), $item->country->name);
             })
-            ->filter(function (Builder $query) {
-                $keyword = $this->request->input('search.value');
+            ->onAjax(function () {
+                $data = $this->table
+                    ->eloquent($this->query())
+                    ->editColumn('country_id', function (State $item) {
+                        if (! $item->country_id && $item->country->name) {
+                            return null;
+                        }
 
-                if (! $keyword) {
-                    return $query;
-                }
+                        return Html::link(route('country.edit', $item->country_id), $item->country->name);
+                    })
+                    ->filter(function (Builder $query) {
+                        $keyword = $this->request->input('search.value');
 
-                return $query->where(function (Builder $query) use ($keyword) {
-                    $query
-                        ->where('id', $keyword)
-                        ->orWhere('name', 'LIKE', '%' . $keyword . '%')
-                        ->orWhereHas('country', function (Builder $subQuery) use ($keyword) {
-                            return $subQuery
-                                ->where('name', 'LIKE', '%' . $keyword . '%');
+                        if (! $keyword) {
+                            return $query;
+                        }
+
+                        return $query->where(function (Builder $query) use ($keyword): void {
+                            $query
+                                ->where('id', $keyword)
+                                ->orWhere('name', 'LIKE', '%' . $keyword . '%')
+                                ->orWhereHas('country', function (Builder $subQuery) use ($keyword) {
+                                    return $subQuery
+                                        ->where('name', 'LIKE', '%' . $keyword . '%');
+                                });
                         });
-                });
-            });
+                    });
 
-        return $this->toJson($data);
+                return $this->toJson($data);
+            });
     }
 }

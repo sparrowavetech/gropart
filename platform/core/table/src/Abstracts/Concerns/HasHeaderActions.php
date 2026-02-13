@@ -21,6 +21,8 @@ trait HasHeaderActions
             $this->addHeaderAction($action);
         }
 
+        $this->earlyTable = true;
+
         return $this;
     }
 
@@ -31,8 +33,12 @@ trait HasHeaderActions
         return $this;
     }
 
-    public function removeHeaderActions(array $names): static
+    public function removeHeaderActions(array $names = []): static
     {
+        if (! $names) {
+            $names = array_keys($this->headerActions);
+        }
+
         foreach ($names as $name) {
             $this->removeHeaderAction($name);
         }

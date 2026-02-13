@@ -2,9 +2,11 @@
 
 namespace Botble\Blog\Forms;
 
+use Botble\ACL\Models\User;
 use Botble\Base\Forms\FieldOptions\ContentFieldOption;
 use Botble\Base\Forms\FieldOptions\DescriptionFieldOption;
 use Botble\Base\Forms\FieldOptions\IsFeaturedFieldOption;
+use Botble\Base\Forms\FieldOptions\MediaImageFieldOption;
 use Botble\Base\Forms\FieldOptions\NameFieldOption;
 use Botble\Base\Forms\FieldOptions\RadioFieldOption;
 use Botble\Base\Forms\FieldOptions\SelectFieldOption;
@@ -32,18 +34,27 @@ class PostForm extends FormAbstract
         $this
             ->model(Post::class)
             ->setValidatorClass(PostRequest::class)
-            ->hasTabs()
-            ->add('name', TextField::class, NameFieldOption::make()->required()->toArray())
-            ->add('description', TextareaField::class, DescriptionFieldOption::make()->toArray())
+            ->add('name', TextField::class, NameFieldOption::make()->required())
+            ->add('description', TextareaField::class, DescriptionFieldOption::make())
             ->add(
                 'is_featured',
                 OnOffField::class,
                 IsFeaturedFieldOption::make()
-                    ->toArray()
             )
-            ->add('content', EditorField::class, ContentFieldOption::make()->allowedShortcodes()->toArray())
-            ->add('status', SelectField::class, StatusFieldOption::make()->toArray())
-            ->when(get_post_formats(true), function (PostForm $form, array $postFormats) {
+            ->add('content', EditorField::class, ContentFieldOption::make()->allowedShortcodes())
+            ->add('status', SelectField::class, StatusFieldOption::make())
+            ->add(
+                'author_id',
+                SelectField::class,
+                SelectFieldOption::make()
+                    ->label(trans('plugins/blog::posts.author'))
+                    ->helperText(trans('plugins/blog::posts.author_helper'))
+                    ->choices(fn () => $this->getAuthors())
+                    ->searchable()
+                    ->emptyValue(trans('plugins/blog::posts.select_author'))
+                    ->allowClear()
+            )
+            ->when(get_post_formats(true), function (PostForm $form, array $postFormats): void {
                 if (count($postFormats) > 1) {
                     $choices = [];
 
@@ -58,7 +69,6 @@ class PostForm extends FormAbstract
                             RadioFieldOption::make()
                                 ->label(trans('plugins/blog::posts.form.format_type'))
                                 ->choices($choices)
-                                ->toArray()
                         );
                 }
             })
@@ -67,40 +77,66 @@ class PostForm extends FormAbstract
                 TreeCategoryField::class,
                 SelectFieldOption::make()
                     ->label(trans('plugins/blog::posts.form.categories'))
-                    ->choices(get_categories_with_children())
+                    ->choices(function () {
+                        return Category::query()
+                            ->wherePublished()
+                            ->select(['id', 'name', 'parent_id'])
+                            ->with('activeChildren')
+                            ->where('parent_id', 0)
+                            ->get();
+                    })
                     ->when($this->getModel()->getKey(), function (SelectFieldOption $fieldOption) {
-                        return $fieldOption->selected($this->getModel()->categories()->pluck('category_id')->all());
+                        /**
+                         * @var Post $post
+                         */
+                        $post = $this->getModel();
+
+                        return $fieldOption->selected($post->categories()->pluck('category_id')->all());
                     }, function (SelectFieldOption $fieldOption) {
                         return $fieldOption
-                            ->selected(Category::query()
-                            ->where('is_default', 1)
-                            ->pluck('id')
-                            ->all());
+                            ->selected(
+                                Category::query()
+                                    ->wherePublished()
+                                    ->where('is_default', 1)
+                                    ->pluck('id')
+                                    ->all()
+                            );
                     })
-                    ->toArray()
             )
-            ->add('image', MediaImageField::class)
+            ->add('image', MediaImageField::class, MediaImageFieldOption::make())
             ->add(
                 'tag',
                 TagField::class,
                 TagFieldOption::make()
                     ->label(trans('plugins/blog::posts.form.tags'))
                     ->when($this->getModel()->getKey(), function (TagFieldOption $fieldOption) {
+                        /**
+                         * @var Post $post
+                         */
+                        $post = $this->getModel();
+
                         return $fieldOption
                             ->selected(
-                                $this
-                                ->getModel()
-                                ->tags()
-                                ->select('name')
-                                ->get()
-                                ->map(fn (Tag $item) => $item->name)
-                                ->implode(',')
+                                $post
+                                    ->tags()
+                                    ->select('name')
+                                    ->get()
+                                    ->map(fn (Tag $item) => $item->name)
+                                    ->implode(',')
                             );
                     })
                     ->placeholder(trans('plugins/blog::base.write_some_tags'))
                     ->ajaxUrl(route('tags.all'))
-                    ->toArray()
             )
             ->setBreakFieldPoint('status');
+    }
+
+    public function getAuthors(): array
+    {
+        return User::query()
+            ->select(['id', 'first_name', 'last_name'])
+            ->get()
+            ->mapWithKeys(fn ($user) => [$user->id => $user->name])
+            ->all();
     }
 }

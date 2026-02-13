@@ -7,6 +7,7 @@ use Brick\Math\BigNumber;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\File\Exception\FileNotFoundException;
 
 class MediaImageRule implements ValidationRule
@@ -21,7 +22,11 @@ class MediaImageRule implements ValidationRule
 
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        if (RvMedia::isUsingCloud()) {
+        if (RvMedia::isUsingCloud() || (is_string($value) && Str::startsWith($value, ['http', 'https']))) {
+            if (strlen($value) > 190) {
+                $fail(trans('validation.max.string', ['max' => 255]));
+            }
+
             return;
         }
 

@@ -13,7 +13,9 @@ use Botble\Ecommerce\Enums\ShippingMethodEnum;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Facades\InvoiceHelper;
 use Botble\Ecommerce\Http\Requests\Settings\ShippingLabelTemplateSettingRequest;
+use Botble\Ecommerce\Supports\TwigExtension;
 use Botble\Media\Facades\RvMedia;
+use Botble\Theme\Facades\Theme;
 use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Arr;
@@ -27,14 +29,17 @@ class ShippingLabelTemplateSettingController extends SettingController
 
         Assets::addScriptsDirectly('vendor/core/core/setting/js/email-template.js');
 
-        $content = (new Pdf())->getContent(
-            plugin_path('ecommerce/resources/templates/shipping-label.tpl'),
-            storage_path('app/templates/ecommerce/shipping-label.tpl')
-        );
+        $content = (new Pdf())
+            ->twigExtensions([
+                new TwigExtension(),
+            ])
+            ->supportLanguage(InvoiceHelper::getLanguageSupport())
+            ->getContent(
+                plugin_path('ecommerce/resources/templates/shipping-label.tpl'),
+                storage_path('app/templates/ecommerce/shipping-label.tpl')
+            );
 
-        $variables = [
-
-        ];
+        $variables = [];
 
         return view('plugins/ecommerce::shipping-label-template.settings', compact('content', 'variables'));
     }
@@ -46,6 +51,8 @@ class ShippingLabelTemplateSettingController extends SettingController
         File::ensureDirectoryExists(File::dirname($filePath));
 
         BaseHelper::saveFileData($filePath, $request->input('content'), false);
+
+        setting()->set('shipping_label_template_custom_css', $request->input('shipping_label_template_custom_css'))->save();
 
         return $this
             ->httpResponse()
@@ -74,13 +81,25 @@ class ShippingLabelTemplateSettingController extends SettingController
 
         $qrCode = $writer->writeString($url);
 
+        $extraCss = apply_filters('ecommerce_shipping_label_extra_css', null, null);
+
+        if ($customCss = setting('shipping_label_template_custom_css')) {
+            $extraCss = $extraCss ? $extraCss . "\n" . $customCss : $customCss;
+        }
+
         return (new Pdf())
             ->templatePath(plugin_path('ecommerce/resources/templates/shipping-label.tpl'))
             ->destinationPath(storage_path('app/templates/ecommerce/shipping-label.tpl'))
             ->paperSizeHalfLetter()
             ->supportLanguage(InvoiceHelper::getLanguageSupport())
+            ->twigExtensions([
+                new TwigExtension(),
+            ])
             ->data(
                 [
+                    'settings' => [
+                        'extra_css' => $extraCss,
+                    ],
                     'shipment' => [
                         'order_number' => get_order_code(123),
                         'code' => get_shipment_code(345),
@@ -94,9 +113,16 @@ class ShippingLabelTemplateSettingController extends SettingController
                         'tracking_link' => $url,
                         'note' => 'Note here',
                         'qr_code' => base64_encode($qrCode),
+                        'order' => [
+                            'amount' => format_price(1100),
+                            'tax_amount' => format_price(100),
+                            'shipping_amount' => format_price(0),
+                            'discount_amount' => format_price(0),
+                            'sub_total' => format_price(1000),
+                        ],
                     ],
                     'sender' => [
-                        'logo' => RvMedia::getRealPath(theme_option('logo')),
+                        'logo' => Theme::getLogo() ? RvMedia::getRealPath(Theme::getLogo()) : null,
                         'name' => get_ecommerce_setting('store_name'),
                         'phone' => get_ecommerce_setting('store_phone'),
                         'email' => get_ecommerce_setting('store_email'),
@@ -105,7 +131,7 @@ class ShippingLabelTemplateSettingController extends SettingController
                         'city' => $city = get_ecommerce_setting('store_city'),
                         'zip_code' => $zipCode = get_ecommerce_setting('store_zip_code'),
                         'address' => $address = get_ecommerce_setting('store_address'),
-                        'full_address' => implode(', ', array_filter([
+                        'full_address' => implode(', ', array_filter([ // @phpstan-ignore-line
                             $address,
                             $city,
                             $state,
@@ -121,7 +147,7 @@ class ShippingLabelTemplateSettingController extends SettingController
                     ],
                 ]
             )
-            ->compile()
+            ->setProcessingLibrary(get_ecommerce_setting('invoice_processing_library', 'dompdf'))
             ->stream();
     }
 }

@@ -9,12 +9,13 @@ use Exception;
 use GuzzleHttp\Psr7\Utils;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
+use Throwable;
 
 class DownloadLocaleService
 {
     public const REPOSITORY = 'botble/translations';
 
-    public function handle(string $locale): void
+    public function handle(string $locale, bool $includeVendor = true): void
     {
         if (! File::isWritable(lang_path())) {
             throw new Exception('The "language" directory is not writable.');
@@ -33,13 +34,14 @@ class DownloadLocaleService
         }
 
         $destination = storage_path('app/translations.zip');
-        $path = storage_path("app/translations-master/{$locale}");
+        $path = storage_path("app/translations-develop/{$locale}");
 
         BaseHelper::maximumExecutionTimeAndMemoryLimit();
 
         Http::withoutVerifying()
+            ->timeout(300)
             ->sink(Utils::tryFopen($destination, 'w'))
-            ->get(sprintf('https://github.com/%s/archive/refs/heads/master.zip', self::REPOSITORY))
+            ->get(sprintf('https://github.com/%s/archive/refs/heads/develop.zip', self::REPOSITORY))
             ->throw();
 
         $zip = new Zipper();
@@ -48,22 +50,26 @@ class DownloadLocaleService
 
         File::copyDirectory("{$path}/{$locale}", lang_path($locale));
 
-        if (File::isDirectory("{$path}/vendor")) {
+        if ($includeVendor && File::isDirectory("{$path}/vendor")) {
             File::copyDirectory("{$path}/vendor", lang_path('vendor'));
         }
 
-        $parentTheme = Theme::getThemeName();
+        if (class_exists('Theme')) {
+            $parentTheme = Theme::getThemeName();
 
-        if (Theme::hasInheritTheme()) {
-            $parentTheme = Theme::getInheritTheme();
-        }
+            if (Theme::hasInheritTheme()) {
+                $parentTheme = Theme::getInheritTheme();
+            }
 
-        if (File::exists("{$path}/{$locale}.json") && ! File::exists(lang_path("vendor/themes/{$parentTheme}/{$locale}.json"))) {
-            File::copy("{$path}/{$locale}.json", lang_path("vendor/themes/{$parentTheme}/{$locale}.json"));
+            File::ensureDirectoryExists(lang_path("vendor/themes/{$parentTheme}"));
+
+            if (File::exists("{$path}/{$locale}.json") && ! File::exists(lang_path("vendor/themes/{$parentTheme}/{$locale}.json"))) {
+                File::copy("{$path}/{$locale}.json", lang_path("vendor/themes/{$parentTheme}/{$locale}.json"));
+            }
         }
 
         File::delete($destination);
-        File::deleteDirectory(storage_path('app/translations-master'));
+        File::deleteDirectory(storage_path('app/translations-develop'));
     }
 
     public function getAvailableLocales(): array
@@ -74,7 +80,7 @@ class DownloadLocaleService
             $data = Http::withoutVerifying()
                 ->asJson()
                 ->acceptJson()
-                ->get(sprintf('https://api.github.com/repos/%s/git/trees/master', self::REPOSITORY))
+                ->get(sprintf('https://api.github.com/repos/%s/git/trees/develop', self::REPOSITORY))
                 ->json('tree');
 
             foreach ($data as $item) {
@@ -82,7 +88,9 @@ class DownloadLocaleService
                     $locales[] = $item['path'];
                 }
             }
-        } catch (Exception) {
+        } catch (Throwable $e) {
+            BaseHelper::logError($e);
+
             return [];
         }
 

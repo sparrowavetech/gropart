@@ -39,7 +39,12 @@ class CustomFieldController extends BaseController
         $form->setRequest($request)->saveOnlyValidatedData();
 
         if (! empty($options = $request->input('options', []))) {
-            $form->getModel()->saveOptions($options);
+            /**
+             * @var CustomField $model
+             */
+            $model = $form->getModel();
+
+            $model->saveOptions($options);
         }
 
         return $this

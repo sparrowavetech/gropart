@@ -38,7 +38,6 @@ class AnalyticsSettingForm extends SettingForm
                 OnOffFieldOption::make()
                     ->label(trans('plugins/analytics::analytics.settings.enable_dashboard_widgets'))
                     ->value($targetValue = old('analytics_dashboard_widgets', setting('analytics_dashboard_widgets', 0)))
-                    ->toArray()
             )
             ->addOpenCollapsible('analytics_dashboard_widgets', '1', $targetValue)
             ->add(
@@ -54,9 +53,8 @@ class AnalyticsSettingForm extends SettingForm
                             attributes: ['target' => '_blank']
                         )
                     )
-                    ->toArray()
             )
-            ->when(! BaseHelper::hasDemoModeEnabled(), function (AnalyticsSettingForm $form) {
+            ->when(! BaseHelper::hasDemoModeEnabled(), function (AnalyticsSettingForm $form): void {
                 $form
                     ->add(
                         'analytics_service_account_credentials',
@@ -72,11 +70,20 @@ class AnalyticsSettingForm extends SettingForm
                                     attributes: ['target' => '_blank']
                                 )
                             )
-                            ->toArray()
                     )
-                    ->add('upload_account_json_file', HtmlField::class, HtmlFieldOption::make()->view('plugins/analytics::upload-button')->toArray());
+                    ->add(
+                        'upload_account_json_file',
+                        HtmlField::class,
+                        HtmlFieldOption::make()->view('plugins/analytics::upload-button')
+                    );
             })
-            ->addCloseCollapsible('analytics_dashboard_widgets', '1');
+            ->addCloseCollapsible('analytics_dashboard_widgets', '1')
+            ->add(
+                'settings_info',
+                HtmlField::class,
+                HtmlFieldOption::make()
+                    ->content(view('plugins/analytics::partials.settings-info')->render())
+            );
 
         $this->add(
             'google_analytics_info',
@@ -84,8 +91,6 @@ class AnalyticsSettingForm extends SettingForm
             AlertFieldOption::make()
                 ->type('info')
                 ->content(trans('plugins/analytics::analytics.settings.google_analytics_information'))
-                ->toArray()
         );
-
     }
 }

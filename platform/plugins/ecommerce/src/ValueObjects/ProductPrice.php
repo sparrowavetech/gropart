@@ -7,6 +7,9 @@ use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Models\ProductVariation;
 use Illuminate\Database\Eloquent\Collection;
 
+/**
+ * @phpstan-consistent-constructor
+ */
 class ProductPrice
 {
     protected mixed $state;
@@ -33,7 +36,7 @@ class ProductPrice
                 ? $this->product->front_sale_price_with_taxes
                 : $this->product->price_with_taxes;
         } else {
-            $price = $this->product->isOnSale() ? $this->product->front_sale_price : $this->product->price;
+            $price = $this->product->isOnSale() ? $this->product->front_sale_price : $this->product->getConvertedPrice();
         }
 
         return $this->applyFilters('price', 'value', (float) $price);
@@ -48,7 +51,7 @@ class ProductPrice
 
     public function displayAsHtml(...$args): string
     {
-        return view(EcommerceHelper::viewPath('products.partials.price'), [
+        return view(EcommerceHelper::viewPath('includes.product-price'), [
             'product' => $this->product,
             ...$args,
         ])->render();
@@ -109,7 +112,7 @@ class ProductPrice
     {
         return $this->minimumVariation ??= $this
             ->getVariations()
-            ->sortBy(function (ProductVariation $productVariation) {
+            ->sortBy(function (ProductVariation $productVariation) { // @phpstan-ignore-line
                 return $productVariation->product->price()->getPrice();
             })
         ->first()
@@ -120,7 +123,7 @@ class ProductPrice
     {
         return $this->maximumVariation ??= $this
             ->getVariations()
-            ->sortByDesc(function (ProductVariation $productVariation) {
+            ->sortByDesc(function (ProductVariation $productVariation) { // @phpstan-ignore-line
                 return $productVariation->product->price()->getPrice();
             })
             ->first()

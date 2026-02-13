@@ -106,7 +106,7 @@ class CropImageCommand extends Command
     {
         $this->components->task(
             sprintf('Cropping %s', $path),
-            function () use ($newName, $saveTo, $height, $width, $path) {
+            function () use ($newName, $saveTo, $height, $width, $path): void {
                 $thumbImage = RvMedia::imageManager()->read($path);
                 $thumbImage->cover($width, $height);
                 $extension = File::extension($path);
@@ -135,8 +135,8 @@ class CropImageCommand extends Command
 
     public function renderMessage(int $numberOfFiles, string $saveTo): void
     {
-        $this->components->info('Cropped successfully. ' . $numberOfFiles . ' image(s) cropped.');
+        $this->components->info(sprintf('Cropped %d %s successfully!', $numberOfFiles, Str::plural('file', $numberOfFiles)));
 
-        $this->line('Saved to: ' . $saveTo);
+        $this->components->info('Saved to: ' . $saveTo);
     }
 }

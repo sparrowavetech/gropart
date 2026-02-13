@@ -14,9 +14,6 @@ class Rectangle extends Polygon implements SizeInterface
     /**
      * Create new rectangle instance
      *
-     * @param int $width
-     * @param int $height
-     * @param PointInterface $pivot
      * @return void
      */
     public function __construct(
@@ -32,10 +29,6 @@ class Rectangle extends Polygon implements SizeInterface
 
     /**
      * Set size of rectangle
-     *
-     * @param int $width
-     * @param int $height
-     * @return Rectangle
      */
     public function setSize(int $width, int $height): self
     {
@@ -44,9 +37,6 @@ class Rectangle extends Polygon implements SizeInterface
 
     /**
      * Set width of rectangle
-     *
-     * @param int $width
-     * @return Rectangle
      */
     public function setWidth(int $width): self
     {
@@ -58,9 +48,6 @@ class Rectangle extends Polygon implements SizeInterface
 
     /**
      * Set height of rectangle
-     *
-     * @param int $height
-     * @return Rectangle
      */
     public function setHeight(int $height): self
     {
@@ -72,8 +59,6 @@ class Rectangle extends Polygon implements SizeInterface
 
     /**
      * Return pivot point of rectangle
-     *
-     * @return PointInterface
      */
     public function pivot(): PointInterface
     {
@@ -82,9 +67,6 @@ class Rectangle extends Polygon implements SizeInterface
 
     /**
      * Set pivot point of rectangle
-     *
-     * @param PointInterface $pivot
-     * @return Rectangle
      */
     public function setPivot(PointInterface $pivot): self
     {
@@ -96,11 +78,6 @@ class Rectangle extends Polygon implements SizeInterface
     /**
      * Move pivot to the given position in the rectangle and adjust the new
      * position by given offset values.
-     *
-     * @param string $position
-     * @param int $offset_x
-     * @param int $offset_y
-     * @return Rectangle
      */
     public function movePivot(string $position, int $offset_x = 0, int $offset_y = 0): self
     {
@@ -111,13 +88,13 @@ class Rectangle extends Polygon implements SizeInterface
             case 'center-top':
             case 'middle-top':
                 $x = intval(round($this->width() / 2)) + $offset_x;
-                $y = 0 + $offset_y;
+                $y = $offset_y;
                 break;
 
             case 'top-right':
             case 'right-top':
                 $x = $this->width() - $offset_x;
-                $y = 0 + $offset_y;
+                $y = $offset_y;
                 break;
 
             case 'left':
@@ -125,7 +102,7 @@ class Rectangle extends Polygon implements SizeInterface
             case 'left-middle':
             case 'center-left':
             case 'middle-left':
-                $x = 0 + $offset_x;
+                $x = $offset_x;
                 $y = intval(round($this->height() / 2)) + $offset_y;
                 break;
 
@@ -140,7 +117,7 @@ class Rectangle extends Polygon implements SizeInterface
 
             case 'bottom-left':
             case 'left-bottom':
-                $x = 0 + $offset_x;
+                $x = $offset_x;
                 $y = $this->height() - $offset_y;
                 break;
 
@@ -170,8 +147,8 @@ class Rectangle extends Polygon implements SizeInterface
             default:
             case 'top-left':
             case 'left-top':
-                $x = 0 + $offset_x;
-                $y = 0 + $offset_y;
+                $x = $offset_x;
+                $y = $offset_y;
                 break;
         }
 
@@ -182,10 +159,6 @@ class Rectangle extends Polygon implements SizeInterface
 
     /**
      * Align pivot relative to given size at given position
-     *
-     * @param SizeInterface $size
-     * @param string $position
-     * @return Rectangle
      */
     public function alignPivotTo(SizeInterface $size, string $position): self
     {
@@ -201,9 +174,6 @@ class Rectangle extends Polygon implements SizeInterface
 
     /**
      * Return relative position to given rectangle
-     *
-     * @param SizeInterface $rectangle
-     * @return PointInterface
      */
     public function relativePositionTo(SizeInterface $rectangle): PointInterface
     {
@@ -215,8 +185,6 @@ class Rectangle extends Polygon implements SizeInterface
 
     /**
      * Return aspect ration of rectangle
-     *
-     * @return float
      */
     public function aspectRatio(): float
     {
@@ -225,9 +193,6 @@ class Rectangle extends Polygon implements SizeInterface
 
     /**
      * Determine if rectangle fits into given rectangle
-     *
-     * @param SizeInterface $size
-     * @return bool
      */
     public function fitsInto(SizeInterface $size): bool
     {
@@ -244,8 +209,6 @@ class Rectangle extends Polygon implements SizeInterface
 
     /**
      * Determine if rectangle has landscape format
-     *
-     * @return bool
      */
     public function isLandscape(): bool
     {
@@ -254,8 +217,6 @@ class Rectangle extends Polygon implements SizeInterface
 
     /**
      * Determine if rectangle has landscape format
-     *
-     * @return bool
      */
     public function isPortrait(): bool
     {
@@ -264,8 +225,6 @@ class Rectangle extends Polygon implements SizeInterface
 
     /**
      * Return most top left point of rectangle
-     *
-     * @return PointInterface
      */
     public function topLeftPoint(): PointInterface
     {
@@ -274,8 +233,6 @@ class Rectangle extends Polygon implements SizeInterface
 
     /**
      * Return bottom right point of rectangle
-     *
-     * @return PointInterface
      */
     public function bottomRightPoint(): PointInterface
     {
@@ -283,6 +240,78 @@ class Rectangle extends Polygon implements SizeInterface
     }
 
     /**
+     * @see SizeInterface::resize()
+     *
+     * @throws GeometryException
+     */
+    public function resize(?int $width = null, ?int $height = null): SizeInterface
+    {
+        return $this->resizer($width, $height)->resize($this);
+    }
+
+    /**
+     * @see SizeInterface::resizeDown()
+     *
+     * @throws GeometryException
+     */
+    public function resizeDown(?int $width = null, ?int $height = null): SizeInterface
+    {
+        return $this->resizer($width, $height)->resizeDown($this);
+    }
+
+    /**
+     * @see SizeInterface::scale()
+     *
+     * @throws GeometryException
+     */
+    public function scale(?int $width = null, ?int $height = null): SizeInterface
+    {
+        return $this->resizer($width, $height)->scale($this);
+    }
+
+    /**
+     * @see SizeInterface::scaleDown()
+     *
+     * @throws GeometryException
+     */
+    public function scaleDown(?int $width = null, ?int $height = null): SizeInterface
+    {
+        return $this->resizer($width, $height)->scaleDown($this);
+    }
+
+    /**
+     * @see SizeInterface::cover()
+     *
+     * @throws GeometryException
+     */
+    public function cover(int $width, int $height): SizeInterface
+    {
+        return $this->resizer($width, $height)->cover($this);
+    }
+
+    /**
+     * @see SizeInterface::contain()
+     *
+     * @throws GeometryException
+     */
+    public function contain(int $width, int $height): SizeInterface
+    {
+        return $this->resizer($width, $height)->contain($this);
+    }
+
+    /**
+     * @see SizeInterface::containMax()
+     *
+     * @throws GeometryException
+     */
+    public function containMax(int $width, int $height): SizeInterface
+    {
+        return $this->resizer($width, $height)->containDown($this);
+    }
+
+    /**
+     * Create resizer instance with given target size
+     *
      * @throws GeometryException
      */
     protected function resizer(?int $width = null, ?int $height = null): RectangleResizer
@@ -290,38 +319,17 @@ class Rectangle extends Polygon implements SizeInterface
         return new RectangleResizer($width, $height);
     }
 
-    public function resize(?int $width = null, ?int $height = null): SizeInterface
+    /**
+     * Show debug info for the current rectangle
+     *
+     * @return array<string, int|object>
+     */
+    public function __debugInfo(): array
     {
-        return $this->resizer($width, $height)->resize($this);
-    }
-
-    public function resizeDown(?int $width = null, ?int $height = null): SizeInterface
-    {
-        return $this->resizer($width, $height)->resizeDown($this);
-    }
-
-    public function scale(?int $width = null, ?int $height = null): SizeInterface
-    {
-        return $this->resizer($width, $height)->scale($this);
-    }
-
-    public function scaleDown(?int $width = null, ?int $height = null): SizeInterface
-    {
-        return $this->resizer($width, $height)->scaleDown($this);
-    }
-
-    public function cover(int $width, int $height): SizeInterface
-    {
-        return $this->resizer($width, $height)->cover($this);
-    }
-
-    public function contain(int $width, int $height): SizeInterface
-    {
-        return $this->resizer($width, $height)->contain($this);
-    }
-
-    public function containMax(int $width, int $height): SizeInterface
-    {
-        return $this->resizer($width, $height)->containDown($this);
+        return [
+            'width' => $this->width(),
+            'height' => $this->height(),
+            'pivot' => $this->pivot,
+        ];
     }
 }

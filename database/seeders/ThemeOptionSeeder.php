@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use Botble\Base\Supports\BaseSeeder;
 use Botble\Page\Models\Page;
 use Botble\Theme\Database\Traits\HasThemeOptionSeeder;
-use Carbon\Carbon;
 
 class ThemeOptionSeeder extends BaseSeeder
 {
@@ -18,7 +17,7 @@ class ThemeOptionSeeder extends BaseSeeder
         $this->createThemeOptions([
             'site_title' => 'Farmart - Laravel Ecommerce system',
             'seo_description' => 'Farmart is a modern and flexible Multipurpose Marketplace Laravel script. This script is suited for electronic, organic and grocery store, furniture store, clothing store, hitech store and accessories store… With the theme, you can create your own marketplace and allow vendors to sell just like Amazon, Envato, eBay…',
-            'copyright' => sprintf('©%s Farmart. All Rights Reserved.', Carbon::now()->year),
+            'copyright' => '© %Y Farmart. All Rights Reserved.',
             'favicon' => 'general/favicon.png',
             'logo' => 'general/logo.png',
             'seo_og_image' => 'general/open-graph-image.png',
@@ -67,6 +66,7 @@ class ThemeOptionSeeder extends BaseSeeder
             ],
             'social_sharing' => [
                 [
+                    ['key' => 'name', 'value' => 'Facebook'],
                     ['key' => 'social', 'value' => 'facebook'],
                     ['key' => 'icon', 'value' => 'ti ti-brand-facebook'],
                     ['key' => 'icon_image', 'value' => null],
@@ -74,13 +74,15 @@ class ThemeOptionSeeder extends BaseSeeder
                     ['key' => 'background_color', 'value' => '#3b5999'],
                 ],
                 [
+                    ['key' => 'name', 'value' => 'X (Twitter)'],
                     ['key' => 'social', 'value' => 'x'],
-                    ['key' => 'icon', 'value' => 'ti ti-brand-twitter'],
+                    ['key' => 'icon', 'value' => 'ti ti-brand-x'],
                     ['key' => 'icon_image', 'value' => null],
                     ['key' => 'color', 'value' => '#fff'],
                     ['key' => 'background_color', 'value' => '#55acee'],
                 ],
                 [
+                    ['key' => 'name', 'value' => 'Pinterest'],
                     ['key' => 'social', 'value' => 'pinterest'],
                     ['key' => 'icon', 'value' => 'ti ti-brand-pinterest'],
                     ['key' => 'icon_image', 'value' => null],
@@ -88,11 +90,20 @@ class ThemeOptionSeeder extends BaseSeeder
                     ['key' => 'background_color', 'value' => '#b10c0c'],
                 ],
                 [
+                    ['key' => 'name', 'value' => 'Linkedin'],
                     ['key' => 'social', 'value' => 'linkedin'],
                     ['key' => 'icon', 'value' => 'ti ti-brand-linkedin'],
                     ['key' => 'icon_image', 'value' => null],
                     ['key' => 'color', 'value' => '#fff'],
                     ['key' => 'background_color', 'value' => '#0271ae'],
+                ],
+                [
+                    ['key' => 'name', 'value' => 'Whatsapp'],
+                    ['key' => 'social', 'value' => 'whatsapp'],
+                    ['key' => 'icon', 'value' => 'ti ti-brand-whatsapp'],
+                    ['key' => 'icon_image', 'value' => null],
+                    ['key' => 'color', 'value' => '#fff'],
+                    ['key' => 'background_color', 'value' => '#25d366'],
                 ],
             ],
             'primary_font' => 'Mulish',

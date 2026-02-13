@@ -2,7 +2,6 @@
 
 namespace Botble\Location;
 
-use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Models\BaseQueryBuilder;
 use Botble\Base\Supports\Helper;
 use Botble\Base\Supports\Zipper;
@@ -21,19 +20,30 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Str;
 use Throwable;
 
 class Location
 {
-    public function getStates(): array
+    protected const CACHE_TTL = 3600;
+
+    protected const CACHE_PREFIX = 'location_';
+
+    public function getStates(?int $countryId = null): array
     {
-        return State::query()
-            ->wherePublished()
-            ->orderBy('order')
-            ->orderBy('name')
-            ->pluck('name', 'id')
-            ->all();
+        $cacheKey = self::CACHE_PREFIX . 'states_' . ($countryId ?? 'all') . '_' . $this->getLocaleKey();
+
+        return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($countryId) {
+            $query = State::query()
+                ->wherePublished()
+                ->oldest('order')
+                ->oldest('name');
+
+            if ($countryId) {
+                $query->where('country_id', $countryId);
+            }
+
+            return $query->pluck('name', 'id')->all();
+        });
     }
 
     public function getCitiesByState(int|string|null $stateId): array
@@ -42,13 +52,36 @@ class Location
             return [];
         }
 
-        return City::query()
-            ->wherePublished()
-            ->where('state_id', $stateId)
-            ->orderBy('order')
-            ->orderBy('name')
-            ->pluck('name', 'id')
-            ->all();
+        $cacheKey = self::CACHE_PREFIX . 'cities_state_' . $stateId . '_' . $this->getLocaleKey();
+
+        return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($stateId) {
+            return City::query()
+                ->wherePublished()
+                ->where('state_id', $stateId)
+                ->oldest('order')
+                ->oldest('name')
+                ->pluck('name', 'id')
+                ->all();
+        });
+    }
+
+    public function getCitiesByCountry(int|string|null $countryId): array
+    {
+        if (! $countryId) {
+            return [];
+        }
+
+        $cacheKey = self::CACHE_PREFIX . 'cities_country_' . $countryId . '_' . $this->getLocaleKey();
+
+        return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($countryId) {
+            return City::query()
+                ->wherePublished()
+                ->where('country_id', $countryId)
+                ->oldest('order')
+                ->oldest('name')
+                ->pluck('name', 'id')
+                ->all();
+        });
     }
 
     public function getCityById(int|string|null $cityId): City|Model|null
@@ -57,10 +90,14 @@ class Location
             return null;
         }
 
-        return City::query()->where([
-            'id' => $cityId,
-            'status' => BaseStatusEnum::PUBLISHED,
-        ])->first();
+        $cacheKey = self::CACHE_PREFIX . 'city_' . $cityId . '_' . $this->getLocaleKey();
+
+        return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($cityId) {
+            return City::query()
+                ->wherePublished()
+                ->where('id', $cityId)
+                ->first();
+        });
     }
 
     public function getCityNameById(int|string|null $cityId): ?string
@@ -74,16 +111,80 @@ class Location
         return $city?->name;
     }
 
+    public function getStateById(int|string|null $stateId): State|Model|null
+    {
+        if (! $stateId) {
+            return null;
+        }
+
+        $cacheKey = self::CACHE_PREFIX . 'state_' . $stateId . '_' . $this->getLocaleKey();
+
+        return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($stateId) {
+            return State::query()
+                ->wherePublished()
+                ->where('id', $stateId)
+                ->first();
+        });
+    }
+
     public function getStateNameById(int|string|null $stateId): ?string
     {
         if (! $stateId) {
             return null;
         }
 
-        return State::query()
-            ->wherePublished()
-            ->where('id', $stateId)
-            ->value('name');
+        $state = $this->getStateById($stateId);
+
+        return $state?->name;
+    }
+
+    public function getCountries(): array
+    {
+        $cacheKey = self::CACHE_PREFIX . 'countries_' . $this->getLocaleKey();
+
+        return Cache::remember($cacheKey, self::CACHE_TTL, function () {
+            return Country::query()
+                ->wherePublished()
+                ->oldest('order')
+                ->oldest('name')
+                ->pluck('name', 'id')
+                ->all();
+        });
+    }
+
+    public function clearCache(): void
+    {
+        $keys = [
+            'states_*',
+            'cities_*',
+            'city_*',
+            'state_*',
+            'countries_*',
+        ];
+
+        foreach ($keys as $pattern) {
+            Cache::forget(self::CACHE_PREFIX . $pattern);
+        }
+    }
+
+    public function clearCityCache(int|string $cityId): void
+    {
+        Cache::forget(self::CACHE_PREFIX . 'city_' . $cityId . '_' . $this->getLocaleKey());
+    }
+
+    public function clearStateCache(int|string $stateId): void
+    {
+        Cache::forget(self::CACHE_PREFIX . 'state_' . $stateId . '_' . $this->getLocaleKey());
+        Cache::forget(self::CACHE_PREFIX . 'cities_state_' . $stateId . '_' . $this->getLocaleKey());
+    }
+
+    protected function getLocaleKey(): string
+    {
+        if (is_plugin_active('language') && class_exists(Language::class)) {
+            return Language::getCurrentLocale() ?: 'default';
+        }
+
+        return 'default';
     }
 
     public function isSupported(string|object $model): bool
@@ -93,7 +194,7 @@ class Location
         }
 
         if (is_object($model)) {
-            $model = get_class($model);
+            $model = $model::class;
         }
 
         return in_array($model, $this->supportedModels());
@@ -104,14 +205,14 @@ class Location
         return array_keys($this->getSupported());
     }
 
-    public function getSupported(string|object $model = null): array
+    public function getSupported(string|object|null $model = null): array
     {
         if (! $model) {
             return config('plugins.location.general.supported', []);
         }
 
         if (is_object($model)) {
-            $model = get_class($model);
+            $model = $model::class;
         }
 
         return Arr::get(config('plugins.location.general.supported', []), $model, []);
@@ -212,7 +313,10 @@ class Location
         $dataPath = storage_path('app/locations-master/' . $countryCode);
 
         if (! File::isDirectory($dataPath)) {
-            abort(404);
+            return [
+                'error' => true,
+                'message' => trans('plugins/location::bulk-import.cant_download_location_at_this_time'),
+            ];
         }
 
         $country = file_get_contents($dataPath . '/country.json');
@@ -235,7 +339,7 @@ class Location
             $state['country_id'] = $country->id;
 
             $statesForInserting[] = array_merge($state, [
-                'slug' => Str::slug($state['name']),
+                'slug' => City::createSlug($state['name']),
                 'country_id' => $country->id,
                 'created_at' => $now,
                 'updated_at' => $now,
@@ -265,7 +369,7 @@ class Location
             foreach ($item['cities'] as $cityName) {
                 $citiesForInserting[] = [
                     'name' => $cityName,
-                    'slug' => Str::slug($cityName),
+                    'slug' => City::createSlug($cityName),
                     'state_id' => $stateId,
                     'country_id' => $country->id,
                     'created_at' => $now,
@@ -292,12 +396,12 @@ class Location
         ];
     }
 
-    public function filter($model, int|string $cityId = null, string $location = null, int|string $stateId = null)
+    public function filter($model, int|string|null $cityId = null, ?string $location = null, int|string|null $stateId = null)
     {
         if ($model instanceof BaseQueryBuilder) {
-            $className = get_class($model->getModel());
+            $className = $model->getModel()::class;
         } else {
-            $className = get_class($model);
+            $className = $model::class;
         }
 
         if ($this->isSupported($className)) {
@@ -322,20 +426,20 @@ class Location
 
                 if (count($locationData) > 1) {
                     $model = $model
-                        ->whereHas($cityRelation, function ($query) use ($locationData) {
+                        ->whereHas($cityRelation, function ($query) use ($locationData): void {
                             $query->where('name', 'LIKE', '%' . trim($locationData[0]) . '%');
                         })
-                        ->whereHas($stateRelation, function ($query) use ($locationData) {
+                        ->whereHas($stateRelation, function ($query) use ($locationData): void {
                             $query->where('name', 'LIKE', '%' . trim($locationData[1]) . '%');
                         });
                 } else {
                     $model = $model
-                        ->where(function (Builder $query) use ($cityRelation, $stateRelation, $location) {
+                        ->where(function (Builder $query) use ($cityRelation, $stateRelation, $location): void {
                             $query
-                                ->whereHas($cityRelation, function ($query) use ($location) {
+                                ->whereHas($cityRelation, function ($query) use ($location): void {
                                     $query->where('name', 'LIKE', '%' . $location . '%');
                                 })
-                                ->orWhereHas($stateRelation, function ($query) use ($location) {
+                                ->orWhereHas($stateRelation, function ($query) use ($location): void {
                                     $query->where('name', 'LIKE', '%' . $location . '%');
                                 });
                         });

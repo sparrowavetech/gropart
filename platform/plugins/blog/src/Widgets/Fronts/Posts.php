@@ -18,8 +18,8 @@ class Posts extends AbstractWidget
     public function __construct()
     {
         parent::__construct([
-            'name' => __('Blog Posts'),
-            'description' => __('Display blog posts'),
+            'name' => trans('plugins/blog::posts.widget_posts'),
+            'description' => trans('plugins/blog::posts.widget_posts_description'),
             'number_display' => 3,
             'type' => '',
         ]);
@@ -44,21 +44,20 @@ class Posts extends AbstractWidget
     protected function settingForm(): WidgetForm|string|null
     {
         return WidgetForm::createFromArray($this->getConfig())
-            ->add('name', TextField::class, TextFieldOption::make()->label(__('Name'))->toArray())
+            ->add('name', TextField::class, TextFieldOption::make()->label(trans('plugins/blog::base.name')))
             ->add(
                 'type',
                 SelectField::class,
                 SelectFieldOption::make()
-                    ->label(__('Type'))
+                    ->label(trans('plugins/blog::base.type'))
                     ->choices([
-                        '' => __('Latest'),
-                        'featured' => __('Featured'),
-                        'popular' => __('Popular'),
-                        'recent' => __('Recent'),
+                        '' => trans('plugins/blog::base.latest'),
+                        'featured' => trans('plugins/blog::base.featured'),
+                        'popular' => trans('plugins/blog::base.popular'),
+                        'recent' => trans('plugins/blog::base.recent'),
                     ])
-                    ->toArray()
             )
-            ->add('number_display', NumberField::class, NumberFieldOption::make()->label(__('Limit'))->toArray());
+            ->add('number_display', NumberField::class, NumberFieldOption::make()->label(trans('plugins/blog::base.limit')));
     }
 
     protected function requiredPlugins(): array

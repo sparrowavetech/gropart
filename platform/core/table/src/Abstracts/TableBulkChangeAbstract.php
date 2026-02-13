@@ -14,6 +14,8 @@ abstract class TableBulkChangeAbstract implements Arrayable
 
     protected array|string|null $validate = null;
 
+    protected bool $required = false;
+
     public static function make(array $data = []): static
     {
         return app(static::class, $data);
@@ -51,6 +53,13 @@ abstract class TableBulkChangeAbstract implements Arrayable
         return $this;
     }
 
+    public function required(bool $required = true): static
+    {
+        $this->required = $required;
+
+        return $this;
+    }
+
     public function getName(): string
     {
         return $this->name;
@@ -58,10 +67,23 @@ abstract class TableBulkChangeAbstract implements Arrayable
 
     public function toArray(): array
     {
-        return [
+        $data = [
             'title' => $this->title,
             'type' => $this->type,
             'validate' => $this->validate,
         ];
+
+        if ($this->required) {
+            $validate = explode('|', $data['validate'] ?? '');
+
+            $validate = [
+                'required',
+                ...$validate,
+            ];
+
+            $data['validate'] = implode('|', $validate);
+        }
+
+        return $data;
     }
 }

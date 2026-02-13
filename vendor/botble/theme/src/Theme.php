@@ -2,11 +2,14 @@
 
 namespace Botble\Theme;
 
+use Botble\Base\Facades\AdminHelper;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\Html;
 use Botble\Media\Facades\RvMedia;
+use Botble\SeoHelper\Facades\SeoHelper;
 use Botble\Setting\Facades\Setting;
 use Botble\Theme\Contracts\Theme as ThemeContract;
+use Botble\Theme\Events\RenderingTheme;
 use Botble\Theme\Exceptions\UnknownPartialFileException;
 use Botble\Theme\Exceptions\UnknownThemeException;
 use Botble\Theme\Supports\SocialLink;
@@ -20,11 +23,13 @@ use Illuminate\Filesystem\Filesystem;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\HtmlString;
 use Illuminate\View\Factory;
 use Symfony\Component\HttpFoundation\Cookie;
+use Throwable;
 
 class Theme implements ThemeContract
 {
@@ -64,6 +69,10 @@ class Theme implements ThemeContract
         protected Filesystem $files,
         protected Breadcrumb $breadcrumb
     ) {
+        if ($this->config->get('core.base.general.disable_front_theme')) {
+            return;
+        }
+
         $this->uses($this->getThemeName())->layout(setting('layout', 'default'));
     }
 
@@ -96,14 +105,14 @@ class Theme implements ThemeContract
         }
 
         // Is theme ready?
-        if (! $this->exists($theme) && ! app()->runningInConsole()) {
+        if (! $this->exists($theme) && ! app()->runningInConsole() && ! AdminHelper::isInAdmin(true)) {
             throw new UnknownThemeException('Theme [' . $theme . '] not found.');
         }
 
         $this->inheritTheme = $this->getConfig('inherit');
 
         // If inherit theme is set and not exists, so throw exception.
-        if ($this->hasInheritTheme() && ! $this->exists($this->getInheritTheme())) {
+        if ($this->hasInheritTheme() && ! $this->exists($this->getInheritTheme()) && ! AdminHelper::isInAdmin(true)) {
             throw new UnknownThemeException('Parent theme [' . $this->getInheritTheme() . '] not found.');
         }
 
@@ -206,7 +215,7 @@ class Theme implements ThemeContract
         return empty($key) ? $config : Arr::get($config, $key);
     }
 
-    protected function loadConfigFromTheme(string $theme): void
+    protected function loadConfigFromTheme(?string $theme): void
     {
         // Config inside a public theme.
         // This config having buffer by array object.
@@ -297,7 +306,7 @@ class Theme implements ThemeContract
             return $theme;
         }
 
-        return Arr::first(BaseHelper::scanFolder(theme_path()));
+        return Arr::first(BaseHelper::scanFolder(theme_path())) ?: '';
     }
 
     public function setThemeName(string $theme): self
@@ -342,6 +351,8 @@ class Theme implements ThemeContract
         if ($onEvent instanceof Closure) {
             $onEvent($args);
         }
+
+        $this->events->dispatch('theme.' . $event, $args);
     }
 
     /**
@@ -350,7 +361,7 @@ class Theme implements ThemeContract
     public function breadcrumb(): Breadcrumb
     {
         if (! $this->breadcrumb->getCrumbs()) {
-            $this->breadcrumb->add(__('Home'), BaseHelper::getHomepageUrl());
+            $this->breadcrumb->add(trans('packages/theme::theme.common.home'), BaseHelper::getHomepageUrl());
         }
 
         return $this->breadcrumb;
@@ -673,7 +684,17 @@ class Theme implements ThemeContract
         // Keeping arguments.
         $this->arguments = $args;
 
-        $content = $this->view->make($view, $args)->render();
+        try {
+            $content = $this->view->make($view, $args)->render();
+        } catch (Throwable $exception) {
+            if (App::hasDebugModeEnabled()) {
+                throw $exception;
+            }
+
+            report($exception);
+
+            $content = str_replace(base_path('/'), '', $exception->getMessage());
+        }
 
         // View path of content.
         $this->content = $view;
@@ -797,31 +818,47 @@ class Theme implements ThemeContract
 
     public function header(): string
     {
-        $schema = [
-            '@context' => 'https://schema.org',
-            '@type' => 'BreadcrumbList',
-            'itemListElement' => [],
-        ];
-
-        $index = 1;
-
-        foreach ($this->breadcrumb->crumbs as $item) {
-            $schema['itemListElement'][] = [
-                '@type' => 'ListItem',
-                'position' => $index,
-                'name' => BaseHelper::clean($item['label']),
-                'item' => $item['url'],
+        if (! empty($this->breadcrumb->crumbs)) {
+            $schema = [
+                '@context' => 'https://schema.org',
+                '@type' => 'BreadcrumbList',
+                'itemListElement' => [],
             ];
 
-            $index++;
+            $index = 1;
+
+            foreach ($this->breadcrumb->crumbs as $item) {
+                $schema['itemListElement'][] = [
+                    '@type' => 'ListItem',
+                    'position' => $index,
+                    'name' => BaseHelper::clean($item['label']),
+                    'item' => $item['url'],
+                ];
+
+                $index++;
+            }
+
+            $schema = json_encode($schema, JSON_UNESCAPED_UNICODE);
+
+            $this
+                ->asset()
+                ->container('header')
+                ->writeScript('breadcrumb-schema', $schema, attributes: ['type' => 'application/ld+json']);
         }
 
-        $schema = json_encode($schema, JSON_UNESCAPED_UNICODE);
+        $websiteSchema = [
+            '@context' => 'https://schema.org',
+            '@type' => 'WebSite',
+            'name' => rescue(fn () => SeoHelper::openGraph()->getProperty('site_name')),
+            'url' => url(''),
+        ];
+
+        $websiteSchema = json_encode($websiteSchema, JSON_UNESCAPED_UNICODE);
 
         $this
             ->asset()
             ->container('header')
-            ->writeScript('breadcrumb-schema', $schema, attributes: ['type' => 'application/ld+json']);
+            ->writeScript('website-schema', $websiteSchema, attributes: ['type' => 'application/ld+json']);
 
         return $this->view->make('packages/theme::partials.header')->render();
     }
@@ -853,9 +890,9 @@ class Theme implements ThemeContract
         require package_path('theme/routes/public.php');
     }
 
-    public function registerRoutes(Closure|callable $closure): Router
+    public function registerRoutes(Closure|callable $closure, array $middlewares = ['web', 'core']): Router
     {
-        return Route::group(['middleware' => ['web', 'core']], function () use ($closure) {
+        return Route::group(['middleware' => $middlewares], function () use ($closure): void {
             Route::group(apply_filters(BASE_FILTER_GROUP_PUBLIC_ROUTE, []), fn () => $closure());
         });
     }
@@ -874,7 +911,8 @@ class Theme implements ThemeContract
     {
         $this->fire('asset', $this->asset);
 
-        // Fire event before render theme.
+        RenderingTheme::dispatch();
+
         $this->fire('beforeRenderTheme', $this);
 
         // Fire event before render layout.
@@ -883,23 +921,35 @@ class Theme implements ThemeContract
         return $this;
     }
 
-    public function getThemeScreenshot(string $theme): string
+    public function getThemeScreenshot(string $theme, ?string $name = null): string
     {
         $publicThemeName = Theme::getPublicThemeName();
 
         $themeName = Theme::getThemeName() == $theme && $publicThemeName ? $publicThemeName : $theme;
 
-        $screenshot = public_path($this->getConfig('themeDir') . '/' . $themeName . '/screenshot.png');
+        $screenshotName = $name ?: 'screenshot.png';
 
-        if (! File::exists($screenshot)) {
-            $screenshot = $this->path($theme) . '/screenshot.png';
+        $themeDir = $this->getConfig('themeDir');
+
+        $publicRelativePath = $themeDir . '/' . $themeName . '/' . $screenshotName;
+
+        if (File::exists(public_path($publicRelativePath))) {
+            return url($publicRelativePath);
         }
+
+        $screenshot = theme_path($theme . '/' . $screenshotName);
 
         if (! File::exists($screenshot)) {
             return RvMedia::getDefaultImage();
         }
 
-        return 'data:image/png;base64,' . base64_encode(File::get($screenshot));
+        try {
+            $guessedMimeType = File::mimeType($screenshot);
+
+            return 'data:' . $guessedMimeType . ';base64,' . base64_encode(File::get($screenshot));
+        } catch (Throwable $e) {
+            return RvMedia::getDefaultImage();
+        }
     }
 
     public function registerThemeIconFields(array $icons, array $css = [], array $js = []): void
@@ -1027,25 +1077,47 @@ class Theme implements ThemeContract
         return apply_filters('theme_logo', theme_option($logoKey));
     }
 
+    public function getFavicon(): ?string
+    {
+        return apply_filters('theme_favicon', theme_option('favicon'));
+    }
+
     public function getSiteTitle(): ?string
     {
         return apply_filters('theme_site_title', theme_option('site_title'));
     }
 
-    public function getLogoImage(array $attributes = [], string $logoKey = 'logo'): ?HtmlString
-    {
-        $logo = $this->getLogo($logoKey);
+    public function getLogoImage(
+        array $attributes = [],
+        string $logoKey = 'logo',
+        int $maxHeight = 0,
+        ?string $logoUrl = null
+    ): ?HtmlString {
+        if ($logoUrl) {
+            $logo = $logoUrl;
+        } else {
+            $logo = $this->getLogo($logoKey);
+        }
 
         if (! $logo) {
             return null;
         }
 
-        $attributes = [
-            ...$attributes,
-            'loading' => false,
-        ];
+        $height = theme_option('logo_height') ?: $maxHeight;
 
-        return apply_filters('theme_logo_image', RvMedia::image($logo, $this->getSiteTitle(), attributes: $attributes));
+        if ($height) {
+            $maxHeightStyle = 'max-height: %s';
+
+            if (setting('optimize_inline_css', 0)) {
+                $maxHeightStyle = 'max-height: %s !important';
+            }
+
+            $attributes['style'] = sprintf($maxHeightStyle, is_numeric($height) ? "{$height}px" : $height);
+        }
+
+        $attributes['loading'] = false;
+
+        return apply_filters('theme_logo_image', RvMedia::image($logo, $this->getSiteTitle(), attributes: $attributes, lazy: false));
     }
 
     public function formatDate(CarbonInterface|string|int|null $date, ?string $format = null): ?string
@@ -1063,5 +1135,10 @@ class Theme implements ThemeContract
     public function renderSocialSharing(?string $url = null, ?string $title = null, ?string $thumbnail = null): string
     {
         return ThemeSupport::renderSocialSharingButtons($url, $title, $thumbnail);
+    }
+
+    public function termAndPrivacyPolicyUrl(): ?string
+    {
+        return theme_option('term_and_privacy_policy_url');
     }
 }

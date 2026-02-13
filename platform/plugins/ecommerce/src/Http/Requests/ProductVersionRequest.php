@@ -17,7 +17,7 @@ class ProductVersionRequest extends Request
                 'nullable',
                 'min:0',
                 Rule::when($this->input('sale_price'), function () {
-                    return 'gt:sale_price';
+                    return 'gte:sale_price';
                 }),
             ],
             'sale_price' => ['numeric', 'nullable', 'min:0'],
@@ -38,6 +38,7 @@ class ProductVersionRequest extends Request
             'product_files_external.*.size' => ['nullable', 'numeric', 'min:0', 'max:100000000'],
             'barcode' => [
                 'nullable',
+                Rule::requiredIf((bool) get_ecommerce_setting('make_product_barcode_required', false)),
                 'string',
                 'max:150',
             ],
@@ -50,6 +51,7 @@ class ProductVersionRequest extends Request
             'attribute_sets' => ['nullable', 'array'],
             'attribute_sets.*' => ['required'],
             'general_license_code' => ['nullable', 'in:0,1'],
+            'auto_generate_sku' => ['nullable', 'boolean'],
         ];
     }
 

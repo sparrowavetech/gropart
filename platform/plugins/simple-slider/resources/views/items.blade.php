@@ -5,9 +5,7 @@
         <x-core::loading />
 
         <x-slot:footer>
-            <x-core::button
-                data-bs-dismiss="modal"
-            >
+            <x-core::button data-bs-dismiss="modal">
                 {{ trans('core/base::forms.cancel') }}
             </x-core::button>
 

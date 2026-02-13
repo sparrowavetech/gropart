@@ -3,9 +3,11 @@
 namespace Botble\Ecommerce\Http\Controllers\Fronts;
 
 use Botble\Base\Http\Controllers\BaseController;
+use Botble\Ecommerce\AdsTracking\GoogleTagManager;
 use Botble\Ecommerce\Facades\Cart;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Models\Product;
+use Botble\Ecommerce\Models\SharedWishlist;
 use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
 use Botble\Ecommerce\Services\ProductWishlistService;
 use Botble\SeoHelper\Facades\SeoHelper;
@@ -15,9 +17,16 @@ use Illuminate\Pagination\LengthAwarePaginator;
 
 class WishlistController extends BaseController
 {
-    public function index(Request $request, ProductInterface $productRepository)
+    public function index(Request $request, ProductInterface $productRepository, ?string $code = null)
     {
-        SeoHelper::setTitle(__('Wishlist'));
+        abort_if($code && ! EcommerceHelper::isWishlistSharingEnabled(), 404);
+
+        $title = __('Wishlist');
+
+        SeoHelper::setTitle(theme_option('ecommerce_wishlist_seo_title') ?: $title)
+            ->setDescription(theme_option('ecommerce_wishlist_seo_description'));
+
+        Theme::breadcrumb()->add($title, route('public.wishlist'));
 
         $queryParams = [
             'paginate' => [
@@ -25,29 +34,34 @@ class WishlistController extends BaseController
                 'current_paged' => $request->integer('page', 1) ?: 1,
             ],
             'with' => ['slugable'],
-            ...EcommerceHelper::withReviewsParams(),
         ];
 
-        if (auth('customer')->check()) {
-            $products = $productRepository->getProductsWishlist(auth('customer')->id(), $queryParams);
+        if ($code && EcommerceHelper::isWishlistSharingEnabled()) {
+            $sharedWishlist = SharedWishlist::query()->where('code', $code)->firstOrFail();
+
+            $products = $productRepository->getProductsByIds($sharedWishlist->product_ids, $queryParams);
         } else {
-            $products = new LengthAwarePaginator([], 0, 10);
+            if (auth('customer')->check()) {
+                $products = $productRepository->getProductsWishlist(auth('customer')->id(), $queryParams);
+            } else {
+                $products = new LengthAwarePaginator([], 0, 10);
 
-            $itemIds = Cart::instance('wishlist')
-                ->content()
-                ->sortBy([['updated_at', 'desc']])
-                ->pluck('id')
-                ->unique('id')
-                ->all();
+                $itemIds = Cart::instance('wishlist')
+                    ->content()
+                    ->sortBy([['updated_at', 'desc']])
+                    ->pluck('id')
+                    ->unique()
+                    ->all();
 
-            if ($itemIds) {
-                $products = $productRepository->getProductsByIds($itemIds, $queryParams);
+                if ($itemIds) {
+                    $products = $productRepository->getProductsByIds($itemIds, $queryParams);
+                }
             }
         }
 
-        Theme::breadcrumb()->add(__('Wishlist'), route('public.wishlist'));
+        $canRemoveWishlist = ! $code || (EcommerceHelper::getWishlistCode() === $code);
 
-        return Theme::scope('ecommerce.wishlist', compact('products'), 'plugins/ecommerce::themes.wishlist')->render();
+        return Theme::scope('ecommerce.wishlist', compact('products', 'canRemoveWishlist'), 'plugins/ecommerce::themes.wishlist')->render();
     }
 
     public function store(int|string $productId, Request $request)
@@ -60,7 +74,7 @@ class WishlistController extends BaseController
             return $this
                 ->httpResponse()
                 ->setError()
-                ->setMessage(__('This product is not available.'));
+                ->setMessage(trans('plugins/ecommerce::products.wishlist.product_not_available'));
         }
 
         /**
@@ -74,12 +88,13 @@ class WishlistController extends BaseController
             ->httpResponse()
             ->setMessage(
                 $isAdded
-                ? __('Added product :product successfully!', ['product' => $product->name])
-                : __('Removed product :product from wishlist successfully!', ['product' => $product->name])
+                ? trans('plugins/ecommerce::products.wishlist.added_success', ['product' => $product->name])
+                : trans('plugins/ecommerce::products.wishlist.removed_success', ['product' => $product->name])
             )
             ->setData([
                 'count' => $this->wishlistCount(),
                 'added' => $isAdded,
+                'extra_data' => app(GoogleTagManager::class)->formatProductTrackingData($product->original_product),
             ]);
     }
 
@@ -94,8 +109,11 @@ class WishlistController extends BaseController
 
         return $this
             ->httpResponse()
-            ->setMessage(__('Removed product :product from wishlist successfully!', ['product' => $product->name]))
-            ->setData(['count' => $this->wishlistCount()]);
+            ->setMessage(trans('plugins/ecommerce::products.wishlist.removed_success', ['product' => $product->name]))
+            ->setData([
+                'count' => $this->wishlistCount(),
+                'extra_data' => app(GoogleTagManager::class)->formatProductTrackingData($product->original_product),
+            ]);
     }
 
     protected function wishlistCount(): int

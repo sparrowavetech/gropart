@@ -10,10 +10,15 @@ use Intervention\Image\Modifiers\RemoveAnimationModifier as GenericRemoveAnimati
 
 class RemoveAnimationModifier extends GenericRemoveAnimationModifier implements SpecializedInterface
 {
+    /**
+     * {@inheritdoc}
+     *
+     * @see ModifierInterface::apply()
+     */
     public function apply(ImageInterface $image): ImageInterface
     {
         $image->core()->setNative(
-            $this->chosenFrame($image, $this->position)->native()
+            $this->selectedFrame($image)->native()
         );
 
         return $image;

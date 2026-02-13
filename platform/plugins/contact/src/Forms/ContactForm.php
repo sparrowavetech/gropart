@@ -25,7 +25,6 @@ class ContactForm extends FormAbstract
                 SelectField::class,
                 StatusFieldOption::make()
                     ->choices(ContactStatusEnum::labels())
-                    ->toArray()
             )
             ->setBreakFieldPoint('status')
             ->addMetaBoxes([

@@ -1,5 +1,12 @@
 {!! apply_filters('ecommerce_product_variation_form_start', null, $product) !!}
 
+@php
+    $currencies = \Botble\Ecommerce\Models\Currency::query()->oldest('order')->get();
+    $defaultCurrency = get_application_currency();
+    $productCurrencyCode = old('currency_code', $product?->currency_code ?? $originalProduct?->currency_code ?? $defaultCurrency->title);
+    $selectedCurrency = $currencies->firstWhere('title', $productCurrencyCode) ?? $defaultCurrency;
+@endphp
+
 <div class="row price-group">
     <input
         class="detect-schedule d-none"
@@ -8,7 +15,7 @@
         value="{{ old('sale_type', $product ? $product->sale_type : 0) }}"
     >
 
-    <div class="col-md-4">
+    <div class="col-md-6">
         <x-core::form.text-input
             :label="trans('plugins/ecommerce::products.sku')"
             name="sku"
@@ -19,43 +26,78 @@
             <x-core::form.checkbox
                 :label="trans('plugins/ecommerce::products.form.auto_generate_sku')"
                 name="auto_generate_sku"
+                :value="1"
             />
         @endif
     </div>
 
-    <div class="col-md-4">
+    @php
+        $showCurrencySelector = empty($isVariation) && (empty($product) || !$product->is_variation);
+        if ($showCurrencySelector) {
+            if (is_in_admin()) {
+                $showCurrencySelector = EcommerceHelper::isEnabledProductCurrencySelection();
+            } else {
+                $showCurrencySelector = EcommerceHelper::isEnabledProductCurrencySelection()
+                    && \Botble\Marketplace\Facades\MarketplaceHelper::allowVendorManageProductCurrency();
+            }
+        }
+    @endphp
+    @if ($showCurrencySelector)
+        <div class="col-md-6">
+            <x-core::form.label for="currency_code">
+                {{ trans('plugins/ecommerce::products.form.currency') }}
+            </x-core::form.label>
+            <select
+                name="currency_code"
+                id="currency_code"
+                class="form-select product-currency-selector"
+            >
+                @foreach($currencies as $currency)
+                    <option
+                        value="{{ $currency->title }}"
+                        data-symbol="{{ $currency->symbol }}"
+                        @selected($productCurrencyCode === $currency->title)
+                    >
+                        {{ $currency->title }} ({{ $currency->symbol }})
+                    </option>
+                @endforeach
+            </select>
+        </div>
+    @endif
+
+    <div class="col-md-6">
         <x-core::form.text-input
             :label="trans('plugins/ecommerce::products.form.price')"
             name="price"
             :data-thousands-separator="EcommerceHelper::getThousandSeparatorForInputMask()"
             :data-decimal-separator="EcommerceHelper::getDecimalSeparatorForInputMask()"
-            :value="old('price', $product ? $product->price : $originalProduct->price ?? 0)"
+            :value="old('price', $product ? $product->getRawPrice() : ($originalProduct ? $originalProduct->getRawPrice() : 0))"
             step="any"
             class="input-mask-number"
             :group-flat="true"
         >
             <x-slot:prepend>
-                <span class="input-group-text">{{ get_application_currency()->symbol }}</span>
+                <span class="input-group-text currency-symbol">{{ $selectedCurrency->symbol }}</span>
             </x-slot:prepend>
         </x-core::form.text-input>
     </div>
-    <div class="col-md-4">
+    <div class="col-md-6">
         <x-core::form.text-input
             :label="trans('plugins/ecommerce::products.form.price_sale')"
             class="input-mask-number"
             name="sale_price"
             :data-thousands-separator="EcommerceHelper::getThousandSeparatorForInputMask()"
             :data-decimal-separator="EcommerceHelper::getDecimalSeparatorForInputMask()"
-            :value="old('sale_price', $product ? $product->sale_price : $originalProduct->sale_price ?? null)"
+            :value="old('sale_price', $product ? $product->getRawSalePrice() : ($originalProduct ? $originalProduct->getRawSalePrice() : null))"
             :group-flat="true"
             :data-sale-percent-text="trans('plugins/ecommerce::products.form.price_sale_percent_helper')"
         >
             <x-slot:helper-text>
-                {!! trans('plugins/ecommerce::products.form.price_sale_percent_helper', ['percent' => '<strong>' . ($product ? $product->sale_percent : 0) . '%</strong>']) !!}
+                {!! BaseHelper::clean(trans('plugins/ecommerce::products.form.price_sale_percent_helper', ['percent' => '<strong>' . ($product ? $product->sale_percent : 0) . '%</strong>'])) !!}
             </x-slot:helper-text>
 
             <x-slot:prepend>
-                <span class="input-group-text">{{ get_application_currency()->symbol }}</span>
+                <span class="input-group-text currency-symbol">{{ $selectedCurrency->symbol }}</span>
             </x-slot:prepend>
             <x-slot:labelDescription>
                 <a
@@ -95,11 +137,22 @@
         />
     </div>
 
+    @if (Botble\Ecommerce\Facades\EcommerceHelper::isTaxEnabled())
+        <div class="col-md-12">
+            <x-core::form.on-off.checkbox
+                :label="trans('plugins/ecommerce::products.form.price_includes_tax')"
+                name="price_includes_tax"
+                :checked="old('price_includes_tax', $product ? $product->price_includes_tax : $originalProduct->price_includes_tax ?? false)"
+                :helper-text="trans('plugins/ecommerce::products.form.price_includes_tax_helper')"
+            />
+        </div>
+    @endif
+
     <div class="col-md-6">
         <x-core::form.text-input
             :label="trans('plugins/ecommerce::products.form.cost_per_item')"
             name="cost_per_item"
-            :value="old('cost_per_item', $product ? $product->cost_per_item : $originalProduct->cost_per_item ?? 0)"
+            :value="old('cost_per_item', $product ? $product->getRawCostPerItem() : ($originalProduct ? $originalProduct->getRawCostPerItem() : 0))"
             :placeholder="trans('plugins/ecommerce::products.form.cost_per_item_placeholder')"
             step="any"
             class="input-mask-number"
@@ -107,7 +160,7 @@
             :helper-text="trans('plugins/ecommerce::products.form.cost_per_item_helper')"
         >
             <x-slot:prepend>
-                <span class="input-group-text">{{ get_application_currency()->symbol }}</span>
+                <span class="input-group-text currency-symbol">{{ $selectedCurrency->symbol }}</span>
             </x-slot:prepend>
         </x-core::form.text-input>
     </div>
@@ -121,9 +174,11 @@
             :label="trans('plugins/ecommerce::products.form.barcode')"
             name="barcode"
             type="text"
-            :value="old('barcode', $product ? $product->barcode : $originalProduct->barcode ?? null)"
+            :value="old('barcode', $product)"
             step="any"
             :placeholder="trans('plugins/ecommerce::products.form.barcode_placeholder')"
+            :required="(bool) get_ecommerce_setting('make_product_barcode_required', false)"
+            :helper-text="trans('plugins/ecommerce::products.form.barcode_helper')"
         />
     </div>
 </div>
@@ -170,8 +225,8 @@
 
 @if (
     ! EcommerceHelper::isEnabledSupportDigitalProducts()
-    || (!$product && !$originalProduct &&  request()->input('product_type') != Botble\Ecommerce\Enums\ProductTypeEnum::DIGITAL)
-    || ($originalProduct && $originalProduct->isTypePhysical()) || ($product && $product->isTypePhysical())
+    || (! EcommerceHelper::isDisabledPhysicalProduct() && !$product && ! $originalProduct && request()->input('product_type') != Botble\Ecommerce\Enums\ProductTypeEnum::DIGITAL)
+    || (! EcommerceHelper::isDisabledPhysicalProduct() && $originalProduct && $originalProduct->isTypePhysical()) || ($product && $product->isTypePhysical())
 )
     <x-core::form.fieldset>
         <legend>
@@ -235,17 +290,153 @@
 @endif
 
 @if (
-    EcommerceHelper::isEnabledSupportDigitalProducts()
+    EcommerceHelper::isDisabledPhysicalProduct()
+    ||
+    (EcommerceHelper::isEnabledSupportDigitalProducts()
     && (
         (!$product &&  !$originalProduct && request()->input('product_type') == Botble\Ecommerce\Enums\ProductTypeEnum::DIGITAL)
         || ($originalProduct && $originalProduct->isTypeDigital()) || ($product && $product->isTypeDigital())
-    )
+    ))
 )
+    @if (EcommerceHelper::isEnabledLicenseCodesForDigitalProducts())
     <x-core::form.on-off.checkbox
         :label="trans('plugins/ecommerce::products.digital_attachments.generate_license_code_after_purchasing_product')"
         name="generate_license_code"
         :checked="old('generate_license_code', $product ? $product->generate_license_code : $originalProduct->generate_license_code ?? 0)"
+        data-bb-toggle="collapse"
+        data-bb-target="#license-code-options"
     />
+
+    <div class="collapse @if(old('generate_license_code', $product ? $product->generate_license_code : $originalProduct->generate_license_code ?? 0)) show @endif" id="license-code-options">
+        <x-core::form-group class="mt-3">
+            <x-core::form.label for="license_code_type" :value="trans('plugins/ecommerce::products.license_codes.type.title')" />
+            <x-core::form.select name="license_code_type" id="license_code_type">
+                <option value="auto_generate" @if(old('license_code_type', $product ? $product->license_code_type : 'auto_generate') === 'auto_generate') selected @endif>
+                    {{ trans('plugins/ecommerce::products.license_codes.type.auto_generate') }}
+                </option>
+                <option value="pick_from_list" @if(old('license_code_type', $product ? $product->license_code_type : 'auto_generate') === 'pick_from_list') selected @endif>
+                    {{ trans('plugins/ecommerce::products.license_codes.type.pick_from_list') }}
+                </option>
+            </x-core::form.select>
+            <x-core::form.helper-text>
+                {{ trans('plugins/ecommerce::products.license_codes.type.description') }}
+            </x-core::form.helper-text>
+        </x-core::form-group>
+    </div>
+
+    <x-core::form-group class="product-license-codes-management mb-5" id="license-codes-management" @style(['display: none' => !($product && $product->generate_license_code && $product->license_code_type === 'pick_from_list')])>
+        <x-core::form.label for="license_codes" class="mb-3">
+            {{ trans('plugins/ecommerce::products.license_codes.title') }}
+            @if($product && $product->is_variation)
+                <small class="text-muted d-block">
+                    {{ trans('plugins/ecommerce::products.license_codes.variation_specific_note') }}
+                </small>
+            @elseif($product && $product->has_variation)
+                <small class="text-muted d-block">
+                    {{ trans('plugins/ecommerce::products.license_codes.main_product_note') }}
+                </small>
+            @endif
+
+            <x-slot:description>
+                <div class="btn-list mt-3 mb-3">
+                    @if($product && \Botble\Ecommerce\Http\Controllers\ProductLicenseCodeController::canAccessLicenseCodeManagement($product))
+                        <a href="{{ route('products.license-codes.index', $product->id) }}"
+                           class="btn btn-sm btn-primary"
+                           target="_blank">
+                            <x-core::icon name="ti ti-external-link" />
+                            {{ trans('plugins/ecommerce::products.license_codes.manage_codes') }}
+                        </a>
+                    @endif
+
+                    <x-core::button type="button" class="license-code-add-btn" size="sm" icon="ti ti-plus">
+                        {{ trans('plugins/ecommerce::products.license_codes.add') }}
+                    </x-core::button>
+
+                    <x-core::button type="button" class="license-code-generate-btn" size="sm" icon="ti ti-refresh">
+                        {{ trans('plugins/ecommerce::products.license_codes.generate') }}
+                    </x-core::button>
+                </div>
+
+                @if (get_ecommerce_setting('hide_used_license_codes_in_product_form', false) && $product && $product->licenseCodes->filter(fn($code) => $code->isUsed())->count() > 0)
+                    <div class="alert alert-info alert-sm mt-2">
+                        <x-core::icon name="ti ti-info-circle" />
+                        {{ trans('plugins/ecommerce::products.license_codes.used_codes_hidden', ['count' => $product->licenseCodes->filter(fn($code) => $code->isUsed())->count()]) }}
+                    </div>
+                @endif
+            </x-slot:description>
+        </x-core::form.label>
+
+        <div class="clearfix"></div>
+
+        <div class="table-responsive">
+            <x-core::table>
+                <x-core::table.header>
+                    <x-core::table.header.cell>
+                        {{ trans('plugins/ecommerce::products.license_codes.code') }}
+                    </x-core::table.header.cell>
+                    <x-core::table.header.cell>
+                        {{ trans('plugins/ecommerce::products.license_codes.status') }}
+                    </x-core::table.header.cell>
+                    <x-core::table.header.cell>
+                        {{ trans('plugins/ecommerce::products.license_codes.assigned_at') }}
+                    </x-core::table.header.cell>
+                    <x-core::table.header.cell />
+                </x-core::table.header>
+
+                <x-core::table.body id="license-codes-table-body">
+                @if($product)
+                    @php
+                        $hideUsedCodes = get_ecommerce_setting('hide_used_license_codes_in_product_form', false);
+                        $licenseCodes = $hideUsedCodes ? $product->licenseCodes->filter(fn($code) => $code->isAvailable()) : $product->licenseCodes;
+                    @endphp
+                    @foreach ($licenseCodes as $licenseCode)
+                        <x-core::table.body.row data-license-code-id="{{ $licenseCode->id }}">
+                            <x-core::table.body.cell>
+                                <input type="text"
+                                       name="license_codes[{{ $licenseCode->id }}][code]"
+                                       value="{{ $licenseCode->license_code }}"
+                                       class="form-control license-code-input"
+                                    {{ $licenseCode->isUsed() ? 'readonly' : '' }}>
+                            </x-core::table.body.cell>
+                            <x-core::table.body.cell>
+                                {!! $licenseCode->status->toHtml() !!}
+                            </x-core::table.body.cell>
+                            <x-core::table.body.cell>
+                                @if($licenseCode->assigned_at && $licenseCode->assignedOrderProduct && $licenseCode->assignedOrderProduct->order)
+                                    <div>
+                                        {{ BaseHelper::formatDate($licenseCode->assigned_at) }}
+                                        <br>
+                                        <a href="{{ route('orders.edit', $licenseCode->assignedOrderProduct->order->id) }}"
+                                           class="text-primary"
+                                           target="_blank">
+                                            <x-core::icon name="ti ti-external-link" />
+                                            {{ trans('plugins/ecommerce::order.view_order') }} #{{ $licenseCode->assignedOrderProduct->order->code }}
+                                        </a>
+                                    </div>
+                                @else
+                                    {{ $licenseCode->assigned_at ? BaseHelper::formatDate($licenseCode->assigned_at) : '-' }}
+                                @endif
+                            </x-core::table.body.cell>
+                            <x-core::table.body.cell>
+                                @if($licenseCode->isAvailable())
+                                    <x-core::button type="button"
+                                                    class="license-code-delete-btn"
+                                                    size="sm"
+                                                    color="danger"
+                                                    icon="ti ti-trash"
+                                                    data-license-code-id="{{ $licenseCode->id }}">
+                                        {{ trans('core/base::tables.delete') }}
+                                    </x-core::button>
+                                @endif
+                            </x-core::table.body.cell>
+                        </x-core::table.body.row>
+                    @endforeach
+                @endif
+            </x-core::table.body>
+        </x-core::table>
+        </div>
+    </x-core::form-group>
+    @endif
 
     <x-core::form-group class="product-type-digital-management">
         <x-core::form.label for="product_file" class="mb-3">
@@ -280,11 +471,11 @@
             </x-core::table.header>
 
             <x-core::table.body>
-                @if($product)
+                @if($product && $product->productFiles->isNotEmpty())
                     @foreach ($product->productFiles as $file)
                         <x-core::table.body.row>
                             <x-core::table.body.cell>
-                                <x-core::form.on-off.checkbox
+                                <x-core::form.checkbox
                                     name="product_files[{{ $file->id }}]"
                                     class="digital-attachment-checkbox"
                                     :checked="true"
@@ -311,6 +502,12 @@
                             <x-core::table.body.cell />
                         </x-core::table.body.row>
                     @endforeach
+                @else
+                    <x-core::table.body.row class="digital-attachments-empty-row">
+                        <x-core::table.body.cell colspan="5" class="text-center text-secondary">
+                            {{ trans('plugins/ecommerce::products.digital_attachments.no_attachments') }}
+                        </x-core::table.body.cell>
+                    </x-core::table.body.row>
                 @endif
             </x-core::table.body>
         </x-core::table>
@@ -324,11 +521,26 @@
         </div>
     </x-core::form-group>
 
+    @if($product)
+        <x-core::form.checkbox
+            name="notify_attachment_updated"
+            :label="trans('plugins/ecommerce::products.digital_attachments.notify_attachment_updated')"
+            :checked="old('notify_attachment_updated', $product->notify_attachment_updated)"
+            :value="true"
+        />
+    @endif
+
     @if (request()->ajax())
         @include('plugins/ecommerce::products.partials.digital-product-file-template')
+        @if (EcommerceHelper::isEnabledLicenseCodesForDigitalProducts())
+            @include('plugins/ecommerce::products.partials.license-code-template', ['isVariation' => $isVariation ?? false])
+        @endif
     @else
         @pushOnce('footer')
             @include('plugins/ecommerce::products.partials.digital-product-file-template')
+            @if (EcommerceHelper::isEnabledLicenseCodesForDigitalProducts())
+                @include('plugins/ecommerce::products.partials.license-code-template', ['isVariation' => $isVariation ?? false])
+            @endif
         @endpushOnce
     @endif
 @endif

@@ -6,20 +6,15 @@ use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Models\BaseQueryBuilder;
-use Botble\Base\Events\CreatedContentEvent;
+use Botble\Ecommerce\AdsTracking\FacebookPixel;
 use Botble\Ecommerce\AdsTracking\GoogleTagManager;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Forms\Fronts\OrderTrackingForm;
 use Botble\Ecommerce\Http\Requests\Fronts\OrderTrackingRequest;
-use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Http\Resources\ProductVariationResource;
 use Botble\Ecommerce\Models\Order;
 use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Models\ProductCategory;
-use Botble\Ecommerce\Models\Enquiry;
-use Botble\Ecommerce\Enums\EnquiryStatusEnum;
-use Botble\Ecommerce\Http\Requests\EnquiryRequest;
-use Botble\Ecommerce\Repositories\Interfaces\EnquiryInterface;
 use Botble\Ecommerce\Models\ProductVariation;
 use Botble\Ecommerce\Models\ProductVariationItem;
 use Botble\Ecommerce\Repositories\Interfaces\ProductInterface;
@@ -27,96 +22,42 @@ use Botble\Ecommerce\Services\HandleFrontPages;
 use Botble\Ecommerce\Services\Products\GetProductService;
 use Botble\Ecommerce\Services\Products\GetProductWithCrossSalesBySlugService;
 use Botble\Ecommerce\Services\Products\ProductCrossSalePriceService;
+use Botble\Ecommerce\Services\Products\ProductImageService;
 use Botble\Media\Facades\RvMedia;
 use Botble\SeoHelper\Facades\SeoHelper;
 use Botble\Theme\Facades\Theme;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
-use Botble\Marketplace\Supports\MarketplaceHelper;
-use Botble\Ecommerce\Supports\OrderHelper;
+use Illuminate\Support\Facades\Cache;
 
 class PublicProductController extends BaseController
 {
     public function getProducts(Request $request, GetProductService $productService)
     {
-
         if (! EcommerceHelper::productFilterParamsValidated($request)) {
             return $this
                 ->httpResponse()
                 ->setNextUrl(route('public.products'));
         }
 
-        $with = EcommerceHelper::withProductEagerLoadingRelations();
+        SeoHelper::setTitle(theme_option('ecommerce_products_seo_title') ?: __('Products'))
+            ->setDescription(theme_option('ecommerce_products_seo_description'));
 
-        $condition = ['is_enquiry' => 0];
+        $with = EcommerceHelper::withProductEagerLoadingRelations();
 
         if (($query = BaseHelper::stringify($request->input('q'))) && ! $request->ajax()) {
-            $products = $productService->getProduct($request, null, null, $with, [], $condition);
+            $products = $productService->getProduct($request, null, null, $with);
+
             SeoHelper::setTitle(__('Search result for ":query"', compact('query')));
 
             Theme::breadcrumb()
                 ->add(__('Search'), route('public.products'));
 
-            SeoHelper::meta()->setUrl(route('public.products'));
+            SeoHelper::meta()
+                ->setUrl(route('public.products'));
 
-            return Theme::scope(
-                'ecommerce.search',
-                compact('products', 'query', 'condition'),
-                'plugins/ecommerce::themes.search'
-            )->render();
-        }
-
-        if ($request->query('enquiry') == 1) {
-            Theme::breadcrumb()->add(__("Equipment's Enquiry"), route('public.product.enquiry'));
-        } else {
-            Theme::breadcrumb()->add(__('Products'), route('public.products'));
-        }
-
-        $products = $productService->getProduct($request, null, null, $with, $condition);
-
-        if ($request->ajax()) {
-            return $this->ajaxFilterProductsResponse($products);
-        }
-
-        SeoHelper::setTitle(__('Products'))->setDescription(__('Products'));
-
-        do_action(PRODUCT_MODULE_SCREEN_NAME);
-
-        app(GoogleTagManager::class)->viewItemList($products->all(), 'Product List');
-
-        return Theme::scope(
-            'ecommerce.products',
-            compact('products', 'condition'),
-            'plugins/ecommerce::themes.products'
-        )->render();
-    }
-    public function getEnquiryProduct(Request $request, GetProductService $productService)
-    {
-
-        if (!EcommerceHelper::productFilterParamsValidated($request)) {
-            return $this
-                ->httpResponse()
-                ->setNextUrl(route('public.products'));
-        }
-
-        $query = $request->input('q');
-
-        $with = EcommerceHelper::withProductEagerLoadingRelations();
-
-        if (is_plugin_active('marketplace')) {
-            $with = array_merge($with, ['store', 'store.slugable']);
-        }
-
-        $withCount = EcommerceHelper::withReviewsCount();
-        $condition = ['is_enquiry' => 1];
-        if ($query && !$request->ajax()) {
-            $products = $productService->getProduct($request, null, null, $with, $withCount, $condition);
-
-            SeoHelper::setTitle(__('Search result for ":query"', compact('query')));
-
-            Theme::breadcrumb()
-                ->add(__('Home'), route('public.index'))
-                ->add(__('Search'), route('public.products'));
+            app(GoogleTagManager::class)->search($query, $products->all());
+            app(FacebookPixel::class)->search($query, $products->all());
 
             return Theme::scope(
                 'ecommerce.search',
@@ -125,76 +66,34 @@ class PublicProductController extends BaseController
             )->render();
         }
 
-        $products = $productService->getProduct($request, null, null, $with, $withCount, $condition);
+        Theme::breadcrumb()->add(__('Products'), route('public.products'));
+
+        $products = $productService->getProduct($request, null, null, $with);
 
         if ($request->ajax()) {
-            return $this->ajaxFilterProductsResponse($products);
+            $category = null;
+
+            if ($categoryId = $request->input('categories')) {
+                $category = ProductCategory::query()
+                    ->wherePublished()
+                    ->where('id', is_array($categoryId) ? reset($categoryId) : $categoryId)
+                    ->first();
+            }
+
+            return $this->ajaxFilterProductsResponse($products, $category);
         }
-
-        Theme::breadcrumb()
-            ->add(__('Home'), route('public.index'))
-            ->add(__("Equipment's Enquiry"), route('public.product.enquiry'));
-
-        SeoHelper::setTitle(__("Equipment's Enquiry"))->setDescription(__('Enquiry Products'));
 
         do_action(PRODUCT_MODULE_SCREEN_NAME);
 
+        app(GoogleTagManager::class)->viewItemList($products->all(), 'Product List');
+
         return Theme::scope(
             'ecommerce.products',
-            compact('products', 'condition'),
+            compact('products'),
             'plugins/ecommerce::themes.products'
         )->render();
     }
-    public function EnquiryFrom(Product $product)
-    {
-        SeoHelper::setTitle(__('Enquiry Form'))->setDescription(__('Product Enquiry Form Description'));
 
-        Theme::breadcrumb()->add(__('Products'), route('public.products'));
-
-        return Theme::scope(
-            'ecommerce.enquiry_from',
-            compact('product'),
-            'plugins/ecommerce::themes.enquiry_from'
-        )->render();
-    }
-
-    public function EnquiryFromSubmit(EnquiryRequest $request, BaseHttpResponse $response)
-    {
-        $request->merge([
-            'status' => EnquiryStatusEnum::PENDING(),
-        ]);
-        if ($request->hasFile('attachment')) {
-            $result = RvMedia::handleUpload($request->file('attachment'), 0, 'enquiry');
-            if ($result['error']) {
-                return $response->setError()->setMessage($result['message']);
-            }
-            $request->merge([
-                'attachment' => $result['data']->url,
-            ]);
-        }
-
-        $enquiry =  Enquiry::query()->create($request->input());
-
-        event(new CreatedContentEvent(CUSTOMER_MODULE_SCREEN_NAME, $request, $enquiry));
-
-        if (is_plugin_active('marketplace')) {
-            MarketplaceHelper::sendEnquiryMail($enquiry);
-        }
-
-        OrderHelper::sendEnquiryMail($enquiry);
-
-        return $response
-            ->setPreviousUrl(route('public.enquiry.get', $enquiry->product_id))
-            ->setNextUrl(route('public.enquiry.success', base64_encode($enquiry->id)))
-            ->setMessage(trans('core/base::notices.create_success_message'));
-    }
-    public function EnquirySuccess($enquiry_id)
-    {
-        SeoHelper::setTitle(__('Enquiry Success'))->setDescription(__('Enquiry Success'));
-        $enquiry_id = base64_decode($enquiry_id);
-        $enquiry = Enquiry::query()->with('product')->findOrFail($enquiry_id);
-        return view('plugins/ecommerce::enquires.enquiry-thank-you', compact('enquiry'));
-    }
     public function getProductVariation(
         int|string $id,
         Request $request,
@@ -233,7 +132,9 @@ class PublicProductController extends BaseController
                         'ec_products.barcode',
                         'ec_products.description',
                         'ec_products.is_variation',
+                        'ec_products.price_includes_tax',
                         'original_products.images as original_images',
+                        'original_products.currency_code',
                         'ec_products.height',
                         'ec_products.weight',
                         'ec_products.wide',
@@ -259,6 +160,8 @@ class PublicProductController extends BaseController
                     'sku',
                     'description',
                     'is_variation',
+                    'price_includes_tax',
+                    'currency_code',
                     'height',
                     'weight',
                     'wide',
@@ -270,31 +173,8 @@ class PublicProductController extends BaseController
         }
 
         if ($product) {
-            if ($product->images) {
-                $originalImages = $product->images;
-
-                if (get_ecommerce_setting(
-                    'how_to_display_product_variation_images'
-                ) == 'variation_images_and_main_product_images') {
-                    $parentImages = is_array($product->original_images) ? $product->original_images : (array) json_decode($product->original_images, true);
-
-                    if ($parentImages && is_array($parentImages)) {
-                        $originalImages = array_merge($originalImages, $parentImages);
-                    }
-                }
-            } else {
-                $originalImages = $product->original_images ?: $product->original_product->images;
-
-                if (! is_array($originalImages)) {
-                    $originalImages = json_decode($originalImages, true);
-                }
-            }
-
-            $product->image_with_sizes = rv_get_image_list($originalImages, array_unique([
-                'origin',
-                'thumb',
-                ...array_keys(RvMedia::getSizes()),
-            ]));
+            $imageData = app(ProductImageService::class)->getProductImagesWithSizes($product);
+            $product->image_with_sizes = $imageData['image_with_sizes'];
 
             if ($product->stock_status == 'on_backorder') {
                 $product->warningMessage = __('Warning: This product is on backorder and may take longer to ship.');
@@ -332,6 +212,8 @@ class PublicProductController extends BaseController
                     'sku',
                     'description',
                     'is_variation',
+                    'price_includes_tax',
+                    'currency_code',
                     'height',
                     'weight',
                     'wide',
@@ -359,15 +241,49 @@ class PublicProductController extends BaseController
                 ->setMessage(__('Not available'));
         }
 
-        $productAttributes = $productRepository->getRelatedProductAttributes($originalProduct)->sortBy('order');
+        // Cache variation data for better performance
+        $cacheKey = 'product_variation_ajax_' . $originalProduct->id . '_' . app()->getLocale();
 
-        $attributeSets = $originalProduct->productAttributeSets()->orderBy('order')->get();
+        $variationData = Cache::remember($cacheKey, 1800, function () use ($originalProduct, $productRepository) {
+            $productAttributes = $productRepository->getRelatedProductAttributes($originalProduct)->sortBy('order');
+            $attributeSets = $originalProduct->productAttributeSets()->orderBy('order')->get();
 
-        $productVariations = ProductVariation::query()
-            ->where('configurable_product_id', $originalProduct->id)
-            ->get();
+            // Only load necessary fields for variations
+            $productVariations = ProductVariation::query()
+                ->where('configurable_product_id', $originalProduct->id)
+                ->with(['product:id,stock_status,quantity,with_storehouse_management,allow_checkout_when_out_of_stock'])
+                ->select('id', 'product_id', 'configurable_product_id')
+                ->get();
 
-        $productVariationsInfo = ProductVariationItem::getVariationsInfo($productVariations->pluck('id')->toArray());
+            // Load variation info in chunks
+            $variationIds = $productVariations->pluck('id')->all();
+            $productVariationsInfo = collect();
+
+            foreach (array_chunk($variationIds, 100) as $chunk) {
+                $productVariationsInfo = $productVariationsInfo->merge(
+                    ProductVariationItem::getVariationsInfo($chunk)
+                );
+            }
+
+            // More efficient filtering
+            if ($productVariationsInfo->isNotEmpty()) {
+                $outOfStockProductIds = $productVariations
+                    ->filter(function ($variation) {
+                        return $variation->product && $variation->product->isOutOfStock();
+                    })
+                    ->pluck('id')
+                    ->toArray();
+
+                $productVariationsInfo = $productVariationsInfo
+                    ->reject(function ($item) use ($outOfStockProductIds) {
+                        return in_array($item->variation_id, $outOfStockProductIds);
+                    });
+            }
+
+            return compact('productAttributes', 'attributeSets', 'productVariations', 'productVariationsInfo');
+        });
+
+        extract($variationData);
 
         $variationInfo = $productVariationsInfo;
 
@@ -446,7 +362,7 @@ class PublicProductController extends BaseController
                 })
                 ->with(['address', 'products'])
                 ->select('ec_orders.*')
-                ->when(EcommerceHelper::isLoginUsingPhone(), function (BaseQueryBuilder $query) use ($request): void {
+                ->when(EcommerceHelper::isOrderTrackingUsingPhone(), function (BaseQueryBuilder $query) use ($request): void {
                     $query->where(function (BaseQueryBuilder $query) use ($request): void {
                         $query
                             ->whereHas('address', fn ($subQuery) => $subQuery->where('phone', $request->input('phone')))
@@ -469,7 +385,8 @@ class PublicProductController extends BaseController
             $title = __('Order tracking :code', ['code' => $code]);
         }
 
-        SeoHelper::setTitle($title);
+        SeoHelper::setTitle(theme_option('ecommerce_order_tracking_seo_title') ?: $title)
+            ->setDescription(theme_option('ecommerce_order_tracking_seo_description'));
 
         Theme::breadcrumb()
             ->add($title, route('public.orders.tracking'));
@@ -478,6 +395,40 @@ class PublicProductController extends BaseController
 
         return Theme::scope('ecommerce.order-tracking', compact('order', 'form'), 'plugins/ecommerce::themes.order-tracking')
             ->render();
+    }
+
+    public function ajaxGetUpSaleProducts(Product $product)
+    {
+        $parentProduct = $product;
+        $products = get_up_sale_products($product);
+
+        return $this
+            ->httpResponse()
+            ->setData(
+                Theme::scope(
+                    'ecommerce.includes.up-sale-products',
+                    compact('products', 'parentProduct'),
+                    'plugins/ecommerce::themes.includes.up-sale-products'
+                )->content()
+            );
+    }
+
+    public function ajaxGetCrossSaleProducts(Product $product, ProductCrossSalePriceService $productCrossSalePriceService)
+    {
+        $parentProduct = $product;
+        $products = get_cross_sale_products($product);
+
+        $productCrossSalePriceService->applyProduct($product);
+
+        return $this
+            ->httpResponse()
+            ->setData(
+                Theme::scope(
+                    'ecommerce.includes.cross-sale-products',
+                    compact('products', 'parentProduct'),
+                    'plugins/ecommerce::themes.includes.cross-sale-products'
+                )->content()
+            );
     }
 
     protected function ajaxFilterProductsResponse($products, ?ProductCategory $category = null)

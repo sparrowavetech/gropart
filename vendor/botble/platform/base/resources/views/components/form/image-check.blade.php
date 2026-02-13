@@ -13,7 +13,7 @@
         $numberItemsPerRow = $numberItemsPerRowAttr;
     }
 
-    if (! ($isWithoutAspectRatio = Arr::get($attributes, 'without_aspect_ratio'))) {
+    if (!($isWithoutAspectRatio = Arr::get($attributes, 'without_aspect_ratio'))) {
         $ratio = null;
 
         if (Arr::has($attributes, 'ratio')) {
@@ -34,26 +34,41 @@
         }
     }
 
-    $col =  min($numberItemsPerRow, 12);
+    $col = min($numberItemsPerRow, 12);
 @endphp
 
 <div class="row g-2 row-cols-sm-{{ intval(round($col / 2)) }} row-cols-md-{{ $col }}">
-    @foreach($options as $key => $option)
+    @foreach ($options as $key => $option)
         @php
             $label = Arr::get($option, 'label');
             $image = Arr::get($option, 'image', asset('vendor/core/core/base/images/ui-selector-placeholder.jpg'));
         @endphp
 
         <div @class(['ui-selector mb-3', 'without-ratio' => $isWithoutAspectRatio])>
-            <label for="{{ $id }}-{{ $key }}" class="form-imagecheck form-imagecheck-tick mb-2">
-                <input {{ $attributes->merge(['id' => "$id-$key", 'name' => $name, 'type' => 'radio', 'value' => $key, 'class' => 'form-imagecheck-input', 'checked' => $key == old($name, $value)]) }}>
-                <span class="form-imagecheck-figure" @style(["padding-top:$imagePaddingTop%" => $imagePaddingTop])>
-                    <img src="{{ $image }}" alt="{{ $label }}" class="form-imagecheck-image">
+            <label
+                for="{{ $id }}-{{ $key }}"
+                class="form-imagecheck form-imagecheck-tick mb-2"
+            >
+                <input
+                    {{ $attributes->merge(['id' => "$id-$key", 'name' => $name, 'type' => 'radio', 'value' => $key, 'class' => 'form-imagecheck-input', 'checked' => $key == old($name, $value)]) }}
+                >
+                <span
+                    class="form-imagecheck-figure"
+                    @style(["padding-top:$imagePaddingTop%" => $imagePaddingTop])
+                >
+                    <img
+                        src="{{ $image }}"
+                        alt="{{ $label }}"
+                        class="form-imagecheck-image"
+                    >
                 </span>
             </label>
 
-            @if($label)
-                <label for="{{ $id }}-{{ $key }}" class="cursor-pointer text-center form-check-label">
+            @if ($label)
+                <label
+                    for="{{ $id }}-{{ $key }}"
+                    class="cursor-pointer text-center form-check-label"
+                >
                     {{ $label }}
                 </label>
             @endif

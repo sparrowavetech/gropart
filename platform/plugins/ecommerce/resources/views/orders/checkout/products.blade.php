@@ -6,9 +6,13 @@
         @endphp
 
         @if (!empty($product))
-            @include('plugins/ecommerce::orders.checkout.product')
+            @include('plugins/ecommerce::orders.checkout.product', [
+                'product' => $product,
+                'cartItem' => $cartItem,
+                'key' => $cartItem->rowId,
+            ])
         @endif
     @endforeach
 
-    <hr>
+    <hr class="border-dark-subtle" />
 @endif

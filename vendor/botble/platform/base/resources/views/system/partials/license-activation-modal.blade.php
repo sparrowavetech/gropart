@@ -1,6 +1,6 @@
 <x-core::modal
     id="quick-activation-license-modal"
-    :title="__('License Activation')"
+    :title="trans('core/base::system.license_activation')"
 >
     <form
         action="{{ route('settings.license.activate') }}"
@@ -8,7 +8,10 @@
         data-bb-toggle="activate-license"
         data-reload="true"
     >
-        <x-core::license.form :reset="false" :is-vue="false" />
+        <x-core::license.form
+            :reset="false"
+            :is-vue="false"
+        />
     </form>
 </x-core::modal>
 

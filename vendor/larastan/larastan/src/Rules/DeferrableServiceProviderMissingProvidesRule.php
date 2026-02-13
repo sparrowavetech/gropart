@@ -34,7 +34,7 @@ class DeferrableServiceProviderMissingProvidesRule implements Rule
         $classReflection = $node->getClassReflection();
 
         // This rule is only applicable to deferrable serviceProviders
-        if (! $classReflection->isSubclassOf(ServiceProvider::class) || ! $classReflection->implementsInterface(DeferrableProvider::class)) {
+        if (! $classReflection->is(ServiceProvider::class) || ! $classReflection->implementsInterface(DeferrableProvider::class)) {
             return [];
         }
 
@@ -51,7 +51,7 @@ class DeferrableServiceProviderMissingProvidesRule implements Rule
 
         return [
             RuleErrorBuilder::message('ServiceProviders that implement the "DeferrableProvider" interface should implement the "provides" method that returns an array of strings or class-strings')
-                ->line($node->getLine())
+                ->line($node->getStartLine())
                 ->identifier('larastan.deferrableServiceProvider.missingProvides')
                 ->build(),
         ];

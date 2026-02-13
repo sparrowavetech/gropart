@@ -1,11 +1,9 @@
 <ul {!! $options !!}>
     @foreach ($menu_nodes as $key => $row)
-        <li
-            @class([
-                $row->css_class => $row->css_class,
-                'current' => $row->active,
-            ])
-        >
+        <li @class([
+            $row->css_class => $row->css_class,
+            'current' => $row->active,
+        ])>
             <a
                 href="{{ url($row->url) }}"
                 title="{{ $row->title }}"

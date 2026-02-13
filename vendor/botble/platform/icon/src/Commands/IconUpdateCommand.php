@@ -3,8 +3,10 @@
 namespace Botble\Icon\Commands;
 
 use Botble\Icon\Facades\Icon;
+use Carbon\Carbon;
 use GuzzleHttp\Psr7\Utils as Psr7Utils;
 use Illuminate\Console\Command;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
@@ -18,7 +20,9 @@ class IconUpdateCommand extends Command
     {
         $this->components->info('Fetching latest release of Tabler Icons...');
 
-        $response = Http::withoutVerifying()->get('https://api.github.com/repos/tabler/tabler-icons/releases/latest');
+        $response = Http::withoutVerifying()
+            ->timeout(300)
+            ->get('https://api.github.com/repos/tabler/tabler-icons/releases/latest');
 
         if ($response->failed()) {
             $this->components->error($response->reason() ?: 'Failed to fetch latest release of Tabler Icons.');
@@ -29,14 +33,37 @@ class IconUpdateCommand extends Command
         $response = $response->json();
 
         $tagName = str_replace('v', '', Arr::get($response, 'tag_name'));
-        $downloadUrl = Arr::get($response, 'assets.0.browser_download_url');
+        $downloadUrl = Arr::get($response, 'zipball_url');
+
+        if (! $downloadUrl) {
+            $this->components->error('Failed to fetch latest release of Tabler Icons.');
+
+            return self::FAILURE;
+        }
+
         $folderName = "core-icons-$tagName";
         $destination = storage_path("app/$folderName");
         $zipDestination = "$destination.zip";
 
-        $this->components->info("Downloading v$tagName...");
+        if (
+            ! File::exists($zipDestination)
+            || Carbon::createFromTimestamp(filectime($zipDestination))->diffInHours() > 1
+        ) {
+            $this->components->info("Downloading v$tagName...");
 
-        Http::withoutVerifying()->sink(Psr7Utils::tryFopen($zipDestination, 'w+'))->get($downloadUrl);
+            try {
+                Http::withoutVerifying()
+                    ->timeout(300)
+                    ->sink(Psr7Utils::tryFopen($zipDestination, 'w+'))
+                    ->get($downloadUrl);
+            } catch (ConnectionException $exception) {
+                File::delete($zipDestination);
+
+                $this->components->error($exception->getMessage());
+
+                return self::FAILURE;
+            }
+        }
 
         $this->components->info('Extracting files...');
 
@@ -53,7 +80,27 @@ class IconUpdateCommand extends Command
 
         $currentIconsCount = count(File::allFiles($iconsDestination));
 
-        foreach (File::allFiles("$destination/svg/outline") as $file) {
+        $extractedFolders = File::directories($destination);
+        if (empty($extractedFolders)) {
+            $this->components->error('No extracted folder found.');
+            File::delete($zipDestination);
+            File::deleteDirectory($destination);
+
+            return self::FAILURE;
+        }
+
+        $extractedFolder = $extractedFolders[0];
+        $svgOutlinePath = "$extractedFolder/icons/outline";
+
+        if (! File::exists($svgOutlinePath)) {
+            $this->components->error('SVG outline folder not found in extracted archive.');
+            File::delete($zipDestination);
+            File::deleteDirectory($destination);
+
+            return self::FAILURE;
+        }
+
+        foreach (File::allFiles($svgOutlinePath) as $file) {
             $fileName = $file->getFilename();
 
             File::move($file->getPathname(), "$iconsDestination/$fileName");

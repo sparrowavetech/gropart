@@ -8,7 +8,7 @@
             href="{{ Auth::guard()->user()->url }}"
             class="p-0 nav-link d-flex lh-1 text-reset"
             data-bs-toggle="dropdown"
-            aria-label="{{ __('Open user menu') }}"
+            aria-label="{{ trans('core/base::forms.open_user_menu') }}"
         >
             <span
                 class="crop-image-original avatar avatar-sm"

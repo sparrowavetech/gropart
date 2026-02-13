@@ -2,17 +2,12 @@
 
 namespace Botble\Ecommerce\Http\Controllers;
 
-use Botble\Base\Events\BeforeEditContentEvent;
-use Botble\Base\Events\CreatedContentEvent;
-use Botble\Base\Events\DeletedContentEvent;
-use Botble\Base\Events\UpdatedContentEvent;
+use Botble\Base\Http\Actions\DeleteResourceAction;
 use Botble\Base\Supports\Breadcrumb;
 use Botble\Ecommerce\Forms\ProductLabelForm;
 use Botble\Ecommerce\Http\Requests\ProductLabelRequest;
 use Botble\Ecommerce\Models\ProductLabel;
 use Botble\Ecommerce\Tables\ProductLabelTable;
-use Exception;
-use Illuminate\Http\Request;
 
 class ProductLabelController extends BaseController
 {
@@ -38,36 +33,33 @@ class ProductLabelController extends BaseController
 
     public function store(ProductLabelRequest $request)
     {
-        $productLabel = ProductLabel::query()->create($request->input());
+        $form = ProductLabelForm::create();
 
-        event(new CreatedContentEvent(PRODUCT_LABEL_MODULE_SCREEN_NAME, $request, $productLabel));
+        $form->setRequest($request)->save();
 
         return $this
             ->httpResponse()
             ->setPreviousUrl(route('product-label.index'))
-            ->setNextUrl(route('product-label.edit', $productLabel->id))
+            ->setNextUrl(route('product-label.edit', $form->getModel()->id))
             ->withCreatedSuccessMessage();
     }
 
-    public function edit(int|string $id, Request $request)
+    public function edit(ProductLabel $productLabel)
     {
-        $productLabel = ProductLabel::query()->findOrFail($id);
-
-        event(new BeforeEditContentEvent($request, $productLabel));
-
         $this->pageTitle(trans('core/base::forms.edit_item', ['name' => $productLabel->name]));
 
         return ProductLabelForm::createFromModel($productLabel)->renderForm();
     }
 
-    public function update(int|string $id, ProductLabelRequest $request)
+    public function update(ProductLabel $productLabel, ProductLabelRequest $request)
     {
-        $productLabel = ProductLabel::query()->findOrFail($id);
+        ProductLabelForm::createFromModel($productLabel)->setRequest($request)->save();
 
-        $productLabel->fill($request->input());
-        $productLabel->save();
+        if ($productIds = $request->input('label_products')) {
+            $productIds = array_filter(explode(',', $productIds));
+        }
 
-        event(new UpdatedContentEvent(PRODUCT_LABEL_MODULE_SCREEN_NAME, $request, $productLabel));
+        $productLabel->products()->sync($productIds ?: []);
 
         return $this
             ->httpResponse()
@@ -75,23 +67,8 @@ class ProductLabelController extends BaseController
             ->withUpdatedSuccessMessage();
     }
 
-    public function destroy(int|string $id, Request $request)
+    public function destroy(ProductLabel $productLabel)
     {
-        try {
-            $productLabel = ProductLabel::query()->findOrFail($id);
-
-            $productLabel->delete();
-
-            event(new DeletedContentEvent(PRODUCT_LABEL_MODULE_SCREEN_NAME, $request, $productLabel));
-
-            return $this
-                ->httpResponse()
-                ->setMessage(trans('core/base::notices.delete_success_message'));
-        } catch (Exception $exception) {
-            return $this
-                ->httpResponse()
-                ->setError()
-                ->setMessage($exception->getMessage());
-        }
+        return DeleteResourceAction::make($productLabel);
     }
 }

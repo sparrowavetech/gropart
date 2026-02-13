@@ -23,7 +23,7 @@ class PayoutInformationSettingRequest extends Request
     public function attributes(): array
     {
         return array_merge([
-            'bank_info' => __('Payout info'),
+            'bank_info' => trans('plugins/marketplace::withdrawal.payout_info'),
         ], PayoutPaymentMethodsEnum::getAttributes('bank_info'));
     }
 

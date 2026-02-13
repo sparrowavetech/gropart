@@ -14,7 +14,7 @@ class ThemeOptionSection implements Arrayable
 
     protected string $icon;
 
-    protected int $priority = 999;
+    protected float $priority = 999;
 
     protected array $fields = [];
 
@@ -49,7 +49,7 @@ class ThemeOptionSection implements Arrayable
         return $this;
     }
 
-    public function priority(int $priority): self
+    public function priority(float $priority): self
     {
         $this->priority = $priority;
 

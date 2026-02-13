@@ -12,7 +12,7 @@ class FilterCategory
             'search' => $request['search'] ?? null,
             'exclude' => $request['exclude'] ?? null,
             'include' => $request['include'] ?? null,
-            'order' => $request['order'] ?? 'desc',
+            'order' => in_array(strtolower($request['order'] ?? ''), ['asc', 'desc']) ? strtolower($request['order']) : 'desc',
             'order_by' => $request['order_by'] ?? 'name',
             'hide_empty' => $request['include'] ?? null,
             'parent' => $request['parent'] ?? null,

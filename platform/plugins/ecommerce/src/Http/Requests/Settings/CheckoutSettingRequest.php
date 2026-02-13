@@ -12,6 +12,8 @@ class CheckoutSettingRequest extends Request
 {
     public function rules(): array
     {
+        $countries = array_keys(Helper::countries());
+
         return [
             'enable_guest_checkout' => $onOffRule = new OnOffRule(),
             'minimum_order_amount' => ['nullable', 'numeric', 'min:0'],
@@ -27,9 +29,15 @@ class CheckoutSettingRequest extends Request
             'load_countries_states_cities_from_location_plugin' => $onOffRule,
             'use_city_field_as_field_text' => $onOffRule,
             'available_countries' => ['sometimes', 'array'],
-            'available_countries.*' => ['nullable', Rule::in(array_keys(Helper::countries()))],
+            'available_countries.*' => ['nullable', Rule::in($countries)],
             'enable_customer_recently_viewed_products' => $onOffRule,
             'max_customer_recently_viewed_products' => ['nullable', 'required_if:enable_customer_recently_viewed_products,1', 'integer', 'min:1'],
+            'default_country_at_checkout_page' => ['nullable', Rule::in($countries)],
+            'checkout_product_quantity_editable' => $onOffRule,
+            'show_terms_and_policy_checkbox' => $onOffRule,
+            'terms_and_policy_checkbox_checked_by_default' => $onOffRule,
+            'checkout_acceptance_message_enabled' => $onOffRule,
+            'hide_customer_info_at_checkout' => $onOffRule,
         ];
     }
 }

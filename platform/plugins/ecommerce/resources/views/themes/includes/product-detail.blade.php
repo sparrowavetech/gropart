@@ -25,14 +25,16 @@
                 <form class="single-variation-wrap" data-bb-toggle="product-form" action="{{ route('public.cart.add-to-cart') }}" method="post">
                     @csrf
                     <div class="row product-filters">
-                        @if ($product->variations()->count() > 0)
+                        @if ($product->has_variation)
                             {!! render_product_swatches($product, [
                                 'selected' => $selectedAttrs,
                             ]) !!}
                         @endif
                     </div>
 
-                    {!! apply_filters(ECOMMERCE_PRODUCT_DETAIL_EXTRA_HTML, null) !!}
+                    {!! render_product_options($product) !!}
+
+                    {!! apply_filters(ECOMMERCE_PRODUCT_DETAIL_EXTRA_HTML, null, $product) !!}
                     <input
                         id="hidden-product-is_out_of_stock"
                         name="product_is_out_of_stock"
@@ -57,7 +59,7 @@
                             {!! EcommerceHelper::jsAttributes('add-to-cart-in-form', $product) !!}
                         >
                             <x-core::icon name="ti ti-shopping-cart"/>
-                            {{ __('Add To Cart') }}
+                            {{ trans('plugins/ecommerce::ecommerce.add_to_cart') }}
                         </button>
                     </div>
 
@@ -72,7 +74,7 @@
                                     data-remove-url="{{ route('public.compare.remove', $product) }}"
                                 >
                                     <x-core::icon name="ti ti-refresh"/>
-                                    {{ __('Compare') }}
+                                    {{ trans('plugins/ecommerce::ecommerce.compare') }}
                                 </button>
                             @endif
                             @if (EcommerceHelper::isWishlistEnabled())
@@ -82,7 +84,7 @@
                                     data-url="{{ route('public.wishlist.add', $product) }}"
                                 >
                                     <x-core::icon name="ti ti-heart"/>
-                                    {{ __('Add Wishlist') }}
+                                    {{ trans('plugins/ecommerce::ecommerce.add_wishlist') }}
                                 </button>
                             @endif
                         </div>
@@ -90,7 +92,7 @@
                 </form>
                 <div class="bb-product-meta">
                     @if ($product->sku)
-                        <span>{{ __('SKU') }} : <span
+                        <span>{{ trans('plugins/ecommerce::products.sku') }} : <span
                                 class="sku"
                                 id="product-sku"
                                 itemprop="sku"
@@ -98,11 +100,11 @@
                     @endif
                     <span>
                     <span
-                        id="is-out-of-stock">{{ !$product->isOutOfStock() ? __('In stock') : __('Out of stock') }}</span>
+                        id="is-out-of-stock">{{ !$product->isOutOfStock() ? trans('plugins/ecommerce::ecommerce.in_stock') : trans('plugins/ecommerce::ecommerce.out_of_stock') }}</span>
                 </span>
 
                     @if (!$product->categories->isEmpty())
-                        <span>{{ __('Categories') }} :
+                        <span>{{ trans('plugins/ecommerce::products.categories') }} :
                         @foreach ($product->categories as $category)
                             <a href="{{ $category->url }}"> {{ $category->name }}
                                 @if (!$loop->last), @endif

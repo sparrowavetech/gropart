@@ -8,13 +8,21 @@ use Illuminate\Support\Str;
 
 class ShortcodeField
 {
-    public function tabs(array $fields, array $attributes = [], int $max = 20, int $min = 1, ?string $tabKey = null): string
+    public function tabs(array $fields, array $attributes = [], int $max = 20, int $min = 1, ?string $tabKey = null, $wrapperAttributes = [], ?string $label = null, bool $required = false): string
     {
         if (! $fields) {
             return '';
         }
 
-        $current = (int) Arr::get($attributes, $tabKey ? "{$tabKey}_quantity" : 'quantity') ?: 6;
+        $current = Arr::get($attributes, $tabKey ? "{$tabKey}_quantity" : 'quantity') ?: 6;
+
+        if (is_array($current)) {
+            $current = end($current);
+        } elseif (str_contains($current, ',')) {
+            $current = Str::afterLast($current, ',');
+        }
+
+        $current = (int) $current;
 
         $selector = 'quantity_' . Str::random(20);
 
@@ -23,7 +31,7 @@ class ShortcodeField
 
         return view(
             'packages/shortcode::fields.tabs',
-            compact('fields', 'attributes', 'current', 'selector', 'choices', 'max', 'min', 'tabKey')
+            compact('fields', 'attributes', 'current', 'selector', 'choices', 'max', 'min', 'tabKey', 'wrapperAttributes', 'label', 'required')
         )->render();
     }
 
@@ -78,10 +86,14 @@ class ShortcodeField
         return static::parseIds($value);
     }
 
-    public static function parseIds(?string $value): array
+    public static function parseIds(string|array|null $value): array
     {
         if (empty($value)) {
             return [];
+        }
+
+        if (is_array($value)) {
+            return $value;
         }
 
         return explode(',', $value) ?: [];

@@ -11,7 +11,7 @@ class ProductSalePriceService extends ProductPriceHandlerService
     public function handle(Product $product, Closure $next)
     {
         $price = $product->getFinalPrice();
-        $salePrice = $product->sale_price;
+        $salePrice = $product->getConvertedSalePrice();
 
         if ($salePrice === null || $salePrice > $price) {
             return $next($product);

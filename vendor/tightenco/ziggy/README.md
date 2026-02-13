@@ -44,7 +44,7 @@ Add the `@routes` Blade directive to your main layout (_before_ your application
 
 ### `route()` function
 
-Ziggy's `route()` function works like [Laravel's `route()` helper](https://laravel.com/docs/10.x/helpers#method-route)—you can pass it the name of a route, and the parameters you want to pass to the route, and it will generate a URL.
+Ziggy's `route()` function works like [Laravel's `route()` helper](https://laravel.com/docs/helpers#method-route)—you can pass it the name of a route, and the parameters you want to pass to the route, and it will generate a URL.
 
 #### Basic usage
 
@@ -287,6 +287,20 @@ If you don't have Ziggy's NPM package installed, add the following to your `jsco
 }
 ```
 
+#### Strict route name type checking
+
+By default, even when you generate type definitions to enable better autocompletion, Ziggy still allows passing any string to `route()`. You can optionally enable strict type checking of route names, so that calling `route()` with a route name Ziggy doensn't recognizes triggers a type error. To do so, extend Ziggy's `TypeConfig` interface and set `strictRouteNames` to `true`:
+
+```ts
+declare module 'ziggy-js' {
+  interface TypeConfig {
+    strictRouteNames: true
+  }
+}
+```
+
+Place this declaration in a `.d.ts` type definition file somewhere in your project. Depending on your setup, you may need to add an `export {};` statement to the end of file so TypeScript can pick it up.
+
 ## JavaScript frameworks
 
 > [!NOTE]
@@ -376,6 +390,16 @@ Now you can use the `route()` function anywhere in your Vue components and templ
 
 ```vue
 <a class="nav-link" :href="route('home')">Home</a>
+```
+
+With `<script setup>` in Vue 3 you can use `inject` to make the `route()` function available in your component script:
+
+```vue
+<script setup>
+import { inject } from 'vue';
+
+const route = inject('route');
+</script>
 ```
 
 If you are not using the `@routes` Blade directive, import Ziggy's configuration too and pass it to `.use()`:
@@ -522,6 +546,12 @@ A [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CS
 @routes(nonce: 'your-nonce-here')
 ```
 
+Alternatively, you can configure Ziggy to output your routes as plain JSON, rather than JavaScript, so that the output is ignored by the CSP. Note that if you use this option you will need to load Ziggy's JavaScript `route()` function yourself, by configuring the Vue plugin or React hook or importing the JavaScript manually.
+
+```php
+@routes(json: true)
+```
+
 ### Disabling the `route()` helper
 
 If you only want to use the `@routes` directive to make Ziggy's configuration available in JavaScript, but don't need the `route()` helper function, set the `ziggy.skip-route-function` config to `true`.
@@ -540,7 +570,7 @@ Route::get('ziggy', fn () => response()->json(new Ziggy));
 
 ### Re-generating the routes file when your app routes change
 
-If you are generating your Ziggy config as a file by running `php artisan ziggy:generate`, you may want to re-run that command when your app's route files change. The example below is a Laravel Mix plugin, but similar functionality could be achieved without Mix. Huge thanks to [Nuno Rodrigues](https://github.com/nacr) for [the idea and a sample implementation](https://github.com/tighten/ziggy/issues/321#issuecomment-689150082). See [#655 for a Vite example](https://github.com/tighten/ziggy/pull/655/files#diff-4aeb78f813e14842fcf95bdace9ced23b8a6eed60b23c165eaa52e8db2f97b61).
+If you are generating your Ziggy config as a file by running `php artisan ziggy:generate`, you may want to re-run that command when your app's route files change. The example below is a Laravel Mix plugin, but similar functionality could be achieved without Mix. Huge thanks to [Nuno Rodrigues](https://github.com/nacr) for [the idea and a sample implementation](https://github.com/tighten/ziggy/issues/321#issuecomment-689150082). See [#655](https://github.com/tighten/ziggy/pull/655/files#diff-4aeb78f813e14842fcf95bdace9ced23b8a6eed60b23c165eaa52e8db2f97b61) or [vite-plugin-ziggy](https://github.com/aniftyco/vite-plugin-ziggy) for Vite examples.
 
 <details>
 <summary>Laravel Mix plugin example</summary>

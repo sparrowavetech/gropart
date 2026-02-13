@@ -12,7 +12,11 @@ class CustomerUpdateEmailRequest extends Request
     public function rules(): array
     {
         return [
-            'email' => ['required', new EmailRule(), Rule::unique((new Customer())->getTable(), 'email')->ignore($this->route('id'))],
+            'email' => [
+                'required',
+                new EmailRule(),
+                Rule::unique((new Customer())->getTable(), 'email')->ignore($this->route('id')),
+            ],
         ];
     }
 }

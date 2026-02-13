@@ -18,14 +18,14 @@
 ></div>
 
 <header
-    @class(['top-0 w-100 position-fixed end-0 z-1000', 'vertical-wrapper' => AdminHelper::isInAdmin(true) && AdminAppearance::isVerticalLayout()])
+    class="top-0 w-100 position-fixed end-0 z-1000"
     id="form-actions"
     @style(['display: none'])
 >
     <div class="navbar">
         <div class="{{ AdminAppearance::getContainerWidth() }}">
             <div class="row g-2 align-items-center w-100">
-                @if(is_in_admin(true))
+                @if (is_in_admin(true))
                     <div class="col">
                         <div class="page-pretitle">
                             {!! Breadcrumbs::render('main', PageTitle::getTitle(false)) !!}

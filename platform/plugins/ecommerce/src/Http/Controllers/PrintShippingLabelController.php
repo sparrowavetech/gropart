@@ -12,14 +12,20 @@ use Botble\Base\Supports\Pdf;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Facades\InvoiceHelper;
 use Botble\Ecommerce\Models\Shipment;
+use Botble\Location\Models\City;
+use Botble\Location\Models\State;
 use Botble\Media\Facades\RvMedia;
+use Botble\Payment\Enums\PaymentMethodEnum;
+use Botble\Theme\Facades\Theme;
 use Illuminate\Http\Response;
 use Illuminate\Support\Str;
 
 class PrintShippingLabelController extends BaseController
 {
-    public function __invoke(Shipment $shipment, Pdf $pdf): Response
+    public function __invoke(Shipment $shipment, Pdf $pdf): ?Response
     {
+        $this->pageTitle(trans('plugins/ecommerce::shipping.shipping_label.print_shipping_label'));
+
         $renderer = new ImageRenderer(
             new RendererStyle(400),
             new SvgImageBackEnd()
@@ -27,14 +33,67 @@ class PrintShippingLabelController extends BaseController
 
         $writer = new Writer($renderer);
 
-        if ($shipment->tracking_link) {
-            $url = $shipment->tracking_link;
-        } else {
-            $params = EcommerceHelper::isLoginUsingPhone() ? ['phone' => $shipment->order->user->phone] : ['email' => $shipment->order->user->email];
-            $url = route('public.orders.tracking', ['order_id' => get_order_code($shipment->order_id), ...$params]);
+        $url = $shipment->tracking_link;
+
+        if (! $url) {
+            $params = [
+                'order_id' => get_order_code($shipment->order_id),
+            ];
+
+            $customer = $shipment->order->user;
+
+            $orderAddress  = $shipment->order->address;
+
+            if (EcommerceHelper::isOrderTrackingUsingPhone()) {
+                $params['phone'] = $orderAddress->phone ?: $customer->phone;
+            } else {
+                $params['email'] = $orderAddress->email ?: $customer->email;
+            }
+
+            $url = route('public.orders.tracking', $params);
         }
 
         $qrCode = $writer->writeString($url);
+
+        $country = EcommerceHelper::getCountryNameById(get_ecommerce_setting('store_country'));
+        $state = get_ecommerce_setting('store_state');
+        $city = get_ecommerce_setting('store_city');
+
+        if (EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation()) {
+            if (is_numeric($state)) {
+                $state = State::query()->where('id', $state)->value('name');
+            }
+
+            if (is_numeric($city)) {
+                $city = City::query()->where('id', $city)->value('name');
+            }
+        }
+
+        $address = get_ecommerce_setting('store_address');
+
+        $zipCode = get_ecommerce_setting('store_zip_code');
+
+        $fullAddress = implode(', ', array_filter([
+            $address,
+            $city,
+            $state,
+            $country,
+            EcommerceHelper::isZipCodeEnabled() ? $zipCode : '',
+        ]));
+
+        $order = $shipment->order;
+
+        $isCOD = is_plugin_active('payment')
+            && $order->payment
+            && $order->payment->id
+            && $order->payment->payment_channel == PaymentMethodEnum::COD;
+        $codAmount = $isCOD ? $order->amount : 0;
+
+        $extraCss = apply_filters('ecommerce_shipping_label_extra_css', null, $shipment);
+
+        if ($customCss = setting('shipping_label_template_custom_css')) {
+            $extraCss = $extraCss ? $extraCss . "\n" . $customCss : $customCss;
+        }
 
         return $pdf
             ->templatePath(plugin_path('ecommerce/resources/templates/shipping-label.tpl'))
@@ -42,50 +101,54 @@ class PrintShippingLabelController extends BaseController
             ->paperSizeHalfLetter()
             ->supportLanguage(InvoiceHelper::getLanguageSupport())
             ->data(apply_filters('ecommerce_shipping_label_data', [
+                'settings' => [
+                    'extra_css' => $extraCss,
+                ],
                 'shipment' => [
                     'order_number' => get_order_code($shipment->order_id),
                     'code' => get_shipment_code($shipment->getKey()),
                     'weight' => $shipment->weight,
                     'weight_unit' => ecommerce_weight_unit(),
                     'created_at' => BaseHelper::formatDate($shipment->created_at),
-                    'shipping_method' => $shipment->order->shipping_method_name,
+                    'shipping_method' => $order->shipping_method_name,
                     'shipping_fee' => format_price($shipment->price),
+                    'total_collectable_amount' => format_price($codAmount),
+                    'cod_amount' => format_price($codAmount),
+                    'is_cod' => $isCOD,
                     'shipping_company_name' => $shipment->shipping_company_name,
                     'tracking_id' => $shipment->tracking_id,
-                    'tracking_link' => $url,
+                    'tracking_link' => $shipment->tracking_link,
                     'note' => Str::limit((string) $shipment->note, 90),
                     'qr_code' => base64_encode($qrCode),
+                    'order' => [
+                        'amount' => format_price($order->amount),
+                        'tax_amount' => format_price($order->tax_amount),
+                        'shipping_amount' => format_price($order->shipping_amount),
+                        'discount_amount' => format_price($order->discount_amount),
+                        'sub_total' => format_price($order->sub_total),
+                    ],
                 ],
                 'sender' => [
-                    'brandlogo' => Rvmedia::getRealPath(get_ecommerce_setting('company_logo_for_invoicing') ?: (theme_option('logo_in_invoices'))),
-                    'companyName' => theme_option('site_title'),
-                    'companyGST' => get_ecommerce_setting('company_tax_id_for_invoicing'),
-                    'logo' => RvMedia::getRealPath(theme_option('logo')),
+                    'logo' => RvMedia::getRealPath(Theme::getLogo()),
                     'name' => get_ecommerce_setting('store_name'),
                     'phone' => get_ecommerce_setting('store_phone'),
                     'email' => get_ecommerce_setting('store_email'),
-                    'country' => $country = get_ecommerce_setting('store_country'),
-                    'state' => $state = get_ecommerce_setting('store_state'),
-                    'city' => $city = get_ecommerce_setting('store_city'),
-                    'zip_code' => $zipCode = get_ecommerce_setting('store_zip_code'),
-                    'address' => $address = get_ecommerce_setting('store_address'),
-                    'full_address' => implode(', ', array_filter([
-                        $address,
-                        $city,
-                        $state,
-                        $country,
-                        EcommerceHelper::isZipCodeEnabled() ? $zipCode : '',
-                    ])),
+                    'country' => $country,
+                    'state' => $state,
+                    'city' => $city,
+                    'zip_code' => $zipCode,
+                    'address' => $address,
+                    'full_address' => $fullAddress,
                 ],
                 'receiver' => [
-                    'name' => $shipment->order->user_name,
-                    'full_address' => $shipment->order->full_address,
-                    'email' => $shipment->order->user->email,
-                    'phone' => $shipment->order->user->phone,
-                    'note' => Str::limit((string) $shipment->order->description, 90),
+                    'name' => $order->shippingAddress->name ?: $order->user->name,
+                    'full_address' => $order->full_address,
+                    'email' => $order->shippingAddress->email ?: $order->user->email,
+                    'phone' => $order->shippingAddress->phone ?: $order->user->phone,
+                    'note' => Str::limit((string) $order->description, 90),
                 ],
             ], $shipment))
-            ->compile()
-            ->stream();
+            ->setProcessingLibrary(get_ecommerce_setting('invoice_processing_library', 'dompdf'))
+            ->stream('shipping-label.pdf');
     }
 }

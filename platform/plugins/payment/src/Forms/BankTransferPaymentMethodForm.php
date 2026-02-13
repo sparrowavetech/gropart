@@ -11,12 +11,14 @@ use Botble\Base\Forms\FormAbstract;
 use Botble\Payment\Concerns\Forms\HasAvailableCountriesField;
 use Botble\Payment\Enums\PaymentMethodEnum;
 
-class BankTransferPaymentMethodForm extends FormAbstract
+class BankTransferPaymentMethodForm extends PaymentMethodForm
 {
     use HasAvailableCountriesField;
 
     public function setup(): void
     {
+        parent::setup();
+
         $this
             ->template('plugins/payment::forms.fields-only')
             ->add(
@@ -25,7 +27,6 @@ class BankTransferPaymentMethodForm extends FormAbstract
                 TextFieldOption::make()
                     ->value(PaymentMethodEnum::BANK_TRANSFER)
                     ->attributes(['class' => 'payment_type'])
-                    ->toArray()
             )
             ->add(
                 get_payment_setting_key('name', PaymentMethodEnum::BANK_TRANSFER),
@@ -37,8 +38,7 @@ class BankTransferPaymentMethodForm extends FormAbstract
                         'name',
                         PaymentMethodEnum::BANK_TRANSFER,
                         PaymentMethodEnum::BANK_TRANSFER()->label(),
-                    ))
-                    ->toArray(),
+                    )),
             )
             ->add(
                 get_payment_setting_key('description', PaymentMethodEnum::BANK_TRANSFER),
@@ -47,12 +47,13 @@ class BankTransferPaymentMethodForm extends FormAbstract
                     ->wrapperAttributes(['style' => 'max-width: 99.8%'])
                     ->label(trans('plugins/payment::payment.payment_method_description'))
                     ->value(get_payment_setting('description', PaymentMethodEnum::BANK_TRANSFER))
-                    ->toArray()
             )
+            ->paymentMethodLogoField(PaymentMethodEnum::BANK_TRANSFER)
+            ->paymentFeeField(PaymentMethodEnum::BANK_TRANSFER)
             ->addAvailableCountriesField(PaymentMethodEnum::BANK_TRANSFER)
             ->when(
                 apply_filters(PAYMENT_METHOD_SETTINGS_CONTENT, null, PaymentMethodEnum::BANK_TRANSFER),
-                function (FormAbstract $form, ?string $data) {
+                function (FormAbstract $form, ?string $data): void {
                     $form->add('metabox', HtmlField::class, ['html' => $data]);
                 }
             );

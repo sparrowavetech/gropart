@@ -1,0 +1,10 @@
+{
+    "id": "friendsofbotble/facebook-catalog-feed",
+    "name": "Facebook Catalog Feed",
+    "namespace": "FriendsOfBotble\\FacebookCatalogFeed\\",
+    "provider": "FriendsOfBotble\\FacebookCatalogFeed\\Providers\\FacebookCatalogFeedServiceProvider",
+    "author": "FriendsOfBotble",
+    "url": "https://github.com/FriendsOfBotble",
+    "version": "1.0.3",
+    "description": "Generate Facebook Catalog Feed XML for your products"
+}

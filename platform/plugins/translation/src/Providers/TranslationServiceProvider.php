@@ -8,7 +8,12 @@ use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\DataSynchronize\PanelSections\ExportPanelSection;
 use Botble\DataSynchronize\PanelSections\ImportPanelSection;
+use Botble\Translation\Console\AutoTranslateCoreCommand;
+use Botble\Translation\Console\AutoTranslateThemeCommand;
+use Botble\Translation\Console\CheckMissingTranslationCommand;
+use Botble\Translation\Console\CleanupTranslationsCommand;
 use Botble\Translation\Console\DownloadLocaleCommand;
+use Botble\Translation\Console\FindTranslationsByPathCommand;
 use Botble\Translation\Console\RemoveLocaleCommand;
 use Botble\Translation\Console\RemoveUnusedTranslationsCommand;
 use Botble\Translation\Console\UpdateThemeTranslationCommand;
@@ -22,18 +27,19 @@ class TranslationServiceProvider extends ServiceProvider
     {
         $this
             ->setNamespace('plugins/translation')
-            ->loadAndPublishConfigurations(['general', 'permissions'])
+            ->loadAndPublishConfigurations(['general'])
+            ->loadAndPublishConfigurations(['permissions'])
             ->loadMigrations()
             ->loadRoutes()
             ->loadAndPublishViews()
             ->loadAndPublishTranslations()
             ->publishAssets();
 
-        PanelSectionManager::beforeRendering(function () {
+        PanelSectionManager::beforeRendering(function (): void {
             PanelSectionManager::register(LocalizationPanelSection::class);
         });
 
-        PanelSectionManager::setGroupId('data-synchronize')->beforeRendering(function () {
+        PanelSectionManager::setGroupId('data-synchronize')->beforeRendering(function (): void {
             PanelSectionManager::default()
                 ->registerItem(
                     ExportPanelSection::class,
@@ -88,9 +94,14 @@ class TranslationServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 UpdateThemeTranslationCommand::class,
+                FindTranslationsByPathCommand::class,
+                CleanupTranslationsCommand::class,
                 RemoveUnusedTranslationsCommand::class,
                 DownloadLocaleCommand::class,
                 RemoveLocaleCommand::class,
+                AutoTranslateThemeCommand::class,
+                AutoTranslateCoreCommand::class,
+                CheckMissingTranslationCommand::class,
             ]);
         }
     }

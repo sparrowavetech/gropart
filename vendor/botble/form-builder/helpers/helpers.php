@@ -3,12 +3,12 @@
 use Kris\LaravelFormBuilder\Fields\FormField;
 use Kris\LaravelFormBuilder\Form;
 
-if(! function_exists('getFormBuilderViewPath')) {
+if (! function_exists('getFormBuilderViewPath')) {
     function getFormBuilderViewPath(string $fileName): string
     {
         $p = explode('.', $fileName);
         $c = count($p);
-        if($c > 2 || $p[$c - 1] != 'php') {
+        if ($c > 2 || $p[$c - 1] != 'php') {
             throw new Exception('You should use only *.php files with this function');
         }
 
@@ -18,7 +18,7 @@ if(! function_exists('getFormBuilderViewPath')) {
     }
 }
 
-if(! function_exists('errorBlockPath')) {
+if (! function_exists('errorBlockPath')) {
 
     function errorBlockPath(): string
     {
@@ -27,7 +27,7 @@ if(! function_exists('errorBlockPath')) {
 
 }
 
-if(! function_exists('helpBlockPath')) {
+if (! function_exists('helpBlockPath')) {
 
     function helpBlockPath(): string
     {

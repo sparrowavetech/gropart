@@ -3,32 +3,43 @@
 namespace Botble\Ecommerce\Http\Controllers;
 
 use Botble\Base\Events\CreatedContentEvent;
-use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Base\Facades\Assets;
 use Botble\Base\Forms\FormAbstract;
+use Botble\Base\Http\Actions\DeleteResourceAction;
 use Botble\Base\Http\Requests\UpdateTreeCategoryRequest;
 use Botble\Ecommerce\Forms\ProductCategoryForm;
 use Botble\Ecommerce\Http\Requests\ProductCategoryRequest;
 use Botble\Ecommerce\Http\Resources\ProductCategoryResource;
 use Botble\Ecommerce\Models\ProductCategory;
-use Exception;
+use Botble\Ecommerce\Tables\ProductCategoryTable;
+use Botble\Support\Services\Cache\Cache as CacheService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 
 class ProductCategoryController extends BaseController
 {
-    
-    public function index(Request $request)
+    public function index(Request $request, ProductCategoryTable $dataTable)
     {
         $this->pageTitle(trans('plugins/ecommerce::product-categories.name'));
-     
+
+        if ($request->get('as') === 'table') {
+            return $dataTable->renderTable();
+        }
+
         $categories = ProductCategory::query()
-            ->orderBy('order')
-            ->orderByDesc('created_at')
+            ->select([
+                'id',
+                'name',
+                'parent_id',
+                'status',
+                'order',
+                'slug',
+            ])
+            ->oldest('order')
+            ->latest()
             ->with('slugable')
-            ->withCount('products')
             ->get();
 
         if ($request->ajax()) {
@@ -43,8 +54,9 @@ class ProductCategoryController extends BaseController
         Assets::addStylesDirectly(['vendor/core/core/base/css/tree-category.css'])
             ->addScriptsDirectly(['vendor/core/core/base/js/tree-category.js']);
 
-        $form = ProductCategoryForm::create(['template' => 'core/base::forms.form-tree-category']);
+        $form = ProductCategoryForm::create(['template' => 'plugins/ecommerce::product-categories.form-tree-category']);
         $form = $this->setFormOptions($form, null, compact('categories'));
+        $form->setUrl(route('product-categories.create'));
 
         return $form->renderForm();
     }
@@ -104,7 +116,9 @@ class ProductCategoryController extends BaseController
 
         $this->pageTitle(trans('core/base::forms.edit_item', ['name' => $productCategory->name]));
 
-        return ProductCategoryForm::createFromModel($productCategory)->renderForm();
+        return ProductCategoryForm::createFromModel($productCategory)
+            ->setUrl(route('product-categories.edit', $productCategory->getKey()))
+            ->renderForm();
     }
 
     public function update(ProductCategory $productCategory, ProductCategoryRequest $request)
@@ -134,26 +148,16 @@ class ProductCategoryController extends BaseController
             ->withUpdatedSuccessMessage();
     }
 
-    public function destroy(ProductCategory $productCategory, Request $request)
+    public function destroy(ProductCategory $productCategory)
     {
-        try {
-            $productCategory->delete();
-            event(new DeletedContentEvent(PRODUCT_CATEGORY_MODULE_SCREEN_NAME, $request, $productCategory));
-
-            return $this
-                ->httpResponse()
-                ->setMessage(trans('core/base::notices.delete_success_message'));
-        } catch (Exception $exception) {
-            return $this
-                ->httpResponse()
-                ->setError()
-                ->setMessage($exception->getMessage());
-        }
+        return DeleteResourceAction::make($productCategory);
     }
 
     public function updateTree(UpdateTreeCategoryRequest $request)
     {
         ProductCategory::updateTree($request->validated('data'));
+
+        (new CacheService(app('cache'), ProductCategory::class))->flush();
 
         return $this
             ->httpResponse()
@@ -170,6 +174,12 @@ class ProductCategoryController extends BaseController
         $form = ProductCategoryForm::create($options);
 
         $form = $this->setFormOptions($form, $model);
+
+        if (! $model) {
+            $form->setUrl(route('product-categories.create'));
+        } else {
+            $form->setUrl(route('product-categories.edit', $model->getKey()));
+        }
 
         return $form->renderForm();
     }
@@ -228,8 +238,7 @@ class ProductCategoryController extends BaseController
                 'name',
                 'parent_id',
             ])
-            ->orderBy('order')
-            ->orderByDesc('created_at')
+            ->oldest('order')->latest()
             ->get();
 
         return $this

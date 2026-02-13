@@ -27,7 +27,7 @@ class SimpleSliderForm extends FormAbstract
         $this
             ->model(SimpleSlider::class)
             ->setValidatorClass(SimpleSliderRequest::class)
-            ->add('name', TextField::class, NameFieldOption::make()->required()->toArray())
+            ->add('name', TextField::class, NameFieldOption::make()->required())
             ->add(
                 'key',
                 TextField::class,
@@ -35,12 +35,11 @@ class SimpleSliderForm extends FormAbstract
                 ->label(trans('plugins/simple-slider::simple-slider.key'))
                 ->required()
                 ->maxLength(120)
-                ->toArray()
             )
-            ->add('description', TextareaField::class, DescriptionFieldOption::make()->toArray())
-            ->add('status', SelectField::class, StatusFieldOption::make()->toArray())
+            ->add('description', TextareaField::class, DescriptionFieldOption::make())
+            ->add('status', SelectField::class, StatusFieldOption::make())
             ->setBreakFieldPoint('status')
-            ->when($this->model->id, function () {
+            ->when($this->model->id, function (): void {
                 $this->addMetaBoxes([
                     'slider-items' => [
                         'title' => trans('plugins/simple-slider::simple-slider.slide_items'),

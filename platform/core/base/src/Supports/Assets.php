@@ -52,14 +52,26 @@ class Assets extends BaseAssets
             $this->config['resources']['styles']['select2']['src']['local'][1] = '/vendor/core/core/base/css/libraries/select2.rtl.css';
         }
 
-        return parent::renderHeader($lastStyles);
+        $styles = $this->getStyles($lastStyles);
+        $headScripts = $this->getScripts(self::ASSETS_SCRIPT_POSITION_HEADER);
+
+        return view('core/base::assets.header', compact('styles', 'headScripts'))->render();
     }
 
     public function renderFooter(): string
     {
         $bodyScripts = $this->getScripts(self::ASSETS_SCRIPT_POSITION_FOOTER);
 
-        return view('assets::footer', compact('bodyScripts'))->render();
+        return view('core/base::assets.footer', compact('bodyScripts'))->render();
+    }
+
+    public function getBuildVersionFor(string $src): string
+    {
+        if (str_contains($src, '?')) {
+            return '';
+        }
+
+        return $this->getBuildVersion();
     }
 
     public function usingVueJS(): self

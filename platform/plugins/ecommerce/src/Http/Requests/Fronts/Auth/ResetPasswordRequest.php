@@ -12,7 +12,7 @@ class ResetPasswordRequest extends Request
         return [
             'token' => ['required', 'string'],
             'email' => ['required', new EmailRule()],
-            'password' => ['required', 'confirmed', 'min:6'],
+            'password' => ['required', 'string', 'confirmed', 'min:6'],
         ];
     }
 }

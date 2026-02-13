@@ -1,5 +1,7 @@
 <div
-    class="form-group mb-3 variant-radio product-option product-option-{{ Str::slug($option->name) }} product-option-{{ $option->id }}">
+    class="form-group mb-3 variant-radio product-option product-option-{{ Str::slug($option->name) }} product-option-{{ $option->id }}"
+    data-option-slug="{{ Str::slug($option->name) }}"
+>
     <div class="product-option-item-wrapper">
         <div class="product-option-item-label">
             <label class="{{ $option->required ? 'required' : '' }}">
@@ -17,6 +19,7 @@
                 name="options[{{ $option->id }}][values]"
                 {{ $option->required ? 'required' : '' }}
             >
+                <option value="">{{ trans('plugins/ecommerce::ecommerce.select_an_option') }}</option>
                 @foreach ($option->values as $value)
                     @php
                         $price = 0;
@@ -26,6 +29,7 @@
                     @endphp
                     <option
                         data-extra-price="{{ $price }}"
+                        data-value-slug="{{ Str::slug($value->option_value) }}"
                         value="{{ $value->option_value }}"
                     >{{ $value->option_value }} {{ $price > 0 ? '+' . format_price($price) : '' }}</option>
                 @endforeach

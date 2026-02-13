@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static array getVariableValues(string|null $module = null)
  * @method static \Botble\Base\Supports\EmailHandler setVariableValues(array $data, string|null $module = null)
  * @method static \Botble\Base\Supports\EmailHandler addTemplateSettings(string $module, array|null $data, string $type = 'plugins')
+ * @method static \Botble\Base\Supports\EmailHandler removeTemplateSettings(string $module, string $type = 'plugins')
  * @method static array getTemplates()
  * @method static array|string|null getTemplateData(string $type, string $module, string $name)
  * @method static array getFunctions()

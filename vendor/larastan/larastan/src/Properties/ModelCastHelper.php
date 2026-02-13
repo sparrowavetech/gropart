@@ -15,17 +15,23 @@ use Illuminate\Database\Eloquent\Casts\AsCollection;
 use Illuminate\Database\Eloquent\Casts\AsEncryptedArrayObject;
 use Illuminate\Database\Eloquent\Casts\AsEncryptedCollection;
 use Illuminate\Database\Eloquent\Casts\AsStringable;
+use Illuminate\Database\Eloquent\Concerns\HasUniqueStringIds;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon as IlluminateCarbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Stringable as IlluminateStringable;
+use PhpParser\Node;
+use PhpParser\Node\Expr\Array_;
+use PhpParser\NodeFinder;
 use PHPStan\Analyser\OutOfClassScope;
+use PHPStan\Analyser\ScopeContext;
+use PHPStan\Analyser\ScopeFactory;
+use PHPStan\Parser\Parser;
 use PHPStan\Reflection\ClassReflection;
 use PHPStan\Reflection\MissingMethodFromReflectionException;
 use PHPStan\Reflection\ParameterReflection;
-use PHPStan\Reflection\ParametersAcceptorSelector;
 use PHPStan\Reflection\ReflectionProvider;
 use PHPStan\ShouldNotHappenException;
 use PHPStan\Type\Accessory\AccessoryNumericStringType;
@@ -37,10 +43,12 @@ use PHPStan\Type\FloatType;
 use PHPStan\Type\Generic\GenericObjectType;
 use PHPStan\Type\IntegerType;
 use PHPStan\Type\MixedType;
+use PHPStan\Type\NullType;
 use PHPStan\Type\ObjectType;
 use PHPStan\Type\StringType;
 use PHPStan\Type\Type;
 use PHPStan\Type\TypeCombinator;
+use PHPStan\Type\VerbosityLevel;
 use ReflectionException;
 use stdClass;
 use Stringable;
@@ -52,7 +60,6 @@ use function array_merge;
 use function class_exists;
 use function explode;
 use function str_replace;
-use function version_compare;
 
 class ModelCastHelper
 {
@@ -60,7 +67,10 @@ class ModelCastHelper
     private array $modelCasts = [];
 
     public function __construct(
-        protected ReflectionProvider $reflectionProvider,
+        private ReflectionProvider $reflectionProvider,
+        private Parser $parser,
+        private bool $parseModelCastsMethod,
+        private ScopeFactory $scopeFactory,
     ) {
     }
 
@@ -80,7 +90,10 @@ class ModelCastHelper
             'date', 'datetime' => $this->getDateType(),
             'immutable_date', 'immutable_datetime' => new ObjectType(CarbonImmutable::class),
             AsArrayObject::class, AsEncryptedArrayObject::class => new ObjectType(ArrayObject::class),
-            AsCollection::class, AsEncryptedCollection::class => new GenericObjectType(Collection::class, [new BenevolentUnionType([new IntegerType(), new StringType()]), new MixedType()]),
+            AsCollection::class, AsEncryptedCollection::class => new BenevolentUnionType([
+                new GenericObjectType(Collection::class, [new BenevolentUnionType([new IntegerType(), new StringType()]), new MixedType()]),
+                new NullType(),
+            ]),
             AsStringable::class => new ObjectType(IlluminateStringable::class),
             default => null,
         };
@@ -99,22 +112,22 @@ class ModelCastHelper
             return new ObjectType($cast);
         }
 
-        if ($classReflection->isSubclassOf(Castable::class)) {
+        if ($classReflection->is(Castable::class)) {
             $methodReflection = $classReflection->getNativeMethod('castUsing');
-            $castUsingReturn  = ParametersAcceptorSelector::selectSingle($methodReflection->getVariants())->getReturnType();
+            $castUsingReturn  = $methodReflection->getVariants()[0]->getReturnType();
 
             if ($castUsingReturn->getObjectClassReflections() !== []) {
                 $classReflection = $castUsingReturn->getObjectClassReflections()[0];
             }
         }
 
-        if ($classReflection->isSubclassOf(CastsAttributes::class)) {
+        if ($classReflection->is(CastsAttributes::class)) {
             $methodReflection = $classReflection->getNativeMethod('get');
 
-            return ParametersAcceptorSelector::selectSingle($methodReflection->getVariants())->getReturnType();
+            return $methodReflection->getVariants()[0]->getReturnType();
         }
 
-        if ($classReflection->isSubclassOf(CastsInboundAttributes::class)) {
+        if ($classReflection->is(CastsInboundAttributes::class)) {
             return $originalType;
         }
 
@@ -156,9 +169,9 @@ class ModelCastHelper
             return new ObjectType($cast);
         }
 
-        if ($classReflection->isSubclassOf(Castable::class)) {
+        if ($classReflection->is(Castable::class)) {
             $methodReflection = $classReflection->getNativeMethod('castUsing');
-            $castUsingReturn  = ParametersAcceptorSelector::selectSingle($methodReflection->getVariants())->getReturnType();
+            $castUsingReturn  = $methodReflection->getVariants()[0]->getReturnType();
 
             if ($castUsingReturn->getObjectClassReflections() !== []) {
                 $classReflection = $castUsingReturn->getObjectClassReflections()[0];
@@ -166,11 +179,11 @@ class ModelCastHelper
         }
 
         if (
-            $classReflection->isSubclassOf(CastsAttributes::class)
-            || $classReflection->isSubclassOf(CastsInboundAttributes::class)
+            $classReflection->is(CastsAttributes::class)
+            || $classReflection->is(CastsInboundAttributes::class)
         ) {
             $methodReflection = $classReflection->getNativeMethod('set');
-            $parameters       = ParametersAcceptorSelector::selectSingle($methodReflection->getVariants())->getParameters();
+            $parameters       = $methodReflection->getVariants()[0]->getParameters();
 
             $valueParameter = Arr::first($parameters, static fn (ParameterReflection $parameterReflection) => $parameterReflection->getName() === 'value');
 
@@ -189,7 +202,7 @@ class ModelCastHelper
             : IlluminateCarbon::class;
 
         if ($dateClass === IlluminateCarbon::class) {
-            return TypeCombinator::union(new ObjectType($dateClass), new ObjectType(Carbon::class));
+            return new ObjectType(Carbon::class);
         }
 
         return new ObjectType($dateClass);
@@ -211,22 +224,14 @@ class ModelCastHelper
 
     public function hasCastForProperty(ClassReflection $modelClassReflection, string $propertyName): bool
     {
-        if (! array_key_exists($modelClassReflection->getName(), $this->modelCasts)) {
-            $modelCasts = $this->getModelCasts($modelClassReflection);
-        } else {
-            $modelCasts = $this->modelCasts[$modelClassReflection->getName()];
-        }
+        $modelCasts = $this->getModelCasts($modelClassReflection);
 
         return array_key_exists($propertyName, $modelCasts);
     }
 
     public function getCastForProperty(ClassReflection $modelClassReflection, string $propertyName): string|null
     {
-        if (! array_key_exists($modelClassReflection->getName(), $this->modelCasts)) {
-            $modelCasts = $this->getModelCasts($modelClassReflection);
-        } else {
-            $modelCasts = $this->modelCasts[$modelClassReflection->getName()];
-        }
+        $modelCasts = $this->getModelCasts($modelClassReflection);
 
         return $modelCasts[$propertyName] ?? null;
     }
@@ -239,6 +244,12 @@ class ModelCastHelper
      */
     private function getModelCasts(ClassReflection $modelClassReflection): array
     {
+        $className = $modelClassReflection->getName();
+
+        if (array_key_exists($className, $this->modelCasts)) {
+            return $this->modelCasts[$className];
+        }
+
         try {
             /** @var Model $modelInstance */
             $modelInstance = $modelClassReflection->getNativeReflection()->newInstanceWithoutConstructor();
@@ -246,25 +257,74 @@ class ModelCastHelper
             throw new ShouldNotHappenException();
         }
 
-        $modelCasts = $modelInstance->getCasts();
-
-        if (version_compare(LARAVEL_VERSION, '11.0.0', '>=')) { // @phpstan-ignore-line
-            $castsMethodReturnType = ParametersAcceptorSelector::selectSingle($modelClassReflection->getMethod(
-                'casts',
-                new OutOfClassScope(),
-            )->getVariants())->getReturnType();
-
-            if ($castsMethodReturnType->isConstantArray()->yes()) {
-                $modelCasts = array_merge(
-                    $modelCasts,
-                    array_combine(
-                        array_map(static fn ($key) => $key->getValue(), $castsMethodReturnType->getKeyTypes()), // @phpstan-ignore-line
-                        array_map(static fn ($value) => str_replace('\\\\', '\\', $value->getValue()), $castsMethodReturnType->getValueTypes()), // @phpstan-ignore-line
-                    ),
-                );
-            }
+        if ($modelClassReflection->hasTraitUse(HasUniqueStringIds::class)) {
+            $modelInstance->usesUniqueIds = true;
         }
 
+        $modelCasts = $modelInstance->getCasts();
+
+        if ($this->parseModelCastsMethod) {
+            $castsMethodReturnType = $this->parseCastsMethod($modelClassReflection);
+        } else {
+            $castsMethodReturnType = $modelClassReflection->getMethod(
+                'casts',
+                new OutOfClassScope(),
+            )->getVariants()[0]->getReturnType();
+        }
+
+        if ($castsMethodReturnType->isConstantArray()->yes()) {
+            $modelCasts = array_merge(
+                $modelCasts,
+                array_combine(
+                    array_map(static fn ($key) => $key->getValue(), $castsMethodReturnType->getKeyTypes()), // @phpstan-ignore-line
+                    array_map(static function (Type $value) {
+                        if ($value->isConstantValue()->yes()) {
+                            return str_replace('\\\\', '\\', (string) $value->getValue()); // @phpstan-ignore-line
+                        }
+
+                        return $value->describe(VerbosityLevel::value());
+                    }, $castsMethodReturnType->getValueTypes()), // @phpstan-ignore-line
+                ),
+            );
+        }
+
+        $this->modelCasts[$className] = $modelCasts;
+
         return $modelCasts;
+    }
+
+    private function parseCastsMethod(ClassReflection $modelClassReflection): Type
+    {
+        $castsMethod = $modelClassReflection->getNativeMethod('casts');
+        $fileName    = $castsMethod->getDeclaringClass()->getFileName();
+
+        if ($fileName === null) {
+            return new NullType();
+        }
+
+        $stmts = $this->parser->parseFile($fileName);
+
+        $castsMethodNode = (new NodeFinder())->findFirst($stmts, static function (Node $node) use ($castsMethod): bool {
+            return $node instanceof Node\Stmt\ClassMethod && $node->name->toString() === $castsMethod->getName();
+        });
+
+        if ($castsMethodNode === null) {
+            return new NullType();
+        }
+
+        /** @var Node\Stmt\Return_|null $returnNode */
+        $returnNode = (new NodeFinder())->findFirstInstanceOf($castsMethodNode, Node\Stmt\Return_::class);
+
+        if ($returnNode === null) {
+            return new NullType();
+        }
+
+        if (! $returnNode->expr instanceof Array_) {
+            return new NullType();
+        }
+
+        $scope = $this->scopeFactory->create(ScopeContext::create($fileName));
+
+        return $scope->getType($returnNode->expr);
     }
 }

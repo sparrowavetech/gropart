@@ -30,6 +30,10 @@ class ApiLayerExchangeRateService implements ExchangeRateInterface
             ->get();
 
         foreach ($currencies as $currency) {
+            if (! isset($rates[$currency->title])) {
+                continue;
+            }
+
             $currency->update(['exchange_rate' => number_format($rates[$currency->title], 8, '.', '')]);
         }
 
@@ -43,7 +47,7 @@ class ApiLayerExchangeRateService implements ExchangeRateInterface
 
         $params = [
             'symbols' => implode(',', $currencies),
-            'base' => strtoupper($defaultCurrency->title),
+            'base' => $defaultCurrency->title,
         ];
 
         $rates = Cache::remember('currency_exchange_rate', 86_400, function () use ($params) {
@@ -64,7 +68,7 @@ class ApiLayerExchangeRateService implements ExchangeRateInterface
             ->get('exchangerates_data/latest?' . http_build_query($params));
 
         if ($response->failed()) {
-            throw new Exception($response->reason());
+            throw new Exception($response->json('message') ?: $response->reason());
         }
 
         return $response->json();

@@ -18,9 +18,9 @@ class GlobalOptionForm extends FormAbstract
             ->addScriptsDirectly('vendor/core/plugins/ecommerce/js/global-option.js');
 
         $this
-            ->setupModel(new GlobalOption())
+            ->model(GlobalOption::class)
             ->setValidatorClass(GlobalOptionRequest::class)
-            ->add('name', TextField::class, NameFieldOption::make()->toArray())
+            ->add('name', TextField::class, NameFieldOption::make())
             ->add('option_type', 'customSelect', [
                 'label' => trans('plugins/ecommerce::product-option.option_type'),
                 'required' => true,

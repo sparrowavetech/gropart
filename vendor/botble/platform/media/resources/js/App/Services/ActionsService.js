@@ -32,13 +32,13 @@ export class ActionsService {
                     selected.push(value.preview_url)
                 }
 
-                RecentItems.push(value.id)
+                // Add to recent items on the server
+                Helpers.addToRecent(value.id)
             }
         })
 
         if (Helpers.size(selected) > 0) {
             Botble.lightbox(selected)
-            Helpers.storeRecentItems()
         } else {
             this.handleGlobalAction('download')
         }
@@ -173,6 +173,9 @@ export class ActionsService {
             case 'alt_text':
                 $('#modal_alt_text_items').modal('show').find('form.form-alt-text').data('action', type)
                 break
+            case 'move':
+                $('#modal_move_items').modal('show')
+                break
             case 'crop':
                 $('#modal_crop_image').modal('show').find('form.rv-form').data('action', type)
                 break
@@ -304,29 +307,36 @@ export class ActionsService {
 
     static renderShareItems() {
         const target = $('#modal_share_items [data-bb-value="share-result"]')
-        const shareType =  $('#modal_share_items select[data-bb-value="share-type"]').val()
+        const shareType = $('#modal_share_items select[data-bb-value="share-type"]').val()
         target.val('')
 
         let results = []
 
         Helpers.each(Helpers.getSelectedItems(), (value) => {
+            // Convert absolute URL to relative URL for HTML and markdown
+            let imageUrl = value.full_url
+            if (
+                (shareType === 'html' || shareType === 'markdown') &&
+                imageUrl &&
+                imageUrl.startsWith(window.location.origin)
+            ) {
+                imageUrl = imageUrl.replace(window.location.origin, '')
+            }
+
             switch (shareType) {
                 case 'html':
                     results.push(
                         value.type === 'image'
-                            ? `<img src="${value.full_url}" alt="${value.alt}" />`
-                            : `<a href="${value.full_url}" target="_blank">${value.alt}</a>`
+                            ? `<img src="${imageUrl}" alt="${value.alt}" />`
+                            : `<a href="${imageUrl}" target="_blank">${value.alt}</a>`
                     )
-                    break;
+                    break
                 case 'markdown':
-                    results.push(
-                        (value.type === 'image' ? '!' : '') +
-                        `[${value.alt}](${value.full_url})`
-                    )
-                    break;
+                    results.push((value.type === 'image' ? '!' : '') + `[${value.alt}](${imageUrl})`)
+                    break
                 case 'indirect_url':
                     results.push(value.indirect_url)
-                    break;
+                    break
                 default:
                     results.push(value.full_url)
             }
@@ -348,9 +358,7 @@ export class ActionsService {
         if (hasFolderSelected) {
             const ignoreActions = ['preview', 'crop', 'alt_text', 'copy_link', 'copy_direct_link', 'share']
 
-            actionsList.basic = Helpers.arrayReject(
-                actionsList.basic, (item) => ignoreActions.includes(item.action)
-            )
+            actionsList.basic = Helpers.arrayReject(actionsList.basic, (item) => ignoreActions.includes(item.action))
 
             if (!Helpers.hasPermission('folders.create')) {
                 actionsList.file = Helpers.arrayReject(actionsList.file, (item) => {
@@ -360,7 +368,7 @@ export class ActionsService {
 
             if (!Helpers.hasPermission('folders.edit')) {
                 actionsList.file = Helpers.arrayReject(actionsList.file, (item) => {
-                    return Helpers.inArray(['rename'], item.action)
+                    return Helpers.inArray(['rename', 'move'], item.action)
                 })
 
                 actionsList.user = Helpers.arrayReject(actionsList.user, (item) => {
@@ -422,7 +430,7 @@ export class ActionsService {
 
             if (!Helpers.hasPermission('files.edit')) {
                 actionsList.file = Helpers.arrayReject(actionsList.file, (item) => {
-                    return Helpers.inArray(['rename'], item.action)
+                    return Helpers.inArray(['rename', 'move'], item.action)
                 })
             }
 
@@ -521,7 +529,16 @@ export class ActionsService {
             .withResponseType('blob')
             .post(RV_MEDIA_URL.download, { selected: files })
             .then((response) => {
-                const fileName = (response.headers['content-disposition'] || '').split('filename=')[1].split(';')[0]
+                let fileName = 'download'
+                const contentDisposition = response.headers['content-disposition'] || ''
+
+                if (contentDisposition) {
+                    const fileNameMatch = contentDisposition.match(/filename\*=UTF-8''(.+)|filename="?([^";\n]+)"?/i)
+                    if (fileNameMatch) {
+                        fileName = decodeURIComponent(fileNameMatch[1] || fileNameMatch[2])
+                    }
+                }
+
                 const objectUrl = URL.createObjectURL(response.data)
                 const a = document.createElement('a')
 

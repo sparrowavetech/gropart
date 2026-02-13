@@ -25,8 +25,12 @@ class Validator
     {
     }
 
-    public function validate(string $field, array $parameters = []): void
+    public function validate(?string $field, array $parameters = []): void
     {
+        if ($field === null) {
+            return;
+        }
+
         $attribute = $this->parseAttributeName($field);
         $validationParams = $this->parseParameters($parameters);
         $validationResult = $this->validateJsRemoteRequest($attribute, $validationParams);
@@ -52,7 +56,7 @@ class Validator
         return $newParams;
     }
 
-    protected function validateJsRemoteRequest(string $attribute, array $parameters): array|bool
+    protected function validateJsRemoteRequest(?string $attribute, array $parameters): array|bool
     {
         $this->setRemoteValidation($attribute, $parameters['validate_all']);
 

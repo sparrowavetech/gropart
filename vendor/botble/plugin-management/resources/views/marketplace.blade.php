@@ -1,27 +1,40 @@
 @extends(BaseHelper::getAdminMasterLayoutTemplate())
 
 @section('content')
-    <div role="alert" class="alert alert-warning">
-        Those plugins are from our Botble community <a href="https://marketplace.botble.com/products" target="_blank">marketplace.botble.com/products</a>. We regret to inform
+    <x-core::alert
+        type="warning"
+        title="Important notes:"
+        :important="false"
+    >
+        Those plugins are from our Botble community <a
+            href="https://marketplace.botble.com/products"
+            target="_blank"
+        >marketplace.botble.com/products</a>. We regret to inform
         you that we cannot assume responsibility for the functionality or support of free plugins, as they are
         developed and maintained independently. However, we are more than happy to assist with any inquiries or
         issues related to our official products and services.
-    </div>
+    </x-core::alert>
 
-    <plugin-list plugin-list-url="{{ route('plugins.marketplace.ajax.list') }}" plugin-remove-url="{{ route('plugins.remove', '__name__') }}"></plugins-list>
+    <v-plugin-list
+        plugin-list-url="{{ route('plugins.marketplace.ajax.list') }}"
+        plugin-remove-url="{{ route('plugins.remove', '__name__') }}"
+    ></v-plugin-list>
 @endsection
 
 @push('footer')
     <x-core::modal
         id="terms-and-policy-modal"
-        :title="__('Install plugin from Marketplace')"
-        :submit-button-label="__('Accept and install')"
+        :title="trans('packages/plugin-management::plugin.install_plugin_from_marketplace')"
+        :submit-button-label="trans('packages/plugin-management::plugin.accept_and_install')"
         size="md"
     >
         <div class="text-start">
             <p>
                 You are installing plugin from our Botble community. Those plugins are developed by author
-                on <a href="https://marketplace.botble.com" target="_blank">marketplace.botble.com</a>.
+                on <a
+                    href="https://marketplace.botble.com"
+                    target="_blank"
+                >marketplace.botble.com</a>.
             </p>
             <p>We (Botble) <strong>won't</strong> support free plugins from Marketplace.</p>
             <p>
@@ -38,13 +51,21 @@
             <div class="w-100">
                 <div class="row">
                     <div class="col">
-                        <button type="button" class="btn w-100" data-bs-dismiss="modal">
-                            {{ __('Cancel') }}
+                        <button
+                            type="button"
+                            class="btn w-100"
+                            data-bs-dismiss="modal"
+                        >
+                            {{ trans('packages/plugin-management::plugin.cancel') }}
                         </button>
                     </div>
                     <div class="col">
-                        <button type="button" class="btn btn-info w-100" data-bb-toggle="accept-term-and-policy">
-                            {{ __('Accept and install') }}
+                        <button
+                            type="button"
+                            class="btn btn-info w-100"
+                            data-bb-toggle="accept-term-and-policy"
+                        >
+                            {{ trans('packages/plugin-management::plugin.accept_and_install') }}
                         </button>
                     </div>
                 </div>

@@ -5,6 +5,7 @@ namespace Botble\Ecommerce\Tables;
 use Botble\Base\Facades\Form;
 use Botble\Base\Facades\Html;
 use Botble\Ecommerce\Enums\ProductTypeEnum;
+use Botble\Ecommerce\Enums\StockStatusEnum;
 use Botble\Ecommerce\Models\ProductAttributeSet;
 use Botble\Ecommerce\Models\ProductVariation;
 use Botble\Table\Abstracts\TableAbstract;
@@ -19,6 +20,7 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Collection;
+use Yajra\DataTables\EloquentDataTable as YajraEloquentDataTable;
 
 class ProductVariationTable extends TableAbstract
 {
@@ -53,7 +55,7 @@ class ProductVariationTable extends TableAbstract
         return $this->toJson($data);
     }
 
-    protected function loadDataTable(): EloquentDataTable
+    protected function loadDataTable(): YajraEloquentDataTable|EloquentDataTable
     {
         $data = $this->table
             ->eloquent($this->query());
@@ -81,6 +83,10 @@ class ProductVariationTable extends TableAbstract
                 return Html::tag('div', format_price($item->product->front_sale_price)) . $salePrice;
             })
             ->editColumn('quantity', function (ProductVariation $item) {
+                if ($item->product->isOutOfStock()) {
+                    return StockStatusEnum::OUT_OF_STOCK()->toHtml();
+                }
+
                 return $item->product->with_storehouse_management ? $item->product->quantity : '&#8734;';
             })
             ->editColumn('is_default', function (ProductVariation $item) {
@@ -137,10 +143,10 @@ class ProductVariationTable extends TableAbstract
 
         foreach ($this->getProductAttributeSets()->whereNotNull('is_selected') as $attributeSet) {
             $data
-                ->filterColumn('set_' . $attributeSet->id, function ($query, $keyword) {
+                ->filterColumn('set_' . $attributeSet->id, function ($query, $keyword): void {
                     if ($keyword) {
-                        $query->whereHas('variationItems', function ($query) use ($keyword) {
-                            $query->whereHas('attribute', function ($query) use ($keyword) {
+                        $query->whereHas('variationItems', function ($query) use ($keyword): void {
+                            $query->whereHas('attribute', function ($query) use ($keyword): void {
                                 $query->where('id', $keyword);
                             });
                         });
@@ -155,7 +161,7 @@ class ProductVariationTable extends TableAbstract
     {
         $query = $this->baseQuery()
             ->with([
-                'product' => function (BelongsTo $query) {
+                'product' => function (BelongsTo $query): void {
                     $query
                         ->select([
                             'id',
@@ -171,11 +177,11 @@ class ProductVariationTable extends TableAbstract
                             'image',
                             'images',
                         ])
-                        ->when($this->hasDigitalProduct, function ($query) {
+                        ->when($this->hasDigitalProduct, function ($query): void {
                             $query->with('productFiles:id,product_id,extras');
                         });
                 },
-                'configurableProduct' => function (BelongsTo $query) {
+                'configurableProduct' => function (BelongsTo $query): void {
                     $query
                         ->select([
                             'id',
@@ -185,12 +191,14 @@ class ProductVariationTable extends TableAbstract
                             'start_date',
                             'end_date',
                             'is_variation',
+                            'currency_code',
                             'image',
                             'images',
                         ]);
                 },
                 'configurableProduct.productCollections:id,name,slug',
                 'productAttributes:id,attribute_set_id,title,slug',
+                'variationItems.attribute:id,attribute_set_id,title,slug',
             ]);
 
         return $this->applyScopes($query);
@@ -201,7 +209,7 @@ class ProductVariationTable extends TableAbstract
         return $this
             ->getModel()
             ->query()
-            ->whereHas('configurableProduct', function (Builder $query) {
+            ->whereHas('configurableProduct', function (Builder $query): void {
                 $query->where('configurable_product_id', $this->productId);
             })
             ->whereNot('product_id');
@@ -209,7 +217,7 @@ class ProductVariationTable extends TableAbstract
 
     public function getProductAttributeSets(): Collection
     {
-        if (! $this->productAttributeSets->count()) {
+        if ($this->productAttributeSets->isEmpty()) {
             $this->productAttributeSets = ProductAttributeSet::getAllWithSelected($this->productId, []);
         }
 
@@ -256,6 +264,7 @@ class ProductVariationTable extends TableAbstract
                 'title' => $attributeSet->title,
                 'class' => 'text-start',
                 'orderable' => false,
+                'searchable' => true,
                 'width' => '90',
                 'search_data' => [
                     'attribute_set_id' => $attributeSet->id,

@@ -80,7 +80,11 @@ abstract class MolliePaymentAbstract implements ProduceServiceInterface
     public function refundOrder($paymentId, $amount, array $options = []): array
     {
         try {
+            do_action('payment_before_making_api_request', MOLLIE_PAYMENT_METHOD_NAME, ['payment_id' => $paymentId]);
+
             $payment = $this->client->payments->get($paymentId);
+
+            do_action('payment_after_api_response', MOLLIE_PAYMENT_METHOD_NAME, ['payment_id' => $paymentId], (array) $payment);
 
             if ($payment->canBeRefunded() &&
                 $payment->amountRemaining->currency == $this->paymentCurrency &&
@@ -88,7 +92,8 @@ abstract class MolliePaymentAbstract implements ProduceServiceInterface
                 /*
                  * https://docs.mollie.com/reference/v2/refunds-api/create-refund
                  */
-                $description = Arr::get($options, 'refund_note') ?: get_order_code(Arr::get($options, 'order_id'));
+                $description = Arr::get($options, 'refund_note');
+
                 $refund = $payment->refund([
                     'amount' => [
                         'currency' => $this->paymentCurrency,

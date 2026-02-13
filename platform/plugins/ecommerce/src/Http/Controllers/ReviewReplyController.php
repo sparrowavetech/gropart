@@ -29,6 +29,7 @@ class ReviewReplyController extends BaseController
         $review->reply()->create([
             'user_id' => $userId,
             'message' => $request->input('message'),
+            'created_at' => $request->input('created_at') ?: now(),
         ]);
 
         return $this
@@ -38,12 +39,11 @@ class ReviewReplyController extends BaseController
 
     public function update(Review $review, ReviewReply $reply, ReviewReplyRequest $request)
     {
-        if ($reply->review()->isNot($review)) {
-            abort(404);
-        }
+        abort_if($reply->review()->isNot($review), 404);
 
         $reply->update([
             'message' => $request->input('message'),
+            'created_at' => $request->input('created_at') ?: $reply->created_at,
         ]);
 
         return $this

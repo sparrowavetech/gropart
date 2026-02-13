@@ -1,4 +1,4 @@
-@if (! $asDropdown && $choices)
+@if (!$asDropdown && $choices)
     <x-core::form.fieldset class="fieldset-for-multi-check-list">
         <div class="multi-check-list-wrapper">
             @php
@@ -13,7 +13,7 @@
 
             @foreach ($choices as $key => $item)
                 @php
-                    $checked = is_array($value) ? in_array($key, $value) : ($key == $value);
+                    $checked = is_array($value) ? in_array($key, $value) : $key == $value;
                 @endphp
                 <x-core::form.checkbox
                     :id="sprintf('%s-item-%s', Str::slug($name), $key)"
@@ -40,29 +40,36 @@
     <div
         class="position-relative"
         data-bb-toggle="dropdown-checkboxes"
-        @if($ajaxUrl)
-            data-ajax-url="{{ $ajaxUrl }}"
-        @endif
+        @if ($ajaxUrl) data-ajax-url="{{ $ajaxUrl }}" @endif
         data-name="{{ $name }}"
         data-selected-text="{{ trans('core/base::forms.selected') }}"
         data-placeholder="{{ $placeholder }}"
     >
         <span class="form-select text-truncate">{{ $placeholder }}</span>
 
-        @if($ajaxUrl)
+        @if ($ajaxUrl)
             <div class="d-none multi-checklist-selected">
-                @foreach($value as $item)
-                    <input type="hidden" name="{{ $name }}" value="{{ $item }}">
+                @foreach ($value as $item)
+                    <input
+                        type="hidden"
+                        name="{{ $name }}"
+                        value="{{ $item }}"
+                    >
                 @endforeach
             </div>
         @endif
 
-        <input type="text" class="form-select" placeholder="{{ trans('core/table::table.search') }}" style="display: none">
+        <input
+            type="text"
+            class="form-select"
+            placeholder="{{ trans('core/table::table.search') }}"
+            style="display: none"
+        >
 
         <div class="dropdown-menu dropdown-menu-end w-100">
             <div data-bb-toggle="tree-checkboxes">
                 <ul class="list-unstyled p-3 pb-0">
-                    @if(! $ajaxUrl && ! empty($choices))
+                    @if (!$ajaxUrl && !empty($choices))
                         @foreach ($choices as $key => $item)
                             <li>
                                 <x-core::form.checkbox

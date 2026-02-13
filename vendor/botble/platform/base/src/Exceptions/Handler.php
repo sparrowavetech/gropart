@@ -2,7 +2,6 @@
 
 namespace Botble\Base\Exceptions;
 
-use App\Exceptions\Handler as ExceptionHandler;
 use Botble\Base\Contracts\Exceptions\IgnoringReport;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\EmailHandler;
@@ -12,6 +11,8 @@ use Carbon\Carbon;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Http\Exceptions\MalformedUrlException;
 use Illuminate\Http\Exceptions\PostTooLargeException;
 use Illuminate\Session\TokenMismatchException;
 use Illuminate\Support\Facades\Cache;
@@ -33,6 +34,7 @@ class Handler extends ExceptionHandler
         parent::__construct($container);
 
         $this->ignore(PhpSpreadsheetException::class);
+        $this->ignore(MalformedUrlException::class);
 
         $this->baseHttpResponse = new BaseHttpResponse();
     }
@@ -48,13 +50,19 @@ class Handler extends ExceptionHandler
         }
 
         switch (true) {
+            case $e instanceof MalformedUrlException:
+                return response(trans('core/base::errors.bad_request'), 400);
             case $e instanceof DisabledInDemoModeException:
             case $e instanceof MethodNotAllowedHttpException:
-            case $e instanceof TokenMismatchException:
                 return $this->baseHttpResponse
                     ->setError()
                     ->setCode($e->getCode())
                     ->setMessage($e->getMessage());
+            case $e instanceof TokenMismatchException:
+                return $this->baseHttpResponse
+                    ->setError()
+                    ->setCode($e->getCode())
+                    ->setMessage(is_in_admin(true) ? $e->getMessage() : trans('core/base::errors.token_mismatch'));
             case $e instanceof PostTooLargeException:
                 if (! empty($request->allFiles())) {
                     return RvMedia::responseError(
@@ -130,11 +138,15 @@ class Handler extends ExceptionHandler
 
         $key = 'send_error_exception';
 
-        if (Cache::has($key)) {
-            return;
-        }
+        try {
+            if (Cache::has($key)) {
+                return;
+            }
 
-        Cache::put($key, 1, Carbon::now()->addMinutes(5));
+            Cache::put($key, 1, Carbon::now()->addMinutes(5));
+        } catch (Throwable) {
+            // Do nothing
+        }
 
         if (! app()->isLocal() && ! app()->runningInConsole() && ! app()->isDownForMaintenance()) {
             if (
@@ -160,11 +172,11 @@ class Handler extends ExceptionHandler
                 $inputs = $inputs ? BaseHelper::jsonEncodePrettify($inputs) : null;
 
                 logger()->channel('slack')->critical(
-                    $e->getMessage() . ($previous ? '(' . $previous . ')' : null),
+                    str_replace(base_path(), '', $e->getMessage()) . ($previous ? '(' . $previous . ')' : null),
                     [
                         'Request URL' => $request->fullUrl(),
                         'Request IP' => $request->ip(),
-                        'Request Referer' => $request->header('referer'),
+                        'Request Referer' => $request->header('referer') ?: 'No referer',
                         'Request Method' => $request->method(),
                         'Request Form Data' => $inputs,
                         'Exception Type' => $e::class,
@@ -218,7 +230,7 @@ class Handler extends ExceptionHandler
 
     protected function unauthenticated($request, AuthenticationException $exception)
     {
-        if ($request->wantsJson() || $request->expectsJson()) {
+        if ($request->expectsJson()) {
             return $this
                 ->baseHttpResponse
                 ->setError()
@@ -229,7 +241,7 @@ class Handler extends ExceptionHandler
 
         if (array_filter($exception->guards())) {
             $defaultException = redirect()
-                ->guest($exception->redirectTo() ?? (Route::has('login') ? route('login') : url('login')));
+                ->guest($exception->redirectTo($request) ?? (Route::has('login') ? route('login') : url('login')));
 
             return apply_filters('cms_unauthenticated_response', $defaultException, $request, $exception);
         }

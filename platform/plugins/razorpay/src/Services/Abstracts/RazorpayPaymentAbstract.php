@@ -66,7 +66,12 @@ abstract class RazorpayPaymentAbstract implements ProduceServiceInterface
     public function getPaymentDetails($paymentId)
     {
         try {
+            do_action('payment_before_making_api_request', RAZORPAY_PAYMENT_METHOD_NAME, ['payment_id' => $paymentId]);
+
+            // @phpstan-ignore-next-line
             $response = $this->client->payment->fetch($paymentId); // Returns a particular payment
+
+            do_action('payment_after_api_response', RAZORPAY_PAYMENT_METHOD_NAME, ['payment_id' => $paymentId], (array) $response);
         } catch (Exception $exception) {
             $this->setErrorMessageAndLogging($exception, 1);
 
@@ -79,11 +84,18 @@ abstract class RazorpayPaymentAbstract implements ProduceServiceInterface
     public function refundOrder($paymentId, $amount, array $options = []): array
     {
         try {
-            $response = $this->client->refund->create([
+            $data = [
                 'payment_id' => $paymentId,
                 'amount' => $amount * 100,
                 'notes' => $options,
-            ]);
+            ];
+
+            do_action('payment_before_making_api_request', RAZORPAY_PAYMENT_METHOD_NAME, $data);
+
+            // @phpstan-ignore-next-line
+            $response = $this->client->refund->create($data);
+
+            do_action('payment_after_api_response', RAZORPAY_PAYMENT_METHOD_NAME, $data, (array) $response);
 
             $status = $response->status;
 
@@ -115,7 +127,12 @@ abstract class RazorpayPaymentAbstract implements ProduceServiceInterface
     public function getRefundDetails($refundId): array
     {
         try {
+            do_action('payment_before_making_api_request', RAZORPAY_PAYMENT_METHOD_NAME, ['refund_id' => $refundId]);
+
+            // @phpstan-ignore-next-line
             $response = $this->client->refund->fetch($refundId);
+
+            do_action('payment_after_api_response', RAZORPAY_PAYMENT_METHOD_NAME, ['refund_id' => $refundId], (array) $response);
 
             return [
                 'error' => false,

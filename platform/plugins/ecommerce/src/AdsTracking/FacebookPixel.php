@@ -10,9 +10,49 @@ use Botble\SeoHelper\Facades\SeoHelper;
 class FacebookPixel
 {
     protected array $events = [];
+    protected FacebookPixelEnhanced $enhanced;
+
+    protected const NO_OFFSET_CURRENCIES = [
+        'BIF', 'CLP', 'DJF', 'GNF', 'JPY', 'KMF', 'KRW',
+        'MGA', 'PYG', 'RWF', 'UGX', 'VND', 'VUV', 'XAF',
+        'XOF', 'XPF',
+    ];
+
+    public function __construct()
+    {
+        $this->enhanced = new FacebookPixelEnhanced();
+    }
+
+    public static function formatValue(?float $value, ?string $currency = null): float
+    {
+        if ($value === null) {
+            return 0.0;
+        }
+
+        $currencyCode = $currency ?: get_application_currency()->title;
+
+        if (in_array(strtoupper($currencyCode), self::NO_OFFSET_CURRENCIES)) {
+            return round($value, 0);
+        }
+
+        return round($value, 2);
+    }
+
+    protected function formatValueForFacebook(?float $value, ?string $currency = null): float
+    {
+        return static::formatValue($value, $currency);
+    }
 
     public function view(Product $product): static
     {
+        if ($this->enhanced->isEnabled()) {
+            $this->enhanced->viewContent($product);
+
+            return $this;
+        }
+
+        $currency = get_application_currency()->title;
+
         $this->pushEvent('ViewContent', [$product], [
             'content_category' => $product->categories()->first()->name ?? '',
             'content_name' => $product->name,
@@ -23,8 +63,8 @@ class FacebookPixel
                     'quantity' => 1,
                 ],
             ],
-            'currency' => get_application_currency()->title,
-            'value' => $product->price,
+            'currency' => $currency,
+            'value' => $this->formatValueForFacebook($product->price, $currency),
         ]);
 
         return $this;
@@ -32,15 +72,23 @@ class FacebookPixel
 
     public function checkout(array $items, float $value): static
     {
+        if ($this->enhanced->isEnabled()) {
+            $this->enhanced->initiateCheckout($items, $value);
+
+            return $this;
+        }
+
+        $currency = get_application_currency()->title;
+
         $this->pushEvent('InitiateCheckout', $items, [
             'content_name' => 'Checkout',
             'contents' => array_map(fn ($item) => [
                 'id' => $item->id,
                 'quantity' => $item->cartItem->qty,
             ], $items),
-            'currency' => get_application_currency()->title,
+            'currency' => $currency,
             'num_items' => count($items),
-            'value' => $value,
+            'value' => $this->formatValueForFacebook($value, $currency),
         ]);
 
         return $this;
@@ -48,7 +96,14 @@ class FacebookPixel
 
     public function purchase(Order $order): static
     {
+        if ($this->enhanced->isEnabled()) {
+            $this->enhanced->purchase($order);
+
+            return $this;
+        }
+
         $products = $order->getOrderProducts()->all();
+        $currency = get_application_currency()->title;
 
         $this->pushEvent('Purchase', $products, [
             'content_name' => 'Purchase',
@@ -57,8 +112,8 @@ class FacebookPixel
                 'id' => $item->product_id,
                 'quantity' => $item->qty,
             ])->values()->all(),
-            'currency' => get_application_currency()->title,
-            'value' => $order->sub_total,
+            'currency' => $currency,
+            'value' => $this->formatValueForFacebook($order->sub_total, $currency),
         ]);
 
         return $this;
@@ -66,6 +121,14 @@ class FacebookPixel
 
     public function addToCart(Product $product, int $quantity, float $value): self
     {
+        if ($this->enhanced->isEnabled()) {
+            $this->enhanced->addToCart($product, $quantity, $value);
+
+            return $this;
+        }
+
+        $currency = get_application_currency()->title;
+
         $this->pushEvent('AddToCart', [$product], [
             'content_name' => 'Add to Cart',
             'content_type' => 'product',
@@ -75,8 +138,8 @@ class FacebookPixel
                     'quantity' => $quantity,
                 ],
             ],
-            'currency' => get_application_currency()->title,
-            'value' => $value,
+            'currency' => $currency,
+            'value' => $this->formatValueForFacebook($value, $currency),
         ]);
 
         return $this;
@@ -84,7 +147,7 @@ class FacebookPixel
 
     public function isEnabled(): bool
     {
-        return get_ecommerce_setting('facebook_pixel_enabled', false) && get_ecommerce_setting('facebook_pixel_id');
+        return $this->enhanced->isEnabled();
     }
 
     public function pushEvent(string $event, array $items = [], array $data = []): void
@@ -97,6 +160,10 @@ class FacebookPixel
 
     public function render(): string
     {
+        if ($this->enhanced->isEnabled()) {
+            return $this->enhanced->render();
+        }
+
         if (empty($this->events)) {
             return '';
         }
@@ -129,5 +196,16 @@ class FacebookPixel
         add_filter('ecommerce_checkout_footer', function (?string $html) {
             return $html . SeoHelper::meta()->getAnalytics()->render() . $this->render();
         }, 999);
+    }
+
+    public function __call($method, $parameters)
+    {
+        if (method_exists($this->enhanced, $method)) {
+            $this->enhanced->$method(...$parameters);
+
+            return $this;
+        }
+
+        throw new \BadMethodCallException("Method {$method} does not exist.");
     }
 }

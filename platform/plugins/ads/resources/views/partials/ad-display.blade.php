@@ -10,7 +10,7 @@
 
     <div {!! Html::attributes($attributes) !!}>
         @if ($item->url)
-            <a href="{{ $item->click_url }}" @if($item->open_in_new_tab) target="_blank" @endif title="{{ __('Banner') }}">
+            <a href="{{ $item->click_url }}" @if ($item->open_in_new_tab) target="_blank" @endif title="{{ trans('plugins/ads::ads.banner') }}">
         @endif
                 <picture>
                     <source

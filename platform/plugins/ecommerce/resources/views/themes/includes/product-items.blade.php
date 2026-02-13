@@ -6,5 +6,11 @@
     @endforeach
 </div>
 
+@if($products instanceof \Illuminate\Pagination\LengthAwarePaginator && $products->hasPages())
+    <div class="d-flex justify-content-center mt-4">
+        {!! $products->withQueryString()->links() !!}
+    </div>
+@endif
+
 @include(EcommerceHelper::viewPath('includes.quick-shop-modal'))
 @include(EcommerceHelper::viewPath('includes.quick-view-modal'))

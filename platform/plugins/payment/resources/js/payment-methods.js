@@ -2,6 +2,9 @@
 
 class PaymentMethodManagement {
     init() {
+        this.initSortable()
+        this.initDefaultPaymentMethod()
+
         $('.toggle-payment-item')
             .off('click')
             .on('click', (event) => {
@@ -74,6 +77,103 @@ class PaymentMethodManagement {
                         _self.closest('tbody').find('.btn-text-trigger-save').addClass('hidden')
                         Botble.showSuccess(data.message)
                     })
+            })
+    }
+
+    initSortable() {
+        const container = document.getElementById('payment-methods-sortable')
+
+        if (!container || typeof Sortable === 'undefined') {
+            return
+        }
+
+        new Sortable(container, {
+            handle: '.drag-handle',
+            draggable: '.payment-method-item',
+            animation: 150,
+            ghostClass: 'sortable-ghost',
+            onEnd: () => {
+                this.saveSortOrder(container)
+            },
+        })
+    }
+
+    initDefaultPaymentMethod() {
+        $(document)
+            .off('click', '.set-default-payment-method')
+            .on('click', '.set-default-payment-method', (event) => {
+                event.preventDefault()
+
+                const button = $(event.currentTarget)
+                const card = button.closest('.payment-method-item')
+                const type = card.data('payment-type')
+                const container = document.getElementById('payment-methods-sortable')
+
+                if (!container || !type) {
+                    return
+                }
+
+                const url = container.getAttribute('data-sort-order-url')
+
+                $httpClient.make()
+                    .withButtonLoading(button)
+                    .post(url, { default_payment_method: type })
+                    .then(({ data }) => {
+                        if (data.error) {
+                            Botble.showError(data.message)
+                            return
+                        }
+
+                        $('.set-default-payment-method').removeClass('text-warning').addClass('text-muted')
+                        $('.set-default-payment-method svg use').each(function () {
+                            const href = $(this).attr('href') || $(this).attr('xlink:href') || ''
+                            if (href.includes('star-filled')) {
+                                const newHref = href.replace('star-filled', 'star')
+                                $(this).attr('href', newHref)
+                                if ($(this).attr('xlink:href')) {
+                                    $(this).attr('xlink:href', newHref)
+                                }
+                            }
+                        })
+
+                        button.removeClass('text-muted').addClass('text-warning')
+                        button.find('svg use').each(function () {
+                            const href = $(this).attr('href') || $(this).attr('xlink:href') || ''
+                            if (href.includes('#ti-star')) {
+                                const newHref = href.replace('#ti-star', '#ti-star-filled')
+                                $(this).attr('href', newHref)
+                                if ($(this).attr('xlink:href')) {
+                                    $(this).attr('xlink:href', newHref)
+                                }
+                            }
+                        })
+
+                        Botble.showSuccess(data.message)
+                    })
+            })
+    }
+
+    saveSortOrder(container) {
+        const items = container.querySelectorAll('.payment-method-item')
+        const order = {}
+
+        items.forEach((item, index) => {
+            const type = item.getAttribute('data-payment-type')
+            if (type) {
+                order[type] = index
+            }
+        })
+
+        const url = container.getAttribute('data-sort-order-url')
+
+        $httpClient.make()
+            .post(url, { order })
+            .then(({ data }) => {
+                if (data.error) {
+                    Botble.showError(data.message)
+                } else {
+                    Botble.showSuccess(data.message)
+                }
             })
     }
 }

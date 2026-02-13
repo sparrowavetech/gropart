@@ -12,6 +12,10 @@ use Intervention\Image\Modifiers\DrawEllipseModifier as GenericDrawEllipseModifi
 class DrawEllipseModifier extends GenericDrawEllipseModifier implements SpecializedInterface
 {
     /**
+     * {@inheritdoc}
+     *
+     * @see ModifierInterface::apply()
+     *
      * @throws RuntimeException
      */
     public function apply(ImageInterface $image): ImageInterface

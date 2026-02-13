@@ -1,9 +1,9 @@
-@if($categories)
+@if ($categories)
     @php
         $selected = (array) $selected;
     @endphp
 
-    @foreach($categories as $category)
+    @foreach ($categories as $category)
         <option
             value="{{ $category->id ?? '' }}"
             @selected(in_array($category->id, $selected))
@@ -13,13 +13,13 @@
             {{ $category->name }}
         </option>
 
-        @if($category->activeChildren)
+        @if ($category->activeChildren)
             @include('core/base::forms.partials.tree-categories-select-options', [
                 'categories' => $category->activeChildren,
                 'selected' => $selected,
                 'currentId' => $currentId,
                 'name' => $name,
-                'indent' => "{$indent}—"
+                'indent' => "{$indent}—",
             ])
         @endif
     @endforeach

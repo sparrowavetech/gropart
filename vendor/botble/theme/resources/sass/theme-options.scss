@@ -13,6 +13,14 @@
                 @media (min-width: 768px) {
                     width: 20rem;
                 }
+
+                .nav-link:not(.active) {
+                    color: var(--bb-body-color);
+
+                    &:hover {
+                        color: var(--bb-primary);
+                    }
+                }
             }
         }
     }

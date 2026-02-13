@@ -46,4 +46,6 @@ return [
         'variations' => 'Variations',
     ],
     'import_products' => 'Import products',
+    'update_existing_products' => 'Update existing products',
+    'update_existing_products_description' => 'Existing products will be updated based on the ID or SKU. Products that do not exist will be ignored.',
 ];

@@ -59,7 +59,7 @@ class MenuNestable {
                 let value = sanitizeHTML(current.val())
                 let name = sanitizeHTML(current.attr('name'))
                 let old = sanitizeHTML(current.attr('data-old'))
-                let currentInfo = $.parseJSON(JSON.stringify(parent.data('menu-item')))
+                let currentInfo = JSON.parse(JSON.stringify(parent.data('menu-item')))
 
                 currentInfo[name] = value
 

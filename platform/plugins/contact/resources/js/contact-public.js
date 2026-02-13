@@ -71,6 +71,8 @@ $(() => {
                 if (typeof refreshRecaptcha !== 'undefined') {
                     refreshRecaptcha()
                 }
+
+                document.dispatchEvent(new CustomEvent('contact-form.submitted'))
             },
             error: (error) => {
                 if (typeof refreshRecaptcha !== 'undefined') {

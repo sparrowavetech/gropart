@@ -1,4 +1,5 @@
 <?php
+
 namespace Illuminate\Database\Query;
 
 class Expression {}
@@ -6,26 +7,9 @@ class Expression {}
 class Builder
 {
     /**
-     * Add a subquery join clause to the query.
-     *
-     * @template TAnyModelClass of \Illuminate\Database\Eloquent\Model
-     * @param  \Closure|\Illuminate\Database\Query\Builder|\Illuminate\Database\Eloquent\Builder<TAnyModelClass>|string  $query
-     * @param  string  $as
-     * @param  \Closure|string  $first
-     * @param  string|null  $operator
-     * @param  string|null  $second
-     * @param  string  $type
-     * @param  bool  $where
-     * @return $this
-     *
-     * @throws \InvalidArgumentException
-     */
-    public function joinSub($query, $as, $first, $operator = null, $second = null, $type = 'inner', $where = false);
-
-    /**
      * Add a basic where clause to the query.
      *
-     * @param  \Closure|string|array<string|int, mixed>  $column
+     * @param  \Closure|string|array<string|int, mixed>|\Illuminate\Contracts\Database\Query\Expression  $column
      * @param  mixed  $operator
      * @param  mixed  $value
      * @param  string  $boolean
@@ -46,7 +30,7 @@ class Builder
     /**
      * Add an "or where" clause to the query.
      *
-     * @param  \Closure|string|array<string|int, mixed>  $column
+     * @param  \Closure|string|array<array-key, mixed>|\Illuminate\Contracts\Database\Query\Expression  $column
      * @param  mixed  $operator
      * @param  mixed  $value
      * @return $this
@@ -56,7 +40,7 @@ class Builder
     /**
      * Add a "where" clause comparing two columns to the query.
      *
-     * @param  string|array<string|int, mixed>  $first
+     * @param  \Illuminate\Contracts\Database\Query\Expression|string|array<array-key, mixed>  $first
      * @param  string|null  $operator
      * @param  string|null  $second
      * @param  string|null  $boolean
@@ -106,7 +90,7 @@ class Builder
     /**
      * Add a "where null" clause to the query.
      *
-     * @param  string|array<string>  $columns
+     * @param  string|array<string>|\Illuminate\Contracts\Database\Query\Expression  $columns
      * @param  string  $boolean
      * @param  bool  $not
      * @return $this
@@ -116,7 +100,7 @@ class Builder
     /**
      * Add a "where not null" clause to the query.
      *
-     * @param  string|array<string>  $columns
+     * @param  string|array<string>|\Illuminate\Contracts\Database\Query\Expression  $columns
      * @param  string  $boolean
      * @return $this
      */
@@ -157,54 +141,67 @@ class Builder
     public function havingBetween($column, array $values, $boolean = 'and', $not = false);
 
     /**
-     * Add a union statement to the query.
-     *
-     * @template TModelClass of \Illuminate\Database\Eloquent\Model
-     * @param  \Illuminate\Database\Query\Builder|\Illuminate\Database\Eloquent\Builder<TModelClass>|\Closure  $query
-     * @param  bool  $all
-     * @return $this
-     */
-    public function union($query, $all = false);
-
-    /**
-     * Add a union all statement to the query.
-     *
-     * @template TModelClass of \Illuminate\Database\Eloquent\Model
-     * @param  \Illuminate\Database\Query\Builder|\Illuminate\Database\Eloquent\Builder<TModelClass>|\Closure  $query
-     * @return $this
-     */
-    public function unionAll($query);
-
-    /**
      * Execute a query for a single record by ID.
      *
      * @param  int|string  $id
-     * @param  array<string>  $columns
-     * @return mixed|static
+     * @param  array<string|\Illuminate\Contracts\Database\Query\Expression>  $columns
+     * @return array<array-key, mixed>|object|null
      */
     public function find($id, $columns = ['*']);
 
     /**
      * Get a lazy collection for the given query.
      *
-     * @return \Illuminate\Support\LazyCollection<int, mixed>
+     * @return \Illuminate\Support\LazyCollection<int, \stdClass>
      */
     public function cursor();
 
     /**
+     * Execute the query as a "select" statement.
+     *
+     * @param  array<string|\Illuminate\Contracts\Database\Query\Expression>|string  $columns
+     * @return \Illuminate\Support\Collection<int, \stdClass>
+     */
+    public function get($columns = ['*']);
+
+    /**
      * Get an array with the values of a given column.
      *
-     * @param  string|\Illuminate\Database\Query\Expression  $column
+     * @param  string|\Illuminate\Contracts\Database\Query\Expression  $column
      * @param  string|null  $key
      * @return \Illuminate\Support\Collection<array-key, mixed>
      */
     public function pluck($column, $key = null);
 
     /**
+     * Retrieve the sum of the values of a given column.
+     *
+     * @param  \Illuminate\Contracts\Database\Query\Expression|string  $column
+     * @return numeric-string|float|int
+     */
+    public function sum($column);
+
+    /**
+     * Retrieve the average of the values of a given column.
+     *
+     * @param  \Illuminate\Contracts\Database\Query\Expression|string  $column
+     * @return numeric-string|float|int|null
+     */
+    public function avg($column);
+
+    /**
+     * Alias for the "avg" method.
+     *
+     * @param  \Illuminate\Contracts\Database\Query\Expression|string  $column
+     * @return numeric-string|float|int|null
+     */
+    public function average($column);
+
+    /**
      * Execute an aggregate function on the database.
      *
      * @param  string  $function
-     * @param  array<string>  $columns
+     * @param  array<string|\Illuminate\Contracts\Database\Query\Expression>  $columns
      * @return mixed
      */
     public function aggregate($function, $columns = ['*']);
@@ -213,7 +210,7 @@ class Builder
      * Execute a numeric aggregate function on the database.
      *
      * @param  string  $function
-     * @param  array<string>  $columns
+     * @param  array<string|\Illuminate\Contracts\Database\Query\Expression>  $columns
      * @return float|int
      */
     public function numericAggregate($function, $columns = ['*']);
@@ -222,7 +219,7 @@ class Builder
      * Set the aggregate property without running the query.
      *
      * @param  string  $function
-     * @param  array<string>  $columns
+     * @param  array<string|\Illuminate\Contracts\Database\Query\Expression>  $columns
      * @return $this
      */
     protected function setAggregate($function, $columns);
@@ -250,9 +247,8 @@ class Builder
     /**
      * Insert new records into the table using a subquery.
      *
-     * @template TModelClass of \Illuminate\Database\Eloquent\Model
      * @param  array<string>  $columns
-     * @param  \Closure|\Illuminate\Database\Query\Builder|\Illuminate\Database\Eloquent\Builder<TModelClass>|string  $query
+     * @param  \Closure|\Illuminate\Database\Query\Builder|\Illuminate\Database\Eloquent\Builder<*>|string  $query
      * @return int
      */
     public function insertUsing(array $columns, $query);
@@ -269,15 +265,15 @@ class Builder
      * Insert or update a record matching the attributes, and fill it with values.
      *
      * @param  array<string, mixed>  $attributes
-     * @param  array<string, mixed>  $values
+     * @param  array<string, mixed>|(callable(bool): array<string, mixed>)  $values
      * @return bool
      */
-    public function updateOrInsert(array $attributes, array $values = []);
+    public function updateOrInsert(array $attributes = [], array|callable $values = []);
 
     /**
      * Increment a column's value by a given amount.
      *
-     * @param  string|\Illuminate\Database\Query\Expression  $column
+     * @param  string|\Illuminate\Contracts\Database\Query\Expression  $column
      * @param  float|int  $amount
      * @param  array<string, mixed>  $extra
      * @return int
@@ -289,7 +285,7 @@ class Builder
     /**
      * Decrement a column's value by a given amount.
      *
-     * @param  string|\Illuminate\Database\Query\Expression  $column
+     * @param  string|\Illuminate\Contracts\Database\Query\Expression  $column
      * @param  float|int  $amount
      * @param  array<string, mixed>  $extra
      * @return int
@@ -297,4 +293,20 @@ class Builder
      * @throws \InvalidArgumentException
      */
     public function decrement($column, $amount = 1, array $extra = []);
+
+    /**
+     * Get the count of the total records for the paginator.
+     *
+     * @param  array<string|\Illuminate\Contracts\Database\Query\Expression>  $columns
+     * @return int<0, max>
+     */
+    public function getCountForPagination($columns = ['*']);
+
+    /**
+     * Retrieve the "count" result of the query.
+     *
+     * @param  \Illuminate\Contracts\Database\Query\Expression|string  $columns
+     * @return int<0, max>
+     */
+    public function count($columns = '*');
 }

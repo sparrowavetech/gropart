@@ -11,20 +11,16 @@ class SimpleSliderSupport
         SimpleSliderItemForm::extend(function (SimpleSliderItemForm $form) {
             $form
                 ->addAfter('image', 'tablet_image', 'mediaImage', [
-                    'label' => __('Tablet Image'),
+                    'label' => trans('plugins/simple-slider::simple-slider.tablet_image'),
                     'help_block' => [
-                        'text' => __(
-                            'For devices with width from 768px to 1200px, if empty, will use the image from the desktop.'
-                        ),
+                        'text' => trans('plugins/simple-slider::simple-slider.tablet_image_helper'),
                     ],
                     'metadata' => true,
                 ])
                 ->addAfter('tablet_image', 'mobile_image', 'mediaImage', [
-                    'label' => __('Mobile Image'),
+                    'label' => trans('plugins/simple-slider::simple-slider.mobile_image'),
                     'help_block' => [
-                        'text' => __(
-                            'For devices with width less than 768px, if empty, will use the image from the tablet.'
-                        ),
+                        'text' => trans('plugins/simple-slider::simple-slider.mobile_image_helper'),
                     ],
                     'metadata' => true,
                 ]);

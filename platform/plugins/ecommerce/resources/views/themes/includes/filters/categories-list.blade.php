@@ -10,23 +10,24 @@
     $currentCategories = $groupedCategories->get($parentId ?? 0);
 @endphp
 
-@if($currentCategories)
+@if ($currentCategories)
     <ul
-        class="bb-product-filter-items filter-checkbox"
         @if(
-            in_array($categoryId, $categoriesRequest)
-            || isset($category) && $categoryId == $category->id
+            $isCategoriesListActive = (in_array($categoryId, $categoriesRequest)
+            || isset($category) && $categoryId == $category->id)
         )
             style="display: block !important;"
         @endif
+
+        class="bb-product-filter-items @if ($isCategoriesListActive) active @endif"
     >
         @foreach ($currentCategories as $category)
             @if (! empty($categoriesRequest) && $loop->first && ! $category->parent_id)
                 <li class="bb-product-filter-item">
-                    <a href="{{ route('public.products') }}" @class(['bb-product-filter-link', 'active' => empty($categoriesRequest)])>
+                    <a href="{{ $currentMainFilterUrl ?? route('public.products') }}" @class(['bb-product-filter-link', 'active' => empty($categoriesRequest)])>
                         <x-core::icon name="ti ti-chevron-left" />
 
-                        {{ __('All categories') }}
+                        {{ trans('plugins/ecommerce::products.all_categories') }}
                     </a>
                 </li>
             @endif
@@ -37,16 +38,17 @@
                     @class(['bb-product-filter-link', 'active' => $categoryId == $category->id || $urlCurrent == route('public.single', $category->url)])
                     data-id="{{ $category->id }}"
                 >
-                    @if (!$category->parent_id)
+                    @if (! $category->parent_id)
                         @if ($category->icon_image)
                             {{ RvMedia::image($category->icon_image, $category->name) }}
                         @elseif ($category->icon)
                             {!! BaseHelper::renderIcon($category->icon) !!}
+                        @else
+                            <x-core::icon name="ti ti-folder" />
                         @endif
-                        {{ $category->name }}
-                    @else
-                        {{ $category->name }}
                     @endif
+
+                    {{ $category->name }}
                 </a>
 
                 @php
@@ -54,14 +56,15 @@
                 @endphp
 
                 @if ($hasChildren)
-                    <button class="float-end" data-bb-toggle="toggle-product-categories-tree">
-                        <x-core::icon name="ti ti-chevron-down" />
-                    </button>
-
                     @include(EcommerceHelper::viewPath('includes.filters.categories-list'), [
-                        'groupedCategories' => $groupedCategories,
+                        'categories' => $groupedCategories,
                         'parentId' => $category->id,
                     ])
+
+                    <button data-bb-toggle="toggle-product-categories-tree">
+                        <x-core::icon name="ti ti-plus" />
+                        <x-core::icon name="ti ti-minus" style="display: none;" />
+                    </button>
                 @endif
             </li>
         @endforeach

@@ -15,7 +15,11 @@
 @php
     $id ??= $name ?? Str::random(8);
 
-    $classes = Arr::toCssClasses(['form-select', 'is-invalid' => $name && $errors->has($name), 'select-search-full' => $searchable]);
+    $classes = Arr::toCssClasses([
+        'form-select',
+        'is-invalid' => $name && $errors->has($name),
+        'select-search-full' => $searchable,
+    ]);
 @endphp
 
 <x-core::form-group :class="$wrapperClass">

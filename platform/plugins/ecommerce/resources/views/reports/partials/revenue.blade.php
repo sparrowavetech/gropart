@@ -23,7 +23,7 @@
                 aria-hidden="true"
             ></i>
             <span>{{ $defaultRange }}</span>
-            <i class="fa fa-angle-down "></i>
+            <x-core::icon name="ti ti-caret-down" />
         </a>
         <ul class="dropdown-menu float-end">
             <li>

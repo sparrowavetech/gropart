@@ -33,7 +33,7 @@ class ThumbnailService
         $this->thumbRate = 0.75;
         $this->xCoordinate = null;
         $this->yCoordinate = null;
-        $this->fitPosition = 'center';
+        $this->fitPosition = setting('media_thumbnail_crop_position', 'center');
     }
 
     public function setImage(string $imagePath): self
@@ -172,7 +172,9 @@ class ThumbnailService
         }
 
         try {
-            $this->uploadManager->saveFile($destinationPath, $thumbImage->encode(new AutoEncoder()));
+            $encodedImage = $thumbImage->encode(new AutoEncoder());
+
+            $this->uploadManager->saveFile($destinationPath, (string) $encodedImage);
         } catch (Throwable $exception) {
             BaseHelper::logError($exception);
 

@@ -12,9 +12,11 @@ use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Models\Brand;
 use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Models\ProductCategory;
+use Botble\Ecommerce\Tables\BulkChanges\StockStatusBulkChange;
 use Botble\Table\Abstracts\TableAbstract;
 use Botble\Table\Actions\DeleteAction;
 use Botble\Table\Actions\EditAction;
+use Botble\Table\Actions\ViewAction;
 use Botble\Table\BulkActions\DeleteBulkAction;
 use Botble\Table\BulkChanges\CreatedAtBulkChange;
 use Botble\Table\BulkChanges\IsFeaturedBulkChange;
@@ -31,7 +33,6 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\Relations\Relation as EloquentRelation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
@@ -44,6 +45,7 @@ class ProductTable extends TableAbstract
         $this
             ->model(Product::class)
             ->addActions([
+                ViewAction::make()->route('products.view'),
                 EditAction::make()->route('products.edit'),
                 DeleteAction::make()->route('products.destroy'),
             ])
@@ -54,7 +56,57 @@ class ProductTable extends TableAbstract
                 ImportHeaderAction::make()
                     ->route('tools.data-synchronize.import.products.index')
                     ->permission('ecommerce.import.products.index'),
-            ]);
+            ])
+            ->addBulkActions([
+                DeleteBulkAction::make()->permission('products.destroy'),
+            ])
+            ->addColumns([
+                IdColumn::make(),
+                ImageColumn::make(),
+                Column::make('name')
+                    ->title(trans('plugins/ecommerce::products.name'))
+                    ->alignStart(),
+                Column::make('price')
+                    ->title(trans('plugins/ecommerce::products.price'))
+                    ->alignStart(),
+                Column::make('stock_status')
+                    ->title(trans('plugins/ecommerce::products.stock_status')),
+                Column::make('quantity')
+                    ->title(trans('plugins/ecommerce::products.quantity'))
+                    ->alignStart(),
+                Column::make('sku')
+                    ->title(trans('plugins/ecommerce::products.sku'))
+                    ->alignStart(),
+                Column::make('order')
+                    ->title(trans('plugins/ecommerce::ecommerce.sort_order'))
+                    ->width(50),
+                CreatedAtColumn::make(),
+                StatusColumn::make(),
+            ])
+            ->queryUsing(function (Builder $query) {
+                return $query
+                    ->select([
+                        'id',
+                        'name',
+                        'order',
+                        'created_at',
+                        'status',
+                        'sku',
+                        'image',
+                        'images',
+                        'price',
+                        'sale_price',
+                        'sale_type',
+                        'start_date',
+                        'end_date',
+                        'quantity',
+                        'with_storehouse_management',
+                        'stock_status',
+                        'product_type',
+                        'currency_code',
+                    ])
+                    ->where('is_variation', 0);
+            });
     }
 
     public function ajax(): JsonResponse
@@ -64,11 +116,11 @@ class ProductTable extends TableAbstract
             ->editColumn('name', function (Product $item) {
                 $productType = null;
 
-                if (EcommerceHelper::isEnabledSupportDigitalProducts()) {
+                if (! EcommerceHelper::isDisabledPhysicalProduct() && EcommerceHelper::isEnabledSupportDigitalProducts()) {
                     $productType = Html::tag('small', ' &mdash; ' . $item->product_type->label())->toHtml();
                 }
 
-                if (! $this->hasPermission('products.edit')) {
+                if (! EcommerceHelper::isDisabledPhysicalProduct() && ! $this->hasPermission('products.edit')) {
                     return BaseHelper::clean($item->name) . $productType;
                 }
 
@@ -115,62 +167,10 @@ class ProductTable extends TableAbstract
                 return BaseHelper::clean($item->stock_status_html);
             })
             ->filter(function ($query) {
-                $keyword = request()->input('search.value');
-                if ($keyword) {
-                    $keyword = '%' . $keyword . '%';
-
-                    $query
-                        ->where('ec_products.name', 'LIKE', $keyword)
-                        ->where('is_variation', 0)
-                        ->orWhere(function ($query) use ($keyword) {
-                            $query
-                                ->where('is_variation', 0)
-                                ->where(function ($query) use ($keyword) {
-                                    $query
-                                        ->orWhere('ec_products.sku', 'LIKE', $keyword)
-                                        ->orWhere('ec_products.created_at', 'LIKE', $keyword)
-                                        ->orWhereHas('variations.product', function ($query) use ($keyword) {
-                                            $query->where('sku', 'LIKE', $keyword);
-                                        });
-                                });
-                        });
-
-                    return $query;
-                }
-
-                return $query;
+                return $query->searchByKeyword(request()->input('search.value'));
             });
 
         return $this->toJson($data);
-    }
-
-    public function query(): Relation|Builder|QueryBuilder
-    {
-        $query = $this->getModel()
-            ->query()
-            ->select([
-                'id',
-                'name',
-                'order',
-                'created_at',
-                'status',
-                'sku',
-                'image',
-                'images',
-                'price',
-                'sale_price',
-                'sale_type',
-                'start_date',
-                'end_date',
-                'quantity',
-                'with_storehouse_management',
-                'stock_status',
-                'product_type',
-            ])
-            ->where('is_variation', 0)
-            ->with('variations.product');
-
-        return $this->applyScopes($query);
     }
 
     public function htmlDrawCallbackFunction(): ?string
@@ -178,38 +178,11 @@ class ProductTable extends TableAbstract
         return parent::htmlDrawCallbackFunction() . 'Botble.initEditable()';
     }
 
-    public function columns(): array
-    {
-        return [
-            IdColumn::make(),
-            ImageColumn::make(),
-            Column::make('name')
-                ->title(trans('plugins/ecommerce::products.name'))
-                ->alignStart(),
-            Column::make('price')
-                ->title(trans('plugins/ecommerce::products.price'))
-                ->alignStart(),
-            Column::make('stock_status')
-                ->title(trans('plugins/ecommerce::products.stock_status')),
-            Column::make('quantity')
-                ->title(trans('plugins/ecommerce::products.quantity'))
-                ->alignStart(),
-            Column::make('sku')
-                ->title(trans('plugins/ecommerce::products.sku'))
-                ->alignStart(),
-            Column::make('order')
-                ->title(trans('plugins/ecommerce::ecommerce.sort_order'))
-                ->width(50),
-            CreatedAtColumn::make(),
-            StatusColumn::make(),
-        ];
-    }
-
     public function buttons(): array
     {
         $buttons = [];
 
-        if (EcommerceHelper::isEnabledSupportDigitalProducts() && $this->hasPermission('products.create')) {
+        if (EcommerceHelper::isEnabledSupportDigitalProducts() && ! EcommerceHelper::isDisabledPhysicalProduct() && $this->hasPermission('products.create')) {
             $buttons['create'] = [
                 'extend' => 'collection',
                 'text' => view('core/table::partials.create')->render(),
@@ -221,10 +194,10 @@ class ProductTable extends TableAbstract
                             'span',
                             ProductTypeEnum::PHYSICAL()->label(),
                             [
-                                    'data-action' => 'physical-product',
-                                    'data-href' => route('products.create'),
-                                    'class' => 'ms-1',
-                                ]
+                                'data-action' => 'physical-product',
+                                'data-href' => route('products.create'),
+                                'class' => 'ms-1',
+                            ]
                         )->toHtml(),
                     ],
                     [
@@ -233,26 +206,19 @@ class ProductTable extends TableAbstract
                             'span',
                             ProductTypeEnum::DIGITAL()->label(),
                             [
-                                    'data-action' => 'digital-product',
-                                    'data-href' => route('products.create', ['product_type' => 'digital']),
-                                    'class' => 'ms-1',
-                                ]
+                                'data-action' => 'digital-product',
+                                'data-href' => route('products.create', ['product_type' => 'digital']),
+                                'class' => 'ms-1',
+                            ]
                         )->toHtml(),
                     ],
                 ],
             ];
-        } else {
+        } elseif (! EcommerceHelper::isEnabledSupportDigitalProducts() || EcommerceHelper::isDisabledPhysicalProduct()) {
             $buttons = $this->addCreateButton(route('products.create'), 'products.create');
         }
 
         return $buttons;
-    }
-
-    public function bulkActions(): array
-    {
-        return [
-            DeleteBulkAction::make()->permission('products.destroy'),
-        ];
     }
 
     public function renderTable($data = [], $mergeData = []): View|Factory|Response
@@ -276,20 +242,6 @@ class ProductTable extends TableAbstract
             'type' => 'select-ajax',
         ]);
 
-        $data['is_enquiry'] = [
-            'title' => trans('plugins/ecommerce::products.form.is_enquiry'),
-            'type' => 'select',
-            'choices' =>[1=>'Yes',0=>'No'],
-            'validate' => 'required|in:' . implode(',', StockStatusEnum::values()),
-        ];
-
-        $data['product_free_shipping'] = [
-            'title' => trans('plugins/ecommerce::products.form.product_free_shipping'),
-            'type' => 'select',
-            'choices' =>[1=>'Yes',0=>'No'],
-            'validate' => 'required|in:' . implode(',', StockStatusEnum::values()),
-        ];
-
         $data['stock_status'] = [
             'title' => trans('plugins/ecommerce::products.form.stock_status'),
             'type' => 'select',
@@ -302,6 +254,11 @@ class ProductTable extends TableAbstract
             'type' => 'select',
             'choices' => ProductTypeEnum::labels(),
             'validate' => 'required|in:' . implode(',', ProductTypeEnum::values()),
+        ];
+
+        $data['sku'] = [
+            'title' => trans('plugins/ecommerce::products.sku'),
+            'type' => 'text',
         ];
 
         return $data;
@@ -349,6 +306,7 @@ class ProductTable extends TableAbstract
                 },
             ],
             StatusBulkChange::make(),
+            StockStatusBulkChange::make(),
             CreatedAtBulkChange::make(),
             IsFeaturedBulkChange::make(),
         ];
@@ -391,7 +349,15 @@ class ProductTable extends TableAbstract
                         ->select($query->getModel()->getTable() . '.*');
                 }
 
-                return $query->where('ec_product_category_product.category_id', $value);
+                $category = ProductCategory::query()->find($value);
+
+                if (! $category) {
+                    break;
+                }
+
+                $categoryIds = ProductCategory::getChildrenIds($category->activeChildren, [$category->getKey()]);
+
+                return $query->whereIn('ec_product_category_product.category_id', $categoryIds);
 
             case 'brand':
                 if (! $value) {
@@ -411,14 +377,14 @@ class ProductTable extends TableAbstract
 
                 if ($value == StockStatusEnum::OUT_OF_STOCK) {
                     return $query
-                        ->where(function ($query) {
+                        ->where(function ($query): void {
                             $query
-                                ->where(function ($subQuery) {
+                                ->where(function ($subQuery): void {
                                     $subQuery
                                         ->where('with_storehouse_management', 0)
                                         ->where('stock_status', StockStatusEnum::OUT_OF_STOCK);
                                 })
-                                ->orWhere(function ($subQuery) {
+                                ->orWhere(function ($subQuery): void {
                                     $subQuery
                                         ->where('with_storehouse_management', 1)
                                         ->where('allow_checkout_when_out_of_stock', 0)
@@ -431,15 +397,15 @@ class ProductTable extends TableAbstract
                     return $query
                         ->where(function ($query) {
                             return $query
-                                ->where(function ($subQuery) {
+                                ->where(function ($subQuery): void {
                                     $subQuery
                                         ->where('with_storehouse_management', 0)
                                         ->where('stock_status', StockStatusEnum::IN_STOCK);
                                 })
-                                ->orWhere(function ($subQuery) {
+                                ->orWhere(function ($subQuery): void {
                                     $subQuery
                                         ->where('with_storehouse_management', 1)
-                                        ->where(function ($sub) {
+                                        ->where(function ($sub): void {
                                             $sub
                                                 ->where('allow_checkout_when_out_of_stock', 1)
                                                 ->orWhere('quantity', '>', 0);

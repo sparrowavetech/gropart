@@ -11,13 +11,13 @@ class EncodedImage extends File implements EncodedImageInterface
     /**
      * Create new instance
      *
-     * @param string $data
-     * @param string $mediaType
+     * @param string|resource $data
      */
     public function __construct(
-        protected string $data,
+        mixed $data,
         protected string $mediaType = 'application/octet-stream'
     ) {
+        parent::__construct($data);
     }
 
     /**
@@ -47,6 +47,19 @@ class EncodedImage extends File implements EncodedImageInterface
      */
     public function toDataUri(): string
     {
-        return sprintf('data:%s;base64,%s', $this->mediaType, base64_encode($this->data));
+        return sprintf('data:%s;base64,%s', $this->mediaType(), base64_encode((string) $this));
+    }
+
+    /**
+     * Show debug info for the current image
+     *
+     * @return array<string, mixed>
+     */
+    public function __debugInfo(): array
+    {
+        return [
+            'mediaType' => $this->mediaType(),
+            'size' => $this->size(),
+        ];
     }
 }

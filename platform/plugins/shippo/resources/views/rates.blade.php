@@ -1,5 +1,5 @@
 {!! Form::open([
-    'url' => route('ecommerce.shipments.shippo.update-rate', $shipment->id),
+    'url' => route(app(\Botble\Shippo\Shippo::class)->getRoutePrefixByFactor() . 'shippo.update-rate', $shipment->id),
     'class' => 'update-rate-shipment',
 ]) !!}
 <div class="payment-checkout-form mt-3">

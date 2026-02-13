@@ -5,6 +5,7 @@
     "provider": "Botble\\Translation\\Providers\\TranslationServiceProvider",
     "author": "Botble Technologies",
     "url": "https://botble.com",
-    "version": "2.0.2",
-    "description": "Manage translation text"
+    "version": "2.0.8",
+    "description": "Manage translation text",
+    "minimum_core_version": "7.3.0"
 }

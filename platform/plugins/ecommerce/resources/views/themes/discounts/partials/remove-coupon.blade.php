@@ -1,7 +1,7 @@
-<div class="alert alert-success mb-1">
+<div class="applied-coupon-alert mb-1">
     <div class="d-flex align-items-center gap-2 justify-content-between flex-wrap">
         <div>
-            {!! BaseHelper::clean(__('Coupon code: :code', ['code' => '<strong>' . session('applied_coupon_code') . '</strong>'])) !!}
+            {!! BaseHelper::clean(trans('plugins/ecommerce::discount.coupon_code_label', ['code' => '<strong>' . session('applied_coupon_code') . '</strong>'])) !!}
         </div>
 
         <button
@@ -9,7 +9,7 @@
             data-url="{{ route('public.coupon.remove') }}"
             type="button"
         >
-            <span>{{ __('Remove') }}</span>
+            <span>{{ trans('plugins/ecommerce::discount.remove') }}</span>
         </button>
     </div>
 </div>

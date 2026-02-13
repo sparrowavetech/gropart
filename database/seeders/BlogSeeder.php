@@ -20,8 +20,6 @@ class BlogSeeder extends BaseSeeder
         Category::query()->truncate();
         Tag::query()->truncate();
 
-        $faker = $this->fake();
-
         $categories = [
             [
                 'name' => 'Ecommerce',
@@ -164,7 +162,7 @@ class BlogSeeder extends BaseSeeder
 
             $item['author_id'] = User::query()->value('id');
             $item['author_type'] = User::class;
-            $item['views'] = $faker->numberBetween(100, 2500);
+            $item['views'] = rand(100, 2500);
             $item['is_featured'] = $index < 10;
             $item['image'] = 'news/' . ($index + 1) . '.jpg';
             $item['description'] = 'You should pay more attention when you choose your wallets. There are a lot of them on the market with the different designs and styles. When you choose carefully, you would be able to buy a wallet that is catered to your needs. Not to mention that it will help to enhance your style significantly.';
@@ -173,8 +171,8 @@ class BlogSeeder extends BaseSeeder
             $post = Post::query()->create($item);
 
             $post->categories()->sync([
-                $faker->numberBetween(1, 2),
-                $faker->numberBetween(3, 4),
+                rand(1, 2),
+                rand(3, 4),
             ]);
 
             $post->tags()->sync([1, 2, 3, 4, 5]);
@@ -188,10 +186,16 @@ class BlogSeeder extends BaseSeeder
         int|string|null $parentId = 0,
         bool $isFeatured = false
     ): Category {
-        $faker = fake();
+        $descriptions = [
+            'Discover the latest trends and insights in this category. Browse our collection of articles and stay informed.',
+            'Explore our curated content covering everything you need to know about this topic.',
+            'Find helpful guides, tips, and expert advice in this category to enhance your knowledge.',
+            'Stay up-to-date with the latest news and developments in this exciting category.',
+        ];
 
-        $item['description'] = $faker->text();
+        $item['description'] = Arr::random($descriptions);
         $item['author_id'] = User::query()->value('id');
+        $item['author_type'] = User::class;
         $item['parent_id'] = $parentId;
         $item['is_featured'] = $isFeatured;
 

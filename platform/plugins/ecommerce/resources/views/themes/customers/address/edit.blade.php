@@ -1,6 +1,6 @@
 @extends(EcommerceHelper::viewPath('customers.master'))
 
-@section('title', __('Address books'))
+@section('title', trans('plugins/ecommerce::customer-dashboard.address_books'))
 
 @section('content')
     {!! Form::open(['route' => ['customer.address.edit', $address->id]]) !!}

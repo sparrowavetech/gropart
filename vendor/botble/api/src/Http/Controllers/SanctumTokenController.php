@@ -49,7 +49,6 @@ class SanctumTokenController extends BaseController
 
     public function destroy(PersonalAccessToken $sanctumToken): DeleteResourceAction
     {
-        die;
         return DeleteResourceAction::make($sanctumToken);
     }
 }

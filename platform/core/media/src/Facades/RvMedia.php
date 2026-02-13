@@ -58,13 +58,17 @@ use Illuminate\Support\Facades\Facade;
  * @method static void setDoSpacesDisk(array $config)
  * @method static void setWasabiDisk(array $config)
  * @method static void setBunnyCdnDisk(array $config)
- * @method static \Illuminate\Support\HtmlString image(string|null $url, string|null $alt = null, string|null $size = null, bool $useDefaultImage = true, array $attributes = [], bool|null $secure = null)
+ * @method static void setBackblazeDisk(array $config)
+ * @method static \Illuminate\Support\HtmlString image(string|null $url, string|null $alt = null, string|null $size = null, bool $useDefaultImage = true, array $attributes = [], bool|null $secure = null, bool|null $lazy = true)
  * @method static string|null getFileSize(string|null $path)
  * @method static void renameFile(\Botble\Media\Models\MediaFile $file, string $newName, bool $renameOnDisk = true)
  * @method static void renameFolder(\Botble\Media\Models\MediaFolder $folder, string $newName, bool $renameOnDisk = true)
  * @method static void refreshCache()
  * @method static array getFolderColors()
  * @method static \Intervention\Image\ImageManager imageManager(string|null $driver = null)
+ * @method static bool canOnlyViewOwnMedia()
+ * @method static responseDownloadFile(string $filePath)
+ * @method static array getAvailableDrivers()
  *
  * @see \Botble\Media\RvMedia
  */

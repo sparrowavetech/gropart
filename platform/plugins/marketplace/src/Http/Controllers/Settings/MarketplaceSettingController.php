@@ -2,6 +2,7 @@
 
 namespace Botble\Marketplace\Http\Controllers\Settings;
 
+use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Supports\Helper;
 use Botble\Ecommerce\Models\ProductCategory;
 use Botble\Marketplace\Facades\MarketplaceHelper;
@@ -15,7 +16,7 @@ class MarketplaceSettingController extends SettingController
 {
     public function edit()
     {
-        $this->pageTitle(trans('plugins/marketplace::marketplace.settings.name'));
+        $this->pageTitle(trans('plugins/marketplace::marketplace.name'));
 
         $productCategories = ProductCategory::query()->get();
 
@@ -48,21 +49,13 @@ class MarketplaceSettingController extends SettingController
             $validated['fee_per_order'] = $value < 0 ? 0 : min($value, 100);
         }
 
-        if (in_array('default_platform_fee', array_keys($validated))) {
-            $value = $validated['default_platform_fee'];
-            $validated['default_platform_fee'] = $value < 0 ? 0 : min($value, 100);
-        }
-
-        if (in_array('default_fee_tax', array_keys($validated))) {
-            $value = $validated['default_fee_tax'];
-            $validated['default_fee_tax'] = $value < 0 ? 0 : min($value, 100);
-        }
-
         $this->saveSettings($validated);
 
         if ($preVerifyVendor != MarketplaceHelper::getSetting('verify_vendor', 1)) {
             Helper::clearCache();
         }
+
+        DashboardMenu::clearCachesForCurrentUser();
 
         return $this
             ->httpResponse()

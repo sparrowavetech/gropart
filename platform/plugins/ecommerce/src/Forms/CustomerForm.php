@@ -5,14 +5,17 @@ namespace Botble\Ecommerce\Forms;
 use Botble\Base\Facades\Assets;
 use Botble\Base\Forms\FieldOptions\DatePickerFieldOption;
 use Botble\Base\Forms\FieldOptions\EmailFieldOption;
+use Botble\Base\Forms\FieldOptions\MediaImageFieldOption;
 use Botble\Base\Forms\FieldOptions\NameFieldOption;
 use Botble\Base\Forms\FieldOptions\OnOffFieldOption;
+use Botble\Base\Forms\FieldOptions\PhoneNumberFieldOption;
 use Botble\Base\Forms\FieldOptions\StatusFieldOption;
 use Botble\Base\Forms\FieldOptions\TextareaFieldOption;
 use Botble\Base\Forms\FieldOptions\TextFieldOption;
 use Botble\Base\Forms\Fields\DatePickerField;
 use Botble\Base\Forms\Fields\MediaImageField;
 use Botble\Base\Forms\Fields\OnOffField;
+use Botble\Base\Forms\Fields\PhoneNumberField;
 use Botble\Base\Forms\Fields\SelectField;
 use Botble\Base\Forms\Fields\TextareaField;
 use Botble\Base\Forms\Fields\TextField;
@@ -26,25 +29,24 @@ class CustomerForm extends FormAbstract
     public function setup(): void
     {
         Assets::addScriptsDirectly('vendor/core/plugins/ecommerce/js/address.js')
-            ->addStylesDirectly('vendor/core/plugins/ecommerce/css/customer-admin.css')
             ->addStylesDirectly('vendor/core/plugins/ecommerce/css/review.css');
 
         $this
-            ->setupModel(new Customer())
+            ->model(Customer::class)
             ->setValidatorClass(CustomerCreateRequest::class)
             ->template('plugins/ecommerce::customers.form')
             ->columns()
-            ->add('name', TextField::class, NameFieldOption::make()->maxLength(120)->colspan(1)->toArray())
-            ->add('email', TextField::class, EmailFieldOption::make()->required()->colspan(1)->toArray())
+            ->add('name', TextField::class, NameFieldOption::make()->maxLength(120)->colspan(1))
+            ->add('email', TextField::class, EmailFieldOption::make()->required()->colspan(1))
             ->add(
                 'phone',
-                TextField::class,
-                TextFieldOption::make()
+                PhoneNumberField::class,
+                PhoneNumberFieldOption::make()
                     ->label(trans('plugins/ecommerce::customer.phone'))
                     ->placeholder(trans('plugins/ecommerce::customer.phone_placeholder'))
                     ->maxLength(15)
                     ->colspan(1)
-                    ->toArray()
+                    ->withCountryCodeSelection()
             )
             ->add(
                 'dob',
@@ -53,7 +55,6 @@ class CustomerForm extends FormAbstract
                     ->label(trans('plugins/ecommerce::customer.dob'))
                     ->defaultValue(null)
                     ->colspan(1)
-                    ->toArray()
             )
             ->add(
                 'is_change_password',
@@ -66,7 +67,6 @@ class CustomerForm extends FormAbstract
                     ])
                     ->defaultValue(0)
                     ->colspan(2)
-                    ->toArray()
             )
             ->add(
                 'password',
@@ -77,7 +77,6 @@ class CustomerForm extends FormAbstract
                     ->maxLength(60)
                     ->collapsible('is_change_password', 1, ! $this->getModel()->exists || $this->getModel()->is_change_password)
                     ->colspan(1)
-                    ->toArray()
             )
             ->add(
                 'password_confirmation',
@@ -88,7 +87,6 @@ class CustomerForm extends FormAbstract
                     ->maxLength(60)
                     ->collapsible('is_change_password', 1, ! $this->getModel()->exists || $this->getModel()->is_change_password)
                     ->colspan(1)
-                    ->toArray()
             )
             ->add(
                 'private_notes',
@@ -98,40 +96,53 @@ class CustomerForm extends FormAbstract
                     ->helperText(trans('plugins/ecommerce::customer.private_notes_helper'))
                     ->rows(2)
                     ->colspan(2)
-                    ->toArray()
             )
-            ->add('status', SelectField::class, StatusFieldOption::make()->choices(CustomerStatusEnum::labels())->toArray())
-            ->add('avatar', MediaImageField::class)
+            ->add('status', SelectField::class, StatusFieldOption::make()->choices(CustomerStatusEnum::labels()))
+            ->add(
+                'avatar',
+                MediaImageField::class,
+                MediaImageFieldOption::make()
+                    ->label(trans('plugins/ecommerce::customer.avatar'))
+            )
             ->setBreakFieldPoint('status')
-            ->when($this->getModel()->getKey(), function () {
-                $wishlist = $this->getModel()->wishlist->loadMissing('product');
+            ->when($this->getModel()->getKey(), function (): void {
+                /**
+                 * @var Customer $model
+                 */
+                $model = $this->getModel();
 
-                $this
-                    ->addMetaBoxes([
-                        'addresses' => [
-                            'title' => trans('plugins/ecommerce::addresses.addresses'),
-                            'content' => view('plugins/ecommerce::customers.addresses.addresses', [
-                                'addresses' => $this->model->addresses()->get(),
-                            ])->render(),
-                            'header_actions' => view('plugins/ecommerce::customers.addresses.address-actions')->render(),
-                            'wrap' => true,
-                            'has_table' => true,
-                        ],
-                        'wishlist' => [
-                            'title' => trans('plugins/ecommerce::ecommerce.wishlist'),
-                            'content' => view('plugins/ecommerce::customers.wishlist', compact('wishlist'))->render(),
-                            'wrap' => true,
-                            'has_table' => true,
-                        ],
-                        'payments' => [
-                            'title' => trans('plugins/ecommerce::payment.name'),
-                            'content' => view('plugins/ecommerce::customers.payments.payments', [
-                                'payments' => $this->model->payments()->get(),
-                            ])->render(),
-                            'wrap' => true,
-                            'has_table' => true,
-                        ],
-                    ]);
+                $wishlist = $model->wishlist->loadMissing('product');
+
+                $metaBoxes = [
+                    'addresses' => [
+                        'title' => trans('plugins/ecommerce::addresses.addresses'),
+                        'content' => view('plugins/ecommerce::customers.addresses.addresses', [
+                            'addresses' => $model->addresses()->get(),
+                        ])->render(),
+                        'header_actions' => view('plugins/ecommerce::customers.addresses.address-actions')->render(),
+                        'wrap' => true,
+                        'has_table' => true,
+                    ],
+                    'wishlist' => [
+                        'title' => trans('plugins/ecommerce::ecommerce.wishlist'),
+                        'content' => view('plugins/ecommerce::customers.wishlist', compact('wishlist'))->render(),
+                        'wrap' => true,
+                        'has_table' => true,
+                    ],
+                ];
+
+                if (is_plugin_active('payment')) {
+                    $metaBoxes['payments'] = [
+                        'title' => trans('plugins/ecommerce::payment.name'),
+                        'content' => view('plugins/ecommerce::customers.payments.payments', [
+                            'payments' => $model->payments()->get(),
+                        ])->render(),
+                        'wrap' => true,
+                        'has_table' => true,
+                    ];
+                }
+
+                $this->addMetaBoxes($metaBoxes);
             });
     }
 }

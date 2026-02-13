@@ -9,7 +9,7 @@
 <div class="container-xxxl">
     <div class="row my-4">
         <div class="col-md-3">
-            <ul class="nav flex-column dashboard-navigation mb-4">
+            <ul class="nav flex-column dashboard-navigation mb-5">
                 @foreach (DashboardMenu::getAll('customer') as $item)
                     <li class="nav-item" id="{{ $item['id'] }}">
                         <a

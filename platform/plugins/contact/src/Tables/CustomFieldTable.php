@@ -22,7 +22,9 @@ class CustomFieldTable extends TableAbstract
     {
         $this
             ->model(CustomField::class)
-            ->addHeaderAction(CreateHeaderAction::make()->route('contacts.custom-fields.create')->permission('contacts.edit'))
+            ->addHeaderActions([
+                CreateHeaderAction::make()->route('contacts.custom-fields.create')->permission('contacts.edit'),
+            ])
             ->addBulkChanges([
                 NameBulkChange::make()->validate('required|max:120'),
                 CreatedAtBulkChange::make(),

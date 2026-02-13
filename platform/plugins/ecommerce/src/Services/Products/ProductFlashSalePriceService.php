@@ -14,7 +14,7 @@ class ProductFlashSalePriceService extends ProductPriceHandlerService
             return $next($product);
         }
 
-        $finalPrice = (float) ($product->getFinalPrice() ?: $product->price);
+        $finalPrice = (float) ($product->getFinalPrice() ?: $product->getConvertedPrice());
         $flashSalePrice = (float) $product->getFlashSalePrice();
 
         if ($flashSalePrice < $finalPrice) {

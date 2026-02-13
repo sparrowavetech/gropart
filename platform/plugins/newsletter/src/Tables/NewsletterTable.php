@@ -2,11 +2,9 @@
 
 namespace Botble\Newsletter\Tables;
 
-use ArchiElite\NotificationPlus\Drivers\WhatsApp;
 use Botble\Newsletter\Models\Newsletter;
 use Botble\Table\Abstracts\TableAbstract;
 use Botble\Table\Actions\DeleteAction;
-use Botble\Table\Columns\LinkableColumn;
 use Botble\Table\BulkActions\DeleteBulkAction;
 use Botble\Table\BulkChanges\CreatedAtBulkChange;
 use Botble\Table\BulkChanges\EmailBulkChange;
@@ -28,12 +26,6 @@ class NewsletterTable extends TableAbstract
             ->addColumns([
                 IdColumn::make(),
                 EmailColumn::make()->linkable(),
-                LinkableColumn::make('whatsapp')
-                    ->urlUsing(fn(LinkableColumn $column) => 'https://wa.me/' . $column->getItem()->whatsapp)
-                    ->attributes([
-                        'target' => '_blank',
-                    ])
-                    ->title(trans('plugins/newsletter::newsletter.whatsapp')),
                 NameColumn::make(),
                 CreatedAtColumn::make(),
                 StatusColumn::make(),
@@ -56,16 +48,12 @@ class NewsletterTable extends TableAbstract
                         'name',
                         'created_at',
                         'status',
-                        'whatsapp',
                     ]);
             });
     }
 
     public function getDefaultButtons(): array
     {
-        return [
-            'export',
-            'reload',
-        ];
+        return array_unique(array_merge(['export'], parent::getDefaultButtons()));
     }
 }

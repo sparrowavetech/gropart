@@ -12,9 +12,9 @@
         </p>
     </li>
     <li>
-        <p>{{ __('After registration at :name, you will have Store ID and Store Password (API/Secret key)', ['name' => 'SslCommerz']) }}</p>
+        <p>{{ trans('plugins/sslcommerz::sslcommerz.after_registration', ['name' => 'SslCommerz']) }}</p>
     </li>
     <li>
-        <p>{{ __('Enter Store ID and Store Password (API/Secret key) into the box in right hand') }}</p>
+        <p>{{ trans('plugins/sslcommerz::sslcommerz.enter_credentials') }}</p>
     </li>
 </ol>

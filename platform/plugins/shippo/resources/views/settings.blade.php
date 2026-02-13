@@ -193,7 +193,7 @@
 
                                 @if (! empty($logFiles))
                                     <div class="form-group mb-3">
-                                        <p class="mb-0">{{ __('Log files') }}: </p>
+                                        <p class="mb-0">{{ trans('plugins/shippo::shippo.log_files') }}: </p>
                                         <ul class="list-unstyled">
                                             @foreach ($logFiles as $logFile)
                                                 <li><a

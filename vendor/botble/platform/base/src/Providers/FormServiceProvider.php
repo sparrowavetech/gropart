@@ -11,8 +11,6 @@ use Kris\LaravelFormBuilder\Events\FormComponentRegistering;
 
 class FormServiceProvider extends ServiceProvider
 {
-    protected bool $defer = true;
-
     public function register(): void
     {
         /**
@@ -38,7 +36,7 @@ class FormServiceProvider extends ServiceProvider
             ],
         ]);
 
-        $this->app['events']->listen(FormComponentRegistering::class, function (FormComponentRegistering $event) {
+        $this->app['events']->listen(FormComponentRegistering::class, function (FormComponentRegistering $event): void {
             $form = $event->form;
             $form->component('mediaImage', 'core/base::forms.partials.image', [
                 'name',
@@ -96,6 +94,7 @@ class FormServiceProvider extends ServiceProvider
                  * ]
                  */
                 'values',
+                'inline',
             ]);
 
             /**

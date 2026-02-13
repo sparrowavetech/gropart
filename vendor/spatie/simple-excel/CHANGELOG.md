@@ -2,6 +2,55 @@
 
 All notable changes to `simple-excel` will be documented in this file
 
+## 3.7.2 - 2025-02-14
+
+### What's Changed
+
+* Laravel 12.x Compatibility by @laravel-shift in https://github.com/spatie/simple-excel/pull/182
+
+**Full Changelog**: https://github.com/spatie/simple-excel/compare/3.7.1...3.7.2
+
+## 3.7.1 - 2024-12-16
+
+### What's Changed
+
+* Update documentation on how to use custom delimiter by @pikant in https://github.com/spatie/simple-excel/pull/179
+* Fix deprecation warning for PHP 8.4 implicit nullable parameter by @hmazter in https://github.com/spatie/simple-excel/pull/180
+
+### New Contributors
+
+* @pikant made their first contribution in https://github.com/spatie/simple-excel/pull/179
+
+**Full Changelog**: https://github.com/spatie/simple-excel/compare/3.7.0...3.7.1
+
+## 3.7.0 - 2024-09-23
+
+### What's Changed
+
+* Improve the wording and fix a typo about automatically detecting headers. by @timmch in https://github.com/spatie/simple-excel/pull/174
+* Fix README sheetExists() should be hasSheet() by @damonzocp in https://github.com/spatie/simple-excel/pull/175
+* Add XLSX option helpers to SimpleExcelReader by @brodos in https://github.com/spatie/simple-excel/pull/178
+
+### New Contributors
+
+* @timmch made their first contribution in https://github.com/spatie/simple-excel/pull/174
+* @damonzocp made their first contribution in https://github.com/spatie/simple-excel/pull/175
+* @brodos made their first contribution in https://github.com/spatie/simple-excel/pull/178
+
+**Full Changelog**: https://github.com/spatie/simple-excel/compare/3.6.0...3.7.0
+
+## 3.6.0 - 2024-04-24
+
+### What's Changed
+
+* CSV stream callback fixed by @rakibhoossain in https://github.com/spatie/simple-excel/pull/170
+
+### New Contributors
+
+* @rakibhoossain made their first contribution in https://github.com/spatie/simple-excel/pull/170
+
+**Full Changelog**: https://github.com/spatie/simple-excel/compare/3.5.0...3.6.0
+
 ## 3.5.0 - 2024-04-03
 
 ### What's Changed

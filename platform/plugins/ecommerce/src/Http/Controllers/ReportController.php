@@ -5,6 +5,7 @@ namespace Botble\Ecommerce\Http\Controllers;
 use Botble\Base\Facades\Assets;
 use Botble\Base\Widgets\Contracts\AdminWidget;
 use Botble\Ecommerce\Enums\OrderStatusEnum;
+use Botble\Ecommerce\Enums\StockStatusEnum;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Models\Order;
 use Botble\Ecommerce\Models\Product;
@@ -66,7 +67,7 @@ class ReportController extends BaseController
         $today = Carbon::now();
 
         $processingOrders = Order::query()
-            ->where(function (Builder $query) {
+            ->where(function (Builder $query): void {
                 $query
                     ->whereNotIn('status', [OrderStatusEnum::CANCELED, OrderStatusEnum::COMPLETED])
                     ->orWhereNull('completed_at');
@@ -76,13 +77,23 @@ class ReportController extends BaseController
             ->count();
 
         $completedOrders = Order::query()
-            ->where(function (Builder $query) {
+            ->where(function (Builder $query): void {
                 $query
                     ->where('status', OrderStatusEnum::COMPLETED)
                     ->orWhereNotNull('completed_at');
             })
-            ->whereDate('created_at', '>=', $startOfMonth)
-            ->whereDate('created_at', '<=', $today)
+            ->where(function (Builder $query) use ($startOfMonth, $today): void {
+                $query
+                    ->where(function (Builder $q) use ($startOfMonth, $today): void {
+                        $q->whereDate('completed_at', '>=', $startOfMonth)
+                            ->whereDate('completed_at', '<=', $today);
+                    })
+                    ->orWhere(function (Builder $q) use ($startOfMonth, $today): void {
+                        $q->whereNull('completed_at')
+                            ->whereDate('created_at', '>=', $startOfMonth)
+                            ->whereDate('created_at', '<=', $today);
+                    });
+            })
             ->count();
 
         $revenue = Order::countRevenueByDateRange($startOfMonth, $today);
@@ -94,8 +105,17 @@ class ReportController extends BaseController
             ->count();
 
         $outOfStockProducts = Product::query()
-            ->where('with_storehouse_management', 1)
-            ->where('quantity', '<', 1)
+            ->where(function (Builder $query): void {
+                $query
+                    ->where(function (Builder $q): void {
+                        $q->where('with_storehouse_management', 1)
+                            ->where('quantity', '<', 1);
+                    })
+                    ->orWhere(function (Builder $q): void {
+                        $q->where('with_storehouse_management', 0)
+                            ->where('stock_status', StockStatusEnum::OUT_OF_STOCK);
+                    });
+            })
             ->count();
 
         return $this

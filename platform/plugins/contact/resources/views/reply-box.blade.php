@@ -1,9 +1,13 @@
 @if ($contact)
-    <div id="reply-wrapper" class="mb-3">
+    <div
+        id="reply-wrapper"
+        class="mb-3"
+    >
         @if ($contact->replies->isNotEmpty())
             @foreach ($contact->replies as $reply)
                 <x-core::form.fieldset>
-                    <p>{{ trans('plugins/contact::contact.tables.time') }}: <i>{{ BaseHelper::formatDateTime($reply->created_at) }}</i></p>
+                    <p>{{ trans('plugins/contact::contact.tables.time') }}:
+                        <i>{{ BaseHelper::formatDateTime($reply->created_at) }}</i></p>
                     <p>{{ trans('plugins/contact::contact.tables.content') }}:</p>
                     {!! BaseHelper::clean($reply->message) !!}
                 </x-core::form.fieldset>
@@ -13,9 +17,18 @@
         @endif
     </div>
 
-    <x-core::button type="button" class="answer-trigger-button">
-        {{ trans('plugins/contact::contact.reply') }}
-    </x-core::button>
+    @if (!$contact->email || !filter_var($contact->email, FILTER_VALIDATE_EMAIL))
+        <x-core::alert type="warning">
+            {{ trans('plugins/contact::contact.email_invalid_for_reply') }}
+        </x-core::alert>
+    @else
+        <x-core::button
+            type="button"
+            class="answer-trigger-button"
+        >
+            {{ trans('plugins/contact::contact.reply') }}
+        </x-core::button>
+    @endif
 
     <div class="answer-wrapper mt-3">
         <input

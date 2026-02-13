@@ -7,6 +7,7 @@ use Botble\Base\Models\BaseModel;
 use Botble\Base\Supports\Avatar;
 use Botble\Contact\Enums\ContactStatusEnum;
 use Botble\Media\Facades\RvMedia;
+use Botble\Support\Services\Cache\Cache;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Throwable;
@@ -48,6 +49,17 @@ class Contact extends BaseModel
             } catch (Throwable) {
                 return RvMedia::getDefaultImage();
             }
+        });
+    }
+
+    protected static function booted(): void
+    {
+        static::saved(function (): void {
+            Cache::make(static::class)->flush();
+        });
+
+        static::deleted(function (): void {
+            Cache::make(static::class)->flush();
         });
     }
 }

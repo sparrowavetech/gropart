@@ -3,12 +3,12 @@
 use Botble\Base\Facades\AdminHelper;
 use Illuminate\Support\Facades\Route;
 
-AdminHelper::registerRoutes(function () {
+AdminHelper::registerRoutes(function (): void {
     Route::group([
         'namespace' => 'Botble\Ecommerce\Http\Controllers\Settings',
-    ], function () {
-        Route::group(['prefix' => 'ecommerce'], function () {
-            Route::prefix('settings')->group(function () {
+    ], function (): void {
+        Route::group(['prefix' => 'ecommerce'], function (): void {
+            Route::prefix('settings')->group(function (): void {
                 Route::get('general', [
                     'as' => 'ecommerce.settings.general',
                     'uses' => 'GeneralSettingController@edit',
@@ -137,14 +137,14 @@ AdminHelper::registerRoutes(function () {
                     'middleware' => 'preventDemo',
                 ]);
 
-                Route::post('invoice-template/reset', [
+                Route::post('invoice-template/{template}/reset', [
                     'as' => 'ecommerce.settings.invoice-template.reset',
                     'uses' => 'InvoiceTemplateSettingController@reset',
                     'permission' => 'ecommerce.invoice-template.index',
                     'middleware' => 'preventDemo',
                 ]);
 
-                Route::get('invoice-template/preview', [
+                Route::get('invoice-template/{template}/preview', [
                     'as' => 'ecommerce.settings.invoice-template.preview',
                     'uses' => 'InvoiceTemplateSettingController@preview',
                     'permission' => 'ecommerce.invoice-template.index',
@@ -220,15 +220,10 @@ AdminHelper::registerRoutes(function () {
                     'permission' => 'ecommerce.settings.webhook',
                 ]);
 
-                Route::get('tracking', [
-                    'as' => 'ecommerce.settings.tracking',
-                    'uses' => 'TrackingSettingController@edit',
-                ]);
-
-                Route::put('tracking', [
-                    'as' => 'ecommerce.settings.tracking.update',
-                    'uses' => 'TrackingSettingController@update',
-                    'permission' => 'ecommerce.settings.tracking',
+                Route::post('webhook/test', [
+                    'as' => 'ecommerce.settings.webhook.test',
+                    'uses' => 'WebhookTestController@test',
+                    'permission' => 'ecommerce.settings.webhook',
                 ]);
 
                 Route::get('standard-and-format', [
@@ -251,6 +246,17 @@ AdminHelper::registerRoutes(function () {
                     'as' => 'ecommerce.settings.flash-sale.update',
                     'uses' => 'FlashSaleSettingController@update',
                     'permission' => 'ecommerce.settings.flash-sale',
+                ]);
+
+                Route::get('abandoned-carts', [
+                    'as' => 'ecommerce.settings.abandoned-carts',
+                    'uses' => 'AbandonedCartSettingController@edit',
+                ]);
+
+                Route::put('abandoned-carts', [
+                    'as' => 'ecommerce.settings.abandoned-carts.update',
+                    'uses' => 'AbandonedCartSettingController@update',
+                    'permission' => 'ecommerce.settings.abandoned-carts',
                 ]);
             });
         });

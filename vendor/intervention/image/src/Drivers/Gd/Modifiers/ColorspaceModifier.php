@@ -12,9 +12,14 @@ use Intervention\Image\Modifiers\ColorspaceModifier as GenericColorspaceModifier
 
 class ColorspaceModifier extends GenericColorspaceModifier implements SpecializedInterface
 {
+    /**
+     * {@inheritdoc}
+     *
+     * @see ModifierInterface::apply()
+     */
     public function apply(ImageInterface $image): ImageInterface
     {
-        if (!is_a($this->targetColorspace(), RgbColorspace::class)) {
+        if (!($this->targetColorspace() instanceof RgbColorspace)) {
             throw new NotSupportedException(
                 'Only RGB colorspace is supported by GD driver.'
             );

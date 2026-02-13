@@ -43,16 +43,16 @@ class ProductController extends BaseController
         return $dataTable->renderTable();
     }
 
-    public function create(Request $request)
+    public function create()
     {
-        if (EcommerceHelper::isEnabledSupportDigitalProducts()) {
-            if ($request->input('product_type') == ProductTypeEnum::DIGITAL) {
+        $this->pageTitle(trans('plugins/ecommerce::products.create'));
+
+        if (EcommerceHelper::isEnabledSupportDigitalProducts() && ! EcommerceHelper::isDisabledPhysicalProduct()) {
+            if (EcommerceHelper::getCurrentCreationContextProductType() == ProductTypeEnum::DIGITAL) {
                 $this->pageTitle(trans('plugins/ecommerce::products.create_product_type.digital'));
-            } else {
+            } elseif (EcommerceHelper::getCurrentCreationContextProductType() == ProductTypeEnum::PHYSICAL) {
                 $this->pageTitle(trans('plugins/ecommerce::products.create_product_type.physical'));
             }
-        } else {
-            $this->pageTitle(trans('plugins/ecommerce::products.create'));
         }
 
         return ProductForm::create()->renderForm();
@@ -60,11 +60,11 @@ class ProductController extends BaseController
 
     public function edit(Product $product, Request $request)
     {
-        if ($product->is_variation) {
-            abort(404);
-        }
+        abort_if($product->is_variation, 404);
 
         $this->pageTitle(trans('plugins/ecommerce::products.edit', ['name' => $product->name]));
+
+        $product->load(['licenseCodes.assignedOrderProduct.order']);
 
         event(new BeforeEditContentEvent($request, $product));
 
@@ -80,8 +80,12 @@ class ProductController extends BaseController
         $product = new Product();
 
         $product->status = $request->input('status');
-        if (EcommerceHelper::isEnabledSupportDigitalProducts() && $productType = $request->input('product_type')) {
-            $product->product_type = $productType;
+        if (EcommerceHelper::getCurrentCreationContextProductType() == ProductTypeEnum::DIGITAL) {
+            $product->product_type = ProductTypeEnum::DIGITAL;
+        } elseif (EcommerceHelper::getCurrentCreationContextProductType() == ProductTypeEnum::PHYSICAL) {
+            $product->product_type = ProductTypeEnum::PHYSICAL;
+        } else {
+            abort(404);
         }
 
         $product = $service->execute($request, $product);
@@ -114,6 +118,7 @@ class ProductController extends BaseController
             $variation['variation_default_id'] = $variation['id'];
 
             $variation['sku'] = $product->sku;
+            $variation['barcode'] = $product->barcode;
             $variation['auto_generate_sku'] = true;
 
             $variation['images'] = array_filter((array) $request->input('images', []));
@@ -179,7 +184,7 @@ class ProductController extends BaseController
             $variation = $result['variation'];
 
             foreach ($addedAttributes as $attribute) {
-                ProductVariationItem::query()->create([
+                ProductVariationItem::query()->firstOrCreate([
                     'attribute_id' => $attribute,
                     'variation_id' => $variation->getKey(),
                 ]);
@@ -255,5 +260,14 @@ class ProductController extends BaseController
         return $this
             ->httpResponse()
             ->withUpdatedSuccessMessage();
+    }
+
+    public function view(Product $product)
+    {
+        abort_if($product->is_variation, 404);
+
+        $this->pageTitle(trans('plugins/ecommerce::products.view', ['name' => $product->name]));
+
+        return view('plugins/ecommerce::products.view', $this->getProductViewData($product));
     }
 }

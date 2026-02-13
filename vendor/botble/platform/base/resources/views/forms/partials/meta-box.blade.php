@@ -8,7 +8,7 @@
         :attributes="new \Illuminate\View\ComponentAttributeBag(Arr::get($metaBox, 'attributes', []))"
     >
         <x-core::card.header>
-            @if(($subtitle = Arr::get($metaBox, 'subtitle')) && ($title = Arr::get($metaBox, 'title')))
+            @if (($subtitle = Arr::get($metaBox, 'subtitle')) && ($title = Arr::get($metaBox, 'title')))
                 <div>
                     <x-core::card.title>{{ $title }}</x-core::card.title>
                     <x-core::card.subtitle>{{ $subtitle }}</x-core::card.subtitle>
@@ -32,7 +32,7 @@
             {!! Arr::get($metaBox, 'content') !!}
         @endif
 
-        @if(($footer = Arr::get($metaBox, 'footer')))
+        @if ($footer = Arr::get($metaBox, 'footer'))
             <x-core::card.footer>
                 {!! $footer !!}
             </x-core::card.footer>

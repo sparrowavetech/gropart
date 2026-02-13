@@ -16,6 +16,9 @@ class GifDataStream extends AbstractEntity
 {
     /**
      * Create new instance
+     *
+     * @param array<FrameBlock> $frames
+     * @param array<CommentExtension> $comments
      */
     public function __construct(
         protected Header $header = new Header(),
@@ -24,12 +27,11 @@ class GifDataStream extends AbstractEntity
         protected array $frames = [],
         protected array $comments = []
     ) {
+        //
     }
 
     /**
      * Get header
-     *
-     * @return Header
      */
     public function getHeader(): Header
     {
@@ -38,8 +40,6 @@ class GifDataStream extends AbstractEntity
 
     /**
      * Set header
-     *
-     * @param Header $header
      */
     public function setHeader(Header $header): self
     {
@@ -50,8 +50,6 @@ class GifDataStream extends AbstractEntity
 
     /**
      * Get logical screen descriptor
-     *
-     * @return LogicalScreenDescriptor
      */
     public function getLogicalScreenDescriptor(): LogicalScreenDescriptor
     {
@@ -60,9 +58,6 @@ class GifDataStream extends AbstractEntity
 
     /**
      * Set logical screen descriptor
-     *
-     * @param LogicalScreenDescriptor $descriptor
-     * @return GifDataStream
      */
     public function setLogicalScreenDescriptor(LogicalScreenDescriptor $descriptor): self
     {
@@ -73,8 +68,6 @@ class GifDataStream extends AbstractEntity
 
     /**
      * Return global color table if available else null
-     *
-     * @return null|ColorTable
      */
     public function getGlobalColorTable(): ?ColorTable
     {
@@ -83,9 +76,6 @@ class GifDataStream extends AbstractEntity
 
     /**
      * Set global color table
-     *
-     * @param ColorTable $table
-     * @return GifDataStream
      */
     public function setGlobalColorTable(ColorTable $table): self
     {
@@ -100,8 +90,6 @@ class GifDataStream extends AbstractEntity
 
     /**
      * Get main graphic control extension
-     *
-     * @return NetscapeApplicationExtension
      */
     public function getMainApplicationExtension(): ?NetscapeApplicationExtension
     {
@@ -117,7 +105,7 @@ class GifDataStream extends AbstractEntity
     /**
      * Get array of frames
      *
-     * @return array
+     * @return array<FrameBlock>
      */
     public function getFrames(): array
     {
@@ -127,7 +115,7 @@ class GifDataStream extends AbstractEntity
     /**
      * Return array of "global" comments
      *
-     * @return array
+     * @return array<CommentExtension>
      */
     public function getComments(): array
     {
@@ -136,8 +124,6 @@ class GifDataStream extends AbstractEntity
 
     /**
      * Return first frame
-     *
-     * @return null|FrameBlock
      */
     public function getFirstFrame(): ?FrameBlock
     {
@@ -150,9 +136,6 @@ class GifDataStream extends AbstractEntity
 
     /**
      * Add frame
-     *
-     * @param FrameBlock $frame
-     * @return GifDataStream
      */
     public function addFrame(FrameBlock $frame): self
     {
@@ -163,9 +146,6 @@ class GifDataStream extends AbstractEntity
 
     /**
      * Add comment extension
-     *
-     * @param CommentExtension $comment
-     * @return GifDataStream
      */
     public function addComment(CommentExtension $comment): self
     {
@@ -177,7 +157,7 @@ class GifDataStream extends AbstractEntity
     /**
      * Set the current data
      *
-     * @param array $frames
+     * @param array<FrameBlock> $frames
      */
     public function setFrames(array $frames): self
     {
@@ -188,8 +168,6 @@ class GifDataStream extends AbstractEntity
 
     /**
      * Get trailer
-     *
-     * @return Trailer
      */
     public function getTrailer(): Trailer
     {
@@ -198,8 +176,6 @@ class GifDataStream extends AbstractEntity
 
     /**
      * Determine if gif is animated
-     *
-     * @return bool
      */
     public function isAnimated(): bool
     {
@@ -208,8 +184,6 @@ class GifDataStream extends AbstractEntity
 
     /**
      * Determine if global color table is set
-     *
-     * @return bool
      */
     public function hasGlobalColorTable(): bool
     {

@@ -1,4 +1,5 @@
-@props(['label',
+@props([
+    'label',
     'name',
     'action',
     'deleteAction' => null,
@@ -26,16 +27,16 @@
 
 <div class="crop-image-container">
     <x-core::form-group>
-        @if($showLabel)
+        @if ($showLabel)
             <x-core::form.label>{{ $label }}</x-core::form.label>
         @endif
         <div class="avatar-view rounded-{{ $rounded }} overflow-hidden">
             <img {{ $attributes->merge(['class' => $imageClasses, 'src' => $value, 'alt' => $label]) }} />
 
-            @if(!$hiddenCropper || $canDelete)
+            @if (!$hiddenCropper || $canDelete)
                 <div class="backdrop"></div>
                 <div class="action">
-                    @if(!$hiddenCropper)
+                    @if (!$hiddenCropper)
                         <a
                             href="javascript:void(0);"
                             class="text-decoration-none text-white"
@@ -46,7 +47,7 @@
                         </a>
                     @endif
 
-                    @if($canDelete)
+                    @if ($canDelete)
                         <a
                             data-bb-toggle="delete-avatar"
                             href="{{ $deleteAction }}"
@@ -59,7 +60,7 @@
             @endif
         </div>
 
-        @if($showChooseImageLink && !$hiddenCropper)
+        @if ($showChooseImageLink && !$hiddenCropper)
             <a
                 href="javascript:void(0);"
                 data-bs-toggle="modal"
@@ -71,10 +72,10 @@
         @endif
     </x-core::form-group>
 
-    @if(!$hiddenCropper)
+    @if (!$hiddenCropper)
         <x-core::modal
             id="{{ $name }}-modal"
-            :title="__('Update :name', ['name' => $label])"
+            :title="trans('core/base::forms.crop_image_update', ['name' => $label])"
             size="lg"
             class="crop-image-modal"
         >
@@ -90,7 +91,10 @@
                     </form>
 
                     <div class="cropper-image-wrap">
-                        <img src="" class="cropper-image" />
+                        <img
+                            src=""
+                            class="cropper-image"
+                        />
                     </div>
                 </div>
                 <div class="col-md-4">
@@ -101,10 +105,17 @@
             </div>
 
             <x-slot:footer>
-                <x-core::button data-bs-dismiss="modal" type="button">
+                <x-core::button
+                    data-bs-dismiss="modal"
+                    type="button"
+                >
                     {{ trans('core/base::base.close') }}
                 </x-core::button>
-                <x-core::button type="submit" color="primary" class="ms-auto">
+                <x-core::button
+                    type="submit"
+                    color="primary"
+                    class="ms-auto"
+                >
                     {{ trans('core/base::forms.save_and_continue') }}
                 </x-core::button>
             </x-slot:footer>

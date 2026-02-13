@@ -9,18 +9,23 @@
 
         <x-core::form.text-input
             wrapper-class="shop-url-wrapper"
-            :label="__('Shop URL')"
+            :label="trans('plugins/marketplace::store.shop_url')"
             label-description=" "
             type="text"
             id="shop-url"
             name="slug"
             :data-url="route('public.ajax.check-store-url')"
             :value="old('slug', $store->slug)"
-            :placeholder="__('Shop URL')"
+            :placeholder="trans('plugins/marketplace::store.shop_url')"
             :required="true"
+            dir="ltr"
+            style="direction: ltr; text-align: left;"
         >
-            <x-core::form.helper-text data-base-url="{{ route('public.store', old('slug', '')) }}">
-                {{ route('public.store', old('slug', $store->slug)) }}
+            <x-core::form.helper-text data-base-url="{{ route('public.store', old('slug', '/') ?: '/') }}">
+                {{ route('public.store', old('slug', $store->slug ?: '/') ?: '/') }}
+            </x-core::form.helper-text>
+            <x-core::form.helper-text>
+                {{ trans('plugins/marketplace::store.forms.shop_url_helper') }}
             </x-core::form.helper-text>
         </x-core::form.text-input>
     </div>

@@ -11,6 +11,11 @@ use Illuminate\Support\Facades\DB;
 
 class ReportGeneralHtml extends Html
 {
+    public function getColumns(): int
+    {
+        return 12; // Full width for detailed analytics
+    }
+
     public function getContent(): string
     {
         if (! is_plugin_active('payment')) {
@@ -27,10 +32,18 @@ class ReportGeneralHtml extends Html
                 DB::raw('SUM(COALESCE(payments.amount, 0) - COALESCE(payments.refunded_amount, 0)) as revenue'),
                 'payments.status',
             ])
-            ->join('payments', 'payments.id', '=', 'ec_orders.payment_id')
-            ->whereIn('payments.status', [PaymentStatusEnum::COMPLETED, PaymentStatusEnum::PENDING])
-            ->whereDate('payments.created_at', '>=', $this->startDate)
-            ->whereDate('payments.created_at', '<=', $this->endDate)
+            ->leftJoin('payments', 'payments.id', '=', 'ec_orders.payment_id')
+            ->where(function ($q): void {
+                $q->whereIn('payments.status', [PaymentStatusEnum::COMPLETED, PaymentStatusEnum::PENDING])
+                    ->orWhereNull('ec_orders.payment_id');
+            })
+            ->where(function ($q): void {
+                $q->where(function ($subQ): void {
+                    $subQ->whereDate('payments.created_at', '>=', $this->startDate)
+                        ->whereDate('payments.created_at', '<=', $this->endDate);
+                })->orWhereNull('ec_orders.payment_id');
+            })
+            ->where('is_finished', true)
             ->groupBy('payments.status')
             ->get();
 
@@ -84,7 +97,7 @@ class ReportGeneralHtml extends Html
         $series[] = $data;
 
         foreach ($period as $date) {
-            $dates[] = $date->toDateString();
+            $dates[] = $date->translatedFormat('d M');
         }
 
         $colors = $earningSales->pluck('color');

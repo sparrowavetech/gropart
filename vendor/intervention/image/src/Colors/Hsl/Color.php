@@ -16,6 +16,11 @@ use Intervention\Image\Interfaces\ColorspaceInterface;
 
 class Color extends AbstractColor
 {
+    /**
+     * Create new color object
+     *
+     * @return void
+     */
     public function __construct(int $h, int $s, int $l)
     {
         /** @throws void */
@@ -50,8 +55,6 @@ class Color extends AbstractColor
 
     /**
      * Return the Hue channel
-     *
-     * @return ColorChannelInterface
      */
     public function hue(): ColorChannelInterface
     {
@@ -61,8 +64,6 @@ class Color extends AbstractColor
 
     /**
      * Return the Saturation channel
-     *
-     * @return ColorChannelInterface
      */
     public function saturation(): ColorChannelInterface
     {
@@ -72,8 +73,6 @@ class Color extends AbstractColor
 
     /**
      * Return the Luminance channel
-     *
-     * @return ColorChannelInterface
      */
     public function luminance(): ColorChannelInterface
     {
@@ -117,6 +116,16 @@ class Color extends AbstractColor
      * @see ColorInterface::isTransparent()
      */
     public function isTransparent(): bool
+    {
+        return false;
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @see ColorInterface::isClear()
+     */
+    public function isClear(): bool
     {
         return false;
     }

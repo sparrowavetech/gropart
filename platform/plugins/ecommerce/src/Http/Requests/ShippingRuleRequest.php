@@ -28,7 +28,11 @@ class ShippingRuleRequest extends Request
             $ruleItems['shipping_id'] = [
                 'required',
                 Rule::exists('ec_shipping', 'id')->where(function ($query) {
-                    if ($this->input('type') == ShippingRuleTypeEnum::BASED_ON_ZIPCODE) {
+                    if (in_array($this->input('type'), [
+                        ShippingRuleTypeEnum::BASED_ON_ZIPCODE,
+                        ShippingRuleTypeEnum::BASED_ON_ZIPCODE_AND_WEIGHT,
+                        ShippingRuleTypeEnum::BASED_ON_LOCATION,
+                    ])) {
                         return $query->whereNotNull('country');
                     }
 
@@ -38,6 +42,15 @@ class ShippingRuleRequest extends Request
         }
 
         return $ruleItems;
+    }
+
+    public function messages(): array
+    {
+        return [
+            'shipping_id.exists' => trans('plugins/ecommerce::shipping.rule.cannot_create_rule_type_for_this_location', [
+                'type' => ShippingRuleTypeEnum::getLabel($this->input('type')),
+            ]),
+        ];
     }
 
     public function attributes(): array

@@ -68,16 +68,25 @@ class OrderSeeder extends BaseSeeder
             $customers = Customer::with(['addresses'])->get();
         }
 
+        $productsCount = $products->count();
+
+        $storeLocatorsCount = $storeLocators->count();
+
+        if ($customers->isEmpty() || $productsCount === 0) {
+            return;
+        }
+
         $total = 20;
         for ($i = 0; $i < $total; $i++) {
             $customer = $customers->random();
             $address = $customer->addresses->first();
 
-            if (! $address || $products->isEmpty()) {
+            if (! $address || ! $productsCount) {
                 continue;
             }
 
-            $orderProducts = $products->random(rand(2, 4));
+            $randomCount = min(rand(2, 4), $productsCount);
+            $orderProducts = $productsCount > 1 ? $products->random($randomCount) : $products->first();
 
             $groupedProducts = $this->group($orderProducts);
 
@@ -149,7 +158,6 @@ class OrderSeeder extends BaseSeeder
                         'tax_amount' => $groupedProduct->tax_amount,
                         'options' => [
                             'sku' => $groupedProduct->sku,
-                            'barcode' => $groupedProduct->barcode,
                             'attributes' => $groupedProduct->is_variation ? $groupedProduct->variation_attributes : '',
                         ],
                         'product_type' => $groupedProduct->product_type,
@@ -221,6 +229,9 @@ class OrderSeeder extends BaseSeeder
                 $order->payment_id = $payment->id;
                 $order->save();
 
+                /**
+                 * @var Order $order
+                 */
                 InvoiceHelper::store($order);
 
                 $shipmentStatus = Arr::random([ShippingStatusEnum::APPROVED, ShippingStatusEnum::DELIVERED]);
@@ -235,16 +246,21 @@ class OrderSeeder extends BaseSeeder
                     $codStatus = ShippingCodStatusEnum::PENDING;
                 }
 
-                if ($isAvailableShipping) {
+                /**
+                 * @var StoreLocator|null $storeLocator
+                 */
+                $storeLocator = $storeLocatorsCount >= 1 ? $storeLocators->random() : null;
+
+                if ($isAvailableShipping && ! Shipment::query()->where(['order_id' => $order->getKey()])->exists()) {
                     $shipment = Shipment::query()->create([
                         'status' => $shipmentStatus,
-                        'order_id' => $order->id,
+                        'order_id' => $order->getKey(),
                         'weight' => $weight,
                         'note' => '',
                         'cod_amount' => $codAmount,
                         'cod_status' => $codStatus,
                         'price' => $order->shipping_amount,
-                        'store_id' => $storeLocators->count() > 1 ? $storeLocators->random(1)->id : 0,
+                        'store_id' => $storeLocator?->id,
                         'tracking_id' => 'JJD00' . rand(1111111, 99999999),
                         'shipping_company_name' => Arr::random(['DHL', 'AliExpress', 'GHN', 'FastShipping']),
                         'tracking_link' => 'https://mydhl.express.dhl/us/en/tracking.html#/track-by-reference',
@@ -332,26 +348,17 @@ class OrderSeeder extends BaseSeeder
                     'user_id' => 0,
                 ]);
 
-                if ($isMarketplace && $order->store->id && $order->store->customer->id) {
+                if ($isMarketplace && $order->store?->id && $order->store->customer->id) {
                     $customer = $order->store->customer;
                     $vendorInfo = $customer->vendorInfo;
 
                     if ($vendorInfo->id) {
                         $fee = $this->calculatorCommissionFeeByProduct($order->products);
-                        //$amount = $order->amount - $fee;
-
-                        $vendorShippingAllow = Store::where('customer_id', $order->store->customer->id)->value('is_manage_shipping');
-
-                        if(setting('marketplace_allow_vendor_manage_shipping') == 1 && $vendorShippingAllow == 1) {
-                            $amount = ($order->amount) - $fee;
-                        } else {
-                            $amount = ($order->amount) - $order->shipping_amount - $fee;
-                        }
-
+                        $amount = $order->amount - $fee;
                         $currentBalance = $customer->balance;
 
                         $amountByCurrency = $amount;
-                        $time = Carbon::now()->subMinutes(($order->id + 1) * 120 * rand(1, 10));
+                        $time = Carbon::now()->subMinutes(rand(120, 12000));
 
                         $data = [
                             'sub_amount' => $order->amount,
@@ -396,7 +403,7 @@ class OrderSeeder extends BaseSeeder
 
         Withdrawal::query()->truncate();
         $vendors = Customer::query()->where('is_vendor', 1)->get();
-        $fee = MarketplaceHelper::getSetting('fee_withdrawal', 0);
+        $fee = (float) MarketplaceHelper::getSetting('fee_withdrawal', 0);
         foreach ($vendors as $vendor) {
             $vendorInfo = $vendor->vendorInfo;
             $rand = rand(1, 3);
@@ -438,25 +445,12 @@ class OrderSeeder extends BaseSeeder
             }
             $product = Product::with(['categories'])->find($id);
             $listCategories = $product->categories->pluck('id')->all();
-            $commissionSetting = CategoryCommission::query()->whereIn('product_category_id', $listCategories)->orderBy(
-                'commission_percentage',
-                'desc'
-            )->first();
+            $commissionSetting = CategoryCommission::query()->whereIn('product_category_id', $listCategories)->latest('commission_percentage')->first();
             $commissionFeePercentage = MarketplaceHelper::getSetting('fee_per_order', 0);
-            $platformFeePercentage = MarketplaceHelper::getSetting('default_platform_fee', 0);
-            $FeeTaxPercentage = MarketplaceHelper::getSetting('default_fee_tax', 0);
-
-            $totalSystemFees = $platformFeePercentage + $commissionFeePercentage;
-
             if (! empty($commissionSetting)) {
-                $totalSystemFees = $commissionSetting->commission_percentage + $platformFeePercentage;
+                $commissionFeePercentage = $commissionSetting->commission_percentage;
             }
-
-            $totalFeeAmount = $orderProduct->price * $totalSystemFees / 100;
-
-            $FeeTax = $totalFeeAmount * ($FeeTaxPercentage / 100);
-
-            $totalFee += $totalFeeAmount + $FeeTax;
+            $totalFee += $orderProduct->price * $commissionFeePercentage / 100;
         }
 
         return $totalFee;

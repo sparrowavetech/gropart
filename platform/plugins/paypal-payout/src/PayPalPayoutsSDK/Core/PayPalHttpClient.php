@@ -6,8 +6,11 @@ use PayPalHttp\HttpClient;
 
 class PayPalHttpClient extends HttpClient
 {
-    private $refreshToken;
+    public $refreshToken;
+
     public $authInjector;
+
+    public $curlCls;
 
     public function __construct(PayPalEnvironment $environment, $refreshToken = null)
     {

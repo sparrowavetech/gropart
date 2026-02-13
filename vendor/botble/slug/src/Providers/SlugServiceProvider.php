@@ -23,8 +23,6 @@ class SlugServiceProvider extends ServiceProvider
 {
     use LoadAndPublishDataTrait;
 
-    protected bool $defer = true;
-
     public function register(): void
     {
         $this->app->bind(SlugInterface::class, function () {
@@ -51,7 +49,7 @@ class SlugServiceProvider extends ServiceProvider
         $this->app->register(EventServiceProvider::class);
         $this->app->register(CommandServiceProvider::class);
 
-        PanelSectionManager::default()->beforeRendering(function () {
+        PanelSectionManager::default()->beforeRendering(function (): void {
             PanelSectionManager::registerItem(
                 SettingCommonPanelSection::class,
                 fn () => PanelSectionItem::make('permalink')
@@ -64,7 +62,7 @@ class SlugServiceProvider extends ServiceProvider
             );
         });
 
-        $this->app->booted(function () {
+        $this->app->booted(function (): void {
             $this->app->register(FormServiceProvider::class);
 
             $supportedModels = array_keys($this->app->make(SlugHelper::class)->supportedModels());
@@ -111,7 +109,7 @@ class SlugServiceProvider extends ServiceProvider
                         'getUrlAttribute',
                         function () {
                             /**
-                             * @var BaseModel $this
+                             * @var BaseModel $model
                              */
                             $model = $this;
 
@@ -138,7 +136,7 @@ class SlugServiceProvider extends ServiceProvider
                     );
                 }
 
-                $this->app['events']->listen('eloquent.deleted: ' . $item, function (Model $model) {
+                $this->app['events']->listen('eloquent.deleted: ' . $item, function (Model $model): void {
                     Slug::query()
                         ->where('reference_type', $model::class)
                         ->where('reference_id', $model->getKey())

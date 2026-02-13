@@ -3,16 +3,21 @@
 use Botble\Base\Facades\AdminHelper;
 use Botble\Base\Http\Middleware\RequiresJsonRequestMiddleware;
 use Botble\Ecommerce\Facades\EcommerceHelper;
+use Botble\Ecommerce\Http\Controllers\ExportProductCategoryController;
+use Botble\Ecommerce\Http\Controllers\Fronts\GuestPaymentProofController;
 use Botble\Ecommerce\Http\Controllers\Fronts\PublicUpdateCheckoutController;
 use Botble\Ecommerce\Http\Controllers\Fronts\PublicUpdateTaxCheckoutController;
 use Botble\Ecommerce\Http\Controllers\Fronts\QuickShopController;
 use Botble\Ecommerce\Http\Controllers\Fronts\QuickViewController;
+use Botble\Ecommerce\Http\Controllers\ImportProductCategoryController;
+use Botble\Ecommerce\Http\Controllers\ImportProductLicenseCodeController;
+use Botble\Ecommerce\Http\Controllers\OrderExportController;
 use Botble\Theme\Events\ThemeRoutingBeforeEvent;
 use Botble\Theme\Facades\Theme;
 use Illuminate\Support\Facades\Route;
 
-AdminHelper::registerRoutes(function () {
-    Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'prefix' => 'ecommerce'], function () {
+AdminHelper::registerRoutes(function (): void {
+    Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'prefix' => 'ecommerce'], function (): void {
         Route::post('update-currencies-from-exchange-api', [
             'as' => 'ecommerce.setting.update-currencies-from-exchange-api',
             'uses' => 'EcommerceController@updateCurrenciesFromExchangeApi',
@@ -61,7 +66,7 @@ AdminHelper::registerRoutes(function () {
             'permission' => 'ecommerce.settings',
         ]);
 
-        Route::group(['prefix' => 'product-categories', 'as' => 'product-categories.'], function () {
+        Route::group(['prefix' => 'product-categories', 'as' => 'product-categories.'], function (): void {
             Route::resource('', 'ProductCategoryController')
                 ->parameters(['' => 'product_category']);
 
@@ -84,7 +89,7 @@ AdminHelper::registerRoutes(function () {
             ]);
         });
 
-        Route::group(['prefix' => 'product-tags', 'as' => 'product-tag.'], function () {
+        Route::group(['prefix' => 'product-tags', 'as' => 'product-tag.'], function (): void {
             Route::resource('', 'ProductTagController')
                 ->parameters(['' => 'product-tag']);
 
@@ -95,7 +100,7 @@ AdminHelper::registerRoutes(function () {
             ]);
         });
 
-        Route::group(['prefix' => 'options', 'as' => 'global-option.'], function () {
+        Route::group(['prefix' => 'options', 'as' => 'global-option.'], function (): void {
             Route::resource('', 'ProductOptionController')->parameters(['' => 'option']);
 
             Route::get('ajax', [
@@ -105,7 +110,7 @@ AdminHelper::registerRoutes(function () {
             ]);
         });
 
-        Route::group(['prefix' => 'brands', 'as' => 'brands.'], function () {
+        Route::group(['prefix' => 'brands', 'as' => 'brands.'], function (): void {
             Route::resource('', 'BrandController')
                 ->parameters(['' => 'brand']);
 
@@ -116,7 +121,7 @@ AdminHelper::registerRoutes(function () {
             ]);
         });
 
-        Route::group(['prefix' => 'product-collections', 'as' => 'product-collections.'], function () {
+        Route::group(['prefix' => 'product-collections', 'as' => 'product-collections.'], function (): void {
             Route::resource('', 'ProductCollectionController')
                 ->parameters(['' => 'product_collection']);
 
@@ -133,55 +138,105 @@ AdminHelper::registerRoutes(function () {
             ])->wherePrimaryKey();
         });
 
-        Route::group(['prefix' => 'product-attribute-sets', 'as' => 'product-attribute-sets.'], function () {
+        Route::group(['prefix' => 'product-attribute-sets', 'as' => 'product-attribute-sets.'], function (): void {
             Route::resource('', 'ProductAttributeSetsController')
                 ->parameters(['' => 'product_attribute_set']);
         });
 
-        Route::group(['prefix' => 'reports'], function () {
+        Route::group(['prefix' => 'reports', 'as' => 'ecommerce.report.'], function (): void {
             Route::get('', [
-                'as' => 'ecommerce.report.index',
+                'as' => 'index',
                 'uses' => 'ReportController@getIndex',
             ]);
 
             Route::post('top-selling-products', [
-                'as' => 'ecommerce.report.top-selling-products',
+                'as' => 'top-selling-products',
                 'uses' => 'ReportController@getTopSellingProducts',
                 'permission' => 'ecommerce.report.index',
             ]);
 
             Route::post('recent-orders', [
-                'as' => 'ecommerce.report.recent-orders',
+                'as' => 'recent-orders',
                 'uses' => 'ReportController@getRecentOrders',
                 'permission' => 'ecommerce.report.index',
             ]);
 
             Route::post('trending-products', [
-                'as' => 'ecommerce.report.trending-products',
+                'as' => 'trending-products',
                 'uses' => 'ReportController@getTrendingProducts',
                 'permission' => 'ecommerce.report.index',
             ]);
 
             Route::get('dashboard-general-report', [
-                'as' => 'ecommerce.report.dashboard-widget.general',
+                'as' => 'dashboard-widget.general',
                 'uses' => 'ReportController@getDashboardWidgetGeneral',
                 'permission' => 'ecommerce.report.index',
             ]);
+
+            Route::group(['prefix' => 'widget-config', 'as' => 'widget-config.'], function (): void {
+                Route::get('', [
+                    'as' => 'index',
+                    'uses' => 'ReportWidgetConfigController@index',
+                    'permission' => 'ecommerce.report.index',
+                ]);
+
+                Route::post('save', [
+                    'as' => 'save',
+                    'uses' => 'ReportWidgetConfigController@store',
+                    'permission' => 'ecommerce.report.index',
+                ]);
+
+                Route::get('get', [
+                    'as' => 'get',
+                    'uses' => 'ReportWidgetConfigController@getConfiguration',
+                    'permission' => 'ecommerce.report.index',
+                ]);
+            });
         });
 
-        Route::group(['prefix' => 'flash-sales', 'as' => 'flash-sale.'], function () {
+        Route::group(['prefix' => 'flash-sales', 'as' => 'flash-sale.'], function (): void {
             Route::resource('', 'FlashSaleController')->parameters(['' => 'flash-sale']);
         });
 
-        Route::group(['prefix' => 'product-labels', 'as' => 'product-label.'], function () {
+        Route::group(['prefix' => 'product-labels', 'as' => 'product-label.'], function (): void {
             Route::resource('', 'ProductLabelController')->parameters(['' => 'product-label']);
+        });
+    });
+
+    Route::prefix('tools/data-synchronize')->name('tools.data-synchronize.')->group(function (): void {
+        Route::prefix('export')->name('export.')->group(function (): void {
+            Route::group(['prefix' => 'product-categories', 'as' => 'product-categories.', 'permission' => 'product-categories.export'], function (): void {
+                Route::get('/', [ExportProductCategoryController::class, 'index'])->name('index');
+                Route::post('/', [ExportProductCategoryController::class, 'store'])->name('store');
+            });
+
+            Route::group(['prefix' => 'orders', 'as' => 'orders.', 'permission' => 'orders.export'], function (): void {
+                Route::get('/', [OrderExportController::class, 'index'])->name('index');
+                Route::post('/', [OrderExportController::class, 'store'])->name('store');
+            });
+        });
+
+        Route::prefix('import')->name('import.')->group(function (): void {
+            Route::group(['prefix' => 'product-categories', 'as' => 'product-categories.', 'permission' => 'product-categories.import'], function (): void {
+                Route::get('/', [ImportProductCategoryController::class, 'index'])->name('index');
+                Route::post('/', [ImportProductCategoryController::class, 'import'])->name('store');
+                Route::post('validate', [ImportProductCategoryController::class, 'validateData'])->name('validate');
+                Route::post('download-example', [ImportProductCategoryController::class, 'downloadExample'])->name('download-example');
+            });
+
+            Route::group(['prefix' => 'product-license-codes', 'as' => 'product-license-codes.', 'permission' => 'product-license-codes.import'], function (): void {
+                Route::get('/', [ImportProductLicenseCodeController::class, 'index'])->name('index');
+                Route::post('/', [ImportProductLicenseCodeController::class, 'import'])->name('store');
+                Route::post('validate', [ImportProductLicenseCodeController::class, 'validateData'])->name('validate');
+                Route::post('download-example', [ImportProductLicenseCodeController::class, 'downloadExample'])->name('download-example');
+            });
         });
     });
 });
 
-Theme::registerRoutes(function () {
-    app('events')->listen(ThemeRoutingBeforeEvent::class, function () {
-        Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers\Fronts'], function () {
+Theme::registerRoutes(function (): void {
+    app('events')->listen(ThemeRoutingBeforeEvent::class, function (): void {
+        Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers\Fronts'], function (): void {
             Route::get(EcommerceHelper::getPageSlug('product_listing'), [
                 'uses' => 'PublicProductController@getProducts',
                 'as' => 'public.products',
@@ -202,23 +257,6 @@ Theme::registerRoutes(function () {
                 'uses' => 'PublicProductController@getOrderTracking',
             ])->wherePrimaryKey();
 
-            Route::get(EcommerceHelper::getPageSlug('enquiry'), [
-                'as'   => 'public.product.enquiry',
-                'uses' => 'PublicProductController@getEnquiryProduct',
-            ]);
-            Route::get('product/enquiry/{product}', [
-                'as'   => 'public.enquiry.get',
-                'uses' => 'PublicProductController@EnquiryFrom',
-            ]);
-            Route::post('product/enquiry/', [
-                'as'   => 'public.enquiry.form',
-                'uses' => 'PublicProductController@EnquiryFromSubmit',
-            ]);
-            Route::get('product/enquiry/success/{id}', [
-                'as'   => 'public.enquiry.success',
-                'uses' => 'PublicProductController@EnquirySuccess',
-            ]);
-
             Route::get('ajax/quick-view/{id?}', [QuickViewController::class, 'show'])
                 ->middleware(RequiresJsonRequestMiddleware::class)
                 ->name('public.ajax.quick-view')
@@ -229,6 +267,16 @@ Theme::registerRoutes(function () {
                 ->name('public.ajax.quick-shop')
                 ->wherePrimaryKey();
 
+            Route::get('ajax/up-sale-products/{product}', [
+                'uses' => 'PublicProductController@ajaxGetUpSaleProducts',
+                'as' => 'public.ajax.up-sale-products',
+            ])->wherePrimaryKey();
+
+            Route::get('ajax/cross-sale-products/{product}', [
+                'uses' => 'PublicProductController@ajaxGetCrossSaleProducts',
+                'as' => 'public.ajax.cross-sale-products',
+            ])->wherePrimaryKey();
+
             Route::post('ajax/checkout/update', [PublicUpdateCheckoutController::class, '__invoke'])
                 ->middleware(RequiresJsonRequestMiddleware::class)
                 ->name('public.ajax.checkout.update');
@@ -236,35 +284,13 @@ Theme::registerRoutes(function () {
             Route::post('ajax/checkout/update-tax', [PublicUpdateTaxCheckoutController::class, '__invoke'])
                 ->middleware(RequiresJsonRequestMiddleware::class)
                 ->name('public.ajax.checkout.update-tax');
-        });
-    });
-});
-Route::group(['namespace' => 'Botble\Ecommerce\Http\Controllers', 'middleware' => ['web', 'core']], function () {
-    Route::group(['prefix' => BaseHelper::getAdminPrefix(), 'middleware' => 'auth'], function () {
-        Route::group(['prefix' => 'enquires', 'as' => 'enquires.'], function () {
-            Route::resource('', 'EnquiryController')
-                ->parameters(['' => 'enquiry']);
 
-            Route::delete('items/destroy', [
-                'as'         => 'deletes',
-                'uses'       => 'EnquiryController@deletes',
-                'permission' => 'enquires.destroy',
-            ]);
-            Route::get('not_available/{id}', [
-                'as'         => 'not_available',
-                'uses'       => 'EnquiryController@not_available',
-                'permission' => 'enquires.edit',
-            ]);
-            Route::get('contacted/{id}', [
-                'as'         => 'contacted',
-                'uses'       => 'EnquiryController@contacted',
-                'permission' => 'enquires.edit',
-            ]);
-            Route::get('rejected/{id}', [
-                'as'         => 'rejected',
-                'uses'       => 'EnquiryController@rejected',
-                'permission' => 'enquires.edit',
-            ]);
+            Route::group(['prefix' => 'orders/payment-proof'], function (): void {
+                Route::post('{token}/upload', [GuestPaymentProofController::class, 'upload'])
+                    ->name('public.orders.upload-proof-guest');
+                Route::get('{token}/download', [GuestPaymentProofController::class, 'download'])
+                    ->name('public.orders.download-proof-guest');
+            });
         });
     });
 });

@@ -15,6 +15,6 @@
         href="#"
         role="button"
     >
-        <i class="fa fa-trash"></i>
+        <x-core::icon name="ti ti-trash" />
     </a>
 @endif

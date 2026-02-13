@@ -16,6 +16,8 @@ class OrderCancellationReasonEnum extends Enum
 
     public const INCORRECT_ADDRESS = 'incorrect-address';
 
+    public const OUT_OF_SERVICE_AREA = 'out-of-service-area';
+
     public const CUSTOMER_REQUESTED_CANCELLATION = 'customer-requested';
 
     public const PRODUCT_NOT_AS_DESCRIBED = 'not-as-described';

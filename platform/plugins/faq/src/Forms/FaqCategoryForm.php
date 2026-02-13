@@ -21,10 +21,10 @@ class FaqCategoryForm extends FormAbstract
         $this
             ->model(FaqCategory::class)
             ->setValidatorClass(FaqCategoryRequest::class)
-            ->add('name', TextField::class, NameFieldOption::make()->required()->toArray())
-            ->add('description', TextareaField::class, DescriptionFieldOption::make()->toArray())
-            ->add('order', NumberField::class, SortOrderFieldOption::make()->toArray())
-            ->add('status', SelectField::class, StatusFieldOption::make()->toArray())
+            ->add('name', TextField::class, NameFieldOption::make()->required())
+            ->add('description', TextareaField::class, DescriptionFieldOption::make())
+            ->add('order', NumberField::class, SortOrderFieldOption::make())
+            ->add('status', SelectField::class, StatusFieldOption::make())
             ->setBreakFieldPoint('status');
     }
 }

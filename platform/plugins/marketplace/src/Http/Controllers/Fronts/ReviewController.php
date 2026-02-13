@@ -10,7 +10,7 @@ class ReviewController extends BaseController
 {
     public function index(ReviewTable $table)
     {
-        $this->pageTitle(__('Reviews'));
+        $this->pageTitle(trans('plugins/ecommerce::review.name'));
 
         Assets::addStylesDirectly('vendor/core/plugins/ecommerce/css/review.css');
 

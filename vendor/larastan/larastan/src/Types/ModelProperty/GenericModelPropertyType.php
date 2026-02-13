@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Larastan\Larastan\Types\ModelProperty;
 
 use Larastan\Larastan\Properties\ModelPropertyHelper;
-use PHPStan\TrinaryLogic;
 use PHPStan\Type\AcceptsResult;
 use PHPStan\Type\CompoundType;
 use PHPStan\Type\Generic\TemplateType;
@@ -13,6 +12,7 @@ use PHPStan\Type\Generic\TemplateTypeMap;
 use PHPStan\Type\Generic\TemplateTypeReference;
 use PHPStan\Type\Generic\TemplateTypeVariance;
 use PHPStan\Type\IntersectionType;
+use PHPStan\Type\IsSuperTypeOfResult;
 use PHPStan\Type\MixedType;
 use PHPStan\Type\ObjectType;
 use PHPStan\Type\ObjectWithoutClassType;
@@ -50,10 +50,10 @@ class GenericModelPropertyType extends StringType
         return $this->type;
     }
 
-    public function acceptsWithReason(Type $type, bool $strictTypes): AcceptsResult
+    public function accepts(Type $type, bool $strictTypes): AcceptsResult
     {
         if ($type instanceof CompoundType) {
-            return $type->isAcceptedWithReasonBy($this, $strictTypes);
+            return $type->isAcceptedBy($this, $strictTypes);
         }
 
         if (count($type->getConstantStrings()) === 1) {
@@ -65,7 +65,11 @@ class GenericModelPropertyType extends StringType
             }
 
             if (count($genericType->getObjectClassNames()) < 1) {
-                return AcceptsResult::createNo();
+                return AcceptsResult::createYes();
+            }
+
+            if (str_contains($givenString, ' as ')) {
+                $givenString = explode(' as ', $givenString)[0];
             }
 
             if (str_contains($givenString, '.')) {
@@ -86,15 +90,15 @@ class GenericModelPropertyType extends StringType
 
             $reasons = [];
 
-            if (! $genericType->hasProperty($givenString)->yes()) {
+            if (! $genericType->hasInstanceProperty($givenString)->yes()) {
                 $reasons[] = sprintf('The given string should be a property of %s, %s given.', $this->type->describe(VerbosityLevel::value()), $givenString);
             }
 
-            return new AcceptsResult($genericType->hasProperty($givenString), $reasons);
+            return new AcceptsResult($genericType->hasInstanceProperty($givenString), $reasons);
         }
 
         if ($type instanceof self) {
-            return new AcceptsResult($this->getGenericType()->accepts($type->getGenericType(), $strictTypes), [sprintf('The given string should be a property of %s', $this->type->describe(VerbosityLevel::value()))]);
+            return new AcceptsResult($this->getGenericType()->accepts($type->getGenericType(), $strictTypes)->result, [sprintf('The given string should be a property of %s', $this->type->describe(VerbosityLevel::value()))]);
         }
 
         if ($type->isString()->yes()) {
@@ -106,16 +110,16 @@ class GenericModelPropertyType extends StringType
         return AcceptsResult::createNo();
     }
 
-    public function isSuperTypeOf(Type $type): TrinaryLogic
+    public function isSuperTypeOf(Type $type): IsSuperTypeOfResult
     {
         $constantStrings = $type->getConstantStrings();
 
         if (count($constantStrings) === 1) {
-            if (! $this->getGenericType()->hasProperty($constantStrings[0]->getValue())->yes()) {
-                return TrinaryLogic::createNo();
+            if (! $this->getGenericType()->hasInstanceProperty($constantStrings[0]->getValue())->yes()) {
+                return IsSuperTypeOfResult::createNo();
             }
 
-            return TrinaryLogic::createYes();
+            return IsSuperTypeOfResult::createYes();
         }
 
         if ($type instanceof self) {
@@ -126,7 +130,7 @@ class GenericModelPropertyType extends StringType
             return $type->isSubTypeOf($this);
         }
 
-        return TrinaryLogic::createNo();
+        return IsSuperTypeOfResult::createNo();
     }
 
     public function traverse(callable $cb): Type
@@ -152,7 +156,7 @@ class GenericModelPropertyType extends StringType
             $typeToInfer = new ObjectType($constantStrings[0]->getValue());
         } elseif ($receivedType instanceof self) {
             $typeToInfer = $receivedType->type;
-        } elseif ($receivedType->isClassStringType()->yes()) {
+        } elseif ($receivedType->isClassString()->yes()) {
             $typeToInfer = $this->getGenericType();
 
             if ($typeToInfer instanceof TemplateType) {
@@ -177,6 +181,11 @@ class GenericModelPropertyType extends StringType
         $variance = $positionVariance->compose(TemplateTypeVariance::createCovariant());
 
         return $this->getGenericType()->getReferencedTemplateTypes($variance);
+    }
+
+    public function hasTemplateOrLateResolvableType(): bool
+    {
+        return true;
     }
 
     /** @param  mixed[] $properties */

@@ -61,7 +61,7 @@
                     />
 
                     <x-core::button
-                        :title="trans('core/base::forms.delete')"
+                        :title="trans('plugins/ecommerce::ecommerce.forms.delete')"
                         :data-section="route('customers.addresses.destroy', $address->id)"
                         icon="ti ti-trash"
                         class="deleteDialog"

@@ -39,7 +39,7 @@
     </div>
 @else
     <x-core::empty-state
-        :title="__('No results found')"
+        :title="trans('plugins/blog::base.no_results_found')"
         :subtitle="trans('plugins/blog::posts.no_new_post_now')"
     />
 @endif

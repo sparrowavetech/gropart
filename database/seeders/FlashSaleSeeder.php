@@ -20,7 +20,7 @@ class FlashSaleSeeder extends BaseSeeder
          */
         $flashSale = FlashSale::query()->create([
             'name' => 'Winter Sale',
-            'end_date' => Carbon::now()->addDays(30)->toDateString(),
+            'end_date' => Carbon::now()->addMonths(7)->addDays(30)->toDateString(),
         ]);
 
         $products = Product::query()->where('is_variation', 0)->inRandomOrder()->limit(10)->get();

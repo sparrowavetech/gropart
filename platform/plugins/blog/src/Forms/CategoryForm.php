@@ -2,13 +2,16 @@
 
 namespace Botble\Blog\Forms;
 
+use Botble\Base\Forms\FieldOptions\CoreIconFieldOption;
 use Botble\Base\Forms\FieldOptions\DescriptionFieldOption;
+use Botble\Base\Forms\FieldOptions\HiddenFieldOption;
 use Botble\Base\Forms\FieldOptions\IsDefaultFieldOption;
+use Botble\Base\Forms\FieldOptions\IsFeaturedFieldOption;
 use Botble\Base\Forms\FieldOptions\NameFieldOption;
-use Botble\Base\Forms\FieldOptions\OnOffFieldOption;
 use Botble\Base\Forms\FieldOptions\SelectFieldOption;
 use Botble\Base\Forms\FieldOptions\StatusFieldOption;
-use Botble\Base\Forms\FieldOptions\TextFieldOption;
+use Botble\Base\Forms\Fields\CoreIconField;
+use Botble\Base\Forms\Fields\HiddenField;
 use Botble\Base\Forms\Fields\OnOffField;
 use Botble\Base\Forms\Fields\SelectField;
 use Botble\Base\Forms\Fields\TextareaField;
@@ -21,60 +24,63 @@ class CategoryForm extends FormAbstract
 {
     public function setup(): void
     {
-        $list = get_categories(['condition' => []]);
-
-        $categories = [];
-        foreach ($list as $row) {
-            if ($this->getModel() && ($this->model->id === $row->id || $this->model->id === $row->parent_id)) {
-                continue;
-            }
-
-            $categories[$row->id] = $row->indent_text . ' ' . $row->name;
-        }
-
-        $categories = [0 => trans('plugins/blog::categories.none')] + $categories;
-
-        $maxOrder = Category::query()
-            ->whereIn('parent_id', [0, null])
-            ->orderByDesc('order')
-            ->value('order');
-
         $this
             ->model(Category::class)
             ->setValidatorClass(CategoryRequest::class)
-            ->add('order', 'hidden', [
-                'value' => $this->getModel()->exists ? $this->getModel()->order : $maxOrder + 1,
-            ])
-            ->add('name', TextField::class, NameFieldOption::make()->required()->toArray())
+            ->add(
+                'order',
+                HiddenField::class,
+                HiddenFieldOption::make()
+                    ->value(function () {
+                        if ($this->getModel()->exists) {
+                            return $this->getModel()->order;
+                        }
+
+                        return Category::query()
+                                ->whereIn('parent_id', [0, null])
+                                ->latest('order')
+                                ->value('order') + 1;
+                    })
+            )
+            ->add('name', TextField::class, NameFieldOption::make()->required())
             ->add(
                 'parent_id',
                 SelectField::class,
                 SelectFieldOption::make()
                     ->label(trans('core/base::forms.parent'))
-                    ->choices($categories)
+                    ->choices(function () {
+                        $modelId = null;
+
+                        if ($this->getModel() && $this->getModel()->exists) {
+                            $modelId = $this->getModel()->getKey();
+                        }
+
+                        $categories = [];
+                        foreach (get_categories(['condition' => []]) as $row) {
+                            if ($modelId && ($modelId === $row->id || $modelId === $row->parent_id)) {
+                                continue;
+                            }
+
+                            $categories[$row->id] = $row->indent_text . ' ' . $row->name;
+                        }
+
+                        return [0 => trans('plugins/blog::categories.none')] + $categories;
+                    })
                     ->searchable()
-                    ->toArray()
             )
-            ->add('description', TextareaField::class, DescriptionFieldOption::make()->toArray())
-            ->add('is_default', OnOffField::class, IsDefaultFieldOption::make()->toArray())
+            ->add('description', TextareaField::class, DescriptionFieldOption::make())
+            ->add('is_default', OnOffField::class, IsDefaultFieldOption::make())
             ->add(
                 'icon',
-                $this->getFormHelper()->hasCustomField('themeIcon') ? 'themeIcon' : TextField::class,
-                TextFieldOption::make()
-                    ->label(trans('core/base::forms.icon'))
-                    ->placeholder(trans('core/base::forms.icon_placeholder'))
-                    ->maxLength(120)
-                    ->toArray()
+                CoreIconField::class,
+                CoreIconFieldOption::make()
             )
             ->add(
                 'is_featured',
                 OnOffField::class,
-                OnOffFieldOption::make()
-                    ->label(trans('core/base::forms.is_featured'))
-                    ->defaultValue(false)
-                    ->toArray()
+                IsFeaturedFieldOption::make()
             )
-            ->add('status', SelectField::class, StatusFieldOption::make()->toArray())
+            ->add('status', SelectField::class, StatusFieldOption::make())
             ->setBreakFieldPoint('status');
     }
 }

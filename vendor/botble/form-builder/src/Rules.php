@@ -28,7 +28,7 @@ class Rules
         return $this;
     }
 
-    public function addFieldRule($rule, string $fieldName = null): void
+    public function addFieldRule($rule, ?string $fieldName = null): void
     {
         $rules = $this->getFieldRules($fieldName);
         $rules[] = $rule;
@@ -57,7 +57,7 @@ class Rules
         return $fieldName;
     }
 
-    public function setFieldRules(array $rules, string $fieldName = null): void
+    public function setFieldRules(array $rules, ?string $fieldName = null): void
     {
         $fieldName = $this->ensureFieldName($fieldName);
         $this->rules[$fieldName] = $rules;

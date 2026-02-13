@@ -33,6 +33,9 @@ class WithdrawalController extends BaseController
 
     public function edit(int|string $id, Request $request)
     {
+        /**
+         * @var Withdrawal $withdrawal
+         */
         $withdrawal = Withdrawal::query()->findOrFail($id);
 
         event(new BeforeEditContentEvent($request, $withdrawal));
@@ -44,6 +47,9 @@ class WithdrawalController extends BaseController
 
     public function update(int|string $id, WithdrawalRequest $request)
     {
+        /**
+         * @var Withdrawal $withdrawal
+         */
         $withdrawal = Withdrawal::query()->findOrFail($id);
 
         $data = [

@@ -9,7 +9,6 @@ use Botble\LanguageAdvanced\Supports\LanguageAdvancedManager;
 use Botble\Testimonial\Models\Testimonial;
 use Botble\Testimonial\Repositories\Eloquent\TestimonialRepository;
 use Botble\Testimonial\Repositories\Interfaces\TestimonialInterface;
-use Illuminate\Routing\Events\RouteMatched;
 
 class TestimonialServiceProvider extends ServiceProvider
 {
@@ -24,7 +23,8 @@ class TestimonialServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        $this->setNamespace('plugins/testimonial')
+        $this
+            ->setNamespace('plugins/testimonial')
             ->loadHelpers()
             ->loadAndPublishConfigurations(['permissions'])
             ->loadMigrations()
@@ -39,15 +39,15 @@ class TestimonialServiceProvider extends ServiceProvider
             ]);
         }
 
-        $this->app['events']->listen(RouteMatched::class, function () {
-            DashboardMenu::registerItem([
-                'id' => 'cms-plugins-testimonial',
-                'priority' => 5,
-                'parent_id' => null,
-                'name' => 'plugins/testimonial::testimonial.name',
-                'icon' => 'far fa-comment-dots',
-                'url' => route('testimonial.index'),
-                'permissions' => ['testimonial.index'],
+        DashboardMenu::beforeRetrieving(function (): void {
+            DashboardMenu::make()
+                ->registerItem([
+                    'id' => 'cms-plugins-testimonial',
+                    'priority' => 5,
+                    'name' => 'plugins/testimonial::testimonial.name',
+                    'icon' => 'ti ti-user-star',
+                    'url' => route('testimonial.index'),
+                    'permissions' => ['testimonial.index'],
             ]);
         });
     }

@@ -1,1 +1,6 @@
-<x-core::copy :copyableState="$copyableState" :copyableAction="$copyableAction" :copyableMessage="$copyableMessage" :copyablePositionClass="$copyablePositionClass" />
+<x-core::copy
+    :copyableState="$copyableState"
+    :copyableAction="$copyableAction"
+    :copyableMessage="$copyableMessage"
+    :copyablePositionClass="$copyablePositionClass"
+/>

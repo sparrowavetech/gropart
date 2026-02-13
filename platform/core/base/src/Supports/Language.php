@@ -3,6 +3,8 @@
 namespace Botble\Base\Supports;
 
 use Botble\Base\Facades\BaseHelper;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\File;
 
 class Language
@@ -268,6 +270,7 @@ class Language
      */
     protected static array $languages = [
         'af' => ['af', 'af', 'Afrikaans', 'ltr', 'za'],
+        'am' => ['am', 'am', 'አማርኛ', 'ltr', 'et'],
         'ar' => ['ar', 'ar', 'العربية', 'rtl', 'ar'],
         'ary' => ['ar', 'ary', 'العربية المغربية', 'rtl', 'ma'],
         'az' => ['az', 'az', 'Azərbaycan', 'ltr', 'az'],
@@ -356,6 +359,7 @@ class Language
         'sl_SI' => ['sl', 'sl_SI', 'Slovenščina', 'ltr', 'si'],
         'so_SO' => ['so', 'so_SO', 'Af-Soomaali', 'ltr', 'so'],
         'sq' => ['sq', 'sq', 'Shqip', 'ltr', 'al'],
+        'sq_AL' => ['sq', 'sq_AL', 'Shqip (Shqipëri)', 'ltr', 'al'],
         'sr_RS' => ['sr', 'sr_RS', 'Српски језик', 'ltr', 'rs'],
         'su_ID' => ['su', 'su_ID', 'Basa Sunda', 'ltr', 'id'],
         'sv_SE' => ['sv', 'sv_SE', 'Svenska', 'ltr', 'se'],
@@ -363,6 +367,7 @@ class Language
         'sw' => ['sw', 'sw', 'Swahili', 'ltr', 'tz'],
         'ta_LK' => ['ta', 'ta_LK', 'தமிழ்', 'ltr', 'lk'],
         'th' => ['th', 'th', 'ไทย', 'ltr', 'th'],
+        'ti' => ['ti', 'ti', 'ትግርኛ', 'ltr', 'er'],
         'tl' => ['tl', 'tl', 'Tagalog', 'ltr', 'ph'],
         'tr_TR' => ['tr', 'tr_TR', 'Türkçe', 'ltr', 'tr'],
         'ug_CN' => ['ug', 'ug_CN', 'Uyƣurqə', 'ltr', 'cn'],
@@ -381,7 +386,7 @@ class Language
         return self::$flags;
     }
 
-    public static function getAvailableLocales(): array
+    public static function getAvailableLocales(bool $original = false): array
     {
         $languages = [];
         $locales = BaseHelper::scanFolder(lang_path());
@@ -400,8 +405,10 @@ class Language
                 ) {
                     $languages[$locale] = [
                         'locale' => $locale,
+                        'code' => $language[1],
                         'name' => $language[2],
                         'flag' => $language[4],
+                        'is_rtl' => $language[3] === 'rtl',
                     ];
 
                     break;
@@ -411,8 +418,10 @@ class Language
                     in_array($language[0], [$locale, str_replace('-', '_', $locale)])) {
                     $languages[$locale] = [
                         'locale' => $locale,
+                        'code' => $language[1],
                         'name' => $language[2],
                         'flag' => $language[4],
+                        'is_rtl' => $language[3] === 'rtl',
                     ];
                 }
             }
@@ -420,13 +429,19 @@ class Language
             if (! array_key_exists($locale, $languages) && File::isDirectory(lang_path($locale))) {
                 $languages[$locale] = [
                     'locale' => $locale,
+                    'code' => $locale,
                     'name' => $locale,
                     'flag' => $locale,
+                    'is_rtl' => Arr::get($languages, "$locale.3") === 'rtl',
                 ];
             }
         }
 
-        return $languages;
+        if ($original) {
+            return $languages;
+        }
+
+        return apply_filters('core_available_locales', $languages);
     }
 
     public static function getListLanguages(): array
@@ -436,25 +451,58 @@ class Language
 
     public static function getDefaultLanguage(): array
     {
-        return [
+        return apply_filters('core_default_language', [
             'locale' => 'en',
+            'code' => 'en_US',
             'name' => 'English',
             'flag' => 'us',
-        ];
+            'is_rtl' => false,
+        ]);
     }
 
     public static function getLocales(): array
     {
-        return collect(static::getListLanguages())->pluck('2', '0')->unique()->all();
+        $locales = collect(static::getListLanguages())->pluck('2', '0')->unique()->all();
+
+        $locales = [
+            ...$locales,
+            'de_CH' => 'Deutsch (Schweiz)',
+            'pt_BR' => 'Português (Brasil)',
+            'sr_Cyrl' => 'Српски (ћирилица)',
+            'sr_Latn' => 'Srpski (latinica)',
+            'sr_Latn_ME' => 'Srpski (latinica, Crna Gora)',
+            'uz_Cyrl' => 'Ўзбек (Ўзбекистон)',
+            'uz_Latn' => 'O‘zbek',
+            'zh_CN' => '中文 (中国)',
+            'zh_TW' => '中文 (台灣)',
+            'zh_HK' => '中文 (香港)',
+        ];
+
+        ksort($locales);
+
+        return $locales;
     }
 
     public static function getLocaleKeys(): array
     {
-        return array_unique(array_keys(static::getLocales()));
+        $locales = array_unique(array_keys(static::getLocales()));
+
+        return apply_filters('core_locales', $locales);
     }
 
     public static function getLanguageCodes(): array
     {
         return collect(static::getListLanguages())->pluck('1')->unique()->all();
+    }
+
+    public static function getCurrentLocale(): array
+    {
+        $locale = static::getDefaultLanguage();
+
+        if (array_key_exists($currentLocale = App::getLocale(), $availableLocales = static::getAvailableLocales())) {
+            return Arr::get($availableLocales, $currentLocale, $locale);
+        }
+
+        return $locale;
     }
 }

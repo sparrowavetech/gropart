@@ -13,6 +13,6 @@
             {!! Form::customLabel($name, $options['label'], $options['label_attr']) !!}
         @endif
     </x-slot:label>
-    
+
     {!! Form::ckeditor($name, $options['value'], $options['attr']) !!}
 </x-core::form.field>

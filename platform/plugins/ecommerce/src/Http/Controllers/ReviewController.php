@@ -2,6 +2,7 @@
 
 namespace Botble\Ecommerce\Http\Controllers;
 
+use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Facades\Assets;
 use Botble\Base\Http\Actions\DeleteResourceAction;
@@ -43,10 +44,7 @@ class ReviewController extends BaseController
 
     public function store(ReviewRequest $request)
     {
-        if (
-            ! ($request->filled('customer_id') || $request->filled('customer_name') || $request->filled('customer_email'))
-            && ! $request->filled('customer_id')
-        ) {
+        if (! $request->filled('customer_id') && ! $request->filled('customer_name') && ! $request->filled('customer_email')) {
             return $this
                 ->httpResponse()
                 ->setError()
@@ -67,7 +65,7 @@ class ReviewController extends BaseController
 
         $review = Review::query()
             ->where('product_id', $request->input('product_id'))
-            ->where(function (Builder $query) use ($request) {
+            ->where(function (Builder $query) use ($request): void {
                 $query
                     ->whereNotNull('customer_id')
                     ->where('customer_id', $request->input('customer_id'));
@@ -82,7 +80,10 @@ class ReviewController extends BaseController
                 ->setMessage(trans('plugins/ecommerce::review.review_already_exists'));
         }
 
-        $review = Review::query()->forceCreate($request->validated());
+        $review  = new Review();
+        $review->forceFill($request->validated());
+        $review->status = BaseStatusEnum::PUBLISHED;
+        $review->save();
 
         event(new CreatedContentEvent('review', $request, $review));
 
@@ -119,7 +120,7 @@ class ReviewController extends BaseController
     public function ajaxSearchCustomers(SelectSearchAjaxRequest $request)
     {
         $customers = Customer::query()
-            ->where(function (Builder $query) use ($request) {
+            ->where(function (Builder $query) use ($request): void {
                 $keyword = "%{$request->input('search')}%";
 
                 $query

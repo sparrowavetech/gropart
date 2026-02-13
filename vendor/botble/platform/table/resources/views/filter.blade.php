@@ -57,7 +57,10 @@
         </div>
     </div>
 
-    <x-core::form class="filter-form" method="get">
+    <x-core::form
+        class="filter-form"
+        method="get"
+    >
         <input
             type="hidden"
             name="filter_table_id"
@@ -79,7 +82,8 @@
                     <div class="col-auto w-50 w-sm-auto">
                         <x-core::form.select
                             name="filter_columns[]"
-                            :options="['' => trans('core/table::table.select_field')] + array_combine(array_keys($columns), array_column($columns, 'title'))"
+                            :options="['' => trans('core/table::table.select_field')] +
+                                array_combine(array_keys($columns), array_column($columns, 'title'))"
                             :value="$filterItem['column']"
                             class="filter-column-key"
                         />
@@ -145,6 +149,7 @@
                 data-bb-toggle="datatable-reset-filter"
                 @style(['display: none' => !request()->has('filter_table_id')])
                 icon="ti ti-refresh"
+                class="w-6"
                 :icon-only="true"
             />
         </div>

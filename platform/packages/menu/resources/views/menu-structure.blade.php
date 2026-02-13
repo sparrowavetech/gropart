@@ -32,7 +32,10 @@
                                 type="button"
                                 class="btn-action"
                             >
-                                <x-core::icon name="ti ti-chevron-down" size="sm" />
+                                <x-core::icon
+                                    name="ti ti-chevron-down"
+                                    size="sm"
+                                />
                             </button>
                         </a>
                     </x-core::card.header>
@@ -72,6 +75,13 @@
                         <x-core::card.title>{{ trans('packages/menu::menu.structure') }}</x-core::card.title>
                     </x-core::card.header>
                     <x-core::card.body>
+                        <x-core::alert
+                            type="info"
+                            class="bg-white text-info"
+                        >
+                            {{ trans('packages/menu::menu.drag_drop_info') }}
+                        </x-core::alert>
+
                         <div
                             class="dd nestable-menu"
                             id="nestable"
@@ -99,7 +109,7 @@
                                 </div>
                                 <div class="col-md-8">
                                     @foreach (Menu::getMenuLocations() as $location => $description)
-                                        <div @class(['mb-3' => ! $loop->last])>
+                                        <div @class(['mb-3' => !$loop->last])>
                                             <x-core::form.checkbox
                                                 :label="$description"
                                                 id="menu_location_{{ $location }}"

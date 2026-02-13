@@ -59,6 +59,17 @@ class FormFrontManager
         }
     }
 
+    public static function remove(string $form): void
+    {
+        if (($key = array_search($form, static::$forms)) !== false) {
+            unset(static::$forms[$key]);
+        }
+
+        if (isset(static::$formRequests[$form])) {
+            unset(static::$formRequests[$form]);
+        }
+    }
+
     public static function forms(): array
     {
         return static::$forms;

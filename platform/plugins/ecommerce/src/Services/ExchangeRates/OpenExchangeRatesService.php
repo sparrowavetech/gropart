@@ -30,7 +30,11 @@ class OpenExchangeRatesService implements ExchangeRateInterface
             ->get();
 
         foreach ($currencies as $currency) {
-            $currency->update(['exchange_rate' => number_format($rates[strtoupper($currency->title)], 8, '.', '')]);
+            if (! isset($rates[$currency->title])) {
+                continue;
+            }
+
+            $currency->update(['exchange_rate' => number_format($rates[$currency->title], 8, '.', '')]);
         }
 
         return CurrencyModel::query()->get();
@@ -42,7 +46,7 @@ class OpenExchangeRatesService implements ExchangeRateInterface
         $currencies = Currency::currencies()->pluck('title')->all();
 
         $params = [
-            'base' => strtoupper($defaultCurrency->title),
+            'base' => $defaultCurrency->title,
         ];
 
         return Cache::remember('currency_exchange_rate', 86_400, function () use ($params, $currencies) {
@@ -64,7 +68,7 @@ class OpenExchangeRatesService implements ExchangeRateInterface
             ->get('latest.json?' . http_build_query($params));
 
         if ($response->failed()) {
-            throw new Exception($response->json()['description']);
+            throw new Exception($response->json('description') ?: $response->reason());
         }
 
         return $response->json();

@@ -3,6 +3,7 @@
 namespace Botble\Base\Forms\FieldOptions;
 
 use Botble\Base\Forms\FormFieldOptions;
+use Closure;
 use Illuminate\Support\Collection;
 
 class SelectFieldOption extends FormFieldOptions
@@ -19,9 +20,9 @@ class SelectFieldOption extends FormFieldOptions
 
     protected bool $allowClear = false;
 
-    public function choices(array|Collection $choices): static
+    public function choices(array|Collection|Closure $choices): static
     {
-        $this->choices = $choices;
+        $this->choices = $choices instanceof Closure ? $choices() : $choices;
 
         return $this;
     }
@@ -31,9 +32,9 @@ class SelectFieldOption extends FormFieldOptions
         return $this->choices;
     }
 
-    public function selected(array|string|bool|float|null $selected): static
+    public function selected(array|string|bool|float|null|Closure $selected): static
     {
-        $this->selected = $selected;
+        $this->selected = $selected instanceof Closure ? $selected() : $selected;
 
         return $this;
     }
@@ -87,7 +88,14 @@ class SelectFieldOption extends FormFieldOptions
         return $this;
     }
 
-    public function emptyValue(string $value): static
+    public function placeholder(string $placeholder): static
+    {
+        $this->addAttribute('placeholder', $placeholder);
+
+        return $this;
+    }
+
+    public function emptyValue(string|bool|int|null $value): static
     {
         $this->emptyValue = $value;
 
@@ -118,7 +126,15 @@ class SelectFieldOption extends FormFieldOptions
             if (is_array($this->selected) && ! empty(array_filter($this->selected))) {
                 $data['attr']['data-selected'] = json_encode($this->getSelected());
             }
+        } elseif (isset($data['value']) && $data['value'] !== null && $data['value'] !== '') {
+            // Use the actual form value if it exists (from model/attributes)
+            $data['selected'] = $data['value'];
+
+            if (is_array($data['value']) && ! empty(array_filter($data['value']))) {
+                $data['attr']['data-selected'] = json_encode($data['value']);
+            }
         } elseif (isset($this->defaultValue)) {
+            // Only use defaultValue as fallback when no actual value exists
             $data['selected'] = $this->getDefaultValue();
         }
 

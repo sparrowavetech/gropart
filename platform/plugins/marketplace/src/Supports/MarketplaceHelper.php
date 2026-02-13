@@ -2,18 +2,22 @@
 
 namespace Botble\Marketplace\Supports;
 
+use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Facades\EmailHandler;
 use Botble\Base\Supports\EmailHandler as BaseEmailHandler;
 use Botble\Ecommerce\Enums\DiscountTypeOptionEnum;
+use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Facades\OrderHelper;
 use Botble\Ecommerce\Models\Order as OrderModel;
-use Botble\Marketplace\Models\VendorInfo;
-use Botble\Marketplace\Models\Store;
+use Botble\Ecommerce\Models\ProductCategory;
+use Botble\Media\Facades\RvMedia;
 use Botble\Theme\Facades\Theme;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
-use Botble\Ecommerce\Models\Enquiry;
-use Botble\Sms\Supports\SmsHandler;
+use Illuminate\Support\Collection as SupportCollection;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class MarketplaceHelper
 {
@@ -43,12 +47,12 @@ class MarketplaceHelper
 
     public function discountTypes(): array
     {
-        return Arr::except(DiscountTypeOptionEnum::labels(), [DiscountTypeOptionEnum::SAME_PRICE]);
+        return Arr::except(DiscountTypeOptionEnum::labels(), [DiscountTypeOptionEnum::SAME_PRICE, DiscountTypeOptionEnum::SHIPPING]);
     }
 
     public function getAssetVersion(): string
     {
-        return '1.2.2';
+        return '2.2.1';
     }
 
     public function hideStorePhoneNumber(): bool
@@ -76,62 +80,9 @@ class MarketplaceHelper
         return (bool) $this->getSetting('allow_vendor_manage_shipping', false);
     }
 
-    public function isVendorProfileComplete(int $customerID)
+    public function isChargeShippingPerVendor(): bool
     {
-        $isVendorData = Store::where('customer_id', $customerID)->first();
-        $isVendorTaxData = VendorInfo::where('customer_id', $customerID)->value('tax_info');
-
-        $data['status'] = 0;
-        $data['completePercentage'] = "10";
-        $data['storeVerified'] = $isVendorData['is_verified'];
-
-        $percentageIncrease = 5;
-
-        if ($isVendorTaxData) {
-            $taxVendorSignature     = isset($isVendorTaxData['signature_image']) ? $isVendorTaxData['signature_image'] : '';
-            $taxVendorBusinessName  = isset($isVendorTaxData['business_name']) ? $isVendorTaxData['business_name'] : '';
-            $taxVendorAddress       = isset($isVendorTaxData['address']) ? $isVendorTaxData['address'] : '';
-            $taxVendorTaxNumber     = isset($isVendorTaxData['tax_id']) ? $isVendorTaxData['tax_id'] : '';
-
-            if ($taxVendorSignature && $taxVendorBusinessName && $taxVendorAddress && $taxVendorTaxNumber) {
-                $data['completePercentage'] = 80;
-                $data['status'] = 1;
-            } else {
-                // Increase percentage for each available tax data field
-                if ($taxVendorSignature) {
-                    $data['completePercentage'] += $percentageIncrease;
-                }
-                if ($taxVendorBusinessName) {
-                    $data['completePercentage'] += $percentageIncrease;
-                }
-                if ($taxVendorAddress) {
-                    $data['completePercentage'] += $percentageIncrease;
-                }
-                if ($taxVendorTaxNumber) {
-                    $data['completePercentage'] += $percentageIncrease;
-                }
-            }
-        }
-
-        $vendorDataFields = [
-            'email',
-            'company',
-            'address',
-            'state',
-            'city',
-            'zip_code',
-            'logo'
-        ];
-
-        foreach ($vendorDataFields as $field) {
-            if ($isVendorData[$field]) {
-                $data['completePercentage'] += $percentageIncrease;
-            }
-        }
-
-        $data['completePercentage'] = min($data['completePercentage'], 80);
-
-        return $data;
+        return (bool) $this->getSetting('charge_shipping_per_vendor', true);
     }
 
     public function sendMailToVendorAfterProcessingOrder($orders)
@@ -204,83 +155,177 @@ class MarketplaceHelper
     {
         return (bool) $this->getSetting('enabled_messaging_system', true);
     }
-    /**
-     * @param Collection $orders
-     * @return Collection
-     * @throws FileNotFoundException
-     * @throws Throwable
-     */
-    public static function sendEnquiryMail($enquiry)
-    {
-        $mailer = EmailHandler::setModule(MARKETPLACE_MODULE_SCREEN_NAME);
 
-        if ($mailer->templateEnabled('store_new_enquiry')) {
-            if ($enquiry->product->store->email) {
-                self::setEmailVendorVariablesForEnquiry($enquiry);
-                $mailer->sendUsingTemplate('store_new_enquiry', $enquiry->product->store->email);
-            }
+    public function allowVendorManageProductCurrency(): bool
+    {
+        return (bool) $this->getSetting('allow_vendor_manage_product_currency', false);
+    }
+
+    public function getAllowedSocialLinks(): array
+    {
+        return [
+            'facebook' => [
+                'title' => 'Facebook',
+                'icon' => 'facebook',
+                'url' => 'https://facebook.com/',
+            ],
+            'twitter' => [
+                'title' => 'X (Twitter)',
+                'icon' => 'x',
+                'url' => 'https://x.com/',
+            ],
+            'instagram' => [
+                'title' => 'Instagram',
+                'icon' => 'instagram',
+                'url' => 'https://instagram.com/',
+            ],
+            'pinterest' => [
+                'title' => 'Pinterest',
+                'icon' => 'pinterest',
+                'url' => 'https://pinterest.com/',
+            ],
+            'youtube' => [
+                'title' => 'Youtube',
+                'icon' => 'youtube',
+                'url' => 'https://youtube.com/',
+            ],
+            'linkedin' => [
+                'title' => 'Linkedin',
+                'icon' => 'linkedin',
+                'url' => 'https://linkedin.com/',
+            ],
+            'messenger' => [
+                'title' => 'Messenger',
+                'icon' => 'messenger',
+                'url' => 'https://messenger.com/',
+            ],
+            'flickr' => [
+                'title' => 'Flickr',
+                'icon' => 'flickr',
+                'url' => 'https://flickr.com/',
+            ],
+            'tiktok' => [
+                'title' => 'Tiktok',
+                'icon' => 'tiktok',
+                'url' => 'https://tiktok.com/',
+            ],
+            'skype' => [
+                'title' => 'Skype',
+                'icon' => 'skype',
+                'placeholder' => 'Ex: https://skype.com/{username}',
+            ],
+            'snapchat' => [
+                'title' => 'Snapchat',
+                'icon' => 'snapchat',
+                'placeholder' => 'Ex: https://snapchat.com/{username}',
+            ],
+            'tumblr' => [
+                'title' => 'Tumblr',
+                'icon' => 'tumblr',
+                'placeholder' => 'Ex: https://tumblr.com/{username}',
+            ],
+            'whatsapp' => [
+                'title' => 'Whatsapp',
+                'icon' => 'whatsapp',
+                'placeholder' => 'Ex: https://whatsapp.com/{username}',
+            ],
+            'wechat' => [
+                'title' => 'Wechat',
+                'icon' => 'wechat',
+                'placeholder' => 'Ex: https://wechat.com/{username}',
+            ],
+            'vimeo' => [
+                'title' => 'Vimeo',
+                'icon' => 'vimeo',
+                'placeholder' => 'Ex: https://vimeo.com/{username}',
+            ],
+        ];
+    }
+
+    public function isSingleVendorCheckout(): bool
+    {
+        return (bool) $this->getSetting('single_vendor_checkout', false);
+    }
+
+    public function mediaMimeTypesAllowed(): array
+    {
+        $allowedMimeTypes = $this->getSetting('media_mime_types_allowed', []);
+
+        if (! is_array($allowedMimeTypes) && Str::isJson($allowedMimeTypes)) {
+            $allowedMimeTypes = json_decode($allowedMimeTypes, true);
         }
-        return $enquiry;
+
+        if (empty($allowedMimeTypes)) {
+            $allowedMimeTypes = RvMedia::getConfig('allowed_mime_types');
+            $allowedMimeTypes = explode(',', $allowedMimeTypes);
+        }
+
+        return $allowedMimeTypes;
     }
 
-    /**
-     * @param EnquiryrModel $order
-     * @return \Botble\Base\Supports\EmailHandler
-     * @throws Throwable
-     */
-    public static function setEmailVendorVariablesForEnquiry(Enquiry $enquiry): \Botble\Base\Supports\EmailHandler
+    public function isEnabledVendorCategoriesFilter(): bool
     {
-        return EmailHandler::setModule(MARKETPLACE_MODULE_SCREEN_NAME)
-            ->setVariableValues([
-                'enquiry_id'    => $enquiry->code,
-                'customer_name'    => $enquiry->name,
-                'customer_email'   => $enquiry->email,
-                'customer_phone'   => $enquiry->phone,
-                'customer_address' => $enquiry->address . ', ' . $enquiry->cityName->name . ', ' . $enquiry->stateName->name . ', ' . $enquiry->zip_code,
-                'product_list'     => view('plugins/ecommerce::emails.partials.enquiry-detail', compact('enquiry'))
-                    ->render(),
-                'enquiry_description'      => $enquiry->description,
-                'store_name'       => $enquiry->product->store->name,
-            ]);
-    }
-    /**
-     * @param EnquiryrModel $order
-     * @return \Botble\Base\Supports\EmailHandler
-     * @throws Throwable
-     */
-    public static function setSmsVendorVariablesForEnquiry(Enquiry $enquiry, SmsHandler $sms)
-    {
-        $sms->setModule(ECOMMERCE_MODULE_SCREEN_NAME)
-            ->setVariableValues([
-                'customer_name'    => $enquiry->name,
-                'customer_email'   => $enquiry->email,
-                'customer_phone'   => $enquiry->phone,
-                'customer_address' => $enquiry->address . ', ' . $enquiry->cityName->name . ', ' . $enquiry->stateName->name . ', ' . $enquiry->zip_code,
-                'enquiry_id'    => $enquiry->code,
-                'enquiry_description'  => $enquiry->description,
-                'store_name'       => $enquiry->product->store->name,
-            ]);
-
-        return $sms;
+        return (bool) $this->getSetting('enable_vendor_categories_filter', true);
     }
 
-    /**
-     * @param Order $order
-     *
-     * @return SmsHandler
-     * @throws Throwable
-     */
-    public function setSmsVariables(OrderModel $order, SmsHandler $sms)
+    public function isVendorDigitalProductsEnabled(): bool
     {
-        $sms->setModule(ECOMMERCE_MODULE_SCREEN_NAME)
-            ->setVariableValues([
-                'customer_name' => $order->user->name ?: $order->address->name,
-                'customer_email' => $order->user->email ?: $order->address->email,
-                'customer_phone' => $order->user->phone ?: $order->address->phone,
-                'customer_address' => $order->full_address,
-                'shipping_method' => $order->shipping_method_name,
-                'payment_method' => $order->payment->payment_channel->label(),
-                'store_name' => $order->store->name,
-            ]);
+        if (! EcommerceHelper::isEnabledSupportDigitalProducts()) {
+            return false;
+        }
+
+        return (bool) $this->getSetting('allow_vendor_digital_products', true);
+    }
+
+    public function getCategoriesForVendor(string|int $storeId): SupportCollection
+    {
+        $cacheKey = 'marketplace_store_categories_' . $storeId;
+
+        return Cache::remember($cacheKey, 3600, function () use ($storeId) {
+            $categoryIds = DB::table('ec_product_category_product')
+                ->whereIn('product_id', function ($query) use ($storeId): void {
+                    $query->select('id')
+                        ->from('ec_products')
+                        ->where('store_id', $storeId)
+                        ->where('is_variation', 0)
+                        ->where('status', BaseStatusEnum::PUBLISHED);
+                })
+                ->distinct()
+                ->pluck('category_id');
+
+            if ($categoryIds->isEmpty()) {
+                return collect();
+            }
+
+            $allCategoryIds = collect($categoryIds);
+            $parentIds = $categoryIds;
+
+            while ($parentIds->isNotEmpty()) {
+                $parentIds = ProductCategory::query()
+                    ->whereIn('id', $parentIds)
+                    ->whereNotNull('parent_id')
+                    ->where('parent_id', '>', 0)
+                    ->pluck('parent_id')
+                    ->unique();
+
+                if ($parentIds->isNotEmpty()) {
+                    $allCategoryIds = $allCategoryIds->merge($parentIds)->unique();
+                }
+            }
+
+            $categories = ProductCategory::query()
+                ->whereIn('id', $allCategoryIds)
+                ->wherePublished()
+                ->with(['slugable'])
+                ->orderBy('parent_id')
+                ->orderBy('order')
+                ->get();
+
+            return $categories->map(function ($category) {
+                $category->url = $category->slugable ? route('public.single', $category->slugable->key) : '#';
+
+                return $category;
+            });
+        });
     }
 }

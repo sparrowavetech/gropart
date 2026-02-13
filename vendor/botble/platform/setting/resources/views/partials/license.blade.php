@@ -1,10 +1,8 @@
 @php
-    $manageLicense = auth()
-        ->user()
-        ->hasPermission('core.manage.license');
+    $manageLicense = auth()->user()->hasPermission('core.manage.license');
 
-    $licenseTitle = __('License');
-    $licenseDescription = __('Setup license code');
+    $licenseTitle = trans('core/setting::setting.license_title');
+    $licenseDescription = trans('core/setting::setting.setup_license');
 @endphp
 
 <v-license-form
@@ -16,7 +14,7 @@
     v-slot="{ initialized, loading, verified, license, deactivateLicense, resetLicense }"
     v-cloak
 >
-    <template v-if="initialized && !verified">
+    <template v-if="initialized && (! verified || ! license)">
         <x-core-setting::section
             :title="$licenseTitle"
             :description="$licenseDescription"
@@ -27,23 +25,25 @@
         </x-core-setting::section>
     </template>
 
-    <template v-if="initialized && verified">
-        @if(! config('core.base.general.hide_activated_license_info', false))
+    <template v-if="initialized && verified && license">
+        @if (!config('core.base.general.hide_activated_license_info', false))
             <x-core-setting::section
                 :title="$licenseTitle"
                 :description="$licenseDescription"
             >
                 <p class="text-info">
-                <span v-if="license.licensed_to">Licensed to <span v-text="license.licensed_to"></span>.
-                </span>Activated
+                    <span v-if="license.licensed_to">Licensed to <span v-text="license.licensed_to"></span>.
+                    </span>Activated
                     since <span v-text="license.activated_at"></span>.
                 </p>
 
                 <div>
                     <x-core::button
                         color="warning"
+                        icon="ti ti-x"
                         @click="deactivateLicense"
-                        :disabled="!$manageLicense"
+                        v-bind:disabled="loading || {{ !$manageLicense ? 'true' : 'false' }}"
+                        v-bind:class="{ 'btn-loading': loading }"
                     >
                         Deactivate license
                     </x-core::button>

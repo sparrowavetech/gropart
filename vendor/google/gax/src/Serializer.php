@@ -53,18 +53,6 @@ class Serializer
     private static array $snakeCaseMap = [];
     private static array $camelCaseMap = [];
 
-    private static $metadataKnownTypes = [
-        'google.rpc.retryinfo-bin' => \Google\Rpc\RetryInfo::class,
-        'google.rpc.debuginfo-bin' => \Google\Rpc\DebugInfo::class,
-        'google.rpc.quotafailure-bin' => \Google\Rpc\QuotaFailure::class,
-        'google.rpc.badrequest-bin' => \Google\Rpc\BadRequest::class,
-        'google.rpc.requestinfo-bin' => \Google\Rpc\RequestInfo::class,
-        'google.rpc.resourceinfo-bin' => \Google\Rpc\ResourceInfo::class,
-        'google.rpc.errorinfo-bin' => \Google\Rpc\ErrorInfo::class,
-        'google.rpc.help-bin' => \Google\Rpc\Help::class,
-        'google.rpc.localizedmessage-bin' => \Google\Rpc\LocalizedMessage::class,
-    ];
-
     private $fieldTransformers;
     private $messageTypeTransformers;
     private $decodeFieldTransformers;
@@ -123,7 +111,7 @@ class Serializer
             return $this->encodeMessageImpl($message, $messageType);
         } catch (\Exception $e) {
             throw new ValidationException(
-                "Error encoding message: " . $e->getMessage(),
+                'Error encoding message: ' . $e->getMessage(),
                 $e->getCode(),
                 $e
             );
@@ -147,7 +135,7 @@ class Serializer
             return $this->decodeMessageImpl($message, $messageType, $data);
         } catch (\Exception $e) {
             throw new ValidationException(
-                "Error decoding message: " . $e->getMessage(),
+                'Error decoding message: ' . $e->getMessage(),
                 $e->getCode(),
                 $e
             );
@@ -178,27 +166,51 @@ class Serializer
      * Decode metadata received from gRPC status object
      *
      * @param array $metadata
+     * @param null|array $errors
      * @return array
      */
-    public static function decodeMetadata(array $metadata)
+    public static function decodeMetadata(array $metadata, ?array &$errors = null)
     {
         if (count($metadata) == 0) {
             return [];
         }
+        // ensure known types are available from the descriptor pool
+        KnownTypes::addKnownTypesToDescriptorPool();
         $result = [];
+        // If metadata contains a "status" bin, use that instead
+        if (isset($metadata['grpc-status-details-bin'])) {
+            $status = new \Google\Rpc\Status();
+            $status->mergeFromString($metadata['grpc-status-details-bin'][0]);
+            foreach ($status->getDetails() as $any) {
+                if (isset(KnownTypes::JSON_TYPES[$any->getTypeUrl()])) {
+                    $errors[] = $error = $any->unpack();
+                    $result[] = [
+                        '@type' => $any->getTypeUrl(),
+                    ] + self::serializeToPhpArray($error);
+                }
+            }
+            return $result;
+        }
+
+        // look for individual error detail bins and decode those
+        // NOTE: This method SHOULD be superceeded by 'grpc-status-details-bin' in every case, but
+        // we are keeping it for now to be safe
         foreach ($metadata as $key => $values) {
             foreach ($values as $value) {
                 $decodedValue = [
                     '@type' => $key,
                 ];
                 if (self::hasBinaryHeaderSuffix($key)) {
-                    if (isset(self::$metadataKnownTypes[$key])) {
-                        $class = self::$metadataKnownTypes[$key];
+                    if (isset(KnownTypes::GRPC_TYPES[$key])) {
+                        $class = KnownTypes::GRPC_TYPES[$key];
                         /** @var Message $message */
                         $message = new $class();
                         try {
                             $message->mergeFromString($value);
                             $decodedValue += self::serializeToPhpArray($message);
+                            if (!is_null($errors)) {
+                                $errors[] = $message;
+                            }
                         } catch (\Exception $e) {
                             // We encountered an error trying to deserialize the data
                             $decodedValue += [
@@ -344,7 +356,7 @@ class Serializer
                     $arr[$this->encodeElement($keyField, $k)] = $this->encodeElement($valueField, $vv);
                 }
                 $v = $arr;
-            } elseif ($field->getLabel() === GPBLabel::REPEATED) {
+            } elseif ($this->checkFieldRepeated($field)) {
                 $arr = [];
                 foreach ($v as $k => $vv) {
                     $arr[$k] = $this->encodeElement($field, $vv);
@@ -409,7 +421,7 @@ class Serializer
             // Unknown field found
             if (!isset($fieldsByName[$fieldName])) {
                 throw new RuntimeException(sprintf(
-                    "cannot handle unknown field %s on message %s",
+                    'cannot handle unknown field %s on message %s',
                     $fieldName,
                     $messageType->getFullName()
                 ));
@@ -427,7 +439,7 @@ class Serializer
                     $arr[$this->decodeElement($keyField, $k)] = $this->decodeElement($valueField, $vv);
                 }
                 $value = $arr;
-            } elseif ($field->getLabel() === GPBLabel::REPEATED) {
+            } elseif ($this->checkFieldRepeated($field)) {
                 $arr = [];
                 foreach ($v as $k => $vv) {
                     $arr[$k] = $this->decodeElement($field, $vv);
@@ -445,6 +457,17 @@ class Serializer
             unset($value);
         }
         return $message;
+    }
+
+    /**
+     * @param FieldDescriptor $field
+     * @return bool
+     */
+    private function checkFieldRepeated(FieldDescriptor $field): bool
+    {
+        return method_exists($field, 'isRepeated')
+            ? $field->isRepeated()
+            : $field->getLabel() === GPBLabel::REPEATED;
     }
 
     /**
@@ -503,7 +526,7 @@ class Serializer
 
     private static function hasBinaryHeaderSuffix(string $key)
     {
-        return substr_compare($key, "-bin", strlen($key) - 4) === 0;
+        return substr_compare($key, '-bin', strlen($key) - 4) === 0;
     }
 
     private static function getPhpArraySerializer()
@@ -516,8 +539,8 @@ class Serializer
 
     public static function loadKnownMetadataTypes()
     {
-        foreach (self::$metadataKnownTypes as $key => $class) {
-            new $class;
+        foreach (KnownTypes::GRPC_TYPES as $key => $class) {
+            new $class();
         }
     }
 }

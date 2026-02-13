@@ -6,7 +6,7 @@
     >
         <x-slot name="currencyNotSupportedMessage">
             <p class="mt-1 mb-0">
-                {{ __('Learn more') }}:
+                {{ trans('plugins/paypal::paypal.learn_more') }}:
                 {{ Html::link('https://developer.paypal.com/docs/api/reference/currency-codes', attributes: ['target' => '_blank', 'rel' => 'nofollow']) }}.
             </p>
         </x-slot>
