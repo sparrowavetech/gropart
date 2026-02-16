@@ -1,0 +1,19 @@
+{
+    "name": "sparrowave/advanced-cod",
+    "description": "Enable product-specific COD eligibility and dynamic partial prepayment.",
+    "type": "botble-plugin",
+    "require": {
+        "botble/plugin-management": "*",
+        "botble/ecommerce": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "SparroWave\\AdvancedCod\\": "src/"
+        }
+    },
+    "extra": {
+        "botble": {
+            "enable": true
+        }
+    }
+}

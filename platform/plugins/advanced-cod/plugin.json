@@ -1,0 +1,11 @@
+{
+    "id": "advanced-cod",
+    "name": "Advanced COD Payment Method",
+    "namespace": "SparroWave\\AdvancedCod\\",
+    "provider": "SparroWave\\AdvancedCod\\Providers\\AdvancedCodServiceProvider",
+    "author": "Sparrowave Solutions",
+    "url": "https://www.sparrowave.com",
+    "version": "1.0.0",
+    "description": "Enable product-specific COD eligibility and dynamic partial prepayment.",
+    "minimum_core_version": "7.0.0"
+}

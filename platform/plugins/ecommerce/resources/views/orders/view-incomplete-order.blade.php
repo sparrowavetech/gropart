@@ -83,6 +83,20 @@
                                                 <strong>{{ $product->sku }}</strong>
                                             </p>
                                         @endif
+                                        
+                                        @php
+                                            // Fallback to check original product if current is variation and doesn't have explicit set (though usually it should be on object)
+                                            // But standard is check the object itself.
+                                            $isCodEligible = $product->is_cod_eligible;
+                                        @endphp
+
+                                        <div class="mt-1">
+                                            @if ($isCodEligible)
+                                                <span class="badge bg-success text-white" style="font-size: 0.7em;">{{ __('COD Eligible') }}</span>
+                                            @else
+                                                <span class="badge bg-danger text-white" style="font-size: 0.7em;">{{ __('Not COD Eligible') }}</span>
+                                            @endif
+                                        </div>
                                     </x-core::table.body.cell>
                                     <x-core::table.body.cell class="text-end">
                                         {{ format_price($orderProduct->price) }}

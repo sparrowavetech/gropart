@@ -142,4 +142,6 @@ return array(
     '56823cacd97af379eceaf82ad00b928f' => $vendorDir . '/phpseclib/bcmath_compat/lib/bcmath.php',
     'ec07570ca5a812141189b1fa81503674' => $vendorDir . '/phpunit/phpunit/src/Framework/Assert/Functions.php',
     '13906c19e3d8fcd1341b24ed4d51cf72' => $vendorDir . '/razorpay/razorpay/Deprecated.php',
+    '8679384eea5ab1edaf01677f4c65aa39' => $baseDir . '/platform/plugins/product-bundles/src/Helpers/helpers.php',
+    'd65b876f85974e80f5214eb7a8ced06c' => $baseDir . '/platform/plugins/product-bundles/src/Helpers/constants.php',
 );

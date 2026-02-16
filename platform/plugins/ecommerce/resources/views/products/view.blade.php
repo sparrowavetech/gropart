@@ -199,6 +199,15 @@
                                 {!! BaseHelper::clean($product->stock_status_html) !!}
                             </x-core::datagrid.item>
 
+                            <x-core::datagrid.item>
+                                <x-slot:title>COD Available</x-slot:title>
+                                @if($product->is_cod_eligible)
+                                    <span class="badge bg-success text-success-fg">Yes</span>
+                                @else
+                                    <span class="badge bg-danger text-danger-fg">No</span>
+                                @endif
+                            </x-core::datagrid.item>
+
                             @if($product->brand)
                                 <x-core::datagrid.item>
                                     <x-slot:title>{{ trans('plugins/ecommerce::products.brand') }}</x-slot:title>
