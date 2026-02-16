@@ -1,5 +1,5 @@
 {
-    "id": "advanced-cod",
+    "id": "sparrowave/advanced-cod",
     "name": "Advanced COD Payment Method",
     "namespace": "SparroWave\\AdvancedCod\\",
     "provider": "SparroWave\\AdvancedCod\\Providers\\AdvancedCodServiceProvider",

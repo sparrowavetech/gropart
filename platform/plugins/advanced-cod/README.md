@@ -130,6 +130,3 @@ If the plugin fails to activate, please refer to `ACTIVATION_GUIDE.md` for commo
 
 **Developer:** Sparrowave Solutions  
 **Website:** https://www.sparrowave.com
-
----
-**Note:** These documentation files are saved in the plugin folder for future reference. They remain accessible even if you switch your Antigravity account.
