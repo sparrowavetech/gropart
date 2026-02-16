@@ -117,6 +117,50 @@ If the plugin fails to activate, please refer to `ACTIVATION_GUIDE.md` for commo
 - Ensure the folder name is exactly `advanced-cod`.
 - Check folder permissions.
 
+## 🔌 API Endpoints
+
+The plugin provides REST API endpoints for mobile/headlines integrations.
+
+### 1. Check Product Eligibility
+**Endpoint:** `GET /api/v1/advanced-cod/eligibility`
+**Parameters:**
+- `product_ids` (string, comma-separated): e.g., `1,2,3`
+
+**Response:**
+```json
+{
+    "error": false,
+    "data": {
+        "is_cart_cod_eligible": true,
+        "products": [
+            { "id": 1, "name": "Product A", "is_cod_eligible": true },
+            { "id": 2, "name": "Product B", "is_cod_eligible": false }
+        ]
+    },
+    "message": "Eligibility check completed."
+}
+```
+
+### 2. Calculate Prepayment
+**Endpoint:** `GET /api/v1/advanced-cod/prepayment-calculate`
+**Parameters:**
+- `amount` (float): Total order amount.
+
+**Response:**
+```json
+{
+    "error": false,
+    "data": {
+        "total_amount": 1000,
+        "prepayment_percentage": 30,
+        "pay_now_amount": 300,
+        "pay_on_delivery_amount": 700,
+        "currency": "$"
+    },
+    "message": "Prepayment calculation completed."
+}
+```
+
 ## 📅 Changelog
 
 ### Version 1.0.0 (2026-02-14)

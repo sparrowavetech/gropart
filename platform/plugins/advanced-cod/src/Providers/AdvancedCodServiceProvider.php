@@ -18,6 +18,7 @@ class AdvancedCodServiceProvider extends ServiceProvider
             ->loadAndPublishConfigurations(['permissions'])
             ->loadAndPublishTranslations()
             ->loadAndPublishViews()
+            ->loadRoutes(['web', 'api'])
             ->loadMigrations();
 
         $this->app->booted(function () {
