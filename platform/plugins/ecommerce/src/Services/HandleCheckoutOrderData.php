@@ -22,8 +22,7 @@ class HandleCheckoutOrderData
         protected HandleApplyCouponService $applyCouponService,
         protected HandleRemoveCouponService $removeCouponService,
         protected HandleSetCountryForPaymentCheckout $setCountryForPaymentCheckout
-    ) {
-    }
+    ) {}
 
     public function execute(Request $request, Collection $products, string $token, array &$sessionCheckoutData): CheckoutOrderData
     {
@@ -53,19 +52,28 @@ class HandleCheckoutOrderData
                 $couponDiscountAmount,
             ] = apply_filters(PROCESS_CHECKOUT_ORDER_DATA_ECOMMERCE, $products, $token, $sessionCheckoutData, $request);
 
+            $shippingAmount = 0; // Explicitly recalculate multi-vendor sum
+
             foreach (Arr::get($sessionCheckoutData, 'marketplace', []) as $storeData) {
+
+                // Additive multi-vendor shipping calculation
+                if (isset($storeData['shipping_amount'])) {
+                    $shippingAmount += $storeData['shipping_amount'];
+                }
+
                 if (! empty($storeData['created_order_id'])) {
                     $order = Order::query()
                         ->where('id', $storeData['created_order_id'])
                         ->first();
 
                     if ($order && isset($storeData['shipping_amount'])) {
-                        $shippingAmount = $storeData['shipping_amount'];
-                        $newAmount = max($order->sub_total - $order->discount_amount + $order->tax_amount + $shippingAmount + ($order->payment_fee ?? 0), 0);
+                        // We do NOT override the global $shippingAmount here! Instead we use local store amount
+                        $storeShippingAmount = $storeData['shipping_amount'];
+                        $newAmount = max($order->sub_total - $order->discount_amount + $order->tax_amount + $storeShippingAmount + ($order->payment_fee ?? 0), 0);
 
-                        if ($order->shipping_amount != $shippingAmount || $order->amount != $newAmount) {
+                        if ($order->shipping_amount != $storeShippingAmount || $order->amount != $newAmount) {
                             $order->update([
-                                'shipping_amount' => $shippingAmount,
+                                'shipping_amount' => $storeShippingAmount,
                                 'shipping_option' => Arr::get($storeData, 'shipping_option'),
                                 'amount' => $newAmount,
                             ]);

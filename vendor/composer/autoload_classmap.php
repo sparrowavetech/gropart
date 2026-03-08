@@ -12152,6 +12152,7 @@ return array(
     'Shippo_Util_Set' => $vendorDir . '/shippo/shippo-php/lib/Shippo/Util/Set.php',
     'SparroWave\\AdvancedCod\\Hooks\\AdvancedCodCheckoutListener' => $baseDir . '/platform/plugins/advanced-cod/src/Hooks/AdvancedCodCheckoutListener.php',
     'SparroWave\\AdvancedCod\\Hooks\\AdvancedCodHookListener' => $baseDir . '/platform/plugins/advanced-cod/src/Hooks/AdvancedCodHookListener.php',
+    'SparroWave\\AdvancedCod\\Http\\Controllers\\AdvancedCodApiController' => $baseDir . '/platform/plugins/advanced-cod/src/Http/Controllers/AdvancedCodApiController.php',
     'SparroWave\\AdvancedCod\\Plugin' => $baseDir . '/platform/plugins/advanced-cod/src/Plugin.php',
     'SparroWave\\AdvancedCod\\Providers\\AdvancedCodServiceProvider' => $baseDir . '/platform/plugins/advanced-cod/src/Providers/AdvancedCodServiceProvider.php',
     'Spatie\\SimpleExcel\\ReaderFactory' => $vendorDir . '/spatie/simple-excel/src/ReaderFactory.php',

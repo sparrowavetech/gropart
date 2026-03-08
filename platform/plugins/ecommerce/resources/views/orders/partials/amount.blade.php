@@ -1,98 +1,110 @@
 {!! apply_filters(RENDER_PRODUCTS_IN_CHECKOUT_PAGE, $products) !!}
 
 @php
-    $cartSubTotal = Cart::instance('cart')->rawSubTotal();
-    $cartTax = Cart::instance('cart')->rawTax();
-    $hasShipping = ! empty($shipping) && Arr::get($sessionCheckoutData, 'is_available_shipping', true) && $shippingAmount > 0;
-    $hasDiscount = $couponDiscountAmount > 0 || $promotionDiscountAmount > 0;
-    $hasPaymentFee = isset($paymentFee) && $paymentFee > 0;
-    $showSubtotal = $cartSubTotal != $orderAmount || $cartTax > 0 || $hasShipping || $hasDiscount || $hasPaymentFee;
+$cartSubTotal = Cart::instance('cart')->rawSubTotal();
+$cartTax = Cart::instance('cart')->rawTax();
+$hasShipping = ! empty($shipping) && Arr::get($sessionCheckoutData, 'is_available_shipping', true) && $shippingAmount > 0;
+$hasDiscount = $couponDiscountAmount > 0 || $promotionDiscountAmount > 0;
+$hasPaymentFee = isset($paymentFee) && $paymentFee > 0;
+$showSubtotal = $cartSubTotal != $orderAmount || $cartTax > 0 || $hasShipping || $hasDiscount || $hasPaymentFee;
 @endphp
 
 <div class="mt-2 p-2">
     @if ($showSubtotal)
-        <div class="row ec-checkout-subtotal-row">
-            <div class="col-6">
-                <p>{{ __('Subtotal') }}:</p>
-            </div>
-            <div class="col-6">
-                <p class="price-text sub-total-text text-end">
-                    {{ $cartSubTotal == 0 ? trans('plugins/ecommerce::ecommerce.free') : format_price($cartSubTotal) }}
-                </p>
-            </div>
+    <div class="row ec-checkout-subtotal-row">
+        <div class="col-6">
+            <p>{{ __('Subtotal') }}:</p>
         </div>
+        <div class="col-6">
+            <p class="price-text sub-total-text text-end">
+                {{ $cartSubTotal == 0 ? trans('plugins/ecommerce::ecommerce.free') : format_price($cartSubTotal) }}
+            </p>
+        </div>
+    </div>
     @endif
     {!! apply_filters('ecommerce_checkout_after_subtotal', null, $products) !!}
     @if (EcommerceHelper::isTaxEnabled() && $cartTax > 0)
-        <div class="row ec-checkout-tax-row">
-            <div class="col-6">
-                <p>{{ __('Tax') }} @if ($cartTax && EcommerceHelper::isDisplayCheckoutTaxInformation())
-                    (<small>{{ Cart::instance('cart')->taxClassesName() }}</small>)
+    <div class="row ec-checkout-tax-row">
+        <div class="col-6">
+            <p>{{ __('Tax') }} @if ($cartTax && EcommerceHelper::isDisplayCheckoutTaxInformation())
+                (<small>{{ Cart::instance('cart')->taxClassesName() }}</small>)
                 @endif</p>
-            </div>
-            <div class="col-6 float-end">
-                <p class="price-text tax-price-text">
-                    {{ format_price($cartTax) }}
-                </p>
-            </div>
         </div>
+        <div class="col-6 float-end">
+            <p class="price-text tax-price-text">
+                {{ format_price($cartTax) }}
+            </p>
+        </div>
+    </div>
     @endif
     @if (session('applied_coupon_code'))
-        <div class="row coupon-information">
-            <div class="col-6">
-                <p>{{ __('Coupon code') }}:</p>
-            </div>
-            <div class="col-6">
-                <p class="price-text coupon-code-text">
-                    {{ session('applied_coupon_code') }}
-                </p>
-            </div>
+    <div class="row coupon-information">
+        <div class="col-6">
+            <p>{{ __('Coupon code') }}:</p>
         </div>
+        <div class="col-6">
+            <p class="price-text coupon-code-text">
+                {{ session('applied_coupon_code') }}
+            </p>
+        </div>
+    </div>
     @endif
     @if ($couponDiscountAmount > 0)
-        <div class="row price discount-amount">
-            <div class="col-6">
-                <p>{{ __('Coupon code discount amount') }}:</p>
-            </div>
-            <div class="col-6">
-                <p class="price-text total-discount-amount-text">
-                    {{ format_price($couponDiscountAmount) }}
-                </p>
-            </div>
+    <div class="row price discount-amount">
+        <div class="col-6">
+            <p>{{ __('Coupon code discount amount') }}:</p>
         </div>
+        <div class="col-6">
+            <p class="price-text total-discount-amount-text">
+                {{ format_price($couponDiscountAmount) }}
+            </p>
+        </div>
+    </div>
     @endif
     @if ($promotionDiscountAmount > 0)
-        <div class="row">
-            <div class="col-6">
-                <p>{{ __('Promotion discount amount') }}:</p>
-            </div>
-            <div class="col-6">
-                <p class="price-text">
-                    {{ format_price($promotionDiscountAmount) }}
-                </p>
-            </div>
+    <div class="row">
+        <div class="col-6">
+            <p>{{ __('Promotion discount amount') }}:</p>
         </div>
+        <div class="col-6">
+            <p class="price-text">
+                {{ format_price($promotionDiscountAmount) }}
+            </p>
+        </div>
+    </div>
     @endif
     @if (!empty($shipping) && Arr::get($sessionCheckoutData, 'is_available_shipping', true))
-        <div class="row">
-            <div class="col-6">
-                <p>{{ __('Shipping fee') }}:</p>
-            </div>
-            <div class="col-6 float-end">
-                <p class="price-text shipping-price-text">{{ $shippingAmount > 0 ? format_price($shippingAmount) : trans('plugins/ecommerce::order.free_shipping') }}</p>
-            </div>
+    <div class="row">
+        <div class="col-6">
+            <p>{{ __('Shipping fee') }}:</p>
         </div>
+        <div class="col-6 float-end">
+            @php
+            // Safely check if the user has actually selected a method or option yet
+            $hasChosenShipping = Arr::get($sessionCheckoutData, 'shipping_method') && Arr::get($sessionCheckoutData, 'shipping_option') !== null;
+            @endphp
+            <p class="price-text shipping-price-text">
+                @if ($shippingAmount > 0)
+                {{ format_price($shippingAmount) }}
+                @elseif ($hasChosenShipping)
+                {{ trans('plugins/ecommerce::order.free_shipping') }}
+                @else
+                <span class="text-muted">— Select Option —</span>
+                @endif
+            </p>
+        </div>
+    </div>
     @endif
 
     @if (isset($paymentFee) && $paymentFee > 0)
-        <div class="row payment-fee-row">
-            <div class="col-6">
-                <p>{{ __('plugins/payment::payment.payment_fee') }}:</p>
-            </div>
-            <div class="col-6 float-end">
-                <p class="price-text payment-fee-text">{{ format_price($paymentFee) }}</p>
-            </div>
+    <div class="row payment-fee-row">
+        <div class="col-6">
+            <p>{{ __('plugins/payment::payment.payment_fee') }}:</p>
         </div>
+        <div class="col-6 float-end">
+            <p class="price-text payment-fee-text">{{ format_price($paymentFee) }}</p>
+        </div>
+    </div>
     @endif
 
     <div class="row ec-checkout-total-row">

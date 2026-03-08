@@ -13514,6 +13514,7 @@ class ComposerStaticInit4d770ee905bc70668f57fcfa6bd2e25b
         'Shippo_Util_Set' => __DIR__ . '/..' . '/shippo/shippo-php/lib/Shippo/Util/Set.php',
         'SparroWave\\AdvancedCod\\Hooks\\AdvancedCodCheckoutListener' => __DIR__ . '/../..' . '/platform/plugins/advanced-cod/src/Hooks/AdvancedCodCheckoutListener.php',
         'SparroWave\\AdvancedCod\\Hooks\\AdvancedCodHookListener' => __DIR__ . '/../..' . '/platform/plugins/advanced-cod/src/Hooks/AdvancedCodHookListener.php',
+        'SparroWave\\AdvancedCod\\Http\\Controllers\\AdvancedCodApiController' => __DIR__ . '/../..' . '/platform/plugins/advanced-cod/src/Http/Controllers/AdvancedCodApiController.php',
         'SparroWave\\AdvancedCod\\Plugin' => __DIR__ . '/../..' . '/platform/plugins/advanced-cod/src/Plugin.php',
         'SparroWave\\AdvancedCod\\Providers\\AdvancedCodServiceProvider' => __DIR__ . '/../..' . '/platform/plugins/advanced-cod/src/Providers/AdvancedCodServiceProvider.php',
         'Spatie\\SimpleExcel\\ReaderFactory' => __DIR__ . '/..' . '/spatie/simple-excel/src/ReaderFactory.php',

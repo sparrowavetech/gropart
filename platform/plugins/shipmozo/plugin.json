@@ -1,0 +1,11 @@
+{
+    "id": "sparrowave/shipmozo",
+    "name": "ShipMozo Multi-Vendor Delivery",
+    "namespace": "SparroWave\\Shipmozo\\",
+    "provider": "SparroWave\\Shipmozo\\Providers\\ShipmozoServiceProvider",
+    "author": "Sparrowave Solutions",
+    "url": "https://www.sparrowave.com",
+    "version": "1.0.3",
+    "description": "Multi-Carrier ShipMozo Shipping Rates & Multi-Vendor Serviceability Validation exclusively built for Farmart Botble Ecommerce.",
+    "minimum_core_version": "7.3.0"
+}

@@ -125,12 +125,12 @@ class MainCheckout {
             const button = event.target.closest('.payment-checkout-btn')
             if (!button) return
 
+            let hasError = false;
+
             const $agreeTerms = $checkoutForm.find('input[name="agree_terms_and_policy"]')
 
             if ($agreeTerms.length && !$agreeTerms.is(':checked')) {
-                event.preventDefault()
-                event.stopImmediatePropagation()
-
+                hasError = true;
                 const errorMessage = $agreeTerms.data('error-message') || 'You must agree to the terms and conditions.'
                 const $formCheck = $agreeTerms.closest('.form-check')
                 const $container = $agreeTerms.closest('.form-group, .mobile-checkout-footer__terms')
@@ -148,6 +148,20 @@ class MainCheckout {
                 document.dispatchEvent(new CustomEvent('checkout:validation-failed', {
                     detail: { field: 'agree_terms_and_policy', message: errorMessage }
                 }))
+            }
+
+            const isShippingSelected = $('input.shipping_method_input:checked').length > 0;
+            if (!isShippingSelected) {
+                hasError = true;
+                MainCheckout.showError('Please select any delivery method to proceed.');
+                document.dispatchEvent(new CustomEvent('checkout:validation-failed', {
+                    detail: { field: 'shipping_method', message: 'Please select any delivery method to proceed.' }
+                }))
+            }
+
+            if (hasError) {
+                event.preventDefault()
+                event.stopImmediatePropagation()
             }
         }, true)
 
@@ -241,8 +255,26 @@ class MainCheckout {
                 complete: () => {
                     enablePaymentMethodsForm()
                     $('.shipping-info-loading').hide()
+                    MainCheckout.validateShippingSelection()
                 },
             })
+        }
+
+        MainCheckout.validateShippingSelection = () => {
+            const hasShippingOptions = $('input.shipping_method_input').length > 0;
+            const isShippingSelected = $('input.shipping_method_input:checked').length > 0;
+
+            if (hasShippingOptions && !isShippingSelected) {
+                $('.payment-checkout-btn, .payment-checkout-btn-step').prop('disabled', true);
+                const $cartSummary = $('.cart-item-wrapper');
+                $cartSummary.find('div:contains("Delivery Charge")').parent().hide();
+                $cartSummary.find('div:contains("Total")').closest('.row, .d-flex').hide();
+            } else {
+                $('.payment-checkout-btn, .payment-checkout-btn-step').prop('disabled', false);
+                const $cartSummary = $('.cart-item-wrapper');
+                $cartSummary.find('div:contains("Delivery Charge")').parent().show();
+                $cartSummary.find('div:contains("Total")').closest('.row, .d-flex').show();
+            }
         }
 
         $(document).on('change', 'input.shipping_method_input', (event) => {
@@ -298,13 +330,13 @@ class MainCheckout {
             calculateShippingFee({ payment_method: method })
         })
 
-        document.addEventListener('coupon:applied', function() {
+        document.addEventListener('coupon:applied', function () {
             const paymentMethod = $(document).find('input[name=payment_method]:checked').first()
 
             calculateShippingFee(paymentMethod)
         })
 
-        document.addEventListener('coupon:removed', function() {
+        document.addEventListener('coupon:removed', function () {
             const paymentMethod = $(document).find('input[name=payment_method]:checked').first()
 
             calculateShippingFee(paymentMethod)
