@@ -5,26 +5,5 @@
     "Botble\\Contact\\Models\\Contact": [
         "0c175e4a57799ccc0d2967044852a2f8@unread-contacts",
         "0c175e4a57799ccc0d2967044852a2f8@unread-contacts-count"
-    ],
-    "Botble\\Ecommerce\\Models\\ProductCategory": [
-        "e2df835384821fa5036252a0581ba12b@ecommerce_categories_for_widgets_en_2e8a0576c85200fb1850b08cea0d87a4",
-        "e2df835384821fa5036252a0581ba12b@ecommerce_categories_for_widgets_en_5a77def70579251758775868ce925d93",
-        "e2df835384821fa5036252a0581ba12b@ecommerce_categories_for_widgets_en_d3ff5fdbc945235e5f8d97a8bca6ae9e",
-        "e2df835384821fa5036252a0581ba12b@ecommerce_categories_for_widgets_en_4c53905313ef68da3da672c5ac2e077f",
-        "e2df835384821fa5036252a0581ba12b@ecommerce_categories_for_rendering_select_en_e812eeb68c3b31e01ae94a39a0bfc688",
-        "e2df835384821fa5036252a0581ba12b@ecommerce_categories_for_widgets_en_e812eeb68c3b31e01ae94a39a0bfc688",
-        "e2df835384821fa5036252a0581ba12b@ecommerce_categories_for_widgets__5a77def70579251758775868ce925d93",
-        "e2df835384821fa5036252a0581ba12b@ecommerce_categories_for_widgets__d3ff5fdbc945235e5f8d97a8bca6ae9e",
-        "e2df835384821fa5036252a0581ba12b@ecommerce_categories_for_widgets__4c53905313ef68da3da672c5ac2e077f"
-    ],
-    "Botble\\Menu\\Models\\Menu": [
-        "876a095a247b966461c4079f23f9e7ae@menu_all_menus_54927c928140989190521eb8e90f55a2",
-        "876a095a247b966461c4079f23f9e7ae@menu_location_50f196151ee35d1ae491d09807ba5ca6",
-        "876a095a247b966461c4079f23f9e7ae@menu_location_d2d49e88cfcf33d27994cd183feae69c",
-        "876a095a247b966461c4079f23f9e7ae@menu_location_90c0e4fc70ab11ca7766920e771a1750",
-        "876a095a247b966461c4079f23f9e7ae@menu_location_9354ea0be7b0c0f413392e756ed0d9df",
-        "876a095a247b966461c4079f23f9e7ae@menu_location_913a07a06bc9d7ef7266099a85217f84",
-        "876a095a247b966461c4079f23f9e7ae@menu_location_1d610baec2cf90a03a57181e3667ab7e",
-        "876a095a247b966461c4079f23f9e7ae@menu_location_3a52bbf11484dcd9847a9f1ff6164a12"
     ]
 }
