@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Shipping API Version V1</title>
+    <link rel="stylesheet" type="text/css" href="https://shipping-api.com/api/v1/asset/swagger-ui.css?v=0cc4180f1befeea306a82ff969b7fe7c">
+    <link rel="icon" type="image/png" href="https://shipping-api.com/api/v1/asset/favicon-32x32.png?v=40d4f2c38d1cd854ad463f16373cbcb6" sizes="32x32"/>
+    <link rel="icon" type="image/png" href="https://shipping-api.com/api/v1/asset/favicon-16x16.png?v=f0ae831196d55d8f4115b6c5e8ec5384" sizes="16x16"/>
+    <style>
+    html
+    {
+        box-sizing: border-box;
+        overflow: -moz-scrollbars-vertical;
+        overflow-y: scroll;
+    }
+    *,
+    *:before,
+    *:after
+    {
+        box-sizing: inherit;
+    }
+
+    body {
+      margin:0;
+      background: #fafafa;
+    }
+    </style>
+</head>
+
+<body>
+<div id="swagger-ui"></div>
+
+<script src="https://shipping-api.com/api/v1/asset/swagger-ui-bundle.js?v=1af3ec62ad38bd8b4c1f99a31e07e58c"></script>
+<script src="https://shipping-api.com/api/v1/asset/swagger-ui-standalone-preset.js?v=0e73555b7119ba9593b450964ce857a0"></script>
+<script>
+    window.onload = function() {
+        // Build a system
+        const ui = SwaggerUIBundle({
+            dom_id: '#swagger-ui',
+            url: "https://shipping-api.com/api/v1/api-docs-v1.json",
+            operationsSorter: null,
+            configUrl: null,
+            validatorUrl: null,
+            oauth2RedirectUrl: "https://shipping-api.com/api/v1/callback",
+
+            requestInterceptor: function(request) {
+                request.headers['X-CSRF-TOKEN'] = '';
+                return request;
+            },
+
+            presets: [
+                SwaggerUIBundle.presets.apis,
+                SwaggerUIStandalonePreset
+            ],
+
+            plugins: [
+                SwaggerUIBundle.plugins.DownloadUrl
+            ],
+
+            layout: "StandaloneLayout",
+            docExpansion : "none",
+            deepLinking: true,
+            filter: true,
+            persistAuthorization: "false",
+
+        })
+
+        window.ui = ui
+    }
+</script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v67327c56f0bb4ef8b305cae61679db8f1769101564043" integrity="sha512-rdcWY47ByXd76cbCFzznIcEaCN71jqkWBBqlwhF1SY7KubdLKZiEGeP7AyieKZlGP9hbY/MhGrwXzJC/HulNyg==" data-cf-beacon='{"version":"2024.11.0","token":"4a24cdd5b7684533b46910882f3cc752","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body>
+</html>
