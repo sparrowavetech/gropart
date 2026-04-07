@@ -12,6 +12,10 @@ class HookServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
+        if (! defined('ECOMMERCE_PRODUCT_DETAIL_EXTRA_HTML')) {
+            return;
+        }
+
         add_filter(ECOMMERCE_PRODUCT_DETAIL_EXTRA_HTML, function ($html, $product) {
             if ($product instanceof Product) {
                 $estimateService = app(DeliveryEstimateService::class);
