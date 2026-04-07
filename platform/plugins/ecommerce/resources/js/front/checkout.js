@@ -5,8 +5,35 @@ try {
 } catch (e) {
 }
 
+import Toastify from '../../../../../core/base/resources/js/base/toast'
 import { CheckoutAddress } from './partials/address'
 import { DiscountManagement } from './partials/discount'
+
+const showToast = (type, message) => {
+    const icons = {
+        success: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /><path d="M9 12l2 2l4 -4" /></svg>',
+        error: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /><path d="M12 9v4" /><path d="M12 16v.01" /></svg>',
+    }
+
+    const colors = {
+        success: '#437a43',
+        error: '#bd362f',
+    }
+
+    Toastify({
+        text: message,
+        icon: icons[type] || '',
+        duration: 5000,
+        close: true,
+        gravity: 'bottom',
+        position: 'right',
+        offset: { x: 15, y: 15 },
+        stopOnFocus: true,
+        style: { background: colors[type] || '#437a43' },
+        escapeMarkup: false,
+        className: 'toastify-' + type,
+    }).showToast()
+}
 
 class MainCheckout {
     constructor() {
@@ -14,35 +41,8 @@ class MainCheckout {
         new DiscountManagement().init()
     }
 
-    static showNotice(messageType, message, messageHeader = '') {
-        toastr.clear()
-
-        toastr.options = {
-            closeButton: true,
-            positionClass: 'toast-bottom-right',
-            onclick: null,
-            showDuration: 1000,
-            hideDuration: 1000,
-            timeOut: 10000,
-            extendedTimeOut: 1000,
-            showEasing: 'swing',
-            hideEasing: 'linear',
-            showMethod: 'fadeIn',
-            hideMethod: 'fadeOut',
-        }
-
-        if (!messageHeader) {
-            switch (messageType) {
-                case 'error':
-                    messageHeader = window.messages.error_header
-                    break
-                case 'success':
-                    messageHeader = window.messages.success_header
-                    break
-            }
-        }
-
-        toastr[messageType](message, messageHeader)
+    static showNotice(messageType, message) {
+        showToast(messageType, message)
     }
 
     static handleError(data, $container) {
@@ -106,12 +106,12 @@ class MainCheckout {
         }
     }
 
-    static showError(message, messageHeader = '') {
-        this.showNotice('error', message, messageHeader)
+    static showError(message) {
+        this.showNotice('error', message)
     }
 
-    static showSuccess(message, messageHeader = '') {
-        this.showNotice('success', message, messageHeader)
+    static showSuccess(message) {
+        this.showNotice('success', message)
     }
 
     init() {
@@ -130,6 +130,8 @@ class MainCheckout {
             const $agreeTerms = $checkoutForm.find('input[name="agree_terms_and_policy"]')
 
             if ($agreeTerms.length && !$agreeTerms.is(':checked')) {
+                //event.preventDefault()
+                //event.stopImmediatePropagation()
                 hasError = true;
                 const errorMessage = $agreeTerms.data('error-message') || 'You must agree to the terms and conditions.'
                 const $formCheck = $agreeTerms.closest('.form-check')
@@ -379,6 +381,7 @@ class MainCheckout {
             const locationFields = ['address_country', 'address_state', 'address_city']
             if (locationFields.includes(changedId)) {
                 if (changedId === 'address_country') {
+                    calculateShippingFee()
                     return
                 }
                 const $state = $('#address_state')
@@ -425,17 +428,15 @@ class MainCheckout {
             const $form = _self.closest('form')
             const changedId = _self.attr('id')
 
-            if (changedId === 'address_country') {
-                return
-            }
-
-            const $state = $form.find('#address_state')
-            const $city = $form.find('#address_city')
-            if ($state.length && !$state.val()) {
-                return
-            }
-            if ($city.length && !$city.val() && changedId !== 'address_state') {
-                return
+            if (changedId !== 'address_country') {
+                const $state = $form.find('#address_state')
+                const $city = $form.find('#address_city')
+                if ($state.length && !$state.val()) {
+                    return
+                }
+                if ($city.length && !$city.val() && changedId !== 'address_state') {
+                    return
+                }
             }
 
             $.ajax({
