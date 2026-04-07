@@ -136,34 +136,14 @@
                             </button>
                         </div>
                     @else
-                        <div class="alert alert-warning" role="alert">
-                            <div class="d-flex">
-                                <div>
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="icon alert-icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                                        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                                        <circle cx="12" cy="12" r="9"></circle>
-                                        <line x1="12" y1="8" x2="12" y2="12"></line>
-                                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                                    </svg>
-                                </div>
-                                <div>
-                                    <h4 class="alert-title">{{ trans('plugins/marketplace::store.not_verified') }}</h4>
-                                    <div class="text-secondary">{{ trans('plugins/marketplace::store.store_not_verified_yet') }}</div>
-                                </div>
-                            </div>
-                        </div>
+                        <div class="text-center py-3">
+                            <span class="avatar avatar-lg bg-warning-lt mb-3">
+                                <x-core::icon name="ti ti-shield-exclamation" />
+                            </span>
+                            <h3 class="mb-1">{{ trans('plugins/marketplace::store.not_verified') }}</h3>
+                            <p class="text-secondary mb-3">{{ trans('plugins/marketplace::store.click_verify_to_approve') }}</p>
 
-                        <div class="text-center py-4">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-lg text-muted mb-3" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                                <path d="M12 3a12 12 0 0 0 8.5 3a12 12 0 0 1 -8.5 15a12 12 0 0 1 -8.5 -15a12 12 0 0 0 8.5 -3"></path>
-                                <circle cx="12" cy="11" r="1"></circle>
-                                <line x1="12" y1="12" x2="12" y2="14.5"></line>
-                            </svg>
-                            <h3>{{ trans('plugins/marketplace::store.verification_pending') }}</h3>
-                            <p class="text-muted">{{ trans('plugins/marketplace::store.click_verify_to_approve') }}</p>
-
-                            <button type="button" class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#verify-store-modal">
+                            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#verify-store-modal">
                                 <x-core::icon name="ti ti-shield-check" />
                                 {{ trans('plugins/marketplace::store.verify_store') }}
                             </button>

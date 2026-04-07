@@ -97,7 +97,7 @@
                                 ])
                             @endif
 
-                            @if (!$isUnifiedShipping && $order->shipping_method->getValue())
+                            @if ($order->shipping_method->getValue())
                                 @include('plugins/ecommerce::orders.thank-you.total-row', [
                                     'label' => trans('plugins/ecommerce::order.shipping_fee'),
                                     'value' => $order->shipping_method_name . ((float) $order->shipping_amount ? ' - ' . format_price($order->shipping_amount) : ' - ' . trans('plugins/ecommerce::ecommerce.free')),
@@ -111,7 +111,7 @@
                                         foreach ($order->products as $orderProduct) {
                                             if ($orderProduct->tax_amount > 0 && !empty($orderProduct->options['taxClasses'])) {
                                                 foreach ($orderProduct->options['taxClasses'] as $taxName => $taxRate) {
-                                                    $taxKey = $taxName . ' (' . $taxRate . '%)';
+                                                    $taxKey = $taxName . ' ' . $taxRate . '%';
                                                     if (!isset($taxGroups[$taxKey])) {
                                                         $taxGroups[$taxKey] = 0;
                                                     }
@@ -124,8 +124,8 @@
                                     @if (!empty($taxGroups))
                                         @foreach ($taxGroups as $taxName => $taxAmount)
                                             @include('plugins/ecommerce::orders.thank-you.total-row', [
-                                                'label' => trans('plugins/ecommerce::order.tax') . ' (' . $taxName . ')',
-                                                'value' => format_price($taxAmount),
+                                                'label' => trans('plugins/ecommerce::order.tax'),
+                                                'value' => format_price($taxAmount) . ' <small>(' . $taxName . ')</small>',
                                             ])
                                         @endforeach
                                     @else
@@ -140,6 +140,13 @@
                                         'value' => format_price($order->tax_amount),
                                     ])
                                 @endif
+                            @endif
+
+                            @if ((float) ($order->shipping_tax_amount ?? 0))
+                                @include('plugins/ecommerce::orders.thank-you.total-row', [
+                                    'label' => trans('plugins/ecommerce::order.shipping_tax'),
+                                    'value' => format_price($order->shipping_tax_amount),
+                                ])
                             @endif
 
                             @if ((float) $order->discount_amount)
@@ -195,6 +202,13 @@
                                 @include('plugins/ecommerce::orders.thank-you.total-row', [
                                     'label' => trans('plugins/ecommerce::order.tax'),
                                     'value' => format_price($orders->sum('tax_amount')),
+                                ])
+                            @endif
+
+                            @if ($orders->sum('shipping_tax_amount'))
+                                @include('plugins/ecommerce::orders.thank-you.total-row', [
+                                    'label' => trans('plugins/ecommerce::order.shipping_tax'),
+                                    'value' => format_price($orders->sum('shipping_tax_amount')),
                                 ])
                             @endif
 
