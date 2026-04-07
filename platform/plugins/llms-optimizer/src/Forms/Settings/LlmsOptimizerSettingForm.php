@@ -5,7 +5,6 @@ namespace Shaqi\LlmsOptimizer\Forms\Settings;
 use Botble\Setting\Forms\SettingForm;
 use Botble\Slug\Facades\SlugHelper;
 use Shaqi\LlmsOptimizer\Http\Requests\Settings\LlmsOptimizerSettingRequest;
-use Illuminate\Support\Str;
 
 class LlmsOptimizerSettingForm extends SettingForm
 {
@@ -32,16 +31,18 @@ class LlmsOptimizerSettingForm extends SettingForm
         $supportedModels = SlugHelper::supportedModels();
 
         foreach ($supportedModels as $modelClass => $modelName) {
-            // Generate setting key from model class
-            $modelBaseName = class_basename($modelClass);
-            $settingKey = 'enable_' . Str::snake(Str::plural($modelBaseName));
+            $settingKey = llms_optimizer_model_setting_key($modelClass, $supportedModels);
+            $legacySettingKey = llms_optimizer_legacy_model_setting_key($modelClass);
 
             // Get display name
             $displayName = is_callable($modelName) ? $modelName() : $modelName;
 
             $this->add($settingKey, 'onOffCheckbox', [
                 'label' => 'Enable ' . $displayName,
-                'value' => get_llms_optimizer_setting($settingKey, true),
+                'value' => get_llms_optimizer_setting(
+                    $settingKey,
+                    get_llms_optimizer_setting($legacySettingKey, true)
+                ),
                 'help_block' => [
                     'text' => 'Include ' . strtolower($displayName) . ' in llms.txt file',
                 ],
@@ -162,4 +163,3 @@ class LlmsOptimizerSettingForm extends SettingForm
             ]);
     }
 }
-

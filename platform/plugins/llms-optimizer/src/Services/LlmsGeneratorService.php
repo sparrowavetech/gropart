@@ -105,11 +105,14 @@ class LlmsGeneratorService
         $supportedModels = SlugHelper::supportedModels();
 
         foreach ($supportedModels as $modelClass => $modelName) {
-            // Generate a setting key from model class
-            $settingKey = $this->getSettingKeyFromModel($modelClass);
+            $settingKey = llms_optimizer_model_setting_key($modelClass, $supportedModels);
+            $legacySettingKey = llms_optimizer_legacy_model_setting_key($modelClass);
 
             // Check if this content type is enabled in settings
-            if (!get_llms_optimizer_setting($settingKey, true)) {
+            if (! get_llms_optimizer_setting(
+                $settingKey,
+                get_llms_optimizer_setting($legacySettingKey, true)
+            )) {
                 continue;
             }
 
@@ -124,21 +127,6 @@ class LlmsGeneratorService
         }
 
         return apply_filters('llms_optimizer_content_types', $types);
-    }
-
-    /**
-     * Generate setting key from model class
-     * Example: Botble\Page\Models\Page => enable_pages
-     */
-    protected function getSettingKeyFromModel(string $modelClass): string
-    {
-        // Extract model name from class
-        $modelName = class_basename($modelClass);
-
-        // Convert to snake_case and pluralize
-        $key = Str::snake(Str::plural($modelName));
-
-        return 'enable_' . $key;
     }
 
     /**
@@ -329,4 +317,3 @@ class LlmsGeneratorService
         return null;
     }
 }
-

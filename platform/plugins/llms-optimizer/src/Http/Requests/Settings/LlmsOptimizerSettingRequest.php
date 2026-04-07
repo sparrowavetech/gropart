@@ -4,7 +4,6 @@ namespace Shaqi\LlmsOptimizer\Http\Requests\Settings;
 
 use Botble\Slug\Facades\SlugHelper;
 use Botble\Support\Http\Requests\Request;
-use Illuminate\Support\Str;
 
 class LlmsOptimizerSettingRequest extends Request
 {
@@ -30,12 +29,10 @@ class LlmsOptimizerSettingRequest extends Request
         $supportedModels = SlugHelper::supportedModels();
 
         foreach ($supportedModels as $modelClass => $modelName) {
-            $modelBaseName = class_basename($modelClass);
-            $settingKey = 'enable_' . Str::snake(Str::plural($modelBaseName));
+            $settingKey = llms_optimizer_model_setting_key($modelClass, $supportedModels);
             $rules[$settingKey] = 'nullable|boolean';
         }
 
         return $rules;
     }
 }
-

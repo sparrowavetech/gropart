@@ -55,6 +55,15 @@ Navigate to **Admin Panel → Settings → LLMS Optimizer** to configure:
 ### Content Types
 - Enable/disable specific content types (Pages, Posts, Products, etc.)
 - Automatically detects all available content types from installed plugins
+- Handles duplicate model basenames safely (for example, multiple `Category` models from different plugins)
+
+### Content Type Key Compatibility
+In environments where different plugins register slugable models with the same class basename (for example, two `Category` models), LLMS Optimizer now generates unique internal setting keys per model to prevent admin form field collisions.
+
+Backward compatibility is preserved:
+- Existing legacy keys such as `enable_categories` are still read as fallback values
+- New installs and conflicting-model setups use unique keys automatically
+- No manual migration is required for existing settings
 
 ### Formatting Options
 - **Site Description**: Custom AI-friendly description of your site
@@ -184,4 +193,3 @@ This plugin is open-sourced software licensed under the [MIT license](LICENSE).
 ---
 
 Made with ❤️ for the Botble CMS community
-
