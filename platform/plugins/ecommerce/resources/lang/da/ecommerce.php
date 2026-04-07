@@ -121,6 +121,7 @@ return [
     'apply' => 'Anvend',
     'available' => 'Tilgængelig',
     'back_to_return_requests' => 'Tilbage til returanmodninger',
+    'backorder_warning' => 'Advarsel: Dette produkt er i restordre og kan tage længere tid at sende.',
     'choose_reason' => 'Vælg årsag',
     'clear' => 'Ryd',
     'clear_all_filters' => 'Ryd alle filtre',

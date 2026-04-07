@@ -31,6 +31,8 @@ class RazorpayPaymentMethodForm extends PaymentMethodForm
                 TextField::class,
                 TextFieldOption::make()
                     ->label(trans('plugins/razorpay::razorpay.key'))
+                    ->placeholder('rzp_live_xxxxxxxxxxxxxx')
+                    ->helperText(trans('plugins/razorpay::razorpay.key_helper'))
                     ->value(BaseHelper::hasDemoModeEnabled() ? '*******************************' : get_payment_setting('key', RAZORPAY_PAYMENT_METHOD_NAME))
             )
             ->add(
@@ -38,6 +40,8 @@ class RazorpayPaymentMethodForm extends PaymentMethodForm
                 'password',
                 TextFieldOption::make()
                     ->label(trans('plugins/razorpay::razorpay.secret'))
+                    ->placeholder('xxxxxxxxxxxxxxxxxxxxxxxx')
+                    ->helperText(trans('plugins/razorpay::razorpay.secret_helper'))
                     ->value(BaseHelper::hasDemoModeEnabled() ? '*******************************' : get_payment_setting('secret', RAZORPAY_PAYMENT_METHOD_NAME))
             )
             ->add(
@@ -46,8 +50,8 @@ class RazorpayPaymentMethodForm extends PaymentMethodForm
                 SelectFieldOption::make()
                     ->label(trans('plugins/razorpay::razorpay.payment_type'))
                     ->choices([
-                        'hosted_checkout' => 'Hosted Checkout',
-                        'website_embedded' => 'Website Embedded',
+                        'hosted_checkout' => trans('plugins/razorpay::razorpay.payment_type_embedded'),
+                        'website_embedded' => trans('plugins/razorpay::razorpay.payment_type_standard'),
                     ])
                     ->selected(get_payment_setting(
                         'payment_type',
@@ -60,6 +64,7 @@ class RazorpayPaymentMethodForm extends PaymentMethodForm
                 TextField::class,
                 TextFieldOption::make()
                     ->label(trans('plugins/razorpay::razorpay.webhook_secret'))
+                    ->placeholder('whsec_xxxxxxxxxxxxxxxxxxxxxxxx')
                     ->helperText(trans('plugins/razorpay::razorpay.webhook_secret_helper'))
                     ->value(BaseHelper::hasDemoModeEnabled() ? '*******************************' : get_payment_setting('webhook_secret', RAZORPAY_PAYMENT_METHOD_NAME))
             )

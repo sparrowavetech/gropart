@@ -109,4 +109,23 @@ return [
         'images_mimes' => 'Bilder müssen im JPG-, JPEG- oder PNG-Format sein.',
         'images_file_max' => 'Jedes Bild darf :max KB nicht überschreiten.',
     ],
+    'badge_type' => 'Bewertungs-Badge',
+    'badge_type_help' => 'Wählen Sie ein Badge für diese Bewertung aus. „Automatisch erkennen" zeigt „Vor X gekauft" für Kunden mit Bestellungen.',
+    'badge_types' => [
+        'auto' => 'Automatisch erkennen',
+        'none' => 'Kein Badge',
+        'purchased' => '✅ Gekauft',
+        'community_review' => '💬 Community-Bewertung',
+        'expert_reviewer' => '🏅 Experten-Rezensent',
+        'top_contributor' => '⭐ Top-Beitragender',
+        'verified_buyer' => '✅ Verifizierter Käufer',
+    ],
+    'placeholders' => [
+        'customer_name' => 'e.g: John Doe',
+        'customer_email' => 'e.g: example@domain.com',
+        'comment' => 'Schreiben Sie hier den Bewertungskommentar...',
+    ],
+    'helpers' => [
+        'star' => 'Bewertung von 1 (niedrigste) bis 5 (höchste).',
+    ],
 ];

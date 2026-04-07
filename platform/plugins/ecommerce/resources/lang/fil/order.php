@@ -95,6 +95,8 @@ return [
     'coupon_code' => 'Coupon code: ":code"',
     'shipping_fee' => 'Bayad sa paghahatid',
     'tax' => 'Buwis',
+    'shipping_tax' => 'Buwis sa pagpapadala',
+
     'refunded_amount' => 'Halaga ng na-refund',
     'amount_received' => 'Ang halagang aktwal na natanggap',
     'download_invoice' => 'I-download ang invoice',

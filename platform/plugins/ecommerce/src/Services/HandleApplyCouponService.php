@@ -22,10 +22,6 @@ class HandleApplyCouponService
     {
         $token = OrderHelper::getOrderSessionToken();
 
-        if (! $token) {
-            $token = OrderHelper::getOrderSessionToken();
-        }
-
         if (! $sessionData) {
             $sessionData = OrderHelper::getOrderSessionData($token);
         }
@@ -81,17 +77,7 @@ class HandleApplyCouponService
         }
 
         if ($prefix) {
-            switch ($discountTypeOption) {
-                case DiscountTypeOptionEnum::PERCENTAGE:
-                case DiscountTypeOptionEnum::SAME_PRICE:
-                    Arr::set($sessionData, $prefix . 'coupon_discount_amount', $couponDiscountAmount);
-
-                    break;
-                default:
-                    Arr::set($sessionData, $prefix . 'coupon_discount_amount', 0);
-
-                    break;
-            }
+            Arr::set($sessionData, $prefix . 'coupon_discount_amount', $couponDiscountAmount);
         } else {
             Arr::set($sessionData, 'coupon_discount_amount', $couponDiscountAmount);
         }
@@ -121,7 +107,11 @@ class HandleApplyCouponService
         return Discount::query()
             ->where('code', $couponCode)
             ->where('type', DiscountTypeEnum::COUPON)
-            ->where('start_date', '<=', Carbon::now())
+            ->where(
+                fn (Builder $query) => $query
+                ->whereNull('start_date')
+                ->orWhere('start_date', '<=', Carbon::now())
+            )
             ->where(function (Builder $query) use ($sessionData): void {
                 $query
                     ->where(function (Builder $sub) {
@@ -226,7 +216,7 @@ class HandleApplyCouponService
                     'error' => true,
                     'error_code' => 'CANNOT_USE_WITH_FLASH_SALE',
                     'message' => trans('plugins/ecommerce::discount.cannot_use_same_time_with_flash_sale', [
-                        'product_name' => '<strong>' . implode(', ', $productsInFlashSales) . '</strong>',
+                        'product_name' => '<strong>' . e(implode(', ', $productsInFlashSales)) . '</strong>',
                     ]),
                 ];
             }
@@ -658,7 +648,7 @@ class HandleApplyCouponService
                     });
 
                     foreach ($validCartItems as $cartItem) {
-                        $couponDiscountAmount += max($cartItem->total - $discountValue, 0) * $cartItem->qty;
+                        $couponDiscountAmount += max($cartItem->priceTax - $discountValue, 0) * $cartItem->qty;
                     }
                 } elseif ($discount->target == DiscountTargetEnum::PRODUCT_CATEGORIES) {
                     $products->loadMissing([
@@ -694,7 +684,7 @@ class HandleApplyCouponService
                     });
 
                     foreach ($validCartItems as $cartItem) {
-                        $couponDiscountAmount += max($cartItem->total - $discountValue, 0) * $cartItem->qty;
+                        $couponDiscountAmount += max($cartItem->priceTax - $discountValue, 0) * $cartItem->qty;
                     }
                 }
 

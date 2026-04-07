@@ -88,4 +88,19 @@ $(() => {
 
             toggleEditReply(currentTarget)
         })
+        .on('change', '#review-badge-type', (event) => {
+            const select = $(event.currentTarget)
+            const url = select.data('url')
+
+            $httpClient
+                .make()
+                .put(url, { badge_type: select.val() })
+                .then(({ data }) => {
+                    if (data.error) {
+                        Botble.showError(data.message)
+                        return
+                    }
+                    Botble.showSuccess(data.message)
+                })
+        })
 })

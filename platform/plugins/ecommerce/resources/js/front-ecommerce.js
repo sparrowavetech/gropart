@@ -853,9 +853,7 @@ class Ecommerce {
         if (!onlyQuickView) {
             const $gallery = $(document).find('.bb-product-gallery-images')
 
-            if (!$gallery.length) {
-                return
-            }
+            if ($gallery.length) {
 
             const $thumbnails = $(document).find('.bb-product-gallery-thumbnails')
 
@@ -1032,6 +1030,7 @@ class Ecommerce {
             this.initLightGallery($gallery)
 
             EcommerceApp.updateLazyLoad()
+            }
         }
 
         const $quickViewGallery = $(document).find('.bb-quick-view-gallery-images')
@@ -1636,19 +1635,44 @@ class Ecommerce {
                 const existingVideoElements = $existingGalleryImages.find('.bb-product-video').clone()
                 const existingVideoThumbnails = $existingThumbnails.find('.video-thumbnail').clone()
 
-                let finalImageHtml = imageHtml
-                let finalThumbHtml = thumbHtml
+                let videoImageHtml = ''
+                let videoThumbHtml = ''
 
                 if (existingVideoElements.length > 0) {
                     existingVideoElements.each(function() {
-                        finalImageHtml += $(this)[0].outerHTML
+                        videoImageHtml += $(this)[0].outerHTML
                     })
                 }
 
                 if (existingVideoThumbnails.length > 0) {
                     existingVideoThumbnails.each(function() {
-                        finalThumbHtml += `<div>${$(this)[0].outerHTML}</div>`
+                        videoThumbHtml += `<div>${$(this)[0].outerHTML}</div>`
                     })
+                }
+
+                const videoPosition = $galleryImages.data('video-position') || 'bottom'
+                let finalImageHtml = ''
+                let finalThumbHtml = ''
+
+                // Split images into array for positional insertion
+                const $tempImages = $('<div>').html(imageHtml)
+                const imageItems = $tempImages.children().toArray().map(el => el.outerHTML)
+                const $tempThumbs = $('<div>').html(thumbHtml)
+                const thumbItems = $tempThumbs.children().toArray().map(el => el.outerHTML)
+
+                if (videoPosition === 'top' || (videoPosition === 'after_first_image' && imageItems.length === 0)) {
+                    finalImageHtml = videoImageHtml + imageHtml
+                    finalThumbHtml = videoThumbHtml + thumbHtml
+                } else if (videoPosition === 'after_first_image' && imageItems.length > 0) {
+                    finalImageHtml = imageItems[0] + videoImageHtml + imageItems.slice(1).join('')
+                    finalThumbHtml = (thumbItems[0] || '') + videoThumbHtml + thumbItems.slice(1).join('')
+                } else if (videoPosition === 'before_last_image' && imageItems.length > 1) {
+                    finalImageHtml = imageItems.slice(0, -1).join('') + videoImageHtml + imageItems.slice(-1).join('')
+                    finalThumbHtml = thumbItems.slice(0, -1).join('') + videoThumbHtml + thumbItems.slice(-1).join('')
+                } else {
+                    // 'bottom' or fallback
+                    finalImageHtml = imageHtml + videoImageHtml
+                    finalThumbHtml = thumbHtml + videoThumbHtml
                 }
 
                 const $thumbnails = $galleryImages.find('.bb-product-gallery-thumbnails')
@@ -1674,6 +1698,10 @@ class Ecommerce {
 
                 if (typeof EcommerceApp !== 'undefined') {
                     EcommerceApp.initProductGallery()
+
+                    if ($quickViewGalleryImages.length) {
+                        EcommerceApp.initProductGallery(true)
+                    }
                 }
             }
         }

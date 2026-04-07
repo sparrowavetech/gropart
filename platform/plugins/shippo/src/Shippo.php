@@ -446,11 +446,9 @@ class Shippo
         $height = 0;
 
         foreach (Arr::get($inParams, 'items', []) as $item) {
-            $_length = $item['length'] * $item['qty'];
-            $_height = $item['height'] * $item['qty'];
-            $length = max($length, $_length);
-            $height = $height > $_height ? $length : $_height;
-            $width += $item['wide'] * $item['qty'];
+            $length = max($length, $item['length']);
+            $width = max($width, $item['wide']);
+            $height += $item['height'] * $item['qty'];
         }
 
         $width = ecommerce_convert_width_height($width);
@@ -530,7 +528,7 @@ class Shippo
     protected function beforePrepareAddress(array $addr): array
     {
         if (EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation()) {
-            $cityId = $addr['city'];
+            $cityId = $addr['city'] ?? null;
             if (! EcommerceHelper::useCityFieldAsTextField()) {
                 if (! is_numeric($cityId)) {
                     $city = City::query()->where('name', $cityId)->first();
@@ -541,7 +539,7 @@ class Shippo
                     }
                 }
             } else {
-                if (! is_numeric($addr['state'])) {
+                if (! empty($addr['state']) && ! is_numeric($addr['state'])) {
                     $state = State::query()->where('name', $addr['state'])->first();
                     if ($state) {
                         $addr['state'] = $state->id;
@@ -557,7 +555,7 @@ class Shippo
     protected function afterPrepareAddress(array $addr): array
     {
         if (EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation()) {
-            $cityId = $addr['city'];
+            $cityId = $addr['city'] ?? null;
             if (! EcommerceHelper::useCityFieldAsTextField()) {
                 $city = Location::getCityById($cityId);
                 if ($city) {
@@ -566,7 +564,7 @@ class Shippo
                     $addr['country'] = $city->state->country->code;
                 }
             } else {
-                $state = State::query()->find($addr['state']);
+                $state = ! empty($addr['state']) ? State::query()->find($addr['state']) : null;
 
                 if ($state) {
                     $addr['state'] = $state->abbreviation ?: $state->name;

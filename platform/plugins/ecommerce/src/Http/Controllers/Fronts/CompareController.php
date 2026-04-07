@@ -47,6 +47,8 @@ class CompareController extends BaseController
             foreach ($products->load('productAttributeSets.attributes') as $product) {
                 $attributeSets = $attributeSets->merge($product->productAttributeSets);
             }
+
+            $attributeSets = $attributeSets->unique('id');
         }
 
         return Theme::scope(

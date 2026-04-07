@@ -77,6 +77,11 @@ $(() => {
                     self.productOptions[index].required = $(this).is(':checked')
                 })
 
+                .on('change', '.option-price-per-product', function () {
+                    const index = $(this).parents('.accordion-item').data('product-option-index')
+                    self.productOptions[index].price_per_product = $(this).is(':checked')
+                })
+
                 .on('click', '.add-new-row', function () {
                     self.addNewRow($(this))
                 })
@@ -96,6 +101,7 @@ $(() => {
                         ],
                         option_type: 'N/A',
                         required: false,
+                        price_per_product: false,
                     }
 
                     self.productOptions.push(option)
@@ -132,6 +138,7 @@ $(() => {
                     option_value: data.option_value,
                     values: data.values,
                     required: data.required,
+                    price_per_product: data.price_per_product,
                 }
 
                 self.productOptions.push(option)
@@ -147,6 +154,7 @@ $(() => {
             const order = typeof option.order !== 'undefined' && option.order != 9999 ? option.order : index
             const template = $(document).find('#template-option').html()
             const checked = option.required ? 'checked' : ''
+            const checkedPricePerProduct = option.price_per_product ? 'checked' : ''
             const values = this.generateOptionValues(option.values, option.option_type, index)
             return template
                 .replace(/__index__/g, index)
@@ -159,7 +167,10 @@ $(() => {
                 .replace(/__optionTypeLabel__/g, productOptionLang.option_type)
                 .replace(/__optionTypeOption__/g, options)
                 .replace(/__checked__=""/g, checked)
+                .replace(/__checkedPricePerProduct__=""/g, checkedPricePerProduct)
                 .replace(/__requiredLabel__/g, productOptionLang.required)
+                .replace(/__pricePerProductLabel__/g, productOptionLang.price_per_product)
+                .replace(/__pricePerProductHelper__/g, productOptionLang.price_per_product_helper)
                 .replace(/__optionValueSortable__/g, values)
         },
         generateFieldOptions(option) {

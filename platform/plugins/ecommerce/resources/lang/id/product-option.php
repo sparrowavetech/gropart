@@ -27,4 +27,6 @@ return [
     'option_value_name_attribute' => 'Nilai opsi :key',
     'please_choose_option_type' => 'Silakan pilih tipe opsi!',
     'no_global_options' => 'Belum ada opsi global yang tersedia. Silakan tambahkan opsi produk dalam bahasa default terlebih dahulu.',
+    'price_per_product' => 'Harga per produk',
+    'price_per_product_helper' => 'Jika diaktifkan, harga opsi diterapkan satu kali per produk, tidak dikalikan dengan jumlah.',
 ];

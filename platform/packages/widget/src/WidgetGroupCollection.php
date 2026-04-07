@@ -92,7 +92,14 @@ class WidgetGroupCollection
             $languageCode = $currentLocale && $currentLocale != Language::getDefaultLocaleCode() ? '-' . $currentLocale : null;
         }
 
-        return Widget::query()->where(['theme' => Theme::getThemeName() . $languageCode])->get();
+        $themeName = Theme::getThemeName() . $languageCode;
+        $data = Widget::query()->where(['theme' => $themeName])->get();
+
+        if ($data->isEmpty() && $languageCode !== null) {
+            $data = Widget::query()->where(['theme' => Theme::getThemeName()])->get();
+        }
+
+        return $data;
     }
 
     public function getData(): Collection

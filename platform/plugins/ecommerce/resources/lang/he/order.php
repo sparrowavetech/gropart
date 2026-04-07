@@ -95,6 +95,8 @@ return [
     'coupon_code' => 'קוד קופון: ":code"',
     'shipping_fee' => 'עלות משלוח',
     'tax' => 'מע"מ',
+    'shipping_tax' => 'מס על משלוח',
+
     'refunded_amount' => 'סכום שהוחזר',
     'amount_received' => 'הסכום שהתקבל בפועל',
     'download_invoice' => 'הורד חשבונית',

@@ -2,6 +2,9 @@
 
 return [
     'webhook_secret' => 'Webhook 시크릿',
+    'webhook_secret_helper' => 'Stripe Dashboard의 Developers > Webhooks > Signing secret에서 확인할 수 있습니다.',
+    'public_key_helper' => 'Stripe Dashboard의 Developers > API keys에서 확인할 수 있습니다.',
+    'secret_key_helper' => 'Stripe Dashboard의 Developers > API keys에서 확인할 수 있습니다. 이 키는 기밀로 유지하세요.',
     'webhook_setup_guide' => [
         'title' => 'Stripe Webhook 설정 가이드',
         'description' => 'Stripe webhook을 설정하려면 다음 단계를 따르십시오',

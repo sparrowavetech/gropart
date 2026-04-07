@@ -3,6 +3,7 @@
 namespace Botble\Ecommerce\Listeners;
 
 use Botble\Base\Facades\EmailHandler;
+use Botble\Base\Supports\EmailHandler as EmailHandlerSupport;
 use Botble\Ecommerce\Events\AbandonedCartReminderEvent;
 use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Services\AbandonedCartService;
@@ -67,7 +68,7 @@ class SendAbandonedCartReminderEmail
                     'unsubscribe_url' => $unsubscribeUrl,
                     'email_sequence' => $sequence,
                 ])
-                ->sendUsingTemplate($templateName, $abandonedCart->email);
+                ->sendUsingTemplateWithLocale($templateName, $abandonedCart->email, EmailHandlerSupport::getDefaultEmailLocale());
         } catch (Exception $exception) {
             Log::error('Failed to send abandoned cart reminder email: ' . $exception->getMessage());
 

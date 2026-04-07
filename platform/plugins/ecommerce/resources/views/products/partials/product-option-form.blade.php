@@ -211,31 +211,18 @@
             <div id="collapse-product-option-__index__" class="accordion-collapse collapse-product-option show" aria-labelledby="product-option-__id__" data-bs-parent="#accordion-product-option">
                 <div class="accordion-body">
                     <div class="row align-items-end">
-                        <div class="col col-12 col-md-3 mb-3 mb-md-0">
+                        <div class="col col-12 col-md-5 mb-3 mb-md-0">
                             <x-core::form.label>__nameLabel__</x-core::form.label>
                             <input type="text" name="options[__index__][name]" class="form-control option-name" value="__option_name__" placeholder="__namePlaceHolder__">
                         </div>
                         @if ($isDefaultLanguage)
-                            <div class="col col-12 col-md-3 mb-3 mb-md-0">
+                            <div class="col col-12 col-md-5 mb-3 mb-md-0">
                                 <x-core::form.label>__optionTypeLabel__</x-core::form.label>
                                 <select name="options[__index__][option_type]" id="" class="form-select option-type">
                                     __optionTypeOption__
                                 </select>
                             </div>
-                            <div class="col col-12 col-md-3 mb-3 mb-md-0">
-                                <div class="mb-3">
-                                    <x-core::form.label class="sr-only">__requiredLabel__</x-core::form.label>
-                                    <x-core::form.checkbox
-                                        label="__requiredLabel__"
-                                        id="required-__index__"
-                                        name="options[__index__][required]"
-                                        class="option-required"
-                                        value="1"
-                                        __checked__=""
-                                    />
-                                </div>
-                            </div>
-                            <div class="col col-12 col-md-3 text-md-end">
+                            <div class="col col-12 col-md-2 mb-3 mb-md-0 text-md-end">
                                 <x-core::button
                                     type="button"
                                     color="danger"
@@ -247,6 +234,29 @@
                             </div>
                         @endif
                     </div>
+                    @if ($isDefaultLanguage)
+                        <div class="d-flex gap-4 mt-3">
+                            <x-core::form.checkbox
+                                label="__requiredLabel__"
+                                id="required-__index__"
+                                name="options[__index__][required]"
+                                class="option-required"
+                                value="1"
+                                __checked__=""
+                            />
+                            <div>
+                                <x-core::form.checkbox
+                                    label="__pricePerProductLabel__"
+                                    id="price-per-product-__index__"
+                                    name="options[__index__][price_per_product]"
+                                    class="option-price-per-product"
+                                    value="1"
+                                    __checkedPricePerProduct__=""
+                                />
+                                <small class="text-muted d-block ms-4 ps-1">__pricePerProductHelper__</small>
+                            </div>
+                        </div>
+                    @endif
                     <div class="option-value-wrapper option-value-sortable">
                         __optionValueSortable__
                     </div>

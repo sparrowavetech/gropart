@@ -1,5 +1,5 @@
 @php
-    Theme::set('pageDescription', $tag->description);
+    Theme::set('pageDescription', $tag->content ? \Botble\Shortcode\Facades\Shortcode::compile($tag->content, true)->toHtml() : $tag->description);
     $pageName = $tag->name;
 @endphp
 

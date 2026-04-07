@@ -35,13 +35,13 @@
 
     <div class="row">
         <div class="col-12 mb-3">
-            <x-core::form.label for="txt-comment" class="required">
+            <x-core::form.label for="txt-comment" :class="EcommerceHelper::isReviewCommentRequired() ? 'required' : ''">
                 {{ trans('plugins/ecommerce::customer-dashboard.review') }}
             </x-core::form.label>
             <x-core::form.textarea
                 id="txt-comment"
                 name="comment"
-                :required="true"
+                :required="EcommerceHelper::isReviewCommentRequired()"
                 rows="5"
                 :placeholder="trans('plugins/ecommerce::customer-dashboard.write_your_review')"
                 aria-describedby="review-help"

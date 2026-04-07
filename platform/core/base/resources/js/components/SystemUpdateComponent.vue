@@ -200,21 +200,77 @@ export default {
                     this.percent = 100
                     this.loading = false
                     clearInterval(this.percentInterval)
+
+                    localStorage.removeItem('system_update_has_new_version')
+                    localStorage.removeItem('system_update_message')
+                    localStorage.removeItem('system_update_check_time')
                 })
                 .catch((error) => {
-                    let message = error.message
                     this.loading = false
 
-                    if (error.data && error.data.message) {
-                        message = error.data.message
-                    } else if (error.response && error.response.data.message) {
-                        message = error.response.data.message
-                    }
+                    const message = this.extractErrorMessage(error)
 
                     this.results.push({ text: message, error: true })
 
                     throw error
                 })
+        },
+
+        extractErrorMessage(error) {
+            const stepLabels = {
+                download: 'downloading update files',
+                update_files: 'updating system files',
+                update_database: 'updating databases',
+                publish_core_assets: 'publishing core assets',
+                publish_packages_assets: 'publishing packages assets',
+                clean_up: 'cleaning up',
+            }
+
+            const stepLabel = stepLabels[this.step] || this.step
+            const statusCode = error.response?.status
+
+            // Try to extract message from JSON response
+            const serverMessage =
+                error.response?.data?.message || error.data?.message || null
+
+            if (serverMessage) {
+                return `Error while ${stepLabel}: ${serverMessage}`
+            }
+
+            // Try to extract message from HTML error page
+            if (typeof error.response?.data === 'string' && error.response.data.includes('<title>')) {
+                const titleMatch = error.response.data.match(/<title>(.*?)<\/title>/i)
+
+                if (titleMatch && titleMatch[1]) {
+                    const title = titleMatch[1].trim()
+
+                    return `Error while ${stepLabel}: ${title} (HTTP ${statusCode})`
+                }
+            }
+
+            // Provide a more descriptive fallback based on status code
+            if (statusCode === 500) {
+                return `Server error while ${stepLabel} (HTTP 500). Check the server logs for more details.`
+            }
+
+            if (statusCode === 504 || statusCode === 408) {
+                return `Request timed out while ${stepLabel} (HTTP ${statusCode}). Try increasing max_execution_time or memory_limit.`
+            }
+
+            if (statusCode === 503) {
+                return `Service unavailable while ${stepLabel} (HTTP 503). The server may be overloaded.`
+            }
+
+            if (statusCode) {
+                return `Error while ${stepLabel}: ${error.message} (HTTP ${statusCode})`
+            }
+
+            // Network error (no response)
+            if (!error.response) {
+                return `Network error while ${stepLabel}. Please check your connection and try again.`
+            }
+
+            return error.message || 'An unknown error occurred.'
         },
 
         refresh() {

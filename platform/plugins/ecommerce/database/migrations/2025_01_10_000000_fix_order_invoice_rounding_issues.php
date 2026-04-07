@@ -14,10 +14,6 @@ return new class () extends Migration {
 
     public function up(): void
     {
-        ini_set('max_execution_time', 0);
-        ini_set('memory_limit', -1);
-        set_time_limit(0);
-
         try {
             $this->currencies = Currency::query()->get()->keyBy('id');
             $this->defaultCurrency = $this->currencies->firstWhere('is_default', 1);

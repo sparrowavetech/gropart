@@ -14,6 +14,7 @@ class ProductTag extends BaseModel
     protected $fillable = [
         'name',
         'description',
+        'content',
         'status',
     ];
 

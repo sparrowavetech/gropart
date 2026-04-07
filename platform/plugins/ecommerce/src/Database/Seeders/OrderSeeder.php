@@ -153,7 +153,7 @@ class OrderSeeder extends BaseSeeder
                         'product_name' => $groupedProduct->name,
                         'product_image' => $groupedProduct->image,
                         'qty' => $groupedProduct->qty,
-                        'weight' => $groupedProduct->weight * $groupedProduct->qty,
+                        'weight' => $groupedProduct->weight,
                         'price' => $groupedProduct->price ?: 1,
                         'tax_amount' => $groupedProduct->tax_amount,
                         'options' => [

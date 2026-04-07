@@ -2,6 +2,9 @@
 
 return [
     'webhook_secret' => 'سر الويب هوك',
+    'webhook_secret_helper' => 'يمكنك العثور على هذا في لوحة تحكم Stripe ضمن Developers > Webhooks > Signing secret.',
+    'public_key_helper' => 'يمكنك العثور على هذا في لوحة تحكم Stripe ضمن Developers > API keys.',
+    'secret_key_helper' => 'يمكنك العثور على هذا في لوحة تحكم Stripe ضمن Developers > API keys. احتفظ بهذا المفتاح سرياً.',
     'webhook_setup_guide' => [
         'title' => 'دليل إعداد خطاف Webhook الشريطي',
         'description' => 'اتبع هذه الخطوات لإعداد خطاف ويب Stripe',

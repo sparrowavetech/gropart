@@ -184,4 +184,6 @@ return [
     'subject_placeholder' => 'Subjek',
     'your_message' => 'Mesej anda',
     'agree_terms_privacy' => 'Saya bersetuju dengan terma dan dasar privasi',
+    'agree_terms_privacy_link' => 'Saya bersetuju dengan :link',
+    'terms_and_privacy_policy' => 'terma dan dasar privasi',
 ];

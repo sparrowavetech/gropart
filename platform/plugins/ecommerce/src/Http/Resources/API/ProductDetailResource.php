@@ -3,6 +3,7 @@
 namespace Botble\Ecommerce\Http\Resources\API;
 
 use Botble\Ecommerce\Models\Product;
+use Botble\Media\Facades\RvMedia;
 use Botble\Shortcode\Facades\Shortcode;
 
 /**
@@ -28,6 +29,8 @@ class ProductDetailResource extends AvailableProductResource
                     'id' => $store->id,
                     'slug' => $store->slugable?->key,
                     'name' => $store->name,
+                    'logo' => $store->logo ? RvMedia::getImageUrl($store->logo) : null,
+                    'logo_url' => $store->logo_url,
                     'reviews_avg' => (float) round($store->reviews()->avg('star'), 2),
                     'reviews_count' => (int) $totalReviews,
                     'positive_rating' => (float) $positiveRating,
@@ -49,6 +52,7 @@ class ProductDetailResource extends AvailableProductResource
                     'slug' => $category->slug,
                 ];
             }),
+            'videos' => $this->video,
             'sale_percent' => $this->sale_percent,
         ];
     }

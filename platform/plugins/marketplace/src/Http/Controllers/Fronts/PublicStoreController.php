@@ -25,6 +25,10 @@ class PublicStoreController extends BaseController
 {
     public function getStores(Request $request)
     {
+        if (! MarketplaceHelper::isStoresPageEnabled()) {
+            return redirect()->to(route('public.index'));
+        }
+
         $title = trans('plugins/marketplace::store.stores');
         Theme::breadcrumb()
             ->add($title, route('public.stores'));
@@ -106,9 +110,13 @@ class PublicStoreController extends BaseController
 
         SeoHelper::setSeoOpenGraph($meta);
 
-        Theme::breadcrumb()
-            ->add(trans('plugins/marketplace::store.stores'), route('public.stores'))
-            ->add($store->name, $store->url);
+        $breadcrumb = Theme::breadcrumb();
+
+        if (MarketplaceHelper::isStoresPageEnabled()) {
+            $breadcrumb->add(trans('plugins/marketplace::store.stores'), route('public.stores'));
+        }
+
+        $breadcrumb->add($store->name, $store->url);
 
         $with = EcommerceHelper::withProductEagerLoadingRelations();
 

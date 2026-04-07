@@ -63,6 +63,7 @@ class SettingController extends BaseController
 
             $request->validate([
                 'logo_input' => ['nullable', new MediaImageRule()],
+                'logo_square_input' => ['nullable', new MediaImageRule()],
                 'cover_image_input' => ['nullable', new MediaImageRule()],
             ]);
 
@@ -71,6 +72,14 @@ class SettingController extends BaseController
                 if (! $result['error']) {
                     $file = $result['data'];
                     $request->merge(['logo' => $file->url]);
+                }
+            }
+
+            if ($request->hasFile('logo_square_input')) {
+                $result = RvMedia::handleUpload($request->file('logo_square_input'), 0, $store->upload_folder);
+                if (! $result['error']) {
+                    $file = $result['data'];
+                    $request->merge(['logo_square' => $file->url]);
                 }
             }
 

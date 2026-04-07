@@ -2,6 +2,9 @@
 
 return [
     'webhook_secret' => 'Webhook 密鑰',
+    'webhook_secret_helper' => '在 Stripe Dashboard 的 Developers > Webhooks > Signing secret 中找到此項目。',
+    'public_key_helper' => '在 Stripe Dashboard 的 Developers > API keys 中找到此項目。',
+    'secret_key_helper' => '在 Stripe Dashboard 的 Developers > API keys 中找到此項目。請妥善保管此密鑰。',
     'webhook_setup_guide' => [
         'title' => 'Stripe Webhook 設定指南',
         'description' => '跟隨這些步驟來設置 Stripe webhook',

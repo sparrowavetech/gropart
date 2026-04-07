@@ -74,7 +74,7 @@ class CompressImagesCommand extends Command
             $originalSize = filesize($path);
             $this->totalOriginalSize += $originalSize;
 
-            $encoder = new AutoEncoder();
+            $encoder = new AutoEncoder(quality: RvMedia::getImageQuality());
 
             $image = RvMedia::imageManager()->read($path);
 

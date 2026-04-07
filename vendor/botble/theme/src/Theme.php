@@ -807,11 +807,13 @@ class Theme implements ThemeContract
             $content->withCookie($this->cookie);
         }
 
-        $content->withHeaders([
-            'CMS-Version' => get_core_version(),
-            'Authorization-At' => Setting::get('membership_authorization_at'),
-            'Activated-License' => ! empty(Setting::get('licensed_to')) ? 'Yes' : 'No',
-        ]);
+        if (! config('core.base.general.hide_version_headers', false)) {
+            $content->withHeaders([
+                'CMS-Version' => get_core_version(),
+                'Authorization-At' => Setting::get('membership_authorization_at'),
+                'Activated-License' => ! empty(Setting::get('licensed_to')) ? 'Yes' : 'No',
+            ]);
+        }
 
         return $content;
     }
@@ -838,7 +840,7 @@ class Theme implements ThemeContract
                 $index++;
             }
 
-            $schema = json_encode($schema, JSON_UNESCAPED_UNICODE);
+            $schema = json_encode($schema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
             $this
                 ->asset()
@@ -853,7 +855,7 @@ class Theme implements ThemeContract
             'url' => url(''),
         ];
 
-        $websiteSchema = json_encode($websiteSchema, JSON_UNESCAPED_UNICODE);
+        $websiteSchema = json_encode($websiteSchema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
         $this
             ->asset()

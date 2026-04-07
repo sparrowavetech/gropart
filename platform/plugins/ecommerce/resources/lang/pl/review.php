@@ -109,4 +109,23 @@ return [
         'images_mimes' => 'Obrazy muszą być w formacie JPG, JPEG lub PNG.',
         'images_file_max' => 'Każdy obraz nie może przekroczyć :max KB.',
     ],
+    'badge_type' => 'Odznaka recenzji',
+    'badge_type_help' => 'Wybierz odznakę do wyświetlenia na tej recenzji. „Automatyczne wykrywanie" wyświetla „Kupiono X temu" dla klientów z zamówieniami.',
+    'badge_types' => [
+        'auto' => 'Automatyczne wykrywanie',
+        'none' => 'Brak odznaki',
+        'purchased' => '✅ Kupiono',
+        'community_review' => '💬 Recenzja społeczności',
+        'expert_reviewer' => '🏅 Recenzent ekspert',
+        'top_contributor' => '⭐ Najlepszy współtwórca',
+        'verified_buyer' => '✅ Zweryfikowany kupujący',
+    ],
+    'placeholders' => [
+        'customer_name' => 'e.g: John Doe',
+        'customer_email' => 'e.g: example@domain.com',
+        'comment' => 'Wpisz tutaj komentarz do recenzji...',
+    ],
+    'helpers' => [
+        'star' => 'Ocena od 1 (najniższa) do 5 (najwyższa).',
+    ],
 ];

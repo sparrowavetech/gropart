@@ -5,6 +5,7 @@ namespace Botble\Ecommerce\Models;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Models\BaseModel;
 use Botble\Base\Supports\Avatar;
+use Botble\Ecommerce\Enums\ReviewBadgeEnum;
 use Botble\Media\Facades\RvMedia;
 use Exception;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -25,12 +26,14 @@ class Review extends BaseModel
         'comment',
         'status',
         'images',
+        'badge_type',
     ];
 
     protected $casts = [
         'status' => BaseStatusEnum::class,
         'images' => 'array',
         'order_created_at' => 'datetime',
+        'badge_type' => ReviewBadgeEnum::class,
     ];
 
     public static function hasUserReviewed(int|string $customerId, int|string $productId): bool

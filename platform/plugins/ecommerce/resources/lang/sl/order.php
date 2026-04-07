@@ -95,6 +95,8 @@ return [
     'coupon_code' => 'Kuponska koda: ":code"',
     'shipping_fee' => 'Strošek dostave',
     'tax' => 'Davek',
+    'shipping_tax' => 'Davek na pošiljanje',
+
     'refunded_amount' => 'Vrnjeni znesek',
     'amount_received' => 'Dejansko prejeti znesek',
     'download_invoice' => 'Prenesi račun',

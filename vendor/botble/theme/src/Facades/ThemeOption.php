@@ -34,6 +34,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static array getOptions()
  * @method static bool saveOptions()
  * @method static array getFields()
+ * @method static bool isFieldShared(string $key)
  * @method static bool hasField(string $id)
  * @method static array prepareFromArray(array $options, string|null $locale = null, string|null $defaultLocale = null)
  * @method static \Botble\Theme\ThemeOption|mixed when(\Closure|mixed|null $value = null, callable|null $callback = null, callable|null $default = null)

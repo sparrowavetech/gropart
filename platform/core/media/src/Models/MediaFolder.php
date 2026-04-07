@@ -2,12 +2,15 @@
 
 namespace Botble\Media\Models;
 
+use Botble\ACL\Models\User;
 use Botble\Base\Casts\SafeContent;
 use Botble\Base\Models\BaseModel;
 use Botble\Media\Facades\RvMedia;
+use Botble\Media\Services\FolderPermissionService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
@@ -52,7 +55,21 @@ class MediaFolder extends BaseModel
 
         static::addGlobalScope('ownMedia', function (Builder $query): void {
             if (RvMedia::canOnlyViewOwnMedia()) {
-                $query->where('media_folders.user_id', auth()->id());
+                $userId = auth()->id();
+                if (! $userId) {
+                    $query->where('media_folders.user_id', 0);
+
+                    return;
+                }
+                $accessibleIds = app(FolderPermissionService::class)
+                    ->getAccessibleFolderIds($userId);
+
+                $query->where(function ($q) use ($userId, $accessibleIds) {
+                    $q->where('media_folders.user_id', $userId);
+                    if ($accessibleIds->isNotEmpty()) {
+                        $q->orWhereIn('media_folders.id', $accessibleIds);
+                    }
+                });
             }
         });
     }
@@ -60,6 +77,21 @@ class MediaFolder extends BaseModel
     public function files(): HasMany
     {
         return $this->hasMany(MediaFile::class, 'folder_id', 'id');
+    }
+
+    public function permissions(): HasMany
+    {
+        return $this->hasMany(MediaFolderPermission::class, 'folder_id');
+    }
+
+    public function permittedUsers(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            User::class,
+            'media_folder_permissions',
+            'folder_id',
+            'user_id'
+        )->withPivot('permission', 'granted_by')->withTimestamps();
     }
 
     public function parent(): BelongsTo

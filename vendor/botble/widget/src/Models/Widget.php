@@ -28,6 +28,15 @@ class Widget extends BaseModel
         return Attribute::get(fn ($value) => $value >= 0 && $value < 127 ? $value : (int) substr($value, -1));
     }
 
+    public static function getDefaultThemeName(?string $theme = null): string
+    {
+        if (! $theme) {
+            $theme = Theme::getThemeName();
+        }
+
+        return $theme;
+    }
+
     public static function getThemeName(
         ?string $locale = null,
         ?string $defaultLocale = null,

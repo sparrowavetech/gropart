@@ -3,9 +3,13 @@
 namespace Botble\Page\Providers;
 
 use Botble\Base\Facades\DashboardMenu;
+use Botble\Base\Facades\PanelSectionManager;
+use Botble\Base\PanelSections\PanelSectionItem;
 use Botble\Base\Supports\DashboardMenuItem;
 use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
+use Botble\DataSynchronize\PanelSections\ExportPanelSection;
+use Botble\DataSynchronize\PanelSections\ImportPanelSection;
 use Botble\Page\Models\Page;
 use Botble\Page\Repositories\Eloquent\PageRepository;
 use Botble\Page\Repositories\Interfaces\PageInterface;
@@ -51,6 +55,28 @@ class PageServiceProvider extends ServiceProvider
                         ->icon('ti ti-notebook')
                         ->route('pages.index')
                         ->permissions('pages.index')
+                );
+        });
+
+        PanelSectionManager::setGroupId('data-synchronize')->beforeRendering(function (): void {
+            PanelSectionManager::default()
+                ->registerItem(
+                    ExportPanelSection::class,
+                    fn () => PanelSectionItem::make('pages')
+                        ->setTitle(trans('packages/page::pages.pages'))
+                        ->withDescription(trans('packages/page::pages.export.description'))
+                        ->withPriority(99)
+                        ->withPermission('pages.export')
+                        ->withRoute('tools.data-synchronize.export.pages.index')
+                )
+                ->registerItem(
+                    ImportPanelSection::class,
+                    fn () => PanelSectionItem::make('pages')
+                        ->setTitle(trans('packages/page::pages.pages'))
+                        ->withDescription(trans('packages/page::pages.import.description'))
+                        ->withPriority(99)
+                        ->withPermission('pages.import')
+                        ->withRoute('tools.data-synchronize.import.pages.index')
                 );
         });
 

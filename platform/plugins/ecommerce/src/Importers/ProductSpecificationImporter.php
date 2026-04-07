@@ -264,6 +264,14 @@ class ProductSpecificationImporter extends Importer implements WithMapping
                 continue;
             }
 
+            if ($attribute->hasOptions() && $attribute->hasIdBasedOptions()) {
+                $optionId = $attribute->getOptionIdByValue($value);
+
+                if ($optionId) {
+                    $value = $optionId;
+                }
+            }
+
             $pivotData[$attribute->id] = [
                 'value' => $value,
                 'hidden' => false,
@@ -284,6 +292,10 @@ class ProductSpecificationImporter extends Importer implements WithMapping
             $attribute = $this->resolveSpecificationAttribute($attributeName);
 
             if (! $attribute) {
+                continue;
+            }
+
+            if ($attribute->hasOptions() && $attribute->hasIdBasedOptions()) {
                 continue;
             }
 
@@ -329,18 +341,16 @@ class ProductSpecificationImporter extends Importer implements WithMapping
         $parts = [];
 
         foreach ($product->specificationAttributes as $attribute) {
-            if ($locale) {
-                $value = ProductSpecificationAttributeTranslation::getTranslatedValue(
-                    $product->id,
-                    $attribute->id,
-                    $locale
-                );
+            $value = $attribute->pivot->value;
 
-                if (! $value) {
-                    $value = $attribute->pivot->value;
-                }
-            } else {
-                $value = $attribute->pivot->value;
+            if ($locale) {
+                $value = ProductSpecificationAttributeTranslation::getDisplayValue(
+                    $product,
+                    $attribute,
+                    $locale
+                ) ?? $value;
+            } elseif ($attribute->hasOptions() && $attribute->hasIdBasedOptions()) {
+                $value = $attribute->getOptionValueById($value) ?? $value;
             }
 
             if ($value) {

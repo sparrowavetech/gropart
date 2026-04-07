@@ -160,6 +160,7 @@ class PublicCheckoutController extends BaseController
         $couponDiscountAmount = $checkoutOrderData->couponDiscountAmount;
         $shippingAmount = $checkoutOrderData->shippingAmount;
         $paymentFee = $checkoutOrderData->paymentFee;
+        $shippingTaxAmount = $checkoutOrderData->shippingTaxAmount;
 
         $data = compact(
             'token',
@@ -173,6 +174,7 @@ class PublicCheckoutController extends BaseController
             'products',
             'isShowAddressForm',
             'paymentFee',
+            'shippingTaxAmount',
         );
 
         if (auth('customer')->check()) {
@@ -418,16 +420,21 @@ class PublicCheckoutController extends BaseController
                     ? $existingOrder->shipping_amount
                     : Arr::get($sessionData, 'shipping_amount', 0);
 
+                $shippingTaxAmountToUse = $existingOrder && $existingOrder->shipping_tax_amount > 0
+                    ? $existingOrder->shipping_tax_amount
+                    : Arr::get($sessionData, 'shipping_tax_amount', 0);
+
                 $paymentFeeToUse = $existingOrder && $existingOrder->payment_fee > 0
                     ? $existingOrder->payment_fee
                     : Arr::get($sessionData, 'payment_fee', 0);
 
-                $amountToUse = Cart::instance('cart')->rawTotal() + $shippingAmountToUse + $paymentFeeToUse;
+                $amountToUse = Cart::instance('cart')->rawTotal() + $shippingAmountToUse + $shippingTaxAmountToUse + $paymentFeeToUse;
 
                 $shippingMethodToUse = $shippingMethod ?? ShippingMethodEnum::DEFAULT;
                 $shippingOptionToUse = $shippingOption;
             } else {
                 $shippingAmountToUse = $existingOrder ? $existingOrder->shipping_amount : 0;
+                $shippingTaxAmountToUse = $existingOrder ? $existingOrder->shipping_tax_amount : 0;
                 $paymentFeeToUse = $existingOrder ? $existingOrder->payment_fee : 0;
                 $amountToUse = $existingOrder ? $existingOrder->amount : Cart::instance('cart')->rawTotal();
                 $shippingMethodToUse = $existingOrder ? $existingOrder->shipping_method : ($shippingMethod ?? ShippingMethodEnum::DEFAULT);
@@ -440,6 +447,7 @@ class PublicCheckoutController extends BaseController
                 'shipping_method' => $shippingMethodToUse,
                 'shipping_option' => $shippingOptionToUse,
                 'shipping_amount' => $shippingAmountToUse,
+                'shipping_tax_amount' => $shippingTaxAmountToUse,
                 'payment_fee' => $paymentFeeToUse,
                 'tax_amount' => Cart::instance('cart')->rawTax(),
                 'sub_total' => Cart::instance('cart')->rawSubTotal(),
@@ -487,7 +495,7 @@ class PublicCheckoutController extends BaseController
                     'product_name' => $cartItem->name,
                     'product_image' => $cartItem->options['image'],
                     'qty' => $cartItem->qty,
-                    'weight' => $weight,
+                    'weight' => Arr::get($cartItem->options, 'weight', 0),
                     'price' => $cartItem->price,
                     'tax_amount' => $cartItem->taxTotal,
                     'options' => $cartItem->options,
@@ -550,11 +558,13 @@ class PublicCheckoutController extends BaseController
                     if ($order) {
                         $shippingAmount = Arr::get($storeData, 'shipping_amount', 0);
                         $shippingOption = Arr::get($storeData, 'shipping_option');
-                        $newAmount = $order->sub_total - $order->discount_amount + $order->tax_amount + $shippingAmount + ($order->payment_fee ?? 0);
+                        $storeShippingTaxAmount = EcommerceHelper::calculateShippingTax($shippingAmount);
+                        $newAmount = $order->sub_total - $order->discount_amount + $order->tax_amount + $shippingAmount + $storeShippingTaxAmount + ($order->payment_fee ?? 0);
 
                         if ($order->shipping_amount != $shippingAmount || $order->amount != $newAmount || $order->shipping_option != $shippingOption) {
                             $order->update([
                                 'shipping_amount' => $shippingAmount,
+                                'shipping_tax_amount' => $storeShippingTaxAmount,
                                 'shipping_option' => $shippingOption,
                                 'amount' => $newAmount,
                             ]);
@@ -580,11 +590,13 @@ class PublicCheckoutController extends BaseController
                 if ($order) {
                     $shippingAmount = Arr::get($sessionData, 'shipping_amount', 0);
                     $shippingOption = Arr::get($sessionData, 'shipping_option');
-                    $newAmount = $order->sub_total - $order->discount_amount + $order->tax_amount + $shippingAmount + ($order->payment_fee ?? 0);
+                    $orderShippingTaxAmount = EcommerceHelper::calculateShippingTax($shippingAmount);
+                    $newAmount = $order->sub_total - $order->discount_amount + $order->tax_amount + $shippingAmount + $orderShippingTaxAmount + ($order->payment_fee ?? 0);
 
                     if ($order->shipping_amount != $shippingAmount || $order->amount != $newAmount || $order->shipping_option != $shippingOption) {
                         $order->update([
                             'shipping_amount' => $shippingAmount,
+                            'shipping_tax_amount' => $orderShippingTaxAmount,
                             'shipping_option' => $shippingOption,
                             'amount' => $newAmount,
                         ]);
@@ -702,20 +714,43 @@ class PublicCheckoutController extends BaseController
                 ->setMessage($stockValidation['message']);
         }
 
+        $reservedItems = $stockValidation['reserved_items'] ?? [];
+
+        try {
+            return $this->processCheckoutAfterStockReserved(
+                $request,
+                $token,
+                $sessionData,
+                $products,
+                $handleApplyPromotionsService,
+                $shippingFeeService,
+                $applyCouponService,
+                $removeCouponService,
+            );
+        } catch (Exception $e) {
+            OrderHelper::restoreReservedStock($reservedItems);
+
+            throw $e;
+        }
+    }
+
+    protected function processCheckoutAfterStockReserved(
+        CheckoutRequest $request,
+        string $token,
+        array $sessionData,
+        Collection $products,
+        HandleApplyPromotionsService $handleApplyPromotionsService,
+        HandleShippingFeeService $shippingFeeService,
+        HandleApplyCouponService $applyCouponService,
+        HandleRemoveCouponService $removeCouponService,
+    ) {
         $paymentMethod = $request->input('payment_method', session('selected_payment_method'));
 
         if ($paymentMethod) {
             session()->put('selected_payment_method', $paymentMethod);
         }
 
-        try {
-            do_action('ecommerce_post_checkout', $products, $request, $token, $sessionData);
-        } catch (Exception $e) {
-            return $this
-                ->httpResponse()
-                ->setError()
-                ->setMessage($e->getMessage());
-        }
+        do_action('ecommerce_post_checkout', $products, $request, $token, $sessionData);
 
         if (is_plugin_active('marketplace')) {
             return apply_filters(
@@ -738,7 +773,6 @@ class PublicCheckoutController extends BaseController
 
         $isAvailableShipping = EcommerceHelper::isAvailableShipping($products);
 
-        // Get existing order to use as fallback for shipping data
         $existingOrder = Order::query()->where(compact('token'))->first();
 
         $shippingMethodInput = $request->input('shipping_method', Arr::get($sessionData, 'shipping_method', $existingOrder?->shipping_method ?? ShippingMethodEnum::DEFAULT));
@@ -808,14 +842,15 @@ class PublicCheckoutController extends BaseController
 
         $orderAmount += (float) $shippingAmount;
 
-        // Add payment fee if applicable
+        $shippingTaxAmount = EcommerceHelper::calculateShippingTax($shippingAmount);
+        $orderAmount += $shippingTaxAmount;
+
         $paymentFee = 0;
         if ($paymentMethod && is_plugin_active('payment')) {
             $paymentFee = PaymentFeeHelper::calculateFee($paymentMethod, $orderAmount);
             $orderAmount += $paymentFee;
         }
 
-        // Store payment fee in request
         $request->merge(['payment_fee' => $paymentFee]);
 
         $request->merge([
@@ -825,6 +860,7 @@ class PublicCheckoutController extends BaseController
             'shipping_method' => $isAvailableShipping ? $shippingMethodInput : '',
             'shipping_option' => $isAvailableShipping ? $shippingOption : null,
             'shipping_amount' => (float) $shippingAmount,
+            'shipping_tax_amount' => $shippingTaxAmount,
             'payment_fee' => (float) $paymentFee,
             'tax_amount' => $taxAmount,
             'sub_total' => $subTotal,

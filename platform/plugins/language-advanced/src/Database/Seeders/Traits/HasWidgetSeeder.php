@@ -129,14 +129,15 @@ trait HasWidgetSeeder
      */
     protected function applyWidgetTranslations(array $data, array $translations, string $locale): array
     {
-        foreach (['name', 'title', 'subtitle', 'about'] as $key) {
+        foreach (['name', 'title', 'subtitle', 'about', 'content'] as $key) {
             if (isset($data[$key]) && is_string($data[$key])) {
                 $data[$key] = $this->translateValue($translations, $data[$key]);
             }
         }
 
-        if (($data['menu_id'] ?? null) === 'social') {
-            $data['menu_id'] = $this->localizedSlug('social', $locale);
+        // Localize menu_id slug for translated widgets
+        if (! empty($data['menu_id']) && is_string($data['menu_id'])) {
+            $data['menu_id'] = sprintf('%s-%s', $data['menu_id'], $locale);
         }
 
         if (isset($data['items']) && is_array($data['items'])) {

@@ -166,9 +166,9 @@ class MollieController extends BaseController
             ], $token);
 
             if (in_array($result->status, [
-                PaymentStatus::STATUS_CANCELED,
-                PaymentStatus::STATUS_EXPIRED,
-                PaymentStatus::STATUS_FAILED,
+                PaymentStatus::CANCELED,
+                PaymentStatus::EXPIRED,
+                PaymentStatus::FAILED,
             ])) {
                 $this->logRequest([
                     'webhook_payment_failed' => $result->status,
@@ -206,7 +206,7 @@ class MollieController extends BaseController
                         'is_fully_refunded' => $isFullyRefunded,
                         'status' => $status,
                     ], $token);
-                } elseif (in_array($result->status, [PaymentStatus::STATUS_OPEN, PaymentStatus::STATUS_AUTHORIZED])) {
+                } elseif (in_array($result->status, [PaymentStatus::OPEN, PaymentStatus::AUTHORIZED])) {
                     $status = PaymentStatusEnum::PENDING;
                 }
 

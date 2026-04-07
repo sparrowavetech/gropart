@@ -164,6 +164,7 @@ abstract class FormFront extends FormAbstract
                 if (in_array($field->getType(), [CheckboxField::class, OnOffCheckboxField::class, 'checkbox', 'radio'])) {
                     $labelClass = str_replace('sr-only', '', $labelClass);
                     $labelClass = str_replace('d-none', '', $labelClass);
+                    $labelClass = str_replace('visually-hidden', '', $labelClass);
                 }
 
                 $field->setOption('label_attr.class', $labelClass . str_replace('form-label', '', $field->getOption('label_attr.class', '')));

@@ -7,10 +7,12 @@ use Illuminate\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
+        if (Schema::hasColumn('simple_slider_items', 'status')) {
+            return;
+        }
+
         Schema::table('simple_slider_items', function (Blueprint $table): void {
-            if (! Schema::hasColumn('simple_slider_items', 'status')) {
-                $table->string('status', 60)->default('published')->after('order');
-            }
+            $table->string('status', 60)->default('published')->after('order');
         });
     }
 

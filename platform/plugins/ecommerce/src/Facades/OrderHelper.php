@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Facade;
 /**
  * @method static \Illuminate\Support\Collection|\Illuminate\Database\Eloquent\Model|array|bool processOrder(array|string|null $orderIds, string|null $chargeId = null)
  * @method static array validateAndReserveStock(array $cartItems)
+ * @method static void restoreReservedStock(array $reservedItems)
  * @method static bool decreaseProductQuantity(\Botble\Ecommerce\Models\Order $order)
  * @method static \Botble\Base\Supports\EmailHandler setEmailVariables(\Botble\Ecommerce\Models\Order $order)
  * @method static array getEmailVariables(\Botble\Ecommerce\Models\Order $order)

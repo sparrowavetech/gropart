@@ -121,6 +121,7 @@ return [
     'apply' => '应用',
     'available' => '可用',
     'back_to_return_requests' => '返回退货请求',
+    'backorder_warning' => '警告：此商品为预购，发货时间可能较长。',
     'choose_reason' => '选择原因',
     'clear' => '清除',
     'clear_all_filters' => '清除所有筛选',

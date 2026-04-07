@@ -9,7 +9,9 @@
         >
             <x-core::icon name="ti ti-bell" />
             <span
-                class="badge bg-blue text-blue-fg badge-pill notification-count">{{ number_format($countNotificationUnread) }}</span>
+                class="badge bg-blue text-blue-fg badge-pill notification-count"
+                @if(! $countNotificationUnread) style="display: none" @endif
+            >{{ number_format($countNotificationUnread) }}</span>
         </a>
     </div>
 @endonce

@@ -2,28 +2,18 @@
 
 namespace Botble\PluginManagement\Listeners;
 
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\ServiceProvider as IlluminateServiceProvider;
-use Illuminate\Support\Str;
+use Botble\PluginManagement\Services\PluginService;
 
 class PublishPluginAssets
 {
-    public function handle(): void
+    public function __construct(protected PluginService $pluginService)
     {
-        $pluginPath = plugin_path();
-
-        foreach ($this->publishPaths() as $from => $to) {
-            if (! Str::contains($from, $pluginPath)) {
-                continue;
-            }
-
-            File::ensureDirectoryExists(dirname($to));
-            File::copyDirectory($from, $to);
-        }
     }
 
-    private function publishPaths(): array
+    public function handle(): void
     {
-        return IlluminateServiceProvider::pathsToPublish(null, 'cms-public');
+        foreach (PluginService::getInstalledPlugins() as $plugin) {
+            $this->pluginService->publishAssets($plugin);
+        }
     }
 }

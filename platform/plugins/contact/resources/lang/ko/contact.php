@@ -184,4 +184,6 @@ return [
     'subject_placeholder' => '주제',
     'your_message' => '귀하의 메시지',
     'agree_terms_privacy' => '이용약관 및 개인정보 보호정책에 동의합니다.',
+    'agree_terms_privacy_link' => ':link에 동의합니다.',
+    'terms_and_privacy_policy' => '이용약관 및 개인정보 보호정책',
 ];

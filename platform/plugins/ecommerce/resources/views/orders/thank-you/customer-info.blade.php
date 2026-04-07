@@ -118,19 +118,19 @@
             <div class="info-block info-block-full">
                 <div class="tax-info-grid">
                     <div class="tax-info-item">
-                        <span class="tax-label">{{ trans('plugins/ecommerce::order.checkout.company_name') }}</span>
+                        <span class="tax-label">{{ trans('plugins/ecommerce::order.tax_info.company_name') }}</span>
                         <span class="tax-value">{{ $tax->company_name }}</span>
                     </div>
                     <div class="tax-info-item">
-                        <span class="tax-label">{{ trans('plugins/ecommerce::order.checkout.company_tax_code') }}</span>
+                        <span class="tax-label">{{ trans('plugins/ecommerce::order.tax_info.company_tax_code') }}</span>
                         <span class="tax-value">{{ $tax->company_tax_code }}</span>
                     </div>
                     <div class="tax-info-item">
-                        <span class="tax-label">{{ trans('plugins/ecommerce::order.checkout.company_email') }}</span>
+                        <span class="tax-label">{{ trans('plugins/ecommerce::order.tax_info.company_email') }}</span>
                         <span class="tax-value">{{ $tax->company_email }}</span>
                     </div>
                     <div class="tax-info-item">
-                        <span class="tax-label">{{ trans('plugins/ecommerce::order.checkout.company_address') }}</span>
+                        <span class="tax-label">{{ trans('plugins/ecommerce::order.tax_info.company_address') }}</span>
                         <span class="tax-value">{{ $tax->company_address }}</span>
                     </div>
                 </div>

@@ -30,10 +30,11 @@ This package is a plugin of [Laravel DataTables](https://github.com/yajra/larave
 | 10.x          | 10.x    |
 | 11.x          | 11.x    |
 | 12.x          | 12.x    |
+| 13.x          | 13.x    |
 
 ## Quick Installation
 
-`composer require yajra/laravel-datatables-html:^12`
+`composer require yajra/laravel-datatables-html:^13`
 
 #### Setup scripts with ViteJS
 

@@ -13,7 +13,7 @@ This package is a plugin of [Laravel DataTables](https://github.com/yajra/larave
 
 ## Requirements
 
-- [PHP >= 8.2](http://php.net/)
+- [PHP >= 8.3](http://php.net/)
 - [Laravel 12.x](https://github.com/laravel/framework)
 - [Laravel DataTables](https://github.com/yajra/laravel-datatables)
 - [jQuery DataTables v1.10.x](http://datatables.net/)
@@ -32,10 +32,11 @@ This package is a plugin of [Laravel DataTables](https://github.com/yajra/larave
 | 10.x          | 10.x    |
 | 11.x          | 11.x    |
 | 12.x          | 12.x    |
+| 13.x          | 13.x    |
 
 ## Quick Installation
 
-`composer require yajra/laravel-datatables-buttons:^12`
+`composer require yajra/laravel-datatables-buttons:^13`
 
 #### Service Provider (Optional on Laravel 5.5)
 

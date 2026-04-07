@@ -108,7 +108,9 @@ class WidgetManagement {
         }
 
         const formData = $('#widget-add-form').serialize()
-        const sourceWidget = $(`#wrap-widget-1 li[data-id="${widgetId}"]`)
+        const sourceWidget = $('#wrap-widget-1 li').filter(function () {
+            return $(this).data('id') === widgetId
+        })
         if (sourceWidget.length === 0) {
             return
         }

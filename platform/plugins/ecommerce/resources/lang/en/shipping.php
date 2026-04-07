@@ -146,6 +146,7 @@ return [
             'confirmation' => 'Are you sure you want to delete shipping rule item <strong class="item-label"></strong>?',
             'load_data_table' => 'Load data table (:total)',
             'tables' => [
+                'name' => 'Name',
                 'shipping_rule' => 'Shipping rule',
                 'country' => 'Country',
                 'state' => 'State',
@@ -156,6 +157,9 @@ return [
                 'is_enabled' => 'Is enabled?',
             ],
             'forms' => [
+                'name' => 'Name',
+                'name_placeholder' => 'e.g., Downtown Area, South Region',
+                'name_helper' => 'Optional label to identify this shipping rule item',
                 'country' => 'Country',
                 'country_placeholder' => 'Country',
                 'state' => 'State',

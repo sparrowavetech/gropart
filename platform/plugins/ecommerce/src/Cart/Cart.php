@@ -114,7 +114,9 @@ class Cart
             ($productOptions = Arr::get($options, 'options', [])) &&
             is_array($productOptions)
         ) {
-            $price = $this->getPriceByOptions($price, $productOptions);
+            $priceResult = $this->getPriceByOptions($price, $productOptions);
+            $price = $priceResult['price'];
+            $options['option_price_once'] = $priceResult['option_price_once'];
         }
 
         if ($id instanceof Buyable) {
@@ -122,6 +124,16 @@ class Cart
             $cartItem->setQuantity($name ?: 1);
             $cartItem->associate($id);
         } elseif (is_array($id)) {
+            if (
+                EcommerceHelper::isEnabledProductOptions() &&
+                ($itemProductOptions = Arr::get($id, 'options.options', [])) &&
+                is_array($itemProductOptions)
+            ) {
+                $priceResult = $this->getPriceByOptions($id['price'], $itemProductOptions);
+                $id['price'] = $priceResult['price'];
+                $id['options']['option_price_once'] = $priceResult['option_price_once'];
+            }
+
             $cartItem = CartItem::fromArray($id);
             $cartItem->setQuantity($id['qty']);
         } else {
@@ -129,36 +141,55 @@ class Cart
             $cartItem->setQuantity($qty);
         }
 
-        $cartItem->setTaxRate($options['taxRate'] ?? 0);
+        $taxRate = is_array($id) ? Arr::get($id, 'options.taxRate', 0) : ($options['taxRate'] ?? 0);
+        $cartItem->setTaxRate($taxRate);
 
         return $cartItem;
     }
 
-    public function getPriceByOptions(float|int $price, array $options = []): float|int
+    public function getPriceByOptions(float|int $price, array $options = []): array
     {
         $basePrice = $price;
+        $optionPriceOnce = 0;
+
         foreach (Arr::get($options, 'optionCartValue', []) as $value) {
             if (is_array($value)) {
                 foreach ($value as $valueItem) {
+                    $affectPrice = $valueItem['affect_price'];
+
                     if ($valueItem['affect_type'] == 1) {
-                        $valueItem['affect_price'] = ($basePrice * $valueItem['affect_price']) / 100;
+                        $affectPrice = ($basePrice * $affectPrice) / 100;
                     }
-                    $price += $valueItem['affect_price'];
+
+                    if (! empty($valueItem['price_per_product'])) {
+                        $optionPriceOnce += $affectPrice;
+                    } else {
+                        $price += $affectPrice;
+                    }
                 }
             } else {
                 if (Arr::get($value, 'option_type') == 'field') {
                     continue;
                 }
 
+                $affectPrice = $value['affect_price'];
+
                 if ($value['affect_type'] == 1) {
-                    $value['affect_price'] = ($basePrice * $value['affect_price']) / 100;
+                    $affectPrice = ($basePrice * $affectPrice) / 100;
                 }
 
-                $price += $value['affect_price'];
+                if (! empty($value['price_per_product'])) {
+                    $optionPriceOnce += $affectPrice;
+                } else {
+                    $price += $affectPrice;
+                }
             }
         }
 
-        return $price;
+        return [
+            'price' => $price,
+            'option_price_once' => $optionPriceOnce,
+        ];
     }
 
     protected function getContent(): Collection
@@ -320,17 +351,19 @@ class Cart
                 return 0;
             }
 
+            $optionPriceOnce = $cartItem->options->get('option_price_once', 0);
+
             if (! EcommerceHelper::isTaxEnabled()) {
-                return $total + $cartItem->qty * $cartItem->price;
+                return $total + $cartItem->qty * $cartItem->price + $optionPriceOnce;
             }
 
             $priceIncludesTax = $cartItem->options->get('price_includes_tax', false);
 
             if ($priceIncludesTax) {
-                return $total + $cartItem->qty * $cartItem->price;
+                return $total + $cartItem->qty * $cartItem->price + $optionPriceOnce;
             }
 
-            return $total + ($cartItem->qty * ($cartItem->priceTax == 0 ? $cartItem->price : $cartItem->priceTax));
+            return $total + ($cartItem->qty * ($cartItem->priceTax == 0 ? $cartItem->price : $cartItem->priceTax) + $optionPriceOnce);
         }, 0);
 
         return apply_filters('ecommerce_cart_raw_total', $total, $content);
@@ -343,17 +376,19 @@ class Cart
                 return 0;
             }
 
+            $optionPriceOnce = $cartItem->options->get('option_price_once', 0);
+
             if (! EcommerceHelper::isTaxEnabled()) {
-                return $total + $cartItem->qty * $cartItem->price;
+                return $total + $cartItem->qty * $cartItem->price + $optionPriceOnce;
             }
 
             $priceIncludesTax = $cartItem->options->get('price_includes_tax', false);
 
             if ($priceIncludesTax) {
-                return $total + $cartItem->qty * $cartItem->price;
+                return $total + $cartItem->qty * $cartItem->price + $optionPriceOnce;
             }
 
-            return $total + ($cartItem->qty * ($cartItem->priceTax == 0 ? $cartItem->price : $cartItem->priceTax));
+            return $total + ($cartItem->qty * ($cartItem->priceTax == 0 ? $cartItem->price : $cartItem->priceTax) + $optionPriceOnce);
         }, 0);
 
         return (float) apply_filters('ecommerce_cart_raw_total_by_items', $total, $content);
@@ -373,7 +408,8 @@ class Cart
             $taxRate = $cartItem->taxRate;
             if ($taxRate > 0) {
                 $priceIncludesTax = $cartItem->options->get('price_includes_tax', false);
-                $itemPrice = $cartItem->qty * $cartItem->price;
+                $optionPriceOnce = $cartItem->options->get('option_price_once', 0);
+                $itemPrice = $cartItem->qty * $cartItem->price + $optionPriceOnce;
                 $effectiveItemPrice = $itemPrice * $discountRatio;
 
                 if ($priceIncludesTax) {
@@ -393,14 +429,15 @@ class Cart
 
         $subTotal = $content->reduce(function ($subTotal, CartItem $cartItem) {
             $priceIncludesTax = $cartItem->options->get('price_includes_tax', false);
+            $optionPriceOnce = $cartItem->options->get('option_price_once', 0);
 
             if (EcommerceHelper::isTaxEnabled() && $priceIncludesTax && $cartItem->taxRate > 0) {
                 $basePrice = $cartItem->price / (1 + $cartItem->taxRate / 100);
 
-                return $subTotal + EcommerceHelper::roundPrice($cartItem->qty * $basePrice);
+                return $subTotal + EcommerceHelper::roundPrice($cartItem->qty * $basePrice + $optionPriceOnce);
             }
 
-            return $subTotal + EcommerceHelper::roundPrice($cartItem->qty * $cartItem->price);
+            return $subTotal + EcommerceHelper::roundPrice($cartItem->qty * $cartItem->price + $optionPriceOnce);
         }, 0);
 
         return apply_filters('ecommerce_cart_raw_subtotal', $subTotal, $content);
@@ -410,14 +447,15 @@ class Cart
     {
         $subTotal = $content->reduce(function ($subTotal, CartItem $cartItem) {
             $priceIncludesTax = $cartItem->options->get('price_includes_tax', false);
+            $optionPriceOnce = $cartItem->options->get('option_price_once', 0);
 
             if (EcommerceHelper::isTaxEnabled() && $priceIncludesTax && $cartItem->taxRate > 0) {
                 $basePrice = $cartItem->price / (1 + $cartItem->taxRate / 100);
 
-                return $subTotal + EcommerceHelper::roundPrice($cartItem->qty * $basePrice);
+                return $subTotal + EcommerceHelper::roundPrice($cartItem->qty * $basePrice + $optionPriceOnce);
             }
 
-            return $subTotal + EcommerceHelper::roundPrice($cartItem->qty * $cartItem->price);
+            return $subTotal + EcommerceHelper::roundPrice($cartItem->qty * $cartItem->price + $optionPriceOnce);
         }, 0);
 
         return (float) apply_filters('ecommerce_cart_raw_subtotal_by_items', $subTotal, $content);
@@ -843,7 +881,9 @@ class Cart
                 return 0;
             }
 
-            return $total + ($cartItem->qty * ($cartItem->priceTax == 0 ? $cartItem->price : $cartItem->priceTax));
+            $optionPriceOnce = $cartItem->options->get('option_price_once', 0);
+
+            return $total + ($cartItem->qty * ($cartItem->priceTax == 0 ? $cartItem->price : $cartItem->priceTax) + $optionPriceOnce);
         }, 0);
 
         $total = apply_filters('ecommerce_cart_total', $total, $content);
@@ -875,7 +915,8 @@ class Cart
             $taxRate = $cartItem->taxRate;
             if ($taxRate > 0) {
                 $priceIncludesTax = $cartItem->options->get('price_includes_tax', false);
-                $itemPrice = $cartItem->qty * $cartItem->price;
+                $optionPriceOnce = $cartItem->options->get('option_price_once', 0);
+                $itemPrice = $cartItem->qty * $cartItem->price + $optionPriceOnce;
                 $effectiveItemPrice = $itemPrice * $discountRatio;
 
                 if ($priceIncludesTax) {
@@ -894,7 +935,9 @@ class Cart
         $content = $this->getContent();
 
         $subTotal = $content->reduce(function ($subTotal, CartItem $cartItem) {
-            return $subTotal + ($cartItem->qty * $cartItem->price);
+            $optionPriceOnce = $cartItem->options->get('option_price_once', 0);
+
+            return $subTotal + ($cartItem->qty * $cartItem->price + $optionPriceOnce);
         }, 0);
 
         $subTotal = apply_filters('ecommerce_cart_subtotal', $subTotal, $content);
@@ -972,7 +1015,7 @@ class Cart
             return collect();
         }
 
-        $content = $this->session->get($this->instance);
+        $content = $this->getContent();
 
         return apply_filters('ecommerce_cart_content', $content, $this->instance);
     }

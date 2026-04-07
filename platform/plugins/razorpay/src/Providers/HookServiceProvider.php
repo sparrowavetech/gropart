@@ -115,11 +115,16 @@ class HookServiceProvider extends ServiceProvider
         $data['errorMessage'] = null;
         $data['orderId'] = null;
 
+        $paymentService = new RazorpayPaymentService();
+        $minimumAmount = $paymentService->getMinimumOrderAmount();
+        $data['minimumAmount'] = $minimumAmount;
+        $data['orderAmount'] = $data['amount'] ?? 0;
+
         if (get_payment_setting(
             'payment_type',
             RAZORPAY_PAYMENT_METHOD_NAME,
             'hosted_checkout',
-        ) == 'website_embedded') {
+        ) == 'website_embedded' && (float) ($data['amount'] ?? 0) >= $minimumAmount) {
             try {
                 $api = new Api($apiKey, $apiSecret);
 
@@ -160,6 +165,18 @@ class HookServiceProvider extends ServiceProvider
         }
 
         $paymentData = apply_filters(PAYMENT_FILTER_PAYMENT_DATA, [], $request);
+
+        $paymentService = new RazorpayPaymentService();
+        $minimumAmount = $paymentService->getMinimumOrderAmount();
+
+        if ((float) $paymentData['amount'] < $minimumAmount) {
+            $data['error'] = true;
+            $data['message'] = trans('plugins/razorpay::razorpay.minimum_amount_error', [
+                'amount' => format_price($minimumAmount),
+            ]);
+
+            return $data;
+        }
 
         $data['charge_id'] = $request->input('razorpay_payment_id');
 

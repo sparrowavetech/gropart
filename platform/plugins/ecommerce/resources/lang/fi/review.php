@@ -109,4 +109,23 @@ return [
         'images_mimes' => 'Kuvien on oltava JPG-, JPEG- tai PNG-muodossa.',
         'images_file_max' => 'Mikään kuva ei saa ylittää :max KB.',
     ],
+    'badge_type' => 'Arvostelumerkki',
+    'badge_type_help' => 'Valitse merkki näytettäväksi tässä arvostelussa. "Automaattinen tunnistus" näyttää "Ostettu X sitten" asiakkaille, joilla on tilauksia.',
+    'badge_types' => [
+        'auto' => 'Automaattinen tunnistus',
+        'none' => 'Ei merkkiä',
+        'purchased' => '✅ Ostettu',
+        'community_review' => '💬 Yhteisön arvostelu',
+        'expert_reviewer' => '🏅 Asiantuntija-arvostelija',
+        'top_contributor' => '⭐ Huippuosallistuja',
+        'verified_buyer' => '✅ Vahvistettu ostaja',
+    ],
+    'placeholders' => [
+        'customer_name' => 'e.g: John Doe',
+        'customer_email' => 'e.g: example@domain.com',
+        'comment' => 'Kirjoita arvostelun kommentti tähän...',
+    ],
+    'helpers' => [
+        'star' => 'Arvosana 1:stä (alhaisin) 5:een (korkein).',
+    ],
 ];

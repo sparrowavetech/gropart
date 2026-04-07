@@ -65,4 +65,5 @@ return [
     'please_select_record' => 'Wybierz co najmniej jeden rekord, aby wykonać tę akcję!',
     'checkbox' => 'Pole wyboru',
     'toggle_columns' => 'Przełącz kolumny',
+    'created_by' => 'Utworzone przez',
 ];

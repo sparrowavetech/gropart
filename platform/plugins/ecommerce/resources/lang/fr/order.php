@@ -95,6 +95,8 @@ return [
     'coupon_code' => 'Code coupon : ":code"',
     'shipping_fee' => 'Frais d\'expédition',
     'tax' => 'Taxe',
+    'shipping_tax' => 'Taxe sur la livraison',
+
     'refunded_amount' => 'Montant remboursé',
     'amount_received' => 'Le montant réellement reçu',
     'download_invoice' => 'Télécharger la facture',

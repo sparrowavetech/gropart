@@ -185,8 +185,8 @@ export class Helpers {
         RV_MEDIA_CONFIG.pagination = { paged: 1, posts_per_page: 40, in_process_get_media: false, has_more: true }
     }
 
-    static trans(key) {
-        return _.get(RV_MEDIA_CONFIG.translations, key, key)
+    static trans(key, fallback = null) {
+        return _.get(RV_MEDIA_CONFIG.translations, key, fallback ?? key)
     }
 
     static config(key, defaultValue = null) {

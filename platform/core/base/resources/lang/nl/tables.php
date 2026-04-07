@@ -65,4 +65,5 @@ return [
     'phone' => 'Telefoon',
     'checkbox' => 'Selectievakje',
     'toggle_columns' => 'Kolommen wisselen',
+    'created_by' => 'Aangemaakt door',
 ];

@@ -65,4 +65,5 @@ return [
     'please_select_record' => 'Pasirinkite bent vieną įrašą, kad atliktumėte šį veiksmą!',
     'checkbox' => 'Žymimasis langelis',
     'toggle_columns' => 'Perjungti stulpelius',
+    'created_by' => 'Sukūrė',
 ];

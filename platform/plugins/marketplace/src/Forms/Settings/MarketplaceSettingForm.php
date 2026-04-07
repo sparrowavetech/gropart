@@ -133,6 +133,16 @@ class MarketplaceSettingForm extends SettingForm
                     ->addAttribute('step', 1)
             )
             ->add(
+                'low_stock_threshold',
+                NumberField::class,
+                NumberFieldOption::make()
+                    ->label(trans('plugins/marketplace::marketplace.settings.low_stock_threshold'))
+                    ->helperText(trans('plugins/marketplace::marketplace.settings.low_stock_threshold_helper'))
+                    ->value(MarketplaceHelper::lowStockThreshold())
+                    ->addAttribute('min', 1)
+                    ->addAttribute('step', 1)
+            )
+            ->add(
                 'media_mime_types_allowed[]',
                 MultiCheckListField::class,
                 MultiChecklistFieldOption::make()
@@ -189,6 +199,14 @@ class MarketplaceSettingForm extends SettingForm
             )
             ->addCloseFieldset('vendor_registration_settings')
             ->add(
+                'enable_stores_page',
+                OnOffCheckboxField::class,
+                OnOffFieldOption::make()
+                    ->label(trans('plugins/marketplace::marketplace.settings.enable_stores_page'))
+                    ->helperText(trans('plugins/marketplace::marketplace.settings.enable_stores_page_helper'))
+                    ->value(MarketplaceHelper::isStoresPageEnabled())
+            )
+            ->add(
                 'hide_store_phone_number',
                 OnOffCheckboxField::class,
                 OnOffFieldOption::make()
@@ -219,6 +237,14 @@ class MarketplaceSettingForm extends SettingForm
                     ->label(trans('plugins/marketplace::marketplace.settings.hide_store_social_links'))
                     ->helperText(trans('plugins/marketplace::marketplace.settings.hide_store_social_links_helper'))
                     ->value(MarketplaceHelper::hideStoreSocialLinks())
+            )
+            ->add(
+                'hide_store_info_in_invoice',
+                OnOffCheckboxField::class,
+                OnOffFieldOption::make()
+                    ->label(trans('plugins/marketplace::marketplace.settings.hide_store_info_in_invoice'))
+                    ->helperText(trans('plugins/marketplace::marketplace.settings.hide_store_info_in_invoice_helper'))
+                    ->value(MarketplaceHelper::getSetting('hide_store_info_in_invoice', false))
             )
             ->add(
                 'enable_vendor_categories_filter',

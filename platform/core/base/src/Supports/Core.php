@@ -71,7 +71,7 @@ final class Core
 
     private string $version = '1.0.0';
 
-    private string $minimumPhpVersion = '8.2.0';
+    private string $minimumPhpVersion = '8.3.0';
 
     private string $licenseUrl = 'https://license.botble.com';
 
@@ -379,18 +379,16 @@ final class Core
         $filePath = $this->getUpdatedFilePath($version);
 
         if (! $this->files->exists($filePath) || Carbon::createFromTimestamp(filectime($filePath))->diffInHours() > 1) {
-            $response = $this->createRequest('download_update/main/' . $updateId, $data);
-
-            throw_if($response->unauthorized(), RequiresLicenseActivatedException::class);
-
-            if (! $response->successful()) {
-                throw new Exception('Failed to download update. Server returned status: ' . $response->status());
-            }
-
             try {
-                $this->files->put($filePath, $response->body());
-            } catch (Throwable) {
-                throw UnableToWriteFile::atLocation($filePath);
+                $this->streamDownloadUpdate('download_update/main/' . $updateId, $data, $filePath);
+            } catch (RequiresLicenseActivatedException $e) {
+                $this->files->delete($filePath);
+
+                throw $e;
+            } catch (Throwable $e) {
+                $this->files->delete($filePath);
+
+                throw new Exception('Failed to download update: ' . $e->getMessage());
             }
         }
 
@@ -531,14 +529,46 @@ final class Core
         BaseHelper::logError($exception);
     }
 
-    private function publishPaths(): array
-    {
-        return IlluminateServiceProvider::pathsToPublish(null, 'cms-public');
-    }
-
     public function publishAssets(string $path): void
     {
-        foreach ($this->publishPaths() as $from => $to) {
+        if (! $this->files->isDirectory($path)) {
+            return;
+        }
+
+        $platformPath = base_path('platform');
+
+        if (Str::startsWith($path, $platformPath)) {
+            $this->publishPlatformAssets($path, $platformPath);
+        } else {
+            $this->publishVendorAssets($path);
+        }
+    }
+
+    protected function publishPlatformAssets(string $path, string $platformPath): void
+    {
+        $relativePath = Str::after($path, $platformPath . DIRECTORY_SEPARATOR);
+
+        foreach (BaseHelper::scanFolder($path) as $module) {
+            $publicPath = BaseHelper::joinPaths([$path, $module, 'public']);
+
+            if (! $this->files->isDirectory($publicPath)) {
+                continue;
+            }
+
+            $targetPath = public_path(BaseHelper::joinPaths(['vendor', 'core', $relativePath, $module]));
+
+            try {
+                $this->files->ensureDirectoryExists($targetPath);
+                $this->files->copyDirectory($publicPath, $targetPath);
+            } catch (Throwable $exception) {
+                $this->logError($exception);
+            }
+        }
+    }
+
+    protected function publishVendorAssets(string $path): void
+    {
+        foreach (IlluminateServiceProvider::pathsToPublish(null, 'cms-public') as $from => $to) {
             if (! Str::contains($from, $path)) {
                 continue;
             }
@@ -718,7 +748,7 @@ final class Core
             return self::$coreFileData;
         }
 
-        if ($this->cache->has('core_file_data') && $coreData = $this->cache->get('core_file_data')) {
+        if ($coreData = $this->cache->get('core_file_data')) {
             self::$coreFileData = $coreData;
 
             return $coreData;
@@ -739,6 +769,34 @@ final class Core
             return $data;
         } catch (FileNotFoundException) {
             return [];
+        }
+    }
+
+    private function streamDownloadUpdate(string $path, array $data, string $filePath): void
+    {
+        if (! extension_loaded('curl')) {
+            throw new MissingCURLExtensionException();
+        }
+
+        $response = Http::baseUrl(ltrim($this->licenseUrl, '/') . '/api')
+            ->withHeaders([
+                'LB-API-KEY' => $this->licenseKey,
+                'LB-URL' => rtrim(url(''), '/'),
+                'LB-IP' => $this->getClientIpAddress(),
+                'LB-LANG' => 'english',
+            ])
+            ->asJson()
+            ->acceptJson()
+            ->withoutVerifying()
+            ->connectTimeout(100)
+            ->timeout(900)
+            ->withOptions(['sink' => $filePath])
+            ->post($path, $data);
+
+        throw_if($response->unauthorized(), RequiresLicenseActivatedException::class);
+
+        if (! $response->successful()) {
+            throw new Exception('Server returned status: ' . $response->status());
         }
     }
 

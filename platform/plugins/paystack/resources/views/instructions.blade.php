@@ -19,4 +19,20 @@
             {{ trans('plugins/paystack::paystack.enter_keys') }}
         </p>
     </li>
+    <li>
+        <p>
+            {!! trans('plugins/paystack::paystack.callback_url_instruction') !!}
+        </p>
+        <p>
+            <code>{{ route('paystack.payment.callback') }}</code>
+        </p>
+    </li>
+    <li>
+        <p>
+            {!! trans('plugins/paystack::paystack.webhook_url_instruction') !!}
+        </p>
+        <p>
+            <code>{{ route('paystack.webhook') }}</code>
+        </p>
+    </li>
 </ol>

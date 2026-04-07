@@ -3,6 +3,9 @@
 return [
     'settings' => [],
     'webhook_secret' => 'Bí mật Webhook',
+    'webhook_secret_helper' => 'Tìm thấy trong Stripe Dashboard của bạn tại Developers > Webhooks > Signing secret.',
+    'public_key_helper' => 'Tìm thấy trong Stripe Dashboard của bạn tại Developers > API keys.',
+    'secret_key_helper' => 'Tìm thấy trong Stripe Dashboard của bạn tại Developers > API keys. Giữ bí mật khóa này.',
     'webhook_setup_guide' => [
         'title' => 'Hướng dẫn thiết lập Webhook Stripe',
         'description' => 'Làm theo các bước sau để thiết lập webhook Stripe',

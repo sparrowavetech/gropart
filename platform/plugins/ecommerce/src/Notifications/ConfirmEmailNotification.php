@@ -3,6 +3,7 @@
 namespace Botble\Ecommerce\Notifications;
 
 use Botble\Base\Facades\EmailHandler;
+use Botble\Base\Supports\EmailHandler as EmailHandlerSupport;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -15,6 +16,13 @@ class ConfirmEmailNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
+    protected string $emailLocale;
+
+    public function __construct()
+    {
+        $this->emailLocale = EmailHandlerSupport::getDefaultEmailLocale();
+    }
+
     public function via($notifiable): array
     {
         return ['mail'];
@@ -22,27 +30,34 @@ class ConfirmEmailNotification extends Notification implements ShouldQueue
 
     public function toMail($notifiable): MailMessage
     {
-        $expirationMinutes = (int) get_ecommerce_setting('verification_expire_minutes');
+        $previousLocale = app()->getLocale();
+        app()->setLocale($this->emailLocale);
 
-        if (! $expirationMinutes) {
-            $expirationMinutes = (int) config('plugins.ecommerce.general.verification_expire_minutes', 60);
+        try {
+            $expirationMinutes = (int) get_ecommerce_setting('verification_expire_minutes');
+
+            if (! $expirationMinutes) {
+                $expirationMinutes = (int) config('plugins.ecommerce.general.verification_expire_minutes', 60);
+            }
+
+            $emailHandler = EmailHandler::setModule(ECOMMERCE_MODULE_SCREEN_NAME)
+                ->setType('plugins')
+                ->setTemplate('confirm-email')
+                ->addTemplateSettings(ECOMMERCE_MODULE_SCREEN_NAME, config('plugins.ecommerce.email', []))
+                ->setVariableValues([
+                    'verify_link' => URL::temporarySignedRoute(
+                        'customer.confirm',
+                        Carbon::now()->addMinutes($expirationMinutes),
+                        ['user' => $notifiable->id]
+                    ),
+                    'customer_name' => $notifiable->name,
+                ]);
+
+            return (new MailMessage())
+                ->view(['html' => new HtmlString($emailHandler->getContent())])
+                ->subject($emailHandler->getSubject());
+        } finally {
+            app()->setLocale($previousLocale);
         }
-
-        $emailHandler = EmailHandler::setModule(ECOMMERCE_MODULE_SCREEN_NAME)
-            ->setType('plugins')
-            ->setTemplate('confirm-email')
-            ->addTemplateSettings(ECOMMERCE_MODULE_SCREEN_NAME, config('plugins.ecommerce.email', []))
-            ->setVariableValues([
-                'verify_link' => URL::temporarySignedRoute(
-                    'customer.confirm',
-                    Carbon::now()->addMinutes($expirationMinutes),
-                    ['user' => $notifiable->id]
-                ),
-                'customer_name' => $notifiable->name,
-            ]);
-
-        return (new MailMessage())
-            ->view(['html' => new HtmlString($emailHandler->getContent())])
-            ->subject($emailHandler->getSubject());
     }
 }

@@ -62,6 +62,13 @@
                 </tr>
             @endif
 
+            @if ((float) ($order->shipping_tax_amount ?? 0))
+                <tr>
+                    <td colspan="2" class="bb-text-right">{{ trans('plugins/ecommerce::order.shipping_tax') }}</td>
+                    <td colspan="2" class="bb-text-right">{{ format_price($order->shipping_tax_amount) }}</td>
+                </tr>
+            @endif
+
             @if ((float)$order->discount_amount)
                 <tr>
                     <td colspan="2" class="bb-text-right">{{ trans('plugins/ecommerce::products.form.discount') }}</td>

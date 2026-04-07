@@ -208,6 +208,11 @@ return [
     ],
     'term_and_privacy_policy_url' => 'Şartlar ve Gizlilik Politikası URL\'si',
     'site_title_separator' => 'SEO başlık ayırıcı',
+    'site_title_helper' => 'Marka veya işletme adınız. Tarayıcı sekmesinde ve arama sonuçlarında görünür (örn. "My Company").',
+    'show_site_name_helper' => 'Seçilen ayırıcıyı kullanarak her sayfa başlığına site adını ekler. Örnek: "Page Title - My Company".',
+    'site_title_separator_helper' => 'Sayfa başlığı ile site adı arasında kullanılan karakter. Tire ile örnek: "Page Title - My Company". Dikey çizgi ile örnek: "Page Title | My Company".',
+    'seo_title_helper' => 'Arama motoru sonuçlarında gösterilen ana sayfa başlığı. En iyi görüntüleme için 60 karakterin altında tutun. Site başlığını kullanmak için boş bırakın.',
+    'seo_description_helper' => 'Arama motoru sonuçlarında gösterilen ana sayfa açıklaması. En iyi görüntüleme için 120-160 karakter arasında tutun.',
     'no_meta_keywords' => 'Meta anahtar kelimeler Google tarafından kaldırıldı, web sitenize meta anahtar kelimeler eklemenize gerek yok. Daha fazla bilgi edinin: :link',
     'validation' => [
         'gtm_container_id_format' => 'GTM Container ID must be in format GTM-XXXXXX (e.g., GTM-N7MK3KH2)',
@@ -389,6 +394,9 @@ return [
     ],
 
     'typography_primary' => 'Birincil yazı tipi',
+    'all_languages' => 'Tüm diller',
+    'shared_field_notice' => 'Bu alan tüm dillerde paylaşılmaktadır. Varsayılan dilden yönetin.',
+    'shared_section_notice' => 'Bu bölümdeki tüm seçenekler tüm dillerde paylaşılmaktadır. Değişiklik yapmak için varsayılan dile geçin.',
     'admin_appearance' => [
         'show_admin_bar' => 'Giriş yapmış yöneticiler için yönetici çubuğunu göster, ön sitede bile',
         'show_admin_bar_helper' => 'Yönetici olarak giriş yaptığınızda web sitesinin üst kısmında hızlı erişim yönetici araç çubuğunu göster',

@@ -177,7 +177,7 @@ class ReviewController extends BaseController
                     'ecommerce.includes.review-list',
                     compact('reviews', 'product'),
                     'plugins/ecommerce::themes.includes.review-list'
-                )->getContent()
+                )->getContent() ?: ' '
             )
             ->setMessage($message, false)
             ->toApiResponse();

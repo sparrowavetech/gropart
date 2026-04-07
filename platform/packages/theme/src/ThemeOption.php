@@ -325,6 +325,31 @@ class ThemeOption
         return false;
     }
 
+    public function isFieldShared(string $key): bool
+    {
+        if (! config('packages.theme.general.enable_shared_theme_options', false)) {
+            return (bool) apply_filters('theme_option_field_is_shared', false, $key);
+        }
+
+        $field = $this->getField($key);
+
+        if (! $field) {
+            return (bool) apply_filters('theme_option_field_is_shared', false, $key);
+        }
+
+        $isShared = Arr::get($field, 'shared', false);
+
+        if (! $isShared) {
+            $sectionId = Arr::get($field, 'section_id');
+
+            if ($sectionId && isset($this->sections[$this->optName][$sectionId])) {
+                $isShared = Arr::get($this->sections[$this->optName][$sectionId], 'shared', false);
+            }
+        }
+
+        return (bool) apply_filters('theme_option_field_is_shared', $isShared, $key);
+    }
+
     public function hideField(string $id = '', bool $hide = true): void
     {
         $this->checkOptName();
@@ -419,7 +444,9 @@ class ThemeOption
             $value = json_encode($value);
         }
 
-        Setting::set($this->getOptionKey($key, $this->getCurrentLocaleCode()), $value);
+        $locale = $this->isFieldShared($key) ? null : $this->getCurrentLocaleCode();
+
+        Setting::set($this->getOptionKey($key, $locale), $value);
 
         return $this;
     }
@@ -487,7 +514,9 @@ class ThemeOption
 
     public function hasOption(string $key): bool
     {
-        return setting()->has($this->getOptionKey($key, $this->getCurrentLocaleCode()));
+        $locale = $this->isFieldShared($key) ? null : $this->getCurrentLocaleCode();
+
+        return setting()->has($this->getOptionKey($key, $locale));
     }
 
     public function getOption(string $key = '', bool|string|null|array $default = ''): ?string
@@ -540,7 +569,10 @@ class ThemeOption
 
     public function prepareFromArray(array $options, ?string $locale = null, ?string $defaultLocale = null): array
     {
+        $isNonDefaultLocale = $locale && $locale !== $defaultLocale;
+
         return collect($options)
+            ->reject(fn (mixed $value, string $key) => $isNonDefaultLocale && $this->isFieldShared($key))
             ->mapWithKeys(function (string|array|bool|null $value, string $key) use ($locale, $defaultLocale) {
                 if (is_array($value)) {
                     $value = json_encode($value);

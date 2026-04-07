@@ -11,6 +11,7 @@ use Botble\Ecommerce\Facades\OrderHelper;
 use Botble\Ecommerce\Models\Order as OrderModel;
 use Botble\Ecommerce\Models\ProductCategory;
 use Botble\Media\Facades\RvMedia;
+use Botble\Slug\Facades\SlugHelper;
 use Botble\Theme\Facades\Theme;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
@@ -53,6 +54,11 @@ class MarketplaceHelper
     public function getAssetVersion(): string
     {
         return '2.2.1';
+    }
+
+    public function isStoresPageEnabled(): bool
+    {
+        return (bool) $this->getSetting('enable_stores_page', true);
     }
 
     public function hideStorePhoneNumber(): bool
@@ -242,6 +248,11 @@ class MarketplaceHelper
         ];
     }
 
+    public function lowStockThreshold(): int
+    {
+        return (int) $this->getSetting('low_stock_threshold', 5);
+    }
+
     public function isSingleVendorCheckout(): bool
     {
         return (bool) $this->getSetting('single_vendor_checkout', false);
@@ -321,10 +332,17 @@ class MarketplaceHelper
                 ->orderBy('order')
                 ->get();
 
-            return $categories->map(function ($category) {
-                $category->url = $category->slugable ? route('public.single', $category->slugable->key) : '#';
+            $prefix = SlugHelper::getPrefix(ProductCategory::class);
 
-                return $category;
+            return $categories->map(function ($category) use ($prefix) {
+                $slug = $category->slugable?->key;
+
+                $item = (object) $category->attributesToArray();
+                $item->url = $slug
+                    ? ($prefix ? $prefix . '/' . $slug : $slug)
+                    : '#';
+
+                return $item;
             });
         });
     }

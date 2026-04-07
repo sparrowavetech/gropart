@@ -95,6 +95,8 @@ return [
     'coupon_code' => 'კუპონის კოდი: ":code"',
     'shipping_fee' => 'მიწოდების საფასური',
     'tax' => 'გადასახადი',
+    'shipping_tax' => 'გადაზიდვის გადასახადი',
+
     'refunded_amount' => 'დაბრუნებული თანხა',
     'amount_received' => 'რეალურად მიღებული თანხა',
     'download_invoice' => 'ინვოისის ჩამოტვირთვა',

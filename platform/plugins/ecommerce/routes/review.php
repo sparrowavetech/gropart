@@ -51,6 +51,12 @@ AdminHelper::registerRoutes(function (): void {
                 'permission' => 'reviews.destroy',
             ]);
 
+            Route::put('{review}/badge', [
+                'as' => 'update-badge',
+                'uses' => 'ReviewController@updateBadge',
+                'permission' => 'reviews.index',
+            ]);
+
             Route::post('{review}/publish', [
                 'as' => 'publish',
                 'uses' => 'PublishedReviewController@store',

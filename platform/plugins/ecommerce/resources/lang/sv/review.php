@@ -109,4 +109,23 @@ return [
         'images_mimes' => 'Bilder måste vara i JPG, JPEG eller PNG-format.',
         'images_file_max' => 'Varje bild får inte överstiga :max KB.',
     ],
+    'badge_type' => 'Recensionsmärke',
+    'badge_type_help' => 'Välj ett märke att visa på den här recensionen. "Automatisk igenkänning" visar "Köpt för X sedan" för kunder med beställningar.',
+    'badge_types' => [
+        'auto' => 'Automatisk igenkänning',
+        'none' => 'Inget märke',
+        'purchased' => '✅ Köpt',
+        'community_review' => '💬 Gemenskapsrecension',
+        'expert_reviewer' => '🏅 Expertrecensent',
+        'top_contributor' => '⭐ Toppbidragsgivare',
+        'verified_buyer' => '✅ Verifierad köpare',
+    ],
+    'placeholders' => [
+        'customer_name' => 'e.g: John Doe',
+        'customer_email' => 'e.g: example@domain.com',
+        'comment' => 'Skriv recensionskommentaren här...',
+    ],
+    'helpers' => [
+        'star' => 'Betyg från 1 (lägsta) till 5 (högsta).',
+    ],
 ];

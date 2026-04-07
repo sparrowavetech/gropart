@@ -109,4 +109,23 @@ return [
         'images_mimes' => 'छवियां JPG, JPEG या PNG प्रारूप में होनी चाहिए।',
         'images_file_max' => 'प्रत्येक छवि :max KB से अधिक नहीं हो सकती।',
     ],
+    'badge_type' => 'समीक्षा बैज',
+    'badge_type_help' => 'इस समीक्षा पर प्रदर्शित करने के लिए एक बैज चुनें। "ऑटो डिटेक्ट" ऑर्डर वाले ग्राहकों के लिए "X पहले खरीदा" दिखाता है।',
+    'badge_types' => [
+        'auto' => 'ऑटो डिटेक्ट',
+        'none' => 'कोई बैज नहीं',
+        'purchased' => '✅ खरीदा गया',
+        'community_review' => '💬 समुदाय समीक्षा',
+        'expert_reviewer' => '🏅 विशेषज्ञ समीक्षक',
+        'top_contributor' => '⭐ शीर्ष योगदानकर्ता',
+        'verified_buyer' => '✅ सत्यापित खरीदार',
+    ],
+    'placeholders' => [
+        'customer_name' => 'e.g: John Doe',
+        'customer_email' => 'e.g: example@domain.com',
+        'comment' => 'यहाँ समीक्षा टिप्पणी लिखें...',
+    ],
+    'helpers' => [
+        'star' => '1 (सबसे कम) से 5 (सबसे अधिक) तक रेटिंग।',
+    ],
 ];

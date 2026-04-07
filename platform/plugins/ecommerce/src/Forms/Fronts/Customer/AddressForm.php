@@ -33,7 +33,7 @@ class AddressForm extends FormFront
             ->model(Address::class)
             ->setValidatorClass(AddressRequest::class)
             ->contentOnly()
-            ->columns(3)
+            ->columns(2)
             ->add(
                 'name',
                 TextField::class,
@@ -69,16 +69,24 @@ class AddressForm extends FormFront
                     ->label(__('Use this address as default.'))
                     ->checked($model && $model->is_default)
                     ->value(1)
-                    ->colspan(3)
+                    ->colspan(2)
             )
             ->add(
                 'submit',
                 'submit',
                 ButtonFieldOption::make()
-                    ->colspan(3)
+                    ->colspan(2)
                     ->label(($model && $model->getKey()) ? __('Update') : __('Create'))
                     ->cssClass('btn btn-primary mt-4')
             );
+
+        $locationFields = ['country', 'state', 'city', 'address', 'zip_code'];
+
+        foreach ($this->getFields() as &$field) {
+            if (in_array($field->getName(), $locationFields)) {
+                $field->setOption('colspan', 1);
+            }
+        }
     }
 
     public function setFormSelectInputClass(string $cssClass): static

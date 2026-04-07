@@ -2,6 +2,9 @@
 
 return [
     'webhook_secret' => 'Webhook 密钥',
+    'webhook_secret_helper' => '在 Stripe Dashboard 的 Developers > Webhooks > Signing secret 中找到此项。',
+    'public_key_helper' => '在 Stripe Dashboard 的 Developers > API keys 中找到此项。',
+    'secret_key_helper' => '在 Stripe Dashboard 的 Developers > API keys 中找到此项。请妥善保管此密钥。',
     'webhook_setup_guide' => [
         'step_1_description' => '访问 :link 并在 "开发者" 标签的 "Webhooks" 部分点击 "添加端点" 按钮。',
         'step_2_description' => '选择“payment_intent.succeeded”事件，并在“端点 URL”字段中输入以下 URL：:url',

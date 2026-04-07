@@ -27,4 +27,6 @@ return [
     'option_value_name_attribute' => 'Mga value ng opsyon :key',
     'please_choose_option_type' => 'Mangyaring pumili ng uri ng opsyon!',
     'no_global_options' => 'Wala pang available na mga global na opsyon. Mangyaring magdagdag ng mga opsyon ng produkto sa default na wika muna.',
+    'price_per_product' => 'Presyo bawat produkto',
+    'price_per_product_helper' => 'Kapag naka-enable, ang presyo ng opsyon ay inilalapat nang isang beses bawat produkto, hindi ini-multiply sa dami.',
 ];

@@ -10,6 +10,9 @@ class MediaListRequest extends Request
     {
         return [
             'folder_id' => ['nullable', 'string'],
+            'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
+            'page' => ['nullable', 'integer', 'min:1'],
+            'include_files' => ['nullable', 'string'],
         ];
     }
 }

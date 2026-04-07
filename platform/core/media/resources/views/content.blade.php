@@ -1021,6 +1021,48 @@
     >
 </x-core::custom-template>
 
+<x-core::modal
+    id="modal_folder_permissions"
+    :title="trans('core/media::media.manage_access')"
+    size="md"
+>
+    <div class="folder-permissions-container">
+        <div class="mb-3">
+            <label class="form-label">{{ trans('core/media::media.add_user_access') }}</label>
+            <div class="row g-2">
+                <div class="col-6">
+                    <select class="form-select" id="folder-permission-user-select">
+                        <option value="">{{ trans('core/media::media.select_user') }}</option>
+                    </select>
+                </div>
+                <div class="col-4">
+                    <select class="form-select" id="folder-permission-level-select">
+                        <option value="view">{{ trans('core/media::media.permission_view') }}</option>
+                        <option value="upload">{{ trans('core/media::media.permission_upload') }}</option>
+                        <option value="manage">{{ trans('core/media::media.permission_manage') }}</option>
+                    </select>
+                </div>
+                <div class="col-2">
+                    <x-core::button
+                        type="button"
+                        color="primary"
+                        id="btn-grant-folder-permission"
+                    >
+                        {{ trans('core/media::media.grant') }}
+                    </x-core::button>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-0">
+            <label class="form-label">{{ trans('core/media::media.current_permissions') }}</label>
+            <div id="folder-permissions-list" class="list-group list-group-flush">
+                <div class="text-muted text-center py-3">{{ trans('core/media::media.loading') }}...</div>
+            </div>
+        </div>
+    </div>
+</x-core::modal>
+
 <div
     class="media-download-popup"
     style="display: none"

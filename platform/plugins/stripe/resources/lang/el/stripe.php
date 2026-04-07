@@ -2,6 +2,9 @@
 
 return [
     'webhook_secret' => 'Μυστικό Webhook',
+    'webhook_secret_helper' => 'Βρείτε το στο Stripe Dashboard σας στην ενότητα Developers > Webhooks > Signing secret.',
+    'public_key_helper' => 'Βρείτε το στο Stripe Dashboard σας στην ενότητα Developers > API keys.',
+    'secret_key_helper' => 'Βρείτε το στο Stripe Dashboard σας στην ενότητα Developers > API keys. Κρατήστε αυτό το κλειδί εμπιστευτικό.',
     'webhook_setup_guide' => [
         'title' => 'Οδηγός ρύθμισης Stripe Webhook',
         'description' => 'Ακολουθήστε αυτά τα βήματα για να ρυθμίσετε ένα Stripe webhook',

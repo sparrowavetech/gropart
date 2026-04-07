@@ -8,21 +8,10 @@ return new class () extends Migration {
     public function up(): void
     {
         Schema::table('mp_stores', function (Blueprint $table): void {
-            if (! Schema::hasColumn('mp_stores', 'is_verified')) {
-                $table->boolean('is_verified')->default(false)->after('status');
-            }
-
-            if (! Schema::hasColumn('mp_stores', 'verified_at')) {
-                $table->timestamp('verified_at')->nullable()->after('is_verified');
-            }
-
-            if (! Schema::hasColumn('mp_stores', 'verified_by')) {
-                $table->foreignId('verified_by')->nullable()->after('verified_at');
-            }
-
-            if (! Schema::hasColumn('mp_stores', 'verification_note')) {
-                $table->text('verification_note')->nullable()->after('verified_by');
-            }
+            $table->boolean('is_verified')->default(false)->after('status');
+            $table->timestamp('verified_at')->nullable()->after('is_verified');
+            $table->foreignId('verified_by')->nullable()->after('verified_at');
+            $table->text('verification_note')->nullable()->after('verified_by');
         });
     }
 

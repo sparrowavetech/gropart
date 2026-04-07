@@ -12,7 +12,7 @@ class ReviewRequest extends Request
         $rules = [
             'product_id' => ['required', 'exists:ec_products,id'],
             'star' => ['required', 'numeric', 'min:1', 'max:5'],
-            'comment' => ['required', 'string', 'max:5000'],
+            'comment' => [EcommerceHelper::isReviewCommentRequired() ? 'required' : 'nullable', 'string', 'max:5000'],
         ];
 
         if (EcommerceHelper::isCustomerReviewImageUploadEnabled()) {

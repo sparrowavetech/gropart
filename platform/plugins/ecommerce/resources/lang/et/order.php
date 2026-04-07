@@ -95,6 +95,8 @@ return [
     'coupon_code' => 'Kupongikood: ":code"',
     'shipping_fee' => 'Transpordikulu',
     'tax' => 'Maks',
+    'shipping_tax' => 'Maks saatmisele',
+
     'refunded_amount' => 'Tagastatud summa',
     'amount_received' => 'Tegelikult saadud summa',
     'download_invoice' => 'Laadi arve alla',

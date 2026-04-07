@@ -27,4 +27,6 @@ return [
     'option_value_name_attribute' => ':key seçeneğinin değerleri',
     'please_choose_option_type' => 'Lütfen seçenek türünü seçin!',
     'no_global_options' => 'Henüz global seçenek mevcut değil. Lütfen önce varsayılan dilde ürün seçenekleri ekleyin.',
+    'price_per_product' => 'Ürün başına fiyat',
+    'price_per_product_helper' => 'Etkinleştirildiğinde, seçenek fiyatı ürün başına bir kez uygulanır, miktarla çarpılmaz.',
 ];

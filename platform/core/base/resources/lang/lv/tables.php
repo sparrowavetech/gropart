@@ -65,4 +65,5 @@ return [
     'please_select_record' => 'Lūdzu, izvēlieties vismaz vienu ierakstu, lai veiktu šo darbību!',
     'checkbox' => 'Izvēles rūtiņa',
     'toggle_columns' => 'Pārslēgt kolonnas',
+    'created_by' => 'Izveidoja',
 ];

@@ -109,4 +109,23 @@ return [
         'images_mimes' => 'Afbeeldingen moeten in JPG, JPEG of PNG formaat zijn.',
         'images_file_max' => 'Elke afbeelding mag niet groter zijn dan :max KB.',
     ],
+    'badge_type' => 'Beoordeling badge',
+    'badge_type_help' => 'Kies een badge om op deze beoordeling weer te geven. "Automatisch detecteren" toont "X geleden gekocht" voor klanten met bestellingen.',
+    'badge_types' => [
+        'auto' => 'Automatisch detecteren',
+        'none' => 'Geen badge',
+        'purchased' => '✅ Gekocht',
+        'community_review' => '💬 Gemeenschapsbeoordeling',
+        'expert_reviewer' => '🏅 Expert beoordelaar',
+        'top_contributor' => '⭐ Beste bijdrager',
+        'verified_buyer' => '✅ Geverifieerde koper',
+    ],
+    'placeholders' => [
+        'customer_name' => 'e.g: John Doe',
+        'customer_email' => 'e.g: example@domain.com',
+        'comment' => 'Schrijf de beoordelingsopmerking hier...',
+    ],
+    'helpers' => [
+        'star' => 'Beoordeling van 1 (laagste) tot 5 (hoogste).',
+    ],
 ];

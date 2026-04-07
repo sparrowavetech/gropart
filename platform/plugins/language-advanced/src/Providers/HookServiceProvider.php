@@ -9,6 +9,7 @@ use Botble\Base\Supports\ServiceProvider;
 use Botble\Language\Facades\Language;
 use Botble\Language\Models\Language as LanguageModel;
 use Botble\LanguageAdvanced\Supports\LanguageAdvancedManager;
+use Botble\Page\Models\Page;
 use Botble\Table\CollectionDataTable;
 use Botble\Table\EloquentDataTable;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
@@ -26,6 +27,17 @@ class HookServiceProvider extends ServiceProvider
     public function boot(): void
     {
         LanguageAdvancedManager::registerImportersAndExporters();
+
+        if (LanguageAdvancedManager::isSupported(Page::class)) {
+            LanguageAdvancedManager::registerTranslationImportExport(
+                Page::class,
+                fn () => trans('plugins/language-advanced::language-advanced.page_translations'),
+                [
+                    'import' => 'page-translations.import',
+                    'export' => 'page-translations.export',
+                ]
+            );
+        }
 
         $this->setLocaleFromRefLang();
 
@@ -50,6 +62,7 @@ class HookServiceProvider extends ServiceProvider
 
         add_filter('stored_meta_box_key', [$this, 'storeMetaBoxKey'], 1134, 2);
         add_filter('slug_helper_get_slug_query', [$this, 'getSlugQuery'], 1134, 2);
+        add_filter('language_switcher_get_url', [$this, 'translateSlugSwitcherUrl'], 1134, 4);
         add_filter(['model_after_execute_get', 'model_after_execute_paginate'], function ($data, BaseModel $model) {
             if ($model instanceof LanguageModel) {
                 return $data;
@@ -393,6 +406,107 @@ class HookServiceProvider extends ServiceProvider
                 });
         } catch (Throwable) {
             return $query;
+        }
+    }
+
+    protected ?object $cachedSlugRecord = null;
+
+    protected ?Collection $cachedSlugTranslations = null;
+
+    protected bool $slugLookupDone = false;
+
+    public function translateSlugSwitcherUrl(string $url, string $localeCode, string $languageCode, $languageManager): string
+    {
+        try {
+            if (! $this->slugLookupDone) {
+                $this->resolveCurrentSlug();
+            }
+
+            if (! $this->cachedSlugRecord) {
+                return $url;
+            }
+
+            $defaultLocale = Language::getDefaultLocale();
+
+            if ($localeCode === $defaultLocale) {
+                $targetPrefix = $this->cachedSlugRecord->prefix;
+                $targetKey = $this->cachedSlugRecord->key;
+            } else {
+                $targetTranslation = $this->cachedSlugTranslations?->firstWhere('lang_code', $localeCode);
+
+                if ($targetTranslation) {
+                    $targetPrefix = $targetTranslation->prefix;
+                    $targetKey = $targetTranslation->key;
+                } else {
+                    $targetPrefix = $this->cachedSlugRecord->prefix;
+                    $targetKey = $this->cachedSlugRecord->key;
+                }
+            }
+
+            $path = $targetPrefix ? $targetPrefix . '/' . $targetKey : $targetKey;
+
+            $queryString = request()->getQueryString();
+
+            $translatedUrl = $languageManager->getLocalizedURL($localeCode, '/' . $path, [], false);
+
+            if ($queryString) {
+                $translatedUrl .= '?' . $queryString;
+            }
+
+            return $translatedUrl;
+        } catch (Throwable) {
+            return $url;
+        }
+    }
+
+    protected function resolveCurrentSlug(): void
+    {
+        $this->slugLookupDone = true;
+
+        $route = Route::current();
+
+        if (! $route) {
+            return;
+        }
+
+        $currentSlug = $route->parameter('slug');
+
+        if (! $currentSlug) {
+            return;
+        }
+
+        $currentPrefix = $route->parameter('prefix');
+        $defaultLocale = Language::getDefaultLocale();
+        $currentLocale = Language::getCurrentLocale();
+
+        if ($currentLocale === $defaultLocale) {
+            $query = DB::table('slugs')->where('key', $currentSlug);
+
+            if ($currentPrefix) {
+                $query->where('prefix', $currentPrefix);
+            }
+
+            $this->cachedSlugRecord = $query->first();
+        } else {
+            $query = DB::table('slugs_translations')
+                ->where('key', $currentSlug)
+                ->where('lang_code', $currentLocale);
+
+            if ($currentPrefix) {
+                $query->where('prefix', $currentPrefix);
+            }
+
+            $translation = $query->first();
+
+            if ($translation) {
+                $this->cachedSlugRecord = DB::table('slugs')->where('id', $translation->slugs_id)->first();
+            }
+        }
+
+        if ($this->cachedSlugRecord) {
+            $this->cachedSlugTranslations = DB::table('slugs_translations')
+                ->where('slugs_id', $this->cachedSlugRecord->id)
+                ->get();
         }
     }
 

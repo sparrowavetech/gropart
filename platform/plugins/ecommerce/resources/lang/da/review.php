@@ -109,4 +109,23 @@ return [
         'images_mimes' => 'Billeder skal være i JPG, JPEG eller PNG format.',
         'images_file_max' => 'Hvert billede må ikke overstige :max KB.',
     ],
+    'badge_type' => 'Anmeldelsesmærke',
+    'badge_type_help' => 'Vælg et mærke til visning på denne anmeldelse. "Automatisk registrering" viser "Købt for X siden" for kunder med ordrer.',
+    'badge_types' => [
+        'auto' => 'Automatisk registrering',
+        'none' => 'Intet mærke',
+        'purchased' => '✅ Købt',
+        'community_review' => '💬 Fællesskabsanmeldelse',
+        'expert_reviewer' => '🏅 Ekspertanmelder',
+        'top_contributor' => '⭐ Topbidragyder',
+        'verified_buyer' => '✅ Verificeret køber',
+    ],
+    'placeholders' => [
+        'customer_name' => 'e.g: John Doe',
+        'customer_email' => 'e.g: example@domain.com',
+        'comment' => 'Skriv anmeldelseskommentaren her...',
+    ],
+    'helpers' => [
+        'star' => 'Bedømmelse fra 1 (lavest) til 5 (højest).',
+    ],
 ];

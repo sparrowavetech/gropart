@@ -184,4 +184,6 @@ return [
     'subject_placeholder' => 'נוֹשֵׂא',
     'your_message' => 'ההודעה שלך',
     'agree_terms_privacy' => 'אני מסכים לתנאים ולמדיניות הפרטיות',
+    'agree_terms_privacy_link' => 'אני מסכים ל:link',
+    'terms_and_privacy_policy' => 'תנאים ומדיניות הפרטיות',
 ];

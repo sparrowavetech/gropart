@@ -65,4 +65,5 @@ return [
     'please_select_record' => 'Vennligst velg minst én post for å utføre denne handlingen!',
     'checkbox' => 'Avkrysningsboks',
     'toggle_columns' => 'Bytt kolonner',
+    'created_by' => 'Opprettet av',
 ];

@@ -5,6 +5,7 @@ namespace Illuminate\Support;
 use Closure;
 use Illuminate\Contracts\Container\Container;
 use InvalidArgumentException;
+use Throwable;
 
 abstract class Manager
 {
@@ -25,14 +26,14 @@ abstract class Manager
     /**
      * The registered custom driver creators.
      *
-     * @var array
+     * @var array<string, \Closure>
      */
     protected $customCreators = [];
 
     /**
      * The array of created "drivers".
      *
-     * @var array
+     * @var array<string, mixed>
      */
     protected $drivers = [];
 
@@ -120,10 +121,19 @@ abstract class Manager
      *
      * @param  string  $driver
      * @param  \Closure  $callback
+     *
+     * @param-closure-this  $this  $callback
+     *
      * @return $this
      */
     public function extend($driver, Closure $callback)
     {
+        try {
+            $callback = $callback->bindTo($this, static::class) ?? throw new RuntimeException;
+        } catch (Throwable) {
+            $callback = $callback->bindTo(null, static::class);
+        }
+
         $this->customCreators[$driver] = $callback;
 
         return $this;
@@ -132,7 +142,7 @@ abstract class Manager
     /**
      * Get all of the created "drivers".
      *
-     * @return array
+     * @return array<string, mixed>
      */
     public function getDrivers()
     {
@@ -178,7 +188,7 @@ abstract class Manager
      * Dynamically call the default driver instance.
      *
      * @param  string  $method
-     * @param  array  $parameters
+     * @param  array<string, mixed>  $parameters
      * @return mixed
      */
     public function __call($method, $parameters)

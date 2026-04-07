@@ -27,4 +27,6 @@ return [
     'option_value_name_attribute' => 'Waarden van optie :key',
     'please_choose_option_type' => 'Kies alstublieft optie type!',
     'no_global_options' => 'Nog geen globale opties beschikbaar. Voeg alstublieft eerst product opties toe in de standaardtaal.',
+    'price_per_product' => 'Prijs per product',
+    'price_per_product_helper' => 'Indien ingeschakeld, wordt de optieprijs eenmaal per product toegepast en niet vermenigvuldigd met het aantal.',
 ];

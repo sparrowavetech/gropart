@@ -2,26 +2,9 @@
     <x-core::table>
         <x-core::table.header>
             <x-core::table.header.cell>
-                #
-            </x-core::table.header.cell>
-            <x-core::table.header.cell>
                 {{ trans('plugins/ecommerce::addresses.address') }}
             </x-core::table.header.cell>
-            @if (EcommerceHelper::isZipCodeEnabled())
-                <x-core::table.header.cell>
-                    {{ trans('plugins/ecommerce::addresses.zip') }}
-                </x-core::table.header.cell>
-            @endif
-            <x-core::table.header.cell>
-                {{ trans('plugins/ecommerce::addresses.country') }}
-            </x-core::table.header.cell>
-            <x-core::table.header.cell>
-                {{ trans('plugins/ecommerce::addresses.state') }}
-            </x-core::table.header.cell>
-            <x-core::table.header.cell>
-                {{ trans('plugins/ecommerce::addresses.city') }}
-            </x-core::table.header.cell>
-            <x-core::table.header.cell>
+            <x-core::table.header.cell class="text-end">
                 {{ trans('plugins/ecommerce::addresses.action') }}
             </x-core::table.header.cell>
         </x-core::table.header>
@@ -29,27 +12,21 @@
         <x-core::table.body>
         @forelse ($addresses as $address)
             <x-core::table.body.row>
-                <x-core::table.body.cell>
-                    {{ $loop->iteration }}
-                </x-core::table.body.cell>
                 <x-core::table.body.cell class="text-start">
-                    {{ $address->address }}
+                    <div>
+                        <strong>{{ $address->name }}</strong>
+                        @if ($address->is_default)
+                            <span class="badge bg-blue-lt ms-1">{{ trans('plugins/ecommerce::customer.default') }}</span>
+                        @endif
+                    </div>
+                    <div class="text-muted mt-1">{{ $address->full_address }}</div>
+                    @if ($address->phone)
+                        <div class="text-muted mt-1">
+                            <x-core::icon name="ti ti-phone" /> {{ $address->phone }}
+                        </div>
+                    @endif
                 </x-core::table.body.cell>
-                @if (EcommerceHelper::isZipCodeEnabled())
-                    <x-core::table.body.cell>
-                        {{ $address->zip_code }}
-                    </x-core::table.body.cell>
-                @endif
-                <x-core::table.body.cell>
-                    {{ $address->country_name }}
-                </x-core::table.body.cell>
-                <x-core::table.body.cell>
-                    {{ $address->state_name }}
-                </x-core::table.body.cell>
-                <x-core::table.body.cell>
-                    {{ $address->city_name }}
-                </x-core::table.body.cell>
-                <x-core::table.body.cell class="text-center">
+                <x-core::table.body.cell class="text-end">
                     <x-core::button
                         :title="trans('core/base::forms.edit')"
                         :data-section="route('customers.addresses.edit', $address->id)"
@@ -73,7 +50,7 @@
             </x-core::table.body.row>
         @empty
             <x-core::table.body.row class="text-center text-muted">
-                <x-core::table.body.cell colspan="7">
+                <x-core::table.body.cell colspan="2">
                     {{ trans('plugins/ecommerce::addresses.no_data') }}
                 </x-core::table.body.cell>
             </x-core::table.body.row>

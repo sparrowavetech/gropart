@@ -184,4 +184,6 @@ return [
     'subject_placeholder' => 'Subiect',
     'your_message' => 'Mesajul dvs',
     'agree_terms_privacy' => 'Sunt de acord cu Termenii și Politica de confidențialitate',
+    'agree_terms_privacy_link' => 'Sunt de acord cu :link',
+    'terms_and_privacy_policy' => 'Termenii și Politica de confidențialitate',
 ];

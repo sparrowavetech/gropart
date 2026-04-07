@@ -95,6 +95,8 @@ return [
     'coupon_code' => '优惠券代码：":code"',
     'shipping_fee' => '运费',
     'tax' => '税费',
+    'shipping_tax' => '运费税',
+
     'refunded_amount' => '已退款金额',
     'amount_received' => '实际收到金额',
     'download_invoice' => '下载发票',

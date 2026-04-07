@@ -116,6 +116,8 @@ class Cache implements CacheInterface
 
     public function forget(string $key): bool
     {
+        $key = $this->generateCacheKey($key);
+
         return $this->cache->forget($key);
     }
 

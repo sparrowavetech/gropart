@@ -38,7 +38,7 @@ use Illuminate\Auth\Events\Login;
 use Illuminate\Config\Repository;
 use Illuminate\Database\Events\MigrationsStarted;
 use Illuminate\Database\Events\QueryExecuted;
-use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Routing\Router;
@@ -196,7 +196,7 @@ class EventServiceProvider extends ServiceProvider
             || $config->get('core.base.general.disable_verify_csrf_token', false)
             || ($this->app->environment('production') && AdminHelper::isInAdmin())
         ) {
-            $this->app->instance(ValidateCsrfToken::class, new BaseMiddleware());
+            $this->app->instance(PreventRequestForgery::class, new BaseMiddleware());
         }
     }
 }

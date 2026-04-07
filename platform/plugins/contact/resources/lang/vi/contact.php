@@ -177,4 +177,6 @@ return [
     'subject_placeholder' => 'Chủ thể',
     'your_message' => 'Tin nhắn của bạn',
     'agree_terms_privacy' => 'Tôi đồng ý với Điều khoản và Chính sách quyền riêng tư',
+    'agree_terms_privacy_link' => 'Tôi đồng ý với :link',
+    'terms_and_privacy_policy' => 'Điều khoản và Chính sách quyền riêng tư',
 ];

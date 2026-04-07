@@ -16,6 +16,7 @@ class TaxSettingRequest extends Request
             'display_checkout_tax_information' => $onOffRule,
             'display_item_tax_at_checkout' => $onOffRule,
             'display_tax_description' => $onOffRule,
+            'tax_on_shipping_fee' => $onOffRule,
         ];
     }
 }

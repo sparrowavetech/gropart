@@ -56,7 +56,14 @@ class CheckoutForm extends FormFront
                     $isMobile = apply_filters('ecommerce_checkout_is_mobile', $isMobile);
 
                     $cartItemHtml = HtmlFieldOption::make()->content(view('plugins/ecommerce::orders.partials.amount', $model));
-                    $discountFormHtml = HtmlFieldOption::make()->content(view(EcommerceHelper::viewPath('discounts.partials.form'), ['discounts' => $model['discounts'], 'isMobile' => $isMobile]));
+
+                    $discountFormContent = view(EcommerceHelper::viewPath('discounts.partials.form'), ['discounts' => $model['discounts'], 'isMobile' => $isMobile])->render();
+                    $discountFormContent = apply_filters('ecommerce_checkout_discount_form_html', $discountFormContent, [
+                        'discounts' => $model['discounts'],
+                        'isMobile' => $isMobile,
+                        'model' => $model,
+                    ]);
+                    $discountFormHtml = HtmlFieldOption::make()->content($discountFormContent);
 
                     $form
                         ->when(! $isMobile, function (CheckoutForm $form) use ($model, $discountFormHtml, $cartItemHtml): void {

@@ -177,4 +177,6 @@ return [
     'subject_placeholder' => '主題',
     'your_message' => 'あなたのメッセージ',
     'agree_terms_privacy' => '利用規約とプライバシーポリシーに同意します',
+    'agree_terms_privacy_link' => ':link に同意します',
+    'terms_and_privacy_policy' => '利用規約とプライバシーポリシー',
 ];

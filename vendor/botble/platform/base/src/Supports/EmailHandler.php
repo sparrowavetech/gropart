@@ -575,6 +575,17 @@ class EmailHandler
         }
     }
 
+    public static function getDefaultEmailLocale(): string
+    {
+        $locale = setting('email_default_locale');
+
+        if ($locale) {
+            return $locale;
+        }
+
+        return apply_filters('cms_default_email_locale', config('app.locale', 'en'));
+    }
+
     protected function sanitizeUtf8(string $content): string
     {
         if (json_encode($content) === false) {

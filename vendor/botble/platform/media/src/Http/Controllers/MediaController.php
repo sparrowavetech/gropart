@@ -756,6 +756,19 @@ class MediaController extends BaseController
                     $id = $item['id'];
 
                     if (! $item['is_folder']) {
+                        $newName = $item['name'];
+                        $extension = File::extension($newName);
+
+                        if ($extension && RvMedia::isExecutableFileExtension($extension)) {
+                            $response = RvMedia::responseError(
+                                trans('core/media::media.rename_error_dangerous_extension', [
+                                    'extension' => $extension,
+                                ])
+                            );
+
+                            break 2;
+                        }
+
                         /**
                          * @var MediaFile $file
                          */
@@ -892,14 +905,15 @@ class MediaController extends BaseController
 
         if (Storage::exists($oldPath)) {
             Storage::move($oldPath, $newPath);
-            $file->url = str_replace(
-                RvMedia::getRealPath(File::dirname($file->url)),
-                RvMedia::getRealPath($this->folderRepository->getFullPath($newFolderId)),
-                $file->url
-            );
-            $file->folder_id = $newFolderId;
-            $file->save();
         }
+
+        $file->url = str_replace(
+            RvMedia::getRealPath(File::dirname($file->url)),
+            $newFolderPath,
+            $file->url
+        );
+        $file->folder_id = $newFolderId;
+        $file->save();
 
         return $file;
     }

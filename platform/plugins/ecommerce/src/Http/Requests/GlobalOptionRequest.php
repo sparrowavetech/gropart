@@ -20,6 +20,7 @@ class GlobalOptionRequest extends Request
                 Rule::requiredIf(fn () => $this->input('option_type') == GlobalOptionEnum::NA),
             ],
             'required' => ['boolean'],
+            'price_per_product' => ['boolean'],
         ];
     }
 }

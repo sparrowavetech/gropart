@@ -102,6 +102,7 @@ return [
     'coupon_code' => 'Coupon code: ":code"',
     'shipping_fee' => 'Shipping fee',
     'tax' => 'Tax',
+    'shipping_tax' => 'Tax on shipping',
     'refunded_amount' => 'Refunded amount',
     'amount_received' => 'The amount actually received',
     'download_invoice' => 'Download invoice',

@@ -1,5 +1,5 @@
 @if ($displayBasePrice && $basePrice != null)
-    <div class="small d-flex justify-content-between">
+    <div class="small d-flex gap-2">
         <span>{{ trans('plugins/ecommerce::product-option.price') }}:</span>
         <strong>{{ format_price($basePrice) }}</strong>
     </div>
@@ -11,7 +11,7 @@
         $totalOptionValue = count($optionValue);
     @endphp
     @continue(!$totalOptionValue)
-    <div class="small d-flex justify-content-between">
+    <div class="small d-flex gap-2">
         <span>
             {{ $productOptions['optionInfo'][$key] }}:
             @foreach ($optionValue as $value)

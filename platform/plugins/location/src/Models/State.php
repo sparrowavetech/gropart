@@ -38,7 +38,7 @@ class State extends BaseModel
     protected static function booted(): void
     {
         static::deleted(function (State $state): void {
-            $state->cities()->delete();
+            $state->cities->each->delete();
         });
 
         static::saving(function (self $model): void {

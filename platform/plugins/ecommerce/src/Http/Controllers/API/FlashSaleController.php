@@ -41,10 +41,16 @@ class FlashSaleController extends BaseApiController
             }
         }
 
+        $perPage = min((int) $request->input('per_page', 20), 50);
+
         // Build the base query
         $query = FlashSale::query()
             ->wherePublished()
             ->notExpired()
+            ->withCount(['products' => function ($query): void {
+                $query->wherePublished()
+                    ->whereColumn('ec_flash_sale_products.quantity', '>', 'ec_flash_sale_products.sold');
+            }])
             ->with([
                 'products' => function ($query): void {
                     $query
@@ -60,9 +66,9 @@ class FlashSaleController extends BaseApiController
             $query->whereIn('id', $keys);
         }
 
-        // Get the flash sales and format them
-        $flashSales = $query->get()->map(function ($flashSale) {
-            return $this->formatFlashSale($flashSale);
+        // Get the flash sales and format them, applying per-sale product limit
+        $flashSales = $query->get()->map(function ($flashSale) use ($perPage) {
+            return $this->formatFlashSale($flashSale, $perPage);
         });
 
         return $response
@@ -73,14 +79,15 @@ class FlashSaleController extends BaseApiController
     /**
      * Format flash sale data for API response
      */
-    protected function formatFlashSale(FlashSale $flashSale): array
+    protected function formatFlashSale(FlashSale $flashSale, int $perPage = 20): array
     {
         return [
             'id' => $flashSale->id,
             'name' => $flashSale->name,
             'end_date' => $flashSale->end_date->format('Y-m-d H:i:s'),
             'expired' => $flashSale->expired,
-            'products' => FlashSaleProductResource::collection($flashSale->products),
+            'products_count' => $flashSale->products_count ?? 0,
+            'products' => FlashSaleProductResource::collection($flashSale->products->take($perPage)),
         ];
     }
 }

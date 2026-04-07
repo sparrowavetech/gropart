@@ -177,4 +177,6 @@ return [
     'subject_placeholder' => 'موضوع',
     'your_message' => 'رسالتك',
     'agree_terms_privacy' => 'أوافق على الشروط وسياسة الخصوصية',
+    'agree_terms_privacy_link' => 'أوافق على :link',
+    'terms_and_privacy_policy' => 'الشروط وسياسة الخصوصية',
 ];

@@ -313,19 +313,22 @@ $(() => {
     // Check initial selection on page load
     $('.product-attribute-swatches').each(function() {
         const $container = $(this)
-        const hasCheckedVariation = $container.find('input[type=radio]:checked:not(:disabled)').length > 0
-        
+        const hasCheckedRadio = $container.find('input[type=radio]:checked:not(:disabled)').length > 0
+        const hasSelectedDropdown = $container.find('select.product-filter-item').filter(function() {
+            return !!$(this).val()
+        }).length > 0
+
         // If no valid variation is selected, select the first available one
-        if (!hasCheckedVariation) {
+        if (!hasCheckedRadio && !hasSelectedDropdown) {
             $container.find('.attribute-swatches-wrapper').each(function() {
                 const $wrapper = $(this)
                 const $firstAvailable = $wrapper.find('input[type=radio]:not(:disabled)').first()
-                
+
                 if ($firstAvailable.length) {
                     $firstAvailable.prop('checked', true)
                 }
             })
-            
+
             // Trigger change to update product info
             swatchInstance.getProductVariation($container)
         }

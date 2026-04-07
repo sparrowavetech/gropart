@@ -19,7 +19,7 @@ class UpdateProductView implements ShouldQueue
             ProductView::query()
                 ->upsert(
                     [
-                        'product_id' => $event->product->getKey(),
+                        'product_id' => $event->productId,
                         'date' => $event->dateTime->toDateString(),
                         'views' => 1,
                     ],

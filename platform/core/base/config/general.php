@@ -34,6 +34,8 @@ return [
     'force_root_url' => env('FORCE_ROOT_URL'),
     'force_schema' => env('FORCE_SCHEMA'),
     'enable_http_security_headers' => env('ENABLE_HTTP_SECURITY_HEADERS', true),
+    'enable_public_cache_control' => env('CMS_PUBLIC_CACHE_CONTROL_ENABLED', false),
+    'public_cache_max_age' => env('CMS_PUBLIC_CACHE_MAX_AGE', 600),
     'max_execution_time' => env('CMS_MAX_EXECUTION_TIME', 300),
     'memory_limit' => env('CMS_MEMORY_LIMIT'),
     'date_format' => [
@@ -465,6 +467,7 @@ return [
     'enabled_cleanup_database' => env('CMS_ENABLED_CLEANUP_DATABASE', false),
     'hide_cleanup_system_menu' => env('CMS_HIDE_CLEANUP_SYSTEM_MENU', false),
     'hide_activated_license_info' => env('CMS_HIDE_ACTIVATED_LICENSE_INFO', false),
+    'hide_version_headers' => env('CMS_HIDE_VERSION_HEADERS', false),
     'google_fonts_url' => env('CMS_GOOGLE_FONTS_URL', 'https://fonts.bunny.net'),
     'google_fonts_enabled' => env('CMS_GOOGLE_FONTS_ENABLED', true),
     'google_fonts_enabled_cache' => env('CMS_GOOGLE_FONTS_ENABLED_CACHE', true),

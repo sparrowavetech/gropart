@@ -2,6 +2,9 @@
 
 return [
     'webhook_secret' => 'Webhook titok',
+    'webhook_secret_helper' => 'Ezt a Stripe Dashboard-on találja a Developers > Webhooks > Signing secret alatt.',
+    'public_key_helper' => 'Ezt a Stripe Dashboard-on találja a Developers > API keys alatt.',
+    'secret_key_helper' => 'Ezt a Stripe Dashboard-on találja a Developers > API keys alatt. Tartsa bizalmasan ezt a kulcsot.',
     'webhook_setup_guide' => [
         'title' => 'Stripe Webhook telepítési útmutató',
         'description' => 'Kövesse ezeket a lépéseket a Stripe webhook beállításához',

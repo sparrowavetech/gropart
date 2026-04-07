@@ -8,6 +8,7 @@ use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Facades\FlashSale;
 use Botble\Ecommerce\Http\Resources\API\AvailableProductResource;
 use Botble\Ecommerce\Http\Resources\API\ProductDetailResource;
+use Botble\Ecommerce\Http\Resources\API\ProductSearchResource;
 use Botble\Ecommerce\Http\Resources\API\RelatedProductResource;
 use Botble\Ecommerce\Http\Resources\API\ReviewResource;
 use Botble\Ecommerce\Http\Resources\ProductVariationResource;
@@ -72,6 +73,35 @@ class ProductController extends BaseApiController
     }
 
     /**
+     * Search products (lightweight)
+     *
+     * @group Products
+     * @queryParam q string required Search keyword. No-example
+     * @queryParam limit int Number of results (1-20, default 8). No-example
+     */
+    public function search(Request $request)
+    {
+        $request->validate([
+            'q' => ['required', 'string', 'max:255'],
+            'limit' => ['sometimes', 'integer', 'min:1', 'max:20'],
+        ]);
+
+        $products = Product::query()
+            ->wherePublished()
+            ->where('is_variation', false)
+            ->where('name', 'LIKE', '%' . $request->input('q') . '%')
+            ->with('slugable')
+            ->orderBy('name')
+            ->limit($request->integer('limit', 8))
+            ->get();
+
+        return $this
+            ->httpResponse()
+            ->setData(ProductSearchResource::collection($products))
+            ->toApiResponse();
+    }
+
+    /**
      * Get product details by slug
      *
      * @group Products
@@ -105,6 +135,9 @@ class ProductController extends BaseApiController
                     'crossSales' => function (BelongsToMany $query): void {
                         $query->where('ec_product_cross_sale_relations.is_variant', false);
                     },
+                    'variations.productAttributes',
+                    'variations.product',
+                    'productAttributeSets',
                 ],
             ]
         );
@@ -129,10 +162,8 @@ class ProductController extends BaseApiController
         }
 
         // Get product variations info for filtering unavailable attributes
-        $productVariations = ProductVariation::query()
-            ->where('configurable_product_id', $product->id)
-            ->with(['productAttributes', 'product'])
-            ->get();
+        // Uses already-loaded 'variations.productAttributes' and 'variations.product' relations
+        $productVariations = $product->variations;
 
         $productVariationsInfo = ProductVariationItem::getVariationsInfo($productVariations->pluck('id')->all());
 
@@ -149,8 +180,8 @@ class ProductController extends BaseApiController
                 });
         }
 
-        // Get attribute sets and attributes
-        $attributeSets = $product->productAttributeSets()->oldest('order')->get();
+        // Get attribute sets and attributes — uses already-loaded 'productAttributeSets' relation
+        $attributeSets = $product->productAttributeSets->sortBy('order')->values();
         $productAttributes = app(ProductInterface::class)->getRelatedProductAttributes($product)->sortBy('order');
 
         $price = $productVariation->price();

@@ -31,12 +31,23 @@ class CopyThemeOptions
         $themeKey = 'theme-' . $fromTheme . '-' . $event->language->lang_code . '-';
 
         RenderingThemeOptionSettings::dispatch();
-        $existsThemeOptionKeys = array_keys(Arr::get(ThemeOption::getFields(), 'theme', []));
+
+        $themeFields = Arr::get(ThemeOption::getFields(), 'theme', []);
+        $existsThemeOptionKeys = array_keys($themeFields);
+
+        $sharedFieldKeys = collect($themeFields)
+            ->filter(fn (array $field) => ThemeOption::isFieldShared(Arr::get($field, 'id', '')))
+            ->keys()
+            ->all();
+
         $themeOptions = collect(ThemeOption::getOptions())
             ->filter(
-                function (mixed $value, string $key) use ($existsThemeOptionKeys, $fromThemeKey) {
+                function (mixed $value, string $key) use ($existsThemeOptionKeys, $sharedFieldKeys, $fromThemeKey) {
+                    $fieldKey = Str::after($key, $fromThemeKey);
+
                     return Str::startsWith($key, $fromThemeKey)
-                        && in_array(Str::after($key, $fromThemeKey), $existsThemeOptionKeys, true);
+                        && in_array($fieldKey, $existsThemeOptionKeys, true)
+                        && ! in_array($fieldKey, $sharedFieldKeys, true);
                 }
             )
             ->toArray();

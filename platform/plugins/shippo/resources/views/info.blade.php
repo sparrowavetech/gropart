@@ -7,6 +7,7 @@
                         src="{{ $image }}"
                         alt="{{ Arr::get($rate, 'servicelevel.name') }}"
                         style="max-height: 40px; max-width: 55px"
+                        onerror="this.style.display='none'"
                     >
                 @endif
                 <span>

@@ -27,4 +27,6 @@ return [
     'option_value_name_attribute' => 'Vrednosti opcije :key',
     'please_choose_option_type' => 'Molimo izaberite tip opcije!',
     'no_global_options' => 'Još nema dostupnih globalnih opcija. Molimo prvo dodajte opcije proizvoda na podrazumevanom jeziku.',
+    'price_per_product' => 'Цена по производу',
+    'price_per_product_helper' => 'Када је омогућено, цена опције се примењује једном по производу, а не множи се количином.',
 ];

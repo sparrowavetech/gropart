@@ -65,4 +65,5 @@ return [
     'please_select_record' => 'Mangyaring pumili ng kahit isang rekord upang isagawa ang aksyon na ito!',
     'checkbox' => 'Checkbox',
     'toggle_columns' => 'Toggle ang Mga Kolum',
+    'created_by' => 'Nilikha ni',
 ];

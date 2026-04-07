@@ -121,6 +121,7 @@ return [
     'apply' => 'Guna',
     'available' => 'Tersedia',
     'back_to_return_requests' => 'Kembali ke Permintaan Pulangan',
+    'backorder_warning' => 'Amaran: Produk ini dalam pesanan tertunggak dan mungkin mengambil masa lebih lama untuk dihantar.',
     'choose_reason' => 'Pilih Sebab',
     'clear' => 'Kosongkan',
     'clear_all_filters' => 'Kosongkan semua penapis',

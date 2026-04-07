@@ -3,7 +3,9 @@
 namespace Botble\Ecommerce\Supports;
 
 use Botble\Base\Facades\EmailHandler;
+use Botble\Base\Supports\EmailHandler as EmailHandlerSupport;
 use Botble\Ecommerce\Enums\OrderReturnHistoryActionEnum;
+use Botble\Ecommerce\Enums\OrderReturnReasonEnum;
 use Botble\Ecommerce\Enums\OrderReturnStatusEnum;
 use Botble\Ecommerce\Events\OrderReturnedEvent;
 use Botble\Ecommerce\Facades\EcommerceHelper;
@@ -13,6 +15,7 @@ use Botble\Ecommerce\Models\OrderProduct;
 use Botble\Ecommerce\Models\OrderReturn;
 use Botble\Ecommerce\Models\OrderReturnItem;
 use Botble\Ecommerce\Models\Product;
+use Botble\Media\Facades\RvMedia;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -20,6 +23,44 @@ use Throwable;
 
 class OrderReturnHelper
 {
+    public function getReturnableItems(Order $order): array
+    {
+        $order->loadMissing('products');
+
+        $returnableItems = [];
+
+        foreach ($order->products as $orderProduct) {
+            $returnableItems[] = [
+                'order_item_id' => $orderProduct->id,
+                'product_id' => $orderProduct->product_id,
+                'product_name' => $orderProduct->product_name,
+                'product_image' => RvMedia::getImageUrl($orderProduct->product_image, 'thumb', false, RvMedia::getDefaultImage()),
+                'price' => format_price($orderProduct->price),
+                'qty' => $orderProduct->qty,
+            ];
+        }
+
+        return $returnableItems;
+    }
+
+    public function getReturnReasons(): array
+    {
+        $reasons = [];
+
+        foreach (OrderReturnReasonEnum::labels() as $value => $label) {
+            if ($value === '') {
+                continue;
+            }
+
+            $reasons[] = [
+                'value' => $value,
+                'label' => $label,
+            ];
+        }
+
+        return $reasons;
+    }
+
     public function returnOrder(Order $order, array $data): array
     {
         $orderReturnData = [
@@ -190,6 +231,8 @@ class OrderReturnHelper
             $customer = $orderReturn->customer;
 
             if ($customer?->email) {
+                $locale = $orderReturn->order?->getOrderMetadata('customer_locale') ?: EmailHandlerSupport::getDefaultEmailLocale();
+
                 EmailHandler::setModule(ECOMMERCE_MODULE_SCREEN_NAME)
                     ->setVariableValues([
                         'customer_name' => $customer->name ?? 'Guest',
@@ -197,7 +240,7 @@ class OrderReturnHelper
                         'description' => $data['description'] ?? null,
                         'status' => $orderReturn->return_status->label(),
                     ])
-                    ->sendUsingTemplate('order-return-status-updated', $customer->email);
+                    ->sendUsingTemplateWithLocale('order-return-status-updated', $customer->email, $locale);
             }
 
             DB::commit();

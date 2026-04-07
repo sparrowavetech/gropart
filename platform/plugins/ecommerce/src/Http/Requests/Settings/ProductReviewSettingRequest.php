@@ -14,6 +14,7 @@ class ProductReviewSettingRequest extends Request
             'allow_customer_upload_image_in_review' => $onOffRule,
             'review_max_file_size' => ['nullable', 'required_if:allow_customer_upload_image_in_review,1', 'numeric', 'min:1'],
             'review_max_file_number' => ['nullable', 'required_if:allow_customer_upload_image_in_review,1', 'integer', 'min:1'],
+            'review_comment_required' => $onOffRule,
             'only_allow_customers_purchased_to_review' => $onOffRule,
             'review_need_to_be_approved' => $onOffRule,
             'show_customer_full_name' => $onOffRule,

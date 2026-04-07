@@ -91,7 +91,7 @@
                                 )
 
                                 @if (!empty($orderProduct->product_options) && is_array($orderProduct->product_options))
-                                    {!! render_product_options_html($orderProduct->product_options, $orderProduct->price) !!}
+                                    {!! render_product_options_html($orderProduct->product_options, $product?->front_sale_price ?? $orderProduct->price) !!}
                                 @endif
 
                                 @if ($orderProduct->license_code)

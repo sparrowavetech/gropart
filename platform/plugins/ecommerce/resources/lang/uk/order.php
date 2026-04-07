@@ -95,6 +95,8 @@ return [
     'coupon_code' => 'Промокод: ":code"',
     'shipping_fee' => 'Вартість доставки',
     'tax' => 'Податок',
+    'shipping_tax' => 'Податок на доставку',
+
     'refunded_amount' => 'Повернена сума',
     'amount_received' => 'Фактично отримана сума',
     'download_invoice' => 'Завантажити рахунок',

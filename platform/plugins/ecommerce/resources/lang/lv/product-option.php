@@ -27,4 +27,6 @@ return [
     'option_value_name_attribute' => 'Opcijas vērtības :key',
     'please_choose_option_type' => 'Lūdzu, izvēlieties opcijas tipu!',
     'no_global_options' => 'Globālās opcijas vēl nav pieejamas. Lūdzu, vispirms pievienojiet produktu opcijas noklusējuma valodā.',
+    'price_per_product' => 'Cena par produktu',
+    'price_per_product_helper' => 'Ja iespējots, opcijas cena tiek piemērota vienu reizi par produktu, nevis reizināta ar daudzumu.',
 ];

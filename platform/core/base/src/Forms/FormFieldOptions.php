@@ -28,6 +28,8 @@ class FormFieldOptions implements Arrayable
 
     protected array|bool $wrapperAttributes = [];
 
+    protected bool $shared = false;
+
     protected bool $metadata = false;
 
     protected Closure|bool $disabled = false;
@@ -104,6 +106,18 @@ class FormFieldOptions implements Arrayable
         return $this->metadata;
     }
 
+    public function shared(bool $shared = true): static
+    {
+        $this->shared = $shared;
+
+        return $this;
+    }
+
+    public function isShared(): bool
+    {
+        return $this->shared;
+    }
+
     public function metadata(bool $metadata = true): static
     {
         $this->metadata = $metadata;
@@ -161,6 +175,10 @@ class FormFieldOptions implements Arrayable
 
         if ($this->wrapperAttributes || $this->wrapperAttributes === false) {
             $data['wrapper'] = $this->getWrapperAttributes();
+        }
+
+        if ($this->isShared()) {
+            $data['shared'] = true;
         }
 
         if ($this->isMetadata()) {

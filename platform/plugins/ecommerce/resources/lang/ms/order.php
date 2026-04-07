@@ -95,6 +95,8 @@ return [
     'coupon_code' => 'Kod kupon: ":code"',
     'shipping_fee' => 'Bayaran penghantaran',
     'tax' => 'Cukai',
+    'shipping_tax' => 'Cukai penghantaran',
+
     'refunded_amount' => 'Jumlah dibayar balik',
     'amount_received' => 'Jumlah sebenar diterima',
     'download_invoice' => 'Muat turun invois',

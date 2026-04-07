@@ -31,6 +31,11 @@ class GlobalOptionForm extends FormAbstract
                 'label' => trans('plugins/ecommerce::product-option.required'),
                 'default_value' => false,
             ])
+            ->add('price_per_product', 'onOff', [
+                'label' => trans('plugins/ecommerce::product-option.price_per_product'),
+                'default_value' => false,
+                'helper_text' => trans('plugins/ecommerce::product-option.price_per_product_helper'),
+            ])
             ->setBreakFieldPoint('option_type')
             ->addMetaBoxes([
                 'product_options_box' => [

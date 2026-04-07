@@ -52,4 +52,26 @@ return [
         'enable_page_visual_builder' => 'Enable page visual builder',
         'enable_page_visual_builder_helper' => 'Allow users to build pages visually using drag-and-drop shortcodes. Disable this to hide the visual builder option',
     ],
+    'export' => [
+        'description' => 'Export pages to CSV/Excel file.',
+        'total' => 'Total Pages',
+        'limit' => 'Limit',
+        'limit_placeholder' => 'Leave empty to export all',
+        'all_status' => 'All Status',
+        'all_templates' => 'All Templates',
+        'template' => 'Template',
+        'start_date' => 'Start Date',
+        'start_date_placeholder' => 'Start date',
+        'end_date' => 'End Date',
+        'end_date_placeholder' => 'End date',
+    ],
+    'import' => [
+        'description' => 'Import pages from a CSV/Excel file.',
+        'done_message' => ':created pages created and :updated pages updated.',
+        'rules' => [
+            'nullable_string_max' => 'The :attribute field accepts a string value of up to :max characters or may be left blank.',
+            'nullable_string' => 'The :attribute field accepts a string value or may be left blank.',
+            'in' => ':attribute must be one of the following values: :values.',
+        ],
+    ],
 ];

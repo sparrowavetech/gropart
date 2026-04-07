@@ -219,18 +219,24 @@ class StoreProductService
                 if (isset($attributeData['value'])) {
                     $attribute = SpecificationAttribute::query()->find($attributeId);
 
-                    if ($attribute) {
-                        ProductSpecificationAttributeTranslation::query()->updateOrCreate(
-                            [
-                                'product_id' => $product->id,
-                                'attribute_id' => $attributeId,
-                                'lang_code' => $langCode,
-                            ],
-                            [
-                                'value' => $attributeData['value'],
-                            ]
-                        );
+                    if (! $attribute) {
+                        continue;
                     }
+
+                    if ($attribute->hasOptions() && $attribute->hasIdBasedOptions()) {
+                        continue;
+                    }
+
+                    ProductSpecificationAttributeTranslation::query()->updateOrCreate(
+                        [
+                            'product_id' => $product->id,
+                            'attribute_id' => $attributeId,
+                            'lang_code' => $langCode,
+                        ],
+                        [
+                            'value' => $attributeData['value'],
+                        ]
+                    );
                 }
             }
         }
@@ -376,6 +382,7 @@ class StoreProductService
                 }
 
                 $opt['required'] = isset($opt['required']) && $opt['required'] == 1;
+                $opt['price_per_product'] = isset($opt['price_per_product']) && $opt['price_per_product'] == 1;
                 $option->fill($opt);
                 $option->product_id = $product->getKey();
                 $option->save();

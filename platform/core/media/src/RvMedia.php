@@ -70,6 +70,8 @@ class RvMedia
             'global_actions' => route('media.global_actions'),
             'media_upload_from_editor' => route('media.files.upload.from.editor'),
             'download_url' => route('media.download_url'),
+            'folder_permissions' => route('media.folder_permissions.index', ['folder' => '__FOLDER_ID__']),
+            'folder_permissions_users' => route('media.folder_permissions.users'),
         ];
     }
 
@@ -255,16 +257,21 @@ class RvMedia
             }
 
             return str_replace('.digitaloceanspaces.com', '.cdn.digitaloceanspaces.com', Storage::url($path));
-        } else {
-            if ($this->getMediaDriver() === 'backblaze' && (int) setting('media_backblaze_cdn_enabled')) {
-                $customDomain = setting('media_backblaze_cdn_custom_domain');
-                $currentEndpoint = setting('media_backblaze_endpoint');
-                if ($customDomain) {
-                    return $customDomain . '/' . ltrim($path, '/');
-                }
+        } elseif ($this->getMediaDriver() === 'wasabi' && (int) setting('media_wasabi_cdn_enabled')) {
+            $customDomain = setting('media_wasabi_cdn_custom_domain');
 
-                return str_replace($currentEndpoint, $customDomain, Storage::url($path));
+            if ($customDomain) {
+                return $customDomain . '/' . ltrim($path, '/');
             }
+        } elseif ($this->getMediaDriver() === 'backblaze' && (int) setting('media_backblaze_cdn_enabled')) {
+            $customDomain = setting('media_backblaze_cdn_custom_domain');
+            $currentEndpoint = setting('media_backblaze_endpoint');
+
+            if ($customDomain) {
+                return $customDomain . '/' . ltrim($path, '/');
+            }
+
+            return str_replace($currentEndpoint, $customDomain, Storage::url($path));
         }
 
         return Storage::url($path);
@@ -477,7 +484,8 @@ class RvMedia
                 $rules = ['required'];
 
                 if (! $allowedToUploadAnyFileTypes) {
-                    $rules[] = ValidationFile::types(explode(',', $allowedMimeTypes));
+                    $allowedExtensions = explode(',', $allowedMimeTypes);
+                    $rules[] = ValidationFile::types($allowedExtensions);
                 }
 
                 $validator = Validator::make(['uploaded_file' => $fileUpload], [
@@ -490,7 +498,16 @@ class RvMedia
                     'uploaded_file' => trans('core/media::media.validation.attributes.uploaded_file'),
                 ]);
 
-                if ($validator->fails()) {
+                if (
+                    $validator->fails()
+                    && ! $allowedToUploadAnyFileTypes
+                    && in_array('avif', $allowedExtensions)
+                    && $this->isAvifFile($fileUpload->getRealPath())
+                ) {
+                    $validator = null;
+                }
+
+                if ($validator?->fails()) {
                     return [
                         'error' => true,
                         'message' => $validator->getMessageBag()->first(),
@@ -592,14 +609,15 @@ class RvMedia
                 $originalFilePath = $filePath;
 
                 try {
-                    $encoder = new AutoEncoder();
+                    $imageQuality = $this->getImageQuality();
+                    $encoder = new AutoEncoder(quality: $imageQuality);
                     $shouldConvertToWebp = in_array($fileExtension, ['jpg', 'jpeg', 'png'])
                         && setting('media_convert_image_to_webp', false);
 
                     $keepOriginalQuality = setting('media_keep_original_file_size_and_quality');
 
                     if ($shouldConvertToWebp) {
-                        $encoder = new WebpEncoder();
+                        $encoder = new WebpEncoder(quality: $imageQuality);
 
                         if ($keepOriginalQuality) {
                             $encoder = new WebpEncoder(quality: 100);
@@ -720,7 +738,7 @@ class RvMedia
         return round($size);
     }
 
-    public function generateThumbnails(MediaFile $file, ?UploadedFile $fileUpload = null): bool
+    public function generateThumbnails(MediaFile $file, ?UploadedFile $fileUpload = null, bool $overrideExisting = false): bool
     {
         if (! $file->canGenerateThumbnails()) {
             return false;
@@ -763,7 +781,7 @@ class RvMedia
             $dirName = File::dirname($file->url);
             $thumbnailPath = ($dirName === '.' || ! $dirName) ? $thumbnailFileName : $dirName . '/' . $thumbnailFileName;
 
-            if (! $this->isUsingCloud() && Storage::exists($thumbnailPath)) {
+            if (! $overrideExisting && ! $this->isUsingCloud() && Storage::exists($thumbnailPath)) {
                 continue;
             }
 
@@ -864,7 +882,7 @@ class RvMedia
             File::name($image) . '.' . File::extension($image)
         );
 
-        $encodedImage = $imageSource->encode(new AutoEncoder());
+        $encodedImage = $imageSource->encode(new AutoEncoder(quality: $this->getImageQuality()));
 
         $this->uploadManager->saveFile($destinationPath, (string) $encodedImage);
 
@@ -898,6 +916,40 @@ class RvMedia
         return Str::startsWith($mimeType, 'image/');
     }
 
+    public function isExecutableFileExtension(string $extension): bool
+    {
+        $dangerousExtensions = [
+            'php', 'php3', 'php4', 'php5', 'php7', 'php8', 'phtml', 'phar',
+            'asp', 'aspx', 'jsp', 'jspx',
+            'cgi', 'pl', 'py', 'rb',
+            'sh', 'bash', 'zsh', 'bat', 'cmd', 'com', 'ps1',
+            'exe', 'dll', 'msi',
+            'htaccess', 'htpasswd',
+        ];
+
+        return in_array(strtolower($extension), $dangerousExtensions);
+    }
+
+    public function isAvifFile(string $path): bool
+    {
+        $handle = fopen($path, 'rb');
+
+        if (! $handle) {
+            return false;
+        }
+
+        $header = fread($handle, 12);
+        fclose($handle);
+
+        if (strlen($header) < 12) {
+            return false;
+        }
+
+        // AVIF files have "ftyp" at bytes 4-7 and "avif" or "avis" at bytes 8-11
+        return substr($header, 4, 4) === 'ftyp'
+            && in_array(substr($header, 8, 4), ['avif', 'avis', 'mif1']);
+    }
+
     public function isUsingCloud(): bool
     {
         return ! in_array($this->getMediaDriver(), ['local', 'public']);
@@ -916,10 +968,30 @@ class RvMedia
             ];
         }
 
-        $info = pathinfo($url);
+        $scheme = parse_url($url, PHP_URL_SCHEME);
+        $host = parse_url($url, PHP_URL_HOST);
+
+        if (! in_array($scheme, ['http', 'https']) || ! $host) {
+            return [
+                'error' => true,
+                'message' => trans('core/media::media.url_invalid'),
+            ];
+        }
+
+        $ip = gethostbyname($host);
+
+        if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false) {
+            return [
+                'error' => true,
+                'message' => trans('core/media::media.url_invalid'),
+            ];
+        }
+
+        $urlPath = parse_url($url, PHP_URL_PATH) ?: $url;
+        $info = pathinfo($urlPath);
 
         try {
-            $response = Http::withoutVerifying()->get($url);
+            $response = Http::get($url);
 
             if ($response->failed() || ! $response->body()) {
                 return [
@@ -947,7 +1019,8 @@ class RvMedia
         $path = '/tmp';
         File::ensureDirectoryExists($path);
 
-        $path = $path . '/' . Str::limit($info['basename'], 50, '');
+        $basename = $info['basename'] ?: Str::random(20);
+        $path = $path . '/' . Str::limit($basename, 50, '');
         file_put_contents($path, $contents);
 
         $fileUpload = $this->newUploadedFile($path, $defaultMimetype);
@@ -990,7 +1063,15 @@ class RvMedia
 
     protected function newUploadedFile(string $path, ?string $defaultMimeType = null): UploadedFile
     {
-        $mimeType = $this->getMimeType($path);
+        $mimeType = null;
+
+        if (file_exists($path)) {
+            $mimeType = File::mimeType($path) ?: null;
+        }
+
+        if (empty($mimeType)) {
+            $mimeType = $this->getMimeType($path);
+        }
 
         if (empty($mimeType)) {
             $mimeType = $defaultMimeType;
@@ -1147,7 +1228,19 @@ class RvMedia
             return false;
         }
 
-        return $this->isImage($mimeType) && ! in_array($mimeType, ['image/svg+xml', 'image/x-icon']);
+        if (! $this->isImage($mimeType) || in_array($mimeType, ['image/svg+xml', 'image/x-icon'])) {
+            return false;
+        }
+
+        if ($mimeType === 'image/avif') {
+            if ($this->getImageProcessingLibrary() === 'imagick' && extension_loaded('imagick')) {
+                return ! empty(\Imagick::queryFormats('AVIF'));
+            }
+
+            return function_exists('imageavif');
+        }
+
+        return true;
     }
 
     public function createFolder(string $folderSlug, int|string|null $parentId = 0, bool $force = false): int|string
@@ -1217,6 +1310,11 @@ class RvMedia
     public function turnOffAutomaticUrlTranslationIntoLatin(): bool
     {
         return (int) setting('media_turn_off_automatic_url_translation_into_latin', 0) == 1;
+    }
+
+    public function getImageQuality(): int
+    {
+        return (int) setting('media_image_quality', 75);
     }
 
     public function getImageProcessingLibrary(): string
@@ -1484,7 +1582,10 @@ class RvMedia
                     $file->url
                 );
 
-                $this->generateThumbnails($file);
+                try {
+                    $this->generateThumbnails($file);
+                } catch (Throwable) {
+                }
             }
         }
 

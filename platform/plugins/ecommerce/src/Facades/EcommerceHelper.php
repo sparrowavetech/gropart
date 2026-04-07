@@ -90,6 +90,8 @@ use Illuminate\Support\Facades\Facade;
  * @method static array withProductEagerLoadingRelations()
  * @method static bool isDisplayTaxFieldsAtCheckoutPage()
  * @method static bool isDisplayCheckoutTaxInformation()
+ * @method static bool isTaxOnShippingFeeEnabled()
+ * @method static float calculateShippingTax(float $shippingAmount)
  * @method static int getProductMaxPrice(array $categoryIds = [])
  * @method static void clearProductMaxPriceCache()
  * @method static bool isEnabledFilterProductsByBrands()

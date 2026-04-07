@@ -208,6 +208,11 @@ return [
     ],
     'term_and_privacy_policy_url' => '条款和隐私政策网址',
     'site_title_separator' => 'SEO标题分隔符',
+    'site_title_helper' => '您的品牌或企业名称。显示在浏览器选项卡和搜索结果中（例如 "My Company"）。',
+    'show_site_name_helper' => '使用所选分隔符将网站名称附加到每个页面标题。示例："Page Title - My Company"。',
+    'site_title_separator_helper' => '用于页面标题与网站名称之间的字符。破折号示例："Page Title - My Company"。竖线示例："Page Title | My Company"。',
+    'seo_title_helper' => '显示在搜索引擎结果中的首页标题。保持在60个字符以内以获得最佳显示效果。留空则使用网站标题。',
+    'seo_description_helper' => '显示在搜索引擎结果中的首页描述。保持在120-160个字符之间以获得最佳显示效果。',
     'no_meta_keywords' => 'Meta keywords was removed by Google, you don\'t need to add meta keywords to your website. Learn more: :link',
     'validation' => [
         'gtm_container_id_format' => 'GTM Container ID must be in format GTM-XXXXXX (e.g., GTM-N7MK3KH2)',
@@ -389,6 +394,9 @@ return [
     ],
 
     'typography_primary' => '主要字体',
+    'all_languages' => '所有语言',
+    'shared_field_notice' => '此字段在所有语言中共享。请从默认语言进行管理。',
+    'shared_section_notice' => '此部分中的所有选项在所有语言中共享。请切换到默认语言进行更改。',
     'admin_appearance' => [
         'show_admin_bar' => '为已登录的管理员显示管理栏，即使在前台网站',
         'show_admin_bar_helper' => '以管理员身份登录时，在网站顶部显示快速访问管理工具栏',

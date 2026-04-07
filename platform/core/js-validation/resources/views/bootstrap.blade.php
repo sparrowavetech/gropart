@@ -10,6 +10,8 @@
                     if (element.closest('[data-bb-toggle="tree-checkboxes"]').length) {
                         error.insertAfter(element.closest(
                             '[data-bb-toggle="tree-checkboxes"]'));
+                    } else if (element.parent('.iti').length) {
+                        error.insertAfter(element.closest('.iti'));
                     } else if (element.parent('.input-group').length || element.prop(
                         'type') === 'checkbox' || element.prop('type') === 'radio') {
                         error.insertAfter(element.parent());

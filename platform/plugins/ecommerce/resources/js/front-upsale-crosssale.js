@@ -128,7 +128,7 @@
                     url: url,
                     type: 'GET',
                     success: function (response) {
-                        const data = response.data || response
+                        const data = response.data !== undefined ? response.data : response;
                         $element.replaceWith(data)
 
                         // Update lazy load images if available
@@ -295,7 +295,7 @@
                 url: this.upsellRefreshUrl,
                 type: 'GET',
                 success: function (response) {
-                    const data = response.data || response
+                    const data = response.data !== undefined ? response.data : response;
                     $section.replaceWith(data)
 
                     dispatchEvent('ecommerce.upsale.section.refreshed', {

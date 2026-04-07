@@ -6,6 +6,7 @@ use Botble\Base\Casts\SafeContent;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Models\BaseModel;
 use Botble\Media\Facades\RvMedia;
+use Botble\Media\Services\FolderPermissionService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -49,7 +50,21 @@ class MediaFile extends BaseModel
 
         static::addGlobalScope('ownMedia', function (Builder $query): void {
             if (RvMedia::canOnlyViewOwnMedia()) {
-                $query->where('media_files.user_id', auth()->id());
+                $userId = auth()->id();
+                if (! $userId) {
+                    $query->where('media_files.user_id', 0);
+
+                    return;
+                }
+                $accessibleIds = app(FolderPermissionService::class)
+                    ->getAccessibleFolderIds($userId);
+
+                $query->where(function ($q) use ($userId, $accessibleIds) {
+                    $q->where('media_files.user_id', $userId);
+                    if ($accessibleIds->isNotEmpty()) {
+                        $q->orWhereIn('media_files.folder_id', $accessibleIds);
+                    }
+                });
             }
         });
     }

@@ -1072,7 +1072,7 @@ class Product extends BaseModel
                         $data['video_id'] = Str::afterLast($url, 'video/');
                     } elseif (preg_match('/^.*https:\/\/twitter\.com\/(?:#!\/)?(\w+)\/status(es)?\/(\d+)/', $url)) {
                         $data['provider'] = 'twitter';
-                    } elseif (in_array(Str::lower(File::extension($url)), ['mp4', 'webm', 'ogg'])) {
+                    } elseif (in_array(Str::lower(File::extension($url)), ['mp4', 'webm', 'ogg', 'mov'])) {
                         $data['provider'] = 'video';
                     } else {
                         $data['provider'] = 'iframe';

@@ -95,6 +95,8 @@ return [
     'coupon_code' => 'Код на купон: ":code"',
     'shipping_fee' => 'Такса за доставка',
     'tax' => 'Данък',
+    'shipping_tax' => 'Данък върху доставката',
+
     'refunded_amount' => 'Възстановена сума',
     'amount_received' => 'Фактически получена сума',
     'download_invoice' => 'Изтегли фактура',

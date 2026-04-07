@@ -21,4 +21,14 @@ return [
         'flag' => 'property-translations.export',
         'parent_flag' => 'tools.data-synchronize',
     ],
+    [
+        'name' => 'Export Page Translations',
+        'flag' => 'page-translations.export',
+        'parent_flag' => 'tools.data-synchronize',
+    ],
+    [
+        'name' => 'Import Page Translations',
+        'flag' => 'page-translations.import',
+        'parent_flag' => 'tools.data-synchronize',
+    ],
 ];

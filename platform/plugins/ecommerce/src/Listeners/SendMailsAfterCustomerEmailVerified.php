@@ -3,6 +3,7 @@
 namespace Botble\Ecommerce\Listeners;
 
 use Botble\Base\Facades\EmailHandler;
+use Botble\Base\Supports\EmailHandler as EmailHandlerSupport;
 use Botble\Ecommerce\Events\CustomerEmailVerified;
 
 class SendMailsAfterCustomerEmailVerified
@@ -16,7 +17,7 @@ class SendMailsAfterCustomerEmailVerified
                 ->setVariableValues([
                     'customer_name' => $customer->name,
                 ])
-                ->sendUsingTemplate('welcome', $customer->email);
+                ->sendUsingTemplateWithLocale('welcome', $customer->email, EmailHandlerSupport::getDefaultEmailLocale());
         }
     }
 }

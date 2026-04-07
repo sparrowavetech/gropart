@@ -125,6 +125,14 @@ $rows = SimpleExcelReader::create($pathToXlsx)
     ->getRows();
 ```
 
+You can also retrieve all sheet names in a document using the `getSheetNames()` method.
+
+```php
+$sheets = SimpleExcelReader::create($pathToXlsx)
+    ->getSheetNames();
+```    
+
+
 With multiple spreadsheets, you can too select the sheet you want to use with the `fromSheetName()` method to select by name.
 
 ```php
@@ -254,7 +262,7 @@ $rows = SimpleExcelReader::create($pathToCsv)
 
 #### Manually working with the reader object
 
-Under the hood this package uses the [box/spout](https://github.com/openspout/openspout) package. You can get to the underlying reader that implements `\OpenSpout\Reader\ReaderInterface` by calling the `getReader` method.
+Under the hood this package uses the [openspout/spout](https://github.com/openspout/openspout) package. You can get to the underlying reader that implements `\OpenSpout\Reader\ReaderInterface` by calling the `getReader` method.
 
 ```php
 $reader = SimpleExcelReader::create($pathToCsv)->getReader();

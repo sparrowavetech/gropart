@@ -184,4 +184,6 @@ return [
     'subject_placeholder' => 'Tema',
     'your_message' => 'Din melding',
     'agree_terms_privacy' => 'Jeg godtar vilkårene og personvernreglene',
+    'agree_terms_privacy_link' => 'Jeg godtar :link',
+    'terms_and_privacy_policy' => 'vilkårene og personvernreglene',
 ];

@@ -62,6 +62,7 @@ class InvoiceHelper
             'paid_at' => Carbon::now(),
             'tax_amount' => $order->tax_amount ?: 0,
             'shipping_amount' => $order->shipping_amount ?: 0,
+            'shipping_tax_amount' => $order->shipping_tax_amount ?: 0,
             'payment_fee' => $order->payment_fee,
             'discount_amount' => $order->discount_amount ?: 0,
             'sub_total' => $order->sub_total,
@@ -323,6 +324,7 @@ class InvoiceHelper
             'has_multiple_products' => $hasMultipleProducts,
             'has_product_options' => $hasProductOptions,
             'summary_colspan' => 4 + ($hasMultipleProducts ? 1 : 0),
+            'shipping_tax_amount' => $invoice->shipping_tax_amount ?: 0,
         ];
 
         $data['settings']['font_css'] = null;

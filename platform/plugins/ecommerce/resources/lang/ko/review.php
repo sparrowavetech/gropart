@@ -109,4 +109,23 @@ return [
         'images_mimes' => '이미지는 JPG, JPEG 또는 PNG 형식이어야 합니다.',
         'images_file_max' => '각 이미지는 :max KB를 초과할 수 없습니다.',
     ],
+    'badge_type' => '리뷰 배지',
+    'badge_type_help' => '이 리뷰에 표시할 배지를 선택하세요. "자동 감지"는 주문이 있는 고객에게 "X 전에 구매함"을 표시합니다.',
+    'badge_types' => [
+        'auto' => '자동 감지',
+        'none' => '배지 없음',
+        'purchased' => '✅ 구매함',
+        'community_review' => '💬 커뮤니티 리뷰',
+        'expert_reviewer' => '🏅 전문가 리뷰어',
+        'top_contributor' => '⭐ 최고 기여자',
+        'verified_buyer' => '✅ 인증된 구매자',
+    ],
+    'placeholders' => [
+        'customer_name' => 'e.g: John Doe',
+        'customer_email' => 'e.g: example@domain.com',
+        'comment' => '여기에 리뷰 댓글을 작성하세요...',
+    ],
+    'helpers' => [
+        'star' => '1(최저)에서 5(최고)까지의 평점.',
+    ],
 ];

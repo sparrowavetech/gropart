@@ -95,6 +95,8 @@ return [
     'coupon_code' => 'کد کوپن: ":code"',
     'shipping_fee' => 'هزینه ارسال',
     'tax' => 'مالیات',
+    'shipping_tax' => 'مالیات بر حمل و نقل',
+
     'refunded_amount' => 'مبلغ استرداد شده',
     'amount_received' => 'مبلغ واقعی دریافتی',
     'download_invoice' => 'دانلود فاکتور',

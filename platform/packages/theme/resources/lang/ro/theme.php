@@ -208,6 +208,11 @@ return [
     ],
     'term_and_privacy_policy_url' => 'URL termeni și politică de confidențialitate',
     'site_title_separator' => 'Separator titlu SEO',
+    'site_title_helper' => 'Numele mărcii sau al afacerii dvs. Apare în fila browserului și în rezultatele căutării (de ex. "My Company").',
+    'show_site_name_helper' => 'Adaugă numele site-ului la fiecare titlu de pagină folosind separatorul selectat. Exemplu: "Page Title - My Company".',
+    'site_title_separator_helper' => 'Caracterul folosit între titlul paginii și numele site-ului. Exemplu cu liniuță: "Page Title - My Company". Exemplu cu bară verticală: "Page Title | My Company".',
+    'seo_title_helper' => 'Titlul paginii de start afișat în rezultatele motoarelor de căutare. Păstrați-l sub 60 de caractere pentru cea mai bună afișare. Lăsați gol pentru a utiliza titlul site-ului.',
+    'seo_description_helper' => 'Descrierea paginii de start afișată în rezultatele motoarelor de căutare. Păstrați-o între 120-160 de caractere pentru cea mai bună afișare.',
     'no_meta_keywords' => 'Cuvintele cheie meta au fost eliminate de Google, nu trebuie să adăugați cuvinte cheie meta pe site-ul dvs. Aflați mai multe: :link',
     'validation' => [
         'gtm_container_id_format' => 'ID-ul containerului GTM trebuie să fie în formatul GTM-XXXXXX (de ex., GTM-N7MK3KH2)',
@@ -389,6 +394,9 @@ return [
     ],
 
     'typography_primary' => 'Font principal',
+    'all_languages' => 'Toate limbile',
+    'shared_field_notice' => 'Acest câmp este partajat între toate limbile. Gestionați-l din limba implicită.',
+    'shared_section_notice' => 'Toate opțiunile din această secțiune sunt partajate între toate limbile. Comutați la limba implicită pentru a face modificări.',
     'admin_appearance' => [
         'show_admin_bar' => 'Afișați bara de administrare pentru administratorii autentificați, chiar și pe site-ul public',
         'show_admin_bar_helper' => 'Afișați o bara de instrumente de acces rapid la administrare în partea de sus a site-ului web când sunteți autentificat ca administrator',

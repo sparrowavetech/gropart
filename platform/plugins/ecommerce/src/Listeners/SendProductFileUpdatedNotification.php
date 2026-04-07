@@ -4,6 +4,7 @@ namespace Botble\Ecommerce\Listeners;
 
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\EmailHandler;
+use Botble\Base\Supports\EmailHandler as EmailHandlerSupport;
 use Botble\Ecommerce\Events\ProductFileUpdatedEvent;
 use Botble\Ecommerce\Models\OrderProduct;
 use Botble\Ecommerce\Models\ProductFile;
@@ -24,6 +25,7 @@ class SendProductFileUpdatedNotification implements ShouldQueue
         foreach ($orderProducts as $orderProduct) {
             $order = $orderProduct->order;
             $customer = $order->user;
+            $locale = $order->getOrderMetadata('customer_locale') ?: EmailHandlerSupport::getDefaultEmailLocale();
 
             EmailHandler::setModule(ECOMMERCE_MODULE_SCREEN_NAME)
                 ->setVariableValues([
@@ -39,7 +41,7 @@ class SendProductFileUpdatedNotification implements ShouldQueue
                         ];
                     })->all(),
                 ])
-                ->sendUsingTemplate('product-file-updated', $customer?->email ?: $order->address->email);
+                ->sendUsingTemplateWithLocale('product-file-updated', $customer?->email ?: $order->address->email, $locale);
         }
     }
 }

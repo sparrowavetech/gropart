@@ -56,6 +56,7 @@ $(function () {
                 if (!data.error) {
                     $modalLoading.addClass('d-none')
                     $modalFormContent.html(data)
+                    document.dispatchEvent(new Event('phone-number-field:init'))
                 } else {
                     Botble.showNotice('error', data.message)
                 }
@@ -116,13 +117,16 @@ $(function () {
                     Botble.showError(data.message)
                 } else {
                     Botble.showSuccess(data.message)
-                    const formAction = $('.page-wrapper form').prop('action')
-                    $('#address-histories').load(formAction + ' #address-histories > *')
                 }
-                _self.closest('.modal').modal('hide')
+            })
+            .catch(() => {
+                Botble.showError('Something went wrong. Please try again.')
             })
             .finally(() => {
+                _self.closest('.modal').modal('hide')
                 Botble.hideButtonLoading(_self)
+                const formAction = $('.page-wrapper form').prop('action')
+                $('#address-histories').load(formAction + ' #address-histories > *')
             })
     })
 })

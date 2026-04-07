@@ -79,11 +79,15 @@ class PublicCartController extends BaseController
     public function index(Request $request)
     {
         if ($token = $request->query('token')) {
-            $abandonedCartService = app(AbandonedCartService::class);
-            $abandonedCart = $abandonedCartService->recoverCart($token);
+            try {
+                $abandonedCartService = app(AbandonedCartService::class);
+                $abandonedCart = $abandonedCartService->recoverCart($token);
 
-            if ($abandonedCart) {
-                session()->flash('success', __('Your cart has been restored! Complete your purchase now.'));
+                if ($abandonedCart) {
+                    session()->flash('success', __('Your cart has been restored! Complete your purchase now.'));
+                }
+            } catch (Throwable) {
+                // Recovery failed — redirect to cart page gracefully
             }
 
             return redirect()->route('public.cart');

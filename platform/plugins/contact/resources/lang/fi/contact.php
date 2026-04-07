@@ -184,4 +184,6 @@ return [
     'subject_placeholder' => 'Aihe',
     'your_message' => 'Viestisi',
     'agree_terms_privacy' => 'Hyväksyn ehdot ja tietosuojakäytännön',
+    'agree_terms_privacy_link' => 'Hyväksyn :link',
+    'terms_and_privacy_policy' => 'ehdot ja tietosuojakäytännön',
 ];

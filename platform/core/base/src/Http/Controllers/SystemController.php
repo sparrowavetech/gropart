@@ -191,16 +191,17 @@ class SystemController extends BaseSystemController
 
         $this->pageTitle(trans('core/base::system.updater'));
 
-        $activated = $core->verifyLicense(false, 15);
         $isOutdated = false;
 
         try {
+            $activated = $core->verifyLicense(false, 15);
             $latestUpdate = $core->getLatestVersion();
 
             if ($latestUpdate) {
                 $isOutdated = version_compare($core->version(), $latestUpdate->version, '<');
             }
         } catch (ConnectionException $exception) {
+            $activated = $core->hasLicenseData();
             $latestUpdate = null;
 
             BaseHelper::logError($exception);

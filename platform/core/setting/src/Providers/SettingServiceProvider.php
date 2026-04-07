@@ -57,7 +57,6 @@ class SettingServiceProvider extends ServiceProvider implements DeferrableProvid
             ->loadAndPublishViews()
             ->loadAnonymousComponents()
             ->loadAndPublishTranslations()
-            ->loadAndPublishConfigurations(['email'])
             ->loadAndPublishConfigurations(['permissions'])
             ->loadMigrations()
             ->publishAssets();
@@ -78,7 +77,7 @@ class SettingServiceProvider extends ServiceProvider implements DeferrableProvid
         $events = $this->app['events'];
 
         $this->app->booted(function (): void {
-            EmailHandler::addTemplateSettings('base', config('core.setting.email', []), 'core');
+            EmailHandler::addTemplateSettings('base', config('core.base.email', []), 'core');
         });
 
         PanelSectionManager::default()

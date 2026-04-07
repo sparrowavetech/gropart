@@ -289,7 +289,8 @@ class LanguageAdvancedManager
     public static function registerTranslationImportExport(
         string $modelClass,
         callable|string $name,
-        array $permissions = []
+        array $permissions = [],
+        int $priority = 100
     ): void {
         if (! self::isSupported($modelClass)) {
             return;
@@ -307,7 +308,8 @@ class LanguageAdvancedManager
                 $modelClass,
                 $exportPermission,
                 $importPermission,
-                $itemKey
+                $itemKey,
+                $priority
             ): void {
                 $name = is_callable($name) ? $name() : $name;
 
@@ -317,7 +319,7 @@ class LanguageAdvancedManager
                         fn () => PanelSectionItem::make($itemKey)
                             ->setTitle($name)
                             ->withDescription(trans('plugins/language-advanced::language-advanced.import_description', ['name' => $name]))
-                            ->withPriority(100)
+                            ->withPriority($priority)
                             ->withPermission($importPermission)
                             ->withRoute('tools.data-synchronize.import.translations.index', ['type' => 'model', 'class' => $modelClass])
                     );
@@ -328,7 +330,7 @@ class LanguageAdvancedManager
                         fn () => PanelSectionItem::make($itemKey)
                             ->setTitle($name)
                             ->withDescription(trans('plugins/language-advanced::language-advanced.export_description', ['name' => $name]))
-                            ->withPriority(100)
+                            ->withPriority($priority)
                             ->withPermission($exportPermission)
                             ->withRoute('tools.data-synchronize.export.translations.index', ['type' => 'model', 'class' => $modelClass])
                     );

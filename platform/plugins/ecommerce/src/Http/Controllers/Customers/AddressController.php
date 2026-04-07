@@ -63,9 +63,9 @@ class AddressController extends BaseController
             ->withUpdatedSuccessMessage();
     }
 
-    public function destroy(Address $address)
+    public function destroy(int|string $id)
     {
-        $address->delete();
+        Address::query()->where('id', $id)->delete();
 
         return $this
             ->httpResponse()

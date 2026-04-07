@@ -27,4 +27,6 @@ return [
     'option_value_name_attribute' => 'Vaihtoehdon :key arvot',
     'please_choose_option_type' => 'Valitse vaihtoehdon tyyppi!',
     'no_global_options' => 'Globaaleja vaihtoehtoja ei ole vielä saatavilla. Lisää tuotevaihtoehdot ensin oletuskielellä.',
+    'price_per_product' => 'Hinta tuotetta kohti',
+    'price_per_product_helper' => 'Kun käytössä, valinnan hinta lisätään kerran tuotetta kohti eikä kerrottuna määrällä.',
 ];

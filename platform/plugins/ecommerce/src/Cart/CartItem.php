@@ -151,6 +151,8 @@ class CartItem implements Arrayable, Jsonable
             return $this->{$attribute};
         }
 
+        $optionPriceOnce = $this->options->get('option_price_once', 0);
+
         if ($attribute === 'priceTax') {
             if (! EcommerceHelper::isTaxEnabled()) {
                 return 0;
@@ -166,17 +168,17 @@ class CartItem implements Arrayable, Jsonable
         }
 
         if ($attribute === 'subtotal') {
-            return EcommerceHelper::roundPrice($this->qty * $this->price);
+            return EcommerceHelper::roundPrice($this->qty * $this->price + $optionPriceOnce);
         }
 
         if ($attribute === 'total') {
             $priceIncludesTax = $this->options->get('price_includes_tax', false);
 
             if ($priceIncludesTax) {
-                return $this->qty * $this->price;
+                return $this->qty * $this->price + $optionPriceOnce;
             }
 
-            return $this->qty * $this->price + $this->taxTotal;
+            return $this->qty * $this->price + $optionPriceOnce + $this->taxTotal;
         }
 
         if ($attribute === 'tax') {
@@ -199,7 +201,7 @@ class CartItem implements Arrayable, Jsonable
             }
 
             $priceIncludesTax = $this->options->get('price_includes_tax', false);
-            $itemPrice = $this->price * $this->qty;
+            $itemPrice = $this->price * $this->qty + $optionPriceOnce;
 
             if ($priceIncludesTax) {
                 return EcommerceHelper::roundPrice($itemPrice - ($itemPrice / (1 + $this->taxRate / 100)));

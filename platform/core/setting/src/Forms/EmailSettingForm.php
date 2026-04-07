@@ -41,6 +41,7 @@ class EmailSettingForm extends SettingForm
                         'ses' => 'SES',
                         'postmark' => 'Postmark',
                         'resend' => 'Resend',
+                        'sendgrid' => 'SendGrid',
                         'log' => 'Log (for testing only, will not send email)',
                         'array' => 'Array (for testing only, will not send email)',
                     ] + (function_exists('proc_open') ? ['sendmail' => 'Sendmail'] : [])))
@@ -88,9 +89,6 @@ class EmailSettingForm extends SettingForm
                     ->placeholder(trans('core/setting::setting.email.password_placeholder'))
                     ->helperText(trans('core/setting::setting.email.password_helper'))
                     ->maxLength(255)
-                    ->attributes([
-                        'type' => 'password',
-                    ])
             )
             ->add(
                 'email_local_domain',
@@ -213,6 +211,20 @@ class EmailSettingForm extends SettingForm
                 );
             })
             ->addCloseCollapsible('email_driver', 'resend')
+            ->addOpenCollapsible('email_driver', 'sendgrid', $mailer === 'sendgrid', ['class' => 'email-fields'])
+            ->when(! BaseHelper::hasDemoModeEnabled(), function (): void {
+                $this->add(
+                    'email_sendgrid_key',
+                    TextField::class,
+                    TextFieldOption::make()
+                        ->label(trans('core/setting::setting.email.sendgrid_key'))
+                        ->value(old('email_sendgrid_key', setting('email_sendgrid_key')))
+                        ->placeholder(trans('core/setting::setting.email.sendgrid_key_placeholder'))
+                        ->helperText(trans('core/setting::setting.email.sendgrid_key_helper'))
+                        ->maxLength(120)
+                );
+            })
+            ->addCloseCollapsible('email_driver', 'sendgrid')
             ->addOpenCollapsible('email_driver', 'sendmail', old('email_driver', $mailer) === 'sendmail', ['class' => 'email-fields'])
             ->add(
                 'email_sendmail_path',
@@ -259,9 +271,7 @@ class EmailSettingForm extends SettingForm
                     ->placeholder(trans('core/setting::setting.email.sender_email_placeholder', ['default' => 'admin@example.com']))
                     ->helperText(trans('core/setting::setting.email.sender_email_helper'))
                     ->maxLength(60)
-                    ->wrapperAttributes([
-                        'class' => 'mb-0',
-                    ])
             );
+
     }
 }

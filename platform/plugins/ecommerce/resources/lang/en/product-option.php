@@ -27,4 +27,6 @@ return [
     'option_value_name_attribute' => 'Values of option :key',
     'please_choose_option_type' => 'Please choose option type!',
     'no_global_options' => 'No global options available yet. Please add product options in the default language first.',
+    'price_per_product' => 'Price per product',
+    'price_per_product_helper' => 'When enabled, the option price is applied once per product, not multiplied by quantity.',
 ];

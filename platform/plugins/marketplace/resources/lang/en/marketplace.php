@@ -45,6 +45,9 @@ return [
         'store_verified_title' => 'Store Verification Approved',
         'store_verified_description' => 'Send notification when store is verified',
         'store_verified_subject' => 'Your store {{ store_name }} has been verified',
+        'store_low_stock_title' => 'Low stock notification',
+        'store_low_stock_description' => 'Send email to vendor when a product\'s stock drops below the low stock threshold',
+        'store_low_stock_subject' => 'Low stock alert: {{ product_name }} is running low',
         'store_unverified_title' => 'Store Verification Removed',
         'store_unverified_description' => 'Send notification when store verification is removed',
         'store_unverified_subject' => 'Verification status changed for {{ store_name }}',
@@ -138,6 +141,12 @@ return [
         'login_vendor_account_button' => 'Log in to your vendor account',
         'welcome_vendor_closing' => 'We\'re excited to see your store flourish on :site_title!',
 
+        // Low Stock
+        'store_low_stock_title' => 'Low Stock Alert',
+        'store_low_stock_message' => 'Your product <strong>:product_name</strong> is running low on stock with only <strong>:product_quantity</strong> item(s) remaining. The low stock threshold is set to <strong>:low_stock_threshold</strong>.',
+        'store_low_stock_restock' => 'Please restock this product to avoid missing sales.',
+        'store_low_stock_view_product' => 'View Product',
+
         // Store Verification
         'store_verified_title' => 'Store Verification Approved',
         'store_verified_message' => 'Congratulations! Your store has been successfully verified on <strong>:site_title</strong>. This verification badge will help build trust with your customers.',
@@ -191,6 +200,8 @@ return [
         'hide_become_vendor_menu_in_customer_dashboard_description' => 'If enabled, the "Become a vendor" menu will be hidden in the customer dashboard.',
         'enable_product_approval' => 'Enable product approval',
         'enable_product_approval_description' => 'If enabled, the admin must approve the product before it is published.',
+        'enable_stores_page' => 'Enable stores listing page?',
+        'enable_stores_page_helper' => 'If disabled, the stores listing page (e.g. /stores) will return a 404 error.',
         'hide_store_phone_number' => 'Hide store phone number?',
         'hide_store_phone_number_helper' => 'If enabled, the store phone number will be hidden from the public store page.',
         'hide_store_email' => 'Hide store email?',
@@ -199,6 +210,8 @@ return [
         'hide_store_address_helper' => 'If enabled, the store address will be hidden from the public store page.',
         'hide_store_social_links' => 'Hide store social links?',
         'hide_store_social_links_helper' => 'If enabled, the store social links will be hidden from the public store page.',
+        'hide_store_info_in_invoice' => 'Hide store info in invoice?',
+        'hide_store_info_in_invoice_helper' => 'If enabled, invoices will use the main site information instead of the vendor/store information.',
         'enable_vendor_categories_filter' => 'Enable vendor categories filter',
         'enable_vendor_categories_filter_description' => 'Show categories filter on vendor store page. Only categories that have vendor products will be displayed.',
         'allow_vendor_manage_shipping' => 'Allow vendor manage shipping?',
@@ -237,6 +250,8 @@ return [
         'media_file_types_can_be_uploaded_by_vendor_helper' => 'Specify the media file types that vendors can upload. Select them in the above list.',
         'allow_vendor_digital_products' => 'Allow vendors to sell digital products',
         'allow_vendor_digital_products_helper' => 'Enable this to allow vendors to create and sell digital/downloadable products.',
+        'low_stock_threshold' => 'Low stock threshold',
+        'low_stock_threshold_helper' => 'When a product\'s quantity drops to or below this number, the vendor will receive a low stock email notification. Default is 5.',
     ],
     'theme_options' => [
         'name' => 'Marketplace',
@@ -250,6 +265,8 @@ return [
     'store_url' => 'Store URL',
     'product_name' => 'Product name',
     'product_url' => 'Product URL',
+    'product_quantity' => 'Product quantity',
+    'low_stock_threshold' => 'Low stock threshold',
     'withdrawal_amount' => 'Withdrawal amount',
     'helpers' => [
         'store_status' => 'If you change the status other than ":status" this store\'s account will also change to ":customer"',

@@ -39,10 +39,20 @@ class LoginController extends BaseController
 
         Theme::breadcrumb()->add($title, route('customer.login'));
 
+        $currentHost = request()->getHost();
+
         if (request()->has('redirect') && request()->get('redirect')) {
-            session(['url.intended' => request()->get('redirect')]);
+            $redirect = request()->get('redirect');
+
+            if (parse_url($redirect, PHP_URL_HOST) === $currentHost || ! parse_url($redirect, PHP_URL_HOST)) {
+                session(['url.intended' => $redirect]);
+            }
         } elseif (! session()->has('url.intended') && ! in_array(url()->previous(), [route('customer.login'), route('customer.register')])) {
-            session(['url.intended' => url()->previous()]);
+            $previous = url()->previous();
+
+            if (parse_url($previous, PHP_URL_HOST) === $currentHost) {
+                session(['url.intended' => $previous]);
+            }
         }
 
         return Theme::scope(

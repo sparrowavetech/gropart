@@ -1169,7 +1169,14 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
                     } else {
                         MartApp.showSuccess(res.message)
                         $('.btn-compare .header-item-counter').text(res.data.count)
-                        $('.compare-page-content').load(window.location.href + ' .compare-page-content > *')
+
+                        if (res.data && res.data.count > 0) {
+                            let table = _self.closest('table')
+                            let columnIndex = _self.closest('td').index() + 1
+                            table.find('td:nth-child(' + columnIndex + ')').remove()
+                        } else {
+                            window.location.reload()
+                        }
                     }
                 },
                 error: (res) => {

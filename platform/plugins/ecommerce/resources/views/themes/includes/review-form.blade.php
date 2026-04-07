@@ -111,13 +111,13 @@
             </div>
 
             <div class="mb-3">
-                <label for="comment" class="form-label required">
+                <label for="comment" @class(['form-label', 'required' => EcommerceHelper::isReviewCommentRequired()])>
                     {{ trans('plugins/ecommerce::review.review') }}:
                 </label>
                 <textarea
                     class="form-control"
                     name="comment"
-                    required
+                    @if(EcommerceHelper::isReviewCommentRequired()) required @endif
                     rows="8"
                     placeholder="{{ trans('plugins/ecommerce::review.write_your_review') }}"
                     @disabled(! auth('customer')->check())

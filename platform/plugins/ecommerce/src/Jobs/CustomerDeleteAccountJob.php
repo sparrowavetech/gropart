@@ -3,6 +3,7 @@
 namespace Botble\Ecommerce\Jobs;
 
 use Botble\Base\Facades\EmailHandler;
+use Botble\Base\Supports\EmailHandler as EmailHandlerSupport;
 use Botble\Ecommerce\Events\AccountDeletedEvent;
 use Botble\Ecommerce\Events\AccountDeletingEvent;
 use Botble\Ecommerce\Models\Customer;
@@ -44,7 +45,7 @@ class CustomerDeleteAccountJob implements ShouldQueue
 
         EmailHandler::setModule(ECOMMERCE_MODULE_SCREEN_NAME)
             ->setVariableValue('customer_name', $name)
-            ->sendUsingTemplate('customer-deletion-request-completed', $email);
+            ->sendUsingTemplateWithLocale('customer-deletion-request-completed', $email, EmailHandlerSupport::getDefaultEmailLocale());
 
         AccountDeletedEvent::dispatch($email, $name, $customer);
     }

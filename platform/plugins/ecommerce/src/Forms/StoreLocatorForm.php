@@ -3,7 +3,7 @@
 namespace Botble\Ecommerce\Forms;
 
 use Botble\Base\Forms\FieldOptions\CheckboxFieldOption;
-use Botble\Base\Forms\Fields\CheckboxField;
+use Botble\Base\Forms\Fields\OnOffCheckboxField;
 use Botble\Base\Forms\Fields\TextField;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Ecommerce\Forms\Concerns\HasLocationFields;
@@ -66,10 +66,10 @@ class StoreLocatorForm extends FormAbstract
             )
             ->add(
                 'is_shipping_location',
-                CheckboxField::class,
+                OnOffCheckboxField::class,
                 CheckboxFieldOption::make()
                     ->label(trans('plugins/ecommerce::store-locator.is_shipping_location'))
-                    ->checked($this->getModel() && $this->getModel()->is_shipping_location)
+                    ->value($this->getModel() && $this->getModel()->is_shipping_location)
                     ->colspan(6)
             );
     }

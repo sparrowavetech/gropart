@@ -120,6 +120,7 @@ return [
     'apply' => 'Terapkan',
     'available' => 'Tersedia',
     'back_to_return_requests' => 'Kembali ke Permintaan Pengembalian',
+    'backorder_warning' => 'Peringatan: Produk ini sedang pre-order dan pengiriman mungkin lebih lama.',
     'choose_reason' => 'Pilih Alasan',
     'clear' => 'Hapus',
     'clear_all_filters' => 'Hapus semua filter',

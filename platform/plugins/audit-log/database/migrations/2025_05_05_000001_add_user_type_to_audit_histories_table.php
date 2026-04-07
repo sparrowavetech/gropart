@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        if (Schema::hasColumn('audit_histories', 'reference_user')) {
+        if (! Schema::hasColumn('audit_histories', 'actor_id')) {
             Schema::table('audit_histories', function (Blueprint $table): void {
                 $table->renameColumn('reference_user', 'actor_id');
             });
@@ -16,12 +16,8 @@ return new class () extends Migration {
 
         if (! Schema::hasColumn('audit_histories', 'user_type')) {
             Schema::table('audit_histories', function (Blueprint $table): void {
-                $table->string('user_type')->nullable()->after('user_id');
+                $table->string('user_type')->nullable()->after('user_id')->default(addslashes(User::class));
             });
-
-            DB::table('audit_histories')->update([
-                'user_type' => User::class,
-            ]);
         }
     }
 

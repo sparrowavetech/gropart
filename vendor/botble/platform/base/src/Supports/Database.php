@@ -24,7 +24,7 @@ class Database
         } catch (Throwable $exception) {
             $config = DB::getConfig();
 
-            $command = 'mysql --user="%s" --password="%s" --host="%s" --port="%s" "%s" < "%s"';
+            $command = 'mysql --init-command="SET sql_mode=\'\'" --user="%s" --password="%s" --host="%s" --port="%s" "%s" < "%s"';
 
             $sql = sprintf(
                 $command,

@@ -109,4 +109,23 @@ return [
         'images_mimes' => 'Vaizdai turi būti JPG, JPEG arba PNG formato.',
         'images_file_max' => 'Kiekvienas vaizdas negali viršyti :max KB.',
     ],
+    'badge_type' => 'Atsiliepimo ženklelis',
+    'badge_type_help' => 'Pasirinkite ženklelį, rodomą šiame atsiliepime. „Automatinis aptikimas" rodo „Nupirkta prieš X" klientams, turintiems užsakymų.',
+    'badge_types' => [
+        'auto' => 'Automatinis aptikimas',
+        'none' => 'Be ženklelio',
+        'purchased' => '✅ Nupirkta',
+        'community_review' => '💬 Bendruomenės atsiliepimas',
+        'expert_reviewer' => '🏅 Eksperto recenzentas',
+        'top_contributor' => '⭐ Geriausias prisidėjęs',
+        'verified_buyer' => '✅ Patvirtintas pirkėjas',
+    ],
+    'placeholders' => [
+        'customer_name' => 'e.g: John Doe',
+        'customer_email' => 'e.g: example@domain.com',
+        'comment' => 'Čia įrašykite atsiliepimo komentarą...',
+    ],
+    'helpers' => [
+        'star' => 'Įvertinimas nuo 1 (žemiausias) iki 5 (aukščiausias).',
+    ],
 ];

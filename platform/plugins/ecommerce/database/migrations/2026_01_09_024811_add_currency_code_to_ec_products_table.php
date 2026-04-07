@@ -7,6 +7,10 @@ use Illuminate\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
+        if (Schema::hasColumn('ec_products', 'currency_code')) {
+            return;
+        }
+
         Schema::table('ec_products', function (Blueprint $table): void {
             $table->string('currency_code', 10)
                 ->nullable()

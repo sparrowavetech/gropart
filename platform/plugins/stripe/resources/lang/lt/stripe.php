@@ -2,6 +2,9 @@
 
 return [
     'webhook_secret' => 'Webhook slaptažodis',
+    'webhook_secret_helper' => 'Tai rasite savo Stripe Dashboard skiltyje Developers > Webhooks > Signing secret.',
+    'public_key_helper' => 'Tai rasite savo Stripe Dashboard skiltyje Developers > API keys.',
+    'secret_key_helper' => 'Tai rasite savo Stripe Dashboard skiltyje Developers > API keys. Laikykite šį raktą konfidencialų.',
     'webhook_setup_guide' => [
         'title' => 'Stripe Webhook nustatymo vadovas',
         'description' => 'Vykdykite šiuos veiksmus, kad nustatytumėte Stripe webhook',

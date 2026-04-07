@@ -208,6 +208,11 @@ return [
     ],
     'term_and_privacy_policy_url' => 'Bedingungen und Datenschutzrichtlinien -URL',
     'site_title_separator' => 'SEO -Titelabscheider',
+    'site_title_helper' => 'Ihr Marken- oder Unternehmensname. Erscheint im Browser-Tab und in den Suchergebnissen (z.B. "My Company").',
+    'show_site_name_helper' => 'Fügt den Website-Namen mit dem ausgewählten Trennzeichen an jeden Seitentitel an. Beispiel: "Page Title - My Company".',
+    'site_title_separator_helper' => 'Das Zeichen, das zwischen dem Seitentitel und dem Website-Namen verwendet wird. Beispiel mit Bindestrich: "Page Title - My Company". Beispiel mit senkrechtem Strich: "Page Title | My Company".',
+    'seo_title_helper' => 'Der Startseiten-Titel in den Suchmaschinenergebnissen. Halten Sie ihn unter 60 Zeichen für die beste Anzeige. Leer lassen, um den Website-Titel zu verwenden.',
+    'seo_description_helper' => 'Die Startseiten-Beschreibung in den Suchmaschinenergebnissen. Halten Sie sie zwischen 120 und 160 Zeichen für die beste Anzeige.',
     'no_meta_keywords' => 'Meta keywords was removed by Google, you don\'t need to add meta keywords to your website. Learn more: :link',
     'validation' => [
         'gtm_container_id_format' => 'GTM Container ID must be in format GTM-XXXXXX (e.g., GTM-N7MK3KH2)',
@@ -389,6 +394,9 @@ return [
     ],
 
     'typography_primary' => 'Primäre Schriftart',
+    'all_languages' => 'Alle Sprachen',
+    'shared_field_notice' => 'Dieses Feld wird für alle Sprachen geteilt. Verwalten Sie es in der Standardsprache.',
+    'shared_section_notice' => 'Alle Optionen in diesem Abschnitt werden für alle Sprachen geteilt. Wechseln Sie zur Standardsprache, um Änderungen vorzunehmen.',
     'admin_appearance' => [
         'show_admin_bar' => 'Admin-Leiste für eingeloggte Administratoren anzeigen, auch auf der öffentlichen Seite',
         'show_admin_bar_helper' => 'Zeigen Sie eine Schnellzugriffs-Admin-Symbolleiste oben auf der Website an, wenn Sie als Administrator angemeldet sind',

@@ -17,7 +17,8 @@ class CartItemResource extends JsonResource
     {
         $originalPrice = Arr::get($this->options, 'original_price');
         $taxPrice = $this->price * Arr::get($this->options, 'taxRate') / 100;
-        $totalPrice = $this->price * $this->qty;
+        $optionPriceOnce = Arr::get($this->options, 'option_price_once', 0);
+        $totalPrice = $this->price * $this->qty + $optionPriceOnce;
 
         $options = collect(Arr::get($this->options, 'options.optionCartValue', []))->map(function ($item) use ($originalPrice) {
             $affectType = Arr::get(Arr::first($item), 'affect_type');

@@ -95,6 +95,8 @@ return [
     'coupon_code' => 'কুপন কোড: ":code"',
     'shipping_fee' => 'শিপিং ফি',
     'tax' => 'ট্যাক্স',
+    'shipping_tax' => 'শিপিং এর উপর কর',
+
     'refunded_amount' => 'রিফান্ড করা পরিমাণ',
     'amount_received' => 'প্রকৃতপক্ষে প্রাপ্ত পরিমাণ',
     'download_invoice' => 'ইনভয়েস ডাউনলোড করুন',

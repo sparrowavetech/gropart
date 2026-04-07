@@ -65,4 +65,5 @@ return [
     'please_select_record' => 'Bitte wählen Sie mindestens einen Datensatz aus, um diese Aktion auszuführen!',
     'checkbox' => 'Kontrollkästchen',
     'toggle_columns' => 'Spalten umschalten',
+    'created_by' => 'Erstellt von',
 ];

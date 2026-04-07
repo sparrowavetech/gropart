@@ -95,6 +95,8 @@ return [
     'coupon_code' => 'Couponcode: ":code"',
     'shipping_fee' => 'Verzendkosten',
     'tax' => 'Belasting',
+    'shipping_tax' => 'Belasting op verzending',
+
     'refunded_amount' => 'Gerestitueerd bedrag',
     'amount_received' => 'Het daadwerkelijk ontvangen bedrag',
     'download_invoice' => 'Factuur downloaden',

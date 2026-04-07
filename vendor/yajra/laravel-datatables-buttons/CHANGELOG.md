@@ -1,40 +1,36 @@
-## [12.3.1](https://github.com/yajra/laravel-datatables-buttons/compare/v12.3.0...v12.3.1) (2025-12-02)
+# [13.2.0](https://github.com/yajra/laravel-datatables-buttons/compare/v13.1.0...v13.2.0) (2026-03-28)
 
 
 ### Bug Fixes
 
-* trigger semantic release for [#205](https://github.com/yajra/laravel-datatables-buttons/issues/205) ([2a39b45](https://github.com/yajra/laravel-datatables-buttons/commit/2a39b4573a8ab23724615fbd2136ab02842e47a9))
+* pint :robot: ([9568431](https://github.com/yajra/laravel-datatables-buttons/commit/9568431850ba339642406fce023341e1e7bd2f6b))
 
-# Laravel DataTables Buttons Plugin CHANGELOG
 
-## v12.3.0 - 2025-10-01
+### Features
 
-- feat: DataTable as route action #201
+* export support for enum ([fb94866](https://github.com/yajra/laravel-datatables-buttons/commit/fb9486658883964a1090712fa87b16cd210077fb))
 
-## v12.2.1 - 2025-10-01
+# [13.1.0](https://github.com/yajra/laravel-datatables-buttons/compare/v13.0.2...v13.1.0) (2026-03-28)
 
-- fix: defaults override via options #200
 
-## v12.2.0 - 2025-10-01
+### Bug Fixes
 
-- feat: improve html builder #199
+* php 8.3 compatibility ([dff9d75](https://github.com/yajra/laravel-datatables-buttons/commit/dff9d75ea48f08c56a4f3caa13920319902f8359))
+* pint :robot: ([ab0efe8](https://github.com/yajra/laravel-datatables-buttons/commit/ab0efe8ee52fdb6b4d248af7131ee790a603b0f8))
+* **sonar:** Refactor this function to reduce its Cognitive Complexity from 18 to the 15 allowed. ([ef5d0b1](https://github.com/yajra/laravel-datatables-buttons/commit/ef5d0b17366dfbbcbc48d14f24d1dd1903566ea2))
 
-## v12.1.3 - 2025-04-07
 
-- fix: custom ajax action #197
+### Features
 
-## v12.1.2 - 2025-03-18
+* export using OpenSpout - drop fastexcel ([cf052c3](https://github.com/yajra/laravel-datatables-buttons/commit/cf052c3a2edd427675ffeb755b752e571631d1e2))
 
-- fix: stubs with generics #196
+## [13.0.1](https://github.com/yajra/laravel-datatables-buttons/compare/v13.0.0...v13.0.1) (2026-03-25)
 
-## v12.1.1 - 2025-02-26
 
-- fix: stubs #195
+### Bug Fixes
 
-## v12.1.0 - 2025-02-26
+* use minifiedAjax instead of postAjax ([1da6c2e](https://github.com/yajra/laravel-datatables-buttons/commit/1da6c2e926a0856836ca329d9407b9edd4c5e489))
 
-- feat: Macroable DataTable Base Class #193
+## v13.0.0 - 2026-03-25
 
-## v12.0.0 - 2025-02-26
-
-- Laravel 12.x support
+- Laravel 13 support

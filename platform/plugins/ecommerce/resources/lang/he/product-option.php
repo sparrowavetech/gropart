@@ -27,4 +27,6 @@ return [
     'option_value_name_attribute' => 'ערכים של אפשרות :key',
     'please_choose_option_type' => 'אנא בחר סוג אפשרות!',
     'no_global_options' => 'אין עדיין אפשרויות גלובליות זמינות. אנא הוסף אפשרויות מוצר בשפת ברירת המחדל תחילה.',
+    'price_per_product' => 'מחיר למוצר',
+    'price_per_product_helper' => 'כאשר מופעל, מחיר האפשרות מוחל פעם אחת למוצר, ולא מוכפל בכמות.',
 ];

@@ -7,6 +7,7 @@
                     src="{{ $image }}"
                     alt="{{ $shippingItem['name'] }}"
                     style="max-height: 40px; max-width: 55px"
+                    onerror="this.style.display='none'"
                 >
             @endif
             <span>

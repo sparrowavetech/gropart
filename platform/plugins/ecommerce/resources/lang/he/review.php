@@ -109,4 +109,23 @@ return [
         'images_mimes' => 'התמונות חייבות להיות בפורמט JPG, JPEG או PNG.',
         'images_file_max' => 'כל תמונה לא יכולה לעלות על :max KB.',
     ],
+    'badge_type' => 'תגית ביקורת',
+    'badge_type_help' => 'בחר תגית להצגה בביקורת זו. "זיהוי אוטומטי" מציג "נרכש לפני X" עבור לקוחות עם הזמנות.',
+    'badge_types' => [
+        'auto' => 'זיהוי אוטומטי',
+        'none' => 'ללא תגית',
+        'purchased' => '✅ נרכש',
+        'community_review' => '💬 ביקורת קהילה',
+        'expert_reviewer' => '🏅 מבקר מומחה',
+        'top_contributor' => '⭐ תורם מוביל',
+        'verified_buyer' => '✅ קונה מאומת',
+    ],
+    'placeholders' => [
+        'customer_name' => 'e.g: John Doe',
+        'customer_email' => 'e.g: example@domain.com',
+        'comment' => 'כתוב את תגובת הביקורת כאן...',
+    ],
+    'helpers' => [
+        'star' => 'דירוג מ-1 (הנמוך ביותר) עד 5 (הגבוה ביותר).',
+    ],
 ];

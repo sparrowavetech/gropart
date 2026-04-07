@@ -109,4 +109,23 @@ return [
         'images_mimes' => '圖片必須是JPG、JPEG或PNG格式。',
         'images_file_max' => '每張圖片不能超過:max KB。',
     ],
+    'badge_type' => '評論徽章',
+    'badge_type_help' => '選擇要在此評論上顯示的徽章。「自動偵測」會為有訂單的客戶顯示「X前購買」。',
+    'badge_types' => [
+        'auto' => '自動偵測',
+        'none' => '無徽章',
+        'purchased' => '✅ 已購買',
+        'community_review' => '💬 社群評論',
+        'expert_reviewer' => '🏅 專家評論者',
+        'top_contributor' => '⭐ 頂級貢獻者',
+        'verified_buyer' => '✅ 認證買家',
+    ],
+    'placeholders' => [
+        'customer_name' => 'e.g: John Doe',
+        'customer_email' => 'e.g: example@domain.com',
+        'comment' => '在此處寫下評論內容...',
+    ],
+    'helpers' => [
+        'star' => '評分從1（最低）到5（最高）。',
+    ],
 ];

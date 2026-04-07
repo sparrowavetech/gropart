@@ -184,4 +184,6 @@ return [
     'subject_placeholder' => 'Téma',
     'your_message' => 'Az Ön üzenete',
     'agree_terms_privacy' => 'Elfogadom a Feltételeket és az Adatvédelmi szabályzatot',
+    'agree_terms_privacy_link' => 'Elfogadom a :link',
+    'terms_and_privacy_policy' => 'Feltételeket és az Adatvédelmi szabályzatot',
 ];

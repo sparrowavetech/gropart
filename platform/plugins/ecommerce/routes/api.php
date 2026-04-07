@@ -32,6 +32,7 @@ Route::group([
     Route::get('download/{token}/{order_id}', [DownloadController::class, 'downloadFile'])->name('api.ecommerce.download.download-file');
     Route::get('orders/download-proof/{token}/{order_id}', [OrderController::class, 'downloadProofFile'])->name('api.ecommerce.orders.download-proof-file');
     Route::get('products', [ProductController::class, 'index']);
+    Route::get('products/search', [ProductController::class, 'search']);
     Route::get('products/{slug}', [ProductController::class, 'show']);
     Route::get('products/{slug}/related', [ProductController::class, 'relatedProducts']);
     Route::get('products/{slug}/cross-sale', [ProductController::class, 'getCrossSaleProducts']);

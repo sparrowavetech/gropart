@@ -54,7 +54,7 @@
         ])
 
         @if (!empty($cartItem->options['options']))
-            {!! render_product_options_html($cartItem->options['options'], $product->original_price) !!}
+            {!! render_product_options_html($cartItem->options['options'], $product->front_sale_price) !!}
         @endif
 
         @if (EcommerceHelper::isTaxEnabled() && EcommerceHelper::isDisplayItemTaxAtCheckout() && $cartItem->taxRate > 0 && $cartItem->taxTotal > 0 && ! $cartItem->options->get('price_includes_tax', false))

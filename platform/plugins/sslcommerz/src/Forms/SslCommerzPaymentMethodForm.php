@@ -31,14 +31,18 @@ class SslCommerzPaymentMethodForm extends PaymentMethodForm
                 TextField::class,
                 TextFieldOption::make()
                     ->label(trans('plugins/sslcommerz::sslcommerz.store_id'))
+                    ->placeholder('your_store_id')
+                    ->helperText(trans('plugins/sslcommerz::sslcommerz.store_id_helper'))
                     ->value(BaseHelper::hasDemoModeEnabled() ? '*******************************' : get_payment_setting('store_id', SSLCOMMERZ_PAYMENT_METHOD_NAME))
-                    ->attributes(['data-counter' => 400])
+                    ->maxLength(400)
             )
             ->add(
                 sprintf('payment_%s_store_password', SSLCOMMERZ_PAYMENT_METHOD_NAME),
                 'password',
                 TextFieldOption::make()
                     ->label(trans('plugins/sslcommerz::sslcommerz.store_password'))
+                    ->placeholder('your_store_password')
+                    ->helperText(trans('plugins/sslcommerz::sslcommerz.store_password_helper'))
                     ->value(BaseHelper::hasDemoModeEnabled() ? '*******************************' : get_payment_setting('store_password', SSLCOMMERZ_PAYMENT_METHOD_NAME))
             )
             ->add(

@@ -162,7 +162,7 @@ trait HasColumns
     /**
      * Get collection of columns.
      *
-     * @return \Illuminate\Support\Collection<array-key, Column>
+     * @return Collection<array-key, Column>
      */
     public function getColumns(): Collection
     {

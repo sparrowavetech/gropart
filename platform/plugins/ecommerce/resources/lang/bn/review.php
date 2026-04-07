@@ -109,4 +109,23 @@ return [
         'images_mimes' => 'ছবি অবশ্যই JPG, JPEG বা PNG ফরম্যাটে হতে হবে।',
         'images_file_max' => 'প্রতিটি ছবি :max KB এর বেশি হতে পারে না।',
     ],
+    'badge_type' => 'রিভিউ ব্যাজ',
+    'badge_type_help' => 'এই রিভিউতে প্রদর্শনের জন্য একটি ব্যাজ বেছে নিন। "অটো ডিটেক্ট" অর্ডার সহ গ্রাহকদের জন্য "X আগে কেনা হয়েছে" দেখায়।',
+    'badge_types' => [
+        'auto' => 'অটো ডিটেক্ট',
+        'none' => 'কোনো ব্যাজ নেই',
+        'purchased' => '✅ ক্রয় করা হয়েছে',
+        'community_review' => '💬 কমিউনিটি রিভিউ',
+        'expert_reviewer' => '🏅 বিশেষজ্ঞ রিভিউয়ার',
+        'top_contributor' => '⭐ শীর্ষ অবদানকারী',
+        'verified_buyer' => '✅ যাচাইকৃত ক্রেতা',
+    ],
+    'placeholders' => [
+        'customer_name' => 'e.g: John Doe',
+        'customer_email' => 'e.g: example@domain.com',
+        'comment' => 'এখানে রিভিউ মন্তব্য লিখুন...',
+    ],
+    'helpers' => [
+        'star' => '১ (সর্বনিম্ন) থেকে ৫ (সর্বোচ্চ) পর্যন্ত রেটিং।',
+    ],
 ];

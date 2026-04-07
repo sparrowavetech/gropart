@@ -57,6 +57,7 @@ class ProductReviewSettingForm extends SettingForm
             ->add('review_max_file_size', 'number', [
                 'label' => trans('plugins/ecommerce::setting.product_review.form.review.max_file_size'),
                 'value' => EcommerceHelper::reviewMaxFileSize(),
+                'helper_text' => trans('plugins/ecommerce::setting.product_review.form.review.max_file_size_help'),
                 'attr' => [
                     'min' => 1,
                     'max' => 1024,
@@ -65,6 +66,7 @@ class ProductReviewSettingForm extends SettingForm
             ->add('review_max_file_number', 'number', [
                 'label' => trans('plugins/ecommerce::setting.product_review.form.review.max_file_number'),
                 'value' => EcommerceHelper::reviewMaxFileNumber(),
+                'helper_text' => trans('plugins/ecommerce::setting.product_review.form.review.max_file_number_help'),
                 'attr' => [
                     'min' => 1,
                     'max' => 100,
@@ -79,16 +81,29 @@ class ProductReviewSettingForm extends SettingForm
                     ->helperText(trans('plugins/ecommerce::setting.product_review.form.display_uploaded_customer_review_images_list_help'))
             )
             ->add('close_fieldset_review_image_settings', 'html', ['html' => '</fieldset>'])
-            ->add('only_allow_customers_purchased_to_review', 'onOffCheckbox', [
-                'label' => trans('plugins/ecommerce::setting.product_review.form.only_allow_customers_purchased_to_review'),
-                'value' => EcommerceHelper::onlyAllowCustomersPurchasedToReview(),
-            ])
+            ->add(
+                'review_comment_required',
+                OnOffCheckboxField::class,
+                OnOffFieldOption::make()
+                    ->label(trans('plugins/ecommerce::setting.product_review.form.review_comment_required'))
+                    ->value(EcommerceHelper::isReviewCommentRequired())
+                    ->helperText(trans('plugins/ecommerce::setting.product_review.form.review_comment_required_help'))
+            )
+            ->add(
+                'only_allow_customers_purchased_to_review',
+                OnOffCheckboxField::class,
+                OnOffFieldOption::make()
+                    ->label(trans('plugins/ecommerce::setting.product_review.form.only_allow_customers_purchased_to_review'))
+                    ->value(EcommerceHelper::onlyAllowCustomersPurchasedToReview())
+                    ->helperText(trans('plugins/ecommerce::setting.product_review.form.only_allow_customers_purchased_to_review_help'))
+            )
             ->add(
                 'review_need_to_be_approved',
                 OnOffCheckboxField::class,
                 OnOffFieldOption::make()
                     ->label(trans('plugins/ecommerce::setting.product_review.form.review_need_to_be_approved'))
-                    ->value(get_ecommerce_setting('review_need_to_be_approved')),
+                    ->value(get_ecommerce_setting('review_need_to_be_approved'))
+                    ->helperText(trans('plugins/ecommerce::setting.product_review.form.review_need_to_be_approved_help'))
             )
             ->add(
                 'show_customer_full_name',

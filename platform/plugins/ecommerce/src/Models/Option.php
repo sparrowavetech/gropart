@@ -15,6 +15,7 @@ class Option extends BaseModel
         'name',
         'option_type',
         'required',
+        'price_per_product',
         'product_id',
         'order',
     ];

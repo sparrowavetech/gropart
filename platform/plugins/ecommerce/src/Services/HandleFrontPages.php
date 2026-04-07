@@ -123,7 +123,7 @@ class HandleFrontPages
                 SeoHelper::twitter()->setCard($card);
 
                 if (Helper::handleViewCount($product, 'viewed_product')) {
-                    event(new ProductViewed($product, Carbon::now()));
+                    event(new ProductViewed($product->getKey(), Carbon::now()));
 
                     EcommerceHelper::handleCustomerRecentlyViewedProduct($product);
                 }
@@ -359,7 +359,7 @@ class HandleFrontPages
                 }
 
                 $tag = ProductTag::query()
-                    ->with(['slugable', 'products'])
+                    ->with(['slugable'])
                     ->where($condition)
                     ->firstOrFail();
 
@@ -425,7 +425,7 @@ class HandleFrontPages
                 }
 
                 $collection = ProductCollection::query()
-                    ->with(['slugable', 'products'])
+                    ->with(['slugable'])
                     ->where($condition)
                     ->firstOrFail();
 

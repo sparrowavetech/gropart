@@ -80,4 +80,6 @@ return [
     'public_single_ending_url' => env('PUBLIC_SINGLE_ENDING_URL'),
 
     'extra_date_format' => env('CMS_THEME_EXTRA_DATE_FORMAT'),
+
+    'enable_shared_theme_options' => env('CMS_THEME_ENABLE_SHARED_OPTIONS', false),
 ];

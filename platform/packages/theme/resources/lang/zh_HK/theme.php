@@ -208,6 +208,11 @@ return [
     ],
     'term_and_privacy_policy_url' => '條款及私隱政策網址',
     'site_title_separator' => 'SEO 標題分隔符',
+    'site_title_helper' => '您的品牌或企業名稱。顯示在瀏覽器選項卡和搜尋結果中（例如 "My Company"）。',
+    'show_site_name_helper' => '使用所選分隔符將網站名稱附加到每個頁面標題。範例："Page Title - My Company"。',
+    'site_title_separator_helper' => '用於頁面標題與網站名稱之間的字元。破折號範例："Page Title - My Company"。豎線範例："Page Title | My Company"。',
+    'seo_title_helper' => '顯示在搜尋引擎結果中的首頁標題。保持在60個字元以內以獲得最佳顯示效果。留空則使用網站標題。',
+    'seo_description_helper' => '顯示在搜尋引擎結果中的首頁描述。保持在120-160個字元之間以獲得最佳顯示效果。',
     'no_meta_keywords' => 'Meta keywords was removed by Google, you don\'t need to add meta keywords to your website. Learn more: :link',
     'validation' => [
         'gtm_container_id_format' => 'GTM Container ID must be in format GTM-XXXXXX (e.g., GTM-N7MK3KH2)',
@@ -389,6 +394,9 @@ return [
     ],
 
     'typography_primary' => '主要字體',
+    'all_languages' => '所有語言',
+    'shared_field_notice' => '此欄位在所有語言中共用。請從預設語言進行管理。',
+    'shared_section_notice' => '此部分中的所有選項在所有語言中共用。請切換到預設語言進行更改。',
     'admin_appearance' => [
         'show_admin_bar' => '為已登入的管理員顯示管理欄，即使在前台網站',
         'show_admin_bar_helper' => '以管理員身份登入時，在網站頂部顯示快速存取管理工具列',

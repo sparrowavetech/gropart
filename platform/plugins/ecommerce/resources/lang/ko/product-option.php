@@ -27,4 +27,6 @@ return [
     'option_value_name_attribute' => '옵션 :key의 값',
     'please_choose_option_type' => '옵션 유형을 선택해 주세요!',
     'no_global_options' => '아직 글로벌 옵션이 없습니다. 먼저 기본 언어로 제품 옵션을 추가해 주세요.',
+    'price_per_product' => '제품당 가격',
+    'price_per_product_helper' => '활성화하면 옵션 가격이 제품당 한 번 적용되며 수량에 곱하지 않습니다.',
 ];

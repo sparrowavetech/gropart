@@ -120,6 +120,7 @@ return [
     'apply' => 'Áp dụng',
     'available' => 'Có sẵn',
     'back_to_return_requests' => 'Quay lại yêu cầu hoàn hàng',
+    'backorder_warning' => 'Cảnh báo: Sản phẩm đang đặt trước và có thể giao lâu hơn.',
     'choose_reason' => 'Chọn lý do',
     'clear' => 'Xóa',
     'clear_all_filters' => 'Xóa tất cả bộ lọc',

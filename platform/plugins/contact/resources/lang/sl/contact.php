@@ -184,4 +184,6 @@ return [
     'subject_placeholder' => 'Predmet',
     'your_message' => 'Vaše sporočilo',
     'agree_terms_privacy' => 'Strinjam se s pogoji in politiko zasebnosti',
+    'agree_terms_privacy_link' => 'Strinjam se s :link',
+    'terms_and_privacy_policy' => 'pogoji in politiko zasebnosti',
 ];

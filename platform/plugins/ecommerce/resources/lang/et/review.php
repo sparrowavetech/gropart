@@ -109,4 +109,23 @@ return [
         'images_mimes' => 'Pildid peavad olema JPG, JPEG või PNG formaadis.',
         'images_file_max' => 'Iga pilt ei saa ületada :max KB.',
     ],
+    'badge_type' => 'Arvustuse märk',
+    'badge_type_help' => 'Valige selle arvustuse jaoks kuvatav märk. "Automaatne tuvastamine" näitab "Ostetud X tagasi" klientidele, kellel on tellimusi.',
+    'badge_types' => [
+        'auto' => 'Automaatne tuvastamine',
+        'none' => 'Märk puudub',
+        'purchased' => '✅ Ostetud',
+        'community_review' => '💬 Kogukonna arvustus',
+        'expert_reviewer' => '🏅 Ekspertarvustaja',
+        'top_contributor' => '⭐ Tippkaastöötaja',
+        'verified_buyer' => '✅ Kinnitatud ostja',
+    ],
+    'placeholders' => [
+        'customer_name' => 'e.g: John Doe',
+        'customer_email' => 'e.g: example@domain.com',
+        'comment' => 'Kirjutage arvustuse kommentaar siia...',
+    ],
+    'helpers' => [
+        'star' => 'Hinnang 1-st (madalaim) kuni 5-ni (kõrgeim).',
+    ],
 ];

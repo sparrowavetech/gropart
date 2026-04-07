@@ -18,7 +18,9 @@
                     aria-expanded="{{ $isParentActive ? 'true' : 'false' }}"
                 @endif
             >
-                <x-core::icon :name="$item['icon']" />
+                @if($item['icon'])
+                    <x-core::icon :name="$item['icon']" />
+                @endif
                 {{ $item['name'] }}
                 @if($hasChildren)
                     <x-core::icon name="ti ti-chevron-down" class="menu-arrow" />
@@ -37,7 +39,9 @@
                                 href="{{ $child['url'] }}"
                                 @class(['active' => $child['active']])
                             >
-                                <x-core::icon :name="$child['icon']" />
+                                @if($child['icon'])
+                                    <x-core::icon :name="$child['icon']" />
+                                @endif
                                 {{ $child['name'] }}
                             </a>
                         </li>

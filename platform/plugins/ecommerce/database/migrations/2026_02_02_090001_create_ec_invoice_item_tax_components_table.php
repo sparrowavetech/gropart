@@ -7,6 +7,10 @@ use Illuminate\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
+        if (Schema::hasTable('ec_invoice_item_tax_components')) {
+            return;
+        }
+
         Schema::create('ec_invoice_item_tax_components', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('invoice_item_id')->constrained('ec_invoice_items')->cascadeOnDelete();

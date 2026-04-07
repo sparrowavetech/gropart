@@ -25,12 +25,16 @@ class CreateCountryTranslationListener
 
             $row = $event->row;
 
-            DB::table('countries_translations')->insertOrIgnore([
-                'countries_id' => $event->country->getKey(),
-                'lang_code' => $language->lang_code,
-                'name' => Arr::get($row, "name_$language->lang_code", Arr::get($row, 'name')),
-                'nationality' => Arr::get($row, "nationality_$language->lang_code", Arr::get($row, 'nationality')),
-            ]);
+            DB::table('countries_translations')->updateOrInsert(
+                [
+                    'countries_id' => $event->country->getKey(),
+                    'lang_code' => $language->lang_code,
+                ],
+                [
+                    'name' => Arr::get($row, "name_$language->lang_code") ?: Arr::get($row, 'name'),
+                    'nationality' => Arr::get($row, "nationality_$language->lang_code") ?: Arr::get($row, 'nationality'),
+                ]
+            );
         }
     }
 }

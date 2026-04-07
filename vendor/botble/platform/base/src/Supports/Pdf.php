@@ -152,7 +152,7 @@ class Pdf
                 ],
             ];
 
-            $data = [...$defaultData, ...$this->data];
+            $data = array_replace_recursive($defaultData, $this->data);
 
             switch ($this->supportLanguage) {
                 case 'bangladesh':

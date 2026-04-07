@@ -3,9 +3,9 @@
 namespace Botble\LanguageAdvanced\Importers;
 
 use Botble\DataSynchronize\Importer\Importer;
-use Exception;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class TranslationImporterManager
 {
@@ -30,7 +30,7 @@ class TranslationImporterManager
     public function getImporter(string $type): Importer
     {
         if (! Arr::has($this->importers, $type)) {
-            throw new Exception(sprintf('Importer type [%s] is not registered', $type));
+            throw new NotFoundHttpException(sprintf('Importer type [%s] is not registered', $type));
         }
 
         $importerClass = $this->importers[$type];

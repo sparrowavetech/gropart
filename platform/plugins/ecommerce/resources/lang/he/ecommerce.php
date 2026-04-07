@@ -121,6 +121,7 @@ return [
     'apply' => 'החל',
     'available' => 'זמין',
     'back_to_return_requests' => 'חזור לבקשות החזרה',
+    'backorder_warning' => 'אזהרה: מוצר זה בהזמנה מוקדמת ומשלוח עשוי לקחת יותר זמן.',
     'choose_reason' => 'בחר סיבה',
     'clear' => 'נקה',
     'clear_all_filters' => 'נקה את כל הסינונים',

@@ -29,6 +29,9 @@ class ProductCategoryResource extends JsonResource
                 'thumb',
                 ...array_keys(RvMedia::getSizes()),
             ])) : null,
+            'children' => $this->whenLoaded('activeChildren', function () {
+                return ProductCategoryResource::collection($this->activeChildren);
+            }),
         ];
     }
 }

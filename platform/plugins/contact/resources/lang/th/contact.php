@@ -184,4 +184,6 @@ return [
     'subject_placeholder' => 'เรื่อง',
     'your_message' => 'ข้อความของคุณ',
     'agree_terms_privacy' => 'ฉันยอมรับข้อกำหนดและนโยบายความเป็นส่วนตัว',
+    'agree_terms_privacy_link' => 'ฉันยอมรับ :link',
+    'terms_and_privacy_policy' => 'ข้อกำหนดและนโยบายความเป็นส่วนตัว',
 ];

@@ -184,4 +184,6 @@ return [
     'subject_placeholder' => 'Predmet',
     'your_message' => 'Vaša správa',
     'agree_terms_privacy' => 'Súhlasím s Podmienkami a Zásadami ochrany osobných údajov',
+    'agree_terms_privacy_link' => 'Súhlasím s :link',
+    'terms_and_privacy_policy' => 'Podmienkami a Zásadami ochrany osobných údajov',
 ];

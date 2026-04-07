@@ -121,6 +121,7 @@ return [
     'apply' => 'लागू करें',
     'available' => 'उपलब्ध',
     'back_to_return_requests' => 'रिटर्न अनुरोधों पर वापस जाएं',
+    'backorder_warning' => 'चेतावनी: यह उत्पाद बैकऑर्डर पर है और शिपमेंट में अधिक समय लग सकता है।',
     'choose_reason' => 'कारण चुनें',
     'clear' => 'साफ़ करें',
     'clear_all_filters' => 'सभी फ़िल्टर साफ़ करें',

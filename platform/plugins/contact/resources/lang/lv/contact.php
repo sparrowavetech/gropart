@@ -184,4 +184,6 @@ return [
     'subject_placeholder' => 'Priekšmets',
     'your_message' => 'Jūsu Ziņa',
     'agree_terms_privacy' => 'Es piekrītu Noteikumiem un Privātuma politikai',
+    'agree_terms_privacy_link' => 'Es piekrītu :link',
+    'terms_and_privacy_policy' => 'Noteikumiem un Privātuma politikai',
 ];

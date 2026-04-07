@@ -177,4 +177,6 @@ return [
     'subject_placeholder' => 'Sujet',
     'your_message' => 'Votre message',
     'agree_terms_privacy' => 'J\'accepte les conditions et la politique de confidentialité',
+    'agree_terms_privacy_link' => 'J\'accepte les :link',
+    'terms_and_privacy_policy' => 'conditions et la politique de confidentialité',
 ];

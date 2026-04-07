@@ -90,20 +90,20 @@
     @if (! $customer->orders()->exists())
         <div class="card border-0 bg-info bg-opacity-10">
             <div class="card-body">
-                <div class="row align-items-center">
-                    <div class="col-12 col-md text-center text-md-start">
-                        <span class="bg-info bg-opacity-20 rounded-circle p-3 mb-3 mb-md-0 d-inline-block">
+                <div class="row align-items-center g-3">
+                    <div class="col-auto">
+                        <span class="bg-info rounded-circle p-3 d-inline-flex">
                             <x-core::icon name="ti ti-shopping-cart" class="text-white" size="lg" />
                         </span>
                     </div>
-                    <div class="col-12 col-md text-center text-md-start">
+                    <div class="col">
                         <h5 class="card-title h6 mb-1">{{ trans('plugins/ecommerce::customer-dashboard.ready_to_start_shopping') }}</h5>
-                        <p class="card-text text-muted small mb-3 mb-md-0">
+                        <p class="card-text text-muted small mb-0">
                             {{ trans('plugins/ecommerce::customer-dashboard.no_orders_browse_description') }}
                         </p>
                     </div>
                     <div class="col-12 col-md-auto">
-                        <a href="{{ route('public.products') }}" class="btn btn-info w-100 w-md-auto">
+                        <a href="{{ route('public.products') }}" class="btn btn-outline-info w-100 w-md-auto">
                             <x-core::icon name="ti ti-shopping-bag" class="me-1" />
                             {{ trans('plugins/ecommerce::customer-dashboard.browse_products') }}
                         </a>

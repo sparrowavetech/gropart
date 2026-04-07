@@ -55,19 +55,23 @@ class NewsletterManager extends Manager implements Factory
                     ->fields([
                         ToggleField::make()
                             ->name('newsletter_popup_enable')
-                            ->label(trans('plugins/newsletter::newsletter.enable_newsletter_popup')),
+                            ->label(trans('plugins/newsletter::newsletter.enable_newsletter_popup'))
+                            ->shared(),
                         MediaImageField::make()
                             ->name('newsletter_popup_image')
                             ->label(trans('plugins/newsletter::newsletter.popup_image'))
-                            ->helperText(trans('plugins/newsletter::newsletter.popup_image_helper')),
+                            ->helperText(trans('plugins/newsletter::newsletter.popup_image_helper'))
+                            ->shared(),
                         MediaImageField::make()
                             ->name('newsletter_popup_tablet_image')
                             ->label(trans('plugins/newsletter::newsletter.popup_tablet_image'))
-                            ->helperText(trans('plugins/newsletter::newsletter.popup_tablet_image_helper')),
+                            ->helperText(trans('plugins/newsletter::newsletter.popup_tablet_image_helper'))
+                            ->shared(),
                         MediaImageField::make()
                             ->name('newsletter_popup_mobile_image')
                             ->label(trans('plugins/newsletter::newsletter.popup_mobile_image'))
-                            ->helperText(trans('plugins/newsletter::newsletter.popup_mobile_image_helper')),
+                            ->helperText(trans('plugins/newsletter::newsletter.popup_mobile_image_helper'))
+                            ->shared(),
                         TextField::make()
                             ->name('newsletter_popup_title')
                             ->label(trans('plugins/newsletter::newsletter.popup_title')),
@@ -86,12 +90,14 @@ class NewsletterManager extends Manager implements Factory
                             )
                             ->attributes([
                                 'min' => 0,
-                            ]),
+                            ])
+                            ->shared(),
                         MultiCheckListField::make()
                             ->name('newsletter_popup_display_pages')
                             ->label(trans('plugins/newsletter::newsletter.display_on_pages'))
                             ->inline()
                             ->defaultValue(['public.index'])
+                            ->shared()
                             ->options(
                                 apply_filters('newsletter_popup_display_pages', [
                                     'public.index' => trans('plugins/newsletter::newsletter.homepage'),

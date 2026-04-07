@@ -184,7 +184,12 @@ class Backup
 
     protected function processMySqlDumpPHP(string $path, array $config): bool
     {
-        $dump = new MySqlDump('mysql:host=' . $config['host'] . ';dbname=' . $config['database'], $config['username'], $config['password']);
+        $dump = new MySqlDump(
+            'mysql:host=' . $config['host'] . ';dbname=' . $config['database'],
+            $config['username'],
+            $config['password'],
+            ['add-drop-table' => true]
+        );
 
         $dump->start($path . '.sql');
 

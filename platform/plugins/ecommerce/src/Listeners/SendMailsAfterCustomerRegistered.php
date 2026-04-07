@@ -3,6 +3,7 @@
 namespace Botble\Ecommerce\Listeners;
 
 use Botble\Base\Facades\EmailHandler;
+use Botble\Base\Supports\EmailHandler as EmailHandlerSupport;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Models\Customer;
 use Illuminate\Auth\Events\Registered;
@@ -24,7 +25,7 @@ class SendMailsAfterCustomerRegistered
                 ->setVariableValues([
                     'customer_name' => $customer->name,
                 ])
-                ->sendUsingTemplate('welcome', $customer->email);
+                ->sendUsingTemplateWithLocale('welcome', $customer->email, EmailHandlerSupport::getDefaultEmailLocale());
         }
     }
 }

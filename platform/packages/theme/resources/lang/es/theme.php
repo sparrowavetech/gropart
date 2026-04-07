@@ -208,6 +208,11 @@ return [
     ],
     'term_and_privacy_policy_url' => 'Terms and Privacy Policy URL',
     'site_title_separator' => 'SEO title separator',
+    'site_title_helper' => 'El nombre de tu marca o negocio. Aparece en la pestaña del navegador y en los resultados de búsqueda (ej. "My Company").',
+    'show_site_name_helper' => 'Añade el nombre del sitio a cada título de página usando el separador seleccionado. Ejemplo: "Page Title - My Company".',
+    'site_title_separator_helper' => 'El carácter utilizado entre el título de la página y el nombre del sitio. Ejemplo con guión: "Page Title - My Company". Ejemplo con barra: "Page Title | My Company".',
+    'seo_title_helper' => 'El título de la página de inicio mostrado en los resultados de los motores de búsqueda. Mantenlo por debajo de 60 caracteres para mejor visualización. Déjalo vacío para usar el título del sitio.',
+    'seo_description_helper' => 'La descripción de la página de inicio mostrada en los resultados de los motores de búsqueda. Mantenla entre 120 y 160 caracteres para mejor visualización.',
     'no_meta_keywords' => 'Meta keywords was removed by Google, you don\'t need to add meta keywords to your website. Learn more: :link',
     'validation' => [
         'gtm_container_id_format' => 'GTM Container ID must be in format GTM-XXXXXX (e.g., GTM-N7MK3KH2)',
@@ -389,6 +394,9 @@ return [
     ],
 
     'typography_primary' => 'Fuente principal',
+    'all_languages' => 'Todos los idiomas',
+    'shared_field_notice' => 'Este campo se comparte en todos los idiomas. Adminístrelo desde el idioma predeterminado.',
+    'shared_section_notice' => 'Todas las opciones de esta sección se comparten en todos los idiomas. Cambie al idioma predeterminado para realizar cambios.',
     'admin_appearance' => [
         'show_admin_bar' => 'Mostrar barra de administración para administradores conectados, incluso en el sitio público',
         'show_admin_bar_helper' => 'Muestra una barra de herramientas de acceso rápido de administración en la parte superior del sitio web al iniciar sesión como administrador',

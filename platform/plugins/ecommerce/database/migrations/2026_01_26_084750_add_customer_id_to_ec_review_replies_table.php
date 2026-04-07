@@ -7,6 +7,10 @@ use Illuminate\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
+        if (Schema::hasColumn('ec_review_replies', 'customer_id')) {
+            return;
+        }
+
         Schema::table('ec_review_replies', function (Blueprint $table): void {
             $table->foreignId('user_id')->nullable()->change();
             $table->foreignId('customer_id')->nullable()->after('user_id');

@@ -109,4 +109,23 @@ return [
         'images_mimes' => 'As imagens devem estar no formato JPG, JPEG ou PNG.',
         'images_file_max' => 'Cada imagem não pode exceder :max KB.',
     ],
+    'badge_type' => 'Distintivo de avaliação',
+    'badge_type_help' => 'Escolha um distintivo para exibir nesta avaliação. "Deteção automática" mostra "Comprado há X" para clientes com encomendas.',
+    'badge_types' => [
+        'auto' => 'Deteção automática',
+        'none' => 'Sem distintivo',
+        'purchased' => '✅ Comprado',
+        'community_review' => '💬 Avaliação da comunidade',
+        'expert_reviewer' => '🏅 Avaliador especialista',
+        'top_contributor' => '⭐ Melhor colaborador',
+        'verified_buyer' => '✅ Comprador verificado',
+    ],
+    'placeholders' => [
+        'customer_name' => 'e.g: John Doe',
+        'customer_email' => 'e.g: example@domain.com',
+        'comment' => 'Escreva aqui o comentário da avaliação...',
+    ],
+    'helpers' => [
+        'star' => 'Classificação de 1 (mais baixa) a 5 (mais alta).',
+    ],
 ];

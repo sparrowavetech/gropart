@@ -177,4 +177,6 @@ return [
     'subject_placeholder' => 'Тема',
     'your_message' => 'Ваше повідомлення',
     'agree_terms_privacy' => 'Я погоджуюся з Умовами та Політикою конфіденційності',
+    'agree_terms_privacy_link' => 'Я погоджуюся з :link',
+    'terms_and_privacy_policy' => 'Умовами та Політикою конфіденційності',
 ];

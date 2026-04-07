@@ -51,8 +51,8 @@ class AddHrefLangListener
 
     protected function generateHreflangUrls(?string $referenceType, int|string|null $referenceId): array
     {
-        $hreflangUrls = [];
-        $currentAppLocale = app()->getLocale();
+        $entries = [];
+        $languageVariantCounts = $this->countLanguageVariants();
 
         foreach (Language::getSupportedLocales() as $localeCode => $properties) {
             $hreflangCode = Language::formatLocaleForHrefLang($properties['lang_code']);
@@ -69,21 +69,36 @@ class AddHrefLangListener
             if (str_contains($hreflangCode, '-')) {
                 $languageOnly = explode('-', $hreflangCode)[0];
 
-                if ($localeCode === $currentAppLocale) {
-                    $hreflangUrls[$languageOnly] = $url;
-                    $hreflangUrls[$hreflangCode] = $url;
+                if (($languageVariantCounts[$languageOnly] ?? 0) > 1) {
+                    $entries[$hreflangCode] = $url;
                 } else {
-                    $hreflangUrls[$hreflangCode] = $url;
-                    if (! isset($hreflangUrls[$languageOnly])) {
-                        $hreflangUrls[$languageOnly] = $url;
-                    }
+                    $entries[$languageOnly] = $url;
                 }
             } else {
-                $hreflangUrls[$hreflangCode] = $url;
+                $entries[$hreflangCode] = $url;
             }
         }
 
-        return $hreflangUrls;
+        return $entries;
+    }
+
+    protected function countLanguageVariants(): array
+    {
+        $counts = [];
+
+        foreach (Language::getSupportedLocales() as $properties) {
+            $hreflangCode = Language::formatLocaleForHrefLang($properties['lang_code']);
+
+            if (str_contains($hreflangCode, '-')) {
+                $languageOnly = explode('-', $hreflangCode)[0];
+            } else {
+                $languageOnly = $hreflangCode;
+            }
+
+            $counts[$languageOnly] = ($counts[$languageOnly] ?? 0) + 1;
+        }
+
+        return $counts;
     }
 
     protected function getTranslatedUrl(?string $referenceType, int|string|null $referenceId, string $langCode, string $localeCode): ?string
@@ -106,20 +121,27 @@ class AddHrefLangListener
         return $this->getStandardTranslatedUrl($referenceType, $referenceId, $langCode, $localeCode, $defaultLocale);
     }
 
+    protected ?Slug $cachedSlug = null;
+
+    protected bool $slugCacheDone = false;
+
     protected function getAdvancedTranslatedUrl(string $referenceType, int|string $referenceId, string $langCode, string $localeCode, string $defaultLocale): ?string
     {
-        $slug = Slug::query()
-            ->where('reference_id', $referenceId)
-            ->where('reference_type', $referenceType)
-            ->select(['id', 'key', 'prefix', 'reference_id'])
-            ->with('translations')
-            ->first();
+        if (! $this->slugCacheDone) {
+            $this->slugCacheDone = true;
+            $this->cachedSlug = Slug::query()
+                ->where('reference_id', $referenceId)
+                ->where('reference_type', $referenceType)
+                ->select(['id', 'key', 'prefix', 'reference_id'])
+                ->with('translations')
+                ->first();
+        }
 
-        if (! $slug) {
+        if (! $this->cachedSlug) {
             return null;
         }
 
-        foreach ($slug->translations as $translation) {
+        foreach ($this->cachedSlug->translations as $translation) {
             if ($translation->lang_code === $langCode) {
                 $locale = Language::getLocaleByLocaleCode($translation->lang_code);
 
@@ -127,33 +149,60 @@ class AddHrefLangListener
                     $locale = null;
                 }
 
-                return url($locale . ($slug->prefix ? '/' . $slug->prefix : '') . '/' . $translation->key);
+                $basePrefix = $this->cachedSlug->getRawOriginal('prefix');
+                $translatedPrefix = $translation->prefix ?? $basePrefix;
+
+                return url($locale . ($translatedPrefix ? '/' . $translatedPrefix : '') . '/' . $translation->key);
             }
         }
 
-        return null;
+        $locale = Language::getLocaleByLocaleCode($langCode);
+
+        if ($locale == $defaultLocale && Language::hideDefaultLocaleInURL()) {
+            $locale = null;
+        }
+
+        $prefix = $this->cachedSlug->getRawOriginal('prefix');
+        $key = $this->cachedSlug->getRawOriginal('key');
+
+        return url($locale . ($prefix ? '/' . $prefix : '') . '/' . $key);
     }
+
+    protected ?array $cachedStandardSlugs = null;
 
     protected function getStandardTranslatedUrl(string $referenceType, int|string $referenceId, string $langCode, string $localeCode, string $defaultLocale): ?string
     {
-        $languageMeta = LanguageMeta::query()
-            ->where('language_meta.lang_meta_code', $langCode)
-            ->join('language_meta as meta', 'meta.lang_meta_origin', 'language_meta.lang_meta_origin')
-            ->where([
-                'meta.reference_type' => $referenceType,
-                'meta.reference_id' => $referenceId,
-            ])
-            ->first();
+        if ($this->cachedStandardSlugs === null) {
+            $this->cachedStandardSlugs = [];
 
-        if (! $languageMeta) {
-            return null;
+            $languageMetas = LanguageMeta::query()
+                ->join('language_meta as meta', 'meta.lang_meta_origin', 'language_meta.lang_meta_origin')
+                ->where([
+                    'meta.reference_type' => $referenceType,
+                    'meta.reference_id' => $referenceId,
+                ])
+                ->select(['language_meta.lang_meta_code', 'language_meta.reference_id'])
+                ->get();
+
+            if ($languageMetas->isNotEmpty()) {
+                $slugs = Slug::query()
+                    ->whereIn('reference_id', $languageMetas->pluck('reference_id'))
+                    ->where('reference_type', $referenceType)
+                    ->select(['key', 'prefix', 'reference_id'])
+                    ->get()
+                    ->keyBy('reference_id');
+
+                foreach ($languageMetas as $meta) {
+                    $slug = $slugs[$meta->reference_id] ?? null;
+
+                    if ($slug) {
+                        $this->cachedStandardSlugs[$meta->lang_meta_code] = $slug;
+                    }
+                }
+            }
         }
 
-        $slug = Slug::query()
-            ->where('reference_id', $languageMeta->reference_id)
-            ->where('reference_type', $referenceType)
-            ->select(['key', 'prefix'])
-            ->first();
+        $slug = $this->cachedStandardSlugs[$langCode] ?? null;
 
         if (! $slug) {
             return null;

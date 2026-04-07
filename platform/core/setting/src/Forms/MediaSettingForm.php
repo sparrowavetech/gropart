@@ -235,7 +235,7 @@ class MediaSettingForm extends SettingForm
                 CheckboxFieldOption::make()
                     ->label(trans('core/setting::setting.media.do_spaces_cdn_enabled'))
                     ->helperText(trans('core/setting::setting.media.do_spaces_cdn_enabled_helper'))
-                    ->checked((bool) setting('media_do_spaces_cdn_enabled'))
+                    ->value((bool) setting('media_do_spaces_cdn_enabled'))
             )
             ->add(
                 'media_do_spaces_cdn_custom_domain',
@@ -299,6 +299,24 @@ class MediaSettingForm extends SettingForm
                     ->placeholder('Default: /')
                     ->helperText(trans('core/setting::setting.media.wasabi_root_helper'))
             )
+            ->add(
+                'media_wasabi_cdn_enabled',
+                OnOffCheckboxField::class,
+                CheckboxFieldOption::make()
+                    ->label(trans('core/setting::setting.media.wasabi_cdn_enabled'))
+                    ->helperText(trans('core/setting::setting.media.wasabi_cdn_enabled_helper'))
+                    ->value($wasabiCdnEnabled = (bool) setting('media_wasabi_cdn_enabled'))
+            )
+            ->addOpenCollapsible('media_wasabi_cdn_enabled', '1', $wasabiCdnEnabled)
+            ->add(
+                'media_wasabi_cdn_custom_domain',
+                TextField::class,
+                TextFieldOption::make()
+                    ->label(trans('core/setting::setting.media.media_wasabi_cdn_custom_domain'))
+                    ->value(setting('media_wasabi_cdn_custom_domain'))
+                    ->placeholder(trans('core/setting::setting.media.media_wasabi_cdn_custom_domain_placeholder'))
+            )
+            ->addCloseCollapsible('media_wasabi_cdn_enabled', '1')
             ->addCloseCollapsible('media_driver', 'wasabi')
             ->addOpenCollapsible('media_driver', 'bunnycdn', $mediaDriver === 'bunnycdn')
             ->add(
@@ -442,7 +460,16 @@ class MediaSettingForm extends SettingForm
                 OnOffFieldOption::make()
                     ->label(trans('core/setting::setting.media.keep_original_file_size_and_quality'))
                     ->helperText(trans('core/setting::setting.media.keep_original_file_size_and_quality_helper'))
-                    ->value(setting('media_keep_original_file_size_and_quality'))
+                    ->value($keepOriginalQuality = setting('media_keep_original_file_size_and_quality'))
+                    ->colspan(6)
+            )
+            ->add(
+                'media_image_quality',
+                NumberField::class,
+                NumberFieldOption::make()
+                    ->label(trans('core/setting::setting.media.image_quality'))
+                    ->value(setting('media_image_quality', 75))
+                    ->helperText(trans('core/setting::setting.media.image_quality_helper'))
                     ->colspan(6)
             )
             ->add(

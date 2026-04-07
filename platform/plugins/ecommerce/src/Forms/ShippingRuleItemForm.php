@@ -85,7 +85,18 @@ class ShippingRuleItemForm extends FormAbstract
                         'defaults.wrapper_class'
                     ) . ($shippingRuleId ? ' d-none' : ''),
                 ],
-            ]);
+            ])
+            ->add(
+                'name',
+                TextField::class,
+                TextFieldOption::make()
+                    ->label(trans('plugins/ecommerce::shipping.rule.item.forms.name'))
+                    ->helperText(trans('plugins/ecommerce::shipping.rule.item.forms.name_helper'))
+                    ->attributes([
+                        'class' => 'form-control',
+                        'placeholder' => trans('plugins/ecommerce::shipping.rule.item.forms.name_placeholder'),
+                    ])
+            );
 
         $isZipCodeType = false;
         if ($shippingRuleId) {

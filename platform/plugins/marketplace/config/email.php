@@ -188,6 +188,20 @@ return [
                 'product_list' => 'plugins/ecommerce::ecommerce.product_list',
             ],
         ],
+        'store-low-stock' => [
+            'title' => 'plugins/marketplace::marketplace.email.store_low_stock_title',
+            'description' => 'plugins/marketplace::marketplace.email.store_low_stock_description',
+            'subject' => 'plugins/marketplace::marketplace.email.store_low_stock_subject',
+            'can_off' => true,
+            'enabled' => true,
+            'variables' => [
+                'store_name' => 'plugins/marketplace::marketplace.store_name',
+                'product_name' => 'plugins/marketplace::marketplace.product_name',
+                'product_url' => 'plugins/marketplace::marketplace.product_url',
+                'product_quantity' => 'plugins/marketplace::marketplace.product_quantity',
+                'low_stock_threshold' => 'plugins/marketplace::marketplace.low_stock_threshold',
+            ],
+        ],
         'store-verified' => [
             'title' => 'plugins/marketplace::marketplace.email.store_verified_title',
             'description' => 'plugins/marketplace::marketplace.email.store_verified_description',

@@ -2,6 +2,9 @@
 
 return [
     'webhook_secret' => 'Webhook シークレット',
+    'webhook_secret_helper' => 'Stripe Dashboard の Developers > Webhooks > Signing secret から確認できます。',
+    'public_key_helper' => 'Stripe Dashboard の Developers > API keys から確認できます。',
+    'secret_key_helper' => 'Stripe Dashboard の Developers > API keys から確認できます。このキーは機密情報として取り扱ってください。',
     'webhook_setup_guide' => [
         'title' => 'Stripe Webhook セットアップガイド',
         'description' => 'Stripe Webhook を設定するには、次の手順に従います。',

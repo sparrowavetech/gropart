@@ -184,4 +184,6 @@ return [
     'subject_placeholder' => 'विषय',
     'your_message' => 'आपका संदेश',
     'agree_terms_privacy' => 'मैं शर्तों और गोपनीयता नीति से सहमत हूं',
+    'agree_terms_privacy_link' => 'मैं :link से सहमत हूं',
+    'terms_and_privacy_policy' => 'शर्तों और गोपनीयता नीति',
 ];

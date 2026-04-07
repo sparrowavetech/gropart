@@ -208,6 +208,11 @@ return [
     ],
     'term_and_privacy_policy_url' => 'URL uvjeta i politike privatnosti',
     'site_title_separator' => 'SEO razdjelnik naslova',
+    'site_title_helper' => 'Naziv vaše marke ili tvrtke. Prikazuje se u kartici preglednika i rezultatima pretraživanja (npr. "My Company").',
+    'show_site_name_helper' => 'Dodaje naziv stranice svakom naslovu stranice koristeći odabrani razdjelnik. Primjer: "Page Title - My Company".',
+    'site_title_separator_helper' => 'Znak koji se koristi između naslova stranice i naziva web mjesta. Primjer s crticom: "Page Title - My Company". Primjer s okomitom crticom: "Page Title | My Company".',
+    'seo_title_helper' => 'Naslov početne stranice prikazan u rezultatima tražilica. Zadržite ga ispod 60 znakova za najbolji prikaz. Ostavite prazno za korištenje naslova stranice.',
+    'seo_description_helper' => 'Opis početne stranice prikazan u rezultatima tražilica. Zadržite ga između 120 i 160 znakova za najbolji prikaz.',
     'no_meta_keywords' => 'Meta keywords je Google uklonio, ne trebate dodavati meta keywords na svoju web stranicu. Saznajte više: :link',
     'validation' => [
         'gtm_container_id_format' => 'GTM Container ID mora biti u formatu GTM-XXXXXX (npr., GTM-N7MK3KH2)',
@@ -389,6 +394,9 @@ return [
     ],
 
     'typography_primary' => 'Primarni font',
+    'all_languages' => 'Svi jezici',
+    'shared_field_notice' => 'Ovo polje je dijeljeno između svih jezika. Upravljajte njime iz zadanog jezika.',
+    'shared_section_notice' => 'Sve opcije u ovom odjeljku su dijeljene između svih jezika. Prebacite se na zadani jezik za izmjene.',
     'admin_appearance' => [
         'show_admin_bar' => 'Prikaži admin traku za prijavljene administratore, čak i na front stranici',
         'show_admin_bar_helper' => 'Prikaži traku s alatima za brzi pristup administraciji na vrhu web stranice kada ste prijavljeni kao administrator',

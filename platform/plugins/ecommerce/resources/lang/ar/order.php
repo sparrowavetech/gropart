@@ -95,6 +95,8 @@ return [
     'coupon_code' => 'كود الكوبون: ":code"',
     'shipping_fee' => 'رسوم الشحن',
     'tax' => 'الضريبة',
+    'shipping_tax' => 'ضريبة على الشحن',
+
     'refunded_amount' => 'المبلغ المسترد',
     'amount_received' => 'المبلغ المستلم فعلياً',
     'download_invoice' => 'تحميل الفاتورة',

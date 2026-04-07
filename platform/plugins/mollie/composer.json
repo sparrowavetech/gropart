@@ -3,6 +3,6 @@
     "description": "Mollie payment gateway",
     "type": "package",
     "require": {
-        "mollie/laravel-mollie": "^3.0"
+        "mollie/laravel-mollie": "^4.0"
     }
 }

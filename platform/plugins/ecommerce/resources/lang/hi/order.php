@@ -95,6 +95,8 @@ return [
     'coupon_code' => 'कूपन कोड: ":code"',
     'shipping_fee' => 'शिपिंग फीस',
     'tax' => 'टैक्स',
+    'shipping_tax' => 'शिपिंग पर कर',
+
     'refunded_amount' => 'रिफंड राशि',
     'amount_received' => 'वास्तव में प्राप्त राशि',
     'download_invoice' => 'इनवॉइस डाउनलोड करें',

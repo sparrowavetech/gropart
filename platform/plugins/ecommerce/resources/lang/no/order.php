@@ -95,6 +95,8 @@ return [
     'coupon_code' => 'Rabattkode: ":code"',
     'shipping_fee' => 'Fraktgebyr',
     'tax' => 'Mva',
+    'shipping_tax' => 'Skatt på frakt',
+
     'refunded_amount' => 'Refundert beløp',
     'amount_received' => 'Beløpet faktisk mottatt',
     'download_invoice' => 'Last ned faktura',

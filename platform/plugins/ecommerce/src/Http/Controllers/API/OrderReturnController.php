@@ -232,6 +232,10 @@ class OrderReturnController extends BaseApiController
                 'order' => new OrderDetailResource($order),
                 'returnable_items' => $returnableItems,
                 'return_reasons' => OrderReturnHelper::getReturnReasons(),
+                'allow_partial_return' => EcommerceHelper::allowPartialReturn(),
+                'is_image_upload_enabled' => EcommerceHelper::isReturnImageUploadEnabled(),
+                'max_file_number' => EcommerceHelper::returnMaxFileNumber(),
+                'max_file_size' => EcommerceHelper::returnMaxFileSize(),
             ])
             ->toApiResponse();
     }

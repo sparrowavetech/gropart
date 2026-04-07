@@ -309,7 +309,7 @@ class Schedule
     /**
      * Create new schedule group.
      *
-     * @param  \Illuminate\Console\Scheduling\Event  $event
+     * @param  \Closure  $events
      * @return void
      *
      * @throws \RuntimeException
@@ -479,6 +479,8 @@ class Schedule
      * @param  string  $method
      * @param  array  $parameters
      * @return mixed
+     *
+     * @throws \BadMethodCallException
      */
     public function __call($method, $parameters)
     {
@@ -486,7 +488,7 @@ class Schedule
             return $this->macroCall($method, $parameters);
         }
 
-        if (method_exists(PendingEventAttributes::class, $method)) {
+        if (method_exists(PendingEventAttributes::class, $method) || Event::hasMacro($method)) {
             $this->attributes ??= $this->groupStack ? clone array_last($this->groupStack) : new PendingEventAttributes($this);
 
             return $this->attributes->$method(...$parameters);

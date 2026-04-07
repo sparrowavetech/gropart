@@ -3,9 +3,9 @@
 namespace Botble\LanguageAdvanced\Exporters;
 
 use Botble\DataSynchronize\Exporter\Exporter;
-use Exception;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class TranslationExporterManager
 {
@@ -30,7 +30,7 @@ class TranslationExporterManager
     public function getExporter(string $type): Exporter
     {
         if (! Arr::has($this->exporters, $type)) {
-            throw new Exception(sprintf('Exporter type [%s] is not registered', $type));
+            throw new NotFoundHttpException(sprintf('Exporter type [%s] is not registered', $type));
         }
 
         $exporterClass = $this->exporters[$type];

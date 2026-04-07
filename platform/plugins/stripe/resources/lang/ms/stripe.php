@@ -2,6 +2,9 @@
 
 return [
     'webhook_secret' => 'Rahsia Webhook',
+    'webhook_secret_helper' => 'Cari ini dalam Stripe Dashboard anda di bawah Developers > Webhooks > Signing secret.',
+    'public_key_helper' => 'Cari ini dalam Stripe Dashboard anda di bawah Developers > API keys.',
+    'secret_key_helper' => 'Cari ini dalam Stripe Dashboard anda di bawah Developers > API keys. Simpan kunci ini dengan sulit.',
     'webhook_setup_guide' => [
         'title' => 'Panduan Persediaan Stripe Webhook',
         'description' => 'Ikuti langkah-langkah ini untuk menyediakan webhook Stripe',

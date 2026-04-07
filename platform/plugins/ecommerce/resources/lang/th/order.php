@@ -95,6 +95,8 @@ return [
     'coupon_code' => 'รหัสคูปอง: ":code"',
     'shipping_fee' => 'ค่าจัดส่ง',
     'tax' => 'ภาษี',
+    'shipping_tax' => 'ภาษีการจัดส่ง',
+
     'refunded_amount' => 'จำนวนเงินที่คืน',
     'amount_received' => 'จำนวนเงินที่ได้รับจริง',
     'download_invoice' => 'ดาวน์โหลดใบแจ้งหนี้',

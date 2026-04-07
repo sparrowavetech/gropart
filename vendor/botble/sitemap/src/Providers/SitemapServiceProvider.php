@@ -59,7 +59,8 @@ class SitemapServiceProvider extends ServiceProvider implements DeferrableProvid
             $this->app->afterResolving(Schedule::class, function (Schedule $schedule): void {
                 $schedule
                     ->command('sitemap:indexnow')
-                    ->dailyAt('02:00');
+                    ->dailyAt('02:00')
+                    ->when(fn () => app(IndexNowService::class)->isEnabled());
             });
         }
 

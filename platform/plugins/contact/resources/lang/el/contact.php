@@ -177,4 +177,6 @@ return [
     'subject_placeholder' => 'Θέμα',
     'your_message' => 'Το μήνυμά σας',
     'agree_terms_privacy' => 'Συμφωνώ με τους Όρους και την Πολιτική Απορρήτου',
+    'agree_terms_privacy_link' => 'Συμφωνώ με τους :link',
+    'terms_and_privacy_policy' => 'Όρους και την Πολιτική Απορρήτου',
 ];

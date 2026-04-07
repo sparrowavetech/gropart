@@ -65,4 +65,5 @@ return [
     'shortcode' => 'მოკლე კოდი',
     'checkbox' => 'მონიშვნის ველი',
     'toggle_columns' => 'სვეტების გადართვა',
+    'created_by' => 'შექმნილია',
 ];

@@ -65,4 +65,5 @@ return [
     'please_select_record' => 'Molimo izaberite bar jedan zapis da izvršite ovu akciju!',
     'checkbox' => 'Polje za potvrdu',
     'toggle_columns' => 'Prebacite kolone',
+    'created_by' => 'Креирао',
 ];

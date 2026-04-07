@@ -3,12 +3,13 @@
 namespace Yajra\DataTables\Html\Editor\Fields;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
 class BelongsTo extends Select
 {
     /**
-     * @param  class-string<\Illuminate\Database\Eloquent\Model>|Builder  $class
+     * @param  class-string<Model>|Builder  $class
      */
     public static function model(Builder|string $class, string $text, string $id = 'id', ?string $foreign = null): static
     {

@@ -120,6 +120,7 @@ return [
     'apply' => 'Apply',
     'available' => 'Available',
     'back_to_return_requests' => 'Back to Return Requests',
+    'backorder_warning' => 'Warning: This product is on backorder and may take longer to ship.',
     'choose_reason' => 'Choose Reason',
     'clear' => 'Clear',
     'clear_all_filters' => 'Clear all filters',

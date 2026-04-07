@@ -2,6 +2,9 @@
 
 return [
     'webhook_secret' => 'Webhook salaisuus',
+    'webhook_secret_helper' => 'Löydät tämän Stripe Dashboard -palvelustasi kohdasta Developers > Webhooks > Signing secret.',
+    'public_key_helper' => 'Löydät tämän Stripe Dashboard -palvelustasi kohdasta Developers > API keys.',
+    'secret_key_helper' => 'Löydät tämän Stripe Dashboard -palvelustasi kohdasta Developers > API keys. Pidä tämä avain luottamuksellisena.',
     'webhook_setup_guide' => [
         'title' => 'Stripe Webhook -asennusopas',
         'description' => 'Noudata näitä vaiheita Stripe webhookin määrittämiseksi',

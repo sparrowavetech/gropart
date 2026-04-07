@@ -65,4 +65,5 @@ return [
     'please_select_record' => 'Por favor, selecciona al menos un registro para realizar esta acción.',
     'checkbox' => 'Casilla de verificación',
     'toggle_columns' => 'Alternar Columnas',
+    'created_by' => 'Creado por',
 ];

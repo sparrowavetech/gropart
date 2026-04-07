@@ -41,6 +41,8 @@ class LazyCollection implements CanBeEscapedWhenCastToString, Enumerable
      * Create a new lazy collection instance.
      *
      * @param  \Illuminate\Contracts\Support\Arrayable<TKey, TValue>|iterable<TKey, TValue>|(Closure(): \Generator<TKey, TValue, mixed, void>)|self<TKey, TValue>|array<TKey, TValue>|null  $source
+     *
+     * @throws \InvalidArgumentException
      */
     public function __construct($source = null)
     {
@@ -58,6 +60,17 @@ class LazyCollection implements CanBeEscapedWhenCastToString, Enumerable
     }
 
     /**
+     * Create a new instance of the collection.
+     *
+     * @param  \Illuminate\Contracts\Support\Arrayable<TKey, TValue>|iterable<TKey, TValue>|(Closure(): \Generator<TKey, TValue, mixed, void>)|self<TKey, TValue>|array<TKey, TValue>|null  $items
+     * @return static
+     */
+    protected function newInstance($items = [])
+    {
+        return new static($items);
+    }
+
+    /**
      * Create a new collection instance if the value isn't one already.
      *
      * @template TMakeKey of array-key
@@ -66,9 +79,9 @@ class LazyCollection implements CanBeEscapedWhenCastToString, Enumerable
      * @param  \Illuminate\Contracts\Support\Arrayable<TMakeKey, TMakeValue>|iterable<TMakeKey, TMakeValue>|(Closure(): \Generator<TMakeKey, TMakeValue, mixed, void>)|self<TMakeKey, TMakeValue>|array<TMakeKey, TMakeValue>|null  $items
      * @return static<TMakeKey, TMakeValue>
      */
-    public static function make($items = [])
+    public static function make($items = [], ...$args)
     {
-        return new static($items);
+        return new static($items, ...$args);
     }
 
     /**
@@ -77,9 +90,11 @@ class LazyCollection implements CanBeEscapedWhenCastToString, Enumerable
      * @param  int  $from
      * @param  int  $to
      * @param  int  $step
-     * @return static<int, int>
+     * @return ($step is zero ? never : static<int, int>)
+     *
+     * @throws \InvalidArgumentException
      */
-    public static function range($from, $to, $step = 1)
+    public static function range($from, $to, $step = 1, ...$args)
     {
         if ($step == 0) {
             throw new InvalidArgumentException('Step value cannot be zero.');
@@ -312,11 +327,9 @@ class LazyCollection implements CanBeEscapedWhenCastToString, Enumerable
     }
 
     /**
-     * Count the number of items in the collection by a field or using a callback.
-     *
-     * @param  (callable(TValue, TKey): (array-key|\UnitEnum))|string|null  $countBy
-     * @return static<array-key, int>
+     * {@inheritDoc}
      */
+    #[\Override]
     public function countBy($countBy = null)
     {
         $countBy = is_null($countBy)
@@ -535,16 +548,6 @@ class LazyCollection implements CanBeEscapedWhenCastToString, Enumerable
 
     /**
      * {@inheritDoc}
-     *
-     * @template TGroupKey of array-key|\UnitEnum|\Stringable
-     *
-     * @param  (callable(TValue, TKey): TGroupKey)|array|string  $groupBy
-     * @return static<
-     *  ($groupBy is (array|string)
-     *      ? array-key
-     *      : (TGroupKey is \UnitEnum ? array-key : (TGroupKey is \Stringable ? string : TGroupKey))),
-     *  static<($preserveKeys is true ? TKey : int), ($groupBy is array ? mixed : TValue)>
-     * >
      */
     #[\Override]
     public function groupBy($groupBy, $preserveKeys = false)
@@ -553,13 +556,9 @@ class LazyCollection implements CanBeEscapedWhenCastToString, Enumerable
     }
 
     /**
-     * Key an associative array by a field or using a callback.
-     *
-     * @template TNewKey of array-key|\UnitEnum
-     *
-     * @param  (callable(TValue, TKey): TNewKey)|array|string  $keyBy
-     * @return static<($keyBy is (array|string) ? array-key : (TNewKey is \UnitEnum ? array-key : TNewKey)), TValue>
+     * {@inheritDoc}
      */
+    #[\Override]
     public function keyBy($keyBy)
     {
         return new static(function () use ($keyBy) {
@@ -912,7 +911,7 @@ class LazyCollection implements CanBeEscapedWhenCastToString, Enumerable
      *
      * @param  int  $step
      * @param  int  $offset
-     * @return static
+     * @return ($step is positive-int ? static : never)
      *
      * @throws \InvalidArgumentException
      */
@@ -1026,11 +1025,12 @@ class LazyCollection implements CanBeEscapedWhenCastToString, Enumerable
      * Get one or a specified number of items randomly from the collection.
      *
      * @param  int|null  $number
+     * @param  bool  $preserveKeys
      * @return static<int, TValue>|TValue
      *
      * @throws \InvalidArgumentException
      */
-    public function random($number = null)
+    public function random($number = null, $preserveKeys = false)
     {
         $result = $this->collect()->random(...func_get_args());
 
@@ -1433,7 +1433,7 @@ class LazyCollection implements CanBeEscapedWhenCastToString, Enumerable
      * Split a collection into a certain number of groups, and fill the first groups completely.
      *
      * @param  int  $numberOfGroups
-     * @return static<int, static>
+     * @return ($numberOfGroups is positive-int ? static<int, static> : never)
      *
      * @throws \InvalidArgumentException
      */
@@ -1701,11 +1701,12 @@ class LazyCollection implements CanBeEscapedWhenCastToString, Enumerable
     /**
      * Flatten a multi-dimensional associative array with dots.
      *
+     * @param  int  $depth
      * @return static
      */
-    public function dot()
+    public function dot($depth = INF)
     {
-        return $this->passthru(__FUNCTION__, []);
+        return $this->passthru(__FUNCTION__, [$depth]);
     }
 
     /**

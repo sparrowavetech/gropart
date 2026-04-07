@@ -31,6 +31,7 @@ class ProductCategoryController extends BaseApiController
     {
         $categories = ProductCategory::query()
             ->wherePublished()
+            ->with(['activeChildren'])
             ->oldest('order')->latest()
             ->when($request->input('categories'), function ($query, $categoryIds) {
                 return $query->whereIn('id', $categoryIds);

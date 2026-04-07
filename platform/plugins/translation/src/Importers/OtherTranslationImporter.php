@@ -67,6 +67,14 @@ class OtherTranslationImporter extends Importer implements WithMapping
             return [];
         }
 
+        $locales = array_map(fn ($locale) => $locale['locale'], Language::getAvailableLocales());
+
+        foreach ($locales as $locale) {
+            if (isset($row[$locale]) && ! is_string($row[$locale])) {
+                $row[$locale] = (string) $row[$locale];
+            }
+        }
+
         if (! str_contains($row['key'], '::')) {
             return $row;
         }

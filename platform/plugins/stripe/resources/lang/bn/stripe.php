@@ -2,6 +2,9 @@
 
 return [
     'webhook_secret' => 'ওয়েবহুক সিক্রেট',
+    'webhook_secret_helper' => 'এটি আপনার Stripe Dashboard-এ Developers > Webhooks > Signing secret-এর অধীনে পাবেন।',
+    'public_key_helper' => 'এটি আপনার Stripe Dashboard-এ Developers > API keys-এর অধীনে পাবেন।',
+    'secret_key_helper' => 'এটি আপনার Stripe Dashboard-এ Developers > API keys-এর অধীনে পাবেন। এই কীটি গোপন রাখুন।',
     'webhook_setup_guide' => [
         'title' => 'স্ট্রাইপ ওয়েবহুক সেটআপ গাইড',
         'description' => 'একটি স্ট্রাইপ ওয়েবহুক সেট আপ করতে এই পদক্ষেপগুলি অনুসরণ করুন',

@@ -177,4 +177,6 @@ return [
     'subject_placeholder' => 'Ders',
     'your_message' => 'Mesajınız',
     'agree_terms_privacy' => 'Şartları ve Gizlilik Politikasını kabul ediyorum',
+    'agree_terms_privacy_link' => ':link kabul ediyorum',
+    'terms_and_privacy_policy' => 'Şartları ve Gizlilik Politikasını',
 ];

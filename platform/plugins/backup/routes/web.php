@@ -21,26 +21,26 @@ Route::group(['namespace' => 'Botble\Backup\Http\Controllers'], function (): voi
                 'as' => 'backups.destroy',
                 'uses' => 'BackupController@destroy',
                 'middleware' => 'preventDemo',
-            ]);
+            ])->where('folder', '[\d\-]+');
 
             Route::get('restore/{folder}', [
                 'as' => 'backups.restore',
                 'uses' => 'BackupController@getRestore',
-            ]);
+            ])->where('folder', '[\d\-]+');
 
             Route::get('download-database/{folder}', [
                 'as' => 'backups.download.database',
                 'uses' => 'BackupController@getDownloadDatabase',
                 'middleware' => 'preventDemo',
                 'permission' => 'backups.index',
-            ]);
+            ])->where('folder', '[\d\-]+');
 
             Route::get('download-uploads-folder/{folder}', [
                 'as' => 'backups.download.uploads.folder',
                 'uses' => 'BackupController@getDownloadUploadFolder',
                 'middleware' => 'preventDemo',
                 'permission' => 'backups.index',
-            ]);
+            ])->where('folder', '[\d\-]+');
         });
     });
 });

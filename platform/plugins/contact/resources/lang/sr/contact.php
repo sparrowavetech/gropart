@@ -184,4 +184,6 @@ return [
     'subject_placeholder' => 'Предмет',
     'your_message' => 'Ваша порука',
     'agree_terms_privacy' => 'Слажем се са условима и политиком приватности',
+    'agree_terms_privacy_link' => 'Слажем се са :link',
+    'terms_and_privacy_policy' => 'условима и политиком приватности',
 ];

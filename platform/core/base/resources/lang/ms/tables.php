@@ -65,4 +65,5 @@ return [
     'please_select_record' => 'Sila pilih sekurang-kurangnya satu rekod untuk melakukan tindakan ini!',
     'checkbox' => 'Kotak semak',
     'toggle_columns' => 'Togol Lajur',
+    'created_by' => 'Dicipta oleh',
 ];

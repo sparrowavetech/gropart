@@ -13,6 +13,7 @@ use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Facades\PageTitle;
 use Botble\Base\Facades\PanelSectionManager as PanelSectionManagerFacade;
 use Botble\Base\GlobalSearch\GlobalSearchableManager;
+use Botble\Base\Http\Middleware\PublicCacheControl;
 use Botble\Base\Models\BaseModel;
 use Botble\Base\PanelSections\Manager as PanelSectionManager;
 use Botble\Base\PanelSections\System\SystemPanelSection;
@@ -40,6 +41,7 @@ use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Database\Schema\Builder;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Foundation\Application;
+use Illuminate\Foundation\Http\Events\RequestHandled;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Routing\ResourceRegistrar;
 use Illuminate\Routing\Route;
@@ -97,13 +99,14 @@ class BaseServiceProvider extends ServiceProvider
 
         $this->overrideDefaultConfigs();
 
-        Schema::defaultStringLength(191);
+        Schema::defaultStringLength(255);
     }
 
     public function boot(): void
     {
         $this
             ->loadAndPublishConfigurations(['assets'])
+            ->loadAndPublishConfigurations(['email'])
             ->loadAndPublishConfigurations(['permissions'])
             ->loadAndPublishViews()
             ->loadAnonymousComponents()
@@ -113,6 +116,8 @@ class BaseServiceProvider extends ServiceProvider
             ->publishAssets();
 
         $this->app['blade.compiler']->anonymousComponentPath($this->getViewsPath() . '/components', 'core');
+
+        $this->registerPublicCacheControl();
 
         $this->overridePackagesConfigs();
 
@@ -321,8 +326,11 @@ class BaseServiceProvider extends ServiceProvider
 
         $this->app->setLocale($locale);
 
-        if (in_array($timezone, DateTimeZone::listIdentifiers())) {
+        try {
+            new DateTimeZone($timezone);
             date_default_timezone_set($timezone);
+        } catch (\Exception) {
+            // Invalid timezone, keep the default
         }
 
         if ($iframeRegex = Arr::get($baseConfig, 'iframe_regex')) {
@@ -452,5 +460,12 @@ class BaseServiceProvider extends ServiceProvider
         if (! class_exists('AdminHelper')) {
             $aliasLoader->alias('AdminHelper', AdminHelper::class);
         }
+    }
+
+    protected function registerPublicCacheControl(): void
+    {
+        $this->app['events']->listen(RequestHandled::class, function (RequestHandled $event): void {
+            $this->app->make(PublicCacheControl::class)->handleRequestHandled($event);
+        });
     }
 }

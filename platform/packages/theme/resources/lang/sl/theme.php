@@ -208,6 +208,11 @@ return [
     ],
     'term_and_privacy_policy_url' => 'URL pogojev in pravilnika o zasebnosti',
     'site_title_separator' => 'Ločilo naslova SEO',
+    'site_title_helper' => 'Ime vaše blagovne znamke ali podjetja. Prikazuje se v zavihku brskalnika in rezultatih iskanja (npr. "My Company").',
+    'show_site_name_helper' => 'Doda ime spletnega mesta k vsakemu naslovu strani z izbranim ločilom. Primer: "Page Title - My Company".',
+    'site_title_separator_helper' => 'Znak, ki se uporablja med naslovom strani in imenom spletnega mesta. Primer s pomišljajem: "Page Title - My Company". Primer s pokončno črto: "Page Title | My Company".',
+    'seo_title_helper' => 'Naslov domače strani, prikazan v rezultatih iskalnikov. Za najboljši prikaz ga ohranite pod 60 znakov. Pustite prazno, da uporabite naslov spletnega mesta.',
+    'seo_description_helper' => 'Opis domače strani, prikazan v rezultatih iskalnikov. Za najboljši prikaz ga ohranite med 120-160 znaki.',
     'no_meta_keywords' => 'Google je odstranil meta ključne besede, ni vam treba dodajati meta ključnih besed na svoje spletno mesto. Več informacij: :link',
     'validation' => [
         'gtm_container_id_format' => 'GTM ID vsebnika mora biti v formatu GTM-XXXXXX (npr. GTM-N7MK3KH2)',
@@ -389,6 +394,9 @@ return [
     ],
 
     'typography_primary' => 'Primarna pisava',
+    'all_languages' => 'Vsi jeziki',
+    'shared_field_notice' => 'To polje je deljeno med vsemi jeziki. Upravljajte ga iz privzetega jezika.',
+    'shared_section_notice' => 'Vse možnosti v tem razdelku so deljene med vsemi jeziki. Za spremembe preklopite na privzeti jezik.',
     'admin_appearance' => [
         'show_admin_bar' => 'Prikaži administratorsko vrstico za prijavljene skrbnike, tudi na sprednji strani',
         'show_admin_bar_helper' => 'Prikaži orodjarno za hiter dostop skrbnika na vrhu spletnega mesta, ko ste prijavljeni kot skrbnik',

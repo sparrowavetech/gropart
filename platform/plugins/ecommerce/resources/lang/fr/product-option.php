@@ -27,4 +27,6 @@ return [
     'option_value_name_attribute' => 'Valeurs de l\'option :key',
     'please_choose_option_type' => 'Veuillez choisir le type d\'option !',
     'no_global_options' => 'Aucune option globale disponible pour le moment. Veuillez d\'abord ajouter des options de produit dans la langue par défaut.',
+    'price_per_product' => 'Prix par produit',
+    'price_per_product_helper' => 'Lorsqu\'activé, le prix de l\'option est appliqué une fois par produit, sans être multiplié par la quantité.',
 ];

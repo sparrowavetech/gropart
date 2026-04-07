@@ -246,6 +246,17 @@
         </tr>
     {% endif %}
 
+    {% if shipping_tax_amount > 0 %}
+        <tr>
+            <td colspan="{{ summary_colspan }}" class="right">
+                {{ 'plugins/ecommerce::order.shipping_tax'|trans }}
+            </td>
+            <td class="bold">
+                {{ shipping_tax_amount|price_format }}
+            </td>
+        </tr>
+    {% endif %}
+
     {% if invoice.discount_amount > 0 %}
         <tr>
             <td colspan="{{ summary_colspan }}" class="right">

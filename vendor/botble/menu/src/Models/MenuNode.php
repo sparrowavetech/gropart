@@ -62,7 +62,7 @@ class MenuNode extends BaseModel
                 return apply_filters(MENU_FILTER_NODE_URL, $value);
             }
 
-            if (! $this->reference_type) {
+            if (! $this->reference_type || ! class_exists($this->reference_type)) {
                 return '/';
             }
 
@@ -82,7 +82,7 @@ class MenuNode extends BaseModel
                     return $value;
                 }
 
-                if (! $this->reference_type || ! $this->reference) {
+                if (! $this->reference_type || ! class_exists($this->reference_type) || ! $this->reference) {
                     return $value;
                 }
 

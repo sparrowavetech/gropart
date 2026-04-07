@@ -130,6 +130,7 @@
                                 type="tel"
                                 data-country-code-selection="true"
                                 value="{{ $billingPhoneValue }}"
+                                placeholder="{{ trans('plugins/ecommerce::addresses.phone_placeholder') }}"
                             >
                             <input
                                 type="hidden"
@@ -147,6 +148,7 @@
                                 autocomplete="phone"
                                 type="tel"
                                 value="{{ $billingPhoneValue }}"
+                                placeholder="{{ trans('plugins/ecommerce::addresses.phone_placeholder') }}"
                             >
                         @endif
                         <label for="billing-address-phone">{{ __('Phone') }}</label>

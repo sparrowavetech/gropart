@@ -173,7 +173,17 @@ abstract class RazorpayPaymentAbstract implements ProduceServiceInterface
             'USD',
             'EUR',
             'SGD',
+            'NGN',
         ];
+    }
+
+    /**
+     * Razorpay minimum order amount is 1.00 in any currency (100 subunits).
+     * @see https://razorpay.com/docs/api/orders/create/
+     */
+    public function getMinimumOrderAmount(): float
+    {
+        return 1.00;
     }
 
     abstract public function afterMakePayment(Request $request);

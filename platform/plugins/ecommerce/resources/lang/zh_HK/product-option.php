@@ -27,4 +27,6 @@ return [
     'option_value_name_attribute' => '選項 :key 的值',
     'please_choose_option_type' => '請選擇選項類型!',
     'no_global_options' => '尚無全域選項。請先在預設語言中新增產品選項。',
+    'price_per_product' => '每個產品的價格',
+    'price_per_product_helper' => '啟用後，選項價格按每個產品應用一次，不會乘以數量。',
 ];

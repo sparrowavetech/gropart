@@ -12,6 +12,7 @@ use Botble\Payment\Enums\PaymentMethodEnum;
 use Botble\Payment\Facades\PaymentMethods;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 
 class PublicUpdateCheckoutController extends BaseController
 {
@@ -20,6 +21,13 @@ class PublicUpdateCheckoutController extends BaseController
         $sessionCheckoutData = OrderHelper::getOrderSessionData(
             $token = OrderHelper::getOrderSessionToken()
         );
+
+        if ($country = $request->input('address.country')) {
+            if (Arr::get($sessionCheckoutData, 'country') !== $country) {
+                $sessionCheckoutData['country'] = $country;
+                OrderHelper::setOrderSessionData($token, $sessionCheckoutData);
+            }
+        }
 
         /**
          * @var Collection $products
@@ -58,6 +66,7 @@ class PublicUpdateCheckoutController extends BaseController
                     'promotionDiscountAmount' => $checkoutOrderData->promotionDiscountAmount,
                     'couponDiscountAmount' => $checkoutOrderData->couponDiscountAmount,
                     'paymentFee' => $checkoutOrderData->paymentFee,
+                    'shippingTaxAmount' => $checkoutOrderData->shippingTaxAmount,
                 ])->render(),
                 'payment_methods' => view('plugins/ecommerce::orders.partials.payment-methods', [
                     'orderAmount' => $checkoutOrderData->orderAmount,

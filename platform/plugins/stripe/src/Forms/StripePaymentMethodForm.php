@@ -32,8 +32,9 @@ class StripePaymentMethodForm extends PaymentMethodForm
                 TextFieldOption::make()
                     ->label(trans('plugins/payment::payment.stripe_key'))
                     ->value(BaseHelper::hasDemoModeEnabled() ? '*******************************' : get_payment_setting('client_id', 'stripe'))
-                    ->placeholder('pk_*************')
-                    ->attributes(['data-counter' => 400])
+                    ->placeholder('pk_live_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+                    ->helperText(trans('plugins/stripe::stripe.public_key_helper'))
+                    ->maxLength(400)
             )
             ->add(
                 'payment_stripe_secret',
@@ -41,7 +42,8 @@ class StripePaymentMethodForm extends PaymentMethodForm
                 TextFieldOption::make()
                     ->label(trans('plugins/payment::payment.stripe_secret'))
                     ->value(BaseHelper::hasDemoModeEnabled() ? '*******************************' : get_payment_setting('secret', 'stripe'))
-                    ->placeholder('sk_*************')
+                    ->placeholder('sk_live_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+                    ->helperText(trans('plugins/stripe::stripe.secret_key_helper'))
             )
             ->add(
                 'payment_' . STRIPE_PAYMENT_METHOD_NAME . '_payment_type',
@@ -64,7 +66,8 @@ class StripePaymentMethodForm extends PaymentMethodForm
                 TextFieldOption::make()
                     ->label(trans('plugins/stripe::stripe.webhook_secret'))
                     ->value(BaseHelper::hasDemoModeEnabled() ? '*******************************' : get_payment_setting('webhook_secret', 'stripe'))
-                    ->placeholder('whsec_*************')
+                    ->placeholder('whsec_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+                    ->helperText(trans('plugins/stripe::stripe.webhook_secret_helper'))
             )
             ->addAvailableCountriesField(STRIPE_PAYMENT_METHOD_NAME);
     }

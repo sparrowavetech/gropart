@@ -210,14 +210,10 @@ class Menu
     protected function read(): Collection
     {
         $cacheEnabled = setting('cache_front_menu_enabled', true);
-        $cacheKey = 'menu_all_menus_' . md5(serialize(BaseHelper::getHomepageUrl()));
+        $cacheKey = 'menu_all_menus_' . md5(serialize(BaseHelper::getHomepageUrl()) . app()->getLocale());
 
-        if ($cacheEnabled && $this->cache->has($cacheKey)) {
-            $cached = $this->cache->get($cacheKey);
-
-            if ($cached instanceof Collection) {
-                return $cached;
-            }
+        if ($cacheEnabled && ($cached = $this->cache->get($cacheKey)) instanceof Collection) {
+            return $cached;
         }
 
         $with = apply_filters('cms_menu_load_with_relations', [
@@ -226,7 +222,9 @@ class Menu
             'menuNodes.metadata',
             'menuNodes.child.metadata',
             'menuNodes.reference',
+            'menuNodes.reference.slugable',
             'menuNodes.child.reference',
+            'menuNodes.child.reference.slugable',
             'locations',
         ]);
 
@@ -234,7 +232,17 @@ class Menu
             ->wherePublished()
             ->with($with);
 
-        $result = RepositoryHelper::applyBeforeExecuteQuery($items, new MenuModel())->get();
+        try {
+            $result = RepositoryHelper::applyBeforeExecuteQuery($items, new MenuModel())->get();
+        } catch (Throwable) {
+            $safeWith = array_values(array_filter($with, fn ($relation) => ! str_contains($relation, '.reference')));
+
+            $items = MenuModel::query()
+                ->wherePublished()
+                ->with($safeWith);
+
+            $result = RepositoryHelper::applyBeforeExecuteQuery($items, new MenuModel())->get();
+        }
 
         $this->preloadMenuNodeMetadata($result);
 
@@ -282,14 +290,14 @@ class Menu
 
         $theme = Arr::get($args, 'theme', true);
 
-        $cacheKey = 'menu_location_' . md5(serialize(BaseHelper::getHomepageUrl()) . serialize($args));
+        $cacheKey = 'menu_location_' . md5(serialize(BaseHelper::getHomepageUrl()) . serialize($args) . app()->getLocale());
 
         $cacheEnabled = setting('cache_front_menu_enabled', true);
 
         $data = [];
 
-        if ($cacheEnabled && $this->cache->has($cacheKey)) {
-            $data = $this->cache->get($cacheKey);
+        if ($cacheEnabled) {
+            $data = $this->cache->get($cacheKey, []);
         }
 
         if (! $data) {
@@ -326,7 +334,7 @@ class Menu
 
             if ($menuNodes instanceof Collection) {
                 try {
-                    $menuNodes->loadMissing('reference');
+                    $menuNodes->loadMissing(['reference', 'reference.slugable']);
                 } catch (Throwable) {
                 }
             }
@@ -427,14 +435,15 @@ class Menu
     public function clearCacheMenuItems(): self
     {
         try {
-            $nodes = MenuNode::query()->get();
+            $nodes = MenuNode::query()
+                ->whereNotNull('reference_type')
+                ->whereNotNull('reference_id')
+                ->where('reference_id', '>', 0)
+                ->with(['reference'])
+                ->get();
 
             foreach ($nodes as $node) {
-                if (! $node->reference_type ||
-                    ! class_exists($node->reference_type) ||
-                    ! $node->reference_id ||
-                    ! $node->reference
-                ) {
+                if (! class_exists($node->reference_type) || ! $node->reference) {
                     continue;
                 }
 

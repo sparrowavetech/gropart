@@ -31,7 +31,19 @@ class WidgetController extends BaseController
 
         RenderingWidgetSettings::dispatch();
 
-        $widgets = Widget::query()->where('theme', Widget::getThemeName())->orderBy('position')->get();
+        $themeName = Widget::getThemeName();
+        $widgets = Widget::query()->where('theme', $themeName)->orderBy('position')->get();
+
+        $isInheriting = false;
+
+        if ($widgets->isEmpty()) {
+            $defaultThemeName = Widget::getDefaultThemeName();
+
+            if ($defaultThemeName !== $themeName) {
+                $widgets = Widget::query()->where('theme', $defaultThemeName)->orderBy('position')->get();
+                $isInheriting = $widgets->isNotEmpty();
+            }
+        }
 
         $groups = WidgetGroup::getGroups();
         foreach ($widgets as $widget) {
@@ -44,7 +56,7 @@ class WidgetController extends BaseController
                 ->addWidget($widget->widget_id, $widget->data);
         }
 
-        return view('packages/widget::list');
+        return view('packages/widget::list', compact('isInheriting'));
     }
 
     public function update(Request $request)

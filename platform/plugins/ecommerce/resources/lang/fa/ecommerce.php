@@ -120,6 +120,7 @@ return [
     'apply' => 'اعمال',
     'available' => 'موجود',
     'back_to_return_requests' => 'بازگشت به درخواست‌های بازگشت',
+    'backorder_warning' => 'هشدار: این محصول پیش‌سفارش است و ممکن است ارسال بیشتر طول بکشد.',
     'choose_reason' => 'انتخاب دلیل',
     'clear' => 'پاک کردن',
     'clear_all_filters' => 'پاک کردن همه فیلترها',

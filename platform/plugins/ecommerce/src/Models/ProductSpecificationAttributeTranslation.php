@@ -6,6 +6,7 @@ use Botble\Base\Models\BaseModel;
 use Botble\Language\Facades\Language;
 use Botble\Language\Models\Language as LanguageModel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\DB;
 
 class ProductSpecificationAttributeTranslation extends BaseModel
 {
@@ -113,16 +114,51 @@ class ProductSpecificationAttributeTranslation extends BaseModel
     {
         $specificationAttribute = $product->specificationAttributes->where('id', $attribute->id)->first();
 
-        $defaultValue = optional($specificationAttribute)->pivot?->value ?: $attribute->default_value;
+        $rawValue = optional($specificationAttribute)->pivot?->value ?: $attribute->default_value;
+
+        if (! $rawValue) {
+            return null;
+        }
 
         $langCode = $langCode ?: self::getCurrentLanguageCode();
 
+        if ($attribute->hasOptions() && $attribute->hasIdBasedOptions()) {
+            return self::resolveOptionLabel($attribute, $rawValue, $langCode);
+        }
+
         if (self::isDefaultLanguage($langCode)) {
-            return $defaultValue;
+            return $rawValue;
         }
 
         $translatedValue = self::getTranslatedValue($product->id, $attribute->id, $langCode);
 
-        return $translatedValue ?: $defaultValue;
+        return $translatedValue ?: $rawValue;
+    }
+
+    public static function resolveOptionLabel(
+        SpecificationAttribute $attribute,
+        string $optionId,
+        string $langCode
+    ): ?string {
+        if (self::isDefaultLanguage($langCode)) {
+            return $attribute->getOptionValueById($optionId) ?? $optionId;
+        }
+
+        $translation = DB::table('ec_specification_attributes_translations')
+            ->where('ec_specification_attributes_id', $attribute->id)
+            ->where('lang_code', $langCode)
+            ->value('options');
+
+        if ($translation) {
+            $translatedOptions = json_decode($translation, true) ?: [];
+
+            foreach ($translatedOptions as $opt) {
+                if (is_array($opt) && ($opt['id'] ?? '') === $optionId) {
+                    return $opt['value'];
+                }
+            }
+        }
+
+        return $attribute->getOptionValueById($optionId) ?? $optionId;
     }
 }

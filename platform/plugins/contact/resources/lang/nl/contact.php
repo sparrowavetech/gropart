@@ -177,4 +177,6 @@ return [
     'subject_placeholder' => 'Onderwerp',
     'your_message' => 'Jouw bericht',
     'agree_terms_privacy' => 'Ik ga akkoord met de voorwaarden en het privacybeleid',
+    'agree_terms_privacy_link' => 'Ik ga akkoord met de :link',
+    'terms_and_privacy_policy' => 'voorwaarden en het privacybeleid',
 ];

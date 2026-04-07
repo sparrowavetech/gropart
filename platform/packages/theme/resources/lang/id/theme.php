@@ -208,6 +208,11 @@ return [
     ],
     'term_and_privacy_policy_url' => 'URL Ketentuan dan Kebijakan Privasi',
     'site_title_separator' => 'Pemisah judul SEO',
+    'site_title_helper' => 'Nama merek atau bisnis Anda. Muncul di tab browser dan hasil pencarian (mis. "My Company").',
+    'show_site_name_helper' => 'Menambahkan nama situs ke setiap judul halaman menggunakan pemisah yang dipilih. Contoh: "Page Title - My Company".',
+    'site_title_separator_helper' => 'Karakter yang digunakan antara judul halaman dan nama situs. Contoh dengan tanda hubung: "Page Title - My Company". Contoh dengan garis tegak: "Page Title | My Company".',
+    'seo_title_helper' => 'Judul beranda yang ditampilkan di hasil mesin pencari. Pertahankan di bawah 60 karakter untuk tampilan terbaik. Biarkan kosong untuk menggunakan judul situs.',
+    'seo_description_helper' => 'Deskripsi beranda yang ditampilkan di hasil mesin pencari. Pertahankan antara 120 hingga 160 karakter untuk tampilan terbaik.',
     'no_meta_keywords' => 'Meta keywords telah dihapus oleh Google, Anda tidak perlu menambahkan meta keywords ke situs web Anda. Pelajari lebih lanjut: :link',
     'validation' => [
         'gtm_container_id_format' => 'ID Container GTM harus dalam format GTM-XXXXXX (contoh: GTM-N7MK3KH2)',
@@ -389,6 +394,9 @@ return [
     ],
 
     'typography_primary' => 'Font utama',
+    'all_languages' => 'Semua bahasa',
+    'shared_field_notice' => 'Bidang ini digunakan bersama di semua bahasa. Kelola dari bahasa default.',
+    'shared_section_notice' => 'Semua opsi di bagian ini digunakan bersama di semua bahasa. Beralih ke bahasa default untuk melakukan perubahan.',
     'admin_appearance' => [
         'show_admin_bar' => 'Tampilkan bilah admin untuk admin yang masuk, bahkan di situs depan',
         'show_admin_bar_helper' => 'Tampilkan toolbar akses cepat admin di bagian atas situs web saat masuk sebagai administrator',

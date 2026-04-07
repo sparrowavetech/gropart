@@ -95,6 +95,8 @@ return [
     'coupon_code' => 'Alennuskoodi: ":code"',
     'shipping_fee' => 'Toimitusmaksu',
     'tax' => 'Vero',
+    'shipping_tax' => 'Toimitusvero',
+
     'refunded_amount' => 'Hyvitetty summa',
     'amount_received' => 'Todellinen vastaanotettu summa',
     'download_invoice' => 'Lataa lasku',

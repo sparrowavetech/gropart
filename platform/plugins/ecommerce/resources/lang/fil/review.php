@@ -109,4 +109,23 @@ return [
         'images_mimes' => 'Ang mga larawan ay dapat nasa JPG, JPEG o PNG format.',
         'images_file_max' => 'Ang bawat larawan ay hindi maaaring lumampas sa :max KB.',
     ],
+    'badge_type' => 'Badge ng Review',
+    'badge_type_help' => 'Pumili ng badge para ipakita sa review na ito. Ang "Auto detect" ay nagpapakita ng "Binili X na ang nakakaraan" para sa mga customer na may mga order.',
+    'badge_types' => [
+        'auto' => 'Auto detect',
+        'none' => 'Walang badge',
+        'purchased' => '✅ Nabili',
+        'community_review' => '💬 Community Review',
+        'expert_reviewer' => '🏅 Expert Reviewer',
+        'top_contributor' => '⭐ Nangungunang Kontribyutor',
+        'verified_buyer' => '✅ Verified na Bumibili',
+    ],
+    'placeholders' => [
+        'customer_name' => 'e.g: John Doe',
+        'customer_email' => 'e.g: example@domain.com',
+        'comment' => 'Isulat ang komento ng review dito...',
+    ],
+    'helpers' => [
+        'star' => 'Rating mula 1 (pinakamababa) hanggang 5 (pinakamataas).',
+    ],
 ];

@@ -65,4 +65,5 @@ return [
     'please_select_record' => 'Prosimo, izberite vsaj en zapis za izvedbo tega dejanja!',
     'checkbox' => 'Potrditveno polje',
     'toggle_columns' => 'Preklopi stolpce',
+    'created_by' => 'Ustvaril',
 ];

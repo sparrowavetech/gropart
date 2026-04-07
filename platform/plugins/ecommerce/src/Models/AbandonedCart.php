@@ -106,12 +106,19 @@ class AbandonedCart extends BaseModel
 
     public function scopeNeedsSequenceEmail(Builder $query, int $sequence, int $hoursDelay): Builder
     {
-        return $query
+        $query
             ->abandoned()
             ->whereNotNull('email')
-            ->where('last_email_sequence', '<', $sequence)
+            ->whereNull('unsubscribed_at')
+            ->where('last_email_sequence', $sequence - 1)
             ->where('abandoned_at', '<=', now()->subHours($hoursDelay))
             ->where('abandoned_at', '>=', now()->subDays(30));
+
+        if ($sequence > 1) {
+            $query->where('reminder_sent_at', '<=', now()->subHour());
+        }
+
+        return $query;
     }
 
     public function scopeNotExpired(Builder $query, int $days = 30): Builder

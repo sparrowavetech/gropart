@@ -27,4 +27,6 @@ return [
     'option_value_name_attribute' => 'Hodnoty možnosti :key',
     'please_choose_option_type' => 'Vyberte prosím typ možnosti!',
     'no_global_options' => 'Zatiaľ nie sú k dispozícii žiadne globálne možnosti. Najprv pridajte možnosti produktu v predvolenom jazyku.',
+    'price_per_product' => 'Cena za produkt',
+    'price_per_product_helper' => 'Ak je povolené, cena možnosti sa uplatní raz na produkt, nie je násobená množstvom.',
 ];

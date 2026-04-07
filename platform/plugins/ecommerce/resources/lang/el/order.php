@@ -95,6 +95,8 @@ return [
     'coupon_code' => 'Κωδικός κουπονιού: ":code"',
     'shipping_fee' => 'Έξοδα αποστολής',
     'tax' => 'Φόρος',
+    'shipping_tax' => 'Φόρος αποστολής',
+
     'refunded_amount' => 'Ποσό που επιστράφηκε',
     'amount_received' => 'Το ποσό που εισπράχθηκε πραγματικά',
     'download_invoice' => 'Λήψη τιμολογίου',

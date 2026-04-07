@@ -208,6 +208,11 @@ return [
     ],
     'term_and_privacy_policy_url' => '이용 약관 및 개인정보 보호정책 URL',
     'site_title_separator' => 'SEO 제목 구분 기호',
+    'site_title_helper' => '브랜드 또는 비즈니스 이름입니다. 브라우저 탭과 검색 결과에 표시됩니다 (예: "My Company").',
+    'show_site_name_helper' => '선택한 구분 기호를 사용하여 모든 페이지 제목에 사이트 이름을 추가합니다. 예: "Page Title - My Company".',
+    'site_title_separator_helper' => '페이지 제목과 사이트 이름 사이에 사용되는 문자입니다. 대시 예: "Page Title - My Company". 파이프 예: "Page Title | My Company".',
+    'seo_title_helper' => '검색 엔진 결과에 표시되는 홈페이지 제목입니다. 최적 표시를 위해 60자 이내로 유지하세요. 비워두면 사이트 제목이 사용됩니다.',
+    'seo_description_helper' => '검색 엔진 결과에 표시되는 홈페이지 설명입니다. 최적 표시를 위해 120-160자 사이로 유지하세요.',
     'no_meta_keywords' => '메타 키워드는 Google에서 제거되었으므로 웹사이트에 메타 키워드를 추가할 필요가 없습니다. 자세히 알아보기: :link',
     'validation' => [
         'gtm_container_id_format' => 'GTM 컨테이너 ID는 GTM-XXXXXX 형식이어야 합니다(예: GTM-N7MK3KH2)',
@@ -389,6 +394,9 @@ return [
     ],
 
     'typography_primary' => '기본 글꼴',
+    'all_languages' => '모든 언어',
+    'shared_field_notice' => '이 필드는 모든 언어에서 공유됩니다. 기본 언어에서 관리하세요.',
+    'shared_section_notice' => '이 섹션의 모든 옵션은 모든 언어에서 공유됩니다. 변경하려면 기본 언어로 전환하세요.',
     'admin_appearance' => [
         'show_admin_bar' => '로그인한 관리자를 위해 관리자 표시줄 표시, 프론트 사이트에서도',
         'show_admin_bar_helper' => '관리자로 로그인했을 때 웹사이트 상단에 빠른 액세스 관리자 도구 모음 표시',

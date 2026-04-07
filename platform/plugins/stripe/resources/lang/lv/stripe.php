@@ -2,6 +2,9 @@
 
 return [
     'webhook_secret' => 'Webhook noslēpums',
+    'webhook_secret_helper' => 'Atrodiet to savā Stripe Dashboard sadaļā Developers > Webhooks > Signing secret.',
+    'public_key_helper' => 'Atrodiet to savā Stripe Dashboard sadaļā Developers > API keys.',
+    'secret_key_helper' => 'Atrodiet to savā Stripe Dashboard sadaļā Developers > API keys. Glabājiet šo atslēgu konfidenciāli.',
     'webhook_setup_guide' => [
         'title' => 'Stripe Webhook iestatīšanas rokasgrāmata',
         'description' => 'Izpildiet šīs darbības, lai iestatītu Stripe webhook',

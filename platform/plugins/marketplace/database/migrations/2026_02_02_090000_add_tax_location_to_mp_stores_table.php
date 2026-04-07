@@ -7,6 +7,10 @@ use Illuminate\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
+        if (Schema::hasColumn('mp_stores', 'tax_country')) {
+            return;
+        }
+
         Schema::table('mp_stores', function (Blueprint $table): void {
             $table->string('tax_country', 120)->nullable()->after('tax_id');
             $table->string('tax_state', 120)->nullable()->after('tax_country');

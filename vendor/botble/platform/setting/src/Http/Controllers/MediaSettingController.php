@@ -53,6 +53,7 @@ class MediaSettingController extends SettingController
         $totalFiles = $request->input('total');
         $offset = $request->input('offset', 0);
         $limit = $request->input('limit', RvMedia::getConfig('generate_thumbnails_chunk_limit'));
+        $overrideExisting = $request->boolean('override_existing');
 
         /**
          * @var Collection<MediaFile> $files
@@ -68,7 +69,7 @@ class MediaSettingController extends SettingController
         if ($files->isNotEmpty()) {
             foreach ($files as $file) {
                 try {
-                    RvMedia::generateThumbnails($file);
+                    RvMedia::generateThumbnails($file, overrideExisting: $overrideExisting);
                 } catch (Throwable $exception) {
                     BaseHelper::logError($exception);
                     $errors[] = $file->url;

@@ -121,6 +121,7 @@ return [
     'apply' => 'Använd',
     'available' => 'Tillgänglig',
     'back_to_return_requests' => 'Tillbaka till returförfrågningar',
+    'backorder_warning' => 'Varning: Denna produkt är i restorder och kan ta längre tid att leverera.',
     'choose_reason' => 'Välj orsak',
     'clear' => 'Rensa',
     'clear_all_filters' => 'Rensa alla filter',

@@ -208,6 +208,11 @@ return [
     ],
     'term_and_privacy_policy_url' => 'Felhasználási feltételek és adatvédelmi irányelvek URL',
     'site_title_separator' => 'SEO cím elválasztó',
+    'site_title_helper' => 'A márkaneve vagy vállalkozásának neve. Megjelenik a böngésző fülén és a keresési eredményekben (pl. "My Company").',
+    'show_site_name_helper' => 'A kiválasztott elválasztóval hozzáfűzi a webhely nevét minden oldal címéhez. Példa: "Page Title - My Company".',
+    'site_title_separator_helper' => 'Az oldal címe és a webhely neve között használt karakter. Példa kötőjellel: "Page Title - My Company". Példa függőleges vonallal: "Page Title | My Company".',
+    'seo_title_helper' => 'A kezdőlap keresőmotorokban megjelenő címe. A legjobb megjelenítéshez tartsa 60 karakter alatt. Hagyja üresen a webhely cím használatához.',
+    'seo_description_helper' => 'A kezdőlap keresőmotorokban megjelenő leírása. A legjobb megjelenítéshez tartsa 120 és 160 karakter között.',
     'no_meta_keywords' => 'A Google eltávolította a meta kulcsszavakat, nem kell meta kulcsszavakat hozzáadnia a webhelyéhez. Tudjon meg többet: :link',
     'validation' => [
         'gtm_container_id_format' => 'A GTM Container ID formátuma GTM-XXXXXX kell legyen (pl. GTM-N7MK3KH2)',
@@ -389,6 +394,9 @@ return [
     ],
 
     'typography_primary' => 'Elsődleges betűtípus',
+    'all_languages' => 'Minden nyelv',
+    'shared_field_notice' => 'Ez a mező minden nyelven megosztott. Kezelje az alapértelmezett nyelvből.',
+    'shared_section_notice' => 'Az összes beállítás ebben a szekcióban minden nyelven megosztott. Váltson az alapértelmezett nyelvre a módosításokhoz.',
     'admin_appearance' => [
         'show_admin_bar' => 'Admin sáv megjelenítése bejelentkezett adminisztrátorok számára, még az előoldalon is',
         'show_admin_bar_helper' => 'Gyorselérési adminisztrátori eszköztár megjelenítése a webhely tetején, amikor adminisztrátorként van bejelentkezve',

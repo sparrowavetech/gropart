@@ -6,7 +6,7 @@
 
         @if (! empty($pageDescription))
             <div class="bb-block__content ck-content">
-                {!! BaseHelper::clean($pageDescription) !!}
+                {!! $pageDescription !!}
             </div>
         @endif
     </div>

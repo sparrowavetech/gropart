@@ -121,6 +121,7 @@ return [
     'apply' => 'Ilapat',
     'available' => 'Available',
     'back_to_return_requests' => 'Bumalik sa Mga Kahilingan sa Pagbabalik',
+    'backorder_warning' => 'Babala: Ang produktong ito ay nasa backorder at maaaring mas matagal bago maipadala.',
     'choose_reason' => 'Pumili ng Dahilan',
     'clear' => 'I-clear',
     'clear_all_filters' => 'I-clear ang lahat ng filter',

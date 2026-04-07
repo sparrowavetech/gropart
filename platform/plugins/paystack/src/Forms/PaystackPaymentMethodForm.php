@@ -29,6 +29,8 @@ class PaystackPaymentMethodForm extends PaymentMethodForm
                 TextField::class,
                 TextFieldOption::make()
                     ->label(trans('plugins/paystack::paystack.public_key'))
+                    ->placeholder('pk_live_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+                    ->helperText(trans('plugins/paystack::paystack.public_key_helper'))
                     ->value(BaseHelper::hasDemoModeEnabled() ? '*******************************' : get_payment_setting('public', PAYSTACK_PAYMENT_METHOD_NAME))
             )
             ->add(
@@ -36,7 +38,18 @@ class PaystackPaymentMethodForm extends PaymentMethodForm
                 'password',
                 TextFieldOption::make()
                     ->label(trans('plugins/paystack::paystack.secret_key'))
+                    ->placeholder('sk_live_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+                    ->helperText(trans('plugins/paystack::paystack.secret_key_helper'))
                     ->value(BaseHelper::hasDemoModeEnabled() ? '*******************************' : get_payment_setting('secret', PAYSTACK_PAYMENT_METHOD_NAME))
+            )
+            ->add(
+                sprintf('payment_%s_webhook_secret', PAYSTACK_PAYMENT_METHOD_NAME),
+                'password',
+                TextFieldOption::make()
+                    ->label(trans('plugins/paystack::paystack.webhook_secret'))
+                    ->placeholder('whsec_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+                    ->helperText(trans('plugins/paystack::paystack.webhook_secret_helper'))
+                    ->value(BaseHelper::hasDemoModeEnabled() ? '*******************************' : get_payment_setting('webhook_secret', PAYSTACK_PAYMENT_METHOD_NAME))
             )
             ->addAvailableCountriesField(PAYSTACK_PAYMENT_METHOD_NAME);
     }

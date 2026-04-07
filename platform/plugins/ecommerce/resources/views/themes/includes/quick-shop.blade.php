@@ -5,6 +5,8 @@
 
     @include(EcommerceHelper::viewPath('includes.product-price'))
 
+    {!! apply_filters('ecommerce_after_product_description', null, $product) !!}
+
     <x-core::form :url="route('public.cart.add-to-cart')" method="POST" data-bb-toggle="product-form" class="product-form">
         <input type="hidden" name="id" value="{{ ($product->is_variation || !$product->defaultVariation->product_id) ? $product->id : $product->defaultVariation->product_id }}" />
 

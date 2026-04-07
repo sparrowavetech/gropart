@@ -16,6 +16,8 @@ class ThemeOptionSection implements Arrayable
 
     protected float $priority = 999;
 
+    protected bool $shared = false;
+
     protected array $fields = [];
 
     public function __construct(string $id)
@@ -56,6 +58,18 @@ class ThemeOptionSection implements Arrayable
         return $this;
     }
 
+    public function shared(bool $shared = true): self
+    {
+        $this->shared = $shared;
+
+        return $this;
+    }
+
+    public function isShared(): bool
+    {
+        return $this->shared;
+    }
+
     public function fields(array $fields): self
     {
         $this->fields = $fields;
@@ -70,6 +84,7 @@ class ThemeOptionSection implements Arrayable
             'title' => $this->title,
             'description' => $this->description,
             'icon' => $this->icon,
+            'shared' => $this->shared,
             'priority' => $this->priority,
             'fields' => $this->fields,
         ];

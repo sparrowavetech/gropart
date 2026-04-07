@@ -177,4 +177,6 @@ return [
     'subject_placeholder' => 'Thema',
     'your_message' => 'Ihre Nachricht',
     'agree_terms_privacy' => 'Ich stimme den Allgemeinen Geschäftsbedingungen und der Datenschutzerklärung zu',
+    'agree_terms_privacy_link' => 'Ich stimme den :link zu',
+    'terms_and_privacy_policy' => 'Allgemeinen Geschäftsbedingungen und der Datenschutzerklärung',
 ];

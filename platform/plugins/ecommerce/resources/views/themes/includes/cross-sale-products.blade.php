@@ -38,7 +38,7 @@
                         'breakpoint' => 575,
                         'settings' => [
                             'arrows' => true,
-                            'slidesToShow' => 1,
+                            'slidesToShow' => 2,
                             'slidesToScroll' => 1,
                         ],
                     ],

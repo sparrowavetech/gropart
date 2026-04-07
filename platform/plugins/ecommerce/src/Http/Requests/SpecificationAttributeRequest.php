@@ -16,7 +16,15 @@ class SpecificationAttributeRequest extends Request
             'name' => ['required', 'string', 'max:250'],
             'type' => ['required', Rule::in(SpecificationAttributeFieldType::values())],
             'default_value' => ['nullable', 'string', 'max:250'],
-            'options' => [Rule::requiredIf(fn () => in_array($this->input('type'), [SpecificationAttributeFieldType::SELECT, SpecificationAttributeFieldType::RADIO])), 'array'],
+            'options' => [
+                Rule::requiredIf(fn () => in_array($this->input('type'), [
+                    SpecificationAttributeFieldType::SELECT,
+                    SpecificationAttributeFieldType::RADIO,
+                ])),
+                'array',
+            ],
+            'options.*.id' => ['nullable', 'string', 'max:20'],
+            'options.*.value' => ['required_with:options', 'string', 'max:250'],
         ];
     }
 }

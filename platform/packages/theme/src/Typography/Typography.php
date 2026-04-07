@@ -9,6 +9,7 @@ use Botble\Theme\Facades\ThemeOption;
 use Botble\Theme\Http\Requests\UpdateOptionsRequest;
 use Botble\Theme\ThemeOption\Fields\GoogleFontsField;
 use Botble\Theme\ThemeOption\Fields\NumberField;
+use Botble\Theme\ThemeOption\Fields\SelectField;
 use Botble\Theme\ThemeOption\ThemeOptionSection;
 use Illuminate\Support\Facades\Event;
 
@@ -141,6 +142,16 @@ class Typography
                 $fontFamily->getName(),
                 $value
             );
+
+            $fontWeight = theme_option("tp_{$fontFamily->getName()}_font_weight");
+
+            if ($fontWeight) {
+                $styles .= sprintf(
+                    '--%s-font-weight: %s;',
+                    $fontFamily->getName(),
+                    $fontWeight
+                );
+            }
         }
 
         $fontSizes = $this->getFontSizes();
@@ -171,9 +182,34 @@ class Typography
             }
         }
 
+        // Apply font-weight from font families if set
+        foreach ($fontFamilies as $fontFamily) {
+            $fontWeight = theme_option("tp_{$fontFamily->getName()}_font_weight");
+
+            if (! $fontWeight) {
+                continue;
+            }
+
+            if ($fontFamily->getName() === 'primary') {
+                $styles .= sprintf('body{font-weight: var(--%s-font-weight);}', $fontFamily->getName());
+            } elseif ($fontFamily->getName() === 'heading') {
+                $styles .= sprintf('h1,h2,h3,h4,h5,h6{font-weight: var(--%s-font-weight);}', $fontFamily->getName());
+            }
+        }
+
         $styles .= '</style>';
 
-        return $fontFaces . $styles;
+        $fontPreloads = '';
+
+        if ($fontFaces) {
+            // Extract the first woff2 font URL from the inlined @font-face CSS for preloading
+            if (preg_match('/url\(([^)]+\.woff2)/i', $fontFaces, $matches)) {
+                $fontUrl = trim($matches[1], '\'"');
+                $fontPreloads = '<link rel="preload" href="' . e($fontUrl) . '" as="font" type="font/woff2" crossorigin>';
+            }
+        }
+
+        return $fontPreloads . $fontFaces . $styles;
     }
 
     public function renderThemeOptions(): void
@@ -190,6 +226,25 @@ class Typography
                     ->name("tp_{$fontFamily->getName()}_font")
                     ->label(trans('packages/theme::theme.typography_font_family', ['name' => $fontFamily->getLabel()]))
                     ->defaultValue($fontFamily->getDefault());
+
+                if ($fontFamily->getDefaultFontWeight() !== null) {
+                    $fields[] = SelectField::make()
+                        ->name("tp_{$fontFamily->getName()}_font_weight")
+                        ->label(trans('packages/theme::theme.typography_font_weight', ['name' => $fontFamily->getLabel()]))
+                        ->options([
+                            '' => trans('packages/theme::theme.typography_font_weight_default'),
+                            '100' => '100 - Thin',
+                            '200' => '200 - Extra Light',
+                            '300' => '300 - Light',
+                            '400' => '400 - Regular',
+                            '500' => '500 - Medium',
+                            '600' => '600 - Semi Bold',
+                            '700' => '700 - Bold',
+                            '800' => '800 - Extra Bold',
+                            '900' => '900 - Black',
+                        ])
+                        ->defaultValue((string) $fontFamily->getDefaultFontWeight());
+                }
             }
 
             foreach ($this->fontSizes as $fontSize) {
@@ -218,6 +273,10 @@ class Typography
 
             foreach ($this->fontFamilies as $fontFamily) {
                 $rules["tp_{$fontFamily->getName()}_font"] = ['sometimes', 'required', 'string'];
+
+                if ($fontFamily->getDefaultFontWeight() !== null) {
+                    $rules["tp_{$fontFamily->getName()}_font_weight"] = ['sometimes', 'nullable', 'string', 'in:,100,200,300,400,500,600,700,800,900'];
+                }
             }
 
             foreach ($this->fontSizes as $fontSize) {
@@ -234,6 +293,10 @@ class Typography
 
             foreach ($this->fontFamilies as $fontFamily) {
                 $attributes["tp_{$fontFamily->getName()}_font"] = $fontFamily->getLabel();
+
+                if ($fontFamily->getDefaultFontWeight() !== null) {
+                    $attributes["tp_{$fontFamily->getName()}_font_weight"] = $fontFamily->getLabel() . ' Font Weight';
+                }
             }
 
             foreach ($this->fontSizes as $fontSize) {

@@ -73,6 +73,14 @@ class ThemeTranslationImporter extends Importer implements WithMapping
 
     public function map(mixed $row): array
     {
+        $locales = array_map(fn ($locale) => $locale['locale'], Language::getAvailableLocales());
+
+        foreach ($locales as $locale) {
+            if (isset($row[$locale]) && ! is_string($row[$locale])) {
+                $row[$locale] = (string) $row[$locale];
+            }
+        }
+
         return $row;
     }
 

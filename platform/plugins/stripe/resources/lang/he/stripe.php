@@ -2,6 +2,9 @@
 
 return [
     'webhook_secret' => 'סוד Webhook',
+    'webhook_secret_helper' => 'מצא זאת בלוח המחוונים של Stripe תחת Developers > Webhooks > Signing secret.',
+    'public_key_helper' => 'מצא זאת בלוח המחוונים של Stripe תחת Developers > API keys.',
+    'secret_key_helper' => 'מצא זאת בלוח המחוונים של Stripe תחת Developers > API keys. שמור מפתח זה בסודיות.',
     'webhook_setup_guide' => [
         'title' => 'מדריך התקנת Stripe Webhook',
         'description' => 'עקוב אחר השלבים הבאים כדי להגדיר webhook של Stripe',

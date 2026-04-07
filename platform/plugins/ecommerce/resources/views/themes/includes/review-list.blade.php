@@ -38,8 +38,15 @@
                 <time class="text-muted small" datetime="{{ $review->created_at->translatedFormat('Y-m-d\TH:i:sP') }}">
                     {{ $review->created_at->diffForHumans() }}
                 </time>
-                @if ($review->order_created_at)
+                @php
+                    $badgeType = $review->badge_type?->getValue() ?? \Botble\Ecommerce\Enums\ReviewBadgeEnum::AUTO;
+                @endphp
+                @if ($badgeType === \Botble\Ecommerce\Enums\ReviewBadgeEnum::AUTO && $review->order_created_at)
                     <div class="small text-muted">{{ trans('plugins/ecommerce::review.purchased_at_time', ['time' => $review->order_created_at->diffForHumans()]) }}</div>
+                @elseif ($badgeType === \Botble\Ecommerce\Enums\ReviewBadgeEnum::PURCHASED)
+                    <div class="small text-muted">{{ trans('plugins/ecommerce::review.purchased_at_time', ['time' => $review->created_at->subHours(12)->diffForHumans()]) }}</div>
+                @elseif ($badgeType !== \Botble\Ecommerce\Enums\ReviewBadgeEnum::AUTO && $badgeType !== \Botble\Ecommerce\Enums\ReviewBadgeEnum::NONE)
+                    <div class="small text-muted">{{ $review->badge_type->label() }}</div>
                 @endif
                 @if (! $review->is_approved)
                     <div class="small text-warning">{{ trans('plugins/ecommerce::review.waiting_for_approval') }}</div>

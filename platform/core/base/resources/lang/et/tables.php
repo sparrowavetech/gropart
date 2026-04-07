@@ -65,4 +65,5 @@ return [
     'please_select_record' => 'Palun valige vähemalt üks kirje selle toimingu sooritamiseks!',
     'checkbox' => 'Märkeruut',
     'toggle_columns' => 'Lülita veerge',
+    'created_by' => 'Loodud',
 ];

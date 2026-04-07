@@ -11,6 +11,9 @@
                     'title' => '#',
                     'width' => 0,
                 ],
+                'name' => [
+                    'title' => trans('plugins/ecommerce::shipping.rule.item.tables.name'),
+                ],
                 'state' => [
                     'title' => trans('plugins/ecommerce::shipping.rule.item.tables.state'),
                 ],
@@ -18,7 +21,7 @@
                     'title' => trans('plugins/ecommerce::shipping.rule.item.tables.city'),
                 ],
                 'zip_code' => [
-                    'title' => trans('plugins/ecommerce::shipping.rule.item.tables.zip_code'),
+                    'title' => trans('plugins/ecommerce::shipping.rule.item.tables.zip_range'),
                 ],
                 'adjustment_price' => [
                     'title' => trans('plugins/ecommerce::shipping.rule.item.tables.adjustment_price'),

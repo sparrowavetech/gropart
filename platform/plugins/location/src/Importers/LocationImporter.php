@@ -41,8 +41,13 @@ class LocationImporter extends Importer
             $supportedLocales = Language::getSupportedLocales();
 
             foreach ($supportedLocales as $properties) {
-                if ($properties['lang_code'] != $defaultLanguage && $properties['lang_code'] == 'vi') {
-                    $columns[] = ImportColumn::make('name_vi')
+                if ($properties['lang_code'] != $defaultLanguage) {
+                    $langCode = $properties['lang_code'];
+                    $exportLabel = 'Name (' . strtoupper($langCode) . ')';
+
+                    $columns[] = ImportColumn::make('name_' . $langCode)
+                        ->heading(strtolower(str_replace(' ', '_', $exportLabel)))
+                        ->label($exportLabel)
                         ->rules(['nullable', 'string', 'max:120'], trans('plugins/location::location.import.rules.name'));
                 }
             }
@@ -160,11 +165,12 @@ class LocationImporter extends Importer
 
             $supportedLocales = Language::getSupportedLocales();
             foreach ($supportedLocales as $properties) {
-                if ($properties['lang_code'] != $defaultLanguage && $properties['lang_code'] == 'vi') {
-                    $locations[1]['name_vi'] = 'Bang Texas';
-                    $locations[2]['name_vi'] = 'Bang Washington';
-                    $locations[3]['name_vi'] = 'Thành phố Houston';
-                    $locations[4]['name_vi'] = 'Thành phố San Antonio';
+                if ($properties['lang_code'] != $defaultLanguage) {
+                    $langCode = $properties['lang_code'];
+                    $locations[1]['name_' . $langCode] = 'Bang Texas';
+                    $locations[2]['name_' . $langCode] = 'Bang Washington';
+                    $locations[3]['name_' . $langCode] = 'Thành phố Houston';
+                    $locations[4]['name_' . $langCode] = 'Thành phố San Antonio';
                 }
             }
         }

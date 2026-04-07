@@ -208,6 +208,11 @@ return [
     ],
     'term_and_privacy_policy_url' => 'URL Termini e Informativa sulla Privacy',
     'site_title_separator' => 'Separatore titolo SEO',
+    'site_title_helper' => 'Il nome del tuo brand o azienda. Appare nella scheda del browser e nei risultati di ricerca (es. "My Company").',
+    'show_site_name_helper' => 'Aggiunge il nome del sito a ogni titolo di pagina usando il separatore selezionato. Esempio: "Page Title - My Company".',
+    'site_title_separator_helper' => 'Il carattere usato tra il titolo della pagina e il nome del sito. Esempio con trattino: "Page Title - My Company". Esempio con barra verticale: "Page Title | My Company".',
+    'seo_title_helper' => 'Il titolo della homepage mostrato nei risultati dei motori di ricerca. Mantienilo sotto i 60 caratteri per la migliore visualizzazione. Lascia vuoto per usare il titolo del sito.',
+    'seo_description_helper' => 'La descrizione della homepage mostrata nei risultati dei motori di ricerca. Mantienila tra 120 e 160 caratteri per la migliore visualizzazione.',
     'no_meta_keywords' => 'Le meta keywords sono state rimosse da Google, non è necessario aggiungere meta keywords al tuo sito web. Per saperne di più: :link',
     'validation' => [
         'gtm_container_id_format' => 'L\'ID Container GTM deve essere nel formato GTM-XXXXXX (es. GTM-N7MK3KH2)',
@@ -389,6 +394,9 @@ return [
     ],
 
     'typography_primary' => 'Font principale',
+    'all_languages' => 'Tutte le lingue',
+    'shared_field_notice' => 'Questo campo è condiviso tra tutte le lingue. Gestiscilo dalla lingua predefinita.',
+    'shared_section_notice' => 'Tutte le opzioni in questa sezione sono condivise tra tutte le lingue. Passa alla lingua predefinita per apportare modifiche.',
     'admin_appearance' => [
         'show_admin_bar' => 'Mostra barra admin per gli amministratori connessi, anche sul sito pubblico',
         'show_admin_bar_helper' => 'Visualizza una barra degli strumenti di accesso rapido all\'amministrazione nella parte superiore del sito web quando sei connesso come amministratore',

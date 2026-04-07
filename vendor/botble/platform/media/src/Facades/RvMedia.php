@@ -36,6 +36,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static bool insertWatermark(string $image)
  * @method static string getRealPath(string|null $url)
  * @method static bool isImage(string $mimeType)
+ * @method static bool isExecutableFileExtension(string $extension)
  * @method static bool isUsingCloud()
  * @method static array|null uploadFromUrl(string $url, string|int $folderId = 0, string|null $folderSlug = null, string|null $defaultMimetype = null)
  * @method static array uploadFromPath(string $path, string|int $folderId = 0, string|null $folderSlug = null, string|null $defaultMimetype = null)

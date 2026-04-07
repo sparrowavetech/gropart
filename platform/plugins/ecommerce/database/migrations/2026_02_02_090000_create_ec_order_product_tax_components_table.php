@@ -7,6 +7,10 @@ use Illuminate\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
+        if (Schema::hasTable('ec_order_product_tax_components')) {
+            return;
+        }
+
         Schema::create('ec_order_product_tax_components', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('order_product_id');

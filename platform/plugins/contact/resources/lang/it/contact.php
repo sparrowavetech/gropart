@@ -184,4 +184,6 @@ return [
     'subject_placeholder' => 'Soggetto',
     'your_message' => 'Il tuo messaggio',
     'agree_terms_privacy' => 'Accetto i Termini e l\'Informativa sulla privacy',
+    'agree_terms_privacy_link' => 'Accetto i :link',
+    'terms_and_privacy_policy' => 'Termini e l\'Informativa sulla privacy',
 ];

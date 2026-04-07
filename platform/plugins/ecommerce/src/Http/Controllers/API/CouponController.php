@@ -23,6 +23,39 @@ class CouponController extends BaseApiController
     ) {
     }
 
+    protected function getCustomerId(): ?int
+    {
+        return auth('sanctum')->check() ? auth('sanctum')->id() : null;
+    }
+
+    protected function restoreCart(?string $cartId = null): ?string
+    {
+        $customerId = $this->getCustomerId();
+
+        if ($customerId) {
+            Cart::instance('cart')->restoreForCustomer($customerId);
+
+            return (string) $customerId;
+        }
+
+        if ($cartId) {
+            Cart::instance('cart')->restore($cartId);
+        }
+
+        return $cartId;
+    }
+
+    protected function saveCart(?string $identifier = null): void
+    {
+        $customerId = $this->getCustomerId();
+
+        if ($customerId) {
+            Cart::instance('cart')->storeForCustomerQuietly($customerId);
+        } elseif ($identifier) {
+            Cart::instance('cart')->updateOrStore($identifier);
+        }
+    }
+
     /**
      * Apply coupon code
      *
@@ -38,10 +71,7 @@ class CouponController extends BaseApiController
         abort_unless(EcommerceHelper::isCartEnabled(), 404);
 
         $cartId = $request->input('cart_id');
-
-        if ($cartId) {
-            Cart::instance('cart')->restore($cartId);
-        }
+        $identifier = $this->restoreCart($cartId);
 
         $result = [
             'error' => false,
@@ -55,9 +85,7 @@ class CouponController extends BaseApiController
         }
 
         if ($result['error']) {
-            if ($cartId) {
-                Cart::instance('cart')->updateOrStore($cartId);
-            }
+            $this->saveCart($identifier);
 
             $response = $this
                 ->httpResponse()
@@ -89,12 +117,10 @@ class CouponController extends BaseApiController
         }
 
         // Store the cart to save changes
-        if ($cartId) {
-            Cart::instance('cart')->updateOrStore($cartId);
-        }
+        $this->saveCart($identifier);
 
         // Get updated cart data
-        $cartData = $this->getCartData($cartId);
+        $cartData = $this->getCartData($identifier);
 
         return $this
             ->httpResponse()
@@ -119,10 +145,8 @@ class CouponController extends BaseApiController
         $cartId = $request->input('cart_id');
         $requestCouponCode = $request->input('coupon_code');
 
-        // Step 1: Get the current cart content
-        if ($cartId) {
-            Cart::instance('cart')->restore($cartId);
-        }
+        // Step 1: Get the current cart content (properly restore for authenticated users)
+        $identifier = $this->restoreCart($cartId);
 
         $cartContent = Cart::instance('cart')->content();
         if ($cartContent->isEmpty()) {
@@ -149,9 +173,7 @@ class CouponController extends BaseApiController
         }
 
         if (! $couponCode) {
-            if ($cartId) {
-                Cart::instance('cart')->updateOrStore($cartId);
-            }
+            $this->saveCart($identifier);
 
             return $this
                 ->httpResponse()
@@ -184,12 +206,10 @@ class CouponController extends BaseApiController
         }
 
         // Step 6: Store the updated cart
-        if ($cartId) {
-            Cart::instance('cart')->updateOrStore($cartId);
-        }
+        $this->saveCart($identifier);
 
         // Get updated cart data
-        $cartData = $this->getCartData($cartId);
+        $cartData = $this->getCartData($identifier);
 
         return $this
             ->httpResponse()

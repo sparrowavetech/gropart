@@ -5,6 +5,7 @@ namespace Botble\Setting\Http\Requests;
 use Botble\Base\Facades\AdminAppearance;
 use Botble\Base\Facades\AdminHelper;
 use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Rules\ColorRule;
 use Botble\Base\Rules\GoogleFontsRule;
 use Botble\Support\Http\Requests\Request;
 use Illuminate\Validation\Rule;
@@ -21,20 +22,21 @@ class AdminAppearanceRequest extends Request
             'login_screen_backgrounds' => ['nullable', 'array'],
             'login_screen_backgrounds*' => ['string', 'required'],
             'admin_title' => ['nullable', 'string', 'max:255'],
-            'admin_appearance_locale' => ['sometimes', 'required', Rule::in(array_keys(AdminHelper::getAdminLocales()))],
+            'admin_appearance_locale' => ['sometimes', 'nullable', Rule::in(['' , ...array_keys(AdminHelper::getAdminLocales())])],
             'admin_appearance_locale_direction' => ['required', 'in:ltr,rtl'],
             'rich_editor' => ['required', Rule::in(array_keys(BaseHelper::availableRichEditors()))],
             'enable_page_visual_builder' => ['nullable', 'bool'],
             'admin_appearance_layout' => ['required', 'string', Rule::in(array_keys(AdminAppearance::getLayouts()))],
             'admin_appearance_show_menu_item_icon' => ['nullable', 'bool'],
+            'admin_appearance_show_get_started' => ['nullable', 'bool'],
             'admin_appearance_container_width' => ['required', 'string', Rule::in(array_keys(AdminAppearance::getContainerWidths()))],
             'admin_primary_font' => new GoogleFontsRule(),
-            'admin_primary_color' => ['nullable', 'string'],
-            'admin_secondary_color' => ['nullable', 'string'],
-            'admin_heading_color' => ['nullable', 'string'],
-            'admin_text_color' => ['nullable', 'string'],
-            'admin_link_color' => ['nullable', 'string'],
-            'admin_link_hover_color' => ['nullable', 'string'],
+            'admin_primary_color' => ['nullable', new ColorRule()],
+            'admin_secondary_color' => ['nullable', new ColorRule()],
+            'admin_heading_color' => ['nullable', new ColorRule()],
+            'admin_text_color' => ['nullable', new ColorRule()],
+            'admin_link_color' => ['nullable', new ColorRule()],
+            'admin_link_hover_color' => ['nullable', new ColorRule()],
             'admin_appearance_custom_css' => ['nullable', 'string', 'max:100000'],
             'admin_appearance_custom_header_js' => ['nullable', 'string', 'max:2500'],
             'admin_appearance_custom_body_js' => ['nullable', 'string', 'max:2500'],

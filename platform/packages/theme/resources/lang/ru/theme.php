@@ -208,6 +208,11 @@ return [
     ],
     'term_and_privacy_policy_url' => 'Terms and Privacy Policy URL',
     'site_title_separator' => 'SEO title separator',
+    'site_title_helper' => 'Название вашего бренда или компании. Отображается во вкладке браузера и результатах поиска (например, "My Company").',
+    'show_site_name_helper' => 'Добавляет название сайта к каждому заголовку страницы с использованием выбранного разделителя. Пример: "Page Title - My Company".',
+    'site_title_separator_helper' => 'Символ, используемый между заголовком страницы и названием сайта. Пример с дефисом: "Page Title - My Company". Пример с вертикальной чертой: "Page Title | My Company".',
+    'seo_title_helper' => 'Заголовок главной страницы, отображаемый в результатах поисковых систем. Держите его до 60 символов для наилучшего отображения. Оставьте пустым, чтобы использовать заголовок сайта.',
+    'seo_description_helper' => 'Описание главной страницы, отображаемое в результатах поисковых систем. Держите его в диапазоне 120-160 символов для наилучшего отображения.',
     'no_meta_keywords' => 'Meta keywords was removed by Google, you don\'t need to add meta keywords to your website. Learn more: :link',
     'validation' => [
         'gtm_container_id_format' => 'GTM Container ID must be in format GTM-XXXXXX (e.g., GTM-N7MK3KH2)',
@@ -389,6 +394,9 @@ return [
     ],
 
     'typography_primary' => 'Основной шрифт',
+    'all_languages' => 'Все языки',
+    'shared_field_notice' => 'Это поле является общим для всех языков. Управляйте им из языка по умолчанию.',
+    'shared_section_notice' => 'Все параметры в этом разделе являются общими для всех языков. Переключитесь на язык по умолчанию, чтобы внести изменения.',
     'admin_appearance' => [
         'show_admin_bar' => 'Показывать панель администратора для вошедших администраторов, даже на публичном сайте',
         'show_admin_bar_helper' => 'Отображать панель инструментов быстрого доступа администратора вверху веб-сайта при входе в систему как администратор',

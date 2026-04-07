@@ -109,4 +109,23 @@ return [
         'images_mimes' => '画像はJPG、JPEG、またはPNG形式である必要があります。',
         'images_file_max' => '各画像は:max KBを超えることはできません。',
     ],
+    'badge_type' => 'レビューバッジ',
+    'badge_type_help' => 'このレビューに表示するバッジを選択してください。「自動検出」は注文のある顧客に「X前に購入」と表示します。',
+    'badge_types' => [
+        'auto' => '自動検出',
+        'none' => 'バッジなし',
+        'purchased' => '✅ 購入済み',
+        'community_review' => '💬 コミュニティレビュー',
+        'expert_reviewer' => '🏅 エキスパートレビュアー',
+        'top_contributor' => '⭐ トップコントリビューター',
+        'verified_buyer' => '✅ 確認済み購入者',
+    ],
+    'placeholders' => [
+        'customer_name' => 'e.g: John Doe',
+        'customer_email' => 'e.g: example@domain.com',
+        'comment' => 'レビューコメントをここに記入してください...',
+    ],
+    'helpers' => [
+        'star' => '1（最低）から5（最高）の評価。',
+    ],
 ];

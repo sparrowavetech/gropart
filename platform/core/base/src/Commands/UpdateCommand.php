@@ -60,18 +60,49 @@ class UpdateCommand extends Command
 
         $this->components->warn('Notice:');
 
-        array_map(fn (string $line) => note($line), [
+        $notices = [
             'Please backup your database and script files before upgrading',
-            'You need to activate your license before doing upgrade.',
-            'If you don\'t need this 1-click update, you can disable it in <fg=yellow>.env</>? by adding <fg=yellow>CMS_ENABLE_SYSTEM_UPDATER=false</>',
-            'It will override all files in <fg=yellow>./platform/core</>, <fg=yellow>./platform/packages</>, all plugins developed by us in <fg=yellow>./platform/plugins</> and theme developed by us in <fg=yellow>./platform/themes</>.',
-        ]);
+        ];
+
+        if (! $this->core->verifyLicense(true)) {
+            $notices[] = 'You need to activate your license before doing upgrade.';
+        }
+
+        $notices[] = 'If you don\'t need this 1-click update, you can disable it in <fg=yellow>.env</> by adding <fg=yellow>CMS_ENABLE_SYSTEM_UPDATER=false</>';
+        $notices[] = 'It will override all files in <fg=yellow>./platform/core</>, <fg=yellow>./platform/packages</>, all plugins developed by us in <fg=yellow>./platform/plugins</> and theme developed by us in <fg=yellow>./platform/themes</>.';
+
+        array_map(fn (string $line) => note($line), $notices);
 
         if (confirm('Do you really wish to run this command?')) {
             return $this->performUpdate($latestUpdate->updateId, $latestUpdate->version);
         }
 
         return self::SUCCESS;
+    }
+
+    protected function downloadWithRetry(string $updateId, string $version, int $maxAttempts = 3): void
+    {
+        $lastException = null;
+
+        for ($attempt = 1; $attempt <= $maxAttempts; $attempt++) {
+            try {
+                $this->core->downloadUpdate($updateId, $version);
+
+                return;
+            } catch (Throwable $exception) {
+                $lastException = $exception;
+
+                if ($attempt < $maxAttempts) {
+                    $this->components->warn(
+                        sprintf('Download failed (attempt %d/%d): %s. Retrying...', $attempt, $maxAttempts, $exception->getMessage())
+                    );
+
+                    sleep($attempt * 2);
+                }
+            }
+        }
+
+        throw $lastException;
     }
 
     protected function performUpdate(string $updateId, string $version): int
@@ -95,7 +126,7 @@ class UpdateCommand extends Command
             $progress->label('Downloading the latest update...');
             $progress->advance();
 
-            $this->core->downloadUpdate($updateId, $version);
+            $this->downloadWithRetry($updateId, $version);
 
             $progress->label('Updating files and database...');
             $progress->advance();

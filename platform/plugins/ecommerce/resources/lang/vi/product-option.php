@@ -27,4 +27,6 @@ return [
     'option_value_name_attribute' => 'Giá trị của tùy chọn :key',
     'please_choose_option_type' => 'Vui lòng chọn loại tùy chọn!',
     'no_global_options' => 'Chưa có tùy chọn toàn cầu nào. Vui lòng thêm tùy chọn sản phẩm trong ngôn ngữ mặc định trước.',
+    'price_per_product' => 'Giá theo sản phẩm',
+    'price_per_product_helper' => 'Khi bật, giá của tùy chọn được áp dụng một lần cho mỗi sản phẩm, không nhân với số lượng.',
 ];

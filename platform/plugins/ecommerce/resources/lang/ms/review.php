@@ -109,4 +109,23 @@ return [
         'images_mimes' => 'Imej mestilah dalam format JPG, JPEG atau PNG.',
         'images_file_max' => 'Setiap imej tidak boleh melebihi :max KB.',
     ],
+    'badge_type' => 'Lencana Ulasan',
+    'badge_type_help' => 'Pilih lencana untuk dipaparkan pada ulasan ini. "Kesan automatik" menunjukkan "Dibeli X lalu" untuk pelanggan yang mempunyai pesanan.',
+    'badge_types' => [
+        'auto' => 'Kesan automatik',
+        'none' => 'Tiada lencana',
+        'purchased' => '✅ Dibeli',
+        'community_review' => '💬 Ulasan Komuniti',
+        'expert_reviewer' => '🏅 Pengulas Pakar',
+        'top_contributor' => '⭐ Penyumbang Teratas',
+        'verified_buyer' => '✅ Pembeli Disahkan',
+    ],
+    'placeholders' => [
+        'customer_name' => 'e.g: John Doe',
+        'customer_email' => 'e.g: example@domain.com',
+        'comment' => 'Tulis ulasan komen di sini...',
+    ],
+    'helpers' => [
+        'star' => 'Penilaian dari 1 (terendah) hingga 5 (tertinggi).',
+    ],
 ];

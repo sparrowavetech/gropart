@@ -59,7 +59,6 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -308,6 +307,8 @@ class OrderHelper
     public function validateAndReserveStock(array $cartItems): array
     {
         return DB::transaction(function () use ($cartItems) {
+            $reservedItems = [];
+
             foreach ($cartItems as $item) {
                 $product = Product::query()
                     ->where('id', $item['product_id'])
@@ -319,6 +320,8 @@ class OrderHelper
                 }
 
                 if ($product->isOutOfStock()) {
+                    $this->restoreReservedStock($reservedItems);
+
                     return [
                         'success' => false,
                         'message' => __('Product :product is out of stock!', ['product' => $product->original_product->name]),
@@ -328,6 +331,8 @@ class OrderHelper
 
                 if ($product->with_storehouse_management && ! $product->allow_checkout_when_out_of_stock) {
                     if ($product->quantity < $item['qty']) {
+                        $this->restoreReservedStock($reservedItems);
+
                         return [
                             'success' => false,
                             'message' => __('Product :product only has :quantity item(s) left in stock, but you are trying to order :requested!', [
@@ -338,9 +343,21 @@ class OrderHelper
                             'product' => $product,
                         ];
                     }
+
+                    $product->quantity -= $item['qty'];
+                    $product->save();
+
+                    $reservedItems[] = [
+                        'product_id' => $product->id,
+                        'qty' => $item['qty'],
+                    ];
+
+                    event(new ProductQuantityUpdatedEvent($product));
                 }
 
                 if ($product->minimum_order_quantity > 0 && $item['qty'] < $product->minimum_order_quantity) {
+                    $this->restoreReservedStock($reservedItems);
+
                     return [
                         'success' => false,
                         'message' => __('Minimum order quantity of product :product is :quantity, you need to buy more :more to place an order! ', [
@@ -353,6 +370,8 @@ class OrderHelper
                 }
 
                 if ($product->maximum_order_quantity > 0 && $item['qty'] > $product->maximum_order_quantity) {
+                    $this->restoreReservedStock($reservedItems);
+
                     return [
                         'success' => false,
                         'message' => __('Maximum order quantity of product :product is :quantity! ', [
@@ -364,7 +383,32 @@ class OrderHelper
                 }
             }
 
-            return ['success' => true, 'message' => null, 'product' => null];
+            return ['success' => true, 'message' => null, 'product' => null, 'reserved_items' => $reservedItems];
+        });
+    }
+
+    public function restoreReservedStock(array $reservedItems): void
+    {
+        if (empty($reservedItems)) {
+            return;
+        }
+
+        DB::transaction(function () use ($reservedItems): void {
+            foreach ($reservedItems as $item) {
+                $product = Product::query()
+                    ->where('id', $item['product_id'])
+                    ->lockForUpdate()
+                    ->first();
+
+                if (! $product) {
+                    continue;
+                }
+
+                $product->quantity += $item['qty'];
+                $product->save();
+
+                event(new ProductQuantityUpdatedEvent($product));
+            }
         });
     }
 
@@ -558,7 +602,7 @@ class OrderHelper
 
         $locale = $order->getOrderMetadata('customer_locale');
         if (! $locale) {
-            $locale = App::getLocale();
+            $locale = EmailHandler::getDefaultEmailLocale();
         }
 
         $customerCurrencyCode = $order->getCustomerCurrency();
@@ -937,8 +981,11 @@ class OrderHelper
 
             $result['optionCartValue'][$key] = $optionValue->get()->toArray();
 
+            $optionModel = Option::query()->find($key);
+
             foreach ($result['optionCartValue'][$key] as &$item) {
                 $item['option_type'] = $option['option_type'];
+                $item['price_per_product'] = (bool) $optionModel?->price_per_product;
             }
 
             if (
@@ -1220,7 +1267,7 @@ class OrderHelper
                     'product_name' => $cartItem->name,
                     'product_image' => $cartItem->options['image'],
                     'qty' => $cartItem->qty,
-                    'weight' => $productByCartItem->weight * $cartItem->qty,
+                    'weight' => $productByCartItem->weight,
                     'price' => EcommerceHelper::roundPrice($cartItem->price),
                     'tax_amount' => $cartItem->taxTotal,
                     'options' => [],

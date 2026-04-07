@@ -8,9 +8,14 @@ use Botble\Base\Models\AdminNotificationQueryBuilder;
 use Carbon\Carbon;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
 
 class NotificationController extends BaseController
 {
+    protected function clearNotificationCountCache(): void
+    {
+        cache()->forget('admin-notifications-count-' . Auth::guard()->id());
+    }
     public function index(): BaseHttpResponse
     {
         $notificationsCount = AdminNotification::countUnread();
@@ -36,6 +41,8 @@ class NotificationController extends BaseController
         $notificationItem = AdminNotification::query()->findOrFail($id);
         $notificationItem->delete();
 
+        $this->clearNotificationCountCache();
+
         /**
          * @var AdminNotificationQueryBuilder $adminQuery
          */
@@ -59,6 +66,8 @@ class NotificationController extends BaseController
     {
         AdminNotification::query()->delete();
 
+        $this->clearNotificationCountCache();
+
         return $this->httpResponse();
     }
 
@@ -71,6 +80,7 @@ class NotificationController extends BaseController
 
         if ($notificationItem->read_at === null) {
             $notificationItem->markAsRead();
+            $this->clearNotificationCountCache();
         }
 
         if (! $notificationItem->action_url || $notificationItem->action_url == '#') {
@@ -87,6 +97,8 @@ class NotificationController extends BaseController
             ->update([
                 'read_at' => Carbon::now(),
             ]);
+
+        $this->clearNotificationCountCache();
 
         return $this->httpResponse();
     }

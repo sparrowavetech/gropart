@@ -43,7 +43,7 @@ class Builder
     protected static string $jsType = 'text/javascript';
 
     /**
-     * @var Collection<int, \Yajra\DataTables\Html\Column>
+     * @var Collection<int, Column>
      */
     public Collection $collection;
 

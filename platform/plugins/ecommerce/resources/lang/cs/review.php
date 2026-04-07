@@ -109,4 +109,23 @@ return [
         'images_mimes' => 'Obrázky musí být ve formátu JPG, JPEG nebo PNG.',
         'images_file_max' => 'Každý obrázek nesmí překročit :max KB.',
     ],
+    'badge_type' => 'Odznak recenze',
+    'badge_type_help' => 'Vyberte odznak k zobrazení u této recenze. „Automatické rozpoznání" zobrazuje „Zakoupeno před X" pro zákazníky s objednávkami.',
+    'badge_types' => [
+        'auto' => 'Automatické rozpoznání',
+        'none' => 'Žádný odznak',
+        'purchased' => '✅ Zakoupeno',
+        'community_review' => '💬 Komunitní recenze',
+        'expert_reviewer' => '🏅 Odborný recenzent',
+        'top_contributor' => '⭐ Nejlepší přispěvatel',
+        'verified_buyer' => '✅ Ověřený kupující',
+    ],
+    'placeholders' => [
+        'customer_name' => 'e.g: John Doe',
+        'customer_email' => 'e.g: example@domain.com',
+        'comment' => 'Napište komentář recenze zde...',
+    ],
+    'helpers' => [
+        'star' => 'Hodnocení od 1 (nejnižší) do 5 (nejvyšší).',
+    ],
 ];

@@ -199,6 +199,8 @@ class ProductImporter extends Importer implements WithMapping
                 ->rules([Rule::in(StockStatusEnum::values())], trans('plugins/ecommerce::products.import.rules.in', ['attribute' => 'Stock status', 'values' => implode(', ', StockStatusEnum::values())])),
             ImportColumn::make('with_storehouse_management')
                 ->rules(['nullable', 'bool'], trans('plugins/ecommerce::products.import.rules.nullable_bool', ['attribute' => 'With storehouse management'])),
+            ImportColumn::make('allow_checkout_when_out_of_stock')
+                ->rules(['nullable', 'bool'], trans('plugins/ecommerce::products.import.rules.nullable_bool', ['attribute' => 'Allow checkout when out of stock'])),
             ImportColumn::make('quantity')
                 ->rules(['numeric', 'nullable', 'min:0', 'max:100000000'], trans('plugins/ecommerce::products.import.rules.nullable_numeric_min_max', ['attribute' => 'Quantity', 'min' => 0, 'max' => 100000000])),
             ImportColumn::make('sale_price')
@@ -329,6 +331,7 @@ class ProductImporter extends Importer implements WithMapping
                 'is_variation_default' => 1,
                 'stock_status' => 'in_stock',
                 'with_storehouse_management' => 1,
+                'allow_checkout_when_out_of_stock' => 0,
                 'quantity' => '100',
                 'sale_price' => '90',
                 'start_date' => '2021-01-01',
@@ -667,6 +670,12 @@ class ProductImporter extends Importer implements WithMapping
         if (! $existingProduct && ($sku = $request->input('sku'))) {
             $existingProduct = $this->getProductQuery()
                 ->where('sku', $sku)
+                ->first();
+        }
+
+        if (! $existingProduct && ($barcode = $request->input('barcode'))) {
+            $existingProduct = $this->getProductQuery()
+                ->where('barcode', $barcode)
                 ->first();
         }
 

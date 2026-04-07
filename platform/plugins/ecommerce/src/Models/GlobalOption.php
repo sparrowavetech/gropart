@@ -14,6 +14,7 @@ class GlobalOption extends BaseModel
         'name',
         'option_type',
         'required',
+        'price_per_product',
     ];
 
     protected static function booted(): void

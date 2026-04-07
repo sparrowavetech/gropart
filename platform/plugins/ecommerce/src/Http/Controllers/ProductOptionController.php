@@ -43,7 +43,7 @@ class ProductOptionController extends BaseController
         /**
          * @var GlobalOption $option
          */
-        $option = GlobalOption::query()->create($request->only(['name', 'option_type', 'required']));
+        $option = GlobalOption::query()->create($request->only(['name', 'option_type', 'required', 'price_per_product']));
 
         $optionValues = $this->formatOptionValue($request->input());
 
@@ -90,7 +90,7 @@ class ProductOptionController extends BaseController
          */
         $option = GlobalOption::query()->findOrFail($id);
 
-        $option->fill($request->only(['name', 'option_type', 'required']));
+        $option->fill($request->only(['name', 'option_type', 'required', 'price_per_product']));
         $option->save();
 
         $optionValues = $this->formatOptionValue($request->input());

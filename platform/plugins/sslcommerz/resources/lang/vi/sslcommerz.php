@@ -3,7 +3,9 @@
 return [
     'payment_description' => 'Khách hàng có thể mua sản phẩm và thanh toán trực tiếp bằng Visa, thẻ tín dụng qua :name',
     'store_id' => 'ID Cửa hàng',
+    'store_id_helper' => 'Tìm thấy trong bảng điều khiển thương nhân SSLCommerz của bạn.',
     'store_password' => 'Mật khẩu Cửa hàng (Khóa API/Bí mật)',
+    'store_password_helper' => 'Tìm thấy trong bảng điều khiển thương nhân SSLCommerz của bạn. Giữ khóa này bí mật.',
     'after_registration' => 'Sau khi đăng ký tại :name, bạn sẽ có ID Cửa hàng và Mật khẩu Cửa hàng (Khóa API/Bí mật)',
     'enter_credentials' => 'Nhập ID Cửa hàng và Mật khẩu Cửa hàng (Khóa API/Bí mật) vào ô bên tay phải',
     'payment_failed' => 'Thanh toán thất bại!',

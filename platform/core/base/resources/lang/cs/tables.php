@@ -65,4 +65,5 @@ return [
     'please_select_record' => 'Pro provedení této akce vyberte prosím alespoň jeden záznam!',
     'checkbox' => 'Zaškrtávací políčko',
     'toggle_columns' => 'Přepnout sloupce',
+    'created_by' => 'Vytvořil',
 ];

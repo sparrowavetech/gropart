@@ -22,6 +22,8 @@ abstract class ThemeOptionField implements Arrayable
 
     protected array $attributes = [];
 
+    protected bool $shared = false;
+
     protected float $priority = 999;
 
     public static function make(): static
@@ -92,6 +94,18 @@ abstract class ThemeOptionField implements Arrayable
         return $this->value ?: $this->defaultValue;
     }
 
+    public function shared(bool $shared = true): static
+    {
+        $this->shared = $shared;
+
+        return $this;
+    }
+
+    public function isShared(): bool
+    {
+        return $this->shared;
+    }
+
     public function priority(float $priority): static
     {
         $this->priority = $priority;
@@ -121,6 +135,7 @@ abstract class ThemeOptionField implements Arrayable
             'id' => $this->id ?? $this->getName(),
             'type' => $this->fieldType(),
             'label' => $this->label,
+            'shared' => $this->shared,
             'priority' => $this->priority,
             'attributes' => [
                 'name' => $this->getName(),

@@ -2,6 +2,9 @@
 
 return [
     'webhook_secret' => 'Webhook Gizli',
+    'webhook_secret_helper' => 'Bunu Stripe Dashboard\'unuzda Developers > Webhooks > Signing secret altında bulabilirsiniz.',
+    'public_key_helper' => 'Bunu Stripe Dashboard\'unuzda Developers > API keys altında bulabilirsiniz.',
+    'secret_key_helper' => 'Bunu Stripe Dashboard\'unuzda Developers > API keys altında bulabilirsiniz. Bu anahtarı gizli tutun.',
     'webhook_setup_guide' => [
         'title' => 'Stripe Webhook Kurulum Kılavuzu',
         'description' => 'Stripe webhook\'u kurmak için şu adımları izleyin',

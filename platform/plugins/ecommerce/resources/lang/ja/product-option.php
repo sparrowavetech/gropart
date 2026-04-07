@@ -27,4 +27,6 @@ return [
     'option_value_name_attribute' => 'オプション :key の値',
     'please_choose_option_type' => 'オプションタイプを選択してください！',
     'no_global_options' => 'グローバルオプションはまだ利用できません。まずデフォルト言語で商品オプションを追加してください。',
+    'price_per_product' => '商品ごとの価格',
+    'price_per_product_helper' => '有効にすると、オプション価格は商品ごとに1回適用され、数量で乗算されません。',
 ];

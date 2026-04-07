@@ -17,7 +17,8 @@ class CartItemResource extends JsonResource
         $originalPrice = Arr::get($this->options, 'original_price');
         $taxRate = $this->getTaxRate();
         $taxPrice = $this->price * $taxRate / 100;
-        $subtotal = $this->price * $this->qty;
+        $optionPriceOnce = Arr::get($this->options, 'option_price_once', 0);
+        $subtotal = $this->price * $this->qty + $optionPriceOnce;
         $totalTax = $taxPrice * $this->qty;
         $totalPrice = $subtotal + $totalTax;
 

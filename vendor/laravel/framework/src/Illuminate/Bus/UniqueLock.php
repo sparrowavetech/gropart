@@ -3,9 +3,13 @@
 namespace Illuminate\Bus;
 
 use Illuminate\Contracts\Cache\Repository as Cache;
+use Illuminate\Queue\Attributes\ReadsQueueAttributes;
+use Illuminate\Queue\Attributes\UniqueFor;
 
 class UniqueLock
 {
+    use ReadsQueueAttributes;
+
     /**
      * The cache repository implementation.
      *
@@ -33,7 +37,7 @@ class UniqueLock
     {
         $uniqueFor = method_exists($job, 'uniqueFor')
             ? $job->uniqueFor()
-            : ($job->uniqueFor ?? 0);
+            : ($this->getAttributeValue($job, UniqueFor::class, 'uniqueFor') ?? 0);
 
         $cache = method_exists($job, 'uniqueVia')
             ? ($job->uniqueVia() ?? $this->cache)
@@ -70,7 +74,7 @@ class UniqueLock
             : ($job->uniqueId ?? '');
 
         $jobName = method_exists($job, 'displayName')
-            ? $job->displayName()
+            ? hash('xxh128', $job->displayName())
             : get_class($job);
 
         return 'laravel_unique_job:'.$jobName.':'.$uniqueId;

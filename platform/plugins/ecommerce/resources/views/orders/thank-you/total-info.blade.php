@@ -24,7 +24,7 @@
             foreach ($order->products as $orderProduct) {
                 if ($orderProduct->tax_amount > 0 && !empty($orderProduct->options['taxClasses'])) {
                     foreach ($orderProduct->options['taxClasses'] as $taxName => $taxRate) {
-                        $taxKey = $taxName . ' (' . $taxRate . '%)';
+                        $taxKey = $taxName . ' ' . $taxRate . '%';
                         if (!isset($taxGroups[$taxKey])) {
                             $taxGroups[$taxKey] = 0;
                         }
@@ -37,8 +37,8 @@
         @if (!empty($taxGroups))
             @foreach ($taxGroups as $taxName => $taxAmount)
                 @include('plugins/ecommerce::orders.thank-you.total-row', [
-                    'label' => trans('plugins/ecommerce::order.tax') . ' <small>(' . $taxName . ')</small>',
-                    'value' => format_price($taxAmount),
+                    'label' => trans('plugins/ecommerce::order.tax'),
+                    'value' => format_price($taxAmount) . ' <small>(' . $taxName . ')</small>',
                 ])
             @endforeach
         @else
@@ -53,6 +53,13 @@
             'value' => format_price($order->tax_amount),
         ])
     @endif
+@endif
+
+@if ((float) ($order->shipping_tax_amount ?? 0))
+    @include('plugins/ecommerce::orders.thank-you.total-row', [
+        'label' => trans('plugins/ecommerce::order.shipping_tax'),
+        'value' => format_price($order->shipping_tax_amount),
+    ])
 @endif
 
 @if ((float) $order->discount_amount)

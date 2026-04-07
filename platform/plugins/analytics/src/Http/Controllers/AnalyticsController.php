@@ -128,7 +128,7 @@ class AnalyticsController extends BaseController
     public function getTopVisitPages(AnalyticsRequest $request)
     {
         try {
-            $period = $this->getPeriodFromRequest($request);
+            $period = $this->getPeriodFromRequest($request, 'page');
 
             $query = Analytics::fetchMostVisitedPages($period, 10);
 
@@ -170,7 +170,7 @@ class AnalyticsController extends BaseController
     public function getTopBrowser(AnalyticsRequest $request)
     {
         try {
-            $period = $this->getPeriodFromRequest($request);
+            $period = $this->getPeriodFromRequest($request, 'browser');
 
             $browsers = Analytics::fetchTopBrowsers($period);
 
@@ -190,7 +190,7 @@ class AnalyticsController extends BaseController
     public function getTopReferrer(AnalyticsRequest $request)
     {
         try {
-            $period = $this->getPeriodFromRequest($request);
+            $period = $this->getPeriodFromRequest($request, 'referrer');
 
             $query = Analytics::fetchTopReferrers($period, 10);
 
@@ -216,13 +216,13 @@ class AnalyticsController extends BaseController
         }
     }
 
-    protected function getPeriodFromRequest(AnalyticsRequest $request): Period
+    protected function getPeriodFromRequest(AnalyticsRequest $request, string $widgetKey = 'general'): Period
     {
         $dashboardInstance = new DashboardWidgetInstance();
         $predefinedRangeFound = $dashboardInstance->getFilterRange($request->input('predefined_range'));
         if ($request->input('changed_predefined_range')) {
             $dashboardInstance->saveSettings(
-                'widget_analytics_general',
+                'widget_analytics_' . $widgetKey,
                 ['predefined_range' => $predefinedRangeFound['key']]
             );
         }

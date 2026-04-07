@@ -125,6 +125,7 @@ class HookServiceProvider extends ServiceProvider
                                 'id' => 'site_title',
                                 'type' => 'text',
                                 'label' => trans('core/setting::setting.general.site_title'),
+                                'helper' => trans('packages/theme::theme.site_title_helper'),
                                 'attributes' => [
                                     'name' => 'site_title',
                                     'value' => null,
@@ -140,6 +141,7 @@ class HookServiceProvider extends ServiceProvider
                                 'section_id' => 'opt-text-subsection-general',
                                 'type' => 'customSelect',
                                 'label' => trans('core/setting::setting.general.show_site_name'),
+                                'helper' => trans('packages/theme::theme.show_site_name_helper'),
                                 'attributes' => [
                                     'name' => 'show_site_name',
                                     'list' => [
@@ -154,6 +156,7 @@ class HookServiceProvider extends ServiceProvider
                                 'section_id' => 'opt-text-subsection-general',
                                 'type' => 'customSelect',
                                 'label' => trans('packages/theme::theme.site_title_separator'),
+                                'helper' => trans('packages/theme::theme.site_title_separator_helper'),
                                 'attributes' => [
                                     'name' => 'site_title_separator',
                                     'list' => [
@@ -167,6 +170,7 @@ class HookServiceProvider extends ServiceProvider
                                 'id' => 'seo_title',
                                 'type' => 'text',
                                 'label' => trans('core/setting::setting.general.seo_title'),
+                                'helper' => trans('packages/theme::theme.seo_title_helper'),
                                 'attributes' => [
                                     'name' => 'seo_title',
                                     'value' => null,
@@ -181,6 +185,7 @@ class HookServiceProvider extends ServiceProvider
                                 'id' => 'seo_description',
                                 'type' => 'textarea',
                                 'label' => trans('core/setting::setting.general.seo_description'),
+                                'helper' => trans('packages/theme::theme.seo_description_helper'),
                                 'attributes' => [
                                     'name' => 'seo_description',
                                     'value' => null,
@@ -243,6 +248,7 @@ class HookServiceProvider extends ServiceProvider
                         ->title(trans('packages/theme::theme.theme_option_breadcrumb'))
                         ->icon('ti ti-directions')
                         ->priority(0)
+                        ->shared()
                         ->fields([
                             ThemeOptionRadioField::make()
                                 ->name('theme_breadcrumb_enabled')
@@ -260,6 +266,7 @@ class HookServiceProvider extends ServiceProvider
                         ->title(trans('packages/theme::theme.theme_option_logo'))
                         ->icon('ti ti-photo')
                         ->priority(0)
+                        ->shared()
                         ->fields([
                             [
                                 'id' => 'favicon',

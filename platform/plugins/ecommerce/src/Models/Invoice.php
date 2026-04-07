@@ -28,6 +28,7 @@ class Invoice extends BaseModel
         'sub_total',
         'tax_amount',
         'shipping_amount',
+        'shipping_tax_amount',
         'payment_fee',
         'discount_amount',
         'amount',

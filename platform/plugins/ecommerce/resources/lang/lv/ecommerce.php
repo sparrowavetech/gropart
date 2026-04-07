@@ -121,6 +121,7 @@ return [
     'apply' => 'Pielietot',
     'available' => 'Pieejams',
     'back_to_return_requests' => 'Atpakaļ uz atgriešanas pieprasījumiem',
+    'backorder_warning' => 'Brīdinājums: Šis produkts ir iepriekšpasūtījumā un piegāde var aizņemt ilgāku laiku.',
     'choose_reason' => 'Izvēlieties iemeslu',
     'clear' => 'Notīrīt',
     'clear_all_filters' => 'Notīrīt visus filtrus',

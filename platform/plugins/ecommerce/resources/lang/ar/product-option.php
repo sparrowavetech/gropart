@@ -27,4 +27,6 @@ return [
     'option_value_name_attribute' => 'قيم الخيار :key',
     'please_choose_option_type' => 'يرجى اختيار نوع الخيار!',
     'no_global_options' => 'لا توجد خيارات عامة متاحة بعد. يرجى إضافة خيارات المنتج باللغة الافتراضية أولاً.',
+    'price_per_product' => 'السعر لكل منتج',
+    'price_per_product_helper' => 'عند التفعيل، يتم تطبيق سعر الخيار مرة واحدة لكل منتج، ولا يتم ضربه في الكمية.',
 ];

@@ -27,7 +27,7 @@ class EmailTemplateIframeController extends BaseController
         $emailHandler->setVariableValues($inputData);
 
         if (in_array($template, ['header', 'footer'])) {
-            $content = file_get_contents(core_path('setting/resources/email-templates/test.tpl'));
+            $content = get_setting_email_template_content('core', 'base', 'test');
         } else {
             $content = get_setting_email_template_content($type, $module, $template);
         }

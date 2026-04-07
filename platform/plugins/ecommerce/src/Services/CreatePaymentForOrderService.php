@@ -50,7 +50,7 @@ class CreatePaymentForOrderService
             'payment_type' => 'confirm',
             'order_id' => $order->getKey(),
             'charge_id' => $chargeId ?: Str::upper(Str::random(10)),
-            'user_id' => $user->getKey(),
+            'user_id' => $user?->getKey(),
         ];
 
         if ($customerId) {
@@ -75,7 +75,7 @@ class CreatePaymentForOrderService
                     'money' => format_price($order->amount),
                 ]),
                 'order_id' => $order->getKey(),
-                'user_id' => $user->getKey(),
+                'user_id' => $user?->getKey(),
             ]);
         }
     }

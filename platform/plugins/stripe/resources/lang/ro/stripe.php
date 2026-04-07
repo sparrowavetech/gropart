@@ -2,6 +2,9 @@
 
 return [
     'webhook_secret' => 'Secret Webhook',
+    'webhook_secret_helper' => 'Găsiți-l în Stripe Dashboard sub Developers > Webhooks > Signing secret.',
+    'public_key_helper' => 'Găsiți-l în Stripe Dashboard sub Developers > API keys.',
+    'secret_key_helper' => 'Găsiți-l în Stripe Dashboard sub Developers > API keys. Păstrați această cheie confidențială.',
     'webhook_setup_guide' => [
         'title' => 'Ghid de configurare Stripe Webhook',
         'description' => 'Urmați acești pași pentru a configura un webhook Stripe',

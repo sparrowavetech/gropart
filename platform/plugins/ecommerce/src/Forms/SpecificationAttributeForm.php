@@ -14,13 +14,39 @@ use Botble\Ecommerce\Enums\SpecificationAttributeFieldType;
 use Botble\Ecommerce\Http\Requests\SpecificationAttributeRequest;
 use Botble\Ecommerce\Models\SpecificationAttribute;
 use Botble\Ecommerce\Models\SpecificationGroup;
+use Botble\Language\Facades\Language;
+use Illuminate\Support\Facades\DB;
 
 class SpecificationAttributeForm extends FormAbstract
 {
     public function setup(): void
     {
-        $options = $this->getModel()->options ?? [];
-        $options = is_array($options) ? $options : json_decode($options, true);
+        $isNotDefaultLanguage = defined('LANGUAGE_ADVANCED_MODULE_SCREEN_NAME')
+            && $this->request->input('ref_lang')
+            && $this->request->input('ref_lang') !== Language::getDefaultLocaleCode();
+
+        // Always get default-language options (with IDs) for existing models
+        $defaultOptions = [];
+        $model = $this->getModel();
+
+        if ($model instanceof SpecificationAttribute && $model->getKey()) {
+            $defaultOptions = $this->getModel()->getDefaultLanguageOptions();
+        }
+
+        $options = $defaultOptions;
+        $translatedOptions = [];
+
+        if ($isNotDefaultLanguage && $model instanceof SpecificationAttribute && $model->getKey()) {
+            $refLang = $this->request->input('ref_lang');
+            $trans = DB::table('ec_specification_attributes_translations')
+                ->where('ec_specification_attributes_id', $model->getKey())
+                ->where('lang_code', $refLang)
+                ->value('options');
+            $translatedOptions = json_decode($trans ?: '', true) ?: [];
+        } elseif (! ($model instanceof SpecificationAttribute) || ! $model->getKey()) {
+            // New model — no default options yet
+            $options = [];
+        }
 
         $this
             ->model(SpecificationAttribute::class)
@@ -70,8 +96,15 @@ class SpecificationAttributeForm extends FormAbstract
                         ),
                     ])
                     ->title(trans('plugins/ecommerce::product-specification.specification_attributes.options.heading'))
-                    ->content(view('plugins/ecommerce::specification-attributes.partials.options', compact('options')))
-                    ->footerContent(view('plugins/ecommerce::specification-attributes.partials.options-footer'))
+                    ->content(view(
+                        'plugins/ecommerce::specification-attributes.partials.options',
+                        compact('options', 'isNotDefaultLanguage', 'defaultOptions', 'translatedOptions')
+                    ))
+                    ->footerContent(
+                        $isNotDefaultLanguage
+                            ? null
+                            : view('plugins/ecommerce::specification-attributes.partials.options-footer')
+                    )
             );
     }
 }

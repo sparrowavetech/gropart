@@ -109,4 +109,23 @@ return [
         'images_mimes' => 'รูปภาพต้องเป็นรูปแบบ JPG, JPEG หรือ PNG',
         'images_file_max' => 'แต่ละรูปภาพไม่สามารถเกิน :max KB',
     ],
+    'badge_type' => 'ป้ายรีวิว',
+    'badge_type_help' => 'เลือกป้ายเพื่อแสดงในรีวิวนี้ "ตรวจจับอัตโนมัติ" จะแสดง "ซื้อเมื่อ X ที่แล้ว" สำหรับลูกค้าที่มีคำสั่งซื้อ',
+    'badge_types' => [
+        'auto' => 'ตรวจจับอัตโนมัติ',
+        'none' => 'ไม่มีป้าย',
+        'purchased' => '✅ ซื้อแล้ว',
+        'community_review' => '💬 รีวิวชุมชน',
+        'expert_reviewer' => '🏅 ผู้เชี่ยวชาญรีวิว',
+        'top_contributor' => '⭐ ผู้มีส่วนร่วมสูงสุด',
+        'verified_buyer' => '✅ ผู้ซื้อที่ยืนยันแล้ว',
+    ],
+    'placeholders' => [
+        'customer_name' => 'e.g: John Doe',
+        'customer_email' => 'e.g: example@domain.com',
+        'comment' => 'เขียนความคิดเห็นรีวิวที่นี่...',
+    ],
+    'helpers' => [
+        'star' => 'คะแนนจาก 1 (ต่ำสุด) ถึง 5 (สูงสุด)',
+    ],
 ];

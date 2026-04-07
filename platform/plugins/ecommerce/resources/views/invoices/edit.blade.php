@@ -177,7 +177,7 @@
                                                 @endif
 
                                                 <p class="mb-0 small">
-                                                    {!! $invoiceItem->product_options_implode !!}
+                                                    {!! BaseHelper::clean($invoiceItem->product_options_implode) !!}
                                                 </p>
 
                                                 @if (is_plugin_active('marketplace') && ($product = $invoiceItem->reference) && $product->original_product->store?->id)

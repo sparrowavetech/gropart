@@ -80,5 +80,27 @@
     @push('footer')
         {!! JsValidator::formRequest(Botble\ACL\Http\Requests\UpdateProfileRequest::class, '#profile-form') !!}
         {!! JsValidator::formRequest(Botble\ACL\Http\Requests\UpdatePasswordRequest::class, '#password-form') !!}
+
+        <script>
+            (() => {
+                const container = document.querySelector('.user-profile')
+                if (!container) return
+
+                const hash = window.location.hash.substring(1)
+                if (hash) {
+                    const tab = container.querySelector(`a[data-bs-toggle="tab"][href="#${hash}"]`)
+                    if (tab) {
+                        new bootstrap.Tab(tab).show()
+                    }
+                }
+
+                container.querySelectorAll('a[data-bs-toggle="tab"]').forEach(tab => {
+                    tab.addEventListener('shown.bs.tab', (e) => {
+                        const id = e.target.getAttribute('href').substring(1)
+                        history.replaceState(null, null, `#${id}`)
+                    })
+                })
+            })()
+        </script>
     @endpush
 @endif

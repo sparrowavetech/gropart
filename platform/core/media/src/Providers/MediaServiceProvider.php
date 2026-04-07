@@ -3,6 +3,7 @@
 namespace Botble\Media\Providers;
 
 use Aws\S3\S3Client;
+use Botble\ACL\Models\User;
 use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Supports\DashboardMenuItem;
 use Botble\Base\Supports\ServiceProvider;
@@ -16,6 +17,7 @@ use Botble\Media\Commands\InsertWatermarkCommand;
 use Botble\Media\Facades\RvMedia;
 use Botble\Media\Models\MediaFile;
 use Botble\Media\Models\MediaFolder;
+use Botble\Media\Models\MediaFolderPermission;
 use Botble\Media\Models\MediaSetting;
 use Botble\Media\Repositories\Eloquent\MediaFileRepository;
 use Botble\Media\Repositories\Eloquent\MediaFolderRepository;
@@ -23,6 +25,7 @@ use Botble\Media\Repositories\Eloquent\MediaSettingRepository;
 use Botble\Media\Repositories\Interfaces\MediaFileInterface;
 use Botble\Media\Repositories\Interfaces\MediaFolderInterface;
 use Botble\Media\Repositories\Interfaces\MediaSettingInterface;
+use Botble\Media\Services\FolderPermissionService;
 use Botble\Media\Storage\BunnyCDN\BunnyCDNAdapter;
 use Botble\Media\Storage\BunnyCDN\BunnyCDNClient;
 use Botble\Setting\Supports\SettingStore;
@@ -57,6 +60,8 @@ class MediaServiceProvider extends ServiceProvider
         });
 
         $this->app->singleton(ChunkStorage::class);
+
+        $this->app->singleton(FolderPermissionService::class);
 
         if (! class_exists('RvMedia')) {
             AliasLoader::getInstance()->alias('RvMedia', RvMedia::class);
@@ -224,6 +229,10 @@ class MediaServiceProvider extends ServiceProvider
 
                     break;
             }
+        });
+
+        User::resolveRelationUsing('folderPermissions', function ($model) {
+            return $model->hasMany(MediaFolderPermission::class, 'user_id');
         });
 
         DashboardMenu::default()->beforeRetrieving(function (): void {

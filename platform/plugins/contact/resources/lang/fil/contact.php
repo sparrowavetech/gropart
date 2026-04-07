@@ -184,4 +184,6 @@ return [
     'subject_placeholder' => 'Paksa',
     'your_message' => 'Ang iyong mensahe',
     'agree_terms_privacy' => 'Sumasang -ayon ako sa Patakaran sa Mga Tuntunin at Pagkapribado',
+    'agree_terms_privacy_link' => 'Sumasang-ayon ako sa :link',
+    'terms_and_privacy_policy' => 'Mga Tuntunin at Patakaran sa Privacy',
 ];

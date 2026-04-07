@@ -121,6 +121,7 @@ return [
     'apply' => 'Uygula',
     'available' => 'Mevcut',
     'back_to_return_requests' => 'İade Taleplerine Dön',
+    'backorder_warning' => 'Uyarı: Bu ürün ön siparişte ve gönderim daha uzun sürebilir.',
     'choose_reason' => 'Sebep Seçin',
     'clear' => 'Temizle',
     'clear_all_filters' => 'Tüm filtreleri temizle',

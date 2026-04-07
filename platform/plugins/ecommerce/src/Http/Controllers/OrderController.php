@@ -136,7 +136,23 @@ class OrderController extends BaseController
         /**
          * @var Order $order
          */
-        $order = Order::query()->create($request->input());
+        $order = Order::query()->create($request->only([
+            'amount',
+            'user_id',
+            'shipping_method',
+            'shipping_option',
+            'shipping_amount',
+            'tax_amount',
+            'sub_total',
+            'coupon_code',
+            'discount_amount',
+            'promotion_amount',
+            'discount_description',
+            'description',
+            'is_confirmed',
+            'is_finished',
+            'status',
+        ]));
 
         if ($order) {
             OrderHistory::query()->create([
@@ -301,7 +317,7 @@ class OrderController extends BaseController
 
     public function update(Order $order, UpdateOrderRequest $request)
     {
-        $order->fill($request->input());
+        $order->fill($request->validated());
         $order->save();
 
         event(new UpdatedContentEvent(ORDER_MODULE_SCREEN_NAME, $request, $order));
@@ -484,10 +500,10 @@ class OrderController extends BaseController
 
     public function postUpdateShippingAddress(OrderAddress $address, AddressRequest $request)
     {
+        abort_if($address->order->status == OrderStatusEnum::CANCELED, 401);
+
         $address->fill($request->input());
         $address->save();
-
-        abort_if($address->order->status == OrderStatusEnum::CANCELED, 401);
 
         return $this
             ->httpResponse()
@@ -509,9 +525,9 @@ class OrderController extends BaseController
 
         $taxInformation->load(['order']);
 
-        $taxInformation->update($validated);
-
         abort_if($taxInformation->order->status == OrderStatusEnum::CANCELED, 401);
+
+        $taxInformation->update($validated);
 
         return $this
             ->httpResponse()
@@ -1109,7 +1125,9 @@ class OrderController extends BaseController
             ];
 
             $price = $product->front_sale_price;
-            $price = Cart::getPriceByOptions($price, $productOptions);
+            $priceResult = Cart::getPriceByOptions($price, $productOptions);
+            $price = $priceResult['price'];
+            $options['option_price_once'] = $priceResult['option_price_once'];
 
             $cartItem = CartItem::fromAttributes(
                 $product->id,

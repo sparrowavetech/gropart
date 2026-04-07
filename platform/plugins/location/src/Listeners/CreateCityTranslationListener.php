@@ -26,12 +26,18 @@ class CreateCityTranslationListener
 
             $row = $event->row;
 
-            DB::table('cities_translations')->insertOrIgnore([
-                'cities_id' => $event->city->getKey(),
-                'lang_code' => $language->lang_code,
-                'name' => $name = Arr::get($row, "name_$language->lang_code", Arr::get($row, 'name')),
-                'slug' => Str::slug($name),
-            ]);
+            $name = Arr::get($row, "name_$language->lang_code") ?: Arr::get($row, 'name');
+
+            DB::table('cities_translations')->updateOrInsert(
+                [
+                    'cities_id' => $event->city->getKey(),
+                    'lang_code' => $language->lang_code,
+                ],
+                [
+                    'name' => $name,
+                    'slug' => Str::slug($name),
+                ]
+            );
         }
     }
 }

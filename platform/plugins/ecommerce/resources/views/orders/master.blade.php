@@ -99,13 +99,13 @@
         <script type="text/javascript">
             $(document).ready(function() {
                 @if (session()->has('success_msg') && session('success_msg'))
-                    MainCheckout.showNotice('success', '{{ session('success_msg') }}');
+                    MainCheckout.showNotice('success', @json(session('success_msg')));
                 @endif
                 @if (session()->has('error_msg'))
-                    MainCheckout.showNotice('error', '{{ session('error_msg') }}');
+                    MainCheckout.showNotice('error', @json(session('error_msg')));
                 @endif
                 @if (isset($errors) && $errors->count())
-                    MainCheckout.showNotice('error', '{{ $errors->first() }}');
+                    MainCheckout.showNotice('error', @json($errors->first()));
                 @endif
             });
         </script>

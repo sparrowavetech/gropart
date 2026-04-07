@@ -31,9 +31,25 @@ class ShippingRuleItemRequest extends Request
             ->exists();
     }
 
+    protected function prepareForValidation(): void
+    {
+        if ($this->filled('zip_code_from')) {
+            $this->merge([
+                'zip_code_from' => preg_replace('/\D/', '', $this->input('zip_code_from')),
+            ]);
+        }
+
+        if ($this->filled('zip_code_to')) {
+            $this->merge([
+                'zip_code_to' => preg_replace('/\D/', '', $this->input('zip_code_to')),
+            ]);
+        }
+    }
+
     public function rules(): array
     {
         return [
+            'name' => ['nullable', 'string', 'max:120'],
             'shipping_rule_id' => [
                 'required',
                 Rule::exists(ShippingRule::class, 'id')->where(function ($query) {

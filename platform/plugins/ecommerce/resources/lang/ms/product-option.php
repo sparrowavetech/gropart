@@ -27,4 +27,6 @@ return [
     'option_value_name_attribute' => 'Nilai pilihan :key',
     'please_choose_option_type' => 'Sila pilih jenis pilihan!',
     'no_global_options' => 'Tiada pilihan global tersedia lagi. Sila tambah pilihan produk dalam bahasa piawai terlebih dahulu.',
+    'price_per_product' => 'Harga setiap produk',
+    'price_per_product_helper' => 'Apabila didayakan, harga opsyen digunakan sekali bagi setiap produk, tidak didarab dengan kuantiti.',
 ];

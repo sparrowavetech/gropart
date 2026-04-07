@@ -184,4 +184,6 @@ return [
     'subject_placeholder' => 'Tema',
     'your_message' => 'Jūsų žinutė',
     'agree_terms_privacy' => 'Sutinku su sąlygomis ir privatumo politika',
+    'agree_terms_privacy_link' => 'Sutinku su :link',
+    'terms_and_privacy_policy' => 'sąlygomis ir privatumo politika',
 ];

@@ -177,4 +177,6 @@ return [
     'subject_placeholder' => 'Teema',
     'your_message' => 'Sinu sõnum',
     'agree_terms_privacy' => 'Nõustun tingimuste ja privaatsuspoliitikaga',
+    'agree_terms_privacy_link' => 'Nõustun :link',
+    'terms_and_privacy_policy' => 'tingimuste ja privaatsuspoliitikaga',
 ];

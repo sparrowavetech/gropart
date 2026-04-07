@@ -3,6 +3,7 @@
 namespace Botble\Ecommerce\Notifications;
 
 use Botble\Base\Facades\EmailHandler;
+use Botble\Base\Supports\EmailHandler as EmailHandlerSupport;
 use Botble\Ecommerce\Models\CustomerDeletionRequest;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -14,8 +15,11 @@ class SendVerificationCodeNotification extends Notification implements ShouldQue
 {
     use Queueable;
 
+    protected string $emailLocale;
+
     public function __construct(public CustomerDeletionRequest $deletionRequest)
     {
+        $this->emailLocale = EmailHandlerSupport::getDefaultEmailLocale();
     }
 
     public function via(): array
@@ -25,18 +29,25 @@ class SendVerificationCodeNotification extends Notification implements ShouldQue
 
     public function toMail(): MailMessage
     {
-        $customer = $this->deletionRequest->customer;
+        $previousLocale = app()->getLocale();
+        app()->setLocale($this->emailLocale);
 
-        $emailHandler = EmailHandler::setModule(ECOMMERCE_MODULE_SCREEN_NAME)
-            ->setType('plugins')
-            ->setTemplate('customer-deletion-verification-code')
-            ->addTemplateSettings(ECOMMERCE_MODULE_SCREEN_NAME, config('plugins.ecommerce.email', []))
-            ->setVariableValue('customer_name', $customer->name)
-            ->setVariableValue('customer_email', $customer->email)
-            ->setVariableValue('verification_code', $this->deletionRequest->verification_code);
+        try {
+            $customer = $this->deletionRequest->customer;
 
-        return (new MailMessage())
-            ->view(['html' => new HtmlString($emailHandler->getContent())])
-            ->subject($emailHandler->getSubject());
+            $emailHandler = EmailHandler::setModule(ECOMMERCE_MODULE_SCREEN_NAME)
+                ->setType('plugins')
+                ->setTemplate('customer-deletion-verification-code')
+                ->addTemplateSettings(ECOMMERCE_MODULE_SCREEN_NAME, config('plugins.ecommerce.email', []))
+                ->setVariableValue('customer_name', $customer->name)
+                ->setVariableValue('customer_email', $customer->email)
+                ->setVariableValue('verification_code', $this->deletionRequest->verification_code);
+
+            return (new MailMessage())
+                ->view(['html' => new HtmlString($emailHandler->getContent())])
+                ->subject($emailHandler->getSubject());
+        } finally {
+            app()->setLocale($previousLocale);
+        }
     }
 }

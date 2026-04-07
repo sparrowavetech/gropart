@@ -78,18 +78,16 @@ class ProductSpecificationExporter extends Exporter
         $parts = [];
 
         foreach ($product->specificationAttributes as $attribute) {
-            if ($locale) {
-                $value = ProductSpecificationAttributeTranslation::getTranslatedValue(
-                    $product->id,
-                    $attribute->id,
-                    $locale
-                );
+            $value = $attribute->pivot->value;
 
-                if (! $value) {
-                    $value = $attribute->pivot->value;
-                }
-            } else {
-                $value = $attribute->pivot->value;
+            if ($locale) {
+                $value = ProductSpecificationAttributeTranslation::getDisplayValue(
+                    $product,
+                    $attribute,
+                    $locale
+                ) ?? $value;
+            } elseif ($attribute->hasOptions() && $attribute->hasIdBasedOptions()) {
+                $value = $attribute->getOptionValueById($value) ?? $value;
             }
 
             if ($value) {

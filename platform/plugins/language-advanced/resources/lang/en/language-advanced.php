@@ -22,4 +22,5 @@ return [
     'export_model_translations' => ':model Translations',
     'import_description' => 'Import translations for :name from a CSV/Excel file.',
     'export_description' => 'Export translations for :name to a CSV/Excel file.',
+    'page_translations' => 'Page Translations',
 ];

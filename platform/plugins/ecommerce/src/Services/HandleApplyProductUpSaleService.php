@@ -4,9 +4,11 @@ namespace Botble\Ecommerce\Services;
 
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Ecommerce\Facades\Cart;
+use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Services\Products\GetProductWithUpSalesBySlugService;
 use Botble\Ecommerce\Services\Products\ProductUpSalePriceService;
+use Illuminate\Support\Arr;
 
 class HandleApplyProductUpSaleService
 {
@@ -102,8 +104,19 @@ class HandleApplyProductUpSaleService
                 }
 
                 $newPrice = $productPrices[$cartItem->id];
+                $options = $cartItem->options->toArray();
 
-                if ($cartItem->price == $newPrice) {
+                $newPriceWithOptions = $newPrice;
+                if (
+                    EcommerceHelper::isEnabledProductOptions() &&
+                    ($productOptions = Arr::get($options, 'options', [])) &&
+                    is_array($productOptions)
+                ) {
+                    $priceResult = $cart->getPriceByOptions($newPrice, $productOptions);
+                    $newPriceWithOptions = $priceResult['price'];
+                }
+
+                if ($cartItem->price == $newPriceWithOptions) {
                     continue;
                 }
 
@@ -114,7 +127,7 @@ class HandleApplyProductUpSaleService
                     $cartItem->name,
                     $cartItem->qty,
                     $newPrice,
-                    $cartItem->options->toArray()
+                    $options
                 );
             }
         }

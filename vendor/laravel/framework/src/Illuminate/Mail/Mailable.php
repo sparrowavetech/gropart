@@ -230,7 +230,17 @@ class Mailable implements MailableContract, Renderable
 
         $connection = property_exists($this, 'connection') ? $this->connection : null;
 
-        $queueName = property_exists($this, 'queue') ? $this->queue : null;
+        if (is_null($connection) && method_exists($queue, 'resolveConnectionFromQueueRoute')) {
+            $connection = $queue->resolveConnectionFromQueueRoute($this);
+        }
+
+        $queueName = property_exists($this, 'queue')
+            ? $this->queue
+            : null;
+
+        if (is_null($queueName) && method_exists($queue, 'resolveQueueFromQueueRoute')) {
+            $queueName = $queue->resolveQueueFromQueueRoute($this);
+        }
 
         return $queue->connection($connection)->pushOn(
             $queueName ?: null, $this->newQueuedJob()
@@ -248,10 +258,24 @@ class Mailable implements MailableContract, Renderable
     {
         $connection = property_exists($this, 'connection') ? $this->connection : null;
 
-        $queueName = property_exists($this, 'queue') ? $this->queue : null;
+        $queueName = property_exists($this, 'queue')
+            ? $this->queue
+            : null;
+
+        if (is_null($connection) && method_exists($queue, 'resolveConnectionFromQueueRoute')) {
+            $connection = $queue->resolveConnectionFromQueueRoute($this);
+        }
+
+        if (is_null($queueName) && method_exists($queue, 'resolveQueueFromQueueRoute')) {
+            $queueName = $queue->resolveQueueFromQueueRoute($this);
+        }
+
+        $job = $this->newQueuedJob();
+
+        $job->delay($delay);
 
         return $queue->connection($connection)->laterOn(
-            $queueName ?: null, $delay, $this->newQueuedJob()
+            $queueName ?: null, $delay, $job
         );
     }
 
@@ -264,7 +288,6 @@ class Mailable implements MailableContract, Renderable
     {
         $messageGroup = $this->messageGroup ?? (method_exists($this, 'messageGroup') ? $this->messageGroup() : null);
 
-        /** @phpstan-ignore callable.nonNativeMethod (false positive since method_exists guard is used) */
         $deduplicator = $this->deduplicator ?? (method_exists($this, 'deduplicationId') ? $this->deduplicationId(...) : null);
 
         return Container::getInstance()->make(SendQueuedMailable::class, ['mailable' => $this])
@@ -1527,6 +1550,28 @@ class Mailable implements MailableContract, Renderable
      * @param  array  $options
      * @return $this
      */
+    public function assertHasNoAttachments()
+    {
+        $this->renderForAssertions();
+
+        PHPUnit::assertEmpty(
+            $this->attachments,
+            'Expected no attachments, but found ['.count($this->attachments).'] file attachment(s).'
+        );
+
+        PHPUnit::assertEmpty(
+            $this->rawAttachments,
+            'Expected no attachments, but found ['.count($this->rawAttachments).'] raw data attachment(s).'
+        );
+
+        PHPUnit::assertEmpty(
+            $this->diskAttachments,
+            'Expected no attachments, but found ['.count($this->diskAttachments).'] storage attachment(s).'
+        );
+
+        return $this;
+    }
+
     public function assertHasAttachment($file, array $options = [])
     {
         $this->renderForAssertions();

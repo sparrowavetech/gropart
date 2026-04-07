@@ -97,7 +97,7 @@ class CityController extends BaseController
 
     public function ajaxGetCities(Request $request)
     {
-        $data = City::query()
+        $query = City::query()
             ->select(['id', 'name'])
             ->wherePublished()
             ->orderBy('order')
@@ -106,30 +106,44 @@ class CityController extends BaseController
         $stateId = $request->input('state_id');
 
         if ($stateId && $stateId != 'null') {
-            $data = $data->where('state_id', $stateId);
+            $query = $query->where('state_id', $stateId);
         }
 
         $countryId = $request->input('country_id');
 
         if ($countryId && $countryId != 'null') {
-            $data = $data->where('country_id', $countryId);
+            $query = $query->where('country_id', $countryId);
         }
 
+        $term = BaseHelper::stringify($request->query('term'));
         $keyword = BaseHelper::stringify($request->query('k'));
 
-        if ($keyword) {
-            $data = $data
-                ->where('name', 'LIKE', '%' . $keyword . '%')
-                ->paginate(10);
-        } else {
-            $data = $data->get();
+        if ($term) {
+            $query = $query->where('name', 'LIKE', '%' . $term . '%');
+        } elseif ($keyword) {
+            $query = $query->where('name', 'LIKE', '%' . $keyword . '%');
+        }
+
+        if ($request->has('page')) {
+            $paginated = $query->paginate(20);
+
+            return $this
+                ->httpResponse()
+                ->setData([
+                    'data' => CityResource::collection($paginated),
+                    'pagination' => ['more' => $paginated->hasMorePages()],
+                ]);
         }
 
         if ($keyword) {
+            $data = $query->paginate(10);
+
             return $this
                 ->httpResponse()
                 ->setData([CityResource::collection($data), 'total' => $data->total()]);
         }
+
+        $data = $query->get();
 
         $data->prepend(new City(['id' => 0, 'name' => trans('plugins/location::city.select_city')]));
 

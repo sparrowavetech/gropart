@@ -27,4 +27,6 @@ return [
     'option_value_name_attribute' => 'Parinkties :key reikšmės',
     'please_choose_option_type' => 'Pasirinkite parinkties tipą!',
     'no_global_options' => 'Kol kas nėra visuotinių parinkčių. Pirmiausia pridėkite produktų parinktis numatytąja kalba.',
+    'price_per_product' => 'Kaina už produktą',
+    'price_per_product_helper' => 'Kai įjungta, pasirinkimo kaina taikoma vieną kartą produktui, nedauginant iš kiekio.',
 ];

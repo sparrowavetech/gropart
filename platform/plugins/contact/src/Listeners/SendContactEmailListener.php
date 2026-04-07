@@ -18,6 +18,8 @@ class SendContactEmailListener implements ShouldQueue
             return;
         }
 
+        $locale = $event->locale;
+
         $receiverEmails = $this->getReceiverEmails();
         $customFields = $contact->custom_fields ?? [];
 
@@ -42,7 +44,7 @@ class SendContactEmailListener implements ShouldQueue
 
         $args = ['replyTo' => is_array($receiverEmails) ? Arr::first($receiverEmails) : $receiverEmails];
 
-        $emailHandler->sendUsingTemplate('sender-confirmation', $contact->email, $args);
+        $emailHandler->sendUsingTemplateWithLocale('sender-confirmation', $contact->email, $locale, $args);
     }
 
     protected function getReceiverEmails(): string|array|null

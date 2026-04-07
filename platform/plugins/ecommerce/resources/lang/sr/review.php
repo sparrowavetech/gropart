@@ -109,4 +109,23 @@ return [
         'images_mimes' => 'Slike moraju biti u JPG, JPEG ili PNG formatu.',
         'images_file_max' => 'Svaka slika ne može premašiti :max KB.',
     ],
+    'badge_type' => 'Значка рецензије',
+    'badge_type_help' => 'Изаберите значку за приказ на овој рецензији. „Аутоматско препознавање" приказује „Купљено пре X" за купце са поруџбинама.',
+    'badge_types' => [
+        'auto' => 'Аутоматско препознавање',
+        'none' => 'Без значке',
+        'purchased' => '✅ Купљено',
+        'community_review' => '💬 Рецензија заједнице',
+        'expert_reviewer' => '🏅 Стручни рецензент',
+        'top_contributor' => '⭐ Водећи сарадник',
+        'verified_buyer' => '✅ Верификовани купац',
+    ],
+    'placeholders' => [
+        'customer_name' => 'e.g: John Doe',
+        'customer_email' => 'e.g: example@domain.com',
+        'comment' => 'Овде напишите коментар рецензије...',
+    ],
+    'helpers' => [
+        'star' => 'Оцена од 1 (најниже) до 5 (највише).',
+    ],
 ];

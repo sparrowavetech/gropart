@@ -6,7 +6,7 @@
         :title="trans('plugins/ecommerce::addresses.add_address')"
         :form-action="route('customers.addresses.store')"
         form-method="POST"
-        size="md"
+        size="lg"
     >
         {!!
             \Botble\Ecommerce\Forms\Fronts\Customer\AddressForm::create()
@@ -36,7 +36,7 @@
     <x-core::modal
         id="edit-address-modal"
         :title="trans('plugins/ecommerce::addresses.edit_address')"
-        size="md"
+        size="lg"
     >
         <div class="modal-loading-block d-none">
             <x-core::loading />

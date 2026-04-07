@@ -208,6 +208,11 @@ return [
     ],
     'term_and_privacy_policy_url' => 'URL dos termos e da política de privacidade',
     'site_title_separator' => 'Separador de título SEO',
+    'site_title_helper' => 'O nome da sua marca ou empresa. Aparece no separador do navegador e nos resultados de pesquisa (ex.: "My Company").',
+    'show_site_name_helper' => 'Acrescenta o nome do site a cada título de página usando o separador selecionado. Exemplo: "Page Title - My Company".',
+    'site_title_separator_helper' => 'O caractere usado entre o título da página e o nome do site. Exemplo com traço: "Page Title - My Company". Exemplo com barra vertical: "Page Title | My Company".',
+    'seo_title_helper' => 'O título da página inicial exibido nos resultados dos motores de pesquisa. Mantenha abaixo de 60 caracteres para melhor exibição. Deixe vazio para usar o título do site.',
+    'seo_description_helper' => 'A descrição da página inicial exibida nos resultados dos motores de pesquisa. Mantenha entre 120-160 caracteres para melhor exibição.',
     'no_meta_keywords' => 'O Google removeu as meta keywords, não é necessário adicioná-las ao seu site. Saiba mais: :link',
     'validation' => [
         'gtm_container_id_format' => 'O ID do contêiner GTM deve estar no formato GTM-XXXXXX (ex.: GTM-N7MK3KH2).',
@@ -389,6 +394,9 @@ return [
     ],
 
     'typography_primary' => 'Tipo de letra principal',
+    'all_languages' => 'Todos os idiomas',
+    'shared_field_notice' => 'Este campo é partilhado entre todos os idiomas. Gerencie-o a partir do idioma predefinido.',
+    'shared_section_notice' => 'Todas as opções nesta secção são partilhadas entre todos os idiomas. Mude para o idioma predefinido para fazer alterações.',
     'admin_appearance' => [
         'show_admin_bar' => 'Mostrar barra de administração para administradores conectados, mesmo no site público',
         'show_admin_bar_helper' => 'Exibir uma barra de ferramentas de acesso rápido de administração no topo do site quando conectado como administrador',

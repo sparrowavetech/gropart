@@ -137,7 +137,7 @@
                                             )
 
                                             @if (!empty($orderProduct->product_options) && is_array($orderProduct->product_options))
-                                                {!! render_product_options_html($orderProduct->product_options, $orderProduct->price) !!}
+                                                {!! render_product_options_html($orderProduct->product_options, $product?->front_sale_price ?? $orderProduct->price) !!}
                                             @endif
 
                                             @if ($orderProduct->license_code)
@@ -216,9 +216,25 @@
 
                     <div class="bb-order-totals">
                         @if (EcommerceHelper::isTaxEnabled() && (float)$order->tax_amount)
+                            @php
+                                $taxInfo = '';
+                                if (EcommerceHelper::isDisplayCheckoutTaxInformation()) {
+                                    $taxParts = [];
+                                    foreach ($order->products as $op) {
+                                        if ($op->tax_amount > 0 && !empty($op->options['taxClasses'])) {
+                                            foreach ($op->options['taxClasses'] as $tn => $tr) {
+                                                $taxParts[$tn . ' ' . $tr . '%'] = true;
+                                            }
+                                        }
+                                    }
+                                    if ($taxParts) {
+                                        $taxInfo = ' <small>(' . implode(', ', array_keys($taxParts)) . ')</small>';
+                                    }
+                                }
+                            @endphp
                             <div class="bb-order-total-item">
                                 <span class="label">{{ trans('plugins/ecommerce::ecommerce.tax') }}:</span>
-                                <span class="value">{{ format_price($order->tax_amount) }}</span>
+                                <span class="value">{!! BaseHelper::clean(format_price($order->tax_amount) . $taxInfo) !!}</span>
                             </div>
                         @endif
 
@@ -244,6 +260,13 @@
                             <div class="bb-order-total-item">
                                 <span class="label">{{ trans('plugins/ecommerce::order.shipping_fee') }}:</span>
                                 <span class="value">{{ format_price($order->shipping_amount) }}</span>
+                            </div>
+                        @endif
+
+                        @if ((float) ($order->shipping_tax_amount ?? 0))
+                            <div class="bb-order-total-item">
+                                <span class="label">{{ trans('plugins/ecommerce::order.shipping_tax') }}:</span>
+                                <span class="value">{{ format_price($order->shipping_tax_amount) }}</span>
                             </div>
                         @endif
 

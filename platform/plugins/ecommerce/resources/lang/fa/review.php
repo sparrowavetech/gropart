@@ -109,4 +109,23 @@ return [
         'images_mimes' => 'تصاویر باید در فرمت JPG، JPEG یا PNG باشند.',
         'images_file_max' => 'هر تصویر نمی‌تواند بیشتر از :max کیلوبایت باشد.',
     ],
+    'badge_type' => 'نشان نقد',
+    'badge_type_help' => 'یک نشان برای نمایش در این نقد انتخاب کنید. "تشخیص خودکار" برای مشتریانی که سفارش دارند "X پیش خریداری شد" را نشان می‌دهد.',
+    'badge_types' => [
+        'auto' => 'تشخیص خودکار',
+        'none' => 'بدون نشان',
+        'purchased' => '✅ خریداری شده',
+        'community_review' => '💬 نقد جامعه',
+        'expert_reviewer' => '🏅 بررسی‌کننده متخصص',
+        'top_contributor' => '⭐ مشارکت‌کننده برتر',
+        'verified_buyer' => '✅ خریدار تأیید شده',
+    ],
+    'placeholders' => [
+        'customer_name' => 'e.g: John Doe',
+        'customer_email' => 'e.g: example@domain.com',
+        'comment' => 'نظر نقد را اینجا بنویسید...',
+    ],
+    'helpers' => [
+        'star' => 'امتیاز از ۱ (پایین‌ترین) تا ۵ (بالاترین).',
+    ],
 ];

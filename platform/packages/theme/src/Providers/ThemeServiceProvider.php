@@ -15,6 +15,7 @@ use Botble\Theme\Commands\ThemeAssetsPublishCommand;
 use Botble\Theme\Commands\ThemeAssetsRemoveCommand;
 use Botble\Theme\Commands\ThemeClearCacheCommand;
 use Botble\Theme\Commands\ThemeOptionCheckMissingCommand;
+use Botble\Theme\Commands\ThemeOptionCleanupSharedCommand;
 use Botble\Theme\Commands\ThemeRemoveCommand;
 use Botble\Theme\Commands\ThemeRenameCommand;
 use Botble\Theme\Contracts\Theme as ThemeContract;
@@ -182,6 +183,7 @@ class ThemeServiceProvider extends ServiceProvider
                 ThemeOptionCheckMissingCommand::class,
                 ThemeAssetsRemoveCommand::class,
                 ThemeRenameCommand::class,
+                ThemeOptionCleanupSharedCommand::class,
             ]);
         }
     }

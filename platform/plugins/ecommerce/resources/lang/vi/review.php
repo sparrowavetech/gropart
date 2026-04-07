@@ -109,4 +109,23 @@ return [
         'images_mimes' => 'Hình ảnh phải có định dạng JPG, JPEG hoặc PNG.',
         'images_file_max' => 'Mỗi hình ảnh không được vượt quá :max KB.',
     ],
+    'badge_type' => 'Huy hiệu đánh giá',
+    'badge_type_help' => 'Chọn huy hiệu để hiển thị trên đánh giá này. "Tự động phát hiện" hiển thị "Đã mua X trước đây" cho khách hàng có đơn hàng.',
+    'badge_types' => [
+        'auto' => 'Tự động phát hiện',
+        'none' => 'Không có huy hiệu',
+        'purchased' => '✅ Đã mua',
+        'community_review' => '💬 Đánh giá cộng đồng',
+        'expert_reviewer' => '🏅 Chuyên gia đánh giá',
+        'top_contributor' => '⭐ Người đóng góp hàng đầu',
+        'verified_buyer' => '✅ Người mua đã xác minh',
+    ],
+    'placeholders' => [
+        'customer_name' => 'e.g: John Doe',
+        'customer_email' => 'e.g: example@domain.com',
+        'comment' => 'Viết nội dung bình luận đánh giá tại đây...',
+    ],
+    'helpers' => [
+        'star' => 'Đánh giá từ 1 (thấp nhất) đến 5 (cao nhất).',
+    ],
 ];

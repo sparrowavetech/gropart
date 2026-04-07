@@ -63,6 +63,7 @@ class HookServiceProvider extends ServiceProvider
                             'id' => 'opt-text-subsection-page',
                             'subsection' => true,
                             'icon' => 'ti ti-book',
+                            'shared' => true,
                             'fields' => [
                                 [
                                     'id' => 'homepage_id',
@@ -101,7 +102,7 @@ class HookServiceProvider extends ServiceProvider
                             ],
                         ];
 
-                        return $html . Html::tag('script', json_encode($schema, JSON_UNESCAPED_UNICODE), ['type' => 'application/ld+json'])
+                        return $html . Html::tag('script', json_encode($schema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), ['type' => 'application/ld+json'])
                                 ->toHtml();
                     }, 2);
                 }, 2, 2);

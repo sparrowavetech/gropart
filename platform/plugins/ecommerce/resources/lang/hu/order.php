@@ -95,6 +95,8 @@ return [
     'coupon_code' => 'Kuponkód: ":code"',
     'shipping_fee' => 'Szállítási díj',
     'tax' => 'ÁFA',
+    'shipping_tax' => 'Szállítási adó',
+
     'refunded_amount' => 'Visszatérített összeg',
     'amount_received' => 'Ténylegesen beérkezett összeg',
     'download_invoice' => 'Számla letöltése',

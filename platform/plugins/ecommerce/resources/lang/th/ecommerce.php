@@ -121,6 +121,7 @@ return [
     'apply' => 'นำไปใช้',
     'available' => 'พร้อมใช้งาน',
     'back_to_return_requests' => 'กลับไปที่คำขอคืนสินค้า',
+    'backorder_warning' => 'คำเตือน: สินค้านี้เป็นพรีออเดอร์และอาจใช้เวลาจัดส่งนานขึ้น',
     'choose_reason' => 'เลือกเหตุผล',
     'clear' => 'ล้าง',
     'clear_all_filters' => 'ล้างตัวกรองทั้งหมด',

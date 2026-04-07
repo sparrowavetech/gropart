@@ -95,6 +95,8 @@ return [
     'coupon_code' => 'Kod kupona: ":code"',
     'shipping_fee' => 'Naknada za dostavu',
     'tax' => 'Porez',
+    'shipping_tax' => 'Порез на доставу',
+
     'refunded_amount' => 'Vraćen iznos',
     'amount_received' => 'Zapravo primljen iznos',
     'download_invoice' => 'Preuzmi fakturu',

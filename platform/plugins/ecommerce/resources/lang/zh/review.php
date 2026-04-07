@@ -109,4 +109,23 @@ return [
         'images_mimes' => '图片必须是JPG、JPEG或PNG格式。',
         'images_file_max' => '每张图片不能超过:max KB。',
     ],
+    'badge_type' => '评论徽章',
+    'badge_type_help' => '选择要在此评论上显示的徽章。"自动检测"会为有订单的客户显示"X前购买"。',
+    'badge_types' => [
+        'auto' => '自动检测',
+        'none' => '无徽章',
+        'purchased' => '✅ 已购买',
+        'community_review' => '💬 社区评论',
+        'expert_reviewer' => '🏅 专家评论者',
+        'top_contributor' => '⭐ 顶级贡献者',
+        'verified_buyer' => '✅ 认证买家',
+    ],
+    'placeholders' => [
+        'customer_name' => 'e.g: John Doe',
+        'customer_email' => 'e.g: example@domain.com',
+        'comment' => '在此处写下评论内容...',
+    ],
+    'helpers' => [
+        'star' => '评分从1（最低）到5（最高）。',
+    ],
 ];

@@ -27,4 +27,6 @@ return [
     'option_value_name_attribute' => ':key opció értékei',
     'please_choose_option_type' => 'Kérjük, válasszon opció típust!',
     'no_global_options' => 'Még nincsenek elérhető globális opciók. Kérjük, először adja hozzá a termék opciókat az alapértelmezett nyelven.',
+    'price_per_product' => 'Ár termékenként',
+    'price_per_product_helper' => 'Ha engedélyezve van, az opció ára termékenként egyszer kerül alkalmazásra, nem szorozva a mennyiséggel.',
 ];

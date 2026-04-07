@@ -65,4 +65,5 @@ return [
     'please_select_record' => '请至少选择一条记录以执行此操作！',
     'checkbox' => '复选框',
     'toggle_columns' => '切换列',
+    'created_by' => '创建者',
 ];

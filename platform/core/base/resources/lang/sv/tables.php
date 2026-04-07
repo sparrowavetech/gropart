@@ -65,4 +65,5 @@ return [
     'please_select_record' => 'Välj minst en post för att utföra denna åtgärd!',
     'checkbox' => 'Kryssruta',
     'toggle_columns' => 'Växla kolumner',
+    'created_by' => 'Skapad av',
 ];

@@ -32,6 +32,8 @@ class PaypalPaymentMethodForm extends PaymentMethodForm
                 TextField::class,
                 TextFieldOption::make()
                     ->label(trans('plugins/payment::payment.client_id'))
+                    ->placeholder('AxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxE')
+                    ->helperText(trans('plugins/paypal::paypal.client_id_helper'))
                     ->value(BaseHelper::hasDemoModeEnabled() ? '*******************************' : get_payment_setting('client_id', 'paypal'))
             )
             ->add(
@@ -39,6 +41,8 @@ class PaypalPaymentMethodForm extends PaymentMethodForm
                 'password',
                 TextFieldOption::make()
                     ->label(trans('plugins/payment::payment.client_secret'))
+                    ->placeholder('ExxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxD')
+                    ->helperText(trans('plugins/paypal::paypal.client_secret_helper'))
                     ->value(BaseHelper::hasDemoModeEnabled() ? '*******************************' : get_payment_setting('client_secret', 'paypal'))
             )
             ->add(

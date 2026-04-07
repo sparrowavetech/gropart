@@ -37,6 +37,7 @@ class ProductSearchSettingForm extends SettingForm
                         'name' => trans('plugins/ecommerce::products.form.name'),
                         'sku' => trans('plugins/ecommerce::products.sku'),
                         'variation_sku' => trans('plugins/ecommerce::products.variation_sku'),
+                        'barcode' => trans('plugins/ecommerce::products.form.barcode'),
                         'description' => trans('plugins/ecommerce::products.form.description'),
                         'brand' => trans('plugins/ecommerce::products.form.brand'),
                         'tag' => trans('plugins/ecommerce::products.form.tags'),

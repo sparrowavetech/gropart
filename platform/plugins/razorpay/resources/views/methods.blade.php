@@ -15,6 +15,12 @@
             </p>
         </x-slot>
 
+        @if (isset($minimumAmount) && isset($orderAmount) && (float) $orderAmount < (float) $minimumAmount)
+            <div class="alert alert-warning my-2">
+                {{ trans('plugins/razorpay::razorpay.minimum_amount_warning', ['amount' => format_price($minimumAmount)]) }}
+            </div>
+        @endif
+
         @if ($errorMessage)
             <div class="text-danger my-2">
                 {!! BaseHelper::clean($errorMessage) !!}

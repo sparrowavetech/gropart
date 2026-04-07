@@ -184,4 +184,6 @@ return [
     'subject_placeholder' => 'Subject',
     'your_message' => 'Your Message',
     'agree_terms_privacy' => 'I agree to the Terms and Privacy Policy',
+    'agree_terms_privacy_link' => 'I agree to the :link',
+    'terms_and_privacy_policy' => 'Terms and Privacy Policy',
 ];

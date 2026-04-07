@@ -27,4 +27,6 @@ return [
     'option_value_name_attribute' => '选项 :key 的值',
     'please_choose_option_type' => '请选择选项类型！',
     'no_global_options' => '尚无全局选项。请先在默认语言中添加产品选项。',
+    'price_per_product' => '每个产品的价格',
+    'price_per_product_helper' => '启用后，选项价格按每个产品应用一次，不会乘以数量。',
 ];

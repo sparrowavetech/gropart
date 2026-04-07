@@ -1,6 +1,8 @@
 <?php
 
 use Botble\Base\Facades\AdminHelper;
+use Botble\Page\Http\Controllers\ExportPageController;
+use Botble\Page\Http\Controllers\ImportPageController;
 use Illuminate\Support\Facades\Route;
 
 Route::group(['namespace' => 'Botble\Page\Http\Controllers'], function (): void {
@@ -38,6 +40,24 @@ Route::group(['namespace' => 'Botble\Page\Http\Controllers'], function (): void 
                 'uses' => 'PageController@renderShortcodeTypes',
                 'permission' => 'pages.edit',
             ]);
+        });
+
+        Route::prefix('tools/data-synchronize')->name('tools.data-synchronize.')->group(function (): void {
+            Route::prefix('export')->name('export.')->group(function (): void {
+                Route::group(['prefix' => 'pages', 'as' => 'pages.', 'permission' => 'pages.export'], function (): void {
+                    Route::get('/', [ExportPageController::class, 'index'])->name('index');
+                    Route::post('/', [ExportPageController::class, 'store'])->name('store');
+                });
+            });
+
+            Route::prefix('import')->name('import.')->group(function (): void {
+                Route::group(['prefix' => 'pages', 'as' => 'pages.', 'permission' => 'pages.import'], function (): void {
+                    Route::get('/', [ImportPageController::class, 'index'])->name('index');
+                    Route::post('/', [ImportPageController::class, 'import'])->name('store');
+                    Route::post('validate', [ImportPageController::class, 'validateData'])->name('validate');
+                    Route::post('download-example', [ImportPageController::class, 'downloadExample'])->name('download-example');
+                });
+            });
         });
     });
 });

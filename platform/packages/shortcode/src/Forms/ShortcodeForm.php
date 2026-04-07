@@ -161,43 +161,44 @@ class ShortcodeForm extends FormAbstract
             TextareaFieldOption::make()
                 ->label(trans('packages/shortcode::shortcode.form.custom_css'))
                 ->helperText(trans('packages/shortcode::shortcode.form.custom_css_helper'))
+                ->shared()
         );
     }
 
     public function withBackgroundColor(string $defaultColor = '#fff'): static
     {
-        return $this
-                ->add(
-                    'background_color',
-                    ColorField::class,
-                    ColorFieldOption::make()
-                        ->label(trans('packages/shortcode::shortcode.form.background_color'))
-                        ->when($defaultColor, fn (ColorFieldOption $option) => $option->defaultValue($defaultColor))
-                );
+        return $this->add(
+            'background_color',
+            ColorField::class,
+            ColorFieldOption::make()
+                ->label(trans('packages/shortcode::shortcode.form.background_color'))
+                ->when($defaultColor, fn (ColorFieldOption $option) => $option->defaultValue($defaultColor))
+                ->shared()
+        );
     }
 
     public function withTextColor(?string $defaultColor = null): static
     {
-        return $this
-            ->add(
-                'text_color',
-                ColorField::class,
-                ColorFieldOption::make()
-                    ->label(trans('packages/shortcode::shortcode.form.text_color'))
-                    ->when($defaultColor, fn (ColorFieldOption $option) => $option->defaultValue($defaultColor))
-                    ->helperText(trans('packages/shortcode::shortcode.form.text_color_helper'))
-            );
+        return $this->add(
+            'text_color',
+            ColorField::class,
+            ColorFieldOption::make()
+                ->label(trans('packages/shortcode::shortcode.form.text_color'))
+                ->when($defaultColor, fn (ColorFieldOption $option) => $option->defaultValue($defaultColor))
+                ->helperText(trans('packages/shortcode::shortcode.form.text_color_helper'))
+                ->shared()
+        );
     }
 
     public function withBackgroundImage(?string $defaultImage = null): static
     {
-        return $this
-            ->add(
-                'background_image',
-                MediaImageField::class,
-                MediaImageFieldOption::make()
-                    ->label(trans('packages/shortcode::shortcode.form.background_image'))
-                    ->when($defaultImage, fn (MediaImageFieldOption $option) => $option->defaultValue($defaultImage))
-            );
+        return $this->add(
+            'background_image',
+            MediaImageField::class,
+            MediaImageFieldOption::make()
+                ->label(trans('packages/shortcode::shortcode.form.background_image'))
+                ->when($defaultImage, fn (MediaImageFieldOption $option) => $option->defaultValue($defaultImage))
+                ->shared()
+        );
     }
 }

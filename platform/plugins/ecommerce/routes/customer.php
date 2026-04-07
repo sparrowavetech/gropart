@@ -128,11 +128,7 @@ Theme::registerRoutes(function (): void {
 
     Route::group([
         'namespace' => 'Botble\Ecommerce\Http\Controllers\Customers',
-        'middleware' => [
-            'web',
-            'core',
-            EcommerceHelper::isEnableEmailVerification() ? 'customer' : 'customer.guest',
-        ],
+        'middleware' => ['web', 'core'],
         'as' => 'customer.',
     ], function (): void {
         Route::get('register/confirm/resend', 'RegisterController@resendConfirmation')

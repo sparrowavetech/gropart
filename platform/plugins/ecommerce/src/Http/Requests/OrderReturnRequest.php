@@ -9,6 +9,18 @@ use Illuminate\Validation\Rule;
 
 class OrderReturnRequest extends Request
 {
+    protected function prepareForValidation(): void
+    {
+        if (EcommerceHelper::allowPartialReturn() && $this->has('return_items')) {
+            $this->merge([
+                'return_items' => array_filter(
+                    $this->input('return_items', []),
+                    fn ($item) => ! empty($item['is_return'])
+                ),
+            ]);
+        }
+    }
+
     public function rules(): array
     {
         $validReasons = array_values(array_filter(

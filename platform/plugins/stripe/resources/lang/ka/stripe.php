@@ -2,6 +2,9 @@
 
 return [
     'webhook_secret' => 'Webhook საიდუმლო',
+    'webhook_secret_helper' => 'ეს შეგიძლიათ იხილოთ Stripe Dashboard-ში Developers > Webhooks > Signing secret განყოფილებაში.',
+    'public_key_helper' => 'ეს შეგიძლიათ იხილოთ Stripe Dashboard-ში Developers > API keys განყოფილებაში.',
+    'secret_key_helper' => 'ეს შეგიძლიათ იხილოთ Stripe Dashboard-ში Developers > API keys განყოფილებაში. შეინახეთ ეს გასაღები კონფიდენციალური.',
     'webhook_setup_guide' => [
         'title' => 'Stripe Webhook-ის დაყენების გზამკვლევი',
         'description' => 'მიჰყევით ამ ნაბიჯებს Stripe webhook-ის დასაყენებლად',

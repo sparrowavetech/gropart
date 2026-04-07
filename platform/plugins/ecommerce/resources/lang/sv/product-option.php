@@ -27,4 +27,6 @@ return [
     'option_value_name_attribute' => 'Värden för alternativ :key',
     'please_choose_option_type' => 'Vänligen välj alternativtyp!',
     'no_global_options' => 'Inga globala alternativ tillgängliga än. Lägg till produktalternativ på standardspråket först.',
+    'price_per_product' => 'Pris per produkt',
+    'price_per_product_helper' => 'När aktiverat tillämpas optionspriset en gång per produkt, inte multiplicerat med antal.',
 ];

@@ -177,4 +177,6 @@ return [
     'subject_placeholder' => '主题',
     'your_message' => '您的留言',
     'agree_terms_privacy' => '我同意条款和隐私政策',
+    'agree_terms_privacy_link' => '我同意 :link',
+    'terms_and_privacy_policy' => '条款和隐私政策',
 ];

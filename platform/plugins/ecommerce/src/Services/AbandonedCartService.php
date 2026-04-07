@@ -185,15 +185,22 @@ class AbandonedCartService
         Cart::instance('cart')->destroy();
 
         foreach ($abandonedCart->cart_data as $item) {
-            $product = Product::query()->find($item['id']);
-            if ($product && ! $product->isOutOfStock()) {
-                Cart::instance('cart')->add([
-                    'id' => $product->id,
-                    'name' => $product->name,
-                    'qty' => $item['qty'],
-                    'price' => $product->front_sale_price,
-                    'options' => $item['options'] ?? [],
-                ]);
+            try {
+                $product = Product::query()->find($item['id']);
+
+                if (! $product || $product->isOutOfStock()) {
+                    continue;
+                }
+
+                Cart::instance('cart')->addQuietly(
+                    $product->getKey(),
+                    $product->name,
+                    $item['qty'] ?? 1,
+                    $product->front_sale_price ?: $product->price,
+                    $item['options'] ?? []
+                );
+            } catch (\Throwable) {
+                continue;
             }
         }
 

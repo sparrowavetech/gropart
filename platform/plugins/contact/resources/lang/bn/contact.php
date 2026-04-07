@@ -177,4 +177,6 @@ return [
     'subject_placeholder' => 'বিষয়',
     'your_message' => 'আপনার বার্তা',
     'agree_terms_privacy' => 'আমি শর্তাবলী এবং গোপনীয়তা নীতিতে সম্মত',
+    'agree_terms_privacy_link' => 'আমি :link এ সম্মত',
+    'terms_and_privacy_policy' => 'শর্তাবলী এবং গোপনীয়তা নীতি',
 ];

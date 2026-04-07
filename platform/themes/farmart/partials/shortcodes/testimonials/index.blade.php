@@ -71,7 +71,7 @@
                                             {{ RvMedia::image($testimonial->image, $testimonial->name, 'thumb') }}
                                         </div>
                                         <div class="testimonial-user-info">
-                                            <h6>{{ $testimonial->name }}</h6>
+                                            <p class="mb-0 fw-bold">{{ $testimonial->name }}</p>
                                             <span>{{ $testimonial->company }}</span>
                                         </div>
                                     </div>

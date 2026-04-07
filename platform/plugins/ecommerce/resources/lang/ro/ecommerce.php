@@ -121,6 +121,7 @@ return [
     'apply' => 'Aplică',
     'available' => 'Disponibil',
     'back_to_return_requests' => 'Înapoi la solicitări de returnare',
+    'backorder_warning' => 'Atenție: Acest produs este în precomandă și livrarea poate dura mai mult.',
     'choose_reason' => 'Alegeți motivul',
     'clear' => 'Șterge',
     'clear_all_filters' => 'Șterge toate filtrele',

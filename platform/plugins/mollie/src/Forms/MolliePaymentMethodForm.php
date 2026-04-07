@@ -29,6 +29,7 @@ class MolliePaymentMethodForm extends PaymentMethodForm
                 TextField::class,
                 TextFieldOption::make()
                     ->label(trans('plugins/mollie::mollie.api_key'))
+                    ->placeholder('live_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
                     ->value(BaseHelper::hasDemoModeEnabled() ? '*******************************' : get_payment_setting('api_key', MOLLIE_PAYMENT_METHOD_NAME))
                     ->helperText(trans('plugins/mollie::mollie.api_key_helper'))
             )
@@ -37,6 +38,7 @@ class MolliePaymentMethodForm extends PaymentMethodForm
                 TextField::class,
                 TextFieldOption::make()
                     ->label(trans('plugins/mollie::mollie.webhook_secret'))
+                    ->placeholder('whsec_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
                     ->value(BaseHelper::hasDemoModeEnabled() ? '*******************************' : get_payment_setting('webhook_secret', MOLLIE_PAYMENT_METHOD_NAME))
                     ->helperText(trans('plugins/mollie::mollie.webhook_secret_helper'))
             )

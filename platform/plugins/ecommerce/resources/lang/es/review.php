@@ -109,4 +109,23 @@ return [
         'images_mimes' => 'Las imágenes deben ser formato JPG, JPEG o PNG.',
         'images_file_max' => 'Cada imagen no puede exceder :max KB.',
     ],
+    'badge_type' => 'Insignia de reseña',
+    'badge_type_help' => 'Elija una insignia para mostrar en esta reseña. "Detección automática" muestra "Comprado hace X" para clientes con pedidos.',
+    'badge_types' => [
+        'auto' => 'Detección automática',
+        'none' => 'Sin insignia',
+        'purchased' => '✅ Comprado',
+        'community_review' => '💬 Reseña de la comunidad',
+        'expert_reviewer' => '🏅 Revisor experto',
+        'top_contributor' => '⭐ Mayor contribuidor',
+        'verified_buyer' => '✅ Comprador verificado',
+    ],
+    'placeholders' => [
+        'customer_name' => 'e.g: John Doe',
+        'customer_email' => 'e.g: example@domain.com',
+        'comment' => 'Escriba el comentario de la reseña aquí...',
+    ],
+    'helpers' => [
+        'star' => 'Calificación de 1 (más baja) a 5 (más alta).',
+    ],
 ];

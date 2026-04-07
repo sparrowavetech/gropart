@@ -4,6 +4,7 @@ namespace Botble\Media\Http\Resources;
 
 use Botble\Base\Facades\BaseHelper;
 use Botble\Media\Models\MediaFolder;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -12,7 +13,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  */
 class FolderResource extends JsonResource
 {
-    protected Collection $files;
+    protected Collection|LengthAwarePaginator|null $files = null;
 
     public function toArray($request): array
     {
@@ -22,13 +23,13 @@ class FolderResource extends JsonResource
             'color' => $this->color,
             'created_at' => BaseHelper::formatDate($this->created_at, 'Y-m-d H:i:s'),
             'updated_at' => BaseHelper::formatDate($this->updated_at, 'Y-m-d H:i:s'),
-            ...isset($this->files) ? [
+            ...$this->files !== null ? [
                 'files' => FileResource::collection($this->files),
             ] : [],
         ];
     }
 
-    public function withFiles(Collection $files): self
+    public function withFiles(Collection|LengthAwarePaginator $files): self
     {
         $this->files = $files;
 

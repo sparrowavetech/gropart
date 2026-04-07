@@ -11,6 +11,7 @@ use Botble\Payment\Supports\PaymentHelper;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\ServiceProvider;
+use Mollie\Api\Exceptions\ApiException;
 use Mollie\Laravel\Facades\Mollie;
 
 class HookServiceProvider extends ServiceProvider
@@ -132,7 +133,9 @@ class HookServiceProvider extends ServiceProvider
             exit;
         } catch (Exception $exception) {
             $data['error'] = true;
-            $data['message'] = $exception->getMessage();
+            $data['message'] = $exception instanceof ApiException
+                ? $exception->getPlainMessage()
+                : $exception->getMessage();
         }
 
         return $data;

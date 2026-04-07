@@ -35,6 +35,8 @@ class MediaSettingRequest extends Request
             'media_wasabi_default_region' => ['nullable', 'string', 'required_if:media_driver,wasabi', new AwsRegionRule()],
             'media_wasabi_bucket' => ['nullable', 'string', 'required_if:media_driver,wasabi'],
             'media_wasabi_root' => ['nullable', 'string'],
+            'media_wasabi_cdn_enabled' => $onOffRule,
+            'media_wasabi_cdn_custom_domain' => ['nullable', 'url', 'max:255'],
 
             'media_do_spaces_access_key_id' => ['nullable', 'string', 'required_if:media_driver,do_spaces'],
             'media_do_spaces_secret_key' => ['nullable', 'string', 'required_if:media_driver,do_spaces'],
@@ -63,6 +65,7 @@ class MediaSettingRequest extends Request
             'media_turn_off_automatic_url_translation_into_latin' => $onOffRule,
             'media_use_original_name_for_file_path' => $onOffRule,
             'media_keep_original_file_size_and_quality' => $onOffRule,
+            'media_image_quality' => ['nullable', 'numeric', 'min:70', 'max:100'],
             'media_default_placeholder_image' => ['nullable', 'string'],
             'max_upload_filesize' => ['nullable', 'numeric', 'min:0'],
 

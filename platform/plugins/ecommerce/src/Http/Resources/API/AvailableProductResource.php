@@ -51,6 +51,8 @@ class AvailableProductResource extends JsonResource
             'height' => $this->height,
             'wide' => $this->wide,
             'length' => $this->length,
+            'minimum_order_quantity' => $this->minimum_order_quantity ?: 0,
+            'maximum_order_quantity' => $this->maximum_order_quantity ?: 0,
             'product_type' => $this->product_type?->getValue() ?? 'physical',
             'image_url' => RvMedia::getImageUrl($this->image, $thumbnailSize, false, RvMedia::getDefaultImage()),
             'product_options' => $this->when(! $this->is_variation, function () {

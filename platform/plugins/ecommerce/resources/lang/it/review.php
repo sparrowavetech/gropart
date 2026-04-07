@@ -109,4 +109,23 @@ return [
         'images_mimes' => 'Le immagini devono essere in formato JPG, JPEG o PNG.',
         'images_file_max' => 'Ogni immagine non può superare :max KB.',
     ],
+    'badge_type' => 'Badge recensione',
+    'badge_type_help' => 'Scegli un badge da visualizzare su questa recensione. "Rilevamento automatico" mostra "Acquistato X fa" per i clienti con ordini.',
+    'badge_types' => [
+        'auto' => 'Rilevamento automatico',
+        'none' => 'Nessun badge',
+        'purchased' => '✅ Acquistato',
+        'community_review' => '💬 Recensione della comunità',
+        'expert_reviewer' => '🏅 Recensore esperto',
+        'top_contributor' => '⭐ Miglior collaboratore',
+        'verified_buyer' => '✅ Acquirente verificato',
+    ],
+    'placeholders' => [
+        'customer_name' => 'e.g: John Doe',
+        'customer_email' => 'e.g: example@domain.com',
+        'comment' => 'Scrivi qui il commento della recensione...',
+    ],
+    'helpers' => [
+        'star' => 'Valutazione da 1 (più bassa) a 5 (più alta).',
+    ],
 ];

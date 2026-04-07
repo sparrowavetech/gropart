@@ -18,6 +18,10 @@ use Illuminate\Contracts\Broadcasting\ShouldRescue;
 use Illuminate\Contracts\Bus\Dispatcher as BusDispatcherContract;
 use Illuminate\Contracts\Cache\Repository as Cache;
 use Illuminate\Contracts\Foundation\CachesRoutes;
+use Illuminate\Queue\Attributes\Connection as ConnectionAttribute;
+use Illuminate\Queue\Attributes\Queue as QueueAttribute;
+use Illuminate\Queue\Attributes\ReadsQueueAttributes;
+use Illuminate\Support\Queue\Concerns\ResolvesQueueRoutes;
 use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 use Pusher\Pusher;
@@ -29,6 +33,8 @@ use Throwable;
  */
 class BroadcastManager implements FactoryContract
 {
+    use ReadsQueueAttributes, ResolvesQueueRoutes;
+
     /**
      * The application instance.
      *
@@ -78,7 +84,7 @@ class BroadcastManager implements FactoryContract
             $router->match(
                 ['get', 'post'], '/broadcasting/auth',
                 '\\'.BroadcastController::class.'@authenticate'
-            )->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
+            )->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\PreventRequestForgery::class]);
         });
     }
 
@@ -100,7 +106,7 @@ class BroadcastManager implements FactoryContract
             $router->match(
                 ['get', 'post'], '/broadcasting/user-auth',
                 '\\'.BroadcastController::class.'@authenticateUser'
-            )->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
+            )->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\PreventRequestForgery::class]);
         });
     }
 
@@ -189,14 +195,17 @@ class BroadcastManager implements FactoryContract
                 : $dispatch();
         }
 
-        $queue = null;
+        $queue = match (true) {
+            method_exists($event, 'broadcastQueue') => $event->broadcastQueue(),
+            isset($event->broadcastQueue) => $event->broadcastQueue,
+            isset($event->queue) => $event->queue,
+            default => null,
+        };
 
-        if (method_exists($event, 'broadcastQueue')) {
-            $queue = $event->broadcastQueue();
-        } elseif (isset($event->broadcastQueue)) {
-            $queue = $event->broadcastQueue;
-        } elseif (isset($event->queue)) {
-            $queue = $event->queue;
+        if (is_null($queue)) {
+            $queue = $this->getAttributeValue($event, QueueAttribute::class, 'queue')
+                ?? $this->resolveQueueFromQueueRoute($event)
+                ?? null;
         }
 
         $broadcastEvent = new BroadcastEvent(clone $event);
@@ -210,7 +219,12 @@ class BroadcastManager implements FactoryContract
         }
 
         $push = fn () => $this->app->make('queue')
-            ->connection($event->connection ?? null)
+            ->connection(
+                $event->connection
+                    ?? $this->getAttributeValue($event, ConnectionAttribute::class, 'connection')
+                    ?? $this->resolveConnectionFromQueueRoute($event)
+                    ?? null
+            )
             ->pushOn($queue, $broadcastEvent);
 
         $event instanceof ShouldRescue
@@ -236,12 +250,12 @@ class BroadcastManager implements FactoryContract
     /**
      * Get a driver instance.
      *
-     * @param  string|null  $driver
+     * @param  string|null  $name
      * @return mixed
      */
-    public function connection($driver = null)
+    public function connection($name = null)
     {
-        return $this->driver($driver);
+        return $this->driver($name);
     }
 
     /**
@@ -275,6 +289,7 @@ class BroadcastManager implements FactoryContract
      * @return \Illuminate\Contracts\Broadcasting\Broadcaster
      *
      * @throws \InvalidArgumentException
+     * @throws \RuntimeException
      */
     protected function resolve($name)
     {
@@ -331,7 +346,7 @@ class BroadcastManager implements FactoryContract
      */
     protected function createPusherDriver(array $config)
     {
-        return new PusherBroadcaster($this->pusher($config));
+        return new PusherBroadcaster($this->pusher($config), $config['jsonp'] ?? false);
     }
 
     /**
@@ -450,7 +465,7 @@ class BroadcastManager implements FactoryContract
      */
     public function getDefaultDriver()
     {
-        return $this->app['config']['broadcasting.default'];
+        return $this->app['config']['broadcasting.default'] ?? 'null';
     }
 
     /**
@@ -482,10 +497,19 @@ class BroadcastManager implements FactoryContract
      *
      * @param  string  $driver
      * @param  \Closure  $callback
+     *
+     * @param-closure-this  $this  $callback
+     *
      * @return $this
      */
     public function extend($driver, Closure $callback)
     {
+        try {
+            $callback = $callback->bindTo($this, static::class) ?? throw new RuntimeException;
+        } catch (Throwable) {
+            $callback = $callback->bindTo(null, static::class);
+        }
+
         $this->customCreators[$driver] = $callback;
 
         return $this;

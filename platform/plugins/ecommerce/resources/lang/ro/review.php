@@ -109,4 +109,23 @@ return [
         'images_mimes' => 'Imaginile trebuie să fie în format JPG, JPEG sau PNG.',
         'images_file_max' => 'Fiecare imagine nu poate depăși :max KB.',
     ],
+    'badge_type' => 'Insignă recenzie',
+    'badge_type_help' => 'Alegeți o insignă pentru afișare pe această recenzie. "Detectare automată" arată "Cumpărat acum X" pentru clienții cu comenzi.',
+    'badge_types' => [
+        'auto' => 'Detectare automată',
+        'none' => 'Fără insignă',
+        'purchased' => '✅ Cumpărat',
+        'community_review' => '💬 Recenzie comunitate',
+        'expert_reviewer' => '🏅 Recenzent expert',
+        'top_contributor' => '⭐ Contribuitor de top',
+        'verified_buyer' => '✅ Cumpărător verificat',
+    ],
+    'placeholders' => [
+        'customer_name' => 'e.g: John Doe',
+        'customer_email' => 'e.g: example@domain.com',
+        'comment' => 'Scrieți comentariul recenziei aici...',
+    ],
+    'helpers' => [
+        'star' => 'Evaluare de la 1 (cea mai mică) la 5 (cea mai mare).',
+    ],
 ];

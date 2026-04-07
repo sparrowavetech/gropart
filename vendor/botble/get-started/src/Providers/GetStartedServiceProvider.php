@@ -16,6 +16,7 @@ class GetStartedServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->setNamespace('packages/get-started')
+            ->loadAndPublishConfigurations(['general'])
             ->loadAndPublishTranslations()
             ->publishAssets()
             ->loadRoutes()
@@ -42,9 +43,11 @@ class GetStartedServiceProvider extends ServiceProvider
 
     protected function shouldShowGetStartedPopup(): bool
     {
-        return ! BaseHelper::hasDemoModeEnabled() &&
+        return $this->app['config']->get('packages.get-started.general.enabled', true) &&
+            ! BaseHelper::hasDemoModeEnabled() &&
             is_in_admin(true) &&
             Auth::guard()->check() &&
+            setting('admin_appearance_show_get_started', '1') == '1' &&
             setting('is_completed_get_started') != '1';
     }
 }

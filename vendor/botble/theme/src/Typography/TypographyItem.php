@@ -14,18 +14,22 @@ class TypographyItem
 
     protected bool $isGoogleFont = true;
 
+    protected string|int|null $defaultFontWeight = null;
+
     public function __construct(
         string $name,
         string $label,
         string|float $default,
         array $fontWeights = [],
-        bool $isGoogleFont = true
+        bool $isGoogleFont = true,
+        string|int|null $defaultFontWeight = null
     ) {
         $this->name = $name;
         $this->label = $label;
         $this->default = $default;
         $this->fontWeights = $fontWeights;
         $this->isGoogleFont = $isGoogleFont;
+        $this->defaultFontWeight = $defaultFontWeight;
     }
 
     public function getName(): string
@@ -51,5 +55,10 @@ class TypographyItem
     public function isGoogleFont(): bool
     {
         return $this->isGoogleFont;
+    }
+
+    public function getDefaultFontWeight(): string|int|null
+    {
+        return $this->defaultFontWeight;
     }
 }

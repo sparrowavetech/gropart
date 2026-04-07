@@ -109,4 +109,23 @@ return [
         'images_mimes' => 'Resimler JPG, JPEG veya PNG formatında olmalıdır.',
         'images_file_max' => 'Her resim :max KB\'ı aşamaz.',
     ],
+    'badge_type' => 'İnceleme Rozeti',
+    'badge_type_help' => 'Bu inceleme için görüntülenecek bir rozet seçin. "Otomatik tespit", siparişi olan müşteriler için "X önce satın alındı" gösterir.',
+    'badge_types' => [
+        'auto' => 'Otomatik tespit',
+        'none' => 'Rozet yok',
+        'purchased' => '✅ Satın Alındı',
+        'community_review' => '💬 Topluluk İncelemesi',
+        'expert_reviewer' => '🏅 Uzman İncelemeci',
+        'top_contributor' => '⭐ En İyi Katkıda Bulunan',
+        'verified_buyer' => '✅ Doğrulanmış Alıcı',
+    ],
+    'placeholders' => [
+        'customer_name' => 'e.g: John Doe',
+        'customer_email' => 'e.g: example@domain.com',
+        'comment' => 'İnceleme yorumunu buraya yazın...',
+    ],
+    'helpers' => [
+        'star' => '1 (en düşük) ile 5 (en yüksek) arasında puan.',
+    ],
 ];

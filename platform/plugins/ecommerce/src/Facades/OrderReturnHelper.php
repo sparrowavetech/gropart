@@ -6,6 +6,8 @@ use Botble\Ecommerce\Supports\OrderReturnHelper as BaseOrderReturnHelper;
 use Illuminate\Support\Facades\Facade;
 
 /**
+ * @method static array getReturnableItems(\Botble\Ecommerce\Models\Order $order)
+ * @method static array getReturnReasons()
  * @method static array returnOrder(\Botble\Ecommerce\Models\Order $order, array $data)
  * @method static array cancelReturnOrder(\Botble\Ecommerce\Models\OrderReturn $orderReturn, string|null $reason = null)
  * @method static array updateReturnOrder(\Botble\Ecommerce\Models\OrderReturn $orderReturn, array $data)

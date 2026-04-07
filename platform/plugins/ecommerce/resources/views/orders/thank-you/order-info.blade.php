@@ -29,7 +29,7 @@
 
                 @if (!empty($orderProduct->product_options) && is_array($orderProduct->product_options))
                     <div class="product-options">
-                        {!! render_product_options_html($orderProduct->product_options, $orderProduct->price) !!}
+                        {!! render_product_options_html($orderProduct->product_options, $orderProduct->product?->front_sale_price ?? $orderProduct->price) !!}
                     </div>
                 @endif
 
@@ -47,6 +47,8 @@
                         'referenceProduct' => $bundleReferenceProduct,
                     ])
                 @endif
+
+                {!! apply_filters('ecommerce_thank_you_order_product_item', null, $orderProduct, $order) !!}
             </div>
             <div class="product-price-col">
                 @php($isOrderProductFree = $orderProduct->price == 0)

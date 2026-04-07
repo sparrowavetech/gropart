@@ -95,6 +95,8 @@ return [
     'coupon_code' => '優惠券代碼:「:code」',
     'shipping_fee' => '運費',
     'tax' => '稅金',
+    'shipping_tax' => '運費稅',
+
     'refunded_amount' => '已退款金額',
     'amount_received' => '實際收到金額',
     'download_invoice' => '下載發票',

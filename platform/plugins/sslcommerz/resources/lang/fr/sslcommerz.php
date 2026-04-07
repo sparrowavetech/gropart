@@ -3,7 +3,9 @@
 return [
     'payment_description' => 'Le client peut acheter des produits et payer directement par Visa, carte de crédit via :name',
     'store_id' => 'ID du magasin',
+    'store_id_helper' => 'Trouvez ceci dans votre panneau marchand SSLCommerz.',
     'store_password' => 'Mot de passe du magasin (Clé API/Secrète)',
+    'store_password_helper' => 'Trouvez ceci dans votre panneau marchand SSLCommerz. Gardez cette clé confidentielle.',
     'after_registration' => 'Après l\'inscription sur :name, vous aurez l\'ID du magasin et le mot de passe du magasin (Clé API/Secrète)',
     'enter_credentials' => 'Entrez l\'ID du magasin et le mot de passe du magasin (Clé API/Secrète) dans la case à droite',
     'payment_failed' => 'Paiement échoué !',

@@ -95,6 +95,8 @@ return [
     'coupon_code' => 'Kupon kodu: ":code"',
     'shipping_fee' => 'Kargo ücreti',
     'tax' => 'Vergi',
+    'shipping_tax' => 'Kargo vergisi',
+
     'refunded_amount' => 'Geri ödenen tutar',
     'amount_received' => 'Gerçekten alınan tutar',
     'download_invoice' => 'Faturayı indir',

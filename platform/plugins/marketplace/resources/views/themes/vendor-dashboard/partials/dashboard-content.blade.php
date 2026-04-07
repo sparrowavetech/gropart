@@ -51,13 +51,13 @@
                         @if (MarketplaceHelper::isVendorDigitalProductsEnabled() && ! EcommerceHelper::isDisabledPhysicalProduct())
                             <div class="dropdown w-100">
                                 <button
-                                    class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center gap-1 dropdown-toggle"
+                                    class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center gap-1 text-nowrap dropdown-toggle"
                                     data-bs-toggle="dropdown"
                                     type="button"
                                 >
                                     <x-core::icon name="ti ti-plus" />
-                                    <span class="d-none d-sm-inline">{{ trans('plugins/marketplace::marketplace.add_product') }}</span>
-                                    <span class="d-inline d-sm-none">{{ trans('plugins/marketplace::marketplace.product') }}</span>
+                                    <span class="d-none d-sm-inline text-truncate">{{ trans('plugins/marketplace::marketplace.add_product') }}</span>
+                                    <span class="d-inline d-sm-none text-truncate">{{ trans('plugins/marketplace::marketplace.product') }}</span>
                                 </button>
                                 <div class="dropdown-menu">
                                     <a class="dropdown-item" href="{{ route('marketplace.vendor.products.create') }}">
@@ -71,32 +71,32 @@
                                 </div>
                             </div>
                         @else
-                            <a href="{{ route('marketplace.vendor.products.create') }}" class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center gap-1">
+                            <a href="{{ route('marketplace.vendor.products.create') }}" class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center gap-1 text-nowrap">
                                 <x-core::icon name="ti ti-plus" />
-                                <span class="d-none d-sm-inline">{{ trans('plugins/marketplace::marketplace.add_product') }}</span>
-                                <span class="d-inline d-sm-none">{{ trans('plugins/marketplace::marketplace.product') }}</span>
+                                <span class="d-none d-sm-inline text-truncate">{{ trans('plugins/marketplace::marketplace.add_product') }}</span>
+                                <span class="d-inline d-sm-none text-truncate">{{ trans('plugins/marketplace::marketplace.product') }}</span>
                             </a>
                         @endif
                     </div>
                     <div class="col-6">
-                        <a href="{{ route('marketplace.vendor.discounts.create') }}" class="btn btn-outline-info w-100 d-flex align-items-center justify-content-center gap-1">
+                        <a href="{{ route('marketplace.vendor.discounts.create') }}" class="btn btn-outline-info w-100 d-flex align-items-center justify-content-center gap-1 text-nowrap">
                             <x-core::icon name="ti ti-discount-2" />
-                            <span class="d-none d-sm-inline">{{ trans('plugins/marketplace::marketplace.create_discount') }}</span>
-                            <span class="d-inline d-sm-none">{{ trans('plugins/ecommerce::discount.name') }}</span>
+                            <span class="d-none d-sm-inline text-truncate">{{ trans('plugins/marketplace::marketplace.create_discount') }}</span>
+                            <span class="d-inline d-sm-none text-truncate">{{ trans('plugins/ecommerce::discount.name') }}</span>
                         </a>
                     </div>
                     <div class="col-6 mt-2">
-                        <a href="{{ route('marketplace.vendor.settings') }}" class="btn btn-outline-warning w-100 d-flex align-items-center justify-content-center gap-1">
+                        <a href="{{ route('marketplace.vendor.settings') }}" class="btn btn-outline-warning w-100 d-flex align-items-center justify-content-center gap-1 text-nowrap">
                             <x-core::icon name="ti ti-settings" />
-                            <span class="d-none d-sm-inline">{{ trans('plugins/marketplace::marketplace.store_settings') }}</span>
-                            <span class="d-inline d-sm-none">{{ trans('plugins/marketplace::marketplace.settings.title') }}</span>
+                            <span class="d-none d-sm-inline text-truncate">{{ trans('plugins/marketplace::marketplace.store_settings') }}</span>
+                            <span class="d-inline d-sm-none text-truncate">{{ trans('plugins/marketplace::marketplace.settings.title') }}</span>
                         </a>
                     </div>
                     <div class="col-6 mt-2">
-                        <a href="{{ route('marketplace.vendor.withdrawals.create') }}" class="btn btn-outline-success w-100 d-flex align-items-center justify-content-center gap-1">
+                        <a href="{{ route('marketplace.vendor.withdrawals.create') }}" class="btn btn-outline-success w-100 d-flex align-items-center justify-content-center gap-1 text-nowrap">
                             <x-core::icon name="ti ti-cash-banknote" />
-                            <span class="d-none d-sm-inline">{{ trans('plugins/marketplace::marketplace.withdrawals') }}</span>
-                            <span class="d-inline d-sm-none">{{ trans('plugins/marketplace::marketplace.withdraw') }}</span>
+                            <span class="d-none d-sm-inline text-truncate">{{ trans('plugins/marketplace::marketplace.withdrawals') }}</span>
+                            <span class="d-inline d-sm-none text-truncate">{{ trans('plugins/marketplace::marketplace.withdraw') }}</span>
                         </a>
                     </div>
                 </div>
@@ -169,7 +169,7 @@
                 </symbol>
             </svg>
             <div
-                class="alert alert-success"
+                class="alert alert-success d-block"
                 role="alert"
             >
                 <h4 class="alert-heading">
@@ -222,7 +222,7 @@
                 </symbol>
             </svg>
             <div
-                class="alert alert-info"
+                class="alert alert-info d-block"
                 role="alert"
             >
                 <h4 class="alert-heading">
@@ -556,8 +556,10 @@
                 <x-core::card.body>
                     <div class="inventory-status">
                         @php
-                            $lowStockProducts = collect($data['products'])->filter(function($product) {
-                                return $product->with_storehouse_management && $product->quantity > 0 && $product->quantity <= 5;
+                            $lowStockThreshold = \Botble\Marketplace\Facades\MarketplaceHelper::lowStockThreshold();
+
+                            $lowStockProducts = collect($data['products'])->filter(function($product) use ($lowStockThreshold) {
+                                return $product->with_storehouse_management && $product->quantity > 0 && $product->quantity <= $lowStockThreshold;
                             })->count();
 
                             $outOfStockProducts = collect($data['products'])->filter(function($product) {
@@ -595,7 +597,7 @@
                                 <span class="text-muted">{{ trans('plugins/marketplace::marketplace.low_stock') }}</span>
                             </div>
                             <div>
-                                <a href="{{ route('marketplace.vendor.products.index', ['filter_table_id' => 'table-marketplace-vendor-products', 'class' => 'Botble\Ecommerce\Models\Product', 'filter_columns' => ['quantity' => '1-5']]) }}" class="btn btn-sm btn-outline-warning">
+                                <a href="{{ route('marketplace.vendor.products.index', ['filter_table_id' => 'table-marketplace-vendor-products', 'class' => 'Botble\Ecommerce\Models\Product', 'filter_columns' => ['quantity' => '1-' . $lowStockThreshold]]) }}" class="btn btn-sm btn-outline-warning">
                                     {{ trans('core/base::tables.view') }}
                                 </a>
                             </div>

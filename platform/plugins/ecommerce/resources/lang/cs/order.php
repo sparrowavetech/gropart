@@ -95,6 +95,8 @@ return [
     'coupon_code' => 'Slevový kód: ":code"',
     'shipping_fee' => 'Poplatek za dopravu',
     'tax' => 'Daň',
+    'shipping_tax' => 'Daň z přepravy',
+
     'refunded_amount' => 'Refundovaná částka',
     'amount_received' => 'Skutečně přijatá částka',
     'download_invoice' => 'Stáhnout fakturu',

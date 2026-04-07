@@ -208,6 +208,11 @@ return [
     ],
     'term_and_privacy_policy_url' => 'URL til vilkår og privatlivspolitik',
     'site_title_separator' => 'SEO titelseparator',
+    'site_title_helper' => 'Dit brand eller firmanavn. Vises i browserfanen og søgeresultater (f.eks. "My Company").',
+    'show_site_name_helper' => 'Tilføjer sitenavnet til hvert sidetitel ved hjælp af den valgte separator. Eksempel: "Page Title - My Company".',
+    'site_title_separator_helper' => 'Tegnet der bruges mellem sidetitlen og sitenavnet. Eksempel med streg: "Page Title - My Company". Eksempel med lodret streg: "Page Title | My Company".',
+    'seo_title_helper' => 'Hjemmesidens titel vist i søgemaskineresultater. Hold den under 60 tegn for bedste visning. Lad feltet være tomt for at bruge sidens titel.',
+    'seo_description_helper' => 'Hjemmesidens beskrivelse vist i søgemaskineresultater. Hold den mellem 120 og 160 tegn for bedste visning.',
     'no_meta_keywords' => 'Meta keywords blev fjernet af Google, du behøver ikke at tilføje meta keywords til dit websted. Læs mere: :link',
     'validation' => [
         'gtm_container_id_format' => 'GTM Container ID skal være i format GTM-XXXXXX (f.eks. GTM-N7MK3KH2)',
@@ -389,6 +394,9 @@ return [
     ],
 
     'typography_primary' => 'Primær skrifttype',
+    'all_languages' => 'Alle sprog',
+    'shared_field_notice' => 'Dette felt deles på tværs af alle sprog. Administrer det fra standardsproget.',
+    'shared_section_notice' => 'Alle indstillinger i denne sektion deles på tværs af alle sprog. Skift til standardsproget for at foretage ændringer.',
     'admin_appearance' => [
         'show_admin_bar' => 'Vis admin-bjælke for indloggede administratorer, selv på forsiden',
         'show_admin_bar_helper' => 'Vis en hurtig adgang admin-værktøjslinje øverst på hjemmesiden, når du er logget ind som administrator',

@@ -109,4 +109,23 @@ return [
         'images_mimes' => 'A képeknek JPG, JPEG vagy PNG formátumban kell lenniük.',
         'images_file_max' => 'Minden kép legfeljebb :max KB lehet.',
     ],
+    'badge_type' => 'Értékelés jelvény',
+    'badge_type_help' => 'Válasszon jelvényt az értékelésen való megjelenítéshez. Az „Automatikus felismerés" megjeleníti a „X-szel ezelőtt vásárolta" feliratot a rendelésekkel rendelkező vevőknél.',
+    'badge_types' => [
+        'auto' => 'Automatikus felismerés',
+        'none' => 'Nincs jelvény',
+        'purchased' => '✅ Megvásárolt',
+        'community_review' => '💬 Közösségi értékelés',
+        'expert_reviewer' => '🏅 Szakértő értékelő',
+        'top_contributor' => '⭐ Legjobb hozzájáruló',
+        'verified_buyer' => '✅ Hitelesített vevő',
+    ],
+    'placeholders' => [
+        'customer_name' => 'e.g: John Doe',
+        'customer_email' => 'e.g: example@domain.com',
+        'comment' => 'Írja ide az értékelés megjegyzését...',
+    ],
+    'helpers' => [
+        'star' => 'Értékelés 1-től (legalacsonyabb) 5-ig (legmagasabb).',
+    ],
 ];

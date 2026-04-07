@@ -95,6 +95,8 @@ return [
     'coupon_code' => 'Код купона: ":code"',
     'shipping_fee' => 'Стоимость доставки',
     'tax' => 'Налог',
+    'shipping_tax' => 'Налог на доставку',
+
     'refunded_amount' => 'Возвращенная сумма',
     'amount_received' => 'Фактически полученная сумма',
     'download_invoice' => 'Скачать счет',

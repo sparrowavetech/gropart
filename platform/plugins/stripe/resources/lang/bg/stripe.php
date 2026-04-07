@@ -2,6 +2,9 @@
 
 return [
     'webhook_secret' => 'Webhook тайна',
+    'webhook_secret_helper' => 'Намерете го в Stripe Dashboard под Developers > Webhooks > Signing secret.',
+    'public_key_helper' => 'Намерете го в Stripe Dashboard под Developers > API keys.',
+    'secret_key_helper' => 'Намерете го в Stripe Dashboard под Developers > API keys. Пазете този ключ поверителен.',
     'webhook_setup_guide' => [
         'title' => 'Ръководство за настройка на Stripe Webhook',
         'description' => 'Следвайте тези стъпки, за да настроите Stripe webhook',

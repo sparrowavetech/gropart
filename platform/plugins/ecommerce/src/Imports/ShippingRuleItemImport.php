@@ -127,6 +127,7 @@ class ShippingRuleItemImport implements
         $shippingRuleItem = null;
         $isCreateOrUpdate = false;
         $data = array_merge($condition, [
+            'name' => $row['name'] ?? null,
             'adjustment_price' => $row['adjustment_price'],
             'is_enabled' => $row['is_enabled'],
         ]);
@@ -339,6 +340,7 @@ class ShippingRuleItemImport implements
         }
 
         $this->setValues($row, [
+            ['key' => 'name', 'type' => 'string'],
             ['key' => 'shipping_rule', 'type' => 'string'],
             ['key' => 'country', 'type' => 'string'],
             ['key' => 'state', 'type' => 'string'],

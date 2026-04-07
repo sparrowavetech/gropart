@@ -23,6 +23,7 @@ class SeoHelper implements SeoHelperContract
         protected SeoTwitterContract $seoTwitter
     ) {
         $this->openGraph()->addProperty('type', 'website');
+        $this->twitter()->setType('summary');
     }
 
     public function setSeoMeta(SeoMetaContract $seoMeta): static

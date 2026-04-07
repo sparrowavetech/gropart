@@ -11,7 +11,9 @@
             aria-controls="navbar-menu"
             aria-expanded="false"
             aria-label="Toggle navigation"
-            data-url="{{ route('users.update-preferences', Auth::user()) }}"
+            @if(Auth::check())
+                data-url="{{ route('users.update-preferences', Auth::user()->getKey()) }}"
+            @endif
             data-method="PATCH"
         >
             <x-core::icon name="ti ti-menu-2" />

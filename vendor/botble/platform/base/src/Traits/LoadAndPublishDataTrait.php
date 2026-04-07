@@ -15,6 +15,8 @@ trait LoadAndPublishDataTrait
 {
     protected ?string $namespace = null;
 
+    protected ?string $modulePath = null;
+
     protected function setNamespace(string $namespace): static
     {
         $this->namespace = ltrim(rtrim($namespace, '/'), '/');
@@ -26,17 +28,19 @@ trait LoadAndPublishDataTrait
 
     protected function getPath(?string $path = null): string
     {
-        $reflection = new ReflectionClass($this);
+        if ($this->modulePath === null) {
+            $reflection = new ReflectionClass($this);
 
-        $modulePath = str_replace('/src/Providers', '', File::dirname($reflection->getFilename()));
+            $modulePath = str_replace('/src/Providers', '', File::dirname($reflection->getFilename()));
 
-        if (! Str::contains($modulePath, base_path('platform/plugins'))) {
-            $modulePath = base_path('platform/' . $this->getDashedNamespace());
+            if (! Str::contains($modulePath, base_path('platform/plugins'))) {
+                $modulePath = base_path('platform/' . $this->getDashedNamespace());
+            }
+
+            $this->modulePath = str_replace('/', DIRECTORY_SEPARATOR, $modulePath);
         }
 
-        $modulePath = str_replace('/', DIRECTORY_SEPARATOR, $modulePath);
-
-        return $modulePath . ($path ? DIRECTORY_SEPARATOR . ltrim($path, DIRECTORY_SEPARATOR) : '');
+        return $this->modulePath . ($path ? DIRECTORY_SEPARATOR . ltrim($path, DIRECTORY_SEPARATOR) : '');
     }
 
     protected function loadAndPublishConfigurations(array|string $fileNames): static
@@ -116,10 +120,13 @@ trait LoadAndPublishDataTrait
     public function loadAndPublishTranslations(): static
     {
         $this->loadTranslationsFrom($this->getTranslationsPath(), $this->getDashedNamespace());
-        $this->publishes(
-            [$this->getTranslationsPath() => lang_path('vendor/' . $this->getDashedNamespace())],
-            'cms-lang'
-        );
+
+        if ($this->app->runningInConsole()) {
+            $this->publishes(
+                [$this->getTranslationsPath() => lang_path('vendor/' . $this->getDashedNamespace())],
+                'cms-lang'
+            );
+        }
 
         return $this;
     }
@@ -143,13 +150,15 @@ trait LoadAndPublishDataTrait
 
     protected function publishAssets(?string $path = null): static
     {
-        if (empty($path)) {
-            $path = 'vendor/core/' . $this->getDashedNamespace();
+        if ($this->app->runningInConsole()) {
+            if (empty($path)) {
+                $path = 'vendor/core/' . $this->getDashedNamespace();
+            }
+
+            $path = str_replace('/', DIRECTORY_SEPARATOR, $path);
+
+            $this->publishes([$this->getAssetsPath() => public_path($path)], 'cms-public');
         }
-
-        $path = str_replace('/', DIRECTORY_SEPARATOR, $path);
-
-        $this->publishes([$this->getAssetsPath() => public_path($path)], 'cms-public');
 
         return $this;
     }

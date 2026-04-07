@@ -121,6 +121,7 @@ return [
     'apply' => '適用',
     'available' => '利用可能',
     'back_to_return_requests' => '返品リクエストに戻る',
+    'backorder_warning' => '警告：この商品はバックオーダー中で、配送に時間がかかる場合があります。',
     'choose_reason' => '理由を選択',
     'clear' => 'クリア',
     'clear_all_filters' => 'すべてのフィルターをクリア',

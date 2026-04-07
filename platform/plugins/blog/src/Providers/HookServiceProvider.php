@@ -46,7 +46,8 @@ class HookServiceProvider extends ServiceProvider
                     [
                         'import' => 'post-translations.import',
                         'export' => 'post-translations.export',
-                    ]
+                    ],
+                    1000
                 );
             }
         });
@@ -193,6 +194,7 @@ class HookServiceProvider extends ServiceProvider
                 'id' => 'opt-text-subsection-blog',
                 'subsection' => true,
                 'icon' => 'ti ti-edit',
+                'shared' => true,
                 'fields' => [
                     [
                         'id' => 'blog_page_id',

@@ -95,6 +95,8 @@ return [
     'coupon_code' => 'Gutscheincode: ":code"',
     'shipping_fee' => 'Versandkosten',
     'tax' => 'Steuer',
+    'shipping_tax' => 'Steuer auf Versand',
+
     'refunded_amount' => 'Erstatteter Betrag',
     'amount_received' => 'Der tatsächlich erhaltene Betrag',
     'download_invoice' => 'Rechnung herunterladen',

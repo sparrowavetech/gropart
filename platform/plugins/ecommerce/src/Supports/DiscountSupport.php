@@ -21,10 +21,6 @@ class DiscountSupport
 
     protected array $productCollectionsCache = [];
 
-    protected bool $productCategoriesLoaded = false;
-
-    protected bool $productCollectionsLoaded = false;
-
     public function __construct()
     {
         if (! is_in_admin() && auth('customer')->check()) {
@@ -177,42 +173,46 @@ class DiscountSupport
         }
     }
 
-    protected function ensureProductRelationsLoaded(string $type = 'all'): void
+    protected function ensureProductRelationsLoaded(string $type, array $productIds): void
     {
-        if (in_array($type, ['categories', 'all']) && ! $this->productCategoriesLoaded) {
+        $missingIds = array_filter($productIds, fn ($id) => ! isset($this->productCategoriesCache[$id]));
+
+        if (in_array($type, ['categories', 'all']) && $missingIds) {
             $categories = DB::table('ec_product_category_product')
                 ->select(['product_id', 'category_id'])
+                ->whereIn('product_id', $missingIds)
                 ->get();
+
+            foreach ($missingIds as $id) {
+                $this->productCategoriesCache[$id] ??= [];
+            }
 
             foreach ($categories as $category) {
-                if (! isset($this->productCategoriesCache[$category->product_id])) {
-                    $this->productCategoriesCache[$category->product_id] = [];
-                }
                 $this->productCategoriesCache[$category->product_id][] = $category->category_id;
             }
-
-            $this->productCategoriesLoaded = true;
         }
 
-        if (in_array($type, ['collections', 'all']) && ! $this->productCollectionsLoaded) {
+        $missingCollectionIds = array_filter($productIds, fn ($id) => ! isset($this->productCollectionsCache[$id]));
+
+        if (in_array($type, ['collections', 'all']) && $missingCollectionIds) {
             $collections = DB::table('ec_product_collection_products')
                 ->select(['product_id', 'product_collection_id'])
+                ->whereIn('product_id', $missingCollectionIds)
                 ->get();
 
-            foreach ($collections as $collection) {
-                if (! isset($this->productCollectionsCache[$collection->product_id])) {
-                    $this->productCollectionsCache[$collection->product_id] = [];
-                }
-                $this->productCollectionsCache[$collection->product_id][] = $collection->product_collection_id;
+            foreach ($missingCollectionIds as $id) {
+                $this->productCollectionsCache[$id] ??= [];
             }
 
-            $this->productCollectionsLoaded = true;
+            foreach ($collections as $collection) {
+                $this->productCollectionsCache[$collection->product_id][] = $collection->product_collection_id;
+            }
         }
     }
 
     protected function getProductCategoryIds(array $productIds): array
     {
-        $this->ensureProductRelationsLoaded('categories');
+        $this->ensureProductRelationsLoaded('categories', $productIds);
 
         $categoryIds = [];
         foreach ($productIds as $productId) {
@@ -226,7 +226,7 @@ class DiscountSupport
 
     protected function getProductCollectionIds(array $productIds): array
     {
-        $this->ensureProductRelationsLoaded('collections');
+        $this->ensureProductRelationsLoaded('collections', $productIds);
 
         $collectionIds = [];
         foreach ($productIds as $productId) {

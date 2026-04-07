@@ -1,7 +1,7 @@
 @if(! empty($productOptions['optionCartValue']))
     <div class="product-cart-options mt-1">
         @if ($displayBasePrice)
-            <div class="small d-flex justify-content-between">
+            <div class="small d-flex gap-2">
                 <span>{{ trans('plugins/ecommerce::product-option.price') }}:</span>
                 <strong>{{ $product->original_product->price()->displayAsText() }}</strong>
             </div>
@@ -13,7 +13,7 @@
                 $totalOptionValue = count($optionValue);
             @endphp
             @continue(!$totalOptionValue)
-            <div class="small d-flex justify-content-between">
+            <div class="small d-flex gap-2">
                 <span>
                     {{ $productOptions['optionInfo'][$key] }}:
                     @foreach ($optionValue as $value)

@@ -290,6 +290,7 @@ class ProductForm extends BaseProductForm
                             ]
                         ),
                         'before_wrapper' => '<div id="main-manage-product-type">',
+                        'after_wrapper' => $productAttributeSets->isEmpty() ? '</div>' : null,
                         'priority' => 2,
                     ],
                     ...($productAttributeSets->isNotEmpty() ? [

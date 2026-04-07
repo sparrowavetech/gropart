@@ -2,6 +2,9 @@
 
 return [
     'webhook_secret' => 'Webhook saladus',
+    'webhook_secret_helper' => 'Leiate selle oma Stripe Dashboard\'is Developers > Webhooks > Signing secret alt.',
+    'public_key_helper' => 'Leiate selle oma Stripe Dashboard\'is Developers > API keys alt.',
+    'secret_key_helper' => 'Leiate selle oma Stripe Dashboard\'is Developers > API keys alt. Hoidke see võti konfidentsiaalsena.',
     'webhook_setup_guide' => [
         'title' => 'Stripe Webhook seadistamise juhend',
         'description' => 'Järgige neid samme Stripe webhook\'i seadistamiseks',

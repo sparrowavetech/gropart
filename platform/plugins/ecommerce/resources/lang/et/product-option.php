@@ -27,4 +27,6 @@ return [
     'option_value_name_attribute' => 'Valiku :key väärtused',
     'please_choose_option_type' => 'Palun valige valiku tüüp!',
     'no_global_options' => 'Globaalseid valikuid pole veel saadaval. Palun lisage tootele valikud esmalt vaikekeeles.',
+    'price_per_product' => 'Hind toote kohta',
+    'price_per_product_helper' => 'Kui lubatud, rakendatakse valiku hind ühe korra toote kohta, mitte ei korrutata kogusega.',
 ];

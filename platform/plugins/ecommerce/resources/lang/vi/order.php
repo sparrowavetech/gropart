@@ -99,6 +99,8 @@ return [
     'coupon_code' => 'Mã giảm giá: ":code"',
     'shipping_fee' => 'Phí vận chuyển',
     'tax' => 'Thuế',
+    'shipping_tax' => 'Thuế vận chuyển',
+
     'refunded_amount' => 'Số tiền đã hoàn trả',
     'amount_received' => 'Số tiền thực tế nhận được',
     'download_invoice' => 'Tải xuống hóa đơn',

@@ -20,6 +20,7 @@ use Botble\Base\Forms\Fields\TextField;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Base\Rules\OnOffRule;
+use Botble\Base\Supports\EmailHandler as EmailHandlerSupport;
 use Botble\Base\Supports\TwigCompiler;
 use Botble\Dashboard\Events\RenderingDashboardWidgets;
 use Botble\Dashboard\Supports\DashboardWidgetInstance;
@@ -1205,6 +1206,8 @@ class HookServiceProvider extends ServiceProvider
                         ];
                     }
 
+                    $locale = $invoice->order?->getOrderMetadata('customer_locale') ?: EmailHandlerSupport::getDefaultEmailLocale();
+
                     EmailHandler::setModule(ECOMMERCE_MODULE_SCREEN_NAME)
                         ->setVariableValues([
                             'customer_name' => $invoice->customer_name,
@@ -1214,7 +1217,7 @@ class HookServiceProvider extends ServiceProvider
                                 $invoice->getKey()
                             ) : null,
                         ])
-                        ->sendUsingTemplate('invoice-payment-created', $invoice->customer_email, [
+                        ->sendUsingTemplateWithLocale('invoice-payment-created', $invoice->customer_email, $locale, [
                             'attachments' => $attachments,
                         ]);
                 } catch (Exception $exception) {
@@ -1467,6 +1470,7 @@ class HookServiceProvider extends ServiceProvider
                         'id' => 'number_of_products_per_page',
                         'type' => 'number',
                         'label' => trans('plugins/ecommerce::ecommerce.theme_options.number_products_per_page'),
+                        'shared' => true,
                         'attributes' => [
                             'name' => 'number_of_products_per_page',
                             'value' => 12,
@@ -1479,6 +1483,7 @@ class HookServiceProvider extends ServiceProvider
                         'id' => 'number_of_cross_sale_product',
                         'type' => 'number',
                         'label' => trans('plugins/ecommerce::ecommerce.theme_options.number_of_cross_sale_product'),
+                        'shared' => true,
                         'attributes' => [
                             'name' => 'number_of_cross_sale_product',
                             'value' => 4,
@@ -1491,6 +1496,7 @@ class HookServiceProvider extends ServiceProvider
                         'id' => 'number_of_related_product',
                         'type' => 'number',
                         'label' => trans('plugins/ecommerce::ecommerce.theme_options.number_of_related_product'),
+                        'shared' => true,
                         'attributes' => [
                             'name' => 'number_of_related_product',
                             'value' => 4,
@@ -1504,6 +1510,7 @@ class HookServiceProvider extends ServiceProvider
                         'id' => 'max_filter_price',
                         'type' => 'number',
                         'label' => trans('plugins/ecommerce::ecommerce.theme_options.max_price_filter'),
+                        'shared' => true,
                         'attributes' => [
                             'name' => 'max_filter_price',
                             'value' => EcommerceHelper::getProductMaxPrice(),
@@ -1516,6 +1523,7 @@ class HookServiceProvider extends ServiceProvider
                         'id' => 'logo_in_the_checkout_page',
                         'type' => 'mediaImage',
                         'label' => trans('plugins/ecommerce::ecommerce.theme_options.logo_in_the_checkout_page'),
+                        'shared' => true,
                         'attributes' => [
                             'name' => 'logo_in_the_checkout_page',
                             'value' => null,
@@ -1528,6 +1536,7 @@ class HookServiceProvider extends ServiceProvider
                         'id' => 'checkout_primary_color',
                         'type' => 'customColor',
                         'label' => trans('plugins/ecommerce::ecommerce.theme_options.checkout_primary_color'),
+                        'shared' => true,
                         'attributes' => [
                             'name' => 'checkout_primary_color',
                             'value' => '#197bbd',
@@ -1537,6 +1546,7 @@ class HookServiceProvider extends ServiceProvider
                         'id' => 'login_background',
                         'type' => 'mediaImage',
                         'label' => trans('plugins/ecommerce::ecommerce.theme_options.login_background_image'),
+                        'shared' => true,
                         'attributes' => [
                             'name' => 'login_background',
                         ],
@@ -1545,6 +1555,7 @@ class HookServiceProvider extends ServiceProvider
                         'id' => 'register_background',
                         'type' => 'mediaImage',
                         'label' => trans('plugins/ecommerce::ecommerce.theme_options.register_background_image'),
+                        'shared' => true,
                         'attributes' => [
                             'name' => 'register_background',
                         ],
@@ -1567,6 +1578,7 @@ class HookServiceProvider extends ServiceProvider
                         'id' => 'merchant_return_days',
                         'type' => 'number',
                         'label' => trans('plugins/ecommerce::ecommerce.theme_options.merchant_return_days'),
+                        'shared' => true,
                         'attributes' => [
                             'name' => 'merchant_return_days',
                             'value' => 30,
@@ -1580,6 +1592,7 @@ class HookServiceProvider extends ServiceProvider
                         'id' => 'merchant_return_applicable_country',
                         'type' => 'text',
                         'label' => trans('plugins/ecommerce::ecommerce.theme_options.merchant_return_applicable_country'),
+                        'shared' => true,
                         'attributes' => [
                             'name' => 'merchant_return_applicable_country',
                             'value' => null,

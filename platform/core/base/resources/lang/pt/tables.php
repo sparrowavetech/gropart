@@ -65,4 +65,5 @@ return [
     'please_select_record' => 'Selecione pelo menos um registro para realizar esta ação!',
     'checkbox' => 'Caixa de seleção',
     'toggle_columns' => 'Alternar colunas',
+    'created_by' => 'Criado por',
 ];

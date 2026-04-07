@@ -121,6 +121,7 @@ return [
     'apply' => 'Primijeni',
     'available' => 'Dostupno',
     'back_to_return_requests' => 'Natrag na zahtjeve za povrat',
+    'backorder_warning' => 'Upozorenje: Ovaj proizvod je na povratnoj narudžbi i isporuka može potrajati duže.',
     'choose_reason' => 'Odaberite razlog',
     'clear' => 'Očisti',
     'clear_all_filters' => 'Očisti sve filtre',

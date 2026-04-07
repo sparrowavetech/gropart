@@ -1101,7 +1101,13 @@ class LanguageManager
 
         $showRelated = setting('language_show_default_item_if_current_version_not_existed', true);
 
-        $url = $showRelated ? $this->getLocalizedURL($localeCode) : url($localeCode);
+        $url = $showRelated ? $this->getLocalizedURL($localeCode, null, [], false) : url($localeCode);
+
+        if ($this->hideDefaultLocaleInURL()
+            && $localeCode == $this->getDefaultLocale()
+            && rtrim($url, '/') === rtrim(url(''), '/')) {
+            $url = url($localeCode);
+        }
 
         return apply_filters('language_switcher_get_url', $url, $localeCode, $languageCode, $this);
     }
@@ -1111,7 +1117,7 @@ class LanguageManager
      */
     public function getSerializedTranslatedRoutes(): string
     {
-        return base64_encode(serialize($this->translatedRoutes));
+        return base64_encode(json_encode($this->translatedRoutes));
     }
 
     /**
@@ -1124,7 +1130,7 @@ class LanguageManager
             return;
         }
 
-        $this->translatedRoutes = unserialize(base64_decode($serializedRoutes));
+        $this->translatedRoutes = json_decode(base64_decode($serializedRoutes), true) ?: [];
     }
 
     public function setRoutesCachePath(): string

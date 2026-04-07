@@ -177,4 +177,6 @@ return [
     'subject_placeholder' => 'საგანი',
     'your_message' => 'თქვენი შეტყობინება',
     'agree_terms_privacy' => 'ვეთანხმები პირობებს და კონფიდენციალურობის პოლიტიკას',
+    'agree_terms_privacy_link' => 'ვეთანხმები :link',
+    'terms_and_privacy_policy' => 'პირობებს და კონფიდენციალურობის პოლიტიკას',
 ];

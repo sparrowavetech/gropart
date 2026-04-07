@@ -132,7 +132,7 @@ class CartController extends BaseApiController
                 ->toApiResponse();
         }
 
-        $maxQuantity = $product->quantity;
+        $maxQuantity = $product->max_cart_quantity;
 
         if (! $product->canAddToCart($request->input('qty', 1))) {
             return $response
@@ -260,6 +260,8 @@ class CartController extends BaseApiController
      */
     public function update(UpdateCartRequest $request, ?string $id = null)
     {
+        $response = $this->httpResponse();
+
         $newQty = $request->input('qty', 1);
 
         $productId = $request->input('product_id');
@@ -268,6 +270,8 @@ class CartController extends BaseApiController
          * @var Product $product
          */
         $product = Product::query()->find($productId);
+
+        $originalProduct = $product->original_product;
 
         $rowId = null;
 
@@ -282,8 +286,6 @@ class CartController extends BaseApiController
         }
 
         if (! $rowId) {
-            $originalProduct = $product->original_product;
-
             $cartItems = OrderHelper::handleAddCart($product, $request);
 
             $cartItem = Arr::first(array_filter($cartItems, fn ($item) => $item['id'] == $product->id));
@@ -320,7 +322,10 @@ class CartController extends BaseApiController
         if (! $cartItem) {
             $this->saveCart($identifier);
 
-            return response()->json(['error' => trans('plugins/ecommerce::products.cart.item_not_found')], 404);
+            return $response
+                ->setError()
+                ->setMessage(trans('plugins/ecommerce::products.cart.item_not_found'))
+                ->toApiResponse();
         }
 
         /**
@@ -329,6 +334,17 @@ class CartController extends BaseApiController
         $product = Product::query()->find($cartItem->id);
 
         if ($product) {
+            $maxQuantity = $product->max_cart_quantity;
+
+            if ($maxQuantity && $newQty > $maxQuantity) {
+                $this->saveCart($identifier);
+
+                return $response
+                    ->setError()
+                    ->setMessage(trans('plugins/ecommerce::products.cart.max_quantity', ['max' => $maxQuantity]))
+                    ->toApiResponse();
+            }
+
             $originalQuantity = $product->quantity;
             $product->quantity = (int) $product->quantity - (int) $newQty + 1;
 
@@ -339,7 +355,15 @@ class CartController extends BaseApiController
             if ($product->isOutOfStock()) {
                 $this->saveCart($identifier);
 
-                return response()->json(['error' => trans('plugins/ecommerce::products.cart.product_out_of_stock')], 400);
+                return $response
+                    ->setError()
+                    ->setMessage(
+                        trans(
+                            'plugins/ecommerce::products.cart.out_of_stock',
+                            ['product' => $originalProduct->name ?: $product->name]
+                        )
+                    )
+                    ->toApiResponse();
             }
 
             Cart::instance('cart')->update($rowId, ['qty' => $newQty]);
@@ -552,8 +576,19 @@ class CartController extends BaseApiController
         $countCart = $cart->count();
 
         if (is_plugin_active('marketplace')) {
+            // Batch-load all products with store relation to avoid N+1 queries
+            $productIds = $content->pluck('id')->filter()->unique()->values()->all();
+            $productsMap = Product::query()
+                ->whereIn('id', $productIds)
+                ->with([
+                    'variationInfo.configurableProduct.store',
+                    'variationInfo.configurableProduct.store.slugable',
+                ])
+                ->get()
+                ->keyBy('id');
+
             foreach ($content as $item) {
-                $product = Product::query()->find($item->id);
+                $product = $productsMap->get($item->id);
 
                 if (! $product) {
                     continue;

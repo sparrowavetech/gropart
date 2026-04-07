@@ -95,6 +95,8 @@ return [
     'coupon_code' => 'Cod cupon: ":code"',
     'shipping_fee' => 'Taxă transport',
     'tax' => 'Taxe',
+    'shipping_tax' => 'Taxă pe livrare',
+
     'refunded_amount' => 'Sumă rambursată',
     'amount_received' => 'Suma efectiv primită',
     'download_invoice' => 'Descarcă factura',

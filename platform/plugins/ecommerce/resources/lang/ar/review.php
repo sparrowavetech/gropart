@@ -109,4 +109,23 @@ return [
         'images_mimes' => 'يجب أن تكون الصور بتنسيق JPG أو JPEG أو PNG.',
         'images_file_max' => 'لا يمكن أن يتجاوز حجم كل صورة :max كيلوبايت.',
     ],
+    'badge_type' => 'شارة المراجعة',
+    'badge_type_help' => 'اختر شارة لعرضها على هذه المراجعة. "الكشف التلقائي" يعرض "تم الشراء منذ X" للعملاء الذين لديهم طلبات.',
+    'badge_types' => [
+        'auto' => 'كشف تلقائي',
+        'none' => 'بدون شارة',
+        'purchased' => '✅ تم الشراء',
+        'community_review' => '💬 مراجعة المجتمع',
+        'expert_reviewer' => '🏅 مراجع خبير',
+        'top_contributor' => '⭐ أفضل مساهم',
+        'verified_buyer' => '✅ مشترٍ موثق',
+    ],
+    'placeholders' => [
+        'customer_name' => 'e.g: John Doe',
+        'customer_email' => 'e.g: example@domain.com',
+        'comment' => 'اكتب تعليق المراجعة هنا...',
+    ],
+    'helpers' => [
+        'star' => 'التقييم من 1 (الأدنى) إلى 5 (الأعلى).',
+    ],
 ];

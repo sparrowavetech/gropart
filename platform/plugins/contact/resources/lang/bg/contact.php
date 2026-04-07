@@ -177,4 +177,6 @@ return [
     'subject_placeholder' => 'Предмет',
     'your_message' => 'Вашето съобщение',
     'agree_terms_privacy' => 'Съгласен съм с Условията и Политиката за поверителност',
+    'agree_terms_privacy_link' => 'Съгласен съм с :link',
+    'terms_and_privacy_policy' => 'Условията и Политиката за поверителност',
 ];

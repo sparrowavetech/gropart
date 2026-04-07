@@ -498,45 +498,6 @@
     }
 }
 
-// Dark mode support (if applicable)
-@media (prefers-color-scheme: dark) {
-    .mobile-coupon-sheet.offcanvas-bottom {
-        background-color: #1a1d20;
-
-        .mobile-coupon-sheet__drag-handle span {
-            background-color: #495057;
-        }
-
-        .offcanvas-footer {
-            background: #1a1d20;
-            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
-        }
-    }
-
-    .mobile-coupon-item {
-        border-color: #495057 !important;
-        background-color: #212529;
-
-        &:hover {
-            border-color: #007bff !important;
-            background-color: #1a1d20;
-        }
-
-        &:has(.mobile-coupon-radio:checked) {
-            background-color: rgba(0, 123, 255, 0.1);
-        }
-
-        .mobile-coupon-icon {
-            background-color: rgba(0, 123, 255, 0.2) !important;
-        }
-
-        .badge {
-            background-color: #495057 !important;
-            color: #fff !important;
-        }
-    }
-}
-
 // Accessibility improvements
 .mobile-coupon-item {
     &:focus-within {

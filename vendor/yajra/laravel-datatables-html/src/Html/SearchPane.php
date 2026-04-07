@@ -5,6 +5,7 @@ namespace Yajra\DataTables\Html;
 use Closure;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Illuminate\Database\Eloquent\Model;
 use Yajra\DataTables\Html\Editor\Fields\Options;
 
 class SearchPane extends Fluent
@@ -211,7 +212,7 @@ class SearchPane extends Fluent
     /**
      * Get options from a model.
      *
-     * @param  class-string<\Illuminate\Database\Eloquent\Model>|EloquentBuilder  $model
+     * @param  class-string<Model>|EloquentBuilder  $model
      */
     public function modelOptions(EloquentBuilder|string $model, string $value, string $key = 'id'): SearchPane
     {

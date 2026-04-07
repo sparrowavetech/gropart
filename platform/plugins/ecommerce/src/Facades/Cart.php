@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static \Carbon\CarbonInterface|null getLastUpdatedAt()
  * @method static mixed add($id, $name = null, $qty = null, $price = null, array $options = [])
  * @method static mixed addQuietly($id, $name = null, $qty = null, $price = null, array $options = [])
- * @method static int|float getPriceByOptions(int|float $price, array $options = [])
+ * @method static array{price: float, option_price_once: float} getPriceByOptions(int|float $price, array $options = [])
  * @method static static putToSession($content)
  * @method static void setLastUpdatedAt()
  * @method static \Botble\Ecommerce\Cart\CartItem|bool|null update(string $rowId, \Botble\Ecommerce\Cart\Contracts\Buyable|array|int $qty)

@@ -2,10 +2,11 @@
 
 namespace Yajra\DataTables\Services;
 
+use BackedEnum;
 use Barryvdh\Snappy\PdfWrapper;
 use Closure;
-use Generator;
 use Illuminate\Contracts\Support\Renderable;
+use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Relations\Relation as EloquentRelation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
@@ -17,11 +18,13 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\LazyCollection;
 use Illuminate\Support\Traits\Macroable;
 use Maatwebsite\Excel\ExcelServiceProvider;
-use OpenSpout\Common\Entity\Style\Style;
-use Rap2hpoutre\FastExcel\FastExcel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Yajra\DataTables\Contracts\DataTableButtons;
 use Yajra\DataTables\Contracts\DataTableScope;
+use Yajra\DataTables\DataTableAbstract;
 use Yajra\DataTables\Exceptions\Exception;
+use Yajra\DataTables\Exports\OpenSpoutStreamExporter;
 use Yajra\DataTables\Html\Builder;
 use Yajra\DataTables\Html\Column;
 use Yajra\DataTables\QueryDataTable;
@@ -67,7 +70,7 @@ abstract class DataTable implements DataTableButtons
     /**
      * Query scopes.
      *
-     * @var \Yajra\DataTables\Contracts\DataTableScope[]
+     * @var DataTableScope[]
      */
     protected array $scopes = [];
 
@@ -117,15 +120,14 @@ abstract class DataTable implements DataTableButtons
     protected ?Request $request = null;
 
     /**
-     * Flag to use fast-excel package for export.
+     * Flag to use OpenSpout streaming writers for Excel/CSV export.
      */
     protected bool $fastExcel = false;
 
     /**
-     * Flag to enable/disable fast-excel callback.
-     * Note: Disabling this flag can improve you export time.
-     * Enabled by default to emulate the same output
-     * with laravel-excel.
+     * Flag to enable/disable export column mapping callback.
+     * Note: Disabling this flag can improve your export time.
+     * Enabled by default to emulate the same output as laravel-excel.
      */
     protected bool $fastExcelCallback = true;
 
@@ -225,7 +227,7 @@ abstract class DataTable implements DataTableButtons
             $query = $this->applyScopes($query);
         }
 
-        /** @var \Yajra\DataTables\DataTableAbstract $dataTable */
+        /** @var DataTableAbstract $dataTable */
         // @phpstan-ignore-next-line
         $dataTable = app()->call([$this, 'dataTable'], compact('query'));
 
@@ -247,7 +249,7 @@ abstract class DataTable implements DataTableButtons
     /**
      * Display printable view of datatables.
      *
-     * @return \Illuminate\Contracts\View\View
+     * @return View
      */
     public function printPreview(): Renderable
     {
@@ -301,7 +303,7 @@ abstract class DataTable implements DataTableButtons
     /**
      * Optional method if you want to use html builder.
      *
-     * @return \Yajra\DataTables\Html\Builder
+     * @return Builder
      */
     public function html()
     {
@@ -327,7 +329,7 @@ abstract class DataTable implements DataTableButtons
     /**
      * Map ajax response to columns definition.
      */
-    protected function mapResponseToColumns(array|\Illuminate\Support\Collection $columns, string $type): array
+    protected function mapResponseToColumns(array|Collection $columns, string $type): array
     {
         $transformer = new DataArrayTransformer;
 
@@ -402,7 +404,7 @@ abstract class DataTable implements DataTableButtons
     /**
      * Export results to Excel file.
      *
-     * @return string|\Symfony\Component\HttpFoundation\BinaryFileResponse|\Symfony\Component\HttpFoundation\StreamedResponse
+     * @return string|BinaryFileResponse|StreamedResponse
      *
      * @throws \Exception
      */
@@ -410,33 +412,25 @@ abstract class DataTable implements DataTableButtons
     {
         set_time_limit(3600);
 
+        if ($this->fastExcel) {
+            return $this->streamOpenSpoutExport(false);
+        }
+
         $path = $this->getFilename().'.'.strtolower($this->excelWriter);
 
         $excelFile = $this->buildExcelFile();
-
-        if ($excelFile instanceof FastExcel) {
-            $callback = $this->fastExcelCallback ? $this->fastExcelCallback() : null;
-
-            return $excelFile->download($path, $callback);
-        }
 
         // @phpstan-ignore-next-line
         return $excelFile->download($path, $this->excelWriter);
     }
 
     /**
-     * Build Excel file and prepare for export.
-     *
-     * @return mixed|FastExcel
+     * Build Maatwebsite/Laravel Excel export instance.
      *
      * @throws \Exception
      */
-    protected function buildExcelFile()
+    protected function buildExcelFile(): object
     {
-        if ($this->fastExcel) {
-            return $this->buildFastExcelFile();
-        }
-
         if (! class_exists(ExcelServiceProvider::class)) {
             throw new Exception('Please `composer require maatwebsite/excel` to be able to use this function.');
         }
@@ -525,22 +519,21 @@ abstract class DataTable implements DataTableButtons
     /**
      * Export results to CSV file.
      *
-     * @return string|\Symfony\Component\HttpFoundation\StreamedResponse
+     * @return string|StreamedResponse
      *
      * @throws \Exception
      */
     public function csv()
     {
         set_time_limit(3600);
+
+        if ($this->fastExcel) {
+            return $this->streamOpenSpoutExport(true);
+        }
+
         $path = $this->getFilename().'.'.strtolower($this->csvWriter);
 
         $excelFile = $this->buildExcelFile();
-
-        if ($excelFile instanceof FastExcel) {
-            $callback = $this->fastExcelCallback ? $this->fastExcelCallback() : null;
-
-            return $excelFile->download($path, $callback);
-        }
 
         // @phpstan-ignore-next-line
         return $excelFile->download($path, $this->csvWriter);
@@ -549,7 +542,7 @@ abstract class DataTable implements DataTableButtons
     /**
      * Export results to PDF file.
      *
-     * @return \Illuminate\Http\Response|string|\Symfony\Component\HttpFoundation\StreamedResponse
+     * @return Response|string|StreamedResponse
      *
      * @throws \Exception
      */
@@ -564,10 +557,30 @@ abstract class DataTable implements DataTableButtons
     }
 
     /**
+     * Stream Excel or CSV export using OpenSpout (memory-efficient).
+     *
+     * @throws Exception
+     */
+    protected function streamOpenSpoutExport(bool $asCsv): StreamedResponse
+    {
+        return (new OpenSpoutStreamExporter)->streamDownload(
+            $asCsv,
+            $this->getFilename(),
+            $this->csvWriter,
+            $this->excelWriter,
+            fn (): Collection => $this->exportColumns()
+                ->reject(fn (Column $column) => $column->exportable === false)
+                ->values(),
+            fn (): iterable => $this->iterateRowsForOpenSpoutExport(),
+            fn (mixed $row, Collection $cols): array => $this->mapSourceRowToExportValues($row, $cols),
+        );
+    }
+
+    /**
      * PDF version of the table using print preview blade template.
      *
      *
-     * @throws \Yajra\DataTables\Exceptions\Exception
+     * @throws Exception
      */
     public function snappyPdf(): Response
     {
@@ -575,7 +588,7 @@ abstract class DataTable implements DataTableButtons
             throw new Exception('Please `composer require barryvdh/laravel-snappy` to be able to use this feature.');
         }
 
-        /** @var \Barryvdh\Snappy\PdfWrapper $snappy */
+        /** @var PdfWrapper $snappy */
         $snappy = app('snappy.pdf.wrapper');
         $options = (array) config('datatables-buttons.snappy.options');
 
@@ -684,6 +697,76 @@ abstract class DataTable implements DataTableButtons
         return $collection->lazy();
     }
 
+    /**
+     * @return iterable<mixed>
+     */
+    protected function iterateRowsForOpenSpoutExport(): iterable
+    {
+        $query = null;
+        if (method_exists($this, 'query')) {
+            /** @var EloquentBuilder|QueryBuilder $query */
+            $query = app()->call([$this, 'query']);
+            $query = $this->applyScopes($query);
+        }
+
+        /** @var DataTableAbstract $dataTable */
+        // @phpstan-ignore-next-line
+        $dataTable = app()->call([$this, 'dataTable'], compact('query'));
+        $dataTable->skipPaging();
+
+        if ($dataTable instanceof QueryDataTable) {
+            foreach ($dataTable->getFilteredQuery()->cursor() as $row) {
+                yield $row;
+            }
+
+            return;
+        }
+
+        foreach ($dataTable->toArray()['data'] as $row) {
+            yield $row;
+        }
+    }
+
+    /**
+     * OpenSpout (fast Excel) iterates Eloquent models from cursor without DataProcessor; enum casts
+     * must be reduced to scalars before writing cells.
+     *
+     * @param  Collection<int, Column>  $exportableColumns
+     * @return list<mixed>
+     */
+    protected function mapSourceRowToExportValues(mixed $row, Collection $exportableColumns): array
+    {
+        $values = [];
+
+        foreach ($exportableColumns as $column) {
+            $callback = $column->exportRender ?? null;
+            $key = $column->data;
+
+            if (is_array($key)) {
+                $data = Arr::get($row, $key['_']);
+            } else {
+                $data = Arr::get($row, $key);
+            }
+
+            $cell = ($this->fastExcelCallback && is_callable($callback))
+                ? $callback($row, $data)
+                : $data;
+
+            $values[] = $this->normalizeOpenSpoutCellValue($cell);
+        }
+
+        return $values;
+    }
+
+    private function normalizeOpenSpoutCellValue(mixed $value): mixed
+    {
+        if ($value instanceof BackedEnum) {
+            return $value->value;
+        }
+
+        return $value;
+    }
+
     public function fastExcelCallback(): Closure
     {
         return function ($row) {
@@ -710,47 +793,6 @@ abstract class DataTable implements DataTableButtons
 
             return $mapped;
         };
-    }
-
-    /**
-     * @throws \Yajra\DataTables\Exceptions\Exception
-     */
-    protected function buildFastExcelFile(): FastExcel
-    {
-        if (! class_exists(FastExcel::class)) {
-            throw new Exception('Please `composer require rap2hpoutre/fast-excel` to be able to use this function.');
-        }
-
-        $query = null;
-        if (method_exists($this, 'query')) {
-            /** @var EloquentBuilder|QueryBuilder $query */
-            $query = app()->call([$this, 'query']);
-            $query = $this->applyScopes($query);
-        }
-
-        /** @var \Yajra\DataTables\DataTableAbstract $dataTable */
-        // @phpstan-ignore-next-line
-        $dataTable = app()->call([$this, 'dataTable'], compact('query'));
-        $dataTable->skipPaging();
-
-        $styles = [];
-        $this->exportColumns()
-            ->reject(fn (Column $column) => $column->exportable === false || ! $column->exportFormat)
-            ->each(function (Column $column) use (&$styles) {
-                $styles[$column->title] = (new Style)->setFormat($column->exportFormat);
-            });
-
-        if ($dataTable instanceof QueryDataTable) {
-            $queryGenerator = function ($dataTable): Generator {
-                foreach ($dataTable->getFilteredQuery()->cursor() as $row) {
-                    yield $row;
-                }
-            };
-
-            return (new FastExcel($queryGenerator($dataTable)))->setColumnStyles($styles);
-        }
-
-        return (new FastExcel($dataTable->toArray()['data']))->setColumnStyles($styles);
     }
 
     /**

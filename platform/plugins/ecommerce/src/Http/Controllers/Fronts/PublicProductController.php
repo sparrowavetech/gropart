@@ -407,9 +407,9 @@ class PublicProductController extends BaseController
             ->setData(
                 Theme::scope(
                     'ecommerce.includes.up-sale-products',
-                    compact('products', 'parentProduct'),
+                    compact('products', 'parentProduct', 'product'),
                     'plugins/ecommerce::themes.includes.up-sale-products'
-                )->content()
+                )->content() ?: ' '
             );
     }
 
@@ -425,9 +425,9 @@ class PublicProductController extends BaseController
             ->setData(
                 Theme::scope(
                     'ecommerce.includes.cross-sale-products',
-                    compact('products', 'parentProduct'),
+                    compact('products', 'parentProduct', 'product'),
                     'plugins/ecommerce::themes.includes.cross-sale-products'
-                )->content()
+                )->content() ?: ' '
             );
     }
 

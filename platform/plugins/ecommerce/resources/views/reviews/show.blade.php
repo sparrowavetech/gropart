@@ -175,6 +175,26 @@
                     </div>
                 </x-core::card.body>
             </x-core::card>
+
+            <x-core::card class="mt-3">
+                <x-core::card.header>
+                    <h4 class="card-title">
+                        {{ trans('plugins/ecommerce::review.badge_type') }}
+                    </h4>
+                </x-core::card.header>
+                <x-core::card.body>
+                    <div class="mb-2">
+                        <select class="form-select" id="review-badge-type" data-url="{{ route('reviews.update-badge', $review) }}">
+                            @foreach (\Botble\Ecommerce\Enums\ReviewBadgeEnum::labels() as $value => $label)
+                                <option value="{{ $value }}" @selected($review->badge_type?->getValue() === $value || (is_null($review->badge_type) && $value === \Botble\Ecommerce\Enums\ReviewBadgeEnum::AUTO))>
+                                    {{ $label }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <div class="form-text">{{ trans('plugins/ecommerce::review.badge_type_help') }}</div>
+                    </div>
+                </x-core::card.body>
+            </x-core::card>
         </div>
     </div>
 @endsection

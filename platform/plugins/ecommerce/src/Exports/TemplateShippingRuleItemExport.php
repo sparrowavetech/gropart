@@ -96,6 +96,7 @@ class TemplateShippingRuleItemExport implements
                 foreach ($cities as $cityName => $zipCodes) {
                     foreach ($zipCodes as $zipCode) {
                         $results[] = [
+                            'name' => '',
                             'shipping_rule' => $shippingRule->name,
                             'country' => $countryName,
                             'state' => $stateName,
@@ -131,6 +132,7 @@ class TemplateShippingRuleItemExport implements
                                 foreach ($state->cities as $city) {
                                     for ($i = 1; $i <= 3; $i++) {
                                         $results[] = [
+                                            'name' => '',
                                             'shipping_rule' => $shippingRule->name,
                                             'country' => $country->name,
                                             'state' => $state->name,
@@ -159,6 +161,7 @@ class TemplateShippingRuleItemExport implements
                 foreach ($cities as $cityName => $zipCodes) {
                     foreach ($zipCodes as $zipCode) {
                         $results[] = [
+                            'name' => '',
                             'shipping_rule' => $shippingRuleName,
                             'country' => $countryName,
                             'state' => $stateName,
@@ -185,14 +188,15 @@ class TemplateShippingRuleItemExport implements
     public function headings(): array
     {
         return [
-            'shipping_rule' => 'Shipping Rule', // A
-            'country' => 'Country', // B
-            'state' => 'State', // C
-            'city' => 'City', // D
-            'zip_code' => 'Zip Code', // E
-            'adjustment_price' => 'Adjustment price', // F
-            'is_enabled' => 'Is Enabled?', // G
-            'type' => 'Type', // H
+            'name' => 'Name', // A
+            'shipping_rule' => 'Shipping Rule', // B
+            'country' => 'Country', // C
+            'state' => 'State', // D
+            'city' => 'City', // E
+            'zip_code' => 'Zip Code', // F
+            'adjustment_price' => 'Adjustment price', // G
+            'is_enabled' => 'Is Enabled?', // H
+            'type' => 'Type', // I
         ];
     }
 
@@ -200,9 +204,9 @@ class TemplateShippingRuleItemExport implements
     {
         return [
             AfterSheet::class => function (AfterSheet $event): void {
-                $isEnabledColumn = 'G';
-                $adjustmentPriceColumn = 'F';
-                $typeColumn = 'H';
+                $isEnabledColumn = 'H';
+                $adjustmentPriceColumn = 'G';
+                $typeColumn = 'I';
 
                 $booleanValidation = $this->getBooleanValidation();
                 $decimalValidation = $this->getDecimalValidation(-100000000000, 100000000000);
@@ -304,7 +308,8 @@ class TemplateShippingRuleItemExport implements
             'B2:B' . $this->totalRow => NumberFormat::FORMAT_TEXT,
             'C2:C' . $this->totalRow => NumberFormat::FORMAT_TEXT,
             'D2:D' . $this->totalRow => NumberFormat::FORMAT_TEXT,
-            'F2:V' . $this->totalRow => NumberFormat::FORMAT_NUMBER_00,
+            'E2:E' . $this->totalRow => NumberFormat::FORMAT_TEXT,
+            'G2:V' . $this->totalRow => NumberFormat::FORMAT_NUMBER_00,
         ];
     }
 

@@ -3,6 +3,7 @@
 namespace Botble\Marketplace\Listeners;
 
 use Botble\Base\Enums\BaseStatusEnum;
+use Botble\Marketplace\Facades\MarketplaceHelper;
 use Botble\Marketplace\Models\Store;
 use Botble\Theme\Events\RenderingSiteMapEvent;
 use Botble\Theme\Facades\SiteMapManager;
@@ -30,11 +31,13 @@ class RenderingSiteMapListener
 
                     break;
                 case 'pages':
-                    SiteMapManager::add(route('public.stores'), null, '1', 'monthly');
+                    if (MarketplaceHelper::isStoresPageEnabled()) {
+                        SiteMapManager::add(route('public.stores'), null, '1', 'monthly');
+                    }
 
                     break;
             }
-        } else {
+        } elseif (MarketplaceHelper::isStoresPageEnabled()) {
             SiteMapManager::addSitemap(SiteMapManager::route('stores'));
         }
     }

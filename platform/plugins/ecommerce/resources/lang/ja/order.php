@@ -95,6 +95,8 @@ return [
     'coupon_code' => 'クーポンコード: ":code"',
     'shipping_fee' => '送料',
     'tax' => '税金',
+    'shipping_tax' => '配送税',
+
     'refunded_amount' => '返金額',
     'amount_received' => '実際に受け取った金額',
     'download_invoice' => '請求書をダウンロード',

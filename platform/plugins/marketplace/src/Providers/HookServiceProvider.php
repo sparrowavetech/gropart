@@ -266,6 +266,10 @@ class HookServiceProvider extends ServiceProvider
                     return $variables;
                 }
 
+                if (MarketplaceHelper::getSetting('hide_store_info_in_invoice', false)) {
+                    return $variables;
+                }
+
                 $store = $invoice->reference->store;
 
                 if (! $store || ! $store->id) {
@@ -518,19 +522,34 @@ class HookServiceProvider extends ServiceProvider
                 $vendor = $store->customer;
                 if ($vendor && $vendor->id) {
 
-                    if (
-                        Revenue::query()
-                            ->where(['order_id' => $order->getKey(), 'customer_id' => $vendor->id])
-                            ->doesntExist()
-                    ) {
+                    $originalRevenue = Revenue::query()
+                        ->where([
+                            'order_id' => $order->getKey(),
+                            'customer_id' => $vendor->id,
+                            'type' => RevenueTypeEnum::ADD_AMOUNT,
+                        ])
+                        ->first();
+
+                    if (! $originalRevenue) {
                         return $response;
                     }
 
                     $vendorInfo = $vendor->vendorInfo;
 
-                    if ($vendor->balance > $refundAmount) {
-                        $vendorInfo->total_revenue -= $refundAmount;
-                        $vendorInfo->balance -= $refundAmount;
+                    // Calculate vendor's proportional share of the refund
+                    // The vendor only received amount after tax/shipping/fee deductions,
+                    // so the refund should only subtract the vendor's proportional share.
+                    $orderAmount = $order->amount;
+                    if ($orderAmount > 0 && $originalRevenue->amount > 0) {
+                        $vendorRefundAmount = $refundAmount * ($originalRevenue->amount / $orderAmount);
+                        $vendorRefundAmount = round($vendorRefundAmount, 2);
+                    } else {
+                        $vendorRefundAmount = 0;
+                    }
+
+                    if ($vendor->balance >= $vendorRefundAmount) {
+                        $vendorInfo->total_revenue -= $vendorRefundAmount;
+                        $vendorInfo->balance -= $vendorRefundAmount;
 
                         $data = [
                             'fee' => 0,
@@ -543,7 +562,7 @@ class HookServiceProvider extends ServiceProvider
                             'description' => trans('plugins/marketplace::order.refund.description', [
                                 'order' => $order->code,
                             ]),
-                            'amount' => $refundAmount,
+                            'amount' => $vendorRefundAmount,
                             'sub_amount' => $refundAmount,
                         ];
 
@@ -591,6 +610,7 @@ class HookServiceProvider extends ServiceProvider
                         'id' => 'logo_vendor_dashboard',
                         'type' => 'mediaImage',
                         'label' => trans('plugins/marketplace::marketplace.theme_options.logo_vendor_dashboard'),
+                        'shared' => true,
                         'attributes' => [
                             'name' => 'logo_vendor_dashboard',
                             'value' => null,

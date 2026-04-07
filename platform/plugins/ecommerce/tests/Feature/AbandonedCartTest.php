@@ -616,6 +616,191 @@ class AbandonedCartTest extends BaseTestCase
         $this->assertNull($cart->customer_id);
     }
 
+    public function test_scope_needs_sequence_email_prevents_cascade_in_single_run(): void
+    {
+        $cart = AbandonedCart::query()->create([
+            'session_id' => 'old-cart',
+            'cart_data' => [],
+            'total_amount' => 100,
+            'items_count' => 1,
+            'email' => 'test@example.com',
+            'is_recovered' => false,
+            'abandoned_at' => now()->subHours(73),
+            'last_email_sequence' => 0,
+        ]);
+
+        $matchesSeq1 = AbandonedCart::query()->needsSequenceEmail(1, 1)->get();
+        $this->assertCount(1, $matchesSeq1);
+
+        $matchesSeq2 = AbandonedCart::query()->needsSequenceEmail(2, 24)->get();
+        $this->assertCount(0, $matchesSeq2, 'Cart at sequence 0 should not match sequence 2');
+
+        $matchesSeq3 = AbandonedCart::query()->needsSequenceEmail(3, 72)->get();
+        $this->assertCount(0, $matchesSeq3, 'Cart at sequence 0 should not match sequence 3');
+    }
+
+    public function test_scope_needs_sequence_email_requires_timing_gap_for_next_sequence(): void
+    {
+        AbandonedCart::query()->create([
+            'session_id' => 'just-sent-seq1',
+            'cart_data' => [],
+            'total_amount' => 100,
+            'items_count' => 1,
+            'email' => 'test@example.com',
+            'is_recovered' => false,
+            'abandoned_at' => now()->subHours(25),
+            'last_email_sequence' => 1,
+            'reminder_sent_at' => now(),
+            'reminders_sent' => 1,
+        ]);
+
+        $matchesSeq2 = AbandonedCart::query()->needsSequenceEmail(2, 24)->get();
+        $this->assertCount(0, $matchesSeq2, 'Cart with reminder just sent should not match next sequence');
+    }
+
+    public function test_scope_needs_sequence_email_allows_next_sequence_after_timing_gap(): void
+    {
+        AbandonedCart::query()->create([
+            'session_id' => 'ready-for-seq2',
+            'cart_data' => [],
+            'total_amount' => 100,
+            'items_count' => 1,
+            'email' => 'test@example.com',
+            'is_recovered' => false,
+            'abandoned_at' => now()->subHours(25),
+            'last_email_sequence' => 1,
+            'reminder_sent_at' => now()->subHours(2),
+            'reminders_sent' => 1,
+        ]);
+
+        $matchesSeq2 = AbandonedCart::query()->needsSequenceEmail(2, 24)->get();
+        $this->assertCount(1, $matchesSeq2);
+    }
+
+    public function test_scope_needs_sequence_email_excludes_unsubscribed(): void
+    {
+        AbandonedCart::query()->create([
+            'session_id' => 'unsubscribed-cart',
+            'cart_data' => [],
+            'total_amount' => 100,
+            'items_count' => 1,
+            'email' => 'unsubscribed@example.com',
+            'is_recovered' => false,
+            'abandoned_at' => now()->subHours(2),
+            'last_email_sequence' => 0,
+            'unsubscribed_at' => now()->subHour(),
+        ]);
+
+        $matches = AbandonedCart::query()->needsSequenceEmail(1, 1)->get();
+        $this->assertCount(0, $matches);
+    }
+
+    public function test_sequence_email_full_progression(): void
+    {
+        $cart = AbandonedCart::query()->create([
+            'session_id' => 'progression-cart',
+            'cart_data' => [],
+            'total_amount' => 100,
+            'items_count' => 1,
+            'email' => 'test@example.com',
+            'is_recovered' => false,
+            'abandoned_at' => now()->subHours(73),
+            'last_email_sequence' => 0,
+        ]);
+
+        $this->assertCount(1, AbandonedCart::query()->needsSequenceEmail(1, 1)->get());
+        $this->assertCount(0, AbandonedCart::query()->needsSequenceEmail(2, 24)->get());
+        $this->assertCount(0, AbandonedCart::query()->needsSequenceEmail(3, 72)->get());
+
+        $cart->updateEmailSequence(1);
+        AbandonedCart::query()->where('id', $cart->id)->update(['reminder_sent_at' => now()->subHours(24)]);
+
+        $this->assertCount(0, AbandonedCart::query()->needsSequenceEmail(1, 1)->get());
+        $this->assertCount(1, AbandonedCart::query()->needsSequenceEmail(2, 24)->get());
+        $this->assertCount(0, AbandonedCart::query()->needsSequenceEmail(3, 72)->get());
+
+        $cart->refresh();
+        $cart->updateEmailSequence(2);
+        AbandonedCart::query()->where('id', $cart->id)->update(['reminder_sent_at' => now()->subHours(48)]);
+
+        $this->assertCount(0, AbandonedCart::query()->needsSequenceEmail(1, 1)->get());
+        $this->assertCount(0, AbandonedCart::query()->needsSequenceEmail(2, 24)->get());
+        $this->assertCount(1, AbandonedCart::query()->needsSequenceEmail(3, 72)->get());
+
+        $cart->refresh();
+        $cart->updateEmailSequence(3);
+
+        $this->assertCount(0, AbandonedCart::query()->needsSequenceEmail(1, 1)->get());
+        $this->assertCount(0, AbandonedCart::query()->needsSequenceEmail(2, 24)->get());
+        $this->assertCount(0, AbandonedCart::query()->needsSequenceEmail(3, 72)->get());
+    }
+
+    public function test_service_recover_cart_skips_deleted_products(): void
+    {
+        $product = Product::query()->create([
+            'name' => 'Existing Product',
+            'price' => 50,
+            'status' => BaseStatusEnum::PUBLISHED,
+            'quantity' => 10,
+            'with_storehouse_management' => false,
+            'stock_status' => StockStatusEnum::IN_STOCK,
+        ]);
+
+        $cart = AbandonedCart::query()->create([
+            'session_id' => 'test-cart',
+            'cart_data' => [
+                ['id' => 99999, 'name' => 'Deleted Product', 'qty' => 1, 'price' => 100, 'options' => []],
+                ['id' => $product->id, 'name' => 'Existing Product', 'qty' => 1, 'price' => 50, 'options' => []],
+            ],
+            'total_amount' => 150,
+            'items_count' => 2,
+            'is_recovered' => false,
+            'abandoned_at' => now()->subHours(2),
+        ]);
+
+        $recovered = $this->service->recoverCart($cart->recovery_token);
+
+        $this->assertNotNull($recovered);
+        $this->assertNotNull($recovered->fresh()->clicked_at);
+    }
+
+    public function test_service_recover_cart_skips_out_of_stock_products(): void
+    {
+        $outOfStockProduct = Product::query()->create([
+            'name' => 'Out of Stock Product',
+            'price' => 100,
+            'status' => BaseStatusEnum::PUBLISHED,
+            'quantity' => 0,
+            'with_storehouse_management' => true,
+            'stock_status' => StockStatusEnum::OUT_OF_STOCK,
+        ]);
+
+        $inStockProduct = Product::query()->create([
+            'name' => 'In Stock Product',
+            'price' => 50,
+            'status' => BaseStatusEnum::PUBLISHED,
+            'quantity' => 10,
+            'with_storehouse_management' => false,
+            'stock_status' => StockStatusEnum::IN_STOCK,
+        ]);
+
+        $cart = AbandonedCart::query()->create([
+            'session_id' => 'test-cart',
+            'cart_data' => [
+                ['id' => $outOfStockProduct->id, 'name' => 'Out of Stock', 'qty' => 1, 'price' => 100, 'options' => []],
+                ['id' => $inStockProduct->id, 'name' => 'In Stock', 'qty' => 1, 'price' => 50, 'options' => []],
+            ],
+            'total_amount' => 150,
+            'items_count' => 2,
+            'is_recovered' => false,
+            'abandoned_at' => now()->subHours(2),
+        ]);
+
+        $recovered = $this->service->recoverCart($cart->recovery_token);
+
+        $this->assertNotNull($recovered);
+    }
+
     public function test_service_update_customer_info(): void
     {
         $cart = AbandonedCart::query()->create([

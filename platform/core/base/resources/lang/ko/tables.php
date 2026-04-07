@@ -65,4 +65,5 @@ return [
     'please_select_record' => '이 작업을 수행하려면 최소한 하나의 레코드를 선택하세요!',
     'checkbox' => '체크박스',
     'toggle_columns' => '컬럼 토글',
+    'created_by' => '작성자',
 ];

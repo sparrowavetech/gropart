@@ -95,6 +95,8 @@ return [
     'coupon_code' => 'Kupono kodas: ":code"',
     'shipping_fee' => 'Pristatymo mokestis',
     'tax' => 'Mokestis',
+    'shipping_tax' => 'Pristatymo mokestis',
+
     'refunded_amount' => 'Grąžinta suma',
     'amount_received' => 'Faktiškai gauta suma',
     'download_invoice' => 'Atsisiųsti sąskaitą',

@@ -520,6 +520,15 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
                             });
                         }
 
+                        if (in_array('barcode', $searchProductsBy)) {
+                            $function = $hasWhere ? 'orWhere' : 'where';
+                            $hasWhere = true;
+
+                            $query->{$function}(function (BaseQueryBuilder $subQuery) use ($keyword): void { // @phpstan-ignore-line
+                                $subQuery->addSearch('ec_products.barcode', $keyword, false);
+                            });
+                        }
+
                         if (in_array('variation_sku', $searchProductsBy)) {
                             $function = $hasWhere ? 'orWhereHas' : 'whereHas';
 
@@ -535,7 +544,7 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
                     ->where(function (EloquentBuilder $query) use ($keyword, $searchProductsBy, $isPartial): void {
                         $hasWhere = false;
 
-                        if (in_array('name', $searchProductsBy) || in_array('sku', $searchProductsBy) || in_array('description', $searchProductsBy)) {
+                        if (in_array('name', $searchProductsBy) || in_array('sku', $searchProductsBy) || in_array('description', $searchProductsBy) || in_array('barcode', $searchProductsBy)) {
                             $query
                                 ->where(function (BaseQueryBuilder $subQuery) use ($keyword, $searchProductsBy, $isPartial): void { // @phpstan-ignore-line
                                     if (in_array('name', $searchProductsBy)) {
@@ -544,6 +553,10 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
 
                                     if (in_array('sku', $searchProductsBy)) {
                                         $subQuery->addSearch('ec_products.sku', $keyword, false);
+                                    }
+
+                                    if (in_array('barcode', $searchProductsBy)) {
+                                        $subQuery->addSearch('ec_products.barcode', $keyword, false);
                                     }
 
                                     if (in_array('description', $searchProductsBy)) {

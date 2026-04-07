@@ -184,4 +184,6 @@ return [
     'subject_placeholder' => 'Temat',
     'your_message' => 'Twoja wiadomość',
     'agree_terms_privacy' => 'Zgadzam się z Regulaminem i Polityką Prywatności',
+    'agree_terms_privacy_link' => 'Zgadzam się z :link',
+    'terms_and_privacy_policy' => 'Regulaminem i Polityką Prywatności',
 ];

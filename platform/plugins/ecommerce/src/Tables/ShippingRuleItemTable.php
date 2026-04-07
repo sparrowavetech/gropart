@@ -37,6 +37,9 @@ class ShippingRuleItemTable extends TableAbstract
     {
         $data = $this->table
             ->eloquent($this->query())
+            ->editColumn('name', function (ShippingRuleItem $item) {
+                return $item->name_item;
+            })
             ->editColumn('shipping_rule_id', function (ShippingRuleItem $item) {
                 return $item->shippingRule->name;
             })
@@ -83,6 +86,7 @@ class ShippingRuleItemTable extends TableAbstract
             ->with(['shippingRule', 'shippingRule.shipping'])
             ->select([
                 'id',
+                'name',
                 'shipping_rule_id',
                 'country',
                 'state',
@@ -102,6 +106,9 @@ class ShippingRuleItemTable extends TableAbstract
     {
         return [
             IdColumn::make(),
+            Column::make('name')
+                ->title(trans('plugins/ecommerce::shipping.rule.item.tables.name'))
+                ->orderable(true),
             Column::make('shipping_rule_id')
                 ->title(trans('plugins/ecommerce::shipping.rule.item.tables.shipping_rule')),
             Column::make('country')

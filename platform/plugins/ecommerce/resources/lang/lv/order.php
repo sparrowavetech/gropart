@@ -95,6 +95,8 @@ return [
     'coupon_code' => 'Kupona kods: ":code"',
     'shipping_fee' => 'Piegādes maksa',
     'tax' => 'Nodoklis',
+    'shipping_tax' => 'Nodoklis par piegādi',
+
     'refunded_amount' => 'Atmaksātā summa',
     'amount_received' => 'Faktiski saņemtā summa',
     'download_invoice' => 'Lejupielādēt rēķinu',

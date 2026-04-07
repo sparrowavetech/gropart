@@ -558,6 +558,7 @@ class EcommerceServiceProvider extends ServiceProvider
 
             LanguageAdvancedManager::registerModule(ProductTag::class, [
                 'name',
+                'content',
             ]);
 
             LanguageAdvancedManager::registerModule(Tax::class, [
@@ -598,7 +599,7 @@ class EcommerceServiceProvider extends ServiceProvider
 
                         $specificationAttributes = $request->input('specification_attributes', []);
 
-                        $langCode = $request->input('language');
+                        $langCode = LanguageAdvancedManager::getTranslationLocale();
 
                         if ($specificationAttributes && $langCode) {
                             foreach ($specificationAttributes as $attributeId => $attributeData) {
@@ -629,8 +630,10 @@ class EcommerceServiceProvider extends ServiceProvider
 
                         $newRequest = new Request();
 
+                        $translationLocale = LanguageAdvancedManager::getTranslationLocale();
+
                         $newRequest->replace([
-                            'language' => $request->input('language'),
+                            'language' => $translationLocale,
                             'ref_lang' => $request->input('ref_lang'),
                         ]);
 
@@ -646,7 +649,7 @@ class EcommerceServiceProvider extends ServiceProvider
                             $newRequest = new Request();
 
                             $newRequest->replace([
-                                'language' => $request->input('language'),
+                                'language' => $translationLocale,
                                 'ref_lang' => $request->input('ref_lang'),
                             ]);
 
@@ -678,7 +681,7 @@ class EcommerceServiceProvider extends ServiceProvider
 
                         $request = new Request();
                         $request->replace([
-                            'language' => request()->input('language'),
+                            'language' => LanguageAdvancedManager::getTranslationLocale(),
                             'ref_lang' => request()->input('ref_lang'),
                         ]);
 
@@ -712,7 +715,7 @@ class EcommerceServiceProvider extends ServiceProvider
                         $newRequest = new Request();
 
                         $newRequest->replace([
-                            'language' => $request->input('language'),
+                            'language' => LanguageAdvancedManager::getTranslationLocale(),
                             'ref_lang' => $request->input('ref_lang'),
                         ]);
 

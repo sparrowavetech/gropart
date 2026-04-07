@@ -65,4 +65,5 @@ return [
     'phone' => 'Téléphone',
     'checkbox' => 'Case à cocher',
     'toggle_columns' => 'Basculer les colonnes',
+    'created_by' => 'Créé par',
 ];

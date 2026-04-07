@@ -27,7 +27,7 @@ class RegisterController extends BaseController
 
     public function __construct()
     {
-        $this->middleware('customer.guest');
+        $this->middleware('customer.guest')->except(['confirm', 'resendConfirmation']);
     }
 
     public function showRegistrationForm()
@@ -150,6 +150,10 @@ class RegisterController extends BaseController
 
     public function resendConfirmation(Request $request)
     {
+        if (! EcommerceHelper::isEnableEmailVerification()) {
+            abort(404);
+        }
+
         /**
          * @var Customer $customer
          */
@@ -159,13 +163,22 @@ class RegisterController extends BaseController
             return $this
                 ->httpResponse()
                 ->setError()
+                ->setNextUrl(route('customer.login'))
                 ->setMessage(__('Cannot find this customer!'));
+        }
+
+        if ($customer->confirmed_at) {
+            return $this
+                ->httpResponse()
+                ->setNextUrl(route('customer.login'))
+                ->setMessage(__('Your email has already been verified.'));
         }
 
         $customer->sendEmailVerificationNotification();
 
         return $this
             ->httpResponse()
+            ->setNextUrl(route('customer.login'))
             ->setMessage(__('We sent you another confirmation email. You should receive it shortly.'));
     }
 }

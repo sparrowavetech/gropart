@@ -109,4 +109,23 @@ return [
         'images_mimes' => 'Les images doivent être au format JPG, JPEG ou PNG.',
         'images_file_max' => 'Chaque image ne peut pas dépasser :max Ko.',
     ],
+    'badge_type' => 'Badge d\'avis',
+    'badge_type_help' => 'Choisissez un badge à afficher sur cet avis. "Détection automatique" affiche "Acheté il y a X" pour les clients ayant des commandes.',
+    'badge_types' => [
+        'auto' => 'Détection automatique',
+        'none' => 'Aucun badge',
+        'purchased' => '✅ Acheté',
+        'community_review' => '💬 Avis communautaire',
+        'expert_reviewer' => '🏅 Avis d\'expert',
+        'top_contributor' => '⭐ Meilleur contributeur',
+        'verified_buyer' => '✅ Acheteur vérifié',
+    ],
+    'placeholders' => [
+        'customer_name' => 'e.g: John Doe',
+        'customer_email' => 'e.g: example@domain.com',
+        'comment' => 'Rédigez le commentaire de l\'avis ici...',
+    ],
+    'helpers' => [
+        'star' => 'Note de 1 (la plus basse) à 5 (la plus haute).',
+    ],
 ];

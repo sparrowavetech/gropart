@@ -109,4 +109,23 @@ return [
         'images_mimes' => 'Slike morajo biti v formatu JPG, JPEG ali PNG.',
         'images_file_max' => 'Vsaka slika ne more presegati :max KB.',
     ],
+    'badge_type' => 'Značka ocene',
+    'badge_type_help' => 'Izberite značko za prikaz na tej oceni. "Samodejno zaznavanje" prikaže "Kupljeno pred X" za stranke z naročili.',
+    'badge_types' => [
+        'auto' => 'Samodejno zaznavanje',
+        'none' => 'Brez značke',
+        'purchased' => '✅ Kupljeno',
+        'community_review' => '💬 Ocena skupnosti',
+        'expert_reviewer' => '🏅 Strokovni ocenjevalec',
+        'top_contributor' => '⭐ Najboljši sodelavec',
+        'verified_buyer' => '✅ Preverjen kupec',
+    ],
+    'placeholders' => [
+        'customer_name' => 'e.g: John Doe',
+        'customer_email' => 'e.g: example@domain.com',
+        'comment' => 'Tukaj napišite komentar ocene...',
+    ],
+    'helpers' => [
+        'star' => 'Ocena od 1 (najnižja) do 5 (najvišja).',
+    ],
 ];

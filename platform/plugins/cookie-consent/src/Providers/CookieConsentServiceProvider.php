@@ -51,6 +51,7 @@ class CookieConsentServiceProvider extends ServiceProvider
                             'id' => 'cookie_consent_enable',
                             'type' => 'customSelect',
                             'label' => trans('plugins/cookie-consent::cookie-consent.theme_options.enable'),
+                            'shared' => true,
                             'attributes' => [
                                 'name' => 'cookie_consent_enable',
                                 'list' => [
@@ -67,6 +68,7 @@ class CookieConsentServiceProvider extends ServiceProvider
                             'id' => 'cookie_consent_style',
                             'type' => 'customSelect',
                             'label' => trans('plugins/cookie-consent::cookie-consent.theme_options.style'),
+                            'shared' => true,
                             'attributes' => [
                                 'name' => 'cookie_consent_style',
                                 'list' => [
@@ -143,6 +145,7 @@ class CookieConsentServiceProvider extends ServiceProvider
                             'id' => 'cookie_consent_background_color',
                             'type' => 'customColor',
                             'label' => trans('plugins/cookie-consent::cookie-consent.theme_options.background_color'),
+                            'shared' => true,
                             'attributes' => [
                                 'name' => 'cookie_consent_background_color',
                                 'value' => '#000',
@@ -157,6 +160,7 @@ class CookieConsentServiceProvider extends ServiceProvider
                             'id' => 'cookie_consent_text_color',
                             'type' => 'customColor',
                             'label' => trans('plugins/cookie-consent::cookie-consent.theme_options.text_color'),
+                            'shared' => true,
                             'attributes' => [
                                 'name' => 'cookie_consent_text_color',
                                 'value' => '#fff',

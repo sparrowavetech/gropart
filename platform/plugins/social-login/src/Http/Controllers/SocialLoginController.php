@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 use Laravel\Socialite\AbstractUser;
 use Laravel\Socialite\Facades\Socialite;
@@ -128,7 +129,7 @@ class SocialLoginController extends BaseController
             return $this
                 ->httpResponse()
                 ->setError()
-                ->setNextUrl(value($providerData['login_url']))
+                ->setNextUrl($this->resolveUrl($providerData['login_url']))
                 ->setMessage($message);
         }
 
@@ -136,7 +137,7 @@ class SocialLoginController extends BaseController
             return $this
                 ->httpResponse()
                 ->setError()
-                ->setNextUrl(value($providerData['login_url']))
+                ->setNextUrl($this->resolveUrl($providerData['login_url']))
                 ->setMessage(trans('plugins/social-login::social-login.no_email_provided'));
         }
 
@@ -235,14 +236,33 @@ class SocialLoginController extends BaseController
 
         Auth::guard($guard)->login($account, true);
 
-        $redirectUrl = value($providerData['redirect_url']) ?: BaseHelper::getHomepageUrl();
+        $redirectUrl = $this->resolveUrl($providerData['redirect_url']) ?: BaseHelper::getHomepageUrl();
 
-        $redirectUrl = session()->has('url.intended') ? session('url.intended') : $redirectUrl;
+        if (session()->has('url.intended')) {
+            $intended = session('url.intended');
+
+            if (parse_url($intended, PHP_URL_HOST) === request()->getHost()) {
+                $redirectUrl = $intended;
+            }
+        }
 
         return $this
             ->httpResponse()
             ->setNextUrl($redirectUrl)
             ->setMessage(trans('core/acl::auth.login.success'));
+    }
+
+    protected function resolveUrl(mixed $url): string
+    {
+        if ($url instanceof \Closure) {
+            return $url();
+        }
+
+        if (is_string($url) && Route::has($url)) {
+            return route($url);
+        }
+
+        return (string) $url;
     }
 
     protected function ensureProviderIsExisted(string $provider): void

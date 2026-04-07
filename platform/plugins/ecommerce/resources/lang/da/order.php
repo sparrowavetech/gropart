@@ -95,6 +95,8 @@ return [
     'coupon_code' => 'Kuponkode: ":code"',
     'shipping_fee' => 'Fragtomkostning',
     'tax' => 'Moms',
+    'shipping_tax' => 'Skat på forsendelse',
+
     'refunded_amount' => 'Refunderet beløb',
     'amount_received' => 'Det faktisk modtagne beløb',
     'download_invoice' => 'Download faktura',

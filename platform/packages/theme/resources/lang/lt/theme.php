@@ -208,6 +208,11 @@ return [
     ],
     'term_and_privacy_policy_url' => 'Sąlygų ir privatumo politikos URL',
     'site_title_separator' => 'SEO pavadinimo skirtukas',
+    'site_title_helper' => 'Jūsų prekės ženklo arba verslo pavadinimas. Rodomas naršyklės skirtuke ir paieškos rezultatuose (pvz., "My Company").',
+    'show_site_name_helper' => 'Prideda svetainės pavadinimą prie kiekvieno puslapio pavadinimo naudojant pasirinktą skirtuką. Pavyzdys: "Page Title - My Company".',
+    'site_title_separator_helper' => 'Simbolis naudojamas tarp puslapio pavadinimo ir svetainės pavadinimo. Pavyzdys su brūkšneliu: "Page Title - My Company". Pavyzdys su vamzdžiu: "Page Title | My Company".',
+    'seo_title_helper' => 'Pagrindinio puslapio pavadinimas rodomas paieškos sistemos rezultatuose. Palikite iki 60 simbolių, kad geriau būtų rodoma. Palikite tuščią, jei norite naudoti svetainės pavadinimą.',
+    'seo_description_helper' => 'Pagrindinio puslapio aprašymas rodomas paieškos sistemos rezultatuose. Palikite 120–160 simbolių, kad geriau būtų rodoma.',
     'no_meta_keywords' => 'Meta raktažodžius pašalino Google, jums nereikia pridėti meta raktažodžių į savo svetainę. Sužinokite daugiau: :link',
     'validation' => [
         'gtm_container_id_format' => 'GTM konteinerio ID turi būti GTM-XXXXXX formatu (pvz., GTM-N7MK3KH2)',
@@ -389,6 +394,9 @@ return [
     ],
 
     'typography_primary' => 'Pagrindinis šriftas',
+    'all_languages' => 'Visos kalbos',
+    'shared_field_notice' => 'Šis laukas bendrinamas visomis kalbomis. Valdykite jį iš numatytosios kalbos.',
+    'shared_section_notice' => 'Visos šios skilties parinktys bendrinamos visomis kalbomis. Perjunkite į numatytąją kalbą, kad atliktumėte pakeitimus.',
     'admin_appearance' => [
         'show_admin_bar' => 'Rodyti administratoriaus juostą prisijungusiems administratoriams, net ir priekinėje svetainės dalyje',
         'show_admin_bar_helper' => 'Rodyti greitosios prieigos administratoriaus įrankių juostą svetainės viršuje, kai esate prisijungęs kaip administratorius',

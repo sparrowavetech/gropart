@@ -13,6 +13,7 @@ class ProductTagRequest extends Request
         return [
             'name' => ['required', 'string', 'max:250'],
             'description' => ['nullable', 'string', 'max:400'],
+            'content' => ['nullable', 'string', 'max:100000'],
             'status' => Rule::in(BaseStatusEnum::values()),
         ];
     }

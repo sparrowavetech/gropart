@@ -12,6 +12,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Illuminate\Support\Stringable;
 use PDO;
+use Throwable;
 
 class DatabaseQueue extends Queue implements QueueContract, ClearableQueue
 {
@@ -42,6 +43,13 @@ class DatabaseQueue extends Queue implements QueueContract, ClearableQueue
      * @var int|null
      */
     protected $retryAfter = 60;
+
+    /**
+     * The cached lock type for popping jobs.
+     *
+     * @var string|bool|null
+     */
+    protected $lockForPopping = null;
 
     /**
      * Create a new database queue instance.
@@ -245,7 +253,10 @@ class DatabaseQueue extends Queue implements QueueContract, ClearableQueue
     protected function pushToDatabase($queue, $payload, $delay = 0, $attempts = 0)
     {
         return $this->database->table($this->table)->insertGetId($this->buildDatabaseRecord(
-            $this->getQueue($queue), $payload, $this->availableAt($delay), $attempts
+            $this->getQueue($queue),
+            $payload,
+            $this->availableAt($delay),
+            $attempts
         ));
     }
 
@@ -282,11 +293,28 @@ class DatabaseQueue extends Queue implements QueueContract, ClearableQueue
     {
         $queue = $this->getQueue($queue);
 
-        return $this->database->transaction(function () use ($queue) {
-            if ($job = $this->getNextAvailableJob($queue)) {
-                return $this->marshalJob($queue, $job);
+        $jobRecord = null;
+
+        try {
+            return $this->database->transaction(function () use ($queue, &$jobRecord) {
+                if ($jobRecord = $this->getNextAvailableJob($queue)) {
+                    return $this->marshalJob($queue, $jobRecord);
+                }
+            });
+        } catch (Throwable $e) {
+            // Potentially invalid job that we need to fail (#58978)...
+            if ($jobRecord) {
+                try {
+                    (new DatabaseJob(
+                        $this->container, $this, $jobRecord, $this->connectionName, $queue
+                    ))->fail($e);
+                } catch (Throwable) {
+                    // Ignore and throw the original exception...
+                }
             }
-        });
+
+            throw $e;
+        }
     }
 
     /**
@@ -317,6 +345,10 @@ class DatabaseQueue extends Queue implements QueueContract, ClearableQueue
      */
     protected function getLockForPopping()
     {
+        if ($this->lockForPopping !== null) {
+            return $this->lockForPopping;
+        }
+
         $databaseEngine = $this->database->getPdo()->getAttribute(PDO::ATTR_DRIVER_NAME);
         $databaseVersion = $this->database->getConfig('version') ?? $this->database->getPdo()->getAttribute(PDO::ATTR_SERVER_VERSION);
 
@@ -331,15 +363,16 @@ class DatabaseQueue extends Queue implements QueueContract, ClearableQueue
         if (($databaseEngine === 'mysql' && version_compare($databaseVersion, '8.0.1', '>=')) ||
             ($databaseEngine === 'mariadb' && version_compare($databaseVersion, '10.6.0', '>=')) ||
             ($databaseEngine === 'pgsql' && version_compare($databaseVersion, '9.5', '>=')) ||
-            ($databaseEngine === 'vitess' && version_compare($databaseVersion, '19.0', '>='))) {
-            return 'FOR UPDATE SKIP LOCKED';
+            ($databaseEngine === 'vitess' && version_compare($databaseVersion, '19.0', '>='))
+        ) {
+            return $this->lockForPopping = 'FOR UPDATE SKIP LOCKED';
         }
 
         if ($databaseEngine === 'sqlsrv') {
-            return 'with(rowlock,updlock,readpast)';
+            return $this->lockForPopping = 'with(rowlock,updlock,readpast)';
         }
 
-        return true;
+        return $this->lockForPopping = true;
     }
 
     /**

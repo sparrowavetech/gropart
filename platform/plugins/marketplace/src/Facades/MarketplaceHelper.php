@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static string getSettingKey(string $key = '')
  * @method static array discountTypes()
  * @method static string getAssetVersion()
+ * @method static bool isStoresPageEnabled()
  * @method static bool hideStorePhoneNumber()
  * @method static bool hideStoreEmail()
  * @method static bool hideStoreSocialLinks()

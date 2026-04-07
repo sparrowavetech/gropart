@@ -2,6 +2,7 @@
 
 namespace Yajra\DataTables\Html;
 
+use Illuminate\Contracts\View\Factory;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Yajra\DataTables\Html\Options\Plugins;
@@ -503,7 +504,7 @@ class Column extends Fluent
      */
     public function parseRender(mixed $value): ?string
     {
-        /** @var \Illuminate\Contracts\View\Factory $view */
+        /** @var Factory $view */
         $view = app('view');
         $parameters = [];
 

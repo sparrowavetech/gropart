@@ -87,6 +87,14 @@ class TaxSettingForm extends SettingForm
                     'text' => trans('plugins/ecommerce::setting.tax.display_tax_description_help'),
                 ],
             ])
+            ->add(
+                'tax_on_shipping_fee',
+                OnOffCheckboxField::class,
+                OnOffFieldOption::make()
+                    ->label(trans('plugins/ecommerce::setting.tax.form.tax_on_shipping_fee'))
+                    ->value(EcommerceHelper::isTaxOnShippingFeeEnabled())
+                    ->helperText(trans('plugins/ecommerce::setting.tax.form.tax_on_shipping_fee_helper'))
+            )
             ->add('close_fieldset_tax_settings', 'html', [
                 'html' => '</fieldset>',
             ]);

@@ -90,9 +90,10 @@ class ShortcodeController extends BaseController
             $request->merge(['shortcodeId' => $shortcodeId]);
         }
 
-        // Create a cache key based on the shortcode name, attributes, and current locale
         $locale = app()->getLocale();
-        $cacheKey = 'shortcode_' . md5($name . serialize($attributes) . $locale);
+        $authorized = auth()->check() ? 'auth' : 'anon';
+        $appUrl = url('/');
+        $cacheKey = 'shortcode_' . md5($name . $appUrl . serialize($attributes) . $locale . $authorized);
 
         if (! setting('shortcode_cache_enabled', false)) {
             $code = Shortcode::generateShortcode($name, $attributes);
@@ -101,24 +102,17 @@ class ShortcodeController extends BaseController
             return $this->httpResponse()->setData($content);
         }
 
-        // Check if this shortcode should be cached for longer
-        $cacheable = $this->isShortcodeCacheable($name);
+        $enableCaching = Arr::get($attributes, 'enable_caching');
 
-        // Get cache durations from settings
-        $defaultTtl = (int) setting('shortcode_cache_ttl_default', 5);
-        $cacheableTtl = (int) setting('shortcode_cache_ttl_cacheable', 1800);
-
-        // Set cache duration based on whether the shortcode is cacheable
-        $cacheDuration = $cacheable
-            ? Carbon::now()->addSeconds($cacheableTtl)
-            : Carbon::now()->addSeconds($defaultTtl);
-
-        if ($shortcodeId || request()->input('visual_builder')) {
+        if ($enableCaching === 'no' || $shortcodeId || request()->input('visual_builder')) {
             $code = Shortcode::generateShortcode($name, $attributes);
             $content = Shortcode::compile($code, true)->toHtml();
 
             return $this->httpResponse()->setData($content);
         }
+
+        $cacheTtl = (int) setting('shortcode_cache_ttl', 1800);
+        $cacheDuration = Carbon::now()->addSeconds($cacheTtl);
 
         $content = Cache::remember($cacheKey, $cacheDuration, function () use ($name, $attributes) {
             $code = Shortcode::generateShortcode($name, $attributes);
@@ -129,23 +123,6 @@ class ShortcodeController extends BaseController
         return $this
             ->httpResponse()
             ->setData($content);
-    }
-
-    protected function isShortcodeCacheable(string $name): bool
-    {
-        // List of shortcodes that should be cached for longer periods
-        // These are typically shortcodes that don't change frequently or don't contain dynamic content
-        $cacheableShortcodes = [
-            'static-block',
-            'featured-posts',
-            'gallery',
-            'youtube-video',
-            'google-map',
-            'contact-form',
-            'image',
-        ];
-
-        return in_array($name, $cacheableShortcodes);
     }
 
     protected function protectHtmlInAttributes(string $code): string

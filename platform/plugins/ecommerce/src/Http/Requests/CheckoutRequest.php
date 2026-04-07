@@ -7,6 +7,7 @@ use Botble\Base\Rules\EmailRule;
 use Botble\Ecommerce\Enums\ShippingMethodEnum;
 use Botble\Ecommerce\Facades\Cart;
 use Botble\Ecommerce\Facades\EcommerceHelper;
+use Botble\Ecommerce\Models\Address;
 use Botble\Ecommerce\Models\Customer;
 use Botble\Payment\Enums\PaymentMethodEnum;
 use Botble\Support\Http\Requests\Request;
@@ -20,11 +21,50 @@ class CheckoutRequest extends Request
 
     protected function prepareForValidation(): void
     {
+        $this->mergeSavedAddressData();
+
         $this->preparePhoneFieldForCheckout('address');
 
         if ($this->has('billing_address')) {
             $this->preparePhoneFieldForCheckout('billing_address');
         }
+    }
+
+    protected function mergeSavedAddressData(): void
+    {
+        if (! auth('customer')->check()) {
+            return;
+        }
+
+        $addressId = $this->input('address.address_id');
+
+        if (! $addressId || $addressId === 'new') {
+            return;
+        }
+
+        $savedAddress = Address::query()
+            ->where('customer_id', auth('customer')->id())
+            ->find($addressId);
+
+        if (! $savedAddress) {
+            return;
+        }
+
+        $addressData = $this->input('address', []);
+
+        if (! is_array($addressData)) {
+            $addressData = [];
+        }
+
+        $fields = ['name', 'phone', 'email', 'country', 'state', 'city', 'address', 'zip_code'];
+
+        foreach ($fields as $field) {
+            if (empty($addressData[$field]) && ! empty($savedAddress->{$field})) {
+                $addressData[$field] = $savedAddress->{$field};
+            }
+        }
+
+        $this->merge(['address' => $addressData]);
     }
 
     protected function preparePhoneFieldForCheckout(string $prefix): void
@@ -82,12 +122,8 @@ class CheckoutRequest extends Request
             $rules['shipping_method'] = 'required|' . Rule::in(ShippingMethodEnum::values());
             if (auth('customer')->check()) {
                 $rules['address.address_id'] = 'required_without:address.name';
-                if (! $this->has('address.address_id') || $addressId === 'new') {
-                    $rules = array_merge($rules, EcommerceHelper::getCustomerAddressValidationRules('address.'));
-                }
-            } else {
-                $rules = array_merge($rules, EcommerceHelper::getCustomerAddressValidationRules('address.'));
             }
+            $rules = array_merge($rules, EcommerceHelper::getCustomerAddressValidationRules('address.'));
         }
 
         $billingAddressSameAsShippingAddress = false;

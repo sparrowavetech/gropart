@@ -109,4 +109,23 @@ return [
         'images_mimes' => 'Attēliem jābūt JPG, JPEG vai PNG formātā.',
         'images_file_max' => 'Katrs attēls nedrīkst pārsniegt :max KB.',
     ],
+    'badge_type' => 'Atsauksmes nozīmīte',
+    'badge_type_help' => 'Izvēlieties nozīmīti, ko rādīt šajā atsauksmē. "Automātiskā noteikšana" rāda "Iegādāts pirms X" klientiem ar pasūtījumiem.',
+    'badge_types' => [
+        'auto' => 'Automātiskā noteikšana',
+        'none' => 'Nav nozīmītes',
+        'purchased' => '✅ Iegādāts',
+        'community_review' => '💬 Kopienas atsauksme',
+        'expert_reviewer' => '🏅 Eksperts recenzents',
+        'top_contributor' => '⭐ Labākais ieguldītājs',
+        'verified_buyer' => '✅ Verificēts pircējs',
+    ],
+    'placeholders' => [
+        'customer_name' => 'e.g: John Doe',
+        'customer_email' => 'e.g: example@domain.com',
+        'comment' => 'Šeit ierakstiet atsauksmes komentāru...',
+    ],
+    'helpers' => [
+        'star' => 'Vērtējums no 1 (zemākais) līdz 5 (augstākais).',
+    ],
 ];

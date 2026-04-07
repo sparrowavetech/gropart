@@ -27,4 +27,6 @@ return [
     'option_value_name_attribute' => 'Værdier af mulighed :key',
     'please_choose_option_type' => 'Vælg venligst mulighedstype!',
     'no_global_options' => 'Ingen globale muligheder tilgængelige endnu. Tilføj venligst produktmuligheder i standardsproget først.',
+    'price_per_product' => 'Pris pr. produkt',
+    'price_per_product_helper' => 'Når aktiveret, anvendes optionsprisen én gang pr. produkt, ikke ganget med antal.',
 ];

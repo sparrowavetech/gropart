@@ -6,6 +6,7 @@ use Botble\Base\Facades\BaseHelper;
 use Botble\Media\Facades\RvMedia;
 use Illuminate\Support\Facades\File;
 use Intervention\Image\Encoders\AutoEncoder;
+use Intervention\Image\Encoders\WebpEncoder;
 use Throwable;
 
 class ThumbnailService
@@ -172,7 +173,13 @@ class ThumbnailService
         }
 
         try {
-            $encodedImage = $thumbImage->encode(new AutoEncoder());
+            $quality = RvMedia::getImageQuality();
+            $extension = File::extension($this->fileName ?: File::basename($this->imagePath));
+            $encoder = $extension === 'webp'
+                ? new WebpEncoder(quality: $quality)
+                : new AutoEncoder(quality: $quality);
+
+            $encodedImage = $thumbImage->encode($encoder);
 
             $this->uploadManager->saveFile($destinationPath, (string) $encodedImage);
         } catch (Throwable $exception) {

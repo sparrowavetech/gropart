@@ -11,7 +11,7 @@
 @endphp
 
 <div class="bb-product-gallery-wrapper">
-    <div @class(['bb-product-gallery', 'bb-product-gallery-' . $galleryStyle])>
+    <div @class(['bb-product-gallery', 'bb-product-gallery-' . $galleryStyle]) data-video-position="{{ $videoPosition }}">
         <div class="bb-product-gallery-images">
             @if ($videoPosition == 'top' || ($videoPosition == 'after_first_image' && empty($productImages)))
                 @include(EcommerceHelper::viewPath('includes.product-gallery-video'))

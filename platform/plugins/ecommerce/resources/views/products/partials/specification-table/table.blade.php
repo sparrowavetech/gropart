@@ -72,24 +72,16 @@
                         $data = SpecificationTable::getAttributeDisplayData($product, $attribute, $currentLangCode);
                         $attributeValue = $data['displayValue'];
 
-                        // For translations, get the correct value and options
-                        $attributeOptions = $attribute->options ?: [];
-
                         if (!$isDefaultLanguage) {
-                            // Use product-specific translated value if available
-                            if (isset($productAttributeTranslations[$attribute->id])) {
-                                $attributeValue = $productAttributeTranslations[$attribute->id];
-                            }
-                            // Otherwise, use attribute's translated default value if available
-                            elseif (isset($attributeTranslations[$attribute->id]) && $attributeTranslations[$attribute->id]['default_value'] !== null) {
-                                $attributeValue = $attributeTranslations[$attribute->id]['default_value'];
-                            }
-
-                            // Get translated options for select/radio
-                            if (isset($attributeTranslations[$attribute->id])) {
-                                $translatedOptions = $attributeTranslations[$attribute->id]['options'];
-                                if (!empty($translatedOptions)) {
-                                    $attributeOptions = $translatedOptions;
+                            if ($attribute->hasOptions()) {
+                                // For select/radio: value is an option ID, no per-product translation needed
+                                // Keep $attributeValue as the option ID from the default-language pivot
+                            } else {
+                                // For text/textarea: use translated value as before
+                                if (isset($productAttributeTranslations[$attribute->id])) {
+                                    $attributeValue = $productAttributeTranslations[$attribute->id];
+                                } elseif (isset($attributeTranslations[$attribute->id]) && $attributeTranslations[$attribute->id]['default_value'] !== null) {
+                                    $attributeValue = $attributeTranslations[$attribute->id]['default_value'];
                                 }
                             }
                         }
@@ -108,17 +100,33 @@
                                     <input class="form-check-input" type="checkbox" name="specification_attributes[{{ $attribute->id }}][value]" value="1" @checked($attributeValue)>
                                 @elseif ($attribute->type == 'select')
                                     <select class="form-select" name="specification_attributes[{{ $attribute->id }}][value]">
-                                        @foreach ($attributeOptions as $value)
-                                            <option value="{{ $value }}" @selected($value === $attributeValue)>{{ $value }}</option>
-                                        @endforeach
+                                        <option value="">--</option>
+                                        @if ($attribute->hasIdBasedOptions())
+                                            @foreach ($attribute->getIdBasedOptions() as $opt)
+                                                <option value="{{ $opt['id'] }}" @selected($opt['id'] === $attributeValue)>{{ $opt['value'] }}</option>
+                                            @endforeach
+                                        @else
+                                            @foreach ($attribute->options ?? [] as $value)
+                                                <option value="{{ $value }}" @selected($value === $attributeValue)>{{ $value }}</option>
+                                            @endforeach
+                                        @endif
                                     </select>
                                 @elseif ($attribute->type == 'radio')
-                                    @foreach ($attributeOptions as $value)
-                                        <label class="form-check form-check-inline">
-                                            <input class="form-check-input" type="radio" name="specification_attributes[{{ $attribute->id }}][value]" value="{{ $value }}" @checked($value === $attributeValue)>
-                                            <span class="form-check-label">{{ $value }}</span>
-                                        </label>
-                                    @endforeach
+                                    @if ($attribute->hasIdBasedOptions())
+                                        @foreach ($attribute->getIdBasedOptions() as $opt)
+                                            <label class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" name="specification_attributes[{{ $attribute->id }}][value]" value="{{ $opt['id'] }}" @checked($opt['id'] === $attributeValue)>
+                                                <span class="form-check-label">{{ $opt['value'] }}</span>
+                                            </label>
+                                        @endforeach
+                                    @else
+                                        @foreach ($attribute->options ?? [] as $value)
+                                            <label class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" name="specification_attributes[{{ $attribute->id }}][value]" value="{{ $value }}" @checked($value === $attributeValue)>
+                                                <span class="form-check-label">{{ $value }}</span>
+                                            </label>
+                                        @endforeach
+                                    @endif
                                 @endif
                             @else
                                 @if ($attribute->type == 'text')
@@ -127,23 +135,25 @@
                                     <textarea class="form-control" name="specification_attributes[{{ $attribute->id }}][value]" placeholder="{{ trans('plugins/ecommerce::product-specification.product.specification_table.enter_translation') }}">{{ $attributeValue }}</textarea>
                                 @elseif ($attribute->type == 'checkbox')
                                     <input class="form-check-input" type="checkbox" name="specification_attributes[{{ $attribute->id }}][value]" value="1" @checked($attributeValue)>
-                                @elseif ($attribute->type == 'select')
-                                    <select class="form-select" name="specification_attributes[{{ $attribute->id }}][value]">
-                                        @if(is_array($attributeOptions))
-                                            @foreach ($attributeOptions as $value)
-                                                <option value="{{ $value }}" @selected($value === $attributeValue)>{{ $value }}</option>
-                                            @endforeach
-                                        @endif
-                                    </select>
-                                @elseif ($attribute->type == 'radio')
-                                    @if(is_array($attributeOptions))
-                                        @foreach ($attributeOptions as $value)
-                                            <label class="form-check form-check-inline">
-                                                <input class="form-check-input" type="radio" name="specification_attributes[{{ $attribute->id }}][value]" value="{{ $value }}" @checked($value === $attributeValue)>
-                                                <span class="form-check-label">{{ $value }}</span>
-                                            </label>
-                                        @endforeach
-                                    @endif
+                                @elseif ($attribute->type == 'select' || $attribute->type == 'radio')
+                                    @php
+                                        $resolvedLabel = null;
+                                        if ($attributeValue && $attribute->hasIdBasedOptions()) {
+                                            $translatedOpts = $attributeTranslations[$attribute->id]['options'] ?? [];
+                                            foreach ($translatedOpts as $tOpt) {
+                                                if (is_array($tOpt) && ($tOpt['id'] ?? '') === $attributeValue) {
+                                                    $resolvedLabel = $tOpt['value'];
+                                                    break;
+                                                }
+                                            }
+                                            if (!$resolvedLabel) {
+                                                $resolvedLabel = $attribute->getOptionValueById($attributeValue);
+                                            }
+                                        } elseif ($attributeValue) {
+                                            $resolvedLabel = $attributeValue;
+                                        }
+                                    @endphp
+                                    <span class="form-control-plaintext text-muted">{{ $resolvedLabel ?? '—' }}</span>
                                 @endif
                             @endif
                         </x-core::table.body.cell>

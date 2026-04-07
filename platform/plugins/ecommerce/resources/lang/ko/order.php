@@ -95,6 +95,8 @@ return [
     'coupon_code' => '쿠폰 코드: ":code"',
     'shipping_fee' => '배송비',
     'tax' => '세금',
+    'shipping_tax' => '배송세',
+
     'refunded_amount' => '환불 금액',
     'amount_received' => '실제 받은 금액',
     'download_invoice' => '송장 다운로드',
