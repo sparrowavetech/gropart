@@ -9,6 +9,10 @@ class HookServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
+        if (! is_plugin_active('ecommerce')) {
+            return;
+        }
+
         add_filter(ECOMMERCE_PRODUCT_DETAIL_EXTRA_HTML, function ($html, $product) {
             if ($product instanceof Product && setting('product_whatsapp_order_enabled', true)) {
                 $showForOutOfStock = setting('product_whatsapp_order_show_for_out_of_stock', false);

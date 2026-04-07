@@ -5,7 +5,7 @@
     "provider": "FriendsOfBotble\\ProductWhatsAppOrder\\Providers\\ProductWhatsAppOrderServiceProvider",
     "author": "Friends Of Botble",
     "url": "https://friendsofbotble.com",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Add WhatsApp order functionality to products",
     "minimum_core_version": "7.5.0",
     "require": [
