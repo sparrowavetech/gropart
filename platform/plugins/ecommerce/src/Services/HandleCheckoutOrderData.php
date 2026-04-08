@@ -68,12 +68,14 @@ class HandleCheckoutOrderData
 
                     if ($order && isset($storeData['shipping_amount'])) {
                         // We do NOT override the global $shippingAmount here! Instead we use local store amount
-                        $storeShippingAmount = $storeData['shipping_amount'];
-                        $newAmount = max($order->sub_total - $order->discount_amount + $order->tax_amount + $storeShippingAmount + ($order->payment_fee ?? 0), 0);
+                        $shippingAmount = $storeData['shipping_amount'];
+                        $storeShippingTaxAmount = EcommerceHelper::calculateShippingTax($shippingAmount);
+                        $newAmount = max($order->sub_total - $order->discount_amount + $order->tax_amount + $shippingAmount + $storeShippingTaxAmount + ($order->payment_fee ?? 0), 0);
 
-                        if ($order->shipping_amount != $storeShippingAmount || $order->amount != $newAmount) {
+                        if ($order->shipping_amount != $shippingAmount || $order->amount != $newAmount) {
                             $order->update([
-                                'shipping_amount' => $storeShippingAmount,
+                                'shipping_amount' => $shippingAmount,
+                                'shipping_tax_amount' => $storeShippingTaxAmount,
                                 'shipping_option' => Arr::get($storeData, 'shipping_option'),
                                 'amount' => $newAmount,
                             ]);
@@ -192,11 +194,13 @@ class HandleCheckoutOrderData
                         ->first();
 
                     if ($order) {
-                        $newAmount = max($order->sub_total - $order->discount_amount + $order->tax_amount + $shippingAmount + ($order->payment_fee ?? 0), 0);
+                        $orderShippingTaxAmount = EcommerceHelper::calculateShippingTax($shippingAmount);
+                        $newAmount = max($order->sub_total - $order->discount_amount + $order->tax_amount + $shippingAmount + $orderShippingTaxAmount + ($order->payment_fee ?? 0), 0);
 
                         if ($order->shipping_amount != $shippingAmount || $order->amount != $newAmount) {
                             $order->update([
                                 'shipping_amount' => $shippingAmount,
+                                'shipping_tax_amount' => $orderShippingTaxAmount,
                                 'shipping_option' => $defaultShippingOption,
                                 'amount' => $newAmount,
                             ]);
@@ -234,6 +238,11 @@ class HandleCheckoutOrderData
         $orderAmount = max($rawTotal - $promotionDiscountAmount - $couponDiscountAmount, 0);
         $orderAmount += (float) $shippingAmount;
 
+        $shippingTaxAmount = EcommerceHelper::calculateShippingTax($shippingAmount);
+        $orderAmount += $shippingTaxAmount;
+
+        Arr::set($sessionCheckoutData, 'shipping_tax_amount', $shippingTaxAmount);
+
         $paymentFee = 0;
         if ($paymentMethod && is_plugin_active('payment')) {
             $paymentFee = PaymentFeeHelper::calculateFee($paymentMethod, $orderAmount);
@@ -252,7 +261,8 @@ class HandleCheckoutOrderData
             couponDiscountAmount: $couponDiscountAmount,
             defaultShippingMethod: $defaultShippingMethod,
             defaultShippingOption: $defaultShippingOption,
-            paymentFee: $paymentFee
+            paymentFee: $paymentFee,
+            shippingTaxAmount: $shippingTaxAmount,
         );
     }
 }

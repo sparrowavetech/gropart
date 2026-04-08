@@ -54,6 +54,16 @@
             </x-core::table.body.cell>
         </x-core::table.body.row>
         @endif
+        @if ((float) ($order->shipping_tax_amount ?? 0))
+        <x-core::table.body.row>
+            <x-core::table.body.cell>
+                {{ trans('plugins/ecommerce::order.shipping_tax') }}
+            </x-core::table.body.cell>
+            <x-core::table.body.cell>
+                {{ format_price($order->shipping_tax_amount) }}
+            </x-core::table.body.cell>
+        </x-core::table.body.row>
+        @endif
 
         @if ((float) $order->payment_fee)
         <x-core::table.body.row>

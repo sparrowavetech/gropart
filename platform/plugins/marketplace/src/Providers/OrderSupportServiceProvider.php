@@ -494,6 +494,9 @@ class OrderSupportServiceProvider extends ServiceProvider
 
         $orderAmount += (float) $shippingAmount;
 
+        $shippingTaxAmount = EcommerceHelper::calculateShippingTax($shippingAmount);
+        $orderAmount += $shippingTaxAmount;
+
         $paymentFee = 0;
         if ($paymentMethod && is_plugin_active('payment')) {
             $paymentFee = PaymentFeeHelper::calculateFee($paymentMethod, $orderAmount);
@@ -522,6 +525,7 @@ class OrderSupportServiceProvider extends ServiceProvider
             'shipping_method' => $isAvailableShipping ? $shippingMethodInput : '',
             'shipping_option' => $finalShippingOption,
             'shipping_amount' => (float) $shippingAmount,
+            'shipping_tax_amount' => $shippingTaxAmount,
             'payment_fee' => (float) $paymentFee,
             'tax_amount' => Cart::instance('cart')->rawTaxByItems($cartItems),
             'sub_total' => Cart::instance('cart')->rawSubTotalByItems($cartItems),
@@ -661,7 +665,7 @@ class OrderSupportServiceProvider extends ServiceProvider
 
         foreach ($orders as $order) {
             if ($order->payment_fee > 0 && $order->amount > 0) {
-                $orderAmount = $order->sub_total + $order->tax_amount + $order->shipping_amount + $order->payment_fee - $order->discount_amount;
+                $orderAmount = $order->sub_total + $order->tax_amount + $order->shipping_amount + ($order->shipping_tax_amount ?? 0) + $order->payment_fee - $order->discount_amount;
                 if ($order->amount != $orderAmount) {
                     $order->amount = $orderAmount;
                     $order->save();
@@ -1386,7 +1390,7 @@ class OrderSupportServiceProvider extends ServiceProvider
             }
 
             if ($vendorInfo->id) {
-                $orderAmountWithoutShippingFee = $order->amount - $order->shipping_amount - $order->tax_amount - $order->payment_fee;
+                $orderAmountWithoutShippingFee = $order->amount - $order->shipping_amount - ($order->shipping_tax_amount ?? 0) - $order->tax_amount - $order->payment_fee;
                 if (! MarketplaceHelper::isCommissionCategoryFeeBasedEnabled()) {
                     $feePercentage = MarketplaceHelper::getSetting('fee_per_order', 0);
                     $fee = $orderAmountWithoutShippingFee * ($feePercentage / 100);
