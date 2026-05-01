@@ -1,0 +1,123 @@
+/* Loyalty Points Admin Styles - RTL Support */
+
+// Import the base styles
+@import 'loyalty-admin';
+
+// RTL overrides for admin pages
+body[dir="rtl"] {
+    .loyalty-reports-page {
+        direction: rtl;
+
+        // Table text alignment
+        .table {
+            thead th,
+            tbody td {
+                text-align: right;
+            }
+
+            .text-end {
+                text-align: left !important;
+            }
+        }
+
+        // Card layout
+        .card {
+            text-align: right;
+        }
+
+        // Badge positioning
+        .badge {
+            margin-left: 0;
+            margin-right: 0.5rem;
+        }
+
+        // Empty state
+        .empty-state {
+            text-align: center;
+        }
+
+        // Icon margins
+        .me-1, .me-2, .me-3 {
+            margin-right: 0 !important;
+            margin-left: 0.25rem !important;
+        }
+
+        .ms-1, .ms-2, .ms-3 {
+            margin-left: 0 !important;
+            margin-right: 0.25rem !important;
+        }
+
+        .ms-auto {
+            margin-left: 0 !important;
+            margin-right: auto !important;
+        }
+
+        .me-auto {
+            margin-right: 0 !important;
+            margin-left: auto !important;
+        }
+
+        // Text alignment
+        .text-end {
+            text-align: left !important;
+        }
+
+        .text-start {
+            text-align: right !important;
+        }
+
+        // Form elements
+        .form-label {
+            text-align: right;
+        }
+
+        .form-check {
+            padding-left: 0;
+            padding-right: 1.5em;
+
+            .form-check-input {
+                float: right;
+                margin-left: 0;
+                margin-right: -1.5em;
+            }
+        }
+
+        // Input groups
+        .input-group {
+            flex-direction: row-reverse;
+        }
+
+        // Stat widgets
+        .stat-widget {
+            text-align: right;
+
+            .stat-icon {
+                margin-right: 0;
+                margin-left: 1rem;
+            }
+        }
+
+        // Activity sections
+        .activity-section {
+            text-align: right;
+
+            .activity-icon {
+                margin-right: 0;
+                margin-left: 0.75rem;
+            }
+        }
+
+        // Buttons
+        .btn {
+            .icon {
+                margin-right: 0;
+                margin-left: 0.5rem;
+            }
+        }
+
+        // Dropdown menus
+        .dropdown-menu-end {
+            --bs-position: start;
+        }
+    }
+}

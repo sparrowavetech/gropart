@@ -1,0 +1,457 @@
+.visually-hidden {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
+
+.loyalty-points-compact {
+    margin-bottom: 16px;
+
+    &.loading {
+        position: relative;
+        pointer-events: none;
+
+        &::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.6),
+                transparent
+            );
+            animation: shimmer 1.5s infinite;
+        }
+    }
+
+    .loyalty-applied {
+        background-color: rgba(var(--bs-success-rgb), 0.1);
+        border: 1px dashed var(--bs-success);
+        border-radius: 0.25rem;
+        padding: 0.75rem 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        .loyalty-applied-content {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--bs-success);
+            font-weight: 500;
+            font-size: 0.9rem;
+
+            i,
+            svg {
+                width: 18px;
+                height: 18px;
+            }
+        }
+
+        .btn-remove {
+            color: var(--bs-danger, #dc3545);
+            opacity: 0.7;
+            transition: all 0.2s ease;
+            padding: 4px;
+            border: none;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 4px;
+
+            &:hover {
+                opacity: 1;
+                background-color: rgba(var(--bs-danger-rgb, 220, 53, 69), 0.1);
+            }
+
+            &:focus-visible {
+                outline: 2px solid var(--bs-primary);
+                outline-offset: 2px;
+            }
+
+            &.loading {
+                opacity: 0.5;
+                cursor: wait;
+            }
+
+            i,
+            svg {
+                width: 16px;
+                height: 16px;
+            }
+        }
+    }
+
+    .loyalty-suggestion {
+        background-color: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 0.25rem;
+        padding: 0.75rem 1rem;
+
+        .loyalty-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+
+            i,
+            svg {
+                color: var(--bs-primary) !important;
+                height: 18px;
+                width: 18px;
+            }
+        }
+
+        .loyalty-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .loyalty-balance {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            color: var(--bs-gray-800, #343a40);
+            font-size: 0.95rem;
+
+            i,
+            svg {
+                color: var(--bs-primary);
+                height: 18px;
+                width: 18px;
+            }
+        }
+
+        .loyalty-redeem-info {
+            font-size: 0.85rem;
+            color: var(--bs-gray-600, #6c757d);
+        }
+
+        .btn-primary {
+            background-color: var(--bs-primary);
+            border-color: var(--bs-primary);
+            color: #fff;
+
+            &:hover {
+                background-color: var(--bs-primary);
+                border-color: var(--bs-primary);
+                opacity: 0.9;
+            }
+
+            &:active {
+                background-color: var(--bs-primary);
+                border-color: var(--bs-primary);
+                opacity: 0.8;
+            }
+
+            &:focus-visible {
+                outline: 2px solid var(--bs-primary);
+                outline-offset: 2px;
+            }
+        }
+    }
+
+    .loyalty-preset-buttons {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.5rem;
+    }
+
+    .loyalty-preset-btn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 0.75rem 0.5rem;
+        min-height: 72px;
+        border: 1px solid var(--bs-border-color, #dee2e6);
+        border-radius: 0.375rem;
+        background: #fff;
+        cursor: pointer;
+        transition: all 0.15s ease;
+
+        &:hover:not(:disabled) {
+            border-color: var(--bs-primary);
+            background-color: rgba(var(--bs-primary-rgb), 0.05);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--bs-primary);
+            outline-offset: 2px;
+        }
+
+        &:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        &.loading {
+            position: relative;
+            color: transparent;
+
+            .preset-label,
+            .preset-points,
+            .preset-discount {
+                visibility: hidden;
+            }
+
+            &::after {
+                content: '';
+                position: absolute;
+                width: 16px;
+                height: 16px;
+                border: 2px solid var(--bs-primary);
+                border-radius: 50%;
+                border-top-color: transparent;
+                animation: spin 0.8s linear infinite;
+            }
+        }
+
+        .preset-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--bs-gray-800);
+        }
+
+        .preset-points {
+            font-size: 0.7rem;
+            color: var(--bs-gray-600);
+        }
+
+        .preset-discount {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--bs-success);
+        }
+    }
+
+    .loyalty-earn-preview {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 0.75rem;
+        background-color: rgba(var(--bs-warning-rgb), 0.1);
+        border-radius: 0.25rem;
+        font-size: 0.85rem;
+        color: var(--bs-gray-700, #495057);
+
+        i,
+        svg {
+            width: 16px;
+            height: 16px;
+            color: var(--bs-warning);
+        }
+    }
+
+    .loyalty-tier-boost {
+        padding: 0.5rem 0.75rem;
+        background-color: rgba(var(--bs-success-rgb), 0.1);
+        border-radius: 0.25rem;
+        display: flex;
+        align-items: center;
+
+        i,
+        svg {
+            width: 16px;
+            height: 16px;
+        }
+    }
+
+    .loyalty-error {
+        padding: 0.5rem 0.75rem;
+        background-color: rgba(var(--bs-danger-rgb), 0.1);
+        border: 1px solid var(--bs-danger);
+        border-radius: 0.25rem;
+        color: var(--bs-danger);
+        font-size: 0.85rem;
+        animation: fadeIn 0.2s ease;
+
+        svg {
+            color: var(--bs-danger);
+            flex-shrink: 0;
+        }
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 768px) {
+    .loyalty-points-compact {
+        .loyalty-applied {
+            padding: 0.65rem 0.85rem;
+
+            .loyalty-applied-content {
+                flex: 1;
+                font-size: 0.8rem;
+                gap: 0.4rem;
+
+                i,
+                svg {
+                    width: 16px;
+                    height: 16px;
+                    flex-shrink: 0;
+                }
+            }
+
+            .btn-remove {
+                margin-left: 0.5rem;
+                padding: 2px;
+
+                i,
+                svg {
+                    width: 14px;
+                    height: 14px;
+                }
+            }
+        }
+
+        .loyalty-suggestion {
+            padding: 0.65rem 0.85rem;
+
+            .loyalty-header {
+                gap: 0.4rem;
+
+                i,
+                svg {
+                    width: 16px;
+                    height: 16px;
+                    flex-shrink: 0;
+                }
+            }
+
+            .loyalty-info {
+                gap: 0.25rem;
+            }
+
+            .loyalty-balance {
+                font-size: 0.85rem;
+                gap: 0.4rem;
+
+                i,
+                svg {
+                    width: 16px;
+                    height: 16px;
+                    flex-shrink: 0;
+                }
+            }
+
+            .loyalty-redeem-info {
+                font-size: 0.75rem;
+                line-height: 1.3;
+            }
+
+            .btn-primary {
+                width: 100%;
+                padding: 0.5rem 1rem;
+                font-size: 0.85rem;
+            }
+        }
+
+        .loyalty-preset-buttons {
+            grid-template-columns: repeat(2, 1fr);
+
+            .loyalty-preset-btn:last-child:nth-child(odd) {
+                grid-column: span 2;
+            }
+        }
+
+        .loyalty-preset-btn {
+            min-height: 60px;
+            padding: 0.5rem 0.4rem;
+
+            .preset-label {
+                font-size: 0.75rem;
+            }
+
+            .preset-points {
+                font-size: 0.65rem;
+            }
+
+            .preset-discount {
+                font-size: 0.8rem;
+            }
+        }
+
+        .loyalty-earn-preview {
+            font-size: 0.8rem;
+            padding: 0.4rem 0.65rem;
+        }
+
+        .loyalty-tier-boost {
+            padding: 0.4rem 0.65rem;
+
+            small {
+                font-size: 0.75rem;
+            }
+        }
+    }
+}
+
+@media (prefers-contrast: high) {
+    .loyalty-points-compact {
+        .loyalty-applied,
+        .loyalty-suggestion {
+            border-width: 2px;
+        }
+
+        .loyalty-preset-btn {
+            border-width: 2px;
+        }
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .loyalty-points-compact {
+        &.loading::after {
+            animation: none;
+        }
+
+        .loyalty-preset-btn.loading::after {
+            animation: none;
+            border: 2px solid var(--bs-primary);
+        }
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 1;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+}

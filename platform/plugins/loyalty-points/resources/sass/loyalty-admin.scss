@@ -1,0 +1,151 @@
+/* Loyalty Points Admin Styles - Dark Mode Support */
+
+// CSS Custom Properties for Loyalty Admin Theming
+:root {
+    // Card backgrounds
+    --loyalty-card-bg: #ffffff;
+    --loyalty-card-header-bg: #ffffff;
+    --loyalty-card-border: rgba(0, 0, 0, 0.125);
+    --loyalty-card-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+
+    // Table backgrounds
+    --loyalty-table-header-bg: #f8f9fa;
+    --loyalty-table-hover-bg: rgba(0, 0, 0, 0.02);
+    --loyalty-table-border: #dee2e6;
+
+    // Text colors
+    --loyalty-text-primary: #212529;
+    --loyalty-text-secondary: #6c757d;
+    --loyalty-text-muted: #adb5bd;
+
+    // Activity type backgrounds (light variants)
+    --loyalty-activity-earn-bg: rgba(40, 167, 69, 0.1);
+    --loyalty-activity-redeem-bg: rgba(255, 193, 7, 0.1);
+    --loyalty-activity-adjust-bg: rgba(13, 110, 253, 0.1);
+    --loyalty-activity-reverse-bg: rgba(220, 53, 69, 0.1);
+
+    // Empty state
+    --loyalty-empty-bg: #f8f9fa;
+}
+
+// Dark mode overrides
+[data-bs-theme='dark'] {
+    --loyalty-card-bg: var(--tblr-bg-surface, #1a1d21);
+    --loyalty-card-header-bg: var(--tblr-bg-surface-secondary, #22262a);
+    --loyalty-card-border: rgba(255, 255, 255, 0.1);
+    --loyalty-card-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.3);
+
+    --loyalty-table-header-bg: var(--tblr-bg-surface-secondary, #22262a);
+    --loyalty-table-hover-bg: rgba(255, 255, 255, 0.03);
+    --loyalty-table-border: rgba(255, 255, 255, 0.1);
+
+    --loyalty-text-primary: #e1e4e8;
+    --loyalty-text-secondary: #8b949e;
+    --loyalty-text-muted: #6c757d;
+
+    --loyalty-activity-earn-bg: rgba(40, 167, 69, 0.15);
+    --loyalty-activity-redeem-bg: rgba(255, 193, 7, 0.15);
+    --loyalty-activity-adjust-bg: rgba(13, 110, 253, 0.15);
+    --loyalty-activity-reverse-bg: rgba(220, 53, 69, 0.15);
+
+    --loyalty-empty-bg: var(--tblr-bg-surface-secondary, #22262a);
+}
+
+// Scoped styles for loyalty reports page
+.loyalty-reports-page {
+    // Card styling
+    .card {
+        background-color: var(--loyalty-card-bg);
+        border-color: var(--loyalty-card-border);
+        box-shadow: var(--loyalty-card-shadow);
+        transition: background-color 0.2s ease, border-color 0.2s ease;
+    }
+
+    .card-header {
+        background-color: var(--loyalty-card-header-bg) !important;
+        border-bottom-color: var(--loyalty-card-border);
+    }
+
+    .card-body {
+        background-color: var(--loyalty-card-bg);
+    }
+
+    // Table styling
+    .table {
+        --bs-table-bg: var(--loyalty-card-bg);
+        --bs-table-hover-bg: var(--loyalty-table-hover-bg);
+
+        thead {
+            th {
+                background-color: var(--loyalty-table-header-bg) !important;
+                border-color: var(--loyalty-table-border) !important;
+                color: var(--loyalty-text-secondary);
+            }
+        }
+
+        tbody {
+            td {
+                border-color: var(--loyalty-table-border);
+                color: var(--loyalty-text-primary);
+            }
+
+            tr:hover {
+                background-color: var(--loyalty-table-hover-bg);
+            }
+        }
+    }
+
+    // Remove table-light class override in dark mode
+    .table-light {
+        --bs-table-bg: var(--loyalty-table-header-bg);
+        --bs-table-border-color: var(--loyalty-table-border);
+        --bs-table-color: var(--loyalty-text-secondary);
+    }
+
+    // Activity type sections
+    .activity-section {
+        &.activity-earn {
+            background-color: var(--loyalty-activity-earn-bg);
+        }
+
+        &.activity-redeem {
+            background-color: var(--loyalty-activity-redeem-bg);
+        }
+
+        &.activity-adjust {
+            background-color: var(--loyalty-activity-adjust-bg);
+        }
+
+        &.activity-reverse {
+            background-color: var(--loyalty-activity-reverse-bg);
+        }
+    }
+
+    // Text utilities respect theme
+    .text-muted {
+        color: var(--loyalty-text-secondary) !important;
+    }
+
+    // Empty state styling
+    .empty-state {
+        background-color: var(--loyalty-empty-bg);
+        border-radius: 0.5rem;
+        padding: 2rem;
+        text-align: center;
+
+        .icon-xxl {
+            color: var(--loyalty-text-muted);
+        }
+
+        p {
+            color: var(--loyalty-text-secondary);
+        }
+    }
+
+    // Smooth transitions for theme switching
+    * {
+        transition: background-color 0.2s ease,
+                    border-color 0.2s ease,
+                    color 0.2s ease;
+    }
+}
