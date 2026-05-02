@@ -1,6 +1,8 @@
 @extends(MarketplaceHelper::viewPath('vendor-dashboard.layouts.master'))
 
 @section('content')
+    {!! apply_filters('marketplace_vendor_dashboard_before_content', '', $customer ?? auth('customer')->user()) !!}
+
     @if ($totalProducts)
         <div class="text-start text-sm-end mb-5">
             <x-core::button
@@ -29,6 +31,8 @@
     >
         @include(MarketplaceHelper::viewPath('vendor-dashboard.partials.dashboard-content'))
     </section>
+
+    {!! apply_filters('marketplace_vendor_dashboard_after_content', '', $customer ?? auth('customer')->user()) !!}
 @stop
 
 @push('footer')

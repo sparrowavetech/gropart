@@ -72,6 +72,7 @@
             "@build",
             "@php vendor/bin/testbench serve --ansi"
         ],
+        "minify": "npx terser resources/js/mcp-sdk.js --compress --mangle --output resources/js/mcp-sdk.min.js",
         "lint": [
             "pint",
             "rector"
@@ -81,7 +82,7 @@
             "rector --dry-run"
         ],
         "test:unit": "pest --ci --coverage --min=92.5",
-        "test:types": "phpstan",
+        "test:types": "phpstan --no-progress",
         "test": [
             "@test:lint",
             "@test:unit",

@@ -65,4 +65,5 @@ return [
     'please_select_record' => 'Valitse vähintään yksi tietue suorittaaksesi tämän toiminnon!',
     'checkbox' => 'Valintaruutu',
     'toggle_columns' => 'Vaihda sarakkeita',
+    'created_by' => 'Luonut',
 ];

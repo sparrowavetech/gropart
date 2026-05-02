@@ -203,6 +203,13 @@ return [
         'uploaded_file_too_large' => 'A fájl túl nagy. Kérjük, válasszon egy kisebb fájlt.',
         'uploaded_file_corrupted' => 'A fájl sérültnek vagy érvénytelennek tűnik. Kérjük, próbáljon meg feltölteni egy másik fájlt.',
         'upload_network_error' => 'A feltöltés hálózati problémák miatt nem sikerült. Kérjük, ellenőrizze a kapcsolatot és próbálja újra.',
+        'upload_err_ini_size' => 'A fájl nagyobb, mint a kiszolgáló :size feltöltési korlátja. Növelje az "upload_max_filesize" értéket a PHP beállításokban vagy kérdezze meg a tárhelyszolgáltatóját.',
+        'upload_err_form_size' => 'A fájl meghaladja az űrlap maximális feltöltési méretét.',
+        'upload_err_partial' => 'A fájl csak részben töltődött fel. Kérjük, próbálja újra — ez általában azt jelenti, hogy a kapcsolat megszakadt.',
+        'upload_err_no_tmp_dir' => 'A kiszolgáló nem tudja menteni a feltöltött fájlt, mert a PHP ideiglenes feltöltési könyvtára (upload_tmp_dir) hiányzik vagy nem írható. Kérje meg a tárhelyszolgáltatót, hogy állítsa be az "upload_tmp_dir" értékét a PHP-FPM pool konfigurációjában egy írható mappára (pl. /home/your-user/tmp). Teljes útmutató: https://docs.botble.com/cms/media-upload-errors.html',
+        'upload_err_cant_write' => 'A kiszolgáló nem tudta a feltöltött fájlt a lemezre írni. Ellenőrizze a mappa jogosultságait, a lemezkvótát és hogy a tmp könyvtár írható-e a PHP számára.',
+        'upload_err_extension' => 'Egy PHP-bővítmény (például ModSecurity vagy biztonsági bővítmény) blokkolta a feltöltést. Lépjen kapcsolatba a tárhelyszolgáltatójával.',
+        'upload_err_unknown' => 'A feltöltés sikertelen (PHP hibakód :code). Kérjük, lépjen kapcsolatba a tárhelyszolgáltatójával.',
         'attributes' => [
             'uploaded_file' => 'fájl',
             'upload' => 'fájl',

@@ -505,6 +505,10 @@ return [
             'widget_cache_ttl_helper' => 'המשך לשמירת כל הווידג\'טים במטמון. ברירת המחדל היא 1800 שניות (30 דקות).',
             'plugin_cache_enabled' => 'שמור תוספים מותקנים במטמון',
             'plugin_cache_enabled_helper' => 'שמור את רשימת התוספים המותקנים במטמון לביצועים משופרים. כאשר מופעל, המערכת תשמור את רשימת התוספים במטמון למשך 30 דקות כדי להפחית סריקות מערכת קבצים.',
+            'cache_size_warning_threshold' => 'סף אזהרה לגודל המטמון (MB)',
+            'cache_size_warning_threshold_helper' => 'הצג אזהרה בעמוד ניהול המטמון כאשר מטמון ה-framework חורג מגודל זה (ב-MB). ברירת המחדל היא 50 MB.',
+            'cache_auto_clear_enabled' => 'ניקוי אוטומטי של המטמון כאשר הגודל חורג מהסף',
+            'cache_auto_clear_enabled_helper' => 'מנקה אוטומטית את מטמון ה-framework בכל שעה כאשר גודלו חורג מסף האזהרה שלמעלה. דורש שמתזמן Laravel (<code>php artisan schedule:run</code>) יוגדר כמשימת cron בשרת שלך.',
         ],
     ],
     'appearance' => [

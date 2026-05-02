@@ -208,6 +208,13 @@ return [
         'uploaded_file_too_large' => 'O ficheiro é demasiado grande. Escolha um ficheiro mais pequeno.',
         'uploaded_file_corrupted' => 'O ficheiro parece estar danificado ou inválido. Tente carregar outro ficheiro.',
         'upload_network_error' => 'O carregamento falhou devido a problemas de rede. Verifique a ligação e tente novamente.',
+        'upload_err_ini_size' => 'O ficheiro é maior que o limite de carregamento :size do servidor. Aumente "upload_max_filesize" nas definições do PHP ou contacte o seu fornecedor de alojamento.',
+        'upload_err_form_size' => 'O ficheiro excede o tamanho máximo de carregamento do formulário.',
+        'upload_err_partial' => 'O ficheiro foi apenas parcialmente carregado. Por favor, tente novamente — isto geralmente significa que a ligação foi interrompida.',
+        'upload_err_no_tmp_dir' => 'O servidor não pode guardar o ficheiro carregado porque o diretório de carregamento temporário do PHP (upload_tmp_dir) está ausente ou não é gravável. Peça ao seu fornecedor de alojamento para definir "upload_tmp_dir" na configuração do pool PHP-FPM para uma pasta gravável (por exemplo, /home/your-user/tmp). Instruções completas: https://docs.botble.com/cms/media-upload-errors.html',
+        'upload_err_cant_write' => 'O servidor não conseguiu gravar o ficheiro carregado no disco. Verifique as permissões da pasta, a quota do disco e se o diretório tmp é gravável pelo PHP.',
+        'upload_err_extension' => 'Uma extensão do PHP (como o ModSecurity ou um plugin de segurança) bloqueou o carregamento. Contacte o seu fornecedor de alojamento.',
+        'upload_err_unknown' => 'Falha no carregamento (código de erro PHP :code). Por favor, contacte o seu fornecedor de alojamento.',
         'attributes' => [
             'uploaded_file' => 'ficheiro',
             'upload' => 'carregamento',

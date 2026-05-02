@@ -8,6 +8,7 @@ return [
     'clear_button' => 'Išvalyti',
     'refresh_button' => 'Atnaujinti',
     'cache_size_warning' => 'Jūsų CMS talpyklos dydis yra gana didelis (>50MB). Jos išvalymas gali pagerinti sistemos našumą.',
+    'cache_size_warning_dynamic' => 'Jūsų CMS talpyklos dydis yra gana didelis (>:sizeMB). Jos išvalymas gali pagerinti sistemos našumą.',
     'footer_note' => 'Išvalykite talpyklą po pakeitimų svetainėje, kad jie būtų rodomi teisingai.',
     'type' => 'Tipas',
     'description' => 'Aprašymas',

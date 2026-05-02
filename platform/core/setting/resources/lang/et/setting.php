@@ -505,6 +505,10 @@ return [
             'widget_cache_ttl_helper' => 'Kõigi vidinate vahemällu salvestamise kestus. Vaikimisi on 1800 sekundit (30 minutit).',
             'plugin_cache_enabled' => 'Salvesta paigaldatud pistikprogrammid vahemällu',
             'plugin_cache_enabled_helper' => 'Salvesta paigaldatud pistikprogrammide nimekiri vahemällu parema jõudluse saavutamiseks. Kui lubatud, salvestab süsteem pistikprogrammide nimekirja 30 minutiks vahemällu failisüsteemi skannimiste vähendamiseks.',
+            'cache_size_warning_threshold' => 'Vahemälu suuruse hoiatuse lävi (MB)',
+            'cache_size_warning_threshold_helper' => 'Kuvab vahemälu haldamise lehel hoiatuse, kui raamistiku vahemälu ületab selle suuruse (MB-des). Vaikeväärtus on 50 MB.',
+            'cache_auto_clear_enabled' => 'Tühjenda vahemälu automaatselt, kui suurus ületab läve',
+            'cache_auto_clear_enabled_helper' => 'Tühjendab raamistiku vahemälu automaatselt iga tund, kui selle suurus ületab ülaltoodud hoiatuse läve. Nõuab, et Laraveli ajakavandaja (<code>php artisan schedule:run</code>) oleks teie serveris seadistatud cron-tööna.',
         ],
     ],
     'appearance' => [

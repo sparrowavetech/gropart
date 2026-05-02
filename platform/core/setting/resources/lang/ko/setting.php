@@ -505,6 +505,10 @@ return [
             'widget_cache_ttl_helper' => '모든 위젯을 캐시하는 기간입니다. 기본값은 1800초(30분)입니다.',
             'plugin_cache_enabled' => '설치된 플러그인 캐시',
             'plugin_cache_enabled_helper' => '성능 향상을 위해 설치된 플러그인 목록을 캐시합니다. 활성화하면 파일 시스템 스캔을 줄이기 위해 시스템이 플러그인 목록을 30분 동안 캐시합니다.',
+            'cache_size_warning_threshold' => '캐시 크기 경고 임계값 (MB)',
+            'cache_size_warning_threshold_helper' => '프레임워크 캐시가 이 크기(MB)를 초과할 때 캐시 관리 페이지에 경고를 표시합니다. 기본값은 50 MB입니다.',
+            'cache_auto_clear_enabled' => '크기가 임계값을 초과하면 캐시를 자동으로 지우기',
+            'cache_auto_clear_enabled_helper' => '프레임워크 캐시 크기가 위의 경고 임계값을 초과할 때마다 1시간마다 자동으로 캐시를 지웁니다. 서버에 Laravel 스케줄러(<code>php artisan schedule:run</code>)가 cron 작업으로 구성되어 있어야 합니다.',
         ],
     ],
     'appearance' => [

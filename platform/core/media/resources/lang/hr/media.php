@@ -203,6 +203,13 @@ return [
         'uploaded_file_too_large' => 'Datoteka je prevelika. Molimo odaberite manju datoteku.',
         'uploaded_file_corrupted' => 'Čini se da je datoteka oštećena ili nevažeća. Molimo pokušajte učitati drugu datoteku.',
         'upload_network_error' => 'Učitavanje nije uspjelo zbog problema s mrežom. Molimo provjerite svoju vezu i pokušajte ponovno.',
+        'upload_err_ini_size' => 'Datoteka je veća od poslužiteljevog ograničenja učitavanja :size. Povećajte "upload_max_filesize" u PHP postavkama ili pitajte svog davatelja usluga hostinga.',
+        'upload_err_form_size' => 'Datoteka premašuje maksimalnu veličinu učitavanja obrasca.',
+        'upload_err_partial' => 'Datoteka je samo djelomično učitana. Molimo pokušajte ponovno — to obično znači da je veza prekinuta.',
+        'upload_err_no_tmp_dir' => 'Poslužitelj ne može spremiti učitanu datoteku jer privremeni direktorij za učitavanje PHP-a (upload_tmp_dir) nedostaje ili nije zapisiv. Zatražite od svog davatelja usluga hostinga da postavi "upload_tmp_dir" u konfiguraciji PHP-FPM poola na mapu koja se može pisati (npr. /home/your-user/tmp). Potpune upute: https://docs.botble.com/cms/media-upload-errors.html',
+        'upload_err_cant_write' => 'Poslužitelj nije mogao zapisati učitanu datoteku na disk. Provjerite dopuštenja mape, kvotu diska i je li tmp direktorij zapisiv za PHP.',
+        'upload_err_extension' => 'PHP ekstenzija (poput ModSecurity ili sigurnosnog dodatka) blokirala je učitavanje. Kontaktirajte svog davatelja usluga hostinga.',
+        'upload_err_unknown' => 'Učitavanje nije uspjelo (PHP kod pogreške :code). Molimo kontaktirajte svog davatelja usluga hostinga.',
         'attributes' => [
             'uploaded_file' => 'datoteka',
             'upload' => 'datoteka',

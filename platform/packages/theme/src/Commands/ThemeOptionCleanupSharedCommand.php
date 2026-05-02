@@ -18,6 +18,12 @@ class ThemeOptionCleanupSharedCommand extends Command
     {
         RenderingThemeOptionSettings::dispatch();
 
+        if (defined('RENDERING_THEME_OPTIONS_PAGE')) {
+            do_action(RENDERING_THEME_OPTIONS_PAGE);
+        }
+
+        ThemeOption::constructSections();
+
         $theme = setting('theme');
 
         if (! $theme) {

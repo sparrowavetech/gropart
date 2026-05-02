@@ -93,7 +93,8 @@ class ShortcodeController extends BaseController
         $locale = app()->getLocale();
         $authorized = auth()->check() ? 'auth' : 'anon';
         $appUrl = url('/');
-        $cacheKey = 'shortcode_' . md5($name . $appUrl . serialize($attributes) . $locale . $authorized);
+        $extraCacheKeys = apply_filters('shortcode_cache_key_parts', [], $name);
+        $cacheKey = 'shortcode_' . md5($name . $appUrl . serialize($attributes) . $locale . $authorized . serialize($extraCacheKeys));
 
         if (! setting('shortcode_cache_enabled', false)) {
             $code = Shortcode::generateShortcode($name, $attributes);

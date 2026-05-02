@@ -369,6 +369,10 @@ app('events')->listen(RouteMatched::class, function (): void {
                     'with' => EcommerceHelper::withProductEagerLoadingRelations(),
                 ], EcommerceHelper::withReviewsParams()));
 
+                if (! $products instanceof Collection) {
+                    $products = $products ? collect([$products]) : collect();
+                }
+
                 if ($products->isEmpty()) {
                     return null;
                 }
@@ -465,6 +469,10 @@ app('events')->listen(RouteMatched::class, function (): void {
                     ],
                     'take' => $limit,
                 ], EcommerceHelper::withReviewsParams()));
+
+                if (! $products instanceof Collection) {
+                    $products = $products ? collect([$products]) : collect();
+                }
 
                 if ($products->isEmpty()) {
                     return null;

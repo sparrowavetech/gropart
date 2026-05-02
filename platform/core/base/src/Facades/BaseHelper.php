@@ -38,6 +38,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static \Botble\Base\Helpers\BaseHelper iniSet(string $key, string|int|null $value)
  * @method static \Botble\Base\Helpers\BaseHelper maximumExecutionTimeAndMemoryLimit()
  * @method static array|string|null removeSpecialCharacters(string|null $string)
+ * @method static mixed sanitizeUtf8(mixed $value)
  * @method static string getInputValueFromQueryString(string $name)
  * @method static string|null cleanShortcodes(string|null $content)
  * @method static string|null stringify($content)

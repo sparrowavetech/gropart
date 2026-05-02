@@ -80,4 +80,9 @@ final class LaravelLevelSetList
      * @var string
      */
     public const UP_TO_LARAVEL_120 = __DIR__ . '/../../config/sets/level/up-to-laravel-120.php';
+
+    /**
+     * @var string
+     */
+    public const UP_TO_LARAVEL_130 = __DIR__ . '/../../config/sets/level/up-to-laravel-130.php';
 }

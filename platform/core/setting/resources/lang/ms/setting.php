@@ -505,6 +505,10 @@ return [
             'widget_cache_ttl_helper' => 'Tempoh untuk cache semua widget. Lalai ialah 1800 saat (30 minit).',
             'plugin_cache_enabled' => 'Cache plugin yang dipasang',
             'plugin_cache_enabled_helper' => 'Cache senarai plugin yang dipasang untuk prestasi yang lebih baik. Apabila diaktifkan, sistem akan cache senarai plugin selama 30 minit untuk mengurangkan imbasan sistem fail.',
+            'cache_size_warning_threshold' => 'Ambang amaran saiz cache (MB)',
+            'cache_size_warning_threshold_helper' => 'Tunjukkan amaran pada halaman Pengurusan Cache apabila cache rangka kerja melebihi saiz ini (dalam MB). Lalai ialah 50 MB.',
+            'cache_auto_clear_enabled' => 'Kosongkan cache secara automatik apabila saiz melebihi ambang',
+            'cache_auto_clear_enabled_helper' => 'Mengosongkan cache rangka kerja secara automatik setiap jam apabila saiznya melebihi ambang amaran di atas. Memerlukan penjadual Laravel (<code>php artisan schedule:run</code>) dikonfigurasikan sebagai kerja cron pada pelayan anda.',
         ],
     ],
     'appearance' => [

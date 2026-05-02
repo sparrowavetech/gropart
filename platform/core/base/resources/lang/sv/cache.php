@@ -8,6 +8,7 @@ return [
     'clear_button' => 'Rensa',
     'refresh_button' => 'Uppdatera',
     'cache_size_warning' => 'Din CMS-cachestorlek är ganska stor (>50MB). Att rensa den kan förbättra systemprestandan.',
+    'cache_size_warning_dynamic' => 'Din CMS-cachestorlek är ganska stor (>:sizeMB). Att rensa den kan förbättra systemprestandan.',
     'footer_note' => 'Rensa cachen efter att ha gjort ändringar på din webbplats för att säkerställa att de visas korrekt.',
     'type' => 'Typ',
     'description' => 'Beskrivning',

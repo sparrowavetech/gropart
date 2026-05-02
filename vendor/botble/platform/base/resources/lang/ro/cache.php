@@ -8,6 +8,7 @@ return [
     'clear_button' => 'Șterge',
     'refresh_button' => 'Reîmprospătează',
     'cache_size_warning' => 'Dimensiunea cache-ului CMS este destul de mare (>50MB). Ștergerea acestuia poate îmbunătăți performanța sistemului.',
+    'cache_size_warning_dynamic' => 'Dimensiunea cache-ului CMS este destul de mare (>:sizeMB). Ștergerea acestuia poate îmbunătăți performanța sistemului.',
     'footer_note' => 'Ștergeți cache-ul după ce faceți modificări pe site pentru a vă asigura că acestea apar corect.',
     'type' => 'Tip',
     'description' => 'Descriere',

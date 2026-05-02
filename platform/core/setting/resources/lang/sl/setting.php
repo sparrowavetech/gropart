@@ -505,6 +505,10 @@ return [
             'widget_cache_ttl_helper' => 'Trajanje predpomnjenja vseh gradnikov. Privzeto je 1800 sekund (30 minut).',
             'plugin_cache_enabled' => 'Predpomni nameščene vtičnike',
             'plugin_cache_enabled_helper' => 'Predpomnite seznam nameščenih vtičnikov za izboljšano zmogljivost. Ko je omogočeno, bo sistem predpomnil seznam vtičnikov za 30 minut za zmanjšanje pregledov datotečnega sistema.',
+            'cache_size_warning_threshold' => 'Prag opozorila glede velikosti predpomnilnika (MB)',
+            'cache_size_warning_threshold_helper' => 'Prikaže opozorilo na strani Upravljanje predpomnilnika, ko predpomnilnik ogrodja preseže to velikost (v MB). Privzeta vrednost je 50 MB.',
+            'cache_auto_clear_enabled' => 'Samodejno počisti predpomnilnik, ko velikost preseže prag',
+            'cache_auto_clear_enabled_helper' => 'Samodejno počisti predpomnilnik ogrodja vsako uro, ko njegova velikost preseže zgoraj navedeni prag opozorila. Zahteva, da je razporejevalnik Laravel (<code>php artisan schedule:run</code>) konfiguriran kot cron opravilo na vašem strežniku.',
         ],
     ],
     'appearance' => [

@@ -203,6 +203,13 @@ return [
         'uploaded_file_too_large' => 'File terlalu besar. Silakan pilih file yang lebih kecil.',
         'uploaded_file_corrupted' => 'File tampaknya rusak atau tidak valid. Silakan coba unggah file yang berbeda.',
         'upload_network_error' => 'Unggah gagal karena masalah jaringan. Silakan periksa koneksi Anda dan coba lagi.',
+        'upload_err_ini_size' => 'File lebih besar dari batas unggahan :size server. Tingkatkan "upload_max_filesize" di pengaturan PHP atau tanyakan ke penyedia hosting Anda.',
+        'upload_err_form_size' => 'File melebihi ukuran unggahan maksimum formulir.',
+        'upload_err_partial' => 'File hanya terunggah sebagian. Silakan coba lagi — ini biasanya berarti koneksi terputus.',
+        'upload_err_no_tmp_dir' => 'Server tidak dapat menyimpan file yang diunggah karena direktori unggahan sementara PHP (upload_tmp_dir) hilang atau tidak dapat ditulis. Minta penyedia hosting Anda untuk menyetel "upload_tmp_dir" di konfigurasi PHP-FPM pool ke folder yang dapat ditulis (misalnya /home/your-user/tmp). Petunjuk lengkap: https://docs.botble.com/cms/media-upload-errors.html',
+        'upload_err_cant_write' => 'Server tidak dapat menulis file yang diunggah ke disk. Periksa izin folder, kuota disk, dan bahwa direktori tmp dapat ditulis oleh PHP.',
+        'upload_err_extension' => 'Ekstensi PHP (seperti ModSecurity atau plugin keamanan) memblokir unggahan. Hubungi penyedia hosting Anda.',
+        'upload_err_unknown' => 'Unggahan gagal (kode kesalahan PHP :code). Silakan hubungi penyedia hosting Anda.',
         'attributes' => [
             'uploaded_file' => 'file',
             'upload' => 'file',

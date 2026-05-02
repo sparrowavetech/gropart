@@ -208,6 +208,11 @@ return [
     ],
     'term_and_privacy_policy_url' => 'URL điều khoản và chính sách bảo mật',
     'site_title_separator' => 'Dấu phân cách tiêu đề',
+    'site_title_helper' => 'Tên thương hiệu hoặc doanh nghiệp của bạn. Xuất hiện trong tab trình duyệt và kết quả tìm kiếm (ví dụ: "My Company").',
+    'show_site_name_helper' => 'Thêm tên trang web vào mỗi tiêu đề trang bằng dấu phân cách đã chọn. Ví dụ: "Page Title - My Company".',
+    'site_title_separator_helper' => 'Ký tự được dùng giữa tiêu đề trang và tên trang web. Ví dụ với dấu gạch ngang: "Page Title - My Company". Ví dụ với thanh dọc: "Page Title | My Company".',
+    'seo_title_helper' => 'Tiêu đề trang chủ hiển thị trong kết quả tìm kiếm. Giữ dưới 60 ký tự để hiển thị tốt nhất. Để trống để dùng tiêu đề trang web.',
+    'seo_description_helper' => 'Mô tả trang chủ hiển thị trong kết quả tìm kiếm. Giữ từ 120-160 ký tự để hiển thị tốt nhất.',
     'no_meta_keywords' => 'Không có từ khóa meta',
     'validation' => [
         'gtm_container_id_format' => 'ID Container GTM phải có định dạng GTM-XXXXXX (ví dụ: GTM-N7MK3KH2)',
@@ -393,6 +398,9 @@ return [
     ],
 
     'typography_primary' => 'Font chính',
+    'all_languages' => 'Tất cả ngôn ngữ',
+    'shared_field_notice' => 'Trường này được chia sẻ cho tất cả ngôn ngữ. Quản lý nó từ ngôn ngữ mặc định.',
+    'shared_section_notice' => 'Tất cả tùy chọn trong mục này được chia sẻ cho tất cả ngôn ngữ. Chuyển sang ngôn ngữ mặc định để thực hiện thay đổi.',
     'admin_appearance' => [
         'show_admin_bar' => 'Hiển thị thanh quản trị cho quản trị viên đã đăng nhập, ngay cả trên trang web công khai',
         'show_admin_bar_helper' => 'Hiển thị thanh công cụ truy cập nhanh quản trị ở đầu trang web khi đăng nhập với tư cách quản trị viên',

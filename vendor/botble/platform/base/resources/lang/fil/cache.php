@@ -8,6 +8,7 @@ return [
     'clear_button' => 'I-clear',
     'refresh_button' => 'I-refresh',
     'cache_size_warning' => 'Ang laki ng iyong CMS cache ay medyo malaki (>50MB). Ang pag-clear nito ay maaaring mapabuti ang performance ng sistema.',
+    'cache_size_warning_dynamic' => 'Ang laki ng iyong CMS cache ay medyo malaki (>:sizeMB). Ang pag-clear nito ay maaaring mapabuti ang performance ng sistema.',
     'footer_note' => 'I-clear ang cache pagkatapos gumawa ng mga pagbabago sa iyong site upang masiguro na lumilitaw ito nang tama.',
     'type' => 'Uri',
     'description' => 'Paglalarawan',

@@ -5,12 +5,18 @@ namespace Mollie\Api\Resources;
 class SessionCollection extends CursorCollection
 {
     /**
-     * The name of the collection resource in Mollie's API.
+     * @return string
      */
-    public static string $collectionName = 'sessions';
+    public function getCollectionResourceName()
+    {
+        return "sessions";
+    }
 
     /**
-     * Resource class name.
+     * @return BaseResource
      */
-    public static string $resource = Session::class;
+    protected function createResourceObject()
+    {
+        return new Session($this->client);
+    }
 }

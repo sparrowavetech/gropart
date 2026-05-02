@@ -123,14 +123,20 @@ class SlugServiceProvider extends ServiceProvider
                                 return BaseHelper::getHomepageUrl();
                             }
 
+                            // Allow plugins (e.g. language-advanced) to provide translated slug key and prefix
+                            $translatedSlug = apply_filters('slug_get_translated_slug', null, $slug);
+
+                            $slugKey = is_array($translatedSlug) ? ($translatedSlug['key'] ?? $slug->key) : $slug->key;
+                            $slugPrefix = is_array($translatedSlug) ? ($translatedSlug['prefix'] ?? $slug->prefix) : $slug->prefix;
+
                             $prefix = SlugHelperFacade::getTranslator()->compile(
-                                apply_filters(FILTER_SLUG_PREFIX, $slug->prefix),
+                                apply_filters(FILTER_SLUG_PREFIX, $slugPrefix),
                                 $model
                             );
 
                             return apply_filters(
                                 'slug_filter_url',
-                                url(ltrim($prefix . '/' . $slug->key, '/')) . SlugHelperFacade::getPublicSingleEndingURL()
+                                url(ltrim($prefix . '/' . $slugKey, '/')) . SlugHelperFacade::getPublicSingleEndingURL()
                             );
                         }
                     );

@@ -3,10 +3,10 @@
 declare (strict_types=1);
 namespace Rector\Set\ValueObject;
 
-use RectorPrefix202602\Composer\Semver\Semver;
+use RectorPrefix202604\Composer\Semver\Semver;
 use Rector\Composer\ValueObject\InstalledPackage;
 use Rector\Set\Contract\SetInterface;
-use RectorPrefix202602\Webmozart\Assert\Assert;
+use RectorPrefix202604\Webmozart\Assert\Assert;
 /**
  * @api used by extensions
  */
@@ -51,17 +51,15 @@ final class ComposerTriggeredSet implements SetInterface
         return $this->setFilePath;
     }
     /**
-     * @param InstalledPackage[] $installedPackages
+     * @param array<string, InstalledPackage> $installedPackages
      */
     public function matchInstalledPackages(array $installedPackages): bool
     {
-        foreach ($installedPackages as $installedPackage) {
-            if ($installedPackage->getName() !== $this->packageName) {
-                continue;
-            }
-            return Semver::satisfies($installedPackage->getVersion(), '^' . $this->version);
+        $package = $installedPackages[$this->packageName] ?? null;
+        if (!$package instanceof InstalledPackage) {
+            return \false;
         }
-        return \false;
+        return Semver::satisfies($package->getVersion(), '^' . $this->version);
     }
     public function getName(): string
     {

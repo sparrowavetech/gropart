@@ -75,15 +75,29 @@ CODE_SAMPLE
             return null;
         }
         $args = $node->getArgs();
-        if ($className === SymfonyClass::SYMFONY_VALIDATOR_CONSTRAINTS_COLLECTION && count($args) === 1 && $args[0]->value instanceof Array_) {
+        if ($className === SymfonyClass::SYMFONY_VALIDATOR_CONSTRAINTS_COLLECTION && $args[0]->value instanceof Array_) {
             if ($args[0]->name instanceof Identifier) {
                 return null;
             }
             $args[0]->name = new Identifier('fields');
+            foreach ($args as $key => $arg) {
+                if (!$arg->name instanceof Identifier) {
+                    continue;
+                }
+                if ($arg->name->toString() !== 'allowExtraFields') {
+                    continue;
+                }
+                if (!$this->valueResolver->isFalse($arg->value)) {
+                    continue;
+                }
+                unset($args[$key]);
+            }
+            $node->args = array_values($args);
             return $node;
         }
         $array = $node->args[0]->value;
         $namedArgs = [];
+        $oldTokens = $this->getFile()->getOldTokens();
         foreach ($array->items as $item) {
             if (!$item instanceof ArrayItem) {
                 continue;
@@ -98,6 +112,18 @@ CODE_SAMPLE
             $keyValue = $this->valueResolver->getValue($item->key);
             if (!is_string($keyValue)) {
                 continue;
+            }
+            $lastTokenKey = $item->key->getEndTokenPos();
+            $startTokenValue = $item->value->getStartTokenPos();
+            while ($lastTokenKey < $startTokenValue) {
+                ++$lastTokenKey;
+                if (!isset($oldTokens[$lastTokenKey])) {
+                    break;
+                }
+                $token = $oldTokens[$lastTokenKey];
+                if ($token->is([\T_DOC_COMMENT, \T_COMMENT])) {
+                    return null;
+                }
             }
             $arg = new Arg($item->value);
             $arg->name = new Identifier($keyValue);

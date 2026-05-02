@@ -5,9 +5,9 @@
  * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
  */
 declare (strict_types=1);
-namespace RectorPrefix202602\Nette\Utils;
+namespace RectorPrefix202604\Nette\Utils;
 
-use RectorPrefix202602\Nette;
+use RectorPrefix202604\Nette;
 /**
  * Paginating math.
  *
@@ -105,7 +105,7 @@ class Paginator
      */
     public function getPageCount(): ?int
     {
-        return $this->itemCount === null ? null : (int) ceil($this->itemCount / $this->itemsPerPage);
+        return $this->itemCount === null ? null : max(0, (int) ceil($this->itemCount / $this->itemsPerPage));
     }
     /**
      * @return static
@@ -159,6 +159,6 @@ class Paginator
      */
     public function getLength(): int
     {
-        return $this->itemCount === null ? $this->itemsPerPage : min($this->itemsPerPage, $this->itemCount - $this->getPageIndex() * $this->itemsPerPage);
+        return $this->itemCount === null ? $this->itemsPerPage : max(0, min($this->itemsPerPage, $this->itemCount - $this->getPageIndex() * $this->itemsPerPage));
     }
 }

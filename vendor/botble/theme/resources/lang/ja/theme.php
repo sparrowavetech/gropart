@@ -208,6 +208,11 @@ return [
     ],
     'term_and_privacy_policy_url' => '規約とプライバシーポリシーのURL',
     'site_title_separator' => 'SEO title separator',
+    'site_title_helper' => 'ブランドまたは企業名。ブラウザのタブや検索結果に表示されます (例: "My Company")。',
+    'show_site_name_helper' => '選択した区切り文字を使用して、すべてのページタイトルにサイト名を追加します。例: "Page Title - My Company"。',
+    'site_title_separator_helper' => 'ページタイトルとサイト名の間に使用する文字。ダッシュの例: "Page Title - My Company"。パイプの例: "Page Title | My Company"。',
+    'seo_title_helper' => '検索エンジンの結果に表示されるホームページのタイトル。最良の表示のために60文字以内に収めてください。サイトタイトルを使用する場合は空白のままにしてください。',
+    'seo_description_helper' => '検索エンジンの結果に表示されるホームページの説明。最良の表示のために120〜160文字にしてください。',
     'no_meta_keywords' => 'Meta keywords was removed by Google, you don\'t need to add meta keywords to your website. Learn more: :link',
     'validation' => [
         'gtm_container_id_format' => 'GTM Container ID must be in format GTM-XXXXXX (e.g., GTM-N7MK3KH2)',
@@ -389,6 +394,9 @@ return [
     ],
 
     'typography_primary' => 'プライマリフォント',
+    'all_languages' => 'すべての言語',
+    'shared_field_notice' => 'このフィールドはすべての言語で共有されています。デフォルト言語から管理してください。',
+    'shared_section_notice' => 'このセクションのすべてのオプションはすべての言語で共有されています。変更するにはデフォルト言語に切り替えてください。',
     'admin_appearance' => [
         'show_admin_bar' => 'ログイン中の管理者向けに管理バーを表示（フロントサイトでも）',
         'show_admin_bar_helper' => '管理者としてログインしているときに、ウェブサイトの上部にクイックアクセス管理ツールバーを表示',

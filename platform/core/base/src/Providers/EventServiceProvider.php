@@ -10,6 +10,7 @@ use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\PanelSectionsRendering;
 use Botble\Base\Events\SendMailEvent;
+use Botble\Base\Events\SystemUpdateCachesCleared;
 use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Base\Events\UpdatedEvent;
 use Botble\Base\Facades\AdminHelper;
@@ -70,6 +71,9 @@ class EventServiceProvider extends ServiceProvider
             AdminNotificationListener::class,
         ],
         UpdatedEvent::class => [
+            ClearDashboardMenuCaches::class,
+        ],
+        SystemUpdateCachesCleared::class => [
             ClearDashboardMenuCaches::class,
         ],
         Login::class => [

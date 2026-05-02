@@ -189,4 +189,22 @@ return [
     'share_results' => 'Compartilhar resultados',
     'download_image_to_local_storage' => 'Baixe a imagem para armazenamento local',
     'download_image_to_local_storage_helper' => 'Se estiver desmarcado, a imagem será exibida a partir do URL original',
+    'validation' => [
+        'uploaded_file_required' => 'Por favor selecione um arquivo para enviar.',
+        'uploaded_file_invalid_type' => 'O tipo de arquivo não é permitido. Por favor envie um formato de arquivo válido.',
+        'uploaded_file_too_large' => 'O arquivo é muito grande. Por favor escolha um arquivo menor.',
+        'uploaded_file_corrupted' => 'O arquivo parece estar corrompido ou inválido. Por favor tente enviar um arquivo diferente.',
+        'upload_network_error' => 'Falha no envio devido a problemas de rede. Por favor verifique sua conexão e tente novamente.',
+        'upload_err_ini_size' => 'O arquivo é maior que o limite de upload :size do servidor. Aumente "upload_max_filesize" nas configurações do PHP ou contate seu provedor de hospedagem.',
+        'upload_err_form_size' => 'O arquivo excede o tamanho máximo de upload do formulário.',
+        'upload_err_partial' => 'O arquivo foi enviado apenas parcialmente. Por favor tente novamente — isso geralmente significa que a conexão foi interrompida.',
+        'upload_err_no_tmp_dir' => 'O servidor não pode salvar o arquivo enviado porque o diretório temporário de upload do PHP (upload_tmp_dir) está ausente ou não é gravável. Peça ao seu provedor de hospedagem para definir "upload_tmp_dir" na configuração do pool PHP-FPM para uma pasta gravável (por exemplo /home/your-user/tmp). Instruções completas: https://docs.botble.com/cms/media-upload-errors.html',
+        'upload_err_cant_write' => 'O servidor não conseguiu gravar o arquivo enviado no disco. Verifique as permissões da pasta, a cota do disco e se o diretório tmp é gravável pelo PHP.',
+        'upload_err_extension' => 'Uma extensão do PHP (como o ModSecurity ou um plugin de segurança) bloqueou o envio. Contate seu provedor de hospedagem.',
+        'upload_err_unknown' => 'Falha no envio (código de erro PHP :code). Por favor contate seu provedor de hospedagem.',
+        'attributes' => [
+            'uploaded_file' => 'arquivo',
+            'upload' => 'arquivo',
+        ],
+    ],
 ];

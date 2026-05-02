@@ -1,6 +1,6 @@
 <link
     rel="stylesheet"
-    href="{{ asset('vendor/core/core/base/libraries/intl-tel-input/css/intlTelInput.min.css') }}"
+    href="{{ asset('vendor/core/core/base/libraries/intl-tel-input/css/intlTelInput-v2.min.css') }}"
 >
 
 <style>
@@ -214,7 +214,7 @@
     }
 </style>
 
-<script src="{{ asset('vendor/core/core/base/libraries/intl-tel-input/js/intlTelInput.min.js') }}"></script>
+<script data-pagespeed-no-defer src="{{ asset('vendor/core/core/base/libraries/intl-tel-input/js/intlTelInput.min.js') }}"></script>
 
 <script>
     (function() {
@@ -249,6 +249,7 @@
                 const defaultCountry = getDefaultCountry();
 
                 const config = {
+                    autoPlaceholder: 'polite',
                     dropdownContainer: document.body,
                     geoIpLookup: function(callback) {
                         const cacheKey = 'ipinfo_country_code';
@@ -325,7 +326,6 @@
                     if (flagContainer) {
                         flagContainer.addEventListener('click', function() {
                             setTimeout(function() {
-                                // When dropdownContainer is body, find the dropdown there
                                 const countryList = document.querySelector('.iti--container .iti__country-list') ||
                                                    itiContainer.querySelector('.iti__country-list');
                                 if (countryList && !countryList.querySelector('.iti__search-container')) {
@@ -339,7 +339,6 @@
                                     searchContainer.appendChild(searchInput);
                                     countryList.insertBefore(searchContainer, countryList.firstChild);
 
-                                    // Prevent clicks on search container from closing dropdown
                                     searchContainer.addEventListener('click', function(e) {
                                         e.stopPropagation();
                                     });
@@ -464,6 +463,10 @@
         }
 
         document.addEventListener('payment-form-reloaded', function() {
+            initPhoneNumberFields();
+        });
+
+        document.addEventListener('phone-number-field:init', function() {
             initPhoneNumberFields();
         });
     })();

@@ -84,7 +84,10 @@ class HookServiceProvider extends ServiceProvider
 
         add_action(BASE_ACTION_PUBLIC_RENDER_SINGLE, function (): void {
             if (BaseHelper::getRichEditor() === 'ckeditor') {
+                // Defer to footer — CKEditor content styles are not critical for first paint and only
+                // apply to content inside .ck-content, which is typically below the fold.
                 Theme::asset()
+                    ->container('footer')
                     ->add('ckeditor-content-styles', 'vendor/core/core/base/libraries/ckeditor/content-styles.css');
             }
         }, 15);

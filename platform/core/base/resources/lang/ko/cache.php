@@ -8,6 +8,7 @@ return [
     'clear_button' => '지우기',
     'refresh_button' => '새로고침',
     'cache_size_warning' => 'CMS 캐시 크기가 상당히 큽니다(>50MB). 캐시를 지우면 시스템 성능이 향상될 수 있습니다.',
+    'cache_size_warning_dynamic' => 'CMS 캐시 크기가 상당히 큽니다(>:sizeMB). 캐시를 지우면 시스템 성능이 향상될 수 있습니다.',
     'footer_note' => '사이트 변경 사항이 올바르게 표시되도록 변경 후 캐시를 지우세요.',
     'type' => '유형',
     'description' => '설명',

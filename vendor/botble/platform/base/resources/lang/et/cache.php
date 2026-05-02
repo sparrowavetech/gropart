@@ -8,6 +8,7 @@ return [
     'clear_button' => 'Tühjenda',
     'refresh_button' => 'Värskenda',
     'cache_size_warning' => 'Teie CMS-i vahemälu suurus on üsna suur (>50MB). Selle tühjendamine võib parandada süsteemi jõudlust.',
+    'cache_size_warning_dynamic' => 'Teie CMS-i vahemälu suurus on üsna suur (>:sizeMB). Selle tühjendamine võib parandada süsteemi jõudlust.',
     'footer_note' => 'Tühjendage vahemälu pärast oma saidil muudatuste tegemist, et tagada nende korrektne kuvamine.',
     'type' => 'Tüüp',
     'description' => 'Kirjeldus',

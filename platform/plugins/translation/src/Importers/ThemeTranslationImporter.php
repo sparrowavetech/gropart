@@ -104,11 +104,7 @@ class ThemeTranslationImporter extends Importer implements WithMapping
                     continue;
                 }
 
-                if (isset($translations[$row['en']])) {
-                    $translations[$row['en']] = $row[$locale];
-                } else {
-                    $translations[] = [$row['en'] => $row[$locale]];
-                }
+                $translations[$row['en']] = $row[$locale];
             }
 
             if ($translations) {

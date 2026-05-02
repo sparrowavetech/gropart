@@ -8,6 +8,7 @@ return [
     'clear_button' => 'Wyczyść',
     'refresh_button' => 'Odśwież',
     'cache_size_warning' => 'Rozmiar pamięci podręcznej CMS jest dość duży (>50MB). Wyczyszczenie jej może poprawić wydajność systemu.',
+    'cache_size_warning_dynamic' => 'Rozmiar pamięci podręcznej CMS jest dość duży (>:sizeMB). Wyczyszczenie jej może poprawić wydajność systemu.',
     'footer_note' => 'Wyczyść pamięć podręczną po wprowadzeniu zmian w witrynie, aby upewnić się, że są poprawnie wyświetlane.',
     'type' => 'Typ',
     'description' => 'Opis',

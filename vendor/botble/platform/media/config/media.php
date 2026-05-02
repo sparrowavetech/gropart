@@ -31,7 +31,7 @@ return [
     ],
     'allowed_mime_types' => env(
         'RV_MEDIA_ALLOWED_MIME_TYPES',
-        'jpg,jpeg,png,gif,txt,docx,zip,mp3,bmp,csv,xls,xlsx,ppt,pptx,pdf,mp4,m4v,doc,mpga,wav,webp,webm,mov,jfif,avif,rar,x-rar'
+        'jpg,jpeg,png,gif,txt,docx,zip,mp3,bmp,csv,xls,xlsx,ppt,pptx,pdf,mp4,m4v,doc,mpga,wav,webp,webm,mov,jfif,avif,rar,x-rar,ico'
     ),
     // Danger warning: When enabled, admin users can upload any file types, it leads to security issues if admin users try to hack your site.
     // If it is disabled, admin users can only upload the file types in configure allowed types.

@@ -8,6 +8,7 @@ return [
     'clear_button' => 'Tyhjennä',
     'refresh_button' => 'Päivitä',
     'cache_size_warning' => 'CMS-välimuistisi koko on melko suuri (>50 Mt). Sen tyhjentäminen voi parantaa järjestelmän suorituskykyä.',
+    'cache_size_warning_dynamic' => 'CMS-välimuistisi koko on melko suuri (>:size Mt). Sen tyhjentäminen voi parantaa järjestelmän suorituskykyä.',
     'footer_note' => 'Tyhjennä välimuisti sivustosi muutosten jälkeen varmistaaksesi niiden näkymisen oikein.',
     'type' => 'Tyyppi',
     'description' => 'Kuvaus',

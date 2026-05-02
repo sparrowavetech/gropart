@@ -203,6 +203,13 @@ return [
         'uploaded_file_too_large' => 'Fails ir pārāk liels. Lūdzu, izvēlieties mazāku failu.',
         'uploaded_file_corrupted' => 'Fails šķiet bojāts vai nederīgs. Lūdzu, mēģiniet augšupielādēt citu failu.',
         'upload_network_error' => 'Augšupielāde neizdevās tīkla problēmu dēļ. Lūdzu, pārbaudiet savienojumu un mēģiniet vēlreiz.',
+        'upload_err_ini_size' => 'Fails ir lielāks par servera augšupielādes limitu :size. Palieliniet "upload_max_filesize" PHP iestatījumos vai jautājiet savam mitināšanas pakalpojumu sniedzējam.',
+        'upload_err_form_size' => 'Fails pārsniedz veidlapas maksimālo augšupielādes izmēru.',
+        'upload_err_partial' => 'Fails tika augšupielādēts tikai daļēji. Lūdzu, mēģiniet vēlreiz — tas parasti nozīmē, ka savienojums tika pārtraukts.',
+        'upload_err_no_tmp_dir' => 'Serveris nevar saglabāt augšupielādēto failu, jo PHP pagaidu augšupielādes direktorijs (upload_tmp_dir) nav atrasts vai nav rakstāms. Lūdziet savam mitināšanas pakalpojumu sniedzējam iestatīt "upload_tmp_dir" PHP-FPM pool konfigurācijā uz rakstāmu mapi (piemēram, /home/your-user/tmp). Pilnas instrukcijas: https://docs.botble.com/cms/media-upload-errors.html',
+        'upload_err_cant_write' => 'Serveris nevarēja ierakstīt augšupielādēto failu diskā. Pārbaudiet mapes atļaujas, diska kvotu un vai tmp direktorijs ir rakstāms PHP.',
+        'upload_err_extension' => 'PHP paplašinājums (piemēram, ModSecurity vai drošības spraudnis) bloķēja augšupielādi. Sazinieties ar savu mitināšanas pakalpojumu sniedzēju.',
+        'upload_err_unknown' => 'Augšupielāde neizdevās (PHP kļūdas kods :code). Lūdzu, sazinieties ar savu mitināšanas pakalpojumu sniedzēju.',
         'attributes' => [
             'uploaded_file' => 'fails',
             'upload' => 'fails',

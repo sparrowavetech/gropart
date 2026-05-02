@@ -4,7 +4,8 @@
     "type": "package",
     "autoload": {
         "psr-4": {
-            "Botble\\Installer\\": "src"
+            "Botble\\Installer\\": "src",
+            "Botble\\Installer\\Tests\\": "tests"
         }
     },
     "require": {

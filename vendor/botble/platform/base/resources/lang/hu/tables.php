@@ -65,4 +65,5 @@ return [
     'please_select_record' => 'Kérjük, válasszon ki legalább egy rekordot a művelet végrehajtásához!',
     'checkbox' => 'Jelölőnégyzet',
     'toggle_columns' => 'Oszlopok váltása',
+    'created_by' => 'Létrehozta',
 ];

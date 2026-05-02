@@ -8,6 +8,7 @@ return [
     'clear_button' => 'Počisti',
     'refresh_button' => 'Osveži',
     'cache_size_warning' => 'Velikost predpomnilnika CMS je precej velika (>50MB). Čiščenje lahko izboljša delovanje sistema.',
+    'cache_size_warning_dynamic' => 'Velikost predpomnilnika CMS je precej velika (>:sizeMB). Čiščenje lahko izboljša delovanje sistema.',
     'footer_note' => 'Počistite predpomnilnik po spremembah na vaši strani, da se bodo pravilno prikazale.',
     'type' => 'Tip',
     'description' => 'Opis',

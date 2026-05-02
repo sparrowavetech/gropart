@@ -2,7 +2,5 @@
     "name": "sparrowave/shipmozo",
     "description": "Shipmozo plugin",
     "type": "package",
-    "require": {
-        "shipmozo/shipmozo-php": "^2.0"
-    }
+    "require": {}
 }

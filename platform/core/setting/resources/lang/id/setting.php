@@ -505,6 +505,10 @@ return [
             'widget_cache_ttl_helper' => 'Durasi untuk cache semua widget. Default adalah 1800 detik (30 menit).',
             'plugin_cache_enabled' => 'Cache plugin yang terinstal',
             'plugin_cache_enabled_helper' => 'Cache daftar plugin yang terinstal untuk meningkatkan kinerja. Saat diaktifkan, sistem akan cache daftar plugin selama 30 menit untuk mengurangi pemindaian sistem file.',
+            'cache_size_warning_threshold' => 'Ambang batas peringatan ukuran cache (MB)',
+            'cache_size_warning_threshold_helper' => 'Menampilkan peringatan pada halaman Manajemen Cache ketika cache framework melebihi ukuran ini (dalam MB). Default adalah 50 MB.',
+            'cache_auto_clear_enabled' => 'Bersihkan cache secara otomatis saat ukuran melebihi ambang batas',
+            'cache_auto_clear_enabled_helper' => 'Secara otomatis membersihkan cache framework setiap jam ketika ukurannya melebihi ambang batas peringatan di atas. Memerlukan penjadwal Laravel (<code>php artisan schedule:run</code>) yang dikonfigurasi sebagai cron job di server Anda.',
         ],
     ],
     'appearance' => [

@@ -505,6 +505,10 @@ return [
             'widget_cache_ttl_helper' => 'Трајање кеширања свих виџета. Подразумевано је 1800 секунди (30 минута).',
             'plugin_cache_enabled' => 'Кеширај инсталиране додатке',
             'plugin_cache_enabled_helper' => 'Кеширајте листу инсталираних додатака за побољшане перформансе. Када је омогућено, систем ће кеширати листу додатака 30 минута да смањи скенирање система датотека.',
+            'cache_size_warning_threshold' => 'Prag upozorenja za veličinu keša (MB)',
+            'cache_size_warning_threshold_helper' => 'Prikazuje upozorenje na stranici Upravljanje kešom kada keš okvira premaši ovu veličinu (u MB). Podrazumevana vrednost je 50 MB.',
+            'cache_auto_clear_enabled' => 'Automatski obriši keš kada veličina premaši prag',
+            'cache_auto_clear_enabled_helper' => 'Automatski briše keš okvira svakog sata kada njegova veličina premaši gore navedeni prag upozorenja. Zahteva da Laravel raspoređivač (<code>php artisan schedule:run</code>) bude konfigurisan kao cron zadatak na vašem serveru.',
         ],
     ],
     'appearance' => [

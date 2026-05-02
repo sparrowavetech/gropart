@@ -8,6 +8,7 @@ return [
     'clear_button' => 'Temizle',
     'refresh_button' => 'Yenile',
     'cache_size_warning' => 'CMS önbellek boyutunuz oldukça büyük (>50MB). Bunu temizlemek sistem performansını iyileştirebilir.',
+    'cache_size_warning_dynamic' => 'CMS önbellek boyutunuz oldukça büyük (>:sizeMB). Bunu temizlemek sistem performansını iyileştirebilir.',
     'footer_note' => 'Sitenizde değişiklik yaptıktan sonra, bunların doğru şekilde görüntülendiğinden emin olmak için önbelleği temizleyin.',
     'commands' =>
         [

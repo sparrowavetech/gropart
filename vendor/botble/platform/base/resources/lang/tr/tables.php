@@ -65,4 +65,5 @@ return [
     'please_select_record' => 'Bu işlemi gerçekleştirmek için lütfen en az bir kayıt seçin!',
     'checkbox' => 'Onay kutusu',
     'toggle_columns' => 'Sütunları Değiştir',
+    'created_by' => 'Oluşturan',
 ];

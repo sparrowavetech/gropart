@@ -49,7 +49,7 @@ export class ContextMenuService {
                     name: value.name,
                     icon: (opt, $itemElement, itemKey, item) => {
                         $itemElement.html(
-                            `${value.icon} ${Helpers.trans(`actions_list.${key}.${value.action}`) || item.name}`
+                            `${value.icon} ${Helpers.trans(`actions_list.${key}.${value.action}`, value.name)}`
                         )
 
                         return `context-menu-icon-updated media-action-${value.action}`
@@ -186,6 +186,22 @@ export class ContextMenuService {
 
         items.preview = undefined
         items.copy_link = undefined
+
+        // Add "Manage Access" for folders (server-side enforces authorization)
+        {
+            items.manage_access = {
+                name: Helpers.trans('manage_access', 'Manage Access'),
+                icon: (opt, $itemElement, itemKey, item) => {
+                    $itemElement.html(
+                        `<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M9 7m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"></path><path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path><path d="M21 21v-2a4 4 0 0 0 -3 -3.85"></path></svg> ${item.name}`
+                    )
+                    return 'context-menu-icon-updated'
+                },
+                callback: () => {
+                    ActionsService.handleManageAccess()
+                },
+            }
+        }
 
         return items
     }

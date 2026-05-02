@@ -506,6 +506,10 @@ return [
             'widget_cache_ttl_helper' => 'Thời gian để lưu vào bộ nhớ đệm tất cả widget. Mặc định là 1800 giây (30 phút).',
             'plugin_cache_enabled' => 'Cache plugin đã cài đặt',
             'plugin_cache_enabled_helper' => 'Cache danh sách các plugin đã cài đặt để cải thiện hiệu suất. Khi được bật, hệ thống sẽ lưu vào bộ nhớ đệm danh sách plugin trong 30 phút để giảm quét hệ thống tệp.',
+            'cache_size_warning_threshold' => 'Ngưỡng cảnh báo kích thước bộ nhớ đệm (MB)',
+            'cache_size_warning_threshold_helper' => 'Hiển thị cảnh báo trên trang Quản lý Cache khi bộ nhớ đệm của framework vượt quá kích thước này (tính bằng MB). Mặc định là 50 MB.',
+            'cache_auto_clear_enabled' => 'Tự động xóa cache khi kích thước vượt ngưỡng',
+            'cache_auto_clear_enabled_helper' => 'Tự động xóa bộ nhớ đệm của framework mỗi giờ khi kích thước vượt quá ngưỡng cảnh báo ở trên. Yêu cầu bộ lập lịch Laravel (<code>php artisan schedule:run</code>) được cấu hình như một cron job trên máy chủ của bạn.',
         ],
     ],
     'appearance' => [

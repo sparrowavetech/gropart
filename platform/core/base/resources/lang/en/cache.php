@@ -8,6 +8,7 @@ return [
     'clear_button' => 'Clear',
     'refresh_button' => 'Refresh',
     'cache_size_warning' => 'Your CMS cache size is quite large (>50MB). Clearing it may improve system performance.',
+    'cache_size_warning_dynamic' => 'Your CMS cache size is quite large (>:sizeMB). Clearing it may improve system performance.',
     'footer_note' => 'Clear cache after making changes to your site to ensure they appear correctly.',
     'type' => 'Type',
     'description' => 'Description',

@@ -8,6 +8,7 @@ return [
     'clear_button' => 'Hapus',
     'refresh_button' => 'Muat Ulang',
     'cache_size_warning' => 'Ukuran cache CMS Anda cukup besar (>50MB). Menghapusnya dapat meningkatkan kinerja sistem.',
+    'cache_size_warning_dynamic' => 'Ukuran cache CMS Anda cukup besar (>:sizeMB). Menghapusnya dapat meningkatkan kinerja sistem.',
     'footer_note' => 'Hapus cache setelah melakukan perubahan pada situs Anda untuk memastikan perubahan tampil dengan benar.',
     'type' => 'Tipe',
     'description' => 'Deskripsi',

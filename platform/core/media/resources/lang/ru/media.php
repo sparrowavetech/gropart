@@ -189,4 +189,22 @@ return [
     'share_results' => 'Share Results',
     'download_image_to_local_storage' => 'Download image to local storage',
     'download_image_to_local_storage_helper' => 'If it is unchecked, the image will be displayed from the original URL',
+    'validation' => [
+        'uploaded_file_required' => 'Пожалуйста, выберите файл для загрузки.',
+        'uploaded_file_invalid_type' => 'Тип файла не разрешен. Пожалуйста, загрузите корректный формат файла.',
+        'uploaded_file_too_large' => 'Файл слишком большой. Пожалуйста, выберите файл поменьше.',
+        'uploaded_file_corrupted' => 'Файл кажется поврежденным или недействительным. Пожалуйста, попробуйте загрузить другой файл.',
+        'upload_network_error' => 'Загрузка не удалась из-за проблем с сетью. Пожалуйста, проверьте соединение и попробуйте снова.',
+        'upload_err_ini_size' => 'Файл больше лимита загрузки :size сервера. Увеличьте "upload_max_filesize" в настройках PHP или обратитесь к вашему хостинг-провайдеру.',
+        'upload_err_form_size' => 'Файл превышает максимальный размер загрузки формы.',
+        'upload_err_partial' => 'Файл был загружен только частично. Пожалуйста, попробуйте снова — обычно это означает, что соединение было прервано.',
+        'upload_err_no_tmp_dir' => 'Сервер не может сохранить загруженный файл, так как временный каталог загрузки PHP (upload_tmp_dir) отсутствует или недоступен для записи. Попросите вашего хостинг-провайдера установить "upload_tmp_dir" в конфигурации PHP-FPM pool на доступную для записи папку (например /home/your-user/tmp). Полные инструкции: https://docs.botble.com/cms/media-upload-errors.html',
+        'upload_err_cant_write' => 'Сервер не смог записать загруженный файл на диск. Проверьте права доступа к папке, дисковую квоту и доступна ли директория tmp для записи PHP.',
+        'upload_err_extension' => 'Расширение PHP (например ModSecurity или плагин безопасности) заблокировало загрузку. Обратитесь к вашему хостинг-провайдеру.',
+        'upload_err_unknown' => 'Загрузка не удалась (код ошибки PHP :code). Пожалуйста, обратитесь к вашему хостинг-провайдеру.',
+        'attributes' => [
+            'uploaded_file' => 'файл',
+            'upload' => 'файл',
+        ],
+    ],
 ];

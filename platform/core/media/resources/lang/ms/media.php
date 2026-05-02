@@ -203,6 +203,13 @@ return [
         'uploaded_file_too_large' => 'Fail terlalu besar. Sila pilih fail yang lebih kecil.',
         'uploaded_file_corrupted' => 'Fail kelihatan rosak atau tidak sah. Sila cuba muat naik fail yang berbeza.',
         'upload_network_error' => 'Muat naik gagal kerana masalah rangkaian. Sila semak sambungan anda dan cuba lagi.',
+        'upload_err_ini_size' => 'Fail lebih besar daripada had muat naik :size pelayan. Tingkatkan "upload_max_filesize" dalam tetapan PHP atau tanya penyedia hosting anda.',
+        'upload_err_form_size' => 'Fail melebihi saiz muat naik maksimum borang.',
+        'upload_err_partial' => 'Fail hanya dimuat naik sebahagian. Sila cuba lagi — ini biasanya bermakna sambungan terputus.',
+        'upload_err_no_tmp_dir' => 'Pelayan tidak dapat menyimpan fail yang dimuat naik kerana direktori muat naik sementara PHP (upload_tmp_dir) hilang atau tidak boleh ditulis. Minta penyedia hosting anda untuk menetapkan "upload_tmp_dir" dalam konfigurasi PHP-FPM pool kepada folder yang boleh ditulis (contohnya /home/your-user/tmp). Arahan penuh: https://docs.botble.com/cms/media-upload-errors.html',
+        'upload_err_cant_write' => 'Pelayan tidak dapat menulis fail yang dimuat naik ke cakera. Periksa kebenaran folder, kuota cakera dan bahawa direktori tmp boleh ditulis oleh PHP.',
+        'upload_err_extension' => 'Sambungan PHP (seperti ModSecurity atau pemalam keselamatan) menghalang muat naik. Hubungi penyedia hosting anda.',
+        'upload_err_unknown' => 'Muat naik gagal (kod ralat PHP :code). Sila hubungi penyedia hosting anda.',
         'attributes' => [
             'uploaded_file' => 'fail',
             'upload' => 'fail',

@@ -505,6 +505,10 @@ return [
             'widget_cache_ttl_helper' => 'Trvanie cachovania všetkých widgetov. Predvolená hodnota je 1800 sekúnd (30 minút).',
             'plugin_cache_enabled' => 'Cachovať nainštalované pluginy',
             'plugin_cache_enabled_helper' => 'Cachovať zoznam nainštalovaných pluginov pre zlepšený výkon. Keď je povolené, systém bude cachovať zoznam pluginov na 30 minút, aby sa znížili skenovania súborového systému.',
+            'cache_size_warning_threshold' => 'Prahová hodnota upozornenia na veľkosť medzipamäte (MB)',
+            'cache_size_warning_threshold_helper' => 'Zobrazí upozornenie na stránke Správa medzipamäte, keď medzipamäť frameworku prekročí túto veľkosť (v MB). Predvolená hodnota je 50 MB.',
+            'cache_auto_clear_enabled' => 'Automaticky vymazať medzipamäť, keď veľkosť prekročí prahovú hodnotu',
+            'cache_auto_clear_enabled_helper' => 'Automaticky vymaže medzipamäť frameworku každú hodinu, keď jej veľkosť prekročí vyššie uvedenú prahovú hodnotu upozornenia. Vyžaduje, aby bol plánovač Laravel (<code>php artisan schedule:run</code>) nakonfigurovaný ako cron úloha na vašom serveri.',
         ],
     ],
     'appearance' => [

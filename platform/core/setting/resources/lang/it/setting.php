@@ -505,6 +505,10 @@ return [
             'widget_cache_ttl_helper' => 'La durata per memorizzare in cache tutti i widget. Predefinito è 1800 secondi (30 minuti).',
             'plugin_cache_enabled' => 'Cache plugin installati',
             'plugin_cache_enabled_helper' => 'Memorizza in cache l\'elenco dei plugin installati per prestazioni migliorate. Quando abilitato, il sistema memorizzerà in cache l\'elenco dei plugin per 30 minuti per ridurre le scansioni del file system.',
+            'cache_size_warning_threshold' => 'Soglia di avviso dimensione cache (MB)',
+            'cache_size_warning_threshold_helper' => 'Mostra un avviso nella pagina Gestione Cache quando la cache del framework supera questa dimensione (in MB). Il valore predefinito è 50 MB.',
+            'cache_auto_clear_enabled' => 'Svuota automaticamente la cache quando la dimensione supera la soglia',
+            'cache_auto_clear_enabled_helper' => 'Svuota automaticamente la cache del framework ogni ora quando la sua dimensione supera la soglia di avviso sopra indicata. Richiede che lo scheduler di Laravel (<code>php artisan schedule:run</code>) sia configurato come cron job sul tuo server.',
         ],
     ],
     'appearance' => [

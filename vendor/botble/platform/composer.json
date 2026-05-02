@@ -27,19 +27,20 @@
         "intervention/image": "^3.4",
         "league/flysystem-aws-s3-v3": "^3.0",
         "maatwebsite/excel": "^3.1",
-        "maennchen/zipstream-php": "3.1.*",
-        "mews/purifier": "^3.3",
+        "maennchen/zipstream-php": "3.2.*",
+        "mews/purifier": "^3.3 || dev-l13-compatibility",
         "mobiledetect/mobiledetectlib": "^4.8",
         "mpdf/mpdf": "^8.2",
         "resend/resend-php": "*",
         "symfony/http-client": "^7.2",
         "symfony/mailgun-mailer": "^7.2",
         "symfony/postmark-mailer": "^7.2",
+        "symfony/sendgrid-mailer": "^7.2",
         "tightenco/ziggy": "^2.0",
         "twig/twig": "^3.14",
-        "yajra/laravel-datatables-buttons": "12.3.1",
-        "yajra/laravel-datatables-oracle": "12.6.3",
-        "yajra/laravel-datatables-html": "12.7.0"
+        "yajra/laravel-datatables-buttons": "^12.0",
+        "yajra/laravel-datatables-oracle": "^12.0",
+        "yajra/laravel-datatables-html": "^12.0"
     },
     "autoload": {
         "psr-4": {

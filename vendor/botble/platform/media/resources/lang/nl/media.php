@@ -143,4 +143,22 @@ return [
     'url' => 'URL',
     'download_explain' => 'Enter one URL per line.',
     'downloading' => 'Downloading...',
+    'validation' => [
+        'uploaded_file_required' => 'Selecteer een bestand om te uploaden.',
+        'uploaded_file_invalid_type' => 'Het bestandstype is niet toegestaan. Upload een geldig bestandsformaat.',
+        'uploaded_file_too_large' => 'Het bestand is te groot. Kies een kleiner bestand.',
+        'uploaded_file_corrupted' => 'Het bestand lijkt beschadigd of ongeldig. Probeer een ander bestand te uploaden.',
+        'upload_network_error' => 'Upload mislukt vanwege netwerkproblemen. Controleer uw verbinding en probeer het opnieuw.',
+        'upload_err_ini_size' => 'Het bestand is groter dan de uploadlimiet :size van de server. Verhoog "upload_max_filesize" in de PHP-instellingen of vraag uw hostingprovider.',
+        'upload_err_form_size' => 'Het bestand overschrijdt de maximale uploadgrootte van het formulier.',
+        'upload_err_partial' => 'Het bestand is slechts gedeeltelijk geüpload. Probeer het opnieuw — dit betekent meestal dat de verbinding is onderbroken.',
+        'upload_err_no_tmp_dir' => 'De server kan het geüploade bestand niet opslaan omdat de tijdelijke uploadmap van PHP (upload_tmp_dir) ontbreekt of niet beschrijfbaar is. Vraag uw hostingprovider om "upload_tmp_dir" in de PHP-FPM pool-configuratie in te stellen op een beschrijfbare map (bijv. /home/your-user/tmp). Volledige instructies: https://docs.botble.com/cms/media-upload-errors.html',
+        'upload_err_cant_write' => 'De server kon het geüploade bestand niet naar schijf schrijven. Controleer mapmachtigingen, schijfquotum en of de tmp-map beschrijfbaar is door PHP.',
+        'upload_err_extension' => 'Een PHP-extensie (zoals ModSecurity of een beveiligingsplug-in) blokkeerde de upload. Neem contact op met uw hostingprovider.',
+        'upload_err_unknown' => 'Upload mislukt (PHP-foutcode :code). Neem contact op met uw hostingprovider.',
+        'attributes' => [
+            'uploaded_file' => 'bestand',
+            'upload' => 'bestand',
+        ],
+    ],
 ];

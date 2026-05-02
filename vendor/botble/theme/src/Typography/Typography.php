@@ -138,7 +138,7 @@ class Typography
             }
 
             $styles .= sprintf(
-                '--%s-font: "%s", sans-serif;',
+                '--%s-font: "%s", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;',
                 $fontFamily->getName(),
                 $value
             );
@@ -214,6 +214,30 @@ class Typography
 
     public function renderThemeOptions(): void
     {
+        // Typography (font family, weight, size) is intentionally locale-agnostic:
+        // a font that supports the site's scripts should apply on every language version.
+        // Forcing shared storage avoids the trap where setting Primary font on the default
+        // locale leaves other locales falling back to the registration default.
+        add_filter('theme_option_field_is_shared', function (bool $isShared, string $key): bool {
+            if ($isShared) {
+                return true;
+            }
+
+            foreach ($this->fontFamilies as $fontFamily) {
+                if ($key === "tp_{$fontFamily->getName()}_font" || $key === "tp_{$fontFamily->getName()}_font_weight") {
+                    return true;
+                }
+            }
+
+            foreach ($this->fontSizes as $fontSize) {
+                if ($key === "tp_{$fontSize->getName()}_size") {
+                    return true;
+                }
+            }
+
+            return false;
+        }, 10, 2);
+
         Event::listen(RenderingThemeOptionSettings::class, function (): void {
             if (empty($this->fontFamilies) && empty($this->fontSizes)) {
                 return;
@@ -225,7 +249,8 @@ class Typography
                 $fields[] = GoogleFontsField::make()
                     ->name("tp_{$fontFamily->getName()}_font")
                     ->label(trans('packages/theme::theme.typography_font_family', ['name' => $fontFamily->getLabel()]))
-                    ->defaultValue($fontFamily->getDefault());
+                    ->defaultValue($fontFamily->getDefault())
+                    ->shared();
 
                 if ($fontFamily->getDefaultFontWeight() !== null) {
                     $fields[] = SelectField::make()
@@ -243,7 +268,8 @@ class Typography
                             '800' => '800 - Extra Bold',
                             '900' => '900 - Black',
                         ])
-                        ->defaultValue((string) $fontFamily->getDefaultFontWeight());
+                        ->defaultValue((string) $fontFamily->getDefaultFontWeight())
+                        ->shared();
                 }
             }
 
@@ -254,7 +280,8 @@ class Typography
                     ->defaultValue($fontSize->getDefault())
                     ->helperText(trans('packages/theme::theme.typography_font_size_helper', [
                         'default' => "<code>{$fontSize->getDefault()}</code>",
-                    ]));
+                    ]))
+                    ->shared();
             }
 
             ThemeOption::setSection(

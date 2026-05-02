@@ -505,6 +505,10 @@ return [
             'widget_cache_ttl_helper' => 'Doba, po kterou budou kešovány všechny widgety. Výchozí je 1800 sekund (30 minut).',
             'plugin_cache_enabled' => 'Kešovat nainstalované pluginy',
             'plugin_cache_enabled_helper' => 'Kešovat seznam nainstalovaných pluginů pro zlepšení výkonu. Pokud je povoleno, systém bude kešovat seznam pluginů po dobu 30 minut pro snížení skenování souborového systému.',
+            'cache_size_warning_threshold' => 'Práh upozornění na velikost mezipaměti (MB)',
+            'cache_size_warning_threshold_helper' => 'Zobrazí upozornění na stránce správy mezipaměti, když mezipaměť frameworku překročí tuto velikost (v MB). Výchozí hodnota je 50 MB.',
+            'cache_auto_clear_enabled' => 'Automaticky vymazat mezipaměť, když velikost překročí práh',
+            'cache_auto_clear_enabled_helper' => 'Automaticky vymaže mezipaměť frameworku každou hodinu, když její velikost překročí výše uvedený práh upozornění. Vyžaduje, aby byl plánovač Laravelu (<code>php artisan schedule:run</code>) nakonfigurován jako cron úloha na vašem serveru.',
         ],
     ],
     'appearance' => [

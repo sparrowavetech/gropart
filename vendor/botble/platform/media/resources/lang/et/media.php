@@ -203,6 +203,13 @@ return [
         'uploaded_file_too_large' => 'Fail on liiga suur. Palun valige väiksem fail.',
         'uploaded_file_corrupted' => 'Fail näib olevat rikutud või kehtetu. Palun proovige üles laadida teist faili.',
         'upload_network_error' => 'Üleslaadimine ebaõnnestus võrguprobleemide tõttu. Palun kontrollige ühendust ja proovige uuesti.',
+        'upload_err_ini_size' => 'Fail on suurem kui serveri üleslaadimispiir :size. Suurendage PHP seadetes "upload_max_filesize" või küsige oma majutusteenuse pakkujalt.',
+        'upload_err_form_size' => 'Fail ületab vormi maksimaalse üleslaadimissuuruse.',
+        'upload_err_partial' => 'Fail laaditi üles ainult osaliselt. Proovige uuesti — tavaliselt tähendab see, et ühendus katkes.',
+        'upload_err_no_tmp_dir' => 'Server ei saa üleslaaditud faili salvestada, kuna PHP ajutine üleslaadimiskataloog (upload_tmp_dir) puudub või pole kirjutatav. Paluge oma majutusteenuse pakkujal määrata PHP-FPM pool konfiguratsioonis "upload_tmp_dir" kirjutatavaks kaustaks (nt /home/your-user/tmp). Täielikud juhised: https://docs.botble.com/cms/media-upload-errors.html',
+        'upload_err_cant_write' => 'Server ei saanud üleslaaditud faili kettale kirjutada. Kontrollige kausta õigusi, kettakvooti ja et tmp kataloog oleks PHP poolt kirjutatav.',
+        'upload_err_extension' => 'PHP laiendus (nt ModSecurity või turvaplugin) blokeeris üleslaadimise. Võtke ühendust oma majutusteenuse pakkujaga.',
+        'upload_err_unknown' => 'Üleslaadimine ebaõnnestus (PHP veakood :code). Võtke ühendust oma majutusteenuse pakkujaga.',
         'attributes' => [
             'uploaded_file' => 'fail',
             'upload' => 'fail',

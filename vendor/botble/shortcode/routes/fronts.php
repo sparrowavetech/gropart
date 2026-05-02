@@ -4,7 +4,7 @@ use Botble\Base\Http\Middleware\RequiresJsonRequestMiddleware;
 use Botble\Shortcode\Http\Controllers\ShortcodeController;
 use Botble\Shortcode\Http\Middleware\ShortcodePerformanceMiddleware;
 use Botble\Theme\Facades\Theme;
-use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Support\Facades\Route;
 
 Theme::registerRoutes(function (): void {
@@ -15,5 +15,5 @@ Theme::registerRoutes(function (): void {
             RequiresJsonRequestMiddleware::class,
             ShortcodePerformanceMiddleware::class,
         ])
-        ->withoutMiddleware(VerifyCsrfToken::class);
+        ->withoutMiddleware(PreventRequestForgery::class);
 });

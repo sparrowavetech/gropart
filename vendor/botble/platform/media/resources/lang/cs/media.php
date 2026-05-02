@@ -203,6 +203,13 @@ return [
         'uploaded_file_too_large' => 'Soubor je příliš velký. Vyberte prosím menší soubor.',
         'uploaded_file_corrupted' => 'Soubor se zdá být poškozený nebo neplatný. Zkuste prosím nahrát jiný soubor.',
         'upload_network_error' => 'Nahrávání selhalo kvůli problémům se sítí. Zkontrolujte prosím připojení a zkuste to znovu.',
+        'upload_err_ini_size' => 'Soubor je větší než limit nahrávání :size na serveru. Zvyšte "upload_max_filesize" v nastavení PHP nebo kontaktujte poskytovatele hostingu.',
+        'upload_err_form_size' => 'Soubor přesahuje maximální velikost nahrávání formuláře.',
+        'upload_err_partial' => 'Soubor byl nahrán pouze částečně. Zkuste to prosím znovu — obvykle to znamená, že bylo připojení přerušeno.',
+        'upload_err_no_tmp_dir' => 'Server nemůže uložit nahraný soubor, protože dočasný adresář pro nahrávání PHP (upload_tmp_dir) chybí nebo do něj nelze zapisovat. Požádejte poskytovatele hostingu, aby nastavil "upload_tmp_dir" v konfiguraci PHP-FPM pool na zapisovatelnou složku (např. /home/your-user/tmp). Úplné pokyny: https://docs.botble.com/cms/media-upload-errors.html',
+        'upload_err_cant_write' => 'Server nemohl zapsat nahraný soubor na disk. Zkontrolujte oprávnění složky, diskovou kvótu a zda je adresář tmp zapisovatelný pro PHP.',
+        'upload_err_extension' => 'Rozšíření PHP (například ModSecurity nebo bezpečnostní plugin) zablokovalo nahrávání. Kontaktujte poskytovatele hostingu.',
+        'upload_err_unknown' => 'Nahrávání selhalo (PHP chybový kód :code). Kontaktujte prosím poskytovatele hostingu.',
         'attributes' => [
             'uploaded_file' => 'soubor',
             'upload' => 'soubor',

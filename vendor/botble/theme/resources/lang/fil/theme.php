@@ -208,6 +208,11 @@ return [
     ],
     'term_and_privacy_policy_url' => 'URL ng Mga Tuntunin at Patakaran sa Privacy',
     'site_title_separator' => 'SEO title separator',
+    'site_title_helper' => 'Ang pangalan ng iyong brand o negosyo. Lumalabas sa browser tab at mga resulta ng paghahanap (hal. "My Company").',
+    'show_site_name_helper' => 'Idinaragdag ang pangalan ng site sa bawat pamagat ng pahina gamit ang napiling panghiwalay. Halimbawa: "Page Title - My Company".',
+    'site_title_separator_helper' => 'Ang character na ginagamit sa pagitan ng pamagat ng pahina at pangalan ng site. Halimbawa na may gitling: "Page Title - My Company". Halimbawa na may patayo na linya: "Page Title | My Company".',
+    'seo_title_helper' => 'Ang pamagat ng homepage na ipinapakita sa mga resulta ng search engine. Panatilihin ito sa ilalim ng 60 karakter para sa pinakamahusay na display. Iwanang blangko upang gamitin ang pamagat ng site.',
+    'seo_description_helper' => 'Ang paglalarawan ng homepage na ipinapakita sa mga resulta ng search engine. Panatilihin ito sa pagitan ng 120 hanggang 160 karakter para sa pinakamahusay na display.',
     'no_meta_keywords' => 'Ang meta keywords ay inalis na ng Google, hindi mo na kailangang magdagdag ng meta keywords sa iyong website. Matuto pa: :link',
     'validation' => [
         'gtm_container_id_format' => 'Ang GTM Container ID ay dapat nasa format na GTM-XXXXXX (hal., GTM-N7MK3KH2)',
@@ -389,6 +394,9 @@ return [
     ],
 
     'typography_primary' => 'Pangunahing font',
+    'all_languages' => 'Lahat ng wika',
+    'shared_field_notice' => 'Ang field na ito ay ibinahagi sa lahat ng wika. Pamahalaan ito mula sa default na wika.',
+    'shared_section_notice' => 'Lahat ng opsyon sa seksyong ito ay ibinahagi sa lahat ng wika. Lumipat sa default na wika upang gumawa ng mga pagbabago.',
     'admin_appearance' => [
         'show_admin_bar' => 'Ipakita ang admin bar para sa mga naka-login na admin, kahit sa harapang site',
         'show_admin_bar_helper' => 'Magpakita ng mabilis na pag-access sa admin toolbar sa itaas ng website kapag naka-login bilang administrator',

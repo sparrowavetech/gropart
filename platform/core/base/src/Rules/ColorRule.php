@@ -11,6 +11,15 @@ class ColorRule implements ValidationRule
 
     protected const RGB_PATTERN = '/^rgba?\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*(,\s*(0|1|0?\.\d+)\s*)?\)$/';
 
+    protected const CSS_KEYWORDS = [
+        'inherit',
+        'initial',
+        'unset',
+        'revert',
+        'currentColor',
+        'transparent',
+    ];
+
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         if (! is_string($value)) {
@@ -19,7 +28,11 @@ class ColorRule implements ValidationRule
             return;
         }
 
-        if (! preg_match(self::HEX_PATTERN, $value) && ! preg_match(self::RGB_PATTERN, $value)) {
+        if (
+            ! in_array($value, self::CSS_KEYWORDS)
+            && ! preg_match(self::HEX_PATTERN, $value)
+            && ! preg_match(self::RGB_PATTERN, $value)
+        ) {
             $fail(trans('validation.regex', ['attribute' => $attribute]));
         }
     }

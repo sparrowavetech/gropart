@@ -505,6 +505,10 @@ return [
             'widget_cache_ttl_helper' => 'Varaktigheten för att cacha alla widgets. Standard är 1800 sekunder (30 minuter).',
             'plugin_cache_enabled' => 'Cacha installerade plugins',
             'plugin_cache_enabled_helper' => 'Cacha listan över installerade plugins för förbättrad prestanda. När det är aktiverat kommer systemet att cacha plugin-listan i 30 minuter för att minska filsystemsökningar.',
+            'cache_size_warning_threshold' => 'Varningströskel för cachestorlek (MB)',
+            'cache_size_warning_threshold_helper' => 'Visar en varning på sidan Cachehantering när ramverkets cache överskrider denna storlek (i MB). Standardvärdet är 50 MB.',
+            'cache_auto_clear_enabled' => 'Rensa cache automatiskt när storleken överskrider tröskelvärdet',
+            'cache_auto_clear_enabled_helper' => 'Rensar automatiskt ramverkets cache varje timme när dess storlek överskrider varningströskeln ovan. Kräver att Laravel-schemaläggaren (<code>php artisan schedule:run</code>) är konfigurerad som ett cron-jobb på din server.',
         ],
     ],
     'appearance' => [

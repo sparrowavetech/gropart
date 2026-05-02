@@ -8,6 +8,7 @@ return [
     'clear_button' => 'Törlés',
     'refresh_button' => 'Frissítés',
     'cache_size_warning' => 'A CMS gyorsítótár mérete meglehetősen nagy (>50MB). A törlés javíthatja a rendszer teljesítményét.',
+    'cache_size_warning_dynamic' => 'A CMS gyorsítótár mérete meglehetősen nagy (>:sizeMB). A törlés javíthatja a rendszer teljesítményét.',
     'footer_note' => 'Törölje a gyorsítótárat, miután módosításokat végzett a webhelyén, hogy azok megfelelően megjelenjenek.',
     'type' => 'Típus',
     'description' => 'Leírás',

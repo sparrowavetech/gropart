@@ -90,8 +90,15 @@ class rvMedia {
 
                     ContextMenuService.destroyContext()
                     ContextMenuService.initContext()
+
+                    if (Helpers.isUseInModal()) {
+                        $('.rv-media-footer').removeClass('d-none')
+                    }
                 })
             } else {
+                if (Helpers.isUseInModal()) {
+                    $('.rv-media-footer').removeClass('d-none')
+                }
                 $(document).find('.rv-media-container .js-change-action[data-type=refresh]').trigger('click')
             }
         }

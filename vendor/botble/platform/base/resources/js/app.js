@@ -1,6 +1,7 @@
+import _ from 'lodash'
 import { axios, HttpClient } from './utilities'
 
-window._ = require('lodash')
+window._ = _
 
 window.axios = axios
 

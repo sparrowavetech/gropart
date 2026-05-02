@@ -19,7 +19,14 @@ class ModelTranslationImporter extends Importer implements WithMapping
 
     public function __construct(?string $modelClass = null)
     {
-        $this->modelClass = $modelClass ?: request()->input('class');
+        $modelClass = $modelClass ?: request()->input('class');
+
+        abort_unless(
+            is_string($modelClass) && LanguageAdvancedManager::isSupported($modelClass),
+            404
+        );
+
+        $this->modelClass = $modelClass;
     }
 
     public function chunkSize(): int

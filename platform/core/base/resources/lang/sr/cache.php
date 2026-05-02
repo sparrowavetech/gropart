@@ -8,6 +8,7 @@ return [
     'clear_button' => 'Obrišite',
     'refresh_button' => 'Osvežite',
     'cache_size_warning' => 'Vaš CMS keš je prilično velik (>50MB). Brisanje može poboljšati performanse sistema.',
+    'cache_size_warning_dynamic' => 'Vaš CMS keš je prilično velik (>:sizeMB). Brisanje može poboljšati performanse sistema.',
     'footer_note' => 'Obrišite keš nakon promena na vašem sajtu kako bi se osiguralo da se prikazuju pravilno.',
     'type' => 'Tip',
     'description' => 'Opis',

@@ -505,6 +505,10 @@ return [
             'widget_cache_ttl_helper' => 'The duration to cache all widgets. Default is 1800 seconds (30 minutes).',
             'plugin_cache_enabled' => 'Cache installed plugins',
             'plugin_cache_enabled_helper' => 'Cache the list of installed plugins for improved performance. When enabled, the system will cache the plugin list for 30 minutes to reduce file system scans.',
+            'cache_size_warning_threshold' => 'Поріг попередження про розмір кешу (МБ)',
+            'cache_size_warning_threshold_helper' => 'Показує попередження на сторінці керування кешем, коли кеш фреймворку перевищує цей розмір (у МБ). За замовчуванням 50 МБ.',
+            'cache_auto_clear_enabled' => 'Автоматично очищати кеш, коли розмір перевищує поріг',
+            'cache_auto_clear_enabled_helper' => 'Автоматично очищає кеш фреймворку щогодини, коли його розмір перевищує вищезазначений поріг попередження. Потребує налаштування планувальника Laravel (<code>php artisan schedule:run</code>) як cron-завдання на вашому сервері.',
         ],
     ],
     'appearance' => [

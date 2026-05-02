@@ -59,6 +59,7 @@ return [
     'widget_site_copyright_helper' => 'Go to :link to change the copyright text.',
     'theme_options' => 'Theme options',
 
+    'inheriting_from_default' => 'These widgets are inherited from the default language. Create language-specific widgets to override.',
     'drag_or_click' => 'Drag to sidebar or click + to add',
     'drop_widgets_here' => 'Drop widgets in your sidebar areas',
     'search_widgets' => 'Search widgets...',

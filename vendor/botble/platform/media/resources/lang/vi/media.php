@@ -209,6 +209,13 @@ return [
         'uploaded_file_too_large' => 'Kích thước file vượt quá giới hạn cho phép.',
         'uploaded_file_corrupted' => 'File bị hỏng hoặc không thể đọc được.',
         'upload_network_error' => 'Lỗi mạng khi tải lên file.',
+        'upload_err_ini_size' => 'Tệp lớn hơn giới hạn tải lên :size của máy chủ. Hãy tăng "upload_max_filesize" trong cài đặt PHP hoặc liên hệ nhà cung cấp hosting.',
+        'upload_err_form_size' => 'Tệp vượt quá kích thước tải lên tối đa của biểu mẫu.',
+        'upload_err_partial' => 'Tệp chỉ được tải lên một phần. Vui lòng thử lại — điều này thường do kết nối bị gián đoạn.',
+        'upload_err_no_tmp_dir' => 'Máy chủ không thể lưu tệp tải lên vì thư mục tạm của PHP (upload_tmp_dir) bị thiếu hoặc không thể ghi. Hãy yêu cầu nhà cung cấp hosting thiết lập "upload_tmp_dir" trong cấu hình pool PHP-FPM trỏ tới thư mục có thể ghi (ví dụ /home/your-user/tmp). Hướng dẫn đầy đủ: https://docs.botble.com/cms/media-upload-errors.html',
+        'upload_err_cant_write' => 'Máy chủ không thể ghi tệp tải lên xuống đĩa. Hãy kiểm tra quyền thư mục, dung lượng đĩa và đảm bảo thư mục tmp có thể ghi được bởi PHP.',
+        'upload_err_extension' => 'Một tiện ích PHP (chẳng hạn như ModSecurity hoặc plugin bảo mật) đã chặn việc tải lên. Vui lòng liên hệ nhà cung cấp hosting.',
+        'upload_err_unknown' => 'Tải lên thất bại (mã lỗi PHP :code). Vui lòng liên hệ nhà cung cấp hosting.',
         'attributes' => [
             'uploaded_file' => 'file tải lên',
             'upload' => 'tải lên',

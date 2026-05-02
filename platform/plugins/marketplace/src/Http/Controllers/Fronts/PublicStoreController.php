@@ -110,6 +110,8 @@ class PublicStoreController extends BaseController
 
         SeoHelper::setSeoOpenGraph($meta);
 
+        do_action(BASE_ACTION_PUBLIC_RENDER_SINGLE, STORE_MODULE_SCREEN_NAME, $store);
+
         $breadcrumb = Theme::breadcrumb();
 
         if (MarketplaceHelper::isStoresPageEnabled()) {

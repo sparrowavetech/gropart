@@ -5,7 +5,10 @@ namespace Botble\Blog\Providers;
 use Botble\ACL\Models\User;
 use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Facades\PanelSectionManager;
+use Botble\Base\Forms\FieldOptions\CheckboxFieldOption;
+use Botble\Base\Forms\Fields\OnOffCheckboxField;
 use Botble\Base\PanelSections\PanelSectionItem;
+use Botble\Base\Rules\OnOffRule;
 use Botble\Base\Supports\DashboardMenuItem;
 use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
@@ -27,6 +30,7 @@ use Botble\PluginManagement\Events\RemovedPlugin;
 use Botble\SeoHelper\Facades\SeoHelper;
 use Botble\Setting\PanelSections\SettingOthersPanelSection;
 use Botble\Shortcode\View\View;
+use Botble\Sitemap\Forms\Settings\SitemapSettingForm;
 use Botble\Slug\Facades\SlugHelper;
 use Botble\Slug\Models\Slug;
 use Botble\Theme\Events\ThemeRoutingBeforeEvent;
@@ -82,6 +86,8 @@ class BlogServiceProvider extends ServiceProvider
 
             SiteMapManager::registerMonthlyArchives('blog-posts');
         });
+
+        $this->registerSitemapContentTypeSettings();
 
         SlugHelper::registering(function (): void {
             SlugHelper::registerModule(Post::class, fn () => trans('plugins/blog::base.blog_posts'));
@@ -237,5 +243,44 @@ class BlogServiceProvider extends ServiceProvider
                 }
             }
         );
+    }
+
+    protected function registerSitemapContentTypeSettings(): void
+    {
+        SitemapSettingForm::beforeRendering(function (SitemapSettingForm $form): void {
+            $form
+                ->add(
+                    'sitemap_blog_posts_enabled',
+                    OnOffCheckboxField::class,
+                    CheckboxFieldOption::make()
+                        ->label(trans('packages/sitemap::sitemap.settings.enable_blog_posts_sitemap'))
+                        ->value(setting('sitemap_blog_posts_enabled', true))
+                        ->helperText(trans('packages/sitemap::sitemap.settings.enable_blog_posts_sitemap_help'))
+                )
+                ->add(
+                    'sitemap_blog_categories_enabled',
+                    OnOffCheckboxField::class,
+                    CheckboxFieldOption::make()
+                        ->label(trans('packages/sitemap::sitemap.settings.enable_blog_categories_sitemap'))
+                        ->value(setting('sitemap_blog_categories_enabled', true))
+                        ->helperText(trans('packages/sitemap::sitemap.settings.enable_blog_categories_sitemap_help'))
+                )
+                ->add(
+                    'sitemap_blog_tags_enabled',
+                    OnOffCheckboxField::class,
+                    CheckboxFieldOption::make()
+                        ->label(trans('packages/sitemap::sitemap.settings.enable_blog_tags_sitemap'))
+                        ->value(setting('sitemap_blog_tags_enabled', true))
+                        ->helperText(trans('packages/sitemap::sitemap.settings.enable_blog_tags_sitemap_help'))
+                );
+        });
+
+        add_filter('sitemap_settings_validation_rules', function (array $rules): array {
+            $rules['sitemap_blog_posts_enabled'] = [new OnOffRule()];
+            $rules['sitemap_blog_categories_enabled'] = [new OnOffRule()];
+            $rules['sitemap_blog_tags_enabled'] = [new OnOffRule()];
+
+            return $rules;
+        });
     }
 }

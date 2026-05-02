@@ -94,6 +94,11 @@ final class LaravelSetList
     /**
      * @var string
      */
+    public const LARAVEL_130 = __DIR__ . '/../../config/sets/laravel130.php';
+
+    /**
+     * @var string
+     */
     public const LARAVEL_ARRAYACCESS_TO_METHOD_CALL = __DIR__ . '/../../config/sets/laravel-arrayaccess-to-method-call.php';
 
     /**

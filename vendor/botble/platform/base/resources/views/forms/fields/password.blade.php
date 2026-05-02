@@ -19,8 +19,11 @@
             type="password"
             name="{{ $name }}"
             id="{{ $name }}"
-            value="{{ $options['value'] }}"
             {!! Html::attributes($options['attr']) !!}
+            autocomplete="new-password"
+            @if (!empty($options['value']))
+                value="{{ $options['value'] }}"
+            @endif
             data-bb-password
         >
         <span

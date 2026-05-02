@@ -6,7 +6,6 @@ use ArPHP\I18N\Arabic;
 use Barryvdh\DomPDF\Facade\Pdf as PdfFacade;
 use Barryvdh\DomPDF\PDF as DomPDF;
 use Botble\Base\Facades\BaseHelper;
-use Botble\Base\Facades\Html;
 use Closure;
 use Dompdf\Adapter\CPDF;
 use Dompdf\Image\Cache;
@@ -180,11 +179,9 @@ class Pdf
                     '৳' => 'bangladeshi-taka',
                     '₺' => 'turkish-lira',
                     '﷼' => 'iranian-rial',
+                    '₾' => 'georgian-lari',
+                    '₿' => 'bitcoin',
                 ];
-
-                if ($this->supportLanguage === 'arabic') {
-                    $content = $this->compileArabic($content);
-                }
             } else {
                 $currencies = [
                     '﷼' => 'iranian-rial',
@@ -192,11 +189,42 @@ class Pdf
             }
 
             foreach ($currencies as $currency => $icon) {
-                $content = str_replace(
-                    $currency,
-                    Html::image(asset("vendor/core/core/base/images/pdf-symbols/$icon.svg"), 'currency', ['width' => 10, 'style' => 'margin-right: 2px; display: inline-block;']),
+                if (! str_contains($content, $currency)) {
+                    continue;
+                }
+
+                $svgPath = base_path("platform/core/base/public/images/pdf-symbols/{$icon}.svg");
+
+                if (! is_file($svgPath)) {
+                    continue;
+                }
+
+                $img = sprintf(
+                    '<img src="%s" alt="%s" style="height: 0.85em; vertical-align: middle;">',
+                    e($svgPath),
+                    e($icon)
+                );
+
+                // Glue the image to the adjacent number so DomPDF can't wrap
+                // the currency symbol onto its own line.
+                $content = preg_replace_callback(
+                    '/([0-9][0-9.,]*\h?)?' . preg_quote($currency, '/') . '(\h?[0-9][0-9.,]*)?/u',
+                    function (array $matches) use ($img): string {
+                        $before = $matches[1] ?? '';
+                        $after = $matches[2] ?? '';
+
+                        if ($before === '' && $after === '') {
+                            return $img;
+                        }
+
+                        return '<span style="white-space: nowrap;">' . $before . $img . $after . '</span>';
+                    },
                     $content
                 );
+            }
+
+            if ($this->getProcessingLibrary() == 'dompdf' && $this->supportLanguage === 'arabic') {
+                $content = $this->compileArabic($content);
             }
         }
 

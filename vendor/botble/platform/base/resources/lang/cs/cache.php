@@ -8,6 +8,7 @@ return [
     'clear_button' => 'Vymazat',
     'refresh_button' => 'Obnovit',
     'cache_size_warning' => 'Velikost mezipaměti CMS je poměrně velká (>50MB). Její vymazání může zlepšit výkon systému.',
+    'cache_size_warning_dynamic' => 'Velikost mezipaměti CMS je poměrně velká (>:sizeMB). Její vymazání může zlepšit výkon systému.',
     'footer_note' => 'Vymazejte mezipaměť po provedení změn na vašem webu, abyste zajistili jejich správné zobrazení.',
     'type' => 'Typ',
     'description' => 'Popis',

@@ -72,5 +72,6 @@ return [
     'clear_button' => 'Leeren',
     'refresh_button' => 'Aktualisieren',
     'cache_size_warning' => 'Der CMS-Cache ist größer als 50 MB. Ein Leeren kann die Systemleistung verbessern.',
+    'cache_size_warning_dynamic' => 'Der CMS-Cache ist größer als :size MB. Ein Leeren kann die Systemleistung verbessern.',
     'footer_note' => 'Leeren Sie den Cache nach Änderungen an Ihrer Website, damit sie korrekt angezeigt wird.',
 ];

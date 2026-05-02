@@ -208,6 +208,11 @@ return [
     ],
     'term_and_privacy_policy_url' => 'Terms and Privacy Policy URL',
     'site_title_separator' => 'SEO title separator',
+    'site_title_helper' => 'Le nom de votre marque ou entreprise. Apparaît dans l\'onglet du navigateur et les résultats de recherche (ex. "My Company").',
+    'show_site_name_helper' => 'Ajoute le nom du site à chaque titre de page en utilisant le séparateur sélectionné. Exemple : "Page Title - My Company".',
+    'site_title_separator_helper' => 'Le caractère utilisé entre le titre de la page et le nom du site. Exemple avec tiret : "Page Title - My Company". Exemple avec barre : "Page Title | My Company".',
+    'seo_title_helper' => 'Le titre de la page d\'accueil affiché dans les résultats des moteurs de recherche. Restez en dessous de 60 caractères pour un meilleur affichage. Laissez vide pour utiliser le titre du site.',
+    'seo_description_helper' => 'La description de la page d\'accueil affichée dans les résultats des moteurs de recherche. Restez entre 120 et 160 caractères pour un meilleur affichage.',
     'no_meta_keywords' => 'Meta keywords was removed by Google, you don\'t need to add meta keywords to your website. Learn more: :link',
     'validation' => [
         'gtm_container_id_format' => 'GTM Container ID must be in format GTM-XXXXXX (e.g., GTM-N7MK3KH2)',
@@ -389,6 +394,9 @@ return [
     ],
 
     'typography_primary' => 'Police principale',
+    'all_languages' => 'Toutes les langues',
+    'shared_field_notice' => 'Ce champ est partagé entre toutes les langues. Gérez-le depuis la langue par défaut.',
+    'shared_section_notice' => 'Toutes les options de cette section sont partagées entre toutes les langues. Passez à la langue par défaut pour effectuer des modifications.',
     'admin_appearance' => [
         'show_admin_bar' => 'Afficher la barre d\'administration pour les administrateurs connectés, même sur le site public',
         'show_admin_bar_helper' => 'Afficher une barre d\'outils d\'accès rapide à l\'administration en haut du site Web lorsque vous êtes connecté en tant qu\'administrateur',

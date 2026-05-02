@@ -505,6 +505,10 @@ return [
             'widget_cache_ttl_helper' => 'Az összes widget gyorsítótárazásának időtartama. Alapértelmezett 1800 másodperc (30 perc).',
             'plugin_cache_enabled' => 'Telepített beépülők gyorsítótárazása',
             'plugin_cache_enabled_helper' => 'A telepített beépülők listájának gyorsítótárazása a jobb teljesítmény érdekében. Ha engedélyezve van, a rendszer 30 percre gyorsítótárazza a beépülők listáját, hogy csökkentse a fájlrendszer vizsgálatokat.',
+            'cache_size_warning_threshold' => 'Gyorsítótár méretének figyelmeztetési küszöbe (MB)',
+            'cache_size_warning_threshold_helper' => 'Figyelmeztetést jelenít meg a Gyorsítótár kezelése oldalon, ha a keretrendszer gyorsítótára meghaladja ezt a méretet (MB-ban). Az alapértelmezett érték 50 MB.',
+            'cache_auto_clear_enabled' => 'Gyorsítótár automatikus törlése, ha a méret meghaladja a küszöböt',
+            'cache_auto_clear_enabled_helper' => 'Automatikusan törli a keretrendszer gyorsítótárát óránként, ha a mérete meghaladja a fenti figyelmeztetési küszöböt. A Laravel ütemező (<code>php artisan schedule:run</code>) cron feladatként történő beállítása szükséges a kiszolgálón.',
         ],
     ],
     'appearance' => [

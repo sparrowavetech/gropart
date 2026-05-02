@@ -8,6 +8,7 @@ return [
     'clear_button' => 'Notīrīt',
     'refresh_button' => 'Atsvaidzināt',
     'cache_size_warning' => 'Jūsu CMS kešatmiņas izmērs ir diezgan liels (>50MB). Tās notīrīšana var uzlabot sistēmas veiktspēju.',
+    'cache_size_warning_dynamic' => 'Jūsu CMS kešatmiņas izmērs ir diezgan liels (>:sizeMB). Tās notīrīšana var uzlabot sistēmas veiktspēju.',
     'footer_note' => 'Notīriet kešatmiņu pēc izmaiņu veikšanas jūsu vietnē, lai nodrošinātu, ka tās tiek rādītas pareizi.',
     'type' => 'Tips',
     'description' => 'Apraksts',

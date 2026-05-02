@@ -105,6 +105,23 @@ class CacheSettingForm extends SettingForm
                     ->helperText(trans('core/setting::setting.cache.form.plugin_cache_enabled_helper'))
                     ->value(setting('plugin_cache_enabled', true))
             )
+            ->add(
+                'cache_size_warning_threshold',
+                NumberField::class,
+                NumberFieldOption::make()
+                    ->label(trans('core/setting::setting.cache.form.cache_size_warning_threshold'))
+                    ->helperText(trans('core/setting::setting.cache.form.cache_size_warning_threshold_helper'))
+                    ->value(setting('cache_size_warning_threshold', 50))
+                    ->attributes(['min' => 1])
+            )
+            ->add(
+                'cache_auto_clear_enabled',
+                OnOffCheckboxField::class,
+                OnOffFieldOption::make()
+                    ->label(trans('core/setting::setting.cache.form.cache_auto_clear_enabled'))
+                    ->helperText(trans('core/setting::setting.cache.form.cache_auto_clear_enabled_helper'))
+                    ->value(setting('cache_auto_clear_enabled', false))
+            )
             ->when(setting('sitemap_enabled', true), function (CacheSettingForm $form): void {
                 $form
                     ->add(

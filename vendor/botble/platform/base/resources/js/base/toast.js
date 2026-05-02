@@ -272,17 +272,19 @@ class Toastify {
      * @private
      */
     _reposition() {
+        const bottomBase = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--toastify-bottom-offset')) || 15
+
         let topLeftOffsetSize = {
             top: 15,
-            bottom: 15,
+            bottom: bottomBase,
         }
         let topRightOffsetSize = {
             top: 15,
-            bottom: 15,
+            bottom: bottomBase,
         }
         let offsetSize = {
             top: 15,
-            bottom: 15,
+            bottom: bottomBase,
         }
 
         let allToasts = this._rootElement.querySelectorAll('.toastify')
@@ -427,14 +429,13 @@ function injectCSS() {
             max-width: -moz-fit-content;
         }
 
-        @media only screen and (max-width: 360px) {
-            .toastify-right,
-            .toastify-left {
-                margin-inline-start: auto;
-                margin-inline-end: auto;
-                inset-inline-start: 0;
-                inset-inline-end: 0;
-                max-width: fit-content;
+        @media only screen and (max-width: 768px) {
+            .toastify {
+                width: auto;
+                max-width: calc(100% - 30px);
+                inset-inline-start: 15px !important;
+                inset-inline-end: 15px !important;
+                transform: none !important;
             }
         }
     `

@@ -11,7 +11,11 @@ use PhpParser\Node\Expr\Variable;
 use PhpParser\Node\Identifier;
 use PhpParser\Node\Scalar\Int_;
 use PhpParser\Node\Stmt\Expression;
+use PHPStan\Type\ObjectType;
+use Rector\PHPStan\ScopeFetcher;
+use Rector\PHPUnit\Enum\PHPUnitClassName;
 use Rector\Rector\AbstractRector;
+use Rector\ValueObject\MethodName;
 use Symplify\RuleDocGenerator\ValueObject\CodeSample\CodeSample;
 use Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
 /**
@@ -81,13 +85,27 @@ CODE_SAMPLE
         if (!$this->isName($methodCall->name, 'willReturnMap')) {
             return null;
         }
+        $scope = ScopeFetcher::fetch($node);
+        // allowed as can be flexible
+        if ($scope->getFunctionName() === MethodName::SET_UP) {
+            return null;
+        }
         $topmostCall = $this->resolveTopmostCall($methodCall);
         // already covered
         if ($this->isName($topmostCall->name, 'expects')) {
             return null;
         }
+        if (!$this->isObjectType($topmostCall->var, new ObjectType(PHPUnitClassName::MOCK_OBJECT))) {
+            return null;
+        }
+        if ($methodCall->isFirstClassCallable()) {
+            return null;
+        }
         // count values in will map arg
-        $willReturnMapArg = $methodCall->getArgs()[0];
+        $willReturnMapArg = $methodCall->getArgs()[0] ?? null;
+        if (!$willReturnMapArg instanceof Arg) {
+            return null;
+        }
         if (!$willReturnMapArg->value instanceof Array_) {
             return null;
         }

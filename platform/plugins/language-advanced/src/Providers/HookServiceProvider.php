@@ -10,6 +10,7 @@ use Botble\Language\Facades\Language;
 use Botble\Language\Models\Language as LanguageModel;
 use Botble\LanguageAdvanced\Supports\LanguageAdvancedManager;
 use Botble\Page\Models\Page;
+use Botble\Slug\Models\Slug;
 use Botble\Table\CollectionDataTable;
 use Botble\Table\EloquentDataTable;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
@@ -63,6 +64,7 @@ class HookServiceProvider extends ServiceProvider
         add_filter('stored_meta_box_key', [$this, 'storeMetaBoxKey'], 1134, 2);
         add_filter('slug_helper_get_slug_query', [$this, 'getSlugQuery'], 1134, 2);
         add_filter('language_switcher_get_url', [$this, 'translateSlugSwitcherUrl'], 1134, 4);
+        add_filter('slug_get_translated_slug', [$this, 'getTranslatedSlug'], 1134, 2);
         add_filter(['model_after_execute_get', 'model_after_execute_paginate'], function ($data, BaseModel $model) {
             if ($model instanceof LanguageModel) {
                 return $data;
@@ -457,6 +459,56 @@ class HookServiceProvider extends ServiceProvider
         } catch (Throwable) {
             return $url;
         }
+    }
+
+    /**
+     * Provide translated slug key and prefix for URL generation on non-default locales.
+     * This ensures menu nodes, breadcrumbs, and other components that call $model->url
+     * get the correctly translated slug instead of the default language slug.
+     */
+    protected array $slugTranslationCache = [];
+
+    public function getTranslatedSlug(mixed $translatedSlug, mixed $slug): mixed
+    {
+        if (is_in_admin() || ! $slug instanceof Slug || ! $slug->id) {
+            return $translatedSlug;
+        }
+
+        if (LanguageAdvancedManager::isDefaultLocale()) {
+            return $translatedSlug;
+        }
+
+        $langCode = LanguageAdvancedManager::getTranslationLocale();
+
+        if (! $langCode) {
+            return $translatedSlug;
+        }
+
+        $cacheKey = $slug->id . '_' . $langCode;
+
+        if (array_key_exists($cacheKey, $this->slugTranslationCache)) {
+            return $this->slugTranslationCache[$cacheKey];
+        }
+
+        $translation = DB::table('slugs_translations')
+            ->where('slugs_id', $slug->id)
+            ->where('lang_code', $langCode)
+            ->first();
+
+        if (! $translation) {
+            $this->slugTranslationCache[$cacheKey] = null;
+
+            return $translatedSlug;
+        }
+
+        $result = [
+            'key' => $translation->key ?: $slug->key, // ?: intentional — empty key is invalid, fall back to default
+            'prefix' => $translation->prefix ?? $slug->prefix, // ?? intentional — empty prefix is valid (pages have no content-type prefix)
+        ];
+
+        $this->slugTranslationCache[$cacheKey] = $result;
+
+        return $result;
     }
 
     protected function resolveCurrentSlug(): void

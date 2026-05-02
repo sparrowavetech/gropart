@@ -52,6 +52,10 @@ export default defineComponent({
             this.$refs.modal.addEventListener('hidden.bs.modal', () => {
                 this.$emit('back')
             })
+
+            this.$nextTick(() => {
+                $(this.$refs.modal).find('[data-bs-toggle="tooltip"]').tooltip({ placement: 'top' })
+            })
         },
         checkInstalled() {
             this.isInstalled = window.marketplace.installed.includes(this.packageName)
@@ -74,6 +78,9 @@ export default defineComponent({
         authorAvatar() {
             return `https://github.com/${this.plugin.author_name}.png`
         },
+        isVerifiedAuthor() {
+            return this.plugin.author_name?.toLowerCase().includes('botble')
+        },
     },
 })
 </script>
@@ -85,7 +92,22 @@ export default defineComponent({
                 <div class="modal-header py-3 px-5">
                     <div class="d-flex flex-wrap gap-3 align-items-center justify-content-between w-100">
                         <div>
-                            <h2 class="mb-1">{{ plugin.name }}</h2>
+                            <h2 class="mb-1 d-flex align-items-center gap-1">
+                                {{ plugin.name }}
+                                <svg
+                                    v-if="isVerifiedAuthor"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="22"
+                                    height="22"
+                                    viewBox="0 0 24 24"
+                                    fill="#1d9bf0"
+                                    class="flex-shrink-0"
+                                    data-bs-toggle="tooltip"
+                                    title="Verified by Botble"
+                                >
+                                    <path d="M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.9-.81-3.91s-2.52-1.27-3.91-.81c-.66-1.31-1.91-2.19-3.34-2.19s-2.67.88-3.33 2.19c-1.4-.46-2.91-.2-3.92.81s-1.26 2.52-.8 3.91c-1.31.67-2.2 1.91-2.2 3.34s.89 2.67 2.2 3.34c-.46 1.39-.21 2.9.8 3.91s2.52 1.26 3.91.81c.67 1.31 1.91 2.19 3.34 2.19s2.68-.88 3.34-2.19c1.39.45 2.9.2 3.91-.81s1.27-2.52.81-3.91c1.31-.67 2.19-1.91 2.19-3.34zm-11.71 4.2L6.8 12.46l1.41-1.42 2.26 2.26 4.8-5.23 1.47 1.36-6.2 6.77z"/>
+                                </svg>
+                            </h2>
                             <p class="text-muted mb-0">{{ plugin.description }}</p>
                         </div>
 
@@ -128,6 +150,19 @@ export default defineComponent({
                                                 :style="`background-image: url(${authorAvatar})`"
                                             ></span>
                                             {{ plugin.author_name }}
+                                            <svg
+                                                v-if="isVerifiedAuthor"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                width="16"
+                                                height="16"
+                                                viewBox="0 0 24 24"
+                                                fill="#1d9bf0"
+                                                class="ms-1 flex-shrink-0"
+                                                data-bs-toggle="tooltip"
+                                    title="Verified by Botble"
+                                            >
+                                                <path d="M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.9-.81-3.91s-2.52-1.27-3.91-.81c-.66-1.31-1.91-2.19-3.34-2.19s-2.67.88-3.33 2.19c-1.4-.46-2.91-.2-3.92.81s-1.26 2.52-.8 3.91c-1.31.67-2.2 1.91-2.2 3.34s.89 2.67 2.2 3.34c-.46 1.39-.21 2.9.8 3.91s2.52 1.26 3.91.81c.67 1.31 1.91 2.19 3.34 2.19s2.68-.88 3.34-2.19c1.39.45 2.9.2 3.91-.81s1.27-2.52.81-3.91c1.31-.67 2.19-1.91 2.19-3.34zm-11.71 4.2L6.8 12.46l1.41-1.42 2.26 2.26 4.8-5.23 1.47 1.36-6.2 6.77z"/>
+                                            </svg>
                                         </div>
                                     </div>
                                 </div>

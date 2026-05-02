@@ -40,7 +40,10 @@ class ThemePresetController extends BaseController
 
     public function store(ChooseThemePresetRequest $request, ImportDatabaseService $importDatabaseService): RedirectResponse
     {
-        $this->handleImportDatabaseFile($importDatabaseService, $request->input('theme_preset'));
+        $selectedPresetId = $request->input('theme_preset');
+        $explicitDatabaseFile = InstallerStep::getThemePresets()[$selectedPresetId]['database'] ?? null;
+
+        $this->handleImportDatabaseFile($importDatabaseService, $selectedPresetId, $explicitDatabaseFile);
 
         return redirect()
             ->to(URL::temporarySignedRoute('installers.accounts.index', Carbon::now()->addMinutes(30)));

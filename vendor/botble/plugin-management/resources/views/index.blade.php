@@ -4,22 +4,125 @@
     <style>
         .plugin-card {
             transition: transform 0.2s ease, box-shadow 0.2s ease;
+            border: 1px solid var(--bb-border-color);
+            border-radius: 0.75rem;
+            overflow: hidden;
         }
         .plugin-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
         }
-        .plugin-card .card-img-top {
-            border-bottom: 1px solid var(--bb-border-color);
+        .plugin-card .plugin-image-area {
+            position: relative;
+            aspect-ratio: 2 / 1;
+            overflow: hidden;
         }
         .plugin-card .plugin-image-placeholder {
-            background: var(--bb-card-cap-bg);
+            background: linear-gradient(160deg, #1e293b 0%, #334155 100%);
         }
         .plugin-card .plugin-icon-wrapper {
-            background: rgba(var(--bb-primary-rgb), 0.1);
+            width: 2.75rem;
+            height: 2.75rem;
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 0.625rem;
+            backdrop-filter: blur(8px);
+        }
+        .plugin-card .plugin-icon-wrapper .icon {
+            color: rgba(255, 255, 255, 0.85) !important;
+        }
+        .plugin-card .plugin-name {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            line-height: 1.3;
+        }
+        .plugin-card .card-body {
+            padding: 1rem 1rem 0.75rem;
+        }
+        .plugin-card .plugin-description {
+            font-size: 0.8125rem;
+            line-height: 1.5;
+            color: var(--tblr-secondary);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            min-height: 2.4em;
+        }
+        .plugin-card .plugin-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.625rem;
+            font-size: 0.75rem;
+            color: var(--tblr-secondary);
+        }
+        .plugin-card .plugin-meta .meta-divider {
+            width: 1px;
+            height: 0.875rem;
+            background: var(--bb-border-color);
+        }
+        .plugin-card .plugin-status-dot {
+            width: 0.4375rem;
+            height: 0.4375rem;
+            border-radius: 50%;
+            display: inline-block;
+            flex-shrink: 0;
+        }
+        .plugin-card .plugin-status-dot.active {
+            background: #2fb344;
+            box-shadow: 0 0 0 2px rgba(47, 179, 68, 0.2);
+        }
+        .plugin-card .plugin-status-dot.inactive {
+            background: #9ba4ae;
         }
         .plugin-card .card-footer {
-            background: var(--bb-card-cap-bg);
+            background: var(--tblr-bg-surface-secondary, #f8fafc);
+            border-top: 1px solid var(--bb-border-color);
+            padding: 0.5rem 0.75rem;
+        }
+        .plugin-card .card-footer .btn {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.625rem;
+            border-color: transparent;
+            background: transparent;
+            color: var(--tblr-secondary);
+        }
+        .plugin-card .card-footer .btn:hover {
+            background: var(--tblr-bg-surface, #fff);
+            color: var(--tblr-body-color);
+            border-color: var(--bb-border-color);
+        }
+        .plugin-card .card-footer .btn-activate {
+            color: var(--tblr-primary);
+        }
+        .plugin-card .card-footer .btn-activate:hover {
+            background: rgba(var(--bb-primary-rgb), 0.06);
+            color: var(--tblr-primary);
+            border-color: rgba(var(--bb-primary-rgb), 0.2);
+        }
+        .plugin-card .card-footer .btn-deactivate {
+            color: var(--tblr-warning);
+        }
+        .plugin-card .card-footer .btn-deactivate:hover {
+            background: rgba(var(--tblr-warning-rgb, 245, 159, 0), 0.06);
+            color: var(--tblr-warning);
+            border-color: rgba(var(--tblr-warning-rgb, 245, 159, 0), 0.2);
+        }
+        .plugin-card .card-footer .btn-remove {
+            color: var(--tblr-danger);
+        }
+        .plugin-card .card-footer .btn-remove:hover {
+            background: rgba(var(--tblr-danger-rgb, 214, 57, 57), 0.06);
+            color: var(--tblr-danger);
+            border-color: rgba(var(--tblr-danger-rgb, 214, 57, 57), 0.2);
+        }
+        .plugin-card .card-footer .btn-list {
+            gap: 0.125rem;
+        }
+        .plugin-card.plugin-deactivated {
+            opacity: 0.55;
+        }
+        .plugin-card.plugin-deactivated:hover {
+            opacity: 1;
         }
     </style>
 @endpush
@@ -137,102 +240,67 @@
                     data-description="{{ $plugin->description }}"
                     data-status="{{ $plugin->status ? 'activated' : 'not-activated' }}"
                 >
-                    <x-core::card class="h-100 plugin-card">
-                        <div class="position-relative">
-                            <div
-                                @class(['card-img-top d-flex align-items-center justify-content-center', 'plugin-image-placeholder' => !$plugin->image])
-                                @style([
-                                    'height: 120px',
-                                    "background-image: url('$plugin->image'); background-size: cover; background-position: center" => $plugin->image,
-                                ])
-                            >
-                                @if (!$plugin->image)
-                                    <div class="avatar avatar-xl rounded plugin-icon-wrapper">
-                                        <x-core::icon
-                                            name="ti ti-puzzle"
-                                            class="text-primary"
-                                            style="font-size: 2rem;"
-                                        />
-                                    </div>
-                                @endif
-                            </div>
-                            <div class="position-absolute top-0 end-0 m-2">
-                                <span @class([
-                                    'badge',
-                                    'bg-green-lt text-green' => $plugin->status,
-                                    'bg-secondary-lt text-secondary' => !$plugin->status,
-                                ])>
+                    <x-core::card @class(['h-100 plugin-card', 'plugin-deactivated' => !$plugin->status])>
+                        <div @class(['plugin-image-area d-flex align-items-center justify-content-center', 'plugin-image-placeholder' => !$plugin->image])
+                            @style(["background-image: url('$plugin->image'); background-size: cover; background-position: center" => $plugin->image])
+                        >
+                            @if (!$plugin->image)
+                                <div class="d-flex align-items-center justify-content-center plugin-icon-wrapper">
                                     <x-core::icon
-                                        :name="$plugin->status ? 'ti ti-circle-check' : 'ti ti-circle-x'"
-                                        class="me-1"
+                                        name="ti ti-puzzle"
+                                        style="font-size: 1.25rem;"
                                     />
-                                    {{ $plugin->status ? trans('packages/plugin-management::plugin.activated') : trans('packages/plugin-management::plugin.deactivated') }}
-                                </span>
-                            </div>
+                                </div>
+                            @endif
                         </div>
 
                         <x-core::card.body class="d-flex flex-column">
-                            <div class="mb-3">
-                                <h4 class="card-title mb-1" title="{{ $plugin->name }}">
-                                    <span class="text-truncate d-block">{{ $plugin->name }}</span>
-                                </h4>
-                                @if ($plugin->description)
-                                    <p
-                                        class="text-secondary small mb-0"
-                                        style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 2.5em;"
-                                        title="{{ $plugin->description }}"
-                                    >
-                                        {{ $plugin->description }}
-                                    </p>
-                                @endif
-                            </div>
+                            <h4 class="plugin-name text-truncate mb-1" title="{{ $plugin->name }}">{{ $plugin->name }}</h4>
+                            @if ($plugin->description)
+                                <p class="plugin-description mb-0" title="{{ $plugin->description }}">
+                                    {{ $plugin->description }}
+                                </p>
+                            @endif
 
-                            <div class="mt-auto pt-3 border-top">
-                                <div class="d-flex flex-wrap gap-2 text-secondary small">
+                            <div class="mt-auto pt-2">
+                                <div class="plugin-meta">
+                                    <span class="d-flex align-items-center gap-1">
+                                        <span @class(['plugin-status-dot', 'active' => $plugin->status, 'inactive' => !$plugin->status])></span>
+                                        {{ $plugin->status ? trans('packages/plugin-management::plugin.activated') : trans('packages/plugin-management::plugin.deactivated') }}
+                                    </span>
                                     @if (!config('packages.plugin-management.general.hide_plugin_author', false) && $plugin->author)
-                                        <div class="d-flex align-items-center gap-1">
-                                            <x-core::icon name="ti ti-user" class="text-muted" />
-                                            @if (!empty($plugin->url))
-                                                <a
-                                                    href="{{ $plugin->url }}"
-                                                    target="_blank"
-                                                    class="text-reset text-decoration-none"
-                                                >{{ $plugin->author }}</a>
-                                            @else
-                                                <span>{{ $plugin->author }}</span>
-                                            @endif
-                                        </div>
+                                        <span class="meta-divider"></span>
+                                        @if (!empty($plugin->url))
+                                            <a href="{{ $plugin->url }}" target="_blank" class="text-reset text-decoration-none">{{ $plugin->author }}</a>
+                                        @else
+                                            <span>{{ $plugin->author }}</span>
+                                        @endif
                                     @endif
                                     @if ($plugin->version)
-                                        <div class="d-flex align-items-center gap-1 ms-auto">
-                                            <x-core::icon name="ti ti-tag" class="text-muted" />
-                                            <span>v{{ $plugin->version }}</span>
-                                        </div>
+                                        <span class="ms-auto">v{{ $plugin->version }}</span>
                                     @endif
                                 </div>
                             </div>
                         </x-core::card.body>
 
                         <x-core::card.footer>
-                            <div class="btn-list justify-content-center">
+                            <div class="btn-list justify-content-start">
                                 @if (auth()->user()->hasPermission('plugins.edit'))
-                                    <x-core::button
+                                    <button
                                         type="button"
-                                        size="sm"
-                                        :color="$plugin->status ? 'warning' : 'primary'"
-                                        class="btn-trigger-change-status"
-                                        :icon="$plugin->status ? 'ti ti-player-pause' : 'ti ti-player-play'"
+                                        class="btn btn-sm btn-trigger-change-status {{ $plugin->status ? 'btn-deactivate' : 'btn-activate' }}"
                                         data-plugin="{{ $plugin->path }}"
                                         data-status="{{ $plugin->status }}"
-                                        :data-check-requirement-url="route('plugins.check-requirement', ['name' => $plugin->path])"
-                                        :data-change-status-url="route('plugins.change.status', ['name' => $plugin->path])"
+                                        data-check-requirement-url="{{ route('plugins.check-requirement', ['name' => $plugin->path]) }}"
+                                        data-change-status-url="{{ route('plugins.change.status', ['name' => $plugin->path]) }}"
                                     >
+                                        <x-core::icon :name="$plugin->status ? 'ti ti-player-pause' : 'ti ti-player-play'" class="me-1" />
                                         @if ($plugin->status)
                                             {{ trans('packages/plugin-management::plugin.deactivate') }}
                                         @else
                                             {{ trans('packages/plugin-management::plugin.activate') }}
                                         @endif
-                                    </x-core::button>
+                                    </button>
                                 @endif
 
                                 @if ($isEnabledMarketplaceFeature)
@@ -256,18 +324,15 @@
                                 @endif
 
                                 @if (auth()->user()->hasPermission('plugins.remove'))
-                                    <x-core::button
+                                    <button
                                         type="button"
-                                        size="sm"
-                                        color="danger"
-                                        :outlined="true"
-                                        class="btn-trigger-remove-plugin"
-                                        icon="ti ti-trash"
+                                        class="btn btn-sm btn-remove btn-trigger-remove-plugin ms-auto"
                                         data-plugin="{{ $plugin->path }}"
-                                        :data-url="route('plugins.remove', ['plugin' => $plugin->path])"
+                                        data-url="{{ route('plugins.remove', ['plugin' => $plugin->path]) }}"
                                     >
+                                        <x-core::icon name="ti ti-trash" class="me-1" />
                                         {{ trans('packages/plugin-management::plugin.remove') }}
-                                    </x-core::button>
+                                    </button>
                                 @endif
                             </div>
                         </x-core::card.footer>

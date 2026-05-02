@@ -196,4 +196,22 @@ return [
     'share_results' => '結果を共有する',
     'download_image_to_local_storage' => '画像をローカル ストレージにダウンロードする',
     'download_image_to_local_storage_helper' => 'チェックを外すと元のURLから画像が表示されます',
+    'validation' => [
+        'uploaded_file_required' => 'アップロードするファイルを選択してください。',
+        'uploaded_file_invalid_type' => 'ファイルタイプが許可されていません。有効なファイル形式をアップロードしてください。',
+        'uploaded_file_too_large' => 'ファイルが大きすぎます。より小さいファイルを選択してください。',
+        'uploaded_file_corrupted' => 'ファイルが破損しているか、無効なようです。別のファイルをアップロードしてみてください。',
+        'upload_network_error' => 'ネットワークの問題によりアップロードに失敗しました。接続を確認してもう一度お試しください。',
+        'upload_err_ini_size' => 'ファイルがサーバーの :size アップロード制限より大きいです。PHP設定の "upload_max_filesize" を増やすか、ホスティングプロバイダーに問い合わせてください。',
+        'upload_err_form_size' => 'ファイルがフォームの最大アップロードサイズを超えています。',
+        'upload_err_partial' => 'ファイルが部分的にしかアップロードされませんでした。もう一度お試しください — 通常これは接続が中断されたことを意味します。',
+        'upload_err_no_tmp_dir' => 'PHPの一時アップロードディレクトリ (upload_tmp_dir) が存在しないか書き込み不可のため、サーバーはアップロードされたファイルを保存できません。ホスティングプロバイダーにPHP-FPM poolの設定で "upload_tmp_dir" を書き込み可能なフォルダ (例: /home/your-user/tmp) に設定するよう依頼してください。詳細な手順: https://docs.botble.com/cms/media-upload-errors.html',
+        'upload_err_cant_write' => 'サーバーがアップロードされたファイルをディスクに書き込めませんでした。フォルダの権限、ディスククォータ、tmpディレクトリがPHPで書き込み可能か確認してください。',
+        'upload_err_extension' => 'PHP拡張機能 (ModSecurityやセキュリティプラグインなど) がアップロードをブロックしました。ホスティングプロバイダーに連絡してください。',
+        'upload_err_unknown' => 'アップロード失敗 (PHPエラーコード :code)。ホスティングプロバイダーに連絡してください。',
+        'attributes' => [
+            'uploaded_file' => 'ファイル',
+            'upload' => 'ファイル',
+        ],
+    ],
 ];

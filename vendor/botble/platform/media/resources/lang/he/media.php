@@ -203,6 +203,13 @@ return [
         'uploaded_file_too_large' => 'הקובץ גדול מדי. אנא בחר קובץ קטן יותר.',
         'uploaded_file_corrupted' => 'הקובץ נראה פגום או לא חוקי. אנא נסה להעלות קובץ אחר.',
         'upload_network_error' => 'ההעלאה נכשלה עקב בעיות רשת. אנא בדוק את החיבור שלך ונסה שוב.',
+        'upload_err_ini_size' => 'הקובץ גדול ממגבלת ההעלאה :size של השרת. הגדל את "upload_max_filesize" בהגדרות ה-PHP או פנה לספק האחסון שלך.',
+        'upload_err_form_size' => 'הקובץ חורג מגודל ההעלאה המרבי של הטופס.',
+        'upload_err_partial' => 'הקובץ הועלה רק באופן חלקי. נסה שוב — זה בדרך כלל אומר שהחיבור נקטע.',
+        'upload_err_no_tmp_dir' => 'השרת אינו יכול לשמור את הקובץ שהועלה מכיוון שספריית ההעלאה הזמנית של PHP (upload_tmp_dir) חסרה או שלא ניתן לכתוב אליה. בקש מספק האחסון להגדיר את "upload_tmp_dir" בתצורת PHP-FPM pool לתיקייה הניתנת לכתיבה (למשל /home/your-user/tmp). הוראות מלאות: https://docs.botble.com/cms/media-upload-errors.html',
+        'upload_err_cant_write' => 'השרת לא יכול היה לכתוב את הקובץ שהועלה לדיסק. בדוק את הרשאות התיקייה, מכסת הדיסק ושספריית tmp ניתנת לכתיבה על ידי PHP.',
+        'upload_err_extension' => 'הרחבת PHP (כגון ModSecurity או תוסף אבטחה) חסמה את ההעלאה. צור קשר עם ספק האחסון שלך.',
+        'upload_err_unknown' => 'ההעלאה נכשלה (קוד שגיאת PHP :code). אנא צור קשר עם ספק האחסון שלך.',
         'attributes' => [
             'uploaded_file' => 'קובץ',
             'upload' => 'קובץ',

@@ -107,23 +107,33 @@ abstract class AbstractWidget
         $authorized = auth()->check();
         $appUrl = url('/');
 
-        $renderedContent = $this->renderWidgetContent($args, $data);
-
-        $containsForms = $this->containsFormElements($renderedContent);
-
-        if (
-            setting('widget_cache_enabled', false)
+        $canCache = setting('widget_cache_enabled', false)
             && ! request()->ajax()
             && ! $this->shouldIgnoreCache($widgetClass)
-            && (Arr::get($this->config, 'enable_caching', 'yes') !== 'no')
-            && ! $containsForms
-        ) {
-            $serializableConfig = $this->getSerializableConfig();
-            $cacheKey = 'widget_' . md5($widgetClass . $sidebar . $appUrl . $position . $theme . $locale . $authorized . serialize($serializableConfig));
-            $cacheTtl = (int) setting('widget_cache_ttl', 1800);
-            $cacheDuration = Carbon::now()->addSeconds($cacheTtl);
+            && (Arr::get($this->config, 'enable_caching', 'yes') !== 'no');
 
-            Cache::put($cacheKey, $renderedContent, $cacheDuration);
+        $cacheKey = null;
+
+        if ($canCache) {
+            $serializableConfig = $this->getSerializableConfig();
+            $extraCacheKeys = apply_filters('widget_cache_key_parts', [], $widgetClass);
+            $cacheKey = 'widget_' . md5($widgetClass . $sidebar . $appUrl . $position . $theme . $locale . $authorized . serialize($serializableConfig) . serialize($extraCacheKeys));
+
+            $cached = Cache::get($cacheKey);
+
+            if ($cached !== null) {
+                return $cached;
+            }
+        }
+
+        $renderedContent = $this->renderWidgetContent($args, $data);
+
+        // Form check is post-render here (vs. pre-render name-based blocklist in ShortcodeCompiler)
+        // because widgets don't have a central form-shortcode registry — we have to inspect output.
+        // A form-containing render is simply skipped from write; a form-free render caches normally.
+        if ($canCache && ! $this->containsFormElements($renderedContent)) {
+            $cacheTtl = (int) setting('widget_cache_ttl', 1800);
+            Cache::put($cacheKey, $renderedContent, Carbon::now()->addSeconds($cacheTtl));
         }
 
         return $renderedContent;

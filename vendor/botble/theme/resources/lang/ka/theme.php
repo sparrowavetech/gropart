@@ -208,6 +208,11 @@ return [
     ],
     'term_and_privacy_policy_url' => 'Terms and Privacy Policy URL',
     'site_title_separator' => 'SEO title separator',
+    'site_title_helper' => 'თქვენი ბრენდის ან ბიზნესის სახელი. გამოჩნდება ბრაუზერის ჩანართში და საძიებო შედეგებში (მაგ. "My Company").',
+    'show_site_name_helper' => 'ამატებს საიტის სახელს ყველა გვერდის სათაურს არჩეული გამყოფის გამოყენებით. მაგალითი: "Page Title - My Company".',
+    'site_title_separator_helper' => 'სიმბოლო, რომელიც გამოიყენება გვერდის სათაურსა და საიტის სახელს შორის. მაგალითი ტირეთი: "Page Title - My Company". მაგალითი ვერტიკალური ხაზით: "Page Title | My Company".',
+    'seo_title_helper' => 'მთავარი გვერდის სათაური, რომელიც ნაჩვენებია საძიებო სისტემების შედეგებში. საუკეთესო ჩვენებისთვის შეინახეთ 60 სიმბოლოზე ნაკლები. დატოვეთ ცარიელი საიტის სათაურის გამოსაყენებლად.',
+    'seo_description_helper' => 'მთავარი გვერდის აღწერა, რომელიც ნაჩვენებია საძიებო სისტემების შედეგებში. საუკეთესო ჩვენებისთვის შეინახეთ 120-დან 160 სიმბოლომდე.',
     'no_meta_keywords' => 'Meta keywords was removed by Google, you don\'t need to add meta keywords to your website. Learn more: :link',
     'validation' => [
         'gtm_container_id_format' => 'GTM Container ID must be in format GTM-XXXXXX (e.g., GTM-N7MK3KH2)',
@@ -389,6 +394,9 @@ return [
     ],
 
     'typography_primary' => 'ძირითადი ფონტი',
+    'all_languages' => 'ყველა ენა',
+    'shared_field_notice' => 'ეს ველი გაზიარებულია ყველა ენაზე. მართეთ იგი ნაგულისხმევი ენიდან.',
+    'shared_section_notice' => 'ამ განყოფილების ყველა პარამეტრი გაზიარებულია ყველა ენაზე. ცვლილებებისთვის გადართეთ ნაგულისხმევ ენაზე.',
     'admin_appearance' => [
         'show_admin_bar' => 'აჩვენეთ ადმინისტრაციის ზოლი შესული ადმინისტრატორებისთვის, მოწინავე საიტზეც კი',
         'show_admin_bar_helper' => 'აჩვენეთ სწრაფი წვდომის ადმინისტრაციის ხელსაწყოების ზოლი ვებსაიტის თავში, როდესაც შესული ხართ როგორც ადმინისტრატორი',

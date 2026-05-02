@@ -65,4 +65,5 @@ return [
     'please_select_record' => 'このアクションを実行するには、少なくとも 1 つのレコードを選択してください。',
     'checkbox' => 'チェックボックス',
     'toggle_columns' => '列の切り替え',
+    'created_by' => '作成者',
 ];

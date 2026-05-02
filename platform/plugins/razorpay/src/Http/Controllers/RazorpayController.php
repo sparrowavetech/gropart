@@ -227,6 +227,18 @@ class RazorpayController extends BaseController
         }
     }
 
+    protected function areOrdersAlreadyFinished(array|string|null $orderId): bool
+    {
+        if (empty($orderId) || ! class_exists(Order::class)) {
+            return false;
+        }
+
+        return ! Order::query()
+            ->whereIn('id', (array) $orderId)
+            ->where('is_finished', false)
+            ->exists();
+    }
+
     protected function finalizeOrders(array|string|null $orderId, string $chargeId): void
     {
         if (empty($orderId) || ! class_exists(Order::class)) {
@@ -619,19 +631,45 @@ class RazorpayController extends BaseController
                 $this->linkPaymentWithOrder($chargeId, $orderId, $status);
             }
 
-            $this->saveOrUpdatePayment(
-                $chargeId,
-                $orderId,
-                $amount,
-                $currency,
-                $status,
-                $customerInfo['customer_id'] ?? null,
-                $customerInfo['customer_type'] ?? null,
-                'webhook'
-            );
+            // Guard against double processing: if orders already finished (callback
+            // already processed), only update payment status
+            if ($orderId && $this->areOrdersAlreadyFinished($orderId)) {
+                $this->saveOrUpdatePayment(
+                    $chargeId,
+                    $orderId,
+                    $amount,
+                    $currency,
+                    $status,
+                    $customerInfo['customer_id'] ?? null,
+                    $customerInfo['customer_type'] ?? null,
+                    'webhook'
+                );
+            } elseif (defined('PAYMENT_ACTION_PAYMENT_PROCESSED') && $orderId) {
+                do_action(PAYMENT_ACTION_PAYMENT_PROCESSED, [
+                    'amount' => $amount,
+                    'currency' => $currency,
+                    'charge_id' => $chargeId,
+                    'payment_channel' => RAZORPAY_PAYMENT_METHOD_NAME,
+                    'status' => $status,
+                    'order_id' => $orderId,
+                    'customer_id' => $customerInfo['customer_id'] ?? null,
+                    'customer_type' => $customerInfo['customer_type'] ?? null,
+                ]);
+            } else {
+                $this->saveOrUpdatePayment(
+                    $chargeId,
+                    $orderId,
+                    $amount,
+                    $currency,
+                    $status,
+                    $customerInfo['customer_id'] ?? null,
+                    $customerInfo['customer_type'] ?? null,
+                    'webhook'
+                );
 
-            if ($status == PaymentStatusEnum::COMPLETED) {
-                $this->finalizeOrders($orderId, $chargeId);
+                if ($status == PaymentStatusEnum::COMPLETED) {
+                    $this->finalizeOrders($orderId, $chargeId);
+                }
             }
 
             PaymentHelper::log(
@@ -751,23 +789,62 @@ class RazorpayController extends BaseController
             ['charge_id' => $chargeId, 'token' => $token]
         );
 
+        // Resolve customer info: prefer order's own user_id (trusted), fall back to
+        // request params only if order has no user (guest checkout)
         $customerInfo = $this->getCustomerInfoFromOrder($orderId);
+        $customerId = $customerInfo['customer_id'] ?? null;
+        $customerType = $customerInfo['customer_type'] ?? null;
 
-        $this->saveOrUpdatePayment(
-            $chargeId,
-            $orderId,
-            $amount,
-            $currency,
-            $status,
-            $customerInfo['customer_id'] ?? null,
-            $customerInfo['customer_type'] ?? null
-        );
-
-        if ($status == PaymentStatusEnum::COMPLETED) {
-            $this->finalizeOrders($orderId, $chargeId);
+        if (! $customerId) {
+            $customerId = $request->input('customer_id');
+            $customerType = $request->input('customer_type');
         }
 
+        // Link any orphaned payment (created by webhook before callback) with the order
+        // BEFORE firing PAYMENT_ACTION_PAYMENT_PROCESSED to prevent duplicate payment records
         $this->linkPaymentWithOrder($chargeId, $orderId, $status);
+
+        // Guard against double processing: if orders are already finished (e.g. webhook
+        // already processed them), only update payment status — don't fire the action again
+        // to avoid duplicate emails, double stock decrease, etc.
+        if ($this->areOrdersAlreadyFinished($orderId)) {
+            $this->saveOrUpdatePayment(
+                $chargeId,
+                $orderId,
+                $amount,
+                $currency,
+                $status,
+                $customerId,
+                $customerType
+            );
+        } elseif (defined('PAYMENT_ACTION_PAYMENT_PROCESSED')) {
+            // Fire PAYMENT_ACTION_PAYMENT_PROCESSED so ecommerce plugin properly stores
+            // payment records and processes orders (sends emails, clears cart, etc.)
+            do_action(PAYMENT_ACTION_PAYMENT_PROCESSED, [
+                'amount' => $amount,
+                'currency' => $currency,
+                'charge_id' => $chargeId,
+                'payment_channel' => RAZORPAY_PAYMENT_METHOD_NAME,
+                'status' => $status,
+                'order_id' => $orderId,
+                'customer_id' => $customerId,
+                'customer_type' => $customerType,
+            ]);
+        } else {
+            $this->saveOrUpdatePayment(
+                $chargeId,
+                $orderId,
+                $amount,
+                $currency,
+                $status,
+                $customerId,
+                $customerType
+            );
+
+            if ($status == PaymentStatusEnum::COMPLETED) {
+                $this->finalizeOrders($orderId, $chargeId);
+            }
+        }
 
         return $response
             ->setNextUrl(PaymentHelper::getRedirectURL($token) . '?charge_id=' . $chargeId)

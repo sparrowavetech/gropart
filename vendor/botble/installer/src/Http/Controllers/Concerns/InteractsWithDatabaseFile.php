@@ -7,8 +7,21 @@ use Illuminate\Support\Facades\File;
 
 trait InteractsWithDatabaseFile
 {
-    protected function handleImportDatabaseFile(ImportDatabaseService $importDatabaseService, string $fileName): void
-    {
+    protected function handleImportDatabaseFile(
+        ImportDatabaseService $importDatabaseService,
+        string $fileName,
+        ?string $explicitDatabaseFile = null
+    ): void {
+        if ($explicitDatabaseFile) {
+            $candidate = base_path($explicitDatabaseFile);
+
+            if (File::exists($candidate)) {
+                $importDatabaseService->handle($candidate);
+
+                return;
+            }
+        }
+
         $databaseToImport = base_path(sprintf('database-%s.sql', $fileName));
 
         if (! File::exists($databaseToImport)) {

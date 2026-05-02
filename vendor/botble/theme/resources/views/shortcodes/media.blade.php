@@ -8,7 +8,13 @@
     $marginStart = $data['margin_start'] ?? 0;
     $marginEnd = $data['margin_end'] ?? 0;
 
-    $marginStyle = "margin-top: {$marginTop}px; margin-bottom: {$marginBottom}px; margin-inline-start: {$marginStart}px; margin-inline-end: {$marginEnd}px;";
+    $marginStyle = "margin-top: {$marginTop}px; margin-bottom: {$marginBottom}px;";
+
+    if ($centered) {
+        $marginStyle .= ' margin-inline: auto;';
+    } else {
+        $marginStyle .= " margin-inline-start: {$marginStart}px; margin-inline-end: {$marginEnd}px;";
+    }
 @endphp
 
 @switch($type)
@@ -16,7 +22,7 @@
     @case('vimeo')
         <div
             class="{{ $type }}-iframe"
-            @if (!$width && !$height) style="position: relative; display: block; height: 0; padding-bottom: 56.25%; overflow: hidden; {{ $marginStyle }}{{ $centered ? ' margin-left: auto; margin-right: auto;' : '' }}"
+            @if (!$width && !$height) style="position: relative; display: block; height: 0; padding-bottom: 56.25%; overflow: hidden; {{ $marginStyle }}"
             @else
                 style="{{ $marginStyle }}{{ $centered ? ' display: flex; justify-content: center;' : '' }}" @endif
         >

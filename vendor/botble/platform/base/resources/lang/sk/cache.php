@@ -8,6 +8,7 @@ return [
     'clear_button' => 'Vyčistiť',
     'refresh_button' => 'Obnoviť',
     'cache_size_warning' => 'Veľkosť vyrovnávacej pamäte vášho CMS je pomerne veľká (>50MB). Jej vyčistenie môže zlepšiť výkon systému.',
+    'cache_size_warning_dynamic' => 'Veľkosť vyrovnávacej pamäte vášho CMS je pomerne veľká (>:sizeMB). Jej vyčistenie môže zlepšiť výkon systému.',
     'footer_note' => 'Vyčistite vyrovnávaciu pamäť po vykonaní zmien na vašej stránke, aby sa zobrazovali správne.',
     'type' => 'Typ',
     'description' => 'Popis',

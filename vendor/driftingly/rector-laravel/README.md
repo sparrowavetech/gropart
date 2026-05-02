@@ -53,12 +53,12 @@ use RectorLaravel\Set\LaravelLevelSetList;
 
 return RectorConfig::configure()
     ->withSets([
-        LaravelLevelSetList::UP_TO_LARAVEL_110,
+        LaravelLevelSetList::UP_TO_LARAVEL_130,
     ]);
 ```
 
 The sets in `RectorLaravel\Set\LaravelSetList` only contain changes related to a specific version upgrade.
-For example, the rules in `LaravelSetList::LARAVEL_110` apply when upgrading from Laravel 10 to Laravel 11.
+For example, the rules in `LaravelSetList::LARAVEL_130` apply when upgrading from Laravel 12 to Laravel 13.
 
 ## Additional Sets
 
@@ -175,6 +175,7 @@ Thank you everyone who works so hard on improving this package:
 - [@peterfox](https://github.com/peterfox)
 - [@GeniJaho](https://github.com/GeniJaho)
 - [@driftingly](https://github.com/driftingly)
+- [@calebdw](https://github.com/calebdw)
 - [All Contributors](https://github.com/driftingly/rector-laravel/graphs/contributors)
 
 A special thank you to [Caneco](https://github.com/caneco) for designing the logo!

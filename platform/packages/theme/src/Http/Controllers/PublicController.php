@@ -103,6 +103,10 @@ class PublicController extends BaseController
             $key = null;
         }
 
+        if ($key && SiteMapManager::isKeyExcluded($key)) {
+            abort(404);
+        }
+
         if (! SiteMapManager::init($key, $extension)->isCached()) {
             event(new RenderingSiteMapEvent($key));
         }

@@ -208,6 +208,11 @@ return [
     ],
     'term_and_privacy_policy_url' => 'URL for vilkår og personvernregler',
     'site_title_separator' => 'SEO-tittelavskiller',
+    'site_title_helper' => 'Merke- eller firmanavnet ditt. Vises i nettleserfanen og søkeresultater (f.eks. "My Company").',
+    'show_site_name_helper' => 'Legger til nettstedsnavnet på hver sidetittel ved hjelp av valgt skilletegn. Eksempel: "Page Title - My Company".',
+    'site_title_separator_helper' => 'Tegnet som brukes mellom sidetittelen og nettstedsnavnet. Eksempel med bindestrek: "Page Title - My Company". Eksempel med loddrett strek: "Page Title | My Company".',
+    'seo_title_helper' => 'Hjemmesidetittelen som vises i søkemotorresultater. Hold den under 60 tegn for best visning. La stå tomt for å bruke nettstedstittelen.',
+    'seo_description_helper' => 'Hjemmesidebeskrivelsen som vises i søkemotorresultater. Hold den mellom 120-160 tegn for best visning.',
     'no_meta_keywords' => 'Metanøkkelord ble fjernet av Google, du trenger ikke å legge til metanøkkelord på nettstedet ditt. Lær mer: :link',
     'validation' => [
         'gtm_container_id_format' => 'GTM Container-ID må være i format GTM-XXXXXX (f.eks. GTM-N7MK3KH2)',
@@ -389,6 +394,9 @@ return [
     ],
 
     'typography_primary' => 'Primær skrifttype',
+    'all_languages' => 'Alle språk',
+    'shared_field_notice' => 'Dette feltet deles på tvers av alle språk. Administrer det fra standardspråket.',
+    'shared_section_notice' => 'Alle alternativer i denne seksjonen deles på tvers av alle språk. Bytt til standardspråket for å gjøre endringer.',
     'admin_appearance' => [
         'show_admin_bar' => 'Vis admin-linje for påloggede administratorer, selv på frontside',
         'show_admin_bar_helper' => 'Vis en hurtigtilgang admin-verktøylinje øverst på nettstedet når du er logget inn som administrator',

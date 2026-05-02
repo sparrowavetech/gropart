@@ -49,6 +49,22 @@ class SitemapSettingForm extends SettingForm
                     ->max(100000)
             )
             ->add(
+                'sitemap_content_types_heading',
+                HtmlField::class,
+                HtmlFieldOption::make()
+                    ->content('<h4 class="mt-3">' . trans('packages/sitemap::sitemap.settings.content_types_heading') . '</h4><p class="text-muted">' . trans('packages/sitemap::sitemap.settings.content_types_description') . '</p>')
+            )
+            ->add(
+                'sitemap_pages_enabled',
+                OnOffCheckboxField::class,
+                CheckboxFieldOption::make()
+                    ->label(trans('packages/sitemap::sitemap.settings.enable_pages_sitemap'))
+                    ->value(setting('sitemap_pages_enabled', true))
+                    ->helperText(trans('packages/sitemap::sitemap.settings.enable_pages_sitemap_help'))
+            );
+
+        $this
+            ->add(
                 'indexnow_enabled',
                 OnOffCheckboxField::class,
                 CheckboxFieldOption::make()

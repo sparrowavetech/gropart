@@ -41,7 +41,35 @@ class RenderingSiteMapListener
                     break;
             }
 
-            // Handle posts with pagination using new standardized pattern
+            // Consolidated blog-posts handler with optional page-based pagination.
+            // Matches: blog-posts, blog-posts-page-{N}
+            if ($key === 'blog-posts' || preg_match('/^blog-posts-page-(\d+)$/', $key, $pageMatches)) {
+                $itemsPerPage = SiteMapManager::getItemsPerPage();
+                $page = isset($pageMatches[1]) ? max(1, (int) $pageMatches[1]) : 1;
+                $offset = ($page - 1) * $itemsPerPage;
+
+                $posts = Post::query()
+                    ->wherePublished()
+                    ->latest('updated_at')
+                    ->select(['id', 'name', 'updated_at'])
+                    ->with(['slugable'])
+                    ->skip($offset)
+                    ->take($itemsPerPage)
+                    ->get();
+
+                foreach ($posts as $post) {
+                    if (! $post->slugable) {
+                        continue;
+                    }
+
+                    SiteMapManager::add($post->url, $post->updated_at, '0.8');
+                }
+
+                return;
+            }
+
+            // Backward compatibility: legacy monthly archive URLs (blog-posts-YYYY-MM[-page-N]).
+            // Old indexed URLs continue to resolve so search engines can re-discover from the new index.
             $paginationData = SiteMapManager::extractPaginationDataByPattern($key, 'blog-posts', 'monthly-archive');
 
             if ($paginationData) {
@@ -74,23 +102,18 @@ class RenderingSiteMapListener
             return;
         }
 
-        // Generate sitemap indexes using the new SiteMapManager pagination functionality
-        $posts = Post::query()
-            ->selectRaw('YEAR(created_at) as created_year, MONTH(created_at) as created_month, MAX(created_at) as created_at, COUNT(*) as post_count')
-            ->wherePublished()
-            ->groupBy('created_year', 'created_month')
-            ->orderByDesc('created_year')
-            ->orderByDesc('created_month')
-            ->get();
+        // Sitemap index registration.
+        // Match pages.xml behavior: single consolidated blog-posts.xml by default,
+        // auto-paginate (blog-posts-page-N.xml) only when total posts exceed items_per_page threshold.
+        $totalPosts = Post::query()->wherePublished()->count();
 
-        if ($posts->isNotEmpty()) {
-            foreach ($posts as $post) {
-                $formattedMonth = str_pad($post->created_month, 2, '0', STR_PAD_LEFT);
-                $baseKey = sprintf('blog-posts-%s-%s', $post->created_year, $formattedMonth);
+        if ($totalPosts > 0) {
+            $latestUpdated = Post::query()
+                ->wherePublished()
+                ->latest('updated_at')
+                ->value('updated_at');
 
-                // Use the new createPaginatedSitemaps method
-                SiteMapManager::createPaginatedSitemaps($baseKey, $post->post_count, $post->created_at);
-            }
+            SiteMapManager::createPaginatedSitemaps('blog-posts', $totalPosts, $latestUpdated);
         }
 
         $categoryLastUpdated = Category::query()

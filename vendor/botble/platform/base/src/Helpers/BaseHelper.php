@@ -121,7 +121,7 @@ class BaseHelper
             return $convertToArray ? [] : null;
         }
 
-        return $convertToArray ? json_decode($file, true) : $file;
+        return $convertToArray ? (json_decode($file, true) ?? []) : $file;
     }
 
     public function saveFileData(string $path, array|string|null $data, bool $json = true): bool
@@ -450,6 +450,19 @@ class BaseHelper
         $string = preg_replace('/[^A-Za-z0-9\-]/', '', $string); // Removes special chars.
 
         return preg_replace('/-+/', '-', $string); // Replaces multiple hyphens with single one.
+    }
+
+    public function sanitizeUtf8(mixed $value): mixed
+    {
+        if (is_array($value)) {
+            return array_map(fn ($item) => $this->sanitizeUtf8($item), $value);
+        }
+
+        if (is_string($value) && ! mb_check_encoding($value, 'UTF-8')) {
+            return mb_convert_encoding($value, 'UTF-8', 'UTF-8');
+        }
+
+        return $value;
     }
 
     public function getInputValueFromQueryString(string $name): string

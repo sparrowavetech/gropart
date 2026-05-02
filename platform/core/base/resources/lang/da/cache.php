@@ -8,6 +8,7 @@ return [
     'clear_button' => 'Ryd',
     'refresh_button' => 'Genindlæs',
     'cache_size_warning' => 'Din CMS cache-størrelse er ret stor (>50MB). At rydde den kan forbedre systemets ydeevne.',
+    'cache_size_warning_dynamic' => 'Din CMS cache-størrelse er ret stor (>:sizeMB). At rydde den kan forbedre systemets ydeevne.',
     'footer_note' => 'Ryd cache efter at have foretaget ændringer på din side for at sikre, at de vises korrekt.',
     'type' => 'Type',
     'description' => 'Beskrivelse',

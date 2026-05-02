@@ -206,6 +206,13 @@ return [
         'uploaded_file_too_large' => 'The file is too large. Please choose a smaller file.',
         'uploaded_file_corrupted' => 'The file appears to be corrupted or invalid. Please try uploading a different file.',
         'upload_network_error' => 'Upload failed due to network issues. Please check your connection and try again.',
+        'upload_err_ini_size' => 'The file is larger than the server\'s :size upload limit. Increase "upload_max_filesize" in PHP settings or ask your hosting provider.',
+        'upload_err_form_size' => 'The file exceeds the form\'s maximum upload size.',
+        'upload_err_partial' => 'The file was only partially uploaded. Please try again — this usually means the connection was interrupted.',
+        'upload_err_no_tmp_dir' => 'Server cannot save the uploaded file because PHP\'s temporary upload directory (upload_tmp_dir) is missing or not writable. Ask your hosting provider to set "upload_tmp_dir" in the PHP-FPM pool config to a writable folder (e.g. /home/your-user/tmp). Full instructions: https://docs.botble.com/cms/media-upload-errors.html',
+        'upload_err_cant_write' => 'Server could not write the uploaded file to disk. Check folder permissions, disk quota, and that the tmp directory is writable by PHP.',
+        'upload_err_extension' => 'A PHP extension (such as ModSecurity or a security plugin) blocked the upload. Contact your hosting provider.',
+        'upload_err_unknown' => 'Upload failed (PHP error code :code). Please contact your hosting provider.',
         'attributes' => [
             'uploaded_file' => 'file',
             'upload' => 'file',

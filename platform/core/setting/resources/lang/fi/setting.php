@@ -505,6 +505,10 @@ return [
             'widget_cache_ttl_helper' => 'Kaikkien widgettien välimuistin kesto. Oletus on 1800 sekuntia (30 minuuttia).',
             'plugin_cache_enabled' => 'Välimuistiin asennetut liitännäiset',
             'plugin_cache_enabled_helper' => 'Välimuistiin asennettujen liitännäisten luettelo suorituskyvyn parantamiseksi. Kun käytössä, järjestelmä tallentaa liitännäisluettelon välimuistiin 30 minuutiksi tiedostojärjestelmän skannausten vähentämiseksi.',
+            'cache_size_warning_threshold' => 'Välimuistin koon varoitusraja (Mt)',
+            'cache_size_warning_threshold_helper' => 'Näyttää varoituksen Välimuistin hallinta -sivulla, kun framework-välimuisti ylittää tämän koon (Mt). Oletusarvo on 50 Mt.',
+            'cache_auto_clear_enabled' => 'Tyhjennä välimuisti automaattisesti, kun koko ylittää rajan',
+            'cache_auto_clear_enabled_helper' => 'Tyhjentää framework-välimuistin automaattisesti tunnin välein, kun sen koko ylittää yllä olevan varoitusrajan. Edellyttää, että Laravel-ajastin (<code>php artisan schedule:run</code>) on määritetty cron-työnä palvelimellesi.',
         ],
     ],
     'appearance' => [

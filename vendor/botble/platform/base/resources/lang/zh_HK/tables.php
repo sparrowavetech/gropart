@@ -65,4 +65,5 @@ return [
     'please_select_record' => '請至少選擇一條記錄來執行此操作！',
     'checkbox' => '核取方塊',
     'toggle_columns' => '切換列',
+    'created_by' => '建立者',
 ];

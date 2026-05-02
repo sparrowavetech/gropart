@@ -1123,6 +1123,8 @@ Colors
 
 .bb-text-muted {
     color: #667382;
+    word-break: break-word;
+    overflow-wrap: break-word;
 }
 
 .bb-text-muted-light {

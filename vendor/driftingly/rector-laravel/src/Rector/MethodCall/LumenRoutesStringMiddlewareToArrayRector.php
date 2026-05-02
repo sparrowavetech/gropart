@@ -76,7 +76,6 @@ CODE_SAMPLE)]
             return null;
         }
 
-        /** @var string $middlewareString */
         $middlewareString = $middlewareValue->value;
         $splitMiddleware = explode('|', $middlewareString);
 

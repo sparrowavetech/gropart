@@ -15,7 +15,7 @@
                         {{ trans('core/base::cache.cache_management_description') }}
                     </p>
 
-                    @if ($cacheSize > 50 * 1024 * 1024)
+                    @if ($cacheSize > $cacheSizeWarningThreshold * 1024 * 1024)
                         <x-core::alert
                             type="warning"
                             class="mb-3"
@@ -24,7 +24,7 @@
                                 name="ti ti-alert-triangle"
                                 class="me-1"
                             />
-                            {{ trans('core/base::cache.cache_size_warning') }}
+                            {{ trans('core/base::cache.cache_size_warning_dynamic', ['size' => $cacheSizeWarningThreshold]) }}
                         </x-core::alert>
                     @endif
 

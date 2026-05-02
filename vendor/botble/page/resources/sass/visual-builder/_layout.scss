@@ -4,11 +4,14 @@
 html.h-100,
 body.vb-body {
     height: 100vh !important;
+    height: 100dvh !important;
     overflow: hidden;
+    padding-top: env(safe-area-inset-top, 0);
 }
 
 .vb-container {
     height: calc(100vh - 60px);
+    height: calc(100dvh - 60px - env(safe-area-inset-top, 0));
 }
 
 .vb-header {

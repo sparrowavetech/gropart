@@ -11,6 +11,6 @@
     ],
     "require": {
         "php": "^8.0",
-        "botble/platform": "^7.0"
+        "botble/platform": "*@dev"
     }
 }

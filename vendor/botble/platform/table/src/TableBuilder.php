@@ -18,6 +18,10 @@ class TableBuilder
             throw new InvalidArgumentException(sprintf('Table class with name %s does not exist.', $tableClass));
         }
 
+        if (! is_subclass_of($tableClass, TableAbstract::class)) {
+            throw new InvalidArgumentException(sprintf('Class %s is not a valid table class.', $tableClass));
+        }
+
         return $this->container->make($tableClass);
     }
 }

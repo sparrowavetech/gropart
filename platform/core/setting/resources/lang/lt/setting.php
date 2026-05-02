@@ -505,6 +505,10 @@ return [
             'widget_cache_ttl_helper' => 'Visų valdiklių talpyklos trukmė. Numatytoji yra 1800 sekundžių (30 minučių).',
             'plugin_cache_enabled' => 'Talpyklos įdiegti papildiniai',
             'plugin_cache_enabled_helper' => 'Talpyklos įdiegtų papildinių sąrašas pagerintam našumui. Kai įjungta, sistema talpykloje saugos papildinių sąrašą 30 minučių, kad sumažėtų failų sistemos nuskaitymų.',
+            'cache_size_warning_threshold' => 'Talpyklos dydžio įspėjimo riba (MB)',
+            'cache_size_warning_threshold_helper' => 'Rodo įspėjimą talpyklos valdymo puslapyje, kai karkaso talpykla viršija šį dydį (MB). Numatytoji reikšmė yra 50 MB.',
+            'cache_auto_clear_enabled' => 'Automatiškai išvalyti talpyklą, kai dydis viršija ribą',
+            'cache_auto_clear_enabled_helper' => 'Automatiškai išvalo karkaso talpyklą kas valandą, kai jos dydis viršija aukščiau nurodytą įspėjimo ribą. Reikalaujama, kad Laravel planuoklis (<code>php artisan schedule:run</code>) būtų sukonfigūruotas kaip cron užduotis jūsų serveryje.',
         ],
     ],
     'appearance' => [

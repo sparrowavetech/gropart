@@ -72,5 +72,6 @@ return [
     'clear_button' => 'Xóa',
     'refresh_button' => 'Làm mới',
     'cache_size_warning' => 'Kích thước bộ nhớ đệm CMS của bạn khá lớn (>50MB). Xóa nó có thể cải thiện hiệu suất hệ thống.',
+    'cache_size_warning_dynamic' => 'Kích thước bộ nhớ đệm CMS của bạn khá lớn (>:sizeMB). Xóa nó có thể cải thiện hiệu suất hệ thống.',
     'footer_note' => 'Xóa bộ nhớ đệm sau khi thực hiện thay đổi trên trang web của bạn để đảm bảo chúng hiển thị chính xác.',
 ];

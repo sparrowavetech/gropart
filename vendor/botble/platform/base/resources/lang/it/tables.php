@@ -65,4 +65,5 @@ return [
     'please_select_record' => 'Seleziona almeno un record per eseguire questa azione!',
     'checkbox' => 'Casella di controllo',
     'toggle_columns' => 'Attiva/disattiva colonne',
+    'created_by' => 'Creato da',
 ];

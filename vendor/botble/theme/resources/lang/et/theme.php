@@ -208,6 +208,11 @@ return [
     ],
     'term_and_privacy_policy_url' => 'Tingimuste ja privaatsuspoliitika URL',
     'site_title_separator' => 'SEO pealkirja eraldaja',
+    'site_title_helper' => 'Teie brändi või ettevõtte nimi. Kuvatakse brauseri vahekaardil ja otsingutulemustele (nt "My Company").',
+    'show_site_name_helper' => 'Lisab saidi nime igale lehepealkirjale valitud eraldaja abil. Näide: "Page Title - My Company".',
+    'site_title_separator_helper' => 'Märk, mida kasutatakse lehepealkirja ja saidi nime vahel. Näide kriipsuga: "Page Title - My Company". Näide püstkriipsuga: "Page Title | My Company".',
+    'seo_title_helper' => 'Avalehe pealkiri, mis kuvatakse otsingumootorite tulemustes. Hoidke see alla 60 tähemärgi parima kuvamise jaoks. Jätke tühjaks saidi pealkirja kasutamiseks.',
+    'seo_description_helper' => 'Avalehe kirjeldus, mis kuvatakse otsingumootorite tulemustes. Hoidke see 120 kuni 160 tähemärgi vahel parima kuvamise jaoks.',
     'no_meta_keywords' => 'Google eemaldas meta keywords, te ei pea oma veebisaidile meta märksõnu lisama. Lisateave: :link',
     'validation' => [
         'gtm_container_id_format' => 'GTM Container ID peab olema formaadis GTM-XXXXXX (nt GTM-N7MK3KH2)',
@@ -389,6 +394,9 @@ return [
     ],
 
     'typography_primary' => 'Põhifont',
+    'all_languages' => 'Kõik keeled',
+    'shared_field_notice' => 'See väli on jagatud kõigi keelte vahel. Hallake seda vaikekeelest.',
+    'shared_section_notice' => 'Kõik selle jaotise valikud on jagatud kõigi keelte vahel. Muudatuste tegemiseks lülitage vaikekeelele.',
     'admin_appearance' => [
         'show_admin_bar' => 'Kuva administraatori riba sisselogitud administraatoritele, isegi avalikus saidi osas',
         'show_admin_bar_helper' => 'Kuva kiirjuurdepääsu administraatori tööriistariba veebisaidi ülaosas, kui olete administraatorina sisse logitud',

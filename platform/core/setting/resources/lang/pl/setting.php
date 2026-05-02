@@ -505,6 +505,10 @@ return [
             'widget_cache_ttl_helper' => 'Czas trwania bufora dla wszystkich widgetów. Domyślnie 1800 sekund (30 minut).',
             'plugin_cache_enabled' => 'Buforuj zainstalowane wtyczki',
             'plugin_cache_enabled_helper' => 'Buforuj listę zainstalowanych wtyczek dla poprawy wydajności. Po włączeniu system będzie buforował listę wtyczek przez 30 minut, aby zmniejszyć skanowanie systemu plików.',
+            'cache_size_warning_threshold' => 'Próg ostrzeżenia o rozmiarze pamięci podręcznej (MB)',
+            'cache_size_warning_threshold_helper' => 'Pokazuje ostrzeżenie na stronie Zarządzanie pamięcią podręczną, gdy pamięć podręczna frameworka przekracza ten rozmiar (w MB). Wartość domyślna to 50 MB.',
+            'cache_auto_clear_enabled' => 'Automatyczne czyszczenie pamięci podręcznej, gdy rozmiar przekracza próg',
+            'cache_auto_clear_enabled_helper' => 'Automatycznie czyści pamięć podręczną frameworka co godzinę, gdy jej rozmiar przekracza powyższy próg ostrzeżenia. Wymaga skonfigurowania harmonogramu Laravel (<code>php artisan schedule:run</code>) jako zadania cron na serwerze.',
         ],
     ],
     'appearance' => [

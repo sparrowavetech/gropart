@@ -17,6 +17,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Conditionable;
 use Illuminate\Support\Traits\Tappable;
 use RuntimeException;
+use Throwable;
 
 class DashboardMenu
 {
@@ -187,7 +188,13 @@ class DashboardMenu
         };
 
         if ($this->cacheEnabled) {
-            $items = $this->cache->remember($this->cacheKey(), Carbon::now()->addHours(3), $value);
+            $items = $this->cache->remember(
+                $this->cacheKey(),
+                Carbon::now()->addHours(3),
+                function () use ($value) {
+                    return $this->sanitizeItemsForCache(value($value));
+                }
+            );
         } else {
             $items = value($value);
         }
@@ -325,6 +332,42 @@ class DashboardMenu
         $groupedItems = $this->getGroupedItemsByGroup();
 
         return $this->getMappedItems($groupedItems[''] ?? collect(), $groupedItems);
+    }
+
+    /**
+     * Resolve every Closure inside the menu tree so the Collection is safe to
+     * serialize to the file/redis cache store. Required because plugins may add
+     * items via apply_filters('dashboard_menu', ...) or registerItem([...]) that
+     * still carry Closures in fields other than url/name.
+     */
+    protected function sanitizeItemsForCache(Collection $items): Collection
+    {
+        return $items->map(fn ($item) => $this->sanitizeValue($item));
+    }
+
+    protected function sanitizeValue(mixed $value): mixed
+    {
+        if ($value instanceof Closure) {
+            try {
+                return $this->sanitizeValue(call_user_func($value));
+            } catch (Throwable) {
+                return null;
+            }
+        }
+
+        if ($value instanceof Collection) {
+            return $value->map(fn ($item) => $this->sanitizeValue($item));
+        }
+
+        if (is_array($value)) {
+            foreach ($value as $key => $nested) {
+                $value[$key] = $this->sanitizeValue($nested);
+            }
+
+            return $value;
+        }
+
+        return $value;
     }
 
     protected function getGroupedItemsByGroup(): Collection

@@ -197,4 +197,22 @@ return [
     'download_image_to_local_storage_helper' => 'Wenn es deaktiviert ist, wird das Bild von der ursprünglichen URL angezeigt',
     'skip_trash' => 'Müll überspringen',
     'skip_trash_description' => 'Wenn es überprüft wird, wird die Datei dauerhaft gelöscht, ohne sich zum Müll zu verschieben',
+    'validation' => [
+        'uploaded_file_required' => 'Bitte wählen Sie eine Datei zum Hochladen aus.',
+        'uploaded_file_invalid_type' => 'Der Dateityp ist nicht zulässig. Bitte laden Sie ein gültiges Dateiformat hoch.',
+        'uploaded_file_too_large' => 'Die Datei ist zu groß. Bitte wählen Sie eine kleinere Datei.',
+        'uploaded_file_corrupted' => 'Die Datei scheint beschädigt oder ungültig zu sein. Bitte versuchen Sie, eine andere Datei hochzuladen.',
+        'upload_network_error' => 'Upload fehlgeschlagen aufgrund von Netzwerkproblemen. Bitte überprüfen Sie Ihre Verbindung und versuchen Sie es erneut.',
+        'upload_err_ini_size' => 'Die Datei ist größer als das Upload-Limit :size des Servers. Erhöhen Sie "upload_max_filesize" in den PHP-Einstellungen oder fragen Sie Ihren Hosting-Anbieter.',
+        'upload_err_form_size' => 'Die Datei überschreitet die maximale Upload-Größe des Formulars.',
+        'upload_err_partial' => 'Die Datei wurde nur teilweise hochgeladen. Bitte versuchen Sie es erneut — das bedeutet normalerweise, dass die Verbindung unterbrochen wurde.',
+        'upload_err_no_tmp_dir' => 'Der Server kann die hochgeladene Datei nicht speichern, da das temporäre Upload-Verzeichnis von PHP (upload_tmp_dir) fehlt oder nicht beschreibbar ist. Bitten Sie Ihren Hosting-Anbieter, "upload_tmp_dir" in der PHP-FPM Pool-Konfiguration auf einen beschreibbaren Ordner zu setzen (z.B. /home/your-user/tmp). Vollständige Anweisungen: https://docs.botble.com/cms/media-upload-errors.html',
+        'upload_err_cant_write' => 'Der Server konnte die hochgeladene Datei nicht auf die Festplatte schreiben. Überprüfen Sie die Ordnerberechtigungen, die Speicherplatzquote und ob das tmp-Verzeichnis von PHP beschreibbar ist.',
+        'upload_err_extension' => 'Eine PHP-Erweiterung (wie ModSecurity oder ein Sicherheits-Plugin) hat den Upload blockiert. Kontaktieren Sie Ihren Hosting-Anbieter.',
+        'upload_err_unknown' => 'Upload fehlgeschlagen (PHP-Fehlercode :code). Bitte kontaktieren Sie Ihren Hosting-Anbieter.',
+        'attributes' => [
+            'uploaded_file' => 'Datei',
+            'upload' => 'Datei',
+        ],
+    ],
 ];

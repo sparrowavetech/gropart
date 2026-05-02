@@ -15,6 +15,7 @@ use Botble\Media\Models\MediaFile;
 use Botble\Media\Models\MediaFolder;
 use Botble\Media\Services\ThumbnailService;
 use Botble\Media\Services\UploadsManager;
+use Botble\Media\Supports\ResponsiveImageSrcset;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -494,6 +495,9 @@ class RvMedia
                     'uploaded_file.required' => trans('core/media::media.validation.uploaded_file_required'),
                     'uploaded_file.file' => trans('core/media::media.validation.uploaded_file_invalid_type'),
                     'uploaded_file.types' => trans('core/media::media.validation.uploaded_file_invalid_type'),
+                    'uploaded_file.uploaded' => $fileUpload instanceof UploadedFile
+                        ? $this->getUploadErrorMessage($fileUpload->getError())
+                        : trans('core/media::media.validation.upload_network_error'),
                 ], [
                     'uploaded_file' => trans('core/media::media.validation.attributes.uploaded_file'),
                 ]);
@@ -531,11 +535,11 @@ class RvMedia
 
             $maxSize = $this->getServerConfigMaxUploadFileSize();
 
-            if ($fileUpload->getSize() / 1024 > (int) $maxSize) {
+            if ($maxSize > 0 && $fileUpload->getSize() > $maxSize) {
                 return [
                     'error' => true,
                     'message' => trans('core/media::media.file_too_big_readable_size', [
-                        'size' => BaseHelper::humanFilesize($maxSize * 1024),
+                        'size' => BaseHelper::humanFilesize((int) $maxSize),
                     ]),
                 ];
             }
@@ -667,7 +671,7 @@ class RvMedia
             $file->alt = $file->name;
             $file->size = $data['size'] ?: $fileUpload->getSize();
 
-            $file->mime_type = $data['mime_type'];
+            $file->mime_type = $data['mime_type'] ?: 'application/octet-stream';
             $file->folder_id = $folderId;
             $file->user_id = Auth::guard()->check() ? Auth::guard()->id() : 0;
             $file->options = $request->input('options', []);
@@ -930,16 +934,40 @@ class RvMedia
         return in_array(strtolower($extension), $dangerousExtensions);
     }
 
+    public function getUploadErrorMessage(int $errorCode): string
+    {
+        return match ($errorCode) {
+            UPLOAD_ERR_INI_SIZE => trans('core/media::media.validation.upload_err_ini_size', [
+                'size' => BaseHelper::humanFilesize((int) $this->getServerConfigMaxUploadFileSize()),
+            ]),
+            UPLOAD_ERR_FORM_SIZE => trans('core/media::media.validation.upload_err_form_size'),
+            UPLOAD_ERR_PARTIAL => trans('core/media::media.validation.upload_err_partial'),
+            UPLOAD_ERR_NO_FILE => trans('core/media::media.validation.uploaded_file_required'),
+            UPLOAD_ERR_NO_TMP_DIR => trans('core/media::media.validation.upload_err_no_tmp_dir'),
+            UPLOAD_ERR_CANT_WRITE => trans('core/media::media.validation.upload_err_cant_write'),
+            UPLOAD_ERR_EXTENSION => trans('core/media::media.validation.upload_err_extension'),
+            default => trans('core/media::media.validation.upload_err_unknown', ['code' => $errorCode]),
+        };
+    }
+
     public function isAvifFile(string $path): bool
     {
-        $handle = fopen($path, 'rb');
+        if (! is_file($path)) {
+            return false;
+        }
+
+        $handle = @fopen($path, 'rb');
 
         if (! $handle) {
             return false;
         }
 
-        $header = fread($handle, 12);
+        $header = @fread($handle, 12);
         fclose($handle);
+
+        if ($header === false) {
+            return false;
+        }
 
         if (strlen($header) < 12) {
             return false;
@@ -1182,7 +1210,7 @@ class RvMedia
                 if (! $mimeType) {
                     $mimeTypeDetection = new MimeTypes();
 
-                    return Arr::first($mimeTypeDetection->getMimeTypes($fileExtension));
+                    return Arr::first($mimeTypeDetection->getMimeTypes($fileExtension)) ?: 'application/octet-stream';
                 }
 
                 return $mimeType;
@@ -1207,7 +1235,7 @@ class RvMedia
 
             $mimeTypeDetection = new MimeTypes();
 
-            return Arr::first($mimeTypeDetection->getMimeTypes($fileExtension));
+            return Arr::first($mimeTypeDetection->getMimeTypes($fileExtension)) ?: 'application/octet-stream';
         } catch (Throwable $exception) {
             logger()->error('Failed to get MIME type: ' . $exception->getMessage(), [
                 'url' => $url,
@@ -1508,6 +1536,8 @@ class RvMedia
 
         $defaultImageUrl = $this->getDefaultImage(false, $size);
 
+        $originalUrl = $url;
+
         if (! $url) {
             $url = $defaultImageUrl;
         }
@@ -1522,6 +1552,26 @@ class RvMedia
             'data-bb-lazy' => $lazy ? 'true' : 'false',
             ...$attributes,
         ];
+
+        // Auto-inject srcset/sizes from registered RvMedia sizes with the same aspect ratio
+        // (WordPress-style responsive images). Respect author-provided srcset/sizes.
+        if (
+            $size
+            && $originalUrl
+            && ! isset($attributes['srcset'])
+            && ! Str::startsWith($url, ['data:image/'])
+        ) {
+            $srcset = ResponsiveImageSrcset::build($originalUrl, $size);
+            if ($srcset) {
+                $attributes['srcset'] = $srcset;
+                if (! isset($attributes['sizes'])) {
+                    $sizes = ResponsiveImageSrcset::sizes($size);
+                    if ($sizes) {
+                        $attributes['sizes'] = $sizes;
+                    }
+                }
+            }
+        }
 
         if (Str::startsWith($url, ['data:image/png;base64,', 'data:image/jpeg;base64,', 'data:image/jpg;base64,'])) {
             return Html::tag('img', '', [...$attributes, 'src' => $url, 'alt' => $alt]);

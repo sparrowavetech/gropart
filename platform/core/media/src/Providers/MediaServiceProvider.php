@@ -28,15 +28,20 @@ use Botble\Media\Repositories\Interfaces\MediaSettingInterface;
 use Botble\Media\Services\FolderPermissionService;
 use Botble\Media\Storage\BunnyCDN\BunnyCDNAdapter;
 use Botble\Media\Storage\BunnyCDN\BunnyCDNClient;
+use Botble\Media\Supports\ImageDimensionsInjector;
 use Botble\Setting\Supports\SettingStore;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Filesystem\AwsS3V3Adapter as IlluminateAwsS3V3Adapter;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Filesystem\FilesystemManager;
 use Illuminate\Foundation\AliasLoader;
+use Illuminate\Foundation\Http\Events\RequestHandled;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\HtmlString;
 use League\Flysystem\AwsS3V3\AwsS3V3Adapter;
 use League\Flysystem\Filesystem;
+use Symfony\Component\HttpFoundation\Response as HttpFoundationResponse;
 
 /**
  * @since 02/07/2016 09:50 AM
@@ -235,6 +240,8 @@ class MediaServiceProvider extends ServiceProvider
             return $model->hasMany(MediaFolderPermission::class, 'user_id');
         });
 
+        $this->registerImageDimensionsInjector();
+
         DashboardMenu::default()->beforeRetrieving(function (): void {
             DashboardMenu::make()
                 ->registerItem(
@@ -264,5 +271,66 @@ class MediaServiceProvider extends ServiceProvider
                 }
             });
         }
+    }
+
+    /**
+     * Inject explicit width/height attributes onto every rendered <img> tag.
+     * Two layers:
+     *  1. Fast path — hook the `core_media_image` filter so images rendered via
+     *     RvMedia::image() get dims inline during view compilation.
+     *  2. Catch-all — post-process the final HTML response to add dims on raw
+     *     <img> tags in blade templates that bypass RvMedia::image().
+     * Both layers share ImageDimensionsInjector (cached forever per file path).
+     */
+    protected function registerImageDimensionsInjector(): void
+    {
+        add_filter('core_media_image', function ($html, $url) {
+            if (! $html instanceof HtmlString) {
+                return $html;
+            }
+
+            $raw = $html->toHtml();
+
+            if (! preg_match('/<img\b([^>]*)>/i', $raw, $match)) {
+                return $html;
+            }
+
+            $injected = ImageDimensionsInjector::inject($match[0], $match[1]);
+
+            return $injected === $match[0] ? $html : new HtmlString($injected);
+        }, 10, 4);
+
+        Event::listen(RequestHandled::class, function (RequestHandled $event): void {
+            $response = $event->response;
+
+            if (! $response instanceof HttpFoundationResponse) {
+                return;
+            }
+
+            $contentType = (string) $response->headers->get('Content-Type');
+            if (! str_contains($contentType, 'text/html')) {
+                return;
+            }
+
+            $request = $event->request;
+            if ($request->is('admin*') || $request->is('_debugbar*') || $request->ajax()) {
+                return;
+            }
+
+            $html = $response->getContent();
+            if (! is_string($html) || ! str_contains($html, '<img')) {
+                return;
+            }
+
+            $html = preg_replace_callback(
+                '/<img\b([^>]*)>/i',
+                fn ($match) => ImageDimensionsInjector::inject($match[0], $match[1]),
+                $html
+            );
+
+            if (is_string($html)) {
+                $response->setContent($html);
+            }
+        });
     }
 }

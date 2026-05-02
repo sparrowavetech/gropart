@@ -194,6 +194,13 @@ return [
         'uploaded_file_too_large' => 'The file is too large. Please choose a smaller file.',
         'uploaded_file_corrupted' => 'The file appears to be corrupted or invalid. Please try uploading a different file.',
         'upload_network_error' => 'Upload failed due to network issues. Please check your connection and try again.',
+        'upload_err_ini_size' => 'Dosya, sunucunun :size yükleme sınırından büyük. PHP ayarlarında "upload_max_filesize" değerini artırın veya barındırma sağlayıcınızla görüşün.',
+        'upload_err_form_size' => 'Dosya, formun maksimum yükleme boyutunu aşıyor.',
+        'upload_err_partial' => 'Dosya yalnızca kısmen yüklendi. Lütfen tekrar deneyin — bu genellikle bağlantının kesildiği anlamına gelir.',
+        'upload_err_no_tmp_dir' => 'PHP\'nin geçici yükleme dizini (upload_tmp_dir) eksik olduğu veya yazılabilir olmadığı için sunucu yüklenen dosyayı kaydedemiyor. Barındırma sağlayıcınızdan PHP-FPM pool yapılandırmasında "upload_tmp_dir" değerini yazılabilir bir klasöre (örn. /home/your-user/tmp) ayarlamasını isteyin. Tam talimatlar: https://docs.botble.com/cms/media-upload-errors.html',
+        'upload_err_cant_write' => 'Sunucu yüklenen dosyayı diske yazamadı. Klasör izinlerini, disk kotasını ve tmp dizininin PHP tarafından yazılabilir olduğunu kontrol edin.',
+        'upload_err_extension' => 'Bir PHP uzantısı (ModSecurity veya güvenlik eklentisi gibi) yüklemeyi engelledi. Barındırma sağlayıcınızla iletişime geçin.',
+        'upload_err_unknown' => 'Yükleme başarısız (PHP hata kodu :code). Lütfen barındırma sağlayıcınızla iletişime geçin.',
         'attributes' => [
             'uploaded_file' => 'file',
             'upload' => 'file',

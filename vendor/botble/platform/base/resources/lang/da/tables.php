@@ -65,4 +65,5 @@ return [
     'please_select_record' => 'Vælg venligst mindst én post for at udføre denne handling!',
     'checkbox' => 'Afkrydsningsfelt',
     'toggle_columns' => 'Skift kolonner',
+    'created_by' => 'Oprettet af',
 ];

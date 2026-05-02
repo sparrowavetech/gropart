@@ -208,6 +208,11 @@ return [
     ],
     'term_and_privacy_policy_url' => 'Käyttöehtojen ja tietosuojakäytännön URL',
     'site_title_separator' => 'SEO otsikon erotin',
+    'site_title_helper' => 'Brändisi tai yrityksesi nimi. Näkyy selaimen välilehdessä ja hakutuloksissa (esim. "My Company").',
+    'show_site_name_helper' => 'Lisää sivuston nimen jokaiseen sivuotsikkoon valitun erottimen avulla. Esimerkki: "Page Title - My Company".',
+    'site_title_separator_helper' => 'Merkki, jota käytetään sivuotsikon ja sivuston nimen välissä. Esimerkki viivalla: "Page Title - My Company". Esimerkki pystyviivalla: "Page Title | My Company".',
+    'seo_title_helper' => 'Etusivun otsikko, joka näkyy hakukoneiden tuloksissa. Pidä se alle 60 merkin mittaisena parhaaseen näyttöön. Jätä tyhjäksi käyttääksesi sivuston otsikkoa.',
+    'seo_description_helper' => 'Etusivun kuvaus, joka näkyy hakukoneiden tuloksissa. Pidä se 120-160 merkin välillä parhaaseen näyttöön.',
     'no_meta_keywords' => 'Google poisti meta keywords -ominaisuuden, sinun ei tarvitse lisätä meta-avainsanoja verkkosivustollesi. Lue lisää: :link',
     'validation' => [
         'gtm_container_id_format' => 'GTM Container ID:n on oltava muodossa GTM-XXXXXX (esim. GTM-N7MK3KH2)',
@@ -389,6 +394,9 @@ return [
     ],
 
     'typography_primary' => 'Ensisijainen fontti',
+    'all_languages' => 'Kaikki kielet',
+    'shared_field_notice' => 'Tämä kenttä on jaettu kaikkien kielten kesken. Hallitse sitä oletuskielestä.',
+    'shared_section_notice' => 'Kaikki tämän osion asetukset ovat jaettu kaikkien kielten kesken. Vaihda oletuskieleen tehdäksesi muutoksia.',
     'admin_appearance' => [
         'show_admin_bar' => 'Näytä ylläpitopalkki kirjautuneille ylläpitäjille, myös julkisella sivustolla',
         'show_admin_bar_helper' => 'Näytä pika-käyttö ylläpitotyökalupalkki verkkosivuston yläosassa, kun olet kirjautuneena ylläpitäjänä',

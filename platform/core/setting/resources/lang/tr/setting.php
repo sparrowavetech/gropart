@@ -505,6 +505,10 @@ return [
             'widget_cache_ttl_helper' => 'The duration to cache all widgets. Default is 1800 seconds (30 minutes).',
             'plugin_cache_enabled' => 'Yüklü eklentileri önbelleğe al',
             'plugin_cache_enabled_helper' => 'Gelişmiş performans için yüklü eklentilerin listesini önbelleğe alın. Etkinleştirildiğinde, sistem dosya sistemi taramalarını azaltmak için eklenti listesini 30 dakika boyunca önbelleğe alacaktır.',
+            'cache_size_warning_threshold' => 'Önbellek boyutu uyarı eşiği (MB)',
+            'cache_size_warning_threshold_helper' => 'Framework önbelleği bu boyutu (MB cinsinden) aştığında Önbellek Yönetimi sayfasında bir uyarı gösterir. Varsayılan değer 50 MB\'dir.',
+            'cache_auto_clear_enabled' => 'Boyut eşiği aştığında önbelleği otomatik olarak temizle',
+            'cache_auto_clear_enabled_helper' => 'Framework önbelleğinin boyutu yukarıdaki uyarı eşiğini aştığında her saat başı otomatik olarak temizler. Sunucunuzda Laravel zamanlayıcısının (<code>php artisan schedule:run</code>) cron işi olarak yapılandırılmasını gerektirir.',
         ],
     ],
     'appearance' => [

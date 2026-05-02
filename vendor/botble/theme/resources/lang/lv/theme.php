@@ -208,6 +208,11 @@ return [
     ],
     'term_and_privacy_policy_url' => 'Noteikumu un privātuma politikas URL',
     'site_title_separator' => 'SEO nosaukuma atdalītājs',
+    'site_title_helper' => 'Jūsu zīmola vai uzņēmuma nosaukums. Parādās pārlūkprogrammas cilnē un meklēšanas rezultātos (piem., "My Company").',
+    'show_site_name_helper' => 'Pievieno vietnes nosaukumu katram lapas nosaukumam, izmantojot izvēlēto atdalītāju. Piemērs: "Page Title - My Company".',
+    'site_title_separator_helper' => 'Raksturs, kas tiek izmantots starp lapas nosaukumu un vietnes nosaukumu. Piemērs ar defisi: "Page Title - My Company". Piemērs ar vertikālo svītru: "Page Title | My Company".',
+    'seo_title_helper' => 'Mājas lapas nosaukums, kas parādās meklētājprogrammas rezultātos. Labākai parādīšanai uzturiet to zem 60 rakstzīmēm. Atstājiet tukšu, lai izmantotu vietnes nosaukumu.',
+    'seo_description_helper' => 'Mājas lapas apraksts, kas parādās meklētājprogrammas rezultātos. Labākai parādīšanai uzturiet to 120–160 rakstzīmju robežās.',
     'no_meta_keywords' => 'Meta atslēgvārdus Google ir noņēmis, jums nav jāpievieno meta atslēgvārdi savai vietnei. Uzziniet vairāk: :link',
     'validation' => [
         'gtm_container_id_format' => 'GTM konteinera ID jābūt formātā GTM-XXXXXX (piemēram, GTM-N7MK3KH2)',
@@ -389,6 +394,9 @@ return [
     ],
 
     'typography_primary' => 'Primārais fonts',
+    'all_languages' => 'Visas valodas',
+    'shared_field_notice' => 'Šis lauks ir kopīgs visām valodām. Pārvaldiet to no noklusējuma valodas.',
+    'shared_section_notice' => 'Visas šīs sadaļas opcijas ir kopīgas visām valodām. Pārslēdzieties uz noklusējuma valodu, lai veiktu izmaiņas.',
     'admin_appearance' => [
         'show_admin_bar' => 'Rādīt administratora joslu pieteikušiem administratoriem, pat priekšējā vietnē',
         'show_admin_bar_helper' => 'Rādīt ātras piekļuves administratora rīkjoslu vietnes augšpusē, kad esat pieteicies kā administrators',

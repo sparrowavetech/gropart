@@ -24,6 +24,12 @@ class ThemeOptionCheckMissingCommand extends Command
 
         RenderingThemeOptionSettings::dispatch();
 
+        if (defined('RENDERING_THEME_OPTIONS_PAGE')) {
+            do_action(RENDERING_THEME_OPTIONS_PAGE);
+        }
+
+        ThemeOption::constructSections();
+
         $fields = array_map(
             fn (string $name) => ThemeOption::getOptionKey($name),
             array_keys(Arr::get(ThemeOption::getFields(), 'theme', []))
@@ -40,8 +46,8 @@ class ThemeOptionCheckMissingCommand extends Command
 
         $existsOptions = $existsOptionQuery->pluck('key')->all();
         $missingKeys = $isReverse
-            ? $this->missingKeys($existsOptions, $fields)
-            : $this->missingKeys($fields, $existsOptions);
+            ? $this->missingKeys($fields, $existsOptions)
+            : $this->missingKeys($existsOptions, $fields);
 
         if ($missingKeys->isEmpty()) {
             $this->components->info('No missing option found!');
@@ -54,8 +60,8 @@ class ThemeOptionCheckMissingCommand extends Command
 
         $this->components->info(
             $isReverse
-                ? sprintf('We found <info>%s</info> %s are not exists in settings table (database).', $missingKeysCount, $pluralKeyWord)
-                : sprintf('We found <info>%s</info> %s are not defined in theme options.', $missingKeysCount, $pluralKeyWord)
+                ? sprintf('We found <info>%s</info> %s are defined in theme options but not saved in settings table (database).', $missingKeysCount, $pluralKeyWord)
+                : sprintf('We found <info>%s</info> %s exist in settings table (database) but are not defined in theme options.', $missingKeysCount, $pluralKeyWord)
         );
 
         table(['#', 'Key'], $missingKeys->toArray());

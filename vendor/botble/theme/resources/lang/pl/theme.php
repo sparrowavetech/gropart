@@ -208,6 +208,11 @@ return [
     ],
     'term_and_privacy_policy_url' => 'URL regulaminu i polityki prywatności',
     'site_title_separator' => 'Separator tytułu SEO',
+    'site_title_helper' => 'Nazwa Twojej marki lub firmy. Pojawia się w karcie przeglądarki i wynikach wyszukiwania (np. "My Company").',
+    'show_site_name_helper' => 'Dodaje nazwę witryny do każdego tytułu strony, używając wybranego separatora. Przykład: "Page Title - My Company".',
+    'site_title_separator_helper' => 'Znak używany między tytułem strony a nazwą witryny. Przykład z myślnikiem: "Page Title - My Company". Przykład z pionową kreską: "Page Title | My Company".',
+    'seo_title_helper' => 'Tytuł strony głównej wyświetlany w wynikach wyszukiwarek. Zachowaj go poniżej 60 znaków dla najlepszego wyświetlania. Pozostaw puste, aby użyć tytułu witryny.',
+    'seo_description_helper' => 'Opis strony głównej wyświetlany w wynikach wyszukiwarek. Zachowaj go między 120-160 znakami dla najlepszego wyświetlania.',
     'no_meta_keywords' => 'Słowa kluczowe meta zostały usunięte przez Google, nie musisz dodawać słów kluczowych meta do swojej witryny. Dowiedz się więcej: :link',
     'validation' => [
         'gtm_container_id_format' => 'ID kontenera GTM musi być w formacie GTM-XXXXXX (np. GTM-N7MK3KH2)',
@@ -389,6 +394,9 @@ return [
     ],
 
     'typography_primary' => 'Czcionka podstawowa',
+    'all_languages' => 'Wszystkie języki',
+    'shared_field_notice' => 'To pole jest współdzielone we wszystkich językach. Zarządzaj nim z poziomu domyślnego języka.',
+    'shared_section_notice' => 'Wszystkie opcje w tej sekcji są współdzielone we wszystkich językach. Przełącz na domyślny język, aby wprowadzić zmiany.',
     'admin_appearance' => [
         'show_admin_bar' => 'Pokaż pasek administratora dla zalogowanych administratorów, nawet na stronie frontowej',
         'show_admin_bar_helper' => 'Wyświetl pasek narzędzi szybkiego dostępu administratora u góry witryny po zalogowaniu jako administrator',

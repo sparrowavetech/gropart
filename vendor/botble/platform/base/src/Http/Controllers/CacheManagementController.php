@@ -26,7 +26,9 @@ class CacheManagementController extends BaseSystemController
 
         $formattedCacheSize = BaseHelper::humanFilesize($cacheSize);
 
-        return view('core/base::system.cache', compact('formattedCacheSize', 'cacheSize'));
+        $cacheSizeWarningThreshold = max(1, (int) setting('cache_size_warning_threshold', 50));
+
+        return view('core/base::system.cache', compact('formattedCacheSize', 'cacheSize', 'cacheSizeWarningThreshold'));
     }
 
     public function destroy(ClearCacheRequest $request, ClearCacheService $clearCacheService)

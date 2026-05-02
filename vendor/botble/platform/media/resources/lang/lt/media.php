@@ -203,6 +203,13 @@ return [
         'uploaded_file_too_large' => 'Failas per didelis. Pasirinkite mažesnį failą.',
         'uploaded_file_corrupted' => 'Failas atrodo sugadintas arba neteisingas. Bandykite įkelti kitą failą.',
         'upload_network_error' => 'Įkėlimas nepavyko dėl tinklo problemų. Patikrinkite savo ryšį ir bandykite dar kartą.',
+        'upload_err_ini_size' => 'Failas yra didesnis nei serverio įkėlimo limitas :size. Padidinkite "upload_max_filesize" PHP nustatymuose arba kreipkitės į prieglobos teikėją.',
+        'upload_err_form_size' => 'Failas viršija didžiausią formos įkėlimo dydį.',
+        'upload_err_partial' => 'Failas buvo įkeltas tik iš dalies. Prašome bandyti dar kartą — tai paprastai reiškia, kad ryšys buvo nutrauktas.',
+        'upload_err_no_tmp_dir' => 'Serveris negali išsaugoti įkelto failo, nes PHP laikinasis įkėlimo katalogas (upload_tmp_dir) dingęs arba nėra rašytinas. Paprašykite savo prieglobos teikėjo nustatyti "upload_tmp_dir" PHP-FPM pool konfigūracijoje į rašytiną aplanką (pvz., /home/your-user/tmp). Pilnos instrukcijos: https://docs.botble.com/cms/media-upload-errors.html',
+        'upload_err_cant_write' => 'Serveris negalėjo įrašyti įkelto failo į diską. Patikrinkite aplanko leidimus, disko kvotą ir ar tmp katalogas yra rašytinas PHP.',
+        'upload_err_extension' => 'PHP plėtinys (pvz., ModSecurity arba saugumo įskiepis) užblokavo įkėlimą. Susisiekite su savo prieglobos teikėju.',
+        'upload_err_unknown' => 'Įkėlimas nepavyko (PHP klaidos kodas :code). Prašome susisiekti su savo prieglobos teikėju.',
         'attributes' => [
             'uploaded_file' => 'failas',
             'upload' => 'failas',

@@ -203,6 +203,13 @@ return [
         'uploaded_file_too_large' => 'Tiedosto on liian suuri. Valitse pienempi tiedosto.',
         'uploaded_file_corrupted' => 'Tiedosto näyttää olevan vioittunut tai virheellinen. Yritä ladata eri tiedosto.',
         'upload_network_error' => 'Lataus epäonnistui verkko-ongelmien vuoksi. Tarkista yhteytesi ja yritä uudelleen.',
+        'upload_err_ini_size' => 'Tiedosto on suurempi kuin palvelimen latausraja :size. Suurenna "upload_max_filesize" PHP-asetuksissa tai pyydä hosting-palveluntarjoajaltasi.',
+        'upload_err_form_size' => 'Tiedosto ylittää lomakkeen enimmäislatauskoon.',
+        'upload_err_partial' => 'Tiedosto ladattiin vain osittain. Yritä uudelleen — tämä tarkoittaa yleensä, että yhteys katkesi.',
+        'upload_err_no_tmp_dir' => 'Palvelin ei voi tallentaa ladattua tiedostoa, koska PHP:n väliaikainen lataushakemisto (upload_tmp_dir) puuttuu tai ei ole kirjoitettavissa. Pyydä hosting-palveluntarjoajaa asettamaan "upload_tmp_dir" PHP-FPM pool -konfiguraatiossa kirjoitettavaksi kansioksi (esim. /home/your-user/tmp). Täydelliset ohjeet: https://docs.botble.com/cms/media-upload-errors.html',
+        'upload_err_cant_write' => 'Palvelin ei voinut kirjoittaa ladattua tiedostoa levylle. Tarkista kansion oikeudet, levykiintiö ja että tmp-hakemisto on PHP:n kirjoitettavissa.',
+        'upload_err_extension' => 'PHP-laajennus (kuten ModSecurity tai tietoturvalaajennus) esti latauksen. Ota yhteyttä hosting-palveluntarjoajaasi.',
+        'upload_err_unknown' => 'Lataus epäonnistui (PHP-virhekoodi :code). Ota yhteyttä hosting-palveluntarjoajaasi.',
         'attributes' => [
             'uploaded_file' => 'tiedosto',
             'upload' => 'tiedosto',

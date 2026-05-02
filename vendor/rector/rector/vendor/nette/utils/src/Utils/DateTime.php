@@ -5,7 +5,7 @@
  * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
  */
 declare (strict_types=1);
-namespace RectorPrefix202602\Nette\Utils;
+namespace RectorPrefix202604\Nette\Utils;
 
 use function array_merge, checkdate, implode, is_numeric, is_string, preg_replace_callback, sprintf, time, trim;
 /**
@@ -107,10 +107,7 @@ class DateTime extends \DateTime implements \JsonSerializable
     {
         return (new self('@0 ' . $relativeTime))->getTimestamp();
     }
-    /**
-     * @param \DateTimeZone|string|null $timezone
-     */
-    private function apply(string $datetime, $timezone = null, bool $ctr = \false): void
+    private function apply(string $datetime, ?\DateTimeZone $timezone = null, bool $ctr = \false): void
     {
         $relPart = '';
         $absPart = preg_replace_callback('/[+-]?\s*\d+\s+((microsecond|millisecond|[mµu]sec)s?|[mµ]s|sec(ond)?s?|min(ute)?s?|hours?)(\s+ago)?\b/iu', function ($m) use (&$relPart) {

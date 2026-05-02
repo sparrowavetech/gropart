@@ -8,6 +8,7 @@ return [
     'clear_button' => 'Tøm',
     'refresh_button' => 'Oppdater',
     'cache_size_warning' => 'CMS-hurtigbufferstørrelsen din er ganske stor (>50MB). Tømming kan forbedre systemytelsen.',
+    'cache_size_warning_dynamic' => 'CMS-hurtigbufferstørrelsen din er ganske stor (>:sizeMB). Tømming kan forbedre systemytelsen.',
     'footer_note' => 'Tøm hurtigbufferen etter at du har gjort endringer på nettstedet ditt for å sikre at de vises riktig.',
     'type' => 'Type',
     'description' => 'Beskrivelse',

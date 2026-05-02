@@ -1,7 +1,10 @@
 import Toastify from '../../../../core/base/resources/js/base/toast'
 
-const Theme = Theme || {}
-window.Theme = Theme
+// Reading `Theme` in its own `const` initializer is a temporal-dead-zone
+// error under strict ES modules. Go through window so the expression is
+// spec-compliant regardless of whether the bundler transpiles const → var.
+window.Theme = window.Theme || {}
+const Theme = window.Theme
 
 // Get toast config with defaults
 Theme.getToastConfig = function () {

@@ -743,7 +743,13 @@ class CheckMissingTranslationCommand extends Command
     {
         $output = "<?php\n\nreturn " . VarExporter::export($content) . ";\n";
 
-        File::put(str_replace('/', DIRECTORY_SEPARATOR, $filePath), $output);
+        $filePath = str_replace('/', DIRECTORY_SEPARATOR, $filePath);
+
+        File::put($filePath, $output);
+
+        if (function_exists('opcache_invalidate')) {
+            @opcache_invalidate($filePath, true);
+        }
     }
 
     protected function displayArrayTranslationWarnings(): void

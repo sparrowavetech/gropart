@@ -203,6 +203,13 @@ return [
         'uploaded_file_too_large' => 'Filen er for stor. Vælg venligst en mindre fil.',
         'uploaded_file_corrupted' => 'Filen ser ud til at være beskadiget eller ugyldig. Prøv venligst at uploade en anden fil.',
         'upload_network_error' => 'Upload mislykkedes på grund af netværksproblemer. Tjek venligst din forbindelse og prøv igen.',
+        'upload_err_ini_size' => 'Filen er større end serverens uploadgrænse på :size. Forøg "upload_max_filesize" i PHP-indstillingerne eller kontakt din hostingudbyder.',
+        'upload_err_form_size' => 'Filen overstiger formularens maksimale uploadstørrelse.',
+        'upload_err_partial' => 'Filen blev kun delvist uploadet. Prøv venligst igen — det betyder normalt, at forbindelsen blev afbrudt.',
+        'upload_err_no_tmp_dir' => 'Serveren kan ikke gemme den uploadede fil, fordi PHP\'s midlertidige upload-mappe (upload_tmp_dir) mangler eller ikke kan skrives til. Bed din hostingudbyder om at sætte "upload_tmp_dir" i PHP-FPM pool-konfigurationen til en skrivbar mappe (fx /home/your-user/tmp). Fulde instruktioner: https://docs.botble.com/cms/media-upload-errors.html',
+        'upload_err_cant_write' => 'Serveren kunne ikke skrive den uploadede fil til disken. Tjek mappetilladelser, diskkvote og at tmp-mappen er skrivbar af PHP.',
+        'upload_err_extension' => 'En PHP-udvidelse (såsom ModSecurity eller et sikkerhedsplugin) blokerede uploaden. Kontakt din hostingudbyder.',
+        'upload_err_unknown' => 'Upload mislykkedes (PHP-fejlkode :code). Kontakt venligst din hostingudbyder.',
         'attributes' => [
             'uploaded_file' => 'fil',
             'upload' => 'fil',

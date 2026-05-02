@@ -489,6 +489,7 @@ class Botble {
                 dateFormat: format,
                 wrap: true,
                 locale: locale || 'en',
+                monthSelectorType: 'dropdown',
             }
 
             if ($input.data('options')) {
@@ -643,7 +644,7 @@ class Botble {
                 placeholder: $element.data('placeholder'),
             })
 
-            if ($(this).hasClass('.select-sorting')) {
+            if ($(this).hasClass('select-sorting')) {
                 $(this).on('select2:select', function (e) {
                     const $element = $(e.params.data.element)
 

@@ -505,6 +505,10 @@ return [
             'widget_cache_ttl_helper' => 'Trajanje predmemorije svih widgeta. Zadano je 1800 sekundi (30 minuta).',
             'plugin_cache_enabled' => 'Predmemorija instaliranih dodataka',
             'plugin_cache_enabled_helper' => 'Predmemorirajte popis instaliranih dodataka za poboljšane performanse. Kada je omogućeno, sustav će predmemorirati popis dodataka 30 minuta kako bi se smanjilo skeniranje datotečnog sustava.',
+            'cache_size_warning_threshold' => 'Prag upozorenja za veličinu predmemorije (MB)',
+            'cache_size_warning_threshold_helper' => 'Prikazuje upozorenje na stranici Upravljanje predmemorijom kada predmemorija okvira premaši ovu veličinu (u MB). Zadana vrijednost je 50 MB.',
+            'cache_auto_clear_enabled' => 'Automatski očisti predmemoriju kada veličina premaši prag',
+            'cache_auto_clear_enabled_helper' => 'Automatski čisti predmemoriju okvira svakih sat vremena kada njezina veličina premaši gore navedeni prag upozorenja. Zahtijeva da Laravel rasporednik (<code>php artisan schedule:run</code>) bude konfiguriran kao cron zadatak na vašem poslužitelju.',
         ],
     ],
     'appearance' => [

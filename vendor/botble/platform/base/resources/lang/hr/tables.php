@@ -65,4 +65,5 @@ return [
     'please_select_record' => 'Molimo odaberite barem jedan zapis da biste izvršili ovu radnju!',
     'checkbox' => 'Potvrdni okvir',
     'toggle_columns' => 'Prebaci stupce',
+    'created_by' => 'Kreirao',
 ];

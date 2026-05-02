@@ -65,4 +65,5 @@ return [
     'please_select_record' => 'Vui lòng chọn ít nhất 1 bản ghi để thực hiện hành động này!',
     'checkbox' => 'Hộp kiểm',
     'toggle_columns' => 'Chuyển đổi cột',
+    'created_by' => 'Tạo bởi',
 ];

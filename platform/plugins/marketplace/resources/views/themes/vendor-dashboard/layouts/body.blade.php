@@ -100,6 +100,7 @@
             <div class="ps-sidebar__content">
                 <div class="ps-sidebar__center">
                     @include(MarketplaceHelper::viewPath('vendor-dashboard.layouts.menu'))
+                    {!! apply_filters('marketplace_vendor_sidebar_menu_items', '') !!}
                 </div>
                 <div class="ps-sidebar__footer">
                     <div class="ps-copyright">

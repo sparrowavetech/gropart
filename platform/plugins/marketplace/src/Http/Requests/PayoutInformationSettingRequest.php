@@ -2,6 +2,7 @@
 
 namespace Botble\Marketplace\Http\Requests;
 
+use Botble\Base\Facades\BaseHelper;
 use Botble\Marketplace\Enums\PayoutPaymentMethodsEnum;
 use Botble\Support\Http\Requests\Request;
 use Illuminate\Support\Arr;
@@ -31,6 +32,8 @@ class PayoutInformationSettingRequest extends Request
     {
         $channel = $this->input('payout_payment_method');
 
-        $this->merge(['bank_info' => Arr::get($this->input('bank_info'), $channel)]);
+        $bankInfo = Arr::get($this->input('bank_info'), $channel);
+
+        $this->merge(['bank_info' => BaseHelper::sanitizeUtf8($bankInfo)]);
     }
 }

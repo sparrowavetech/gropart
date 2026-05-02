@@ -505,6 +505,10 @@ return [
             'widget_cache_ttl_helper' => 'Laiks, cik ilgi kešot visus logrīkus. Noklusējuma ir 1800 sekundes (30 minūtes).',
             'plugin_cache_enabled' => 'Kešot instalētos spraudņus',
             'plugin_cache_enabled_helper' => 'Kešot instalēto spraudņu sarakstu uzlabotai veiktspējai. Kad iespējots, sistēma kešos spraudņu sarakstu 30 minūtes, lai samazinātu failu sistēmas skenēšanu.',
+            'cache_size_warning_threshold' => 'Kešatmiņas lieluma brīdinājuma slieksnis (MB)',
+            'cache_size_warning_threshold_helper' => 'Parāda brīdinājumu kešatmiņas pārvaldības lapā, kad sistēmas kešatmiņa pārsniedz šo izmēru (MB). Noklusējuma vērtība ir 50 MB.',
+            'cache_auto_clear_enabled' => 'Automātiski notīrīt kešatmiņu, kad izmērs pārsniedz slieksni',
+            'cache_auto_clear_enabled_helper' => 'Automātiski notīra sistēmas kešatmiņu katru stundu, kad tās izmērs pārsniedz iepriekš norādīto brīdinājuma slieksni. Nepieciešams, lai Laravel plānotājs (<code>php artisan schedule:run</code>) būtu konfigurēts kā cron darbs jūsu serverī.',
         ],
     ],
     'appearance' => [

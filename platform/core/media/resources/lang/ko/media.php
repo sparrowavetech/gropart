@@ -203,6 +203,13 @@ return [
         'uploaded_file_too_large' => '파일이 너무 큽니다. 더 작은 파일을 선택하세요.',
         'uploaded_file_corrupted' => '파일이 손상되었거나 유효하지 않습니다. 다른 파일을 업로드해 보세요.',
         'upload_network_error' => '네트워크 문제로 인해 업로드가 실패했습니다. 연결을 확인하고 다시 시도하세요.',
+        'upload_err_ini_size' => '파일이 서버의 :size 업로드 제한보다 큽니다. PHP 설정에서 "upload_max_filesize"를 늘리거나 호스팅 제공자에게 문의하세요.',
+        'upload_err_form_size' => '파일이 양식의 최대 업로드 크기를 초과합니다.',
+        'upload_err_partial' => '파일이 부분적으로만 업로드되었습니다. 다시 시도해 주세요 — 일반적으로 연결이 중단되었음을 의미합니다.',
+        'upload_err_no_tmp_dir' => 'PHP의 임시 업로드 디렉토리(upload_tmp_dir)가 없거나 쓸 수 없기 때문에 서버가 업로드된 파일을 저장할 수 없습니다. 호스팅 제공자에게 PHP-FPM pool 구성에서 "upload_tmp_dir"를 쓸 수 있는 폴더(예: /home/your-user/tmp)로 설정하도록 요청하세요. 전체 지침: https://docs.botble.com/cms/media-upload-errors.html',
+        'upload_err_cant_write' => '서버가 업로드된 파일을 디스크에 쓸 수 없습니다. 폴더 권한, 디스크 할당량 및 tmp 디렉토리가 PHP에 의해 쓰기 가능한지 확인하세요.',
+        'upload_err_extension' => 'PHP 확장(예: ModSecurity 또는 보안 플러그인)이 업로드를 차단했습니다. 호스팅 제공자에게 문의하세요.',
+        'upload_err_unknown' => '업로드 실패 (PHP 오류 코드 :code). 호스팅 제공자에게 문의하세요.',
         'attributes' => [
             'uploaded_file' => '파일',
             'upload' => '파일',

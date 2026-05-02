@@ -17,6 +17,8 @@ use Illuminate\Support\Facades\Facade;
  * @method static string getKeysRegex()
  * @method static \Botble\Theme\Supports\SiteMapManager registerKey(array|string $key, string|null $value = null)
  * @method static \Botble\Theme\Supports\SiteMapManager removeKey(array|string $key)
+ * @method static bool isKeyExcluded(string $key)
+ * @method static array getExcludableKeys()
  * @method static array allowedExtensions()
  * @method static \Botble\Theme\Supports\SiteMapManager setItemsPerPage(int $itemsPerPage)
  * @method static int getItemsPerPage()

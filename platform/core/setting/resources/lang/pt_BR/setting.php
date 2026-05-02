@@ -505,6 +505,10 @@ return [
             'widget_cache_ttl_helper' => 'The duration to cache all widgets. Default is 1800 seconds (30 minutes).',
             'plugin_cache_enabled' => 'Cache installed plugins',
             'plugin_cache_enabled_helper' => 'Cache the list of installed plugins for improved performance. When enabled, the system will cache the plugin list for 30 minutes to reduce file system scans.',
+            'cache_size_warning_threshold' => 'Limite de aviso do tamanho do cache (MB)',
+            'cache_size_warning_threshold_helper' => 'Exibe um aviso na página de Gerenciamento de Cache quando o cache do framework excede este tamanho (em MB). O padrão é 50 MB.',
+            'cache_auto_clear_enabled' => 'Limpar o cache automaticamente quando o tamanho exceder o limite',
+            'cache_auto_clear_enabled_helper' => 'Limpa automaticamente o cache do framework a cada hora quando seu tamanho ultrapassa o limite de aviso acima. Requer que o agendador do Laravel (<code>php artisan schedule:run</code>) esteja configurado como uma tarefa cron no seu servidor.',
         ],
     ],
     'appearance' => [

@@ -203,6 +203,13 @@ return [
         'uploaded_file_too_large' => 'Masyadong malaki ang file. Mangyaring pumili ng mas maliit na file.',
         'uploaded_file_corrupted' => 'Ang file ay mukhang sira o di-wasto. Mangyaring subukan ang pag-upload ng ibang file.',
         'upload_network_error' => 'Nabigo ang pag-upload dahil sa mga problema sa network. Pakisuri ang iyong koneksyon at subukan ulit.',
+        'upload_err_ini_size' => 'Mas malaki ang file kaysa sa :size na upload limit ng server. Dagdagan ang "upload_max_filesize" sa mga setting ng PHP o hingin sa iyong hosting provider.',
+        'upload_err_form_size' => 'Lumampas ang file sa pinakamalaking upload size ng form.',
+        'upload_err_partial' => 'Bahagi lang ng file ang na-upload. Pakisubukang muli — karaniwang ibig sabihin nito ay naputol ang koneksyon.',
+        'upload_err_no_tmp_dir' => 'Hindi mase-save ng server ang na-upload na file dahil nawawala o hindi nasusulatan ang pansamantalang upload directory ng PHP (upload_tmp_dir). Hingin sa iyong hosting provider na itakda ang "upload_tmp_dir" sa PHP-FPM pool config sa isang sulatan na folder (hal. /home/your-user/tmp). Kumpletong tagubilin: https://docs.botble.com/cms/media-upload-errors.html',
+        'upload_err_cant_write' => 'Hindi maisulat ng server ang na-upload na file sa disk. Suriin ang mga folder permission, disk quota, at na nasusulatan ng PHP ang tmp directory.',
+        'upload_err_extension' => 'Hinarang ng isang PHP extension (tulad ng ModSecurity o isang security plugin) ang pag-upload. Makipag-ugnayan sa iyong hosting provider.',
+        'upload_err_unknown' => 'Nabigo ang pag-upload (PHP error code :code). Makipag-ugnayan sa iyong hosting provider.',
         'attributes' => [
             'uploaded_file' => 'file',
             'upload' => 'file',

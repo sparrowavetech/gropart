@@ -194,4 +194,22 @@ return [
     'share_as_html' => 'HTML',
     'share_as_markdown' => 'Reducción',
     'share_results' => 'Compartir resultados',
+    'validation' => [
+        'uploaded_file_required' => 'Por favor selecciona un archivo para subir.',
+        'uploaded_file_invalid_type' => 'El tipo de archivo no está permitido. Por favor sube un formato de archivo válido.',
+        'uploaded_file_too_large' => 'El archivo es demasiado grande. Por favor elige un archivo más pequeño.',
+        'uploaded_file_corrupted' => 'El archivo parece estar dañado o no ser válido. Por favor intenta subir un archivo diferente.',
+        'upload_network_error' => 'Error al subir debido a problemas de red. Por favor verifica tu conexión e intenta de nuevo.',
+        'upload_err_ini_size' => 'El archivo es más grande que el límite de carga :size del servidor. Aumenta "upload_max_filesize" en la configuración de PHP o consulta a tu proveedor de hosting.',
+        'upload_err_form_size' => 'El archivo excede el tamaño máximo de carga del formulario.',
+        'upload_err_partial' => 'El archivo se subió solo parcialmente. Por favor intenta de nuevo — esto generalmente significa que la conexión se interrumpió.',
+        'upload_err_no_tmp_dir' => 'El servidor no puede guardar el archivo subido porque el directorio temporal de carga de PHP (upload_tmp_dir) falta o no se puede escribir. Pide a tu proveedor de hosting que configure "upload_tmp_dir" en la configuración del pool PHP-FPM a una carpeta con permisos de escritura (p. ej. /home/your-user/tmp). Instrucciones completas: https://docs.botble.com/cms/media-upload-errors.html',
+        'upload_err_cant_write' => 'El servidor no pudo escribir el archivo subido en el disco. Verifica los permisos de carpeta, la cuota de disco y que el directorio tmp sea escribible por PHP.',
+        'upload_err_extension' => 'Una extensión de PHP (como ModSecurity o un plugin de seguridad) bloqueó la carga. Contacta a tu proveedor de hosting.',
+        'upload_err_unknown' => 'Carga fallida (código de error PHP :code). Por favor contacta a tu proveedor de hosting.',
+        'attributes' => [
+            'uploaded_file' => 'archivo',
+            'upload' => 'archivo',
+        ],
+    ],
 ];

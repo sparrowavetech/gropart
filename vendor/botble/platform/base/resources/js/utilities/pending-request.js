@@ -198,8 +198,20 @@ class PendingRequest {
 
     withDefaultErrorHandler() {
         this.errorHandlerUsing((error) => {
+            if (!error.response) {
+                const networkMessage =
+                    error.code === 'ECONNABORTED' || /timeout/i.test(error.message || '')
+                        ? 'Request timed out before the server responded. Please try again or check your server logs.'
+                        : 'Could not reach the server. Please check your network/firewall settings and server logs.'
+
+                error.message = networkMessage
+                Botble.showError(networkMessage)
+
+                return Promise.reject(error)
+            }
+
             const statusCode = error.response.status
-            const data = error.response.data
+            const data = error.response.data || {}
 
             switch (statusCode) {
                 case 419:

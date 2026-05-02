@@ -208,6 +208,11 @@ return [
     ],
     'term_and_privacy_policy_url' => 'Villkor och sekretesspolicy URL',
     'site_title_separator' => 'SEO-titelseparator',
+    'site_title_helper' => 'Ditt varumärkes- eller företagsnamn. Visas i webbläsarfliken och sökresultaten (t.ex. "My Company").',
+    'show_site_name_helper' => 'Lägger till webbplatsens namn till varje sidtitel med hjälp av den valda separatorn. Exempel: "Page Title - My Company".',
+    'site_title_separator_helper' => 'Tecknet som används mellan sidtiteln och webbplatsnamnet. Exempel med bindestreck: "Page Title - My Company". Exempel med vertikalstreck: "Page Title | My Company".',
+    'seo_title_helper' => 'Hemsidans titel som visas i sökmotorresultaten. Håll den under 60 tecken för bästa visning. Lämna tomt för att använda webbplatsens titel.',
+    'seo_description_helper' => 'Hemsidans beskrivning som visas i sökmotorresultaten. Håll den mellan 120-160 tecken för bästa visning.',
     'no_meta_keywords' => 'Meta-nyckelord togs bort av Google, du behöver inte lägga till meta-nyckelord på din webbplats. Läs mer: :link',
     'validation' => [
         'gtm_container_id_format' => 'GTM Container-ID måste vara i formatet GTM-XXXXXX (t.ex. GTM-N7MK3KH2)',
@@ -389,6 +394,9 @@ return [
     ],
 
     'typography_primary' => 'Primärt typsnitt',
+    'all_languages' => 'Alla språk',
+    'shared_field_notice' => 'Det här fältet delas mellan alla språk. Hantera det från standardspråket.',
+    'shared_section_notice' => 'Alla alternativ i det här avsnittet delas mellan alla språk. Byt till standardspråket för att göra ändringar.',
     'admin_appearance' => [
         'show_admin_bar' => 'Visa adminf ält för inloggade administratörer, även på den offentliga webbplatsen',
         'show_admin_bar_helper' => 'Visa en snabbåtkomst admin-verktygsfält högst upp på webbplatsen när du är inloggad som administratör',

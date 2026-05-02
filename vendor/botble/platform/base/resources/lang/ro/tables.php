@@ -65,4 +65,5 @@ return [
     'please_select_record' => 'Vă rugăm să selectați cel puțin o înregistrare pentru a efectua această acțiune!',
     'checkbox' => 'Casetă de selectare',
     'toggle_columns' => 'Comutare coloane',
+    'created_by' => 'Creat de',
 ];

@@ -544,6 +544,18 @@ window.PhpDebugBar = window.PhpDebugBar || {};
             hideEmptyTabsLabel.append(this.hideEmptyTabs, 'Hide empty tabs until they have data');
             fields['Hide Empty Tabs'] = hideEmptyTabsLabel;
 
+            // Fullscreen button
+            const fullscreenCheck = document.createElement('input');
+            fullscreenCheck.type = 'checkbox';
+            fullscreenCheck.checked = debugbar.options.showFullscreenBtn;
+            fullscreenCheck.addEventListener('click', function () {
+                self.storeSetting('showFullscreenBtn', this.checked);
+                debugbar.toggleFullscreenBtn(this.checked);
+            });
+            const fullscreenLabel = document.createElement('label');
+            fullscreenLabel.append(fullscreenCheck, 'Show fullscreen button in toolbar');
+            fields.Fullscreen = fullscreenLabel;
+
             // Autoshow
             this.autoshow = document.createElement('input');
             this.autoshow.type = 'checkbox';
@@ -679,7 +691,7 @@ window.PhpDebugBar = window.PhpDebugBar || {};
      */
     class DebugBar extends Widget {
         get className() {
-            return `phpdebugbar ${csscls('minimized')}`;
+            return `phpdebugbar`;
         }
 
         initialize(options = {}) {
@@ -688,7 +700,9 @@ window.PhpDebugBar = window.PhpDebugBar || {};
                 theme: 'auto',
                 toolbarPosition: 'bottom',
                 openBtnPosition: 'bottomLeft',
-                hideEmptyTabs: false
+                hideEmptyTabs: false,
+                showFullscreenBtn: false,
+                spaNavigationEvents: []
             }, options);
             this.defaultOptions = { ...this.options };
             this.controls = {};
@@ -710,6 +724,7 @@ window.PhpDebugBar = window.PhpDebugBar || {};
             }
             this.registerResizeHandler();
             this.registerMediaListener();
+            this.registerNavigationListener();
 
             // Attach settings
             this.settingsControl = new PhpDebugBar.DebugBar.Tab({ icon: 'adjustments-horizontal', title: 'Settings', widget: new Settings({
@@ -740,6 +755,46 @@ window.PhpDebugBar = window.PhpDebugBar || {};
                     this.setTheme('auto');
                 }
             });
+        }
+
+        /**
+         * Register navigation event listeners for SPA frameworks.
+         *
+         * Listens for events configured via the `spaNavigationEvents` option
+         * and recalculates body padding after navigation completes.
+         */
+        registerNavigationListener() {
+            const events = this.options.spaNavigationEvents;
+            if (!events || !events.length) {
+                return;
+            }
+
+            for (const eventName of events) {
+                document.addEventListener(eventName, () => {
+                    this.recalculateBodyPadding();
+                });
+            }
+        }
+
+        /**
+         * Recalculates and caches the body's original padding values.
+         */
+        recalculateBodyPadding() {
+            if (!this.options.bodyBottomInset) {
+                return;
+            }
+
+            // Clear inline styles to read the page's actual CSS values
+            document.body.style.paddingTop = '';
+            document.body.style.paddingBottom = '';
+
+            // Read the new page's padding values
+            const bodyStyles = window.getComputedStyle(document.body);
+            this.bodyPaddingTopHeight = Number.parseFloat(bodyStyles.paddingTop);
+            this.bodyPaddingBottomHeight = Number.parseFloat(bodyStyles.paddingBottom);
+
+            // Reapply the debugbar offset with the new values
+            this.recomputeBottomOffset();
         }
 
         setTheme(theme) {
@@ -889,6 +944,15 @@ window.PhpDebugBar = window.PhpDebugBar || {};
                 self.close();
             });
 
+            // fullscreen button (visually left of close)
+            this.fullscreenbtn = document.createElement('a');
+            this.fullscreenbtn.classList.add(csscls('fullscreen-btn'));
+            this.fullscreenbtn.hidden = !this.options.showFullscreenBtn;
+            this.headerRight.append(this.fullscreenbtn);
+            this.fullscreenbtn.addEventListener('click', () => {
+                self.toggleFullscreen();
+            });
+
             // minimize button
             this.minimizebtn = document.createElement('a');
             this.minimizebtn.classList.add(csscls('minimize-btn'));
@@ -950,7 +1014,7 @@ window.PhpDebugBar = window.PhpDebugBar || {};
             this.maximizebtn.after(this.settingsControl.tab);
             this.settingsControl.tab.hidden = false;
             this.settingsControl.tab.addEventListener('click', () => {
-                if (!this.isMinimized() && this.activePanelName === '__settings') {
+                if (!this.isMinimized() && this.activePanelName === '__settings' && !this.isFullscreen()) {
                     this.minimize();
                 } else {
                     this.showTab('__settings');
@@ -969,6 +1033,7 @@ window.PhpDebugBar = window.PhpDebugBar || {};
          * @this {DebugBar}
          */
         setHeight(height) {
+            if (this.isFullscreen()) return;
             const min_h = 40;
             const max_h = window.innerHeight - this.header.offsetHeight - 10;
             height = Math.min(height, max_h);
@@ -1006,9 +1071,14 @@ window.PhpDebugBar = window.PhpDebugBar || {};
                     } else {
                         this.showTab();
                     }
-                } else if (visible === '0') {
+                } else {
                     this.minimize();
                 }
+            }
+
+            // Restore fullscreen if it was active this session
+            if (this.options.showFullscreenBtn && sessionStorage.getItem('phpdebugbar-fullscreen') === '1') {
+                this.toggleFullscreen();
             }
         }
 
@@ -1045,7 +1115,7 @@ window.PhpDebugBar = window.PhpDebugBar || {};
             const self = this;
             this.headerLeft.append(tab.tab);
             tab.tab.addEventListener('click', () => {
-                if (!self.isMinimized() && self.activePanelName === name) {
+                if (!self.isMinimized() && self.activePanelName === name && !self.isFullscreen()) {
                     self.minimize();
                 } else {
                     self.restore();
@@ -1216,6 +1286,7 @@ window.PhpDebugBar = window.PhpDebugBar || {};
          * @this {DebugBar}
          */
         minimize() {
+            this.exitFullscreen();
             const activeClass = csscls('active');
             const headerActives = this.header.querySelectorAll(`:scope > div > .${activeClass}`);
             for (const el of headerActives) {
@@ -1262,11 +1333,46 @@ window.PhpDebugBar = window.PhpDebugBar || {};
         }
 
         /**
+         * Toggle fullscreen mode — debugbar fills the entire browser viewport
+         */
+        toggleFullscreen() {
+            if (this.isFullscreen()) {
+                this.exitFullscreen();
+            } else {
+                this._preFullscreenHeight = this.body.offsetHeight;
+                this.el.classList.add(csscls('fullscreen'));
+                this.body.style.height = '';
+                sessionStorage.setItem('phpdebugbar-fullscreen', '1');
+                this.recomputeBottomOffset();
+            }
+        }
+
+        exitFullscreen() {
+            if (!this.isFullscreen()) return;
+            this.el.classList.remove(csscls('fullscreen'));
+            if (this._preFullscreenHeight) {
+                this.body.style.height = `${this._preFullscreenHeight}px`;
+            }
+            sessionStorage.removeItem('phpdebugbar-fullscreen');
+            this.recomputeBottomOffset();
+        }
+
+        isFullscreen() {
+            return this.el.classList.contains(csscls('fullscreen'));
+        }
+
+        toggleFullscreenBtn(show) {
+            this.fullscreenbtn.hidden = !show;
+            if (!show) this.exitFullscreen();
+        }
+
+        /**
          * Close the debug bar
          *
          * @this {DebugBar}
          */
         close() {
+            this.exitFullscreen();
             this.header.hidden = true;
             this.body.hidden = true;
             this.restorebtn.hidden = false;

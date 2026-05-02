@@ -505,6 +505,10 @@ return [
             'widget_cache_ttl_helper' => 'Durata pentru care se pune în cache toate widget-urile. Implicit este 1800 secunde (30 minute).',
             'plugin_cache_enabled' => 'Cache plugin-uri instalate',
             'plugin_cache_enabled_helper' => 'Pune în cache lista de plugin-uri instalate pentru performanță îmbunătățită. Când este activat, sistemul va pune în cache lista de plugin-uri timp de 30 de minute pentru a reduce scanările sistemului de fișiere.',
+            'cache_size_warning_threshold' => 'Prag de avertizare pentru dimensiunea cache-ului (MB)',
+            'cache_size_warning_threshold_helper' => 'Afișează o avertizare pe pagina de Gestionare Cache atunci când cache-ul framework-ului depășește această dimensiune (în MB). Valoarea implicită este 50 MB.',
+            'cache_auto_clear_enabled' => 'Golește automat cache-ul când dimensiunea depășește pragul',
+            'cache_auto_clear_enabled_helper' => 'Golește automat cache-ul framework-ului la fiecare oră când dimensiunea sa depășește pragul de avertizare de mai sus. Necesită ca planificatorul Laravel (<code>php artisan schedule:run</code>) să fie configurat ca sarcină cron pe serverul dumneavoastră.',
         ],
     ],
     'appearance' => [

@@ -208,6 +208,11 @@ return [
     ],
     'term_and_privacy_policy_url' => 'Terms and Privacy Policy URL',
     'site_title_separator' => 'SEO title separator',
+    'site_title_helper' => 'Uw merk- of bedrijfsnaam. Verschijnt in het browsertabblad en zoekresultaten (bijv. "My Company").',
+    'show_site_name_helper' => 'Voegt de sitenaam toe aan elke paginatitel met behulp van het geselecteerde scheidingsteken. Voorbeeld: "Page Title - My Company".',
+    'site_title_separator_helper' => 'Het teken dat wordt gebruikt tussen de paginatitel en de sitenaam. Voorbeeld met koppelteken: "Page Title - My Company". Voorbeeld met pijp: "Page Title | My Company".',
+    'seo_title_helper' => 'De homepaginatitel die wordt weergegeven in zoekmachineresultaten. Houd het onder 60 tekens voor de beste weergave. Laat leeg om de sitetitel te gebruiken.',
+    'seo_description_helper' => 'De homepaginabeschrijving die wordt weergegeven in zoekmachineresultaten. Houd het tussen 120-160 tekens voor de beste weergave.',
     'no_meta_keywords' => 'Meta keywords was removed by Google, you don\'t need to add meta keywords to your website. Learn more: :link',
     'validation' => [
         'gtm_container_id_format' => 'GTM Container ID must be in format GTM-XXXXXX (e.g., GTM-N7MK3KH2)',
@@ -389,6 +394,9 @@ return [
     ],
 
     'typography_primary' => 'Primair lettertype',
+    'all_languages' => 'Alle talen',
+    'shared_field_notice' => 'Dit veld wordt gedeeld door alle talen. Beheer het vanuit de standaardtaal.',
+    'shared_section_notice' => 'Alle opties in deze sectie worden gedeeld door alle talen. Schakel over naar de standaardtaal om wijzigingen aan te brengen.',
     'admin_appearance' => [
         'show_admin_bar' => 'Toon admin balk voor ingelogde beheerders, zelfs op de openbare site',
         'show_admin_bar_helper' => 'Toon een snelle toegang admin werkbalk bovenaan de website wanneer ingelogd als beheerder',

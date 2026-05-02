@@ -65,4 +65,5 @@ return [
     'please_select_record' => 'אנא בחר לפחות רשומה אחת לביצוע פעולה זו!',
     'checkbox' => 'תיבת סימון',
     'toggle_columns' => 'הצג/הסתר עמודות',
+    'created_by' => 'נוצר על ידי',
 ];

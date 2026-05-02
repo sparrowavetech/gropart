@@ -203,6 +203,13 @@ return [
         'uploaded_file_too_large' => 'Fajl je prevelik. Molimo izaberite manji fajl.',
         'uploaded_file_corrupted' => 'Fajl izgleda da je oštećen ili neispravan. Molimo pokušajte da otpremite drugi fajl.',
         'upload_network_error' => 'Otpremanje nije uspelo zbog problema sa mrežom. Molimo proverite konekciju i pokušajte ponovo.',
+        'upload_err_ini_size' => 'Fajl je veći od ograničenja otpremanja :size servera. Povećajte "upload_max_filesize" u PHP podešavanjima ili pitajte svog hosting provajdera.',
+        'upload_err_form_size' => 'Fajl premašuje maksimalnu veličinu otpremanja obrasca.',
+        'upload_err_partial' => 'Fajl je samo delimično otpremljen. Molimo pokušajte ponovo — to obično znači da je veza prekinuta.',
+        'upload_err_no_tmp_dir' => 'Server ne može da sačuva otpremljeni fajl jer privremeni direktorijum za otpremanje PHP-a (upload_tmp_dir) nedostaje ili nije upisiv. Zamolite svog hosting provajdera da postavi "upload_tmp_dir" u konfiguraciji PHP-FPM pool-a na upisivu fasciklu (npr. /home/your-user/tmp). Puna uputstva: https://docs.botble.com/cms/media-upload-errors.html',
+        'upload_err_cant_write' => 'Server nije mogao da upiše otpremljeni fajl na disk. Proverite dozvole fascikle, disk kvotu i da li je tmp direktorijum upisiv za PHP.',
+        'upload_err_extension' => 'PHP ekstenzija (poput ModSecurity ili bezbednosnog dodatka) blokirala je otpremanje. Kontaktirajte svog hosting provajdera.',
+        'upload_err_unknown' => 'Otpremanje nije uspelo (PHP kod greške :code). Molimo kontaktirajte svog hosting provajdera.',
         'attributes' => [
             'uploaded_file' => 'fajl',
             'upload' => 'fajl',

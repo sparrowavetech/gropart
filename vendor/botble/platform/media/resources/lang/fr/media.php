@@ -188,6 +188,13 @@ return [
         'uploaded_file_too_large' => 'The file is too large. Please choose a smaller file.',
         'uploaded_file_corrupted' => 'The file appears to be corrupted or invalid. Please try uploading a different file.',
         'upload_network_error' => 'Upload failed due to network issues. Please check your connection and try again.',
+        'upload_err_ini_size' => 'Le fichier dépasse la limite de téléversement :size du serveur. Augmentez "upload_max_filesize" dans les paramètres PHP ou demandez à votre hébergeur.',
+        'upload_err_form_size' => 'Le fichier dépasse la taille maximale de téléversement du formulaire.',
+        'upload_err_partial' => 'Le fichier n\'a été que partiellement téléversé. Veuillez réessayer — cela signifie généralement que la connexion a été interrompue.',
+        'upload_err_no_tmp_dir' => 'Le serveur ne peut pas enregistrer le fichier téléversé car le répertoire temporaire de téléversement PHP (upload_tmp_dir) est manquant ou non accessible en écriture. Demandez à votre hébergeur de définir "upload_tmp_dir" dans la configuration du pool PHP-FPM sur un dossier accessible en écriture (par ex. /home/your-user/tmp). Instructions complètes : https://docs.botble.com/cms/media-upload-errors.html',
+        'upload_err_cant_write' => 'Le serveur n\'a pas pu écrire le fichier téléversé sur le disque. Vérifiez les permissions du dossier, le quota disque et que le répertoire tmp est accessible en écriture par PHP.',
+        'upload_err_extension' => 'Une extension PHP (telle que ModSecurity ou un plugin de sécurité) a bloqué le téléversement. Contactez votre hébergeur.',
+        'upload_err_unknown' => 'Échec du téléversement (code d\'erreur PHP :code). Veuillez contacter votre hébergeur.',
         'attributes' => [
             'uploaded_file' => 'file',
             'upload' => 'file',

@@ -10,7 +10,9 @@
                 <span class="position-relative">
                     {{ trans('core/base::notifications.notifications') }}
                     <span
-                        class="badge bg-blue text-blue-fg badge-notification badge-pill notification-count">{{ number_format($notificationsCount) }}</span>
+                        class="badge bg-blue text-blue-fg badge-notification badge-pill notification-count"
+                        @if(! $notificationsCount) style="display: none" @endif
+                    >{{ number_format($notificationsCount) }}</span>
                 </span>
             </h2>
             <div class="d-flex gap-2 mt-2">

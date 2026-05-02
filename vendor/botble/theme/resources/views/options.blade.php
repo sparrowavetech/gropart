@@ -74,19 +74,47 @@
                                 <p class="mb-3">{!! BaseHelper::clean($currentSection['description']) !!}</p>
                             @endisset
 
+                            @php
+                                $sharedOptionsEnabled = config('packages.theme.general.enable_shared_theme_options', false);
+                                $isNonDefaultLocale = apply_filters('theme_options_is_non_default_locale', (bool) request()->query('ref_lang'));
+                                $sectionIsShared = $sharedOptionsEnabled && Arr::get($currentSection, 'shared', false);
+                            @endphp
+
+                            @if ($sectionIsShared && $isNonDefaultLocale)
+                                <x-core::alert type="warning">
+                                    {{ trans('packages/theme::theme.shared_section_notice') }}
+                                </x-core::alert>
+                            @endif
+
                             @foreach (ThemeOption::constructFields($currentSection['id']) as $field)
                                 @if (Arr::get($field, 'type') === 'hidden')
                                     {!! ThemeOption::renderField($field) !!}
                                 @else
+                                    @php
+                                        $isShared = $sharedOptionsEnabled && ($sectionIsShared || Arr::get($field, 'shared', false));
+                                        $isDisabled = $isShared && $isNonDefaultLocale;
+                                    @endphp
                                     <x-core::form-group
                                         class="{{ $errors->has($field['attributes']['name'] ?? $field['id']) ? 'has-error' : null }}"
                                     >
-                                        <x-core::form.label
-                                            :for="$field['id']"
-                                            :label="$field['label']"
-                                        />
-                                        {!! ThemeOption::renderField($field) !!}
-                                        @if (array_key_exists('helper', $field))
+                                        <div class="d-flex align-items-center mb-1">
+                                            <x-core::form.label
+                                                :for="$field['id']"
+                                                :label="$field['label']"
+                                                class="mb-0"
+                                            />
+                                            @if ($isShared)
+                                                <span class="badge bg-blue-lt ms-2">{{ trans('packages/theme::theme.all_languages') }}</span>
+                                            @endif
+                                        </div>
+                                        <div @if ($isDisabled) style="opacity: 0.6; pointer-events: none;" @endif>
+                                            {!! ThemeOption::renderField($field) !!}
+                                        </div>
+                                        @if ($isDisabled)
+                                            <x-core::form.helper-text>
+                                                {{ trans('packages/theme::theme.shared_field_notice') }}
+                                            </x-core::form.helper-text>
+                                        @elseif (array_key_exists('helper', $field))
                                             <x-core::form.helper-text>
                                                 {!! BaseHelper::clean($field['helper']) !!}
                                             </x-core::form.helper-text>

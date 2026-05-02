@@ -22,6 +22,8 @@ class CacheSettingRequest extends Request
             'cache_time_site_map' => ['nullable', 'required_if:enable_cache_site_map,1', 'integer', 'min:1'],
             'shortcode_cache_ttl' => ['nullable', 'required_if:shortcode_cache_enabled,1', 'integer', 'min:1'],
             'widget_cache_ttl' => ['nullable', 'required_if:widget_cache_enabled,1', 'integer', 'min:1'],
+            'cache_size_warning_threshold' => ['nullable', 'integer', 'min:1'],
+            'cache_auto_clear_enabled' => [$onOffRule],
         ];
     }
 }

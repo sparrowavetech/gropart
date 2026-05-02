@@ -208,6 +208,11 @@ return [
     ],
     'term_and_privacy_policy_url' => 'URL Terma dan Dasar Privasi',
     'site_title_separator' => 'Pemisah tajuk SEO',
+    'site_title_helper' => 'Nama jenama atau perniagaan anda. Muncul dalam tab pelayar dan hasil carian (cth. "My Company").',
+    'show_site_name_helper' => 'Menambahkan nama laman web ke setiap tajuk halaman menggunakan pemisah yang dipilih. Contoh: "Page Title - My Company".',
+    'site_title_separator_helper' => 'Aksara yang digunakan antara tajuk halaman dan nama laman web. Contoh dengan sengkang: "Page Title - My Company". Contoh dengan paip: "Page Title | My Company".',
+    'seo_title_helper' => 'Tajuk halaman utama yang ditunjukkan dalam hasil enjin carian. Pastikan di bawah 60 aksara untuk paparan terbaik. Biarkan kosong untuk menggunakan tajuk laman web.',
+    'seo_description_helper' => 'Penerangan halaman utama yang ditunjukkan dalam hasil enjin carian. Pastikan antara 120-160 aksara untuk paparan terbaik.',
     'no_meta_keywords' => 'Kata kunci meta telah dikeluarkan oleh Google, anda tidak perlu menambah kata kunci meta ke laman web anda. Ketahui lebih lanjut: :link',
     'validation' => [
         'gtm_container_id_format' => 'ID Bekas GTM mestilah dalam format GTM-XXXXXX (cth., GTM-N7MK3KH2)',
@@ -389,6 +394,9 @@ return [
     ],
 
     'typography_primary' => 'Font utama',
+    'all_languages' => 'Semua bahasa',
+    'shared_field_notice' => 'Medan ini dikongsi merentas semua bahasa. Uruskannya dari bahasa lalai.',
+    'shared_section_notice' => 'Semua pilihan dalam bahagian ini dikongsi merentas semua bahasa. Tukar ke bahasa lalai untuk membuat perubahan.',
     'admin_appearance' => [
         'show_admin_bar' => 'Paparkan bar pentadbir untuk pentadbir yang log masuk, walaupun di laman hadapan',
         'show_admin_bar_helper' => 'Paparkan bar alat akses pantas pentadbir di bahagian atas laman web apabila log masuk sebagai pentadbir',

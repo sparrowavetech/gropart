@@ -72,5 +72,6 @@ return [
     'clear_button' => '清除',
     'refresh_button' => '刷新',
     'cache_size_warning' => '您的CMS缓存大小相当大（>50MB）。清除它可能会提高系统性能。',
+    'cache_size_warning_dynamic' => '您的CMS缓存大小相当大（>:sizeMB）。清除它可能会提高系统性能。',
     'footer_note' => '在对您的网站进行更改后清除缓存，以确保它们正确显示。',
 ];

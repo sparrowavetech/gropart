@@ -65,4 +65,5 @@ return [
     'please_select_record' => 'Silakan pilih setidaknya satu catatan untuk melakukan tindakan ini!',
     'checkbox' => 'Kotak centang',
     'toggle_columns' => 'Beralih Kolom',
+    'created_by' => 'Dibuat oleh',
 ];

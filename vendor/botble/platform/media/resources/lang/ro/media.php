@@ -203,6 +203,13 @@ return [
         'uploaded_file_too_large' => 'Fișierul este prea mare. Vă rugăm să alegeți un fișier mai mic.',
         'uploaded_file_corrupted' => 'Fișierul pare să fie corupt sau invalid. Vă rugăm să încercați să încărcați un alt fișier.',
         'upload_network_error' => 'Încărcarea a eșuat din cauza problemelor de rețea. Vă rugăm să verificați conexiunea și să încercați din nou.',
+        'upload_err_ini_size' => 'Fișierul este mai mare decât limita de încărcare :size a serverului. Măriți "upload_max_filesize" în setările PHP sau întrebați furnizorul dvs. de hosting.',
+        'upload_err_form_size' => 'Fișierul depășește dimensiunea maximă de încărcare a formularului.',
+        'upload_err_partial' => 'Fișierul a fost încărcat doar parțial. Vă rugăm să încercați din nou — de obicei înseamnă că conexiunea a fost întreruptă.',
+        'upload_err_no_tmp_dir' => 'Serverul nu poate salva fișierul încărcat deoarece directorul temporar de încărcare PHP (upload_tmp_dir) lipsește sau nu poate fi scris. Cereți furnizorului de hosting să seteze "upload_tmp_dir" în configurația PHP-FPM pool către un folder care poate fi scris (de exemplu /home/your-user/tmp). Instrucțiuni complete: https://docs.botble.com/cms/media-upload-errors.html',
+        'upload_err_cant_write' => 'Serverul nu a putut scrie fișierul încărcat pe disc. Verificați permisiunile folderului, cota de disc și dacă directorul tmp poate fi scris de PHP.',
+        'upload_err_extension' => 'O extensie PHP (cum ar fi ModSecurity sau un plugin de securitate) a blocat încărcarea. Contactați furnizorul dvs. de hosting.',
+        'upload_err_unknown' => 'Încărcare eșuată (cod de eroare PHP :code). Vă rugăm să contactați furnizorul dvs. de hosting.',
         'attributes' => [
             'uploaded_file' => 'fișier',
             'upload' => 'fișier',

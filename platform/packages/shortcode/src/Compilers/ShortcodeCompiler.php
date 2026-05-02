@@ -182,8 +182,9 @@ class ShortcodeCompiler
             $attributes = $compiled->toArray();
             $content = $compiled->getContent();
             $appUrl = url('/');
+            $extraCacheKeys = apply_filters('shortcode_cache_key_parts', [], $name);
 
-            $cacheKey = 'shortcode_render_' . md5($name . $appUrl . serialize($attributes) . ($content ?? '') . $locale . $authorized);
+            $cacheKey = 'shortcode_render_' . md5($name . $appUrl . serialize($attributes) . ($content ?? '') . $locale . $authorized . serialize($extraCacheKeys));
 
             $cached = Cache::get($cacheKey);
 

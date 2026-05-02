@@ -378,7 +378,13 @@ final class Core
 
         $filePath = $this->getUpdatedFilePath($version);
 
-        if (! $this->files->exists($filePath) || Carbon::createFromTimestamp(filectime($filePath))->diffInHours() > 1) {
+        $shouldDownload = ! $this->files->exists($filePath)
+            || Carbon::createFromTimestamp(filectime($filePath))->diffInHours() > 1
+            || filesize($filePath) < 1024;
+
+        if ($shouldDownload) {
+            $this->files->delete($filePath);
+
             try {
                 $this->streamDownloadUpdate('download_update/main/' . $updateId, $data, $filePath);
             } catch (RequiresLicenseActivatedException $e) {
@@ -548,13 +554,14 @@ final class Core
     {
         $relativePath = Str::after($path, $platformPath . DIRECTORY_SEPARATOR);
 
-        foreach (BaseHelper::scanFolder($path) as $module) {
-            $publicPath = BaseHelper::joinPaths([$path, $module, 'public']);
+        foreach ($this->files->directories($path) as $modulePath) {
+            $publicPath = BaseHelper::joinPaths([$modulePath, 'public']);
 
             if (! $this->files->isDirectory($publicPath)) {
                 continue;
             }
 
+            $module = basename($modulePath);
             $targetPath = public_path(BaseHelper::joinPaths(['vendor', 'core', $relativePath, $module]));
 
             try {
@@ -620,9 +627,38 @@ final class Core
             throw new MissingZipExtensionException();
         }
 
-        $zip = new ZipArchive();
+        $fileSize = @filesize($filePath);
 
-        if ($zip->open($filePath)) {
+        if (! $fileSize || $fileSize < 1024) {
+            $this->files->delete($filePath);
+
+            throw new Exception(sprintf(
+                'The downloaded update file is too small (%s bytes) and likely corrupted. This usually happens when the download times out. Please try again.',
+                $fileSize ?: 0
+            ));
+        }
+
+        $zip = new ZipArchive();
+        $result = $zip->open($filePath);
+
+        if ($result !== true) {
+            $this->files->delete($filePath);
+
+            $errorMessages = [
+                ZipArchive::ER_NOZIP => 'The downloaded file is not a valid zip archive. It may have been corrupted during download.',
+                ZipArchive::ER_INCONS => 'The zip archive is inconsistent and may have been corrupted during download.',
+                ZipArchive::ER_MEMORY => 'Not enough memory to open the update file. Try increasing your PHP memory_limit.',
+                ZipArchive::ER_NOENT => 'The update file was not found. Please try the update again.',
+                ZipArchive::ER_READ => 'Could not read the update file. Please check file permissions and try again.',
+            ];
+
+            $errorMessage = $errorMessages[$result]
+                ?? sprintf('Could not open the update file (error code: %d). Please delete update_main_*.zip from your site root and try again.', $result);
+
+            throw new Exception($errorMessage);
+        }
+
+        try {
             if ($zip->getFromName('.env')) {
                 throw ValidationException::withMessages([
                     'file' => 'The update file contains a .env file. Please remove it and try again.',
@@ -660,16 +696,12 @@ final class Core
 
             if ($validator->passes()) {
                 if ($content['productId'] !== $this->productId) {
-                    $zip->close();
-
                     throw ValidationException::withMessages(
                         ['productId' => 'The product ID of the update does not match the product ID of your website.']
                     );
                 }
 
                 if (version_compare($content['version'], $this->version, '<')) {
-                    $zip->close();
-
                     throw ValidationException::withMessages(
                         ['version' => 'The version of the update is lower than the current version.']
                     );
@@ -679,25 +711,22 @@ final class Core
                     isset($content['minimumPhpVersion']) &&
                     version_compare($content['minimumPhpVersion'], phpversion(), '>')
                 ) {
-                    $zip->close();
-
                     throw ValidationException::withMessages(
                         [
                             'minimumPhpVersion' => sprintf(
-                                'The minimum PHP version required (v%s) for the update is higher than the current PHP version.',
-                                $content['minimumPhpVersion']
+                                'The minimum PHP version required (v%s) for the update is higher than the current PHP version (v%s). Please upgrade PHP before updating.',
+                                $content['minimumPhpVersion'],
+                                phpversion()
                             ),
                         ]
                     );
                 }
             } else {
-                $zip->close();
-
                 throw ValidationException::withMessages($validator->errors()->toArray());
             }
+        } finally {
+            $zip->close();
         }
-
-        $zip->close();
     }
 
     public function getLicenseFile(): ?string
@@ -778,26 +807,72 @@ final class Core
             throw new MissingCURLExtensionException();
         }
 
-        $response = Http::baseUrl(ltrim($this->licenseUrl, '/') . '/api')
-            ->withHeaders([
-                'LB-API-KEY' => $this->licenseKey,
-                'LB-URL' => rtrim(url(''), '/'),
-                'LB-IP' => $this->getClientIpAddress(),
-                'LB-LANG' => 'english',
-            ])
-            ->asJson()
-            ->acceptJson()
-            ->withoutVerifying()
-            ->connectTimeout(100)
-            ->timeout(900)
-            ->withOptions(['sink' => $filePath])
-            ->post($path, $data);
+        // Transient HTTP statuses typically returned by reverse proxies (Cloudflare, nginx)
+        // when the upstream download takes too long. Worth retrying a few times before giving up.
+        $retryableStatuses = [408, 425, 429, 500, 502, 503, 504, 520, 521, 522, 524];
+        $maxAttempts = 3;
+        $retryDelaySeconds = 5;
+        $response = null;
 
-        throw_if($response->unauthorized(), RequiresLicenseActivatedException::class);
+        for ($attempt = 1; $attempt <= $maxAttempts; $attempt++) {
+            try {
+                $response = Http::baseUrl(ltrim($this->licenseUrl, '/') . '/api')
+                    ->withHeaders([
+                        'LB-API-KEY' => $this->licenseKey,
+                        'LB-URL' => rtrim(url(''), '/'),
+                        'LB-IP' => $this->getClientIpAddress(),
+                        'LB-LANG' => 'english',
+                    ])
+                    ->asJson()
+                    ->acceptJson()
+                    ->withoutVerifying()
+                    ->connectTimeout(100)
+                    ->timeout(900)
+                    ->withOptions(['sink' => $filePath])
+                    ->post($path, $data);
+            } catch (ConnectionException $exception) {
+                if ($attempt < $maxAttempts) {
+                    sleep($retryDelaySeconds);
 
-        if (! $response->successful()) {
-            throw new Exception('Server returned status: ' . $response->status());
+                    continue;
+                }
+
+                throw $exception;
+            }
+
+            throw_if($response->unauthorized(), RequiresLicenseActivatedException::class);
+
+            $downloadedSize = $this->files->exists($filePath) ? filesize($filePath) : 0;
+            $fileValid = $downloadedSize >= 1024;
+
+            if ($response->successful() && $fileValid) {
+                return;
+            }
+
+            $incompleteFile = $response->successful() && ! $fileValid;
+            $transientHttpError = ! $response->successful() && in_array($response->status(), $retryableStatuses, true);
+
+            if ($attempt < $maxAttempts && ($incompleteFile || $transientHttpError)) {
+                sleep($retryDelaySeconds);
+
+                continue;
+            }
+
+            break;
         }
+
+        if ($response && ! $response->successful()) {
+            throw new Exception(sprintf(
+                'Server returned HTTP %d after %d attempt(s). This may be caused by a timeout or server overload. Please try again later or contact your hosting provider.',
+                $response->status(),
+                $maxAttempts
+            ));
+        }
+
+        throw new Exception(sprintf(
+            'The update file download appears incomplete after %d attempt(s) (file is empty or too small). This is usually caused by a server timeout. Please try again.',
+            $maxAttempts
+        ));
     }
 
     private function createRequest(string $path, array $data = [], string $method = 'POST', int $timeoutInSeconds = 300): Response

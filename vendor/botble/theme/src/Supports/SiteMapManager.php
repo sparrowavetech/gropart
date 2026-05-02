@@ -39,6 +39,9 @@ class SiteMapManager
         // by default cache is disabled
         $this->siteMap->setCache('cache_site_map_key' . $prefix . $extension, setting('cache_time_site_map', 60), setting('enable_cache_site_map', true));
 
+        // Auto-exclude content types disabled in sitemap settings
+        $this->applyExcludedContentTypes();
+
         if ($prefix == 'pages' && ! BaseHelper::getHomepageId()) {
             $this->add(BaseHelper::getHomepageUrl(), Carbon::now()->toDateTimeString());
         }
@@ -117,6 +120,45 @@ class SiteMapManager
         ];
 
         return $this;
+    }
+
+    /**
+     * Get the list of content type keys that can be excluded via sitemap settings.
+     * Each key maps to a setting: sitemap_{normalized_key}_enabled (default: true).
+     */
+    public static function getExcludableKeys(): array
+    {
+        return ['pages', 'blog-posts', 'blog-categories', 'blog-tags', 'galleries'];
+    }
+
+    /**
+     * Check if a sitemap key is excluded via settings.
+     * Uses prefix matching so paginated/monthly archive sitemaps inherit the parent's setting
+     * (e.g., blog-posts-2025-04-page-2 is excluded when blog-posts is disabled).
+     */
+    public function isKeyExcluded(string $key): bool
+    {
+        foreach (static::getExcludableKeys() as $excludableKey) {
+            if (($key === $excludableKey || str_starts_with($key, $excludableKey . '-'))
+                && ! setting('sitemap_' . str_replace('-', '_', $excludableKey) . '_enabled', true)
+            ) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Read sitemap exclusion settings and remove disabled keys.
+     */
+    protected function applyExcludedContentTypes(): void
+    {
+        foreach (static::getExcludableKeys() as $key) {
+            if (! setting('sitemap_' . str_replace('-', '_', $key) . '_enabled', true)) {
+                $this->removeKey($key);
+            }
+        }
     }
 
     public function allowedExtensions(): array
@@ -290,29 +332,29 @@ class SiteMapManager
     {
         $keys = $this->getKeys();
 
-        // Add base patterns
         $patterns = [];
+
         foreach ($keys as $key) {
-            // If this is a regex pattern, use it directly
             if (str_contains($key, '(')) {
+                // Already a regex pattern; use directly.
                 $patterns[] = $key;
-            } else {
-                // Otherwise, escape it for literal matching
-                $patterns[] = preg_quote($key, '/');
+
+                continue;
             }
-        }
 
-        // Special handling for monthly archives with pagination
-        if (in_array('blog-posts', $keys) || in_array('products', $keys)) {
-            $baseKeys = array_filter($keys, function ($key) {
-                return in_array($key, ['blog-posts', 'products']);
-            });
+            $escaped = preg_quote($key, '/');
+            $patterns[] = $escaped;
 
-            foreach ($baseKeys as $baseKey) {
-                $archivePattern = $baseKey . '-((?:19|20|21|22)\d{2})-(0?[1-9]|1[012])(?:-page-(\d+))?';
-                if (! in_array($archivePattern, $patterns)) {
-                    $patterns[] = $archivePattern;
-                }
+            // Page-based pagination: {key}-page-N (consolidated single-file sitemaps).
+            $pagePattern = $escaped . '-page-(\d+)';
+            if (! in_array($pagePattern, $patterns)) {
+                $patterns[] = $pagePattern;
+            }
+
+            // Legacy monthly archives + month-paginated: {key}-YYYY-MM[-page-N].
+            $archivePattern = $escaped . '-((?:19|20|21|22)\d{2})-(0?[1-9]|1[012])(?:-page-(\d+))?';
+            if (! in_array($archivePattern, $patterns)) {
+                $patterns[] = $archivePattern;
             }
         }
 

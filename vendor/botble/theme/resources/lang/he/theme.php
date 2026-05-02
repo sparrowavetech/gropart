@@ -208,6 +208,11 @@ return [
     ],
     'term_and_privacy_policy_url' => 'כתובת URL של תנאים ומדיניות פרטיות',
     'site_title_separator' => 'מפריד כותרת SEO',
+    'site_title_helper' => 'שם המותג או העסק שלך. מופיע בכרטיסיית הדפדפן ובתוצאות החיפוש (למשל "My Company").',
+    'show_site_name_helper' => 'מוסיף את שם האתר לכל כותרת עמוד באמצעות המפריד שנבחר. דוגמה: "Page Title - My Company".',
+    'site_title_separator_helper' => 'התו המשמש בין כותרת העמוד לשם האתר. דוגמה עם מקף: "Page Title - My Company". דוגמה עם קו אנכי: "Page Title | My Company".',
+    'seo_title_helper' => 'כותרת דף הבית המוצגת בתוצאות מנועי החיפוש. שמור אותה מתחת ל-60 תווים לתצוגה מיטבית. השאר ריק לשימוש בכותרת האתר.',
+    'seo_description_helper' => 'תיאור דף הבית המוצג בתוצאות מנועי החיפוש. שמור אותו בין 120 ל-160 תווים לתצוגה מיטבית.',
     'no_meta_keywords' => 'מילות מפתח מטא הוסרו על ידי Google, אינך צריך להוסיף מילות מפתח מטא לאתר שלך. למד עוד: :link',
     'validation' => [
         'gtm_container_id_format' => 'מזהה מיכל GTM חייב להיות בפורמט GTM-XXXXXX (למשל, GTM-N7MK3KH2)',
@@ -389,6 +394,9 @@ return [
     ],
 
     'typography_primary' => 'גופן ראשי',
+    'all_languages' => 'כל השפות',
+    'shared_field_notice' => 'שדה זה משותף לכל השפות. נהל אותו מהשפה המוגדרת כברירת מחדל.',
+    'shared_section_notice' => 'כל האפשרויות בחלק זה משותפות לכל השפות. עבור לשפת ברירת המחדל כדי לבצע שינויים.',
     'admin_appearance' => [
         'show_admin_bar' => 'הצג סרגל ניהול למנהלים מחוברים, אפילו באתר הציבורי',
         'show_admin_bar_helper' => 'הצג סרגל כלים לגישה מהירה למנהל בחלק העליון של האתר כאשר אתה מחובר כמנהל',

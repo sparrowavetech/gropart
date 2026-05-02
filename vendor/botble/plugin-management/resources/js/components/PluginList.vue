@@ -132,9 +132,10 @@ export default defineComponent({
                         this.serverNoticeHtml = data.additional.advertisement
                     }
                 })
-                .catch(({ response }) => {
+                .catch((error) => {
                     this.serverError = true
-                    this.serverErrorMessage = response.data.message
+                    this.serverErrorMessage =
+                        error?.response?.data?.message || error?.message || 'Failed to load plugins.'
                 })
                 .finally(() => {
                     this.loading = false
@@ -877,7 +878,7 @@ export default defineComponent({
                                     class="badge bg-blue text-blue-fg badge-notification badge-pill"
                                     v-if="filter === item && !loading"
                                 >
-                                    {{ meta.total }}
+                                    {{ meta?.total ?? 0 }}
                                 </span>
                             </button>
                         </li>
@@ -992,7 +993,20 @@ export default defineComponent({
                 />
             </div>
 
-            <pagination :meta="meta" @page-selected="setPage" :scroll-to-top="true" v-if="meta.last_page > 1" />
+            <div v-if="!loading && plugins.length === 0" class="card">
+                <div class="empty">
+                    <div class="empty-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-puzzle" width="40" height="40" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                            <path d="M4 7h3a1 1 0 0 0 1 -1v-1a2 2 0 0 1 4 0v1a1 1 0 0 0 1 1h3a1 1 0 0 1 1 1v3a1 1 0 0 0 1 1h1a2 2 0 0 1 0 4h-1a1 1 0 0 0 -1 1v3a1 1 0 0 1 -1 1h-3a1 1 0 0 1 -1 -1v-1a2 2 0 0 0 -4 0v1a1 1 0 0 1 -1 1h-3a1 1 0 0 1 -1 -1v-3a1 1 0 0 1 1 -1h1a2 2 0 0 0 0 -4h-1a1 1 0 0 1 -1 -1v-3a1 1 0 0 1 1 -1"/>
+                        </svg>
+                    </div>
+                    <p class="empty-title">{{ __('base.no_plugins_found') }}</p>
+                    <p class="empty-subtitle text-secondary">{{ __('base.try_different_search') }}</p>
+                </div>
+            </div>
+
+            <pagination :meta="meta" @page-selected="setPage" :scroll-to-top="true" v-if="meta?.last_page > 1" />
 
             <plugin-details
                 v-if="showingPlugin"

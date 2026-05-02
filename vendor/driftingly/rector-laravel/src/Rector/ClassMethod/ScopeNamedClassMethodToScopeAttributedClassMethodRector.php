@@ -95,6 +95,10 @@ CODE_SAMPLE
 
         $changes = false;
         foreach ($node->getMethods() as $classMethod) {
+            if ($classMethod->isAbstract()) {
+                continue;
+            }
+
             $name = $this->getName($classMethod);
             // make sure it starts with scope and the next character is upper case
             if (strncmp($name, 'scope', strlen('scope')) !== 0 || ! ctype_upper(substr($name, 5, 1))) {

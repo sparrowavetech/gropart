@@ -88,7 +88,6 @@ CODE_SAMPLE
             return null;
         }
 
-        /** @var Closure $closure */
         $closure = $node->getArgs()[1]->value;
 
         if ($closure->getParams() === []) {
@@ -126,7 +125,6 @@ CODE_SAMPLE
             return null;
         }
 
-        /** @var Closure $closure */
         $closure = $methodCall->getArgs()[0]->value;
 
         if ($closure->getParams() === []) {

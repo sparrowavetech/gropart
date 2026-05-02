@@ -2,6 +2,7 @@
 
 namespace Botble\Table\Http\Controllers;
 
+use Botble\Table\Abstracts\TableAbstract;
 use Botble\Table\Http\Requests\FilterRequest;
 use Illuminate\Support\Arr;
 
@@ -11,7 +12,7 @@ class TableFilterController extends TableController
     {
         $class = $request->input('class');
 
-        if (! class_exists($class)) {
+        if (! is_string($class) || ! is_subclass_of($class, TableAbstract::class)) {
             return [];
         }
 

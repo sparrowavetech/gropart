@@ -8,6 +8,7 @@ return [
     'clear_button' => 'Wissen',
     'refresh_button' => 'Vernieuwen',
     'cache_size_warning' => 'De cachegrootte van uw CMS is vrij groot (>50MB). Het wissen ervan kan de systeemprestaties verbeteren.',
+    'cache_size_warning_dynamic' => 'De cachegrootte van uw CMS is vrij groot (>:sizeMB). Het wissen ervan kan de systeemprestaties verbeteren.',
     'footer_note' => 'Wis de cache na het aanbrengen van wijzigingen aan uw site om ervoor te zorgen dat ze correct worden weergegeven.',
     'type' => 'Type',
     'description' => 'Beschrijving',

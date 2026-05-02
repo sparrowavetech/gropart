@@ -21,4 +21,14 @@ return [
         'flag' => 'pages.destroy',
         'parent_flag' => 'pages.index',
     ],
+    [
+        'name' => 'Export Pages',
+        'flag' => 'pages.export',
+        'parent_flag' => 'tools.data-synchronize',
+    ],
+    [
+        'name' => 'Import Pages',
+        'flag' => 'pages.import',
+        'parent_flag' => 'tools.data-synchronize',
+    ],
 ];

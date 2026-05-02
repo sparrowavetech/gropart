@@ -39,8 +39,39 @@ class PaymentHelper
             ->first();
 
         if ($payment) {
+            $dirty = false;
+
             if ($payment->status != $data['status']) {
                 $payment->status = $data['status'];
+                $dirty = true;
+            }
+
+            // Reconcile amount/currency on existing rows. The webhook may create a row
+            // before the callback runs `do_action(PAYMENT_ACTION_PAYMENT_PROCESSED)`,
+            // and the gateway-reported amount can differ from the order total when the
+            // cart was modified between Razorpay-order creation and capture. Without
+            // this, payments.amount stays stale and the admin "Paid amount" diverges
+            // from ec_orders.amount even though Razorpay charged the right amount.
+            //
+            // Note: refunded_amount is a DECIMAL column with no model cast, so Laravel
+            // returns it as a string ("0.00" for unrefunded). Loose-compare to 0 — a
+            // truthiness check (`! $payment->refunded_amount`) would always be false
+            // for "0.00" and skip the reconciliation entirely.
+            if ((float) $payment->refunded_amount <= 0) {
+                $newAmount = Arr::get($data, 'amount');
+                if ($newAmount !== null && (float) $payment->amount !== (float) $newAmount) {
+                    $payment->amount = $newAmount;
+                    $dirty = true;
+                }
+
+                $newCurrency = Arr::get($data, 'currency');
+                if ($newCurrency && $payment->currency !== $newCurrency) {
+                    $payment->currency = $newCurrency;
+                    $dirty = true;
+                }
+            }
+
+            if ($dirty) {
                 $payment->save();
             }
 

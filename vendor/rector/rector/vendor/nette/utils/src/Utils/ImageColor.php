@@ -5,9 +5,9 @@
  * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
  */
 declare (strict_types=1);
-namespace RectorPrefix202602\Nette\Utils;
+namespace RectorPrefix202604\Nette\Utils;
 
-use RectorPrefix202602\Nette;
+use RectorPrefix202604\Nette;
 use function hexdec, ltrim, max, min, round, strlen;
 /**
  * Represent RGB color (0..255) with opacity (0..1).
@@ -50,7 +50,7 @@ class ImageColor
     }
     /**
      * Returns GD-compatible color array [R, G, B, alpha].
-     * @return array{int, int, int, int}
+     * @return array{int<0, 255>, int<0, 255>, int<0, 255>, int<0, 127>}
      */
     public function toRGBA(): array
     {

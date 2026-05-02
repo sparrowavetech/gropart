@@ -5,9 +5,9 @@
  * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
  */
 declare (strict_types=1);
-namespace RectorPrefix202602\Nette\Utils;
+namespace RectorPrefix202604\Nette\Utils;
 
-use RectorPrefix202602\Nette;
+use RectorPrefix202604\Nette;
 use function array_merge, count, func_get_args, func_num_args, glob, implode, is_array, is_dir, iterator_to_array, preg_match, preg_quote, preg_replace, preg_split, rtrim, spl_object_id, sprintf, str_ends_with, str_starts_with, strnatcmp, strpbrk, strrpos, strtolower, strtr, substr, usort;
 use const GLOB_NOESCAPE, GLOB_NOSORT, GLOB_ONLYDIR;
 /**
@@ -248,6 +248,7 @@ class Finder implements \IteratorAggregate
     }
     /**
      * Restricts the search by size. $operator accepts "[operator] [size] [unit]" example: >=10kB
+     * @param  '>'|'>='|'<'|'<='|'='|'=='|'==='|'!='|'!=='|'<>'  $operator  or predicate string
      * @return static
      */
     public function size(string $operator, ?int $size = null)
@@ -266,6 +267,7 @@ class Finder implements \IteratorAggregate
     }
     /**
      * Restricts the search by modified time. $operator accepts "[operator] [date]" example: >1978-01-23
+     * @param  '>'|'>='|'<'|'<='|'='|'=='|'==='|'!='|'!=='|'<>'  $operator  or predicate string
      * @param string|int|\DateTimeInterface|null $date
      * @return static
      */

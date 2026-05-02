@@ -1,4 +1,21 @@
 $(() => {
+    const $cascadingFilters = $('#translation-filter-source, #translation-filter-module')
+    const initialFilterValues = {}
+
+    $cascadingFilters.each(function () {
+        initialFilterValues[this.id] = $(this).val()
+    })
+
+    $(document).on('change', '#translation-filter-source, #translation-filter-module', function () {
+        const currentValue = $(this).val()
+
+        if (initialFilterValues[this.id] === currentValue) {
+            return
+        }
+
+        $(this).closest('form').trigger('submit')
+    })
+
     $(document).on('click', '.button-import-groups, .button-re-import', (event) => {
         event.preventDefault()
 

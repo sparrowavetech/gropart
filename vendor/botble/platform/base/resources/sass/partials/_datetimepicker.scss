@@ -1,3 +1,19 @@
+.flatpickr-months .flatpickr-month {
+    overflow: visible;
+}
+
+.flatpickr-current-month {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: nowrap;
+
+    .flatpickr-monthDropdown-months {
+        flex-shrink: 1;
+        min-width: 0;
+    }
+}
+
 .bootstrap-datetimepicker-widget,
 .bootstrap-timepicker-widget {
     &.dropdown-menu {

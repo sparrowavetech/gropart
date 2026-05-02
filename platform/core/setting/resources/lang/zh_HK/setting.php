@@ -505,6 +505,10 @@ return [
             'widget_cache_ttl_helper' => 'The duration to cache all widgets. Default is 1800 seconds (30 minutes).',
             'plugin_cache_enabled' => 'Cache installed plugins',
             'plugin_cache_enabled_helper' => 'Cache the list of installed plugins for improved performance. When enabled, the system will cache the plugin list for 30 minutes to reduce file system scans.',
+            'cache_size_warning_threshold' => '快取大小警告閾值 (MB)',
+            'cache_size_warning_threshold_helper' => '當框架快取超過此大小（以 MB 為單位）時，在快取管理頁面顯示警告。預設值為 50 MB。',
+            'cache_auto_clear_enabled' => '當快取大小超過閾值時自動清除',
+            'cache_auto_clear_enabled_helper' => '當框架快取大小超過上述警告閾值時，每小時自動清除一次。需要將 Laravel 排程器（<code>php artisan schedule:run</code>）設定為伺服器上的 cron 工作。',
         ],
     ],
     'appearance' => [

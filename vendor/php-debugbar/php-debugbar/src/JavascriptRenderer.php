@@ -90,6 +90,8 @@ class JavascriptRenderer
         'widgets/templates/widget.js',
         'widgets/http/widget.js',
         'highlight.css',
+        'vardumper.js',
+        'vardumper.css',
     ];
 
     /** @var list<array{
@@ -111,6 +113,9 @@ class JavascriptRenderer
     protected ?string $theme = null;
 
     protected ?bool $hideEmptyTabs = null;
+
+    /** @var string[] */
+    protected array $spaNavigationEvents = ['livewire:navigated', 'turbo:load', 'htmx:afterSettle'];
 
     protected int $initialization;
 
@@ -186,6 +191,7 @@ class JavascriptRenderer
      *   use_dist_files?: bool,
      *   theme?: string|null,
      *   hide_empty_tabs?: bool,
+     *   spa_navigation_events?: string[],
      *   controls?: array<string, array{
      *     icon?: string,
      *     tooltip?: string,
@@ -237,6 +243,9 @@ class JavascriptRenderer
         }
         if (array_key_exists('hide_empty_tabs', $options)) {
             $this->setHideEmptyTabs($options['hide_empty_tabs']);
+        }
+        if (array_key_exists('spa_navigation_events', $options)) {
+            $this->setSpaNavigationEvents($options['spa_navigation_events']);
         }
         if (array_key_exists('controls', $options)) {
             foreach ($options['controls'] as $name => $control) {
@@ -463,6 +472,35 @@ class JavascriptRenderer
     public function areEmptyTabsHidden(): ?bool
     {
         return $this->hideEmptyTabs;
+    }
+
+    /**
+     * Sets the SPA navigation events to listen for.
+     *
+     * When using SPA navigation (Livewire, Turbo, HTMX, etc.), the body's
+     * padding may change between pages. Setting these events will cause
+     * the debug bar to recalculate its position after navigation.
+     *
+     * Default: ['livewire:navigated', 'turbo:load', 'htmx:afterSettle']
+     *
+     * Set to an empty array to disable this feature.
+     *
+     * @param string[] $events
+     */
+    public function setSpaNavigationEvents(array $events): static
+    {
+        $this->spaNavigationEvents = $events;
+        return $this;
+    }
+
+    /**
+     * Returns the SPA navigation events.
+     *
+     * @return string[]
+     */
+    public function getSpaNavigationEvents(): array
+    {
+        return $this->spaNavigationEvents;
     }
 
     /**
@@ -858,13 +896,20 @@ class JavascriptRenderer
                 $this->makeUriRelativeTo($basePath, $this->basePath),
                 $this->makeUriRelativeTo($baseUrl, $this->baseUrl),
             );
-            if (isset($assets['css']) && !($this->useDistFiles && $basePath === '' && in_array($assets['css'], $this->distIncludedAssets, true))) {
-                $cssFiles = array_merge($cssFiles, $this->makeUrisRelativeTo(is_string($assets['css']) ? [$assets['css']] : $assets['css'], $root));
+            if (isset($assets['css'])) {
+                foreach ((array) $assets['css'] as $asset) {
+                    if (!($this->useDistFiles && $basePath === '' && in_array($asset, $this->distIncludedAssets, true))) {
+                        $cssFiles = array_merge($cssFiles, $this->makeUrisRelativeTo([$asset], $root));
+                    }
+                }
             }
-            if (isset($assets['js']) && !($this->useDistFiles && $basePath === '' && in_array($assets['js'], $this->distIncludedAssets, true))) {
-                $jsFiles = array_merge($jsFiles, $this->makeUrisRelativeTo(is_string($assets['js']) ? [$assets['js']] : $assets['js'], $root));
+            if (isset($assets['js'])) {
+                foreach ((array) $assets['js'] as $asset) {
+                    if (!($this->useDistFiles && $basePath === '' && in_array($asset, $this->distIncludedAssets, true))) {
+                        $jsFiles = array_merge($jsFiles, $this->makeUrisRelativeTo([$asset], $root));
+                    }
+                }
             }
-
             if (isset($assets['inline_css'])) {
                 $inlineCss = array_merge($inlineCss, (array) $assets['inline_css']);
             }
@@ -1043,7 +1088,7 @@ class JavascriptRenderer
             $url = $this->assetHandlerUrl;
             $assets = $this->getAssets(self::RELATIVE_PATH);
             $cssFiles = [$url . (str_contains($url, '?') ? '&' : '?') . 'type=css&mtime=' . $this->getFilesModifiedTime($assets['css'])];
-            $jsFiles = [$url . (str_contains($url, '?') ? '&' : '?') . 'type=js&hash=' . $this->getFilesModifiedTime($assets['js'])];
+            $jsFiles = [$url . (str_contains($url, '?') ? '&' : '?') . 'type=js&mtime=' . $this->getFilesModifiedTime($assets['js'])];
         }
         $html = '';
 
@@ -1268,6 +1313,8 @@ $js
         if ($this->hideEmptyTabs !== null) {
             $options['hideEmptyTabs'] = $this->hideEmptyTabs;
         }
+
+        $options['spaNavigationEvents'] = $this->spaNavigationEvents;
 
         return $options;
     }

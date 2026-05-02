@@ -203,6 +203,13 @@ return [
         'uploaded_file_too_large' => 'Datoteka je prevelika. Prosimo, izberite manjšo datoteko.',
         'uploaded_file_corrupted' => 'Datoteka je videti poškodovana ali neveljavna. Prosimo, poskusite naložiti drugo datoteko.',
         'upload_network_error' => 'Nalaganje ni uspelo zaradi težav z omrežjem. Prosimo, preverite povezavo in poskusite znova.',
+        'upload_err_ini_size' => 'Datoteka je večja od strežnikove omejitve nalaganja :size. Povečajte "upload_max_filesize" v nastavitvah PHP ali vprašajte svojega ponudnika gostovanja.',
+        'upload_err_form_size' => 'Datoteka presega največjo velikost nalaganja obrazca.',
+        'upload_err_partial' => 'Datoteka je bila le delno naložena. Poskusite znova — to običajno pomeni, da je bila povezava prekinjena.',
+        'upload_err_no_tmp_dir' => 'Strežnik ne more shraniti naložene datoteke, ker začasna mapa za nalaganje PHP (upload_tmp_dir) manjka ali ni zapisljiva. Prosite svojega ponudnika gostovanja, da nastavi "upload_tmp_dir" v konfiguraciji PHP-FPM pool na zapisljivo mapo (npr. /home/your-user/tmp). Celotna navodila: https://docs.botble.com/cms/media-upload-errors.html',
+        'upload_err_cant_write' => 'Strežnik ni mogel zapisati naložene datoteke na disk. Preverite dovoljenja mape, disk kvoto in ali je mapa tmp zapisljiva za PHP.',
+        'upload_err_extension' => 'Razširitev PHP (kot je ModSecurity ali varnostni vtičnik) je blokirala nalaganje. Obrnite se na svojega ponudnika gostovanja.',
+        'upload_err_unknown' => 'Nalaganje ni uspelo (koda napake PHP :code). Prosimo, obrnite se na svojega ponudnika gostovanja.',
         'attributes' => [
             'uploaded_file' => 'datoteka',
             'upload' => 'datoteka',

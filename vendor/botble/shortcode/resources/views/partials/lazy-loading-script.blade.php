@@ -61,6 +61,11 @@
                                 firstChild.setAttribute('data-shortcode-name', name);
                             }
 
+                            tempDiv.querySelectorAll('.wow').forEach(function(el) {
+                                el.classList.remove('wow');
+                                el.style.visibility = 'visible';
+                            });
+
                             data = tempDiv.innerHTML;
                         }
 

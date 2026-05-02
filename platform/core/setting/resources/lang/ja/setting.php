@@ -505,6 +505,10 @@ return [
             'widget_cache_ttl_helper' => 'The duration to cache all widgets. Default is 1800 seconds (30 minutes).',
             'plugin_cache_enabled' => 'Cache installed plugins',
             'plugin_cache_enabled_helper' => 'Cache the list of installed plugins for improved performance. When enabled, the system will cache the plugin list for 30 minutes to reduce file system scans.',
+            'cache_size_warning_threshold' => 'キャッシュサイズ警告のしきい値 (MB)',
+            'cache_size_warning_threshold_helper' => 'フレームワークキャッシュがこのサイズ (MB) を超えた場合、キャッシュ管理ページに警告を表示します。デフォルトは 50 MB です。',
+            'cache_auto_clear_enabled' => 'サイズがしきい値を超えた場合にキャッシュを自動的にクリアする',
+            'cache_auto_clear_enabled_helper' => 'フレームワークキャッシュのサイズが上記の警告しきい値を超えたときに、1時間ごとに自動的にキャッシュをクリアします。Laravel スケジューラ (<code>php artisan schedule:run</code>) をサーバー上の cron ジョブとして設定する必要があります。',
         ],
     ],
     'appearance' => [

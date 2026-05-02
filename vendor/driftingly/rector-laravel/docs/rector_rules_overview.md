@@ -1,4 +1,4 @@
-# 90 Rules Overview
+# 106 Rules Overview
 
 ## AbortIfRector
 
@@ -259,6 +259,27 @@ Convert `app()` to `resolve()` where applicable.
 
 <br>
 
+## AppendsPropertyToAppendsAttributeRector
+
+Changes model appends property to use the appends attribute
+
+- class: [`RectorLaravel\Rector\Class_\AppendsPropertyToAppendsAttributeRector`](../src/Rector/Class_/AppendsPropertyToAppendsAttributeRector.php)
+
+```diff
+ use Illuminate\Database\Eloquent\Model;
++use Illuminate\Database\Eloquent\Attributes\Appends;
+
++#[Appends(['full_name'])]
+ class User extends Model
+ {
+-    protected $appends = [
+-        'full_name',
+-    ];
+ }
+```
+
+<br>
+
 ## ApplyDefaultInsteadOfNullCoalesceRector
 
 Apply default instead of null coalesce
@@ -448,6 +469,25 @@ Avoid negated conditionals in `filter()` by using `reject()`, or vice versa.
 
 <br>
 
+## BackoffPropertyToBackoffAttributeRector
+
+Changes the backoff property to use the Backoff attribute
+
+- class: [`RectorLaravel\Rector\Class_\BackoffPropertyToBackoffAttributeRector`](../src/Rector/Class_/BackoffPropertyToBackoffAttributeRector.php)
+
+```diff
+ use Illuminate\Contracts\Queue\ShouldQueue;
++use Illuminate\Queue\Attributes\Backoff;
+
++#[Backoff(3)]
+ final class ProcessPodcast implements ShouldQueue
+ {
+-    public $backoff = 3;
+ }
+```
+
+<br>
+
 ## CallOnAppArrayAccessToStandaloneAssignRector
 
 Replace magical call on `$this->app["something"]` to standalone type assign variable
@@ -589,6 +629,25 @@ Refactor `config()` calls to use type-specific methods when the expected type is
 +$debug = config()->boolean('app.debug');
 +$version = config()->float('app.version');
 +$connections = config()->array('database.connections');
+```
+
+<br>
+
+## ConnectionPropertyToConnectionAttributeRector
+
+Changes model connection property to use the Connection attribute
+
+- class: [`RectorLaravel\Rector\Class_\ConnectionPropertyToConnectionAttributeRector`](../src/Rector/Class_/ConnectionPropertyToConnectionAttributeRector.php)
+
+```diff
+ use Illuminate\Database\Eloquent\Model;
++use Illuminate\Database\Eloquent\Attributes\Connection;
+
++#[Connection('sqlite')]
+ class User extends Model
+ {
+-    protected $connection = 'sqlite';
+ }
 ```
 
 <br>
@@ -880,6 +939,68 @@ Use the static factory method instead of global factory function.
 
 <br>
 
+## FailOnTimeoutPropertyToFailOnTimeoutAttributeRector
+
+Changes the failOnTimeout property to use the FailOnTimeout attribute
+
+- class: [`RectorLaravel\Rector\Class_\FailOnTimeoutPropertyToFailOnTimeoutAttributeRector`](../src/Rector/Class_/FailOnTimeoutPropertyToFailOnTimeoutAttributeRector.php)
+
+```diff
+ use Illuminate\Contracts\Queue\ShouldQueue;
++use Illuminate\Queue\Attributes\FailOnTimeout;
+
++#[FailOnTimeout(true)]
+ final class ProcessPodcast implements ShouldQueue
+ {
+-    public $failOnTimeout = true;
+ }
+```
+
+<br>
+
+## FillablePropertyToFillableAttributeRector
+
+Changes model fillable property to use the fillable attribute
+
+- class: [`RectorLaravel\Rector\Class_\FillablePropertyToFillableAttributeRector`](../src/Rector/Class_/FillablePropertyToFillableAttributeRector.php)
+
+```diff
+ use Illuminate\Database\Eloquent\Model;
++use Illuminate\Database\Eloquent\Attributes\Fillable;
+
++#[Fillable(['name', 'email'])]
+ class User extends Model
+ {
+-    protected $fillable = [
+-        'name',
+-        'email',
+-    ];
+ }
+```
+
+<br>
+
+## GuardedPropertyToGuardedAttributeRector
+
+Changes model guarded property to use the guarded attribute
+
+- class: [`RectorLaravel\Rector\Class_\GuardedPropertyToGuardedAttributeRector`](../src/Rector/Class_/GuardedPropertyToGuardedAttributeRector.php)
+
+```diff
+ use Illuminate\Database\Eloquent\Model;
++use Illuminate\Database\Eloquent\Attributes\Guarded;
+
++#[Guarded(['is_admin'])]
+ class User extends Model
+ {
+-    protected $guarded = [
+-        'is_admin',
+-    ];
+ }
+```
+
+<br>
+
 ## HelperFuncCallToFacadeClassRector
 
 Change `app()` func calls to facade calls
@@ -894,6 +1015,46 @@ Change `app()` func calls to facade calls
 -        return app('translator')->trans('value');
 +        return \Illuminate\Support\Facades\App::make('translator')->trans('value');
      }
+ }
+```
+
+<br>
+
+## HiddenPropertyToHiddenAttributeRector
+
+Changes model hidden property to use the hidden attribute
+
+- class: [`RectorLaravel\Rector\Class_\HiddenPropertyToHiddenAttributeRector`](../src/Rector/Class_/HiddenPropertyToHiddenAttributeRector.php)
+
+```diff
+ use Illuminate\Database\Eloquent\Model;
++use Illuminate\Database\Eloquent\Attributes\Hidden;
+
++#[Hidden(['password'])]
+ class User extends Model
+ {
+-    protected $hidden = [
+-        'password',
+-    ];
+ }
+```
+
+<br>
+
+## JobConnectionPropertyToJobConnectionAttributeRector
+
+Changes the connection property to use the Connection attribute on queue jobs
+
+- class: [`RectorLaravel\Rector\Class_\JobConnectionPropertyToJobConnectionAttributeRector`](../src/Rector/Class_/JobConnectionPropertyToJobConnectionAttributeRector.php)
+
+```diff
+ use Illuminate\Contracts\Queue\ShouldQueue;
++use Illuminate\Queue\Attributes\Connection;
+
++#[Connection('redis')]
+ final class ProcessPodcast implements ShouldQueue
+ {
+-    public $connection = 'redis';
  }
 ```
 
@@ -1008,6 +1169,25 @@ Makes Model attributes and scopes protected
      {
          return $query->where('active', true);
      }
+ }
+```
+
+<br>
+
+## MaxExceptionsPropertyToMaxExceptionsAttributeRector
+
+Changes the maxExceptions property to use the MaxExceptions attribute
+
+- class: [`RectorLaravel\Rector\Class_\MaxExceptionsPropertyToMaxExceptionsAttributeRector`](../src/Rector/Class_/MaxExceptionsPropertyToMaxExceptionsAttributeRector.php)
+
+```diff
+ use Illuminate\Contracts\Queue\ShouldQueue;
++use Illuminate\Queue\Attributes\MaxExceptions;
+
++#[MaxExceptions(3)]
+ final class ProcessPodcast implements ShouldQueue
+ {
+-    public $maxExceptions = 3;
  }
 ```
 
@@ -1153,6 +1333,25 @@ Change deprecated `$defer` = true; to `Illuminate\Contracts\Support\DeferrablePr
 -     * @var bool
 -     */
 -    protected $defer = true;
+ }
+```
+
+<br>
+
+## QueuePropertyToQueueAttributeRector
+
+Changes the queue property to use the Queue attribute
+
+- class: [`RectorLaravel\Rector\Class_\QueuePropertyToQueueAttributeRector`](../src/Rector/Class_/QueuePropertyToQueueAttributeRector.php)
+
+```diff
+ use Illuminate\Contracts\Queue\ShouldQueue;
++use Illuminate\Queue\Attributes\Queue;
+
++#[Queue('podcasts')]
+ final class ProcessPodcast implements ShouldQueue
+ {
+-    public $queue = 'podcasts';
  }
 ```
 
@@ -1390,6 +1589,27 @@ Replace deprecated faker property fetch with method call
 ```diff
 -$faker->name,
 +$faker->name(),
+```
+
+<br>
+
+## ReplaceQueueTraitsWithQueueableRector
+
+Replace Dispatchable, InteractsWithQueue, Queueable, and SerializesModels traits with the Queueable trait
+
+- class: [`RectorLaravel\Rector\Class_\ReplaceQueueTraitsWithQueueableRector`](../src/Rector/Class_/ReplaceQueueTraitsWithQueueableRector.php)
+
+```diff
+ use Illuminate\Bus\Queueable;
+ use Illuminate\Foundation\Bus\Dispatchable;
+ use Illuminate\Queue\InteractsWithQueue;
+ use Illuminate\Queue\SerializesModels;
+
+ class SomeJob
+ {
+-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
++    use \Illuminate\Foundation\Queue\Queueable;
+ }
 ```
 
 <br>
@@ -1641,6 +1861,31 @@ Use `Str::startsWith()` or `Str::endsWith()` instead of `substr()` === `$str`
 
 <br>
 
+## TablePropertyToTableAttributeRector
+
+Changes model table-related properties to use the Table attribute
+
+- class: [`RectorLaravel\Rector\Class_\TablePropertyToTableAttributeRector`](../src/Rector/Class_/TablePropertyToTableAttributeRector.php)
+
+```diff
+ use Illuminate\Database\Eloquent\Model;
++use Illuminate\Database\Eloquent\Attributes\Table;
+
++#[Table(name: 'users', key: 'user_id', keyType: 'string', incrementing: false)]
+ class User extends Model
+ {
+-    protected $table = 'users';
+-
+-    protected $primaryKey = 'user_id';
+-
+-    protected $keyType = 'string';
+-
+-    protected $incrementing = false;
+ }
+```
+
+<br>
+
 ## ThrowIfAndThrowUnlessExceptionsToUseClassStringRector
 
 changes use of a new throw instance to class string
@@ -1669,6 +1914,65 @@ Change if throw to throw_if
 -}
 +throw_if($condition, new Exception());
 +throw_unless($condition, new Exception());
+```
+
+<br>
+
+## TimeoutPropertyToTimeoutAttributeRector
+
+Changes the timeout property to use the Timeout attribute
+
+- class: [`RectorLaravel\Rector\Class_\TimeoutPropertyToTimeoutAttributeRector`](../src/Rector/Class_/TimeoutPropertyToTimeoutAttributeRector.php)
+
+```diff
+ use Illuminate\Contracts\Queue\ShouldQueue;
++use Illuminate\Queue\Attributes\Timeout;
+
++#[Timeout(120)]
+ final class ProcessPodcast implements ShouldQueue
+ {
+-    public $timeout = 120;
+ }
+```
+
+<br>
+
+## TouchesPropertyToTouchesAttributeRector
+
+Changes model touches property to use the touches attribute
+
+- class: [`RectorLaravel\Rector\Class_\TouchesPropertyToTouchesAttributeRector`](../src/Rector/Class_/TouchesPropertyToTouchesAttributeRector.php)
+
+```diff
+ use Illuminate\Database\Eloquent\Model;
++use Illuminate\Database\Eloquent\Attributes\Touches;
+
++#[Touches(['posts'])]
+ class User extends Model
+ {
+-    protected $touches = [
+-        'posts',
+-    ];
+ }
+```
+
+<br>
+
+## TriesPropertyToTriesAttributeRector
+
+Changes the tries property to use the Tries attribute
+
+- class: [`RectorLaravel\Rector\Class_\TriesPropertyToTriesAttributeRector`](../src/Rector/Class_/TriesPropertyToTriesAttributeRector.php)
+
+```diff
+ use Illuminate\Contracts\Queue\ShouldQueue;
++use Illuminate\Queue\Attributes\Tries;
+
++#[Tries(3)]
+ final class ProcessPodcast implements ShouldQueue
+ {
+-    public $tries = 3;
+ }
 ```
 
 <br>
@@ -1728,6 +2032,25 @@ Unify Model `$dates` property with `$casts`
      ];
 -
 -    protected $dates = ['birthday'];
+ }
+```
+
+<br>
+
+## UniqueForPropertyToUniqueForAttributeRector
+
+Changes the uniqueFor property to use the UniqueFor attribute
+
+- class: [`RectorLaravel\Rector\Class_\UniqueForPropertyToUniqueForAttributeRector`](../src/Rector/Class_/UniqueForPropertyToUniqueForAttributeRector.php)
+
+```diff
+ use Illuminate\Contracts\Queue\ShouldQueue;
++use Illuminate\Queue\Attributes\UniqueFor;
+
++#[UniqueFor(1800)]
+ final class ProcessPodcast implements ShouldQueue
+ {
+-    public $uniqueFor = 1800;
  }
 ```
 

@@ -203,6 +203,13 @@ return [
         'uploaded_file_too_large' => 'Plik jest za duży. Wybierz mniejszy plik.',
         'uploaded_file_corrupted' => 'Plik wydaje się być uszkodzony lub nieprawidłowy. Spróbuj przesłać inny plik.',
         'upload_network_error' => 'Przesyłanie nie powiodło się z powodu problemów z siecią. Sprawdź połączenie i spróbuj ponownie.',
+        'upload_err_ini_size' => 'Plik jest większy niż limit przesyłania :size serwera. Zwiększ "upload_max_filesize" w ustawieniach PHP lub skontaktuj się z dostawcą hostingu.',
+        'upload_err_form_size' => 'Plik przekracza maksymalny rozmiar przesyłania formularza.',
+        'upload_err_partial' => 'Plik został przesłany tylko częściowo. Spróbuj ponownie — zwykle oznacza to, że połączenie zostało przerwane.',
+        'upload_err_no_tmp_dir' => 'Serwer nie może zapisać przesłanego pliku, ponieważ tymczasowy katalog przesyłania PHP (upload_tmp_dir) nie istnieje lub nie można do niego zapisywać. Poproś dostawcę hostingu, aby ustawił "upload_tmp_dir" w konfiguracji puli PHP-FPM na zapisywalny folder (np. /home/your-user/tmp). Pełne instrukcje: https://docs.botble.com/cms/media-upload-errors.html',
+        'upload_err_cant_write' => 'Serwer nie mógł zapisać przesłanego pliku na dysku. Sprawdź uprawnienia folderu, limit dysku oraz czy katalog tmp jest zapisywalny przez PHP.',
+        'upload_err_extension' => 'Rozszerzenie PHP (takie jak ModSecurity lub wtyczka bezpieczeństwa) zablokowało przesyłanie. Skontaktuj się z dostawcą hostingu.',
+        'upload_err_unknown' => 'Przesyłanie nieudane (kod błędu PHP :code). Skontaktuj się z dostawcą hostingu.',
         'attributes' => [
             'uploaded_file' => 'plik',
             'upload' => 'plik',

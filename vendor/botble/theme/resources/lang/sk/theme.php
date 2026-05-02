@@ -208,6 +208,11 @@ return [
     ],
     'term_and_privacy_policy_url' => 'URL podmienok a zásad ochrany súkromia',
     'site_title_separator' => 'Oddeľovač SEO titulku',
+    'site_title_helper' => 'Názov vašej značky alebo firmy. Zobrazuje sa v karte prehliadača a výsledkoch vyhľadávania (napr. "My Company").',
+    'show_site_name_helper' => 'Pridá názov webu ku každému titulku stránky pomocou vybraného oddeľovača. Príklad: "Page Title - My Company".',
+    'site_title_separator_helper' => 'Znak používaný medzi titulkom stránky a názvom webu. Príklad s pomlčkou: "Page Title - My Company". Príklad s zvislou čiarou: "Page Title | My Company".',
+    'seo_title_helper' => 'Titulok domovskej stránky zobrazovaný vo výsledkoch vyhľadávačov. Udržujte ho pod 60 znakov pre najlepšie zobrazenie. Nechajte prázdne, ak chcete použiť titulok webu.',
+    'seo_description_helper' => 'Popis domovskej stránky zobrazovaný vo výsledkoch vyhľadávačov. Udržujte ho medzi 120-160 znakmi pre najlepšie zobrazenie.',
     'no_meta_keywords' => 'Meta kľúčové slová boli odstránené Google, nemusíte pridávať meta kľúčové slová na vašu webstránku. Dozvedieť sa viac: :link',
     'validation' => [
         'gtm_container_id_format' => 'ID kontajnera GTM musí byť vo formáte GTM-XXXXXX (napr. GTM-N7MK3KH2)',
@@ -389,6 +394,9 @@ return [
     ],
 
     'typography_primary' => 'Primárne písmo',
+    'all_languages' => 'Všetky jazyky',
+    'shared_field_notice' => 'Toto pole je zdieľané naprieč všetkými jazykmi. Spravujte ho z predvoleného jazyka.',
+    'shared_section_notice' => 'Všetky možnosti v tejto sekcii sú zdieľané naprieč všetkými jazykmi. Prepnite na predvolený jazyk pre vykonanie zmien.',
     'admin_appearance' => [
         'show_admin_bar' => 'Zobraziť admin panel pre prihlásených administrátorov, aj na prednej stránke',
         'show_admin_bar_helper' => 'Zobraziť rýchly prístup k admin panelu v hornej časti webovej stránky po prihlásení ako administrátor',

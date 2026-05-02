@@ -1,6 +1,6 @@
 ---
 name: folio-routing
-description: "Creates file-based routes with Laravel Folio. Activates when creating new pages, setting up routes, working with route parameters or model binding, adding middleware to pages, working with resources/views/pages; or when the user mentions Folio, pages, file-based routing, page routes, or creating a new page for a URL path."
+description: "Use this skill for Laravel Folio file-based routing tasks: creating pages with `folio:page`, setting up route parameters or model binding in filenames like `[User].blade.php`, defining named routes with `name()`, applying middleware, debugging Folio 404s, or running `folio:list`. Also trigger when a user is choosing between Folio and web.php for a new page, or wants to add a new URL or page in a Folio-enabled project (`resources/views/pages`). Folio automatically maps Blade templates to routes. Do not trigger for Livewire component, Normal Routing, Standard controller routes, or API endpoints"
 license: MIT
 metadata:
   author: laravel
@@ -9,14 +9,6 @@ metadata:
 /** @var \Laravel\Boost\Install\GuidelineAssist $assist */
 @endphp
 # Folio Routing
-
-## When to Apply
-
-Activate this skill when:
-
-- Creating pages with file-based routing
-- Working with route parameters and model binding
-- Adding middleware to Folio pages
 
 ## Documentation
 
@@ -34,7 +26,7 @@ Pages are usually in `resources/views/pages/` and the file structure determines 
 
 ### Listing Routes
 
-You may list available Folio routes using `{{ $assist->artisanCommand('folio:list') }}` or using the `list-routes` tool.
+You may list available Folio routes using `{{ $assist->artisanCommand('folio:list') }}`.
 
 ### Creating Pages
 

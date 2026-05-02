@@ -1,12 +1,22 @@
 $(() => {
     const $notification = $(document).find('#notification-sidebar')
 
+    const setNotificationsBadge = (count) => {
+        const $badges = $(document).find('.badge.notification-count')
+
+        if (count > 0) {
+            $badges.text(count).show()
+        } else {
+            $badges.text('0').hide()
+        }
+    }
+
     const updateNotificationsCount = () => {
         $httpClient
             .make()
             .get($notification.data('count-url'))
             .then(({ data }) => {
-                $(document).find('.badge.notification-count').text(data.data)
+                setNotificationsBadge(data.data)
             })
     }
 
@@ -36,47 +46,49 @@ $(() => {
     $notification
         .on('show.bs.offcanvas', () => {
             updateNotificationsContent()
+            updateNotificationsCount()
 
             $('body').after(`<div class="offcanvas-backdrop"></div>`)
         })
         .on('click', '.mark-all-notifications-as-read', function (e) {
             e.preventDefault()
 
+            setNotificationsBadge(0)
+
             $httpClient
                 .make()
                 .put($(this).data('url'))
-                .then(({ data }) => {
-                    $notification.find('.notification-content').html(data.data)
-                })
-                .finally(() => {
-                    updateNotificationsCount()
+                .then(() => {
                     updateNotificationsContent()
                 })
         })
         .on('click', '.clear-notifications', function () {
-            $httpClient
-                .make()
-                .delete($(this).data('url'))
-                .then(() => {})
-                .finally(() => {
-                    updateNotificationsCount()
-                    closeNotification()
-                })
-        })
-        .on('click', '.list-group-item .btn-delete-notification', function () {
+            setNotificationsBadge(0)
+
             $httpClient
                 .make()
                 .delete($(this).data('url'))
                 .then(() => {
-                    const $this = $(this).closest('.list-group-item')
+                    closeNotification()
+                })
+        })
+        .on('click', '.list-group-item .btn-delete-notification', function () {
+            const $item = $(this).closest('.list-group-item')
+            const isUnread = $item.hasClass('active')
 
-                    $this.hide('slow', () => {
-                        $this.remove()
+            $httpClient
+                .make()
+                .delete($(this).data('url'))
+                .then(() => {
+                    $item.hide('slow', () => {
+                        $item.remove()
                         updateNotificationsContent()
                     })
-                })
-                .finally(() => {
-                    updateNotificationsCount()
+
+                    if (isUnread) {
+                        const currentCount = parseInt($(document).find('.badge.notification-count').first().text(), 10) || 0
+                        setNotificationsBadge(Math.max(0, currentCount - 1))
+                    }
                 })
         })
         .on('click', 'nav .btn-previous', function () {

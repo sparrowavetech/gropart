@@ -203,6 +203,13 @@ return [
         'uploaded_file_too_large' => 'Il file è troppo grande. Scegli un file più piccolo.',
         'uploaded_file_corrupted' => 'Il file sembra essere danneggiato o non valido. Prova a caricare un file diverso.',
         'upload_network_error' => 'Caricamento fallito a causa di problemi di rete. Controlla la connessione e riprova.',
+        'upload_err_ini_size' => 'Il file è più grande del limite di caricamento :size del server. Aumenta "upload_max_filesize" nelle impostazioni PHP o chiedi al tuo provider di hosting.',
+        'upload_err_form_size' => 'Il file supera la dimensione massima di caricamento del modulo.',
+        'upload_err_partial' => 'Il file è stato caricato solo parzialmente. Riprova — di solito significa che la connessione è stata interrotta.',
+        'upload_err_no_tmp_dir' => 'Il server non può salvare il file caricato perché la directory di caricamento temporanea di PHP (upload_tmp_dir) è mancante o non scrivibile. Chiedi al tuo provider di hosting di impostare "upload_tmp_dir" nella configurazione del pool PHP-FPM su una cartella scrivibile (ad es. /home/your-user/tmp). Istruzioni complete: https://docs.botble.com/cms/media-upload-errors.html',
+        'upload_err_cant_write' => 'Il server non è riuscito a scrivere il file caricato su disco. Controlla i permessi della cartella, la quota disco e che la directory tmp sia scrivibile da PHP.',
+        'upload_err_extension' => 'Un\'estensione PHP (come ModSecurity o un plugin di sicurezza) ha bloccato il caricamento. Contatta il tuo provider di hosting.',
+        'upload_err_unknown' => 'Caricamento fallito (codice errore PHP :code). Contatta il tuo provider di hosting.',
         'attributes' => [
             'uploaded_file' => 'file',
             'upload' => 'file',

@@ -17,6 +17,12 @@
             </div>
         </div>
 
+        @if ($isInheriting ?? false)
+            <x-core::alert type="info" class="mb-4">
+                {{ trans('packages/widget::widget.inheriting_from_default') }}
+            </x-core::alert>
+        @endif
+
         <div class="alert alert-info d-flex align-items-center mb-4" role="alert">
             <div class="d-flex align-items-center">
                 <span class="avatar avatar-sm bg-info-lt me-3">

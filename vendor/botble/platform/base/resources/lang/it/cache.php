@@ -8,6 +8,7 @@ return [
     'clear_button' => 'Cancella',
     'refresh_button' => 'Aggiorna',
     'cache_size_warning' => 'La dimensione della cache del CMS è piuttosto grande (>50MB). Cancellarla potrebbe migliorare le prestazioni del sistema.',
+    'cache_size_warning_dynamic' => 'La dimensione della cache del CMS è piuttosto grande (>:sizeMB). Cancellarla potrebbe migliorare le prestazioni del sistema.',
     'footer_note' => 'Cancella la cache dopo aver apportato modifiche al tuo sito per assicurarti che appaiano correttamente.',
     'type' => 'Tipo',
     'description' => 'Descrizione',

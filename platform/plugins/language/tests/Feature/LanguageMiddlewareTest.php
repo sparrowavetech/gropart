@@ -217,4 +217,65 @@ class LanguageMiddlewareTest extends BaseTestCase
             return new Response('ok');
         });
     }
+
+    public function testLocaleSessionRedirectAutoDetectsWhenDefaultLocaleVisible(): void
+    {
+        Setting::set('language_hide_default', false);
+        Setting::set('language_auto_detect_user_language', true);
+        Setting::save();
+        $this->setLocales();
+
+        session()->forget('language');
+
+        $request = Request::create('/', 'GET');
+        $request->headers->set('Accept-Language', 'en-US,en;q=0.9');
+        $middleware = new LocaleSessionRedirect();
+
+        $middleware->handle($request, function () {
+            $this->assertEquals('en', session('language'));
+
+            return new Response('ok');
+        });
+    }
+
+    public function testLocaleSessionRedirectAutoDetectsWhenDefaultLocaleHidden(): void
+    {
+        Setting::set('language_hide_default', true);
+        Setting::set('language_auto_detect_user_language', true);
+        Setting::save();
+        $this->setLocales();
+
+        session()->forget('language');
+
+        $request = Request::create('/', 'GET');
+        $request->headers->set('Accept-Language', 'en-US,en;q=0.9');
+        $middleware = new LocaleSessionRedirect();
+
+        $response = $middleware->handle($request, function () {
+            return new Response('ok');
+        });
+
+        $this->assertEquals('en', session('language'));
+        $this->assertEquals(302, $response->getStatusCode());
+    }
+
+    public function testLocaleSessionRedirectSkipsAutoDetectWhenSettingDisabled(): void
+    {
+        Setting::set('language_hide_default', false);
+        Setting::set('language_auto_detect_user_language', false);
+        Setting::save();
+        $this->setLocales();
+
+        session()->forget('language');
+
+        $request = Request::create('/', 'GET');
+        $request->headers->set('Accept-Language', 'en-US,en;q=0.9');
+        $middleware = new LocaleSessionRedirect();
+
+        $middleware->handle($request, function () {
+            $this->assertEquals('ar', session('language'));
+
+            return new Response('ok');
+        });
+    }
 }

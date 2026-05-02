@@ -72,5 +72,6 @@ return [
     'clear_button' => 'Effacer',
     'refresh_button' => 'Actualiser',
     'cache_size_warning' => 'La taille du cache de votre CMS est assez importante (>50 Mo). Le vider peut améliorer les performances du système.',
+    'cache_size_warning_dynamic' => 'La taille du cache de votre CMS est assez importante (>:size Mo). Le vider peut améliorer les performances du système.',
     'footer_note' => 'Videz le cache après avoir apporté des modifications à votre site pour vous assurer qu\'elles apparaissent correctement.',
 ];

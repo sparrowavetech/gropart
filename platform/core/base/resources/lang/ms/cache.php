@@ -8,6 +8,7 @@ return [
     'clear_button' => 'Kosongkan',
     'refresh_button' => 'Muat Semula',
     'cache_size_warning' => 'Saiz cache CMS anda agak besar (>50MB). Mengosongkannya mungkin meningkatkan prestasi sistem.',
+    'cache_size_warning_dynamic' => 'Saiz cache CMS anda agak besar (>:sizeMB). Mengosongkannya mungkin meningkatkan prestasi sistem.',
     'footer_note' => 'Kosongkan cache selepas membuat perubahan pada laman anda untuk memastikan ia muncul dengan betul.',
     'type' => 'Jenis',
     'description' => 'Penerangan',

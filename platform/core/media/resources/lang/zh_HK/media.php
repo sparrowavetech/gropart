@@ -198,4 +198,22 @@ return [
     'download_image_to_local_storage_helper' => '如果未選中，圖像將從原始網址顯示。',
     'skip_trash' => '跳過垃圾',
     'skip_trash_description' => '如果已選取，該文件將會被永久刪除，而不會移到垃圾桶。',
+    'validation' => [
+        'uploaded_file_required' => '請選擇要上傳的檔案。',
+        'uploaded_file_invalid_type' => '不允許此檔案類型。請上傳有效的檔案格式。',
+        'uploaded_file_too_large' => '檔案太大。請選擇較小的檔案。',
+        'uploaded_file_corrupted' => '檔案似乎已損壞或無效。請嘗試上傳其他檔案。',
+        'upload_network_error' => '由於網絡問題上傳失敗。請檢查你的連接並重試。',
+        'upload_err_ini_size' => '檔案大於伺服器的 :size 上傳限制。請在 PHP 設定中增加 "upload_max_filesize" 或聯繫你的主機供應商。',
+        'upload_err_form_size' => '檔案超過了表單的最大上傳大小。',
+        'upload_err_partial' => '檔案只部分上傳。請重試 — 這通常意味著連接中斷。',
+        'upload_err_no_tmp_dir' => '伺服器無法儲存上傳的檔案，因為 PHP 的臨時上傳目錄 (upload_tmp_dir) 缺失或不可寫入。請讓你的主機供應商在 PHP-FPM pool 配置中將 "upload_tmp_dir" 設置為可寫入的資料夾（例如 /home/your-user/tmp）。完整說明: https://docs.botble.com/cms/media-upload-errors.html',
+        'upload_err_cant_write' => '伺服器無法將上傳的檔案寫入磁碟。請檢查資料夾權限、磁碟配額以及 tmp 目錄是否可被 PHP 寫入。',
+        'upload_err_extension' => 'PHP 擴展（例如 ModSecurity 或安全外掛）阻止了上傳。請聯繫你的主機供應商。',
+        'upload_err_unknown' => '上傳失敗（PHP 錯誤代碼 :code）。請聯繫你的主機供應商。',
+        'attributes' => [
+            'uploaded_file' => '檔案',
+            'upload' => '檔案',
+        ],
+    ],
 ];

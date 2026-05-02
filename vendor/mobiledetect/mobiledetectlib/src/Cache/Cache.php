@@ -9,23 +9,36 @@ use DateInterval;
 use DateTime;
 
 use function is_int;
+use function is_iterable;
+use function is_string;
 use function time;
 
 /**
- * In-memory cache implementation of PSR-16
- * @See https://www.php-fig.org/psr/psr-16/
+ * In-memory cache implementation of PSR-16.
+ *
+ * @see https://www.php-fig.org/psr/psr-16/
+ *
+ * Public method parameters are intentionally left without scalar type
+ * declarations (return types are kept). This keeps the class
+ * Liskov-compatible with PSR-16 v1/v2 as well as v3, so it loads cleanly
+ * in hosts (e.g. WordPress sites) where another plugin's autoloader has
+ * already registered an older `Psr\SimpleCache\CacheInterface`.
+ * Re-narrowing these parameters will break that compatibility. See
+ * https://github.com/serbanghita/Mobile-Detect/issues/989.
  */
 class Cache implements CacheInterface
 {
     protected array $cache = [];
 
     /**
-     * @inheritdoc
+     * @param string $key
+     * @param mixed  $default
+     * @return mixed
      * @throws CacheInvalidArgumentException
      */
-    public function get(string $key, mixed $default = null): mixed
+    public function get($key, mixed $default = null): mixed
     {
-        $this->checkKey($key);
+        $key = $this->checkKey($key);
 
         if (isset($this->cache[$key])) {
             if ($this->cache[$key]['ttl'] === null || $this->cache[$key]['ttl'] > time()) {
@@ -39,12 +52,15 @@ class Cache implements CacheInterface
     }
 
     /**
-     * @inheritdoc
+     * @param string                $key
+     * @param mixed                 $value
+     * @param int|DateInterval|null $ttl
      * @throws CacheInvalidArgumentException
      */
-    public function set(string $key, mixed $value, int|DateInterval|null $ttl = null): bool
+    public function set($key, mixed $value, $ttl = null): bool
     {
-        $this->checkKey($key);
+        $key = $this->checkKey($key);
+        $ttl = $this->checkTtl($ttl);
 
         // From https://www.php-fig.org/psr/psr-16/ "Definitions" -> "Expiration"
         // If a negative or zero TTL is provided, the item MUST be deleted from the cache if it exists, as it is expired already.
@@ -64,10 +80,13 @@ class Cache implements CacheInterface
         return true;
     }
 
-    /** @inheritdoc */
-    public function delete(string $key): bool
+    /**
+     * @param string $key
+     * @throws CacheInvalidArgumentException
+     */
+    public function delete($key): bool
     {
-        $this->checkKey($key);
+        $key = $this->checkKey($key);
         $this->deleteSingle($key);
 
         return true;
@@ -75,9 +94,6 @@ class Cache implements CacheInterface
 
     /**
      * Deletes the cache item from memory.
-     *
-     * @param string $key Cache key
-     * @return void
      */
     private function deleteSingle(string $key): void
     {
@@ -93,12 +109,12 @@ class Cache implements CacheInterface
     }
 
     /**
-     * @inheritdoc
+     * @param string $key
      * @throws CacheInvalidArgumentException
      */
-    public function has(string $key): bool
+    public function has($key): bool
     {
-        $this->checkKey($key);
+        $key = $this->checkKey($key);
 
         if (isset($this->cache[$key])) {
             if ($this->cache[$key]['ttl'] === null || $this->cache[$key]['ttl'] > time()) {
@@ -111,11 +127,16 @@ class Cache implements CacheInterface
         return false;
     }
 
-    /** @inheritdoc */
-    public function getMultiple(iterable $keys, mixed $default = null): iterable
+    /**
+     * @param iterable<string> $keys
+     * @param mixed            $default
+     * @throws CacheInvalidArgumentException
+     */
+    public function getMultiple($keys, mixed $default = null): iterable
     {
-        $data = [];
+        $keys = $this->checkIterable($keys, 'keys');
 
+        $data = [];
         foreach ($keys as $key) {
             $data[$key] = $this->get($key, $default);
         }
@@ -123,11 +144,17 @@ class Cache implements CacheInterface
         return $data;
     }
 
-    /** @inheritdoc */
-    public function setMultiple(iterable $values, int|DateInterval|null $ttl = null): bool
+    /**
+     * @param iterable<string, mixed> $values
+     * @param int|DateInterval|null   $ttl
+     * @throws CacheInvalidArgumentException
+     */
+    public function setMultiple($values, $ttl = null): bool
     {
-        $return = [];
+        $values = $this->checkIterable($values, 'values');
+        $ttl = $this->checkTtl($ttl);
 
+        $return = [];
         foreach ($values as $key => $value) {
             $return[] = $this->set($key, $value, $ttl);
         }
@@ -135,9 +162,14 @@ class Cache implements CacheInterface
         return $this->checkReturn($return);
     }
 
-    /** @inheritdoc */
-    public function deleteMultiple(iterable $keys): bool
+    /**
+     * @param iterable<string> $keys
+     * @throws CacheInvalidArgumentException
+     */
+    public function deleteMultiple($keys): bool
     {
+        $keys = $this->checkIterable($keys, 'keys');
+
         foreach ($keys as $key) {
             $this->delete($key);
         }
@@ -146,10 +178,14 @@ class Cache implements CacheInterface
     }
 
     /**
+     * @param mixed $key
      * @throws CacheInvalidArgumentException
      */
-    protected function checkKey(string $key): string
+    protected function checkKey($key): string
     {
+        if (!is_string($key)) {
+            throw new CacheInvalidArgumentException('Cache key must be a string.');
+        }
 
         if ($key === '' || !preg_match('/^[A-Za-z0-9_.]{1,64}$/', $key)) {
             throw new CacheInvalidArgumentException("Invalid key: '$key'. Must be alphanumeric, can contain _ and . and can be maximum of 64 chars.");
@@ -158,12 +194,37 @@ class Cache implements CacheInterface
         return $key;
     }
 
-    /**  */
+    /**
+     * @param mixed $ttl
+     * @throws CacheInvalidArgumentException
+     */
+    protected function checkTtl($ttl): int|DateInterval|null
+    {
+        if ($ttl !== null && !is_int($ttl) && !($ttl instanceof DateInterval)) {
+            throw new CacheInvalidArgumentException('TTL must be null, int, or DateInterval.');
+        }
+
+        return $ttl;
+    }
+
+    /**
+     * @param mixed $iterable
+     * @return iterable<mixed>
+     * @throws CacheInvalidArgumentException
+     */
+    protected function checkIterable($iterable, string $argName): iterable
+    {
+        if (!is_iterable($iterable)) {
+            throw new CacheInvalidArgumentException(sprintf('%s must be iterable.', ucfirst($argName)));
+        }
+
+        return $iterable;
+    }
+
     protected function getTTL(DateInterval|int|null $ttl): ?int
     {
-
         if ($ttl instanceof DateInterval) {
-            return (new DateTime())->add($ttl)->getTimeStamp() - time();
+            return (new DateTime())->add($ttl)->getTimestamp() - time();
         }
 
         // We treat 0 as a valid value.

@@ -12,6 +12,7 @@ import { EditorService } from './integrate'
 
 class MediaManagement {
     constructor() {
+        this.Helpers = Helpers
         this.MediaService = new MediaService()
         this.UploadService = new UploadService()
         this.FolderService = new FolderService()
@@ -121,6 +122,31 @@ class MediaManagement {
             meta_key = e.metaKey
             /*User hold shift key*/
             shift_key = e.shiftKey
+        })
+
+        /*Press Enter while the media modal is open to insert the selected files*/
+        $(document).on('keydown.rvMediaInsert', (e) => {
+            if (e.key !== 'Enter' || e.isDefaultPrevented()) {
+                return
+            }
+
+            let $target = $(e.target)
+            if ($target.is('input, textarea, select') || $target.closest('[contenteditable="true"]').length) {
+                return
+            }
+
+            let $modal = $('#rv_media_modal')
+            if (! $modal.length || ! $modal.is(':visible')) {
+                return
+            }
+
+            let $insertBtn = $modal.find('.js-insert-to-editor:visible:not(:disabled)').first()
+            if (! $insertBtn.length || ! Helpers.getSelectedItems().length) {
+                return
+            }
+
+            e.preventDefault()
+            $insertBtn.trigger('click')
         })
 
         _self.$body
@@ -737,5 +763,8 @@ class MediaManagement {
 $(() => {
     window.rvMedia = window.rvMedia || {}
 
-    new MediaManagement().init()
+    const management = new MediaManagement()
+    management.init()
+
+    window.rvMedia.mediaManagement = management
 })

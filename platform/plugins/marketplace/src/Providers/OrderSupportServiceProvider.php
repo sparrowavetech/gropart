@@ -81,9 +81,9 @@ class OrderSupportServiceProvider extends ServiceProvider
         }
 
         return $query->where(
-            fn(Builder $query) => $query
-                ->whereNull('store_id')
-                ->orWhereIn('store_id', $storeIds)
+            fn (Builder $query) => $query
+            ->whereNull('store_id')
+            ->orWhereIn('store_id', $storeIds)
         );
     }
 
@@ -424,7 +424,7 @@ class OrderSupportServiceProvider extends ServiceProvider
                     $shippingAmount = 0;
                 }
             } else {
-                [$stores,] = $this->getStoresInCart(true);
+                [$stores, ] = $this->getStoresInCart(true);
                 $storeIds = array_keys($stores);
                 $firstStoreId = reset($storeIds);
 
@@ -474,7 +474,7 @@ class OrderSupportServiceProvider extends ServiceProvider
                 $shippingData = $this->getShippingData($sessionStoreData, $orderAmount, $products, $paymentMethod);
 
                 if ($totalCartAmount > 0 && $totalUnifiedShipping > 0) {
-                    $vendorProportion = $orderAmount / $totalCartAmount;
+                    $vendorProportion = $rawTotal / $totalCartAmount;
                     $shippingAmount = round($totalUnifiedShipping * $vendorProportion, 2);
                 }
 
@@ -665,7 +665,8 @@ class OrderSupportServiceProvider extends ServiceProvider
 
         foreach ($orders as $order) {
             if ($order->payment_fee > 0 && $order->amount > 0) {
-                $orderAmount = $order->sub_total + $order->tax_amount + $order->shipping_amount + ($order->shipping_tax_amount ?? 0) + $order->payment_fee - $order->discount_amount;
+                $orderAmount = $order->sub_total + $order->tax_amount + $order->shipping_amount
+                    + ($order->shipping_tax_amount ?? 0) + $order->payment_fee - $order->discount_amount;
                 if ($order->amount != $orderAmount) {
                     $order->amount = $orderAmount;
                     $order->save();
@@ -941,7 +942,7 @@ class OrderSupportServiceProvider extends ServiceProvider
                 Arr::set($vendorSessionData, 'shipping_amount', $shippingAmount);
             }
 
-            Arr::set($sessionCheckoutData, "marketplace.{$storeId}", $vendorSessionData);
+            $sessionCheckoutData['marketplace'] = [$storeId => $vendorSessionData];
 
             OrderHelper::setOrderSessionData($token, $sessionCheckoutData);
 
@@ -1464,7 +1465,7 @@ class OrderSupportServiceProvider extends ServiceProvider
         ]);
 
         $allCategoryIds = $orderProducts
-            ->map(fn($orderProduct) => $orderProduct->product?->original_product?->categories?->pluck('id'))
+            ->map(fn ($orderProduct) => $orderProduct->product?->original_product?->categories?->pluck('id'))
             ->flatten()
             ->filter()
             ->unique()
@@ -1474,7 +1475,7 @@ class OrderSupportServiceProvider extends ServiceProvider
             ->whereIn('product_category_id', $allCategoryIds)
             ->get()
             ->groupBy('product_category_id')
-            ->map(fn($group) => $group->sortByDesc('commission_percentage')->first());
+            ->map(fn ($group) => $group->sortByDesc('commission_percentage')->first());
 
         $defaultCommissionFeePercentage = MarketplaceHelper::getSetting('fee_per_order', 0);
 
@@ -1532,7 +1533,7 @@ class OrderSupportServiceProvider extends ServiceProvider
                     $feePercentage = MarketplaceHelper::getSetting('fee_per_order', 0);
                     $fee = $refundAmount * ($feePercentage / 100);
                 } else {
-                    $products = $orderReturn->items->map(fn($item) => $item->product);
+                    $products = $orderReturn->items->map(fn ($item) => $item->product);
                     $fee = $this->calculatorCommissionFeeByProduct($products);
                 }
                 $fee = $fee * -1;

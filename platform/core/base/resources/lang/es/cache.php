@@ -72,5 +72,6 @@ return [
     'clear_button' => 'Limpiar',
     'refresh_button' => 'Actualizar',
     'cache_size_warning' => 'El tamaño del caché de su CMS es bastante grande (>50MB). Limpiarlo puede mejorar el rendimiento del sistema.',
+    'cache_size_warning_dynamic' => 'El tamaño del caché de su CMS es bastante grande (>:sizeMB). Limpiarlo puede mejorar el rendimiento del sistema.',
     'footer_note' => 'Limpie el caché después de hacer cambios en su sitio para asegurarse de que aparezcan correctamente.',
 ];

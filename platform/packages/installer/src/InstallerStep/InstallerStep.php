@@ -142,6 +142,7 @@ class InstallerStep
         ];
 
         $presets = collect($presets)
+            ->filter(fn ($preset) => is_array($preset) && ! empty($preset['name']))
             ->mapWithKeys(function ($preset) {
                 $name = $preset['name'];
                 $id = $preset['id'] ?? Str::kebab($name);
@@ -150,6 +151,7 @@ class InstallerStep
                 return [$id => [
                     'label' => $name,
                     'image' => Theme::getThemeScreenshot(self::$currentTheme, $preset['screenshot'] ?? null),
+                    'database' => $preset['database'] ?? null,
                 ]];
             })
             ->all();

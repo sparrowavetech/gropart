@@ -96,7 +96,13 @@ class Manager
         $path = lang_path($file . '.php');
         $output = "<?php\n\nreturn " . VarExporter::export($translations) . ";\n";
 
-        File::put(str_replace('/', DIRECTORY_SEPARATOR, $path), $output);
+        $path = str_replace('/', DIRECTORY_SEPARATOR, $path);
+
+        File::put($path, $output);
+
+        if (function_exists('opcache_invalidate')) {
+            @opcache_invalidate($path, true);
+        }
     }
 
     public function getConfig(?string $key = null): string|array|null
