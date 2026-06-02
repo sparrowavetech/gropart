@@ -41,7 +41,9 @@ class ThemeSeeder extends BaseSeeder
 
     protected function filePath(string $path, ?string $basePath = null): string
     {
-        if (! $basePath && ! isset($this->basePath)) {
+        if ($basePath && ! Str::startsWith($basePath, ['/', '\\']) && ! preg_match('/^[A-Za-z]:[\\\\\/]/', $basePath)) {
+            $basePath = $this->currentDirectoryPath('', $basePath);
+        } elseif (! $basePath && ! isset($this->basePath)) {
             $this->setCurrentDirectoryPath('');
         }
 

@@ -27,4 +27,6 @@ return [
     'parent' => 'প্যারেন্ট শ্রেণী',
     'image' => 'ছবি',
     'product_category_translations' => 'পণ্য শ্রেণী অনুবাদ',
+    'parent_self_reference' => 'একটি বিভাগ নিজের প্যারেন্ট হতে পারে না।',
+    'parent_circular_reference' => 'একটি বিভাগকে তার নিজের কোনো অধস্তন বিভাগের প্যারেন্ট হিসেবে নির্ধারণ করা যাবে না।',
 ];

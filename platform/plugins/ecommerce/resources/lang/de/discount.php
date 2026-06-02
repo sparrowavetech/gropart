@@ -95,6 +95,7 @@ return [
     'you_need_login_to_use_coupon_code' => 'Bitte melden Sie sich an, um diesen Gutscheincode zu verwenden. Dieses Angebot erfordert ein Kundenkonto.',
     'you_used_coupon_code' => 'Sie haben diesen Gutscheincode bereits verwendet. Jeder Kunde kann dieses Angebot nur einmal nutzen.',
     'coupon_not_available_for_your_account' => 'Entschuldigung, der Gutscheincode ":code" ist für Ihr Konto nicht verfügbar. Dies ist ein exklusives Angebot für ausgewählte Kunden.',
+    'coupon_not_valid_for_cart_items' => 'Dieser Gutscheincode ist für die Artikel in Ihrem Warenkorb nicht gültig. Bitte fügen Sie ein berechtigtes Produkt hinzu, um ihn zu verwenden.',
     'customer_used_coupon_code' => 'Kunden, die diesen Rabattcode verwendet haben',
     'apply_via_url' => 'Über URL anwenden?',
     'apply_via_url_description' => 'Diese Einstellung wendet den Gutscheincode an, wenn Kunden die URL mit dem Parameter "?coupon=code" aufrufen.',
@@ -116,4 +117,8 @@ return [
     'close' => 'Schließen',
     'coupon_code_label' => 'Gutscheincode: :code',
     'enter_coupon_code_placeholder' => 'Gutscheincode eingeben...',
+    'applied' => 'Angewendet',
+    'change_coupon' => 'Gutschein ändern',
+    'enter_coupon_code' => 'Gutscheincode eingeben',
+    'or_select_coupon' => 'Oder einen Gutschein auswählen',
 ];

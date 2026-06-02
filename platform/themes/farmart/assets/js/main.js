@@ -2102,48 +2102,6 @@ MartApp.isRTL = $('body').prop('dir') === 'rtl'
                         })
                     }
 
-                    let imageHtml = ''
-                    let thumbHtml = ''
-
-                    if (!data.image_with_sizes.origin.length) {
-                        data.image_with_sizes.origin.push(siteConfig.img_placeholder)
-                    } else {
-                        data.image_with_sizes.origin.forEach(function(item) {
-                            imageHtml += `
-                    <a href='${item}'>
-                        <img src='${item}' alt='${data.name}'>
-                    </a>
-                `
-                        })
-                    }
-
-                    if (!data.image_with_sizes.thumb.length) {
-                        data.image_with_sizes.thumb.push(siteConfig.img_placeholder)
-                    } else {
-                        data.image_with_sizes.thumb.forEach(function(item) {
-                            thumbHtml += `
-                    <div>
-                        <img src='${item}' alt='${data.name}'>
-                    </div>
-                `
-                        })
-                    }
-
-                    const $galleryImages = $(document).find('.bb-product-gallery-wrapper')
-
-                    $galleryImages.find('.bb-product-gallery-thumbnails').slick('unslick').html(thumbHtml)
-
-                    const $quickViewGalleryImages = $(document).find('.bb-quick-view-gallery-images')
-
-                    if ($quickViewGalleryImages.length) {
-                        $quickViewGalleryImages.slick('unslick').html(imageHtml)
-                    }
-
-                    $galleryImages.find('.bb-product-gallery-images').slick('unslick').html(imageHtml)
-
-                    if (typeof EcommerceApp !== 'undefined') {
-                        EcommerceApp.initProductGallery()
-                    }
                 }
             }
         }

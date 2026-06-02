@@ -77,8 +77,18 @@ class LanguageAdvancedManager
 
         $language = $request->input('language') ?: $request->header('X-LANGUAGE');
 
+        // Whitelist user-supplied language codes against active languages.
+        // Prevents arbitrary values (e.g., SQLi probes) from being stored as lang_code.
+        if (! empty($language) && ! self::isValidLanguageCode($language)) {
+            return false;
+        }
+
         if (! $language) {
             $language = self::getTranslationLocale();
+        }
+
+        if (! $language) {
+            return false;
         }
 
         $condition = [
@@ -146,6 +156,20 @@ class LanguageAdvancedManager
         }
 
         return in_array($model, self::supportedModels());
+    }
+
+    public static function getActiveLanguageCodes(): array
+    {
+        return Language::getActiveLanguage(['lang_code'])->pluck('lang_code')->all();
+    }
+
+    public static function isValidLanguageCode(mixed $code): bool
+    {
+        if (! is_string($code) || $code === '' || strlen($code) > 20) {
+            return false;
+        }
+
+        return in_array($code, self::getActiveLanguageCodes(), true);
     }
 
     public static function supportedModels(): array

@@ -31,4 +31,13 @@ return [
     'email' => 'E-mail',
     'password' => 'Heslo',
     'password_confirmation' => 'Potvrdenie hesla',
+    'site_branding' => 'Logo a favicon stránky',
+    'admin_branding' => 'Logo a favicon administrácie',
+    'step_branding' => 'Branding',
+    'step_account' => 'Účet',
+    'back' => 'Späť',
+    'branding_saved' => 'Nastavenia brandingu boli úspešne uložené!',
+    'dont_show_again' => 'Nabudúce nezobrazovať',
+    'dismissed_message' => 'Oznámenie sprievodcu nastavením bolo zatvorené.',
+    'exit_wizard_description' => 'Nastavenie môžete dokončiť neskôr z oznámenia na vašom paneli.',
 ];

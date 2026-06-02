@@ -95,6 +95,7 @@ return [
     'you_need_login_to_use_coupon_code' => 'Mangyaring mag-sign in upang magamit ang coupon code na ito. Ang alok na ito ay nangangailangan ng customer account.',
     'you_used_coupon_code' => 'Ginamit mo na ang coupon code na ito. Ang bawat customer ay maaari lamang gumamit ng alok na ito nang isang beses.',
     'coupon_not_available_for_your_account' => 'Paumanhin, ang coupon code na ":code" ay hindi available para sa iyong account. Ito ay eksklusibong alok para sa mga napiling customer.',
+    'coupon_not_valid_for_cart_items' => 'Ang coupon code na ito ay hindi valid para sa mga item sa iyong cart. Mangyaring magdagdag ng kwalipikadong produkto upang magamit ito.',
     'customer_used_coupon_code' => 'Mga customer na gumamit ng discount code na ito',
     'apply_via_url' => 'Ilapat sa pamamagitan ng URL?',
     'apply_via_url_description' => 'Ang setting na ito ay maglalapat ng coupon code kapag nag-access ang mga customer ng URL na may parameter na "?coupon=code".',
@@ -116,4 +117,8 @@ return [
     'close' => 'Isara',
     'coupon_code_label' => 'Coupon code: :code',
     'enter_coupon_code_placeholder' => 'Ilagay ang coupon code...',
+    'applied' => 'Nailapat na',
+    'change_coupon' => 'Palitan ang Coupon',
+    'enter_coupon_code' => 'Ilagay ang coupon code',
+    'or_select_coupon' => 'O pumili ng coupon',
 ];

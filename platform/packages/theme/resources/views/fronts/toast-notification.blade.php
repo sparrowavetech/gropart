@@ -23,20 +23,20 @@
         <script type="text/javascript">
             window.addEventListener('load', function() {
                 @if (session()->has('success_msg'))
-                Theme.showSuccess('{!! BaseHelper::cleanToastMessage(session('success_msg')) !!}');
+                Theme.showSuccess(@json(session('success_msg')));
                 @endif
 
                 @if (session()->has('error_msg'))
-                Theme.showError('{!! BaseHelper::cleanToastMessage(session('error_msg')) !!}');
+                Theme.showError(@json(session('error_msg')));
                 @endif
 
                 @if (isset($error_msg))
-                Theme.showError('{!! BaseHelper::cleanToastMessage($error_msg) !!}');
+                Theme.showError(@json($error_msg));
                 @endif
 
                 @if (isset($errors))
                 @foreach ($errors->all() as $error)
-                Theme.showError('{!! BaseHelper::cleanToastMessage($error) !!}');
+                Theme.showError(@json($error));
                 @endforeach
                 @endif
             });

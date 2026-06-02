@@ -81,15 +81,15 @@ class BaseSeeder extends Seeder
     protected function filePath(string $path, ?string $basePath = null): string
     {
         $filePath = ($basePath ? sprintf('%s/%s', $basePath, $path) : $this->getBasePath() . '/' . $path);
-        $path = str_replace(database_path('seeders/files/'), '', $filePath);
+        $storagePath = ltrim(str_replace(database_path('seeders/files'), '', $filePath), '/');
 
-        if ($this->getMediaStorage()->exists($path)) {
-            return $path;
+        if ($this->getMediaStorage()->exists($storagePath)) {
+            return $storagePath;
         }
 
         if (File::exists($filePath)) {
             try {
-                $uploadedFile = RvMedia::uploadFromPath($filePath, 0, dirname($path));
+                $uploadedFile = RvMedia::uploadFromPath($filePath, 0, dirname($storagePath));
                 if (isset($uploadedFile['data']['url'])) {
                     return str_replace(RvMedia::getUploadURL() . '/', '', $uploadedFile['data']['url']);
                 }

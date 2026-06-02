@@ -28,10 +28,10 @@
 
     <x-core::stat-widget.item
         label="{{ trans('plugins/marketplace::marketplace.earnings') }}"
-        :value="format_price($data['revenue']['sub_amount'] - $data['revenue']['fee'])"
+        :value="format_price($data['revenue']['sub_amount'])"
         icon="ti ti-wallet"
         color="warning"
-        :url="route('marketplace.vendor.withdrawals.index')"
+        :url="route('marketplace.vendor.revenues.index')"
         column="col-12 col-sm-6 col-md-3"
     />
 </div>
@@ -493,11 +493,11 @@
                         <x-core::table.header>
                             <x-core::table.header.cell>{{ trans('core/base::tables.name') }}</x-core::table.header.cell>
                             <x-core::table.header.cell>{{ trans('plugins/ecommerce::products.price') }}</x-core::table.header.cell>
+                            <x-core::table.header.cell class="d-none d-md-table-cell">{{ trans('plugins/ecommerce::products.quantity') }}</x-core::table.header.cell>
                             <x-core::table.header.cell class="d-none d-md-table-cell">{{ trans('core/base::tables.status') }}</x-core::table.header.cell>
-                            <x-core::table.header.cell class="d-none d-md-table-cell">{{ trans('core/base::tables.created_at') }}</x-core::table.header.cell>
                         </x-core::table.header>
                         <x-core::table.body>
-                            @forelse ($data['products'] as $product)
+                            @forelse ($data['topSellingProducts'] as $product)
                                 <x-core::table.body.row>
                                     <x-core::table.body.cell>
                                         <div class="d-flex align-items-center">
@@ -519,10 +519,10 @@
                                         {!! BaseHelper::clean($product->price_in_table) !!}
                                     </x-core::table.body.cell>
                                     <x-core::table.body.cell class="d-none d-md-table-cell">
-                                        {!! BaseHelper::clean($product->status->toHtml()) !!}
+                                        <span class="badge text-bg-success text-success-fg">{{ (int) $product->total_sold }}</span>
                                     </x-core::table.body.cell>
                                     <x-core::table.body.cell class="d-none d-md-table-cell">
-                                        {{ $product->created_at->translatedFormat('M d, Y') }}
+                                        {!! BaseHelper::clean($product->status->toHtml()) !!}
                                     </x-core::table.body.cell>
                                 </x-core::table.body.row>
                             @empty

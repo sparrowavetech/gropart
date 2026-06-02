@@ -31,4 +31,13 @@ return [
     'email' => 'E-post',
     'password' => 'Lösenord',
     'password_confirmation' => 'Lösenordsbekräftelse',
+    'site_branding' => 'Webbplatsens logotyp och favicon',
+    'admin_branding' => 'Administrationens logotyp och favicon',
+    'step_branding' => 'Varumärke',
+    'step_account' => 'Konto',
+    'back' => 'Tillbaka',
+    'branding_saved' => 'Varumärkesinställningarna har sparats!',
+    'dont_show_again' => 'Visa inte igen',
+    'dismissed_message' => 'Meddelandet från installationsguiden stängdes.',
+    'exit_wizard_description' => 'Du kan återuppta installationen senare från meddelandet på din instrumentpanel.',
 ];

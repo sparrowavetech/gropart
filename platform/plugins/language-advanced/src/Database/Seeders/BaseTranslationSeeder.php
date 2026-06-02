@@ -185,10 +185,16 @@ abstract class BaseTranslationSeeder extends BaseSeeder
 
         $trimmed = trim($value);
 
-        // Try exact match first, then trimmed value, then return original
-        return $translations[$value]
-            ?? $translations[$trimmed]
-            ?? $value;
+        // Try exact match first, then trimmed value, then return original.
+        // Skip nested-array matches (those are entity-level translation containers
+        // handled elsewhere) — fall back to the original string instead.
+        $candidate = $translations[$value] ?? $translations[$trimmed] ?? null;
+
+        if (is_string($candidate)) {
+            return $candidate;
+        }
+
+        return $value;
     }
 
     /**

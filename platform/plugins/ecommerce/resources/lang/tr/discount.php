@@ -95,6 +95,7 @@ return [
     'you_need_login_to_use_coupon_code' => 'Bu kupon kodunu kullanmak için lütfen giriş yapın. Bu teklif müşteri hesabı gerektirir.',
     'you_used_coupon_code' => 'Bu kupon kodunu zaten kullandınız. Her müşteri bu teklifi sadece bir kez kullanabilir.',
     'coupon_not_available_for_your_account' => 'Üzgünüz, ":code" kupon kodu hesabınız için kullanılabilir değil. Bu seçilmiş müşteriler için özel bir tekliftir.',
+    'coupon_not_valid_for_cart_items' => 'Bu kupon kodu sepetinizdeki ürünler için geçerli değil. Kullanmak için lütfen uygun bir ürün ekleyin.',
     'customer_used_coupon_code' => 'Bu indirim kodunu kullanan müşteriler',
     'apply_via_url' => 'URL ile uygulansın mı?',
     'apply_via_url_description' => 'Bu ayar, müşteriler "?coupon=code" parametresi ile URL\'ye eriştiğinde kupon kodunu uygulayacaktır.',
@@ -116,4 +117,8 @@ return [
     'close' => 'Kapat',
     'coupon_code_label' => 'Kupon kodu: :code',
     'enter_coupon_code_placeholder' => 'Kupon kodunu girin...',
+    'applied' => 'Uygulandı',
+    'change_coupon' => 'Kuponu Değiştir',
+    'enter_coupon_code' => 'Kupon kodunu girin',
+    'or_select_coupon' => 'Veya bir kupon seçin',
 ];

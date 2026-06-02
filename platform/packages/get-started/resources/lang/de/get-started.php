@@ -31,4 +31,13 @@ return [
     'email' => 'E-Mail',
     'password' => 'Passwort',
     'password_confirmation' => 'Passwortbestätigung',
+    'site_branding' => 'Website-Logo & Favicon',
+    'admin_branding' => 'Admin-Logo & Favicon',
+    'step_branding' => 'Branding',
+    'step_account' => 'Konto',
+    'back' => 'Zurück',
+    'branding_saved' => 'Branding-Einstellungen erfolgreich gespeichert!',
+    'dont_show_again' => 'Nicht mehr anzeigen',
+    'dismissed_message' => 'Hinweis des Einrichtungsassistenten geschlossen.',
+    'exit_wizard_description' => 'Sie können die Einrichtung später über den Hinweis auf Ihrem Dashboard fortsetzen.',
 ];

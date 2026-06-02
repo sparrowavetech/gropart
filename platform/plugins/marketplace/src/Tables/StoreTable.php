@@ -3,6 +3,7 @@
 namespace Botble\Marketplace\Tables;
 
 use Botble\Base\Facades\Html;
+use Botble\Marketplace\Enums\RevenueTypeEnum;
 use Botble\Marketplace\Enums\StoreStatusEnum;
 use Botble\Marketplace\Models\Store;
 use Botble\Table\Abstracts\TableAbstract;
@@ -49,7 +50,7 @@ class StoreTable extends TableAbstract
                 return $name;
             })
             ->editColumn('earnings', function ($item) {
-                return $item->customer->id ? format_price($item->customer->balance ?: 0) : '--';
+                return format_price((float) $item->store_earnings);
             })
             ->editColumn('products_count', function ($item) {
                 return $item->products_count;
@@ -67,17 +68,29 @@ class StoreTable extends TableAbstract
 
     public function query(): Relation|Builder|QueryBuilder
     {
+        $earningsSubQuery = 'COALESCE((SELECT SUM(CASE '
+            . 'WHEN mp_customer_revenues.type IS NULL OR mp_customer_revenues.type = ? THEN mp_customer_revenues.amount '
+            . 'WHEN mp_customer_revenues.type = ? THEN mp_customer_revenues.amount * -1 '
+            . 'ELSE 0 END) '
+            . 'FROM mp_customer_revenues '
+            . 'INNER JOIN ec_orders ON ec_orders.id = mp_customer_revenues.order_id '
+            . 'WHERE ec_orders.store_id = mp_stores.id AND ec_orders.is_finished = 1), 0) AS store_earnings';
+
         $query = $this
             ->getModel()
             ->query()
             ->select([
-                'id',
-                'logo',
-                'name',
-                'created_at',
-                'status',
-                'customer_id',
-                'is_verified',
+                'mp_stores.id',
+                'mp_stores.logo',
+                'mp_stores.name',
+                'mp_stores.created_at',
+                'mp_stores.status',
+                'mp_stores.customer_id',
+                'mp_stores.is_verified',
+            ])
+            ->selectRaw($earningsSubQuery, [
+                RevenueTypeEnum::ADD_AMOUNT,
+                RevenueTypeEnum::SUBTRACT_AMOUNT,
             ])
             ->with(['customer', 'customer.vendorInfo'])
             ->withCount(['products']);

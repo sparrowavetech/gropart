@@ -95,6 +95,7 @@ return [
     'you_need_login_to_use_coupon_code' => 'Molimo prijavite se za korištenje ovog koda kupona. Ova ponuda zahtijeva korisnički račun.',
     'you_used_coupon_code' => 'Već ste iskoristili ovaj kod kupona. Svaki kupac može iskoristiti ovu ponudu samo jednom.',
     'coupon_not_available_for_your_account' => 'Nažalost, kod kupona ":code" nije dostupan za vaš račun. Ovo je ekskluzivna ponuda za odabrane kupce.',
+    'coupon_not_valid_for_cart_items' => 'Ovaj kôd kupona nije valjan za artikle u vašoj košarici. Dodajte odgovarajući proizvod kako biste ga iskoristili.',
     'customer_used_coupon_code' => 'Kupci koji su koristili ovaj kod popusta',
     'apply_via_url' => 'Primijeni putem URL-a?',
     'apply_via_url_description' => 'Ova postavka će primijeniti kod kupona kada kupci pristupe URL-u s parametrom "?coupon=code".',
@@ -116,4 +117,8 @@ return [
     'close' => 'Zatvori',
     'coupon_code_label' => 'Kod kupona: :code',
     'enter_coupon_code_placeholder' => 'Unesite kod kupona...',
+    'applied' => 'Primijenjeno',
+    'change_coupon' => 'Promijeni kupon',
+    'enter_coupon_code' => 'Unesite kôd kupona',
+    'or_select_coupon' => 'Ili odaberite kupon',
 ];

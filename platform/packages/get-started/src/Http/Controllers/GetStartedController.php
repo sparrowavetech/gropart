@@ -7,6 +7,7 @@ use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\GetStarted\Http\Requests\GetStartedRequest;
+use Botble\GetStarted\Supports\GetStartedHelper;
 use Botble\Setting\Facades\Setting;
 use Botble\Theme\Facades\ThemeOption;
 use Illuminate\Support\Facades\Auth;
@@ -52,21 +53,14 @@ class GetStartedController extends BaseController
 
                 Setting::save();
 
-                $user = Auth::guard()->user();
-
-                $defaultUsername = config('core.base.general.demo.account.username');
-                $defaultPassword = config('core.base.general.demo.account.password');
-
-                if (
-                    $defaultUsername &&
-                    $defaultPassword &&
-                    $user->username != $defaultUsername &&
-                    ! Hash::check($defaultPassword, $user->getAuthPassword())
-                ) {
+                if (! GetStartedHelper::shouldChangeDefaultAccount()) {
                     $nextStep = 4;
                 }
 
-                break;
+                return $this
+                    ->httpResponse()
+                    ->setData(['step' => $nextStep])
+                    ->setMessage(trans('packages/get-started::get-started.branding_saved'));
             case 3:
                 $user = Auth::guard()->user();
 
@@ -124,5 +118,14 @@ class GetStartedController extends BaseController
         return $this
             ->httpResponse()
             ->setData(['step' => $nextStep]);
+    }
+
+    public function dismiss(): BaseHttpResponse
+    {
+        Setting::set('is_completed_get_started', '1')->save();
+
+        return $this
+            ->httpResponse()
+            ->setMessage(trans('packages/get-started::get-started.dismissed_message'));
     }
 }

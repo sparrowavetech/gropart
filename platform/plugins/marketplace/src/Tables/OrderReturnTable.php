@@ -11,6 +11,7 @@ use Botble\Table\Actions\EditAction;
 use Botble\Table\Columns\Column;
 use Botble\Table\Columns\CreatedAtColumn;
 use Botble\Table\Columns\EnumColumn;
+use Botble\Table\Columns\FormattedColumn;
 use Botble\Table\Columns\IdColumn;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -94,8 +95,25 @@ class OrderReturnTable extends TableAbstract
                 ->alignStart(),
             Column::make('items_count')
                 ->title(trans('plugins/ecommerce::order.order_return_items_count')),
-            EnumColumn::make('reason')
-                ->title(trans('plugins/ecommerce::order.return_reason')),
+            FormattedColumn::make('reason')
+                ->title(trans('plugins/ecommerce::order.return_reason'))
+                ->renderUsing(function (FormattedColumn $column) {
+                    $item = $column->getItem();
+
+                    if ($item->reason && $item->reason->label()) {
+                        return $item->reason->toHtml();
+                    }
+
+                    $reasons = [];
+
+                    foreach ($item->items as $returnItem) {
+                        if ($returnItem->reason && $returnItem->reason->label()) {
+                            $reasons[] = $returnItem->reason->toHtml();
+                        }
+                    }
+
+                    return $reasons ? implode(', ', $reasons) : '&mdash;';
+                }),
             EnumColumn::make('return_status')
                 ->title(trans('core/base::tables.status')),
             CreatedAtColumn::make(),

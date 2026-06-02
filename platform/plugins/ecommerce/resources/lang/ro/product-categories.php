@@ -27,4 +27,6 @@ return [
     'parent' => 'Categorie Părinte',
     'image' => 'Imagine',
     'product_category_translations' => 'Traduceri Categorie Produse',
+    'parent_self_reference' => 'O categorie nu poate fi propriul ei părinte.',
+    'parent_circular_reference' => 'O categorie nu poate fi atribuită ca părinte uneia dintre propriile sale subcategorii.',
 ];

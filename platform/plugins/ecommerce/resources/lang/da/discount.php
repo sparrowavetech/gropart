@@ -95,6 +95,7 @@ return [
     'you_need_login_to_use_coupon_code' => 'Log venligst ind for at bruge denne kuponkode. Dette tilbud kræver en kundekonto.',
     'you_used_coupon_code' => 'Du har allerede brugt denne kuponkode. Hver kunde kan kun bruge dette tilbud én gang.',
     'coupon_not_available_for_your_account' => 'Beklager, kuponkoden ":code" er ikke tilgængelig for din konto. Dette er et eksklusivt tilbud til udvalgte kunder.',
+    'coupon_not_valid_for_cart_items' => 'Denne rabatkode er ikke gyldig for varerne i din kurv. Tilføj venligst et kvalificeret produkt for at bruge den.',
     'customer_used_coupon_code' => 'Kunder der har brugt denne rabatkode',
     'apply_via_url' => 'Anvend via URL?',
     'apply_via_url_description' => 'Denne indstilling vil anvende kuponkoden når kunder tilgår URL\'en med parameteren "?coupon=code".',
@@ -116,4 +117,8 @@ return [
     'close' => 'Luk',
     'coupon_code_label' => 'Kuponkode: :code',
     'enter_coupon_code_placeholder' => 'Indtast kuponkode...',
+    'applied' => 'Anvendt',
+    'change_coupon' => 'Skift kupon',
+    'enter_coupon_code' => 'Indtast rabatkode',
+    'or_select_coupon' => 'Eller vælg en kupon',
 ];

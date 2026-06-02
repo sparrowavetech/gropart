@@ -27,4 +27,6 @@ return [
     'parent' => 'Roditeljska kategorija',
     'image' => 'Slika',
     'product_category_translations' => 'Prevodi kategorija proizvoda',
+    'parent_self_reference' => 'Kategorija ne može biti sama sebi roditelj.',
+    'parent_circular_reference' => 'Kategorija ne može biti dodeljena jednoj od svojih sopstvenih potkategorija kao roditelj.',
 ];

@@ -6,6 +6,7 @@ use Botble\Ecommerce\Events\OrderPlacedEvent;
 use Botble\Ecommerce\Models\Invoice;
 use Botble\LoyaltyPoints\Helpers\LoyaltyHelper;
 use Botble\LoyaltyPoints\Models\OrderLoyaltyPoints;
+use Botble\LoyaltyPoints\Models\PointTransaction;
 use Botble\LoyaltyPoints\Services\LoyaltyPointService;
 
 class SaveOrderLoyaltyPoints
@@ -24,16 +25,37 @@ class SaveOrderLoyaltyPoints
             return;
         }
 
-        // Check for guest member ID from session
-        $guestCustomerId = session('loyalty_guest_customer_id');
+        // Idempotency: payment gateway webhooks can fire OrderPlacedEvent more than
+        // once. If we have already created a REDEEM transaction for this order,
+        // bail out so the customer's balance is not decremented twice.
+        $alreadyRedeemed = PointTransaction::query()
+            ->where('order_id', $order->id)
+            ->where('type', PointTransaction::TYPE_REDEEM)
+            ->exists();
+
+        if ($alreadyRedeemed) {
+            return;
+        }
+
+        // Recover the redemption intent from the order_loyalty_points row that was
+        // persisted during ecommerce_before_processing_payment. This row is the
+        // single source of truth and is written per-order, which is critical on
+        // marketplace: one checkout creates several vendor orders but only the
+        // order that owns the redemption carries a row with points/discount.
+        // Reading the intent from the cart-wide session instead would let every
+        // sibling vendor order redeem the full points again - a double charge
+        // (ticket #4567670). For redirect gateways the session is gone anyway, so
+        // the row is the only signal regardless.
+        $pending = OrderLoyaltyPoints::query()->where('order_id', $order->id)->first();
+
+        $pointsToRedeem = (int) ($pending?->points_redeemed ?? 0);
+        $discount = (float) ($pending?->discount_amount ?? 0);
+        $guestCustomerId = $pending?->customer_id;
 
         // Skip if no logged-in user and no guest member ID
         if (! $order->user_id && ! $guestCustomerId) {
             return;
         }
-
-        $pointsToRedeem = (int) session('applied_loyalty_points', 0);
-        $discount = (float) session('loyalty_points_discount', 0);
 
         // Only logged-in users can redeem points
         if ($order->user_id && $pointsToRedeem > 0 && $discount > 0) {

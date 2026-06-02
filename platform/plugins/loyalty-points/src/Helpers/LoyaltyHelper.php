@@ -98,9 +98,14 @@ class LoyaltyHelper
         return (bool) get_loyalty_setting('enable_product_info', true);
     }
 
+    /**
+     * @deprecated since 1.0.8. The exchange rate is no longer used in the
+     * redemption formula; configure the ratio via "Points Required" and
+     * "Discount Value" only. Kept for backward compatibility.
+     */
     public function getPointsExchangeRate(): int
     {
-        return (int) get_loyalty_setting('points_exchange_rate', 100);
+        return (int) get_loyalty_setting('points_exchange_rate', 1);
     }
 
     public function calculatePointsFromAmount(float $amount): int
@@ -162,9 +167,7 @@ class LoyaltyHelper
             return 0;
         }
 
-        $exchangeRate = $this->getPointsExchangeRate();
-
-        return (($points / $rate) * $currency) / $exchangeRate;
+        return ($points / $rate) * $currency;
     }
 
     public function calculateMaxPointsFromAmount(float $amount): int
@@ -176,9 +179,7 @@ class LoyaltyHelper
             return 0;
         }
 
-        $exchangeRate = $this->getPointsExchangeRate();
-
-        return (int) floor((($amount * $exchangeRate) / $currency) * $rate);
+        return (int) floor(($amount / $currency) * $rate);
     }
 
     public function validateRedeemablePoints(int $points, int $customerBalance, float $orderTotal): array

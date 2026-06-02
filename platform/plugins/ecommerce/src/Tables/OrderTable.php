@@ -123,6 +123,7 @@ class OrderTable extends TableAbstract
                 ->title(trans('plugins/ecommerce::order.email'))
                 ->alignStart()
                 ->orderable(false)
+                ->exportable(false)
                 ->renderUsing(function (FormattedColumn $column) {
                     $item = $column->getItem();
 
@@ -134,6 +135,42 @@ class OrderTable extends TableAbstract
                     );
                 })
                 ->responsivePriority(99),
+            FormattedColumn::make('customer_name')
+                ->title(trans('plugins/ecommerce::ecommerce.customer_name'))
+                ->visible(false)
+                ->columnVisibility(false)
+                ->orderable(false)
+                ->searchable(false)
+                ->printable(false)
+                ->renderUsing(function (FormattedColumn $column) {
+                    $item = $column->getItem();
+
+                    return $item->user->name ?: $item->address->name;
+                }),
+            FormattedColumn::make('customer_email')
+                ->title(trans('plugins/ecommerce::ecommerce.customer_email'))
+                ->visible(false)
+                ->columnVisibility(false)
+                ->orderable(false)
+                ->searchable(false)
+                ->printable(false)
+                ->renderUsing(function (FormattedColumn $column) {
+                    $item = $column->getItem();
+
+                    return $item->user->email ?: $item->address->email;
+                }),
+            FormattedColumn::make('customer_phone')
+                ->title(trans('plugins/ecommerce::ecommerce.customer_phone'))
+                ->visible(false)
+                ->columnVisibility(false)
+                ->orderable(false)
+                ->searchable(false)
+                ->printable(false)
+                ->renderUsing(function (FormattedColumn $column) {
+                    $item = $column->getItem();
+
+                    return $item->user->phone ?: $item->address->phone;
+                }),
             Column::formatted('amount')
                 ->title(trans('plugins/ecommerce::order.amount')),
         ];

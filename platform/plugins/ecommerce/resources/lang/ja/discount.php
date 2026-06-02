@@ -95,6 +95,7 @@ return [
     'you_need_login_to_use_coupon_code' => 'このクーポンコードを使用するにはサインインしてください。このオファーには顧客アカウントが必要です。',
     'you_used_coupon_code' => '既にこのクーポンコードを使用しています。各顧客はこのオファーを1回のみ使用できます。',
     'coupon_not_available_for_your_account' => '申し訳ありませんが、クーポンコード":code"はあなたのアカウントでは利用できません。これは選択された顧客専用のオファーです。',
+    'coupon_not_valid_for_cart_items' => 'このクーポンコードはカート内の商品にはご利用いただけません。ご利用になるには対象商品を追加してください。',
     'customer_used_coupon_code' => 'この割引コードを使用した顧客',
     'apply_via_url' => 'URL経由で適用？',
     'apply_via_url_description' => 'この設定により、顧客が"?coupon=code"パラメータ付きのURLにアクセスした際にクーポンコードが適用されます。',
@@ -116,4 +117,8 @@ return [
     'close' => '閉じる',
     'coupon_code_label' => 'クーポンコード: :code',
     'enter_coupon_code_placeholder' => 'クーポンコードを入力...',
+    'applied' => '適用済み',
+    'change_coupon' => 'クーポンを変更',
+    'enter_coupon_code' => 'クーポンコードを入力',
+    'or_select_coupon' => 'またはクーポンを選択',
 ];

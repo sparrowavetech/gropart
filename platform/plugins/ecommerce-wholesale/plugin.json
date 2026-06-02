@@ -5,7 +5,7 @@
     "provider": "Botble\\EcommerceWholesale\\Providers\\WholesaleServiceProvider",
     "author": "Botble technologies",
     "url": "https://botble.com",
-    "version": "1.0.10",
+    "version": "1.0.11",
     "description": "B2B wholesale plugin with customer groups, tiered pricing, and MOQ",
     "minimum_core_version": "7.6.0",
     "require": [

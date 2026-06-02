@@ -26,6 +26,7 @@ class NewsletterForm extends FormFront
             ->contentOnly()
             ->setUrl(route('public.newsletter.subscribe'))
             ->setFormOption('class', 'subscribe-form')
+            ->setFormEndKey('messages')
             ->setValidatorClass(NewsletterRequest::class)
             ->model(Newsletter::class)
             ->add('wrapper_before', HtmlField::class, HtmlFieldOption::make()->content('<div class="input-group mb-3">'))

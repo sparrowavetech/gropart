@@ -27,4 +27,6 @@ return [
     'parent' => 'Kategori Induk',
     'image' => 'Gambar',
     'product_category_translations' => 'Terjemahan Kategori Produk',
+    'parent_self_reference' => 'Sebuah kategori tidak dapat menjadi induknya sendiri.',
+    'parent_circular_reference' => 'Sebuah kategori tidak dapat ditetapkan sebagai induk dari salah satu sub-kategorinya sendiri.',
 ];

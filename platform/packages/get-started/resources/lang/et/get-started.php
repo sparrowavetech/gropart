@@ -31,4 +31,13 @@ return [
     'email' => 'E-post',
     'password' => 'Parool',
     'password_confirmation' => 'Parooli kinnitamine',
+    'site_branding' => 'Saidi logo ja favicon',
+    'admin_branding' => 'Halduse logo ja favicon',
+    'step_branding' => 'Bränding',
+    'step_account' => 'Konto',
+    'back' => 'Tagasi',
+    'branding_saved' => 'Brändingu seaded salvestati edukalt!',
+    'dont_show_again' => 'Ära näita uuesti',
+    'dismissed_message' => 'Seadistusviisardi teade suleti.',
+    'exit_wizard_description' => 'Saate seadistamise hiljem jätkata oma töölaua teate kaudu.',
 ];

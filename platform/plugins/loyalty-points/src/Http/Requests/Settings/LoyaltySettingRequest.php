@@ -13,7 +13,6 @@ class LoyaltySettingRequest extends Request
     {
         $rules = [
             'loyalty_points_enable_loyalty_program' => ['nullable', 'boolean'],
-            'loyalty_points_points_exchange_rate' => ['required', 'numeric', 'min:1'],
             'loyalty_points_points_earning_rate' => ['required', 'numeric', 'min:0'],
             'loyalty_points_points_earning_currency' => ['required', 'numeric', 'min:1'],
             'loyalty_points_eligible_order_statuses' => ['nullable', 'array'],

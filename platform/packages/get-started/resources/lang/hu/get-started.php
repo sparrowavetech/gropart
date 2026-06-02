@@ -31,4 +31,13 @@ return [
     'email' => 'E-mail',
     'password' => 'Jelszó',
     'password_confirmation' => 'Jelszó megerősítése',
+    'site_branding' => 'Webhely logója és faviconja',
+    'admin_branding' => 'Adminisztráció logója és faviconja',
+    'step_branding' => 'Arculat',
+    'step_account' => 'Fiók',
+    'back' => 'Vissza',
+    'branding_saved' => 'Az arculati beállítások sikeresen mentve!',
+    'dont_show_again' => 'Ne jelenjen meg újra',
+    'dismissed_message' => 'A beállítóvarázsló értesítése bezárva.',
+    'exit_wizard_description' => 'A beállítást később folytathatja az irányítópultján található értesítésből.',
 ];

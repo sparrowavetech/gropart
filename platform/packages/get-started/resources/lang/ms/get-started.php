@@ -31,4 +31,13 @@ return [
     'email' => 'E-mel',
     'password' => 'Kata laluan',
     'password_confirmation' => 'Pengesahan kata laluan',
+    'site_branding' => 'Logo & favicon laman',
+    'admin_branding' => 'Logo & favicon admin',
+    'step_branding' => 'Penjenamaan',
+    'step_account' => 'Akaun',
+    'back' => 'Kembali',
+    'branding_saved' => 'Tetapan penjenamaan berjaya disimpan!',
+    'dont_show_again' => 'Jangan tunjuk lagi',
+    'dismissed_message' => 'Notis wizard persediaan telah ditutup.',
+    'exit_wizard_description' => 'Anda boleh menyambung semula persediaan kemudian daripada notis di papan pemuka anda.',
 ];

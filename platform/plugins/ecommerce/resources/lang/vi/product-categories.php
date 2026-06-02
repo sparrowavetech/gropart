@@ -27,4 +27,6 @@ return [
     'parent' => 'Danh mục cha',
     'image' => 'Hình ảnh',
     'product_category_translations' => 'Bản dịch danh mục sản phẩm',
+    'parent_self_reference' => 'Một danh mục không thể là danh mục cha của chính nó.',
+    'parent_circular_reference' => 'Không thể gán một danh mục làm danh mục cha cho một trong các danh mục con của chính nó.',
 ];

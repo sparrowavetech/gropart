@@ -117,10 +117,11 @@ class OrderSupportServiceProvider extends ServiceProvider
 
         $groupedProducts = collect();
         foreach ($products as $product) {
-            $storeId = ($product->original_product && $product->original_product->store_id) ? $product->original_product->store_id : 0;
+            $store = $product->original_product?->store;
+            $storeId = $store && $store->exists ? $store->id : 0;
             if (! Arr::has($groupedProducts, $storeId)) {
                 $groupedProducts[$storeId] = collect([
-                    'store' => $product->original_product->store,
+                    'store' => $store,
                     'products' => collect([$product]),
                 ]);
             } else {
@@ -219,6 +220,12 @@ class OrderSupportServiceProvider extends ServiceProvider
         if ($couponCode && $discounts->count()) {
             DiscountFacade::getFacadeRoot()->afterOrderPlaced($couponCode);
         }
+
+        // Extension point for cart-wide discounts that must be distributed across
+        // the per-vendor orders BEFORE the payment amount is summed (line below).
+        // Plugins (e.g. Loyalty Points) reduce each order's amount by its share so
+        // the discounted total reaches the payment gateway instead of the full price.
+        $orders = apply_filters('marketplace_checkout_orders_before_processing_payment', $orders, $request, $token);
 
         if (! is_plugin_active('payment') || ! $orders->pluck('amount')->sum()) {
             OrderHelper::processOrder($orders->pluck('id')->all());
@@ -902,6 +909,11 @@ class OrderSupportServiceProvider extends ServiceProvider
                     $defaultShippingOption = Arr::first(array_keys(Arr::first($shipping)));
 
                     $defaultShippingMethod = (string) $defaultShippingMethod;
+
+                    // Ensure the resolved key exists in $shipping; otherwise the blade renders no checked radio.
+                    if (! array_key_exists($defaultShippingMethod, $shipping)) {
+                        $defaultShippingMethod = (string) array_key_first($shipping);
+                    }
 
                     $optionRequest = null;
                     if (MarketplaceHelper::isChargeShippingPerVendor()) {

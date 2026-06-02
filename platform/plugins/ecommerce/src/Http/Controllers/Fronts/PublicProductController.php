@@ -43,6 +43,8 @@ class PublicProductController extends BaseController
         SeoHelper::setTitle(theme_option('ecommerce_products_seo_title') ?: __('Products'))
             ->setDescription(theme_option('ecommerce_products_seo_description'));
 
+        SeoHelper::meta()->setUrl(route('public.products'));
+
         $with = EcommerceHelper::withProductEagerLoadingRelations();
 
         if (($query = BaseHelper::stringify($request->input('q'))) && ! $request->ajax()) {

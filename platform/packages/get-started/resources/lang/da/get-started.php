@@ -31,4 +31,13 @@ return [
     'email' => 'E-mail',
     'password' => 'Adgangskode',
     'password_confirmation' => 'Bekræftelse af adgangskode',
+    'site_branding' => 'Sidelogo og favicon',
+    'admin_branding' => 'Administrationslogo og favicon',
+    'step_branding' => 'Branding',
+    'step_account' => 'Konto',
+    'back' => 'Tilbage',
+    'branding_saved' => 'Branding-indstillinger blev gemt!',
+    'dont_show_again' => 'Vis ikke igen',
+    'dismissed_message' => 'Meddelelsen fra opsætningsguiden blev lukket.',
+    'exit_wizard_description' => 'Du kan fortsætte opsætningen senere fra meddelelsen på dit dashboard.',
 ];

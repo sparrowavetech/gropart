@@ -115,17 +115,17 @@ class LoyaltyProductVariation {
     }
 
     calculateMaxPoints(amount) {
-        const { redemptionRate, redemptionCurrency, pointsExchangeRate } = this.config
+        const { redemptionRate, redemptionCurrency } = this.config
         if (redemptionCurrency <= 0) return 0
 
-        return Math.floor(((amount * pointsExchangeRate) / redemptionCurrency) * redemptionRate)
+        return Math.floor((amount / redemptionCurrency) * redemptionRate)
     }
 
     calculateMaxDiscount(amount, maxPoints) {
-        const { redemptionRate, redemptionCurrency, pointsExchangeRate, maxRedemptionPercentage } = this.config
+        const { redemptionRate, redemptionCurrency, maxRedemptionPercentage } = this.config
         if (redemptionRate <= 0) return 0
 
-        let discount = ((maxPoints / redemptionRate) * redemptionCurrency) / pointsExchangeRate
+        let discount = (maxPoints / redemptionRate) * redemptionCurrency
 
         if (maxRedemptionPercentage > 0) {
             const maxAllowed = (amount * maxRedemptionPercentage) / 100

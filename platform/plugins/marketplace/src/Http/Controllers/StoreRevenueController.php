@@ -30,7 +30,7 @@ class StoreRevenueController extends BaseController
         abort_unless($customer->id, 404);
 
         Assets::addScriptsDirectly(['vendor/core/plugins/marketplace/js/store-revenue.js']);
-        $table->setAjaxUrl(route('marketplace.store.revenue.index', $customer->id));
+        $table->setAjaxUrl(route('marketplace.store.revenue.index', ['id' => $customer->id, 'store_id' => $store->id]));
         $this->pageTitle(trans('plugins/marketplace::revenue.view_store', ['store' => $store->name]));
 
         return view('plugins/marketplace::stores.index', compact('table', 'store', 'customer'))->render();

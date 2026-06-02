@@ -5,6 +5,7 @@ namespace Botble\Theme\Http\Controllers;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
+use Botble\Language\Facades\Language;
 use Botble\Page\Models\Page;
 use Botble\Page\Services\PageService;
 use Botble\SeoHelper\Facades\SeoHelper;
@@ -94,6 +95,41 @@ class PublicController extends BaseController
 
     public function getSiteMap()
     {
+        // When the Language plugin is active and the request hits the locale-less
+        // /sitemap.xml URL, return a sitemap index of every active locale's sitemap
+        // so search engines can discover the per-locale sitemaps.
+        if (
+            is_plugin_active('language')
+            && ! Language::checkLocaleInSupportedLocales(request()->segment(1))
+        ) {
+            // Use the supported-locales array keys (lang_locale) — these are what
+            // the language plugin uses as the route prefix, not lang_code. For
+            // English the lang_code is "en_US" while lang_locale is "en", so
+            // /{lang_code}/sitemap.xml would 404.
+            $supportedLocales = Language::getSupportedLocales();
+
+            if (count($supportedLocales) > 1) {
+                $sitemaps = collect($supportedLocales)
+                    ->map(fn (array $language, string $localeCode) => [
+                        'loc' => url($localeCode . '/sitemap.xml'),
+                        'lastmod' => null,
+                    ])
+                    ->values()
+                    ->all();
+
+                // Resolve the sitemap service so its deferred provider boots and
+                // registers the `packages/sitemap` view namespace before render.
+                app('sitemap');
+
+                return response()
+                    ->view('packages/sitemap::sitemapindex', [
+                        'sitemaps' => $sitemaps,
+                        'style' => null,
+                    ])
+                    ->header('Content-Type', 'application/xml');
+            }
+        }
+
         return $this->getSiteMapIndex();
     }
 

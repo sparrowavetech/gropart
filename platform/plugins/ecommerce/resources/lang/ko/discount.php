@@ -95,6 +95,7 @@ return [
     'you_need_login_to_use_coupon_code' => '이 쿠폰 코드를 사용하려면 로그인해 주세요. 이 제안은 고객 계정이 필요합니다.',
     'you_used_coupon_code' => '이미 이 쿠폰 코드를 사용하셨습니다. 각 고객은 이 제안을 한 번만 사용할 수 있습니다.',
     'coupon_not_available_for_your_account' => '죄송합니다. 쿠폰 코드 ":code"는 귀하의 계정에서 사용할 수 없습니다. 이는 선별된 고객을 위한 독점 제안입니다.',
+    'coupon_not_valid_for_cart_items' => '이 쿠폰 코드는 장바구니에 있는 상품에 사용할 수 없습니다. 사용하려면 해당 상품을 추가해 주세요.',
     'customer_used_coupon_code' => '이 할인 코드를 사용한 고객',
     'apply_via_url' => 'URL을 통해 적용하시겠습니까?',
     'apply_via_url_description' => '이 설정은 고객이 "?coupon=code" 매개변수가 있는 URL에 액세스할 때 쿠폰 코드를 적용합니다.',
@@ -116,4 +117,8 @@ return [
     'close' => '닫기',
     'coupon_code_label' => '쿠폰 코드: :code',
     'enter_coupon_code_placeholder' => '쿠폰 코드를 입력하세요...',
+    'applied' => '적용됨',
+    'change_coupon' => '쿠폰 변경',
+    'enter_coupon_code' => '쿠폰 코드 입력',
+    'or_select_coupon' => '또는 쿠폰 선택',
 ];

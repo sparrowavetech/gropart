@@ -27,4 +27,6 @@ return [
     'parent' => '親カテゴリ',
     'image' => '画像',
     'product_category_translations' => '商品カテゴリ翻訳',
+    'parent_self_reference' => 'カテゴリーを自身の親カテゴリーに設定することはできません。',
+    'parent_circular_reference' => 'カテゴリーを自身の子孫カテゴリーの親として割り当てることはできません。',
 ];

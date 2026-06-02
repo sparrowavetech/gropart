@@ -2177,6 +2177,6 @@ class EcommerceHelper
 
     public function getAssetVersion(): string
     {
-        return '3.11.8';
+        return '3.11.9';
     }
 }

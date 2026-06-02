@@ -27,4 +27,6 @@ return [
     'parent' => 'Pagrindinė kategorija',
     'image' => 'Vaizdas',
     'product_category_translations' => 'Produktų kategorijos vertimai',
+    'parent_self_reference' => 'Kategorija negali būti savo pačios pagrindinė kategorija.',
+    'parent_circular_reference' => 'Kategorija negali būti priskirta vienai iš savo pačios subkategorijų kaip pagrindinė kategorija.',
 ];

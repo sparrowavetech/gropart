@@ -49,6 +49,14 @@ class ProductCategoryForm extends FormAbstract
             $cache->put($cacheKey, $categories, Carbon::now()->addHours(2));
         }
 
+        $currentModel = $this->getModel();
+        if ($currentModel instanceof ProductCategory && $currentModel->exists) {
+            $excludedIds = $this->collectDescendantIds($currentModel->getKey());
+            $excludedIds[] = $currentModel->getKey();
+
+            $categories = array_diff_key($categories, array_flip($excludedIds));
+        }
+
         $maxOrder = ProductCategory::query()
             ->whereIn('parent_id', [0, null])
             ->latest('order')
@@ -103,5 +111,29 @@ class ProductCategoryForm extends FormAbstract
                     ->defaultValue(false)
             )
             ->setBreakFieldPoint('status');
+    }
+
+    protected function collectDescendantIds(int $rootId): array
+    {
+        $descendantIds = [];
+        $queue = [$rootId];
+
+        while (! empty($queue)) {
+            $childIds = ProductCategory::query()
+                ->whereIn('parent_id', $queue)
+                ->whereNotIn('id', $descendantIds)
+                ->where('id', '!=', $rootId)
+                ->pluck('id')
+                ->all();
+
+            if (empty($childIds)) {
+                break;
+            }
+
+            $descendantIds = array_merge($descendantIds, $childIds);
+            $queue = $childIds;
+        }
+
+        return $descendantIds;
     }
 }

@@ -31,4 +31,13 @@ return [
     'email' => 'E-mail',
     'password' => 'Hasło',
     'password_confirmation' => 'Potwierdzenie hasła',
+    'site_branding' => 'Logo i favicon witryny',
+    'admin_branding' => 'Logo i favicon panelu administracyjnego',
+    'step_branding' => 'Branding',
+    'step_account' => 'Konto',
+    'back' => 'Wstecz',
+    'branding_saved' => 'Ustawienia brandingu zostały pomyślnie zapisane!',
+    'dont_show_again' => 'Nie pokazuj ponownie',
+    'dismissed_message' => 'Powiadomienie kreatora konfiguracji zostało zamknięte.',
+    'exit_wizard_description' => 'Konfigurację możesz wznowić później z powiadomienia w panelu.',
 ];

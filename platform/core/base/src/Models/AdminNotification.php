@@ -8,6 +8,8 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\MassPrunable;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Throwable;
 
 class AdminNotification extends BaseModel
 {
@@ -78,12 +80,25 @@ class AdminNotification extends BaseModel
         });
 
         static::saved(function (): void {
-            Cache::make(static::class)->flush();
+            static::flushAdminNotificationCache();
         });
 
         static::deleted(function (): void {
-            Cache::make(static::class)->flush();
+            static::flushAdminNotificationCache();
         });
+    }
+
+    protected static function flushAdminNotificationCache(): void
+    {
+        Cache::make(static::class)->flush();
+
+        try {
+            DB::table('users')->pluck('id')->each(function ($id): void {
+                cache()->forget('admin-notifications-count-' . $id);
+            });
+        } catch (Throwable) {
+            // users table may be unavailable during install/migration
+        }
     }
 
     public function newEloquentBuilder($query): AdminNotificationQueryBuilder

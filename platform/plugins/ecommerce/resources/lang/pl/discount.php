@@ -95,6 +95,7 @@ return [
     'you_need_login_to_use_coupon_code' => 'Proszę się zalogować, aby użyć tego kodu kuponu. Ta oferta wymaga konta klienta.',
     'you_used_coupon_code' => 'Już użyłeś tego kodu kuponu. Każdy klient może użyć tej oferty tylko raz.',
     'coupon_not_available_for_your_account' => 'Przepraszamy, kod kuponu ":code" nie jest dostępny dla Twojego konta. To jest ekskluzywna oferta dla wybranych klientów.',
+    'coupon_not_valid_for_cart_items' => 'Ten kod kuponu nie jest ważny dla produktów w Twoim koszyku. Dodaj kwalifikujący się produkt, aby go użyć.',
     'customer_used_coupon_code' => 'Klienci, którzy użyli tego kodu rabatowego',
     'apply_via_url' => 'Zastosuj przez URL?',
     'apply_via_url_description' => 'To ustawienie zastosuje kod kuponu, gdy klienci uzyskają dostęp do URL z parametrem "?coupon=code".',
@@ -116,4 +117,8 @@ return [
     'close' => 'Zamknij',
     'coupon_code_label' => 'Kod kuponu: :code',
     'enter_coupon_code_placeholder' => 'Wprowadź kod kuponu...',
+    'applied' => 'Zastosowano',
+    'change_coupon' => 'Zmień kupon',
+    'enter_coupon_code' => 'Wprowadź kod kuponu',
+    'or_select_coupon' => 'Lub wybierz kupon',
 ];

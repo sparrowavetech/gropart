@@ -12,7 +12,7 @@ class TagRequest extends Request
     {
         return [
             'name' => ['required', 'string', 'max:120'],
-            'description' => ['nullable', 'string', 'max:400'],
+            'description' => ['nullable', 'string'],
             'status' => [Rule::in(BaseStatusEnum::values())],
         ];
     }

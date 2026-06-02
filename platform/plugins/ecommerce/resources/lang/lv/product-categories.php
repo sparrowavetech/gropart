@@ -27,4 +27,6 @@ return [
     'parent' => 'Vecāka kategorija',
     'image' => 'Attēls',
     'product_category_translations' => 'Produktu kategoriju tulkojumi',
+    'parent_self_reference' => 'Kategorija nevar būt pati savs vecāks.',
+    'parent_circular_reference' => 'Kategoriju nevar piešķirt vienai no tās pašas apakškategorijām kā vecāku.',
 ];

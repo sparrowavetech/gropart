@@ -95,6 +95,7 @@ return [
     'you_need_login_to_use_coupon_code' => 'Pro použití tohoto slevového kódu se prosím přihlaste. Tato nabídka vyžaduje zákaznický účet.',
     'you_used_coupon_code' => 'Tento slevový kód jste již použili. Každý zákazník může tuto nabídku použít pouze jednou.',
     'coupon_not_available_for_your_account' => 'Omlouváme se, slevový kód ":code" není pro váš účet dostupný. Jedná se o exkluzivní nabídku pro vybrané zákazníky.',
+    'coupon_not_valid_for_cart_items' => 'Tento slevový kód není platný pro položky ve vašem košíku. Chcete-li jej použít, přidejte způsobilý produkt.',
     'customer_used_coupon_code' => 'Zákazníci, kteří použili tento slevový kód',
     'apply_via_url' => 'Uplatnit přes URL?',
     'apply_via_url_description' => 'Toto nastavení uplatní slevový kód, když zákazníci přistoupí na URL s parametrem "?coupon=kod".',
@@ -116,4 +117,8 @@ return [
     'close' => 'Zavřít',
     'coupon_code_label' => 'Slevový kód: :code',
     'enter_coupon_code_placeholder' => 'Zadejte slevový kód...',
+    'applied' => 'Použito',
+    'change_coupon' => 'Změnit kupon',
+    'enter_coupon_code' => 'Zadejte slevový kód',
+    'or_select_coupon' => 'Nebo vyberte kupon',
 ];

@@ -95,6 +95,7 @@ return [
     'you_need_login_to_use_coupon_code' => 'يرجى تسجيل الدخول لاستخدام رمز الكوبون هذا. هذا العرض يتطلب حساب عميل.',
     'you_used_coupon_code' => 'لقد استخدمت رمز الكوبون هذا بالفعل. يمكن لكل عميل استخدام هذا العرض مرة واحدة فقط.',
     'coupon_not_available_for_your_account' => 'عذراً، رمز الكوبون ":code" غير متاح لحسابك. هذا عرض حصري للعملاء المحددين.',
+    'coupon_not_valid_for_cart_items' => 'رمز القسيمة هذا غير صالح للمنتجات الموجودة في سلتك. يرجى إضافة منتج مؤهل لاستخدامه.',
     'customer_used_coupon_code' => 'العملاء الذين استخدموا رمز الخصم هذا',
     'apply_via_url' => 'تطبيق عبر الرابط؟',
     'apply_via_url_description' => 'سيؤدي هذا الإعداد إلى تطبيق رمز الكوبون عندما يدخل العملاء إلى الرابط مع المعامل "?coupon=code".',
@@ -116,4 +117,8 @@ return [
     'close' => 'إغلاق',
     'coupon_code_label' => 'رمز الكوبون: :code',
     'enter_coupon_code_placeholder' => 'أدخل رمز الكوبون...',
+    'applied' => 'مطبَّق',
+    'change_coupon' => 'تغيير القسيمة',
+    'enter_coupon_code' => 'أدخل رمز القسيمة',
+    'or_select_coupon' => 'أو اختر قسيمة',
 ];

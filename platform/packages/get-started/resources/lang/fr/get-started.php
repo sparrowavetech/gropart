@@ -31,4 +31,13 @@ return [
     'email' => 'Courriel',
     'password' => 'Mot de passe',
     'password_confirmation' => 'Confirmation du mot de passe',
+    'site_branding' => 'Logo et favicon du site',
+    'admin_branding' => 'Logo et favicon de l\'administration',
+    'step_branding' => 'Image de marque',
+    'step_account' => 'Compte',
+    'back' => 'Retour',
+    'branding_saved' => 'Paramètres de marque enregistrés avec succès !',
+    'dont_show_again' => 'Ne plus afficher',
+    'dismissed_message' => 'Avis de l\'assistant de configuration ignoré.',
+    'exit_wizard_description' => 'Vous pouvez reprendre la configuration plus tard depuis l\'avis sur votre tableau de bord.',
 ];

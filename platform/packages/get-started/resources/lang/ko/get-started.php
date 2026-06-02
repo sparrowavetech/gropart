@@ -31,4 +31,13 @@ return [
     'email' => '이메일',
     'password' => '비밀번호',
     'password_confirmation' => '비밀번호 확인',
+    'site_branding' => '사이트 로고 및 파비콘',
+    'admin_branding' => '관리자 로고 및 파비콘',
+    'step_branding' => '브랜딩',
+    'step_account' => '계정',
+    'back' => '뒤로',
+    'branding_saved' => '브랜딩 설정이 성공적으로 저장되었습니다!',
+    'dont_show_again' => '다시 표시하지 않기',
+    'dismissed_message' => '설정 마법사 알림이 닫혔습니다.',
+    'exit_wizard_description' => '나중에 대시보드의 알림에서 설정을 다시 진행할 수 있습니다.',
 ];

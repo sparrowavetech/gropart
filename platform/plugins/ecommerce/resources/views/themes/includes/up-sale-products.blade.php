@@ -128,15 +128,6 @@
                                         <a href="{{ $product->url }}">
                                             {{ RvMedia::image($productImage, $product->name, 'thumb', true) }}
                                         </a>
-                                        @if($bundleDiscountPrice > 0)
-                                            <span class="ec-upsell-discount-badge">
-                                                @if($isPercentDiscount)
-                                                    -{{ (int) $bundleDiscountPrice }}%
-                                                @else
-                                                    -{{ format_price($bundleDiscountPrice) }}
-                                                @endif
-                                            </span>
-                                        @endif
                                     </div>
 
                                     <div class="ec-upsell-bundle-info">
@@ -150,6 +141,17 @@
                                                 <span class="ec-upsell-price-original">{{ format_price($showOriginalPrice) }}</span>
                                             @endif
                                             <span class="ec-upsell-price-sale">{{ format_price($bundlePrice) }}</span>
+                                            @if($bundleDiscountPrice > 0)
+                                                {{-- Badge sits inline next to the sale price (was absolute on
+                                                     the thumb and clipped product images). --}}
+                                                <span class="ec-upsell-discount-badge ec-upsell-discount-badge--inline">
+                                                    @if($isPercentDiscount)
+                                                        -{{ (int) $bundleDiscountPrice }}%
+                                                    @else
+                                                        -{{ format_price($bundleDiscountPrice) }}
+                                                    @endif
+                                                </span>
+                                            @endif
                                         </div>
 
                                         @if($product->variations->isNotEmpty())

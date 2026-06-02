@@ -27,4 +27,6 @@ return [
     'parent' => 'Catégorie parente',
     'image' => 'Illustration',
     'product_category_translations' => 'Traductions des catégories de produits',
+    'parent_self_reference' => 'Une catégorie ne peut pas être sa propre catégorie parente.',
+    'parent_circular_reference' => 'Une catégorie ne peut pas être assignée à l\'une de ses propres sous-catégories comme catégorie parente.',
 ];

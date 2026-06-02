@@ -27,4 +27,6 @@ return [
     'parent' => 'Szülő kategória',
     'image' => 'Kép',
     'product_category_translations' => 'Termékkategória fordítások',
+    'parent_self_reference' => 'Egy kategória nem lehet saját szülőkategóriája.',
+    'parent_circular_reference' => 'Egy kategória nem rendelhető saját alkategóriáinak egyikéhez szülő kategóriaként.',
 ];

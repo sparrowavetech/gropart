@@ -29,9 +29,8 @@ class PointsRedemptionTest extends BaseTestCase
     protected function enableLoyaltyProgram(): void
     {
         setting()->forceSet('loyalty_points_enable_loyalty_program', true)->save();
-        setting()->forceSet('loyalty_points_points_redemption_rate', 100)->save();
+        setting()->forceSet('loyalty_points_points_redemption_rate', 10000)->save();
         setting()->forceSet('loyalty_points_points_redemption_currency', 1)->save();
-        setting()->forceSet('loyalty_points_points_exchange_rate', 100)->save();
         setting()->forceSet('loyalty_points_min_redeemable_points', 0)->save();
         setting()->forceSet('loyalty_points_max_redeemable_points', 0)->save();
         setting()->forceSet('loyalty_points_max_redemption_percentage', 100)->save();

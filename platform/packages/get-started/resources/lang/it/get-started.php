@@ -31,4 +31,13 @@ return [
     'email' => 'Email',
     'password' => 'Password',
     'password_confirmation' => 'Conferma password',
+    'site_branding' => 'Logo e favicon del sito',
+    'admin_branding' => 'Logo e favicon dell\'amministrazione',
+    'step_branding' => 'Branding',
+    'step_account' => 'Account',
+    'back' => 'Indietro',
+    'branding_saved' => 'Impostazioni di branding salvate correttamente!',
+    'dont_show_again' => 'Non mostrare più',
+    'dismissed_message' => 'Avviso della procedura guidata di configurazione ignorato.',
+    'exit_wizard_description' => 'Puoi riprendere la configurazione più tardi dall\'avviso sulla tua dashboard.',
 ];

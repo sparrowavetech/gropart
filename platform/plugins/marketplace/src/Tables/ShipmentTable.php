@@ -79,6 +79,7 @@ class ShipmentTable extends TableAbstract
                 'price',
                 'status',
                 'cod_status',
+                'cod_amount',
                 'created_at',
             ])
             ->whereHas('order', function ($query): void {

@@ -31,4 +31,13 @@ return [
     'email' => 'Sähköposti',
     'password' => 'Salasana',
     'password_confirmation' => 'Salasanan vahvistus',
+    'site_branding' => 'Sivuston logo ja favicon',
+    'admin_branding' => 'Hallinnan logo ja favicon',
+    'step_branding' => 'Brändäys',
+    'step_account' => 'Tili',
+    'back' => 'Takaisin',
+    'branding_saved' => 'Brändäysasetukset tallennettiin onnistuneesti!',
+    'dont_show_again' => 'Älä näytä uudelleen',
+    'dismissed_message' => 'Ohjatun asennuksen ilmoitus suljettiin.',
+    'exit_wizard_description' => 'Voit jatkaa asennusta myöhemmin hallintapaneelin ilmoituksesta.',
 ];

@@ -44,10 +44,22 @@ $(() => {
             .then(({ data }) => {
                 _self.closest('.get-started-modal').modal('hide')
                 $(`.get-started-modal[data-step="${data.data.step}"]`).modal('show')
+
+                if (data.message) {
+                    Botble.showSuccess(data.message)
+                }
             })
             .finally(() => {
                 Botble.hideButtonLoading(_self)
             })
+    })
+
+    $(document).on('click', '.js-wizard-back', function (event) {
+        event.preventDefault()
+
+        const target = $(this).data('back-to')
+        $(this).closest('.get-started-modal').modal('hide')
+        $(`.get-started-modal[data-step="${target}"]`).modal('show')
     })
 
     $('.get-started-modal .btn-close').on('click', function (event) {
@@ -74,6 +86,24 @@ $(() => {
     $(document).on('click', '.resume-setup-wizard', function (event) {
         event.preventDefault()
         $('.get-started-modal[data-step="1"]').modal('show')
+    })
+
+    $(document).on('click', '.dismiss-setup-wizard', function (event) {
+        event.preventDefault()
+
+        const _self = $(this)
+
+        $httpClient
+            .make()
+            .withButtonLoading(_self)
+            .post(_self.data('url'))
+            .then(({ data }) => {
+                $('.resume-setup-wizard-wrapper').remove()
+
+                if (data.message) {
+                    Botble.showSuccess(data.message)
+                }
+            })
     })
 
     $('.get-started-modal').on('hide.bs.modal', () => {

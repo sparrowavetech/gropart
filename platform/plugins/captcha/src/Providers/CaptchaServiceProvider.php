@@ -191,7 +191,7 @@ class CaptchaServiceProvider extends ServiceProvider
         add_filter('core_request_attributes', function (array $attributes): array {
             return [
                 ...$attributes,
-                CaptchaFacade::attributes(),
+                ...CaptchaFacade::attributes(),
             ];
         }, 999);
     }

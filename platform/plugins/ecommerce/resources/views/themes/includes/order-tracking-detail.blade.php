@@ -270,6 +270,13 @@
                             </div>
                         @endif
 
+                        @if ((float) $order->payment_fee)
+                            <div class="bb-order-total-item">
+                                <span class="label">{{ trans('plugins/payment::payment.payment_fee') }}:</span>
+                                <span class="value">{{ format_price($order->payment_fee) }}</span>
+                            </div>
+                        @endif
+
                         <div class="bb-order-total-item grand-total">
                             <span class="label">{{ trans('plugins/ecommerce::ecommerce.total_amount') }}:</span>
                             <span class="value">{{ format_price($order->amount) }}</span>

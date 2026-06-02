@@ -38,6 +38,8 @@ class RegisterController extends BaseController
         SeoHelper::setTitle(theme_option('ecommerce_register_seo_title') ?: $title)
             ->setDescription(theme_option('ecommerce_register_seo_description'));
 
+        SeoHelper::meta()->addMeta('robots', 'noindex, nofollow');
+
         Theme::breadcrumb()->add($title, route('customer.register'));
 
         if (! session()->has('url.intended') &&

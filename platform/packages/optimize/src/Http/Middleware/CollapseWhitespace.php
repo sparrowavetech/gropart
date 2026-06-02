@@ -7,12 +7,9 @@ class CollapseWhitespace extends PageSpeed
     public function apply(string $buffer): string
     {
         $replace = [
-            "/\n([\S])/" => '$1',
-            "/\r/" => '',
-            "/\n/" => '',
-            "/\t/" => '',
-            '/ +/' => ' ',
-            '/> +</' => '><',
+            '/\>[^\S ]+/s' => '>',
+            '/[^\S ]+\</s' => '<',
+            '/(\s)+/s' => '\\1',
         ];
 
         $blocks = preg_split('/(<\/?pre[^>]*>)/', $buffer, -1, PREG_SPLIT_DELIM_CAPTURE);

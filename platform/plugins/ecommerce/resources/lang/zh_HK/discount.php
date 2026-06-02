@@ -95,6 +95,7 @@ return [
     'you_need_login_to_use_coupon_code' => '請登入以使用此優惠券代碼。此優惠需要顧客帳戶。',
     'you_used_coupon_code' => '您已經使用過此優惠券代碼。每位顧客只能使用此優惠一次。',
     'coupon_not_available_for_your_account' => '抱歉,優惠券代碼「:code」不適用於您的帳戶。這是為特定顧客提供的專屬優惠。',
+    'coupon_not_valid_for_cart_items' => '此優惠券代碼不適用於您購物車中的商品。請新增符合條件的商品後再使用。',
     'customer_used_coupon_code' => '使用過此折扣代碼的顧客',
     'apply_via_url' => '通過網址套用?',
     'apply_via_url_description' => '此設定將在顧客訪問帶有參數「?coupon=code」的網址時套用優惠券代碼。',
@@ -116,4 +117,8 @@ return [
     'close' => '關閉',
     'coupon_code_label' => '優惠券代碼：:code',
     'enter_coupon_code_placeholder' => '輸入優惠券代碼...',
+    'applied' => '已套用',
+    'change_coupon' => '更換優惠券',
+    'enter_coupon_code' => '輸入優惠券代碼',
+    'or_select_coupon' => '或選擇優惠券',
 ];

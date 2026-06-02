@@ -31,4 +31,13 @@ return [
     'email' => 'E-mail',
     'password' => 'Heslo',
     'password_confirmation' => 'Potvrzení hesla',
+    'site_branding' => 'Logo a favicon webu',
+    'admin_branding' => 'Logo a favicon administrace',
+    'step_branding' => 'Branding',
+    'step_account' => 'Účet',
+    'back' => 'Zpět',
+    'branding_saved' => 'Nastavení brandingu bylo úspěšně uloženo!',
+    'dont_show_again' => 'Příště nezobrazovat',
+    'dismissed_message' => 'Oznámení průvodce nastavením bylo zavřeno.',
+    'exit_wizard_description' => 'Nastavení můžete dokončit později z oznámení na vašem panelu.',
 ];

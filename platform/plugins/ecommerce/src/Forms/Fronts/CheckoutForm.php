@@ -48,7 +48,11 @@ class CheckoutForm extends FormFront
                     try {
                         $mobileDetect = new MobileDetect();
 
-                        $isMobile = $mobileDetect->isMobile();
+                        // Treat tablets (iPad / Android tablet) as desktop. The mobile
+                        // checkout footer (which carries the agree-terms checkbox) is
+                        // gated by `max-width: 767.98px` in CSS, so tablets at >= 768px
+                        // would otherwise receive the mobile layout but render it invisible.
+                        $isMobile = $mobileDetect->isMobile() && ! $mobileDetect->isTablet();
                     } catch (Throwable) {
                         $isMobile = false;
                     }

@@ -107,7 +107,6 @@
         padding-right: 6px;
     }
 
-    /* RTL fixes for intl-tel-input dropdown */
     body[dir="rtl"] .iti__country-list {
         text-align: left;
     }
@@ -144,12 +143,10 @@
         }
     }
 
-    /* Dropdown container when appended to body */
     .iti--container {
         z-index: 9999;
     }
 
-    /* Dark mode support */
     [data-bs-theme="dark"] .iti__country-list,
     [data-bs-theme="dark"] .iti--container .iti__country-list,
     .dark-mode .iti__country-list,
@@ -324,6 +321,26 @@
                 if (itiContainer) {
                     const flagContainer = itiContainer.querySelector('.iti__flag-container');
                     if (flagContainer) {
+                        flagContainer.addEventListener('pointerdown', function(e) {
+                            if (e.pointerType === 'mouse') {
+                                return;
+                            }
+                            const selectedFlag = itiContainer.querySelector('.iti__selected-flag');
+                            if (!selectedFlag) {
+                                return;
+                            }
+                            if (e.cancelable) {
+                                e.preventDefault();
+                            }
+                            e.stopPropagation();
+                            setTimeout(function() {
+                                if (selectedFlag.getAttribute('aria-expanded') === 'true') {
+                                    return;
+                                }
+                                selectedFlag.click();
+                            }, 50);
+                        }, { passive: false });
+
                         flagContainer.addEventListener('click', function() {
                             setTimeout(function() {
                                 const countryList = document.querySelector('.iti--container .iti__country-list') ||

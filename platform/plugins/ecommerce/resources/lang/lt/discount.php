@@ -95,6 +95,7 @@ return [
     'you_need_login_to_use_coupon_code' => 'Prisijunkite, kad galėtumėte naudoti šį kupono kodą. Ši pasiūla reikalauja kliento paskyros.',
     'you_used_coupon_code' => 'Jau panaudojote šį kupono kodą. Kiekvienas klientas gali naudoti šią pasiūlą tik vieną kartą.',
     'coupon_not_available_for_your_account' => 'Atsiprašome, kupono kodas ":code" nėra prieinamas jūsų paskyrai. Tai yra ekskliazyvi pasiūla pasirinktiniams klientams.',
+    'coupon_not_valid_for_cart_items' => 'Šis nuolaidos kodas negalioja jūsų krepšelyje esančioms prekėms. Norėdami jį panaudoti, pridėkite tinkamą prekę.',
     'customer_used_coupon_code' => 'Klientai, panaudoję šį nuolaidos kodą',
     'apply_via_url' => 'Taikyti per URL?',
     'apply_via_url_description' => 'Šis nustatymas pritaikys kupono kodą, kai klientai pasieks URL su parametru "?coupon=kodas".',
@@ -116,4 +117,8 @@ return [
     'close' => 'Uždaryti',
     'coupon_code_label' => 'Kupono kodas: :code',
     'enter_coupon_code_placeholder' => 'Įveskite kupono kodą...',
+    'applied' => 'Pritaikyta',
+    'change_coupon' => 'Keisti kuponą',
+    'enter_coupon_code' => 'Įveskite nuolaidos kodą',
+    'or_select_coupon' => 'Arba pasirinkite kuponą',
 ];

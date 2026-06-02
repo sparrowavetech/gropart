@@ -31,4 +31,13 @@ return [
     'email' => 'E-pasts',
     'password' => 'Parole',
     'password_confirmation' => 'Paroles apstiprinājums',
+    'site_branding' => 'Vietnes logotips un favikona',
+    'admin_branding' => 'Administrācijas logotips un favikona',
+    'step_branding' => 'Zīmols',
+    'step_account' => 'Konts',
+    'back' => 'Atpakaļ',
+    'branding_saved' => 'Zīmola iestatījumi veiksmīgi saglabāti!',
+    'dont_show_again' => 'Vairs nerādīt',
+    'dismissed_message' => 'Iestatīšanas vedņa paziņojums noraidīts.',
+    'exit_wizard_description' => 'Iestatīšanu varat turpināt vēlāk no paziņojuma savā vadības panelī.',
 ];

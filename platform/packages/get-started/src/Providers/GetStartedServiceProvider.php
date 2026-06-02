@@ -7,6 +7,7 @@ use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Dashboard\Events\RenderingDashboardWidgets;
+use Botble\GetStarted\Supports\GetStartedHelper;
 use Illuminate\Support\Facades\Auth;
 
 class GetStartedServiceProvider extends ServiceProvider
@@ -30,7 +31,9 @@ class GetStartedServiceProvider extends ServiceProvider
                         ->addScripts('jquery-ui');
 
                     add_filter(BASE_FILTER_FOOTER_LAYOUT_TEMPLATE, function ($html) {
-                        return $html . view('packages/get-started::index')->render();
+                        return $html . view('packages/get-started::index', [
+                            'shouldChangeAccount' => GetStartedHelper::shouldChangeDefaultAccount(),
+                        ])->render();
                     }, 120);
 
                     add_filter(DASHBOARD_FILTER_ADMIN_NOTIFICATIONS, function ($html) {

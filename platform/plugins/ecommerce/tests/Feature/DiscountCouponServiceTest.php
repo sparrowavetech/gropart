@@ -349,8 +349,10 @@ class DiscountCouponServiceTest extends BaseTestCase
 
         $result = $this->couponService->execute('ELECTRONICS10');
 
-        $this->assertFalse($result['error']);
-        $this->assertEquals(0, $result['data']['discount_amount']);
+        // The cart product belongs to a different category than the coupon targets,
+        // so the coupon must be rejected rather than applying a silent $0 discount.
+        $this->assertTrue($result['error']);
+        $this->assertEquals('COUPON_NOT_APPLICABLE', $result['error_code']);
     }
 
     public function test_coupon_category_per_every_item_discount(): void
@@ -514,6 +516,33 @@ class DiscountCouponServiceTest extends BaseTestCase
         $this->assertEquals(30, $result['data']['discount_amount']);
     }
 
+    public function test_coupon_specific_product_percentage_scales_with_quantity(): void
+    {
+        // The discount on a specific-product percentage coupon must track the line
+        // total, so increasing the quantity scales the discount accordingly. This
+        // guards the calculation that the checkout summary recomputes on each cart
+        // change (instead of reusing the amount stored at apply time).
+        $product = $this->createProduct(['name' => 'VIP Product', 'price' => 100]);
+        $this->addProductToCart($product, 3);
+
+        $discount = Discount::query()->create([
+            'code' => 'VIP30QTY',
+            'type' => DiscountTypeEnum::COUPON,
+            'type_option' => DiscountTypeOptionEnum::PERCENTAGE,
+            'target' => DiscountTargetEnum::SPECIFIC_PRODUCT,
+            'value' => 30,
+            'start_date' => now()->subDay(),
+            'end_date' => now()->addDay(),
+        ]);
+        $discount->products()->attach($product->id);
+
+        $result = $this->couponService->execute('VIP30QTY');
+
+        $this->assertFalse($result['error']);
+        // 30% of (100 x 3) = 90, not the single-unit 30.
+        $this->assertEquals(90, $result['data']['discount_amount']);
+    }
+
     public function test_coupon_specific_product_not_in_cart(): void
     {
         $product1 = $this->createProduct(['name' => 'Product 1', 'price' => 100]);
@@ -535,8 +564,10 @@ class DiscountCouponServiceTest extends BaseTestCase
 
         $result = $this->couponService->execute('PRODUCT1ONLY');
 
-        $this->assertFalse($result['error']);
-        $this->assertEquals(0, $result['data']['discount_amount']);
+        // A coupon restricted to a specific product must be rejected when that
+        // product is not in the cart, instead of silently applying a $0 discount.
+        $this->assertTrue($result['error']);
+        $this->assertEquals('COUPON_NOT_APPLICABLE', $result['error_code']);
     }
 
     // ========================================

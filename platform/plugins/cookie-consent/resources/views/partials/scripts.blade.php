@@ -105,6 +105,22 @@
                 }
             }
 
+            function acceptAllCookies() {
+                document.querySelectorAll('.js-cookie-category').forEach(function(checkbox) {
+                    checkbox.checked = true;
+                });
+                consentWithCookies();
+            }
+
+            function acceptEssentialOnly() {
+                document.querySelectorAll('.js-cookie-category').forEach(function(checkbox) {
+                    if (!checkbox.disabled) {
+                        checkbox.checked = false;
+                    }
+                });
+                consentWithCookies();
+            }
+
             function rejectAllCookies() {
                 if (cookieExists(COOKIE_NAME)) {
                     const secure = window.location.protocol === 'https:' ? '; Secure' : '';
@@ -234,19 +250,33 @@
             }
 
             document.addEventListener('click', function(event) {
-                if (event.target.classList.contains('js-site-notice-agree')) {
+                const target = event.target.closest(
+                    '.js-site-notice-accept-all, .js-site-notice-essential, .js-site-notice-agree, .js-site-notice-reject, .js-site-notice-customize, .js-site-notice-save'
+                );
+
+                if (!target) {
+                    return;
+                }
+
+                if (target.classList.contains('js-site-notice-accept-all')) {
+                    acceptAllCookies();
+                } else if (target.classList.contains('js-site-notice-essential')) {
+                    acceptEssentialOnly();
+                } else if (target.classList.contains('js-site-notice-agree')) {
                     consentWithCookies();
-                } else if (event.target.classList.contains('js-site-notice-reject')) {
+                } else if (target.classList.contains('js-site-notice-reject')) {
                     rejectAllCookies();
-                } else if (event.target.classList.contains('js-site-notice-customize')) {
+                } else if (target.classList.contains('js-site-notice-customize')) {
                     toggleCustomizeView();
-                } else if (event.target.classList.contains('js-site-notice-save')) {
+                } else if (target.classList.contains('js-site-notice-save')) {
                     savePreferences();
                 }
             });
 
             return {
                 consentWithCookies: consentWithCookies,
+                acceptAllCookies: acceptAllCookies,
+                acceptEssentialOnly: acceptEssentialOnly,
                 rejectAllCookies: rejectAllCookies,
                 hideCookieDialog: hideCookieDialog,
                 savePreferences: savePreferences,

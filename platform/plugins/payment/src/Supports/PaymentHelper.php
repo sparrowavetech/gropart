@@ -80,11 +80,16 @@ class PaymentHelper
 
         $paymentChannel = Arr::get($data, 'payment_channel', PaymentMethodEnum::COD);
 
-        // Get payment fee using PaymentFeeHelper
-        $paymentFee = 0;
-        if ($paymentChannel) {
-            $orderAmount = $data['amount'];
-            $paymentFee = PaymentFeeHelper::calculateFee($paymentChannel, $orderAmount);
+        // Prefer the fee passed in (authoritative — set from ec_orders.payment_fee at checkout).
+        // Recalculating from $data['amount'] would double-apply percentage fees because
+        // $data['amount'] = $order->amount already includes the fee, producing a compounded
+        // value that diverges from the Invoice PDF.
+        if (Arr::has($data, 'payment_fee')) {
+            $paymentFee = (float) $data['payment_fee'];
+        } elseif ($paymentChannel) {
+            $paymentFee = PaymentFeeHelper::calculateFee($paymentChannel, $data['amount']);
+        } else {
+            $paymentFee = 0;
         }
 
         return Payment::query()

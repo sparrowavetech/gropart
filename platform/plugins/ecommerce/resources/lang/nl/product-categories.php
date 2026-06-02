@@ -27,4 +27,6 @@ return [
     'parent' => 'Bovenliggende Categorie',
     'image' => 'Afbeelding',
     'product_category_translations' => 'Product Categorie Vertalingen',
+    'parent_self_reference' => 'Een categorie kan niet haar eigen bovenliggende categorie zijn.',
+    'parent_circular_reference' => 'Een categorie kan niet worden toegewezen aan een van haar eigen onderliggende categorieën als bovenliggende categorie.',
 ];

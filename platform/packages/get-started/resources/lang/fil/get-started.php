@@ -31,4 +31,13 @@ return [
     'email' => 'Email',
     'password' => 'Password',
     'password_confirmation' => 'Kumpirmasyon ng password',
+    'site_branding' => 'Logo at favicon ng site',
+    'admin_branding' => 'Logo at favicon ng admin',
+    'step_branding' => 'Branding',
+    'step_account' => 'Account',
+    'back' => 'Bumalik',
+    'branding_saved' => 'Matagumpay na na-save ang mga setting ng branding!',
+    'dont_show_again' => 'Huwag nang ipakita muli',
+    'dismissed_message' => 'Na-dismiss ang abiso ng setup wizard.',
+    'exit_wizard_description' => 'Maaari mong ipagpatuloy ang setup mamaya mula sa abiso sa iyong dashboard.',
 ];

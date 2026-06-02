@@ -95,6 +95,7 @@ return [
     'you_need_login_to_use_coupon_code' => 'Sila log masuk untuk menggunakan kod kupon ini. Tawaran ini memerlukan akaun pelanggan.',
     'you_used_coupon_code' => 'Anda telah menggunakan kod kupon ini. Setiap pelanggan hanya boleh menggunakan tawaran ini sekali sahaja.',
     'coupon_not_available_for_your_account' => 'Maaf, kod kupon ":code" tidak tersedia untuk akaun anda. Ini adalah tawaran eksklusif untuk pelanggan terpilih.',
+    'coupon_not_valid_for_cart_items' => 'Kod kupon ini tidak sah untuk item dalam troli anda. Sila tambah produk yang layak untuk menggunakannya.',
     'customer_used_coupon_code' => 'Pelanggan yang telah menggunakan kod diskaun ini',
     'apply_via_url' => 'Gunakan melalui URL?',
     'apply_via_url_description' => 'Tetapan ini akan menggunakan kod kupon apabila pelanggan mengakses URL dengan parameter "?coupon=code".',
@@ -116,4 +117,8 @@ return [
     'close' => 'Tutup',
     'coupon_code_label' => 'Kod kupon: :code',
     'enter_coupon_code_placeholder' => 'Masukkan kod kupon...',
+    'applied' => 'Digunakan',
+    'change_coupon' => 'Tukar Kupon',
+    'enter_coupon_code' => 'Masukkan kod kupon',
+    'or_select_coupon' => 'Atau pilih kupon',
 ];

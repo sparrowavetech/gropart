@@ -143,6 +143,12 @@ class SettingEcommercePanelSection extends PanelSection
                     ->withDescription(trans('plugins/ecommerce::setting.abandoned_cart.panel_description'))
                     ->withPriority(200)
                     ->withRoute('ecommerce.settings.abandoned-carts'),
+                PanelSectionItem::make('settings.ecommerce.pending_orders')
+                    ->setTitle(trans('plugins/ecommerce::setting.pending_orders.name'))
+                    ->withIcon('ti ti-clock-x')
+                    ->withDescription(trans('plugins/ecommerce::setting.pending_orders.panel_description'))
+                    ->withPriority(210)
+                    ->withRoute('ecommerce.settings.pending-orders'),
             ]);
     }
 }

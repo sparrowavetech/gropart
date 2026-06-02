@@ -62,6 +62,34 @@ class HandleApplyCouponService
 
             $couponDiscountAmount = Arr::get($couponData, 'discount_amount', 0);
             $validCartItemIds = Arr::get($couponData, 'valid_cart_item_ids', 0);
+
+            $productRestrictedTargets = [
+                DiscountTargetEnum::SPECIFIC_PRODUCT,
+                DiscountTargetEnum::PRODUCT_VARIANT,
+                DiscountTargetEnum::PRODUCT_COLLECTIONS,
+                DiscountTargetEnum::PRODUCT_CATEGORIES,
+            ];
+
+            $validItemCount = $validCartItemIds instanceof \Illuminate\Support\Collection
+                ? $validCartItemIds->count()
+                : (is_countable($validCartItemIds) ? count($validCartItemIds) : 0);
+
+            // A coupon restricted to specific products/collections/categories/variants
+            // must be rejected when none of those items are in the cart, instead of
+            // silently applying a $0 discount (which confuses buyers). Limited to
+            // amount/percentage coupons, where the matched-item set is populated
+            // (the same-price branch computes without filling valid_cart_item_ids).
+            if (
+                in_array($discount->type_option, [DiscountTypeOptionEnum::AMOUNT, DiscountTypeOptionEnum::PERCENTAGE])
+                && in_array($discount->target, $productRestrictedTargets)
+                && $validItemCount === 0
+            ) {
+                return [
+                    'error' => true,
+                    'error_code' => 'COUPON_NOT_APPLICABLE',
+                    'message' => trans('plugins/ecommerce::discount.coupon_not_valid_for_cart_items'),
+                ];
+            }
         }
 
         if ($couponDiscountAmount < 0) {

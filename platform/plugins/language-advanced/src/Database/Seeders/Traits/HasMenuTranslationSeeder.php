@@ -3,6 +3,7 @@
 namespace Botble\LanguageAdvanced\Database\Seeders\Traits;
 
 use Botble\Language\Models\LanguageMeta;
+use Botble\Menu\Database\Traits\HasMenuSeeder;
 use Botble\Menu\Facades\Menu;
 use Botble\Menu\Models\Menu as MenuModel;
 use Botble\Menu\Models\MenuLocation;
@@ -13,6 +14,8 @@ use Illuminate\Support\Str;
 
 trait HasMenuTranslationSeeder
 {
+    use HasMenuSeeder;
+
     /**
      * Seed menu translations for all locales
      *
@@ -50,12 +53,14 @@ trait HasMenuTranslationSeeder
                 continue;
             }
 
-            if (isset($translations['main-menu'])) {
+            if (isset($translations['main-menu']) && is_array($translations['main-menu'])) {
+                $mainMenu = $translations['main-menu'];
+
                 $this->createMenuTranslation(
                     $locale,
                     'main-menu',
-                    $translations['name'],
-                    $this->buildMainMenuItems($translations, $pageIds),
+                    $mainMenu['name'] ?? 'Main menu',
+                    $this->buildMainMenuItems($mainMenu, $pageIds),
                     $menuOrigins['main-menu'] ?? null,
                     $locationOrigin
                 );

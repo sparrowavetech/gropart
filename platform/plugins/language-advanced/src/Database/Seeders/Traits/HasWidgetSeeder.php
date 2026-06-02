@@ -129,7 +129,18 @@ trait HasWidgetSeeder
      */
     protected function applyWidgetTranslations(array $data, array $translations, string $locale): array
     {
-        foreach (['name', 'title', 'subtitle', 'about', 'content'] as $key) {
+        $translatableTopKeys = [
+            'name',
+            'title',
+            'subtitle',
+            'about',
+            'content',
+            'description',
+            'button_label',
+            'action_label',
+        ];
+
+        foreach ($translatableTopKeys as $key) {
             if (isset($data[$key]) && is_string($data[$key])) {
                 $data[$key] = $this->translateValue($translations, $data[$key]);
             }
@@ -139,6 +150,8 @@ trait HasWidgetSeeder
         if (! empty($data['menu_id']) && is_string($data['menu_id'])) {
             $data['menu_id'] = sprintf('%s-%s', $data['menu_id'], $locale);
         }
+
+        $translatableItemKeys = ['label', 'text', 'action_label', 'description', 'title'];
 
         if (isset($data['items']) && is_array($data['items'])) {
             foreach ($data['items'] as $itemIndex => $item) {
@@ -150,7 +163,7 @@ trait HasWidgetSeeder
                         continue;
                     }
 
-                    if (in_array($key, ['label', 'text'], true)) {
+                    if (in_array($key, $translatableItemKeys, true)) {
                         $data['items'][$itemIndex][$fieldIndex]['value'] = $this->translateValue(
                             $translations,
                             $value

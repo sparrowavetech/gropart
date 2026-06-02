@@ -31,4 +31,13 @@ return [
     'email' => '電郵',
     'password' => '密碼',
     'password_confirmation' => '密碼確認',
+    'site_branding' => '網站標誌和圖示',
+    'admin_branding' => '後台標誌和圖示',
+    'step_branding' => '品牌',
+    'step_account' => '帳戶',
+    'back' => '返回',
+    'branding_saved' => '品牌設定已成功儲存！',
+    'dont_show_again' => '不再顯示',
+    'dismissed_message' => '已關閉設定精靈提示。',
+    'exit_wizard_description' => '您可以稍後透過儀表板上的提示繼續設定。',
 ];

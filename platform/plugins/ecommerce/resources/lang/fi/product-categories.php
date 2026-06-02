@@ -27,4 +27,6 @@ return [
     'parent' => 'Yläkategoria',
     'image' => 'Kuva',
     'product_category_translations' => 'Tuotekategorioiden käännökset',
+    'parent_self_reference' => 'Luokka ei voi olla oma ylätason luokkansa.',
+    'parent_circular_reference' => 'Luokkaa ei voi määrittää yhdeksi omista alaluokistaan ylätason luokaksi.',
 ];

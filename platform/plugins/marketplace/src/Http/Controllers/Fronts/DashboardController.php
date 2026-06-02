@@ -153,8 +153,55 @@ class DashboardController extends BaseController
             ->limit(10)
             ->get();
 
+        // Aggregate sold quantities by PARENT product id. ec_order_product.product_id
+        // points at the variation row for products with variations, so we resolve
+        // each row back to its parent via ec_product_variations.
+        $soldSubquery = DB::table('ec_order_product')
+            ->join('ec_orders', 'ec_orders.id', '=', 'ec_order_product.order_id')
+            ->leftJoin('ec_product_variations', 'ec_product_variations.product_id', '=', 'ec_order_product.product_id')
+            ->where('ec_orders.is_finished', 1)
+            ->where('ec_orders.store_id', $store->id)
+            ->whereDate('ec_orders.created_at', '>=', $startDate)
+            ->whereDate('ec_orders.created_at', '<=', $endDate)
+            ->selectRaw(
+                'COALESCE(ec_product_variations.configurable_product_id, ec_order_product.product_id) AS parent_id,
+                SUM(ec_order_product.qty) AS total_sold'
+            )
+            ->groupBy('parent_id');
+
+        $data['topSellingProducts'] = Product::query()
+            ->select([
+                'ec_products.id',
+                'ec_products.name',
+                'ec_products.order',
+                'ec_products.created_at',
+                'ec_products.status',
+                'ec_products.sku',
+                'ec_products.images',
+                'ec_products.price',
+                'ec_products.sale_price',
+                'ec_products.sale_type',
+                'ec_products.start_date',
+                'ec_products.end_date',
+                'ec_products.quantity',
+                'ec_products.with_storehouse_management',
+                'sold.total_sold',
+            ])
+            ->joinSub($soldSubquery, 'sold', 'sold.parent_id', '=', 'ec_products.id')
+            ->where('ec_products.is_variation', false)
+            ->where('ec_products.store_id', $store->id)
+            ->wherePublished('ec_products.status')
+            ->orderByDesc('sold.total_sold')
+            ->limit(10)
+            ->get();
+
         $totalProducts = $store->products()->count();
-        $totalOrders = $store->count();
+        $totalOrders = Order::query()
+            ->where('is_finished', 1)
+            ->where('store_id', $store->id)
+            ->whereDate('created_at', '>=', $startDate)
+            ->whereDate('created_at', '<=', $endDate)
+            ->count();
         $compact = compact('user', 'store', 'data', 'totalProducts', 'totalOrders');
 
         if ($request->ajax()) {

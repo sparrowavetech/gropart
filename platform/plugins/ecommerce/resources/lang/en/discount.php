@@ -95,6 +95,7 @@ return [
     'you_need_login_to_use_coupon_code' => 'Please sign in to use this coupon code. This offer requires a customer account.',
     'you_used_coupon_code' => 'You have already used this coupon code. Each customer can only use this offer once.',
     'coupon_not_available_for_your_account' => 'Sorry, the coupon code ":code" is not available for your account. This is an exclusive offer for selected customers.',
+    'coupon_not_valid_for_cart_items' => 'This coupon code is not valid for the items in your cart. Please add an eligible product to use it.',
     'customer_used_coupon_code' => 'Customers who have used this discount code',
     'apply_via_url' => 'Apply via URL?',
     'apply_via_url_description' => 'This setting will apply coupon code when customers access the URL with the parameter "?coupon=code".',

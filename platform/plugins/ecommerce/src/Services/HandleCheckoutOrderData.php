@@ -2,6 +2,7 @@
 
 namespace Botble\Ecommerce\Services;
 
+use Botble\Ecommerce\Enums\DiscountTypeOptionEnum;
 use Botble\Ecommerce\Enums\ShippingMethodEnum;
 use Botble\Ecommerce\Facades\Cart;
 use Botble\Ecommerce\Facades\EcommerceHelper;
@@ -82,7 +83,31 @@ class HandleCheckoutOrderData
 
             $couponDiscountAmount = 0;
             if (session()->has('applied_coupon_code')) {
-                $couponDiscountAmount = Arr::get($sessionCheckoutData, 'coupon_discount_amount', 0);
+                $appliedCouponCode = session('applied_coupon_code');
+                $discount = $this->applyCouponService->getCouponData($appliedCouponCode, $sessionCheckoutData);
+
+                if (! $discount) {
+                    // Coupon no longer exists or has expired - drop it.
+                    $this->removeCouponService->execute();
+                } elseif ($discount->type_option == DiscountTypeOptionEnum::SHIPPING) {
+                    // Free-shipping coupon: keep the stored state (the shipping fee
+                    // is computed further below, so it can't be re-validated here).
+                    $couponDiscountAmount = (float) Arr::get($sessionCheckoutData, 'coupon_discount_amount', 0);
+                } else {
+                    // Re-apply against the CURRENT cart so the discount tracks quantity
+                    // changes and its conditions (minimum order, product eligibility,
+                    // flash sale, promotion) are re-checked. Drop it when it no longer
+                    // qualifies instead of carrying a stale or invalid discount into the order.
+                    $couponResult = $this->applyCouponService->execute($appliedCouponCode, $sessionCheckoutData);
+
+                    if (Arr::get($couponResult, 'error')) {
+                        $this->removeCouponService->execute();
+                    } else {
+                        $couponDiscountAmount = max((float) Arr::get($couponResult, 'data.discount_amount', 0), 0);
+                    }
+                }
+
+                $sessionCheckoutData['coupon_discount_amount'] = $couponDiscountAmount;
             }
 
             $orderTotal = Cart::instance('cart')->rawTotal() - $promotionDiscountAmount - $couponDiscountAmount;
@@ -142,6 +167,11 @@ class HandleCheckoutOrderData
 
                     if (! is_string($defaultShippingMethod)) {
                         $defaultShippingMethod = (string) $defaultShippingMethod;
+                    }
+
+                    // Ensure the resolved key exists in $shipping; otherwise the blade renders no checked radio.
+                    if (! array_key_exists($defaultShippingMethod, $shipping)) {
+                        $defaultShippingMethod = (string) array_key_first($shipping);
                     }
 
                     $defaultShippingOption = Arr::first(array_keys(Arr::first($shipping)));

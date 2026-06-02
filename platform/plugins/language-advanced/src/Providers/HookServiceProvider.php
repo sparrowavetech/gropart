@@ -428,13 +428,14 @@ class HookServiceProvider extends ServiceProvider
                 return $url;
             }
 
-            $defaultLocale = Language::getDefaultLocale();
-
-            if ($localeCode === $defaultLocale) {
+            // slugs_translations.lang_code stores the languages.lang_code value (e.g. "ru_RU"),
+            // not the URL prefix (e.g. "ru"). Match the translation row by $languageCode so the
+            // switcher resolves to the translated slug even when lang_code differs from lang_locale.
+            if ($languageCode === Language::getDefaultLocaleCode()) {
                 $targetPrefix = $this->cachedSlugRecord->prefix;
                 $targetKey = $this->cachedSlugRecord->key;
             } else {
-                $targetTranslation = $this->cachedSlugTranslations?->firstWhere('lang_code', $localeCode);
+                $targetTranslation = $this->cachedSlugTranslations?->firstWhere('lang_code', $languageCode);
 
                 if ($targetTranslation) {
                     $targetPrefix = $targetTranslation->prefix;
@@ -528,10 +529,10 @@ class HookServiceProvider extends ServiceProvider
         }
 
         $currentPrefix = $route->parameter('prefix');
-        $defaultLocale = Language::getDefaultLocale();
-        $currentLocale = Language::getCurrentLocale();
+        $defaultLocaleCode = Language::getDefaultLocaleCode();
+        $currentLocaleCode = Language::getCurrentLocaleCode();
 
-        if ($currentLocale === $defaultLocale) {
+        if ($currentLocaleCode === $defaultLocaleCode) {
             $query = DB::table('slugs')->where('key', $currentSlug);
 
             if ($currentPrefix) {
@@ -540,9 +541,11 @@ class HookServiceProvider extends ServiceProvider
 
             $this->cachedSlugRecord = $query->first();
         } else {
+            // slugs_translations.lang_code stores the languages.lang_code value (e.g. "ru_RU"),
+            // not the URL prefix. Use getCurrentLocaleCode() so the lookup matches the column.
             $query = DB::table('slugs_translations')
                 ->where('key', $currentSlug)
-                ->where('lang_code', $currentLocale);
+                ->where('lang_code', $currentLocaleCode);
 
             if ($currentPrefix) {
                 $query->where('prefix', $currentPrefix);

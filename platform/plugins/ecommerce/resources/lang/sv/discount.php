@@ -95,6 +95,7 @@ return [
     'you_need_login_to_use_coupon_code' => 'Logga in för att använda denna kupongkod. Detta erbjudande kräver ett kundkonto.',
     'you_used_coupon_code' => 'Du har redan använt denna kupongkod. Varje kund kan bara använda detta erbjudande en gång.',
     'coupon_not_available_for_your_account' => 'Tyvärr, kupongkoden ":code" är inte tillgänglig för ditt konto. Detta är ett exklusivt erbjudande för utvalda kunder.',
+    'coupon_not_valid_for_cart_items' => 'Den här rabattkoden är inte giltig för artiklarna i din varukorg. Lägg till en kvalificerad produkt för att använda den.',
     'customer_used_coupon_code' => 'Kunder som har använt denna rabattkod',
     'apply_via_url' => 'Tillämpa via URL?',
     'apply_via_url_description' => 'Denna inställning kommer att tillämpa kupongkod när kunder besöker URL:en med parametern "?coupon=code".',
@@ -116,4 +117,8 @@ return [
     'close' => 'Stäng',
     'coupon_code_label' => 'Kupongkod: :code',
     'enter_coupon_code_placeholder' => 'Ange kupongkod...',
+    'applied' => 'Tillämpad',
+    'change_coupon' => 'Byt kupong',
+    'enter_coupon_code' => 'Ange rabattkod',
+    'or_select_coupon' => 'Eller välj en kupong',
 ];

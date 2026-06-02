@@ -258,6 +258,17 @@ AdminHelper::registerRoutes(function (): void {
                     'uses' => 'AbandonedCartSettingController@update',
                     'permission' => 'ecommerce.settings.abandoned-carts',
                 ]);
+
+                Route::get('pending-orders', [
+                    'as' => 'ecommerce.settings.pending-orders',
+                    'uses' => 'PendingOrderSettingController@edit',
+                ]);
+
+                Route::put('pending-orders', [
+                    'as' => 'ecommerce.settings.pending-orders.update',
+                    'uses' => 'PendingOrderSettingController@update',
+                    'permission' => 'ecommerce.settings.pending-orders',
+                ]);
             });
         });
     });

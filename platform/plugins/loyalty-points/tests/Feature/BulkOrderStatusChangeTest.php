@@ -35,7 +35,6 @@ class BulkOrderStatusChangeTest extends BaseTestCase
         setting()->forceSet('loyalty_points_enable_loyalty_program', true)->save();
         setting()->forceSet('loyalty_points_points_earning_rate', 1)->save();
         setting()->forceSet('loyalty_points_points_earning_currency', 100)->save();
-        setting()->forceSet('loyalty_points_points_exchange_rate', 1)->save();
         setting()->forceSet('loyalty_points_points_expiry_months', 12)->save();
         setting()->forceSet('loyalty_points_eligible_order_statuses', json_encode(['completed']))->save();
     }

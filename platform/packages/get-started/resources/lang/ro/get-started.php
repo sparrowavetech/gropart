@@ -31,4 +31,13 @@ return [
     'email' => 'Email',
     'password' => 'Parolă',
     'password_confirmation' => 'Confirmare parolă',
+    'site_branding' => 'Logo și favicon site',
+    'admin_branding' => 'Logo și favicon administrare',
+    'step_branding' => 'Branding',
+    'step_account' => 'Cont',
+    'back' => 'Înapoi',
+    'branding_saved' => 'Setările de branding au fost salvate cu succes!',
+    'dont_show_again' => 'Nu mai afișa',
+    'dismissed_message' => 'Notificarea expertului de configurare a fost închisă.',
+    'exit_wizard_description' => 'Puteți relua configurarea mai târziu din notificarea de pe tabloul de bord.',
 ];

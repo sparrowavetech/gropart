@@ -37,6 +37,8 @@ class LoginController extends BaseController
         SeoHelper::setTitle(theme_option('ecommerce_login_seo_title') ?: $title)
             ->setDescription(theme_option('ecommerce_login_seo_description'));
 
+        SeoHelper::meta()->addMeta('robots', 'noindex, nofollow');
+
         Theme::breadcrumb()->add($title, route('customer.login'));
 
         $currentHost = request()->getHost();

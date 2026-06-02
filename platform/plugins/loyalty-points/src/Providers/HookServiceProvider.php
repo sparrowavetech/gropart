@@ -17,6 +17,8 @@ class HookServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->registerAdminOrderHooks();
+        $this->registerOrderRedemptionIntentHook();
+        $this->registerMarketplaceOrderDiscountHook();
         add_filter('ecommerce_checkout_form_before_payment_form', function (?string $html) {
             $loyaltyHelper = app(LoyaltyHelper::class);
 
@@ -332,6 +334,130 @@ class HookServiceProvider extends ServiceProvider
         }, 99);
     }
 
+    /**
+     * Persist the loyalty redemption intent on the order BEFORE the customer is
+     * redirected to a payment gateway. This guarantees the OrderPlaced listener
+     * can recover the redemption details from the DB even when the gateway calls
+     * back via webhook (no PHP session, no auth guard).
+     */
+    protected function registerOrderRedemptionIntentHook(): void
+    {
+        add_action('ecommerce_before_processing_payment', function ($products, $request, $token, $sessionData): void {
+            if (! app(LoyaltyHelper::class)->isEnabled()) {
+                return;
+            }
+
+            $orderId = $request->input('order_id');
+
+            // Marketplace checkout passes an array of per-store order IDs (one
+            // order per vendor); the standard single-vendor checkout passes a
+            // scalar. Normalize to a single concrete ID so the redemption intent
+            // is persisted once - and, critically, so updateOrCreate() never
+            // receives an array as the order_id value, which makes Laravel's
+            // query grammar treat each column value as a row and crash on the
+            // null customer_id (HTTP 500 at checkout on marketplace sites).
+            if (is_array($orderId)) {
+                $orderId = collect($orderId)->filter()->first();
+            }
+
+            if (! $orderId) {
+                return;
+            }
+
+            $appliedPoints = (int) session('applied_loyalty_points', 0);
+            $discount = (float) session('loyalty_points_discount', 0);
+            $guestCustomerId = session('loyalty_guest_customer_id');
+
+            // When the buyer removes the loyalty discount on a retry of the same
+            // order (same checkout token = same order_id), drop any stale intent
+            // row so the webhook listener cannot replay a redemption the buyer
+            // already cancelled.
+            if ($appliedPoints <= 0 && $discount <= 0 && ! $guestCustomerId) {
+                OrderLoyaltyPoints::query()->where('order_id', $orderId)->delete();
+
+                return;
+            }
+
+            OrderLoyaltyPoints::query()->updateOrCreate(
+                ['order_id' => $orderId],
+                [
+                    'customer_id' => $guestCustomerId,
+                    'points_redeemed' => $appliedPoints,
+                    'discount_amount' => $discount,
+                ]
+            );
+        }, 99, 4);
+    }
+
+    /**
+     * Apply the loyalty redemption discount to the per-vendor marketplace orders
+     * BEFORE the payment amount is summed and sent to the gateway.
+     *
+     * Marketplace splits a checkout into one order per vendor and computes the
+     * payment total as the sum of each order's amount - a path that never ran the
+     * loyalty discount, so the gateway (e.g. PayPal) charged the full price while
+     * the order recorded the discount, overcharging the buyer (ticket #4567670).
+     *
+     * We mirror the single-vendor flow: reduce each order's amount by its share of
+     * the discount (distributed by amount, with the last order absorbing the
+     * rounding remainder so the shares sum exactly). We deliberately do NOT touch
+     * discount_amount here - the OrderPlacedEvent listener records that for display
+     * and, seeing the amount already reduced, will not subtract it twice.
+     */
+    protected function registerMarketplaceOrderDiscountHook(): void
+    {
+        add_filter('marketplace_checkout_orders_before_processing_payment', function ($orders, $request, $token) {
+            if (! app(LoyaltyHelper::class)->isEnabled()) {
+                return $orders;
+            }
+
+            if (! Auth::guard('customer')->check()) {
+                return $orders;
+            }
+
+            $discount = (float) session('loyalty_points_discount', 0);
+
+            if ($discount <= 0 || ! $orders || $orders->isEmpty()) {
+                return $orders;
+            }
+
+            // Only orders with a positive amount can absorb the discount.
+            $payableOrders = $orders->filter(fn ($order) => (float) $order->amount > 0)->values();
+            $total = (float) $payableOrders->sum('amount');
+
+            if ($total <= 0) {
+                return $orders;
+            }
+
+            // Never discount more than the payable total.
+            $discount = min($discount, $total);
+
+            $remaining = $discount;
+            $lastIndex = $payableOrders->count() - 1;
+
+            foreach ($payableOrders as $index => $order) {
+                if ($index === $lastIndex) {
+                    // Last order absorbs the remainder so the shares sum exactly.
+                    $share = $remaining;
+                } else {
+                    $share = round($discount * ((float) $order->amount / $total), 2);
+                    $share = min($share, $remaining);
+                }
+
+                if ($share <= 0) {
+                    continue;
+                }
+
+                $order->amount = max(0, (float) $order->amount - $share);
+                $order->save();
+
+                $remaining = round($remaining - $share, 2);
+            }
+
+            return $orders;
+        }, 99, 3);
+    }
+
     public function showLoyaltyPointsInfo(?string $html, $product): string
     {
         $loyaltyHelper = app(LoyaltyHelper::class);
@@ -368,7 +494,7 @@ class HookServiceProvider extends ServiceProvider
             $maxAllowedDiscount = ($productPrice * $maxRedemptionPercentage) / 100;
             if ($maxDiscount > $maxAllowedDiscount) {
                 $maxDiscount = $maxAllowedDiscount;
-                $maxPointsCanUse = (int) ceil(($maxDiscount * $loyaltyHelper->getRedemptionRate()) / $loyaltyHelper->getRedemptionCurrency() * $loyaltyHelper->getPointsExchangeRate());
+                $maxPointsCanUse = (int) ceil(($maxDiscount * $loyaltyHelper->getRedemptionRate()) / $loyaltyHelper->getRedemptionCurrency());
             }
         }
 
@@ -394,7 +520,6 @@ class HookServiceProvider extends ServiceProvider
             'earningCurrency' => $loyaltyHelper->getEarningCurrency(),
             'redemptionRate' => $loyaltyHelper->getRedemptionRate(),
             'redemptionCurrency' => $loyaltyHelper->getRedemptionCurrency(),
-            'pointsExchangeRate' => $loyaltyHelper->getPointsExchangeRate(),
             'maxRedemptionPercentage' => $maxRedemptionPercentage,
             'tierMultiplier' => $tierMultiplier,
             'currencySymbol' => $currencyConfig?->symbol ?? '$',

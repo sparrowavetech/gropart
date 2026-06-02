@@ -66,20 +66,6 @@ class LoyaltySettingForm extends SettingForm
                 ),
             ])
             ->add(
-                'loyalty_points_points_exchange_rate',
-                NumberField::class,
-                NumberFieldOption::make()
-                    ->label(trans('plugins/loyalty-points::loyalty-points.settings.points_exchange_rate'))
-                    ->helperText(trans('plugins/loyalty-points::loyalty-points.settings.points_exchange_rate_help', [
-                        'currency' => $currencySymbol,
-                        'amount' => format_price(1, $currency),
-                    ]))
-                    ->value(get_loyalty_setting('points_exchange_rate', 100))
-                    ->attributes([
-                        'min' => 1,
-                    ])
-            )
-            ->add(
                 'loyalty_points_points_earning_rate',
                 NumberField::class,
                 NumberFieldOption::make()

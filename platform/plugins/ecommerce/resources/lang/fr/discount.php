@@ -95,6 +95,7 @@ return [
     'you_need_login_to_use_coupon_code' => 'Veuillez vous connecter pour utiliser ce code de coupon. Cette offre nécessite un compte client.',
     'you_used_coupon_code' => 'Vous avez déjà utilisé ce code de coupon. Chaque client ne peut utiliser cette offre qu\'une seule fois.',
     'coupon_not_available_for_your_account' => 'Désolé, le code de coupon ":code" n\'est pas disponible pour votre compte. Il s\'agit d\'une offre exclusive pour certains clients.',
+    'coupon_not_valid_for_cart_items' => 'Ce code de coupon n\'est pas valide pour les articles de votre panier. Veuillez ajouter un produit éligible pour l\'utiliser.',
     'customer_used_coupon_code' => 'Clients qui ont utilisé ce code de remise',
     'apply_via_url' => 'Appliquer via URL ?',
     'apply_via_url_description' => 'Ce paramètre appliquera le code de coupon lorsque les clients accèdent à l\'URL avec le paramètre "?coupon=code".',
@@ -116,4 +117,8 @@ return [
     'close' => 'Fermer',
     'coupon_code_label' => 'Code de coupon : :code',
     'enter_coupon_code_placeholder' => 'Saisir le code de coupon...',
+    'applied' => 'Appliqué',
+    'change_coupon' => 'Changer de coupon',
+    'enter_coupon_code' => 'Saisir le code de coupon',
+    'or_select_coupon' => 'Ou sélectionner un coupon',
 ];

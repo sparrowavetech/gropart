@@ -95,6 +95,7 @@ return [
     'you_need_login_to_use_coupon_code' => 'Vă rugăm autentificați-vă pentru a folosi acest cod de cupon. Această ofertă necesită un cont de client.',
     'you_used_coupon_code' => 'Ați folosit deja acest cod de cupon. Fiecare client poate folosi această ofertă doar o singură dată.',
     'coupon_not_available_for_your_account' => 'Ne pare rău, codul de cupon ":code" nu este disponibil pentru contul dumneavoastră. Aceasta este o ofertă exclusivă pentru clienți selectați.',
+    'coupon_not_valid_for_cart_items' => 'Acest cod de cupon nu este valabil pentru produsele din coșul tău. Te rugăm să adaugi un produs eligibil pentru a-l utiliza.',
     'customer_used_coupon_code' => 'Clienți care au folosit acest cod de reducere',
     'apply_via_url' => 'Aplicați prin URL?',
     'apply_via_url_description' => 'Această setare va aplica codul de cupon când clienții accesează URL-ul cu parametrul "?coupon=cod".',
@@ -116,4 +117,8 @@ return [
     'close' => 'Închide',
     'coupon_code_label' => 'Cod de cupon: :code',
     'enter_coupon_code_placeholder' => 'Introduceți codul de cupon...',
+    'applied' => 'Aplicat',
+    'change_coupon' => 'Schimbă cuponul',
+    'enter_coupon_code' => 'Introdu codul cuponului',
+    'or_select_coupon' => 'Sau alege un cupon',
 ];

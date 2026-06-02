@@ -31,4 +31,13 @@ return [
     'email' => 'E-post',
     'password' => 'Passord',
     'password_confirmation' => 'Passordbekreftelse',
+    'site_branding' => 'Nettstedslogo og favicon',
+    'admin_branding' => 'Administrasjonslogo og favicon',
+    'step_branding' => 'Merkevare',
+    'step_account' => 'Konto',
+    'back' => 'Tilbake',
+    'branding_saved' => 'Merkevareinnstillingene ble lagret!',
+    'dont_show_again' => 'Ikke vis igjen',
+    'dismissed_message' => 'Varselet fra oppsettsveiviseren ble lukket.',
+    'exit_wizard_description' => 'Du kan fortsette oppsettet senere fra varselet på dashbordet ditt.',
 ];

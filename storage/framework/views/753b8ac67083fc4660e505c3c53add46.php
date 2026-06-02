@@ -24,17 +24,17 @@
         <script type="text/javascript">
             $(function() {
                 <?php if(Session::has('success_msg')): ?>
-                    Botble.showSuccess('<?php echo BaseHelper::cleanToastMessage(session('success_msg')); ?>');
+                    Botble.showSuccess(<?php echo json_encode(session('success_msg'), 15, 512) ?>);
                 <?php endif; ?>
                 <?php if(Session::has('error_msg')): ?>
-                    Botble.showError('<?php echo BaseHelper::cleanToastMessage(session('error_msg')); ?>');
+                    Botble.showError(<?php echo json_encode(session('error_msg'), 15, 512) ?>);
                 <?php endif; ?>
                 <?php if(isset($error_msg)): ?>
-                    Botble.showError('<?php echo BaseHelper::cleanToastMessage($error_msg); ?>');
+                    Botble.showError(<?php echo json_encode($error_msg, 15, 512) ?>);
                 <?php endif; ?>
                 <?php if(isset($errors)): ?>
                     <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                        Botble.showError('<?php echo BaseHelper::cleanToastMessage($error); ?>');
+                        Botble.showError(<?php echo json_encode($error, 15, 512) ?>);
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 <?php endif; ?>
             })

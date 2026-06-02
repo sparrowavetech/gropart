@@ -10,6 +10,7 @@ use Botble\SeoHelper\Facades\SeoHelper;
 class FacebookPixel
 {
     protected array $events = [];
+    protected array $eventIds = [];
     protected FacebookPixelEnhanced $enhanced;
 
     protected const NO_OFFSET_CURRENCIES = [
@@ -114,7 +115,7 @@ class FacebookPixel
             ])->values()->all(),
             'currency' => $currency,
             'value' => $this->formatValueForFacebook($order->sub_total, $currency),
-        ]);
+        ], $order->code);
 
         return $this;
     }
@@ -150,12 +151,16 @@ class FacebookPixel
         return $this->enhanced->isEnabled();
     }
 
-    public function pushEvent(string $event, array $items = [], array $data = []): void
+    public function pushEvent(string $event, array $items = [], array $data = [], ?string $eventId = null): void
     {
         $this->events[$event] = [
             ...$data,
             'content_ids' => array_map(fn ($item) => (string) $item->id, $items),
         ];
+
+        if ($eventId !== null) {
+            $this->eventIds[$event] = $eventId;
+        }
     }
 
     public function render(): string
@@ -171,7 +176,13 @@ class FacebookPixel
         $content = '';
 
         foreach ($this->events as $event => $data) {
-            $content .= "fbq('track', '$event', " . json_encode($data) . ');';
+            $eventIdSuffix = '';
+
+            if (! empty($this->eventIds[$event])) {
+                $eventIdSuffix = ', ' . json_encode(['eventID' => $this->eventIds[$event]]);
+            }
+
+            $content .= "fbq('track', '$event', " . json_encode($data) . $eventIdSuffix . ');';
         }
 
         return <<<HTML

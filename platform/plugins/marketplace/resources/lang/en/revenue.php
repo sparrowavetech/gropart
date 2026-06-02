@@ -12,8 +12,8 @@ return [
         'created_by' => 'Created By',
     ],
     'types' => [
-        'add-amount' => 'Add Amount',
-        'subtract-amount' => 'Subtract Amount',
+        'add-amount' => 'Credit',
+        'subtract-amount' => 'Debit',
         'order-return' => 'Order Return',
     ],
     'store_name' => 'Store Name',

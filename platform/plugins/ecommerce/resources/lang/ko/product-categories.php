@@ -27,4 +27,6 @@ return [
     'parent' => '상위 카테고리',
     'image' => '이미지',
     'product_category_translations' => '제품 카테고리 번역',
+    'parent_self_reference' => '카테고리는 자기 자신을 상위 카테고리로 지정할 수 없습니다.',
+    'parent_circular_reference' => '카테고리는 자신의 하위 카테고리 중 하나를 상위 카테고리로 지정할 수 없습니다.',
 ];

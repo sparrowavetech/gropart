@@ -20,9 +20,15 @@ class ShipmentManagement {
                 .post(form.prop('action'), form.serialize())
                 .then(({ data }) => {
                     if (!data.error) {
-                        $('.page-body').load(`${window.location.href} .page-body > *`)
                         Botble.showSuccess(data.message)
                         _self.closest('.modal').modal('hide')
+
+                        const $pageBody = $('.page-body')
+                        if ($pageBody.length) {
+                            $pageBody.load(`${window.location.href} .page-body > *`)
+                        } else {
+                            window.location.reload()
+                        }
                     } else {
                         Botble.showError(data.message)
                     }

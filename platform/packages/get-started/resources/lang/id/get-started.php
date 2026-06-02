@@ -31,4 +31,13 @@ return [
     'email' => 'Email',
     'password' => 'Kata sandi',
     'password_confirmation' => 'Konfirmasi kata sandi',
+    'site_branding' => 'Logo & favicon situs',
+    'admin_branding' => 'Logo & favicon admin',
+    'step_branding' => 'Branding',
+    'step_account' => 'Akun',
+    'back' => 'Kembali',
+    'branding_saved' => 'Pengaturan branding berhasil disimpan!',
+    'dont_show_again' => 'Jangan tampilkan lagi',
+    'dismissed_message' => 'Pemberitahuan wizard penyiapan ditutup.',
+    'exit_wizard_description' => 'Anda dapat melanjutkan penyiapan nanti dari pemberitahuan di dasbor Anda.',
 ];

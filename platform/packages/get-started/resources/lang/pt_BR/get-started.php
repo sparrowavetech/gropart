@@ -31,4 +31,13 @@ return [
     'email' => 'E-mail',
     'password' => 'Senha',
     'password_confirmation' => 'Confirmação de senha',
+    'site_branding' => 'Logo e favicon do site',
+    'admin_branding' => 'Logo e favicon do administrador',
+    'step_branding' => 'Identidade visual',
+    'step_account' => 'Conta',
+    'back' => 'Voltar',
+    'branding_saved' => 'Configurações de identidade visual salvas com sucesso!',
+    'dont_show_again' => 'Não mostrar novamente',
+    'dismissed_message' => 'Aviso do assistente de configuração dispensado.',
+    'exit_wizard_description' => 'Você pode retomar a configuração mais tarde pelo aviso no seu painel.',
 ];

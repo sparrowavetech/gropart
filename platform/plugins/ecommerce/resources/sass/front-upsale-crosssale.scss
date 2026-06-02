@@ -240,6 +240,22 @@
     padding: 2px 6px;
     border-radius: 4px;
     z-index: 1;
+
+    // Inline variant — used when the badge sits next to the price instead
+    // of overlaying the product thumbnail. Resets the absolute positioning
+    // so the badge flows inline within .ec-upsell-bundle-price.
+    &.ec-upsell-discount-badge--inline {
+        position: static;
+        top: auto;
+        left: auto;
+        z-index: auto;
+        font-size: 12px;
+        padding: 4px 8px;
+        border-radius: 6px;
+        line-height: 1;
+        display: inline-flex;
+        align-items: center;
+    }
 }
 
 .ec-upsell-bundle-info {

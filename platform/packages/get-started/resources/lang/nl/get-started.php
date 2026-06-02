@@ -31,4 +31,13 @@ return [
     'email' => 'E-mail',
     'password' => 'Wachtwoord',
     'password_confirmation' => 'Wachtwoordbevestiging',
+    'site_branding' => 'Sitelogo & favicon',
+    'admin_branding' => 'Beheerderslogo & favicon',
+    'step_branding' => 'Branding',
+    'step_account' => 'Account',
+    'back' => 'Terug',
+    'branding_saved' => 'Branding-instellingen succesvol opgeslagen!',
+    'dont_show_again' => 'Niet meer tonen',
+    'dismissed_message' => 'Melding van de installatiewizard genegeerd.',
+    'exit_wizard_description' => 'Je kunt de installatie later hervatten via de melding op je dashboard.',
 ];

@@ -31,4 +31,13 @@ return [
     'email' => '電子メール',
     'password' => 'パスワード',
     'password_confirmation' => 'パスワードの確認',
+    'site_branding' => 'サイトのロゴとファビコン',
+    'admin_branding' => '管理画面のロゴとファビコン',
+    'step_branding' => 'ブランディング',
+    'step_account' => 'アカウント',
+    'back' => '戻る',
+    'branding_saved' => 'ブランディング設定を保存しました！',
+    'dont_show_again' => '今後表示しない',
+    'dismissed_message' => 'セットアップウィザードの通知を閉じました。',
+    'exit_wizard_description' => 'セットアップは後でダッシュボードの通知から再開できます。',
 ];

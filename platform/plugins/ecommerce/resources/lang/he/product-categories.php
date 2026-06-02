@@ -27,4 +27,6 @@ return [
     'parent' => 'קטגורית אב',
     'image' => 'תמונה',
     'product_category_translations' => 'תרגומי קטגוריית מוצרים',
+    'parent_self_reference' => 'קטגוריה לא יכולה להיות ההורה של עצמה.',
+    'parent_circular_reference' => 'לא ניתן להגדיר קטגוריה כהורה של אחת מתת-הקטגוריות של עצמה.',
 ];

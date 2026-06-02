@@ -1093,7 +1093,8 @@ class Theme implements ThemeContract
         array $attributes = [],
         string $logoKey = 'logo',
         int $maxHeight = 0,
-        ?string $logoUrl = null
+        ?string $logoUrl = null,
+        bool $lazy = false
     ): ?HtmlString {
         if ($logoUrl) {
             $logo = $logoUrl;
@@ -1117,9 +1118,11 @@ class Theme implements ThemeContract
             $attributes['style'] = sprintf($maxHeightStyle, is_numeric($height) ? "{$height}px" : $height);
         }
 
-        $attributes['loading'] = false;
+        // Default false preserves eager-load behavior for header (LCP) logos.
+        // Footer/aside logo widgets pass lazy: true to opt into native + bb-lazy loading.
+        $attributes['loading'] = $lazy ? 'lazy' : false;
 
-        return apply_filters('theme_logo_image', RvMedia::image($logo, $this->getSiteTitle(), attributes: $attributes, lazy: false));
+        return apply_filters('theme_logo_image', RvMedia::image($logo, $this->getSiteTitle(), attributes: $attributes, lazy: $lazy));
     }
 
     public function formatDate(CarbonInterface|string|int|null $date, ?string $format = null): ?string

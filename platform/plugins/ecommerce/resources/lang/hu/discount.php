@@ -95,6 +95,7 @@ return [
     'you_need_login_to_use_coupon_code' => 'Kérjük, jelentkezzen be ennek a kuponkódnak a használatához. Ez az ajánlat vásárlói fiókot igényel.',
     'you_used_coupon_code' => 'Már felhasználta ezt a kuponkódot. Minden vásárló csak egyszer használhatja ezt az ajánlatot.',
     'coupon_not_available_for_your_account' => 'Sajnáljuk, a ":code" kuponkód nem elérhető az Ön fiókjához. Ez egy exkluzív ajánlat kiválasztott vásárlók számára.',
+    'coupon_not_valid_for_cart_items' => 'Ez a kuponkód nem érvényes a kosarában lévő termékekre. A használatához adjon hozzá egy jogosult terméket.',
     'customer_used_coupon_code' => 'Vásárlók, akik ezt a kedvezménykódot használták',
     'apply_via_url' => 'Alkalmazás URL-en keresztül?',
     'apply_via_url_description' => 'Ez a beállítás alkalmazza a kuponkódot, amikor a vásárlók hozzáférnek az URL-hez a "?coupon=code" paraméterrel.',
@@ -116,4 +117,8 @@ return [
     'close' => 'Bezárás',
     'coupon_code_label' => 'Kuponkód: :code',
     'enter_coupon_code_placeholder' => 'Adja meg a kuponkódot...',
+    'applied' => 'Alkalmazva',
+    'change_coupon' => 'Kupon módosítása',
+    'enter_coupon_code' => 'Adja meg a kuponkódot',
+    'or_select_coupon' => 'Vagy válasszon egy kupont',
 ];

@@ -340,7 +340,7 @@ class AssetContainer
             ThemeFacade::hasInheritTheme()
             && ! $this->isInheritTheme()
             && $isLocal
-            && ! File::exists(public_path($source))
+            && ! File::exists(public_path(Str::before($source, '?')))
         ) {
             $source = str_replace($currentTheme, ThemeFacade::getInheritTheme(), $source);
         }

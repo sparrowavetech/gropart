@@ -12,6 +12,13 @@ Route::group(['namespace' => 'Botble\GetStarted\Http\Controllers'], function ():
                 'permission' => false,
                 'middleware' => 'preventDemo',
             ]);
+
+            Route::post('dismiss', [
+                'as' => 'get-started.dismiss',
+                'uses' => 'GetStartedController@dismiss',
+                'permission' => false,
+                'middleware' => 'preventDemo',
+            ]);
         });
     });
 });

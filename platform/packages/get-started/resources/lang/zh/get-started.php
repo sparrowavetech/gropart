@@ -31,4 +31,13 @@ return [
     'email' => '电子邮件',
     'password' => '密码',
     'password_confirmation' => '密码确认',
+    'site_branding' => '网站徽标和图标',
+    'admin_branding' => '后台徽标和图标',
+    'step_branding' => '品牌',
+    'step_account' => '账户',
+    'back' => '返回',
+    'branding_saved' => '品牌设置已成功保存！',
+    'dont_show_again' => '不再显示',
+    'dismissed_message' => '已关闭设置向导提示。',
+    'exit_wizard_description' => '您可以稍后通过仪表板上的提示继续设置。',
 ];

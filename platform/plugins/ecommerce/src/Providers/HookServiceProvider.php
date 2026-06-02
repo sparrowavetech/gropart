@@ -464,6 +464,7 @@ class HookServiceProvider extends ServiceProvider
                     $data['amount'] = $order->amount;
                     $data['order_id'] = $order->id;
                     $data['currency'] = $currency;
+                    $data['payment_fee'] = (float) $order->payment_fee;
 
                     PaymentHelper::storeLocalPayment($data);
                 }

@@ -27,4 +27,6 @@ return [
     'parent' => 'Hovedkategori',
     'image' => 'Bilde',
     'product_category_translations' => 'Produktkategorioversettelser',
+    'parent_self_reference' => 'En kategori kan ikke være sin egen overkategori.',
+    'parent_circular_reference' => 'En kategori kan ikke tildeles en av sine egne underkategorier som overkategori.',
 ];

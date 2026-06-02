@@ -95,6 +95,7 @@ return [
     'you_need_login_to_use_coupon_code' => 'Palun logige sisse, et seda kupongikoodi kasutada. See pakkumine nõuab kliendikoontot.',
     'you_used_coupon_code' => 'Olete seda kupongikoodi juba kasutanud. Iga klient saab seda pakkumist kasutada ainult ühe korra.',
     'coupon_not_available_for_your_account' => 'Vabandust, kupongikood ":code" pole teie konto jaoks saadaval. See on eksklusiivsne pakkumine valitud klientidele.',
+    'coupon_not_valid_for_cart_items' => 'See sooduskood ei kehti teie ostukorvis olevatele toodetele. Selle kasutamiseks lisage sobiv toode.',
     'customer_used_coupon_code' => 'Kliendid, kes on seda allahindluskoodi kasutanud',
     'apply_via_url' => 'Rakenda URL-i kaudu?',
     'apply_via_url_description' => 'See seade rakendab kupongikoodi, kui kliendid kasutavad URL-i parameetriga "?coupon=code".',
@@ -116,4 +117,8 @@ return [
     'close' => 'Sulge',
     'coupon_code_label' => 'Kupongikood: :code',
     'enter_coupon_code_placeholder' => 'Sisestage kupongikood...',
+    'applied' => 'Rakendatud',
+    'change_coupon' => 'Muuda kupongi',
+    'enter_coupon_code' => 'Sisestage sooduskood',
+    'or_select_coupon' => 'Või valige kupong',
 ];

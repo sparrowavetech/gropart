@@ -152,6 +152,13 @@
                                 </div>
                             @endif
 
+                            @if ((float) ($invoice->payment_fee ?? 0) > 0)
+                                <div class="bb-order-total-item">
+                                    <span class="label">{{ trans('plugins/payment::payment.payment_fee') }}:</span>
+                                    <span class="value">{{ format_price($invoice->payment_fee) }}</span>
+                                </div>
+                            @endif
+
                             @if ((float) $invoice->discount_amount > 0)
                                 <div class="bb-order-total-item">
                                     <span class="label">{{ trans('plugins/ecommerce::invoice.detail.discount') }}:</span>

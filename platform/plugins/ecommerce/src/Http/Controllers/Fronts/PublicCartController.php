@@ -7,6 +7,7 @@ use Botble\Ecommerce\AdsTracking\FacebookPixel;
 use Botble\Ecommerce\AdsTracking\GoogleTagManager;
 use Botble\Ecommerce\Cart\Cart as CartInstance;
 use Botble\Ecommerce\Enums\DiscountTypeEnum;
+use Botble\Ecommerce\Enums\DiscountTypeOptionEnum;
 use Botble\Ecommerce\Facades\Cart;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Facades\OrderHelper;
@@ -20,6 +21,7 @@ use Botble\Ecommerce\Models\ProductVariation;
 use Botble\Ecommerce\Services\AbandonedCartService;
 use Botble\Ecommerce\Services\HandleApplyCouponService;
 use Botble\Ecommerce\Services\HandleApplyPromotionsService;
+use Botble\Ecommerce\Services\HandleRemoveCouponService;
 use Botble\Ecommerce\Services\Products\GetProductWithUpSalesBySlugService;
 use Botble\Ecommerce\Services\Products\ProductUpSalePriceService;
 use Botble\SeoHelper\Facades\SeoHelper;
@@ -41,7 +43,8 @@ class PublicCartController extends BaseController
 
     public function __construct(
         protected HandleApplyPromotionsService $applyPromotionsService,
-        protected HandleApplyCouponService $handleApplyCouponService
+        protected HandleApplyCouponService $handleApplyCouponService,
+        protected HandleRemoveCouponService $handleRemoveCouponService
     ) {
     }
 
@@ -737,7 +740,29 @@ class PublicCartController extends BaseController
         $sessionData = OrderHelper::getOrderSessionData();
 
         if (session()->has('applied_coupon_code')) {
-            $couponDiscountAmount = (float) Arr::get($sessionData, 'coupon_discount_amount', 0);
+            $sessionData['promotion_discount_amount'] = $promotionDiscountAmount;
+            $appliedCouponCode = session('applied_coupon_code');
+            $discount = $this->handleApplyCouponService->getCouponData($appliedCouponCode, $sessionData);
+
+            if (! $discount) {
+                // Coupon no longer exists or has expired - drop it.
+                $this->handleRemoveCouponService->execute();
+                $couponDiscountAmount = 0;
+            } elseif ($discount->type_option == DiscountTypeOptionEnum::SHIPPING) {
+                $couponDiscountAmount = (float) Arr::get($sessionData, 'coupon_discount_amount', 0);
+            } else {
+                // Re-apply against the current cart so the discount tracks quantity
+                // changes and its conditions (minimum order, product eligibility, flash
+                // sale) are re-checked; drop it when it no longer qualifies.
+                $couponResult = $this->handleApplyCouponService->execute($appliedCouponCode, $sessionData, $cartData);
+
+                if (Arr::get($couponResult, 'error')) {
+                    $this->handleRemoveCouponService->execute();
+                    $couponDiscountAmount = 0;
+                } else {
+                    $couponDiscountAmount = max((float) Arr::get($couponResult, 'data.discount_amount', 0), 0);
+                }
+            }
         }
 
         $this->cachedCartData = [$products, $promotionDiscountAmount, $couponDiscountAmount];

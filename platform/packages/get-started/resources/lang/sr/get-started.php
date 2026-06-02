@@ -31,4 +31,13 @@ return [
     'email' => 'Е-пошта',
     'password' => 'Лозинка',
     'password_confirmation' => 'Потврда лозинке',
+    'site_branding' => 'Logo i favikon sajta',
+    'admin_branding' => 'Logo i favikon administracije',
+    'step_branding' => 'Brendiranje',
+    'step_account' => 'Nalog',
+    'back' => 'Nazad',
+    'branding_saved' => 'Podešavanja brendiranja su uspešno sačuvana!',
+    'dont_show_again' => 'Ne prikazuj ponovo',
+    'dismissed_message' => 'Obaveštenje čarobnjaka za podešavanje je odbačeno.',
+    'exit_wizard_description' => 'Podešavanje možete nastaviti kasnije iz obaveštenja na vašoj kontrolnoj tabli.',
 ];

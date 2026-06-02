@@ -27,4 +27,6 @@ return [
     'parent' => 'Overordnet kategori',
     'image' => 'Billede',
     'product_category_translations' => 'Produktkategori oversættelser',
+    'parent_self_reference' => 'En kategori kan ikke være sin egen forælder.',
+    'parent_circular_reference' => 'En kategori kan ikke tildeles en af sine egne underkategorier som forælder.',
 ];

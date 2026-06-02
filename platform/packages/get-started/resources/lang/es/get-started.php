@@ -31,4 +31,13 @@ return [
     'email' => 'Correo electrónico',
     'password' => 'Contraseña',
     'password_confirmation' => 'confirmación de contraseña',
+    'site_branding' => 'Logo y favicon del sitio',
+    'admin_branding' => 'Logo y favicon del administrador',
+    'step_branding' => 'Marca',
+    'step_account' => 'Cuenta',
+    'back' => 'Atrás',
+    'branding_saved' => '¡La configuración de marca se guardó correctamente!',
+    'dont_show_again' => 'No volver a mostrar',
+    'dismissed_message' => 'Aviso del asistente de configuración descartado.',
+    'exit_wizard_description' => 'Puedes reanudar la configuración más tarde desde el aviso en tu panel de control.',
 ];

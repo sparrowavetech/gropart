@@ -27,4 +27,6 @@ return [
     'parent' => 'Übergeordnete Kategorie',
     'image' => 'Bild',
     'product_category_translations' => 'Produktkategorie-Übersetzungen',
+    'parent_self_reference' => 'Eine Kategorie kann nicht ihre eigene übergeordnete Kategorie sein.',
+    'parent_circular_reference' => 'Eine Kategorie kann nicht einer ihrer eigenen Unterkategorien als übergeordnete Kategorie zugewiesen werden.',
 ];

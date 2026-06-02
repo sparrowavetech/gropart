@@ -20,6 +20,8 @@ class StoreRevenueTable extends TableAbstract
 {
     protected ?int $customerId;
 
+    protected ?int $storeId = null;
+
     protected $hasOperations = false;
 
     public function setup(): void
@@ -29,6 +31,7 @@ class StoreRevenueTable extends TableAbstract
             ->addActions([]);
 
         $this->setCustomerId(request()->route()->parameter('id'));
+        $this->storeId = (int) request()->query('store_id') ?: null;
         $this->pageLength = 10;
         $this->type = self::TABLE_TYPE_SIMPLE;
         $this->view = $this->simpleTableView();
@@ -121,6 +124,10 @@ class StoreRevenueTable extends TableAbstract
             ->with(['order:id,code'])
             ->whereHas('order', function (Builder $query): void {
                 $query->where('is_finished', true);
+
+                if ($this->storeId) {
+                    $query->where('store_id', $this->storeId);
+                }
             })
             ->when($this->customerId, function (Builder $query): void {
                 $query

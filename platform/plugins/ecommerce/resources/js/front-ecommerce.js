@@ -564,7 +564,7 @@ class Ecommerce {
                     method: 'POST',
                     data: EcommerceApp.getAjaxData(data, $form),
                     dataType: 'json',
-                    beforeSend: () => currentTarget.addClass('btn-loading'),
+                    beforeSend: () => currentTarget.addClass('btn-loading').prop('disabled', true),
                     success: ({ error, message, data }) => {
                         if (error) {
                             EcommerceApp.showError(message)
@@ -608,7 +608,7 @@ class Ecommerce {
                         }
                     },
                     error: (error) => EcommerceApp.handleError(error),
-                    complete: () => currentTarget.removeClass('btn-loading'),
+                    complete: () => currentTarget.removeClass('btn-loading').prop('disabled', false),
                 })
             })
             .on('click', '[data-bb-toggle="remove-from-cart"]', (e) => {
@@ -976,54 +976,83 @@ class Ecommerce {
             })
 
             if ($gallery.length) {
-                $gallery.map((index, item) => {
+                $gallery.each((index, item) => {
                     const $item = $(item)
+
                     if ($item.hasClass('slick-initialized')) {
                         $item.slick('unslick')
                     }
 
-                    $item.slick({
-                        slidesToShow: 1,
-                        slidesToScroll: 1,
-                        arrows: false,
-                        dots: false,
-                        infinite: false,
-                        fade: true,
-                        lazyLoad: 'ondemand',
-                        asNavFor: '.bb-product-gallery-thumbnails',
-                        rtl: this.isRtl(),
-                    })
+                    $item.removeClass('slick-initialized slick-slider slick-vertical slick-dotted')
+
+                    if (!$item.children().length) {
+                        return
+                    }
+
+                    try {
+                        $item.slick({
+                            slidesToShow: 1,
+                            slidesToScroll: 1,
+                            arrows: false,
+                            dots: false,
+                            infinite: false,
+                            fade: true,
+                            lazyLoad: 'ondemand',
+                            asNavFor: '.bb-product-gallery-thumbnails',
+                            rtl: this.isRtl(),
+                        })
+                    } catch (e) {
+                        console.warn('Slick gallery init failed', e)
+                    }
                 })
             }
 
             if ($thumbnails.length) {
-                let isVertical = $thumbnails.data('vertical') === 1
+                $thumbnails.each((index, item) => {
+                    const $item = $(item)
 
-                if (window.innerWidth < 768) {
-                    isVertical = false
-                }
+                    if ($item.hasClass('slick-initialized')) {
+                        $item.slick('unslick')
+                    }
 
-                $thumbnails.slick({
-                    slidesToShow: 6,
-                    slidesToScroll: 1,
-                    asNavFor: '.bb-product-gallery-images',
-                    focusOnSelect: true,
-                    infinite: false,
-                    rtl: this.isRtl() && ! isVertical,
-                    vertical: isVertical,
-                    verticalSwiping: isVertical,
-                    prevArrow:
-                        '<button class="slick-prev slick-arrow"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M15 6l-6 6l6 6" /></svg></button>',
-                    nextArrow:
-                        '<button class="slick-next slick-arrow"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 6l6 6l-6 6" /></svg></button>',
-                    responsive: [
-                        {
-                            breakpoint: 768,
-                            settings: {
-                                slidesToShow: 4,
-                            },
-                        },
-                    ],
+                    $item.removeClass('slick-initialized slick-slider slick-vertical slick-dotted')
+
+                    if (!$item.children().length) {
+                        return
+                    }
+
+                    let isVertical = $item.data('vertical') === 1
+
+                    if (window.innerWidth < 768) {
+                        isVertical = false
+                    }
+
+                    try {
+                        $item.slick({
+                            slidesToShow: 6,
+                            slidesToScroll: 1,
+                            asNavFor: '.bb-product-gallery-images',
+                            focusOnSelect: true,
+                            infinite: false,
+                            rtl: this.isRtl() && ! isVertical,
+                            vertical: isVertical,
+                            verticalSwiping: isVertical,
+                            prevArrow:
+                                '<button class="slick-prev slick-arrow"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M15 6l-6 6l6 6" /></svg></button>',
+                            nextArrow:
+                                '<button class="slick-next slick-arrow"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 6l6 6l-6 6" /></svg></button>',
+                            responsive: [
+                                {
+                                    breakpoint: 768,
+                                    settings: {
+                                        slidesToShow: 4,
+                                    },
+                                },
+                            ],
+                        })
+                    } catch (e) {
+                        console.warn('Slick thumbnails init failed', e)
+                    }
                 })
             }
 
@@ -1036,17 +1065,31 @@ class Ecommerce {
         const $quickViewGallery = $(document).find('.bb-quick-view-gallery-images')
 
         if ($quickViewGallery.length) {
-            if ($quickViewGallery.hasClass('slick-initialized')) {
-                $quickViewGallery.slick('unslick')
-            }
+            $quickViewGallery.each((index, item) => {
+                const $item = $(item)
 
-            $quickViewGallery.slick({
-                slidesToShow: 1,
-                slidesToScroll: 1,
-                dots: false,
-                arrows: true,
-                adaptiveHeight: false,
-                rtl: this.isRtl(),
+                if ($item.hasClass('slick-initialized')) {
+                    $item.slick('unslick')
+                }
+
+                $item.removeClass('slick-initialized slick-slider slick-vertical slick-dotted')
+
+                if (!$item.children().length) {
+                    return
+                }
+
+                try {
+                    $item.slick({
+                        slidesToShow: 1,
+                        slidesToScroll: 1,
+                        dots: false,
+                        arrows: true,
+                        adaptiveHeight: false,
+                        rtl: this.isRtl(),
+                    })
+                } catch (e) {
+                    console.warn('Slick quick-view init failed', e)
+                }
             })
         }
 
@@ -1609,30 +1652,31 @@ class Ecommerce {
         let thumbHtml = ''
 
         const siteConfig = window.siteConfig || {}
+        const placeholder = $product.find('.bb-product-gallery').data('placeholder') || siteConfig.img_placeholder
 
-        if (!data.image_with_sizes.origin.length) {
-            data.image_with_sizes.origin.push(siteConfig.img_placeholder)
-        } else {
-            data.image_with_sizes.origin.forEach(function(item) {
-                imageHtml += `
+        if (!data.image_with_sizes.origin.length && placeholder) {
+            data.image_with_sizes.origin.push(placeholder)
+        }
+
+        data.image_with_sizes.origin.forEach(function(item) {
+            imageHtml += `
             <a href='${item}'>
                 <img src='${item}' alt='${data.name}'>
             </a>
         `
-            })
+        })
+
+        if (!data.image_with_sizes.thumb.length && placeholder) {
+            data.image_with_sizes.thumb.push(placeholder)
         }
 
-        if (!data.image_with_sizes.thumb.length) {
-            data.image_with_sizes.thumb.push(siteConfig.img_placeholder)
-        } else {
-            data.image_with_sizes.thumb.forEach(function(item) {
-                thumbHtml += `
+        data.image_with_sizes.thumb.forEach(function(item) {
+            thumbHtml += `
             <div>
                 <img src='${item}' alt='${data.name}'>
             </div>
         `
-            })
-        }
+        })
 
         const $galleryImages = $product.find('.bb-product-gallery')
         const $existingGalleryImages = $galleryImages.find('.bb-product-gallery-images')

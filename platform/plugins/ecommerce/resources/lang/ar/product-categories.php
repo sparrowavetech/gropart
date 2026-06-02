@@ -27,4 +27,6 @@ return [
     'parent' => 'الفئة الأصلية',
     'image' => 'الصورة',
     'product_category_translations' => 'ترجمات فئة المنتجات',
+    'parent_self_reference' => 'لا يمكن أن تكون الفئة فئة أم لنفسها.',
+    'parent_circular_reference' => 'لا يمكن تعيين فئة كفئة أم لإحدى الفئات الفرعية الخاصة بها.',
 ];

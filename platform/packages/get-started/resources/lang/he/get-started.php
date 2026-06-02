@@ -31,4 +31,13 @@ return [
     'email' => 'אימייל',
     'password' => 'סיסמה',
     'password_confirmation' => 'אישור סיסמה',
+    'site_branding' => 'לוגו ואייקון של האתר',
+    'admin_branding' => 'לוגו ואייקון של הניהול',
+    'step_branding' => 'מיתוג',
+    'step_account' => 'חשבון',
+    'back' => 'חזרה',
+    'branding_saved' => 'הגדרות המיתוג נשמרו בהצלחה!',
+    'dont_show_again' => 'אל תציג שוב',
+    'dismissed_message' => 'ההודעה של אשף ההתקנה נדחתה.',
+    'exit_wizard_description' => 'ניתן להמשיך את ההתקנה מאוחר יותר מההודעה בלוח הבקרה שלך.',
 ];

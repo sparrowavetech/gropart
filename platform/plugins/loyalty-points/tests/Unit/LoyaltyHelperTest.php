@@ -37,7 +37,6 @@ class LoyaltyHelperTest extends BaseTestCase
         setting()->forceSet('loyalty_points_points_for_referral', 300)->save();
         setting()->forceSet('loyalty_points_points_for_birthday', 200)->save();
         setting()->forceSet('loyalty_points_points_expiry_months', 12)->save();
-        setting()->forceSet('loyalty_points_points_exchange_rate', 100)->save();
         setting()->forceSet('loyalty_points_eligible_order_statuses', json_encode(['completed']))->save();
     }
 
@@ -116,11 +115,6 @@ class LoyaltyHelperTest extends BaseTestCase
         $this->assertEquals(12, $this->helper->getPointsExpiryMonths());
     }
 
-    public function test_get_points_exchange_rate(): void
-    {
-        $this->assertEquals(100, $this->helper->getPointsExchangeRate());
-    }
-
     public function test_get_eligible_order_statuses(): void
     {
         $statuses = $this->helper->getEligibleOrderStatuses();
@@ -156,16 +150,18 @@ class LoyaltyHelperTest extends BaseTestCase
 
     public function test_calculate_discount_from_points(): void
     {
+        // redemption_rate=100, redemption_currency=1: 100 points → (100/100) * 1 = $1
         $discount = $this->helper->calculateDiscountFromPoints(100);
 
-        $this->assertEquals(0.01, $discount);
+        $this->assertEquals(1.0, $discount);
     }
 
     public function test_calculate_discount_from_points_larger(): void
     {
+        // 500 points → (500/100) * 1 = $5
         $discount = $this->helper->calculateDiscountFromPoints(500);
 
-        $this->assertEquals(0.05, $discount);
+        $this->assertEquals(5.0, $discount);
     }
 
     public function test_calculate_max_points_from_amount(): void

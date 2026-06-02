@@ -27,4 +27,6 @@ return [
     'parent' => 'Nadradená kategória',
     'image' => 'Obrázok',
     'product_category_translations' => 'Preklady kategórií produktov',
+    'parent_self_reference' => 'Kategória nemôže byť svojím vlastným rodičom.',
+    'parent_circular_reference' => 'Kategóriu nie je možné priradiť ako rodiča jednej z jej vlastných podkategórií.',
 ];

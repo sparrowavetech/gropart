@@ -135,10 +135,6 @@
         {
             "type": "path",
             "url": "./platform/packages/*"
-        },
-        {
-            "type": "vcs",
-            "url": "https://github.com/laravel-shift/Purifier.git"
         }
     ]
 }

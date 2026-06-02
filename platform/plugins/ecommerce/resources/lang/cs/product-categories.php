@@ -27,4 +27,6 @@ return [
     'parent' => 'Nadřazená kategorie',
     'image' => 'Obrázek',
     'product_category_translations' => 'Překlady kategorií produktů',
+    'parent_self_reference' => 'Kategorie nemůže být svým vlastním rodičem.',
+    'parent_circular_reference' => 'Kategorii nelze přiřadit jako rodiče jednu z jejích vlastních podkategorií.',
 ];

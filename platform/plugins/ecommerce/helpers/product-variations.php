@@ -17,7 +17,7 @@ if (! function_exists('render_product_swatches')) {
     {
         $script = 'vendor/core/plugins/ecommerce/js/change-product-swatches.js';
 
-        Theme::asset()->container('footer')->add('change-product-swatches', $script, ['jquery']);
+        Theme::asset()->container('footer')->add('change-product-swatches', $script, ['jquery'], version: EcommerceHelper::getAssetVersion());
 
         $selected = [];
 

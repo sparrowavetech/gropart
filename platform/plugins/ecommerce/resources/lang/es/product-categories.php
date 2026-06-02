@@ -27,4 +27,6 @@ return [
     'parent' => 'Categoría Padre',
     'image' => 'Imagen',
     'product_category_translations' => 'Traducciones de Categoría de Productos',
+    'parent_self_reference' => 'Una categoría no puede ser su propia categoría principal.',
+    'parent_circular_reference' => 'Una categoría no puede asignarse como principal a una de sus propias subcategorías.',
 ];

@@ -25,8 +25,8 @@ class InlineCss extends PageSpeed
             PREG_OFFSET_CAPTURE
         );
 
-        $this->class = collect($matches[1])->mapWithKeys(function ($item) {
-            return ['page_speed_' . rand() => $item[0]];
+        $this->class = collect($matches[1])->mapWithKeys(function (array $item) {
+            return ['page_speed_' . md5($item[0]) => $item[0]];
         })->unique();
 
         return $this->injectStyle()->injectClass()->fixHTML()->html;

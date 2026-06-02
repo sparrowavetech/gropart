@@ -31,6 +31,8 @@ use Botble\Theme\Facades\Theme;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Http\Request;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Arr;
 
 class HandleFrontPages
@@ -226,6 +228,7 @@ class HandleFrontPages
 
                 $categoryIds = $this->getProductCategoryIds($category->activeChildren, [$category->getKey()]);
 
+                $originalCategoriesInput = $this->snapshotRequestInput($request, 'categories');
                 $requestCategories = (array) $request->input('categories', []) ?: [];
 
                 $request->merge(['categories' => [...$categoryIds, ...$requestCategories]]);
@@ -235,6 +238,8 @@ class HandleFrontPages
                 $request->merge([
                     'categories' => array_merge($category->parents->pluck('id')->all(), $categoryIds),
                 ]);
+
+                $this->keepPaginationQueryClean('categories', $originalCategoriesInput);
 
                 SeoHelper::setTitle($category->name)->setDescription($category->description);
 
@@ -299,6 +304,7 @@ class HandleFrontPages
                     $request = request();
                 }
 
+                $originalBrandsInput = $this->snapshotRequestInput($request, 'brands');
                 $brands = EcommerceHelper::parseFilterParams($request, 'brands');
                 $request->merge(['brands' => array_merge($brands, [$brand->getKey()])]);
 
@@ -308,6 +314,8 @@ class HandleFrontPages
                     $brand->getKey(),
                     EcommerceHelper::withProductEagerLoadingRelations()
                 );
+
+                $this->keepPaginationQueryClean('brands', $originalBrandsInput);
 
                 if ($request->ajax()) {
                     return $this->ajaxFilterProductsResponse($products, $response);
@@ -369,12 +377,15 @@ class HandleFrontPages
 
                 $with = EcommerceHelper::withProductEagerLoadingRelations();
 
+                $originalTagsInput = $this->snapshotRequestInput($request, 'tags');
                 $tags = EcommerceHelper::parseFilterParams($request, 'tags');
                 $request->merge([
                     'tags' => array_merge($tags, [$tag->getKey()]),
                 ]);
 
                 $products = app(GetProductService::class)->getProduct($request, null, null, $with);
+
+                $this->keepPaginationQueryClean('tags', $originalTagsInput);
 
                 if ($request->ajax()) {
                     return $this->ajaxFilterProductsResponse($products, $response);
@@ -435,12 +446,15 @@ class HandleFrontPages
 
                 $with = EcommerceHelper::withProductEagerLoadingRelations();
 
+                $originalCollectionsInput = $this->snapshotRequestInput($request, 'collections');
                 $collections = EcommerceHelper::parseFilterParams($request, 'collections');
                 $request->merge([
                     'collections' => array_merge($collections, [$collection->getKey()]),
                 ]);
 
                 $products = app(GetProductService::class)->getProduct($request, null, null, $with);
+
+                $this->keepPaginationQueryClean('collections', $originalCollectionsInput);
 
                 if ($request->ajax()) {
                     return $this->ajaxFilterProductsResponse($products, $response);
@@ -533,5 +547,38 @@ class HandleFrontPages
     protected function getProductCategoryIds(Collection $children, $categoryIds = []): array
     {
         return ProductCategory::getChildrenIds($children, $categoryIds);
+    }
+
+    /**
+     * Snapshot a request input value before it gets mutated for product fetching, so
+     * pagination links rendered later can still expose only the user-set value.
+     */
+    protected function snapshotRequestInput(Request $request, string $key): array
+    {
+        return [
+            'present' => $request->has($key),
+            'value' => $request->input($key),
+        ];
+    }
+
+    /**
+     * Register a paginator query string resolver that swaps the mutated $key value
+     * back to the original (pre-merge) one, so pagination URLs do not carry
+     * auto-injected entity IDs (e.g. category/brand/tag/collection IDs implied by
+     * the page URL itself). User-provided values for $key are preserved.
+     */
+    protected function keepPaginationQueryClean(string $key, array $original): void
+    {
+        Paginator::queryStringResolver(function () use ($key, $original): array {
+            $query = request()->query();
+
+            if ($original['present']) {
+                $query[$key] = $original['value'];
+            } else {
+                unset($query[$key]);
+            }
+
+            return $query;
+        });
     }
 }

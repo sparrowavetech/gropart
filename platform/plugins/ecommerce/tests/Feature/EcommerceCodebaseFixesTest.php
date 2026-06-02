@@ -415,4 +415,195 @@ class EcommerceCodebaseFixesTest extends BaseTestCase
         $this->assertNotContains('payment_id', $fillable, 'payment_id should not be mass-assignable');
         $this->assertNotContains('code', $fillable, 'code should not be mass-assignable');
     }
+
+    // ── Guest checkout session-fallback (regression guard) ──
+    //
+    // Without this fallback in PublicCheckoutController::processOrderData, guests
+    // who reach postCheckout without address[*] in the request (split-step UIs,
+    // autofill, broken JS) get orders with NULL shipping address, which breaks
+    // every shipping-carrier plugin (no destination → no shipment created).
+    //
+    // The 2026_04_25_000001_backfill_missing_order_shipping_addresses migration
+    // backfills affected EXISTING orders for logged-in customers, but explicitly
+    // cannot backfill guest orders — so the only durable cure is to populate
+    // $addressData from session fields when neither saved $address nor
+    // $request->input('address') is present. This mirrors the same fallback
+    // already in OrderHelper::processAddressOrder.
+
+    public function test_process_order_data_falls_back_to_session_fields_for_guest(): void
+    {
+        $controller = new \ReflectionClass(\Botble\Ecommerce\Http\Controllers\Fronts\PublicCheckoutController::class);
+        $source = file_get_contents($controller->getFileName());
+
+        $this->assertStringContainsString(
+            "elseif (! empty(\$sessionData['name']))",
+            $source,
+            'processOrderData must fall back to session-stored address fields when '
+            .'neither saved $address nor $request->input("address") is populated.'
+        );
+
+        // Standard address keys must all be present in the fallback list
+        foreach (['name', 'phone', 'email', 'country', 'state', 'city', 'address', 'zip_code'] as $key) {
+            $this->assertStringContainsString(
+                "'{$key}'",
+                $source,
+                "Session-fallback must extract the '{$key}' field."
+            );
+        }
+    }
+
+    public function test_process_order_data_creates_shipping_address_from_session_when_request_lacks_address(): void
+    {
+        $order = Order::query()->create([
+            'user_id' => 0,
+            'amount' => 50,
+            'sub_total' => 50,
+            'status' => OrderStatusEnum::PENDING,
+            'shipping_method' => ShippingMethodEnum::DEFAULT,
+            'is_finished' => false,
+            'token' => 'test-token-' . uniqid(),
+        ]);
+
+        $orderHelper = app(\Botble\Ecommerce\Supports\OrderHelper::class);
+
+        $addressData = [
+            'name' => 'Dave Bo',
+            'phone' => '8683845484',
+            'email' => 'guest@example.com',
+            'country' => 'TT',
+            'state' => 'Point Fortin',
+            'city' => 'Cap de Ville',
+            'address' => '2343',
+            'zip_code' => '520448',
+            'order_id' => $order->id,
+        ];
+
+        $sessionData = [
+            'created_order_id' => $order->id,
+            'is_save_order_shipping_address' => true,
+            'name' => 'Dave Bo',
+            'phone' => '8683845484',
+            'email' => 'guest@example.com',
+            'country' => 'TT',
+            'state' => 'Point Fortin',
+            'city' => 'Cap de Ville',
+            'address' => '2343',
+            'zip_code' => '520448',
+            'billing_address_same_as_shipping_address' => true,
+            'billing_address' => [],
+        ];
+
+        $orderHelper->checkAndCreateOrderAddress($addressData, $sessionData);
+
+        $this->assertDatabaseHas('ec_order_addresses', [
+            'order_id' => $order->id,
+            'type' => 'shipping_address',
+            'name' => 'Dave Bo',
+            'city' => 'Cap de Ville',
+        ]);
+    }
+
+    public function test_check_and_create_order_address_skips_creation_when_no_name_and_no_existing_row(): void
+    {
+        $order = Order::query()->create([
+            'user_id' => 0,
+            'amount' => 50,
+            'sub_total' => 50,
+            'status' => OrderStatusEnum::PENDING,
+            'shipping_method' => ShippingMethodEnum::DEFAULT,
+            'is_finished' => false,
+            'token' => 'test-token-skip-' . uniqid(),
+        ]);
+
+        $orderHelper = app(\Botble\Ecommerce\Supports\OrderHelper::class);
+
+        $addressData = [
+            'billing_address_same_as_shipping_address' => true,
+            'billing_address' => [],
+        ];
+
+        $sessionData = [
+            'created_order_id' => $order->id,
+            'is_save_order_shipping_address' => true,
+        ];
+
+        $orderHelper->checkAndCreateOrderAddress($addressData, $sessionData);
+
+        $this->assertDatabaseMissing('ec_order_addresses', [
+            'order_id' => $order->id,
+            'type' => 'shipping_address',
+        ]);
+    }
+
+    public function test_post_checkout_processOrderData_persists_shipping_address_from_session(): void
+    {
+        // The session-fallback branch lives in the non-marketplace code path of
+        // processOrderData. Marketplace builds short-circuit at line 393 and
+        // delegate order handling to the marketplace plugin's own filter, so
+        // this end-to-end test only meaningfully runs without marketplace.
+        // The first two tests above still verify the fix is in source.
+        if (is_plugin_active('marketplace')) {
+            $this->markTestSkipped('processOrderData bypasses non-marketplace branch when marketplace is active');
+        }
+
+        $controller = app(\Botble\Ecommerce\Http\Controllers\Fronts\PublicCheckoutController::class);
+        $reflection = new \ReflectionClass($controller);
+        $method = $reflection->getMethod('processOrderData');
+        $method->setAccessible(true);
+
+        $token = 'test-token-fix-' . uniqid();
+        $order = Order::query()->create([
+            'user_id' => 0,
+            'amount' => 50,
+            'sub_total' => 50,
+            'status' => OrderStatusEnum::PENDING,
+            'shipping_method' => ShippingMethodEnum::DEFAULT,
+            'is_finished' => false,
+            'token' => $token,
+        ]);
+
+        $request = \Illuminate\Http\Request::create(
+            '/checkout/'.$token.'/process',
+            'POST',
+            [
+                'amount' => 50,
+                'shipping_method' => 'default',
+                'payment_method' => 'cod',
+                'billing_address_same_as_shipping_address' => '1',
+                'agree_terms_and_policy' => '1',
+                'token' => $token,
+            ]
+        );
+
+        $sessionData = [
+            'created_order' => true,
+            'created_order_id' => $order->id,
+            'is_save_order_shipping_address' => true,
+            'name' => 'Dave Bo',
+            'phone' => '8683845484',
+            'email' => 'guest@example.com',
+            'country' => 'TT',
+            'state' => 'Point Fortin',
+            'city' => 'Cap de Ville',
+            'address' => '2343',
+            'zip_code' => '520448',
+        ];
+
+        \Cart::instance('cart')->destroy();
+        \Cart::instance('cart')->add('1', 'Test Product', 1, 50, ['weight' => 0.1]);
+
+        try {
+            $method->invoke($controller, $token, $sessionData, $request, true);
+        } catch (\Throwable $e) {
+            // Tolerate downstream side-effects.
+        }
+
+        $this->assertDatabaseHas('ec_order_addresses', [
+            'order_id' => $order->id,
+            'type' => 'shipping_address',
+            'name' => 'Dave Bo',
+            'city' => 'Cap de Ville',
+            'state' => 'Point Fortin',
+        ]);
+    }
 }

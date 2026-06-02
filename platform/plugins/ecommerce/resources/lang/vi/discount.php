@@ -95,6 +95,7 @@ return [
     'you_need_login_to_use_coupon_code' => 'Vui lòng đăng nhập để sử dụng mã giảm giá này. Ưu đãi này yêu cầu tài khoản khách hàng.',
     'you_used_coupon_code' => 'Bạn đã sử dụng mã giảm giá này rồi. Mỗi khách hàng chỉ có thể sử dụng ưu đãi này một lần.',
     'coupon_not_available_for_your_account' => 'Xin lỗi, mã giảm giá ":code" không khả dụng cho tài khoản của bạn. Đây là ưu đãi độc quyền cho khách hàng được chọn.',
+    'coupon_not_valid_for_cart_items' => 'Mã giảm giá này không áp dụng cho các sản phẩm trong giỏ hàng của bạn. Vui lòng thêm sản phẩm đủ điều kiện để sử dụng.',
     'customer_used_coupon_code' => 'Khách hàng đã sử dụng mã giảm giá này',
     'apply_via_url' => 'Áp dụng qua URL?',
     'apply_via_url_description' => 'Cài đặt này sẽ áp dụng mã giảm giá khi khách hàng truy cập URL với tham số "?coupon=code".',
@@ -116,4 +117,8 @@ return [
     'close' => 'Đóng',
     'coupon_code_label' => 'Mã giảm giá: :code',
     'enter_coupon_code_placeholder' => 'Nhập mã giảm giá...',
+    'applied' => 'Đã áp dụng',
+    'change_coupon' => 'Đổi mã giảm giá',
+    'enter_coupon_code' => 'Nhập mã giảm giá',
+    'or_select_coupon' => 'Hoặc chọn mã giảm giá',
 ];

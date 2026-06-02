@@ -31,4 +31,13 @@ return [
     'email' => 'E-mail',
     'password' => 'Mật khẩu',
     'password_confirmation' => 'Xác nhận mật khẩu',
+    'site_branding' => 'Logo & favicon trang web',
+    'admin_branding' => 'Logo & favicon quản trị',
+    'step_branding' => 'Thương hiệu',
+    'step_account' => 'Tài khoản',
+    'back' => 'Quay lại',
+    'branding_saved' => 'Đã lưu cài đặt thương hiệu thành công!',
+    'dont_show_again' => 'Không hiển thị lại',
+    'dismissed_message' => 'Đã đóng thông báo trình hướng dẫn cài đặt.',
+    'exit_wizard_description' => 'Bạn có thể tiếp tục cài đặt sau từ thông báo trên bảng điều khiển của mình.',
 ];

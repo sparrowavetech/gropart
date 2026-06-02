@@ -65,7 +65,7 @@ class ModelTranslationImporter extends Importer implements WithMapping
                         continue;
                     }
 
-                    $maxLength = $column === 'content' ? 300000 : ($column === 'description' ? 400 : 300000);
+                    $maxLength = $column === 'content' ? 300000 : ($column === 'description' ? 65535 : 300000);
 
                     $columns[] = ImportColumn::make("{$column}_({$langCode})")
                         ->label(Str::title($column) . ' (' . $langCode . ')')

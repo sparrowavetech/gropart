@@ -95,6 +95,7 @@ return [
     'you_need_login_to_use_coupon_code' => 'Log alstublieft in om deze couponcode te gebruiken. Dit aanbod vereist een klantaccount.',
     'you_used_coupon_code' => 'U heeft deze couponcode al gebruikt. Elke klant kan dit aanbod slechts eenmaal gebruiken.',
     'coupon_not_available_for_your_account' => 'Sorry, de couponcode ":code" is niet beschikbaar voor uw account. Dit is een exclusief aanbod voor geselecteerde klanten.',
+    'coupon_not_valid_for_cart_items' => 'Deze kortingscode is niet geldig voor de artikelen in je winkelwagen. Voeg een in aanmerking komend product toe om hem te gebruiken.',
     'customer_used_coupon_code' => 'Klanten die deze kortingscode hebben gebruikt',
     'apply_via_url' => 'Toepassen via URL?',
     'apply_via_url_description' => 'Deze instelling zal couponcode toepassen wanneer klanten de URL bezoeken met de parameter "?coupon=code".',
@@ -116,4 +117,8 @@ return [
     'close' => 'Sluiten',
     'coupon_code_label' => 'Couponcode: :code',
     'enter_coupon_code_placeholder' => 'Voer couponcode in...',
+    'applied' => 'Toegepast',
+    'change_coupon' => 'Coupon wijzigen',
+    'enter_coupon_code' => 'Voer kortingscode in',
+    'or_select_coupon' => 'Of selecteer een coupon',
 ];

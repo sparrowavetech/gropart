@@ -56,6 +56,7 @@
                     <option
                         value="{{ $currency->title }}"
                         data-symbol="{{ $currency->symbol }}"
+                        data-is-prefix-symbol="{{ $currency->is_prefix_symbol ? 1 : 0 }}"
                         @selected($productCurrencyCode === $currency->title)
                     >
                         {{ $currency->title }} ({{ $currency->symbol }})
@@ -76,9 +77,15 @@
             class="input-mask-number"
             :group-flat="true"
         >
-            <x-slot:prepend>
-                <span class="input-group-text currency-symbol">{{ $selectedCurrency->symbol }}</span>
-            </x-slot:prepend>
+            @if ($selectedCurrency->is_prefix_symbol)
+                <x-slot:prepend>
+                    <span class="input-group-text currency-symbol">{{ $selectedCurrency->symbol }}</span>
+                </x-slot:prepend>
+            @else
+                <x-slot:append>
+                    <span class="input-group-text currency-symbol">{{ $selectedCurrency->symbol }}</span>
+                </x-slot:append>
+            @endif
         </x-core::form.text-input>
     </div>
     <div class="col-md-6">
@@ -96,9 +103,15 @@
                 {!! BaseHelper::clean(trans('plugins/ecommerce::products.form.price_sale_percent_helper', ['percent' => '<strong>' . ($product ? $product->sale_percent : 0) . '%</strong>'])) !!}
             </x-slot:helper-text>
 
-            <x-slot:prepend>
-                <span class="input-group-text currency-symbol">{{ $selectedCurrency->symbol }}</span>
-            </x-slot:prepend>
+            @if ($selectedCurrency->is_prefix_symbol)
+                <x-slot:prepend>
+                    <span class="input-group-text currency-symbol">{{ $selectedCurrency->symbol }}</span>
+                </x-slot:prepend>
+            @else
+                <x-slot:append>
+                    <span class="input-group-text currency-symbol">{{ $selectedCurrency->symbol }}</span>
+                </x-slot:append>
+            @endif
             <x-slot:labelDescription>
                 <a
                     class="turn-on-schedule"
@@ -159,9 +172,15 @@
             :group-flat="true"
             :helper-text="trans('plugins/ecommerce::products.form.cost_per_item_helper')"
         >
-            <x-slot:prepend>
-                <span class="input-group-text currency-symbol">{{ $selectedCurrency->symbol }}</span>
-            </x-slot:prepend>
+            @if ($selectedCurrency->is_prefix_symbol)
+                <x-slot:prepend>
+                    <span class="input-group-text currency-symbol">{{ $selectedCurrency->symbol }}</span>
+                </x-slot:prepend>
+            @else
+                <x-slot:append>
+                    <span class="input-group-text currency-symbol">{{ $selectedCurrency->symbol }}</span>
+                </x-slot:append>
+            @endif
         </x-core::form.text-input>
     </div>
     <input

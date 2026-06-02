@@ -95,6 +95,7 @@ return [
     'you_need_login_to_use_coupon_code' => 'Prijavite se, da uporabite to kuponsko kodo. Ta ponudba zahteva račun stranke.',
     'you_used_coupon_code' => 'To kuponsko kodo ste že uporabili. Vsaka stranka lahko uporabi to ponudbo samo enkrat.',
     'coupon_not_available_for_your_account' => 'Oprostite, kuponska koda ":code" ni na voljo za vaš račun. To je ekskluzivna ponudba za izbrane stranke.',
+    'coupon_not_valid_for_cart_items' => 'Ta koda za popust ni veljavna za izdelke v vaši košarici. Za uporabo dodajte ustrezen izdelek.',
     'customer_used_coupon_code' => 'Stranke, ki so uporabile to kodo popusta',
     'apply_via_url' => 'Uporabi prek URL-ja?',
     'apply_via_url_description' => 'Ta nastavitev bo uporabila kuponsko kodo, ko stranke dostopajo do URL-ja s parametrom "?coupon=code".',
@@ -116,4 +117,8 @@ return [
     'close' => 'Zapri',
     'coupon_code_label' => 'Kuponska koda: :code',
     'enter_coupon_code_placeholder' => 'Vnesite kuponsko kodo...',
+    'applied' => 'Uporabljeno',
+    'change_coupon' => 'Spremeni kupon',
+    'enter_coupon_code' => 'Vnesite kodo za popust',
+    'or_select_coupon' => 'Ali izberite kupon',
 ];

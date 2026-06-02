@@ -95,6 +95,7 @@ return [
     'you_need_login_to_use_coupon_code' => 'Lūdzu, piesakieties, lai izmantotu šo kupona kodu. Šis piedāvājums prasa klienta kontu.',
     'you_used_coupon_code' => 'Jūs jau esat izmantojis šo kupona kodu. Katrs klients var izmantot šo piedāvājumu tikai vienu reizi.',
     'coupon_not_available_for_your_account' => 'Atvainojiet, kupona kods ":code" nav pieejams jūsu kontam. Šis ir ekskluzīvs piedāvājums izvēlētiem klientiem.',
+    'coupon_not_valid_for_cart_items' => 'Šis atlaides kods nav derīgs jūsu grozā esošajām precēm. Lūdzu, pievienojiet atbilstošu produktu, lai to izmantotu.',
     'customer_used_coupon_code' => 'Klienti, kas izmantoja šo atlaides kodu',
     'apply_via_url' => 'Lietot caur URL?',
     'apply_via_url_description' => 'Šis iestatījums lietosiet kupona kodu, kad klienti piekļūst URL ar parametru "?coupon=code".',
@@ -116,4 +117,8 @@ return [
     'close' => 'Aizvērt',
     'coupon_code_label' => 'Kupona kods: :code',
     'enter_coupon_code_placeholder' => 'Ievadiet kupona kodu...',
+    'applied' => 'Piemērots',
+    'change_coupon' => 'Mainīt kuponu',
+    'enter_coupon_code' => 'Ievadiet atlaides kodu',
+    'or_select_coupon' => 'Vai izvēlieties kuponu',
 ];

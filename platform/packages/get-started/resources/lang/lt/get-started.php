@@ -31,4 +31,13 @@ return [
     'email' => 'El. paštas',
     'password' => 'Slaptažodis',
     'password_confirmation' => 'Slaptažodžio patvirtinimas',
+    'site_branding' => 'Svetainės logotipas ir favikonas',
+    'admin_branding' => 'Administravimo logotipas ir favikonas',
+    'step_branding' => 'Prekės ženklas',
+    'step_account' => 'Paskyra',
+    'back' => 'Atgal',
+    'branding_saved' => 'Prekės ženklo nustatymai sėkmingai išsaugoti!',
+    'dont_show_again' => 'Daugiau nerodyti',
+    'dismissed_message' => 'Sąrankos vediklio pranešimas atmestas.',
+    'exit_wizard_description' => 'Sąranką galite tęsti vėliau iš pranešimo savo skydelyje.',
 ];

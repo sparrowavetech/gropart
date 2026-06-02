@@ -31,4 +31,13 @@ return [
     'email' => 'E-pošta',
     'password' => 'Geslo',
     'password_confirmation' => 'Potrditev gesla',
+    'site_branding' => 'Logotip in favikona spletnega mesta',
+    'admin_branding' => 'Logotip in favikona skrbništva',
+    'step_branding' => 'Blagovna znamka',
+    'step_account' => 'Račun',
+    'back' => 'Nazaj',
+    'branding_saved' => 'Nastavitve blagovne znamke so bile uspešno shranjene!',
+    'dont_show_again' => 'Ne prikaži več',
+    'dismissed_message' => 'Obvestilo čarovnika za namestitev je bilo zaprto.',
+    'exit_wizard_description' => 'Namestitev lahko nadaljujete pozneje prek obvestila na nadzorni plošči.',
 ];

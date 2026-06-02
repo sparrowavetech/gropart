@@ -95,6 +95,7 @@ return [
     'you_need_login_to_use_coupon_code' => 'Kirjaudu sisään käyttääksesi tätä kuponkikoodia. Tämä tarjous vaatii asiakastilin.',
     'you_used_coupon_code' => 'Olet jo käyttänyt tämän kuponkikoodin. Jokainen asiakas voi käyttää tätä tarjousta vain kerran.',
     'coupon_not_available_for_your_account' => 'Kuponkikoodi ":code" ei ole saatavilla tilillesi. Tämä on eksklusiivinen tarjous valituille asiakkaille.',
+    'coupon_not_valid_for_cart_items' => 'Tämä alennuskoodi ei kelpaa ostoskorisi tuotteille. Lisää kelvollinen tuote käyttääksesi sitä.',
     'customer_used_coupon_code' => 'Asiakkaat, jotka ovat käyttäneet tämän alennuskoodin',
     'apply_via_url' => 'Sovella URL:n kautta?',
     'apply_via_url_description' => 'Tämä asetus soveltaa kuponkikoodia, kun asiakkaat käyttävät URL-osoitetta parametrilla "?coupon=code".',
@@ -116,4 +117,8 @@ return [
     'close' => 'Sulje',
     'coupon_code_label' => 'Kuponkikoodi: :code',
     'enter_coupon_code_placeholder' => 'Syötä kuponkikoodi...',
+    'applied' => 'Käytetty',
+    'change_coupon' => 'Vaihda kuponki',
+    'enter_coupon_code' => 'Syötä alennuskoodi',
+    'or_select_coupon' => 'Tai valitse kuponki',
 ];

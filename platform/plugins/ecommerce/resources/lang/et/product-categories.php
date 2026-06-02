@@ -27,4 +27,6 @@ return [
     'parent' => 'Ülemkategooria',
     'image' => 'Pilt',
     'product_category_translations' => 'Tootekategooria tõlked',
+    'parent_self_reference' => 'Kategooria ei saa olla iseenda ülemkategooria.',
+    'parent_circular_reference' => 'Kategooriat ei saa määrata oma alamkategooria ülemkategooriaks.',
 ];

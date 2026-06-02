@@ -837,9 +837,24 @@ $(() => {
     $(document).on('change', '.product-currency-selector', function () {
         const $selected = $(this).find('option:selected')
         const symbol = $selected.data('symbol')
-        if (symbol) {
-            $(this).closest('.price-group').find('.currency-symbol').text(symbol)
+        const isPrefix = parseInt($selected.data('is-prefix-symbol'), 10) === 1
+        if (!symbol) {
+            return
         }
+        $(this).closest('.price-group').find('.currency-symbol').each(function () {
+            const $symbol = $(this)
+            $symbol.text(symbol)
+            const $group = $symbol.closest('.input-group')
+            const $input = $group.find('input.form-control').first()
+            if (!$input.length) {
+                return
+            }
+            if (isPrefix) {
+                $symbol.insertBefore($input)
+            } else {
+                $symbol.insertAfter($input)
+            }
+        })
     })
 
     $('body').on('click', '.list-gallery-media-images .btn_remove_image', (event) => {

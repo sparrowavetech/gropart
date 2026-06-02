@@ -364,6 +364,50 @@ class PublicCheckoutController extends BaseController
             ];
         } elseif ($addressFromInput = (array) $request->input('address', [])) {
             $addressData = $addressFromInput;
+        } elseif (! empty($sessionData['name'])) {
+            // Fallback: previous postSaveInformation merged address fields into
+            // sessionData top-level. Mirrors the same fallback in
+            // OrderHelper::processAddressOrder. Without this, guests whose final
+            // postCheckout request lacks address[*] fields (split-step UIs, autofill,
+            // broken JS) get orders with NULL shipping address — see backfill
+            // migration 2026_04_25_000001_backfill_missing_order_shipping_addresses.
+            $addressData = Arr::only($sessionData, [
+                'name', 'phone', 'email', 'country', 'state', 'city', 'address', 'zip_code',
+            ]);
+        }
+
+        // Safety net: when any address field is still empty after the 3-branch
+        // chain above, fill it from the next available source. Catches cases
+        // where postSaveInformation never fired (broken JS / fast click / autofill)
+        // AND $request->input('address') arrives empty for whatever upstream
+        // reason — without this, $addressData stays at the initial billing-only
+        // shape, checkAndCreateOrderAddress warns + skips, and every shipping-
+        // carrier plugin loses its destination.
+        //
+        // Field list respects admin settings: zip_code is opt-in (default off);
+        // any field in EcommerceHelper::getHiddenFieldsAtCheckout() is excluded
+        // so we never re-introduce a value the admin has chosen to hide.
+        $safetyNetFields = ['name', 'phone', 'email', 'country', 'state', 'city', 'address'];
+        if (EcommerceHelper::isZipCodeEnabled()) {
+            $safetyNetFields[] = 'zip_code';
+        }
+        $safetyNetFields = array_diff(
+            $safetyNetFields,
+            (array) EcommerceHelper::getHiddenFieldsAtCheckout()
+        );
+
+        foreach ($safetyNetFields as $safetyNetField) {
+            if (! empty($addressData[$safetyNetField])) {
+                continue;
+            }
+
+            $value = $request->input("address.$safetyNetField")
+                ?: Arr::get($sessionData, $safetyNetField)
+                ?: $request->input($safetyNetField);
+
+            if (! empty($value)) {
+                $addressData[$safetyNetField] = $value;
+            }
         }
 
         $addressData = OrderHelper::cleanData($addressData);
@@ -471,6 +515,10 @@ class PublicCheckoutController extends BaseController
                 ['order_id' => $sessionData['created_order_id']],
                 (array) $request->input('address', [])
             );
+        } elseif (! empty($addressData['name'])) {
+            // Session-fallback path (set above): keep $addressData but stamp order_id
+            // so checkAndCreateOrderAddress can persist the row.
+            $addressData['order_id'] = $sessionData['created_order_id'];
         }
 
         $sessionData['is_save_order_shipping_address'] = EcommerceHelper::isSaveOrderShippingAddress($products);

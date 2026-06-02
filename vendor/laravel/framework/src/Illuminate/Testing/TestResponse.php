@@ -890,6 +890,20 @@ class TestResponse implements ArrayAccess
     }
 
     /**
+     * Assert that the given paths in the response contain all of the expected values without looking at the order.
+     *
+     * @return $this
+     */
+    public function assertJsonPathsCanonicalizing(array $paths)
+    {
+        foreach ($paths as $path => $expected) {
+            $this->assertJsonPathCanonicalizing($path, $expected);
+        }
+
+        return $this;
+    }
+
+    /**
      * Assert that the given path in the response contains all of the expected values without looking at the order.
      *
      * @param  string  $path
@@ -1638,6 +1652,30 @@ class TestResponse implements ArrayAccess
         } else {
             PHPUnit::withResponse($this)->assertEquals($value, $this->session()->getOldInput($key));
         }
+
+        return $this;
+    }
+
+    /**
+     * Assert that the session is missing a given key in the flashed input array.
+     *
+     * @param  string|array  $key
+     * @return $this
+     */
+    public function assertSessionMissingInput($key)
+    {
+        if (is_array($key)) {
+            foreach ($key as $k) {
+                $this->assertSessionMissingInput($k);
+            }
+
+            return $this;
+        }
+
+        PHPUnit::withResponse($this)->assertFalse(
+            $this->session()->hasOldInput($key),
+            "Session has unexpected key [{$key}]."
+        );
 
         return $this;
     }

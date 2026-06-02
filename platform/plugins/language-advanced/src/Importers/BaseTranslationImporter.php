@@ -78,7 +78,7 @@ abstract class BaseTranslationImporter extends Importer implements WithMapping
                 $langCode = $properties['lang_code'];
 
                 foreach ($translatableColumns as $column) {
-                    $maxLength = $column === 'content' ? 300000 : ($column === 'description' ? 400 : 255);
+                    $maxLength = $column === 'content' ? 300000 : ($column === 'description' ? 65535 : 255);
 
                     $columns[] = ImportColumn::make($column . '_' . $langCode)
                         ->label(Str::title($column) . ' (' . $langCode . ')')

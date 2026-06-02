@@ -95,6 +95,7 @@ return [
     'you_need_login_to_use_coupon_code' => '请登录以使用此优惠券代码。此优惠需要客户账户。',
     'you_used_coupon_code' => '您已经使用过此优惠券代码。每个客户只能使用此优惠一次。',
     'coupon_not_available_for_your_account' => '抱歉，优惠券代码":code"对您的账户不可用。这是为选定客户提供的专属优惠。',
+    'coupon_not_valid_for_cart_items' => '此优惠券代码不适用于您购物车中的商品。请添加符合条件的商品后再使用。',
     'customer_used_coupon_code' => '已使用此折扣代码的客户',
     'apply_via_url' => '通过URL应用？',
     'apply_via_url_description' => '此设置将在客户访问带有参数"?coupon=code"的URL时应用优惠券代码。',
@@ -116,4 +117,8 @@ return [
     'close' => '关闭',
     'coupon_code_label' => '优惠券代码：:code',
     'enter_coupon_code_placeholder' => '输入优惠券代码...',
+    'applied' => '已应用',
+    'change_coupon' => '更换优惠券',
+    'enter_coupon_code' => '输入优惠券代码',
+    'or_select_coupon' => '或选择优惠券',
 ];

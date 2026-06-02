@@ -27,4 +27,6 @@ return [
     'parent' => 'Överordnad kategori',
     'image' => 'Bild',
     'product_category_translations' => 'Produktkategoriöversättningar',
+    'parent_self_reference' => 'En kategori kan inte vara sin egen överordnade kategori.',
+    'parent_circular_reference' => 'En kategori kan inte tilldelas en av sina egna underkategorier som överordnad kategori.',
 ];

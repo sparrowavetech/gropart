@@ -31,4 +31,13 @@ return [
     'email' => 'E-mail',
     'password' => 'Lozinka',
     'password_confirmation' => 'Potvrda lozinke',
+    'site_branding' => 'Logo i favicon stranice',
+    'admin_branding' => 'Logo i favicon administracije',
+    'step_branding' => 'Brendiranje',
+    'step_account' => 'Račun',
+    'back' => 'Natrag',
+    'branding_saved' => 'Postavke brendiranja uspješno su spremljene!',
+    'dont_show_again' => 'Ne prikazuj ponovno',
+    'dismissed_message' => 'Obavijest čarobnjaka za postavljanje je odbačena.',
+    'exit_wizard_description' => 'Postavljanje možete nastaviti kasnije putem obavijesti na nadzornoj ploči.',
 ];

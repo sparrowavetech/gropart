@@ -27,4 +27,6 @@ return [
     'parent' => 'Kategoria nadrzędna',
     'image' => 'Obraz',
     'product_category_translations' => 'Tłumaczenia kategorii produktów',
+    'parent_self_reference' => 'Kategoria nie może być swoim własnym rodzicem.',
+    'parent_circular_reference' => 'Kategorii nie można przypisać do jednej z jej własnych podkategorii jako rodzica.',
 ];

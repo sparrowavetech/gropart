@@ -70,6 +70,9 @@
                                     $salePrice = $productPrice->getPrice();
                                     $originalPrice = $productPrice->getPriceOriginal();
                                     $hasDiscount = $salePrice < $originalPrice;
+                                    $shouldShowPrice =
+                                        (! EcommerceHelper::hideProductPrice() || EcommerceHelper::isCartEnabled())
+                                        && (! EcommerceHelper::hideProductPriceWhenZero() || $salePrice > 0);
                                 @endphp
                                 <div class="ec-cross-sale-slide">
                                     <div class="ec-cross-sale-card">
@@ -93,12 +96,14 @@
                                                         {{ $product->name }}
                                                     </a>
                                                 </h3>
-                                                <div class="ec-cross-sale-price">
-                                                    <span class="ec-cross-sale-price-current">{{ format_price($salePrice) }}</span>
-                                                    @if($hasDiscount)
-                                                        <span class="ec-cross-sale-price-old">{{ format_price($originalPrice) }}</span>
-                                                    @endif
-                                                </div>
+                                                @if ($shouldShowPrice)
+                                                    <div class="ec-cross-sale-price">
+                                                        <span class="ec-cross-sale-price-current">{{ format_price($salePrice) }}</span>
+                                                        @if($hasDiscount)
+                                                            <span class="ec-cross-sale-price-old">{{ format_price($originalPrice) }}</span>
+                                                        @endif
+                                                    </div>
+                                                @endif
                                                 @if(EcommerceHelper::isCartEnabled())
                                                     <button
                                                         type="button"

@@ -95,6 +95,7 @@ return [
     'you_need_login_to_use_coupon_code' => 'אנא התחבר כדי להשתמש בקוד קופון זה. הצעה זו דורשת חשבון לקוח.',
     'you_used_coupon_code' => 'כבר השתמשת בקוד קופון זה. כל לקוח יכול להשתמש בהצעה זו פעם אחת בלבד.',
     'coupon_not_available_for_your_account' => 'מצטערים, קוד הקופון ":code" אינו זמין לחשבון שלך. זוהי הצעה בלעדית ללקוחות נבחרים.',
+    'coupon_not_valid_for_cart_items' => 'קוד הקופון אינו תקף עבור הפריטים בעגלה שלך. אנא הוסף מוצר מתאים כדי להשתמש בו.',
     'customer_used_coupon_code' => 'לקוחות שהשתמשו בקוד הנחה זה',
     'apply_via_url' => 'החל דרך URL?',
     'apply_via_url_description' => 'הגדרה זו תחיל את קוד הקופון כאשר לקוחות ניגשים לכתובת עם הפרמטר "?coupon=code".',
@@ -116,4 +117,8 @@ return [
     'close' => 'סגור',
     'coupon_code_label' => 'קוד קופון: :code',
     'enter_coupon_code_placeholder' => 'הזן קוד קופון...',
+    'applied' => 'הוחל',
+    'change_coupon' => 'שינוי קופון',
+    'enter_coupon_code' => 'הזן קוד קופון',
+    'or_select_coupon' => 'או בחר קופון',
 ];

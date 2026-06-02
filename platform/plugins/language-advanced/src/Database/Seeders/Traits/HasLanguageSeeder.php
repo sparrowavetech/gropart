@@ -32,6 +32,15 @@ trait HasLanguageSeeder
     {
         return [
             [
+                'lang_name' => 'English',
+                'lang_locale' => 'en',
+                'lang_is_default' => true,
+                'lang_code' => 'en_US',
+                'lang_is_rtl' => false,
+                'lang_flag' => 'us',
+                'lang_order' => 0,
+            ],
+            [
                 'lang_name' => 'Arabic',
                 'lang_locale' => 'ar',
                 'lang_is_default' => false,

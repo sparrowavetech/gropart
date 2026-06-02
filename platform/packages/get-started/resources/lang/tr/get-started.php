@@ -31,4 +31,13 @@ return [
     'email' => 'E-posta',
     'password' => 'Şifre',
     'password_confirmation' => 'Şifre onayı',
+    'site_branding' => 'Site logosu ve favicon',
+    'admin_branding' => 'Yönetici logosu ve favicon',
+    'step_branding' => 'Markalama',
+    'step_account' => 'Hesap',
+    'back' => 'Geri',
+    'branding_saved' => 'Markalama ayarları başarıyla kaydedildi!',
+    'dont_show_again' => 'Tekrar gösterme',
+    'dismissed_message' => 'Kurulum sihirbazı bildirimi kapatıldı.',
+    'exit_wizard_description' => 'Kuruluma daha sonra kontrol panelinizdeki bildirimden devam edebilirsiniz.',
 ];

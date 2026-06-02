@@ -76,15 +76,31 @@ class CookieConsentServiceProvider extends ServiceProvider
                             'attributes' => [
                                 'name' => 'cookie_consent_style',
                                 'list' => [
+                                    'card' => trans('plugins/cookie-consent::cookie-consent.theme_options.card'),
                                     'full-width' => trans('plugins/cookie-consent::cookie-consent.theme_options.full_width'),
                                     'minimal' => trans('plugins/cookie-consent::cookie-consent.theme_options.minimal'),
                                     'floating' => trans('plugins/cookie-consent::cookie-consent.theme_options.floating'),
                                     'modal' => trans('plugins/cookie-consent::cookie-consent.theme_options.modal'),
                                     'top-banner' => trans('plugins/cookie-consent::cookie-consent.theme_options.top_banner'),
                                 ],
-                                'value' => 'yes',
+                                'value' => 'card',
                                 'options' => [
                                     'class' => 'form-control',
+                                ],
+                            ],
+                        ],
+                        [
+                            'id' => 'cookie_consent_title',
+                            'type' => 'text',
+                            'label' => trans('plugins/cookie-consent::cookie-consent.theme_options.title'),
+                            'helper' => trans('plugins/cookie-consent::cookie-consent.theme_options.title_helper'),
+                            'attributes' => [
+                                'name' => 'cookie_consent_title',
+                                'value' => trans('plugins/cookie-consent::cookie-consent.title'),
+                                'options' => [
+                                    'class' => 'form-control',
+                                    'placeholder' => trans('plugins/cookie-consent::cookie-consent.theme_options.title'),
+                                    'data-counter' => 120,
                                 ],
                             ],
                         ],
@@ -240,7 +256,7 @@ class CookieConsentServiceProvider extends ServiceProvider
             return $html;
         }
 
-        $view = $this->resolveStyleView(theme_option('cookie_consent_style', 'full-width'));
+        $view = $this->resolveStyleView(theme_option('cookie_consent_style', 'card'));
 
         return $html . view($view, compact('cookieConsentConfig'))->render();
     }

@@ -29,6 +29,8 @@ class ResetPasswordController extends BaseController
         SeoHelper::setTitle(theme_option('ecommerce_reset_password_seo_title') ?: $title)
             ->setDescription(theme_option('ecommerce_reset_password_seo_description'));
 
+        SeoHelper::meta()->addMeta('robots', 'noindex, nofollow');
+
         Theme::breadcrumb()
             ->add($title, route('customer.password.reset'));
 

@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.42.4](https://github.com/googleapis/gax-php/compare/v1.42.3...v1.42.4) (2026-05-11)
+
+
+### Bug Fixes
+
+* Docs for phpdoc for middleware interface ([5330ee7](https://github.com/googleapis/gax-php/commit/5330ee7fc0349f7076afe1c26a189328978aacfb))
+
+## [1.42.3](https://github.com/googleapis/gax-php/compare/v1.42.2...v1.42.3) (2026-04-29)
+
+
+### Bug Fixes
+
+* **serializer:** Catch Throwable to handle PHP 7+ Errors ([#664](https://github.com/googleapis/gax-php/issues/664)) ([250acdb](https://github.com/googleapis/gax-php/commit/250acdb2178afdfa0347947e52b242404a8e0faa))
+
 ## [1.42.2](https://github.com/googleapis/gax-php/compare/v1.42.1...v1.42.2) (2026-04-02)
 
 

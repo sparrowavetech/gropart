@@ -27,4 +27,6 @@ return [
     'parent' => '父分类',
     'image' => '图片',
     'product_category_translations' => '产品分类翻译',
+    'parent_self_reference' => '分类不能将自身设为父分类。',
+    'parent_circular_reference' => '分类不能将其子分类指定为父分类。',
 ];

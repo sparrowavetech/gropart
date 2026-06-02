@@ -240,9 +240,20 @@
                 'table-has-actions' => $table->hasBulkActions(),
                 'table-has-filter' => $table->hasFilters(),
             ])>
-                @section('main-table')
-                    {!! $dataTable->table(compact('id', 'class'), false) !!}
-                @show
+                @if (isset($__env->getSections()['main-table']))
+                    {{-- Legacy override: a plugin or theme defined @section('main-table') with @parent before this view rendered. --}}
+                    @section('main-table')
+                        {!! $dataTable->table(compact('id', 'class'), false) !!}
+                    @show
+                @else
+                    {{-- Per-table override slot. Dynamic section name keeps multi-table pages from clobbering each other. --}}
+                    {{-- NOTE: @parent does NOT work with dynamic section names; overrides must render the dataTable inline. --}}
+                    @if (isset($__env->getSections()['main-table-' . $id]))
+                        @yield('main-table-' . $id)
+                    @else
+                        {!! $dataTable->table(compact('id', 'class'), false) !!}
+                    @endif
+                @endif
             </div>
         </div>
     </x-core::card>

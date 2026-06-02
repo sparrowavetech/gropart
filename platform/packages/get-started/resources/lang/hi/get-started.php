@@ -31,4 +31,13 @@ return [
     'email' => 'ईमेल',
     'password' => 'पासवर्ड',
     'password_confirmation' => 'पासवर्ड की पुष्टि',
+    'site_branding' => 'साइट लोगो और फेविकॉन',
+    'admin_branding' => 'एडमिन लोगो और फेविकॉन',
+    'step_branding' => 'ब्रांडिंग',
+    'step_account' => 'खाता',
+    'back' => 'वापस',
+    'branding_saved' => 'ब्रांडिंग सेटिंग्स सफलतापूर्वक सहेजी गईं!',
+    'dont_show_again' => 'दोबारा न दिखाएं',
+    'dismissed_message' => 'सेटअप विज़ार्ड सूचना खारिज कर दी गई।',
+    'exit_wizard_description' => 'आप बाद में अपने डैशबोर्ड पर दी गई सूचना से सेटअप फिर से शुरू कर सकते हैं।',
 ];
