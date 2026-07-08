@@ -155,6 +155,8 @@ return [
         'fee_per_order' => 'প্রতি অর্ডারে ফি (%), সুপারিশ: 2 বা 3',
         'default_commission_fee' => 'ডিফল্ট কমিশন ফি (%), সুপারিশ: 2 বা 3',
         'default_commission_fee_helper' => 'Set the percentage of each sale that goes to the marketplace as commission.',
+        'fixed_commission_fee' => 'নির্দিষ্ট কমিশন ফি (প্রতি অর্ডার)',
+        'fixed_commission_fee_helper' => 'কমিশনের সাথে যোগ করা একটি নির্দিষ্ট পরিমাণ, উপরের শতাংশের পাশাপাশি প্রতি বিক্রেতা অর্ডারে একবার চার্জ করা হয়। পেমেন্ট গেটওয়ে ফি-এর নির্দিষ্ট অংশ (যেমন Stripe/PayPal €0.25) কভার করতে উপযোগী। নিষ্ক্রিয় করতে 0 রাখুন।',
         'enable_commission_fee_for_each_category' => 'প্রতিটি শ্রেণীর জন্য কমিশন ফি সক্রিয় করবেন?',
         'enable_commission_fee_for_each_category_helper' => 'If enabled, you can set different commission rates for each product category.',
         'categories' => 'শ্রেণীসমূহ',

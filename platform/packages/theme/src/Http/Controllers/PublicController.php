@@ -5,6 +5,7 @@ namespace Botble\Theme\Http\Controllers;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
+use Botble\Blog\Models\Post;
 use Botble\Language\Facades\Language;
 use Botble\Page\Models\Page;
 use Botble\Page\Services\PageService;
@@ -18,6 +19,7 @@ use Botble\Theme\Facades\SiteMapManager;
 use Botble\Theme\Facades\Theme;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Throwable;
 
 class PublicController extends BaseController
 {
@@ -154,5 +156,115 @@ class PublicController extends BaseController
     public function getViewWithPrefix(string $prefix, ?string $slug = null)
     {
         return $this->getView($slug, $prefix);
+    }
+
+    /**
+     * Generate a default llms.txt following the https://llmstxt.org specification.
+     * Served only when a static public/llms.txt file does not exist (the web server
+     * serves the static file first, so this route acts as the dynamic fallback).
+     */
+    public function getLlmsTxt()
+    {
+        $lines = [];
+
+        // Spec requires the document to begin with a single H1 (the site name).
+        $siteTitle = Theme::getSiteTitle() ?: setting('admin_title', config('app.name'));
+        $lines[] = '# ' . $this->cleanLlmsText($siteTitle, 150);
+
+        // Short site summary as a blockquote, right after the H1.
+        $description = theme_option('seo_description') ?: setting('admin_description');
+        if ($description) {
+            $lines[] = '';
+            $lines[] = '> ' . $this->cleanLlmsText($description, 300);
+        }
+
+        // Content sections. Each model is optional - skipped when its plugin is absent.
+        $lines = array_merge($lines, $this->buildLlmsModelSection(Page::class, __('Pages'), 100));
+        $lines = array_merge($lines, $this->buildLlmsModelSection(Post::class, __('Blog'), 50));
+
+        // Reference the XML sitemap for full coverage.
+        if (setting('sitemap_enabled', true)) {
+            $lines[] = '';
+            $lines[] = '## Optional';
+            $lines[] = '- [XML Sitemap](' . route('public.sitemap') . ')';
+        }
+
+        $content = implode("\n", $lines) . "\n";
+
+        return response($content, 200, [
+            'Content-Type' => 'text/plain; charset=UTF-8',
+            'Cache-Control' => 'public, max-age=3600',
+        ]);
+    }
+
+    /**
+     * Build a markdown "## Heading" section listing a slugable model's published
+     * items as links. Returns [] (no leading blank line) when the model's plugin is
+     * not installed or there are no valid items.
+     */
+    protected function buildLlmsModelSection(string $modelClass, string $heading, int $limit): array
+    {
+        if (! class_exists($modelClass)) {
+            return [];
+        }
+
+        try {
+            $items = $modelClass::query()
+                ->wherePublished()
+                ->latest()
+                ->select(['id', 'name', 'description'])
+                ->with('slugable')
+                ->limit($limit)
+                ->get();
+        } catch (Throwable) {
+            return [];
+        }
+
+        $bullets = [];
+
+        foreach ($items as $item) {
+            // Read into variables first: `url` is a dynamic magic accessor, so
+            // empty($item->url) would short-circuit to true via __isset().
+            $url = $item->url;
+            $name = $item->name;
+
+            if (! $url || ! $name) {
+                continue;
+            }
+
+            // Strip brackets from the label so they cannot break the [title](url) syntax.
+            $title = str_replace(['[', ']'], '', $this->cleanLlmsText($name, 150));
+            $line = sprintf('- [%s](%s)', $title, $url);
+
+            $description = $item->description;
+            if ($description) {
+                $line .= ': ' . $this->cleanLlmsText($description, 150);
+            }
+
+            $bullets[] = $line;
+        }
+
+        if (empty($bullets)) {
+            return [];
+        }
+
+        return array_merge(['', '## ' . $heading], $bullets);
+    }
+
+    /**
+     * Normalize text for plain-text/markdown output: strip HTML, collapse
+     * whitespace, and truncate to a readable length.
+     */
+    protected function cleanLlmsText(string $text, int $limit): string
+    {
+        $text = strip_tags($text);
+        $text = str_replace(["\r", "\n", "\t"], ' ', $text);
+        $text = trim((string) preg_replace('/\s+/', ' ', $text));
+
+        if (mb_strlen($text) > $limit) {
+            $text = rtrim(mb_substr($text, 0, $limit - 3)) . '...';
+        }
+
+        return $text;
     }
 }

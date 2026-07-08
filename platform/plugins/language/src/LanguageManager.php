@@ -225,7 +225,7 @@ class LanguageManager
      * Returns a URL adapted to $locale or current locale
      *
      * @param string|null $url URL to adapt. If not passed, the current url would be taken.
-     * @param null $locale Locale to adapt, false to remove locale
+     * @param string|bool|null $locale Locale to adapt, false to remove locale
      * @return string URL translated
      */
     public function localizeURL(?string $url = null, $locale = null): string
@@ -1016,7 +1016,7 @@ class LanguageManager
     {
         $supportedLocales = $this->getSupportedLocales();
 
-        if (empty($locale) || ! is_string($locale)) {
+        if (empty($locale)) {
             // If the locale has not been passed through the function
             // it tries to get it from the first segment of the url
             $locale = $this->request->segment(1);
@@ -1184,7 +1184,7 @@ class LanguageManager
             }
 
             /**
-             * @var BaseModel $item
+             * @var class-string<BaseModel> $item
              */
             $item::resolveRelationUsing('languageMeta', function ($model) {
                 return $model

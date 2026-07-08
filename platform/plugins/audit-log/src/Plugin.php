@@ -2,9 +2,9 @@
 
 namespace Botble\AuditLog;
 
-use Botble\Dashboard\Models\DashboardWidget;
 use Botble\PluginManagement\Abstracts\PluginOperationAbstract;
 use Botble\Widget\Models\Widget;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Schema;
 
 class Plugin extends PluginOperationAbstract
@@ -15,6 +15,6 @@ class Plugin extends PluginOperationAbstract
 
         Widget::query()
             ->where('widget_id', 'widget_audit_logs')
-            ->each(fn (DashboardWidget $dashboardWidget) => $dashboardWidget->delete());
+            ->each(fn (Model $dashboardWidget) => $dashboardWidget->delete());
     }
 }

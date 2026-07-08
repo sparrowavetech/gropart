@@ -6,6 +6,13 @@ return [
     'edit' => 'Üzlet szerkesztése',
     'view' => 'Megtekintés',
     'forms' => [
+        'vacation_mode' => 'Vakáció mód',
+        'vacation_mode_helper' => 'Kapcsolja be az üzlete ideiglenes szüneteltetéséhez. A vásárlók továbbra is böngészhetik termékeit, de nem adhatnak le rendelést, amíg ki nem kapcsolja.',
+        'vacation_message' => 'Vakáció üzenet',
+        'vacation_message_helper' => 'Opcionális értesítés, amely a vásárlóknak jelenik meg az üzletében és a termékoldalakon, amíg a vakáció mód aktív.',
+        'vacation_message_placeholder' => 'Pl.: Július 1-ig szabadságon vagyunk. A most leadott rendeléseket visszatérésünk után szállítjuk.',
+        'vacation_badge' => 'Ez az üzlet szabadságon van',
+        'vacation_default_notice' => ':store jelenleg szabadságon van, és most nem fogad rendeléseket. Kérjük, nézzen vissza később.',
         'logo' => 'Logó',
         'email' => 'E-mail',
         'email_placeholder' => 'Pl.: nev@uzlet.hu',

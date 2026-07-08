@@ -146,6 +146,7 @@ class ResourceRegistry
             Payment::class => 'payments',
             PaymentLink::class => 'payment-links',
             Permission::class => 'permissions',
+            Payout::class => 'payouts',
             Profile::class => 'profiles',
             Refund::class => 'refunds',
             Route::class => 'routes',
@@ -154,6 +155,7 @@ class ResourceRegistry
             Settlement::class => 'settlements',
             Subscription::class => 'subscriptions',
             Terminal::class => 'terminals',
+            TerminalPairingCode::class => 'terminal-pairing-codes',
             Webhook::class => 'webhooks',
             WebhookEvent::class => 'webhook-events',
         ];

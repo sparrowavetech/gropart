@@ -331,6 +331,7 @@ class PublicCartController extends BaseController
             $originalProduct,
             $cartItem['qty'],
             $cartItem['subtotal'],
+            $product->sku,
         );
 
         app(FacebookPixel::class)->addToCart(
@@ -532,6 +533,14 @@ class PublicCartController extends BaseController
     {
         try {
             $cartItem = Cart::instance('cart')->get($id);
+
+            if (! $cartItem) {
+                return $this
+                    ->httpResponse()
+                    ->setError()
+                    ->setMessage(trans('plugins/ecommerce::products.cart.item_not_found'));
+            }
+
             $product = Product::query()->find($cartItem->id);
 
             $googleTagManager = app(GoogleTagManager::class);
@@ -551,6 +560,13 @@ class PublicCartController extends BaseController
             }
 
             $this->persistCart();
+
+            // Mark the cart as freshly synced so the restore middleware
+            // does not overwrite the session with stale DB content on the
+            // next request — the DB updated_at is set after the session
+            // updated_at, which the middleware interprets as "DB is newer"
+            // and restores the old content (including the just-removed item).
+            session(['cart_last_restored_at' => now()->toIso8601String()]);
 
             $responseData = [
                 ...$this->getDataForResponse(),
@@ -709,6 +725,12 @@ class PublicCartController extends BaseController
 
         if (auth('customer')->check()) {
             Cart::instance('cart')->deleteCustomerCart(auth('customer')->id());
+        } else {
+            // For guests, persist the empty cart state so the middleware
+            // does not restore the stale DB content on the next request.
+            $identifier = $this->getOrCreateGuestCartIdentifier();
+            Cart::instance('cart')->updateOrStoreQuietly($identifier);
+            session(['cart_last_restored_at' => now()->toIso8601String()]);
         }
 
         return $this

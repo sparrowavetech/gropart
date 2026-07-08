@@ -155,6 +155,8 @@ return [
         'fee_per_order' => 'Kosten per bestelling (%), suggestie: 2 of 3',
         'default_commission_fee' => 'Standaard commissie (%), suggestie: 2 of 3',
         'default_commission_fee_helper' => 'Stel het percentage van elke verkoop in dat als commissie naar de marketplace gaat.',
+        'fixed_commission_fee' => 'Vaste commissiekosten (per bestelling)',
+        'fixed_commission_fee_helper' => 'Een vast bedrag dat aan de commissie wordt toegevoegd, eenmaal per verkopersbestelling in rekening gebracht bovenop het bovenstaande percentage. Handig om het vaste deel van betaalkosten (bijv. Stripe/PayPal €0,25) te dekken. Laat 0 om uit te schakelen.',
         'enable_commission_fee_for_each_category' => 'Commissie per categorie inschakelen?',
         'enable_commission_fee_for_each_category_helper' => 'Indien ingeschakeld, kunt u verschillende commissietarieven instellen voor elke productcategorie.',
         'categories' => 'Categorieën',

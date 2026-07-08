@@ -155,6 +155,8 @@ return [
         'fee_per_order' => 'Gebühr pro Bestellung (%), empfohlen: 2 oder 3',
         'default_commission_fee' => 'Standard-Provision (%), empfohlen: 2 oder 3',
         'default_commission_fee_helper' => 'Legen Sie den Prozentsatz jedes Verkaufs fest, der als Provision an den Marktplatz geht.',
+        'fixed_commission_fee' => 'Feste Provisionsgebühr (pro Bestellung)',
+        'fixed_commission_fee_helper' => 'Ein fester Betrag, der zusätzlich zum obigen Prozentsatz einmal pro Händlerbestellung zur Provision hinzugefügt wird. Nützlich, um den festen Anteil der Zahlungsgebühren (z. B. Stripe/PayPal €0,25) abzudecken. Zum Deaktivieren 0 lassen.',
         'enable_commission_fee_for_each_category' => 'Provision für jede Kategorie aktivieren?',
         'enable_commission_fee_for_each_category_helper' => 'Wenn aktiviert, können Sie für jede Produktkategorie unterschiedliche Provisionssätze festlegen.',
         'categories' => 'Kategorien',

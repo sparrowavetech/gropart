@@ -151,6 +151,7 @@
                                     data-country-code-selection="true"
                                     value="{{ $phoneValue }}"
                                     placeholder="{{ trans('plugins/ecommerce::addresses.phone_placeholder') }}"
+                                    @required(in_array('phone', $enabledMandatoryFields))
                                 >
                                 <input
                                     type="hidden"
@@ -169,6 +170,7 @@
                                     type="tel"
                                     value="{{ $phoneValue }}"
                                     placeholder="{{ trans('plugins/ecommerce::addresses.phone_placeholder') }}"
+                                    @required(in_array('phone', $enabledMandatoryFields))
                                 >
                             @endif
                             <label for="address_phone">{{ __('Phone') }}@if (!in_array('phone', $enabledMandatoryFields)) <small class="text-muted fw-normal">({{ trans('plugins/ecommerce::ecommerce.optional') }})</small>@endif</label>

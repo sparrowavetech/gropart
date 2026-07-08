@@ -6,6 +6,13 @@ return [
     'edit' => 'Upraviť obchod',
     'view' => 'Zobraziť',
     'forms' => [
+        'vacation_mode' => 'Režim dovolenky',
+        'vacation_mode_helper' => 'Zapnutím dočasne pozastavíte svoj obchod. Zákazníci si stále môžu prezerať vaše produkty, ale nemôžu zadávať objednávky, kým to nevypnete.',
+        'vacation_message' => 'Správa o dovolenke',
+        'vacation_message_helper' => 'Voliteľné upozornenie zobrazené zákazníkom vo vašom obchode a na stránkach produktov, kým je režim dovolenky zapnutý.',
+        'vacation_message_placeholder' => 'Napr.: Máme dovolenku do 1. júla. Objednávky zadané teraz budú odoslané po našom návrate.',
+        'vacation_badge' => 'Tento obchod má dovolenku',
+        'vacation_default_notice' => ':store má momentálne dovolenku a práve teraz neprijíma objednávky. Skúste to neskôr.',
         'logo' => 'Logo',
         'email' => 'E-mail',
         'email_placeholder' => 'Napr.: meno@obchod.com',

@@ -1,0 +1,99 @@
+// Vendor vacation mode — notice (store banner + product detail) and card pill.
+// Fresh-grocery green tone drawn from Farmart tokens ($color-green / --primary-color)
+// so it reads as a friendly "temporarily away" status rather than an error. Aligned
+// with the surrounding store cards: soft tint surface, $border-color hairlines,
+// $primary-font titles. Solid surface + dark text keeps it legible on the
+// image/dark cover banner of the store info box.
+
+$vacation-accent: $color-green; // #2f8a33 fresh grocery green
+$vacation-surface: #f1f8ee; // pale mint tint
+$vacation-border: rgba(47, 138, 51, 0.28);
+$vacation-text: #45614a; // muted green-grey for body copy
+
+// ── Notice (store banner + product detail page) ──────────────
+.store-vacation-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 16px;
+    margin: 12px 0;
+    background: $vacation-surface;
+    border: 1px solid $vacation-border;
+    border-radius: 8px;
+    font-family: $primary-font;
+
+    &__icon {
+        flex-shrink: 0;
+        width: 34px;
+        height: 34px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: rgba(47, 138, 51, 0.14);
+        color: $vacation-accent;
+
+        i.icon {
+            font-size: 16px;
+            line-height: 1;
+        }
+    }
+
+    &__body {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        min-width: 0;
+    }
+
+    &__title {
+        font-weight: 600;
+        font-size: 14px;
+        line-height: 1.3;
+        color: $color-green;
+    }
+
+    &__text {
+        color: $vacation-text;
+        font-size: 13px;
+        line-height: 1.55;
+    }
+}
+
+// The store info-box banner turns surrounding text white (over the cover image /
+// dark overlay). The notice keeps its solid mint surface + dark text, so force the
+// colours back regardless of context so it always reads on light + dark banners.
+.vendor-info {
+    .store-vacation-notice {
+        &__title {
+            color: $color-green;
+        }
+
+        &__text {
+            color: $vacation-text;
+        }
+    }
+}
+
+// ── Pill badge (vendor listing card) ─────────────────────────
+.store-vacation-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    background: $vacation-surface;
+    border: 1px solid rgba(47, 138, 51, 0.35);
+    border-radius: 999px;
+    color: $vacation-accent;
+    font-family: $primary-font;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.4;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+
+    i.icon {
+        font-size: 12px;
+        line-height: 1;
+    }
+}

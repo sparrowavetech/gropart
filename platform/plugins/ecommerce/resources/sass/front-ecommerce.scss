@@ -3038,3 +3038,42 @@ table {
     }
 }
 
+
+// ---------------------------------------------------------------------------
+// Prevent CLS on the product-detail image gallery.
+// `.bb-product-gallery-images` is a Slick slider initialized only by JS. Until
+// then every full-size image (and the video facade) renders stacked at full
+// height, then collapses to a single slide on init - a large layout shift that
+// dominates the page CLS. Reserve the single-slide height up front by painting
+// only the first item; Slick fills the same space on load. Rendering just the
+// first image immediately also helps LCP.
+// ---------------------------------------------------------------------------
+.bb-product-gallery-images:not(.slick-initialized) {
+    overflow: hidden;
+
+    > *:not(:first-child) {
+        display: none;
+    }
+}
+
+// The thumbnail strip is the bigger offender: pre-init it stacks every thumbnail
+// vertically (e.g. 6 x ~316px = ~1900px tall on mobile), then Slick collapses it
+// to a single ~85px row, yanking the whole product-info column up by ~1800px.
+// Lay the thumbnails out as a clipped single horizontal row up front so the
+// reserved height matches the initialized slider and the shift is eliminated.
+.bb-product-gallery-thumbnails:not(.slick-initialized) {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 10px;
+    overflow: hidden;
+
+    > * {
+        flex: 0 0 calc((100% - 30px) / 4);
+        max-width: calc((100% - 30px) / 4);
+    }
+
+    img {
+        width: 100%;
+        height: auto;
+    }
+}

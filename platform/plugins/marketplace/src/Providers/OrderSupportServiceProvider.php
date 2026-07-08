@@ -29,7 +29,8 @@ use Botble\Marketplace\Models\CategoryCommission;
 use Botble\Marketplace\Models\Revenue;
 use Botble\Marketplace\Models\Store;
 use Botble\Marketplace\Models\VendorInfo;
-use Botble\Payment\Enums\PaymentStatusEnum;
+use Botble\Payment\Enums\PaymentMethodEnum;
+use Botble\Payment\Models\Payment;
 use Botble\Payment\Supports\PaymentFeeHelper;
 use Botble\Payment\Supports\PaymentHelper;
 use Botble\PayPal\Services\Gateways\PayPalPaymentService;
@@ -141,6 +142,25 @@ class OrderSupportServiceProvider extends ServiceProvider
     ) {
         $groupedProducts = $this->cartGroupByStore($products);
 
+        // Block checkout if any store in the cart is on vacation (covers items added before the vendor paused the store).
+        // $groupedProducts is keyed by store id (0 = no store); collect() handles both array and Collection returns.
+        $storeIdsInCart = collect($groupedProducts)->keys()->filter()->all();
+        if ($storeIdsInCart) {
+            $vacationStore = Store::query()
+                ->whereIn('id', $storeIdsInCart)
+                ->where('vacation_mode', true)
+                ->first();
+
+            if ($vacationStore) {
+                return $response
+                    ->setError()
+                    ->setMessage(
+                        $vacationStore->vacation_message
+                            ?: trans('plugins/marketplace::store.forms.vacation_default_notice', ['store' => $vacationStore->name])
+                    );
+            }
+        }
+
         $currentUserId = 0;
         if (auth('customer')->check()) {
             $currentUserId = auth('customer')->id();
@@ -226,6 +246,21 @@ class OrderSupportServiceProvider extends ServiceProvider
         // Plugins (e.g. Loyalty Points) reduce each order's amount by its share so
         // the discounted total reaches the payment gateway instead of the full price.
         $orders = apply_filters('marketplace_checkout_orders_before_processing_payment', $orders, $request, $token);
+
+        // Sync payment->amount whenever the filter above reduces an order's total.
+        // Without this, the payment record retains the pre-discount amount, causing
+        // the admin panel to show a mismatch between "Total amount" and "Paid amount".
+        if (is_plugin_active('payment')) {
+            foreach ($orders as $order) {
+                if ($order->payment_id && $order->amount >= 0) {
+                    $payment = Payment::query()->find($order->payment_id);
+                    if ($payment && $payment->amount != $order->amount) {
+                        $payment->amount = $order->amount;
+                        $payment->save();
+                    }
+                }
+            }
+        }
 
         if (! is_plugin_active('payment') || ! $orders->pluck('amount')->sum()) {
             OrderHelper::processOrder($orders->pluck('id')->all());
@@ -563,7 +598,12 @@ class OrderSupportServiceProvider extends ServiceProvider
                     'order_id' => $order->id,
                     'user_id' => 0,
                     'weight' => $shippingData ? Arr::get($shippingData, 'weight') : 0,
-                    'cod_amount' => (is_plugin_active('payment') && $order->payment->id && $order->payment->status != PaymentStatusEnum::COMPLETED) ? $order->amount : 0,
+                    // The shipment is created here before the payment record exists, so we
+                    // cannot rely on $order->payment to decide the COD amount (it would always
+                    // resolve to 0). Base it on the selected payment method instead, so Cash on
+                    // delivery orders keep a collectible COD amount and the vendor sees the COD
+                    // status field on the shipment.
+                    'cod_amount' => (is_plugin_active('payment') && $paymentMethod == PaymentMethodEnum::COD) ? $order->amount : 0,
                     'cod_status' => ShippingCodStatusEnum::PENDING,
                     'type' => $order->shipping_method,
                     'status' => ShippingStatusEnum::PENDING,
@@ -1410,6 +1450,18 @@ class OrderSupportServiceProvider extends ServiceProvider
                 } else {
                     $fee = $this->calculatorCommissionFeeByProduct($order->products);
                 }
+
+                // Add the fixed commission fee, charged once per vendor sub-order.
+                // Each order in the marketplace already belongs to a single store, so this
+                // applies per vendor. Covers the flat part of payment gateway fees (e.g. Stripe/PayPal €0.25).
+                $fixedFee = (float) MarketplaceHelper::getSetting('fee_per_order_fixed', 0);
+                if ($fixedFee > 0) {
+                    $fee += $fixedFee;
+                }
+
+                // Never let the total commission exceed the order sub-amount (avoid a negative vendor payout).
+                $fee = min($fee, $orderAmountWithoutShippingFee);
+
                 $amount = $orderAmountWithoutShippingFee - $fee;
                 $currentBalance = $customer->balance;
 

@@ -8,7 +8,7 @@ use Botble\Dashboard\Events\RenderingDashboardWidgets;
 use Botble\Dashboard\Models\DashboardWidget;
 use Botble\Dashboard\Models\DashboardWidgetSetting;
 use Exception;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\Request;
 
 class DashboardController extends BaseController
@@ -29,7 +29,7 @@ class DashboardController extends BaseController
 
         $widgets = DashboardWidget::query()
             ->with([
-                'settings' => function (HasMany $query) use ($request): void {
+                'settings' => function (Relation $query) use ($request): void {
                     $query
                         ->where('user_id', $request->user()->getKey())
                         ->select(['status', 'order', 'settings', 'widget_id'])

@@ -155,6 +155,8 @@ return [
         'fee_per_order' => 'Commissione per ordine (%), suggerito: 2 o 3',
         'default_commission_fee' => 'Commissione predefinita (%), suggerito: 2 o 3',
         'default_commission_fee_helper' => 'Imposta la percentuale di ogni vendita che va al marketplace come commissione.',
+        'fixed_commission_fee' => 'Commissione fissa (per ordine)',
+        'fixed_commission_fee_helper' => 'Un importo fisso aggiunto alla commissione, addebitato una volta per ordine del venditore oltre alla percentuale sopra. Utile per coprire la parte fissa delle commissioni del gateway di pagamento (es. Stripe/PayPal €0,25). Lascia 0 per disattivare.',
         'enable_commission_fee_for_each_category' => 'Abilitare commissione per ogni categoria?',
         'enable_commission_fee_for_each_category_helper' => 'Se abilitato, puoi impostare tariffe di commissione diverse per ogni categoria di prodotto.',
         'categories' => 'Categorie',

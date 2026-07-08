@@ -1887,7 +1887,7 @@ class EcommerceHelper
         if ($includeTrackingAttributes) {
             $attributes['data-product-id'] = $product->getKey();
             $attributes['data-product-name'] = $product->name;
-            $attributes['data-product-price'] = $product->price;
+            $attributes['data-product-price'] = $product->front_sale_price;
             $attributes['data-product-sku'] = $product->sku;
 
             $category = $product->categories->sortByDesc('id')->first();
@@ -2177,6 +2177,6 @@ class EcommerceHelper
 
     public function getAssetVersion(): string
     {
-        return '3.11.9';
+        return '3.11.10';
     }
 }

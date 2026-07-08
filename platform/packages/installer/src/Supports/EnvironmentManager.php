@@ -53,8 +53,12 @@ class EnvironmentManager
         ];
 
         foreach ($replacements as $key => $replacement) {
+            // Allow an optional leading "#" (and spaces/tabs, not newlines) so commented-out
+            // defaults (e.g. #FORCE_ROOT_URL=...) are uncommented and written. Without this,
+            // FORCE_ROOT_URL is never set, and sub-folder installs fall back to the wrong root
+            // URL (e.g. http://localhost). [ \t]* avoids matching across line breaks.
             $content = preg_replace(
-                '/^' . $key . '=' . $replacement['default'] . '/m',
+                '/^#?[ \t]*' . $key . '=' . $replacement['default'] . '/m',
                 $key . '=' . $replacement['value'],
                 $content
             );

@@ -6,6 +6,13 @@ return [
     'edit' => 'Editare magazin',
     'view' => 'Vizualizare',
     'forms' => [
+        'vacation_mode' => 'Mod vacanță',
+        'vacation_mode_helper' => 'Activați aceasta pentru a pune magazinul pe pauză temporar. Clienții pot vedea în continuare produsele, dar nu pot plasa comenzi până nu dezactivați.',
+        'vacation_message' => 'Mesaj de vacanță',
+        'vacation_message_helper' => 'Notificare opțională afișată clienților în magazinul și paginile de produse cât timp modul vacanță este activ.',
+        'vacation_message_placeholder' => 'Ex.: Suntem în vacanță până pe 1 iulie. Comenzile plasate acum vor fi expediate după întoarcerea noastră.',
+        'vacation_badge' => 'Acest magazin este în vacanță',
+        'vacation_default_notice' => ':store este momentan în vacanță și nu acceptă comenzi acum. Vă rugăm reveniți mai târziu.',
         'logo' => 'Logo',
         'email' => 'Email',
         'email_placeholder' => 'Ex: nume@magazin.com',

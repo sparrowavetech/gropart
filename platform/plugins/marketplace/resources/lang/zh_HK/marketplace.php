@@ -155,6 +155,8 @@ return [
         'fee_per_order' => '每筆訂單手續費(%),建議:2或3',
         'default_commission_fee' => '預設佣金費用(%),建議:2或3',
         'default_commission_fee_helper' => '設置每筆銷售作為佣金給市場的百分比。',
+        'fixed_commission_fee' => '固定佣金費用（每筆訂單）',
+        'fixed_commission_fee_helper' => '在上述百分比之外，按每個賣家訂單收取一次的固定金額，加入佣金中。可用於支付支付閘道費用的固定部分（例如 Stripe/PayPal €0.25）。留 0 表示停用。',
         'enable_commission_fee_for_each_category' => '為每個類別啟用佣金費用?',
         'enable_commission_fee_for_each_category_helper' => '如果啟用，您可以為每個產品類別設置不同的佣金率。',
         'categories' => '類別',

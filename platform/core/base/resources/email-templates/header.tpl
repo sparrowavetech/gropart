@@ -26,7 +26,7 @@
                                                             <tr>
                                                                 <td class="bb-text-left">
                                                                     <a href="{{ site_url }}">
-                                                                        <img class="bb-logo" src="{{ site_logo }}" alt="{{ site_title }}" style="max-height: {{ max_height_for_logo }}px" />
+                                                                        <img class="bb-logo" src="{{ site_logo }}" alt="{{ site_title }}"{% if logo_width and logo_height %} width="{{ logo_width }}" height="{{ logo_height }}"{% else %} height="{{ max_height_for_logo }}"{% endif %} style="display: block; max-height: {{ max_height_for_logo }}px; width: auto; max-width: 100%;" />
                                                                     </a>
                                                                 </td>
                                                                 <td class="bb-text-right">

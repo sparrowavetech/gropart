@@ -134,7 +134,7 @@ class AddLanguageCommand extends Command implements PromptsForMissingInput
             $isDefault = true;
         }
 
-        $language = LanguageModel::query()->create([
+        $language = LanguageModel::create([
             'lang_name' => $name,
             'lang_locale' => $locale,
             'lang_code' => $code,

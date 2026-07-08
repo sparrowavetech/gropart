@@ -18,7 +18,7 @@ class LanguageAdvancedRequest extends Request
                 'max:20',
                 Rule::in(LanguageAdvancedManager::getActiveLanguageCodes()),
             ],
-            'slug_id' => ['nullable', 'integer', 'min:1'],
+            'slug_id' => ['nullable', 'string', 'min:1'],
         ];
     }
 }

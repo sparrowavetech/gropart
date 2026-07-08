@@ -20,6 +20,7 @@ use Botble\Theme\Facades\Theme;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
@@ -58,6 +59,13 @@ class DashboardController extends BaseController
         Assets::usingVueJS();
 
         [$startDate, $endDate, $predefinedRange] = EcommerceHelper::getDateRangeInReport($request);
+
+        // Default the vendor dashboard to the current month (1st up to today) when no range is selected.
+        if (! $request->filled('date_from') && ! $request->filled('date_to') && ! $request->filled('predefined_range')) {
+            $startDate = Carbon::now()->startOfMonth();
+            $endDate = Carbon::now();
+            $predefinedRange = trans('plugins/ecommerce::reports.ranges.this_month');
+        }
 
         $user = auth('customer')->user();
         $store = $user->store;

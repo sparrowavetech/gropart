@@ -176,6 +176,8 @@ return [
         'fee_per_order' => 'Fee per fee (%), suggest: 2 or 3',
         'default_commission_fee' => 'Default commission fee (%), suggest: 2 or 3',
         'default_commission_fee_helper' => 'Set the percentage of each sale that goes to the marketplace as commission.',
+        'fixed_commission_fee' => 'Fixed commission fee (per order)',
+        'fixed_commission_fee_helper' => 'A flat amount added to the commission, charged once per vendor order on top of the percentage above. Useful to cover the fixed part of payment gateway fees (e.g. Stripe/PayPal €0.25). Leave 0 to disable.',
         'enable_commission_fee_for_each_category' => 'Enable commission fee for each category?',
         'enable_commission_fee_for_each_category_helper' => 'If enabled, you can set different commission rates for each product category.',
         'categories' => 'Categories',

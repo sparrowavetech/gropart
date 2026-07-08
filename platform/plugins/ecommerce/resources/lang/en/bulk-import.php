@@ -35,6 +35,7 @@ return [
         ],
     ],
     'import_failed_description' => 'Import failed, please check the errors below!',
+    'location_not_matched' => ':attribute ":value" was not found in the selected country. Use the exact name shown in Location settings, or its ID.',
     'column' => 'Column',
     'row' => 'Row',
     'attribute' => 'Attribute',

@@ -156,6 +156,8 @@ return [
         'fee_per_order' => 'Phí cho mỗi đơn hàng (%), đề xuất: 2 hoặc 3',
         'default_commission_fee' => 'Phí hoa hồng mặc định (%), đề xuất: 2 hoặc 3',
         'default_commission_fee_helper' => 'Đặt tỷ lệ phần trăm của mỗi giao dịch bán hàng được trích cho sàn làm hoa hồng.',
+        'fixed_commission_fee' => 'Phí hoa hồng cố định (mỗi đơn hàng)',
+        'fixed_commission_fee_helper' => 'Một khoản cố định cộng thêm vào hoa hồng, tính một lần cho mỗi đơn hàng của người bán bên cạnh tỷ lệ phần trăm ở trên. Hữu ích để bù phần cố định của phí cổng thanh toán (ví dụ Stripe/PayPal €0,25). Để 0 để tắt.',
         'enable_commission_fee_for_each_category' => 'Bật phí hoa hồng cho từng danh mục?',
         'enable_commission_fee_for_each_category_helper' => 'Nếu bật, bạn có thể đặt tỷ lệ hoa hồng khác nhau cho từng danh mục sản phẩm.',
         'categories' => 'Danh mục',

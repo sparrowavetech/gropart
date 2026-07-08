@@ -18,6 +18,7 @@ use Botble\Menu\Models\MenuNode;
 use Botble\Menu\Repositories\Eloquent\MenuRepository;
 use Botble\Menu\Tables\MenuTable;
 use Botble\Support\Services\Cache\Cache;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use stdClass;
 
@@ -87,7 +88,7 @@ class MenuController extends BaseController
         MenuLocation::query()
             ->where('menu_id', $menu->getKey())
             ->whereNotIn('location', $locations)
-            ->each(fn (MenuLocation $location) => $location->delete());
+            ->each(fn (Model $location): ?bool => $location->delete());
 
         foreach ($locations as $location) {
             $menuLocation = MenuLocation::query()->firstOrCreate([

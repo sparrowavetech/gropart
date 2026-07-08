@@ -155,6 +155,8 @@ return [
         'fee_per_order' => 'Ücret başına ücret (%), öneri: 2 veya 3',
         'default_commission_fee' => 'Varsayılan komisyon ücreti (%), öneri: 2 veya 3',
         'default_commission_fee_helper' => 'Her satışın pazara komisyon olarak giden yüzdesini ayarlayın.',
+        'fixed_commission_fee' => 'Sabit komisyon ücreti (sipariş başına)',
+        'fixed_commission_fee_helper' => 'Yukarıdaki yüzdeye ek olarak satıcı siparişi başına bir kez alınan, komisyona eklenen sabit bir tutar. Ödeme ağ geçidi ücretlerinin sabit kısmını (ör. Stripe/PayPal €0,25) karşılamak için kullanışlıdır. Devre dışı bırakmak için 0 bırakın.',
         'enable_commission_fee_for_each_category' => 'Her kategori için komisyon ücreti etkinleştirilsin mi?',
         'enable_commission_fee_for_each_category_helper' => 'Etkinleştirilirse, her ürün kategorisi için farklı komisyon oranları belirleyebilirsiniz.',
         'categories' => 'Kategoriler',

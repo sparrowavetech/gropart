@@ -17,9 +17,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
-use Laravel\Socialite\AbstractUser;
 use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\InvalidStateException;
+use Laravel\Socialite\Two\User as SocialiteUser;
 
 class SocialLoginController extends BaseController
 {
@@ -108,7 +108,7 @@ class SocialLoginController extends BaseController
 
         try {
             /**
-             * @var AbstractUser $oAuth
+             * @var SocialiteUser $oAuth
              */
             $oAuth = Socialite::driver($provider)->user();
         } catch (Exception $exception) {

@@ -7,6 +7,13 @@ return [
     'view' => 'Voir',
     'tax_id' => 'Numéro de TVA',
     'forms' => [
+        'vacation_mode' => 'Mode vacances',
+        'vacation_mode_helper' => 'Activez cette option pour mettre votre boutique en pause temporairement. Les clients peuvent toujours parcourir vos produits mais ne peuvent pas passer commande tant que vous ne la désactivez pas.',
+        'vacation_message' => 'Message de vacances',
+        'vacation_message_helper' => 'Avis facultatif affiché aux clients sur votre boutique et vos pages produits lorsque le mode vacances est activé.',
+        'vacation_message_placeholder' => 'Ex. : Nous sommes en vacances jusqu\'au 1er juillet. Les commandes passées maintenant seront expédiées à notre retour.',
+        'vacation_badge' => 'Cette boutique est en vacances',
+        'vacation_default_notice' => ':store est actuellement en vacances et n\'accepte pas de commandes pour le moment. Veuillez revenir plus tard.',
         'logo' => 'Logo',
         'logo_square' => 'Logo carré',
         'logo_square_helper' => 'Utilisé dans les endroits nécessitant une version carrée de votre logo (par exemple, la page de paiement).',

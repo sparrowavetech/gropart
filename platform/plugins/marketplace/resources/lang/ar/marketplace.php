@@ -166,6 +166,8 @@ return [
         'check_valid_signature_helper' => 'إذا تم التمكين، سيتحقق النظام من سلامة سجلات أرباح البائعين لمنع التلاعب.',
         'default_commission_fee' => 'رسوم العمولة الافتراضية (%)، اقترح: 2 أو 3',
         'default_commission_fee_helper' => 'حدد نسبة كل عملية بيع التي تذهب إلى السوق كعمولة.',
+        'fixed_commission_fee' => 'رسوم عمولة ثابتة (لكل طلب)',
+        'fixed_commission_fee_helper' => 'مبلغ ثابت يُضاف إلى العمولة، يُحتسب مرة واحدة لكل طلب بائع بالإضافة إلى النسبة المئوية أعلاه. مفيد لتغطية الجزء الثابت من رسوم بوابة الدفع (مثل Stripe/PayPal €0.25). اترك 0 للتعطيل.',
         'enable_commission_fee_for_each_category' => 'تمكين رسوم العمولة لكل فئة؟',
         'enable_commission_fee_for_each_category_helper' => 'إذا تم التمكين، يمكنك تعيين معدلات عمولة مختلفة لكل فئة منتج.',
         'categories' => 'فئات',

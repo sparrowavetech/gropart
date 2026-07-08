@@ -47,6 +47,14 @@ class StoreTable extends TableAbstract
                     $name .= ' ' . view('plugins/marketplace::partials.verified-badge', ['size' => 'sm'])->render();
                 }
 
+                if ($item->vacation_mode) {
+                    $name .= ' ' . Html::tag(
+                        'span',
+                        trans('plugins/marketplace::store.forms.vacation_badge'),
+                        ['class' => 'badge bg-orange text-orange-fg']
+                    )->toHtml();
+                }
+
                 return $name;
             })
             ->editColumn('earnings', function ($item) {
@@ -87,6 +95,7 @@ class StoreTable extends TableAbstract
                 'mp_stores.status',
                 'mp_stores.customer_id',
                 'mp_stores.is_verified',
+                'mp_stores.vacation_mode',
             ])
             ->selectRaw($earningsSubQuery, [
                 RevenueTypeEnum::ADD_AMOUNT,

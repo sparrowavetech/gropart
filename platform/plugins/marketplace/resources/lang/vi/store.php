@@ -7,6 +7,13 @@ return [
     'view' => 'Xem',
     'tax_id' => 'Mã số thuế',
     'forms' => [
+        'vacation_mode' => 'Chế độ nghỉ phép',
+        'vacation_mode_helper' => 'Bật tùy chọn này để tạm dừng cửa hàng của bạn. Khách hàng vẫn có thể xem sản phẩm nhưng không thể đặt hàng cho đến khi bạn tắt.',
+        'vacation_message' => 'Thông báo nghỉ phép',
+        'vacation_message_helper' => 'Thông báo tùy chọn hiển thị cho khách hàng trên cửa hàng và trang sản phẩm của bạn khi chế độ nghỉ phép đang bật.',
+        'vacation_message_placeholder' => 'Ví dụ: Chúng tôi nghỉ phép đến ngày 1 tháng 7. Đơn hàng đặt bây giờ sẽ được giao sau khi chúng tôi trở lại.',
+        'vacation_badge' => 'Cửa hàng này đang nghỉ phép',
+        'vacation_default_notice' => ':store hiện đang nghỉ phép và không nhận đơn hàng vào lúc này. Vui lòng quay lại sau.',
         'logo' => 'Logo',
         'logo_square' => 'Logo vuông',
         'logo_square_helper' => 'Được sử dụng cho những nơi cần phiên bản logo vuông (ví dụ trang thanh toán).',

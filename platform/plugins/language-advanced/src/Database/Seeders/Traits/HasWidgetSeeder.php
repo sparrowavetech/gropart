@@ -4,6 +4,7 @@ namespace Botble\LanguageAdvanced\Database\Seeders\Traits;
 
 use Botble\Theme\Facades\Theme;
 use Botble\Widget\Models\Widget;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
@@ -41,7 +42,7 @@ trait HasWidgetSeeder
 
             if ($widgets->isEmpty() && $baseWidgets->isNotEmpty()) {
                 $clonedWidgets = $baseWidgets
-                    ->map(function (Widget $widget) use ($themeName, $useUuid, &$nextId, $now): array {
+                    ->map(function (Model $widget) use ($themeName, $useUuid, &$nextId, $now): array {
                         return [
                             'id' => $useUuid ? (string) Str::uuid() : ++$nextId,
                             'widget_id' => $widget->widget_id,

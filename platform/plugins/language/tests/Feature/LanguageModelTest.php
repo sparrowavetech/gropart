@@ -180,7 +180,7 @@ class LanguageModelTest extends BaseTestCase
             'lang_order' => 0,
         ]);
 
-        $page = Page::query()->create([
+        $page = Page::create([
             'name' => 'Test Page',
             'user_id' => 0,
         ]);
@@ -195,7 +195,7 @@ class LanguageModelTest extends BaseTestCase
 
     public function testLanguageMetaSaveMetaDataWithExplicitValues(): void
     {
-        $page = Page::query()->create([
+        $page = Page::create([
             'name' => 'Test Page',
             'user_id' => 0,
         ]);

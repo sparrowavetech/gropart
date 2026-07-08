@@ -9,6 +9,8 @@
                 {!! $store->badge !!}
             </h2>
 
+            @include(MarketplaceHelper::viewPath('includes.vacation-notice'))
+
             @if (EcommerceHelper::isReviewEnabled() && (!EcommerceHelper::hideRatingWhenNoReviews() || $store->reviews->count() > 0))
                 <div class="bb-shop-banner-rating">
                     @include(EcommerceHelper::viewPath('includes.rating-star'), ['avg' => $store->reviews()->avg('star'), 'size' => 80])

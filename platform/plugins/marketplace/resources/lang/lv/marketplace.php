@@ -155,6 +155,8 @@ return [
         'fee_per_order' => 'Maksa par pasūtījumu (%), ieteicams: 2 vai 3',
         'default_commission_fee' => 'Noklusējuma komisijas maksa (%), ieteicams: 2 vai 3',
         'default_commission_fee_helper' => 'Set the percentage of each sale that goes to the marketplace as commission.',
+        'fixed_commission_fee' => 'Fiksēta komisijas maksa (par pasūtījumu)',
+        'fixed_commission_fee_helper' => 'Fiksēta summa, kas pievienota komisijai un tiek iekasēta vienu reizi par pārdevēja pasūtījumu papildus iepriekš norādītajam procentam. Noderīga, lai segtu maksājumu vārtejas maksu fiksēto daļu (piem., Stripe/PayPal €0,25). Atstājiet 0, lai atspējotu.',
         'enable_commission_fee_for_each_category' => 'Iespējot komisijas maksu katrai kategorijai?',
         'enable_commission_fee_for_each_category_helper' => 'If enabled, you can set different commission rates for each product category.',
         'categories' => 'Kategorijas',

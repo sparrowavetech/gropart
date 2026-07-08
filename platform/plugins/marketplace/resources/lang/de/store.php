@@ -6,6 +6,13 @@ return [
     'edit' => 'Shop bearbeiten',
     'view' => 'Anzeigen',
     'forms' => [
+        'vacation_mode' => 'Urlaubsmodus',
+        'vacation_mode_helper' => 'Aktivieren Sie dies, um Ihren Shop vorübergehend zu pausieren. Kunden können Ihre Produkte weiterhin ansehen, aber keine Bestellungen aufgeben, bis Sie ihn deaktivieren.',
+        'vacation_message' => 'Urlaubsnachricht',
+        'vacation_message_helper' => 'Optionaler Hinweis, der Kunden in Ihrem Shop und auf Produktseiten angezeigt wird, während der Urlaubsmodus aktiv ist.',
+        'vacation_message_placeholder' => 'Z. B.: Wir sind bis zum 1. Juli im Urlaub. Jetzt aufgegebene Bestellungen werden nach unserer Rückkehr versandt.',
+        'vacation_badge' => 'Dieser Shop ist im Urlaub',
+        'vacation_default_notice' => ':store ist derzeit im Urlaub und nimmt momentan keine Bestellungen an. Bitte schauen Sie später wieder vorbei.',
         'logo' => 'Logo',
         'email' => 'E-Mail',
         'email_placeholder' => 'z.B.: name@shop.com',

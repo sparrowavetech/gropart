@@ -159,7 +159,7 @@ class HookServiceProvider extends ServiceProvider
                         ],
                         'author' => [
                             '@type' => 'Person',
-                            'url' => fn () => BaseHelper::getHomepageUrl(),
+                            'url' => BaseHelper::getHomepageUrl(),
                             'name' => class_exists($post->author_type) ? $post->author->name : '',
                         ],
                         'publisher' => [

@@ -72,18 +72,15 @@ class PublicCacheControl
 
     protected function removeSessionCookies(mixed $response): void
     {
-        $sessionCookieName = config('session.cookie', 'laravel_session');
-        $cookiesToRemove = ['XSRF-TOKEN', $sessionCookieName];
-
-        $existingCookies = $response->headers->getCookies();
+        // A publicly cacheable response must not carry ANY per-visitor Set-Cookie
+        // (session, XSRF, ecommerce footprints, cookie-consent, etc.); otherwise
+        // reverse proxies / CDNs refuse to store it. This runs only for safe,
+        // non-admin, non-authenticated responses with no CSRF tokens (see caller),
+        // so dropping all cookies is safe and lets the response be cached.
         $response->headers->remove('Set-Cookie');
 
-        foreach ($existingCookies as $cookie) {
-            if (in_array($cookie->getName(), $cookiesToRemove)) {
-                continue;
-            }
-
-            $response->headers->setCookie($cookie);
+        foreach ($response->headers->getCookies() as $cookie) {
+            $response->headers->removeCookie($cookie->getName(), $cookie->getPath(), $cookie->getDomain());
         }
     }
 }

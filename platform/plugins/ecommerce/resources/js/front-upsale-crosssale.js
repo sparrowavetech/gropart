@@ -47,6 +47,53 @@
     }
 
     /**
+     * Replace an element with ajax HTML without triggering jQuery's synchronous
+     * XMLHttpRequest for embedded `<script src>` tags (a deprecated browser API).
+     * jQuery's replaceWith() loads external scripts found in the markup via a
+     * blocking sync XHR; here we strip those scripts and (re)load them
+     * asynchronously, only once (matched by path, ignoring the ?v= query). Inline
+     * scripts are left in place for jQuery to evaluate as before.
+     * @param {jQuery} $element - Element to replace
+     * @param {string} html - HTML returned from the ajax response
+     */
+    const replaceWithSafe = function ($element, html) {
+        const template = document.createElement('template')
+        template.innerHTML = html
+
+        const sources = []
+        template.content.querySelectorAll('script[src]').forEach((script) => {
+            sources.push(script.getAttribute('src'))
+            script.remove()
+        })
+
+        $element.replaceWith(template.innerHTML)
+
+        const pathOf = (src) => {
+            try {
+                return new URL(src, window.location.href).pathname
+            } catch (e) {
+                return src
+            }
+        }
+
+        sources.forEach((src) => {
+            if (!src) return
+
+            const alreadyLoaded = Array.prototype.some.call(
+                document.querySelectorAll('script[src]'),
+                (existing) => pathOf(existing.getAttribute('src')) === pathOf(src)
+            )
+
+            if (alreadyLoaded) return
+
+            const script = document.createElement('script')
+            script.src = src
+            script.async = true
+            document.body.appendChild(script)
+        })
+    }
+
+    /**
      * Show success message using available theme methods
      * @param {string} message - Message to show
      */
@@ -135,7 +182,7 @@
                     type: 'GET',
                     success: function (response) {
                         const data = response.data !== undefined ? response.data : response;
-                        $element.replaceWith(data)
+                        replaceWithSafe($element, data)
 
                         // Update lazy load images if available
                         if (typeof window.LazyLoad !== 'undefined' && window.lazyLoadInstance) {
@@ -302,7 +349,7 @@
                 type: 'GET',
                 success: function (response) {
                     const data = response.data !== undefined ? response.data : response;
-                    $section.replaceWith(data)
+                    replaceWithSafe($section, data)
 
                     dispatchEvent('ecommerce.upsale.section.refreshed', {
                         html: data,

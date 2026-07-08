@@ -142,7 +142,6 @@ return array(
     'GPBMetadata\\Google\\Cloud\\' => array($vendorDir . '/google/common-protos/metadata/Cloud'),
     'GPBMetadata\\Google\\Api\\' => array($vendorDir . '/google/common-protos/metadata/Api'),
     'GPBMetadata\\Google\\Analytics\\Data\\' => array($vendorDir . '/google/analytics-data/metadata'),
-    'GPBMetadata\\ApiCore\\' => array($vendorDir . '/google/gax/metadata/ApiCore'),
     'Fruitcake\\Cors\\' => array($vendorDir . '/fruitcake/php-cors/src'),
     'FontLib\\' => array($vendorDir . '/dompdf/php-font-lib/src/FontLib'),
     'Firebase\\JWT\\' => array($vendorDir . '/firebase/php-jwt/src'),

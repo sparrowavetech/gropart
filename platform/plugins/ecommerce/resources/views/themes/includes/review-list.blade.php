@@ -23,7 +23,7 @@
         'current-customer-review' => $isCurrentCustomerReview
     ])>
         <div class="col-auto">
-            <img class="rounded-circle" src="{{ $review->customer_avatar_url }}" alt="{{ $review->display_name }}" width="60">
+            <img class="rounded-circle" src="{{ $review->customer_avatar_url }}" alt="{{ $review->display_name }}" width="60" height="60" style="object-fit: cover;">
         </div>
         <div class="col">
             <div class="d-flex flex-wrap align-items-center gap-2 mb-2 review-item__header">

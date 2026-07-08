@@ -1150,6 +1150,11 @@ class RvMedia
                 'filesystems.disks.public.root' => $this->getUploadPath(),
                 'filesystems.disks.public.url' => $this->getUploadURL(),
             ]);
+
+            // The public disk may already be resolved and cached with the default
+            // /storage path before this runs. Forget it so it is rebuilt with the
+            // customized upload path the next time it is used.
+            Storage::forgetDisk('public');
         }, 124);
 
         return $this;

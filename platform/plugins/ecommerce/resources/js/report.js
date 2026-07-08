@@ -79,6 +79,16 @@ $(() => {
                             })
                         }
 
+                        // Update the date range label after the data loads to ensure it reflects the applied range
+                        let formatValue = $dateRange.data('format-value')
+                        if (!formatValue) {
+                            formatValue = '__from__ - __to__'
+                        }
+                        let labelValue = formatValue
+                            .replace('__from__', start.format(dateFormat))
+                            .replace('__to__', end.format(dateFormat))
+                        $dateRange.find('span').text(labelValue)
+
                         if (window.LaravelDataTables) {
                             Object.keys(window.LaravelDataTables).map((key) => {
                                 let table = window.LaravelDataTables[key]

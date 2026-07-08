@@ -11,7 +11,6 @@ use Botble\Page\Models\Page;
 use Botble\Setting\Facades\Setting;
 use Botble\Setting\Supports\SettingStore;
 use Botble\Slug\Models\Slug;
-use Botble\Theme\Events\RenderingSingleEvent;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
@@ -97,10 +96,6 @@ class AddHrefLangListenerCachingTest extends TestCase
         ]);
 
         Language::setCurrentLocaleCode('en_US');
-
-        // Create mock event
-        $event = \Mockery::mock(RenderingSingleEvent::class);
-        $event->slug = $slug;
 
         // Call getAdvancedTranslatedUrl via reflection to access protected method
         $reflection = new \ReflectionClass($this->listener);

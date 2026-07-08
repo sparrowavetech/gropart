@@ -6,6 +6,13 @@ return [
     'edit' => 'I-edit ang tindahan',
     'view' => 'Tingnan',
     'forms' => [
+        'vacation_mode' => 'Vacation mode',
+        'vacation_mode_helper' => 'I-on ito upang pansamantalang i-pause ang iyong tindahan. Maaari pa ring tingnan ng mga customer ang iyong mga produkto ngunit hindi sila makakapag-order hangga\'t hindi mo ito ina-off.',
+        'vacation_message' => 'Mensahe ng bakasyon',
+        'vacation_message_helper' => 'Opsyonal na paunawa na ipinapakita sa mga customer sa iyong tindahan at mga pahina ng produkto habang naka-on ang vacation mode.',
+        'vacation_message_placeholder' => 'Hal.: Nasa bakasyon kami hanggang Hulyo 1. Ang mga order na ginawa ngayon ay ipapadala pagbalik namin.',
+        'vacation_badge' => 'Nasa bakasyon ang tindahang ito',
+        'vacation_default_notice' => ':store ay kasalukuyang nasa bakasyon at hindi tumatanggap ng mga order sa ngayon. Mangyaring bumalik mamaya.',
         'logo' => 'Logo',
         'email' => 'Email',
         'email_placeholder' => 'Halimbawa: pangalan@tindahan.com',

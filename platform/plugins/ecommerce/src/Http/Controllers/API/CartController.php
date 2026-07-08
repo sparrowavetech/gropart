@@ -228,6 +228,7 @@ class CartController extends BaseApiController
             $originalProduct,
             $cartItem['qty'],
             $cartItem['subtotal'],
+            $product->sku,
         );
 
         app(FacebookPixel::class)->addToCart(

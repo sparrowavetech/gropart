@@ -32,7 +32,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static array handleUpload(\Illuminate\Http\UploadedFile|null $fileUpload, string|int|null $folderId = 0, string|null $folderSlug = null, bool $skipValidation = false, string $visibility = 'public')
  * @method static float getServerConfigMaxUploadFileSize()
  * @method static float parseSize(string|int $size)
- * @method static bool generateThumbnails(\Botble\Media\Models\MediaFile $file, \Illuminate\Http\UploadedFile|null $fileUpload = null)
+ * @method static bool generateThumbnails(\Botble\Media\Models\MediaFile $file, \Illuminate\Http\UploadedFile|null $fileUpload = null, bool $overrideExisting = false)
  * @method static bool insertWatermark(string $image)
  * @method static string getRealPath(string|null $url)
  * @method static bool isImage(string $mimeType)
@@ -68,7 +68,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static array getFolderColors()
  * @method static \Intervention\Image\ImageManager imageManager(string|null $driver = null)
  * @method static bool canOnlyViewOwnMedia()
- * @method static responseDownloadFile(string $filePath)
+ * @method static \Symfony\Component\HttpFoundation\Response responseDownloadFile(string $filePath)
  * @method static array getAvailableDrivers()
  *
  * @see \Botble\Media\RvMedia

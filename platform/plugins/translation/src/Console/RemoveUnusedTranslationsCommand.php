@@ -48,7 +48,7 @@ class RemoveUnusedTranslationsCommand extends Command
     protected function getOptions(): array
     {
         return [
-            ['theme', null, InputOption::VALUE_OPTIONAL, 'The theme name to remove unused translations for'],
+            new InputOption('theme', null, InputOption::VALUE_OPTIONAL, 'The theme name to remove unused translations for'),
         ];
     }
 }

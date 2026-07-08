@@ -6,6 +6,13 @@ return [
     'edit' => 'Edytuj sklep',
     'view' => 'Zobacz',
     'forms' => [
+        'vacation_mode' => 'Tryb wakacyjny',
+        'vacation_mode_helper' => 'Włącz to, aby tymczasowo wstrzymać swój sklep. Klienci nadal mogą przeglądać Twoje produkty, ale nie mogą składać zamówień, dopóki tego nie wyłączysz.',
+        'vacation_message' => 'Wiadomość wakacyjna',
+        'vacation_message_helper' => 'Opcjonalne powiadomienie wyświetlane klientom w Twoim sklepie i na stronach produktów, gdy tryb wakacyjny jest włączony.',
+        'vacation_message_placeholder' => 'Np.: Jesteśmy na wakacjach do 1 lipca. Zamówienia złożone teraz zostaną wysłane po naszym powrocie.',
+        'vacation_badge' => 'Ten sklep jest na wakacjach',
+        'vacation_default_notice' => ':store jest obecnie na wakacjach i w tej chwili nie przyjmuje zamówień. Sprawdź ponownie później.',
         'logo' => 'Logo',
         'email' => 'E-mail',
         'email_placeholder' => 'Np: nazwa@sklep.com',

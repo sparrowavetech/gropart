@@ -155,6 +155,8 @@ return [
         'fee_per_order' => 'Díj rendelésenként (%), javasolt: 2 vagy 3',
         'default_commission_fee' => 'Alapértelmezett jutalékdíj (%), javasolt: 2 vagy 3',
         'default_commission_fee_helper' => 'Set the percentage of each sale that goes to the marketplace as commission.',
+        'fixed_commission_fee' => 'Fix jutalékdíj (rendelésenként)',
+        'fixed_commission_fee_helper' => 'A jutalékhoz hozzáadott fix összeg, amelyet a fenti százalékon felül eladói rendelésenként egyszer számítunk fel. Hasznos a fizetési átjáró díjainak fix részének (pl. Stripe/PayPal €0,25) fedezésére. Hagyja 0-n a letiltáshoz.',
         'enable_commission_fee_for_each_category' => 'Jutalékdíj engedélyezése minden kategóriához?',
         'enable_commission_fee_for_each_category_helper' => 'If enabled, you can set different commission rates for each product category.',
         'categories' => 'Kategóriák',

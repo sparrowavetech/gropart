@@ -98,6 +98,9 @@ trait HasBlogSeeder
             $item['author_id'] ??= $userIds->random();
             $item['author_type'] ??= User::class;
 
+            /**
+             * @var Tag $tag
+             */
             $tag = Tag::query()->create(Arr::except($item, ['metadata']));
 
             SlugHelper::createSlug($tag);
@@ -151,6 +154,9 @@ trait HasBlogSeeder
             $item['author_id'] ??= $userIds->random();
             $item['author_type'] ??= User::class;
 
+            /**
+             * @var Post $post
+             */
             $post = Post::query()->create(Arr::except($item, ['metadata']));
 
             $post->categories()->sync(array_unique([

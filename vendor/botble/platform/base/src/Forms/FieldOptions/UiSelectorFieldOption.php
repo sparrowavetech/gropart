@@ -28,13 +28,9 @@ class UiSelectorFieldOption extends SelectFieldOption
     {
         $data = parent::toArray();
 
-        if (isset($this->ratio)) {
-            $data['attr']['ratio'] = $this->ratio;
-        }
+        $data['attr']['ratio'] = $this->ratio;
 
-        if (isset($this->numberItemsPerRow)) {
-            $data['attr']['number_items_per_row'] = $this->numberItemsPerRow;
-        }
+        $data['attr']['number_items_per_row'] = $this->numberItemsPerRow;
 
         $data['attr']['without_aspect_ratio'] = $this->withoutAspectRatio;
 

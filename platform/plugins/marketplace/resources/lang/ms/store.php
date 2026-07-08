@@ -6,6 +6,13 @@ return [
     'edit' => 'Edit kedai',
     'view' => 'Lihat',
     'forms' => [
+        'vacation_mode' => 'Mod percutian',
+        'vacation_mode_helper' => 'Hidupkan ini untuk menjeda kedai anda buat sementara. Pelanggan masih boleh melayari produk anda tetapi tidak boleh membuat pesanan sehingga anda mematikannya.',
+        'vacation_message' => 'Mesej percutian',
+        'vacation_message_helper' => 'Notis pilihan yang dipaparkan kepada pelanggan di kedai dan halaman produk anda semasa mod percutian dihidupkan.',
+        'vacation_message_placeholder' => 'Cth.: Kami bercuti sehingga 1 Julai. Pesanan yang dibuat sekarang akan dihantar selepas kami kembali.',
+        'vacation_badge' => 'Kedai ini sedang bercuti',
+        'vacation_default_notice' => ':store sedang bercuti dan tidak menerima pesanan buat masa ini. Sila semak semula kemudian.',
         'logo' => 'Logo',
         'email' => 'E-mel',
         'email_placeholder' => 'Contoh: nama@kedai.com',

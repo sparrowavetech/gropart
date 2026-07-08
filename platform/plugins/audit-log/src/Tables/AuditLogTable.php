@@ -38,7 +38,11 @@ class AuditLogTable extends TableAbstract
                     ->attributes(['class' => 'empty-activities-logs-button']),
             ])
             ->addAction(DeleteAction::make()->route('audit-log.destroy'))
-            ->addBulkAction(DeleteBulkAction::make()->permission('audit-log.destroy')->silent())
+            ->addBulkAction(
+                tap(new DeleteBulkAction(), fn (DeleteBulkAction $action) => $action->confirmation())
+                    ->permission('audit-log.destroy')
+                    ->silent()
+            )
             ->onAjax(function (AuditLogTable $table) {
                 return $table->toJson(
                     $table

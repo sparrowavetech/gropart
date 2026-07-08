@@ -6,6 +6,13 @@ return [
     'edit' => 'Modifica negozio',
     'view' => 'Visualizza',
     'forms' => [
+        'vacation_mode' => 'Modalità vacanza',
+        'vacation_mode_helper' => 'Attiva questa opzione per mettere temporaneamente in pausa il tuo negozio. I clienti possono ancora sfogliare i tuoi prodotti ma non possono effettuare ordini finché non la disattivi.',
+        'vacation_message' => 'Messaggio di vacanza',
+        'vacation_message_helper' => 'Avviso facoltativo mostrato ai clienti nel tuo negozio e nelle pagine dei prodotti mentre la modalità vacanza è attiva.',
+        'vacation_message_placeholder' => 'Es.: Siamo in vacanza fino al 1° luglio. Gli ordini effettuati ora verranno spediti al nostro ritorno.',
+        'vacation_badge' => 'Questo negozio è in vacanza',
+        'vacation_default_notice' => ':store è attualmente in vacanza e al momento non accetta ordini. Si prega di ricontrollare più tardi.',
         'logo' => 'Logo',
         'email' => 'Email',
         'email_placeholder' => 'Es: nome@negozio.com',

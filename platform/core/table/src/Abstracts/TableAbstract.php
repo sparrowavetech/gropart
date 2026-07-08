@@ -937,7 +937,7 @@ abstract class TableAbstract extends DataTable implements ExtensibleContract
         return ! $this->request()->wantsJson() &&
             ! $this->request()->ajax() &&
             ! $this->isFiltering() &&
-            ! (method_exists($this, 'query') && $this->query()->exists());
+            ! $this->query()->exists();
     }
 
     public function hasPermission(string $permission): bool

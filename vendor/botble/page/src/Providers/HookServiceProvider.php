@@ -191,7 +191,7 @@ class HookServiceProvider extends ServiceProvider
                     return $html;
                 }
 
-                if (empty($html) || ! is_string($html)) {
+                if (empty($html)) {
                     return $html;
                 }
 

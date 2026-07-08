@@ -155,6 +155,8 @@ return [
         'fee_per_order' => 'Opłata za zamówienie (%), sugestia: 2 lub 3',
         'default_commission_fee' => 'Domyślna prowizja (%), sugestia: 2 lub 3',
         'default_commission_fee_helper' => 'Ustaw procent każdej sprzedaży, który trafia na marketplace jako prowizja.',
+        'fixed_commission_fee' => 'Stała opłata prowizyjna (za zamówienie)',
+        'fixed_commission_fee_helper' => 'Stała kwota dodawana do prowizji, naliczana raz na zamówienie sprzedawcy oprócz powyższego procentu. Przydatna do pokrycia stałej części opłat bramki płatniczej (np. Stripe/PayPal €0,25). Pozostaw 0, aby wyłączyć.',
         'enable_commission_fee_for_each_category' => 'Włączyć prowizję dla każdej kategorii?',
         'enable_commission_fee_for_each_category_helper' => 'Jeśli włączone, możesz ustawić różne stawki prowizji dla każdej kategorii produktów.',
         'categories' => 'Kategorie',

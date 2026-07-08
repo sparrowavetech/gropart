@@ -1248,3 +1248,24 @@ svg.icon {
         }
     }
 }
+
+// Date of birth datepicker (bootstrap-datepicker) responsive fix.
+// On small screens the dropdown can be positioned past the left edge of the
+// viewport, clipping the first day columns (Su, Mo) so dates appear missing.
+// The dropdown is appended to <body>, so centering it within the viewport keeps
+// every column visible regardless of where the input sits.
+@media (max-width: 575.98px) {
+    .datepicker.datepicker-dropdown {
+        left: 50% !important;
+        right: auto !important;
+        transform: translateX(-50%);
+        max-width: calc(100vw - 1rem);
+
+        // The caret arrows point at the input; once centered they no longer line
+        // up, so hide them to avoid a stray, misplaced arrow.
+        &:before,
+        &:after {
+            display: none;
+        }
+    }
+}

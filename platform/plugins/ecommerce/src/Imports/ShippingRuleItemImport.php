@@ -221,8 +221,15 @@ class ShippingRuleItemImport implements
             $country = $this->countries->where('id', $row['country'])->first();
 
             if (! $country) {
+                // In location mode the country column resolves to the ISO code (e.g. "EG"),
+                // while a manually selected country may be the numeric ID - match either so
+                // the states/cities relations load correctly.
                 $country = Country::query()
-                    ->where(['id' => $row['country']])
+                    ->when(
+                        is_numeric($row['country']),
+                        fn ($query) => $query->where('id', $row['country']),
+                        fn ($query) => $query->where('code', $row['country'])
+                    )
                     ->with(['states', 'states.cities'])
                     ->first();
 
@@ -235,11 +242,18 @@ class ShippingRuleItemImport implements
             }
 
             if ($country instanceof Country && $country->id) {
-                $state = $country->states->first(function ($value) use ($stateName) {
-                    return $value->name == $stateName || $value->id == $stateName;
+                // Match by name (case-insensitive, trimmed - consistent with country matching) or by ID.
+                $normalizedStateName = mb_strtolower($stateName);
+                $state = $country->states->first(function ($value) use ($stateName, $normalizedStateName) {
+                    return mb_strtolower((string) $value->name) === $normalizedStateName
+                        || (string) $value->id === $stateName;
                 });
                 if ($state) {
                     $row['state'] = $state->id;
+                } elseif ($stateName !== '') {
+                    // Remember the unmatched name so the validation pass can report it
+                    // instead of the importer silently leaving the State empty.
+                    $row['unmatched_state'] = $stateName;
                 }
             }
         }
@@ -249,7 +263,7 @@ class ShippingRuleItemImport implements
 
     protected function setCityToRow(array $row): array
     {
-        if ($this->isLoadFromLocation && $row['country'] && $row['state']) {
+        if ($this->isLoadFromLocation && $row['country']) {
             $cityName = trim(Arr::get($row, 'city', ''));
 
             $row['city'] = '';
@@ -257,15 +271,41 @@ class ShippingRuleItemImport implements
             if ($country) {
                 $country = $country['model'];
                 if ($country instanceof Country && $country->id) {
-                    $state = $country->states->where('id', $row['state'])->first();
-                    if ($state) {
-                        $city = $state->cities->first(function ($value) use ($cityName) {
-                            return $value->name == $cityName || $value->id == $cityName;
+                    // Resolve the city within the matched state when the State column matched;
+                    // otherwise search every state in the country so a valid city is still linked
+                    // to a real record instead of being silently stored as raw text.
+                    $states = $row['state']
+                        ? $country->states->where('id', $row['state'])
+                        : $country->states;
+
+                    $normalizedCityName = mb_strtolower($cityName);
+                    $city = null;
+
+                    foreach ($states as $state) {
+                        $city = $state->cities->first(function ($value) use ($cityName, $normalizedCityName) {
+                            return mb_strtolower((string) $value->name) === $normalizedCityName
+                                || (string) $value->id === $cityName;
                         });
 
                         if ($city) {
-                            $row['city'] = $city->id;
+                            break;
                         }
+                    }
+
+                    if ($city) {
+                        $row['city'] = $city->id;
+
+                        // Backfill the state from the matched city when the State column did not
+                        // resolve, so checkout can still match the customer's location. The state
+                        // is now recovered, so any earlier "unmatched state" flag no longer applies.
+                        if (! $row['state']) {
+                            $row['state'] = $city->state_id;
+                            Arr::forget($row, 'unmatched_state');
+                        }
+                    } elseif ($cityName !== '') {
+                        // Remember the unmatched name so the validation pass can report it
+                        // instead of the importer silently leaving the City empty.
+                        $row['unmatched_city'] = $cityName;
                     }
                 }
             }

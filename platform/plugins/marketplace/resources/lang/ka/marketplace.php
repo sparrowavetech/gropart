@@ -155,6 +155,8 @@ return [
         'fee_per_order' => 'საკომისიო შეკვეთაზე (%), რეკომენდებული: 2 ან 3',
         'default_commission_fee' => 'საწყისი საკომისიო (%), რეკომენდებული: 2 ან 3',
         'default_commission_fee_helper' => 'Set the percentage of each sale that goes to the marketplace as commission.',
+        'fixed_commission_fee' => 'ფიქსირებული საკომისიო (შეკვეთაზე)',
+        'fixed_commission_fee_helper' => 'ფიქსირებული თანხა, რომელიც ემატება საკომისიოს და ერიცხება ერთხელ თითო გამყიდველის შეკვეთაზე ზემოთ მითითებული პროცენტის გარდა. სასარგებლოა გადახდის გეითვეის საფასურის ფიქსირებული ნაწილის (მაგ. Stripe/PayPal €0.25) დასაფარად. გასათიშად დატოვეთ 0.',
         'enable_commission_fee_for_each_category' => 'ჩართეთ საკომისიო თითოეული კატეგორიისთვის?',
         'enable_commission_fee_for_each_category_helper' => 'If enabled, you can set different commission rates for each product category.',
         'categories' => 'კატეგორიები',

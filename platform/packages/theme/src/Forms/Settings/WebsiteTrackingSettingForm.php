@@ -94,6 +94,14 @@ class WebsiteTrackingSettingForm extends SettingForm
                     ->helperText(trans('packages/theme::theme.settings.website_tracking.gtm_debug_mode_helper'))
             )
             ->add(
+                'gtm_user_data_enabled',
+                OnOffField::class,
+                OnOffFieldOption::make()
+                    ->label(trans('packages/theme::theme.settings.website_tracking.gtm_user_data'))
+                    ->value((bool) setting('gtm_user_data_enabled', false))
+                    ->helperText(trans('packages/theme::theme.settings.website_tracking.gtm_user_data_helper'))
+            )
+            ->add(
                 'gtm_add_ga4',
                 HtmlField::class,
                 HtmlFieldOption::make()

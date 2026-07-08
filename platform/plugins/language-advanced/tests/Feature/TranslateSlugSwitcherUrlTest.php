@@ -359,12 +359,9 @@ class TranslateSlugSwitcherUrlTest extends TestCase
         // Translation should be null
         $this->assertNull($translation);
 
-        // Should fallback to base slug
-        $finalKey = $translation?->key ?? $baseSlug->key;
-        $this->assertEquals('missing-translation-product', $finalKey);
-
-        $finalPrefix = $translation?->prefix ?? $baseSlug->prefix;
-        $this->assertEquals('products', $finalPrefix);
+        // Translation is null (asserted above), so the URL falls back to the base slug.
+        $this->assertEquals('missing-translation-product', $baseSlug->key);
+        $this->assertEquals('products', $baseSlug->prefix);
     }
 
     public function testFallbackToDefaultSlugWhenNoTranslationForTargetLocale(): void
@@ -395,9 +392,9 @@ class TranslateSlugSwitcherUrlTest extends TestCase
         $this->assertNull($arTranslation);
 
         // Simulate translateSlugSwitcherUrl fallback behavior:
-        // When no translation exists for target locale, use base slug
-        $targetPrefix = $arTranslation?->prefix ?? $baseSlug->prefix;
-        $targetKey = $arTranslation?->key ?? $baseSlug->key;
+        // No translation exists for target locale (asserted null above), so the base slug is used.
+        $targetPrefix = $baseSlug->prefix;
+        $targetKey = $baseSlug->key;
 
         $this->assertEquals('products', $targetPrefix);
         $this->assertEquals('fallback-to-base-product', $targetKey);
@@ -450,9 +447,8 @@ class TranslateSlugSwitcherUrlTest extends TestCase
         $fakeTranslation = $cachedTranslations->firstWhere('lang_code', 'fr');
         $this->assertNull($fakeTranslation);
 
-        // Fallback to base slug when not found in cache
-        $finalKey = $fakeTranslation?->key ?? $baseSlug->key;
-        $this->assertEquals('caching-product', $finalKey);
+        // Not found in cache (asserted null above), so the base slug key is used.
+        $this->assertEquals('caching-product', $baseSlug->key);
     }
 
     protected function createLanguages(): void

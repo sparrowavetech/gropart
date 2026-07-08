@@ -26,6 +26,12 @@
                                         {!! $store->badge !!}
                                     </h2>
                                 </div>
+                                @if (method_exists($store, 'isOnVacation') && $store->isOnVacation())
+                                    <span class="store-vacation-badge mt-2">
+                                        <i class="icon icon-leaf" aria-hidden="true"></i>
+                                        {{ trans('plugins/marketplace::store.forms.vacation_badge') }}
+                                    </span>
+                                @endif
                                 @if (EcommerceHelper::isReviewEnabled())
                                     <div class="mt-1">
                                         {!! Theme::partial('star-rating', [

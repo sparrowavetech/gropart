@@ -7,9 +7,8 @@ use Botble\Base\PanelSections\PanelSectionItem;
 use Botble\Base\PanelSections\System\SystemPanelSection;
 use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
-use Illuminate\Contracts\Support\DeferrableProvider;
 
-class BackupServiceProvider extends ServiceProvider implements DeferrableProvider
+class BackupServiceProvider extends ServiceProvider
 {
     use LoadAndPublishDataTrait;
 

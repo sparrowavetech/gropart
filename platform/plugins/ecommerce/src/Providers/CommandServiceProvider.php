@@ -37,7 +37,7 @@ class CommandServiceProvider extends ServiceProvider
                 ->hourly()
                 ->when(fn () => get_ecommerce_setting('abandoned_cart_enabled', false));
 
-            $schedule->command(CheckAbandonedCartsCommand::class, ['--cleanup' => true])
+            $schedule->command(CheckAbandonedCartsCommand::class, ['--cleanup'])
                 ->daily()
                 ->when(fn () => get_ecommerce_setting('abandoned_cart_enabled', false));
 

@@ -155,6 +155,8 @@ return [
         'fee_per_order' => 'Maksu per tilaus (%), suositus: 2 tai 3',
         'default_commission_fee' => 'Oletuspalkkio (%), suositus: 2 tai 3',
         'default_commission_fee_helper' => 'Set the percentage of each sale that goes to the marketplace as commission.',
+        'fixed_commission_fee' => 'Kiinteä komissiomaksu (per tilaus)',
+        'fixed_commission_fee_helper' => 'Kiinteä summa, joka lisätään komissioon ja veloitetaan kerran myyjän tilausta kohden yllä olevan prosentin lisäksi. Hyödyllinen kattamaan maksunvälittäjän maksujen kiinteä osa (esim. Stripe/PayPal €0,25). Jätä 0 poistaaksesi käytöstä.',
         'enable_commission_fee_for_each_category' => 'Ota käyttöön palkkio jokaiselle kategorialle?',
         'enable_commission_fee_for_each_category_helper' => 'If enabled, you can set different commission rates for each product category.',
         'categories' => 'Kategoriat',

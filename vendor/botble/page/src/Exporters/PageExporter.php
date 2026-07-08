@@ -124,7 +124,10 @@ class PageExporter extends Exporter
 
         $this->applyFilters($query);
 
-        return $query->get()
+        /** @var Collection<int, Page> $pages */
+        $pages = $query->get();
+
+        return $pages
             ->transform(fn (Page $page) => [
                 ...$page->toArray(),
                 'slug' => $page->slugable?->key,

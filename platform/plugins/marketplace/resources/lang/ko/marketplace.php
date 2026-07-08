@@ -155,6 +155,8 @@ return [
         'fee_per_order' => '주문당 수수료 (%), 권장: 2 또는 3',
         'default_commission_fee' => '기본 수수료 (%), 권장: 2 또는 3',
         'default_commission_fee_helper' => '마켓플레이스에 수수료로 들어가는 각 판매의 비율을 설정하세요.',
+        'fixed_commission_fee' => '고정 수수료 (주문당)',
+        'fixed_commission_fee_helper' => '위의 비율에 더해 판매자 주문당 한 번 부과되는 고정 금액입니다. 결제 게이트웨이 수수료의 고정 부분(예: Stripe/PayPal €0.25)을 충당하는 데 유용합니다. 비활성화하려면 0으로 두세요.',
         'enable_commission_fee_for_each_category' => '카테고리별 수수료 활성화?',
         'enable_commission_fee_for_each_category_helper' => '활성화하면 각 제품 카테고리에 대해 다른 수수료율을 설정할 수 있습니다.',
         'categories' => '카테고리',

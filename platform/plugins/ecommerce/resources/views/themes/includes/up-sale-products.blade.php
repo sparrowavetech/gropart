@@ -106,6 +106,7 @@
                                             type="checkbox"
                                             class="ec-upsell-checkbox"
                                             data-upsale-checkbox
+                                            aria-label="{{ __('Select :name', ['name' => $product->name]) }}"
                                             data-id="{{ $cartId }}"
                                             data-price="{{ $displayPrice }}"
                                             data-name="{{ $product->name }}"
@@ -170,6 +171,7 @@
                                             type="button"
                                             class="ec-upsell-add-btn"
                                             data-upsale-add-btn
+                                            aria-label="{{ __('Add :name to cart', ['name' => $product->name]) }}"
                                             data-url="{{ route('public.cart.add-to-cart') }}"
                                             data-id="{{ $cartId }}"
                                             data-parent-product="{{ $parentProduct->slug }}"

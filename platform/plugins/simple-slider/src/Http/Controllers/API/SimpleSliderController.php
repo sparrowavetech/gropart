@@ -54,7 +54,10 @@ class SimpleSliderController extends BaseApiController
         }
 
         // Get the sliders and format them
-        $sliders = $query->get()->map(function ($slider) {
+        /** @var \Illuminate\Database\Eloquent\Collection<int, SimpleSlider> $records */
+        $records = $query->get();
+
+        $sliders = $records->map(function (SimpleSlider $slider): array {
             return $this->formatSlider($slider);
         });
 

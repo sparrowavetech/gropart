@@ -62,7 +62,7 @@ class SitemapContentTypeExclusionTest extends TestCase
     {
         $admin = User::query()->first();
 
-        if (! $admin) {
+        if (! $admin instanceof User) {
             $this->markTestSkipped('No admin user found for settings page test.');
         }
 
@@ -76,7 +76,7 @@ class SitemapContentTypeExclusionTest extends TestCase
     {
         $admin = User::query()->first();
 
-        if (! $admin) {
+        if (! $admin instanceof User) {
             $this->markTestSkipped('No admin user found for settings save test.');
         }
 

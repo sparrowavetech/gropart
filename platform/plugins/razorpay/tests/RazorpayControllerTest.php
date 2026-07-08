@@ -2,7 +2,9 @@
 
 namespace Botble\Razorpay\Tests;
 
+use Botble\Ecommerce\Enums\OrderAddressTypeEnum;
 use Botble\Ecommerce\Models\Order;
+use Botble\Ecommerce\Models\OrderAddress;
 use Botble\Payment\Enums\PaymentStatusEnum;
 use Botble\Payment\Models\Payment;
 use Botble\Razorpay\Http\Controllers\RazorpayController;
@@ -80,6 +82,20 @@ class RazorpayControllerTest extends TestCase
             public function testFinalizeOrders(array|string|null $orderId, string $chargeId): void
             {
                 $this->finalizeOrders($orderId, $chargeId);
+            }
+
+            public function testBackfillOrderContactFromGateway(
+                array|string|null $orderId,
+                ?string $email,
+                ?string $phone,
+                ?string $name = null
+            ): void {
+                $this->backfillOrderContactFromGateway($orderId, $email, $phone, $name);
+            }
+
+            public function testFlagUnderpaidOrder(array|string|null $orderId, float $capturedAmount): void
+            {
+                $this->flagUnderpaidOrder($orderId, $capturedAmount);
             }
 
             public function testVerifyWebhookSignature(string $content, string $signature, string $secret): bool
@@ -519,6 +535,178 @@ class RazorpayControllerTest extends TestCase
         $payment = Payment::query()->where('charge_id', $this->chargeId('no_overwrite'))->first();
         $this->assertEquals(10, $payment->customer_id);
         $this->assertEquals('Original', $payment->customer_type);
+    }
+
+    public function test_save_refreshes_stale_charge_id_on_successful_retry(): void
+    {
+        // A failed first attempt left a payment row holding its (failed) charge id
+        // on the order. The successful retry must overwrite it with the real charge.
+        $order = $this->createOrder();
+        $this->createPayment([
+            'charge_id' => $this->chargeId('failed_attempt'),
+            'amount' => 0,
+            'status' => PaymentStatusEnum::FAILED,
+            'order_id' => $order->id,
+        ]);
+
+        $this->controller->testSaveOrUpdatePayment(
+            $this->chargeId('successful_retry'), [$order->id], 1370, 'INR', PaymentStatusEnum::COMPLETED
+        );
+
+        // Still one row (matched by order_id), now carrying the successful charge + amount.
+        $this->assertEquals(0, Payment::query()->where('charge_id', $this->chargeId('failed_attempt'))->count());
+
+        $payment = Payment::query()->where('charge_id', $this->chargeId('successful_retry'))->first();
+        $this->assertNotNull($payment);
+        $this->assertEquals($order->id, $payment->order_id);
+        $this->assertEquals(1370, $payment->amount);
+        $this->assertEquals(PaymentStatusEnum::COMPLETED, $payment->status);
+    }
+
+    public function test_backfill_fills_blank_shipping_address(): void
+    {
+        $order = $this->createOrder();
+        OrderAddress::query()->create([
+            'order_id' => $order->id,
+            'type' => OrderAddressTypeEnum::SHIPPING,
+            'name' => '',
+            'email' => '',
+            'phone' => '',
+        ]);
+
+        $this->controller->testBackfillOrderContactFromGateway(
+            [$order->id], 'latikasharma50@gmail.com', '+919953093027', 'Latika Sharma'
+        );
+
+        $address = OrderAddress::query()
+            ->where('order_id', $order->id)
+            ->where('type', OrderAddressTypeEnum::SHIPPING)
+            ->first();
+
+        $this->assertEquals('Latika Sharma', $address->name);
+        $this->assertEquals('latikasharma50@gmail.com', $address->email);
+        $this->assertEquals('+919953093027', $address->phone);
+        // No duplicate shipping rows created.
+        $this->assertEquals(1, OrderAddress::query()
+            ->where('order_id', $order->id)
+            ->where('type', OrderAddressTypeEnum::SHIPPING)
+            ->count());
+    }
+
+    public function test_backfill_creates_shipping_row_when_missing(): void
+    {
+        $order = $this->createOrder();
+
+        $this->controller->testBackfillOrderContactFromGateway(
+            [$order->id], 'buyer@example.com', '+919999999999', 'Buyer Name'
+        );
+
+        $address = OrderAddress::query()
+            ->where('order_id', $order->id)
+            ->where('type', OrderAddressTypeEnum::SHIPPING)
+            ->first();
+
+        $this->assertNotNull($address);
+        $this->assertEquals('buyer@example.com', $address->email);
+    }
+
+    public function test_backfill_does_not_overwrite_existing_contact(): void
+    {
+        $order = $this->createOrder();
+        OrderAddress::query()->create([
+            'order_id' => $order->id,
+            'type' => OrderAddressTypeEnum::SHIPPING,
+            'name' => 'Real Buyer',
+            'email' => 'real@buyer.com',
+            'phone' => '+910000000000',
+        ]);
+
+        $this->controller->testBackfillOrderContactFromGateway(
+            [$order->id], 'attacker@evil.com', '+911111111111', 'Attacker'
+        );
+
+        $address = OrderAddress::query()
+            ->where('order_id', $order->id)
+            ->where('type', OrderAddressTypeEnum::SHIPPING)
+            ->first();
+
+        $this->assertEquals('Real Buyer', $address->name);
+        $this->assertEquals('real@buyer.com', $address->email);
+        $this->assertEquals('+910000000000', $address->phone);
+    }
+
+    public function test_backfill_noop_when_no_contact(): void
+    {
+        $order = $this->createOrder();
+
+        $this->controller->testBackfillOrderContactFromGateway([$order->id], null, null, null);
+
+        $this->assertEquals(0, OrderAddress::query()->where('order_id', $order->id)->count());
+    }
+
+    public function test_underpaid_order_records_captured_amount_and_flags(): void
+    {
+        // Order total is 2,620 but Razorpay only captured 1,370 (the failed-then-retry case).
+        $payment = $this->createPayment(['charge_id' => $this->chargeId('underpaid'), 'amount' => 2620]);
+        $order = $this->createOrder(['amount' => 2620, 'sub_total' => 2620]);
+        $order->payment_id = $payment->id;
+        $order->save();
+
+        $this->controller->testFlagUnderpaidOrder([$order->id], 1370.0);
+
+        // Payment now reflects the true captured amount, so the order is not fully paid.
+        $this->assertEquals(1370, (float) $payment->fresh()->amount);
+
+        // A review flag was recorded in the order's private notes.
+        $this->assertStringContainsString('Razorpay captured', (string) $order->fresh()->private_notes);
+    }
+
+    public function test_underpaid_flag_is_idempotent(): void
+    {
+        $payment = $this->createPayment(['charge_id' => $this->chargeId('idem'), 'amount' => 2620]);
+        $order = $this->createOrder(['amount' => 2620, 'sub_total' => 2620]);
+        $order->payment_id = $payment->id;
+        $order->save();
+
+        // Callback + webhook can both run.
+        $this->controller->testFlagUnderpaidOrder([$order->id], 1370.0);
+        $this->controller->testFlagUnderpaidOrder([$order->id], 1370.0);
+
+        // Note appended only once.
+        $this->assertEquals(1, substr_count((string) $order->fresh()->private_notes, 'Razorpay captured'));
+    }
+
+    public function test_fully_paid_order_not_flagged(): void
+    {
+        $payment = $this->createPayment(['charge_id' => $this->chargeId('fullpaid'), 'amount' => 1000]);
+        $order = $this->createOrder(['amount' => 1000, 'sub_total' => 1000]);
+        $order->payment_id = $payment->id;
+        $order->save();
+
+        $this->controller->testFlagUnderpaidOrder([$order->id], 1000.0);
+
+        $this->assertEquals(1000, (float) $payment->fresh()->amount);
+        $this->assertStringNotContainsString('Razorpay captured', (string) $order->fresh()->private_notes);
+    }
+
+    public function test_underpaid_guard_skips_split_orders(): void
+    {
+        $p1 = $this->createPayment(['charge_id' => $this->chargeId('split1'), 'amount' => 2000]);
+        $p2 = $this->createPayment(['charge_id' => $this->chargeId('split2'), 'amount' => 2000]);
+        $o1 = $this->createOrder(['amount' => 2000, 'sub_total' => 2000]);
+        $o1->payment_id = $p1->id;
+        $o1->save();
+        $o2 = $this->createOrder(['amount' => 2000, 'sub_total' => 2000]);
+        $o2->payment_id = $p2->id;
+        $o2->save();
+
+        $this->controller->testFlagUnderpaidOrder([$o1->id, $o2->id], 2000.0);
+
+        // Split charges are left untouched.
+        $this->assertEquals(2000, (float) $p1->fresh()->amount);
+        $this->assertEquals(2000, (float) $p2->fresh()->amount);
+        $this->assertStringNotContainsString('Razorpay captured', (string) $o1->fresh()->private_notes);
+        $this->assertStringNotContainsString('Razorpay captured', (string) $o2->fresh()->private_notes);
     }
 
     public function test_save_handles_multiple_order_ids(): void

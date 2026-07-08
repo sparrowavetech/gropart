@@ -3,11 +3,11 @@
 namespace Botble\AuditLog\Listeners;
 
 use Botble\AuditLog\Models\AuditHistory;
-use Botble\Base\Contracts\BaseModel;
 use Botble\Base\Facades\BaseHelper;
 use Exception;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 
 class CustomerLoginListener
@@ -22,12 +22,9 @@ class CustomerLoginListener
             return;
         }
 
-        /**
-         * @var BaseModel $user
-         */
         $user = $event->user;
 
-        if (! $user instanceof Authenticatable) {
+        if (! $user instanceof Model || ! $user instanceof Authenticatable) {
             return;
         }
 

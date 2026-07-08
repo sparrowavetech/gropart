@@ -18,7 +18,7 @@ class GoogleTagManagerEnhanced
             }
 
             $script = match ($renderType) {
-                'custom' => self::renderCustomTracking($debugMode),
+                'custom' => self::renderCustomTracking(),
                 'gtm' => self::renderGtmContainer($debugMode),
                 'id' => self::renderGoogleAnalytics($debugMode),
                 default => self::renderAutoDetect($debugMode),

@@ -157,6 +157,8 @@ return [
         'fee_per_order' => 'Frais par commande (%), suggestion : 2 ou 3',
         'default_commission_fee' => 'Frais de commission par défaut (%), suggestion : 2 ou 3',
         'default_commission_fee_helper' => 'Définissez le pourcentage de chaque vente qui revient à la marketplace en tant que commission.',
+        'fixed_commission_fee' => 'Frais de commission fixe (par commande)',
+        'fixed_commission_fee_helper' => 'Un montant fixe ajouté à la commission, facturé une fois par commande de vendeur en plus du pourcentage ci-dessus. Utile pour couvrir la part fixe des frais de la passerelle de paiement (ex. Stripe/PayPal 0,25 €). Laissez 0 pour désactiver.',
         'enable_commission_fee_for_each_category' => 'Activer les frais de commission pour chaque catégorie ?',
         'enable_commission_fee_for_each_category_helper' => 'Si activé, vous pouvez définir des taux de commission différents pour chaque catégorie de produit.',
         'categories' => 'Catégories',

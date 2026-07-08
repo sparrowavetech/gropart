@@ -24,7 +24,6 @@ abstract class Request extends FormRequest
 
         $validationData = apply_filters('core_request_validation_data', $this->validationData(), $this);
 
-        // @phpstan-ignore-next-line
         $validator = $factory->make(
             $validationData,
             $rules,

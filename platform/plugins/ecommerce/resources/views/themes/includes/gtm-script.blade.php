@@ -15,20 +15,30 @@
             return false;
         }
 
+        // Match the server-side push mechanism (see GoogleTagManager::shouldUseGtag).
+        // For GTM-container / custom setups we push a single flat object so client-side
+        // events (add_to_cart, etc.) stay consistent with the server-rendered ones and
+        // never get the GA4 eventModel wrapper - which previously produced a duplicate,
+        // double-shaped add_to_cart push alongside the flat one.
+        var gtmUseGtag = @json(app(\Botble\Ecommerce\AdsTracking\GoogleTagManager::class)->shouldUseGtag());
+
         function pushEvent(eventName, eventData) {
-            if (typeof gtag === 'function') {
+            if (gtmUseGtag && typeof gtag === 'function') {
                 gtag('event', eventName, eventData);
-            } else if (window.dataLayer && Array.isArray(window.dataLayer)) {
-                var dataLayerEvent = {
-                    event: eventName
-                };
-                for (var key in eventData) {
-                    if (eventData.hasOwnProperty(key)) {
-                        dataLayerEvent[key] = eventData[key];
-                    }
-                }
-                window.dataLayer.push(dataLayerEvent);
+                return;
             }
+
+            window.dataLayer = window.dataLayer || [];
+
+            var dataLayerEvent = {
+                event: eventName
+            };
+            for (var key in eventData) {
+                if (eventData.hasOwnProperty(key)) {
+                    dataLayerEvent[key] = eventData[key];
+                }
+            }
+            window.dataLayer.push(dataLayerEvent);
         }
 
         function formatItemCategories(categories) {

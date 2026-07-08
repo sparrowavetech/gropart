@@ -155,6 +155,8 @@ return [
         'fee_per_order' => 'Yuran setiap yuran (%), cadangan: 2 atau 3',
         'default_commission_fee' => 'Yuran komisen lalai (%), cadangan: 2 atau 3',
         'default_commission_fee_helper' => 'Set the percentage of each sale that goes to the marketplace as commission.',
+        'fixed_commission_fee' => 'Yuran komisen tetap (setiap pesanan)',
+        'fixed_commission_fee_helper' => 'Jumlah tetap yang ditambah pada komisen, dikenakan sekali bagi setiap pesanan penjual selain peratusan di atas. Berguna untuk menampung bahagian tetap yuran gerbang pembayaran (cth. Stripe/PayPal €0.25). Biarkan 0 untuk lumpuhkan.',
         'enable_commission_fee_for_each_category' => 'Aktifkan yuran komisen untuk setiap kategori?',
         'enable_commission_fee_for_each_category_helper' => 'If enabled, you can set different commission rates for each product category.',
         'categories' => 'Kategori',

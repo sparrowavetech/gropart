@@ -41,6 +41,7 @@ class MarketPlaceSettingFormRequest extends BaseProductRequest
             'hide_store_social_links' => 'sometimes|in:0,1',
             'enable_vendor_categories_filter' => [new OnOffRule()],
             'fee_per_order' => 'sometimes|min:0|max:100|numeric',
+            'fee_per_order_fixed' => 'sometimes|min:0|numeric',
             'fee_withdrawal' => 'sometimes|min:0|numeric',
             'withdrawal_fee_type' => ['required', Rule::in(WithdrawalFeeTypeEnum::values())],
             'max_filesize_upload_by_vendor' => 'sometimes|min:1|numeric',

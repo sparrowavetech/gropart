@@ -140,7 +140,7 @@ class SocialService
                 'grant_type' => 'refresh_token',
             ]);
 
-            return json_decode($response->getBody(), true);
+            return json_decode($response->body(), true);
         } catch (Exception $e) {
             BaseHelper::logError($e);
 

@@ -155,6 +155,8 @@ return [
         'fee_per_order' => '注文ごとの手数料 (%)、推奨: 2 または 3',
         'default_commission_fee' => 'デフォルトの手数料 (%)、推奨: 2 または 3',
         'default_commission_fee_helper' => '各販売のマーケットプレイスへの手数料の割合を設定します。',
+        'fixed_commission_fee' => '固定手数料（注文ごと）',
+        'fixed_commission_fee_helper' => '上記のパーセンテージに加えて、出品者の注文ごとに1回請求される固定額です。決済ゲートウェイ手数料の固定部分（例：Stripe/PayPal €0.25）を補うのに便利です。無効にするには0のままにします。',
         'enable_commission_fee_for_each_category' => 'カテゴリごとに手数料を有効にしますか?',
         'enable_commission_fee_for_each_category_helper' => '有効にすると、各製品カテゴリに異なる手数料率を設定できます。',
         'categories' => 'カテゴリー',

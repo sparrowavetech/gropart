@@ -222,7 +222,7 @@ trait HasMenuTranslationSeeder
     ): void {
         $slug = $this->localizedSlug($baseSlug, $locale);
 
-        $menu = MenuModel::query()->updateOrCreate(
+        $menu = MenuModel::updateOrCreate(
             ['slug' => $slug],
             ['name' => $name]
         );
@@ -231,7 +231,7 @@ trait HasMenuTranslationSeeder
         MenuLocation::query()->where('menu_id', $menu->getKey())->delete();
 
         if ($baseSlug === 'main-menu') {
-            $menuLocation = MenuLocation::query()->create([
+            $menuLocation = MenuLocation::create([
                 'menu_id' => $menu->getKey(),
                 'location' => 'main-menu',
             ]);

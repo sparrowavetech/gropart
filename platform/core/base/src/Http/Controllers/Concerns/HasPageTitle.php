@@ -10,7 +10,7 @@ trait HasPageTitle
     {
         PageTitle::setTitle($title);
 
-        if ($registerBreadcrumb && method_exists($this, 'breadcrumb')) {
+        if ($registerBreadcrumb) {
             $this->breadcrumb()->add($title);
         }
     }

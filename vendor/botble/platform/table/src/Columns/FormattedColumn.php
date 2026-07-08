@@ -137,10 +137,8 @@ class FormattedColumn extends Column implements FormattedColumnContract
     {
         $value = $this->getOriginalValue();
 
-        if (isset($this->getValueUsingCallbacks)) {
-            foreach ($this->getValueUsingCallbacks as $callback) {
-                $value = call_user_func($callback, $this, $value);
-            }
+        foreach ($this->getValueUsingCallbacks as $callback) {
+            $value = call_user_func($callback, $this, $value);
         }
 
         return $value;

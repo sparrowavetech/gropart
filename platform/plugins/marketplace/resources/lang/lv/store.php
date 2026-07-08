@@ -6,6 +6,13 @@ return [
     'edit' => 'Rediģēt veikalu',
     'view' => 'Skatīt',
     'forms' => [
+        'vacation_mode' => 'Brīvdienu režīms',
+        'vacation_mode_helper' => 'Ieslēdziet šo, lai uz laiku apturētu savu veikalu. Klienti joprojām var pārlūkot jūsu produktus, bet nevar veikt pasūtījumus, kamēr to neizslēdzat.',
+        'vacation_message' => 'Brīvdienu ziņojums',
+        'vacation_message_helper' => 'Neobligāts paziņojums, kas tiek rādīts klientiem jūsu veikalā un produktu lapās, kamēr ir ieslēgts brīvdienu režīms.',
+        'vacation_message_placeholder' => 'Piem.: Mēs esam atvaļinājumā līdz 1. jūlijam. Tagad veiktie pasūtījumi tiks nosūtīti pēc mūsu atgriešanās.',
+        'vacation_badge' => 'Šis veikals ir atvaļinājumā',
+        'vacation_default_notice' => ':store pašlaik ir atvaļinājumā un patlaban nepieņem pasūtījumus. Lūdzu, pārbaudiet vēlāk.',
         'logo' => 'Logotips',
         'email' => 'E-pasts',
         'email_placeholder' => 'Piemēram: vards@veikals.com',

@@ -53,6 +53,7 @@ class AddHrefLangListener
     {
         $entries = [];
         $languageVariantCounts = $this->countLanguageVariants();
+        $page = (int) request()->query('page');
 
         foreach (Language::getSupportedLocales() as $localeCode => $properties) {
             $hreflangCode = Language::formatLocaleForHrefLang($properties['lang_code']);
@@ -65,6 +66,12 @@ class AddHrefLangListener
             }
 
             $url = rtrim($url, '/');
+
+            // Preserve pagination so hreflang self-references the current paginated URL,
+            // matching the canonical tag (see seo-helper MiscTags::addCanonical).
+            if ($page > 1) {
+                $url .= (str_contains($url, '?') ? '&' : '?') . 'page=' . $page;
+            }
 
             if (str_contains($hreflangCode, '-')) {
                 $languageOnly = explode('-', $hreflangCode)[0];

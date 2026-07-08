@@ -56,7 +56,7 @@ class Action extends TableActionAbstract
         if (! $this->getColor() && $this->color) {
             $this->addAttribute(
                 'style',
-                sprintf('background-color: %s !important; color: %s;', $this->color, $this->colorText ?? '#fff')
+                sprintf('background-color: %s !important; color: %s;', $this->color, $this->colorText)
             );
         }
 

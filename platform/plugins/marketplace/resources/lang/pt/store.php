@@ -7,6 +7,13 @@ return [
     'view' => 'Visualizar',
     'tax_id' => 'ID fiscal',
     'forms' => [
+        'vacation_mode' => 'Modo de férias',
+        'vacation_mode_helper' => 'Ative isto para pausar temporariamente a sua loja. Os clientes ainda podem navegar pelos seus produtos mas não podem fazer pedidos até o desativar.',
+        'vacation_message' => 'Mensagem de férias',
+        'vacation_message_helper' => 'Aviso opcional mostrado aos clientes na sua loja e nas páginas de produtos enquanto o modo de férias está ativo.',
+        'vacation_message_placeholder' => 'Ex.: Estamos de férias até 1 de julho. Os pedidos feitos agora serão enviados após o nosso regresso.',
+        'vacation_badge' => 'Esta loja está de férias',
+        'vacation_default_notice' => ':store está atualmente de férias e não aceita pedidos neste momento. Por favor, volte mais tarde.',
         'logo' => 'Logotipo',
         'logo_square' => 'Logo quadrado',
         'logo_square_helper' => 'Usado em lugares que requerem uma versão quadrada do seu logo (por exemplo, a página de checkout).',

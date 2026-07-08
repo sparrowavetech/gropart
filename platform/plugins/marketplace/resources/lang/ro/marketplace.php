@@ -155,6 +155,8 @@ return [
         'fee_per_order' => 'Taxă per comandă (%), sugestie: 2 sau 3',
         'default_commission_fee' => 'Comision implicit (%), sugestie: 2 sau 3',
         'default_commission_fee_helper' => 'Set the percentage of each sale that goes to the marketplace as commission.',
+        'fixed_commission_fee' => 'Comision fix (per comandă)',
+        'fixed_commission_fee_helper' => 'O sumă fixă adăugată la comision, percepută o dată per comandă a vânzătorului, pe lângă procentul de mai sus. Utilă pentru a acoperi partea fixă a comisioanelor procesatorului de plăți (ex. Stripe/PayPal €0,25). Lăsați 0 pentru a dezactiva.',
         'enable_commission_fee_for_each_category' => 'Activează comision pentru fiecare categorie?',
         'enable_commission_fee_for_each_category_helper' => 'If enabled, you can set different commission rates for each product category.',
         'categories' => 'Categorii',

@@ -193,10 +193,10 @@ class ValidateUpdateFileTest extends TestCase
             phpversion()
         );
 
+        $this->expectNotToPerformAssertions();
+
         // Should not throw
         $this->validateMethod->invoke($this->core, $filePath);
-
-        $this->assertTrue(true);
     }
 
     public function test_accepts_zip_without_minimum_php_version(): void
@@ -206,10 +206,10 @@ class ValidateUpdateFileTest extends TestCase
             null
         );
 
+        $this->expectNotToPerformAssertions();
+
         // Should not throw
         $this->validateMethod->invoke($this->core, $filePath);
-
-        $this->assertTrue(true);
     }
 
     public function test_zip_is_closed_after_validation_exception(): void

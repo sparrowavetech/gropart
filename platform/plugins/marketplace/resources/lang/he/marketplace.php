@@ -155,6 +155,8 @@ return [
         'fee_per_order' => 'עמלה להזמנה (%), מומלץ: 2 או 3',
         'default_commission_fee' => 'עמלת ברירת מחדל (%), מומלץ: 2 או 3',
         'default_commission_fee_helper' => 'Set the percentage of each sale that goes to the marketplace as commission.',
+        'fixed_commission_fee' => 'עמלת עמלה קבועה (לכל הזמנה)',
+        'fixed_commission_fee_helper' => 'סכום קבוע שמתווסף לעמלה, נגבה פעם אחת לכל הזמנת מוכר בנוסף לאחוז שלמעלה. שימושי לכיסוי החלק הקבוע של עמלות שער התשלום (למשל Stripe/PayPal €0.25). השאר 0 כדי להשבית.',
         'enable_commission_fee_for_each_category' => 'הפעל עמלה לכל קטגוריה?',
         'enable_commission_fee_for_each_category_helper' => 'If enabled, you can set different commission rates for each product category.',
         'categories' => 'קטגוריות',

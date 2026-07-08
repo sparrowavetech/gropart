@@ -145,7 +145,10 @@ class PostExporter extends Exporter
 
         $this->applyFilters($query);
 
-        return $query->get()
+        /** @var Collection<int, Post> $posts */
+        $posts = $query->get();
+
+        return $posts
             ->transform(fn (Post $post) => [
                 ...$post->toArray(),
                 'slug' => $post->slugable->key,

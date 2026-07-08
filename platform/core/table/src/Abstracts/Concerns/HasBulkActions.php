@@ -264,7 +264,7 @@ trait HasBulkActions
 
     public function prepareBulkChangeValue(string $key, ?string $value): string
     {
-        if (strpos($key, '.') !== -1) {
+        if (str_contains($key, '.')) {
             $key = Arr::last(explode('.', $key));
         }
 

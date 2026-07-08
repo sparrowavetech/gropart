@@ -36,11 +36,20 @@ class ImageDimensionsInjector
             return $tag;
         }
 
-        if (! preg_match('/\ssrc\s*=\s*"([^"]+)"/i', $attrs, $srcMatch)) {
+        // Prefer the real lazy-loaded image in `data-src` over the placeholder in
+        // `src`. Lazy-loading rewrites `src` to a generic placeholder (e.g. a
+        // 600x400 placeholder.png) and moves the real URL to `data-src`; reading
+        // `src` would reserve the placeholder's aspect ratio and shift the layout
+        // when the real image is swapped in.
+        if (preg_match('/\sdata-src\s*=\s*"([^"]+)"/i', $attrs, $lazyMatch)) {
+            $imageUrl = $lazyMatch[1];
+        } elseif (preg_match('/\ssrc\s*=\s*"([^"]+)"/i', $attrs, $srcMatch)) {
+            $imageUrl = $srcMatch[1];
+        } else {
             return $tag;
         }
 
-        $dims = static::resolveFromUrl($srcMatch[1]);
+        $dims = static::resolveFromUrl($imageUrl);
         if (! $dims) {
             return $tag;
         }

@@ -927,7 +927,7 @@ class MediaController extends BaseController
 
         $query = MediaFolder::query()
             ->where(function ($q) use ($parentId): void {
-                if (! $parentId || $parentId === '0') {
+                if (! $parentId) {
                     $q->whereNull('parent_id')
                         ->orWhere('parent_id', 0)
                         ->orWhere('parent_id', '0');

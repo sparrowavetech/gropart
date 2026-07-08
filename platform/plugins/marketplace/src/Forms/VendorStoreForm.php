@@ -11,6 +11,8 @@ class VendorStoreForm extends StoreForm
     {
         parent::setup();
 
+        // vacation_mode + vacation_message are defined in the parent StoreForm,
+        // so both admin and vendor dashboards share the same fields.
         $this
             ->setValidatorClass(VendorStoreRequest::class)
             ->modify('content', CustomEditorField::class)

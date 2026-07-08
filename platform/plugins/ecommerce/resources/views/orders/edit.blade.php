@@ -168,7 +168,7 @@
                                         @if (count($refunds) === 1)
                                             @php
                                                 $refund = $refunds[0];
-                                                $refundDate = isset($refund['_data_request']['created_at']) ? \Carbon\Carbon::parse($refund['_data_request']['created_at'])->format('Y-m-d H:i:s') : '-';
+                                                $refundDate = isset($refund['_data_request']['created_at']) ? \Carbon\Carbon::parse($refund['_data_request']['created_at'])->setTimezone(config('app.timezone'))->format('Y-m-d H:i:s') : '-';
                                                 $refundAmount = isset($refund['refunded_amount_in_currency']) ? format_price($refund['refunded_amount_in_currency']) : (isset($refund['amount']) ? format_price($refund['amount'] / 100) : '-');
                                                 $refundStatus = $refund['status'] ?? '-';
                                             @endphp
@@ -198,7 +198,7 @@
                                                         <tbody>
                                                             @foreach ($refunds as $refund)
                                                                 <tr>
-                                                                    <td>{{ isset($refund['_data_request']['created_at']) ? \Carbon\Carbon::parse($refund['_data_request']['created_at'])->format('Y-m-d H:i:s') : '-' }}</td>
+                                                                    <td>{{ isset($refund['_data_request']['created_at']) ? \Carbon\Carbon::parse($refund['_data_request']['created_at'])->setTimezone(config('app.timezone'))->format('Y-m-d H:i:s') : '-' }}</td>
                                                                     <td>{{ isset($refund['refunded_amount_in_currency']) ? format_price($refund['refunded_amount_in_currency']) : (isset($refund['amount']) ? format_price($refund['amount'] / 100) : '-') }}</td>
                                                                     <td>
                                                                         <span class="badge text-white bg-{{ isset($refund['status']) && $refund['status'] == 'succeeded' ? 'success' : 'secondary' }}">

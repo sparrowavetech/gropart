@@ -8,7 +8,7 @@
         data-type="text"
         data-slug="{{ $set->slug }}"
     >
-        <h4 class="bb-product-attribute-swatch-title">{{ $set->title }}:</h4>
+        <div class="bb-product-attribute-swatch-title">{{ $set->title }}:</div>
         <ul class="bb-product-attribute-swatch-list text-swatch attribute-swatch">
             @foreach ($displayAttributes as $attribute)
                 @php

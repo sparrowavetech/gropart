@@ -4,7 +4,7 @@
             <td class="bb-py-xl">
                 <table class="bb-text-center bb-text-muted" cellspacing="0" cellpadding="0">
                     <tbody>
-                    {% if social_links %}
+                    {% if site_social_links %}
                         <tr>
                             <td align="center" class="bb-pb-md">
                                 <table class="bb-w-auto" cellspacing="0" cellpadding="0">

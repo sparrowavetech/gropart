@@ -7,6 +7,13 @@ return [
     'view' => 'View',
     'tax_id' => 'Tax ID',
     'forms' => [
+        'vacation_mode' => 'Vacation mode',
+        'vacation_mode_helper' => 'Turn this on to temporarily pause your store. Customers can still browse your products but cannot place orders until you turn it off.',
+        'vacation_message' => 'Vacation message',
+        'vacation_message_helper' => 'Optional notice shown to customers on your store and product pages while vacation mode is on.',
+        'vacation_message_placeholder' => "Ex: We're on vacation until July 1st. Orders placed now will ship after we return.",
+        'vacation_badge' => 'This store is on vacation',
+        'vacation_default_notice' => ':store is currently on vacation and is not accepting orders right now. Please check back later.',
         'logo' => 'Logo',
         'logo_square' => 'Square logo',
         'logo_square_helper' => 'Used in places that require a square version of your logo (for example, the checkout page).',

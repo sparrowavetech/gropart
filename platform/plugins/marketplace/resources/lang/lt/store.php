@@ -6,6 +6,13 @@ return [
     'edit' => 'Redaguoti parduotuvę',
     'view' => 'Peržiūrėti',
     'forms' => [
+        'vacation_mode' => 'Atostogų režimas',
+        'vacation_mode_helper' => 'Įjunkite tai, kad laikinai pristabdytumėte savo parduotuvę. Klientai vis tiek gali naršyti jūsų prekes, bet negali pateikti užsakymų, kol to neišjungsite.',
+        'vacation_message' => 'Atostogų pranešimas',
+        'vacation_message_helper' => 'Neprivalomas pranešimas, rodomas klientams jūsų parduotuvėje ir prekių puslapiuose, kol įjungtas atostogų režimas.',
+        'vacation_message_placeholder' => 'Pvz.: Atostogaujame iki liepos 1 d. Dabar pateikti užsakymai bus išsiųsti mums grįžus.',
+        'vacation_badge' => 'Ši parduotuvė atostogauja',
+        'vacation_default_notice' => ':store šiuo metu atostogauja ir šiuo metu nepriima užsakymų. Patikrinkite vėliau.',
         'logo' => 'Logotipas',
         'email' => 'El. paštas',
         'email_placeholder' => 'Pvz.: vardas@parduotuve.lt',

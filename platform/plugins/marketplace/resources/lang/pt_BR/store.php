@@ -6,6 +6,13 @@ return [
     'edit' => 'Editar loja',
     'view' => 'Visualizar',
     'forms' => [
+        'vacation_mode' => 'Modo de férias',
+        'vacation_mode_helper' => 'Ative isto para pausar temporariamente sua loja. Os clientes ainda podem navegar pelos seus produtos, mas não podem fazer pedidos até você desativar.',
+        'vacation_message' => 'Mensagem de férias',
+        'vacation_message_helper' => 'Aviso opcional exibido aos clientes na sua loja e nas páginas de produtos enquanto o modo de férias está ativo.',
+        'vacation_message_placeholder' => 'Ex.: Estamos de férias até 1º de julho. Os pedidos feitos agora serão enviados após o nosso retorno.',
+        'vacation_badge' => 'Esta loja está de férias',
+        'vacation_default_notice' => ':store está de férias no momento e não está aceitando pedidos agora. Por favor, volte mais tarde.',
         'address' => 'Endereço',
         'address_placeholder' => 'Endereço',
         'city' => 'Cidade',

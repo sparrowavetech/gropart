@@ -155,6 +155,8 @@ return [
         'fee_per_order' => 'Bayad bawat order (%), mungkahi: 2 o 3',
         'default_commission_fee' => 'Default na commission fee (%), mungkahi: 2 o 3',
         'default_commission_fee_helper' => 'Set the percentage of each sale that goes to the marketplace as commission.',
+        'fixed_commission_fee' => 'Nakapirming bayad sa komisyon (bawat order)',
+        'fixed_commission_fee_helper' => 'Isang nakapirming halaga na idinaragdag sa komisyon, sinisingil nang isang beses bawat order ng vendor bukod sa porsyento sa itaas. Kapaki-pakinabang para masaklaw ang nakapirming bahagi ng mga bayarin sa payment gateway (hal. Stripe/PayPal €0.25). Iwang 0 upang i-disable.',
         'enable_commission_fee_for_each_category' => 'Paganahin ang commission fee para sa bawat kategorya?',
         'enable_commission_fee_for_each_category_helper' => 'If enabled, you can set different commission rates for each product category.',
         'categories' => 'Mga Kategorya',

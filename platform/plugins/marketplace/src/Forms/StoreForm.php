@@ -10,11 +10,14 @@ use Botble\Base\Forms\FieldOptions\EmailFieldOption;
 use Botble\Base\Forms\FieldOptions\HtmlFieldOption;
 use Botble\Base\Forms\FieldOptions\MediaImageFieldOption;
 use Botble\Base\Forms\FieldOptions\NameFieldOption;
+use Botble\Base\Forms\FieldOptions\OnOffFieldOption;
+use Botble\Base\Forms\FieldOptions\TextareaFieldOption;
 use Botble\Base\Forms\FieldOptions\TextFieldOption;
 use Botble\Base\Forms\Fields\EditorField;
 use Botble\Base\Forms\Fields\EmailField;
 use Botble\Base\Forms\Fields\HtmlField;
 use Botble\Base\Forms\Fields\MediaImageField;
+use Botble\Base\Forms\Fields\OnOffCheckboxField;
 use Botble\Base\Forms\Fields\SelectField;
 use Botble\Base\Forms\Fields\TextareaField;
 use Botble\Base\Forms\Fields\TextField;
@@ -148,6 +151,24 @@ class StoreForm extends FormAbstract
                     ->all(),
                 'colspan' => 3,
             ])
+            ->add(
+                'vacation_mode',
+                OnOffCheckboxField::class,
+                OnOffFieldOption::make()
+                    ->label(trans('plugins/marketplace::store.forms.vacation_mode'))
+                    ->helperText(trans('plugins/marketplace::store.forms.vacation_mode_helper'))
+                    ->colspan(6)
+            )
+            ->add(
+                'vacation_message',
+                TextareaField::class,
+                TextareaFieldOption::make()
+                    ->label(trans('plugins/marketplace::store.forms.vacation_message'))
+                    ->helperText(trans('plugins/marketplace::store.forms.vacation_message_helper'))
+                    ->placeholder(trans('plugins/marketplace::store.forms.vacation_message_placeholder'))
+                    ->rows(3)
+                    ->colspan(6)
+            )
             ->when(! MarketplaceHelper::hideStoreSocialLinks(), function (): void {
                 $this
                     ->add('extended_info_content', HtmlField::class, [

@@ -6,6 +6,13 @@ return [
     'edit' => 'Editar',
     'view' => 'Vista',
     'forms' => [
+        'vacation_mode' => 'Modo vacaciones',
+        'vacation_mode_helper' => 'Actívalo para pausar temporalmente tu tienda. Los clientes aún pueden ver tus productos, pero no pueden realizar pedidos hasta que lo desactives.',
+        'vacation_message' => 'Mensaje de vacaciones',
+        'vacation_message_helper' => 'Aviso opcional que se muestra a los clientes en tu tienda y en las páginas de productos mientras el modo vacaciones está activo.',
+        'vacation_message_placeholder' => 'Ej.: Estamos de vacaciones hasta el 1 de julio. Los pedidos realizados ahora se enviarán a nuestro regreso.',
+        'vacation_badge' => 'Esta tienda está de vacaciones',
+        'vacation_default_notice' => ':store está de vacaciones actualmente y no acepta pedidos en este momento. Vuelve a consultar más tarde.',
         'logo' => 'Logo',
         'email' => 'Correo electrónico',
         'email_placeholder' => 'Ej: nombre@tienda.com',

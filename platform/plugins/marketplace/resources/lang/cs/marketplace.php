@@ -155,6 +155,8 @@ return [
         'fee_per_order' => 'Poplatek za objednávku (%), doporučeno: 2 nebo 3',
         'default_commission_fee' => 'Výchozí provize (%), doporučeno: 2 nebo 3',
         'default_commission_fee_helper' => 'Set the percentage of each sale that goes to the marketplace as commission.',
+        'fixed_commission_fee' => 'Pevný provizní poplatek (za objednávku)',
+        'fixed_commission_fee_helper' => 'Pevná částka přidaná k provizi, účtovaná jednou za objednávku prodejce nad rámec výše uvedeného procenta. Užitečné k pokrytí pevné části poplatků platební brány (např. Stripe/PayPal €0.25). Ponechte 0 pro vypnutí.',
         'enable_commission_fee_for_each_category' => 'Povolit provizi pro každou kategorii?',
         'enable_commission_fee_for_each_category_helper' => 'If enabled, you can set different commission rates for each product category.',
         'categories' => 'Kategorie',

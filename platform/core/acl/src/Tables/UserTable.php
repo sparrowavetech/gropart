@@ -9,7 +9,6 @@ use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Base\Exceptions\DisabledInDemoModeException;
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
-use Botble\Base\Models\BaseQueryBuilder;
 use Botble\Table\Abstracts\TableAbstract;
 use Botble\Table\Actions\Action;
 use Botble\Table\Actions\DeleteAction;
@@ -201,7 +200,7 @@ class UserTable extends TableAbstract
         if ($key === 'status' && $value) {
 
             if ($value == UserStatusEnum::ACTIVATED) {
-                return $query->whereHas('activations', fn (BaseQueryBuilder $query) => $query->where('completed', true));
+                return $query->whereHas('activations', fn (Builder $query) => $query->where('completed', true));
             }
 
             return $query->whereDoesntHave('activations');

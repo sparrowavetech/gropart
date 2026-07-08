@@ -155,6 +155,8 @@ return [
         'fee_per_order' => 'Tasu tellimuse kohta (%), soovitus: 2 või 3',
         'default_commission_fee' => 'Vaikimisi vahendustasu (%), soovitus: 2 või 3',
         'default_commission_fee_helper' => 'Set the percentage of each sale that goes to the marketplace as commission.',
+        'fixed_commission_fee' => 'Fikseeritud komisjonitasu (tellimuse kohta)',
+        'fixed_commission_fee_helper' => 'Fikseeritud summa, mis lisatakse komisjonile ja võetakse müüja tellimuse kohta üks kord lisaks ülaltoodud protsendile. Kasulik makselüüsi tasude fikseeritud osa katmiseks (nt Stripe/PayPal €0,25). Keelamiseks jäta 0.',
         'enable_commission_fee_for_each_category' => 'Luba vahendustasu iga kategooria jaoks?',
         'enable_commission_fee_for_each_category_helper' => 'If enabled, you can set different commission rates for each product category.',
         'categories' => 'Kategooriad',

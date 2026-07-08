@@ -6,6 +6,13 @@ return [
     'edit' => 'Rediger butikk',
     'view' => 'Vis',
     'forms' => [
+        'vacation_mode' => 'Feriemodus',
+        'vacation_mode_helper' => 'Slå på dette for å sette butikken din på pause midlertidig. Kunder kan fortsatt bla gjennom produktene dine, men kan ikke legge inn bestillinger før du slår det av.',
+        'vacation_message' => 'Feriemelding',
+        'vacation_message_helper' => 'Valgfri melding som vises til kunder i butikken din og på produktsider mens feriemodus er på.',
+        'vacation_message_placeholder' => 'F.eks.: Vi har ferie til 1. juli. Bestillinger som legges inn nå sendes når vi er tilbake.',
+        'vacation_badge' => 'Denne butikken har ferie',
+        'vacation_default_notice' => ':store har for tiden ferie og tar ikke imot bestillinger akkurat nå. Sjekk tilbake senere.',
         'logo' => 'Logo',
         'email' => 'E-post',
         'email_placeholder' => 'Eks: navn@butikk.no',

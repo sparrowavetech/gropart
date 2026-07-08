@@ -105,12 +105,14 @@
                                             </div>
                                         </div>
                                     @endif
-                                    <div class="datagrid-item">
-                                        <div class="datagrid-title">{{ trans('plugins/marketplace::store.verified_at') }}</div>
-                                        <div class="datagrid-content">
-                                            {{ $store->verified_at->format('M d, Y H:i') }}
+                                    @if ($store->verified_at)
+                                        <div class="datagrid-item">
+                                            <div class="datagrid-title">{{ trans('plugins/marketplace::store.verified_at') }}</div>
+                                            <div class="datagrid-content">
+                                                {{ $store->verified_at->format('M d, Y H:i') }}
+                                            </div>
                                         </div>
-                                    </div>
+                                    @endif
                                 </div>
                             </div>
 

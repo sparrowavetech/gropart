@@ -72,7 +72,9 @@ class ProductVariationTable extends TableAbstract
         $data
             ->editColumn('price', function (ProductVariation $item) {
                 $salePrice = '';
-                if ($item->product->front_sale_price != $item->product->price) {
+                $rawSale = $item->product->getRawSalePrice();
+                $basePrice = $item->product->getRawPrice();
+                if ($rawSale !== null && $rawSale > 0 && $rawSale < $basePrice) {
                     $salePrice = Html::tag(
                         'del',
                         format_price($item->product->price),

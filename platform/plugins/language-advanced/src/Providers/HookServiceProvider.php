@@ -348,11 +348,9 @@ class HookServiceProvider extends ServiceProvider
             }
         }
 
-        $refLang = null;
-
-        if (! LanguageAdvancedManager::isDefaultLocale()) {
-            $refLang = '?ref_lang=' . LanguageAdvancedManager::getTranslationLocale();
-        }
+        // Reaching here guarantees a non-default locale (see early return above),
+        // so a ref_lang query string is always appended.
+        $refLang = '?ref_lang=' . LanguageAdvancedManager::getTranslationLocale();
 
         return $form
             ->setUrl(route('language-advanced.save', $model->getKey()) . $refLang)

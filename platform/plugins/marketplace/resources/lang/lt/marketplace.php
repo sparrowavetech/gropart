@@ -155,6 +155,8 @@ return [
         'fee_per_order' => 'Mokestis už užsakymą (%), rekomenduojama: 2 arba 3',
         'default_commission_fee' => 'Numatytasis komisinis mokestis (%), rekomenduojama: 2 arba 3',
         'default_commission_fee_helper' => 'Set the percentage of each sale that goes to the marketplace as commission.',
+        'fixed_commission_fee' => 'Fiksuotas komisinis mokestis (už užsakymą)',
+        'fixed_commission_fee_helper' => 'Fiksuota suma, pridedama prie komisinio mokesčio, imama vieną kartą už pardavėjo užsakymą be aukščiau nurodyto procento. Naudinga padengti fiksuotą mokėjimo šliuzo mokesčių dalį (pvz., Stripe/PayPal €0,25). Palikite 0, kad išjungtumėte.',
         'enable_commission_fee_for_each_category' => 'Įjungti komisinius mokesčius kiekvienai kategorijai?',
         'enable_commission_fee_for_each_category_helper' => 'If enabled, you can set different commission rates for each product category.',
         'categories' => 'Kategorijos',

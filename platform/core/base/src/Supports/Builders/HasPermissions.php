@@ -39,7 +39,7 @@ trait HasPermissions
 
         return empty($this->permissions) || collect($this->permissions)
                 ->filter(
-                    fn (string $permission) => Auth::guard()->user() instanceof User && Auth::guard()->user()->hasPermission($permission)
+                    fn (string $permission) => Auth::guard()->user()->hasPermission($permission)
                 )
                 ->isNotEmpty();
     }

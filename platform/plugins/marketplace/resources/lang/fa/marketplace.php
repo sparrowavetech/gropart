@@ -156,6 +156,8 @@ return [
         'fee_per_order' => 'کارمزد هر سفارش (%)، پیشنهاد: ۲ یا ۳',
         'default_commission_fee' => 'کارمزد کمیسیون پیش‌فرض (%)، پیشنهاد: ۲ یا ۳',
         'default_commission_fee_helper' => 'Set the percentage of each sale that goes to the marketplace as commission.',
+        'fixed_commission_fee' => 'کارمزد ثابت کمیسیون (به ازای هر سفارش)',
+        'fixed_commission_fee_helper' => 'مبلغی ثابت که علاوه بر درصد بالا، یک‌بار به ازای هر سفارش فروشنده به کمیسیون افزوده می‌شود. برای پوشش بخش ثابت کارمزد درگاه پرداخت (مانند Stripe/PayPal €0.25) مفید است. برای غیرفعال‌سازی 0 بگذارید.',
         'enable_commission_fee_for_each_category' => 'فعال‌سازی کارمزد کمیسیون برای هر دسته‌بندی؟',
         'enable_commission_fee_for_each_category_helper' => 'If enabled, you can set different commission rates for each product category.',
         'categories' => 'دسته‌بندی‌ها',

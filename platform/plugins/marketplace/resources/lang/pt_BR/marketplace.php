@@ -163,6 +163,8 @@ return [
         'description' => 'Taxa de comissão de configuração',
         'default_commission_fee' => 'Taxa de comissão padrão (%), sugestão: 2 ou 3',
         'default_commission_fee_helper' => 'Defina a porcentagem de cada venda que vai para o marketplace como comissão.',
+        'fixed_commission_fee' => 'Taxa de comissão fixa (por pedido)',
+        'fixed_commission_fee_helper' => 'Um valor fixo adicionado à comissão, cobrado uma vez por pedido do vendedor além da porcentagem acima. Útil para cobrir a parte fixa das taxas do gateway de pagamento (ex.: Stripe/PayPal €0,25). Deixe 0 para desativar.',
         'enable_commission_fee_for_each_category' => 'Habilitar taxa de comissão para cada categoria?',
         'enable_commission_fee_for_each_category_helper' => 'Se ativado, você pode definir diferentes taxas de comissão para cada categoria de produto.',
         'categories' => 'Categorias',

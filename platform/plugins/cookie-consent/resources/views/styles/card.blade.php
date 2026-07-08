@@ -6,6 +6,35 @@
     $hasCategories = ! empty($cookieConsentConfig['cookie_categories']);
     $primaryColor = theme_option('primary_color', '#f97316');
     $primaryColorHover = theme_option('primary_color_hover', '#d66313');
+
+    // Pick the accept-all button text color (white vs near-black) that has the
+    // highest WCAG contrast against the primary color, so the CTA stays legible
+    // whatever brand color the store sets. White on a mid-tone brand color (e.g.
+    // the default orange) only reaches ~2.9:1 and fails the AA 4.5:1 threshold.
+    $accentTextColor = '#ffffff';
+
+    if (preg_match('/^#?([a-fA-F0-9]{3}|[a-fA-F0-9]{6})$/', $primaryColor)) {
+        $hex = ltrim($primaryColor, '#');
+
+        if (strlen($hex) === 3) {
+            $hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
+        }
+
+        $toLinear = function ($channel) {
+            $channel /= 255;
+
+            return $channel <= 0.03928 ? $channel / 12.92 : pow(($channel + 0.055) / 1.055, 2.4);
+        };
+
+        $luminance = 0.2126 * $toLinear(hexdec(substr($hex, 0, 2)))
+            + 0.7152 * $toLinear(hexdec(substr($hex, 2, 2)))
+            + 0.0722 * $toLinear(hexdec(substr($hex, 4, 2)));
+
+        $contrastWhite = (1.0 + 0.05) / ($luminance + 0.05);
+        $contrastBlack = ($luminance + 0.05) / 0.05;
+
+        $accentTextColor = $contrastWhite >= $contrastBlack ? '#ffffff' : '#18181b';
+    }
 @endphp
 
 <style>
@@ -172,7 +201,7 @@
 
     .site-notice .site-notice__accept-all {
         background-color: var(--cc-primary, #f97316);
-        color: #ffffff;
+        color: var(--cc-accent-text, #ffffff);
         border: 1px solid var(--cc-primary, #f97316);
         font-weight: 600;
         box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
@@ -362,8 +391,9 @@
     class="js-site-notice site-notice"
     dir="{{ BaseHelper::siteLanguageDirection() }}"
     role="dialog"
+    aria-labelledby="js-site-notice-title"
     aria-live="polite"
-    style="--cc-primary: {{ $primaryColor }}; --cc-primary-hover: {{ $primaryColorHover }};"
+    style="--cc-primary: {{ $primaryColor }}; --cc-primary-hover: {{ $primaryColorHover }}; --cc-accent-text: {{ $accentTextColor }};"
     data-nosnippet
 >
     <div class="site-notice-body">
@@ -374,7 +404,7 @@
                         <path d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
                     </svg>
                 </span>
-                <p class="site-notice__title">{{ $cardTitle }}</p>
+                <p class="site-notice__title" id="js-site-notice-title">{{ $cardTitle }}</p>
             </div>
             <button
                 type="button"
@@ -413,10 +443,10 @@
 
     @if ($hasCategories)
         {{-- Category toggles live here. Visible inside the modal; also power accept-all / essential-only. --}}
-        <div class="js-cookie-consent-modal cookie-consent-modal" role="dialog" aria-modal="true">
+        <div class="js-cookie-consent-modal cookie-consent-modal" role="dialog" aria-modal="true" aria-labelledby="js-cookie-consent-modal-title">
             <div class="cookie-consent-modal__dialog">
                 <div class="cookie-consent-modal__header">
-                    <p class="cookie-consent-modal__title">{{ trans('plugins/cookie-consent::cookie-consent.customize_text') }}</p>
+                    <p class="cookie-consent-modal__title" id="js-cookie-consent-modal-title">{{ trans('plugins/cookie-consent::cookie-consent.customize_text') }}</p>
                     <button
                         type="button"
                         class="js-cookie-consent-modal-close site-notice__close"

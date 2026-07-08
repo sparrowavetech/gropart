@@ -6,6 +6,13 @@ return [
     'edit' => '编辑店铺',
     'view' => '查看',
     'forms' => [
+        'vacation_mode' => '休假模式',
+        'vacation_mode_helper' => '开启此项可临时暂停您的店铺。顾客仍可浏览您的商品，但在您关闭之前无法下单。',
+        'vacation_message' => '休假提示',
+        'vacation_message_helper' => '休假模式开启时，在您的店铺和商品页面向顾客显示的可选提示。',
+        'vacation_message_placeholder' => '例如：我们休假至 7 月 1 日。现在下的订单将在我们返回后发货。',
+        'vacation_badge' => '该店铺正在休假',
+        'vacation_default_notice' => ':store 目前正在休假，暂不接受订单。请稍后再来查看。',
         'logo' => '徽标',
         'email' => '邮箱',
         'email_placeholder' => '例：name@store.com',

@@ -155,6 +155,8 @@ return [
         'fee_per_order' => 'Tarifa por pedido (%), sugerencia: 2 o 3',
         'default_commission_fee' => 'Tarifa de comisión predeterminada (%), sugerida: 2 o 3',
         'default_commission_fee_helper' => 'Establezca el porcentaje de cada venta que va al marketplace como comisión.',
+        'fixed_commission_fee' => 'Comisión fija (por pedido)',
+        'fixed_commission_fee_helper' => 'Una cantidad fija añadida a la comisión, cobrada una vez por pedido de vendedor además del porcentaje anterior. Útil para cubrir la parte fija de las comisiones de la pasarela de pago (p. ej., Stripe/PayPal €0,25). Deja 0 para desactivar.',
         'enable_commission_fee_for_each_category' => '¿Habilitar tarifa de comisión para cada categoría?',
         'enable_commission_fee_for_each_category_helper' => 'Si está habilitado, puede establecer diferentes tasas de comisión para cada categoría de producto.',
         'categories' => 'Categorías',

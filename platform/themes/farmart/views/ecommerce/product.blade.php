@@ -4,7 +4,7 @@
 @endphp
 {!! Theme::partial('page-header', ['size' => 'xxxl']) !!}
 
-<div class="product-detail-container">
+<div class="product-detail-container bb-product-detail">
     <div class="bg-light py-md-5 px-lg-3 px-2">
         <div class="container-xxxl rounded-7 bg-white py-lg-5 py-md-4 py-3 px-3 px-md-4 px-lg-5">
             <div class="row">

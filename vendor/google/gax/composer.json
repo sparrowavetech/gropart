@@ -2,7 +2,9 @@
     "name": "google/gax",
     "type": "library",
     "description": "Google API Core for PHP",
-    "keywords": ["google"],
+    "keywords": [
+        "google"
+    ],
     "homepage": "https://github.com/googleapis/gax-php",
     "license": "BSD-3-Clause",
     "require": {
@@ -23,28 +25,29 @@
         "phpstan/phpstan": "^2.0",
         "google/cloud-tools": "^0.16.1"
     },
+    "extra": {
+        "component": {
+            "id": "gax",
+            "target": "googleapis/gax-php.git",
+            "path": "Gax",
+            "entry": "README.md"
+        }
+    },
     "conflict": {
         "ext-protobuf": "<4.31.0"
     },
     "autoload": {
         "psr-4": {
-            "Google\\ApiCore\\": "src",
-            "GPBMetadata\\ApiCore\\": "metadata/ApiCore"
+            "Google\\ApiCore\\": "src"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Google\\ApiCore\\Dev\\": "dev/src",
             "Google\\ApiCore\\Tests\\": "tests",
-            "GPBMetadata\\Google\\": "metadata/Google",
+            "Google\\ApiCore\\Testing\\": "tests/Unit/testdata/generated",
+            "GPBMetadata\\ApiCore\\Testing\\": "tests/Unit/testdata/metadata",
             "Google\\Showcase\\": "tests/Conformance/src",
             "GPBMetadata\\Google\\Showcase\\": "tests/Conformance/metadata"
         }
-    },
-    "scripts": {
-        "regenerate-test-protos": "dev/sh/regenerate-test-protos.sh",
-        "test": "./vendor/bin/phpunit",
-        "cs-lint": "vendor/bin/php-tools cs-fixer googleapis/gax-php --ref $(git rev-parse --abbrev-ref HEAD) --flags \"\\-n --dry-run\"",
-        "cs-fix": "vendor/bin/php-tools cs-fixer googleapis/gax-php --ref $(git rev-parse --abbrev-ref HEAD) --flags \"\\-n\""
     }
 }

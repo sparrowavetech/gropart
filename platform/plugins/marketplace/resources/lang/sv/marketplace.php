@@ -155,6 +155,8 @@ return [
         'fee_per_order' => 'Avgift per beställning (%), förslag: 2 eller 3',
         'default_commission_fee' => 'Standard kommissionsavgift (%), förslag: 2 eller 3',
         'default_commission_fee_helper' => 'Set the percentage of each sale that goes to the marketplace as commission.',
+        'fixed_commission_fee' => 'Fast provisionsavgift (per order)',
+        'fixed_commission_fee_helper' => 'Ett fast belopp som läggs till provisionen, debiteras en gång per säljarorder utöver procentsatsen ovan. Användbart för att täcka den fasta delen av betalningsavgifter (t.ex. Stripe/PayPal €0,25). Lämna 0 för att inaktivera.',
         'enable_commission_fee_for_each_category' => 'Aktivera kommissionsavgift för varje kategori?',
         'enable_commission_fee_for_each_category_helper' => 'If enabled, you can set different commission rates for each product category.',
         'categories' => 'Kategorier',

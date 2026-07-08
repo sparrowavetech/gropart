@@ -91,25 +91,26 @@ class AutoTranslateCoreCommand extends Command implements PromptsForMissingInput
     {
         return (new GetGroupedTranslationsService())
             ->handle()
-            ->transform(fn ($translation) => [
+            ->map(fn ($translation) => [
                 'key' => sprintf('%s::%s', $translation['group'], $translation['key']),
                 'en' => $translation['value'],
             ])
-            ->transform(function ($translation) use ($locale) {
+            ->map(function (array $translation) use ($locale) {
                 [$group, $key] = explode('::', $translation['key']);
 
-                return [
-                    ...$translation,
-                    'group' => $group,
-                    $locale => trans(
-                        Str::of($group)
-                            ->replaceLast(DIRECTORY_SEPARATOR, '::')
-                            ->append(".$key")
-                            ->toString(),
-                        [],
-                        $locale
-                    ),
-                ];
+                $translated = trans(
+                    Str::of($group)
+                        ->replaceLast(DIRECTORY_SEPARATOR, '::')
+                        ->append(".$key")
+                        ->toString(),
+                    [],
+                    $locale
+                );
+
+                $translation['group'] = $group;
+                $translation[$locale] = is_string($translated) ? $translated : $key;
+
+                return $translation;
             });
     }
 }

@@ -6,6 +6,13 @@ return [
     'edit' => 'Redigera butik',
     'view' => 'Visa',
     'forms' => [
+        'vacation_mode' => 'Semesterläge',
+        'vacation_mode_helper' => 'Aktivera detta för att tillfälligt pausa din butik. Kunder kan fortfarande bläddra bland dina produkter men kan inte lägga beställningar förrän du stänger av det.',
+        'vacation_message' => 'Semestermeddelande',
+        'vacation_message_helper' => 'Valfritt meddelande som visas för kunder i din butik och på produktsidor medan semesterläget är på.',
+        'vacation_message_placeholder' => 'T.ex.: Vi har semester till 1 juli. Beställningar som görs nu skickas när vi är tillbaka.',
+        'vacation_badge' => 'Den här butiken har semester',
+        'vacation_default_notice' => ':store har för närvarande semester och tar inte emot beställningar just nu. Kom tillbaka senare.',
         'logo' => 'Logotyp',
         'email' => 'E-post',
         'email_placeholder' => 'Ex: namn@butik.com',

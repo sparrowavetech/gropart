@@ -123,6 +123,9 @@ final class Core
         return true;
     }
 
+    /**
+     * @phpstan-impure Result depends on the license reminder file which may change between calls.
+     */
     public function isSkippedLicenseReminder(): bool
     {
         try {
@@ -1079,6 +1082,9 @@ final class Core
         return false;
     }
 
+    /**
+     * @phpstan-impure Result depends on stored license data which may change between calls.
+     */
     public function hasLicenseData(): bool
     {
         if ($this->isLicenseStoredInDatabase()) {

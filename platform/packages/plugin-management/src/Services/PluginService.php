@@ -464,7 +464,7 @@ class PluginService
         return $validator->errors()->toArray();
     }
 
-    protected function makePluginValidator(string $plugin, bool $strict = false): \Illuminate\Contracts\Validation\Validator
+    protected function makePluginValidator(string $plugin, bool $strict = false): \Illuminate\Validation\Validator
     {
         $content = $this->getPluginInfo($plugin);
 
@@ -670,7 +670,7 @@ class PluginService
 
         if (class_exists($pluginClass) && method_exists($pluginClass, 'getLicenseSettingKey')) {
             try {
-                return call_user_func([$pluginClass, 'getLicenseSettingKey']);
+                return $pluginClass::getLicenseSettingKey();
             } catch (Throwable $exception) {
                 BaseHelper::logError($exception);
             }

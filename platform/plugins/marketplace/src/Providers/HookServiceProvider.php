@@ -477,6 +477,54 @@ class HookServiceProvider extends ServiceProvider
 
             return $data;
         }, 999, 2);
+
+        // Vendor vacation mode: block purchases and show a notice while a store is on vacation.
+        add_action('ecommerce_before_add_to_cart', [$this, 'blockAddToCartForVacationStore'], 45);
+        add_filter('ecommerce_order_validate_products', [$this, 'validateStoresNotOnVacation'], 125, 2);
+        add_filter(ECOMMERCE_PRODUCT_DETAIL_EXTRA_HTML, [$this, 'addVacationNoticeToProductDetail'], 45, 2);
+    }
+
+    public function blockAddToCartForVacationStore(Product $product): void
+    {
+        $store = $product->original_product->store ?? $product->store;
+
+        if ($store && $store->id && $store->isOnVacation()) {
+            throw new Exception(
+                $store->vacation_message
+                    ?: trans('plugins/marketplace::store.forms.vacation_default_notice', ['store' => $store->name])
+            );
+        }
+    }
+
+    public function validateStoresNotOnVacation(array $result, $stores): array
+    {
+        // Respect an error already raised by an earlier validator (e.g. different-vendor check).
+        if (! empty($result['isError'])) {
+            return $result;
+        }
+
+        foreach ($stores as $store) {
+            if ($store && $store->id && $store->isOnVacation()) {
+                return [
+                    'isError' => true,
+                    'message' => $store->vacation_message
+                        ?: trans('plugins/marketplace::store.forms.vacation_default_notice', ['store' => $store->name]),
+                ];
+            }
+        }
+
+        return $result;
+    }
+
+    public function addVacationNoticeToProductDetail(?string $html, Product $product): ?string
+    {
+        $store = $product->original_product->store ?? $product->store;
+
+        if (! $store || ! $store->id || ! $store->isOnVacation()) {
+            return $html;
+        }
+
+        return $html . view(MarketplaceHelper::viewPath('includes.vacation-notice'), compact('store'))->render();
     }
 
     public function beforeOrderRefund(BaseHttpResponse $response, Order $order, Request $request): BaseHttpResponse

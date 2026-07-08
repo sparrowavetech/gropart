@@ -155,6 +155,8 @@ return [
         'fee_per_order' => 'Χρέωση ανά παραγγελία (%), προτείνεται: 2 ή 3',
         'default_commission_fee' => 'Προεπιλεγμένη προμήθεια (%), προτείνεται: 2 ή 3',
         'default_commission_fee_helper' => 'Set the percentage of each sale that goes to the marketplace as commission.',
+        'fixed_commission_fee' => 'Σταθερή προμήθεια (ανά παραγγελία)',
+        'fixed_commission_fee_helper' => 'Ένα σταθερό ποσό που προστίθεται στην προμήθεια, χρεώνεται μία φορά ανά παραγγελία πωλητή επιπλέον του παραπάνω ποσοστού. Χρήσιμο για την κάλυψη του σταθερού μέρους των χρεώσεων πληρωμής (π.χ. Stripe/PayPal €0,25). Αφήστε 0 για απενεργοποίηση.',
         'enable_commission_fee_for_each_category' => 'Ενεργοποίηση προμήθειας για κάθε κατηγορία;',
         'enable_commission_fee_for_each_category_helper' => 'If enabled, you can set different commission rates for each product category.',
         'categories' => 'Κατηγορίες',

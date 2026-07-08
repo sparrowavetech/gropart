@@ -3,7 +3,6 @@
 namespace Botble\Blog\Tables;
 
 use Botble\Base\Facades\Html;
-use Botble\Base\Models\BaseQueryBuilder;
 use Botble\Blog\Models\Category;
 use Botble\Blog\Models\Post;
 use Botble\Table\Abstracts\TableAbstract;
@@ -24,7 +23,6 @@ use Botble\Table\Columns\StatusColumn;
 use Botble\Table\HeaderActions\CreateHeaderAction;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\Relation as EloquentRelation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 
@@ -108,7 +106,7 @@ class PostTable extends TableAbstract
             ->queryUsing(function (Builder $query) {
                 return $query
                     ->with([
-                        'categories' => function (BelongsToMany $query): void {
+                        'categories' => function (EloquentRelation $query): void {
                             $query->select(['categories.id', 'categories.name']);
                         },
                         'author',
@@ -165,7 +163,7 @@ class PostTable extends TableAbstract
 
                     return $query->whereHas(
                         'categories',
-                        fn (BaseQueryBuilder $query) => $query->where('categories.id', $value)
+                        fn (Builder $query) => $query->where('categories.id', $value)
                     );
                 }
             )

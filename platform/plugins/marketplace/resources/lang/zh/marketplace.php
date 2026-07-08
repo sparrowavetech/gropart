@@ -155,6 +155,8 @@ return [
         'fee_per_order' => '每单费用 (%)，建议：2 或 3',
         'default_commission_fee' => '默认佣金费用 (%)，建议：2 或 3',
         'default_commission_fee_helper' => '设置每笔销售作为佣金给市场的百分比。',
+        'fixed_commission_fee' => '固定佣金费用（每笔订单）',
+        'fixed_commission_fee_helper' => '在上述百分比之外，按每个卖家订单收取一次的固定金额，添加到佣金中。可用于覆盖支付网关费用的固定部分（例如 Stripe/PayPal €0.25）。留 0 表示禁用。',
         'enable_commission_fee_for_each_category' => '为每个类别启用佣金费用？',
         'enable_commission_fee_for_each_category_helper' => '如果启用，您可以为每个产品类别设置不同的佣金率。',
         'categories' => '类别',

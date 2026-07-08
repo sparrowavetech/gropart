@@ -155,6 +155,8 @@ return [
         'fee_per_order' => 'Naknada po narudžbi (%), preporuka: 2 ili 3',
         'default_commission_fee' => 'Zadana provizija (%), preporuka: 2 ili 3',
         'default_commission_fee_helper' => 'Set the percentage of each sale that goes to the marketplace as commission.',
+        'fixed_commission_fee' => 'Fiksna provizija (po narudžbi)',
+        'fixed_commission_fee_helper' => 'Fiksni iznos dodan proviziji, naplaćuje se jednom po narudžbi prodavača uz gornji postotak. Korisno za pokrivanje fiksnog dijela naknada platnog pristupnika (npr. Stripe/PayPal €0,25). Ostavite 0 za isključivanje.',
         'enable_commission_fee_for_each_category' => 'Omogući proviziju za svaku kategoriju?',
         'enable_commission_fee_for_each_category_helper' => 'If enabled, you can set different commission rates for each product category.',
         'categories' => 'Kategorije',

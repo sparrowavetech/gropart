@@ -100,6 +100,8 @@ return [
             'custom_tracking_body_html_helper' => 'Paste any noscript or additional code that goes after the opening &lt;body&gt; tag. Leave empty if not required.',
             'gtm_debug_mode' => 'Enable GTM Debug Mode',
             'gtm_debug_mode_helper' => 'Enable debug mode to log GTM events to browser console and troubleshoot tracking issues. Disable in production for better performance.',
+            'gtm_user_data' => 'Include customer data on purchase (Enhanced Conversions)',
+            'gtm_user_data_helper' => 'Adds a user_data object (email, phone, name, address) to the purchase dataLayer event for Google Ads Enhanced Conversions and Meta Advanced Matching. Values are sent unhashed for your GTM tags to hash. Only enable if your privacy policy and consent setup allow sharing this data.',
             'setup_instructions' => 'Setup Instructions',
             'verification_title' => 'How to Verify Your Setup',
             'common_mistakes' => 'Common Mistakes:',

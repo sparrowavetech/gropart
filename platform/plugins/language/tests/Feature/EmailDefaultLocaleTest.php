@@ -63,7 +63,6 @@ class EmailDefaultLocaleTest extends BaseTestCase
 
         $locale = EmailHandler::getDefaultEmailLocale();
 
-        $this->assertIsString($locale);
         $this->assertNotEmpty($locale);
     }
 

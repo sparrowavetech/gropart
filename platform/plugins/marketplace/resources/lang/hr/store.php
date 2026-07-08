@@ -6,6 +6,13 @@ return [
     'edit' => 'Uredi trgovinu',
     'view' => 'Pogledaj',
     'forms' => [
+        'vacation_mode' => 'Način godišnjeg odmora',
+        'vacation_mode_helper' => 'Uključite ovo da privremeno pauzirate svoju trgovinu. Kupci i dalje mogu pregledavati vaše proizvode, ali ne mogu naručivati dok to ne isključite.',
+        'vacation_message' => 'Poruka o godišnjem odmoru',
+        'vacation_message_helper' => 'Neobavezna obavijest prikazana kupcima u vašoj trgovini i na stranicama proizvoda dok je način godišnjeg odmora uključen.',
+        'vacation_message_placeholder' => 'Npr.: Na godišnjem smo odmoru do 1. srpnja. Narudžbe poslane sada bit će otpremljene nakon našeg povratka.',
+        'vacation_badge' => 'Ova trgovina je na godišnjem odmoru',
+        'vacation_default_notice' => ':store je trenutno na godišnjem odmoru i trenutno ne prima narudžbe. Molimo provjerite kasnije.',
         'logo' => 'Logo',
         'email' => 'E-pošta',
         'email_placeholder' => 'Npr: ime@trgovina.com',

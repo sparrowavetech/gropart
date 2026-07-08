@@ -6,6 +6,13 @@ return [
     'edit' => 'Muuda kauplust',
     'view' => 'Vaata',
     'forms' => [
+        'vacation_mode' => 'Puhkuserežiim',
+        'vacation_mode_helper' => 'Lülita see sisse, et oma pood ajutiselt peatada. Kliendid saavad endiselt tooteid sirvida, kuid ei saa tellimusi esitada, kuni selle välja lülitad.',
+        'vacation_message' => 'Puhkuse teade',
+        'vacation_message_helper' => 'Valikuline teade, mida kuvatakse klientidele sinu poes ja tootelehtedel, kui puhkuserežiim on sees.',
+        'vacation_message_placeholder' => 'Nt: Oleme puhkusel kuni 1. juulini. Praegu esitatud tellimused saadetakse pärast naasmist.',
+        'vacation_badge' => 'See pood on puhkusel',
+        'vacation_default_notice' => ':store on hetkel puhkusel ega võta praegu tellimusi vastu. Palun vaata hiljem uuesti.',
         'logo' => 'Logo',
         'email' => 'E-post',
         'email_placeholder' => 'Näiteks: nimi@kauplus.ee',

@@ -3,6 +3,7 @@
 namespace Botble\Contact\Services;
 
 use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Models\BaseModel;
 use Botble\Contact\Enums\CustomFieldType;
 use Botble\Contact\Events\SentContactEvent;
 use Botble\Contact\Forms\Fronts\ContactForm;
@@ -94,6 +95,10 @@ class ContactService
             }
 
             $contact = $form->getModel();
+
+            if (! $contact instanceof BaseModel) {
+                return;
+            }
 
             $contact->fill($data)->save();
 

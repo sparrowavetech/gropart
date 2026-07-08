@@ -4,6 +4,8 @@ namespace Botble\Razorpay\Providers;
 
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\Html;
+use Botble\Ecommerce\Enums\OrderAddressTypeEnum;
+use Botble\Ecommerce\Models\OrderAddress;
 use Botble\Media\Facades\RvMedia;
 use Botble\Payment\Enums\PaymentMethodEnum;
 use Botble\Payment\Enums\PaymentStatusEnum;
@@ -201,17 +203,23 @@ class HookServiceProvider extends ServiceProvider
         ) == 'hosted_checkout') {
             $receiptId = $data['checkout_token'] ?? Str::random(20);
 
+            // Snapshot the buyer's shipping address into the Razorpay order notes so a
+            // guest who pays but never returns (dead checkout session) can still have a
+            // complete order rebuilt from the webhook/callback. Razorpay persists notes
+            // server-side and returns them in both the order and payment payloads.
+            $notes = array_merge([
+                'order_id' => is_array($paymentData['order_id']) ? implode(',', $paymentData['order_id']) : $paymentData['order_id'],
+                'order_token' => $paymentData['checkout_token'],
+                'customer_name' => $paymentData['address']['name'],
+                'customer_email' => $paymentData['address']['email'],
+                'customer_phone' => $paymentData['address']['phone'],
+            ], $this->getShippingAddressNotes($paymentData['order_id']));
+
             $requestData = [
                 'receipt' => $receiptId,
                 'amount' => $amount,
                 'currency' => $data['currency'],
-                'notes' => [
-                    'order_id' => is_array($paymentData['order_id']) ? implode(',', $paymentData['order_id']) : $paymentData['order_id'],
-                    'order_token' => $paymentData['checkout_token'],
-                    'customer_name' => $paymentData['address']['name'],
-                    'customer_email' => $paymentData['address']['email'],
-                    'customer_phone' => $paymentData['address']['phone'],
-                ],
+                'notes' => $notes,
             ];
 
             do_action('payment_before_making_api_request', RAZORPAY_PAYMENT_METHOD_NAME, $requestData);
@@ -223,7 +231,7 @@ class HookServiceProvider extends ServiceProvider
 
             $paymentService = new RazorpayPaymentService();
 
-            $paymentService->redirectToCheckoutPage([
+            $checkoutData = [
                 'key_id' => $apiKey,
                 'amount' => $amount,
                 'currency' => $data['currency'],
@@ -241,12 +249,15 @@ class HookServiceProvider extends ServiceProvider
                 'prefill[name]' => $paymentData['address']['name'],
                 'prefill[email]' => $paymentData['address']['email'],
                 'prefill[contact]' => $paymentData['address']['phone'],
-                'notes[order_id]' => is_array($paymentData['order_id']) ? implode(',', $paymentData['order_id']) : $paymentData['order_id'],
-                'notes[order_token]' => $paymentData['checkout_token'],
-                'notes[customer_name]' => $paymentData['address']['name'],
-                'notes[customer_email]' => $paymentData['address']['email'],
-                'notes[customer_phone]' => $paymentData['address']['phone'],
-            ]);
+            ];
+
+            // Mirror the same notes onto the checkout payload so the shipping snapshot is
+            // also attached to the payment entity (read by the callback recovery path).
+            foreach ($notes as $noteKey => $noteValue) {
+                $checkoutData["notes[$noteKey]"] = $noteValue;
+            }
+
+            $paymentService->redirectToCheckoutPage($checkoutData);
         } else {
             try {
                 $orderId = $request->input('razorpay_order_id');
@@ -294,5 +305,41 @@ class HookServiceProvider extends ServiceProvider
         }
 
         return $data;
+    }
+
+    /**
+     * Build the shipping-address slice of the Razorpay order notes.
+     *
+     * Carries the RAW stored values (country code, state/city as stored), NOT the
+     * display names, so the webhook/callback can rebuild a byte-identical address
+     * row whose accessors resolve exactly like the original. Each value is capped
+     * to Razorpay's 256-char-per-note limit; blanks are dropped.
+     *
+     * @return array<string, string>
+     */
+    protected function getShippingAddressNotes(array|string|null $orderId): array
+    {
+        if (empty($orderId) || ! class_exists(OrderAddress::class)) {
+            return [];
+        }
+
+        $firstOrderId = is_array($orderId) ? Arr::first($orderId) : $orderId;
+
+        $address = OrderAddress::query()
+            ->where('order_id', $firstOrderId)
+            ->where('type', OrderAddressTypeEnum::SHIPPING)
+            ->first();
+
+        if (! $address) {
+            return [];
+        }
+
+        return array_filter([
+            'shipping_address' => Str::limit((string) $address->address, 256, ''),
+            'shipping_city' => Str::limit((string) $address->city, 256, ''),
+            'shipping_state' => Str::limit((string) $address->state, 256, ''),
+            'shipping_country' => Str::limit((string) $address->country, 256, ''),
+            'shipping_zip' => Str::limit((string) $address->zip_code, 256, ''),
+        ], fn ($value) => $value !== '');
     }
 }

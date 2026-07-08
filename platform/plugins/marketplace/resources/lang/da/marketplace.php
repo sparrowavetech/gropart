@@ -155,6 +155,8 @@ return [
         'fee_per_order' => 'Gebyr pr. ordre (%), anbefales: 2 eller 3',
         'default_commission_fee' => 'Standard kommissionsgebyr (%), anbefales: 2 eller 3',
         'default_commission_fee_helper' => 'Set the percentage of each sale that goes to the marketplace as commission.',
+        'fixed_commission_fee' => 'Fast kommissionsgebyr (pr. ordre)',
+        'fixed_commission_fee_helper' => 'Et fast beløb tilføjet til kommissionen, opkrævet én gang pr. forhandlerordre oven i procentsatsen ovenfor. Nyttigt til at dække den faste del af betalingsgebyrer (f.eks. Stripe/PayPal €0.25). Lad være 0 for at deaktivere.',
         'enable_commission_fee_for_each_category' => 'Aktiver kommissionsgebyr for hver kategori?',
         'enable_commission_fee_for_each_category_helper' => 'If enabled, you can set different commission rates for each product category.',
         'categories' => 'Kategorier',

@@ -50,7 +50,6 @@ class LanguageAdvancedManagerTest extends TestCase
     {
         $columns = LanguageAdvancedManager::getTranslatableColumns(Page::class);
 
-        $this->assertIsArray($columns);
         $this->assertContains('name', $columns);
         $this->assertContains('description', $columns);
         $this->assertContains('content', $columns);
@@ -60,7 +59,6 @@ class LanguageAdvancedManagerTest extends TestCase
     {
         $columns = LanguageAdvancedManager::getTranslatableColumns(User::class);
 
-        $this->assertIsArray($columns);
         $this->assertEmpty($columns);
     }
 
@@ -68,7 +66,6 @@ class LanguageAdvancedManagerTest extends TestCase
     {
         $columns = LanguageAdvancedManager::getTranslatableColumns(null);
 
-        $this->assertIsArray($columns);
         $this->assertEmpty($columns);
     }
 
@@ -120,7 +117,6 @@ class LanguageAdvancedManagerTest extends TestCase
     {
         $models = LanguageAdvancedManager::supportedModels();
 
-        $this->assertIsArray($models);
         $this->assertContains(Page::class, $models);
     }
 

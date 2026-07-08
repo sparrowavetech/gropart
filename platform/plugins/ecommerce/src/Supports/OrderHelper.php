@@ -13,6 +13,7 @@ use Botble\Base\Supports\Pdf;
 use Botble\Ecommerce\Enums\OrderAddressTypeEnum;
 use Botble\Ecommerce\Enums\OrderHistoryActionEnum;
 use Botble\Ecommerce\Enums\OrderStatusEnum;
+use Botble\Ecommerce\Enums\ProductTypeEnum;
 use Botble\Ecommerce\Enums\ShippingMethodEnum;
 use Botble\Ecommerce\Events\OrderCancelledEvent;
 use Botble\Ecommerce\Events\OrderCompletedEvent;
@@ -162,6 +163,17 @@ class OrderHelper
                     }
                 }
             }
+
+            // Defense-in-depth: never finalize an order without a shipping address.
+            // The address is normally persisted earlier via the save-shipping-information
+            // AJAX, but that step is session-bound and can be skipped (fast click, autofill,
+            // broken JS, lost guest session, or a redirect/webhook payment flow that finalizes
+            // by token in a context with no session). When that happens the order finalizes
+            // "paid but address-less" (admin shows "Don't have an account yet", no shipping
+            // block). This guard backfills a shipping row from any surviving local source
+            // before is_finished is set. It is purely additive — it only creates a row when
+            // none exists and never overwrites a populated one.
+            $this->ensureShippingAddressBackfilled($order);
 
             event(new OrderPlacedEvent($order));
 
@@ -1074,6 +1086,139 @@ class OrderHelper
         }
 
         return $this->checkAndCreateOrderAddress($addressData, $sessionData);
+    }
+
+    /**
+     * Ensure a finalized order always has a shipping address row.
+     *
+     * Only runs when the SHIPPING row is genuinely missing. Recovers contact/address
+     * data from the first available local source, in priority order:
+     *   1. The order's BILLING address row (often saved when shipping was skipped).
+     *   2. The checkout session data keyed by the order token (survives same-request flows).
+     *   3. The linked customer's default/earliest saved address (logged-in buyers).
+     *   4. The linked payment record's metadata (gateways that persist contact there).
+     *
+     * Purely additive: creates the row only when none exists; never overwrites or deletes.
+     */
+    protected function ensureShippingAddressBackfilled(Order $order): void
+    {
+        $hasShippingAddress = OrderAddress::query()
+            ->where('order_id', $order->getKey())
+            ->where('type', OrderAddressTypeEnum::SHIPPING)
+            ->exists();
+
+        if ($hasShippingAddress) {
+            return;
+        }
+
+        $addressKeys = ['name', 'phone', 'email', 'country', 'state', 'city', 'address', 'zip_code'];
+
+        // Digital-only orders intentionally carry only minimal contact (name/email/phone)
+        // and no physical address — see the digital branch in checkAndCreateOrderAddress().
+        // Mirror that here so the backfill never adds a shipping address the checkout flow
+        // would have omitted. An order needs shipping when digital products are unsupported
+        // or it contains at least one non-digital product.
+        $requiresShipping = ! EcommerceHelper::isEnabledSupportDigitalProducts()
+            || $order->products()->where('product_type', '!=', ProductTypeEnum::DIGITAL)->exists();
+
+        if (! $requiresShipping) {
+            $addressKeys = ['name', 'phone', 'email'];
+        }
+
+        $data = [];
+
+        // 1. Billing row on the same order.
+        $billing = OrderAddress::query()
+            ->where('order_id', $order->getKey())
+            ->where('type', OrderAddressTypeEnum::BILLING)
+            ->first();
+
+        if ($billing) {
+            $data = Arr::only($billing->toArray(), $addressKeys);
+        }
+
+        // 2. Checkout session data (still present in same-request payment flows).
+        if (empty($data['name']) && $order->token) {
+            $sessionData = $this->getOrderSessionData($order->token);
+            foreach ($addressKeys as $key) {
+                if (empty($data[$key]) && ! empty($sessionData[$key])) {
+                    $data[$key] = $sessionData[$key];
+                }
+            }
+        }
+
+        // 3. Customer's saved address (logged-in buyers).
+        if (empty($data['name']) && $order->user_id) {
+            $customerAddress = Address::query()
+                ->where('customer_id', $order->user_id)
+                ->orderByDesc('is_default')
+                ->orderBy('id')
+                ->first();
+
+            if ($customerAddress) {
+                foreach ($addressKeys as $key) {
+                    if (empty($data[$key]) && ! empty($customerAddress->{$key})) {
+                        $data[$key] = $customerAddress->{$key};
+                    }
+                }
+            }
+        }
+
+        // 4. Payment metadata (gateways that persist customer contact there).
+        if (empty($data['name']) && $order->payment_id) {
+            $payment = Payment::query()->find($order->payment_id);
+            $metadata = $payment ? (array) $payment->metadata : [];
+            $map = [
+                'name' => ['customer_name', 'name'],
+                'email' => ['customer_email', 'email'],
+                'phone' => ['customer_phone', 'phone'],
+            ];
+
+            foreach ($map as $field => $candidates) {
+                if (! empty($data[$field])) {
+                    continue;
+                }
+
+                foreach ($candidates as $candidate) {
+                    if (! empty($metadata[$candidate])) {
+                        $data[$field] = $metadata[$candidate];
+
+                        break;
+                    }
+                }
+            }
+        }
+
+        $data = $this->cleanData(array_filter($data, fn ($value) => $value !== null && $value !== ''));
+
+        // Need at least a name or email to make the row meaningful.
+        if (empty($data['name']) && empty($data['email'])) {
+            Log::warning('[ec_order_addresses] Finalizing order without a shipping address; no local source to backfill', [
+                'order_id' => $order->getKey(),
+                'order_code' => $order->code,
+                'user_id' => $order->user_id,
+                'payment_id' => $order->payment_id,
+            ]);
+
+            return;
+        }
+
+        $data['order_id'] = $order->getKey();
+        $data['type'] = OrderAddressTypeEnum::SHIPPING;
+
+        OrderAddress::query()->updateOrCreate(
+            [
+                'order_id' => $order->getKey(),
+                'type' => OrderAddressTypeEnum::SHIPPING,
+            ],
+            $data
+        );
+
+        Log::warning('[ec_order_addresses] Backfilled missing shipping address at order finalize', [
+            'order_id' => $order->getKey(),
+            'order_code' => $order->code,
+            'source_fields' => array_keys($data),
+        ]);
     }
 
     public function checkAndCreateOrderAddress(array $addressData, array $sessionData): array

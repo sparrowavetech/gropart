@@ -18,6 +18,7 @@ class WebsiteTrackingSettingRequest extends Request
             'custom_tracking_header_js' => ['nullable', 'string', 'max:10000'],
             'custom_tracking_body_html' => ['nullable', 'string', 'max:10000'],
             'gtm_debug_mode' => new OnOffRule(),
+            'gtm_user_data_enabled' => new OnOffRule(),
         ];
 
         if ($type === 'gtm') {

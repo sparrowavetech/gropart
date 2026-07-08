@@ -33,17 +33,32 @@
 
                 @case('youtube')
                 @case('vimeo')
+                    {{-- Lazy "facade": render a lightweight thumbnail + play button instead of an
+                         eager <iframe>. The real player (which pulls ~700KB+ of third-party JS and
+                         heavy main-thread work) is only injected on click. See the
+                         `.bb-product-video-facade` handler in front-ecommerce.js. --}}
                     <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; background: #000; border-radius: 8px;">
-                        <iframe
+                        <button
+                            type="button"
+                            class="bb-product-video-facade"
                             data-provider="{{ $video['provider'] }}"
-                            src="{{ $video['url'] }}"
-                            frameborder="0"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                            referrerpolicy="strict-origin-when-cross-origin"
-                            allowfullscreen
-                            title="{{ $product->name }} Video"
-                            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;"
-                        ></iframe>
+                            data-src="{{ $video['url'] }}{{ Str::contains($video['url'], '?') ? '&' : '?' }}autoplay=1"
+                            data-title="{{ $product->name }} Video"
+                            aria-label="{{ __('Play video') }}: {{ $product->name }}"
+                            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; padding: 0; border: 0; cursor: pointer; background: #000;"
+                        >
+                            <img
+                                src="{{ $video['thumbnail'] }}"
+                                alt="{{ $product->name }}"
+                                loading="lazy"
+                                width="600"
+                                height="338"
+                                style="width: 100%; height: 100%; object-fit: cover; display: block;"
+                            >
+                            <span style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80px; height: 80px; background: rgba(255, 255, 255, 0.9); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); transition: all 0.3s ease;">
+                                <x-core::icon name="ti ti-player-play-filled" style="width: 32px; height: 32px; margin-left: 4px;" />
+                            </span>
+                        </button>
                     </div>
                     @break
 

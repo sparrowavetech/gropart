@@ -6,6 +6,8 @@ use Botble\Ecommerce\Enums\OrderCancellationReasonEnum;
 use Botble\Ecommerce\Enums\OrderStatusEnum;
 use Botble\Ecommerce\Facades\OrderHelper;
 use Botble\Ecommerce\Models\Order;
+use Botble\Payment\Enums\PaymentStatusEnum;
+use Botble\Payment\Models\Payment;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Throwable;
@@ -53,6 +55,20 @@ class CancelPendingOrdersCommand extends Command
                         continue;
                     }
 
+                    // Never cancel an order that already has a captured gateway payment.
+                    // Async methods (UPI, wallets, bank redirects) can capture the money
+                    // and record a completed Payment via webhook BEFORE the order is
+                    // finalized (so order.payment_id is still null). Cancelling here would
+                    // void a genuinely paid order and restock it - skip and let the
+                    // payment flow complete it instead.
+                    if ($this->hasCapturedPayment($order)) {
+                        $this->components->warn(
+                            "Skipped order #{$order->id}: a captured payment exists but the order is not finalized yet."
+                        );
+
+                        continue;
+                    }
+
                     try {
                         OrderHelper::cancelOrder(
                             $order,
@@ -69,5 +85,26 @@ class CancelPendingOrdersCommand extends Command
         $this->components->info("Cancelled {$cancelled} pending order(s), {$failed} failed.");
 
         return self::SUCCESS;
+    }
+
+    /**
+     * Whether a captured gateway payment is already recorded for this order.
+     *
+     * Guards against auto-cancelling an order whose money was captured by an async
+     * method (UPI, wallet, bank redirect) but whose finalization hasn't run yet, so
+     * order.payment_id is still null. The webhook links the Payment by order_id even
+     * when the order isn't finished, so a COMPLETED payment row is the reliable local
+     * signal that the order is actually paid.
+     */
+    protected function hasCapturedPayment(Order $order): bool
+    {
+        if (! is_plugin_active('payment')) {
+            return false;
+        }
+
+        return Payment::query()
+            ->where('order_id', $order->getKey())
+            ->where('status', PaymentStatusEnum::COMPLETED)
+            ->exists();
     }
 }

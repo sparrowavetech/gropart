@@ -599,23 +599,30 @@ class Cart
             ->where('instance', $this->currentInstance())
             ->exists();
 
+        $now = Carbon::now();
+
         if ($exists) {
             $table
                 ->where('identifier', $identifier)
                 ->where('instance', $this->currentInstance())
                 ->update([
                     'content' => serialize($this->getContent()),
-                    'updated_at' => Carbon::now(),
+                    'updated_at' => $now,
                 ]);
         } else {
             $table->insert([
                 'identifier' => $identifier,
                 'instance' => $this->currentInstance(),
                 'content' => serialize($this->getContent()),
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
+                'created_at' => $now,
+                'updated_at' => $now,
             ]);
         }
+
+        // Sync session timestamp with the DB write so the
+        // RestoreCustomerCartMiddleware does not treat the DB as
+        // "newer" and overwrite the session with stale content.
+        $this->session->put($this->instance . '_updated_at', $now->toIso8601String());
 
         static::dispatchEvent('cart.stored');
     }
@@ -715,13 +722,15 @@ class Cart
             ->where('instance', $this->currentInstance())
             ->exists();
 
+        $now = Carbon::now();
+
         if ($exists) {
             $table
                 ->where('customer_id', $customerId)
                 ->where('instance', $this->currentInstance())
                 ->update([
                     'content' => serialize($this->getContent()),
-                    'updated_at' => Carbon::now(),
+                    'updated_at' => $now,
                 ]);
         } else {
             $table->insert([
@@ -729,10 +738,15 @@ class Cart
                 'instance' => $this->currentInstance(),
                 'customer_id' => $customerId,
                 'content' => serialize($this->getContent()),
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
+                'created_at' => $now,
+                'updated_at' => $now,
             ]);
         }
+
+        // Sync session timestamp with the DB write so the
+        // RestoreCustomerCartMiddleware does not treat the DB as
+        // "newer" and overwrite the session with stale content.
+        $this->session->put($this->instance . '_updated_at', $now->toIso8601String());
 
         static::dispatchEvent('cart.stored');
     }
@@ -1145,7 +1159,13 @@ class Cart
                     $options = $cartItem->options->toArray();
                     $options['image'] = $product->image ?: $parentProduct->image;
 
-                    $options['taxRate'] = $cartItem->getTaxRate();
+                    // Preserve the original tax option so the rowId stays stable across
+                    // refresh. The CartItem taxRate property defaults to 0 and is only set
+                    // later by setTax() at checkout; overwriting the option with it flipped
+                    // the rowId, so a second Buy Now of the same product no longer merged
+                    // and produced a duplicate cart line. The effective tax rate lives on
+                    // the property (recalculated by HandleTaxService), not in this option.
+                    $options['taxRate'] = $cartItem->options->taxRate ?? $cartItem->getTaxRate();
 
                     $cart->addQuietly(
                         $cartItem->id,

@@ -156,6 +156,8 @@ return [
         'fee_per_order' => 'Biaya per pesanan (%), disarankan: 2 atau 3',
         'default_commission_fee' => 'Biaya komisi default (%), disarankan: 2 atau 3',
         'default_commission_fee_helper' => 'Tetapkan persentase dari setiap penjualan yang masuk ke marketplace sebagai komisi.',
+        'fixed_commission_fee' => 'Biaya komisi tetap (per pesanan)',
+        'fixed_commission_fee_helper' => 'Jumlah tetap yang ditambahkan ke komisi, dikenakan satu kali per pesanan vendor di atas persentase di atas. Berguna untuk menutupi bagian tetap dari biaya gateway pembayaran (mis. Stripe/PayPal €0,25). Biarkan 0 untuk menonaktifkan.',
         'enable_commission_fee_for_each_category' => 'Aktifkan biaya komisi untuk setiap kategori?',
         'enable_commission_fee_for_each_category_helper' => 'Jika diaktifkan, Anda dapat menetapkan tarif komisi berbeda untuk setiap kategori produk.',
         'categories' => 'Kategori',

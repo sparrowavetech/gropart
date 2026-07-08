@@ -126,7 +126,7 @@ class SelectFieldOption extends FormFieldOptions
             if (is_array($this->selected) && ! empty(array_filter($this->selected))) {
                 $data['attr']['data-selected'] = json_encode($this->getSelected());
             }
-        } elseif (isset($data['value']) && $data['value'] !== null && $data['value'] !== '') {
+        } elseif (isset($data['value']) && $data['value'] !== '') {
             // Use the actual form value if it exists (from model/attributes)
             $data['selected'] = $data['value'];
 

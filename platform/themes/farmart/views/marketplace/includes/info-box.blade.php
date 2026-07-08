@@ -25,6 +25,7 @@
                                     </div>
                                     <div class="vendor-store-info col">
                                         <h4 class="vendor-name">{{ $store->name }} {!! $store->badge !!}</h4>
+                                        @includeIf(MarketplaceHelper::viewPath('includes.vacation-notice'), ['store' => $store])
                                         @if (EcommerceHelper::isReviewEnabled())
                                             <div class="vendor-store-rating mb-3">
                                                 {!! Theme::partial('star-rating', [

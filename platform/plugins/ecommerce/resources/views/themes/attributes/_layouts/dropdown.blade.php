@@ -8,7 +8,7 @@
         data-type="dropdown"
         data-slug="{{ $set->slug }}"
     >
-        <h4 class="bb-product-attribute-swatch-title">{{ $set->title }}:</h4>
+        <div class="bb-product-attribute-swatch-title">{{ $set->title }}:</div>
         <div class="bb-product-attribute-swatch-list attribute-swatch">
             <select class="form-select product-filter-item">
                 <option value="">{{ trans('plugins/ecommerce::products.select_attribute', ['name' => strtolower($set->title)]) }}</option>

@@ -6,6 +6,13 @@ return [
     'edit' => 'Rediger butik',
     'view' => 'Vis',
     'forms' => [
+        'vacation_mode' => 'Ferietilstand',
+        'vacation_mode_helper' => 'Slå dette til for midlertidigt at sætte din butik på pause. Kunder kan stadig gennemse dine produkter, men kan ikke afgive ordrer, før du slår det fra.',
+        'vacation_message' => 'Feriebesked',
+        'vacation_message_helper' => 'Valgfri meddelelse vist til kunder i din butik og på produktsider, mens ferietilstand er slået til.',
+        'vacation_message_placeholder' => 'F.eks.: Vi holder ferie indtil 1. juli. Ordrer afgivet nu sendes, når vi er tilbage.',
+        'vacation_badge' => 'Denne butik holder ferie',
+        'vacation_default_notice' => ':store holder i øjeblikket ferie og modtager ikke ordrer lige nu. Kom venligst tilbage senere.',
         'logo' => 'Logo',
         'email' => 'E-mail',
         'email_placeholder' => 'F.eks.: navn@butik.dk',

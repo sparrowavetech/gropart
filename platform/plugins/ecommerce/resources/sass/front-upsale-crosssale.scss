@@ -780,7 +780,8 @@
 
 .ec-cross-sale-price-old {
     font-size: 13px;
-    color: #94a3b8;
+    // Darkened from #94a3b8 (2.56:1) to meet WCAG AA 4.5:1 on white.
+    color: #647082;
     text-decoration: line-through;
     line-height: 1.3;
 }

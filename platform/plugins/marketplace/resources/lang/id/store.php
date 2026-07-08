@@ -7,6 +7,13 @@ return [
     'view' => 'Lihat',
     'tax_id' => 'ID Pajak',
     'forms' => [
+        'vacation_mode' => 'Mode liburan',
+        'vacation_mode_helper' => 'Aktifkan ini untuk menjeda toko Anda sementara. Pelanggan masih dapat menelusuri produk Anda tetapi tidak dapat memesan hingga Anda menonaktifkannya.',
+        'vacation_message' => 'Pesan liburan',
+        'vacation_message_helper' => 'Pemberitahuan opsional yang ditampilkan kepada pelanggan di toko dan halaman produk Anda saat mode liburan aktif.',
+        'vacation_message_placeholder' => 'Mis.: Kami sedang liburan hingga 1 Juli. Pesanan yang dibuat sekarang akan dikirim setelah kami kembali.',
+        'vacation_badge' => 'Toko ini sedang liburan',
+        'vacation_default_notice' => ':store sedang liburan dan tidak menerima pesanan saat ini. Silakan periksa kembali nanti.',
         'logo' => 'Logo',
         'logo_square' => 'Logo persegi',
         'logo_square_helper' => 'Digunakan pada tempat yang membutuhkan versi logo persegi (misalnya halaman checkout).',

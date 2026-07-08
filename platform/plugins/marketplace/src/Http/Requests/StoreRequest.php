@@ -6,6 +6,7 @@ use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Rules\EmailRule;
 use Botble\Base\Rules\MediaImageRule;
+use Botble\Base\Rules\OnOffRule;
 use Botble\Marketplace\Models\Store;
 use Botble\Support\Http\Requests\Request;
 use Illuminate\Validation\Rule;
@@ -33,6 +34,8 @@ class StoreRequest extends Request
             'logo' => ['nullable', 'string', new MediaImageRule()],
             'logo_square' => ['nullable', 'string', new MediaImageRule()],
             'cover_image' => ['nullable', 'string', new MediaImageRule()],
+            'vacation_mode' => [new OnOffRule()],
+            'vacation_message' => ['nullable', 'string', 'max:1000'],
         ];
     }
 }

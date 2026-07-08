@@ -4,10 +4,10 @@ namespace Botble\ACL\Http\Controllers\Auth;
 
 use Botble\ACL\Forms\Auth\LoginForm;
 use Botble\ACL\Http\Requests\LoginRequest;
+use Botble\ACL\Models\User;
 use Botble\ACL\Traits\AuthenticatesUsers;
 use Botble\Base\Http\Controllers\BaseController;
 use Closure;
-use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Http\Request;
 use Illuminate\Pipeline\Pipeline;
 use Illuminate\Validation\ValidationException;
@@ -53,7 +53,7 @@ class LoginController extends BaseController
                     $credentials = $this->credentials($request);
 
                     $callbacks = apply_filters('core_acl_login_attempt_callbacks', [
-                        function (Authenticatable $user) {
+                        function (User $user) {
                             if (! $user->activated) {
                                 throw ValidationException::withMessages([
                                     'username' => [trans('core/acl::auth.login.not_active')],

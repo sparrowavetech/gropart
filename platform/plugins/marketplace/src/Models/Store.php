@@ -55,6 +55,8 @@ class Store extends BaseModel
         'verified_at',
         'verified_by',
         'verification_note',
+        'vacation_mode',
+        'vacation_message',
     ];
 
     protected $casts = [
@@ -67,6 +69,8 @@ class Store extends BaseModel
         'is_verified' => 'boolean',
         'verified_at' => 'datetime',
         'verification_note' => SafeContent::class,
+        'vacation_mode' => 'boolean',
+        'vacation_message' => SafeContent::class,
     ];
 
     protected static function booted(): void
@@ -105,6 +109,11 @@ class Store extends BaseModel
         static::saved(function (): void {
             cache()->forget('marketplace_stores_for_filter');
         });
+    }
+
+    public function isOnVacation(): bool
+    {
+        return (bool) $this->vacation_mode;
     }
 
     public function customer(): BelongsTo

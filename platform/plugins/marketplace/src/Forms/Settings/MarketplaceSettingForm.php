@@ -56,6 +56,16 @@ class MarketplaceSettingForm extends SettingForm
                     ->addAttribute('max', 100)
             )
             ->add(
+                'fee_per_order_fixed',
+                NumberField::class,
+                NumberFieldOption::make()
+                    ->label(trans('plugins/marketplace::marketplace.settings.fixed_commission_fee'))
+                    ->helperText(trans('plugins/marketplace::marketplace.settings.fixed_commission_fee_helper'))
+                    ->value(MarketplaceHelper::getSetting('fee_per_order_fixed', 0))
+                    ->addAttribute('min', 0)
+                    ->addAttribute('step', 'any')
+            )
+            ->add(
                 'enable_commission_fee_for_each_category',
                 OnOffCheckboxField::class,
                 OnOffFieldOption::make()

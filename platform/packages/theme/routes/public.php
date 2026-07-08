@@ -14,6 +14,10 @@ Theme::registerRoutes(function (): void {
 
         Route::get('/', 'getIndex')->name('public.index');
 
+        // Dynamic llms.txt fallback (served only when public/llms.txt is absent).
+        // Registered before the sitemap/catch-all routes so it always matches first.
+        Route::get('llms.txt', 'getLlmsTxt')->name('public.llms-txt');
+
         if (setting('sitemap_enabled', true)) {
             Route::get('sitemap.xml', 'getSiteMap')->name('public.sitemap');
 

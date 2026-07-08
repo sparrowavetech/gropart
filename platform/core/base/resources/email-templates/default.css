@@ -2316,6 +2316,8 @@ Margins, paddings
 
 .bb-logo {
     max-height: 40px;
+    width: auto;
+    height: auto;
 }
 
 .bb-text-left {

@@ -5,6 +5,7 @@ namespace Botble\Analytics;
 use Botble\Dashboard\Models\DashboardWidget;
 use Botble\PluginManagement\Abstracts\PluginOperationAbstract;
 use Botble\Setting\Facades\Setting;
+use Illuminate\Database\Eloquent\Model;
 
 class Plugin extends PluginOperationAbstract
 {
@@ -17,7 +18,7 @@ class Plugin extends PluginOperationAbstract
                 'widget_analytics_browser',
                 'widget_analytics_referrer',
             ])
-            ->each(fn (DashboardWidget $dashboardWidget) => $dashboardWidget->delete());
+            ->each(fn (Model $dashboardWidget) => $dashboardWidget->delete());
 
         Setting::delete([
             'google_analytics',

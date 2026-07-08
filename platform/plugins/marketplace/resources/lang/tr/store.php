@@ -6,6 +6,13 @@ return [
     'edit' => 'Mağazayı düzenle',
     'view' => 'Görüş',
     'forms' => [
+        'vacation_mode' => 'Tatil modu',
+        'vacation_mode_helper' => 'Mağazanızı geçici olarak duraklatmak için bunu açın. Müşteriler ürünlerinize göz atmaya devam edebilir ancak siz kapatana kadar sipariş veremez.',
+        'vacation_message' => 'Tatil mesajı',
+        'vacation_message_helper' => 'Tatil modu açıkken mağazanızda ve ürün sayfalarında müşterilere gösterilen isteğe bağlı bildirim.',
+        'vacation_message_placeholder' => 'Ör.: 1 Temmuz\'a kadar tatildeyiz. Şimdi verilen siparişler dönüşümüzde gönderilecektir.',
+        'vacation_badge' => 'Bu mağaza tatilde',
+        'vacation_default_notice' => ':store şu anda tatilde ve şu an sipariş kabul etmiyor. Lütfen daha sonra tekrar kontrol edin.',
         'logo' => 'Logo',
         'email' => 'E-posta',
         'email_placeholder' => 'Örn: isim@mağaza.com',

@@ -975,6 +975,34 @@ class Ecommerce {
                 });
             })
 
+            // Lazy YouTube/Vimeo: swap the thumbnail facade for the real iframe on click.
+            // Keeps the heavy embed player (and its third-party JS) off the page until the
+            // visitor actually wants to watch, cutting initial load CPU/network significantly.
+            $(document).on('click', '.bb-product-video-facade', function (e) {
+                e.preventDefault()
+
+                const $facade = $(e.currentTarget)
+                const src = $facade.data('src')
+
+                if (!src) {
+                    return
+                }
+
+                const iframe = document.createElement('iframe')
+                iframe.setAttribute('src', src)
+                iframe.setAttribute('frameborder', '0')
+                iframe.setAttribute(
+                    'allow',
+                    'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share'
+                )
+                iframe.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin')
+                iframe.setAttribute('allowfullscreen', '')
+                iframe.setAttribute('title', $facade.data('title') || '')
+                iframe.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;border:0;'
+
+                $facade.replaceWith(iframe)
+            })
+
             if ($gallery.length) {
                 $gallery.each((index, item) => {
                     const $item = $(item)
@@ -1038,9 +1066,9 @@ class Ecommerce {
                             vertical: isVertical,
                             verticalSwiping: isVertical,
                             prevArrow:
-                                '<button class="slick-prev slick-arrow"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M15 6l-6 6l6 6" /></svg></button>',
+                                '<button class="slick-prev slick-arrow" aria-label="Previous"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M15 6l-6 6l6 6" /></svg></button>',
                             nextArrow:
-                                '<button class="slick-next slick-arrow"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 6l6 6l-6 6" /></svg></button>',
+                                '<button class="slick-next slick-arrow" aria-label="Next"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 6l6 6l-6 6" /></svg></button>',
                             responsive: [
                                 {
                                     breakpoint: 768,
@@ -1576,7 +1604,12 @@ class Ecommerce {
             return
         }
 
-        const $product = $('.bb-product-detail')
+        // Scope to the product container that triggered the change (main page or quick-view modal),
+        // so changing a variation inside the quick view does not rewrite the gallery of the page behind it.
+        let $product = element && element.length ? element.closest('.bb-product-detail') : $()
+        if (!$product.length) {
+            $product = $('.bb-product-detail').first()
+        }
         const $form = element.closest('form')
         const $button = $form.find('button[type="submit"]')
         const $quantity = $form.find('input[name="qty"]')
@@ -1729,7 +1762,7 @@ class Ecommerce {
         }
         $thumbnails.html(finalThumbHtml)
 
-        const $quickViewGalleryImages = $(document).find('.bb-quick-view-gallery-images')
+        const $quickViewGalleryImages = $product.find('.bb-quick-view-gallery-images')
 
         if ($quickViewGalleryImages.length) {
             if ($.fn.slick && $quickViewGalleryImages.hasClass('slick-initialized')) {
@@ -1744,12 +1777,14 @@ class Ecommerce {
         }
         $galleryImagesSlider.html(finalImageHtml)
 
-        if (typeof EcommerceApp !== 'undefined') {
-            EcommerceApp.initProductGallery()
-
-            if ($quickViewGalleryImages.length) {
-                EcommerceApp.initProductGallery(true)
+        // When in quick-view modal, skip main-page gallery reinit to avoid
+        // rewriting the page behind the modal — only refresh the quick-view gallery.
+        if (!$quickViewGalleryImages.length) {
+            if (typeof EcommerceApp !== 'undefined') {
+                EcommerceApp.initProductGallery()
             }
+        } else if (typeof EcommerceApp !== 'undefined') {
+            EcommerceApp.initProductGallery(true)
         }
     }
 

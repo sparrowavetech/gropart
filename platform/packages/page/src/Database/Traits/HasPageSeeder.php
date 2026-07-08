@@ -49,11 +49,12 @@ trait HasPageSeeder
 
             $pageData['user_id'] = $userId ?: 0;
 
+            /**
+             * @var Page $page
+             */
             $page = Page::query()->create(Arr::except($pageData, 'metadata'));
 
-            if (method_exists($this, 'createMetadata')) {
-                $this->createMetadata($page, $pageData);
-            }
+            $this->createMetadata($page, $pageData);
 
             SlugHelper::createSlug($page);
 

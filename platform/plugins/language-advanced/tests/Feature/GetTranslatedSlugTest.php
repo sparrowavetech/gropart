@@ -267,8 +267,8 @@ class GetTranslatedSlugTest extends TestCase
         // is_array('') = false, so SlugServiceProvider falls back to $slug->key
         $this->assertFalse(is_array($result));
 
-        $slugKey = is_array($result) ? ($result['key'] ?? $slug->key) : $slug->key;
-        $this->assertEquals('test-page', $slugKey);
+        // Result is not an array (asserted above), so the slug key is used directly.
+        $this->assertEquals('test-page', $slug->key);
     }
 
     protected function createLanguages(): void

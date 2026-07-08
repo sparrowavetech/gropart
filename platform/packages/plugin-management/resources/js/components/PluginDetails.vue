@@ -75,6 +75,10 @@ export default defineComponent({
 
             return packageName.substring(packageName.indexOf('/') + 1)
         },
+        purchaseUrl() {
+            // Paid plugins cannot be installed from the admin panel - redirect to the purchase/marketplace page instead
+            return this.plugin.buy_url || this.plugin.url
+        },
         authorAvatar() {
             return `https://github.com/${this.plugin.author_name}.png`
         },
@@ -270,7 +274,7 @@ export default defineComponent({
                 <div class="modal-footer">
                     <a
                         v-if="!isInstalled && plugin.price > 0"
-                        :href="plugin.buy_url"
+                        :href="purchaseUrl"
                         target="_blank"
                         class="btn btn-warning"
                     >

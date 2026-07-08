@@ -155,6 +155,8 @@ return [
         'fee_per_order' => 'प्रति ऑर्डर शुल्क (%), सुझाव: 2 या 3',
         'default_commission_fee' => 'डिफ़ॉल्ट कमीशन शुल्क (%), सुझाव: 2 या 3',
         'default_commission_fee_helper' => 'Set the percentage of each sale that goes to the marketplace as commission.',
+        'fixed_commission_fee' => 'निश्चित कमीशन शुल्क (प्रति ऑर्डर)',
+        'fixed_commission_fee_helper' => 'कमीशन में जोड़ी गई एक निश्चित राशि, जो ऊपर दिए प्रतिशत के अतिरिक्त प्रति विक्रेता ऑर्डर एक बार ली जाती है। भुगतान गेटवे शुल्क के निश्चित हिस्से (जैसे Stripe/PayPal €0.25) को कवर करने के लिए उपयोगी। अक्षम करने के लिए 0 रखें।',
         'enable_commission_fee_for_each_category' => 'प्रत्येक श्रेणी के लिए कमीशन शुल्क सक्षम करें?',
         'enable_commission_fee_for_each_category_helper' => 'If enabled, you can set different commission rates for each product category.',
         'categories' => 'श्रेणियां',

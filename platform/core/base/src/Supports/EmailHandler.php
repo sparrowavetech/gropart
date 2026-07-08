@@ -9,7 +9,9 @@ use Botble\Media\Facades\RvMedia;
 use Carbon\Carbon;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use Symfony\Component\ErrorHandler\ErrorRenderer\HtmlErrorRenderer;
 use Symfony\Component\ErrorHandler\Exception\FlattenException;
@@ -30,7 +32,7 @@ class EmailHandler
 
     protected array $variableValues = [];
 
-    protected array $coreVariableValues;
+    protected ?array $coreVariableValues = null;
 
     protected TwigCompiler $twigCompiler;
 
@@ -135,7 +137,12 @@ class EmailHandler
             'site_copyright' => $this->getSiteCopyright(),
             'site_social_links' => $this->getSiteSocialLinks(),
             'css' => $this->getCssContent(),
-            'max_height_for_logo' => setting('email_template_max_height_for_logo', 40),
+            'max_height_for_logo' => $maxHeightForLogo = ((int) setting('email_template_max_height_for_logo', 40)) ?: 40,
+            // Real pixel dimensions scaled to the max-height so the header <img> can carry explicit
+            // width/height attributes. These are the only way to lock the logo's aspect ratio across
+            // email clients that strip CSS (e.g. Outlook desktop). Falls back to 0 when unreadable.
+            'logo_width' => ($logoDimensions = $this->getLogoDimensions($maxHeightForLogo))['width'],
+            'logo_height' => $logoDimensions['height'],
         ];
     }
 
@@ -162,6 +169,60 @@ class EmailHandler
                 ? RvMedia::getImageUrl($adminLogo)
                 : url(config('core.base.general.logo'))
             );
+    }
+
+    /**
+     * Resolve the email logo's real pixel size, scaled down to $maxHeight.
+     *
+     * Returns ['width' => int, 'height' => int]; both 0 when the source image can't be read
+     * (e.g. remote logo, unsupported format) so the template can gracefully omit the attributes.
+     */
+    protected function getLogoDimensions(int $maxHeight): array
+    {
+        $empty = ['width' => 0, 'height' => 0];
+
+        // Resolve the same logo that getSiteLogo() renders (filter included) so the computed
+        // dimensions always match the displayed image.
+        $logo = apply_filters('core_email_template_site_logo', setting('email_template_logo'));
+        $logo = $logo ?: setting('admin_logo');
+
+        if (! $logo || $maxHeight < 1) {
+            return $empty;
+        }
+
+        $cacheKey = 'email_template_logo_dimensions_' . md5($logo . '_' . $maxHeight);
+
+        if (is_array($cached = Cache::get($cacheKey))) {
+            return $cached;
+        }
+
+        try {
+            if (! Storage::exists($logo)) {
+                return $empty;
+            }
+
+            $size = getimagesizefromstring((string) Storage::get($logo));
+
+            if (! $size || empty($size[0]) || empty($size[1])) {
+                return $empty;
+            }
+
+            [$naturalWidth, $naturalHeight] = $size;
+
+            // Never upscale a logo smaller than the configured max-height.
+            $height = min($maxHeight, (int) $naturalHeight);
+            $width = (int) round($naturalWidth * ($height / $naturalHeight));
+
+            $dimensions = ['width' => $width, 'height' => $height];
+
+            // Only cache successful reads - a transient storage failure must not disable the
+            // feature permanently.
+            Cache::forever($cacheKey, $dimensions);
+
+            return $dimensions;
+        } catch (Throwable) {
+            return $empty;
+        }
     }
 
     protected function getSiteSocialLinks(): array
@@ -563,7 +624,7 @@ class EmailHandler
         try {
             app()->setLocale($locale);
 
-            unset($this->coreVariableValues);
+            $this->coreVariableValues = null;
 
             $result = $this->sendUsingTemplate($template, $email, $args, $debug, $type, $subject);
 
@@ -571,7 +632,7 @@ class EmailHandler
         } finally {
             app()->setLocale($previousLocale);
 
-            unset($this->coreVariableValues);
+            $this->coreVariableValues = null;
         }
     }
 

@@ -296,7 +296,9 @@ if (! function_exists('the_product_price')) {
             'close_wrap_sale' => '</ins>',
         ], $htmlWrap);
 
-        if ($product->front_sale_price !== $product->display_price) {
+        $rawSalePrice = $product->getRawSalePrice();
+        $basePrice = $product->getRawPrice();
+        if ($rawSalePrice !== null && $rawSalePrice > 0 && $rawSalePrice < $basePrice) {
             return $htmlWrapParams['open_wrap_price'] . format_price($product->display_price) . $htmlWrapParams['close_wrap_price'] .
                 $htmlWrapParams['open_wrap_sale'] . format_price($product->front_sale_price) . $htmlWrapParams['close_wrap_sale'];
         }

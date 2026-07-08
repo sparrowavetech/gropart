@@ -369,13 +369,11 @@ class SlugTranslationCachingTest extends TestCase
         ];
 
         // Looking for Vietnamese translation - found in cache
-        $viSlug = $cachedStandardSlugs['vi'] ?? null;
-        $this->assertNotNull($viSlug);
-        $this->assertEquals('trang-hreflang-fallback', $viSlug->key);
+        $this->assertArrayHasKey('vi', $cachedStandardSlugs);
+        $this->assertEquals('trang-hreflang-fallback', $cachedStandardSlugs['vi']->key);
 
         // Looking for Arabic translation - NOT in cache
-        $arSlug = $cachedStandardSlugs['ar'] ?? null;
-        $this->assertNull($arSlug);
+        $this->assertArrayNotHasKey('ar', $cachedStandardSlugs);
 
         // When translation not found, getAdvancedTranslatedUrl falls back to base slug
         // This simulates the fallback in getAdvancedTranslatedUrl (lines 158-166)
@@ -473,9 +471,8 @@ class SlugTranslationCachingTest extends TestCase
         $frTranslation = $cachedTranslations['fr'] ?? null;
         $this->assertNull($frTranslation);
 
-        // When translation not found, fallback to base slug
-        $fallbackKey = $frTranslation?->key ?? $baseSlug->key;
-        $this->assertEquals('batch-load-page', $fallbackKey);
+        // Translation not found (asserted null above), so the base slug key is used.
+        $this->assertEquals('batch-load-page', $baseSlug->key);
     }
 
     protected function createLanguages(): void

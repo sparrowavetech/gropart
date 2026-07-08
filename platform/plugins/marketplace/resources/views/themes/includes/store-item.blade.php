@@ -7,6 +7,13 @@
             </h4>
         </a>
 
+        @if ($store->isOnVacation())
+            <span class="badge bg-orange text-orange-fg bb-store-item-vacation">
+                <x-core::icon name="ti ti-beach" />
+                {{ trans('plugins/marketplace::store.forms.vacation_badge') }}
+            </span>
+        @endif
+
         @if (EcommerceHelper::isReviewEnabled() && (!EcommerceHelper::hideRatingWhenNoReviews() || $store->reviews->count() > 0))
             <div class="d-flex align-items-center gap-1 bb-store-item-rating">
                 @include(EcommerceHelper::viewPath('includes.rating-star'), ['avg' => $store->reviews()->avg('star')])

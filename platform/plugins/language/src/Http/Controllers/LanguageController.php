@@ -83,7 +83,7 @@ class LanguageController extends SettingController
 
             $this->importLocaleIfMissing($locale);
 
-            $language = LanguageModel::query()->create($request->except('lang_id'));
+            $language = LanguageModel::create($request->except('lang_id'));
 
             $this->clearRoutesCache();
 

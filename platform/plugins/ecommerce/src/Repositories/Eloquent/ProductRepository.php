@@ -113,7 +113,11 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
             'with' => [],
         ], $params);
 
-        $filters = ['categories' => $params['categories']['value_in']];
+        $categoryIds = is_array($params['categories']) && isset($params['categories']['value_in'])
+            ? $params['categories']['value_in']
+            : (array) $params['categories'];
+
+        $filters = ['categories' => $categoryIds];
 
         Arr::forget($params, 'categories');
 
@@ -224,9 +228,13 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
             'withCount' => [],
         ], $params);
 
-        $filters = ['collections' => $params['collections']['value_in']];
+        $collectionIds = is_array($params['collections']) && isset($params['collections']['value_in'])
+            ? $params['collections']['value_in']
+            : (array) $params['collections'];
 
-        Arr::forget($params, 'categories');
+        $filters = ['collections' => $collectionIds];
+
+        Arr::forget($params, 'collections');
 
         return $this->filterProducts($filters, $params);
     }
@@ -283,7 +291,11 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
             'withCount' => [],
         ], $params);
 
-        $filters = ['categories' => $params['categories']['value_in']];
+        $categoryIds = is_array($params['categories']) && isset($params['categories']['value_in'])
+            ? $params['categories']['value_in']
+            : (array) $params['categories'];
+
+        $filters = ['categories' => $categoryIds];
 
         Arr::forget($params, 'categories');
 
@@ -313,7 +325,11 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
             'withCount' => [],
         ], $params);
 
-        $filters = ['tags' => $params['product_tag']['value_in']];
+        $tagIds = is_array($params['product_tag']) && isset($params['product_tag']['value_in'])
+            ? $params['product_tag']['value_in']
+            : (array) $params['product_tag'];
+
+        $filters = ['tags' => $tagIds];
 
         Arr::forget($params, 'product_tag');
 
@@ -497,6 +513,19 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
                                         }
                                     });
                                 });
+
+                            // Cross-language search: also match the default-language name/description
+                            // stored on the base ec_products table so a product can still be found by
+                            // its default (e.g. English) name while browsing a translated storefront.
+                            $query->orWhere(function (BaseQueryBuilder $subQuery) use ($keyword, $searchProductsBy, $isPartial): void { // @phpstan-ignore-line
+                                if (in_array('name', $searchProductsBy)) {
+                                    $subQuery->addSearch('ec_products.name', $keyword, $isPartial);
+                                }
+
+                                if (in_array('description', $searchProductsBy)) {
+                                    $subQuery->addSearch('ec_products.description', $keyword, false);
+                                }
+                            });
                         }
 
                         if (in_array('tag', $searchProductsBy)) {
@@ -566,6 +595,28 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
                                 });
 
                             $hasWhere = true;
+                        }
+
+                        // Cross-language search: also match product name/description stored in
+                        // other languages (ec_products_translations) so e.g. an Arabic product
+                        // name is found while browsing the default (English) storefront.
+                        if ((in_array('name', $searchProductsBy) || in_array('description', $searchProductsBy))
+                            && is_plugin_active('language')
+                            && is_plugin_active('language-advanced')) {
+                            $function = $hasWhere ? 'orWhereHas' : 'whereHas';
+                            $hasWhere = true;
+
+                            $query->{$function}('translations', function (EloquentBuilder $query) use ($keyword, $searchProductsBy, $isPartial): void {
+                                $query->where(function (BaseQueryBuilder $subQuery) use ($keyword, $searchProductsBy, $isPartial): void { // @phpstan-ignore-line
+                                    if (in_array('name', $searchProductsBy)) {
+                                        $subQuery->addSearch('name', $keyword, $isPartial);
+                                    }
+
+                                    if (in_array('description', $searchProductsBy)) {
+                                        $subQuery->addSearch('description', $keyword, false);
+                                    }
+                                });
+                            });
                         }
 
                         if (in_array('tag', $searchProductsBy)) {

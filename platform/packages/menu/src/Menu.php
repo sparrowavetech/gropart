@@ -297,7 +297,7 @@ class Menu
         $data = [];
 
         if ($cacheEnabled) {
-            $data = $this->cache->get($cacheKey, []);
+            $data = $this->cache->get($cacheKey);
         }
 
         if (! $data) {

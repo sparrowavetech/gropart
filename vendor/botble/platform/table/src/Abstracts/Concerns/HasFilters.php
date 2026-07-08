@@ -19,7 +19,7 @@ trait HasFilters
     protected string $filterInputUrl = '';
 
     /**
-     * @var \Closure(\Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Query\Builder|\Illuminate\Database\Eloquent\Relations\Relation $query): static
+     * @var \Closure(\Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Query\Builder|\Illuminate\Database\Eloquent\Relations\Relation $query, string $key, string $operator, ?string $value): mixed
      */
     protected Closure $onFilterQueryCallback;
 
@@ -67,7 +67,7 @@ trait HasFilters
         string $operator,
         ?string $value
     ) {
-        if (strpos($key, '.') !== -1) {
+        if (str_contains($key, '.')) {
             $key = Arr::last(explode('.', $key));
         }
 

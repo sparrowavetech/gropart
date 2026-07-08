@@ -87,7 +87,10 @@
             "@php artisan migrate --force",
             "npm install",
             "npm run prod"
-        ]
+        ],
+        "phpmd:install": "@php -r \"copy('https://github.com/phpmd/phpmd/releases/download/2.15.0/phpmd.phar', 'phpmd.phar');\"",
+        "phpmd": "@php phpmd.phar",
+        "analyse": "@php -d memory_limit=3G vendor/bin/phpstan analyse"
     },
     "extra": {
         "laravel": {

@@ -6,6 +6,13 @@ return [
     'edit' => 'Uredi trgovino',
     'view' => 'Poglej',
     'forms' => [
+        'vacation_mode' => 'Počitniški način',
+        'vacation_mode_helper' => 'Vklopite to, da začasno zaustavite svojo trgovino. Stranke si lahko še vedno ogledujejo vaše izdelke, vendar ne morejo oddati naročil, dokler tega ne izklopite.',
+        'vacation_message' => 'Počitniško sporočilo',
+        'vacation_message_helper' => 'Neobvezno obvestilo, prikazano strankam v vaši trgovini in na straneh izdelkov, ko je počitniški način vklopljen.',
+        'vacation_message_placeholder' => 'Npr.: Na počitnicah smo do 1. julija. Naročila, oddana zdaj, bodo poslana po naši vrnitvi.',
+        'vacation_badge' => 'Ta trgovina je na počitnicah',
+        'vacation_default_notice' => ':store je trenutno na počitnicah in trenutno ne sprejema naročil. Prosimo, preverite pozneje.',
         'logo' => 'Logotip',
         'email' => 'E-pošta',
         'email_placeholder' => 'Npr: ime@trgovina.com',

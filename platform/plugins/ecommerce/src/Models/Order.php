@@ -486,6 +486,7 @@ class Order extends BaseModel
                 'ec_products.id',
                 'ec_products.images',
                 'ec_products.name',
+                'ec_products.brand_id',
                 'ec_products.price',
                 'ec_products.sale_price',
                 'ec_products.sale_type',

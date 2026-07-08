@@ -6,6 +6,13 @@ return [
     'edit' => 'ストアを編集する',
     'view' => 'ビュー',
     'forms' => [
+        'vacation_mode' => '休暇モード',
+        'vacation_mode_helper' => 'ストアを一時的に休止するにはこれをオンにします。顧客は商品を閲覧できますが、オフにするまで注文できません。',
+        'vacation_message' => '休暇メッセージ',
+        'vacation_message_helper' => '休暇モードが有効な間、ストアおよび商品ページで顧客に表示される任意のお知らせです。',
+        'vacation_message_placeholder' => '例：7月1日まで休暇中です。現在の注文は復帰後に発送されます。',
+        'vacation_badge' => 'このストアは休暇中です',
+        'vacation_default_notice' => ':store は現在休暇中で、ただ今注文を受け付けておりません。後ほど再度ご確認ください。',
         'logo' => 'ロゴ',
         'email' => '電子メール',
         'email_placeholder' => '例: name@store.com',

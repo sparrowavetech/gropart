@@ -6,6 +6,13 @@ return [
     'edit' => 'Muokkaa kauppaa',
     'view' => 'Näytä',
     'forms' => [
+        'vacation_mode' => 'Lomatila',
+        'vacation_mode_helper' => 'Ota tämä käyttöön keskeyttääksesi kauppasi väliaikaisesti. Asiakkaat voivat yhä selata tuotteitasi, mutta eivät voi tehdä tilauksia ennen kuin poistat sen käytöstä.',
+        'vacation_message' => 'Lomaviesti',
+        'vacation_message_helper' => 'Valinnainen ilmoitus, joka näytetään asiakkaille kaupassasi ja tuotesivuilla lomatilan ollessa käytössä.',
+        'vacation_message_placeholder' => 'Esim.: Olemme lomalla 1. heinäkuuta asti. Nyt tehdyt tilaukset toimitetaan paluumme jälkeen.',
+        'vacation_badge' => 'Tämä kauppa on lomalla',
+        'vacation_default_notice' => ':store on tällä hetkellä lomalla eikä ota vastaan tilauksia juuri nyt. Tarkista myöhemmin uudelleen.',
         'logo' => 'Logo',
         'email' => 'Sähköposti',
         'email_placeholder' => 'Esim: nimi@kauppa.com',

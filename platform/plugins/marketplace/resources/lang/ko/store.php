@@ -6,6 +6,13 @@ return [
     'edit' => '스토어 편집',
     'view' => '보기',
     'forms' => [
+        'vacation_mode' => '휴가 모드',
+        'vacation_mode_helper' => '스토어를 일시적으로 중지하려면 이 옵션을 켜세요. 고객은 여전히 상품을 둘러볼 수 있지만 끄기 전까지는 주문할 수 없습니다.',
+        'vacation_message' => '휴가 메시지',
+        'vacation_message_helper' => '휴가 모드가 켜져 있는 동안 스토어 및 상품 페이지에서 고객에게 표시되는 선택적 안내입니다.',
+        'vacation_message_placeholder' => '예: 7월 1일까지 휴가 중입니다. 지금 접수된 주문은 복귀 후 발송됩니다.',
+        'vacation_badge' => '이 스토어는 휴가 중입니다',
+        'vacation_default_notice' => ':store 은(는) 현재 휴가 중이며 지금은 주문을 받지 않습니다. 나중에 다시 확인해 주세요.',
         'logo' => '로고',
         'email' => '이메일',
         'email_placeholder' => '예: name@store.com',

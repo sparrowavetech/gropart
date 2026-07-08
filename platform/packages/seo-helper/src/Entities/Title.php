@@ -97,6 +97,9 @@ class Title implements TitleContract
         return $this->switchPosition(false);
     }
 
+    /**
+     * @return $this
+     */
     protected function switchPosition($first): Title
     {
         $this->titleFirst = boolval($first);

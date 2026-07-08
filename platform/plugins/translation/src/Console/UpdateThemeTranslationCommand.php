@@ -27,7 +27,7 @@ class UpdateThemeTranslationCommand extends Command
     protected function getOptions(): array
     {
         return [
-            ['theme', null, InputOption::VALUE_OPTIONAL, 'The theme name to update translations for'],
+            new InputOption('theme', null, InputOption::VALUE_OPTIONAL, 'The theme name to update translations for'),
         ];
     }
 }

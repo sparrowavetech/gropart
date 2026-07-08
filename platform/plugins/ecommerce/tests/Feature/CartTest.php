@@ -306,4 +306,42 @@ class CartTest extends BaseTestCase
         $this->assertEquals(0, Cart::instance('cart')->content()->count());
         $this->assertEquals(0, Cart::instance('cart')->rawSubTotal());
     }
+
+    // Regression: a second "Buy Now" of the same product after returning from the
+    // checkout page must merge into the existing cart line, not create a duplicate.
+    // refresh() used to overwrite the taxRate option with the taxRate property (which
+    // checkout sets to a location-adjusted value), flipping the md5(serialize(options))
+    // rowId so the re-added product no longer matched - producing two identical lines
+    // and a duplicated product in the begin_checkout dataLayer.
+    public function test_refresh_keeps_row_id_stable_when_checkout_sets_tax_rate(): void
+    {
+        $product = Product::query()->create([
+            'name' => 'Italian Pasta Collection',
+            'price' => 8.99,
+            'status' => BaseStatusEnum::PUBLISHED,
+        ]);
+
+        // First "Buy Now": handleAddCart stores the product's tax percentage as an option.
+        $addOptions = ['taxRate' => 0, 'image' => $product->image];
+        Cart::instance('cart')->add($product->id, $product->name, 2, $product->price, $addOptions);
+
+        $this->assertEquals(1, Cart::instance('cart')->content()->count());
+        $originalRowId = Cart::instance('cart')->content()->keys()->first();
+
+        // Checkout applies a location-based tax rate to the line via setTax(), which sets
+        // the taxRate *property* only - the option keeps its original value.
+        Cart::instance('cart')->setTax($originalRowId, 15);
+
+        // refresh() runs on the cart/checkout page.
+        Cart::instance('cart')->refresh();
+
+        $this->assertEquals(1, Cart::instance('cart')->content()->count());
+        $this->assertEquals($originalRowId, Cart::instance('cart')->content()->keys()->first());
+
+        // Second "Buy Now" of the same product after returning from checkout must merge.
+        Cart::instance('cart')->add($product->id, $product->name, 2, $product->price, $addOptions);
+
+        $this->assertEquals(1, Cart::instance('cart')->content()->count());
+        $this->assertEquals(4, Cart::instance('cart')->count());
+    }
 }

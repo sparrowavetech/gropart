@@ -6,6 +6,13 @@ return [
     'edit' => 'Winkel bewerken',
     'view' => 'Bekijken',
     'forms' => [
+        'vacation_mode' => 'Vakantiemodus',
+        'vacation_mode_helper' => 'Schakel dit in om je winkel tijdelijk te pauzeren. Klanten kunnen je producten nog bekijken maar kunnen geen bestellingen plaatsen totdat je het uitschakelt.',
+        'vacation_message' => 'Vakantiebericht',
+        'vacation_message_helper' => 'Optionele melding die aan klanten wordt getoond in je winkel en op productpagina\'s terwijl de vakantiemodus aan staat.',
+        'vacation_message_placeholder' => 'Bijv.: We zijn op vakantie tot 1 juli. Nu geplaatste bestellingen worden na onze terugkeer verzonden.',
+        'vacation_badge' => 'Deze winkel is op vakantie',
+        'vacation_default_notice' => ':store is momenteel op vakantie en accepteert nu geen bestellingen. Kom later terug.',
         'logo' => 'Logo',
         'email' => 'E-mail',
         'email_placeholder' => 'Bijv: naam@winkel.com',

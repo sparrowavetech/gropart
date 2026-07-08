@@ -72,4 +72,5 @@ return [
     'showing_records' => 'Showing :from to :to of :total records',
     'copy' => 'Copy',
     'copied' => 'Copied',
+    'loading' => 'Loading...',
 ];

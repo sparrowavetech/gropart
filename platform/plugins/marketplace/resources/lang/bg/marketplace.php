@@ -155,6 +155,8 @@ return [
         'fee_per_order' => 'Такса на поръчка (%), препоръчително: 2 или 3',
         'default_commission_fee' => 'Комисионна по подразбиране (%), препоръчително: 2 или 3',
         'default_commission_fee_helper' => 'Set the percentage of each sale that goes to the marketplace as commission.',
+        'fixed_commission_fee' => 'Фиксирана комисиона (на поръчка)',
+        'fixed_commission_fee_helper' => 'Фиксирана сума, добавена към комисионата, начислявана веднъж на поръчка към търговец в допълнение към горния процент. Полезно за покриване на фиксираната част от таксите на платежния шлюз (напр. Stripe/PayPal €0.25). Оставете 0, за да изключите.',
         'enable_commission_fee_for_each_category' => 'Активирайте комисионна за всяка категория?',
         'enable_commission_fee_for_each_category_helper' => 'If enabled, you can set different commission rates for each product category.',
         'categories' => 'Категории',

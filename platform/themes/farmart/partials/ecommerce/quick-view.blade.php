@@ -1,4 +1,4 @@
-<div class="container product-detail-container">
+<div class="container product-detail-container bb-product-detail">
     <div class="row">
         <div class="col-md-6">
             <div class="px-1 py-1 px-lg-5 py-lg-5 py-md-1 my-lg-5 my-md-1 my-2 mb-4">

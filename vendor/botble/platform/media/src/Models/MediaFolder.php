@@ -74,6 +74,9 @@ class MediaFolder extends BaseModel
         });
     }
 
+    /**
+     * @return HasMany<MediaFile, $this>
+     */
     public function files(): HasMany
     {
         return $this->hasMany(MediaFile::class, 'folder_id', 'id');
@@ -121,7 +124,7 @@ class MediaFolder extends BaseModel
             return $path;
         }
 
-        $folder = self::query()->where('id', $folderId)->withTrashed()->first();
+        $folder = self::withTrashed()->where('id', $folderId)->first();
 
         if (empty($folder)) {
             return $path;

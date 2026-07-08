@@ -267,11 +267,13 @@ class PostRepository extends RepositoriesAbstract implements PostInterface
             is_plugin_active('language-advanced') &&
             Language::getCurrentLocale() != Language::getDefaultLocale()
         ) {
+            $term = str_replace('&', '&amp;', trim($keyword));
+
             return $model
-                ->whereHas('translations', function (BaseQueryBuilder $query) use ($keyword): void {
+                ->whereHas('translations', function (Builder $query) use ($term): void {
                     $query
-                        ->addSearch('name', $keyword, false, false)
-                        ->addSearch('description', $keyword, false);
+                        ->where('name', 'LIKE', '%' . $term . '%')
+                        ->orWhere('description', 'LIKE', '%' . $term . '%');
                 });
         }
 

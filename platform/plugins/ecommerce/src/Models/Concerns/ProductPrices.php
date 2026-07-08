@@ -127,7 +127,7 @@ trait ProductPrices
             $price = format_price($this->front_sale_price);
             $convertedPrice = $this->getConvertedPrice();
 
-            if ($this->front_sale_price != $convertedPrice) {
+            if ($this->isOnSale()) {
                 $price .= sprintf(' <del class="text-danger">%s</del>', format_price($convertedPrice));
             }
 
@@ -139,22 +139,35 @@ trait ProductPrices
     {
         return Attribute::get(function (): int {
             $convertedPrice = $this->getConvertedPrice();
+            $rawSale = $this->getRawSalePrice();
 
-            if ($this->front_sale_price == 0 && $convertedPrice !== 0) {
+            // Use the product's own sale_price (converted) for the percentage,
+            // ignoring pipeline reductions (cross-sale, up-sale).
+            $effectiveSale = $rawSale !== null && $rawSale > 0
+                ? ($this->getConvertedSalePrice() ?? $rawSale)
+                : $convertedPrice;
+
+            if ($effectiveSale == 0 && $convertedPrice !== 0) {
                 return 100;
             }
 
-            if (! $this->front_sale_price || ! $convertedPrice) {
+            if (! $effectiveSale || ! $convertedPrice) {
                 return 0;
             }
 
-            return (int) round(($convertedPrice - $this->front_sale_price) / $convertedPrice * 100);
+            return (int) round(($convertedPrice - $effectiveSale) / $convertedPrice * 100);
         });
     }
 
     public function isOnSale(): bool
     {
-        return $this->front_sale_price !== $this->getConvertedPrice();
+        // A product is on sale only when its own sale_price is genuinely lower
+        // than its base price. Use raw database values to avoid pipeline pollution
+        // (cross-sale/up-sale handlers that reduce front_sale_price at runtime).
+        $rawSale = $this->getRawSalePrice();
+        $base = $this->getRawPrice();
+
+        return $rawSale !== null && $rawSale > 0 && $base - $rawSale > 0.00001;
     }
 
     public function getOriginalPrice(): float
