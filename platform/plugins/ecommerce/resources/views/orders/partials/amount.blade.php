@@ -80,7 +80,18 @@
                 <p>{{ __('Shipping fee') }}:</p>
             </div>
             <div class="col-6 float-end">
-                <p class="price-text shipping-price-text">{{ $shippingAmount > 0 ? format_price($shippingAmount) : trans('plugins/ecommerce::order.free_shipping') }}</p>
+                @php
+                    $hasChosenShipping = Arr::get($sessionCheckoutData, 'shipping_method') && Arr::get($sessionCheckoutData, 'shipping_option') !== null;
+                @endphp
+                <p class="price-text shipping-price-text">
+                    @if ($shippingAmount > 0)
+                        {{ format_price($shippingAmount) }}
+                    @elseif ($hasChosenShipping)
+                        {{ trans('plugins/ecommerce::order.free_shipping') }}
+                    @else
+                        <span class="text-muted">- Select Option -</span>
+                    @endif
+                </p>
             </div>
         </div>
     @endif

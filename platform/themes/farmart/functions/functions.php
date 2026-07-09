@@ -155,7 +155,7 @@ app()->booted(function (): void {
             $form->addAfter('cover_image', 'background', MediaImageField::class, [
                 'label' => __('Background'),
                 'metadata' => true,
-                'colspan' => 2,
+                'colspan' => 3,
             ]);
         });
 

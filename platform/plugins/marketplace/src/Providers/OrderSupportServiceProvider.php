@@ -994,7 +994,7 @@ class OrderSupportServiceProvider extends ServiceProvider
                 Arr::set($vendorSessionData, 'shipping_amount', $shippingAmount);
             }
 
-            $sessionCheckoutData['marketplace'] = [$storeId => $vendorSessionData];
+            Arr::set($sessionCheckoutData, "marketplace.{$storeId}", $vendorSessionData);
 
             OrderHelper::setOrderSessionData($token, $sessionCheckoutData);
 
