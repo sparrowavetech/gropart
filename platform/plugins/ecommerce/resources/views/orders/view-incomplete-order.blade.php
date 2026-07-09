@@ -83,6 +83,18 @@
                                                 <strong>{{ $product->sku }}</strong>
                                             </p>
                                         @endif
+
+                                        @php
+                                            $isCodEligible = (bool) ($product->is_cod_eligible ?? false);
+                                        @endphp
+
+                                        <div class="mt-1">
+                                            @if ($isCodEligible)
+                                                <span class="badge bg-success text-white" style="font-size: 0.7em;">{{ __('COD Eligible') }}</span>
+                                            @else
+                                                <span class="badge bg-danger text-white" style="font-size: 0.7em;">{{ __('Not COD Eligible') }}</span>
+                                            @endif
+                                        </div>
                                     </x-core::table.body.cell>
                                     <x-core::table.body.cell class="text-end">
                                         {{ format_price($orderProduct->price) }}
