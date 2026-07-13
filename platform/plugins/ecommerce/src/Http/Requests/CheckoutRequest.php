@@ -177,9 +177,11 @@ class CheckoutRequest extends Request
             if ($isDigitalOnly) {
                 $rules['address.name'] = 'required|min:3|max:120';
                 $rules['address.email'] = 'required|email|max:60|min:6';
+                $rules['address.phone'] = 'required|max:10|min:10';
             } else {
                 $rules = array_merge($rules, EcommerceHelper::getCustomerAddressValidationRules('address.'));
                 $rules['address.email'] = 'required|email|max:60|min:6';
+                $rules['address.phone'] = 'required|max:10|min:10';
             }
         }
 

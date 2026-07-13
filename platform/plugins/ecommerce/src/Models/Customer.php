@@ -55,6 +55,7 @@ class Customer extends BaseModel implements
         'phone',
         'status',
         'private_notes',
+        'otp',
         'tax_class',
         'tax_id',
     ];

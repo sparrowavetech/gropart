@@ -109,6 +109,11 @@ Theme::registerRoutes(function (): void {
         Route::get(EcommerceHelper::getPageSlug('login'), 'LoginController@showLoginForm')->name('login');
         Route::post('login', 'LoginController@login')->name('login.post');
 
+        Route::get('otp/{id}', 'CustomerController@otp')->name('otp');
+        Route::get('resend/{id}', 'CustomerController@resend')->name('resend');
+        Route::post('otp', 'CustomerController@verifyotp')->name('otp.post');
+        Route::post('changePhone', 'CustomerController@changePhone')->name('otp.changePhone');
+
         if (EcommerceHelper::isCustomerRegistrationEnabled()) {
             Route::get(EcommerceHelper::getPageSlug('register'), 'RegisterController@showRegistrationForm')->name(
                 'register'

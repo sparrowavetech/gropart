@@ -16,6 +16,16 @@
         <div @class(['row justify-content-center py-5'])>
             <div @class(['col-xl-6 col-lg-8' => $bannerDirection === 'vertical', 'col-lg-10' => $bannerDirection === 'horizontal'])>
                 @endif
+                @if($errors->has('confirmation'))
+                    <div class="alert alert-danger">
+                        {!! $errors->first('confirmation') !!}
+                    </div>
+                @endif
+                @if(session('message'))
+                    <div class="alert alert-warning">
+                        {{ session('message') }}
+                    </div>
+                @endif
                 <div @class(['auth-card', 'card' => $bannerDirection === 'vertical', 'auth-card__horizontal row' => $bannerDirection === 'horizontal'])>
                     @if ($banner)
                         @if ($bannerDirection === 'horizontal')

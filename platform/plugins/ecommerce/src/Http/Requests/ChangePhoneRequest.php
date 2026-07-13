@@ -18,6 +18,8 @@ class ChangePhoneRequest extends Request
                 Rule::requiredIf(EcommerceHelper::isLoginUsingPhone()),
                 ...explode('|', BaseHelper::getPhoneValidationRule()),
                 Rule::unique((new Customer())->getTable(), 'phone'),
+                'min:10',
+                'max:10',
             ],
         ];
     }

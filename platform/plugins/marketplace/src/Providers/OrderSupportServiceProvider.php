@@ -44,6 +44,8 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
+use Botble\Sms\Supports\SmsHandler;
+use Botble\Sms\Enums\SmsEnum;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Throwable;
@@ -819,6 +821,18 @@ class OrderSupportServiceProvider extends ServiceProvider
                         'description' => trans('plugins/ecommerce::order.confirmation_email_was_sent_to_customer'),
                         'order_id' => $order->id,
                     ]);
+                }
+
+                if (is_plugin_active('sms')) {
+                    $sms = new SmsHandler;
+                    $sms->setModule(ECOMMERCE_MODULE_SCREEN_NAME);
+                    if ($sms->templateEnabled(SmsEnum::ORDER_CONFIRMATION())) {
+                        OrderHelper::setSmsVariables($order, $sms);
+                        $sms->sendUsingTemplate(
+                            SmsEnum::ORDER_CONFIRMATION(),
+                            $order->user->phone ?: $order->address->phone
+                        );
+                    }
                 }
             }
 

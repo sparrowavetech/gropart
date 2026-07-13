@@ -63,6 +63,8 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Botble\Sms\Supports\SmsHandler;
+use Botble\Sms\Enums\SmsEnum;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -591,6 +593,18 @@ class OrderHelper
                 ]);
             }
 
+            if (is_plugin_active('sms')) {
+                $sms = new SmsHandler;
+                $sms->setModule(ECOMMERCE_MODULE_SCREEN_NAME);
+                if ($sms->templateEnabled(SmsEnum::ORDER_CONFIRMATION())) {
+                    $this->setSmsVariables($order, $sms);
+                    $sms->sendUsingTemplate(
+                        SmsEnum::ORDER_CONFIRMATION(),
+                        $order->user->phone ?: $order->address->phone
+                    );
+                }
+            }
+
             return true;
         } catch (Exception $exception) {
             Log::error($exception->getMessage());
@@ -697,6 +711,18 @@ class OrderHelper
             'order_id' => $orderId,
             'user_id' => $userId,
         ]);
+
+        if (is_plugin_active('sms')) {
+            $sms = new SmsHandler;
+            $sms->setModule(ECOMMERCE_MODULE_SCREEN_NAME);
+            if ($sms->templateEnabled(SmsEnum::DELIVERING_CONFIRMATION())) {
+                $this->setSmsVariables($order, $sms);
+                $sms->sendUsingTemplate(
+                    SmsEnum::DELIVERING_CONFIRMATION(),
+                    $order->user->phone ?: $order->address->phone
+                );
+            }
+        }
 
         return $order;
     }
@@ -1704,6 +1730,18 @@ class OrderHelper
             $this->sendOrderEmail($order, 'admin_cancel_order');
         }
 
+        if (is_plugin_active('sms')) {
+            $sms = new SmsHandler;
+            $sms->setModule(ECOMMERCE_MODULE_SCREEN_NAME);
+            if ($sms->templateEnabled(SmsEnum::ORDER_CANCELLATION())) {
+                $this->setSmsVariables($order, $sms);
+                $sms->sendUsingTemplate(
+                    SmsEnum::ORDER_CANCELLATION(),
+                    $order->user->phone ?: $order->address->phone
+                );
+            }
+        }
+
         return $order;
     }
 
@@ -1791,6 +1829,18 @@ class OrderHelper
         ]);
 
         $this->sendOrderEmail($order, 'order_confirm');
+
+        if (is_plugin_active('sms')) {
+            $sms = new SmsHandler;
+            $sms->setModule(ECOMMERCE_MODULE_SCREEN_NAME);
+            if ($sms->templateEnabled(SmsEnum::ORDER_CONFIRMATION())) {
+                $this->setSmsVariables($order, $sms);
+                $sms->sendUsingTemplate(
+                    SmsEnum::ORDER_CONFIRMATION(),
+                    $order->user->phone ?: $order->address->phone
+                );
+            }
+        }
     }
 
     public function createOrUpdateIncompleteOrder(array $data, ?Order $order = null): Order|null|false
@@ -1839,5 +1889,21 @@ class OrderHelper
                 }, report: false);
             }
         }
+    }
+
+    public function setSmsVariables(Order $order, SmsHandler $sms){
+        $sms->setModule(ECOMMERCE_MODULE_SCREEN_NAME)
+        ->setVariableValues([
+            'store_address' => get_ecommerce_setting('store_address'),
+            'store_phone' => get_ecommerce_setting('store_phone'),
+            'order_id' => $order->code,
+            'order_token' => $order->token,
+            'customer_name' => BaseHelper::clean($order->user->name ?: $order->address->name),
+            'customer_email' => $order->user->email ?: $order->address->email,
+            'customer_phone' => $order->user->phone ?: $order->address->phone,
+            'customer_address' => $order->full_address,
+            'shipping_method' => $order->shipping_method_name,
+            'payment_method' => $order->payment->payment_channel->label(),
+        ]);
     }
 }

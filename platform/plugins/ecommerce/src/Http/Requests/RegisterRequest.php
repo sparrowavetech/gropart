@@ -34,9 +34,11 @@ class RegisterRequest extends Request
             'phone' => [
                 'nullable',
                 'string',
-                Rule::requiredIf(EcommerceHelper::isLoginUsingPhone() || get_ecommerce_setting('make_customer_phone_number_required', false)),
+                Rule::requiredIf(EcommerceHelper::isLoginUsingPhone() || (is_plugin_active('sms') && setting('sms_otp_enabled')) || get_ecommerce_setting('make_customer_phone_number_required', false)),
                 ...explode('|', BaseHelper::getPhoneValidationRule()),
                 UniquePhoneRule::make(Customer::class),
+                'min:10',
+                'max:10',
             ],
             'password' => ['required', 'string', 'min:6', 'confirmed'],
             'agree_terms_and_policy' => ['sometimes', 'accepted:1'],

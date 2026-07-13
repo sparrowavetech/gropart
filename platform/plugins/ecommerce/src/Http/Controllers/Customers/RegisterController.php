@@ -18,6 +18,8 @@ use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\URL;
+use Botble\Sms\Supports\SmsHandler;
+use Botble\Sms\Enums\SmsEnum;
 
 class RegisterController extends BaseController
 {
@@ -77,7 +79,30 @@ class RegisterController extends BaseController
 
         event(new Registered($customer));
 
-        if (
+        if (is_plugin_active('sms') && setting('sms_otp_enabled')) {
+            $otp = mt_rand(100000, 999999);
+            $sms = new SmsHandler;
+            $customer->otp = $otp;
+            $customer->save();
+            $sms->setModule(ECOMMERCE_MODULE_SCREEN_NAME);
+            if ($sms->templateEnabled(SmsEnum::OTP())) {
+                $sms->setVariableValues([
+                    'customer_name' => $customer->name,
+                    'otp' => $otp,
+                ]);
+                $sms->sendUsingTemplate(
+                    SmsEnum::OTP(),
+                    $customer->phone
+                );
+            }
+            $this->registered($request, $customer);
+
+            return $this
+                ->httpResponse()
+                ->setNextUrl(route('customer.otp', $customer->id))
+                ->setMessage(__('We have sent you an OTP to verify your mobile. Please check and confirm your mobile No!'));
+
+        } else if (
             EcommerceHelper::isEnableEmailVerification() &&
             (! EcommerceHelper::isLoginUsingPhone() || get_ecommerce_setting('keep_email_field_in_registration_form', true))
         ) {
