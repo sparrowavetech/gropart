@@ -36,7 +36,7 @@ return [
     'test_payment' => 'בצע תשלום ניסיון במצב בדיקה תחילה',
     'check_status' => 'בדוק אם סטטוס ההזמנה מתעדכן ל"הושלם"',
     'verify_webhook' => 'אם הזמנות נשארות "לא הושלם", אמת את תצורת ה-webhook שלך',
-    'check_logs' => 'בדוק את יומני התשלום ב-storage/logs/payment-*.log לניפוי באגים',
+    'check_logs' => 'בדוק את יומני התשלום ב-Payments > Payment Logs (admin panel) לניפוי באגים',
     'troubleshooting' => 'טיפים לפתרון בעיות:',
     'ssl_required' => 'וודא שלאתר שלך יש תעודת SSL תקפה (HTTPS)',
     'public_url' => 'אמת שכתובת ה-URL של webhook נגישה לציבור (לא localhost)',

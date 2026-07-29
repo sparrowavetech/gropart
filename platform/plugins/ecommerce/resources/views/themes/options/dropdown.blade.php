@@ -28,7 +28,7 @@
                         }
                     @endphp
                     <option
-                        data-extra-price="{{ $price }}"
+                        data-extra-price="{{ format_price($price, null, true) }}"
                         data-value-slug="{{ Str::slug($value->option_value) }}"
                         value="{{ $value->option_value }}"
                     >{{ $value->option_value }} {{ $price > 0 ? '+' . format_price($price) : '' }}</option>

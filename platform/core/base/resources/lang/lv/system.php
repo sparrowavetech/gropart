@@ -47,6 +47,7 @@ return [
     'get_system_report' => 'Iegūt sistēmas pārskatu',
     'system_environment' => 'Sistēmas vide',
     'framework_version' => 'Ietvara versija',
+    'core_version' => 'Kodola versija',
     'timezone' => 'Laika josla',
     'debug_mode' => 'Atkļūdošanas režīms',
     'debug_mode_off' => 'Atkļūdošanas režīms izslēgts',

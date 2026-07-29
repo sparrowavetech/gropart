@@ -47,6 +47,7 @@ return [
     'get_system_report' => 'Informe del sistema',
     'system_environment' => 'Entorno del sistema',
     'framework_version' => 'Framework Versión',
+    'core_version' => 'Versión del núcleo',
     'timezone' => 'Zona horaria',
     'debug_mode' => 'Modo de depuración',
     'debug_mode_off' => 'Modo de depuración desactivado',

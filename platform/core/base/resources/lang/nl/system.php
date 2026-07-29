@@ -46,6 +46,7 @@ return [
     'get_system_report' => 'Systeemrapport ophalen',
     'system_environment' => 'Systeemomgeving',
     'framework_version' => 'Framework-versie',
+    'core_version' => 'Kernversie',
     'timezone' => 'Tijdzone',
     'debug_mode' => 'Debug-modus',
     'storage_dir_writable' => 'Opslagmap beschrijfbaar',

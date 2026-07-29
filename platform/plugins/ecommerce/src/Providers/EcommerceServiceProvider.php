@@ -815,7 +815,7 @@ class EcommerceServiceProvider extends ServiceProvider
                     'name' => 'plugins/ecommerce::order.order_return',
                     'icon' => 'ti ti-basket-down',
                     'url' => fn () => route('order_returns.index'),
-                    'permissions' => ['orders.edit'],
+                    'permissions' => ['order_returns.index'],
                 ])
                 ->when(! EcommerceHelper::isDisabledPhysicalProduct(), function (DashboardMenuSupport $dashboardMenu): void {
                     $dashboardMenu->registerItem([

@@ -36,7 +36,7 @@ return [
     'test_payment' => 'Tee ensin testmaksu testitilassa',
     'check_status' => 'Tarkista, päivittyykö tilauksen tila "Valmis"-tilaan',
     'verify_webhook' => 'Jos tilaukset pysyvät "Keskeneräisinä", vahvista webhook-määrityksesi',
-    'check_logs' => 'Tarkista maksulokitiedostot kohdassa storage/logs/payment-*.log virheenkorjausta varten',
+    'check_logs' => 'Tarkista maksulokitiedostot kohdassa Payments > Payment Logs (admin panel) virheenkorjausta varten',
     'troubleshooting' => 'Vianmääritysvinkit:',
     'ssl_required' => 'Varmista, että sivustollasi on voimassa oleva SSL-varmenne (HTTPS)',
     'public_url' => 'Vahvista, että webhook-URL on julkisesti saatavilla (ei localhost)',

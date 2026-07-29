@@ -45,6 +45,7 @@ use Illuminate\Auth\Events\Registered;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -448,7 +449,20 @@ class PublicCheckoutController extends BaseController
             return $sessionData;
         }
 
-        if (! isset($sessionData['created_order'])) {
+        // Re-sync the pending order to the cart that is actually being checked out.
+        // The order is a snapshot taken on the first checkout render and stored in the
+        // session. If the buyer edits the cart (quantity/items) or returns later with a
+        // changed cart, the `isset` guards below would skip the rebuild, so the order keeps
+        // its stale items/total while the payment is captured for the new cart amount. We
+        // detect a cart change by comparing the cart's last-updated timestamp against the one
+        // recorded when the order products were last built, and force a rebuild when they differ.
+        $cartLastUpdatedAt = Cart::instance('cart')->getLastUpdatedAt();
+        $storedCartUpdatedAt = Arr::get($sessionData, 'created_order_product');
+        $cartChangedSinceOrder = $storedCartUpdatedAt
+            && $cartLastUpdatedAt
+            && Carbon::parse($storedCartUpdatedAt)->notEqualTo(Carbon::parse($cartLastUpdatedAt));
+
+        if (! isset($sessionData['created_order']) || $cartChangedSinceOrder) {
             $currentUserId = 0;
             if (auth('customer')->check()) {
                 $currentUserId = auth('customer')->id();
@@ -525,7 +539,7 @@ class PublicCheckoutController extends BaseController
 
         $sessionData = OrderHelper::checkAndCreateOrderAddress($addressData, $sessionData);
 
-        if (! isset($sessionData['created_order_product'])) {
+        if (! isset($sessionData['created_order_product']) || $cartChangedSinceOrder) {
             $weight = Cart::instance('cart')->weight();
 
             OrderProduct::query()->where(['order_id' => $sessionData['created_order_id']])->delete();
@@ -557,7 +571,7 @@ class PublicCheckoutController extends BaseController
                 OrderProduct::query()->create($data);
             }
 
-            $sessionData['created_order_product'] = Cart::instance('cart')->getLastUpdatedAt();
+            $sessionData['created_order_product'] = $cartLastUpdatedAt;
         }
 
         OrderHelper::setOrderSessionData($token, $sessionData);

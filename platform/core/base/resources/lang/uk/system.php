@@ -47,6 +47,7 @@ return [
     'get_system_report' => 'Отримати звіт про систему',
     'system_environment' => 'Середовище системи',
     'framework_version' => 'Версія фреймворка',
+    'core_version' => 'Версія ядра',
     'timezone' => 'Часовий пояс',
     'debug_mode' => 'Режим налагодження',
     'debug_mode_off' => 'Режим налагодження вимкнено',

@@ -83,5 +83,7 @@ return [
         'submit_sitemap_error' => 'Zemljevida mesta ni bilo mogoče poslati. Poskusite znova.',
         'indexnow_disabled' => 'IndexNow ni omogočen. Najprej ga omogočite.',
         'indexnow_no_api_key' => 'Ključ API ni bil najden. Najprej ustvarite ključ API.',
+        'enable_llms_txt' => 'Omogoči llms.txt?',
+        'enable_llms_txt_help' => 'Ko je omogočeno, je na :url na voljo dinamična datoteka llms.txt, ki pomaga pajkom umetne inteligence (ChatGPT, Claude, Perplexity itd.) razumeti vašo vsebino v skladu s specifikacijo llmstxt.org. Onemogočite to, če ne želite izpostaviti datoteke llms.txt. Statična datoteka public/llms.txt, če obstaja, ima vedno prednost.',
     ],
 ];

@@ -17,9 +17,31 @@ export class ActionsService {
     }
 
     static handlePreview() {
+        const selectedFiles = Helpers.getSelectedFiles()
+
+        // Previewing a single image opens the images currently loaded in this view as
+        // a gallery, starting on that image, so it can be browsed with the lightbox
+        // arrows / keyboard. Pages not yet fetched by the infinite scroll are not
+        // included; the lightbox cannot be extended once open.
+        if (Helpers.size(selectedFiles) === 1 && selectedFiles[0].type === 'image') {
+            const images = ActionsService.getPreviewableImages()
+            const index = images.findIndex((image) => image.id === selectedFiles[0].id)
+
+            if (images.length > 1 && index !== -1) {
+                Helpers.addToRecent(selectedFiles[0].id)
+
+                Botble.lightbox(
+                    images.map((image) => image.preview_url),
+                    index
+                )
+
+                return
+            }
+        }
+
         let selected = []
 
-        Helpers.each(Helpers.getSelectedFiles(), (value) => {
+        Helpers.each(selectedFiles, (value) => {
             if (value.preview_url) {
                 if (value.type === 'document') {
                     const iframe = document.createElement('iframe')
@@ -42,6 +64,27 @@ export class ActionsService {
         } else {
             this.handleGlobalAction('download')
         }
+    }
+
+    /**
+     * Images currently listed, in display order, that can be shown in the lightbox.
+     *
+     * Reads the rows directly rather than going through Helpers.getItems(), which
+     * computes a positional index per row and would walk the sibling list once per
+     * item on what is now a click-blocking path.
+     */
+    static getPreviewableImages() {
+        const images = []
+
+        $('.js-media-list-title[data-context=file]').each((index, el) => {
+            const data = $(el).data() || {}
+
+            if (data.type === 'image' && data.preview_url) {
+                images.push(data)
+            }
+        })
+
+        return images
     }
 
     static renderCropImage() {

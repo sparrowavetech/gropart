@@ -63,8 +63,6 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Botble\Sms\Supports\SmsHandler;
-use Botble\Sms\Enums\SmsEnum;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -109,6 +107,26 @@ class OrderHelper
             /**
              * @var Order $order
              */
+
+            // Adopt a completed payment that was linked to the order but never written back
+            // onto Order.payment_id. Gateway callback/webhook paths (e.g. Razorpay) can create
+            // and link a Payment (Payment.order_id + status = completed, so it shows in
+            // Transactions) without setting the order's own payment_id column. Without this,
+            // the guard below skips finalization and the paid order is stranded in Incomplete
+            // Orders. Only fills a blank; never overrides an existing link.
+            if (! $order->payment_id && is_plugin_active('payment')) {
+                $linkedPayment = Payment::query()
+                    ->where('order_id', $order->getKey())
+                    ->where('status', PaymentStatusEnum::COMPLETED)
+                    ->latest('id')
+                    ->first();
+
+                if ($linkedPayment) {
+                    $order->payment_id = $linkedPayment->getKey();
+                    $order->save();
+                }
+            }
+
             if (
                 (float) $order->amount
                 && (is_plugin_active('payment') && ! empty(PaymentMethods::methods()) && ! $order->payment_id)
@@ -593,18 +611,6 @@ class OrderHelper
                 ]);
             }
 
-            if (is_plugin_active('sms')) {
-                $sms = new SmsHandler;
-                $sms->setModule(ECOMMERCE_MODULE_SCREEN_NAME);
-                if ($sms->templateEnabled(SmsEnum::ORDER_CONFIRMATION())) {
-                    $this->setSmsVariables($order, $sms);
-                    $sms->sendUsingTemplate(
-                        SmsEnum::ORDER_CONFIRMATION(),
-                        $order->user->phone ?: $order->address->phone
-                    );
-                }
-            }
-
             return true;
         } catch (Exception $exception) {
             Log::error($exception->getMessage());
@@ -711,18 +717,6 @@ class OrderHelper
             'order_id' => $orderId,
             'user_id' => $userId,
         ]);
-
-        if (is_plugin_active('sms')) {
-            $sms = new SmsHandler;
-            $sms->setModule(ECOMMERCE_MODULE_SCREEN_NAME);
-            if ($sms->templateEnabled(SmsEnum::DELIVERING_CONFIRMATION())) {
-                $this->setSmsVariables($order, $sms);
-                $sms->sendUsingTemplate(
-                    SmsEnum::DELIVERING_CONFIRMATION(),
-                    $order->user->phone ?: $order->address->phone
-                );
-            }
-        }
 
         return $order;
     }
@@ -1305,7 +1299,12 @@ class OrderHelper
                 ->exists();
 
             if (! $hasShippingAddress) {
-                Log::warning('[ec_order_addresses] Skipping shipping address creation: empty name in addressData and no existing row', [
+                // Debug, not warning: this fires on the normal "billing same as shipping"
+                // flow, where the address arrives nested under billing_address (no top-level
+                // name) and the shipping row is created later by ensureShippingAddressBackfilled
+                // at finalize. The genuine "finalized with no address source" case is warned
+                // separately in that method - so this is diagnostic noise, not a fault.
+                Log::debug('[ec_order_addresses] Skipping shipping address creation: empty name in addressData and no existing row', [
                     'order_id' => $createdOrderId,
                     'session_address_id' => Arr::get($sessionData, 'address_id'),
                     'has_address_data' => ! empty($addressData),
@@ -1730,18 +1729,6 @@ class OrderHelper
             $this->sendOrderEmail($order, 'admin_cancel_order');
         }
 
-        if (is_plugin_active('sms')) {
-            $sms = new SmsHandler;
-            $sms->setModule(ECOMMERCE_MODULE_SCREEN_NAME);
-            if ($sms->templateEnabled(SmsEnum::ORDER_CANCELLATION())) {
-                $this->setSmsVariables($order, $sms);
-                $sms->sendUsingTemplate(
-                    SmsEnum::ORDER_CANCELLATION(),
-                    $order->user->phone ?: $order->address->phone
-                );
-            }
-        }
-
         return $order;
     }
 
@@ -1829,22 +1816,21 @@ class OrderHelper
         ]);
 
         $this->sendOrderEmail($order, 'order_confirm');
-
-        if (is_plugin_active('sms')) {
-            $sms = new SmsHandler;
-            $sms->setModule(ECOMMERCE_MODULE_SCREEN_NAME);
-            if ($sms->templateEnabled(SmsEnum::ORDER_CONFIRMATION())) {
-                $this->setSmsVariables($order, $sms);
-                $sms->sendUsingTemplate(
-                    SmsEnum::ORDER_CONFIRMATION(),
-                    $order->user->phone ?: $order->address->phone
-                );
-            }
-        }
     }
 
     public function createOrUpdateIncompleteOrder(array $data, ?Order $order = null): Order|null|false
     {
+        // Guard: never rewrite an order that is already completed back to "incomplete".
+        // Re-opening the checkout page with an existing order token, or clicking the
+        // "Recover Cart" link, funnels through here and would otherwise force
+        // is_finished = false on an order that a gateway webhook/callback already
+        // finalized - stranding a paid order in Incomplete Orders (and, on the recover
+        // path, overwriting its items/total from the live cart). If the order is already
+        // finished, or a completed payment is linked to it, leave it untouched.
+        if ($order && ($order->is_finished || $this->hasCompletedPayment($order))) {
+            return $order;
+        }
+
         $data['is_finished'] = false;
 
         if ($order) {
@@ -1868,6 +1854,22 @@ class OrderHelper
         return $order;
     }
 
+    protected function hasCompletedPayment(Order $order): bool
+    {
+        if (! is_plugin_active('payment')) {
+            return false;
+        }
+
+        if ($order->payment_id && $order->payment && $order->payment->status == PaymentStatusEnum::COMPLETED) {
+            return true;
+        }
+
+        return Payment::query()
+            ->where('order_id', $order->getKey())
+            ->where('status', PaymentStatusEnum::COMPLETED)
+            ->exists();
+    }
+
     public function captureFootprints(Order $order): void
     {
         if ($order->referral()->exists()) {
@@ -1889,21 +1891,5 @@ class OrderHelper
                 }, report: false);
             }
         }
-    }
-
-    public function setSmsVariables(Order $order, SmsHandler $sms){
-        $sms->setModule(ECOMMERCE_MODULE_SCREEN_NAME)
-        ->setVariableValues([
-            'store_address' => get_ecommerce_setting('store_address'),
-            'store_phone' => get_ecommerce_setting('store_phone'),
-            'order_id' => $order->code,
-            'order_token' => $order->token,
-            'customer_name' => BaseHelper::clean($order->user->name ?: $order->address->name),
-            'customer_email' => $order->user->email ?: $order->address->email,
-            'customer_phone' => $order->user->phone ?: $order->address->phone,
-            'customer_address' => $order->full_address,
-            'shipping_method' => $order->shipping_method_name,
-            'payment_method' => $order->payment->payment_channel->label(),
-        ]);
     }
 }

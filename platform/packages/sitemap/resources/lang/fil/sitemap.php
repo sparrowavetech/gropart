@@ -83,5 +83,7 @@ return [
         'submit_sitemap_error' => 'Nabigong ipasa ang sitemap. Pakisubukang muli.',
         'indexnow_disabled' => 'Hindi naka-enable ang IndexNow. Pakienable muna ito.',
         'indexnow_no_api_key' => 'Walang nahanap na API key. Mangyaring gumawa muna ng API key.',
+        'enable_llms_txt' => 'Paganahin ang llms.txt?',
+        'enable_llms_txt_help' => 'Kapag pinagana, isang dynamic na llms.txt file ang inihahain sa :url upang tulungan ang mga AI crawler (ChatGPT, Claude, Perplexity, atbp.) na maunawaan ang iyong nilalaman, sumusunod sa llmstxt.org spec. I-disable ito kung ayaw mong ilantad ang isang llms.txt. Ang static na public/llms.txt file, kung mayroon, ay palaging nauuna.',
     ],
 ];

@@ -83,5 +83,7 @@ return [
         'submit_sitemap_error' => 'Slanje sitemapa nije uspjelo. Pokušajte ponovo.',
         'indexnow_disabled' => 'IndexNow nije omogućen. Najprije ga omogućite.',
         'indexnow_no_api_key' => 'API ključ nije pronađen. Najprije generirajte API ključ.',
+        'enable_llms_txt' => 'Omogući llms.txt?',
+        'enable_llms_txt_help' => 'Kada je omogućeno, na :url se poslužuje dinamička llms.txt datoteka koja pomaže AI alatima za indeksiranje (ChatGPT, Claude, Perplexity itd.) razumjeti vaš sadržaj, prema specifikaciji llmstxt.org. Onemogućite ovo ako ne želite izložiti llms.txt. Statička datoteka public/llms.txt, ako postoji, uvijek ima prednost.',
     ],
 ];

@@ -407,18 +407,25 @@ class EmailHandler
         }
 
         $coreData = $this->getCoreVariableValues();
-        $data = [...$coreData, ...$data];
-        $variables = [...array_keys($coreData), ...$variables];
 
         $twigCompiler = apply_filters('cms_twig_compiler', $this->twigCompiler);
 
-        foreach ($data as $key => $value) {
+        // Only the core (admin-authored) template fragments - e.g. header/footer, which embed
+        // other core variables like {{ site_title }} - are compiled as templates so their nested
+        // variables resolve. Plugin-supplied variable values (customer name, order data, etc.)
+        // are attacker-influenced and are passed through as literal data only: they are NEVER
+        // compiled as Twig, which closes the stored server-side template injection surface where
+        // a low-privilege user could inject {{ ... }} into an email via a data field (finding #3).
+        foreach ($coreData as $key => $value) {
             try {
-                $data[$key] = $value && is_string($value) ? $twigCompiler->compile($value, $data) : $value;
+                $coreData[$key] = $value && is_string($value) ? $twigCompiler->compile($value, $coreData) : $value;
             } catch (Throwable) {
-                $data[$key] = $value;
+                // Keep the raw value when the core fragment fails to compile.
             }
         }
+
+        $data = [...$coreData, ...$data];
+        $variables = [...array_keys($coreData), ...$variables];
 
         if (empty($data) || empty($content)) {
             return $content;
@@ -470,9 +477,15 @@ class EmailHandler
 
         if (! $subject) {
             $subject = $this->getSubject();
+        } else {
+            $subject = $this->prepareData($subject);
         }
 
-        $this->send($this->getContent(), $subject, $email, $args, $debug);
+        // getContent()/getSubject() already ran the content and subject through prepareData(),
+        // so tell send() they are prepared. Re-compiling here would evaluate any Twig that a
+        // user-controlled variable value rendered into the body on the first pass (e.g. a
+        // customer name containing "{{ ... }}") - a second-pass template-injection. See send().
+        $this->send($this->getContent(), $subject, $email, $args, $debug, true);
 
         return true;
     }
@@ -487,7 +500,8 @@ class EmailHandler
         string $title,
         string|array|null $to = null,
         array $args = [],
-        bool $debug = false
+        bool $debug = false,
+        bool $prepared = false
     ): void {
         try {
             if (empty($to)) {
@@ -497,11 +511,18 @@ class EmailHandler
                 }
             }
 
-            $content = $this->prepareData($content);
-            $title = $this->prepareData($title);
+            // Skip variable replacement when the caller already prepared the content/subject
+            // (e.g. sendUsingTemplate). Compiling twice would re-evaluate Twig that a
+            // user-controlled variable value output on the first pass - a template injection.
+            if (! $prepared) {
+                $content = $this->prepareData($content);
+                $title = $this->prepareData($title);
+            }
 
             $content = $this->sanitizeUtf8($content);
             $title = $this->sanitizeUtf8($title);
+
+            $content = $this->sanitizeOutput($content);
 
             event(new SendMailEvent($content, $title, $to, $args, $debug));
         } catch (Throwable $throwable) {
@@ -652,6 +673,58 @@ class EmailHandler
         if (json_encode($content) === false) {
             $content = iconv('UTF-8', 'UTF-8//IGNORE', $content) ?: $content;
         }
+
+        return $content;
+    }
+
+    /**
+     * Sanitize the final email body before it is sent.
+     *
+     * Email templates are HTML-by-design and autoescape is off, so a value rendered into an
+     * email (e.g. a customer-supplied name) is emitted as raw HTML. By default we strip only the
+     * active-content XSS vectors (<script>, on* event handlers, javascript:/vbscript: URIs) while
+     * preserving the document structure - the <html>/<body> wrapper, dir/lang attributes (RTL
+     * emails) and Outlook conditional comments all survive.
+     *
+     * Two filters control this:
+     *  - cms_email_sanitize_output (default true): return false to skip sanitization entirely.
+     *  - cms_email_sanitize_output_strict (default false): return true to use the full CMS HTML
+     *    purifier instead - stronger, but it removes the <body> wrapper and therefore its dir/lang
+     *    attributes, so RTL emails lose their direction. Opt in only when that trade-off is fine.
+     */
+    protected function sanitizeOutput(string $content): string
+    {
+        if (! apply_filters('cms_email_sanitize_output', true)) {
+            return $content;
+        }
+
+        if (apply_filters('cms_email_sanitize_output_strict', false)) {
+            return (string) BaseHelper::clean($content);
+        }
+
+        return $this->stripUnsafeMarkup($content);
+    }
+
+    /**
+     * Remove active-content XSS vectors from HTML while leaving the rest of the markup intact.
+     */
+    protected function stripUnsafeMarkup(string $content): string
+    {
+        // Drop <script> blocks (and any stray/self-closing script tags).
+        $content = (string) preg_replace('#<script\b[^>]*>.*?</script\s*>#is', '', $content);
+        $content = (string) preg_replace('#</?script\b[^>]*>#i', '', $content);
+
+        // Strip inline event-handler attributes (onclick, onerror, onload, ...).
+        $content = (string) preg_replace('#\son[a-z]+\s*=\s*"[^"]*"#i', '', $content);
+        $content = (string) preg_replace("#\son[a-z]+\s*=\s*'[^']*'#i", '', $content);
+        $content = (string) preg_replace('#\son[a-z]+\s*=\s*[^\s"\'>]+#i', '', $content);
+
+        // Neutralize dangerous URI schemes in resource/link attributes.
+        $content = (string) preg_replace(
+            '#(\b(?:href|src|action|xlink:href)\s*=\s*)(["\']?)\s*(?:javascript|vbscript)\s*:[^"\'\s>]*\2#i',
+            '$1$2#$2',
+            $content
+        );
 
         return $content;
     }

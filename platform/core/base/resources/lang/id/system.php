@@ -47,6 +47,7 @@ return [
     'get_system_report' => 'Dapatkan Laporan Sistem',
     'system_environment' => 'Lingkungan Sistem',
     'framework_version' => 'Versi Framework',
+    'core_version' => 'Versi Inti',
     'timezone' => 'Zona Waktu',
     'debug_mode' => 'Mode Debug',
     'debug_mode_off' => 'Mode Debug Mati',

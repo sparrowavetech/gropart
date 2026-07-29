@@ -36,7 +36,7 @@ return [
     'test_payment' => '首先在测试模式下进行测试支付',
     'check_status' => '检查订单状态是否更新为"已完成"',
     'verify_webhook' => '如果订单仍为"未完成",请验证您的 webhook 配置',
-    'check_logs' => '检查 storage/logs/payment-*.log 中的支付日志以进行调试',
+    'check_logs' => '检查 Payments > Payment Logs (admin panel) 中的支付日志以进行调试',
     'troubleshooting' => '故障排除提示:',
     'ssl_required' => '确保您的网站具有有效的 SSL 证书 (HTTPS)',
     'public_url' => '验证 webhook URL 可公开访问(非 localhost)',

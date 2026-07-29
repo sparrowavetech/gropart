@@ -83,5 +83,7 @@ return [
         'submit_sitemap_error' => 'Nepavyko pateikti svetainės schemos. Bandykite dar kartą.',
         'indexnow_disabled' => 'IndexNow nėra įjungtas. Įjunkite jį pirmiausia.',
         'indexnow_no_api_key' => 'API raktas nerastas. Pirmiausia sugeneruokite API raktą.',
+        'enable_llms_txt' => 'Įjungti llms.txt?',
+        'enable_llms_txt_help' => 'Kai įjungta, adresu :url pateikiamas dinaminis llms.txt failas, padedantis dirbtinio intelekto naršyklėms (ChatGPT, Claude, Perplexity ir kt.) suprasti jūsų turinį pagal llmstxt.org specifikaciją. Išjunkite tai, jei nenorite atskleisti llms.txt. Statinis public/llms.txt failas, jei jis yra, visada turi pirmenybę.',
     ],
 ];

@@ -83,5 +83,7 @@ return [
         'submit_sitemap_error' => 'Gagal mengirim sitemap. Silakan coba lagi.',
         'indexnow_disabled' => 'IndexNow belum diaktifkan. Silakan aktifkan terlebih dahulu.',
         'indexnow_no_api_key' => 'Kunci API tidak ditemukan. Silakan buat kunci API terlebih dahulu.',
+        'enable_llms_txt' => 'Aktifkan llms.txt?',
+        'enable_llms_txt_help' => 'Saat diaktifkan, file llms.txt dinamis disajikan di :url untuk membantu perayap AI (ChatGPT, Claude, Perplexity, dll.) memahami konten Anda, mengikuti spesifikasi llmstxt.org. Nonaktifkan ini jika Anda tidak ingin mengekspos llms.txt. File statis public/llms.txt, jika ada, selalu diprioritaskan.',
     ],
 ];

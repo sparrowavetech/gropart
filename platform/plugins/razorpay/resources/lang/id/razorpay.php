@@ -36,7 +36,7 @@ return [
     'test_payment' => 'Lakukan pembayaran uji coba dalam Mode Uji terlebih dahulu',
     'check_status' => 'Periksa apakah status pesanan diperbarui menjadi "Selesai"',
     'verify_webhook' => 'Jika pesanan tetap "Tidak Lengkap", verifikasi konfigurasi webhook Anda',
-    'check_logs' => 'Periksa log pembayaran di storage/logs/payment-*.log untuk debugging',
+    'check_logs' => 'Periksa log pembayaran di Payments > Payment Logs (admin panel) untuk debugging',
     'troubleshooting' => 'Tips Pemecahan Masalah:',
     'ssl_required' => 'Pastikan situs Anda memiliki sertifikat SSL yang valid (HTTPS)',
     'public_url' => 'Verifikasi URL webhook dapat diakses secara publik (bukan localhost)',

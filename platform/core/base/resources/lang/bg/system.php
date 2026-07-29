@@ -47,6 +47,7 @@ return [
     'get_system_report' => 'Получаване на системен доклад',
     'system_environment' => 'Системна среда',
     'framework_version' => 'Версия на фреймуорка',
+    'core_version' => 'Версия на ядрото',
     'timezone' => 'Часова зона',
     'debug_mode' => 'Режим на отстраняване на грешки',
     'debug_mode_off' => 'Режим на отстраняване на грешки изключен',

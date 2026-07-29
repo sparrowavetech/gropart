@@ -48,6 +48,13 @@ class ResponsiveImageSrcset
             return null;
         }
 
+        // Width-only sizes (height registered as 0/auto, e.g. hero-sm/hero-md) have no
+        // fixed aspect ratio, so there is nothing to build a same-ratio srcset from -
+        // and dividing by a 0 height would throw DivisionByZeroError.
+        if ($baseDims[0] <= 0 || $baseDims[1] <= 0) {
+            return null;
+        }
+
         $baseAspect = $baseDims[0] / $baseDims[1];
 
         $candidates = [];

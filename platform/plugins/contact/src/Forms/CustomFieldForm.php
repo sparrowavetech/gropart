@@ -66,12 +66,21 @@ class CustomFieldForm extends FormAbstract
                     ->required()
                     ->defaultValue(999)
             )
-            ->when(is_plugin_active('language'), function (FormAbstract $form): void {
-                $isDefaultLanguage = ! defined('LANGUAGE_ADVANCED_MODULE_SCREEN_NAME')
+            ->tap(function (FormAbstract $form): void {
+                // Options only apply to dropdown & radio fields, but the metabox must always be
+                // registered - it is toggled client-side by custom-field.js when the type changes.
+                // Translating options requires the language plugin; without it we are always on
+                // the default language.
+                $isDefaultLanguage = ! is_plugin_active('language')
+                    || ! defined('LANGUAGE_ADVANCED_MODULE_SCREEN_NAME')
                     || ! request()->input('ref_lang')
                     || request()->input('ref_lang') === Language::getDefaultLocaleCode();
                 $customField = $form->getModel();
                 $options = $customField->options->sortBy('order');
+
+                // Compare against the type value, not the model itself - passing the model made
+                // this always false, so the box stayed hidden when editing a dropdown/radio field.
+                $currentType = old('type', $customField->type?->getValue());
 
                 $form->addMetaBox(
                     MetaBox::make('contact-custom-field-options')
@@ -80,7 +89,7 @@ class CustomFieldForm extends FormAbstract
                             'class' => 'custom-field-options-box',
                             'style' => sprintf(
                                 'display: %s;',
-                                in_array(old('type', $customField), [CustomFieldType::DROPDOWN, CustomFieldType::RADIO]) ? 'block' : 'none;'
+                                in_array($currentType, [CustomFieldType::DROPDOWN, CustomFieldType::RADIO]) ? 'block' : 'none;'
                             ),
                         ])
                         ->title(trans('plugins/contact::contact.custom_field.options'))

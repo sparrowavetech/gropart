@@ -1,3 +1,11 @@
+## [13.2.1](https://github.com/yajra/laravel-datatables-buttons/compare/v13.2.0...v13.2.1) (2026-07-21)
+
+
+### Bug Fixes
+
+* **html:** preserve make argument compatibility ([0c5f1ae](https://github.com/yajra/laravel-datatables-buttons/commit/0c5f1aefd16485768101dde99d85480b6dd62b8b))
+* **html:** resolve make arguments through container ([08f9aa5](https://github.com/yajra/laravel-datatables-buttons/commit/08f9aa5f4f2bd21447d59007630a68edba6e402b))
+
 # [13.2.0](https://github.com/yajra/laravel-datatables-buttons/compare/v13.1.0...v13.2.0) (2026-03-28)
 
 

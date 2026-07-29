@@ -61,6 +61,14 @@ class ProductSearchSettingForm extends SettingForm
                     ->defaultValue(true)
             )
             ->add(
+                'enable_filter_products_by_rating',
+                OnOffCheckboxField::class,
+                OnOffFieldOption::make()
+                    ->label(trans('plugins/ecommerce::setting.product_search.form.enable_filter_products_by_rating'))
+                    ->value(EcommerceHelper::isEnabledFilterProductsByRating())
+                    ->defaultValue(false)
+            )
+            ->add(
                 'enable_filter_products_by_tags',
                 OnOffCheckboxField::class,
                 OnOffFieldOption::make()

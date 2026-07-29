@@ -47,6 +47,7 @@ return [
     'get_system_report' => 'सिस्टम रिपोर्ट प्राप्त करें',
     'system_environment' => 'सिस्टम वातावरण',
     'framework_version' => 'फ्रेमवर्क संस्करण',
+    'core_version' => 'कोर संस्करण',
     'timezone' => 'समय क्षेत्र',
     'debug_mode' => 'डीबग मोड',
     'debug_mode_off' => 'डीबग मोड बंद',

@@ -83,5 +83,7 @@ return [
         'submit_sitemap_error' => 'Sivukartan lähetys epäonnistui. Yritä uudelleen.',
         'indexnow_disabled' => 'IndexNow ei ole käytössä. Ota se ensin käyttöön.',
         'indexnow_no_api_key' => 'API-avainta ei löytynyt. Luo ensin API-avain.',
+        'enable_llms_txt' => 'Ota llms.txt käyttöön?',
+        'enable_llms_txt_help' => 'Kun käytössä, osoitteessa :url tarjotaan dynaaminen llms.txt-tiedosto, joka auttaa tekoälyrobotteja (ChatGPT, Claude, Perplexity jne.) ymmärtämään sisältösi llmstxt.org-määrityksen mukaisesti. Poista tämä käytöstä, jos et halua paljastaa llms.txt-tiedostoa. Staattinen public/llms.txt-tiedosto on aina etusijalla, jos se on olemassa.',
     ],
 ];

@@ -83,5 +83,7 @@ return [
         'submit_sitemap_error' => 'השליחה של מפת האתר נכשלה. נסה שוב.',
         'indexnow_disabled' => 'IndexNow אינו פעיל. הפעל אותו תחילה.',
         'indexnow_no_api_key' => 'לא נמצא מפתח API. צור תחילה מפתח API.',
+        'enable_llms_txt' => 'להפעיל את llms.txt?',
+        'enable_llms_txt_help' => 'כאשר מופעל, קובץ llms.txt דינמי מוגש בכתובת :url כדי לעזור לסורקי בינה מלאכותית (ChatGPT, Claude, Perplexity וכו\') להבין את התוכן שלך, בהתאם למפרט llmstxt.org. השבת זאת אם אינך רוצה לחשוף קובץ llms.txt. קובץ סטטי public/llms.txt, אם קיים, תמיד מקבל עדיפות.',
     ],
 ];

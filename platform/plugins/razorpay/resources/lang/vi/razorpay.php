@@ -36,7 +36,7 @@ return [
     'test_payment' => 'Thực hiện thanh toán thử nghiệm trong chế độ thử nghiệm trước',
     'check_status' => 'Kiểm tra xem trạng thái đơn hàng có cập nhật thành "Đã hoàn thành" không',
     'verify_webhook' => 'Nếu đơn hàng vẫn "Chưa hoàn thành", hãy xác minh cấu hình webhook của bạn',
-    'check_logs' => 'Kiểm tra nhật ký thanh toán trong storage/logs/payment-*.log để gỡ lỗi',
+    'check_logs' => 'Kiểm tra nhật ký thanh toán trong Payments > Payment Logs (admin panel) để gỡ lỗi',
     'troubleshooting' => 'Mẹo khắc phục sự cố:',
     'ssl_required' => 'Đảm bảo trang web của bạn có chứng chỉ SSL hợp lệ (HTTPS)',
     'public_url' => 'Xác minh URL webhook có thể truy cập công khai (không phải localhost)',

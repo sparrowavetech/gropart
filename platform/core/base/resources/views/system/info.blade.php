@@ -31,6 +31,7 @@
                 ### {{ trans('core/base::system.system_environment') }}
 
                 - {{ trans('core/base::system.cms_version') }}: {{ get_cms_version() }}
+                - {{ trans('core/base::system.core_version') }}: {{ get_core_version() }}
                 - {{ trans('core/base::system.framework_version') }}: {{ $systemEnv['version'] }}
                 - {{ trans('core/base::system.timezone') }}: {{ $systemEnv['timezone'] }}
                 - {{ trans('core/base::system.server_ip') }}: {{ $serverIp }}
@@ -129,6 +130,9 @@
                 <ul class="list-group list-group-flush">
                     <li class="list-group-item">
                         {{ trans('core/base::system.cms_version') }}: {{ get_cms_version() }}
+                    </li>
+                    <li class="list-group-item">
+                        {{ trans('core/base::system.core_version') }}: {{ get_core_version() }}
                     </li>
                     <li class="list-group-item">
                         {{ trans('core/base::system.framework_version') }}: {{ $systemEnv['version'] }}

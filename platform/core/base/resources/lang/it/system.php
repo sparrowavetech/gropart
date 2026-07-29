@@ -47,6 +47,7 @@ return [
     'get_system_report' => 'Ottieni report di sistema',
     'system_environment' => 'Ambiente di sistema',
     'framework_version' => 'Versione framework',
+    'core_version' => 'Versione del core',
     'timezone' => 'Fuso orario',
     'debug_mode' => 'Modalità debug',
     'debug_mode_off' => 'Modalità debug disattivata',

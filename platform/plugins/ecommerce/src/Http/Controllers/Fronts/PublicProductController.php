@@ -230,6 +230,9 @@ class PublicProductController extends BaseController
                         'thumb',
                         ...array_keys(RvMedia::getSizes()),
                     ]));
+                } else {
+                    // Ensure a consistent structure so the frontend gallery refresh never receives null.
+                    $originalProduct->image_with_sizes = ['origin' => [], 'thumb' => []];
                 }
 
                 $originalProduct->errorMessage = __('Please select attributes');

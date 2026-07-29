@@ -446,10 +446,31 @@ class DashboardMenu
 
     protected function applyActive(Collection $menu): Collection
     {
-        foreach ($menu as $key => $item) {
-            $menu[$key] = $this->applyActiveRecursive($item);
+        $currentUrl = $this->request->fullUrl();
+        $adminRoot = url(BaseHelper::getAdminPrefix());
 
-            if ($menu[$key]['active']) {
+        // First pass: find the single most-specific matching item across the whole
+        // menu tree (the longest matching URL). Selecting the longest match - instead
+        // of the first substring match - keeps a nested sibling (e.g. /admin/plugin/history)
+        // highlighted over the plugin root item (/admin/plugin) whose URL is a prefix of it.
+        $bestLength = 0;
+
+        foreach ($menu as $item) {
+            $this->findLongestActiveMatch($item, $currentUrl, $adminRoot, $bestLength);
+        }
+
+        if ($bestLength === 0) {
+            return $menu;
+        }
+
+        // Second pass: mark the first item that matches at the longest length active,
+        // together with its ancestors, and stop once it is found.
+        $matched = false;
+
+        foreach ($menu as $key => $item) {
+            $menu[$key] = $this->applyActiveRecursive($item, $currentUrl, $adminRoot, $bestLength, $matched);
+
+            if ($matched) {
                 break;
             }
         }
@@ -457,35 +478,57 @@ class DashboardMenu
         return $menu;
     }
 
-    protected function applyActiveRecursive(array $item): array
+    protected function isMenuItemMatched(string $currentUrl, string $url, string $adminRoot): bool
     {
-        $currentUrl = $this->request->fullUrl();
-        $adminPrefix = BaseHelper::getAdminPrefix();
-        $url = $item['url'];
+        return $currentUrl === $url
+            || (Str::contains($currentUrl, $url) && $url !== $adminRoot);
+    }
 
-        $item['active'] = $currentUrl === $item['url']
-            || (
-                Str::contains($currentUrl, $url)
-                && $url !== url($adminPrefix)
-            );
-
-        if ($item['children']->isEmpty()) {
-            return $item;
+    protected function findLongestActiveMatch(array $item, string $currentUrl, string $adminRoot, int &$bestLength): void
+    {
+        if ($this->isMenuItemMatched($currentUrl, $item['url'], $adminRoot)) {
+            $bestLength = max($bestLength, Str::length($item['url']));
         }
 
-        $children = $item['children']->toArray();
+        foreach ($item['children'] as $child) {
+            $this->findLongestActiveMatch((array) $child, $currentUrl, $adminRoot, $bestLength);
+        }
+    }
 
-        foreach ($children as &$child) {
-            $child = $this->applyActiveRecursive($child);
+    protected function applyActiveRecursive(array $item, string $currentUrl, string $adminRoot, int $bestLength, bool &$matched): array
+    {
+        $item['active'] = false;
 
-            if ($child['active']) {
-                $item['active'] = true;
+        if (! $item['children']->isEmpty()) {
+            $children = $item['children']->toArray();
 
-                break;
+            foreach ($children as &$child) {
+                $child = $this->applyActiveRecursive($child, $currentUrl, $adminRoot, $bestLength, $matched);
+
+                if ($child['active']) {
+                    $item['active'] = true;
+
+                    break;
+                }
+            }
+
+            unset($child);
+
+            $item['children'] = collect($children);
+
+            if ($item['active']) {
+                return $item;
             }
         }
 
-        $item['children'] = collect($children);
+        if (
+            ! $matched
+            && $this->isMenuItemMatched($currentUrl, $item['url'], $adminRoot)
+            && Str::length($item['url']) === $bestLength
+        ) {
+            $item['active'] = true;
+            $matched = true;
+        }
 
         return $item;
     }

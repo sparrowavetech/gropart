@@ -52,6 +52,7 @@ class GetProductService
             'sort_by' => $request->input('sort-by') ?: $request->input('sort_by'),
             'num' => $num,
             'discounted_only' => (bool) $request->input('discounted_only'),
+            'rating' => (int) $request->input('rating') ?: null,
         ];
 
         if ($category) {
@@ -152,6 +153,7 @@ class GetProductService
             'attributes' => $queryVar['attributes'],
             'order_by' => $orderBy,
             'discounted_only' => $queryVar['discounted_only'],
+            'rating' => $queryVar['rating'],
         ], $params);
     }
 

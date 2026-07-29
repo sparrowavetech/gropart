@@ -47,6 +47,7 @@ return [
     'get_system_report' => 'Získať systémovú správu',
     'system_environment' => 'Systémové prostredie',
     'framework_version' => 'Verzia frameworku',
+    'core_version' => 'Verzia jadra',
     'timezone' => 'Časová zóna',
     'debug_mode' => 'Režim ladenia',
     'debug_mode_off' => 'Režim ladenia vypnutý',

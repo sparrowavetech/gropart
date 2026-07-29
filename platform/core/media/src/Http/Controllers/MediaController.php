@@ -107,6 +107,13 @@ class MediaController extends BaseController
 
         $folderId = $request->input('folder_id', 0);
 
+        // Scope for the footer status bar totals; filled in per view below so the
+        // numbers always match what the current view actually lists.
+        $statsParams = [
+            'filter' => $request->input('filter'),
+            'search' => $search,
+        ];
+
         switch ($request->input('view_in')) {
             case 'all_media':
                 $breadcrumbs = [
@@ -145,6 +152,8 @@ class MediaController extends BaseController
 
                 $files = FileResource::collection($queried->where('is_folder', 0));
 
+                $statsParams['only_trashed'] = true;
+
                 break;
 
             case 'recent':
@@ -177,6 +186,10 @@ class MediaController extends BaseController
                     $files = FileResource::collection($queried->where('is_folder', 0));
                 } else {
                     // When in root recent view, show all recent items
+                    // Default to empty scope so the totals stay at zero when nothing is recent.
+                    $statsParams['file_ids'] = [];
+                    $statsParams['folder_ids'] = [];
+
                     if (! empty($recentItems)) {
                         $recentValue = $recentItems->value;
 
@@ -185,30 +198,28 @@ class MediaController extends BaseController
                         $folderIds = [];
 
                         foreach ($recentValue as $item) {
-                            if (isset($item['is_folder']) && $item['is_folder']) {
+                            if ($this->isFolderItem($item)) {
                                 $folderIds[] = $item['id'];
                             } else {
                                 $fileIds[] = $item['id'];
                             }
                         }
 
-                        // Get folders
-                        if (count($folderIds) > 0) {
-                            $paramsFolder = array_merge_recursive($paramsFolder, [
-                                'condition' => [
-                                    ['media_folders.id', 'IN', $folderIds],
-                                ],
-                            ]);
-                        }
+                        // Get folders. Applied unconditionally: skipping it when there
+                        // are no recent folders left the query unrestricted, which
+                        // listed every root folder in the recent view.
+                        $paramsFolder = array_merge_recursive($paramsFolder, [
+                            'condition' => [
+                                ['media_folders.id', 'IN', $folderIds],
+                            ],
+                        ]);
 
-                        // Get files
-                        if (count($fileIds) > 0) {
-                            $paramsFile = array_merge_recursive($paramsFile, [
-                                'condition' => [
-                                    ['media_files.id', 'IN', $fileIds],
-                                ],
-                            ]);
-                        }
+                        // Get files. Unconditional for the same reason as the folders above.
+                        $paramsFile = array_merge_recursive($paramsFile, [
+                            'condition' => [
+                                ['media_files.id', 'IN', $fileIds],
+                            ],
+                        ]);
 
                         if (count($fileIds) > 0 || count($folderIds) > 0) {
                             $queried = $this->fileRepository->getFilesByFolderId(
@@ -221,6 +232,9 @@ class MediaController extends BaseController
                             $folders = FolderResource::collection($queried->where('is_folder', 1));
                             $files = FileResource::collection($queried->where('is_folder', 0));
                         }
+
+                        $statsParams['file_ids'] = $fileIds;
+                        $statsParams['folder_ids'] = $folderIds;
                     }
                 }
 
@@ -241,14 +255,20 @@ class MediaController extends BaseController
                         'user_id' => Auth::guard()->id(),
                     ])->first();
 
+                // Default to empty scope so the totals stay at zero when nothing is favorited.
+                $statsParams['file_ids'] = [];
+                $statsParams['folder_ids'] = [];
+
                 if (! empty($favoriteItems)) {
-                    $fileIds = collect($favoriteItems->value)
-                        ->where('is_folder', 'false')
+                    $favoriteValue = collect($favoriteItems->value);
+
+                    $fileIds = $favoriteValue
+                        ->reject(fn ($item) => $this->isFolderItem($item))
                         ->pluck('id')
                         ->all();
 
-                    $folderIds = collect($favoriteItems->value)
-                        ->where('is_folder', 'true')
+                    $folderIds = $favoriteValue
+                        ->filter(fn ($item) => $this->isFolderItem($item))
                         ->pluck('id')
                         ->all();
 
@@ -307,6 +327,17 @@ class MediaController extends BaseController
                     $folders = FolderResource::collection($queried->where('is_folder', 1));
 
                     $files = FileResource::collection($queried->where('is_folder', 0));
+
+                    if ($folderId > 0) {
+                        // Inside a folder the favorites filter is dropped, so count the whole folder.
+                        $statsParams['file_ids'] = null;
+                        $statsParams['folder_ids'] = null;
+                    } else {
+                        // Favorites span folders, so scope by id only.
+                        $statsParams['file_ids'] = $fileIds;
+                        $statsParams['folder_ids'] = $folderIds;
+                        $statsParams['scope_to_root'] = false;
+                    }
                 }
 
                 break;
@@ -319,6 +350,56 @@ class MediaController extends BaseController
             'folders' => $folders,
             'breadcrumbs' => $breadcrumbs,
             'selected_file_id' => $selectedFileId,
+            // Skipped only when appending another page of an infinite scroll: the
+            // totals cover the whole view, so recomputing them per page is wasted
+            // work. Keyed off load_more_file rather than the page number because
+            // several post-action reloads re-request a later page without resetting
+            // pagination, and those must still refresh the totals.
+            'stats' => $request->boolean('load_more_file')
+                ? null
+                : $this->transformStats($this->fileRepository->getStats($folderId, $statsParams)),
+        ]);
+    }
+
+    /**
+     * Whether a stored "recent"/"favorites" entry refers to a folder.
+     *
+     * These entries are persisted as the client sent them, so is_folder may be a
+     * real boolean or the string "true"/"false" depending on when it was saved.
+     * Comparing against either form alone silently matches nothing.
+     */
+    protected function isFolderItem(mixed $item): bool
+    {
+        return filter_var(
+            Arr::get((array) $item, 'is_folder', false),
+            FILTER_VALIDATE_BOOLEAN
+        );
+    }
+
+    /**
+     * Attach display labels to the footer stats so pluralisation happens through
+     * trans_choice instead of a two-form ternary in JavaScript.
+     */
+    protected function transformStats(array $stats): array
+    {
+        $label = fn (string $key, int $count): string => trans_choice(
+            'core/media::media.status_bar.' . $key,
+            $count,
+            ['count' => $count]
+        );
+
+        return array_merge($stats, [
+            'labels' => [
+                'folders' => $label('folders', $stats['total_folders']),
+                'files' => $label('files', $stats['total_files']),
+                'images' => $label('images', $stats['image_count']),
+                'videos' => $label('videos', $stats['video_count']),
+                'documents' => $label('documents', $stats['document_count']),
+                'total_size' => trans(
+                    'core/media::media.status_bar.total_size',
+                    ['size' => $stats['human_total_size']]
+                ),
+            ],
         ]);
     }
 
@@ -616,7 +697,9 @@ class MediaController extends BaseController
                     if (! empty($value)) {
                         foreach ($value as $key => $item) {
                             foreach ($request->input('selected') as $selectedItem) {
-                                if ($item['is_folder'] == $selectedItem['is_folder'] && $item['id'] == $selectedItem['id']) {
+                                if ($this->isFolderItem($item) === $this->isFolderItem($selectedItem)
+                                    && $item['id'] == $selectedItem['id']
+                                ) {
                                     unset($value[$key]);
                                 }
                             }
@@ -659,7 +742,9 @@ class MediaController extends BaseController
 
                 // Check if the item already exists in the list
                 foreach ($value as $key => $item) {
-                    if ($item['id'] == $recentItem['id'] && isset($item['is_folder']) && $item['is_folder'] == $recentItem['is_folder']) {
+                    if ($item['id'] == $recentItem['id']
+                        && $this->isFolderItem($item) === $recentItem['is_folder']
+                    ) {
                         // Remove it so we can add it to the beginning (most recent)
                         unset($value[$key]);
 

@@ -3,6 +3,9 @@
 return [
     'name' => 'Products',
     'description' => 'Manage physical and digital products with inventory, pricing, and variations',
+    'rating' => 'Rating',
+    'star_and_up' => ':count star & up',
+    'stars_and_up' => ':count stars & up',
     'create' => 'New product',
     'create_product_type' => [
         'physical' => 'New physical product',

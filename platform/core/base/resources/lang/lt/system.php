@@ -47,6 +47,7 @@ return [
     'get_system_report' => 'Gauti sistemos ataskaitą',
     'system_environment' => 'Sistemos aplinka',
     'framework_version' => 'Karkaso versija',
+    'core_version' => 'Branduolio versija',
     'timezone' => 'Laiko juosta',
     'debug_mode' => 'Derinimo režimas',
     'debug_mode_off' => 'Derinimo režimas išjungtas',

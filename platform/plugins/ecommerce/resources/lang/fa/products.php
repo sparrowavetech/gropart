@@ -3,6 +3,9 @@
 return [
     'name' => 'محصولات',
     'description' => 'مدیریت محصولات فیزیکی و دیجیتال با موجودی، قیمت‌گذاری و تنوع‌ها',
+    'rating' => 'امتیاز',
+    'star_and_up' => ':count ستاره و بالاتر',
+    'stars_and_up' => ':count ستاره و بالاتر',
     'create' => 'محصول جدید',
     'create_product_type' => [
         'physical' => 'محصول فیزیکی جدید',
@@ -155,7 +158,7 @@ return [
     'save_changes' => 'ذخیره تغییرات',
     'continue' => 'ادامه',
     'edit_attribute' => 'ویرایش ویژگی',
-    'select_attribute' => 'انتخاب ویژگی',
+    'select_attribute' => 'انتخاب :name',
     'add_new_variation' => 'افزودن تنوع جدید',
     'edit_variation' => 'ویرایش تنوع',
     'generate_variations' => 'تولید تنوع‌ها',
@@ -331,6 +334,7 @@ return [
         'multiple_options' => 'گزینه‌های متعدد',
         'multiple_options_available' => 'گزینه‌های متعدد موجود است',
         'select' => 'انتخاب',
+        'select_options_hint' => 'گزینه‌هایی برای افزودن انتخاب کنید',
         'selected_items_total' => 'مجموع اقلام انتخاب شده:',
         'add_selected_to_cart' => 'افزودن انتخاب شده‌ها به سبد خرید',
         'bundle_discount_with' => 'تخفیف بسته با :product',
@@ -446,7 +450,6 @@ return [
     'views' => 'بازدیدها',
     'total' => 'مجموع',
     'view_on_frontend' => 'مشاهده در سایت',
-    'select_attribute' => 'انتخاب :name',
     'all_categories' => 'همه دسته‌بندی‌ها',
     'brands' => 'برندها',
     'sku_1' => 'SKU:',
@@ -505,5 +508,7 @@ return [
         'load_more' => 'بیشتر بارگیری کنید',
         'paste_url_alt' => 'یا URL محصول را جایگذاری کنید',
         'vs_separator' => 'در برابر',
+        'empty_description' => 'تا ۴ محصول را کنار هم اضافه کنید تا تفاوت‌های مشخصات، قیمت و موجودی را به‌سرعت مشاهده کنید.',
+        'browse_products' => 'مرور محصولات',
     ],
 ];

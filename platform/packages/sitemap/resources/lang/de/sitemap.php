@@ -84,5 +84,7 @@ return [
             'submit_sitemap_error' => 'Sitemap konnte nicht gesendet werden. Bitte versuchen Sie es erneut.',
             'indexnow_disabled' => 'IndexNow ist nicht aktiviert. Bitte aktivieren Sie es zuerst.',
             'indexnow_no_api_key' => 'Kein API-Schlüssel gefunden. Bitte generieren Sie zuerst einen API-Schlüssel.',
+            'enable_llms_txt' => 'llms.txt aktivieren?',
+            'enable_llms_txt_help' => 'Wenn aktiviert, wird unter :url eine dynamische llms.txt-Datei bereitgestellt, die KI-Crawlern (ChatGPT, Claude, Perplexity usw.) hilft, Ihre Inhalte gemäß der llmstxt.org-Spezifikation zu verstehen. Deaktivieren Sie dies, wenn Sie keine llms.txt bereitstellen möchten. Eine statische public/llms.txt-Datei hat, sofern vorhanden, immer Vorrang.',
         ],
 ];

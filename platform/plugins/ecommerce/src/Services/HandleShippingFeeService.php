@@ -9,6 +9,7 @@ use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Models\Shipping;
 use Botble\Ecommerce\Models\ShippingRule;
 use Botble\Ecommerce\Models\ShippingRuleItem;
+use Botble\Ecommerce\Supports\VolumetricWeightCalculator;
 use Botble\Support\Services\Cache\Cache;
 use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Database\Eloquent\Builder;
@@ -100,7 +101,10 @@ class HandleShippingFeeService
 
     protected function getShippingFee(array $data, string $method, ?string $option = null): array
     {
-        $weight = EcommerceHelper::validateOrderWeight(Arr::get($data, 'weight'));
+        $weight = VolumetricWeightCalculator::billableWeight(
+            EcommerceHelper::validateOrderWeight(Arr::get($data, 'weight')),
+            Arr::get($data, 'items', [])
+        );
 
         $orderTotal = Arr::get($data, 'order_total', 0);
 
@@ -362,7 +366,21 @@ class HandleShippingFeeService
 
     protected function getCacheKey(array $data): string
     {
-        return md5(json_encode(Arr::only($data, ['origin', 'address_to', 'items', 'extra', 'order_total', 'weight'])));
+        $cacheable = Arr::only($data, ['origin', 'address_to', 'items', 'extra', 'order_total', 'weight']);
+
+        // Fold every setting that billable weight depends on into the cache key, so a settings
+        // change invalidates immediately instead of serving prices computed under the old value.
+        // ClearShippingRuleCache only fires on Shipping/ShippingRule model events, never on a
+        // settings save, so this is the sole invalidation path.
+        //
+        // The unit settings matter as much as the divisor: switching width/height from cm to
+        // inch leaves the raw dimensions, weight and divisor identical - so the key would be
+        // unchanged - while billable weight shifts by 2.54^3.
+        $cacheable['volumetric_weight_divisor'] = get_ecommerce_setting('volumetric_weight_divisor', 0);
+        $cacheable['store_width_height_unit'] = get_ecommerce_setting('store_width_height_unit', 'cm');
+        $cacheable['store_weight_unit'] = get_ecommerce_setting('store_weight_unit', 'g');
+
+        return md5(json_encode($cacheable));
     }
 
     public function clearCache(): void

@@ -47,6 +47,7 @@ return [
     'get_system_report' => 'الحصول على تقرير النظام',
     'system_environment' => 'بيئة النظام',
     'framework_version' => 'نسخة الإطار',
+    'core_version' => 'نسخة النواة',
     'timezone' => 'وحدة زمنية',
     'debug_mode' => 'وضع التصحيح',
     'debug_mode_off' => 'وضع التصحيح معطل',

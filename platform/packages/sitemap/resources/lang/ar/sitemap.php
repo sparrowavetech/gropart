@@ -84,5 +84,7 @@ return [
             'submit_sitemap_error' => 'فشل إرسال خريطة الموقع. يرجى المحاولة مرة أخرى.',
             'indexnow_disabled' => 'IndexNow غير مفعل. يرجى تفعيله أولاً.',
             'indexnow_no_api_key' => 'لم يتم العثور على مفتاح API. يرجى إنشاء مفتاح API أولاً.',
+            'enable_llms_txt' => 'تفعيل llms.txt؟',
+            'enable_llms_txt_help' => 'عند التفعيل، يتم تقديم ملف llms.txt ديناميكي على :url لمساعدة زواحف الذكاء الاصطناعي (ChatGPT وClaude وPerplexity وغيرها) على فهم محتواك، وفقًا لمواصفات llmstxt.org. عطّل هذا إذا كنت لا تريد عرض ملف llms.txt. يأخذ ملف public/llms.txt الثابت، إن وُجد، الأولوية دائمًا.',
         ],
 ];

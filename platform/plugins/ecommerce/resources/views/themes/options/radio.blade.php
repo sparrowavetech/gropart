@@ -26,7 +26,7 @@
                     <input
                         id="option-{{ $option->id }}-value-{{ Str::slug($value->option_value) }}"
                         name="options[{{ $option->id }}][values]"
-                        data-extra-price="{{ $price }}"
+                        data-extra-price="{{ format_price($price, null, true) }}"
                         data-value-slug="{{ Str::slug($value->option_value) }}"
                         type="radio"
                         value="{{ $value->option_value }}"

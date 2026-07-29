@@ -47,6 +47,7 @@ return [
     'get_system_report' => 'Lấy báo cáo hệ thống',
     'system_environment' => 'Môi trường hệ thống',
     'framework_version' => 'Phiên bản Framework',
+    'core_version' => 'Phiên bản lõi',
     'timezone' => 'Múi giờ',
     'debug_mode' => 'Chế độ gỡ lỗi',
     'debug_mode_off' => 'Tắt chế độ gỡ lỗi',

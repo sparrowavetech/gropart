@@ -54,13 +54,7 @@ class HandleCheckoutOrderData
                 $couponDiscountAmount,
             ] = apply_filters(PROCESS_CHECKOUT_ORDER_DATA_ECOMMERCE, $products, $token, $sessionCheckoutData, $request);
 
-            $shippingAmount = 0;
-
             foreach (Arr::get($sessionCheckoutData, 'marketplace', []) as $storeData) {
-                if (isset($storeData['shipping_amount'])) {
-                    $shippingAmount += (float) $storeData['shipping_amount'];
-                }
-
                 if (! empty($storeData['created_order_id'])) {
                     $order = Order::query()
                         ->where('id', $storeData['created_order_id'])

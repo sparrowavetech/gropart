@@ -11,6 +11,9 @@ use Botble\Ecommerce\Models\Customer;
 use Botble\Ecommerce\Models\Order;
 use Botble\Ecommerce\Models\OrderAddress;
 use Botble\Ecommerce\Models\OrderTaxInformation;
+use Botble\Ecommerce\Facades\OrderHelper;
+use Botble\Payment\Enums\PaymentStatusEnum;
+use Botble\Payment\Models\Payment;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Schema;
 
@@ -605,5 +608,76 @@ class EcommerceCodebaseFixesTest extends BaseTestCase
             'city' => 'Cap de Ville',
             'state' => 'Point Fortin',
         ]);
+    }
+
+    // ── Guard: createOrUpdateIncompleteOrder must never reset a completed order ──
+
+    public function test_incomplete_order_update_does_not_reset_a_finished_order(): void
+    {
+        $order = $this->createOrder(['is_finished' => true, 'amount' => 100]);
+
+        $returned = OrderHelper::createOrUpdateIncompleteOrder(
+            ['amount' => 999, 'sub_total' => 999],
+            $order
+        );
+
+        $this->assertNotFalse($returned);
+        $order->refresh();
+
+        // The finished order must be left untouched - not flipped back to incomplete,
+        // and its amount not overwritten from the incoming (live-cart) data.
+        $this->assertTrue((bool) $order->is_finished, 'Finished order must stay finished');
+        $this->assertEquals(100, (float) $order->amount, 'Finished order amount must not be overwritten');
+    }
+
+    public function test_incomplete_order_update_does_not_reset_an_order_with_completed_payment(): void
+    {
+        if (! is_plugin_active('payment')) {
+            $this->markTestSkipped('Payment plugin is not active in this test run.');
+        }
+
+        // The exact stranded state from ticket: is_finished = 0 but a completed payment linked.
+        $order = $this->createOrder(['is_finished' => false, 'amount' => 1997]);
+
+        $payment = Payment::query()->create([
+            'amount' => 1997,
+            'currency' => 'INR',
+            'charge_id' => 'pay_TEST_' . $order->id,
+            'payment_channel' => 'razorpay',
+            'status' => PaymentStatusEnum::COMPLETED,
+            'order_id' => $order->id,
+        ]);
+
+        $order->payment_id = $payment->id;
+        $order->save();
+
+        $returned = OrderHelper::createOrUpdateIncompleteOrder(
+            ['amount' => 500, 'sub_total' => 500],
+            $order
+        );
+
+        $this->assertNotFalse($returned);
+        $order->refresh();
+
+        // The guard must return the paid order untouched: its total is not rewritten
+        // from the incoming live-cart data (500), proving checkout re-entry did not
+        // overwrite an order that already has a completed payment.
+        $this->assertEquals(1997, (float) $order->amount, 'Paid order amount must not be overwritten');
+    }
+
+    public function test_incomplete_order_without_payment_is_still_updated_normally(): void
+    {
+        // Regression: a genuinely incomplete, unpaid order must still update as before.
+        $order = $this->createOrder(['is_finished' => false, 'amount' => 100]);
+
+        OrderHelper::createOrUpdateIncompleteOrder(
+            ['amount' => 250, 'sub_total' => 250],
+            $order
+        );
+
+        $order->refresh();
+
+        $this->assertFalse((bool) $order->is_finished, 'Unpaid incomplete order stays incomplete');
+        $this->assertEquals(250, (float) $order->amount, 'Unpaid incomplete order must still accept updates');
     }
 }

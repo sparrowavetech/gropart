@@ -83,5 +83,7 @@ return [
         'submit_sitemap_error' => 'Site haritası gönderilemedi. Lütfen tekrar deneyin.',
         'indexnow_disabled' => 'IndexNow etkin değil. Lütfen önce etkinleştirin.',
         'indexnow_no_api_key' => 'API anahtarı bulunamadı. Lütfen önce bir API anahtarı oluşturun.',
+        'enable_llms_txt' => 'llms.txt etkinleştirilsin mi?',
+        'enable_llms_txt_help' => 'Etkinleştirildiğinde, yapay zeka tarayıcılarının (ChatGPT, Claude, Perplexity vb.) içeriğinizi anlamasına yardımcı olmak için llmstxt.org spesifikasyonuna uygun olarak :url adresinde dinamik bir llms.txt dosyası sunulur. Bir llms.txt yayınlamak istemiyorsanız bunu devre dışı bırakın. Statik bir public/llms.txt dosyası varsa her zaman önceliklidir.',
     ],
 ];

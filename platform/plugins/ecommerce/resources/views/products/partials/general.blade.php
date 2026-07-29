@@ -3,7 +3,9 @@
 @php
     $currencies = \Botble\Ecommerce\Models\Currency::query()->oldest('order')->get();
     $defaultCurrency = get_application_currency();
-    $productCurrencyCode = old('currency_code', $product?->currency_code ?? $originalProduct?->currency_code ?? $defaultCurrency->title);
+    // Resolve the product's own currency via getSourceCurrency() so variations inherit the parent product's currency (the raw currency_code column is null on variation rows).
+    $sourceCurrency = $product?->getSourceCurrency() ?? $originalProduct?->getSourceCurrency();
+    $productCurrencyCode = old('currency_code', $sourceCurrency?->title ?? $defaultCurrency->title);
     $selectedCurrency = $currencies->firstWhere('title', $productCurrencyCode) ?? $defaultCurrency;
 @endphp
 

@@ -47,6 +47,7 @@ return [
     'get_system_report' => 'Kunin ang Ulat ng Sistema',
     'system_environment' => 'Kapaligiran ng Sistema',
     'framework_version' => 'Bersyon ng Framework',
+    'core_version' => 'Bersyon ng Core',
     'timezone' => 'Sona ng oras',
     'debug_mode' => 'Mode ng pag-debug',
     'debug_mode_off' => 'Naka-off ang Debug Mode',

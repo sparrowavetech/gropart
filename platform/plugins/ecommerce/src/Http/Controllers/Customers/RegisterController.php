@@ -18,8 +18,6 @@ use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\URL;
-use Botble\Sms\Supports\SmsHandler;
-use Botble\Sms\Enums\SmsEnum;
 
 class RegisterController extends BaseController
 {
@@ -79,30 +77,7 @@ class RegisterController extends BaseController
 
         event(new Registered($customer));
 
-        if (is_plugin_active('sms') && setting('sms_otp_enabled')) {
-            $otp = mt_rand(100000, 999999);
-            $sms = new SmsHandler;
-            $customer->otp = $otp;
-            $customer->save();
-            $sms->setModule(ECOMMERCE_MODULE_SCREEN_NAME);
-            if ($sms->templateEnabled(SmsEnum::OTP())) {
-                $sms->setVariableValues([
-                    'customer_name' => $customer->name,
-                    'otp' => $otp,
-                ]);
-                $sms->sendUsingTemplate(
-                    SmsEnum::OTP(),
-                    $customer->phone
-                );
-            }
-            $this->registered($request, $customer);
-
-            return $this
-                ->httpResponse()
-                ->setNextUrl(route('customer.otp', $customer->id))
-                ->setMessage(__('We have sent you an OTP to verify your mobile. Please check and confirm your mobile No!'));
-
-        } else if (
+        if (
             EcommerceHelper::isEnableEmailVerification() &&
             (! EcommerceHelper::isLoginUsingPhone() || get_ecommerce_setting('keep_email_field_in_registration_form', true))
         ) {
@@ -128,8 +103,33 @@ class RegisterController extends BaseController
 
         return $this
             ->httpResponse()
-            ->setNextUrl($this->redirectPath())
+            ->setNextUrl($this->intendedUrl($this->redirectPath()))
             ->setMessage(__('Registered successfully!'));
+    }
+
+    /**
+     * Consume the URL the customer was heading to before being sent to register/login
+     * (e.g. checkout), falling back to $default when there is none. Mirrors what
+     * redirect()->intended() does for the login flow, which registration cannot use
+     * because it returns a BaseHttpResponse instead of a redirect.
+     */
+    protected function intendedUrl(string $default): string
+    {
+        $intended = session()->pull('url.intended');
+
+        if (! $intended || ! is_string($intended)) {
+            return $default;
+        }
+
+        // Only follow same-host targets, so a crafted ?redirect= cannot bounce the
+        // customer off-site right after authenticating.
+        $host = parse_url($intended, PHP_URL_HOST);
+
+        if ($host && $host !== request()->getHost()) {
+            return $default;
+        }
+
+        return $intended;
     }
 
     protected function create(array $data)
@@ -171,7 +171,7 @@ class RegisterController extends BaseController
 
         return $this
             ->httpResponse()
-            ->setNextUrl(route('customer.overview'))
+            ->setNextUrl($this->intendedUrl(route('customer.overview')))
             ->setMessage(__('You successfully confirmed your email address.'));
     }
 

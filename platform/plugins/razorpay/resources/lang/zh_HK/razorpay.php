@@ -36,7 +36,7 @@ return [
     'test_payment' => '首先在測試模式下進行測試付款',
     'check_status' => '檢查訂單狀態是否更新為「已完成」',
     'verify_webhook' => '如果訂單仍為「未完成」,請驗證您的 webhook 配置',
-    'check_logs' => '檢查 storage/logs/payment-*.log 中的付款日誌以進行除錯',
+    'check_logs' => '檢查 Payments > Payment Logs (admin panel) 中的付款日誌以進行除錯',
     'troubleshooting' => '疑難排解提示:',
     'ssl_required' => '確保您的網站具有有效的 SSL 憑證 (HTTPS)',
     'public_url' => '驗證 webhook URL 可公開存取(非 localhost)',

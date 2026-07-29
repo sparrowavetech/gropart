@@ -36,7 +36,7 @@ return [
     'test_payment' => 'Najprej opravite testno plačilo v testnem načinu',
     'check_status' => 'Preverite, ali se stanje naročila posodobi na "Dokončano"',
     'verify_webhook' => 'Če naročila ostanejo "Nepopolna", preverite konfiguracijo webhooka',
-    'check_logs' => 'Preverite dnevnike plačil v storage/logs/payment-*.log za odpravljanje napak',
+    'check_logs' => 'Preverite dnevnike plačil v Payments > Payment Logs (admin panel) za odpravljanje napak',
     'troubleshooting' => 'Nasveti za odpravljanje težav:',
     'ssl_required' => 'Prepričajte se, da ima vaša stran veljaven SSL certifikat (HTTPS)',
     'public_url' => 'Preverite, ali je URL webhooka javno dostopen (ne localhost)',

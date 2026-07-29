@@ -894,6 +894,103 @@ class RazorpayControllerTest extends TestCase
         $this->assertEquals(PaymentStatusEnum::COMPLETED, $result);
     }
 
+    public function test_status_authorized_captures_via_fetched_payment_with_currency(): void
+    {
+        $fakePayment = new class {
+            public $captured = false;
+
+            public ?array $capturedWith = null;
+
+            public function capture($attributes = [])
+            {
+                $this->capturedWith = $attributes;
+                $this->captured = true;
+
+                return $this;
+            }
+        };
+
+        $api = $this->fakeApiReturningPayment($fakePayment);
+
+        // Regression: an authorized-but-uncaptured payment must be captured by first
+        // fetching the payment entity (which carries the id) - the old code called
+        // $api->payment->capture() on the idless accessor and logged
+        // "Undefined array key id". Currency is required by Razorpay's capture API.
+        $result = $this->controller->testDeterminePaymentStatus(
+            ['status' => 'authorized', 'amount' => 10000, 'currency' => 'INR'],
+            ['status' => 'attempted', 'currency' => 'INR'],
+            $api,
+            $this->chargeId('x')
+        );
+
+        $this->assertEquals(PaymentStatusEnum::COMPLETED, $result);
+        $this->assertTrue($fakePayment->captured, 'Authorized payment should be captured');
+        $this->assertEquals(
+            ['amount' => 10000, 'currency' => 'INR'],
+            $fakePayment->capturedWith,
+            'Capture must send amount and currency'
+        );
+    }
+
+    public function test_status_authorized_already_captured_is_not_recaptured(): void
+    {
+        $fakePayment = new class {
+            public $captured = true;
+
+            public bool $captureCalled = false;
+
+            public function capture($attributes = [])
+            {
+                $this->captureCalled = true;
+
+                return $this;
+            }
+        };
+
+        $api = $this->fakeApiReturningPayment($fakePayment);
+
+        // Race case: the captured webhook already settled the payment. Fetching shows
+        // captured = true, so we must NOT call capture again (which would error).
+        $result = $this->controller->testDeterminePaymentStatus(
+            ['status' => 'authorized', 'amount' => 10000, 'currency' => 'INR'],
+            ['status' => 'attempted', 'currency' => 'INR'],
+            $api,
+            $this->chargeId('x')
+        );
+
+        $this->assertEquals(PaymentStatusEnum::COMPLETED, $result);
+        $this->assertFalse($fakePayment->captureCalled, 'Already-captured payment must not be re-captured');
+    }
+
+    protected function fakeApiReturningPayment(object $payment): Api
+    {
+        $resource = new class($payment) {
+            public function __construct(public object $payment)
+            {
+            }
+
+            public function fetch($id): object
+            {
+                return $this->payment;
+            }
+        };
+
+        return new class('key', 'secret', $resource) extends Api {
+            protected object $fakeResource;
+
+            public function __construct($key, $secret, object $resource)
+            {
+                parent::__construct($key, $secret);
+                $this->fakeResource = $resource;
+            }
+
+            public function __get($name)
+            {
+                return $name === 'payment' ? $this->fakeResource : parent::__get($name);
+            }
+        };
+    }
+
     // ═════════════════════════════════════════════════════════════════════
     //  Race condition scenarios
     // ═════════════════════════════════════════════════════════════════════

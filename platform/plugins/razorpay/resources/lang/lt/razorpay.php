@@ -36,7 +36,7 @@ return [
     'test_payment' => 'Pirmiausia atlikite bandomąjį mokėjimą bandomojoje režime',
     'check_status' => 'Patikrinkite, ar užsakymo būsena atnaujinama į „Užbaigta"',
     'verify_webhook' => 'Jei užsakymai lieka „Nebaigti", patikrinkite savo webhook konfigūraciją',
-    'check_logs' => 'Patikrinkite mokėjimų žurnalus storage/logs/payment-*.log derinimui',
+    'check_logs' => 'Patikrinkite mokėjimų žurnalus Payments > Payment Logs (admin panel) derinimui',
     'troubleshooting' => 'Problemų sprendimo patarimai:',
     'ssl_required' => 'Įsitikinkite, kad jūsų svetainė turi galiojantį SSL sertifikatą (HTTPS)',
     'public_url' => 'Patikrinkite, ar webhook URL yra viešai prieinamas (ne localhost)',

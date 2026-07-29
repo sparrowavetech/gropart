@@ -15,11 +15,13 @@ use Illuminate\Support\Str;
 
 class ContactService
 {
-    public function validateBlacklistDomain(string $email): ?string
+    // The email field is optional (nullable in both the request rules and the contacts table),
+    // so this must accept null - a blank email has no domain to check against the blacklist.
+    public function validateBlacklistDomain(?string $email): ?string
     {
         $blacklistDomains = setting('blacklist_email_domains');
 
-        if (! $blacklistDomains) {
+        if (! $blacklistDomains || ! $email) {
             return null;
         }
 

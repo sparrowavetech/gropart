@@ -42,6 +42,12 @@ class SendContactEmailListener implements ShouldQueue
 
         $emailHandler->sendUsingTemplate('notice', $receiverEmails ?: null, $args);
 
+        // The email field is optional. Without a recipient, EmailHandler::send() falls back to the
+        // admin address, which would deliver the sender's own confirmation to the site owner.
+        if (! $contact->email) {
+            return;
+        }
+
         $args = ['replyTo' => is_array($receiverEmails) ? Arr::first($receiverEmails) : $receiverEmails];
 
         $emailHandler->sendUsingTemplateWithLocale('sender-confirmation', $contact->email, $locale, $args);

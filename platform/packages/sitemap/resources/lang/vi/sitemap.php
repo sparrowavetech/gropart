@@ -83,5 +83,7 @@ return [
         'submit_sitemap_error' => 'Gửi sitemap không thành công. Vui lòng thử lại.',
         'indexnow_disabled' => 'IndexNow chưa được bật. Vui lòng bật trước.',
         'indexnow_no_api_key' => 'Không tìm thấy khóa API. Vui lòng tạo khóa API trước.',
+        'enable_llms_txt' => 'Bật llms.txt?',
+        'enable_llms_txt_help' => 'Khi được bật, tệp llms.txt động được cung cấp tại :url để giúp các trình thu thập dữ liệu AI (ChatGPT, Claude, Perplexity, v.v.) hiểu nội dung của bạn, theo đặc tả llmstxt.org. Tắt tùy chọn này nếu bạn không muốn hiển thị tệp llms.txt. Tệp tĩnh public/llms.txt, nếu có, luôn được ưu tiên.',
     ],
 ];

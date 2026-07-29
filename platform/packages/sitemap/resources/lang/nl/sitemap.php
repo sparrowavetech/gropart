@@ -83,5 +83,7 @@ return [
         'submit_sitemap_error' => 'Verzenden van de sitemap is mislukt. Probeer het opnieuw.',
         'indexnow_disabled' => 'IndexNow is niet ingeschakeld. Schakel het eerst in.',
         'indexnow_no_api_key' => 'Geen API-sleutel gevonden. Genereer eerst een API-sleutel.',
+        'enable_llms_txt' => 'llms.txt inschakelen?',
+        'enable_llms_txt_help' => 'Indien ingeschakeld, wordt op :url een dynamisch llms.txt-bestand aangeboden om AI-crawlers (ChatGPT, Claude, Perplexity, enz.) te helpen uw inhoud te begrijpen, volgens de llmstxt.org-specificatie. Schakel dit uit als u geen llms.txt wilt blootstellen. Een statisch public/llms.txt-bestand heeft, indien aanwezig, altijd voorrang.',
     ],
 ];

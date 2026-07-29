@@ -83,5 +83,7 @@ return [
         'submit_sitemap_error' => 'サイトマップの送信に失敗しました。もう一度お試しください。',
         'indexnow_disabled' => 'IndexNow が有効になっていません。先に有効化してください。',
         'indexnow_no_api_key' => 'APIキーが見つかりません。まずは APIキーを生成してください。',
+        'enable_llms_txt' => 'llms.txt を有効にしますか？',
+        'enable_llms_txt_help' => '有効にすると、llmstxt.org 仕様に従って、AI クローラー（ChatGPT、Claude、Perplexity など）がコンテンツを理解できるよう、:url で動的な llms.txt ファイルが提供されます。llms.txt を公開したくない場合は無効にしてください。静的な public/llms.txt ファイルが存在する場合は、常に優先されます。',
     ],
 ];

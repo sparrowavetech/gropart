@@ -83,5 +83,7 @@ return [
         'submit_sitemap_error' => 'Trimiterea sitemap-ului a eșuat. Încercați din nou.',
         'indexnow_disabled' => 'IndexNow nu este activat. Vă rugăm să îl activați mai întâi.',
         'indexnow_no_api_key' => 'Nu a fost găsită nicio cheie API. Generați mai întâi o cheie API.',
+        'enable_llms_txt' => 'Activați llms.txt?',
+        'enable_llms_txt_help' => 'Când este activat, un fișier llms.txt dinamic este servit la :url pentru a ajuta crawlerele AI (ChatGPT, Claude, Perplexity etc.) să înțeleagă conținutul dvs., urmând specificația llmstxt.org. Dezactivați aceasta dacă nu doriți să expuneți un llms.txt. Un fișier static public/llms.txt, dacă există, are întotdeauna prioritate.',
     ],
 ];

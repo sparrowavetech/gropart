@@ -94,6 +94,17 @@ return [
     ],
     'add' => 'Add media',
 
+    // Footer status bar. Pluralised server-side with trans_choice so locales with
+    // more than two plural forms are handled correctly.
+    'status_bar' => [
+        'folders' => '{1} :count folder|[0,*] :count folders',
+        'files' => '{1} :count file|[0,*] :count files',
+        'images' => '{1} :count image|[0,*] :count images',
+        'videos' => '{1} :count video|[0,*] :count videos',
+        'documents' => '{1} :count document|[0,*] :count documents',
+        'total_size' => 'Total: :size',
+    ],
+
     'javascript' => [
         'name' => 'Name',
         'url' => 'URL',
@@ -107,6 +118,31 @@ return [
         'visit_link' => 'Open link',
         'width' => 'Width',
         'height' => 'Height',
+
+        'upload_status' => [
+            'uploading' => 'Uploading...',
+            'uploaded' => 'Uploaded',
+            'error' => 'Error',
+            'canceled' => 'Canceled',
+            'retry' => 'Retry',
+        ],
+
+        // Summary shown once the whole queue finishes. Phrased without plural forms
+        // because these are interpolated in JavaScript, which cannot run trans_choice.
+        'upload_summary' => [
+            'uploaded' => ':count uploaded',
+            'failed' => ':count failed',
+            'canceled' => ':count canceled',
+        ],
+
+        'upload_error' => [
+            // Shown when the request is rejected before it reaches the application,
+            // which is the one upload failure that otherwise reports no reason at all.
+            'too_large' => 'This file is larger than the server upload limit of :size. Increase upload_max_filesize and post_max_size in your PHP configuration, then try again.',
+            'too_large_unknown_limit' => 'This file is larger than the server upload limit. Increase upload_max_filesize and post_max_size in your PHP configuration, then try again.',
+            'incomplete' => 'The upload did not complete. Check your connection and try again.',
+            'unknown' => 'Upload failed (error :code). Please try again.',
+        ],
 
         'no_item' => [
             'all_media' => [

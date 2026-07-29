@@ -36,7 +36,7 @@ return [
     'test_payment' => 'Buat pembayaran ujian dalam Mod Ujian dahulu',
     'check_status' => 'Semak sama ada status pesanan dikemas kini kepada "Selesai"',
     'verify_webhook' => 'Jika pesanan kekal "Tidak Lengkap", sahkan konfigurasi webhook anda',
-    'check_logs' => 'Semak log pembayaran dalam storage/logs/payment-*.log untuk penyahpepijatan',
+    'check_logs' => 'Semak log pembayaran dalam Payments > Payment Logs (admin panel) untuk penyahpepijatan',
     'troubleshooting' => 'Petua Penyelesaian Masalah:',
     'ssl_required' => 'Pastikan laman web anda mempunyai sijil SSL yang sah (HTTPS)',
     'public_url' => 'Sahkan URL webhook boleh diakses secara awam (bukan localhost)',

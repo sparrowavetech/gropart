@@ -36,7 +36,7 @@ return [
     'test_payment' => 'Gjør en testbetaling i testmodus først',
     'check_status' => 'Sjekk om bestillingsstatusen oppdateres til "Fullført"',
     'verify_webhook' => 'Hvis bestillinger forblir "Ufullstendig", verifiser webhook-konfigurasjonen din',
-    'check_logs' => 'Sjekk betalingslogger i storage/logs/payment-*.log for feilsøking',
+    'check_logs' => 'Sjekk betalingslogger i Payments > Payment Logs (admin panel) for feilsøking',
     'troubleshooting' => 'Feilsøkingstips:',
     'ssl_required' => 'Forsikre deg om at nettstedet ditt har et gyldig SSL-sertifikat (HTTPS)',
     'public_url' => 'Verifiser at webhook-URL er offentlig tilgjengelig (ikke localhost)',

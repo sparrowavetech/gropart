@@ -47,6 +47,7 @@ return [
     'get_system_report' => 'সিস্টেম রিপোর্ট পান',
     'system_environment' => 'সিস্টেম পরিবেশ',
     'framework_version' => 'ফ্রেমওয়ার্ক সংস্করণ',
+    'core_version' => 'কোর সংস্করণ',
     'timezone' => 'টাইমজোন',
     'debug_mode' => 'ডিবাগ মোড',
     'debug_mode_off' => 'ডিবাগ মোড বন্ধ',

@@ -16,7 +16,10 @@ Theme::registerRoutes(function (): void {
 
         // Dynamic llms.txt fallback (served only when public/llms.txt is absent).
         // Registered before the sitemap/catch-all routes so it always matches first.
-        Route::get('llms.txt', 'getLlmsTxt')->name('public.llms-txt');
+        // Can be turned off via Admin -> Settings -> Sitemap -> Enable llms.txt.
+        if (setting('llms_txt_enabled', true)) {
+            Route::get('llms.txt', 'getLlmsTxt')->name('public.llms-txt');
+        }
 
         if (setting('sitemap_enabled', true)) {
             Route::get('sitemap.xml', 'getSiteMap')->name('public.sitemap');

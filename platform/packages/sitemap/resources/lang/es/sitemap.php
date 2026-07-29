@@ -84,5 +84,7 @@ return [
             'submit_sitemap_error' => 'No se pudo enviar el mapa del sitio. Por favor, inténtelo de nuevo.',
             'indexnow_disabled' => 'IndexNow no está habilitado. Por favor, habilítelo primero.',
             'indexnow_no_api_key' => 'No se encontró clave API. Por favor, genere primero una clave API.',
+            'enable_llms_txt' => '¿Habilitar llms.txt?',
+            'enable_llms_txt_help' => 'Cuando está habilitado, se sirve un archivo llms.txt dinámico en :url para ayudar a los rastreadores de IA (ChatGPT, Claude, Perplexity, etc.) a comprender tu contenido, siguiendo la especificación llmstxt.org. Desactívalo si no deseas exponer un llms.txt. Un archivo estático public/llms.txt, si existe, siempre tiene prioridad.',
         ],
 ];

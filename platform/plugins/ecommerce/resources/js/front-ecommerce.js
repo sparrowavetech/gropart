@@ -1687,6 +1687,12 @@ class Ecommerce {
         const siteConfig = window.siteConfig || {}
         const placeholder = $product.find('.bb-product-gallery').data('placeholder') || siteConfig.img_placeholder
 
+        // Guard against variations/combinations that return no image set (image_with_sizes can be null
+        // when images live only on variations and an incomplete/invalid attribute combo is selected).
+        if (!data.image_with_sizes) {
+            data.image_with_sizes = { origin: [], thumb: [] }
+        }
+
         if (!data.image_with_sizes.origin.length && placeholder) {
             data.image_with_sizes.origin.push(placeholder)
         }

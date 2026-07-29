@@ -41,6 +41,13 @@ return [
     'return' => 'درخواست بازگشت سفارش',
     'restock_products' => 'بازگرداندن :count محصول به انبار؟',
     'is_return' => 'چک‌باکس بازگشت',
+    'return_images' => 'تصاویر مرجوعی',
+    'return_image' => 'تصویر مرجوعی',
+    'upload_return_images' => 'آپلود تصاویر',
+    'upload_return_images_limit' => 'می‌توانید تا :total عکس آپلود کنید (حداکثر :max مگابایت برای هر کدام)',
+    'return_image_max_size_error' => 'فایل :attribute بیش از حد بزرگ است. حداکثر حجم :max است.',
+    'return_image_max_files_error' => 'تصاویر مرجوعی نباید بیش از :max مورد داشته باشند.',
+    'please_select_return_reason' => 'لطفاً یک دلیل مرجوعی انتخاب کنید.',
     'total_refund_amount' => 'مبلغ کل استرداد',
     'total_amount_can_be_refunded' => 'مبلغ کل قابل استرداد',
     'refund_reason' => 'دلیل استرداد',
@@ -96,7 +103,6 @@ return [
     'shipping_fee' => 'هزینه ارسال',
     'tax' => 'مالیات',
     'shipping_tax' => 'مالیات بر حمل و نقل',
-
     'refunded_amount' => 'مبلغ استرداد شده',
     'amount_received' => 'مبلغ واقعی دریافتی',
     'download_invoice' => 'دانلود فاکتور',
@@ -190,6 +196,8 @@ return [
     'shipping_address' => 'آدرس ارسال',
     'shipping_info' => 'اطلاعات ارسال',
     'billing_address' => 'آدرس صورتحساب',
+    'add_billing_information' => 'افزودن اطلاعات صورت‌حساب',
+    'enter_new_billing_address' => 'آدرس صورت‌حساب جدید را وارد کنید...',
     'see_on_maps' => 'مشاهده در نقشه',
     'name' => 'نام',
     'price' => 'قیمت',
@@ -245,6 +253,9 @@ return [
     'return_order_approve' => 'تأیید',
     'return_order_reject' => 'رد',
     'return_reason' => 'دلیل بازگشت',
+    'return_reason_required' => 'لطفاً یک دلیل مرجوعی انتخاب کنید.',
+    'return_reason_invalid' => 'دلیل مرجوعی انتخاب‌شده نامعتبر است.',
+    'return_items_required' => 'لطفاً حداقل یک مورد برای مرجوع کردن انتخاب کنید.',
     'order_return_moderation' => [
         'approve_button' => 'تأیید',
         'reject_button' => 'رد',
@@ -388,14 +399,13 @@ return [
         'no_downloadable_files' => 'هیچ فایل قابل دانلودی برای این محصول در دسترس نیست.',
         'files_not_available' => 'فایل‌های دانلود در دسترس نیستند. لطفاً با پشتیبانی تماس بگیرید.',
     ],
-        'digital_product_checkout' => [
+    'digital_product_checkout' => [
         'title' => 'دانلود محصول دیجیتال',
         'message' => 'لینک‌های دانلود محصولات دیجیتال شما پس از تکمیل پرداخت به آدرس ایمیل شما ارسال خواهد شد.',
     ],
     'select_one' => 'یکی را انتخاب کنید',
     'confirm_delivery_error' => 'شما نمی‌توانید تحویل این سفارش را تأیید کنید',
     'confirm_delivery_success' => 'تحویل سفارش با موفقیت تأیید شد!',
-
     'export' => [
         'total_orders' => 'مجموع سفارش‌ها',
         'limit' => 'تعداد سفارش‌ها برای صادرات',
@@ -406,7 +416,6 @@ return [
         'end_date' => 'تاریخ پایان',
         'end_date_placeholder' => 'تاریخ پایان را انتخاب کنید',
     ],
-
     'edit_email' => 'ویرایش ایمیل',
     'export_title' => 'سفارش‌ها',
     'export_description' => 'صادرات سفارش‌ها به فایل CSV',
@@ -444,7 +453,6 @@ return [
     'request_code' => 'درخواست #:code',
     'order_successfully_id' => 'سفارش موفق. شماره سفارش :id',
     'thank_you_name' => 'متشکرم، :name!',
-    'customer' => 'مشتری',
     'your_order_is_confirmed' => 'سفارش شما تأیید شد',
     'order_confirmed_message' => 'سفارش شما را پذیرفتیم و در حال آماده‌سازی هستیم.',
     'view_order_history' => 'مشاهده تاریخچه سفارشات',

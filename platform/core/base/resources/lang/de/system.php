@@ -47,6 +47,7 @@ return [
     'get_system_report' => 'Systembericht abrufen',
     'system_environment' => 'Systemumgebung',
     'framework_version' => 'Framework-Version',
+    'core_version' => 'Core-Version',
     'timezone' => 'Zeitzone',
     'debug_mode' => 'Debug-Modus',
     'debug_mode_off' => 'Debug-Modus deaktiviert',

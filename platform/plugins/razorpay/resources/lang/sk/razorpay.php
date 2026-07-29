@@ -36,7 +36,7 @@ return [
     'test_payment' => 'Najprv vykonajte testovaciu platbu v testovacom režime',
     'check_status' => 'Skontrolujte, či sa stav objednávky aktualizuje na "Dokončené"',
     'verify_webhook' => 'Ak objednávky zostávajú "Neúplné", overte konfiguráciu webhooku',
-    'check_logs' => 'Skontrolujte protokoly platieb v storage/logs/payment-*.log na ladenie',
+    'check_logs' => 'Skontrolujte protokoly platieb v Payments > Payment Logs (admin panel) na ladenie',
     'troubleshooting' => 'Tipy na riešenie problémov:',
     'ssl_required' => 'Uistite sa, že vaša stránka má platný SSL certifikát (HTTPS)',
     'public_url' => 'Overte, že URL webhooku je verejne prístupná (nie localhost)',

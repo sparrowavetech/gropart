@@ -93,5 +93,7 @@ return [
         'submit_sitemap_error' => 'Failed to submit sitemap. Please try again.',
         'indexnow_disabled' => 'IndexNow is not enabled. Please enable it first.',
         'indexnow_no_api_key' => 'No API key found. Please generate an API key first.',
+        'enable_llms_txt' => 'Enable llms.txt?',
+        'enable_llms_txt_help' => 'When enabled, a dynamic llms.txt file is served at :url to help AI crawlers (ChatGPT, Claude, Perplexity, etc.) understand your content, following the llmstxt.org spec. Disable this if you do not want to expose an llms.txt. A static public/llms.txt file, if present, always takes precedence.',
     ],
 ];

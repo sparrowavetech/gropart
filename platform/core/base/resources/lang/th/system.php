@@ -47,6 +47,7 @@ return [
     'get_system_report' => 'รับรายงานระบบ',
     'system_environment' => 'สภาพแวดล้อมระบบ',
     'framework_version' => 'เวอร์ชันเฟรมเวิร์ก',
+    'core_version' => 'เวอร์ชันคอร์',
     'timezone' => 'เขตเวลา',
     'debug_mode' => 'โหมดดีบัก',
     'debug_mode_off' => 'โหมดดีบักปิด',

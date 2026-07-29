@@ -36,7 +36,7 @@ return [
     'test_payment' => 'Először végezzen tesztfizetést tesztüzemmódban',
     'check_status' => 'Ellenőrizze, hogy a rendelés állapota "Befejezett"-re frissül-e',
     'verify_webhook' => 'Ha a rendelések "Befejezetlen" maradnak, ellenőrizze a webhook konfigurációt',
-    'check_logs' => 'Ellenőrizze a fizetési naplókat a storage/logs/payment-*.log fájlban hibakereséshez',
+    'check_logs' => 'Ellenőrizze a fizetési naplókat a Payments > Payment Logs (admin panel) fájlban hibakereséshez',
     'troubleshooting' => 'Hibaelhárítási tippek:',
     'ssl_required' => 'Győződjön meg arról, hogy webhelye érvényes SSL tanúsítvánnyal rendelkezik (HTTPS)',
     'public_url' => 'Ellenőrizze, hogy a webhook URL nyilvánosan elérhető (nem localhost)',

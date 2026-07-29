@@ -38,6 +38,10 @@
                 @include(EcommerceHelper::viewPath('includes.filters.attributes', ['view' => $view ?? null]))
             @endif
 
+            @if (EcommerceHelper::isEnabledFilterProductsByRating())
+                @include(EcommerceHelper::viewPath('includes.filters.rating'))
+            @endif
+
             {!! apply_filters('theme_ecommerce_products_filter_after', null, $dataForFilter) !!}
         </form>
     </div>

@@ -466,7 +466,15 @@ class Language
 
     public static function getLocales(): array
     {
-        $locales = collect(static::getListLanguages())->pluck('2', '0')->unique()->all();
+        // Several entries share the same locale code (e.g. `ar` is used by both Arabic and
+        // Moroccan Arabic). Keep the first one so the base language keeps its own name.
+        $locales = [];
+
+        foreach (static::getListLanguages() as $language) {
+            $locales[$language[0]] ??= $language[2];
+        }
+
+        $locales = collect($locales)->unique()->all();
 
         $locales = [
             ...$locales,

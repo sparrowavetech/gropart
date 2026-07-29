@@ -84,5 +84,7 @@ return [
             'submit_sitemap_error' => 'Échec de l\'envoi du plan du site. Veuillez réessayer.',
             'indexnow_disabled' => 'IndexNow n\'est pas activé. Veuillez l\'activer d\'abord.',
             'indexnow_no_api_key' => 'Aucune clé API trouvée. Veuillez d\'abord générer une clé API.',
+            'enable_llms_txt' => 'Activer llms.txt ?',
+            'enable_llms_txt_help' => 'Lorsqu\'il est activé, un fichier llms.txt dynamique est servi à :url pour aider les robots d\'IA (ChatGPT, Claude, Perplexity, etc.) à comprendre votre contenu, conformément à la spécification llmstxt.org. Désactivez ceci si vous ne souhaitez pas exposer de llms.txt. Un fichier statique public/llms.txt, s\'il existe, est toujours prioritaire.',
         ],
 ];

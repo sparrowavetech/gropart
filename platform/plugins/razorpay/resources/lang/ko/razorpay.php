@@ -36,7 +36,7 @@ return [
     'test_payment' => '먼저 테스트 모드에서 테스트 결제를 진행하세요',
     'check_status' => '주문 상태가 "완료"로 업데이트되는지 확인하세요',
     'verify_webhook' => '주문이 "미완료"로 남아 있으면 웹훅 구성을 확인하세요',
-    'check_logs' => '디버깅을 위해 storage/logs/payment-*.log에서 결제 로그를 확인하세요',
+    'check_logs' => '디버깅을 위해 Payments > Payment Logs (admin panel)에서 결제 로그를 확인하세요',
     'troubleshooting' => '문제 해결 팁:',
     'ssl_required' => '사이트에 유효한 SSL 인증서(HTTPS)가 있는지 확인하세요',
     'public_url' => '웹훅 URL이 공개적으로 액세스 가능한지 확인하세요(localhost 아님)',

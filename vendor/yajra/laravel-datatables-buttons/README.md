@@ -48,6 +48,12 @@ This package is a plugin of [Laravel DataTables](https://github.com/yajra/larave
 
 And that's it! Start building out some awesome DataTables!
 
+## HTML Builder Resolution
+
+`DataTableHtml::make()` resolves the HTML builder through Laravel's service container, whether or not constructor arguments are provided. Explicit positional arguments are passed to the resolved class as constructor overrides.
+
+Because container resolution happens before `handle()` builds the table, applications can use container bindings and `resolving` or `afterResolving` callbacks to configure or extend the HTML builder consistently.
+
 ## Contributing
 
 Please see [CONTRIBUTING](https://github.com/yajra/laravel-datatables-buttons/blob/master/.github/CONTRIBUTING.md) for details.

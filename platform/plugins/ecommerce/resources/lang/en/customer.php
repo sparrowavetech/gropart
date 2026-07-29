@@ -70,7 +70,4 @@ return [
         'total' => 'Total customers',
     ],
     'email_verification_link_expired' => 'The email verification link has expired. Please request a new verification email.',
-    'otp_verify_success' => 'OTP verify successfully',
-    'otp_verify_error' => 'OTP Does not match',
-    'verify_otp' => 'verify OTP',
 ];

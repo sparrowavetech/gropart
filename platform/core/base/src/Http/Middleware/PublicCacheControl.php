@@ -18,14 +18,26 @@ class PublicCacheControl
             return;
         }
 
+        // A response is only safe for a shared/public cache when it carries no
+        // per-visitor CSRF token. Botble bakes the session CSRF token into HTML
+        // (hidden `_token` fields, `<meta name="csrf-token">`, or inline JS
+        // headers); caching such a page would serve one visitor's token to
+        // everyone and trigger 419 "page expired" errors on their next form or
+        // AJAX submit. In that case leave the response fully dynamic instead of
+        // advertising `public` and relying on Set-Cookie to deter caching — a
+        // proxy told to ignore Set-Cookie would happily cache (and leak) it.
+        if ($this->responseContainsCsrfTokens($response)) {
+            return;
+        }
+
         $maxAge = (int) config('core.base.general.public_cache_max_age', 600);
 
         $response->headers->set('Cache-Control', sprintf('public, max-age=%d, s-maxage=%d', $maxAge, $maxAge));
         $response->headers->remove('Pragma');
 
-        if (! $this->responseContainsCsrfTokens($response)) {
-            $this->removeSessionCookies($response);
-        }
+        // Safe now: no CSRF token in the body, so dropping per-visitor cookies
+        // lets shared caches store the response without leaking a session.
+        $this->removeSessionCookies($response);
     }
 
     protected function shouldApplyPublicCache(Request $request, mixed $response): bool
@@ -61,13 +73,14 @@ class PublicCacheControl
     {
         $content = $response->getContent();
 
-        if (! $content) {
+        if (! is_string($content) || $content === '') {
             return false;
         }
 
-        return str_contains($content, 'name="_token"')
-            || str_contains($content, 'X-CSRF-TOKEN')
-            || str_contains($content, 'csrf_token');
+        return str_contains($content, 'name="_token"')   // <input name="_token"> (Blade @csrf)
+            || str_contains($content, 'csrf-token')       // <meta name="csrf-token"> + lowercase refs
+            || str_contains($content, 'X-CSRF-TOKEN')     // inline JS header setup (case-sensitive)
+            || str_contains($content, 'csrf_token');      // csrf_token() helper in inline JS
     }
 
     protected function removeSessionCookies(mixed $response): void

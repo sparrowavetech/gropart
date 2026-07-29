@@ -83,5 +83,7 @@ return [
         'submit_sitemap_error' => 'Neizdevās iesniegt vietnes karti. Lūdzu, mēģiniet vēlreiz.',
         'indexnow_disabled' => 'IndexNow nav aktivizēts. Lūdzu, aktivizējiet to vispirms.',
         'indexnow_no_api_key' => 'API atslēga netika atrasta. Lūdzu, vispirms ģenerējiet API atslēgu.',
+        'enable_llms_txt' => 'Iespējot llms.txt?',
+        'enable_llms_txt_help' => 'Kad iespējots, vietnē :url tiek pasniegts dinamisks llms.txt fails, kas palīdz MI rāpuļiem (ChatGPT, Claude, Perplexity utt.) izprast jūsu saturu saskaņā ar llmstxt.org specifikāciju. Atspējojiet to, ja nevēlaties atklāt llms.txt. Statiskam public/llms.txt failam, ja tāds ir, vienmēr ir priekšroka.',
     ],
 ];

@@ -83,5 +83,7 @@ return [
         'submit_sitemap_error' => 'Kunne ikke sende sitemap. Prøv venligst igen.',
         'indexnow_disabled' => 'IndexNow er ikke aktiveret. Aktiver det venligst først.',
         'indexnow_no_api_key' => 'Ingen API-nøgle blev fundet. Generer venligst en API-nøgle først.',
+        'enable_llms_txt' => 'Aktivér llms.txt?',
+        'enable_llms_txt_help' => 'Når det er aktiveret, serveres en dynamisk llms.txt-fil på :url for at hjælpe AI-crawlere (ChatGPT, Claude, Perplexity osv.) med at forstå dit indhold i henhold til llmstxt.org-specifikationen. Deaktiver dette, hvis du ikke vil eksponere en llms.txt. En statisk public/llms.txt-fil har, hvis den findes, altid forrang.',
     ],
 ];

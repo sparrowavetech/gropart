@@ -83,5 +83,7 @@ return [
         'submit_sitemap_error' => 'Az oldaltérkép beküldése nem sikerült. Kérjük, próbálja meg újra.',
         'indexnow_disabled' => 'Az IndexNow nincs engedélyezve. Először engedélyezze.',
         'indexnow_no_api_key' => 'Nem található API-kulcs. Kérjük, először generáljon egy API-kulcsot.',
+        'enable_llms_txt' => 'llms.txt engedélyezése?',
+        'enable_llms_txt_help' => 'Ha engedélyezve van, egy dinamikus llms.txt fájl kerül kiszolgálásra a :url címen, amely segít az AI robotoknak (ChatGPT, Claude, Perplexity stb.) megérteni a tartalmát a llmstxt.org specifikáció szerint. Tiltsa le ezt, ha nem szeretne llms.txt fájlt közzétenni. Egy statikus public/llms.txt fájl, ha létezik, mindig elsőbbséget élvez.',
     ],
 ];

@@ -47,6 +47,7 @@ return [
     'get_system_report' => 'Rendszerjelentés lekérése',
     'system_environment' => 'Rendszer környezet',
     'framework_version' => 'Keretrendszer verzió',
+    'core_version' => 'Mag verzió',
     'timezone' => 'Időzóna',
     'debug_mode' => 'Hibakeresési mód',
     'debug_mode_off' => 'Hibakeresési mód kikapcsolva',

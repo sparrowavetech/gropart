@@ -47,6 +47,7 @@ return [
     'get_system_report' => '시스템 보고서 가져오기',
     'system_environment' => '시스템 환경',
     'framework_version' => '프레임워크 버전',
+    'core_version' => '코어 버전',
     'timezone' => '시간대',
     'debug_mode' => '디버그 모드',
     'debug_mode_off' => '디버그 모드 끔',

@@ -151,10 +151,19 @@ abstract class FormFront extends FormAbstract
             }
 
             if ($this->getFormInputClass()) {
-                $field->setOption('attr.class', $this->getFormInputClass());
+                $inputClass = $this->getFormInputClass();
 
-                if (in_array($field->getType(), [CheckboxField::class, OnOffCheckboxField::class])) {
-                    $field->setOption('attr.class', trim(str_replace('form-control', '', $this->getFormInputClass())));
+                if (in_array($field->getType(), [RadioField::class, 'radio'])) {
+                    // Radio inputs are styled by Bootstrap's .form-check-input. A theme input class
+                    // stretches them to the full column width via form-control, and rounding
+                    // utilities (rounded-2 and friends) override the circle shape, so skip it.
+                    $inputClass = '';
+                } elseif (in_array($field->getType(), [CheckboxField::class, OnOffCheckboxField::class])) {
+                    $inputClass = trim(str_replace('form-control', '', $inputClass));
+                }
+
+                if ($inputClass !== '') {
+                    $field->setOption('attr.class', $inputClass);
                 }
             }
 

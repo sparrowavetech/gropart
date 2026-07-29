@@ -4,11 +4,13 @@ import { ActionsService } from './ActionsService'
 import { ContextMenuService } from './ContextMenuService'
 import { MediaList } from '../Views/MediaList'
 import { MediaDetails } from '../Views/MediaDetails'
+import { MediaStatusBar } from '../Views/MediaStatusBar'
 
 export class MediaService {
     constructor() {
         this.MediaList = new MediaList()
         this.MediaDetails = new MediaDetails()
+        this.MediaStatusBar = new MediaStatusBar()
         this.breadcrumbTemplate = $('#rv_media_breadcrumb_item').html()
     }
 
@@ -72,6 +74,7 @@ export class MediaService {
             .then(({ data }) => {
                 _self.MediaList.renderData(data.data, reload, load_more_file)
                 _self.renderBreadcrumbs(data.data.breadcrumbs)
+                _self.MediaStatusBar.render(data.data.stats)
                 MediaService.refreshFilter()
                 ActionsService.renderActions()
 

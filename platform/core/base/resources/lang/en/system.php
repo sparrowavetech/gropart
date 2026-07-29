@@ -44,6 +44,7 @@ return [
     'get_system_report' => 'Get System Report',
     'system_environment' => 'System Environment',
     'framework_version' => 'Framework Version',
+    'core_version' => 'Core Version',
     'timezone' => 'Timezone',
     'debug_mode' => 'Debug Mode',
     'debug_mode_off' => 'Debug Mode Off',

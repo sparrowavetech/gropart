@@ -30,7 +30,6 @@ class CommandServiceProvider extends ServiceProvider
         ]);
 
         $this->app->afterResolving(Schedule::class, function (Schedule $schedule): void {
-            $schedule->command(SendAbandonedCartsEmailCommand::class)->weekly();
             $schedule->command(CancelExpiredDeletionRequests::class)->daily();
 
             $schedule->command(CheckAbandonedCartsCommand::class)

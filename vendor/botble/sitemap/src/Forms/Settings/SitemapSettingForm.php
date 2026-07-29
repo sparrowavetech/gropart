@@ -90,5 +90,15 @@ class SitemapSettingForm extends SettingForm
             )
             ->addCloseCollapsible('indexnow_enabled', '1')
             ->addCloseCollapsible('sitemap_enabled', '1');
+
+        $this
+            ->add(
+                'llms_txt_enabled',
+                OnOffCheckboxField::class,
+                CheckboxFieldOption::make()
+                    ->label(trans('packages/sitemap::sitemap.settings.enable_llms_txt'))
+                    ->value(setting('llms_txt_enabled', true))
+                    ->helperText(trans('packages/sitemap::sitemap.settings.enable_llms_txt_help', ['url' => url('llms.txt')]))
+            );
     }
 }

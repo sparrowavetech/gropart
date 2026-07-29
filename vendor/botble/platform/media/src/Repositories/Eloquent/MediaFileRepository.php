@@ -307,6 +307,7 @@ class MediaFileRepository extends RepositoriesAbstract implements MediaFileInter
                 'per_page' => null,
                 'current_paged' => 1,
             ],
+            'selected_file_id' => null,
             'filter' => 'everything',
             'take' => null,
             'with' => [],
@@ -383,6 +384,142 @@ class MediaFileRepository extends RepositoriesAbstract implements MediaFileInter
         }
 
         return $this->getFile($params);
+    }
+
+    /**
+     * Aggregate counts/size for the media footer status bar.
+     *
+     * Computed with dedicated aggregate queries rather than from the paginated
+     * result set, so the totals stay accurate for folders larger than one page.
+     *
+     * Supported params: filter, search, only_trashed, file_ids, folder_ids, scope_to_root.
+     *
+     * The id filters are additive: "recent" restricts by id *and* by the root
+     * scope, while "favorites" restricts by id only (favorites span folders) and
+     * therefore passes scope_to_root = false.
+     */
+    public function getStats(int|string|null $folderId, array $params = []): array
+    {
+        $params = array_merge([
+            'filter' => 'everything',
+            'search' => null,
+            'only_trashed' => false,
+            'file_ids' => null,
+            'folder_ids' => null,
+            'scope_to_root' => true,
+        ], $params);
+
+        $onlyTrashed = (bool) $params['only_trashed'];
+
+        $files = MediaFile::query();
+
+        if ($onlyTrashed) {
+            $files->onlyTrashed();
+        }
+
+        if (is_array($params['file_ids'])) {
+            $files->whereIn('media_files.id', $params['file_ids']);
+        }
+
+        if (! empty($folderId)) {
+            $files->where('media_files.folder_id', $folderId);
+        } elseif ($params['scope_to_root']) {
+            $files
+                ->leftJoin('media_folders', 'media_folders.id', '=', 'media_files.folder_id')
+                ->where(function (EloquentBuilder $query) use ($onlyTrashed): void {
+                    $query->where('media_files.folder_id', 0);
+
+                    if ($onlyTrashed) {
+                        // Mirror getTrashed(): files nested under a trashed folder are
+                        // represented by that folder, so they are not listed here.
+                        $query->orWhereNull('media_folders.deleted_at');
+                    } else {
+                        // Mirror getFilesByFolderId(): include files orphaned by a
+                        // deleted or missing parent folder.
+                        $query
+                            ->orWhereNotNull('media_folders.deleted_at')
+                            ->orWhereNull('media_folders.id');
+                    }
+                });
+        }
+
+        if ($params['search']) {
+            $files->where('media_files.name', 'LIKE', '%' . $params['search'] . '%');
+        }
+
+        $mimeTypes = RvMedia::getConfig('mime_types') ?: [];
+
+        // Mirrors getFile() exactly, including the null case: an unrecognised filter
+        // (or null) means "everything that is in no known bucket", not "no filter".
+        if ($params['filter'] != 'everything') {
+            if (isset($mimeTypes[$params['filter']])) {
+                $files->whereIn('media_files.mime_type', $mimeTypes[$params['filter']]);
+            } else {
+                $files->whereNotIn(
+                    'media_files.mime_type',
+                    $mimeTypes ? array_unique(array_merge(...array_values($mimeTypes))) : []
+                );
+            }
+        }
+
+        // One grouped query gives us every number the footer needs; the number of
+        // distinct mime types in a folder is always small.
+        $groupedByMimeType = $files
+            ->select([
+                'media_files.mime_type as mime_type',
+                DB::raw('COUNT(*) as total_files'),
+                DB::raw('COALESCE(SUM(media_files.size), 0) as total_size'),
+            ])
+            ->groupBy('media_files.mime_type')
+            ->get();
+
+        $countByType = fn (string $type): int => (int) $groupedByMimeType
+            ->whereIn('mime_type', $mimeTypes[$type] ?? [])
+            ->sum('total_files');
+
+        $folders = MediaFolder::query();
+
+        if ($onlyTrashed) {
+            $folders->onlyTrashed();
+        }
+
+        if (is_array($params['folder_ids'])) {
+            $folders->whereIn('media_folders.id', $params['folder_ids']);
+        }
+
+        if (! empty($folderId)) {
+            $folders->where('media_folders.parent_id', $folderId);
+        } elseif ($params['scope_to_root']) {
+            if ($onlyTrashed) {
+                // Mirror getTrashed(): a trashed folder is listed at the root unless
+                // its parent is trashed too (the parent represents it instead).
+                $folders
+                    ->leftJoin('media_folders as mf_parent', 'mf_parent.id', '=', 'media_folders.parent_id')
+                    ->where(function (EloquentBuilder $query): void {
+                        $query
+                            ->where('media_folders.parent_id', 0)
+                            ->orWhereNull('mf_parent.deleted_at');
+                    });
+            } else {
+                $folders->where('media_folders.parent_id', 0);
+            }
+        }
+
+        if ($params['search']) {
+            $folders->where('media_folders.name', 'LIKE', '%' . $params['search'] . '%');
+        }
+
+        $totalSize = (int) $groupedByMimeType->sum('total_size');
+
+        return [
+            'total_folders' => $folders->count(),
+            'total_files' => (int) $groupedByMimeType->sum('total_files'),
+            'total_size' => $totalSize,
+            'human_total_size' => BaseHelper::humanFilesize($totalSize),
+            'image_count' => $countByType('image'),
+            'video_count' => $countByType('video'),
+            'document_count' => $countByType('document'),
+        ];
     }
 
     public function emptyTrash(): bool

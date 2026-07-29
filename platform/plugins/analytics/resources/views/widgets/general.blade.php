@@ -104,7 +104,7 @@
                                 {{ trans('plugins/analytics::analytics.bounce_rate') }}
                             </p>
                             <h3 class="mb-n1 fs-1">
-                                {{ round($bounceRate, 2) * 100 }}%
+                                {{ round($bounceRate * 100, 2) }}%
                             </h3>
                         </div>
                     </div>

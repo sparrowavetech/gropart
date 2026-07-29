@@ -1470,6 +1470,11 @@ class EcommerceHelper
         return (bool) get_ecommerce_setting('enable_filter_products_by_tags', true);
     }
 
+    public function isEnabledFilterProductsByRating(): bool
+    {
+        return (bool) get_ecommerce_setting('enable_filter_products_by_rating', false);
+    }
+
     public function isEnabledFilterProductsByLabels(): bool
     {
         return (bool) get_ecommerce_setting('enable_filter_products_by_labels', false);
@@ -2172,7 +2177,8 @@ class EcommerceHelper
             $this->isEnabledFilterProductsByTags() ||
             $this->isEnabledFilterProductsByLabels() ||
             $this->isEnabledFilterProductsByAttributes() ||
-            $this->isEnabledFilterProductsByPrice();
+            $this->isEnabledFilterProductsByPrice() ||
+            $this->isEnabledFilterProductsByRating();
     }
 
     public function getAssetVersion(): string

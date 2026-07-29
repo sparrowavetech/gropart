@@ -83,5 +83,7 @@ return [
         'submit_sitemap_error' => '사이트맵 제출에 실패했습니다. 다시 시도해 주세요.',
         'indexnow_disabled' => 'IndexNow가 활성화되어 있지 않습니다. 먼저 활성화해 주세요.',
         'indexnow_no_api_key' => 'API 키를 찾을 수 없습니다. 먼저 API 키를 생성해 주세요.',
+        'enable_llms_txt' => 'llms.txt를 활성화하시겠습니까?',
+        'enable_llms_txt_help' => '활성화하면 llmstxt.org 사양에 따라 AI 크롤러(ChatGPT, Claude, Perplexity 등)가 콘텐츠를 이해하는 데 도움이 되도록 :url에서 동적 llms.txt 파일이 제공됩니다. llms.txt를 노출하지 않으려면 비활성화하세요. 정적 public/llms.txt 파일이 있는 경우 항상 우선합니다.',
     ],
 ];

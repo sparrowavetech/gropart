@@ -54,6 +54,7 @@ return [
     'get_system_report' => 'მიიღეთ სისტემის ანგარიში',
     'system_environment' => 'სისტემის გარემო',
     'framework_version' => 'ფრეიმვორკის ვერსია',
+    'core_version' => 'ბირთვის ვერსია',
     'timezone' => 'დროის სარტყელი',
     'debug_mode' => 'გამართვის რეჟიმი',
     'debug_mode_off' => 'გამართვის რეჟიმი გამორთულია',

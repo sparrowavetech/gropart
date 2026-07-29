@@ -277,7 +277,19 @@ trait HasMenuTranslationSeeder
             ->where('reference_id', $model->getKey())
             ->value('lang_meta_origin');
 
-        return $origin ?: md5($model->getKey() . $model::class . Str::random(6));
+        if ($origin) {
+            return $origin;
+        }
+
+        // The original record (default language) has no language meta yet.
+        // Persist one with the default locale so it stays visible under the
+        // default language on the front-end (menus are filtered by language
+        // meta) and becomes the shared origin that links translated versions.
+        $origin = md5($model->getKey() . $model::class . Str::random(6));
+
+        LanguageMeta::saveMetaData($model, null, $origin);
+
+        return $origin;
     }
 
     /**

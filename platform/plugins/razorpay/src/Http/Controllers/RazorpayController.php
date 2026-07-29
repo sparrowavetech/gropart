@@ -513,13 +513,27 @@ class RazorpayController extends BaseController
         if (in_array($paymentEntity['status'], ['captured', 'authorized']) || $orderData['status'] === 'paid') {
             if ($paymentEntity['status'] === 'authorized' && empty($paymentEntity['captured'])) {
                 try {
+                    // capture() must be called on a fetched payment entity: the SDK builds
+                    // the URL from $payment->id, so calling $api->payment->capture() on the
+                    // bare (idless) accessor threw "Undefined array key id". Fetch first,
+                    // then re-check captured to skip a payment the captured webhook already
+                    // settled (avoids an "already captured" error on the near-simultaneous
+                    // authorized event). Razorpay requires both amount and currency.
                     // @phpstan-ignore-next-line
-                    $api->payment->capture($chargeId, ['amount' => $paymentEntity['amount']]);
-                    PaymentHelper::log(
-                        RAZORPAY_PAYMENT_METHOD_NAME,
-                        ['payment_captured' => true],
-                        ['charge_id' => $chargeId]
-                    );
+                    $payment = $api->payment->fetch($chargeId);
+
+                    if (empty($payment->captured)) {
+                        $payment->capture(array_filter([
+                            'amount' => $paymentEntity['amount'],
+                            'currency' => $paymentEntity['currency'] ?? ($orderData['currency'] ?? null),
+                        ]));
+
+                        PaymentHelper::log(
+                            RAZORPAY_PAYMENT_METHOD_NAME,
+                            ['payment_captured' => true],
+                            ['charge_id' => $chargeId]
+                        );
+                    }
                 } catch (Exception $e) {
                     PaymentHelper::log(
                         RAZORPAY_PAYMENT_METHOD_NAME,

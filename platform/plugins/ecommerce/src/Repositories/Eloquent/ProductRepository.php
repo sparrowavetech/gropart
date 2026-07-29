@@ -149,9 +149,13 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
             ->where(function (EloquentBuilder $query) {
                 return $query
                     ->where(function (EloquentBuilder $subQuery) {
+                        // Comparing against the base price rather than requiring
+                        // sale_price > 0 keeps 100% discounts (sale_price of 0) in
+                        // the results. A null sale_price fails the comparison, so
+                        // products without a sale price are still excluded.
                         return $subQuery
                             ->where('sale_type', 0)
-                            ->where('sale_price', '>', 0);
+                            ->whereColumn('sale_price', '<', 'price');
                     })
                     ->orWhere(function (EloquentBuilder $subQuery) {
                         return $subQuery
@@ -353,6 +357,7 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
             'discounted_only' => false,
             'recent_days' => null,
             'new_products_only' => false,
+            'rating' => null,
         ], $filters);
 
         $isUsingDefaultCurrency = get_application_currency_id() == cms_currency()->getDefaultCurrency()->getKey();
@@ -751,6 +756,14 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
                 ->whereIn('ec_products.brand_id', $filters['brands']);
         }
 
+        // Filter product by average published-review rating
+        if (! empty($filters['rating']) && $filters['rating'] >= 1 && $filters['rating'] <= 5) {
+            $this->model = $this->model->whereRaw(
+                '(SELECT COALESCE(AVG(ec_reviews.star), 0) FROM ec_reviews WHERE ec_reviews.product_id = ec_products.id AND ec_reviews.status = ?) >= ?',
+                ['published', (int) $filters['rating']]
+            );
+        }
+
         // Filter product by attributes
         $filters['attributes'] = array_filter($filters['attributes']);
         $attributes = $filters['attributes'];
@@ -817,9 +830,10 @@ class ProductRepository extends RepositoriesAbstract implements ProductInterface
         if ($filters['discounted_only']) {
             $this->model = $this->model->where(function ($query): void {
                 $query->where(function ($subQuery): void {
-                    // Products with sale price
+                    // Products with sale price. The column comparison alone proves
+                    // a genuine discount, so requiring sale_price > 0 only served to
+                    // drop 100% discounts (sale_price of 0) from the results.
                     $subQuery->where('sale_type', 0)
-                        ->where('sale_price', '>', 0)
                         ->whereColumn('sale_price', '<', 'price');
                 })->orWhere(function ($subQuery): void {
                     // Products with time-based sale

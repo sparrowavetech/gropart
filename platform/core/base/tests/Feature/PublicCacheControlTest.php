@@ -213,7 +213,7 @@ class PublicCacheControlTest extends BaseTestCase
         $this->assertNotContains('botble_session', $cookieNames);
     }
 
-    public function test_non_session_cookies_preserved_when_cache_applied(): void
+    public function test_all_cookies_removed_when_cache_applied(): void
     {
         config(['core.base.general.enable_public_cache_control' => true]);
         config(['session.cookie' => 'botble_session']);
@@ -226,10 +226,10 @@ class PublicCacheControlTest extends BaseTestCase
 
         $this->invokeHandler($request, $response);
 
-        $cookieNames = array_map(fn (Cookie $c) => $c->getName(), $response->headers->getCookies());
-        $this->assertNotContains('XSRF-TOKEN', $cookieNames);
-        $this->assertNotContains('botble_session', $cookieNames);
-        $this->assertContains('cookie_consent', $cookieNames);
+        // A publicly cacheable response must carry NO per-visitor Set-Cookie at
+        // all (session, XSRF, consent, footprints) — otherwise a shared cache
+        // would replay one visitor's cookies to everyone.
+        $this->assertEmpty($response->headers->getCookies());
     }
 
     public function test_session_cookies_preserved_when_cache_not_applied(): void
@@ -307,7 +307,7 @@ class PublicCacheControlTest extends BaseTestCase
         $this->assertStringContainsString('s-maxage=1800', $cacheControl);
     }
 
-    public function test_session_cookies_preserved_when_response_contains_csrf_form(): void
+    public function test_csrf_form_response_is_not_marked_public_and_keeps_cookies(): void
     {
         config(['core.base.general.enable_public_cache_control' => true]);
         config(['session.cookie' => 'botble_session']);
@@ -320,8 +320,30 @@ class PublicCacheControlTest extends BaseTestCase
 
         $this->invokeHandler($request, $response);
 
-        $cacheControl = $response->headers->get('Cache-Control');
-        $this->assertStringContainsString('public', $cacheControl);
+        // A page carrying a per-session CSRF token must stay dynamic: never
+        // advertised as public and its session cookies left intact.
+        $this->assertStringNotContainsString('public', (string) $response->headers->get('Cache-Control'));
+
+        $cookieNames = array_map(fn (Cookie $c) => $c->getName(), $response->headers->getCookies());
+        $this->assertContains('XSRF-TOKEN', $cookieNames);
+        $this->assertContains('botble_session', $cookieNames);
+    }
+
+    public function test_csrf_meta_tag_response_is_not_marked_public_and_keeps_cookies(): void
+    {
+        config(['core.base.general.enable_public_cache_control' => true]);
+        config(['session.cookie' => 'botble_session']);
+
+        // Standard Botble AJAX-token pattern that the previous detection missed.
+        $html = '<html><head><meta name="csrf-token" content="abc123"></head><body>Shop</body></html>';
+        $request = Request::create('/', 'GET');
+        $response = new Response($html);
+        $response->headers->setCookie(new Cookie('XSRF-TOKEN', 'token123'));
+        $response->headers->setCookie(new Cookie('botble_session', 'session123'));
+
+        $this->invokeHandler($request, $response);
+
+        $this->assertStringNotContainsString('public', (string) $response->headers->get('Cache-Control'));
 
         $cookieNames = array_map(fn (Cookie $c) => $c->getName(), $response->headers->getCookies());
         $this->assertContains('XSRF-TOKEN', $cookieNames);

@@ -3,6 +3,7 @@
 namespace Illuminate\Foundation;
 
 use Illuminate\Support\NodePackageManager;
+use ReflectionClass;
 
 class DevCommands
 {
@@ -56,7 +57,11 @@ class DevCommands
 
         self::artisan('serve --host=localhost', 'server');
         self::artisan('queue:listen --tries=1 --timeout=0', 'queue');
-        self::artisan('pail --timeout=0', 'logs');
+
+        if (function_exists('pcntl_fork')) {
+            self::artisan('pail --timeout=0', 'logs');
+        }
+
         self::node('dev', 'vite');
     }
 
@@ -74,25 +79,16 @@ class DevCommands
         }
 
         $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
-        $source = [];
+        $source = self::resolveSource($trace);
+        $priority = self::resolvePriority($trace);
 
-        foreach ($trace as $frame) {
-            if (($frame['file'] ?? null) === __FILE__) {
-                continue;
-            }
+        $devCommand = new DevCommand($command, $source, $name, $priority);
 
-            if (($frame['class'] ?? null) === self::class) {
-                continue;
-            }
+        $existing = self::$commands[$devCommand->name()] ?? null;
 
-            $source = $frame;
-
-            break;
+        if (! $existing || $devCommand->priority() >= $existing->priority()) {
+            self::$commands[$devCommand->name()] = $devCommand;
         }
-
-        $devCommand = new DevCommand($command, $source, $name);
-
-        self::$commands[$devCommand->name()] = $devCommand;
 
         return $devCommand;
     }
@@ -186,6 +182,65 @@ class DevCommands
         ));
 
         return $available[0] ?? $colors[self::$colorCount++ % count($colors)];
+    }
+
+    /**
+     * Resolve the first external caller frame from a debug backtrace.
+     *
+     * @param  array<int, array{'file': string, 'line': int, 'class'?: string, 'function'?: string}>  $trace
+     * @return array{'file': string, 'line': int, 'class'?: string, 'function'?: string}
+     */
+    protected static function resolveSource(array $trace): array
+    {
+        foreach ($trace as $frame) {
+            if (($frame['file'] ?? null) === __FILE__) {
+                continue;
+            }
+
+            if (($frame['class'] ?? null) === self::class) {
+                continue;
+            }
+
+            return $frame;
+        }
+
+        return [];
+    }
+
+    /**
+     * Determine the registration priority from a debug backtrace.
+     *
+     * @param  array<int, array{'file': string, 'line': int, 'class'?: string, 'function'?: string}>  $trace
+     * @return int
+     */
+    protected static function resolvePriority(array $trace): int
+    {
+        foreach ($trace as $frame) {
+            $file = $frame['file'] ?? null;
+            $class = $frame['class'] ?? null;
+
+            if ($file === __FILE__) {
+                continue;
+            }
+
+            if ($class === self::class && ($frame['function'] ?? null) === 'registerDefaults') {
+                return DevCommand::PRIORITY_DEFAULT;
+            }
+
+            if (! $file && $class) {
+                $file = (new ReflectionClass($class))->getFileName();
+            }
+
+            if (! $file || $file === base_path('artisan')) {
+                continue;
+            }
+
+            if (! str_contains($file, base_path('vendor'))) {
+                return DevCommand::PRIORITY_USERLAND;
+            }
+        }
+
+        return DevCommand::PRIORITY_VENDOR;
     }
 
     /**

@@ -83,5 +83,7 @@ return [
         'submit_sitemap_error' => '提交網站地圖失敗。請再試一次。',
         'indexnow_disabled' => 'IndexNow 未啟用。請先啟用。',
         'indexnow_no_api_key' => '找不到 API 金鑰。請先產生 API 金鑰。',
+        'enable_llms_txt' => '啟用 llms.txt？',
+        'enable_llms_txt_help' => '啟用後，將在 :url 提供動態 llms.txt 檔案，協助 AI 爬蟲（ChatGPT、Claude、Perplexity 等）依照 llmstxt.org 規範理解您的內容。如果您不想公開 llms.txt，請停用此項。靜態 public/llms.txt 檔案（如有）一律優先。',
     ],
 ];

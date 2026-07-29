@@ -36,7 +36,7 @@ return [
     'test_payment' => 'Tehke esmalt testimakse testirežiimis',
     'check_status' => 'Kontrollige, kas tellimuse olek uuendatakse "Lõpetatud"',
     'verify_webhook' => 'Kui tellimused jäävad "Lõpetamatuks", kontrollige oma webhook\'i konfiguratsiooni',
-    'check_logs' => 'Kontrollige makselogisid asukohas storage/logs/payment-*.log silumiseks',
+    'check_logs' => 'Kontrollige makselogisid asukohas Payments > Payment Logs (admin panel) silumiseks',
     'troubleshooting' => 'Tõrkeotsingu näpunäited:',
     'ssl_required' => 'Veenduge, et teie saidil on kehtiv SSL-sertifikaat (HTTPS)',
     'public_url' => 'Kontrollige, et webhook\'i URL oleks avalikult kättesaadav (mitte localhost)',

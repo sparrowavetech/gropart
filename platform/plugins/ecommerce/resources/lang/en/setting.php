@@ -125,6 +125,7 @@ return [
             'search_products_by' => 'Search products by:',
             'enable_filter_products_by_categories' => 'Enable filter products by categories',
             'enable_filter_products_by_brands' => 'Enable filter products by brands',
+            'enable_filter_products_by_rating' => 'Enable filter products by rating',
             'enable_filter_products_by_tags' => 'Enable filter products by tags',
             'number_of_popular_tags_for_filter' => 'Number of popular tags for filter',
             'number_of_popular_tags_for_filter_placeholder' => 'Enter number of popular tags to display',
@@ -430,6 +431,8 @@ return [
             'sort_shipping_options_direction_helper' => 'Sort shipping options by price lower to higher or higher to lower.',
             'price_lower_to_higher' => 'Price lower to higher',
             'price_higher_to_lower' => 'Price higher to lower',
+            'volumetric_weight_divisor' => 'Volumetric weight divisor',
+            'volumetric_weight_divisor_helper' => 'Enter 0 to disable. When set, billable shipping weight becomes the greater of actual weight and dimensional (volumetric) weight, calculated from each product\'s length/wide/height. The divisor is always in cubic centimeters per kilogram (cm³/kg), regardless of your store\'s display units. Typical values: 5000 (standard), 6000 (air freight), 4000 (express). Before enabling this, make sure your highest weight-based shipping rule has an empty "To" value (or a high enough one) - bulky orders will now weigh more, and an order heavier than every rule matches none, leaving the customer with no shipping option at checkout.',
         ],
     ],
     'webhook' => [

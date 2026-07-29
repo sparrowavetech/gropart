@@ -83,5 +83,7 @@ return [
         'submit_sitemap_error' => 'ส่งแผนผังเว็บไซต์ไม่สำเร็จ โปรดลองอีกครั้ง.',
         'indexnow_disabled' => 'IndexNow ยังไม่ได้เปิดใช้งาน กรุณาเปิดใช้งานก่อน.',
         'indexnow_no_api_key' => 'ไม่พบคีย์ API กรุณาสร้างคีย์ API ก่อน.',
+        'enable_llms_txt' => 'เปิดใช้งาน llms.txt?',
+        'enable_llms_txt_help' => 'เมื่อเปิดใช้งาน ไฟล์ llms.txt แบบไดนามิกจะถูกให้บริการที่ :url เพื่อช่วยให้โปรแกรมรวบรวมข้อมูล AI (ChatGPT, Claude, Perplexity ฯลฯ) เข้าใจเนื้อหาของคุณ ตามข้อกำหนด llmstxt.org ปิดใช้งานนี้หากคุณไม่ต้องการเปิดเผย llms.txt ไฟล์ public/llms.txt แบบคงที่ หากมีอยู่ จะมีความสำคัญเหนือกว่าเสมอ',
     ],
 ];

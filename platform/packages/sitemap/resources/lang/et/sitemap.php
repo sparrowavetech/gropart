@@ -83,5 +83,7 @@ return [
         'submit_sitemap_error' => 'Saidikaardi saatmine ebaõnnestus. Palun proovi uuesti.',
         'indexnow_disabled' => 'IndexNow pole lubatud. Palun luba see esmalt.',
         'indexnow_no_api_key' => 'API võtit ei leitud. Palun genereeri esmalt API võti.',
+        'enable_llms_txt' => 'Luba llms.txt?',
+        'enable_llms_txt_help' => 'Kui see on lubatud, serveeritakse aadressil :url dünaamiline llms.txt fail, mis aitab AI roomajatel (ChatGPT, Claude, Perplexity jne) teie sisu mõista, järgides llmstxt.org spetsifikatsiooni. Keelake see, kui te ei soovi llms.txt-i avaldada. Staatiline public/llms.txt fail, kui see on olemas, on alati eelistatud.',
     ],
 ];

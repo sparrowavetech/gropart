@@ -142,12 +142,17 @@ trait ProductPrices
             $rawSale = $this->getRawSalePrice();
 
             // Use the product's own sale_price (converted) for the percentage,
-            // ignoring pipeline reductions (cross-sale, up-sale).
-            $effectiveSale = $rawSale !== null && $rawSale > 0
+            // ignoring pipeline reductions (cross-sale, up-sale). A sale price of
+            // exactly 0 is valid (100% off / free), so only null falls back to the
+            // base price.
+            $effectiveSale = $rawSale !== null && $rawSale >= 0
                 ? ($this->getConvertedSalePrice() ?? $rawSale)
                 : $convertedPrice;
 
-            if ($effectiveSale == 0 && $convertedPrice !== 0) {
+            // getConvertedPrice() returns a float, so a strict !== 0 comparison
+            // against an int would always pass and report 100% off for products
+            // that are simply free.
+            if ($effectiveSale == 0 && $convertedPrice > 0) {
                 return 100;
             }
 
@@ -164,10 +169,12 @@ trait ProductPrices
         // A product is on sale only when its own sale_price is genuinely lower
         // than its base price. Use raw database values to avoid pipeline pollution
         // (cross-sale/up-sale handlers that reduce front_sale_price at runtime).
+        // A sale price of exactly 0 is valid (100% off / free), so only null is
+        // treated as "no sale price set".
         $rawSale = $this->getRawSalePrice();
         $base = $this->getRawPrice();
 
-        return $rawSale !== null && $rawSale > 0 && $base - $rawSale > 0.00001;
+        return $rawSale !== null && $rawSale >= 0 && $base - $rawSale > 0.00001;
     }
 
     public function getOriginalPrice(): float

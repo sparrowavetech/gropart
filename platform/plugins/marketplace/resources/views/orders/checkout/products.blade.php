@@ -150,23 +150,16 @@
                                 <p>{{ trans('plugins/ecommerce::order.shipping_fee') }}:</p>
                             </div>
                             <div class="col-6 text-end">
-                                @php
-                                    $hasChosenShipping = $defaultShippingMethod && $defaultShippingOption !== null;
-                                @endphp
-                                <p class="price-text vendor-shipping-price" data-store-id="{{ $storeId }}">
+                                <p class="price-text">
                                     @if (Arr::get($shippingCurrent, 'price') && $isFreeShipping)
                                         <span class="font-italic" style="text-decoration-line: line-through;">
                                             {{ format_price(Arr::get($shippingCurrent, 'price')) }}
                                         </span>
                                         <span class="font-weight-bold">{{ trans('plugins/ecommerce::order.free_shipping') }}</span>
-                                    @elseif ($shippingAmount > 0)
+                                    @else
                                         <span class="font-weight-bold">
                                             {{ format_price(Arr::get($shippingCurrent, 'price')) }}
                                         </span>
-                                    @elseif ($hasChosenShipping)
-                                        <span class="font-weight-bold">{{ trans('plugins/ecommerce::order.free_shipping') }}</span>
-                                    @else
-                                        <span class="text-muted">- Select Option -</span>
                                     @endif
                                 </p>
                             </div>

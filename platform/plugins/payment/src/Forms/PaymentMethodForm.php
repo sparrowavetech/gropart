@@ -88,7 +88,7 @@ class PaymentMethodForm extends FormAbstract
             $label = trans('plugins/payment::payment.payment_fee') . ' (%)';
         }
 
-        return $this
+        $this
             ->add(
                 get_payment_setting_key('fee', $name),
                 'text',
@@ -115,6 +115,33 @@ class PaymentMethodForm extends FormAbstract
                     ->selected(get_payment_setting('fee_type', $name, PaymentFeeTypeEnum::FIXED))
                     ->helperText(trans('plugins/payment::payment.fee_type_helper', ['currency' => get_application_currency()->title]))
             );
+
+        // The additional fixed surcharge only makes sense alongside a percentage fee (e.g.
+        // "2.9% + $0.30"). When the fee type is already Fixed, showing a second fixed-amount
+        // field would be a confusing "fixed + fixed" pair, so it's hidden entirely rather than
+        // merely discouraged. Merchants switching from Fixed to Percentage will see it appear
+        // after the next save (same round-trip already required for the "(%)" label swap above).
+        if ($feeType === PaymentFeeTypeEnum::PERCENTAGE) {
+            $this->add(
+                get_payment_setting_key('fee_fixed', $name),
+                'text',
+                [
+                    'label' => trans('plugins/payment::payment.fee_fixed'),
+                    'value' => get_payment_setting('fee_fixed', $name, 0),
+                    'help_block' => [
+                        'text' => trans('plugins/payment::payment.fee_fixed_helper', ['currency' => get_application_currency()->title]),
+                    ],
+                    'attr' => [
+                        'placeholder' => '0',
+                        'class' => 'form-control input-mask-number',
+                        'data-thousands-separator' => ',',
+                        'data-decimal-separator' => '.',
+                    ],
+                ]
+            );
+        }
+
+        return $this;
     }
 
     public function getPaymentInstructions(): HtmlString

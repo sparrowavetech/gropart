@@ -47,6 +47,7 @@ return [
     'get_system_report' => 'Preuzmite sistemski izveštaj',
     'system_environment' => 'Sistemsko okruženje',
     'framework_version' => 'Verzija framework-a',
+    'core_version' => 'Верзија језгра',
     'timezone' => 'Vremenska zona',
     'debug_mode' => 'Režim za otklanjanje grešaka',
     'debug_mode_off' => 'Režim za otklanjanje grešaka isključen',

@@ -83,5 +83,7 @@ return [
         'submit_sitemap_error' => '提交网站地图失败。请重试。',
         'indexnow_disabled' => 'IndexNow 未启用。请先启用。',
         'indexnow_no_api_key' => '未找到 API 密钥。请先生成 API 密钥。',
+        'enable_llms_txt' => '启用 llms.txt？',
+        'enable_llms_txt_help' => '启用后，将在 :url 提供动态 llms.txt 文件，帮助 AI 爬虫（ChatGPT、Claude、Perplexity 等）按照 llmstxt.org 规范理解您的内容。如果您不想公开 llms.txt，请禁用此项。静态 public/llms.txt 文件（如果存在）始终优先。',
     ],
 ];

@@ -47,6 +47,7 @@ return [
     'get_system_report' => 'Sistem Raporu Al',
     'system_environment' => 'Sistem Ortamı',
     'framework_version' => 'Çerçeve Sürümü',
+    'core_version' => 'Çekirdek Sürümü',
     'timezone' => 'Zaman dilimi',
     'debug_mode' => 'Hata Ayıklama Modu',
     'debug_mode_off' => 'Hata Ayıklama Modu Kapalı',

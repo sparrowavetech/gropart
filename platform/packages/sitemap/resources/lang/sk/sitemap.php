@@ -83,5 +83,7 @@ return [
         'submit_sitemap_error' => 'Sitemapu sa nepodarilo odoslať. Skúste to znova.',
         'indexnow_disabled' => 'IndexNow nie je povolený. Najprv ho povoľte.',
         'indexnow_no_api_key' => 'Nenašiel sa žiadny API kľúč. Najprv vygenerujte API kľúč.',
+        'enable_llms_txt' => 'Povoliť llms.txt?',
+        'enable_llms_txt_help' => 'Keď je povolené, na :url sa poskytuje dynamický súbor llms.txt, ktorý pomáha AI prehľadávačom (ChatGPT, Claude, Perplexity atď.) porozumieť vášmu obsahu podľa špecifikácie llmstxt.org. Zakážte to, ak nechcete zverejniť llms.txt. Statický súbor public/llms.txt, ak existuje, má vždy prednosť.',
     ],
 ];

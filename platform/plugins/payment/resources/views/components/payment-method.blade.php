@@ -27,14 +27,27 @@
     <div @class(['payment_collapse_wrap collapse mt-1', 'show' => $isSelected])>
         <p class="text-muted">{!! BaseHelper::clean($description ?: get_payment_setting('description', $name) ?: setting('payment_' . $name . '_description')) !!}</p>
         @php
-            $feeValue = get_payment_setting('fee', $name, 0);
+            $feeValue = (float) get_payment_setting('fee', $name, 0);
             $feeType = get_payment_setting('fee_type', $name, \Botble\Payment\Enums\PaymentFeeTypeEnum::FIXED);
+            $feeFixed = (float) get_payment_setting('fee_fixed', $name, 0);
             $orderAmount = apply_filters('payment_order_total_amount', 0);
             $fee = \Botble\Payment\Supports\PaymentFeeHelper::calculateFee($name, $orderAmount);
+
+            // Mirror calculateFee(): fee_fixed only counts for the Percentage type. Guarding on
+            // fee_fixed regardless of type would render an empty "fee: 0.00" line for a value
+            // that is deliberately ignored (a leftover from before the type was switched).
+            // Guarding on $fee alone would instead hide the row - and the hidden input that
+            // storeLocalPayment() reads - whenever the order total is not yet known and a
+            // percentage fee therefore computes to 0.
+            $hasFee = $feeType === \Botble\Payment\Enums\PaymentFeeTypeEnum::PERCENTAGE
+                ? ($feeValue > 0 || $feeFixed > 0)
+                : $feeValue > 0;
         @endphp
-        @if ($feeValue > 0)
+        @if ($hasFee)
             <p class="text-warning">
-                @if ($feeType === \Botble\Payment\Enums\PaymentFeeTypeEnum::PERCENTAGE)
+                @if ($feeType === \Botble\Payment\Enums\PaymentFeeTypeEnum::PERCENTAGE && $feeFixed > 0)
+                    {{ trans('plugins/payment::payment.payment_fee') }}: {{ format_price($fee) }} ({{ $feeValue }}% + {{ format_price($feeFixed) }})
+                @elseif ($feeType === \Botble\Payment\Enums\PaymentFeeTypeEnum::PERCENTAGE)
                     {{ trans('plugins/payment::payment.payment_fee') }}: {{ format_price($fee) }} ({{ $feeValue }}%)
                 @else
                     {{ trans('plugins/payment::payment.payment_fee') }}: {{ format_price($fee) }}

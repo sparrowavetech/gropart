@@ -36,7 +36,7 @@ return [
     'test_payment' => 'Gör en testbetalning i testläge först',
     'check_status' => 'Kontrollera om beställningsstatusen uppdateras till "Slutförd"',
     'verify_webhook' => 'Om beställningar förblir "Ofullständiga", verifiera din webhook-konfiguration',
-    'check_logs' => 'Kontrollera betalningsloggar i storage/logs/payment-*.log för felsökning',
+    'check_logs' => 'Kontrollera betalningsloggar i Payments > Payment Logs (admin panel) för felsökning',
     'troubleshooting' => 'Felsökningstips:',
     'ssl_required' => 'Se till att din webbplats har ett giltigt SSL-certifikat (HTTPS)',
     'public_url' => 'Verifiera att webhook-URL:en är offentligt tillgänglig (inte localhost)',

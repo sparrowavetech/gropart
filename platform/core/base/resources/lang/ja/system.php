@@ -47,6 +47,7 @@ return [
     'get_system_report' => 'システムレポートの取得',
     'system_environment' => 'システム環境',
     'framework_version' => 'フレームワークのバージョン',
+    'core_version' => 'コアバージョン',
     'timezone' => 'タイムゾーン',
     'debug_mode' => 'デバッグモード',
     'debug_mode_off' => 'デバッグモードオフ',

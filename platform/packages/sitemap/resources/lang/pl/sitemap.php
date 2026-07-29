@@ -83,5 +83,7 @@ return [
         'submit_sitemap_error' => 'Nie udało się wysłać mapy witryny. Spróbuj ponownie.',
         'indexnow_disabled' => 'IndexNow nie jest włączony. Włącz go najpierw.',
         'indexnow_no_api_key' => 'Nie znaleziono klucza API. Najpierw wygeneruj klucz API.',
+        'enable_llms_txt' => 'Włączyć llms.txt?',
+        'enable_llms_txt_help' => 'Po włączeniu pod adresem :url udostępniany jest dynamiczny plik llms.txt, który pomaga robotom AI (ChatGPT, Claude, Perplexity itp.) zrozumieć Twoją treść zgodnie ze specyfikacją llmstxt.org. Wyłącz to, jeśli nie chcesz udostępniać pliku llms.txt. Statyczny plik public/llms.txt, jeśli istnieje, zawsze ma pierwszeństwo.',
     ],
 ];

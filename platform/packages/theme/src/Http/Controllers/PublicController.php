@@ -257,6 +257,10 @@ class PublicController extends BaseController
      */
     protected function cleanLlmsText(string $text, int $limit): string
     {
+        // Decode HTML entities first so stored values like "&amp;" render as a clean
+        // "&" instead of printing the literal entity, and so entity-encoded tags are
+        // resolved before strip_tags() removes them.
+        $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
         $text = strip_tags($text);
         $text = str_replace(["\r", "\n", "\t"], ' ', $text);
         $text = trim((string) preg_replace('/\s+/', ' ', $text));

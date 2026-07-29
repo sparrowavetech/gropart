@@ -56,8 +56,22 @@ if (! function_exists('get_sale_percentage')) {
     {
         $symbol = $appendSymbol ? '%' : '';
 
-        if ($salePrice == 0 && $price !== 0) {
-            return 100 . $symbol;
+        // No sale price set at all, so nothing is discounted. Checked before the
+        // 100% case below, where a loose null == 0 would otherwise match.
+        if ($salePrice === null) {
+            return 0 . $symbol;
+        }
+
+        // A sale price of 0 against a real base price is a 100% discount. Compare
+        // the base with > 0 rather than !== 0: $price is a float, so a strict
+        // comparison against an int always passes and would report 100% off for
+        // products that are simply free.
+        //
+        // Returned negative so it matches the sign convention of the calculated
+        // path below, which yields -50% for a half-price product and only drops
+        // the sign when $abs is requested.
+        if ($salePrice == 0 && $price > 0) {
+            return ($abs === true ? 100 : -100) . $symbol;
         }
 
         if (! $salePrice) {

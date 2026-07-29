@@ -15,6 +15,7 @@ class SitemapSettingRequest extends Request
             'sitemap_pages_enabled' => [new OnOffRule()],
             'indexnow_enabled' => [new OnOffRule()],
             'indexnow_api_key' => ['nullable', 'string', 'uuid', 'max:255'],
+            'llms_txt_enabled' => [new OnOffRule()],
         ]);
     }
 }

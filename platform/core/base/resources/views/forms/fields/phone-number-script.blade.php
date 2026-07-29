@@ -307,6 +307,12 @@
                     config.onlyCountries = availableCountries;
                 }
 
+                // With a single allowed country there is nothing to pick, so keep the
+                // flag from opening a one-item dropdown the customer can trip over.
+                if (availableCountries && availableCountries.length === 1) {
+                    config.allowDropdown = false;
+                }
+
                 if (hasCountryCodeSelection) {
                     config.separateDialCode = true;
                     config.nationalMode = false;
@@ -458,9 +464,44 @@
                             }, 100);
                         }
 
+                        // A value that already carries the dial code (browser autofill,
+                        // a paste, or a number typed as +8801...) has to be handed to
+                        // setNumber, which re-derives the country and moves the dial
+                        // code back into the separate selector instead of dropping it.
+                        const applyInternationalValue = function() {
+                            const rawValue = (element.value || '').trim();
+
+                            if (! rawValue) {
+                                return;
+                            }
+
+                            const fullNumber = rawValue.startsWith('00') ? '+' + rawValue.slice(2) : rawValue;
+
+                            if (! fullNumber.startsWith('+')) {
+                                return;
+                            }
+
+                            iti.setNumber(fullNumber);
+                        };
+
+                        // Bulk insertions carry the dial code; a plain keystroke does not.
+                        // Re-parsing on every keystroke would fight the caret while typing.
+                        const bulkInputTypes = ['insertFromPaste', 'insertFromDrop', 'insertReplacementText'];
+
                         element.addEventListener('countrychange', updateHiddenField);
-                        element.addEventListener('input', updateHiddenField);
-                        element.addEventListener('blur', updateHiddenField);
+
+                        element.addEventListener('input', function(event) {
+                            if (! event.inputType || bulkInputTypes.indexOf(event.inputType) !== -1) {
+                                applyInternationalValue();
+                            }
+
+                            updateHiddenField();
+                        });
+
+                        element.addEventListener('blur', function() {
+                            applyInternationalValue();
+                            updateHiddenField();
+                        });
 
                         const form = element.closest('form');
                         if (form) {

@@ -15,5 +15,7 @@ interface MediaFileInterface extends RepositoryInterface
 
     public function getTrashed(int|string $folderId, array $params = [], bool $withFolders = true, array $folderParams = []): Collection;
 
+    public function getStats(int|string|null $folderId, array $params = []): array;
+
     public function emptyTrash(): bool;
 }

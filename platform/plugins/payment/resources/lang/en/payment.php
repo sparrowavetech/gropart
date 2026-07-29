@@ -132,6 +132,8 @@ return [
     'processing_fee' => 'Processing fee (Optional)',
     'fee_helper' => 'Extra fee will be charged when customer selects this payment method. Enter 0 for no fee.',
     'payment_fee' => 'Payment fee',
+    'fee_fixed' => 'Additional fixed fee (Optional)',
+    'fee_fixed_helper' => 'A flat amount added on top of the percentage fee above, e.g. Stripe-style "2.9% + fixed fee". Based on the default currency (:currency). Enter 0 for no additional fixed fee.',
     'payment_log' => [
         'name' => 'Payment Logs',
         'view' => 'View Payment Log #:id',

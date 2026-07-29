@@ -74,7 +74,7 @@
                     <div class="{{ $actionsClass }}">
                         <a href="{{ route('public.products') }}" class="{{ $buttonClass }}">
                             <x-core::icon name="ti ti-shopping-bag" />
-                            {{ trans('plugins/ecommerce::products.browse_products') }}
+                            {{ trans('plugins/ecommerce::customer-dashboard.browse_products') }}
                         </a>
                     </div>
                 @elseif ($checkReview['type'] === 'already_reviewed')

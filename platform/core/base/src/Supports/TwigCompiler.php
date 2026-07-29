@@ -4,6 +4,7 @@ namespace Botble\Base\Supports;
 
 use Twig\Environment;
 use Twig\Extension\ExtensionInterface;
+use Twig\Extension\SandboxExtension;
 
 /**
  * @mixin \Twig\Environment
@@ -20,6 +21,11 @@ class TwigCompiler
         $this->env = new Environment($this->loader, $options);
 
         $this->env->addExtension(new TwigExtension());
+
+        // Enable sandbox mode so user-editable templates cannot pass arbitrary
+        // PHP callables (e.g. {{ [...]|map('system') }}) to Twig's filter/map/
+        // sort/reduce filters, which would otherwise allow remote code execution.
+        $this->env->addExtension(new SandboxExtension(new TwigSecurityPolicy(), true));
     }
 
     public function compile(string $content, array $data = []): string

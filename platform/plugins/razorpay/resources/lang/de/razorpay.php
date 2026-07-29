@@ -36,7 +36,7 @@ return [
     'test_payment' => 'Führen Sie zuerst eine Testzahlung im Testmodus durch',
     'check_status' => 'Überprüfen Sie, ob der Bestellstatus auf "Abgeschlossen" aktualisiert wird',
     'verify_webhook' => 'Wenn Bestellungen "Unvollständig" bleiben, überprüfen Sie Ihre Webhook-Konfiguration',
-    'check_logs' => 'Überprüfen Sie die Zahlungsprotokolle in storage/logs/payment-*.log zur Fehlerbehebung',
+    'check_logs' => 'Überprüfen Sie die Zahlungsprotokolle in Payments > Payment Logs (admin panel) zur Fehlerbehebung',
     'troubleshooting' => 'Tipps zur Fehlerbehebung:',
     'ssl_required' => 'Stellen Sie sicher, dass Ihre Website über ein gültiges SSL-Zertifikat (HTTPS) verfügt',
     'public_url' => 'Überprüfen Sie, ob die Webhook-URL öffentlich zugänglich ist (nicht localhost)',

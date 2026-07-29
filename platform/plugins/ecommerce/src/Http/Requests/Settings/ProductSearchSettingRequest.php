@@ -15,6 +15,7 @@ class ProductSearchSettingRequest extends Request
             'search_products_by.*' => ['required', 'in:name,sku,variation_sku,barcode,description,brand,tag'],
             'enable_filter_products_by_categories' => $onOffRule,
             'enable_filter_products_by_brands' => $onOffRule,
+            'enable_filter_products_by_rating' => $onOffRule,
             'enable_filter_products_by_tags' => $onOffRule,
             'number_of_popular_tags_for_filter' => ['nullable', 'integer', 'min:1', 'max:100'],
             'enable_filter_products_by_labels' => $onOffRule,

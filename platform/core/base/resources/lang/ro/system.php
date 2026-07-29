@@ -47,6 +47,7 @@ return [
     'get_system_report' => 'Obține raport sistem',
     'system_environment' => 'Mediu sistem',
     'framework_version' => 'Versiune framework',
+    'core_version' => 'Versiune nucleu',
     'timezone' => 'Fus orar',
     'debug_mode' => 'Mod depanare',
     'debug_mode_off' => 'Mod depanare dezactivat',

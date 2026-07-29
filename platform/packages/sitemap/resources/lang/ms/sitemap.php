@@ -83,5 +83,7 @@ return [
         'submit_sitemap_error' => 'Gagal menghantar peta laman. Sila cuba lagi.',
         'indexnow_disabled' => 'IndexNow belum didayakan. Sila dayakan terlebih dahulu.',
         'indexnow_no_api_key' => 'Kunci API tidak ditemui. Sila jana kunci API terlebih dahulu.',
+        'enable_llms_txt' => 'Dayakan llms.txt?',
+        'enable_llms_txt_help' => 'Apabila didayakan, fail llms.txt dinamik disajikan di :url untuk membantu perangkak AI (ChatGPT, Claude, Perplexity, dll.) memahami kandungan anda, mengikut spesifikasi llmstxt.org. Lumpuhkan ini jika anda tidak mahu mendedahkan llms.txt. Fail statik public/llms.txt, jika ada, sentiasa diutamakan.',
     ],
 ];

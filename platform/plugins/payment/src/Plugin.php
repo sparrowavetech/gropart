@@ -13,6 +13,10 @@ class Plugin extends PluginOperationAbstract
         Schema::dropIfExists('payments');
         Schema::dropIfExists('payment_logs');
 
+        // Only this plugin's own built-in methods (COD, bank transfer) are cleaned up here.
+        // Third-party gateway settings (payment_stripe_*, payment_paypal_*, ...) are owned by
+        // their own plugins, which may still be installed when this one is deleted - removing
+        // them from here would destroy another plugin's configuration.
         Setting::delete([
             'default_payment_method',
             'payment_cod_status',
@@ -20,11 +24,13 @@ class Plugin extends PluginOperationAbstract
             'payment_cod_name',
             'payment_cod_fee',
             'payment_cod_fee_type',
+            'payment_cod_fee_fixed',
             'payment_bank_transfer_status',
             'payment_bank_transfer_description',
             'payment_bank_transfer_name',
             'payment_bank_transfer_fee',
             'payment_bank_transfer_fee_type',
+            'payment_bank_transfer_fee_fixed',
         ]);
     }
 }

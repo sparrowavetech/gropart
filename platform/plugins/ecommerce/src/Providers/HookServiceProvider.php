@@ -725,7 +725,7 @@ class HookServiceProvider extends ServiceProvider
                     $offers = [
                         '@type' => 'Offer',
                         'price' => format_price($object->price()->getPrice(), null, true),
-                        'priceCurrency' => cms_currency()->getDefaultCurrency()->title,
+                        'priceCurrency' => get_application_currency()->title,
                         'priceValidUntil' => Carbon::today()->startOfMonth()->addDays(5)->addYears(2)->toDateString(),
                         'itemCondition' => 'https://schema.org/NewCondition',
                         'url' => $object->url,

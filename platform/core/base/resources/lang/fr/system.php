@@ -44,6 +44,7 @@ return [
     'get_system_report' => 'Obtenir le rapport système',
     'system_environment' => 'Environnement système',
     'framework_version' => 'Version du framework',
+    'core_version' => 'Version du noyau',
     'timezone' => 'Fuseau horaire',
     'debug_mode' => 'Mode débogage',
     'storage_dir_writable' => 'Répertoire de stockage accessible en écriture',

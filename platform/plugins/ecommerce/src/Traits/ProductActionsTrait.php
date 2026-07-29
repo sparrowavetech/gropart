@@ -403,7 +403,9 @@ trait ProductActionsTrait
             $variation = ProductVariation::query()->findOrFail($id);
             $product = Product::query()->findOrFail($variation->product_id);
             $productVariationsInfo = ProductVariationItem::getVariationsInfo([$id]);
-            $originalProduct = $product;
+            // Point $originalProduct at the parent (configurable) product, not the variation row itself,
+            // so it carries the product's configured currency for the variation edit modal.
+            $originalProduct = $product->original_product ?? $product;
         } else {
             $originalProduct = Product::query()->findOrFail($request->input('product_id'));
         }

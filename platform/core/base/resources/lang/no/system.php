@@ -47,6 +47,7 @@ return [
     'get_system_report' => 'Hent systemrapport',
     'system_environment' => 'Systemmiljø',
     'framework_version' => 'Rammeverksversjon',
+    'core_version' => 'Kjerneversjon',
     'timezone' => 'Tidssone',
     'debug_mode' => 'Feilsøkingsmodus',
     'debug_mode_off' => 'Feilsøkingsmodus av',

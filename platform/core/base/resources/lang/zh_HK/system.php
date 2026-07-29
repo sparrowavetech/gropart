@@ -47,6 +47,7 @@ return [
     'get_system_report' => '獲取系統報告',
     'system_environment' => '系統環境',
     'framework_version' => '框架版本',
+    'core_version' => '核心版本',
     'timezone' => '時區',
     'debug_mode' => '除錯模式',
     'debug_mode_off' => '除錯模式關閉',

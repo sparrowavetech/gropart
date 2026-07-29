@@ -36,7 +36,7 @@ return [
     'test_payment' => 'Vispirms veiciet testa maksājumu testa režīmā',
     'check_status' => 'Pārbaudiet, vai pasūtījuma statuss tiek atjaunināts uz "Pabeigts"',
     'verify_webhook' => 'Ja pasūtījumi paliek "Nepabeigti", pārbaudiet savu webhook konfigurāciju',
-    'check_logs' => 'Pārbaudiet maksājumu žurnālus storage/logs/payment-*.log atkļūdošanai',
+    'check_logs' => 'Pārbaudiet maksājumu žurnālus Payments > Payment Logs (admin panel) atkļūdošanai',
     'troubleshooting' => 'Problēmu novēršanas padomi:',
     'ssl_required' => 'Pārliecinieties, ka jūsu vietnei ir derīgs SSL sertifikāts (HTTPS)',
     'public_url' => 'Pārbaudiet, vai webhook URL ir publiski pieejams (ne localhost)',

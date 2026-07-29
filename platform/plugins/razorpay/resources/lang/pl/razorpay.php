@@ -36,7 +36,7 @@ return [
     'test_payment' => 'Najpierw dokonaj płatności testowej w trybie testowym',
     'check_status' => 'Sprawdź, czy status zamówienia aktualizuje się na "Ukończone"',
     'verify_webhook' => 'Jeśli zamówienia pozostają "Niekompletne", sprawdź konfigurację webhooka',
-    'check_logs' => 'Sprawdź dzienniki płatności w storage/logs/payment-*.log w celu debugowania',
+    'check_logs' => 'Sprawdź dzienniki płatności w Payments > Payment Logs (admin panel) w celu debugowania',
     'troubleshooting' => 'Wskazówki dotyczące rozwiązywania problemów:',
     'ssl_required' => 'Upewnij się, że Twoja witryna ma ważny certyfikat SSL (HTTPS)',
     'public_url' => 'Sprawdź, czy URL webhooka jest publicznie dostępny (nie localhost)',

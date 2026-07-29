@@ -36,7 +36,7 @@ return [
     'test_payment' => 'Realice un pago de prueba en modo de prueba primero',
     'check_status' => 'Verifique si el estado del pedido se actualiza a "Completado"',
     'verify_webhook' => 'Si los pedidos permanecen "Incompletos", verifique su configuración del webhook',
-    'check_logs' => 'Revise los registros de pago en storage/logs/payment-*.log para depuración',
+    'check_logs' => 'Revise los registros de pago en Payments > Payment Logs (admin panel) para depuración',
     'troubleshooting' => 'Consejos de solución de problemas:',
     'ssl_required' => 'Asegúrese de que su sitio tenga un certificado SSL válido (HTTPS)',
     'public_url' => 'Verifique que la URL del webhook sea accesible públicamente (no localhost)',

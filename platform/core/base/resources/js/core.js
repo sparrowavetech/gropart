@@ -1783,14 +1783,15 @@ class Botble {
 
     /**
      * @param {String[]|HTMLElement} sources
+     * @param {Number} index Source to open on, so a gallery can start at the clicked item.
      * @return {FsLightbox}
      */
-    static lightbox(sources) {
+    static lightbox(sources, index = 0) {
         const lightbox = new FsLightbox()
 
         if (Array.isArray(sources)) {
             lightbox.props.sources = sources
-            lightbox.open()
+            lightbox.open(index)
         }
 
         return lightbox

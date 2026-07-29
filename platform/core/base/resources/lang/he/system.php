@@ -54,6 +54,7 @@ return [
     'get_system_report' => 'קבל דוח מערכת',
     'system_environment' => 'סביבת מערכת',
     'framework_version' => 'גרסת המסגרת',
+    'core_version' => 'גרסת ליבה',
     'timezone' => 'אזור זמן',
     'debug_mode' => 'מצב ניפוי',
     'debug_mode_off' => 'מצב ניפוי כבוי',

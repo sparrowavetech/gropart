@@ -36,7 +36,7 @@ return [
     'test_payment' => 'まずテストモードでテスト支払いを行ってください',
     'check_status' => '注文ステータスが「完了」に更新されるかどうかを確認してください',
     'verify_webhook' => '注文が「未完了」のままの場合は、webhook 設定を確認してください',
-    'check_logs' => 'デバッグのために storage/logs/payment-*.log で支払いログを確認してください',
+    'check_logs' => 'デバッグのために Payments > Payment Logs (admin panel) で支払いログを確認してください',
     'troubleshooting' => 'トラブルシューティングのヒント:',
     'ssl_required' => 'サイトに有効な SSL 証明書 (HTTPS) があることを確認してください',
     'public_url' => 'webhook URL が公開アクセス可能であることを確認してください(localhost ではない)',

@@ -36,7 +36,7 @@ return [
     'test_payment' => 'Doe eerst een testbetaling in testmodus',
     'check_status' => 'Controleer of de bestelstatus wordt bijgewerkt naar "Voltooid"',
     'verify_webhook' => 'Als bestellingen "Onvolledig" blijven, controleer dan uw webhook-configuratie',
-    'check_logs' => 'Controleer betalingslogboeken in storage/logs/payment-*.log voor foutopsporing',
+    'check_logs' => 'Controleer betalingslogboeken in Payments > Payment Logs (admin panel) voor foutopsporing',
     'troubleshooting' => 'Tips voor probleemoplossing:',
     'ssl_required' => 'Zorg ervoor dat uw site een geldig SSL-certificaat heeft (HTTPS)',
     'public_url' => 'Controleer of de webhook-URL openbaar toegankelijk is (niet localhost)',

@@ -47,6 +47,7 @@ return [
     'get_system_report' => 'Hankige süsteemiaruanne',
     'system_environment' => 'Süsteemikeskkond',
     'framework_version' => 'Raamistiku versioon',
+    'core_version' => 'Tuuma versioon',
     'timezone' => 'Ajavöönd',
     'debug_mode' => 'Silumisrežiim',
     'debug_mode_off' => 'Silumisrežiim väljas',
