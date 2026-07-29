@@ -29,6 +29,7 @@ use Botble\EcommerceWholesale\Scopes\WholesaleProductVisibilityScope;
 use Botble\EcommerceWholesale\Services\MOQValidationService;
 use Botble\EcommerceWholesale\Services\PricingRuleService;
 use Botble\EcommerceWholesale\Services\ProductVisibilityService;
+use Botble\EcommerceWholesale\Services\ProductWholesaleBoxRenderer;
 use Botble\EcommerceWholesale\Services\WholesalePriceService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -503,25 +504,15 @@ class HookServiceProvider extends ServiceProvider
             return $this->recalculateCartSubtotal($cartContent);
         }, 100, 2);
 
-        add_filter('ecommerce_cart_raw_total', function (float $total, $cartContent) {
-            return $this->recalculateCartTotal($total, $cartContent);
-        }, 100, 2);
-
-        add_filter('ecommerce_cart_raw_tax', function (float $tax, $cartContent, float $discountAmount) {
-            return $this->recalculateCartTax($tax, $cartContent);
-        }, 100, 3);
-
         add_filter('ecommerce_cart_raw_subtotal_by_items', function (float $subtotal, $cartContent) {
             return $this->recalculateCartSubtotal($cartContent);
         }, 100, 2);
 
-        add_filter('ecommerce_cart_raw_total_by_items', function (float $total, $cartContent) {
-            return $this->recalculateCartTotal($total, $cartContent);
-        }, 100, 2);
-
-        add_filter('ecommerce_cart_raw_tax_by_items', function (float $tax, $cartContent, float $discountAmount) {
-            return $this->recalculateCartTax($tax, $cartContent);
-        }, 100, 3);
+        // Cart total and tax are intentionally NOT re-filtered. Wholesale prices are
+        // applied in place to each cart item (updateQuietly), so the core total/tax -
+        // computed from $cartItem->price - is already wholesale-correct at any scope
+        // (full cart or per-vendor slice). A subtotal-ratio rescale here only risked
+        // re-introducing the multivendor shipping inflation it was meant to avoid.
     }
 
     protected function registerCartItemPriceUpdate(): void
@@ -594,7 +585,8 @@ class HookServiceProvider extends ServiceProvider
         }
 
         $originalProduct = $product->is_variation ? $product->original_product : $product;
-        $basePrice = $product->isOnSale() ? $product->front_sale_price : $product->price;
+        // Convert the product's own currency price to the store default currency before applying wholesale discounts.
+        $basePrice = $product->isOnSale() ? $product->front_sale_price : $product->getConvertedPrice();
         $groupIds = app(WholesalePriceService::class)->getApplicableGroupIds($customer);
 
         if (empty($groupIds) && ! WholesaleHelper::isEnabledForGuests()) {
@@ -773,7 +765,11 @@ class HookServiceProvider extends ServiceProvider
             ($productOptions = Arr::get($cartItem->options->toArray(), 'options', [])) &&
             is_array($productOptions)
         ) {
-            return Cart::instance('cart')->getPriceByOptions($wholesalePrice, $productOptions);
+            // getPriceByOptions() returns ['price' => float, 'option_price_once' => float];
+            // the wholesale hook only updates the per-unit price, so extract the 'price' key.
+            $priceResult = Cart::instance('cart')->getPriceByOptions($wholesalePrice, $productOptions);
+
+            return (float) Arr::get($priceResult, 'price', $wholesalePrice);
         }
 
         return $wholesalePrice;
@@ -783,45 +779,20 @@ class HookServiceProvider extends ServiceProvider
     {
         $subtotal = 0;
 
-        foreach (Cart::instance('cart')->content() as $cartItem) {
+        // Sum only the items in the given scope. The "_by_items" cart filters
+        // pass a per-vendor slice here (multivendor checkout); summing the full
+        // cart instead inflates each vendor's total to the whole-cart total,
+        // which breaks the marketplace proportional shipping split (every vendor
+        // then resolves a proportion of 1.0 and is charged the full shipping fee).
+        foreach ($cartContent as $cartItem) {
+            if (! $cartItem) {
+                continue;
+            }
+
             $subtotal += $cartItem->qty * $cartItem->price;
         }
 
         return $subtotal;
-    }
-
-    protected function recalculateCartTotal(float $total, $cartContent): float
-    {
-        $originalSubtotal = 0;
-
-        foreach ($cartContent as $cartItem) {
-            $originalSubtotal += $cartItem->qty * $cartItem->price;
-        }
-
-        $updatedSubtotal = $this->recalculateCartSubtotal($cartContent);
-
-        if ($originalSubtotal > 0 && $updatedSubtotal != $originalSubtotal) {
-            return $total * ($updatedSubtotal / $originalSubtotal);
-        }
-
-        return $total;
-    }
-
-    protected function recalculateCartTax(float $tax, $cartContent): float
-    {
-        $originalSubtotal = 0;
-
-        foreach ($cartContent as $cartItem) {
-            $originalSubtotal += $cartItem->qty * $cartItem->price;
-        }
-
-        $updatedSubtotal = $this->recalculateCartSubtotal($cartContent);
-
-        if ($originalSubtotal > 0 && $updatedSubtotal != $originalSubtotal) {
-            return $tax * ($updatedSubtotal / $originalSubtotal);
-        }
-
-        return $tax;
     }
 
     protected function registerOrderProductPriceHooks(): void
@@ -837,82 +808,8 @@ class HookServiceProvider extends ServiceProvider
         }
 
         add_filter('ecommerce_after_product_description', function (?string $html, Product $product) {
-            if (! WholesaleHelper::isEnabled()) {
-                return $html;
-            }
-
-            $customer = auth('customer')->user();
-            $isGuestEnabled = WholesaleHelper::isEnabledForGuests();
-
-            if (! $customer && ! $isGuestEnabled) {
-                return $html;
-            }
-
-            if ($customer && ! WholesaleHelper::isWholesaleCustomer($customer) && ! $isGuestEnabled) {
-                return $html;
-            }
-
-            $groupIds = $this->getGroupIdsForPricingTable($customer);
-
-            if (empty($groupIds) && ! $isGuestEnabled) {
-                return $html;
-            }
-
-            $originalProduct = $product->is_variation ? $product->original_product : $product;
-
-            $service = app(PricingRuleService::class);
-            $basePrice = $product->isOnSale() ? $product->front_sale_price : $product->price;
-            $pricingTiers = $service->getTieredPricesForCustomer($originalProduct, $groupIds, $basePrice);
-
-            if ($pricingTiers->isEmpty()) {
-                return $html;
-            }
-            $showTable = WholesaleHelper::showPricingTable();
-
-            $output = '';
-
-            if ($showTable) {
-                $output .= view('plugins/ecommerce-wholesale::themes.partials.pricing-table', [
-                    'pricingTiers' => $pricingTiers,
-                    'basePrice' => $basePrice,
-                    'product' => $product,
-                ])->render();
-            } else {
-                $output .= view('plugins/ecommerce-wholesale::themes.partials.pricing-script', [
-                    'pricingTiers' => $pricingTiers,
-                    'basePrice' => $basePrice,
-                ])->render();
-            }
-
-            return $html . $output;
+            return $html . app(ProductWholesaleBoxRenderer::class)->render($product);
         }, 100, 2);
-    }
-
-    protected function getGroupIdsForPricingTable(?Customer $customer): array
-    {
-        if ($customer && WholesaleHelper::isWholesaleCustomer($customer)) {
-            return $customer->wholesaleGroups()
-                ->where('status', CustomerGroupStatusEnum::PUBLISHED)
-                ->pluck('ws_customer_groups.id')
-                ->all();
-        }
-
-        if (WholesaleHelper::isEnabledForGuests()) {
-            $defaultGroupId = WholesaleHelper::getDefaultGroupId();
-
-            if ($defaultGroupId) {
-                return [$defaultGroupId];
-            }
-
-            $firstGroup = CustomerGroup::query()
-                ->where('status', CustomerGroupStatusEnum::PUBLISHED)
-                ->orderBy('priority')
-                ->first();
-
-            return $firstGroup ? [$firstGroup->id] : [];
-        }
-
-        return [];
     }
 
     protected function registerCustomerDashboardWholesaleCard(): void

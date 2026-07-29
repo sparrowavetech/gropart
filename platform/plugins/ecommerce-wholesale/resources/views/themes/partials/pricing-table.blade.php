@@ -151,7 +151,7 @@
         }
     }
 </style>
-<div class="wholesale-pricing-table wholesale-pricing-table--{{ $style }} my-4">
+<div class="wholesale-pricing-table wholesale-pricing-table--{{ $style }} my-4" data-wholesale-box="1">
     <div class="ws-header d-flex align-items-center">
         @if($showIcon)
             <x-core::icon :name="$icon" class="me-2" />

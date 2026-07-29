@@ -68,6 +68,7 @@ class LoyaltyPointsCheckout {
                     } else {
                         this.showSuccess(data.message)
                         document.dispatchEvent(new CustomEvent('coupon:applied'))
+                        this.refreshOrderSummary()
                         this.reloadLoyaltyBlock()
                     }
                 } catch (error) {
@@ -113,6 +114,7 @@ class LoyaltyPointsCheckout {
                 } else {
                     this.showSuccess(data.message)
                     document.dispatchEvent(new CustomEvent('coupon:removed'))
+                    this.refreshOrderSummary()
                     this.reloadLoyaltyBlock()
                 }
             } catch (error) {
@@ -161,6 +163,23 @@ class LoyaltyPointsCheckout {
             console.error('Failed to reload loyalty block', error)
             currentBlock.classList.remove('loading')
             currentBlock.removeAttribute('aria-busy')
+        }
+    }
+
+    refreshOrderSummary() {
+        // After points are applied/removed the ecommerce order summary (the
+        // points discount line and the total) must be recalculated. We dispatch
+        // `coupon:applied`/`coupon:removed` for that, but older ecommerce builds
+        // do not listen to those events on the checkout summary, so the total
+        // would only refresh once the customer changed the shipping method.
+        //
+        // Re-fire the change event on the currently selected shipping method so
+        // ecommerce re-runs its own (proven) shipping calculation, which
+        // re-renders the summary with the loyalty discount while keeping the
+        // selected shipping method intact.
+        const checkedShipping = document.querySelector('input.shipping_method_input:checked')
+        if (checkedShipping) {
+            checkedShipping.dispatchEvent(new Event('change', { bubbles: true }))
         }
     }
 

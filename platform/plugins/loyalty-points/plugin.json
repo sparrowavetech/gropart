@@ -5,7 +5,7 @@
     "provider": "Botble\\LoyaltyPoints\\Providers\\LoyaltyPointsServiceProvider",
     "author": "Botble Technologies",
     "url": "https://botble.com",
-    "version": "1.0.12",
+    "version": "1.0.17",
     "description": "Advanced loyalty program and rewards system for customers",
     "minimum_core_version": "7.5.0",
     "require": [

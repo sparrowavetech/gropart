@@ -7,6 +7,7 @@
         'formattedPrice' => format_price($tier['price']),
     ])->values();
 @endphp
+<span data-wholesale-box="1" hidden></span>
 <script>
 (function() {
     var tiers = @json($tiersJson);

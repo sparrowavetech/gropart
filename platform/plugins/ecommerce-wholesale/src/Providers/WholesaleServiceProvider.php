@@ -7,6 +7,7 @@ use Botble\Base\Supports\DashboardMenu as DashboardMenuSupport;
 use Botble\Base\Supports\Helper;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\EcommerceWholesale\Facades\WholesaleHelper;
+use Botble\EcommerceWholesale\Http\Middleware\InjectWholesaleBoxLoader;
 use Botble\EcommerceWholesale\Models\CustomerGroup;
 use Botble\EcommerceWholesale\Repositories\Eloquent\CustomerGroupRepository;
 use Botble\EcommerceWholesale\Repositories\Interfaces\CustomerGroupInterface;
@@ -53,6 +54,8 @@ class WholesaleServiceProvider extends ServiceProvider
         if (is_plugin_active('marketplace')) {
             $this->loadRoutes(['vendor']);
         }
+
+        $this->app['router']->pushMiddlewareToGroup('web', InjectWholesaleBoxLoader::class);
 
         DashboardMenu::beforeRetrieving(function (): void {
             DashboardMenu::make()

@@ -5,6 +5,7 @@ use Botble\EcommerceWholesale\Enums\CustomerGroupStatusEnum;
 use Botble\EcommerceWholesale\Facades\WholesaleHelper;
 use Botble\EcommerceWholesale\Models\CustomerGroup;
 use Botble\EcommerceWholesale\Services\PricingRuleService;
+use Botble\EcommerceWholesale\Services\ProductWholesaleBoxRenderer;
 use Botble\Theme\Facades\Theme;
 use Illuminate\Support\Facades\Route;
 
@@ -79,5 +80,21 @@ Theme::registerRoutes(function (): void {
 
             return response()->json(['tiers' => $tiers]);
         })->name('tiers')->wherePrimaryKey('productId');
+
+        // Returns the fully rendered wholesale box HTML for a product. Used by the
+        // theme-independent fallback loader when the product page template does not
+        // call the `ecommerce_after_product_description` hook. Output is per-viewer
+        // (guest/customer/group), so it must never be cached.
+        Route::get('box/{productId}', function (int|string $productId) {
+            $product = Product::query()->find($productId);
+
+            $html = $product
+                ? app(ProductWholesaleBoxRenderer::class)->render($product)
+                : '';
+
+            return response()
+                ->json(['html' => $html])
+                ->header('Cache-Control', 'no-store, private');
+        })->name('box')->wherePrimaryKey('productId');
     });
 });

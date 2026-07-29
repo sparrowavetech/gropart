@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Schema;
 
 class Plugin extends PluginOperationAbstract
 {
-    public const ASSETS_VERSION = '1.0.7';
+    public const ASSETS_VERSION = '1.0.10';
 
     public static function remove(): void
     {

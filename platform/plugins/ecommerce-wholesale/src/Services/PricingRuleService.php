@@ -61,7 +61,8 @@ class PricingRuleService
             });
         }
 
-        $basePrice = $product->price;
+        // Convert the product's own currency price to the store default currency before applying wholesale discounts.
+        $basePrice = $product->getConvertedPrice();
 
         return $rules->values()->map(function ($rule) use ($basePrice) {
             return [
@@ -91,7 +92,7 @@ class PricingRuleService
         $rules = $this->resolveRules($product, $groupIds)
             ->sortBy('min_quantity');
 
-        $basePrice = $basePrice ?? ($product->isOnSale() ? $product->front_sale_price : $product->price);
+        $basePrice = $basePrice ?? ($product->isOnSale() ? $product->front_sale_price : $product->getConvertedPrice());
 
         return $rules->values()->map(function ($rule) use ($basePrice) {
             return [
@@ -119,7 +120,7 @@ class PricingRuleService
             return $rule->appliesToQuantity($quantity);
         });
 
-        $basePrice = $basePrice ?? $product->price;
+        $basePrice = $basePrice ?? $product->getConvertedPrice();
         $bestRule = null;
         $bestPrice = $basePrice;
 

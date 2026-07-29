@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Schema;
 
 class Plugin extends PluginOperationAbstract
 {
-    public const VERSION = '1.0.9';
+    public const VERSION = '1.0.13';
 
     public static function activate(): void
     {

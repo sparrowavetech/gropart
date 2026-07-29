@@ -68,7 +68,10 @@ class SaveOrderWholesalePrices
                     ($productOptions = Arr::get($orderOptions, 'options', [])) &&
                     is_array($productOptions)
                 ) {
-                    $wholesalePriceWithOptions = Cart::instance('cart')->getPriceByOptions($wholesalePrice, $productOptions);
+                    // getPriceByOptions() returns ['price' => float, 'option_price_once' => float];
+                    // roundPrice() and the tax ratio below need a float, so extract the 'price' key.
+                    $priceResult = Cart::instance('cart')->getPriceByOptions($wholesalePrice, $productOptions);
+                    $wholesalePriceWithOptions = (float) Arr::get($priceResult, 'price', $wholesalePrice);
                 }
 
                 $roundedPrice = EcommerceHelper::roundPrice($wholesalePriceWithOptions);
@@ -123,7 +126,8 @@ class SaveOrderWholesalePrices
     protected function saveWholesaleInfoToOptions($orderProduct, Product $product, $customer, float $originalPrice): void
     {
         $originalProduct = $product->is_variation ? $product->original_product : $product;
-        $basePrice = $product->isOnSale() ? $product->front_sale_price : $product->price;
+        // Convert the product's own currency price to the store default currency before applying wholesale discounts.
+        $basePrice = $product->isOnSale() ? $product->front_sale_price : $product->getConvertedPrice();
         $groupIds = $this->wholesalePriceService->getApplicableGroupIds($customer);
 
         if (empty($groupIds)) {

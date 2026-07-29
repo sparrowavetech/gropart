@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="{{ locale }}">
 <head>
 <meta charset="UTF-8">
 <style>
@@ -13,7 +13,7 @@ body {
     padding: 3mm;
     width: 85.6mm;
     height: 53.98mm;
-    font-family: DejaVu Sans, sans-serif;
+    font-family: {{ font_family }};
     font-size: 7pt;
     color: #1e293b;
     background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
@@ -35,7 +35,7 @@ body {
     max-width: 25mm;
 }
 .brand-text {
-    font-weight: bold;
+    font-weight: {{ heading_weight }};
     font-size: 9pt;
     color: #0f172a;
 }
@@ -46,7 +46,7 @@ body {
 }
 .member-level-value {
     color: #0f172a;
-    font-weight: bold;
+    font-weight: {{ heading_weight }};
 }
 .content {
     width: 100%;
@@ -76,7 +76,7 @@ body {
     margin-left: 26mm;
 }
 .member-name {
-    font-weight: bold;
+    font-weight: {{ heading_weight }};
     font-size: 10pt;
     color: #0f172a;
     margin-bottom: 0.5mm;
@@ -99,7 +99,7 @@ body {
 }
 .points-value {
     font-size: 11pt;
-    font-weight: bold;
+    font-weight: {{ heading_weight }};
     color: #0f172a;
 }
 .points-secondary .points-value {

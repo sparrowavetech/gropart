@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static bool isRegistrationEnabled()
  * @method static bool isWholesaleCustomer(\Botble\Ecommerce\Models\Customer|null $customer = null)
  * @method static bool showPricingTable()
+ * @method static bool autoDisplay()
  * @method static string getDiscountResolution()
  * @method static int|null getDefaultGroupId()
  * @method static string getAssetVersion()

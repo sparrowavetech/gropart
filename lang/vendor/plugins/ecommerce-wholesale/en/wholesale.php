@@ -214,6 +214,8 @@ return [
         'border_color' => 'Border Color',
         'border_color_help' => 'Border color of the pricing box container.',
         'display_section' => 'Display Options',
+        'auto_display' => 'Automatically display pricing box',
+        'auto_display_help' => 'Show the wholesale box on product pages even if your theme does not include the product page hook. Turn off if you place the box manually in your theme.',
         'show_pricing_table' => 'Show Pricing Table',
         'show_pricing_table_help' => 'Display the wholesale pricing table on product detail pages.',
         'display_mode' => 'Display Mode',

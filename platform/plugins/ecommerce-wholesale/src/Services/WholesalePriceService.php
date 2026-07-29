@@ -96,7 +96,8 @@ class WholesalePriceService
 
         $originalProduct = $product->is_variation ? $product->original_product : $product;
         $storeId = $product->store_id ?? null;
-        $basePrice = $product->isOnSale() ? $product->front_sale_price : $product->price;
+        // Convert the product's own currency price to the store default currency before applying wholesale discounts.
+        $basePrice = $product->isOnSale() ? $product->front_sale_price : $product->getConvertedPrice();
 
         $bestPrice = $this->pricingRuleService->getBestPriceForQuantity(
             $originalProduct,

@@ -191,6 +191,14 @@ class WholesaleSettingForm extends SettingForm
                     ->content('<h4 class="mb-3 mt-4">' . trans('plugins/ecommerce-wholesale::wholesale.appearance.display_section') . '</h4>')
             )
             ->add(
+                'wholesale_auto_display',
+                OnOffCheckboxField::class,
+                OnOffFieldOption::make()
+                    ->label(trans('plugins/ecommerce-wholesale::wholesale.appearance.auto_display'))
+                    ->helperText(trans('plugins/ecommerce-wholesale::wholesale.appearance.auto_display_help'))
+                    ->value(WholesaleHelper::autoDisplay())
+            )
+            ->add(
                 'wholesale_show_pricing_table',
                 OnOffCheckboxField::class,
                 OnOffFieldOption::make()

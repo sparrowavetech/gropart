@@ -20,7 +20,58 @@
         $customStyles .= 'padding: ' . (int) $appearance['padding'] . 'px;';
     }
     $iconColor = $isValidColor($appearance['icon_color'] ?? '') ? 'color: ' . e($appearance['icon_color']) . ';' : '';
+
+    // Resolved colors used by the scoped style block below so the chosen colors
+    // actually take effect on every box style. Several styles paint inner panels
+    // and text with hard-coded Bootstrap utilities (bg-white, bg-light,
+    // text-muted, ...) that carry !important and sit on top of $customStyles
+    // applied only to the outer wrapper, so the settings looked ignored.
+    $bgColor = $isValidColor($appearance['bg_color'] ?? '') ? e($appearance['bg_color']) : '';
+    $textColor = $isValidColor($appearance['text_color'] ?? '') ? e($appearance['text_color']) : '';
+    // Border color also needs a scoped !important override: the styled boxes carry
+    // Bootstrap's .border utility (border-color: var(--bs-border-color) !important),
+    // which beats the plain inline border-color in $customStyles, so the setting
+    // looked ignored on every style except Card (which uses .border-0).
+    $borderColor = $isValidColor($appearance['border_color'] ?? '') ? e($appearance['border_color']) : '';
 @endphp
+
+@if($bgColor !== '' || $textColor !== '' || $borderColor !== '')
+    @once
+        <style>
+            @if($bgColor !== '')
+            {{-- :not(.bg-opacity-10) keeps the subtle tier-boost panels (Card/Banner
+                 styles) translucent instead of forcing them to a solid box color. --}}
+            .loyalty-product-info-box .bg-white,
+            .loyalty-product-info-box .bg-light,
+            .loyalty-product-info-box .bg-success:not(.bg-opacity-10),
+            .loyalty-product-info-box .bg-primary:not(.bg-opacity-10) {
+                background-color: {{ $bgColor }} !important;
+            }
+            @endif
+            @if($textColor !== '')
+            .loyalty-product-info-box,
+            .loyalty-product-info-box h4,
+            .loyalty-product-info-box h5,
+            .loyalty-product-info-box h6,
+            .loyalty-product-info-box p,
+            .loyalty-product-info-box small,
+            .loyalty-product-info-box span,
+            .loyalty-product-info-box div,
+            .loyalty-product-info-box .text-muted,
+            .loyalty-product-info-box .text-primary,
+            .loyalty-product-info-box .text-success,
+            .loyalty-product-info-box .text-info {
+                color: {{ $textColor }} !important;
+            }
+            @endif
+            @if($borderColor !== '')
+            .loyalty-product-info-box .border {
+                border-color: {{ $borderColor }} !important;
+            }
+            @endif
+        </style>
+    @endonce
+@endif
 
 @if(isset($loyaltyConfig))
 @once

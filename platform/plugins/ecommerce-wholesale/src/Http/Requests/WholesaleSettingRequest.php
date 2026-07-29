@@ -29,6 +29,7 @@ class WholesaleSettingRequest extends Request
             'wholesale_savings_color' => ['nullable', 'string', 'max:20'],
             'wholesale_border_color' => ['nullable', 'string', 'max:20'],
             'wholesale_show_pricing_table' => ['nullable', 'in:0,1'],
+            'wholesale_auto_display' => ['nullable', 'in:0,1'],
             'wholesale_show_icon' => ['nullable', 'in:0,1'],
             'wholesale_icon' => ['nullable', 'string', 'max:50'],
             'wholesale_show_original_price' => ['nullable', 'in:0,1'],

@@ -135,6 +135,11 @@ class WholesaleHelper
         return (bool) setting('wholesale_show_pricing_table', true);
     }
 
+    public function autoDisplay(): bool
+    {
+        return (bool) setting('wholesale_auto_display', true);
+    }
+
     public function getStyle(): string
     {
         return setting('wholesale_style', WholesaleStyleEnum::MINIMAL);

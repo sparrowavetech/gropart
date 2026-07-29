@@ -8,12 +8,15 @@ use Botble\LoyaltyPoints\Models\CustomerPointBalance;
 use Botble\Media\Facades\RvMedia;
 use Botble\Theme\Facades\Theme;
 use Illuminate\Http\Response;
+use Mpdf\Language\LanguageToFont;
 
 class LoyaltyCardPdfService
 {
     protected const CARD_WIDTH_MM = 85.6;
 
     protected const CARD_HEIGHT_MM = 53.98;
+
+    protected const DEFAULT_FONT_FAMILY = 'DejaVu Sans, sans-serif';
 
     public function __construct(protected LoyaltyCardService $loyaltyCardService)
     {
@@ -69,7 +72,17 @@ class LoyaltyCardPdfService
     {
         $logo = theme_option('logo') ?: Theme::getLogo();
 
+        $locale = $this->getLocaleCode();
+        $fontFamily = $this->getFontFamily($locale);
+        $usesFallbackFont = $fontFamily !== self::DEFAULT_FONT_FAMILY;
+
         return [
+            'locale' => $locale,
+            'font_family' => $fontFamily,
+            // Fallback script fonts (FreeSerif, etc.) ship no bold variant with the
+            // script's glyphs, so bold non-Latin text would render as empty boxes.
+            // Drop bold for those locales to keep the card readable.
+            'heading_weight' => $usesFallbackFont ? 'normal' : 'bold',
             'customer' => [
                 'id' => $customer->id,
                 'name' => $customer->name,
@@ -100,5 +113,28 @@ class LoyaltyCardPdfService
     protected function svgToDataUri(string $svg): string
     {
         return 'data:image/svg+xml;base64,' . base64_encode($svg);
+    }
+
+    protected function getLocaleCode(): string
+    {
+        // Use only the primary language subtag, e.g. "pt_BR" or "zh-HK" -> "pt" / "zh".
+        return strtolower(preg_split('/[_-]/', (string) app()->getLocale())[0] ?: 'en');
+    }
+
+    protected function getFontFamily(string $locale): string
+    {
+        // The card defaults to DejaVu Sans, which has no glyphs for many non-Latin
+        // scripts (Bengali, Hindi, Thai, CJK, Arabic...) and renders them as empty
+        // boxes. mPDF ships fonts that cover those scripts, so resolve the proper
+        // font for the active locale and only override DejaVu when the script is not
+        // one DejaVu already covers - this keeps Latin/Cyrillic/Greek cards unchanged.
+        $result = (new LanguageToFont())->getLanguageOptions($locale, false);
+        $unifont = is_array($result) ? (string) ($result[1] ?? '') : '';
+
+        if ($unifont !== '' && ! str_starts_with($unifont, 'dejavu')) {
+            return $unifont;
+        }
+
+        return self::DEFAULT_FONT_FAMILY;
     }
 }

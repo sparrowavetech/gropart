@@ -92,8 +92,12 @@
     }
 
     .loyalty-suggestion {
-        background-color: #f8f9fa;
-        border: 1px solid #e9ecef;
+        // Transparent background + inherited text color so the box blends with
+        // the host page. Landing pages (e.g. Landing Funnel dark styles) use
+        // their own color scheme; a hardcoded light bg made the box stay white
+        // on dark pages and the gray text became unreadable.
+        background-color: transparent;
+        border: 1px solid rgba(128, 128, 128, 0.35);
         border-radius: 0.25rem;
         padding: 0.75rem 1rem;
 
@@ -102,12 +106,23 @@
             align-items: center;
             gap: 8px;
 
+            span {
+                color: inherit;
+            }
+
             i,
             svg {
                 color: var(--bs-primary) !important;
                 height: 18px;
                 width: 18px;
             }
+        }
+
+        // Inherit the page text color (overrides Bootstrap .text-muted, which
+        // is a fixed gray that does not adapt to dark landing pages).
+        .loyalty-redeem-prompt {
+            color: inherit;
+            opacity: 0.75;
         }
 
         .loyalty-info {
@@ -137,25 +152,36 @@
             color: var(--bs-gray-600, #6c757d);
         }
 
+        // Outline style so the Look up button stays legible on both light and
+        // dark funnel themes. The old filled style hardcoded white text on the
+        // primary accent; when the theme accent is a pale color (e.g. the sky
+        // blue used on light funnels) the white label became invisible. Using
+        // the accent for text + border on a transparent background keeps the
+        // label readable regardless of page background; hover inverts to filled.
         .btn-primary {
-            background-color: var(--bs-primary);
-            border-color: var(--bs-primary);
-            color: #fff;
+            background-color: transparent;
+            border-color: var(--color-primary, var(--bs-primary));
+            color: var(--color-primary, var(--bs-primary));
 
+            // Hover/active keep the accent-colored label (never white) so the
+            // button stays legible whatever the theme accent lightness. The old
+            // rule filled with the accent under white text, which vanished on a
+            // pale light-theme accent and gave no visible change on dark themes.
+            // A neutral translucent wash reads as hover feedback on both.
             &:hover {
-                background-color: var(--bs-primary);
-                border-color: var(--bs-primary);
-                opacity: 0.9;
+                background-color: rgba(128, 128, 128, 0.12);
+                border-color: var(--color-primary, var(--bs-primary));
+                color: var(--color-primary, var(--bs-primary));
             }
 
             &:active {
-                background-color: var(--bs-primary);
-                border-color: var(--bs-primary);
-                opacity: 0.8;
+                background-color: rgba(128, 128, 128, 0.2);
+                border-color: var(--color-primary, var(--bs-primary));
+                color: var(--color-primary, var(--bs-primary));
             }
 
             &:focus-visible {
-                outline: 2px solid var(--bs-primary);
+                outline: 2px solid var(--color-primary, var(--bs-primary));
                 outline-offset: 2px;
             }
         }
@@ -182,7 +208,15 @@
 
         &:hover:not(:disabled) {
             border-color: var(--bs-primary);
-            background-color: rgba(var(--bs-primary-rgb), 0.05);
+            // Keep an opaque light base so the card stays readable on dark
+            // landing pages. The old rgba tint replaced the solid white base, so
+            // on a dark page the background bled through and the fixed-dark
+            // preset text (gray-800/600) became unreadable on hover.
+            background-color: #fff;
+            background-image: linear-gradient(
+                rgba(var(--bs-primary-rgb), 0.05),
+                rgba(var(--bs-primary-rgb), 0.05)
+            );
         }
 
         &:focus-visible {
@@ -243,7 +277,7 @@
         background-color: rgba(var(--bs-warning-rgb), 0.1);
         border-radius: 0.25rem;
         font-size: 0.85rem;
-        color: var(--bs-gray-700, #495057);
+        color: inherit;
 
         i,
         svg {
@@ -378,6 +412,13 @@
                 width: 100%;
                 padding: 0.5rem 1rem;
                 font-size: 0.85rem;
+            }
+
+            // The "Look up" button sits inline beside the phone input. Keep it
+            // auto-width so the full-width rule above does not collapse the
+            // input to zero width (customer could not type on mobile).
+            .loyalty-member-input-wrapper .btn-primary {
+                width: auto;
             }
         }
 
