@@ -1,4 +1,4 @@
-<?php if (! $__env->hasRenderedOnce('a5727b84-17e5-4926-8614-a7adab9e39cc')): $__env->markAsRenderedOnce('a5727b84-17e5-4926-8614-a7adab9e39cc'); ?>
+<?php if (! $__env->hasRenderedOnce('0b9b1aa0-114a-42b8-8ff9-55d329483393')): $__env->markAsRenderedOnce('0b9b1aa0-114a-42b8-8ff9-55d329483393'); ?>
     <?php
         $successIcon = theme_option('toast_success_icon');
         $errorIcon = theme_option('toast_error_icon');
