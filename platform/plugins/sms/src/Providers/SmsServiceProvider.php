@@ -83,6 +83,25 @@ class SmsServiceProvider extends ServiceProvider
                 'permissions' => ['sms.settings'],
             ]);
         });
+
+        $this->app->booted(function () {
+            // Apply customer registration phone validation rule
+            add_filter('ecommerce_customer_registration_form_validation_rules', function (array $rules) {
+                if (is_plugin_active('sms') && setting('sms_otp_enabled')) {
+                    $rules['phone'] = array_merge($rules['phone'] ?? [], ['required', 'min:10', 'max:10']);
+                    $rules['phone'] = array_filter($rules['phone'], fn($rule) => $rule !== 'nullable');
+                }
+                return $rules;
+            }, 120);
+
+            // Apply checkout form validation rule
+            add_filter('checkout_rules_request', function (array $rules) {
+                if (is_plugin_active('sms') && setting('sms_otp_enabled')) {
+                    $rules['address.phone'] = 'required|max:10|min:10';
+                }
+                return $rules;
+            }, 120);
+        });
       //add_filter(BASE_FILTER_AFTER_SETTING_CONTENT, [$this, 'addSettings'], 249);
     }
      /**

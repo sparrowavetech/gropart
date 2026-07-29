@@ -16,7 +16,16 @@ class EventServiceProvider extends ServiceProvider
     protected $listen = [
         SendSmsEvent::class => [
             SendSmsListener::class,
-        ]
+        ],
+        \Botble\Ecommerce\Events\OrderConfirmedEvent::class => [
+            [\Botble\Sms\Listeners\OrderSmsListener::class, 'handleOrderConfirmed'],
+        ],
+        \Botble\Ecommerce\Events\OrderCompletedEvent::class => [
+            [\Botble\Sms\Listeners\OrderSmsListener::class, 'handleOrderCompleted'],
+        ],
+        \Botble\Ecommerce\Events\OrderCancelledEvent::class => [
+            [\Botble\Sms\Listeners\OrderSmsListener::class, 'handleOrderCancelled'],
+        ],
     ];
    
 }
