@@ -15,8 +15,13 @@
  
          if (Schema::hasTable('ec_orders') && ! Schema::hasColumn('ec_orders', 'cod_prepayment_amount')) {
              Schema::table('ec_orders', function (Blueprint $table) {
-                 $table->decimal('cod_prepayment_amount', 15)->nullable();
-                 $table->decimal('cod_remaining_amount', 15)->nullable();
+                 $table->decimal('cod_prepayment_amount', 15, 2)->nullable();
+             });
+         }
+
+         if (Schema::hasTable('ec_orders') && ! Schema::hasColumn('ec_orders', 'cod_remaining_amount')) {
+             Schema::table('ec_orders', function (Blueprint $table) {
+                 $table->decimal('cod_remaining_amount', 15, 2)->nullable();
              });
          }
      }
@@ -30,8 +35,17 @@
          }
  
          if (Schema::hasTable('ec_orders')) {
-             Schema::table('ec_orders', function (Blueprint $table) {
-                 $table->dropColumn(['cod_prepayment_amount', 'cod_remaining_amount']);
+             $columns = array_filter([
+                 Schema::hasColumn('ec_orders', 'cod_prepayment_amount') ? 'cod_prepayment_amount' : null,
+                 Schema::hasColumn('ec_orders', 'cod_remaining_amount') ? 'cod_remaining_amount' : null,
+             ]);
+
+             if (! $columns) {
+                 return;
+             }
+
+             Schema::table('ec_orders', function (Blueprint $table) use ($columns) {
+                 $table->dropColumn($columns);
              });
          }
      }

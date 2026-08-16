@@ -10,7 +10,6 @@ use Botble\Payment\Enums\PaymentStatusEnum;
 use Botble\Payment\Models\Payment;
 use Botble\Ecommerce\Models\OrderHistory;
 use Botble\Ecommerce\Enums\OrderHistoryActionEnum;
-use Botble\Ecommerce\Facades\EcommerceHelper;
 
 class AdvancedCodCheckoutListener
 {
@@ -23,8 +22,8 @@ class AdvancedCodCheckoutListener
         $cartItems = Cart::instance('cart')->content();
         
         foreach ($cartItems as $item) {
-            $product = Product::query()->find($item->id);
-            if ($product && ! $product->is_cod_eligible) {
+            $product = self::getProductForCodEligibility($item->id);
+            if (! $product || ! $product->is_cod_eligible) {
                 $excludedMethods[] = 'cod';
                 break;
             }
@@ -46,7 +45,7 @@ class AdvancedCodCheckoutListener
         $ineligibleItems = [];
 
         foreach ($cartContent as $item) {
-            $product = Product::query()->find($item->id);
+            $product = self::getProductForCodEligibility($item->id);
             if ($product && $product->is_cod_eligible) {
                 $hasCodEligible = true;
             } else {
@@ -349,7 +348,7 @@ class AdvancedCodCheckoutListener
 
     public static function addCodLabelToCheckoutItem(?string $html, $cartItem): string
     {
-        $product = Product::query()->find($cartItem->id);
+        $product = self::getProductForCodEligibility($cartItem->id);
         
         if (!$product) {
             return $html;
@@ -379,7 +378,7 @@ class AdvancedCodCheckoutListener
 
         $allEligible = true;
         foreach ($cartItems as $item) {
-            $product = Product::query()->find($item->id);
+            $product = self::getProductForCodEligibility($item->id);
             if (!$product || !$product->is_cod_eligible) {
                 $allEligible = false;
                 break;
@@ -513,13 +512,13 @@ class AdvancedCodCheckoutListener
 
         // Store flag for amount adjustment
         session()->put('advanced_cod_prepayment_active', true);
+        session()->put('advanced_cod_order_ids', (array) $request->input('order_id', []));
         
         // Prepare data for online gateway
         $request->merge(['payment_method' => $onlineMethod]);
         $data['type'] = $onlineMethod;
-        
-        // Trigger the online gateway's checkout logic
-        $data = apply_filters(PAYMENT_FILTER_AFTER_POST_CHECKOUT, $data, $request);
+
+        self::markOrdersAsAdvancedCodPending((array) $request->input('order_id', []), (float) $data['amount']);
 
         return $data;
     }
@@ -543,33 +542,49 @@ class AdvancedCodCheckoutListener
 
     public static function handlePaymentSuccess(array $data): void
     {
-        if (! session()->has('advanced_cod_prepayment_active')) {
+        $orderIds = (array) ($data['order_id'] ?? []);
+
+        if (! self::shouldHandleAdvancedCodSuccess($orderIds)) {
             return;
         }
 
-        $orderIds = (array) $data['order_id'];
+        if (($data['status'] ?? null) != PaymentStatusEnum::COMPLETED) {
+            return;
+        }
 
         foreach ($orderIds as $orderId) {
             $order = Order::query()->find($orderId);
             if ($order) {
-                // Wait for payment to be linked? 
-                // In Botble, payment is created then linked. 
-                // We might need to query Payment by charge_id if relation isn't set yet.
-                 $payment = Payment::query()
-                    ->where('charge_id', $data['charge_id'])
-                    ->first();
+                $prepaymentAmount = (float) ($data['amount'] ?? 0);
 
-                if ($payment && $payment->status == PaymentStatusEnum::COMPLETED) {
-                    $prepaymentAmount = $payment->amount;
-                    $remainingAmount = $order->amount - $prepaymentAmount;
+                if ($prepaymentAmount <= 0 && ! empty($data['charge_id'])) {
+                    $payment = Payment::query()
+                        ->where('charge_id', $data['charge_id'])
+                        ->where('order_id', $order->id)
+                        ->first();
 
-                    $order->cod_prepayment_amount = $prepaymentAmount;
-                    $order->cod_remaining_amount = $remainingAmount;
-                    $order->save();
+                    $prepaymentAmount = (float) ($payment?->amount ?? 0);
+                }
 
+                if ($prepaymentAmount <= 0) {
+                    continue;
+                }
+
+                $remainingAmount = max((float) $order->amount - $prepaymentAmount, 0);
+
+                $order->cod_prepayment_amount = $prepaymentAmount;
+                $order->cod_remaining_amount = $remainingAmount;
+                $order->save();
+
+                $historyExists = OrderHistory::query()
+                    ->where('order_id', $order->id)
+                    ->where('description', 'like', 'Partial COD Prepayment%')
+                    ->exists();
+
+                if (! $historyExists) {
                     OrderHistory::query()->create([
                         'action' => OrderHistoryActionEnum::CONFIRM_ORDER,
-                        'description' => "Partial COD Prepayment of " . format_price($prepaymentAmount) . " received. Remaining balance: " . format_price($remainingAmount),
+                        'description' => 'Partial COD Prepayment of ' . format_price($prepaymentAmount) . ' received. Remaining balance: ' . format_price($remainingAmount),
                         'order_id' => $order->id,
                         'user_id' => 0,
                     ]);
@@ -578,6 +593,7 @@ class AdvancedCodCheckoutListener
         }
 
         session()->forget('advanced_cod_prepayment_active');
+        session()->forget('advanced_cod_order_ids');
     }
 
     protected static function isAdvancedCodRequired(): bool
@@ -588,12 +604,72 @@ class AdvancedCodCheckoutListener
         }
 
         foreach ($cartItems as $item) {
-            $product = Product::query()->find($item->id);
-            if ($product && ! $product->is_cod_eligible) {
+            $product = self::getProductForCodEligibility($item->id);
+            if (! $product || ! $product->is_cod_eligible) {
                 return false;
             }
         }
         
         return true;
+    }
+
+    protected static function getProductForCodEligibility(int|string|null $productId): ?Product
+    {
+        if (! $productId) {
+            return null;
+        }
+
+        $product = Product::query()
+            ->with('variationInfo.configurableProduct')
+            ->find($productId);
+
+        if (! $product) {
+            return null;
+        }
+
+        if ($product->is_variation && $product->variationInfo->configurableProduct->id) {
+            return $product->variationInfo->configurableProduct;
+        }
+
+        return $product;
+    }
+
+    protected static function markOrdersAsAdvancedCodPending(array $orderIds, float $orderAmount): void
+    {
+        if (! $orderIds || $orderAmount <= 0) {
+            return;
+        }
+
+        $percentage = (float) get_payment_setting('prepayment_percentage', 'cod', 30);
+        $prepaymentAmount = $orderAmount * ($percentage / 100);
+
+        foreach ($orderIds as $orderId) {
+            $order = Order::query()->find($orderId);
+
+            if (! $order) {
+                continue;
+            }
+
+            $order->cod_prepayment_amount = $prepaymentAmount;
+            $order->cod_remaining_amount = max((float) $order->amount - $prepaymentAmount, 0);
+            $order->save();
+        }
+    }
+
+    protected static function shouldHandleAdvancedCodSuccess(array $orderIds): bool
+    {
+        if (session()->has('advanced_cod_prepayment_active')) {
+            return true;
+        }
+
+        if (! $orderIds) {
+            return false;
+        }
+
+        return Order::query()
+            ->whereIn('id', $orderIds)
+            ->whereNotNull('cod_prepayment_amount')
+            ->whereNotNull('cod_remaining_amount')
+            ->exists();
     }
 }

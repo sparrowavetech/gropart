@@ -23,19 +23,20 @@ class AdvancedCodApiController extends BaseController
         }
 
         $ids = explode(',', $productIds);
-        $products = Product::whereIn('id', $ids)->get();
-
         $results = [];
         $isAllEligible = true;
 
-        foreach ($products as $product) {
-            $isEligible = (bool) $product->is_cod_eligible;
+        foreach ($ids as $id) {
+            $product = $this->getProductForCodEligibility($id);
+            $isEligible = (bool) ($product?->is_cod_eligible);
+
             if (! $isEligible) {
                 $isAllEligible = false;
             }
+
             $results[] = [
-                'id' => $product->id,
-                'name' => $product->name,
+                'id' => (int) $id,
+                'name' => $product?->name,
                 'is_cod_eligible' => $isEligible,
             ];
         }
@@ -61,7 +62,7 @@ class AdvancedCodApiController extends BaseController
                 ->setMessage('Invalid amount.');
         }
 
-        $percentage = (float) get_ecommerce_setting('cod_prepayment_percentage', 30);
+        $percentage = (float) get_payment_setting('prepayment_percentage', 'cod', 30);
         $prepaymentAmount = ($amount * $percentage) / 100;
         $remainingAmount = $amount - $prepaymentAmount;
 
@@ -74,5 +75,26 @@ class AdvancedCodApiController extends BaseController
                 'currency' => get_application_currency()->symbol,
             ])
             ->setMessage('Prepayment calculation completed.');
+    }
+
+    protected function getProductForCodEligibility(int|string|null $productId): ?Product
+    {
+        if (! $productId) {
+            return null;
+        }
+
+        $product = Product::query()
+            ->with('variationInfo.configurableProduct')
+            ->find($productId);
+
+        if (! $product) {
+            return null;
+        }
+
+        if ($product->is_variation && $product->variationInfo->configurableProduct->id) {
+            return $product->variationInfo->configurableProduct;
+        }
+
+        return $product;
     }
 }
