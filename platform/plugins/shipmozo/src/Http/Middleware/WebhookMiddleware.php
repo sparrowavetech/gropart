@@ -2,25 +2,28 @@
 
 namespace SparroWave\Shipmozo\Http\Middleware;
 
-use Botble\Base\Http\Responses\BaseHttpResponse;
 use Closure;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class WebhookMiddleware
 {
-    public function handle($request, Closure $next)
+    public function handle(Request $request, Closure $next): Response
     {
-        if (setting('shipping_shipmozo_webhooks', 1) == 1 && ($token = $request->input('_token'))) {
-            if (setting('shipping_shipmozo_sandbox', 1) == 1) {
-                $apiToken = setting('shipping_shipmozo_test_key');
-            } else {
-                $apiToken = setting('shipping_shipmozo_production_key');
-            }
-
-            if ($apiToken && $apiToken == $token) {
-                return $next($request);
-            }
+        if (! setting('shipping_shipmozo_webhooks', 0)) {
+            abort(404);
         }
 
-        return (new BaseHttpResponse())->setError()->setMessage('Ops!');
+        $configuredToken = (string) setting('shipping_shipmozo_webhook_secret', '');
+        $providedToken = (string) ($request->bearerToken()
+            ?: $request->header('X-Shipmozo-Token')
+            ?: $request->header('X-Webhook-Token')
+            ?: $request->input('_token', ''));
+
+        if ($configuredToken === '' || $providedToken === '' || ! hash_equals($configuredToken, $providedToken)) {
+            return response()->json(['message' => 'Unauthorized webhook request.'], 401);
+        }
+
+        return $next($request);
     }
 }

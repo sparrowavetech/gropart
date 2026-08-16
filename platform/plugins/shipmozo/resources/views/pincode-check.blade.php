@@ -18,12 +18,20 @@
                 e.preventDefault();
                 const pincode = pincodeInput.value.trim();
 
-                if (!pincode) {
-                    resultDiv.innerHTML = '<span class="text-danger">{{ __("Please enter a valid pincode") }}</span>';
+                const showResult = (message, className) => {
+                    resultDiv.replaceChildren();
+                    const result = document.createElement('span');
+                    result.className = className;
+                    result.textContent = message;
+                    resultDiv.appendChild(result);
+                };
+
+                if (!/^[1-9][0-9]{5}$/.test(pincode)) {
+                    showResult(@json(__("Please enter a valid pincode")), 'text-danger');
                     return;
                 }
 
-                resultDiv.innerHTML = '<span class="text-info">{{ __("Checking...") }}</span>';
+                showResult(@json(__("Checking...")), 'text-info');
 
                 // Set loading state on button
                 checkBtn.disabled = true;
@@ -41,21 +49,14 @@
                         return response.json();
                     })
                     .then(data => {
-                        if (data.data && data.data.pickup_pincode) {
-                            console.log('Pickup Pincode:', data.data.pickup_pincode);
-                        }
-                        if (data.data && data.data.delivery_pincode) {
-                            console.log('Drop Pincode:', data.data.delivery_pincode);
-                        }
-
                         if (data.error) {
-                            resultDiv.innerHTML = '<span class="text-danger">' + data.message + '</span>';
+                            showResult(data.message, 'text-danger');
                         } else {
-                            resultDiv.innerHTML = '<span class="text-success"><i class="icon-checkmark"></i> ' + data.message + '</span>';
+                            showResult(data.message, 'text-success');
                         }
                     })
-                    .catch(error => {
-                        resultDiv.innerHTML = '<span class="text-danger">{{ __("An error occurred. Please try again.") }}</span>';
+                    .catch(() => {
+                        showResult(@json(__("An error occurred. Please try again.")), 'text-danger');
                     })
                     .finally(() => {
                         checkBtn.disabled = false;

@@ -1,12 +1,11 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const orderIdElement = document.querySelector('.bb-order-info-item .value.fw-bold');
-        if (!orderIdElement) return;
+        const trackingParams = @json(array_filter($trackingParams ?? []));
+        if (!Object.keys(trackingParams).length) return;
 
-        const orderCode = orderIdElement.innerText.replace('#', '').trim();
-        if (!orderCode) return;
-
-        fetch('{{ route("shipmozo.public.tracking") }}?order_code=' + orderCode)
+        fetch('{{ route("shipmozo.public.tracking") }}?' + new URLSearchParams(trackingParams), {
+                headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+            })
             .then(res => res.json())
             .then(response => {
                 if (response.error || !response.data) return;
@@ -22,13 +21,14 @@
                     </div>
                 `;
 
-                const shippingSection = document.querySelector('.bb-order-shipping');
+                const shippingSection = document.querySelector('.bb-order-shipping, [data-order-shipping]');
                 if (shippingSection) {
-                    shippingSection.closest('.card').insertAdjacentHTML('afterend', trackingHtml);
+                    (shippingSection.closest('.card') || shippingSection).insertAdjacentHTML('afterend', trackingHtml);
                 } else {
-                    document.querySelector('.bb-order-detail-wrapper').insertAdjacentHTML('beforeend', trackingHtml);
+                    const wrapper = document.querySelector('.bb-order-detail-wrapper, .order-tracking, main');
+                    wrapper?.insertAdjacentHTML('beforeend', trackingHtml);
                 }
             })
-            .catch(console.error);
+            .catch(() => {});
     });
 </script>

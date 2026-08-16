@@ -1,64 +1,97 @@
-<div class="container">
-    <div class="row">
-        <div class="col-12 my-3 text-center">
+@php
+    preg_match('/\Ashipmozo_(\d+)/', (string) $order->shipping_option, $courierMatches);
+    $courierId = $courierMatches[1] ?? null;
+    $shipmozoOrderId = Arr::get($shipment->metadata, 'workflow.push_order.data.order_id');
+@endphp
+
+<div>
+    @if ($error = Arr::get($shipment->metadata, 'data.error'))
+        <div class="alert alert-warning d-flex align-items-start gap-2 mb-4" role="alert">
+            <x-core::icon name="ti ti-alert-triangle" class="flex-shrink-0 mt-1" />
             <div>
-                <span class="fs-4 fw-bold">
-                    Push Order to ShipMozo
-                </span>
-                <div>
-                    <small class="text-secondary">Are you sure you want to push this order to ShipMozo and generate an AWB?</small>
-                </div>
+                <div class="fw-semibold">Previous attempt needs attention</div>
+                <div>{{ $error }}</div>
             </div>
         </div>
+    @endif
 
-        <div class="col-12 my-2">
-            <div class="row">
-                <div class="col-6">
-                    <span class="fw-bold fs-5">{{ trans('plugins/ecommerce::shipping.shipping_fee') }}</span>
-                    <table class="table">
-                        <tbody>
-                            <tr>
-                                <td>{{ trans('plugins/ecommerce::shipping.amount') }}</td>
-                                <td>{{ format_price($shipment->price ?: $order->shipping_amount) }}</td>
-                            </tr>
-                            <tr>
-                                <td>{{ trans('core/base::tables.created_at') }}</td>
-                                <td>{{ BaseHelper::formatDateTime($shipment->created_at) }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="col-6">
-                    @if ($order->payment && $order->payment->payment_channel->getValue() == \Botble\Payment\Enums\PaymentMethodEnum::COD)
-                    <span class="fw-bold text-danger" style="font-size: 18px">{{ trans('plugins/ecommerce::shipping.cash_on_delivery') }}</span>
-                    <table class="table">
-                        <tr>
-                            <td>{{ trans('plugins/shipmozo::shipmozo.order_amount') }}</td>
-                            <td>{{ format_price($order->amount) }}</td>
-                        </tr>
-                    </table>
-                    @endif
-                </div>
-            </div>
+    <div class="d-flex align-items-start gap-3 mb-4">
+        <span class="avatar avatar-lg bg-success-lt text-success flex-shrink-0">
+            <x-core::icon name="ti ti-package-export" />
+        </span>
+        <div>
+            <h3 class="mb-1">Ready to create the shipment</h3>
+            <p class="text-secondary mb-0">
+                ShipMozo will assign the courier selected during checkout and return the AWB and tracking details.
+            </p>
         </div>
-
-        @php
-        $url = route(app(\SparroWave\Shipmozo\Shipmozo::class)->getRoutePrefixByFactor() . 'shipmozo.transactions.create', $shipment->id);
-        $isShowButton = true;
-        if (is_in_admin(true) && Auth::check() && ! Auth::user()->hasPermission('ecommerce.shipments.edit')) {
-        $isShowButton = false;
-        }
-        @endphp
-
-        @if ($isShowButton)
-        <div class="col-12 my-4 text-center">
-            <button
-                class="btn btn-primary create-transaction"
-                data-url="{{ $url }}"
-                type="button">
-                Create AWB & Push Order
-            </button>
-        </div>
-        @endif
     </div>
+
+    <div class="border-top border-bottom py-3 mb-4">
+        <div class="row g-4">
+            <div class="col-sm-6">
+                <div class="small text-secondary mb-1">Order</div>
+                <div class="fw-semibold">{{ $order->code }}</div>
+                @if ($shipmozoOrderId)
+                    <div class="small text-secondary">ShipMozo ID: {{ $shipmozoOrderId }}</div>
+                @endif
+            </div>
+            <div class="col-sm-6">
+                <div class="small text-secondary mb-1">Selected courier</div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="status status-green"></span>
+                    <span class="fw-semibold">Courier ID {{ $courierId ? '#' . $courierId : 'Auto assign' }}</span>
+                </div>
+                <div class="small text-secondary">Saved at checkout</div>
+            </div>
+            <div class="col-sm-6">
+                <div class="small text-secondary mb-1">Package weight</div>
+                <div class="fw-semibold">{{ number_format((float) $shipment->weight, 2) }} {{ ecommerce_weight_unit() }}</div>
+            </div>
+            <div class="col-sm-6">
+                <div class="small text-secondary mb-1">Shipping charge</div>
+                <div class="fw-semibold">{{ format_price($shipment->price ?: $order->shipping_amount) }}</div>
+                @if (is_plugin_active('payment') && $order->payment && $order->payment->payment_channel->getValue() == \Botble\Payment\Enums\PaymentMethodEnum::COD)
+                    <div class="small text-danger">COD order: {{ format_price($order->amount) }}</div>
+                @else
+                    <div class="small text-secondary">Prepaid order</div>
+                @endif
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex align-items-start gap-2 text-secondary mb-4">
+        <x-core::icon name="ti ti-wallet" class="flex-shrink-0 mt-1" />
+        <small>Courier assignment requires sufficient balance in the ShipMozo wallet.</small>
+    </div>
+
+    @php
+        $url = route(app(\SparroWave\Shipmozo\Shipmozo::class)->getRoutePrefixByFactor() . 'shipmozo.transactions.create', $shipment->id);
+        $isShowButton = ! is_in_admin(true) || ! Auth::check() || Auth::user()->hasPermission('ecommerce.shipments.edit');
+    @endphp
+
+    @if ($isShowButton)
+        <div class="shipmozo-transaction-actions d-grid d-sm-flex justify-content-sm-between align-items-sm-center gap-2">
+            <button
+                class="btn btn-secondary get-new-rates"
+                data-url="{{ route(app(\SparroWave\Shipmozo\Shipmozo::class)->getRoutePrefixByFactor() . 'shipmozo.rates', $shipment->id) }}"
+                type="button"
+            >
+                <x-core::icon name="ti ti-refresh" class="me-1" />
+                Recheck Rate
+            </button>
+            <div class="d-grid d-sm-flex gap-2">
+                <button class="btn btn-ghost-secondary" data-bs-dismiss="modal" type="button">Cancel</button>
+                <button
+                    class="btn btn-primary btn-lg create-transaction fw-semibold px-4"
+                    data-url="{{ $url }}"
+                    type="button"
+                >
+                    <x-core::icon name="ti ti-barcode" class="me-1" />
+                    Assign Courier & Generate AWB
+                </button>
+            </div>
+        </div>
+        <div class="shipmozo-rates-panel mt-3"></div>
+    @endif
 </div>

@@ -2,14 +2,15 @@
 
 namespace SparroWave\Shipmozo\Listeners;
 
+use Botble\Ecommerce\Enums\ShippingStatusEnum;
 use Botble\Ecommerce\Events\OrderConfirmedEvent;
 use Botble\Ecommerce\Models\Shipment;
-use Botble\Ecommerce\Enums\ShippingStatusEnum;
 use Botble\Ecommerce\Models\ShipmentHistory;
-use SparroWave\Shipmozo\Shipmozo;
+use Botble\Payment\Enums\PaymentStatusEnum;
 use Illuminate\Support\Arr;
-use Exception;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
+use SparroWave\Shipmozo\Shipmozo;
+use Throwable;
 
 class OrderConfirmedListener
 {
@@ -19,61 +20,98 @@ class OrderConfirmedListener
     {
         $order = $event->order;
 
-        // Only process if shipping method is ShipMozo
-        if ($order->shipping_method !== 'shipmozo') {
+        if (! setting('shipping_shipmozo_status') || ! $order->getKey()) {
+            return;
+        }
+
+        if (! $this->shipmozo->isShipmozoOrder($order)) {
+            return;
+        }
+
+        $lock = Cache::lock("shipmozo:order:{$order->getKey()}", 60);
+
+        if (! $lock->get()) {
             return;
         }
 
         try {
-            // Check if shipment already exists, if not create one
-            $shipment = $order->shipment;
-
-            if (!$shipment) {
-                $shipment = Shipment::query()->create([
-                    'order_id' => $order->id,
-                    'user_id' => $event->confirmedBy ? $event->confirmedBy->id : 0,
-                    'weight' => $order->products->sum(fn($p) => $p->weight * $p->qty),
-                    'shipment_id' => $order->id, // Fallback
+            $shipment = Shipment::query()->firstOrCreate(
+                ['order_id' => $order->getKey()],
+                [
+                    'user_id' => $event->confirmedBy?->getAuthIdentifier() ?: 0,
+                    'weight' => $order->products_weight,
+                    'cod_amount' => is_plugin_active('payment')
+                        && $order->payment
+                        && $order->payment->status != PaymentStatusEnum::COMPLETED
+                        ? $order->amount
+                        : 0,
+                    'cod_status' => 'pending',
                     'status' => ShippingStatusEnum::PENDING,
                     'price' => $order->shipping_amount,
-                    'method' => 'shipmozo',
+                    'store_id' => $order->store_id,
+                ]
+            );
+
+            if ($shipment->wasRecentlyCreated) {
+                ShipmentHistory::query()->create([
+                    'action' => 'create_from_order',
+                    'description' => trans('plugins/ecommerce::order.shipping_was_created_from'),
+                    'shipment_id' => $shipment->getKey(),
+                    'order_id' => $order->getKey(),
+                    'user_id' => $event->confirmedBy?->getAuthIdentifier() ?: 0,
                 ]);
             }
 
-            // If already has a tracking ID, don't push again
-            if ($shipment->tracking_id) {
+            $shipment->refresh();
+
+            if (! $this->shipmozo->canCreateTransaction($shipment)) {
                 return;
             }
 
-            $transaction = $this->shipmozo->pushOrder($order);
+            $transaction = $this->shipmozo->createShipment($order);
+            $awb = Arr::get($transaction, 'data.awb_number');
 
-            if (Arr::get($transaction, 'result') == 1) {
-                $awb = Arr::get($transaction, 'awb_number') ?: Arr::get($transaction, 'data.order_id');
+            if (Arr::get($transaction, 'result') != 1 || ! $awb) {
+                $shipment->metadata = $transaction;
+                $shipment->save();
 
-                if ($awb) {
-                    $labelUrl = $this->shipmozo->getOrderLabel($awb);
+                ShipmentHistory::query()->create([
+                    'action' => 'create_transaction_failed',
+                    'description' => 'ShipMozo courier assignment failed: '.Arr::get($transaction, 'data.error', 'Unknown error'),
+                    'order_id' => $order->getKey(),
+                    'user_id' => $event->confirmedBy?->getAuthIdentifier() ?: 0,
+                    'shipment_id' => $shipment->getKey(),
+                ]);
 
-                    $shipment->tracking_link = 'https://panel.shipmozo.com/track-order/' . $awb;
-                    $shipment->label_url = $labelUrl;
-                    $shipment->tracking_id = $awb;
-                    $shipment->metadata = json_encode($transaction);
-                    $shipment->status = ShippingStatusEnum::READY_TO_BE_SHIPPED_OUT;
-                    $shipment->save();
+                $this->shipmozo->logError('Automatic order push failed', [
+                    'order_id' => $order->getKey(),
+                    'message' => Arr::get($transaction, 'data.error', Arr::get($transaction, 'message')),
+                ]);
 
-                    ShipmentHistory::query()->create([
-                        'action' => 'create_transaction',
-                        'description' => 'Automatically pushed order to ShipMozo. Tracking ID: ' . $awb,
-                        'order_id' => $order->id,
-                        'user_id' => $event->confirmedBy ? $event->confirmedBy->id : 0,
-                        'shipment_id' => $shipment->id,
-                    ]);
-                }
-            } else {
-                $error = Arr::get($transaction, 'data.error', Arr::get($transaction, 'message', 'Failed to auto-push to ShipMozo.'));
-                Log::error('ShipMozo Auto-Push Failed for Order #' . $order->id . ': ' . $error);
+                return;
             }
-        } catch (Exception $e) {
-            Log::error('ShipMozo OrderConfirmedListener Error: ' . $e->getMessage());
+
+            $shipment->tracking_link = "https://panel.shipmozo.com/track-order/{$awb}";
+            $shipment->label_url = $this->shipmozo->getOrderLabelUrl((string) $awb);
+            $shipment->tracking_id = $awb;
+            $shipment->metadata = $transaction;
+            $shipment->status = ShippingStatusEnum::READY_TO_BE_SHIPPED_OUT;
+            $shipment->save();
+
+            ShipmentHistory::query()->create([
+                'action' => 'create_transaction',
+                'description' => "Automatically pushed order to ShipMozo. Tracking ID: {$awb}",
+                'order_id' => $order->getKey(),
+                'user_id' => $event->confirmedBy?->getAuthIdentifier() ?: 0,
+                'shipment_id' => $shipment->getKey(),
+            ]);
+        } catch (Throwable $exception) {
+            $this->shipmozo->logError('Automatic order push failed', [
+                'order_id' => $order->getKey(),
+                'message' => $exception->getMessage(),
+            ]);
+        } finally {
+            $lock->release();
         }
     }
 }

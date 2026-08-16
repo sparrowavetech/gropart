@@ -1,54 +1,47 @@
 @extends(BaseHelper::getAdminMasterLayoutTemplate())
-@section('content')
-<div class="card table-responsive">
-    <div class="card-header pb-0 border-bottom-0">
-        <h4 class="card-title">ShipMozo NDRs</h4>
-    </div>
-    <div class="card-body">
-        <table class="table table-striped table-hover mt-3 table-vcenter">
-            <thead>
-                <tr>
-                    <th>AWB Number</th>
-                    <th>Order ID</th>
-                    <th>Status</th>
-                    <th>Reason</th>
-                    <th>Date</th>
-                    <th class="text-center">Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse($ndrs as $ndr)
-                <tr>
-                    <td>{{ \Illuminate\Support\Arr::get($ndr, 'awb_number', 'N/A') }}</td>
-                    <td>{{ \Illuminate\Support\Arr::get($ndr, 'order_id', 'N/A') }}</td>
-                    <td>
-                        <span class="badge bg-warning text-warning-fg">
-                            {{ \Illuminate\Support\Arr::get($ndr, 'status', 'Pending') }}
-                        </span>
-                    </td>
-                    <td>{{ \Illuminate\Support\Arr::get($ndr, 'reason', 'N/A') }}</td>
-                    <td>{{ \Illuminate\Support\Arr::get($ndr, 'date', 'N/A') }}</td>
-                    <td class="text-center">
-                        <form action="{{ route('shipmozo.ndr.action', \Illuminate\Support\Arr::get($ndr, 'awb_number')) }}" method="POST" class="d-inline" onsubmit="return confirm('Trigger re-attempt for this AWB?')">
-                            @csrf
-                            <input type="hidden" name="action" value="reattempt">
-                            <button class="btn btn-sm btn-primary" type="submit" title="Mark for Re-attempt">Re-attempt</button>
-                        </form>
 
-                        <form action="{{ route('shipmozo.ndr.action', \Illuminate\Support\Arr::get($ndr, 'awb_number')) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to mark this as RTO?')">
-                            @csrf
-                            <input type="hidden" name="action" value="rto">
-                            <button class="btn btn-sm btn-danger" type="submit" title="Return to Origin">RTO</button>
-                        </form>
-                    </td>
-                </tr>
+@section('content')
+    <x-core::card>
+        <x-core::card.header>
+            <x-core::card.title>ShipMozo NDRs</x-core::card.title>
+        </x-core::card.header>
+        <x-core::table>
+            <x-core::table.header>
+                <x-core::table.header.cell>AWB Number</x-core::table.header.cell>
+                <x-core::table.header.cell>Order ID</x-core::table.header.cell>
+                <x-core::table.header.cell>Status</x-core::table.header.cell>
+                <x-core::table.header.cell>Reason</x-core::table.header.cell>
+                <x-core::table.header.cell>Action</x-core::table.header.cell>
+            </x-core::table.header>
+            <x-core::table.body>
+                @forelse($ndrs as $ndr)
+                    @php($awb = \Illuminate\Support\Arr::get($ndr, 'awb_number'))
+                    <x-core::table.body.row>
+                        <x-core::table.body.cell>{{ $awb ?: 'N/A' }}</x-core::table.body.cell>
+                        <x-core::table.body.cell>{{ \Illuminate\Support\Arr::get($ndr, 'order_id', 'N/A') }}</x-core::table.body.cell>
+                        <x-core::table.body.cell>{{ \Illuminate\Support\Arr::get($ndr, 'status', 'Pending') }}</x-core::table.body.cell>
+                        <x-core::table.body.cell>{{ \Illuminate\Support\Arr::get($ndr, 'reason', 'N/A') }}</x-core::table.body.cell>
+                        <x-core::table.body.cell>
+                            @if($awb)
+                                <form action="{{ route('shipmozo.ndr.action', $awb) }}" method="POST" class="d-inline">
+                                    @csrf
+                                    <input type="hidden" name="action" value="reattempt">
+                                    <x-core::button type="submit" size="sm">Re-attempt</x-core::button>
+                                </form>
+                                <form action="{{ route('shipmozo.ndr.action', $awb) }}" method="POST" class="d-inline">
+                                    @csrf
+                                    <input type="hidden" name="action" value="rto">
+                                    <x-core::button type="submit" color="danger" size="sm">RTO</x-core::button>
+                                </form>
+                            @endif
+                        </x-core::table.body.cell>
+                    </x-core::table.body.row>
                 @empty
-                <tr>
-                    <td colspan="6" class="text-center text-muted">No NDR records found based on ShipMozo synchronisation.</td>
-                </tr>
+                    <x-core::table.body.row>
+                        <x-core::table.body.cell colspan="5" class="text-center">No NDR records found.</x-core::table.body.cell>
+                    </x-core::table.body.row>
                 @endforelse
-            </tbody>
-        </table>
-    </div>
-</div>
+            </x-core::table.body>
+        </x-core::table>
+    </x-core::card>
 @endsection

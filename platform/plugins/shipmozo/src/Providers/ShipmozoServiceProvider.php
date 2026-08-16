@@ -2,11 +2,14 @@
 
 namespace SparroWave\Shipmozo\Providers;
 
+use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
-use SparroWave\Shipmozo\Http\Middleware\WebhookMiddleware;
-use Illuminate\Contracts\Support\DeferrableProvider;
+use Botble\Ecommerce\Events\OrderConfirmedEvent;
+use Botble\Theme\Facades\Theme;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\ServiceProvider;
+use SparroWave\Shipmozo\Http\Middleware\WebhookMiddleware;
+use SparroWave\Shipmozo\Listeners\OrderConfirmedListener;
 
 class ShipmozoServiceProvider extends ServiceProvider
 {
@@ -31,25 +34,32 @@ class ShipmozoServiceProvider extends ServiceProvider
             ->loadAndPublishTranslations()
             ->loadAndPublishViews()
             ->loadRoutes()
-            ->loadAndPublishConfigurations(['general'])
             ->loadMigrations()
             ->publishAssets();
 
         $this->app['events']->listen(
-            \Botble\Ecommerce\Events\OrderConfirmedEvent::class,
-            \SparroWave\Shipmozo\Listeners\OrderConfirmedListener::class
+            OrderConfirmedEvent::class,
+            OrderConfirmedListener::class
         );
 
-        $this->app['events']->listen(RouteMatched::class, function (\Illuminate\Routing\Events\RouteMatched $event): void {
+        $this->app['events']->listen(RouteMatched::class, function (RouteMatched $event): void {
             $this->app['router']->aliasMiddleware('shipmozo.webhook', WebhookMiddleware::class);
 
-            if (in_array($event->route->getName(), ['public.orders.tracking', 'customer.orders.view'])) {
-                \Botble\Theme\Facades\Theme::asset()
+            if (in_array($event->route->getName(), ['public.orders.tracking', 'customer.orders.view'], true)) {
+                $trackingParams = $event->route->getName() === 'customer.orders.view'
+                    ? ['customer_order_id' => $event->route->parameter('id')]
+                    : [
+                        'order_code' => request()->input('order_id'),
+                        'email' => request()->input('email'),
+                        'phone' => request()->input('phone'),
+                    ];
+
+                Theme::asset()
                     ->container('footer')
-                    ->writeContent('shipmozo-tracking', view('plugins/shipmozo::tracking-scripts')->render());
+                    ->writeContent('shipmozo-tracking', view('plugins/shipmozo::tracking-scripts', compact('trackingParams'))->render());
             }
 
-            \Botble\Base\Facades\DashboardMenu::registerItem([
+            DashboardMenu::registerItem([
                 'id' => 'cms-plugins-shipmozo-ndr',
                 'priority' => 10,
                 'parent_id' => 'cms-plugins-ecommerce',

@@ -11,12 +11,13 @@ class Plugin extends PluginOperationAbstract
     {
         Setting::delete([
             'shipping_shipmozo_status',
-            'shipping_shipmozo_test_key',
-            'shipping_shipmozo_production_key',
-            'shipping_shipmozo_sandbox',
+            'shipping_shipmozo_public_key',
+            'shipping_shipmozo_private_key',
+            'shipping_shipmozo_webhook_secret',
             'shipping_shipmozo_logging',
-            'shipping_shipmozo_cache_response',
             'shipping_shipmozo_webhooks',
+            'shipping_shipmozo_rate_adjustment_type',
+            'shipping_shipmozo_rate_adjustment_value',
         ]);
     }
 }

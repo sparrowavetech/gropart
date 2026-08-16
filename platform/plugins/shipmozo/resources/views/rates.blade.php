@@ -18,10 +18,7 @@
             <p>{{ trans('plugins/shipmozo::shipmozo.carrier_could_not_be_found') }}</p>
         </div>
     @endif
-    <div
-        class="accordion mt-3 @if ($rate) opacity-75 @endif"
-        id="accordion-rates"
-    >
+    <div class="accordion mt-3" id="accordion-rates">
         <div class="accordion-item">
             <h2
                 class="accordion-header"
@@ -49,9 +46,7 @@
                         @foreach ($rates as $item)
                             @include('plugins/shipmozo::rate', [
                                 'index' => $loop->index,
-                                'attributes' => [
-                                    'disabled' => $rate ? 'disabled' : false,
-                                ],
+                                'attributes' => [],
                             ])
                         @endforeach
                     </div>

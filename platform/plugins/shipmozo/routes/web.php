@@ -39,13 +39,14 @@ Route::group(['namespace' => 'SparroWave\Shipmozo\Http\Controllers'], function (
                     'uses' => 'viewLog',
                 ]);
 
-                Route::get('warehouses/create-from-store/{storeId}', [
-                    'as' => 'warehouses.create-from-store',
-                    'uses' => 'createWarehouseFromStore',
-                    'permission' => 'marketplace.store.edit',
-                ]);
+                if (is_plugin_active('marketplace')) {
+                    Route::post('warehouses/create-from-store/{storeId}', [
+                        'as' => 'warehouses.create-from-store',
+                        'uses' => 'createWarehouseFromStore',
+                        'permission' => 'marketplace.store.edit',
+                    ]);
+                }
             });
-
 
             Route::group(['prefix' => 'settings', 'as' => 'settings.'], function (): void {
                 Route::post('update', [
@@ -63,14 +64,8 @@ Route::group(['namespace' => 'SparroWave\Shipmozo\Http\Controllers'], function (
             'permission' => 'orders.index',
         ], function (): void {
             Route::controller('ShipmozoNdrController')->group(function (): void {
-                Route::get('/', [
-                    'as' => 'index',
-                    'uses' => 'index',
-                ]);
-                Route::post('{awbNumber}/action', [
-                    'as' => 'action',
-                    'uses' => 'action',
-                ]);
+                Route::get('/', ['as' => 'index', 'uses' => 'index']);
+                Route::post('{awbNumber}/action', ['as' => 'action', 'uses' => 'action']);
             });
         });
     });
@@ -115,7 +110,7 @@ Route::group(['namespace' => 'SparroWave\Shipmozo\Http\Controllers'], function (
 Route::group([
     'namespace' => 'SparroWave\Shipmozo\Http\Controllers',
     'prefix' => 'shipmozo',
-    'middleware' => ['api', 'shipmozo.webhook'],
+    'middleware' => ['api', 'throttle:60,1', 'shipmozo.webhook'],
     'as' => 'shipmozo.',
 ], function (): void {
     Route::controller('ShipmozoWebhookController')->group(function (): void {
@@ -126,14 +121,19 @@ Route::group([
     });
 });
 
-Route::group(['namespace' => 'SparroWave\Shipmozo\Http\Controllers\Fronts', 'middleware' => ['web', 'core']], function () {
+Route::group(['namespace' => 'SparroWave\Shipmozo\Http\Controllers\Fronts', 'middleware' => ['web', 'core', 'throttle:30,1']], function () {
+    Route::get('shipmozo/public/labels/{awbNumber}', [
+        'as' => 'shipmozo.public.label',
+        'uses' => 'ShipmozoPublicController@label',
+    ]);
+
     Route::get('shipmozo/public/tracking', [
-        'as'   => 'shipmozo.public.tracking',
+        'as' => 'shipmozo.public.tracking',
         'uses' => 'ShipmozoPublicController@tracking',
     ]);
 
     Route::get('shipments/shipmozo/check-pincode', [
-        'as'   => 'ecommerce.shipments.shipmozo.check-pincode',
+        'as' => 'ecommerce.shipments.shipmozo.check-pincode',
         'uses' => 'ShipmozoPublicController@checkPincode',
     ]);
 });

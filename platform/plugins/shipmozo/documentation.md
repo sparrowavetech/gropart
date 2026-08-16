@@ -1,51 +1,45 @@
-# ShipMozo Technical Documentation & Architecture Overview
+# ShipMozo Architecture
 
-**Author:** Sparrowave Solutions
-**Version:** 1.0.3
+## Checkout rates
 
-This document explains the advanced architectural integrations bridging Botble's Core Ecommerce flow, the Farmart theme, and ShipMozo courier APIs.
+`HookServiceProvider::handleShippingFee()` adds ShipMozo rates through Botble's `handle_shipping_fee` filter. Existing Botble rates remain available when ShipMozo is disabled, unavailable, or returns no serviceable rates.
 
----
+Rate requests use the destination pincode, Ecommerce origin, cart product value, dimensions, weight, and payment method. Botble kilogram values are converted to grams. API `courier_id` values and automatic-pickup flags are preserved in Botble's shipping option so the selected courier can be assigned later. Rates can receive a fixed or percentage adjustment.
 
-## 1. Pincode Eligibility Hook (Product Page)
-The ShipMozo architecture overrides Farmart theme product layouts and listens to pincode input boxes via an asynchronous API script.
+## Order lifecycle
 
-**Workflow:**
-Upon pressing "Check", a `fetch()` payload containing the product's defined dimensions (Length, Width, Height, Weight) and the active destination PIN is POSTed to the `\SparroWave\Shipmozo\Http\Controllers\ShipmozoController->getRate()`.
-- If ShipMzo responds with a 404/Not Serviceable error, Botble natively blocks the `add_to_cart` button using frontend Javascript class appending (`.disabled-btn`).
+Only orders whose stored shipping method is `shipmozo` are handled.
 
-## 2. Multi-Vendor Cart Array Calculation
-Botble's native `Marketplace` plugin historically experienced bugged shipping session arrays because the native `ServiceProvider` overwrote `$sessionCheckoutData['marketplace']` inside of loops for each vendor ID.
+- Order confirmation creates a missing Botble shipment and pushes it once under a cache lock.
+- A selected courier follows `push-order -> assign-courier -> get-order-detail`; manual pickups additionally call `schedule-pickup`.
+- Orders without a numeric selected courier use the documented `auto-assign-order` fallback, which requires auto assignment in the ShipMozo panel.
+- Only `data.awb_number` from assignment/pickup/detail responses becomes the Botble tracking ID. A ShipMozo order ID is never treated as an AWB.
+- Manual shipment creation uses the same order lock to prevent concurrent AWB requests.
+- Cancellation and completed-return events are sent only for ShipMozo orders.
+- Cancellation includes the original order ID and scalar AWB. Returns include ShipMozo's required date, pickup fields, payment type, kilogram weight, reason ID, and customer request.
+- Label responses are base64 PNG data; a signed proxy route decodes and serves them without storing oversized data URIs in the shipment row.
+- Webhooks map carrier states to Botble shipment states and ignore duplicate state updates, but remain disabled by default because they are absent from the supplied API guide.
 
-**The Sparrowave Fix:**
-Our package relies on patching Botble's `OrderSupportServiceProvider.php`:
-```php
-Arr::set($sessionCheckoutData, "marketplace.$storeId", $vendorSessionData);
-```
-This forces the session container to act additively. ShipMozo receives individual shipment requests containing dimensions *strictly* filtered by the products matching the specific vendor store ID. Instead of rendering one global list of couriers, ShipMozo pushes distinct multidimensional arrays (`shipping_option[STORE_1]... shipping_option[STORE_2]`) directly back into the cart checkout framework.
+Non-idempotent order, assignment, pickup, cancellation, return, and warehouse POST requests use timeouts but are not automatically retried. Read-only requests and rate/serviceability requests use bounded retries.
 
-## 3. Checkout Button & "Select Options" Javascript Validation Lock
-Botble's native JS does not enforce vendor-level selection requirements.
+NDR management remains available through the plugin's existing `get-ndr-all` and `ndr-action` integration. These endpoints are not defined by the supplied API guide and require account-level verification with ShipMozo.
 
-**Our Override:**
-Our engine embeds a `DOMContentLoaded` script via `products.blade.php`.
-1. The script observes `MutationObserver` AJAX reloads.
-2. It queries Botble's `input[type="radio"]` counts inside the `list_payment_method` wrapper for each generated vendor.
-3. If `OptionCountRequired !== CheckboxesSelected`, it forcefully adds `disabled` property arrays and CSS locks onto the checkout submit button.
-4. *Visual Cue:* Our logic actively queries the string class `.vendor-shipping-price[data-store-id]`. Until the user actively engages the specific vendor's courier options, our JS injects a `— Select Option —` state rather than allowing Botble to assume a `Free Delivery/0.00` fallback parameter.
+## Marketplace integration
 
-## 4. Final Aggregated `handleCheckoutOrderData` Processing
-In Botble Core's native eCommerce service `\Botble\Ecommerce\Services\HandleCheckoutOrderData`, we explicitly patched the internal loop array.
-Because our ShipMozo API returns isolated vendor subtotals, Botble's main `$shippingAmount` was reverting to zero at checkout.
+Marketplace is optional. When it is active, the migration adds nullable `warehouse_id` to `mp_stores`. Every Marketplace hook checks that the table and column exist before use. Store forms can link an existing ShipMozo warehouse or create one from store data. Without Marketplace, the active default ShipMozo warehouse is used; if none exists, the Ecommerce origin is registered through the documented warehouse payload.
 
-We introduced an active summation parser:
-```php
-$shippingAmount = 0;
-foreach (Arr::get($sessionCheckoutData, 'marketplace', []) as $storeData) {
-   if (isset($storeData['shipping_amount'])) {
-       $shippingAmount += $storeData['shipping_amount'];
-   }
-}
-$orderAmount = max($rawTotal - $promotionDiscountAmount - $couponDiscountAmount, 0) + (float) $shippingAmount;
-```
-This guarantees the ShipMozo API output scales infinitely with however many Marketplace blocks natively generate inside the cart array.
+The plugin does not patch Botble Ecommerce or Marketplace core files.
+
+## Frontend integration
+
+The pincode checker uses Botble's `ECOMMERCE_PRODUCT_DETAIL_EXTRA_HTML` hook and the selected product's actual shipping attributes. Tracking is injected on Botble's public tracking and customer order-detail routes, with generic fallback containers for themes that retain the standard Ecommerce views.
+
+Public tracking requires the same order code plus email/phone verification used by Botble. Customer-account tracking requires ownership of the requested order.
+
+## Security
+
+- Settings accept an explicit whitelist with validation.
+- Webhooks require a dedicated secret and constant-time comparison.
+- Public endpoints are rate limited.
+- Log viewing is limited to escaped `shipmozo*.log` files.
+- API logs are disabled by default and redact credential and customer fields.

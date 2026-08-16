@@ -3,6 +3,8 @@ $status = setting('shipping_shipmozo_status', 0);
 $publicKey = setting('shipping_shipmozo_public_key') ?: '';
 $privateKey = setting('shipping_shipmozo_private_key') ?: '';
 $logging = setting('shipping_shipmozo_logging', 0);
+$webhooks = setting('shipping_shipmozo_webhooks', 0);
+$webhookSecret = setting('shipping_shipmozo_webhook_secret') ?: '';
 $rateAdjustmentType = setting('shipping_shipmozo_rate_adjustment_type', 'none');
 $rateAdjustmentValue = setting('shipping_shipmozo_rate_adjustment_value', 0);
 @endphp
@@ -101,10 +103,26 @@ $rateAdjustmentValue = setting('shipping_shipmozo_rate_adjustment_value', 0);
 
                                 <x-core::form.text-input
                                     name="shipping_shipmozo_private_key"
+                                    type="password"
                                     label="Private Key"
                                     placeholder="Enter Private Key"
                                     :disabled="BaseHelper::hasDemoModeEnabled()"
                                     :value="BaseHelper::hasDemoModeEnabled() ? Str::mask($privateKey, '*', 10) : $privateKey" />
+
+                                <x-core::form.text-input
+                                    name="shipping_shipmozo_webhook_secret"
+                                    type="password"
+                                    label="Webhook Secret"
+                                    placeholder="Use at least 16 random characters"
+                                    :disabled="BaseHelper::hasDemoModeEnabled()"
+                                    :value="BaseHelper::hasDemoModeEnabled() ? Str::mask($webhookSecret, '*', 6) : $webhookSecret" />
+
+                                <x-core::form-group>
+                                    <x-core::form.toggle
+                                        name="shipping_shipmozo_webhooks"
+                                        :checked="$webhooks"
+                                        label="Enable ShipMozo webhooks" />
+                                </x-core::form-group>
 
                                 <x-core::form-group class="mt-4">
                                     <x-core::form.toggle

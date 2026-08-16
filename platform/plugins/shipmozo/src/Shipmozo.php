@@ -2,19 +2,25 @@
 
 namespace SparroWave\Shipmozo;
 
-use Botble\Base\Facades\BaseHelper;
-use Botble\Ecommerce\Models\Order;
-use Botble\Ecommerce\Models\Shipment;
 use Botble\Ecommerce\Facades\EcommerceHelper;
+use Botble\Ecommerce\Models\Order;
+use Botble\Ecommerce\Models\OrderReturn;
+use Botble\Ecommerce\Models\Shipment;
+use Botble\Payment\Enums\PaymentMethodEnum;
+use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use RuntimeException;
 
 class Shipmozo
 {
     protected string $baseUrl = 'https://shipping-api.com/app/api/v1';
+
     protected ?string $publicKey;
+
     protected ?string $privateKey;
+
     protected bool $logging;
 
     public function __construct()
@@ -31,23 +37,18 @@ class Shipmozo
 
     public function canCreateTransaction(Shipment $shipment): bool
     {
-        if (!$shipment->order || $shipment->tracking_id) {
+        if (! $shipment->order || $shipment->tracking_id) {
             return false;
         }
 
-        $method = $shipment->order->shipping_method->getValue();
+        return $this->isShipmozoOrder($shipment->order);
+    }
 
-        // Botble Marketplace sets parent "Incomplete" cart shipping methods to "default" because it drops the array.
-        // If it is 'default' but has a numeric shipping_option, we still permit the transaction attempt.
-        if ($method === SHIPMOZO_SHIPPING_METHOD_NAME) {
-            return true;
-        }
+    public function isShipmozoOrder(Order $order): bool
+    {
+        $method = $order->shipping_method->getValue();
 
-        if ($method === \Botble\Ecommerce\Enums\ShippingMethodEnum::DEFAULT && is_numeric($shipment->order->shipping_option)) {
-            return true;
-        }
-
-        return false;
+        return $method === SHIPMOZO_SHIPPING_METHOD_NAME;
     }
 
     public function getRoutePrefixByFactor(): string
@@ -58,24 +59,39 @@ class Shipmozo
     protected function getHeaders(): array
     {
         return [
-            'public-key' => $this->publicKey,
-            'private-key' => $this->privateKey,
+            'public-key' => (string) $this->publicKey,
+            'private-key' => (string) $this->privateKey,
             'Accept' => 'application/json',
             'Content-Type' => 'application/json',
         ];
     }
 
-    public function log(string $message, array $context = [])
+    protected function httpClient(bool $retry = false): PendingRequest
+    {
+        if (! $this->publicKey || ! $this->privateKey) {
+            throw new RuntimeException('ShipMozo API credentials are not configured.');
+        }
+
+        $client = Http::withHeaders($this->getHeaders())
+            ->acceptJson()
+            ->asJson()
+            ->connectTimeout(5)
+            ->timeout(20);
+
+        return $retry ? $client->retry(2, 250, null, false) : $client;
+    }
+
+    public function log(string $message, array $context = []): void
     {
         if ($this->logging) {
-            Log::channel('shipmozo')->info($message, $context);
+            Log::channel('shipmozo')->info($message, $this->redactLogContext($context));
         }
     }
 
-    protected function logError(string $message, array $context = [])
+    public function logError(string $message, array $context = []): void
     {
         if ($this->logging) {
-            Log::channel('shipmozo')->error($message, $context);
+            Log::channel('shipmozo')->error($message, $this->redactLogContext($context));
         }
     }
 
@@ -88,7 +104,7 @@ class Shipmozo
 
         $this->log('Checking Pincode Serviceability', $payload);
 
-        $response = Http::withHeaders($this->getHeaders())
+        $response = $this->httpClient(true)
             ->post("{$this->baseUrl}/pincode-serviceability", $payload);
 
         $this->log('Pincode Serviceability Response', $response->json() ?? []);
@@ -101,17 +117,12 @@ class Shipmozo
         // Calculate total weight and dimensions from order/cart data
         $weight = 0;
         $totalValue = 0;
-        $dimensions = [];
-
         $addressTo = Arr::get($data, 'address_to', []);
         $deliveryPincode = Arr::get($addressTo, 'zip_code') ?: Arr::get($addressTo, 'zip') ?: Arr::get($data, 'zip_code') ?: Arr::get($data, 'zip');
 
-        if (!$deliveryPincode) {
-            \Illuminate\Support\Facades\Log::info('Shipmozo getRates aborted: No delivery zipcode provided in payload.');
-            return []; // Cannot calculate without delivery pin
+        if (! $deliveryPincode) {
+            return [];
         }
-
-        $warehouseId = Arr::get($data, 'origin_warehouse_id');
 
         // Get pickup pincode from first vendor, or default store location
         $origin = Arr::get($data, 'origin') ?: EcommerceHelper::getOriginAddress();
@@ -123,10 +134,10 @@ class Shipmozo
         $height = 0;
 
         foreach ($items as $item) {
-            $qty = $item['qty'] ?: 1;
+            $qty = max((int) Arr::get($item, 'qty', 1), 1);
 
             // Decimal inputs (e.g. 0.200) mean Kilograms in Botble. ShipMozo expects integer Grams.
-            $rawWeight = (float)($item['weight'] ?: 0);
+            $rawWeight = (float) Arr::get($item, 'weight', 0);
             $itemWeightInGrams = $rawWeight < 10 ? ($rawWeight * 1000) : $rawWeight;
 
             // If it evaluates to completely 0, default to 200g
@@ -135,18 +146,10 @@ class Shipmozo
             }
 
             $weight += $itemWeightInGrams * $qty;
-            $totalValue += ($item['price'] ?: 0) * $qty;
-
-            $dimensions[] = [
-                'length' => floatval($item['length']) ?: 10,
-                'width' => floatval($item['wide']) ?: 10,
-                'height' => floatval($item['height']) ?: 10,
-                'weight' => $itemWeightInGrams,
-                'no_of_box' => 1,
-            ];
-            $length = max($length, floatval($item['length']) ?: 10);
-            $wide = max($wide, floatval($item['wide']) ?: 10);
-            $height = max($height, floatval($item['height']) ?: 10);
+            $totalValue += (float) Arr::get($item, 'price', 0) * $qty;
+            $length = max($length, (float) Arr::get($item, 'length', 10));
+            $wide = max($wide, (float) Arr::get($item, 'wide', Arr::get($item, 'width', 10)));
+            $height = max($height, (float) Arr::get($item, 'height', 10));
         }
 
         // Enforce global minimum weight safely ensuring the payload is never 0
@@ -155,23 +158,22 @@ class Shipmozo
         }
 
         $paymentMethod = Arr::get($data, 'payment_method');
-        $isCod = $paymentMethod === \Botble\Payment\Enums\PaymentMethodEnum::COD;
+        $isCod = $paymentMethod == PaymentMethodEnum::COD;
         $paymentType = $isCod ? 'COD' : 'PREPAID';
-        $codAmount = $isCod ? $this->formatAmount($totalValue) : "0.00";
-        $amount = $this->formatAmount($totalValue);
+        $codAmount = $isCod ? $this->formatAmount($totalValue) : '';
+        $amount = round($totalValue, 2);
 
         $payload = [
-            'pickup_pincode' => (string) $pickupPincode,
-            'delivery_pincode' => (string) $deliveryPincode,
+            'pickup_pincode' => (int) $pickupPincode,
+            'delivery_pincode' => (int) $deliveryPincode,
             'weight' => (int) $weight,
             'dimensions' => [
                 [
-                    'length' => (float) max($length, 0),
-                    'width' => (float) max($wide, 0),
-                    'height' => (float) max($height, 0),
-                    'weight' => (int) $weight,
-                    'no_of_box' => 1
-                ]
+                    'no_of_box' => '1',
+                    'length' => (string) max($length, 1),
+                    'width' => (string) max($wide, 1),
+                    'height' => (string) max($height, 1),
+                ],
             ],
             'payment_type' => $paymentType,
             'shipment_type' => 'FORWARD',
@@ -180,36 +182,57 @@ class Shipmozo
             'rov_type' => 'ROV_OWNER',
             'cod_amount' => $codAmount,
             'order_id' => '',
-            'warehouse_id' => $warehouseId ? (string)$warehouseId : "",
         ];
 
-        \Illuminate\Support\Facades\Log::info('ShipMozo getRates Payload: ', $payload);
+        $this->log('Rate calculator request', $payload);
 
-        $response = \Illuminate\Support\Facades\Http::withHeaders($this->getHeaders())
-            ->post($this->baseUrl . '/rate-calculator', $payload);
+        $response = $this->httpClient(true)
+            ->post($this->baseUrl.'/rate-calculator', $payload);
 
         $apiResult = $response->json();
-        \Illuminate\Support\Facades\Log::info('ShipMozo getRates Response: ', (array) $apiResult);
+        $this->log('Rate calculator response', (array) $apiResult);
 
-        $responseData = $apiResult ?? [];
+        $responseData = is_array($apiResult) ? $apiResult : [];
 
         $formattedRates = [];
-        if (Arr::get($responseData, 'result') == 1 && !empty(Arr::get($responseData, 'data'))) {
-            $apiRates = Arr::get($responseData, 'data');
-            \Illuminate\Support\Facades\Log::info('ShipMozo Raw Courier Array Sample: ', (array) Arr::first($apiRates));
-
+        if (Arr::get($responseData, 'result') == 1 && ! empty(Arr::get($responseData, 'data'))) {
+            $apiRates = Arr::get(
+                $responseData,
+                'data.rates',
+                Arr::get($responseData, 'data.courier_rates', Arr::get($responseData, 'data'))
+            );
             // Handle Inflation
             $adjType = setting('shipping_shipmozo_rate_adjustment_type', 'none');
             $adjVal = (float) setting('shipping_shipmozo_rate_adjustment_value', 0);
 
-            // The API response structure for rates (Assuming it returns an array of couriers)
-            // If it returns a single recommended rate or array:
-            if (isset($apiRates['charge'])) { // Single rate fallback mapping
+            if (! is_array($apiRates)) {
+                $apiRates = [];
+            } elseif (Arr::hasAny($apiRates, ['courier_id', 'id', 'charge', 'shipping_charges', 'total_charge'])) {
                 $apiRates = [$apiRates];
             }
 
             foreach ($apiRates as $rate) {
-                $charge = (float) Arr::get($rate, 'charge', Arr::get($rate, 'shipping_charges', 0));
+                if (! is_array($rate)) {
+                    continue;
+                }
+
+                $charge = (float) Arr::get(
+                    $rate,
+                    'total_charge',
+                    Arr::get(
+                        $rate,
+                        'charge',
+                        Arr::get(
+                            $rate,
+                            'shipping_charges',
+                            Arr::get($rate, 'total_charges', Arr::get($rate, 'rate', 0))
+                        )
+                    )
+                );
+
+                if ($charge <= 0) {
+                    continue;
+                }
 
                 if ($adjType === 'fixed') {
                     $charge += $adjVal;
@@ -217,23 +240,36 @@ class Shipmozo
                     $charge += ($charge * ($adjVal / 100));
                 }
 
-                $courierName = Arr::get($rate, 'name', 'ShipMozo Standard');
-                $courierId = Arr::get($rate, 'id', 'shipmozo_standard');
-                $courierKey = \Illuminate\Support\Str::slug((string) $courierId, '_');
+                $courierName = Arr::get($rate, 'courier_name', Arr::get($rate, 'name', 'ShipMozo Standard'));
+                $courierId = Arr::get($rate, 'courier_id', Arr::get($rate, 'id'));
+
+                if (! is_numeric($courierId)) {
+                    continue;
+                }
+
+                $automaticPickup = strtoupper((string) Arr::get($rate, 'pickups_automatically_scheduled'));
+                $pickupSuffix = match ($automaticPickup) {
+                    'YES' => '_auto',
+                    'NO' => '_manual',
+                    default => '',
+                };
+                $courierKey = 'shipmozo_'.(int) $courierId.$pickupSuffix;
 
                 $formattedRates[$courierKey] = [
                     'id' => $courierKey,
                     'name' => $courierName,
                     'price' => $charge,
-                    'estimated_delivery' => Arr::get($rate, 'estimated_delivery', '3-5 Days'),
+                    'courier_id' => (int) $courierId,
+                    'pickups_automatically_scheduled' => Arr::get($rate, 'pickups_automatically_scheduled'),
+                    'estimated_delivery' => Arr::get($rate, 'estimated_delivery', Arr::get($rate, 'etd', '')),
                     'disabled' => false,
                     'error_message' => null,
-                    'image' => Arr::get($rate, 'image')
+                    'image' => Arr::get($rate, 'courier_logo', Arr::get($rate, 'image')),
                 ];
             }
         }
 
-        if (empty($formattedRates) && !empty($deliveryPincode)) {
+        if (empty($formattedRates) && ! empty($deliveryPincode)) {
             $formattedRates['no_service'] = [
                 'id' => 'no_service',
                 'name' => 'ShipMozo Delivery',
@@ -241,7 +277,7 @@ class Shipmozo
                 'estimated_delivery' => '',
                 'disabled' => true,
                 'error_message' => 'Sorry we do not deliver to this pincode, try another pincode.',
-                'image' => null
+                'image' => null,
             ];
         } else {
             // Check Botble's sort direction setting
@@ -252,6 +288,7 @@ class Shipmozo
                 if ($sortDirection === 'price_higher_to_lower') {
                     return $b['price'] <=> $a['price'];
                 }
+
                 // default price_lower_to_higher
                 return $a['price'] <=> $b['price'];
             });
@@ -274,10 +311,10 @@ class Shipmozo
             $product = $orderProduct->product;
 
             // Dynamic Dimensions & Weight
-            $itemLength = (float)($product ? ($product->length ?: 10) : 10);
-            $itemWidth = (float)($product ? ($product->wide ?: 10) : 10);
-            $itemHeight = (float)($product ? ($product->height ?: 10) : 10);
-            $rawWeight = (float)($orderProduct->weight ?: ($product ? $product->weight : 0));
+            $itemLength = (float) ($product ? ($product->length ?: 10) : 10);
+            $itemWidth = (float) ($product ? ($product->wide ?: 10) : 10);
+            $itemHeight = (float) ($product ? ($product->height ?: 10) : 10);
+            $rawWeight = (float) ($orderProduct->weight ?: ($product ? $product->weight : 0));
 
             // Weight Conversion logic (Botble kg -> ShipMozo g)
             $itemWeightInGrams = $rawWeight < 10 ? ($rawWeight * 1000) : $rawWeight;
@@ -296,45 +333,37 @@ class Shipmozo
             }
 
             // Dynamic Discount Calculation
-            $actualPricePaid = (float)$orderProduct->price;
+            $actualPricePaid = (float) $orderProduct->price;
             $discount = 0;
             if ($product && $product->price > $product->sale_price && $product->sale_price > 0) {
-                $discount = (float)($product->price - $product->sale_price);
+                $discount = (float) ($product->price - $product->sale_price);
             }
 
             // Consistency fix: if we send a discount, the unit_price MUST be the original price
             // so that unit_price - discount = actualPricePaid
             $unitPrice = $actualPricePaid + $discount;
 
-            // Dynamic Tax Rate Extraction (Calculate from actual paid price to be safe)
-            $taxRate = 0;
-            if ($actualPricePaid > 0 && $orderProduct->tax_amount > 0) {
-                $taxRate = round(($orderProduct->tax_amount / $actualPricePaid) * 100, 2);
-            }
-
             // HSN Code - attempt to get from meta or barcode
             $hsnCode = '';
             try {
                 $hsnCode = $product ? (get_meta($product, 'hsn_code') ?: ($product->barcode ?: '')) : '';
             } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::warning('ShipMozo: Failed to fetch hsn_code meta due to DB issue: ' . $e->getMessage());
+                $this->logError('Unable to read product HSN metadata', ['message' => $e->getMessage()]);
                 $hsnCode = $product ? ($product->barcode ?: '') : '';
             }
 
-            $cleanCategory = preg_replace('/[^A-Za-z0-9 ]/', '', $categoryName);
+            $cleanCategory = $this->sanitize($categoryName);
             if (empty($cleanCategory)) {
                 $cleanCategory = 'General';
             }
-
-            $taxAmount = (float)($actualPricePaid * $taxRate / 100);
 
             $items[] = [
                 'name' => $orderProduct->product_name,
                 'sku_number' => $product ? $product->sku : 'N/A',
                 'quantity' => (int) $orderProduct->qty,
                 'unit_price' => (float) $unitPrice,
-                //'tax_rate' => (float) $taxRate,
-                //'tax_amount' => (float) $taxAmount,
+                // 'tax_rate' => (float) $taxRate,
+                // 'tax_amount' => (float) $taxAmount,
                 'discount' => (float) $discount,
                 'product_category' => $cleanCategory,
                 'hsn' => $hsnCode,
@@ -343,60 +372,42 @@ class Shipmozo
 
         $origin = EcommerceHelper::getOriginAddress();
 
-        $payment = $order->payment;
-        $isCod = $payment && $payment->payment_channel->getValue() == \Botble\Payment\Enums\PaymentMethodEnum::COD;
+        $payment = is_plugin_active('payment') ? $order->payment : null;
+        $isCod = $payment && $payment->payment_channel->getValue() == PaymentMethodEnum::COD;
 
-        $phone = preg_replace('/[^0-9]/', '', (string)$address->phone);
+        $phone = preg_replace('/[^0-9]/', '', (string) $address->phone);
         if (strlen($phone) > 10) {
             $phone = substr($phone, -10);
         }
 
-        $pickupLocation = 'Primary';
-        if (is_plugin_active('marketplace') && $order->store_id) {
-            $store = $order->store;
-            if ($store) {
-                // EXTREMELY AGGRESSIVE: Remove digits too, just in case
-                $pickupLocation = 'Warehouse' . str_repeat('X', $store->id % 5) . $store->id;
-                $pickupLocation = preg_replace('/[^A-Za-z]/', '', $pickupLocation);
-                // Ensure synchronization uses the same clean name
-                $this->syncWarehouse($store);
-            }
-        }
+        $warehouseId = $this->resolveWarehouseId($order);
 
-        $orderId = preg_replace('/[^A-Za-z0-9]/', '', $order->code ?? (string)$order->id);
+        $orderId = $this->getOrderId($order);
 
         // Calculate amounts and clean items for the final payload
-        $itemsTotal = 0;
         $cleanItems = [];
         foreach ($items as $item) {
-            $uPrice = round((float)($item['unit_price'] ?? 0), 2);
-            $uDiscount = round((float)($item['discount'] ?? 0), 2);
-            $qty = (int)($item['quantity'] ?? 1);
-
-            // Item total for our internal summation
-            $itemsTotal += ($uPrice * $qty) - $uDiscount;
+            $uPrice = round((float) ($item['unit_price'] ?? 0), 2);
+            $uDiscount = round((float) ($item['discount'] ?? 0), 2);
+            $qty = (int) ($item['quantity'] ?? 1);
 
             $cleanItems[] = [
-                'name' => preg_replace('/[^A-Za-z0-9 ]/', '', $item['name']),
-                'sku_number' => (string)($item['sku_number'] ?? 'N/A'),
+                'name' => $this->sanitize($item['name']),
+                'sku_number' => (string) ($item['sku_number'] ?? 'N/A'),
                 'quantity' => $qty,
-                'discount' => $uDiscount > 0 ? (string)number_format($uDiscount, 2, '.', '') : "",
-                'hsn' => (string)($item['hsn'] ?? ''),
-                'unit_price' => (float)$uPrice,
-                'product_category' => (string)($item['product_category'] ?? 'General'),
+                'discount' => $uDiscount > 0 ? (string) number_format($uDiscount, 2, '.', '') : '',
+                'hsn' => (string) ($item['hsn'] ?? ''),
+                'unit_price' => (float) $uPrice,
+                'product_category' => (string) ($item['product_category'] ?? 'General'),
             ];
         }
 
-        $shippingCharged = round((float)$order->shipping_amount, 2);
-        $taxAmount = round((float)$order->tax_amount, 2);
-        $finalTotal = round($itemsTotal + $shippingCharged + $taxAmount, 2);
-        $warehouseId = $order->store ? $order->store->warehouse_id : "";
-
+        $finalTotal = round((float) $order->amount, 2);
         $payload = [
             'order_id' => $orderId,
             'order_date' => $order->created_at->format('Y-m-d'),
             'consignee_name' => $this->sanitize($address->name),
-            'consignee_phone' => (int)$phone,
+            'consignee_phone' => (int) $phone,
             'consignee_email' => $address->email,
             'consignee_address_line_one' => $this->sanitize($address->address),
             'consignee_address_line_two' => $this->sanitize($address->address_2 ?? ''),
@@ -405,20 +416,19 @@ class Shipmozo
             'consignee_state' => $this->sanitize($address->state_name),
             'product_detail' => $cleanItems,
             'payment_type' => $isCod ? 'COD' : 'PREPAID',
-            'cod_amount' => $isCod ? $this->formatAmount($finalTotal) : "0.00",
-            'shipping_charges' => $this->formatAmount($shippingCharged),
+            'cod_amount' => $isCod ? $this->formatAmount($finalTotal) : '',
             'weight' => (int) max($totalWeight, 200),
             'length' => (int) max($maxLength, 10),
             'width' => (int) max($maxWidth, 10),
             'height' => (int) max($maxHeight, 10),
-            'warehouse_id' => (string)$warehouseId,
-            'gst_ewaybill_number' => "",
-            'gstin_number' => "",
+            'warehouse_id' => (string) $warehouseId,
+            'gst_ewaybill_number' => '',
+            'gstin_number' => '',
         ];
 
         $this->log('Push Order Request', $payload);
 
-        $response = Http::withHeaders($this->getHeaders())
+        $response = $this->httpClient()
             ->post("{$this->baseUrl}/push-order", $payload);
 
         $responseData = $response->json() ?? [];
@@ -427,29 +437,152 @@ class Shipmozo
         return $responseData;
     }
 
-    public function getOrderLabel(string $awbNumber): ?string
+    public function getOrderId(Order $order): string
     {
-        $response = Http::withHeaders($this->getHeaders())
-            ->get("{$this->baseUrl}/get-order-label/{$awbNumber}", [
-                'type_of_label' => 'PDF'
-            ]);
-
-        if ($response->successful()) {
-            return $response->json('data.url') ?? null;
-        }
-
-        return null;
+        return trim((string) ($order->code ?: $order->id));
     }
 
-    public function cancelOrder(string $awbNumber): array
+    public function createShipment(Order $order, ?string $existingOrderId = null): array
+    {
+        $push = [];
+
+        if ($existingOrderId) {
+            $orderId = $existingOrderId;
+        } else {
+            $push = $this->pushOrder($order);
+
+            if (Arr::get($push, 'result') != 1) {
+                $error = (string) (Arr::get($push, 'data.error') ?: Arr::get($push, 'message'));
+                if (! preg_match('/already|exist|duplicate/i', $error)) {
+                    return $push;
+                }
+            }
+
+            $orderId = (string) (Arr::get($push, 'data.order_id')
+                ?: Arr::get($push, 'data.reference_id')
+                ?: $this->getOrderId($order));
+        }
+
+        $workflow = $push ? ['push_order' => $push] : ['existing_order_id' => $orderId];
+
+        $courierId = $this->courierIdFromShippingOption($order->shipping_option);
+        if ($courierId === null) {
+            $autoAssign = $this->autoAssignOrder($orderId);
+            $workflow['auto_assign'] = $autoAssign;
+
+            if (Arr::get($autoAssign, 'result') != 1) {
+                return $this->workflowFailure(
+                    Arr::get($autoAssign, 'data.error', Arr::get($autoAssign, 'message', 'ShipMozo auto assignment failed.')),
+                    $workflow
+                );
+            }
+
+            $detail = $this->getOrderDetail($orderId);
+            $workflow['order_detail'] = $detail;
+            $awb = $this->extractAwb($autoAssign) ?: $this->extractAwb($detail);
+
+            return $awb
+                ? $this->workflowSuccess($awb, $workflow)
+                : $this->workflowFailure('ShipMozo assigned a courier but did not return an AWB.', $workflow);
+        }
+
+        $assignment = $this->assignCourier($orderId, $courierId);
+        $workflow['assign_courier'] = $assignment;
+
+        if (Arr::get($assignment, 'result') != 1) {
+            return $this->workflowFailure(
+                Arr::get($assignment, 'data.error', Arr::get($assignment, 'message', 'ShipMozo courier assignment failed.')),
+                $workflow
+            );
+        }
+
+        $detail = $this->getOrderDetail($orderId);
+        $workflow['order_detail'] = $detail;
+        $awb = $this->extractAwb($assignment) ?: $this->extractAwb($detail);
+
+        if ($this->pickupModeFromShippingOption($order->shipping_option) !== 'auto') {
+            $pickup = $this->schedulePickup($orderId);
+            $workflow['schedule_pickup'] = $pickup;
+            $awb = $awb ?: $this->extractAwb($pickup);
+        }
+
+        return $awb
+            ? $this->workflowSuccess($awb, $workflow)
+            : $this->workflowFailure('ShipMozo created the order but did not return an AWB.', $workflow);
+    }
+
+    public function assignCourier(string $orderId, int $courierId): array
+    {
+        return $this->httpClient()
+            ->post("{$this->baseUrl}/assign-courier", [
+                'order_id' => $orderId,
+                'courier_id' => $courierId,
+            ])->json() ?? [];
+    }
+
+    public function schedulePickup(string $orderId): array
+    {
+        return $this->httpClient()
+            ->post("{$this->baseUrl}/schedule-pickup", ['order_id' => $orderId])
+            ->json() ?? [];
+    }
+
+    public function autoAssignOrder(string $orderId): array
+    {
+        return $this->httpClient()
+            ->post("{$this->baseUrl}/auto-assign-order", ['order_id' => $orderId])
+            ->json() ?? [];
+    }
+
+    public function getOrderDetail(string $orderId): array
+    {
+        return $this->httpClient(true)
+            ->get("{$this->baseUrl}/get-order-detail/".rawurlencode($orderId))
+            ->json() ?? [];
+    }
+
+    public function getOrderLabel(string $awbNumber): ?array
+    {
+        $response = $this->httpClient(true)
+            ->get("{$this->baseUrl}/get-order-label/".rawurlencode($awbNumber));
+
+        $label = $response->json('data.0.label');
+        if (! $response->successful() || ! is_string($label)) {
+            return null;
+        }
+
+        if (! preg_match('/\Adata:(image\/(?:png|jpeg));base64,(.+)\z/s', $label, $matches)) {
+            return null;
+        }
+
+        $contents = base64_decode($matches[2], true);
+
+        return $contents === false ? null : ['mime_type' => $matches[1], 'contents' => $contents];
+    }
+
+    public function getOrderLabelUrl(string $awbNumber): string
+    {
+        return route('shipmozo.public.label', [
+            'awbNumber' => $awbNumber,
+            'signature' => $this->labelSignature($awbNumber),
+        ]);
+    }
+
+    public function labelSignature(string $awbNumber): string
+    {
+        return hash_hmac('sha256', $awbNumber, (string) config('app.key'));
+    }
+
+    public function cancelOrder(string $orderId, string $awbNumber): array
     {
         $payload = [
-            'awb_number' => [$awbNumber],
+            'order_id' => $orderId,
+            'awb_number' => $awbNumber,
         ];
 
         $this->log('Canceling Order', $payload);
 
-        $response = Http::withHeaders($this->getHeaders())
+        $response = $this->httpClient()
             ->post("{$this->baseUrl}/cancel-order", $payload);
 
         $responseData = $response->json() ?? [];
@@ -458,7 +591,7 @@ class Shipmozo
         return $responseData;
     }
 
-    public function pushReturnOrder(\Botble\Ecommerce\Models\OrderReturn $orderReturn): array
+    public function pushReturnOrder(OrderReturn $orderReturn): array
     {
         $order = $orderReturn->order;
         $address = $order->shippingAddress;
@@ -473,10 +606,10 @@ class Shipmozo
             $product = $returnItem->product;
 
             // Dynamic Dimensions & Weight
-            $itemLength = (float)($product ? ($product->length ?: 10) : 10);
-            $itemWidth = (float)($product ? ($product->wide ?: 10) : 10);
-            $itemHeight = (float)($product ? ($product->height ?: 10) : 10);
-            $rawWeight = (float)($product ? $product->weight : 0);
+            $itemLength = (float) ($product ? ($product->length ?: 10) : 10);
+            $itemWidth = (float) ($product ? ($product->wide ?: 10) : 10);
+            $itemHeight = (float) ($product ? ($product->height ?: 10) : 10);
+            $rawWeight = (float) ($product ? $product->weight : 0);
 
             // Weight Conversion
             $itemWeightInGrams = $rawWeight < 10 ? ($rawWeight * 1000) : $rawWeight;
@@ -494,13 +627,11 @@ class Shipmozo
                 $categoryName = $product->categories->first()->name;
             }
 
-            // Discount - hard to track in return but let's try to be consistent
-            $discount = 0;
             $hsnCode = '';
             try {
                 $hsnCode = $product ? (get_meta($product, 'hsn_code') ?: ($product->barcode ?: '')) : '';
             } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::warning('ShipMozo: Failed to fetch hsn_code meta in return due to DB issue: ' . $e->getMessage());
+                $this->logError('Unable to read return product HSN metadata', ['message' => $e->getMessage()]);
                 $hsnCode = $product ? ($product->barcode ?: '') : '';
             }
 
@@ -508,42 +639,44 @@ class Shipmozo
                 'name' => $this->sanitize($returnItem->product_name),
                 'sku_number' => $product ? $product->sku : 'N/A',
                 'quantity' => (int) $returnItem->qty,
-                'unit_price' => $this->formatAmount($returnItem->price),
-                'discount' => "0.00",
+                'unit_price' => round((float) $returnItem->price, 2),
+                'discount' => '',
                 'product_category' => $this->sanitize($categoryName),
                 'hsn' => $hsnCode,
             ];
         }
 
-        $origin = EcommerceHelper::getOriginAddress();
-
-        $phone = preg_replace('/[^0-9]/', '', (string)$address->phone);
+        $phone = preg_replace('/[^0-9]/', '', (string) $address->phone);
         if (strlen($phone) > 10) {
             $phone = substr($phone, -10);
         }
 
         $payload = [
-            'order_id' => 'RET_' . $order->id . '_' . time(),
-            'order_amount' => $this->formatAmount($orderReturn->refund_amount ?? 0),
-            'pickup_pincode' => (int) $address->zip_code,
+            'order_id' => (string) ($orderReturn->code ?: 'RET'.$orderReturn->id),
+            'order_date' => $orderReturn->created_at->format('Y-m-d'),
+            'pickup_name' => $this->sanitize($address->name),
+            'pickup_phone' => (int) $phone,
+            'pickup_email' => $address->email,
             'pickup_address_line_one' => $this->sanitize($address->address),
             'pickup_address_line_two' => $this->sanitize($address->address_2 ?? ''),
-            'pickup_name' => $this->sanitize($address->name),
-            'pickup_phone' => $phone,
-            'pickup_email' => $address->email,
+            'pickup_pin_code' => (int) $address->zip_code,
             'pickup_city' => $this->sanitize($address->city_name),
             'pickup_state' => $this->sanitize($address->state_name),
-            'delivery_pincode' => (int) Arr::get($origin, 'zip_code', 0),
             'product_detail' => $items,
-            'weight' => (int) max($totalWeight, 200),
+            'payment_type' => 'PREPAID',
+            'weight' => round(max($totalWeight, 200) / 1000, 3),
             'length' => (float) max($maxLength, 10),
             'width' => (float) max($maxWidth, 10),
             'height' => (float) max($maxHeight, 10),
+            'warehouse_id' => $this->resolveWarehouseId($order),
+            'return_reason_id' => $this->returnReasonId($orderReturn),
+            'customer_request' => 'REFUND',
+            'reason_comment' => (string) ($orderReturn->reason?->label() ?? ''),
         ];
 
         $this->log('Push Return Order Request', $payload);
 
-        $response = Http::withHeaders($this->getHeaders())
+        $response = $this->httpClient()
             ->post("{$this->baseUrl}/push-return-order", $payload);
 
         $responseData = $response->json() ?? [];
@@ -554,7 +687,7 @@ class Shipmozo
 
     public function getNdrAll(): array
     {
-        $response = Http::withHeaders($this->getHeaders())
+        $response = $this->httpClient(true)
             ->get("{$this->baseUrl}/get-ndr-all");
 
         return $response->json('data') ?? [];
@@ -562,15 +695,14 @@ class Shipmozo
 
     public function ndrAction(string $awbNumber, string $action): array
     {
-        // $action typically is 'reattempt' or 'rto' based on API docs.
         $payload = [
             'awb_number' => $awbNumber,
-            'action' => $action
+            'action' => $action,
         ];
 
         $this->log('NDR Action Request', $payload);
 
-        $response = Http::withHeaders($this->getHeaders())
+        $response = $this->httpClient()
             ->post("{$this->baseUrl}/ndr-action", $payload);
 
         $responseData = $response->json() ?? [];
@@ -581,7 +713,7 @@ class Shipmozo
 
     public function getWarehouses(): array
     {
-        $response = Http::withHeaders($this->getHeaders())
+        $response = $this->httpClient(true)
             ->get("{$this->baseUrl}/get-warehouses");
 
         $responseData = $response->json() ?? [];
@@ -593,19 +725,17 @@ class Shipmozo
     public function createWarehouse(array $data): array
     {
         $payload = [
-            'name' => $this->sanitize(Arr::get($data, 'name')),
             'address_title' => $this->sanitize(Arr::get($data, 'address_title')),
-            'contact_name' => $this->sanitize(Arr::get($data, 'contact_name')),
-            'contact_email' => Arr::get($data, 'contact_email'),
-            'contact_phone' => (int)preg_replace('/[^0-9]/', '', Arr::get($data, 'contact_phone')),
-            'pincode' => (int)Arr::get($data, 'pincode'),
-            'city' => $this->sanitize(Arr::get($data, 'city')),
-            'state' => $this->sanitize(Arr::get($data, 'state')),
-            'address' => $this->sanitize(Arr::get($data, 'address')),
-            'phone' => (int)preg_replace('/[^0-9]/', '', Arr::get($data, 'phone')),
+            'name' => $this->sanitize(Arr::get($data, 'contact_name', Arr::get($data, 'name'))),
+            'phone' => (int) preg_replace('/[^0-9]/', '', Arr::get($data, 'phone')),
+            'alternate_phone' => (int) preg_replace('/[^0-9]/', '', Arr::get($data, 'alternate_phone', '')),
+            'email' => Arr::get($data, 'contact_email'),
+            'address_line_one' => $this->sanitize(Arr::get($data, 'address')),
+            'address_line_two' => $this->sanitize(Arr::get($data, 'address_line_two', '')),
+            'pin_code' => (int) Arr::get($data, 'pincode'),
         ];
 
-        $response = Http::withHeaders($this->getHeaders())
+        $response = $this->httpClient()
             ->post("{$this->baseUrl}/create-warehouse", $payload);
 
         $responseData = $response->json() ?? [];
@@ -620,24 +750,21 @@ class Shipmozo
             return ['result' => 1, 'message' => 'Using linked warehouse_id', 'id' => $store->warehouse_id];
         }
 
-        // AGGRESSIVE: No digits or chars in location name
-        $locationName = preg_replace('/[^A-Za-z]/', '', 'Warehouse' . str_repeat('X', $store->id % 5) . $store->id);
+        $locationName = $this->warehouseName($store->getKey());
         $payload = [
-            'name' => $locationName,
             'address_title' => $locationName,
-            'contact_name' => $this->sanitize($store->name, 'alpha'),
-            'contact_email' => $store->email,
-            'contact_phone' => (string)preg_replace('/[^0-9]/', '', $store->phone),
-            'pincode' => (int)$store->zip_code,
-            'city' => $this->sanitize($store->city_name ?? $store->city, 'alpha'),
-            'state' => $this->sanitize($store->state_name ?? $store->state, 'alpha'),
-            'address' => $this->sanitize($store->address),
-            'phone' => (string)preg_replace('/[^0-9]/', '', $store->phone),
+            'name' => $this->sanitize($store->name, 'alpha'),
+            'phone' => (int) preg_replace('/[^0-9]/', '', $store->phone),
+            'alternate_phone' => 0,
+            'email' => $store->email,
+            'address_line_one' => $this->sanitize($store->address),
+            'address_line_two' => '',
+            'pin_code' => (int) $store->zip_code,
         ];
 
         $this->log('Syncing Warehouse to ShipMozo', $payload);
 
-        $response = Http::withHeaders($this->getHeaders())
+        $response = $this->httpClient()
             ->post("{$this->baseUrl}/create-warehouse", $payload);
 
         $responseData = $response->json() ?? [];
@@ -648,28 +775,170 @@ class Shipmozo
 
     public function trackOrder(string $awbNumber): array
     {
-        $response = Http::withHeaders($this->getHeaders())
-            ->get("{$this->baseUrl}/track-order/{$awbNumber}");
+        $response = $this->httpClient(true)
+            ->get("{$this->baseUrl}/track-order", ['awb_number' => $awbNumber]);
 
         return $response->json('data') ?? [];
     }
 
+    private function resolveWarehouseId(Order $order): string
+    {
+        if (is_plugin_active('marketplace') && $order->store_id && $order->store) {
+            $store = $order->store;
+            $warehouse = $this->syncWarehouse($store);
+            $warehouseId = (string) ($store->warehouse_id
+                ?: Arr::get($warehouse, 'data.warehouse_id', Arr::get($warehouse, 'id', '')));
+
+            if ($warehouseId !== '' && ! $store->warehouse_id) {
+                $store->warehouse_id = $warehouseId;
+                $store->saveQuietly();
+            }
+
+            if ($warehouseId !== '') {
+                return $warehouseId;
+            }
+        }
+
+        $warehouses = (array) Arr::get($this->getWarehouses(), 'data', []);
+        $warehouse = Arr::first($warehouses, fn (array $item): bool => strtoupper((string) Arr::get($item, 'default')) === 'YES'
+            && strtoupper((string) Arr::get($item, 'status', 'ACTIVE')) === 'ACTIVE'
+        ) ?: Arr::first($warehouses, fn (array $item): bool => strtoupper((string) Arr::get($item, 'status', 'ACTIVE')) === 'ACTIVE'
+        );
+
+        $warehouseId = (string) Arr::get((array) $warehouse, 'id', '');
+        if ($warehouseId !== '') {
+            return $warehouseId;
+        }
+
+        $origin = EcommerceHelper::getOriginAddress();
+        $created = $this->createWarehouse([
+            'address_title' => 'BotbleOrigin',
+            'name' => Arr::get($origin, 'name', 'Botble Store'),
+            'contact_name' => Arr::get($origin, 'name', 'Botble Store'),
+            'contact_email' => Arr::get($origin, 'email'),
+            'phone' => Arr::get($origin, 'phone'),
+            'address' => Arr::get($origin, 'address'),
+            'address_line_two' => Arr::get($origin, 'address_2'),
+            'pincode' => Arr::get($origin, 'zip_code'),
+        ]);
+        $warehouseId = (string) Arr::get($created, 'data.warehouse_id', '');
+
+        if ($warehouseId === '') {
+            throw new RuntimeException('ShipMozo requires an active warehouse before an order can be pushed.');
+        }
+
+        return $warehouseId;
+    }
+
+    private function courierIdFromShippingOption(mixed $shippingOption): ?int
+    {
+        $shippingOption = (string) $shippingOption;
+
+        if (preg_match('/\Ashipmozo_(\d+)(?:_(?:auto|manual))?\z/', $shippingOption, $matches)) {
+            return (int) $matches[1];
+        }
+
+        return ctype_digit($shippingOption) ? (int) $shippingOption : null;
+    }
+
+    private function pickupModeFromShippingOption(mixed $shippingOption): ?string
+    {
+        return preg_match('/_(auto|manual)\z/', (string) $shippingOption, $matches)
+            ? $matches[1]
+            : null;
+    }
+
+    private function extractAwb(array $response): ?string
+    {
+        $awb = Arr::get($response, 'awb_number')
+            ?: Arr::get($response, 'data.awb_number')
+            ?: Arr::get($response, 'data.0.awb_number')
+            ?: Arr::get($response, 'data.0.zone.awb_number');
+
+        return is_scalar($awb) && (string) $awb !== '' ? (string) $awb : null;
+    }
+
+    private function workflowSuccess(string $awb, array $workflow): array
+    {
+        return [
+            'result' => '1',
+            'message' => 'Success',
+            'data' => ['awb_number' => $awb],
+            'workflow' => $workflow,
+        ];
+    }
+
+    private function workflowFailure(string $message, array $workflow): array
+    {
+        return [
+            'result' => '0',
+            'message' => $message,
+            'data' => ['error' => $message],
+            'workflow' => $workflow,
+        ];
+    }
+
+    private function returnReasonId(OrderReturn $orderReturn): int
+    {
+        $reason = $orderReturn->reason?->getValue()
+            ?: $orderReturn->items->first()?->reason?->getValue()
+            ?: 'other';
+
+        return match ($reason) {
+            'arrived_late' => 1,
+            'no_longer_want' => 8,
+            'damaged', 'defective' => 9,
+            'incorrect_item' => 10,
+            'not_as_described' => 12,
+            default => 14,
+        };
+    }
+
     private function sanitize(?string $text, string $type = 'alphanumeric'): string
     {
-        if (empty($text)) {
+        if ($text === null || $text === '') {
             return '';
         }
 
+        $text = preg_replace('/[\x00-\x1F\x7F]+/u', ' ', trim($text)) ?? '';
+        $text = preg_replace('/\s+/u', ' ', $text) ?? '';
+
         if ($type === 'alpha') {
-            return preg_replace('/[^A-Za-z ]/', '', $text);
+            return preg_replace('/[^\pL ]/u', '', $text) ?? '';
         }
 
-        // Default alphnumeric + space
-        return preg_replace('/[^A-Za-z0-9 ]/', '', $text);
+        return $text;
     }
 
     private function formatAmount($amount): string
     {
-        return number_format((float)$amount, 2, '.', '');
+        return number_format((float) $amount, 2, '.', '');
+    }
+
+    private function redactLogContext(array $context): array
+    {
+        foreach ($context as $key => $value) {
+            if (preg_match('/key|token|secret|email|phone|address|consignee|pickup_name/i', (string) $key)) {
+                $context[$key] = '[REDACTED]';
+            } elseif (is_array($value)) {
+                $context[$key] = $this->redactLogContext($value);
+            }
+        }
+
+        return $context;
+    }
+
+    private function warehouseName(int|string $storeId): string
+    {
+        $number = max((int) $storeId, 1);
+        $suffix = '';
+
+        while ($number > 0) {
+            $number--;
+            $suffix = chr(65 + ($number % 26)).$suffix;
+            $number = intdiv($number, 26);
+        }
+
+        return 'Warehouse'.$suffix;
     }
 }

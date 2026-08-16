@@ -72,7 +72,10 @@ Shipmozo.init = () => {
                 } else {
                     Botble.showSuccess(res.message)
                     $self.addClass('d-none')
-                    $self.parent().append(res.data.html)
+                    $self
+                        .closest('.shipmozo-transaction-actions')
+                        .siblings('.shipmozo-rates-panel')
+                        .html(res.data.html)
                 }
             },
             error: (res) => {

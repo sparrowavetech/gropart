@@ -1,8 +1,6 @@
 @php
 $order = $shipment->order;
-$method = $order->shipping_method->getValue();
-$isShipmozo = ($method === SHIPMOZO_SHIPPING_METHOD_NAME) ||
-($method === \Botble\Ecommerce\Enums\ShippingMethodEnum::DEFAULT && is_numeric($order->shipping_option));
+$isShipmozo = app(SparroWave\Shipmozo\Shipmozo::class)->isShipmozoOrder($order);
 @endphp
 
 @if ($isShipmozo)
@@ -12,17 +10,15 @@ $url = route(app(\SparroWave\Shipmozo\Shipmozo::class)->getRoutePrefixByFactor()
 @endphp
 <x-core::button
     type="button"
-    class="shipmozo-view-and-create"
+    color="primary"
+    class="shipmozo-view-and-create fw-semibold px-3 shadow-sm"
     icon="ti ti-truck-delivery"
     data-bs-toggle="modal"
     data-bs-target="#shipmozo-view-n-create-transaction"
-    data-url="{{ $url }}">
-    <img
-        src="{{ url('vendor/core/plugins/shipmozo/images/icon.svg') }}"
-        alt="shipmozo"
-        style="height: 14px; width: auto; filter: brightness(0) invert(1);"
-        class="me-1">
-    {{ trans('plugins/shipmozo::shipmozo.transaction.view_and_create') }}
+    data-url="{{ $url }}"
+    title="Assign the checkout-selected courier and generate the ShipMozo AWB">
+    Assign Courier & Generate AWB
+    <span class="badge bg-white text-primary ms-2">Action required</span>
 </x-core::button>
 
 <div
@@ -31,19 +27,28 @@ $url = route(app(\SparroWave\Shipmozo\Shipmozo::class)->getRoutePrefixByFactor()
     aria-labelledby="shipmozo-view-n-create-transaction-label"
     aria-hidden="true"
     tabindex="-1">
-    <div class="modal-dialog modal-dialog-scrollable modal-lg">
-        <div class="modal-content">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+        <div class="modal-content shadow">
             <div class="modal-header">
-                <h5
-                    class="modal-title"
-                    id="shipmozo-view-n-create-transaction-label">{{ trans('plugins/shipmozo::shipmozo.transaction.view_and_create') }}</h5>
+                <div class="d-flex align-items-center gap-3">
+                    <span class="avatar bg-primary-lt text-primary">
+                        <x-core::icon name="ti ti-truck-delivery" />
+                    </span>
+                    <div>
+                        <h5
+                            class="modal-title mb-0"
+                            id="shipmozo-view-n-create-transaction-label"
+                        >Confirm ShipMozo Shipment</h5>
+                        <div class="small text-secondary">Courier assignment and AWB generation</div>
+                    </div>
+                </div>
                 <button
                     class="btn-close"
                     data-bs-dismiss="modal"
                     type="button"
                     aria-label="Close"></button>
             </div>
-            <div class="modal-body"></div>
+            <div class="modal-body p-4"></div>
         </div>
     </div>
 </div>

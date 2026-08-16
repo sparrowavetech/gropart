@@ -2,8 +2,8 @@
 
 namespace SparroWave\Shipmozo\Providers;
 
-use SparroWave\Shipmozo\Commands\InitShipmozoCommand;
 use Illuminate\Support\ServiceProvider;
+use SparroWave\Shipmozo\Commands\InitShipmozoCommand;
 
 class CommandServiceProvider extends ServiceProvider
 {

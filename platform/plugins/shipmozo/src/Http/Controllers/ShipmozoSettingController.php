@@ -6,19 +6,27 @@ use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Services\HandleShippingFeeService;
 use Botble\Setting\Supports\SettingStore;
-use SparroWave\Shipmozo\Shipmozo;
 use Botble\Support\Services\Cache\Cache;
 use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Str;
 
 class ShipmozoSettingController extends BaseController
 {
     public function update(Request $request, BaseHttpResponse $response, SettingStore $settingStore)
     {
-        $data = Arr::where($request->except(['_token']), function ($value, $key) {
-            return Str::startsWith($key, 'shipping_');
-        });
+        $data = $request->validate([
+            'shipping_shipmozo_public_key' => ['nullable', 'string', 'max:255'],
+            'shipping_shipmozo_private_key' => ['nullable', 'string', 'max:255'],
+            'shipping_shipmozo_webhook_secret' => ['nullable', 'string', 'min:16', 'max:255'],
+            'shipping_shipmozo_status' => ['nullable', 'boolean'],
+            'shipping_shipmozo_logging' => ['nullable', 'boolean'],
+            'shipping_shipmozo_webhooks' => ['nullable', 'boolean'],
+            'shipping_shipmozo_rate_adjustment_type' => ['required', 'in:none,fixed,percent'],
+            'shipping_shipmozo_rate_adjustment_value' => ['required', 'numeric', 'min:0', 'max:100000'],
+        ]);
+
+        foreach (['shipping_shipmozo_status', 'shipping_shipmozo_logging', 'shipping_shipmozo_webhooks'] as $key) {
+            $data[$key] = $request->boolean($key);
+        }
 
         foreach ($data as $settingKey => $settingValue) {
             $settingStore->set($settingKey, $settingValue);

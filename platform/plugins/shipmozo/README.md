@@ -1,35 +1,51 @@
-# ShipMozo Multi-Vendor Delivery Plugin
+# ShipMozo Shipping for Botble Ecommerce
 
-**Author:** Sparrowave Solutions
-**Version:** 1.0.3
-**Minimum Core Version:** 7.3.0
-**Website:** [Sparrowave Solutions](https://www.sparrowave.com)
+ShipMozo rates, courier assignment, pickup scheduling, labels, tracking, cancellation, returns, NDR actions, pincode checks, and optional Marketplace warehouse synchronization for Botble Ecommerce.
 
-## Overview
+## Requirements
 
-Welcome to the **ShipMozo Multi-Vendor Delivery** plugin, exclusively developed by Sparrowave Solutions for the Botble & Farmart eCommerce ecosystems.
+- Botble CMS 7.6 or newer
+- Ecommerce plugin
+- PHP 8.2 or newer
+- Marketplace plugin only when multi-vendor warehouse support is needed
 
-Unlike basic shipping modules, this complete enterprise-grade package natively supports **Multi-Vendor Carts**, **Dynamic Prepaid/COD Calculations**, and **Real-Time Pincode Serviceability** locks directly embedded into your product pages and checkout flow.
+## Installation
 
-## 🚀 Key Features
+1. Copy `shipmozo` to `platform/plugins/shipmozo`.
+2. Activate Ecommerce, then activate ShipMozo from Admin > Plugins.
+3. Run pending migrations if plugin activation does not run them automatically.
+4. Open Ecommerce shipping settings and configure the ShipMozo public and private keys.
+5. Keep webhooks disabled unless ShipMozo has supplied and confirmed a callback contract for your account. Webhooks and NDR APIs are retained as integration extensions but are not described in the supplied 19-page API guide.
 
-*   **Multi-Vendor Architecture:** Accurately segments cart products by Vendor/Store IDs. Calculates separate ShipMozo courier limits and prices for *each* vendor simultaneously.
-*   **Pincode Serviceability Validation:** Product pages dynamically query the ShipMozo API based on the user's PIN to actively permit or block the Add-to-Cart / Checkout actions.
-*   **Split COD / Prepaid Returns:** Dynamically queries different courier methods arrays and displays eligible options natively based on whether the customer selects "Cash on Delivery" or standard prepayments.
-*   **Bulletproof Checkout UI Locks:** Advanced DOM observers ensure a user physically cannot force a checkout submission unless they have explicitly selected an active carrier method for *every individual vendor's package* in their cart.
-*   **Automated Grand Totals:** Injects additive logic into Botble's core checkout services so that Multi-Vendor cart shipping subtotals securely aggregate into a master 100% accurate grand total.
+The same credentials can be configured without changing catalog or location data:
 
-## 🛠️ Installation
+```bash
+php artisan cms:shipmozo:init \
+  --public-key=PUBLIC_KEY \
+  --private-key=PRIVATE_KEY \
+  --webhook-secret=WEBHOOK_SECRET
+```
 
-1. Upload the `shipmozo` plugin directory to your Botble installation's `platform/plugins/` directory.
-2. Go to your **Admin Dashboard > Plugins**.
-3. Locate **ShipMozo Multi-Vendor Delivery** and click **Activate**.
-4. Go to **Settings > Shipmozo API** in the admin sidebar.
-5. Enter your **Shipmozo Username**, **Password**, and select your default Courier Service priorities.
-6. Check your Farmart/Botble product layouts to confirm the "Check PIN" widget is active.
+## Webhook
 
-## Need Support or Customization?
+The supplied API guide does not document webhooks. The optional compatibility endpoint is `/shipmozo/webhooks`; only enable it after ShipMozo confirms the payload and authenticate with one of:
 
-Have a complex business scenario or need a new courier algorithm integrated securely? Our dedicated team at Sparrowave Solutions is available for advanced system integrations and long-term Botble architecture maintenance.
+- `Authorization: Bearer WEBHOOK_SECRET`
+- `X-Shipmozo-Token: WEBHOOK_SECRET`
+- `X-Webhook-Token: WEBHOOK_SECRET`
 
-Contact us via [www.sparrowave.com](https://www.sparrowave.com).
+The legacy `_token` request field is also accepted for compatibility.
+
+## Documented order flow
+
+The plugin follows the API guide's required sequence: `push-order`, then `assign-courier` for a checkout-selected courier (or `auto-assign-order` when no courier ID exists), followed by `get-order-detail` and `schedule-pickup` when manual pickup is required. Only an actual `awb_number` is stored as the Botble tracking ID.
+
+Labels are decoded from the documented base64 PNG response and served through a signed, rate-limited application URL. Cancellation sends both the original ShipMozo `order_id` and scalar `awb_number`; tracking uses the documented `track-order?awb_number=` query.
+
+## Assets
+
+The plugin includes both the project Vite descriptor and the legacy Laravel Mix descriptor. In this project, install root Node dependencies and run `npm run prod` to rebuild plugin assets.
+
+## Support
+
+Sparrowave Solutions: https://www.sparrowave.com

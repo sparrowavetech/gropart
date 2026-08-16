@@ -4,13 +4,22 @@ namespace SparroWave\Shipmozo\Providers;
 
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\Form;
+use Botble\Base\Forms\FormAbstract;
+use Botble\Ecommerce\Enums\OrderReturnStatusEnum;
 use Botble\Ecommerce\Enums\ShippingMethodEnum;
+use Botble\Ecommerce\Events\OrderCancelledEvent;
+use Botble\Ecommerce\Events\OrderReturnedEvent;
 use Botble\Ecommerce\Models\Shipment;
-use Botble\Payment\Enums\PaymentMethodEnum;
-use SparroWave\Shipmozo\Shipmozo;
+use Botble\Marketplace\Models\Store;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
+use SparroWave\Shipmozo\Shipmozo;
 
 class HookServiceProvider extends ServiceProvider
 {
@@ -18,7 +27,7 @@ class HookServiceProvider extends ServiceProvider
     {
         add_filter('handle_shipping_fee', [$this, 'handleShippingFee'], 11, 2);
 
-        if (is_plugin_active('marketplace')) {
+        if ($this->supportsMarketplaceWarehouses()) {
             add_filter(BASE_FILTER_BEFORE_RENDER_FORM, [$this, 'addWarehouseToStoreForm'], 120, 2);
             add_action(BASE_ACTION_AFTER_CREATE_CONTENT, [$this, 'saveStoreWarehouseId'], 120, 3);
             add_action(BASE_ACTION_AFTER_UPDATE_CONTENT, [$this, 'saveStoreWarehouseId'], 120, 3);
@@ -47,117 +56,88 @@ class HookServiceProvider extends ServiceProvider
         add_filter('shipment_buttons_detail_order', function (?string $content, Shipment $shipment) {
             Assets::addScriptsDirectly('vendor/core/plugins/shipmozo/js/shipmozo.js');
 
-            return $content . view('plugins/shipmozo::buttons', compact('shipment'))->render();
+            return $content.view('plugins/shipmozo::buttons', compact('shipment'))->render();
         }, 1, 2);
 
-        \Illuminate\Support\Facades\Event::listen(\Botble\Ecommerce\Events\OrderCancelledEvent::class, function (\Botble\Ecommerce\Events\OrderCancelledEvent $event) {
+        Event::listen(OrderCancelledEvent::class, function (OrderCancelledEvent $event) {
             $order = $event->order;
-            if ($order && $order->shipment && $order->shipment->tracking_id) {
-                app(Shipmozo::class)->cancelOrder($order->shipment->tracking_id);
-            }
-        });
+            $shipmozo = app(Shipmozo::class);
 
-        \Illuminate\Support\Facades\Event::listen(\Botble\Ecommerce\Events\OrderReturnedEvent::class, function (\Botble\Ecommerce\Events\OrderReturnedEvent $event) {
-            $orderReturn = $event->order;
-            if ($orderReturn && $orderReturn->return_status == \Botble\Ecommerce\Enums\OrderReturnStatusEnum::COMPLETED) {
-                app(Shipmozo::class)->pushReturnOrder($orderReturn);
-            }
-        });
-
-        \Illuminate\Support\Facades\Event::listen(\Botble\Ecommerce\Events\OrderConfirmedEvent::class, function (\Botble\Ecommerce\Events\OrderConfirmedEvent $event) {
-            $order = $event->order;
-
-            if (!$order || !$order->id) {
-                return;
-            }
-
-            $method = $order->shipping_method->getValue();
-            $isShipmozo = ($method === SHIPMOZO_SHIPPING_METHOD_NAME) ||
-                ($method === \Botble\Ecommerce\Enums\ShippingMethodEnum::DEFAULT && is_numeric($order->shipping_option));
-
-            if ($isShipmozo) {
-                // Data Healing: Standardize method name if it's currently 'default'
-                if ($method === \Botble\Ecommerce\Enums\ShippingMethodEnum::DEFAULT) {
-                    $order->update(['shipping_method' => SHIPMOZO_SHIPPING_METHOD_NAME]);
-                }
-                // Ensure a shipment exists for this order
-                $shipment = $order->shipment;
-
-                if (!$shipment || !$shipment->id) {
-                    $shipment = \Botble\Ecommerce\Models\Shipment::query()->create([
-                        'order_id' => $order->id,
-                        'user_id' => $order->user_id,
-                        'weight' => $order->products_weight,
-                        'cod_amount' => $order->payment && $order->payment->status != \Botble\Payment\Enums\PaymentStatusEnum::COMPLETED ? $order->amount : 0,
-                        'cod_status' => 'pending',
-                        'status' => \Botble\Ecommerce\Enums\ShippingStatusEnum::DELIVERING,
-                        'price' => $order->shipping_amount,
-                        'store_id' => $order->store_id,
-                    ]);
-
-                    \Botble\Ecommerce\Models\ShipmentHistory::query()->create([
-                        'action' => 'create_from_order',
-                        'description' => trans('plugins/ecommerce::order.shipping_was_created_from'),
-                        'shipment_id' => $shipment->id,
-                        'order_id' => $order->id,
-                        'user_id' => $order->user_id,
-                    ]);
-                }
-
-                // If no tracking ID exists yet, push the order to ShipMozo
-                if (!$shipment->tracking_id) {
-                    try {
-                        $shipmozo = app(Shipmozo::class);
-                        if ($shipmozo->canCreateTransaction($shipment)) {
-                            $transaction = $shipmozo->pushOrder($order);
-
-                            if (\Illuminate\Support\Arr::get($transaction, 'result') == 1) {
-                                $awb = \Illuminate\Support\Arr::get($transaction, 'awb_number') ?: \Illuminate\Support\Arr::get($transaction, 'data.order_id');
-
-                                if ($awb) {
-                                    $labelUrl = $shipmozo->getOrderLabel($awb);
-
-                                    $shipment->tracking_link = 'https://panel.shipmozo.com/track-order/' . $awb;
-                                    $shipment->label_url = $labelUrl;
-                                    $shipment->tracking_id = $awb;
-                                    $shipment->metadata = json_encode($transaction);
-                                    $shipment->status = \Botble\Ecommerce\Enums\ShippingStatusEnum::READY_TO_BE_SHIPPED_OUT;
-                                    $shipment->save();
-
-                                    \Botble\Ecommerce\Models\ShipmentHistory::query()->create([
-                                        'action' => 'create_transaction',
-                                        'description' => 'Automatically pushed order to ShipMozo. Tracking ID: ' . $awb,
-                                        'order_id' => $shipment->order_id,
-                                        'user_id' => 0,
-                                        'shipment_id' => $shipment->id,
-                                    ]);
-
-                                    \Botble\Ecommerce\Models\ShipmentHistory::query()->create([
-                                        'action' => 'update_status',
-                                        'description' => trans('plugins/ecommerce::shipping.changed_shipping_status', [
-                                            'status' => \Botble\Ecommerce\Enums\ShippingStatusEnum::getLabel(\Botble\Ecommerce\Enums\ShippingStatusEnum::READY_TO_BE_SHIPPED_OUT),
-                                        ]),
-                                        'order_id' => $shipment->order_id,
-                                        'user_id' => 0,
-                                        'shipment_id' => $shipment->id,
-                                    ]);
-                                }
-                            } else {
-                                $errorMsg = \Illuminate\Support\Arr::get($transaction, 'data.error', \Illuminate\Support\Arr::get($transaction, 'message', 'Failed to generate ShipMozo AWB.'));
-                                \Illuminate\Support\Facades\Log::error('ShipMozo Auto-Push Validation Failed for Order ' . $order->id . ': ' . $errorMsg);
-                            }
-                        }
-                    } catch (\Exception $e) {
-                        \Illuminate\Support\Facades\Log::error('ShipMozo Auto-Push Failed: ' . $e->getMessage());
+            if ($order && $shipmozo->isShipmozoOrder($order) && $order->shipment?->tracking_id) {
+                try {
+                    $result = $shipmozo->cancelOrder($shipmozo->getOrderId($order), $order->shipment->tracking_id);
+                    if (Arr::get($result, 'result') != 1) {
+                        $shipmozo->logError('Order cancellation was rejected by ShipMozo', [
+                            'order_id' => $order->getKey(),
+                            'message' => Arr::get($result, 'message', Arr::get($result, 'data.error')),
+                        ]);
                     }
+                } catch (\Throwable $exception) {
+                    $shipmozo->logError('Order cancellation failed', [
+                        'order_id' => $order->getKey(),
+                        'message' => $exception->getMessage(),
+                    ]);
                 }
             }
         });
 
-        if (is_plugin_active('marketplace')) {
-            \Illuminate\Support\Facades\Event::listen('eloquent.saved: Botble\Marketplace\Models\Store', function ($store) {
-                if ($store && $store->zip_code) {
-                    app(Shipmozo::class)->syncWarehouse($store);
+        Event::listen(OrderReturnedEvent::class, function (OrderReturnedEvent $event) {
+            $orderReturn = $event->order;
+            $shipmozo = app(Shipmozo::class);
+
+            if ($orderReturn
+                && $orderReturn->return_status == OrderReturnStatusEnum::COMPLETED
+                && $orderReturn->order
+                && $shipmozo->isShipmozoOrder($orderReturn->order)
+            ) {
+                $pushedKey = "shipmozo:return:{$orderReturn->getKey()}:pushed";
+                if (Cache::has($pushedKey)) {
+                    return;
+                }
+
+                $lock = Cache::lock("shipmozo:return:{$orderReturn->getKey()}", 60);
+                if (! $lock->get()) {
+                    return;
+                }
+
+                try {
+                    $result = $shipmozo->pushReturnOrder($orderReturn);
+                    if (Arr::get($result, 'result') == 1) {
+                        Cache::put($pushedKey, true, now()->addDays(30));
+                    } else {
+                        $shipmozo->logError('Return order was rejected by ShipMozo', [
+                            'order_return_id' => $orderReturn->getKey(),
+                            'message' => Arr::get($result, 'message', Arr::get($result, 'data.error')),
+                        ]);
+                    }
+                } catch (\Throwable $exception) {
+                    $shipmozo->logError('Return order push failed', [
+                        'order_return_id' => $orderReturn->getKey(),
+                        'message' => $exception->getMessage(),
+                    ]);
+                } finally {
+                    $lock->release();
+                }
+            }
+        });
+
+        if ($this->supportsMarketplaceWarehouses()) {
+            Event::listen('eloquent.saved: Botble\Marketplace\Models\Store', function ($store) {
+                if (setting('shipping_shipmozo_status') && $store && $store->zip_code && ! $store->warehouse_id) {
+                    try {
+                        $result = app(Shipmozo::class)->syncWarehouse($store);
+                        $warehouseId = Arr::get($result, 'data.warehouse_id', Arr::get($result, 'id'));
+
+                        if ($warehouseId) {
+                            $store->warehouse_id = $warehouseId;
+                            $store->saveQuietly();
+                        }
+                    } catch (\Throwable $exception) {
+                        app(Shipmozo::class)->logError('Warehouse synchronization failed', [
+                            'store_id' => $store->getKey(),
+                            'message' => $exception->getMessage(),
+                        ]);
+                    }
                 }
             });
         }
@@ -165,31 +145,34 @@ class HookServiceProvider extends ServiceProvider
 
     public function handleShippingFee(array $result, array $data): array
     {
-        \Illuminate\Support\Facades\Log::info('Shipmozo hook fired. Status is: ' . setting('shipping_shipmozo_status'));
-
-        if (setting('shipping_shipmozo_status') == 1) {
-
-            // Strip out Botble's default internal ecommerce "Default" shipping rules
-            $result = [];
+        if (! $this->app->runningInConsole() && setting('shipping_shipmozo_status') == 1) {
 
             $addressTo = Arr::get($data, 'address_to', []);
             $deliveryPincode = Arr::get($addressTo, 'zip_code') ?: Arr::get($addressTo, 'zip') ?: Arr::get($data, 'zip_code') ?: Arr::get($data, 'zip');
 
-            if (!empty($deliveryPincode)) {
+            if (! empty($deliveryPincode)) {
                 // Point 4: If store has a warehouse_id, we should pass it or its details to getRates
-                if (is_plugin_active('marketplace')) {
+                if ($this->supportsMarketplaceWarehouses()) {
                     $storeId = Arr::get($data, 'store_id');
                     if ($storeId) {
-                        $store = \Botble\Marketplace\Models\Store::find($storeId);
+                        $store = Store::find($storeId);
                         if ($store && $store->warehouse_id) {
                             $data['origin_warehouse_id'] = $store->warehouse_id;
                         }
                     }
                 }
 
-                $results = app(Shipmozo::class)->getRates($data);
-                if (!empty(Arr::get($results, 'shipment.rates'))) {
-                    $result['shipmozo'] = Arr::get($results, 'shipment.rates');
+                try {
+                    $results = app(Shipmozo::class)->getRates($data);
+                    $rates = Arr::get($results, 'shipment.rates', []);
+
+                    if ($rates) {
+                        $result[SHIPMOZO_SHIPPING_METHOD_NAME] = $rates;
+                    }
+                } catch (\Throwable $exception) {
+                    app(Shipmozo::class)->logError('Rate calculation failed', [
+                        'message' => $exception->getMessage(),
+                    ]);
                 }
             }
         }
@@ -203,53 +186,59 @@ class HookServiceProvider extends ServiceProvider
 
         if (setting('shipping_shipmozo_logging')) {
             foreach (BaseHelper::scanFolder(storage_path('logs')) as $file) {
-                if (Str::startsWith($file, 'shipmozo-')) {
+                if ($file === 'shipmozo.log' || (Str::startsWith($file, 'shipmozo-') && Str::endsWith($file, '.log'))) {
                     $logFiles[] = $file;
                 }
             }
         }
 
-        return $settings . view('plugins/shipmozo::settings', compact('logFiles'))->render();
+        return $settings.view('plugins/shipmozo::settings', compact('logFiles'))->render();
     }
 
     public function addPincodeCheck(?string $html, $product): string
     {
-        if (setting('shipping_shipmozo_status') != 1 || !$product) {
+        if (setting('shipping_shipmozo_status') != 1 || ! $product) {
             return $html;
         }
 
-        return $html . view('plugins/shipmozo::pincode-check', compact('product'))->render();
+        return $html.view('plugins/shipmozo::pincode-check', compact('product'))->render();
     }
 
-    public function addWarehouseToStoreForm(\Botble\Base\Forms\FormAbstract $form, \Illuminate\Database\Eloquent\Model $data): \Botble\Base\Forms\FormAbstract
+    public function addWarehouseToStoreForm(FormAbstract $form, Model $data): FormAbstract
     {
-        if (get_class($data) === \Botble\Marketplace\Models\Store::class) {
+        if (get_class($data) === Store::class) {
             $shipmozo = app(Shipmozo::class);
-            $warehouses = $shipmozo->getWarehouses();
+            try {
+                $warehouses = $shipmozo->getWarehouses();
+            } catch (\Throwable $exception) {
+                $shipmozo->logError('Unable to load warehouses', ['message' => $exception->getMessage()]);
+                $warehouses = [];
+            }
 
             $options = ['' => 'Select a Warehouse'];
-            foreach (\Illuminate\Support\Arr::get($warehouses, 'data', []) as $warehouse) {
-                $options[$warehouse['id']] = $warehouse['name'] . ' (' . $warehouse['pincode'] . ')';
+            foreach (Arr::get($warehouses, 'data', []) as $warehouse) {
+                $options[$warehouse['id']] = Arr::get($warehouse, 'address_title', Arr::get($warehouse, 'name', 'Warehouse'))
+                    .' ('.Arr::get($warehouse, 'pincode', '').')';
             }
 
             $form
                 ->add('shipmozo_warehouse_section', 'html', [
                     'html' => '<div class="card widget meta-boxes mb-3">
                         <div class="card-header">
-                            <h4 class="card-title">' . trans('plugins/shipmozo::shipmozo.shipmozo_warehouse') . '</h4>
+                            <h4 class="card-title">'.trans('plugins/shipmozo::shipmozo.shipmozo_warehouse').'</h4>
                         </div>
                         <div class="card-body">
                             <div class="row align-items-center">
                                 <div class="col-md-6">
-                                    ' . \Botble\Base\Facades\Form::label('warehouse_id', trans('plugins/shipmozo::shipmozo.shipmozo_warehouse'), ['class' => 'control-label']) . '
-                                    ' . \Botble\Base\Facades\Form::customSelect('warehouse_id', $options, $data->warehouse_id) . '
-                                    ' . \Botble\Base\Facades\Form::helper(trans('plugins/shipmozo::shipmozo.shipmozo_warehouse_selector_hint')) . '
+                                    '.Form::label('warehouse_id', trans('plugins/shipmozo::shipmozo.shipmozo_warehouse'), ['class' => 'control-label']).'
+                                    '.Form::customSelect('warehouse_id', $options, $data->warehouse_id).'
+                                    '.Form::helper(trans('plugins/shipmozo::shipmozo.shipmozo_warehouse_selector_hint')).'
                                 </div>
                                 <div class="col-md-6">
-                                    <a href="#" id="shipmozo-create-warehouse-btn" class="btn btn-secondary w-100">
-                                        <i class="ti ti-home-plus"></i> ' . trans('plugins/shipmozo::shipmozo.create_warehouse_from_store') . '
-                                    </a>
-                                    ' . \Botble\Base\Facades\Form::helper(trans('plugins/shipmozo::shipmozo.create_warehouse_from_store_hint')) . '
+                                    <button type="button" id="shipmozo-create-warehouse-btn" class="btn btn-secondary w-100">
+                                        <i class="ti ti-home-plus"></i> '.trans('plugins/shipmozo::shipmozo.create_warehouse_from_store').'
+                                    </button>
+                                    '.Form::helper(trans('plugins/shipmozo::shipmozo.create_warehouse_from_store_hint')).'
                                 </div>
                             </div>
                         </div>
@@ -257,8 +246,23 @@ class HookServiceProvider extends ServiceProvider
                     <script>
                         document.getElementById("shipmozo-create-warehouse-btn")?.addEventListener("click", function(e) {
                             e.preventDefault();
-                            if(confirm("' . trans('plugins/shipmozo::shipmozo.confirm_create_warehouse') . '")) {
-                                window.location.href = "' . route('ecommerce.shipments.shipmozo.warehouses.create-from-store', $data->id) . '";
+                            if(confirm("'.trans('plugins/shipmozo::shipmozo.confirm_create_warehouse').'")) {
+                                fetch("'.route('ecommerce.shipments.shipmozo.warehouses.create-from-store', $data->id).'", {
+                                    method: "POST",
+                                    headers: {
+                                        "X-CSRF-TOKEN": "'.csrf_token().'",
+                                        "Accept": "application/json",
+                                        "X-Requested-With": "XMLHttpRequest"
+                                    }
+                                }).then(response => response.json()).then(response => {
+                                    if (response.error) {
+                                        Botble.showError(response.message);
+                                        return;
+                                    }
+
+                                    Botble.showSuccess(response.message);
+                                    window.location.reload();
+                                }).catch(() => Botble.showError("Unable to create warehouse."));
                             }
                         });
                     </script>',
@@ -271,9 +275,16 @@ class HookServiceProvider extends ServiceProvider
 
     public function saveStoreWarehouseId(string $screen, $request, $model): void
     {
-        if ($model instanceof \Botble\Marketplace\Models\Store && $request->has('warehouse_id')) {
+        if ($model instanceof Store && $request->has('warehouse_id')) {
             $model->warehouse_id = $request->input('warehouse_id');
             $model->save();
         }
+    }
+
+    private function supportsMarketplaceWarehouses(): bool
+    {
+        return is_plugin_active('marketplace')
+            && Schema::hasTable('mp_stores')
+            && Schema::hasColumn('mp_stores', 'warehouse_id');
     }
 }

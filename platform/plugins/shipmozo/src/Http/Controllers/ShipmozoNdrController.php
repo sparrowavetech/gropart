@@ -5,8 +5,10 @@ namespace SparroWave\Shipmozo\Http\Controllers;
 use Botble\Base\Facades\PageTitle;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
-use SparroWave\Shipmozo\Shipmozo;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
+use SparroWave\Shipmozo\Shipmozo;
+use Throwable;
 
 class ShipmozoNdrController extends BaseController
 {
@@ -16,24 +18,37 @@ class ShipmozoNdrController extends BaseController
     {
         PageTitle::setTitle('ShipMozo NDR Management');
 
-        $ndrs = $this->shipmozo->getNdrAll();
+        try {
+            $ndrs = $this->shipmozo->getNdrAll();
+        } catch (Throwable $exception) {
+            $this->shipmozo->logError('Unable to load NDR records', ['message' => $exception->getMessage()]);
+            $ndrs = [];
+        }
 
         return view('plugins/shipmozo::ndr.index', compact('ndrs'));
     }
 
     public function action(Request $request, string $awbNumber, BaseHttpResponse $response)
     {
-        $action = $request->input('action'); // 'reattempt' or 'rto'
+        $validated = $request->validate(['action' => ['required', 'in:reattempt,rto']]);
 
-        $result = $this->shipmozo->ndrAction($awbNumber, $action);
+        try {
+            $result = $this->shipmozo->ndrAction($awbNumber, $validated['action']);
+        } catch (Throwable $exception) {
+            $this->shipmozo->logError('NDR action failed', [
+                'awb' => $awbNumber,
+                'message' => $exception->getMessage(),
+            ]);
 
-        if (array_key_exists('error', $result) && $result['error']) {
-            return $response
-                ->setError()
-                ->setMessage($result['message'] ?? 'Failed to perform NDR action.');
+            return $response->setError()->setMessage('Unable to perform the NDR action at this time.');
         }
 
-        return $response
-            ->setMessage('NDR action triggered successfully.');
+        if (Arr::get($result, 'result') != 1 || Arr::get($result, 'error')) {
+            return $response->setError()->setMessage(
+                Arr::get($result, 'message', Arr::get($result, 'data.error', 'Failed to perform NDR action.'))
+            );
+        }
+
+        return $response->setMessage('NDR action triggered successfully.');
     }
 }

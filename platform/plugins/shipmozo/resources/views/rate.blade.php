@@ -2,7 +2,7 @@
     {!! Form::input(
         'radio',
         'shipping_option',
-        Arr::get($item, 'servicelevel.token'),
+        Arr::get($item, 'id'),
         array_merge($attributes, [
             'class' => 'magic-radio',
             'id' => 'shipping-method-shipmozo-' . $index,
@@ -10,15 +10,15 @@
     ) !!}
     <label for="shipping-method-shipmozo-{{ $index }}">
         <div>
-            @if ($image = Arr::get($item, 'provider_image_75'))
+            @if ($image = Arr::get($item, 'image'))
                 <img
                     src="{{ $image }}"
-                    alt="{{ Arr::get($item, 'servicelevel.name') }}"
+                    alt="{{ Arr::get($item, 'name') }}"
                     style="max-height: 40px; max-width: 55px"
                 >
             @endif
             <span>
-                {{ Arr::get($item, 'servicelevel.name') }} -
+                {{ Arr::get($item, 'name') }} -
                 {{ format_price($item['price']) }}
             </span>
             @if ($item['price'] != $order->shipping_amount && ($deviant = $order->shipping_amount - $item['price']))
@@ -27,10 +27,10 @@
                 </small>
             @endif
         </div>
-        @if ($days = Arr::get($item, 'days', Arr::get($item, 'estimated_days', 0)))
+        @if ($days = Arr::get($item, 'estimated_delivery'))
             <div>
                 <small
-                    class="text-secondary">{{ trans('plugins/shipmozo::shipmozo.estimated_days', ['day' => $days]) }}</small>
+                    class="text-secondary">{{ $days }}</small>
             </div>
         @endif
     </label>
