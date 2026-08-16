@@ -37,7 +37,7 @@
                 <x-core::table.body.cell>
                     <p class="mb-1">{{ trans('plugins/ecommerce::order.shipping_fee') }}</p>
                     <span class="small d-block">{{ $order->shipping_method_name }}</span>
-                    <span class="small d-block">{{ number_format(ecommerce_convert_weight($weight)) }} {{ ecommerce_weight_unit(true) }}</span>
+                    <span class="small d-block">{{ number_format($weight) }} {{ ecommerce_weight_unit(true) }}</span>
                 </x-core::table.body.cell>
                 <x-core::table.body.cell>
                     {{ format_price($order->shipping_amount) }}

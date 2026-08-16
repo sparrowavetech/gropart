@@ -19,7 +19,11 @@
 .vscode
 storage/cache_keys.json
 storage/framework/license-reminder-latest-time.txt
+storage/framework/views/*
+!storage/framework/views/.gitignore
+tmp/
 #public/assets
 #public/files
 #public/images/icon
 #composer.lock
+
