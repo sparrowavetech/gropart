@@ -1,0 +1,1 @@
+Indian SMS Gateway for Botble reports a non-blocking installation heartbeat to Ashikul License Manager at most once every 12 hours. Version: 1.2.0.

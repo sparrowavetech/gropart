@@ -1,0 +1,20 @@
+{
+    "name": "aryaportal/mobile-command-bar",
+    "description": "Floating mobile/tablet command bar with quick menu, smart search, cart shortcut and account popup for Botble CMS.",
+    "type": "botble-plugin",
+    "license": "proprietary",
+    "authors": [
+        {
+            "name": "AryaPortal",
+            "homepage": "https://aryaportal.ir"
+        }
+    ],
+    "require": {
+        "php": "^8.1|^8.2|^8.3|^8.4|^8.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "Botble\\MobileCommandBar\\": "src/"
+        }
+    }
+}

@@ -1,0 +1,11 @@
+{
+    "id": "aryaportal/mobile-command-bar",
+    "name": "Mobile Command Bar",
+    "namespace": "Botble\\MobileCommandBar\\",
+    "provider": "Botble\\MobileCommandBar\\Providers\\MobileCommandBarServiceProvider",
+    "author": "Hamid Rezazadeh",
+    "url": "https://aryaportal.com",
+    "version": "1.2.3",
+    "minimum_core_version": "7.3.0",
+    "description": "Floating mobile/tablet command bar with quick menu, smart search, cart shortcut and account popup for Botble CMS. Compatible with Botble CMS 7.3 and above, PHP 8.1 to 8.5."
+}

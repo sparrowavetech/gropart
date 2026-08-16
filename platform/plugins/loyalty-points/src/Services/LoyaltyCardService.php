@@ -11,7 +11,9 @@ use Illuminate\Support\Facades\Cache;
 
 class LoyaltyCardService
 {
-    protected const QR_CACHE_PREFIX = 'loyalty_qr_';
+    // v2: bumped when the member token became permanent, to drop QR codes
+    // cached with the old month-rotating token.
+    protected const QR_CACHE_PREFIX = 'loyalty_qr_v2_';
 
     protected const CACHE_TTL_DAYS = 7;
 
@@ -47,41 +49,57 @@ class LoyaltyCardService
         return route('public.loyalty-points.member', ['token' => $token]);
     }
 
+    /**
+     * The token is signed with the customer ID only, never with a timestamp.
+     * Loyalty cards are printed (PVC membership cards) and must keep scanning
+     * for years, so the signature must never rotate.
+     */
     public function generateMemberToken(int|string $customerId): string
     {
-        $secret = config('app.key');
-        $data = $customerId . '|' . now()->format('Y-m');
-
-        return base64_encode($customerId . ':' . hash_hmac('sha256', $data, $secret));
+        return base64_encode($customerId . ':' . $this->signCustomerId($customerId));
     }
 
     public function validateMemberToken(string $token): int|string|null
     {
-        try {
-            $decoded = base64_decode($token);
-            if (! $decoded || ! str_contains($decoded, ':')) {
-                return null;
-            }
+        $decoded = base64_decode($token, true);
 
-            [$customerId, $hash] = explode(':', $decoded, 2);
-
-            $secret = config('app.key');
-            $data = $customerId . '|' . now()->format('Y-m');
-            $expectedHash = hash_hmac('sha256', $data, $secret);
-
-            if (! hash_equals($expectedHash, $hash)) {
-                $data = $customerId . '|' . now()->subMonth()->format('Y-m');
-                $expectedHash = hash_hmac('sha256', $data, $secret);
-
-                if (! hash_equals($expectedHash, $hash)) {
-                    return null;
-                }
-            }
-
-            return is_numeric($customerId) ? (int) $customerId : $customerId;
-        } catch (\Exception) {
+        if (! $decoded || ! str_contains($decoded, ':')) {
             return null;
         }
+
+        [$customerId, $hash] = explode(':', $decoded, 2);
+
+        if (
+            ! hash_equals($this->signCustomerId($customerId), $hash)
+            && ! $this->isLegacyRotatingHash($customerId, $hash)
+        ) {
+            return null;
+        }
+
+        return is_numeric($customerId) ? (int) $customerId : $customerId;
+    }
+
+    protected function signCustomerId(int|string $customerId): string
+    {
+        return hash_hmac('sha256', (string) $customerId, config('app.key'));
+    }
+
+    /**
+     * Cards issued before the permanent token existed were signed with a
+     * month-rotating hash valid for the current and previous month only.
+     * Keep accepting those so already-downloaded cards do not break.
+     */
+    protected function isLegacyRotatingHash(int|string $customerId, string $hash): bool
+    {
+        $secret = config('app.key');
+
+        foreach ([now()->format('Y-m'), now()->subMonth()->format('Y-m')] as $period) {
+            if (hash_equals(hash_hmac('sha256', $customerId . '|' . $period, $secret), $hash)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public function generateSecurityHash(int|string $customerId): string

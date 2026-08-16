@@ -1,0 +1,142 @@
+<?php
+
+return [
+    'name' => 'Mobile Command Bar',
+    'menu_name' => 'Mobile Command Bar',
+    'settings_title' => 'Mobile Command Bar Settings',
+
+    'permissions' => [
+        'settings' => 'Mobile Command Bar - Settings',
+    ],
+
+    'tabs' => [
+        'general' => 'General',
+        'items' => 'Items & Icons',
+        'menu' => 'Menu & Search',
+        'profile' => 'Account Popup',
+        'appearance' => 'Appearance',
+        'visibility' => 'Visibility Rules',
+        'advanced' => 'Advanced',
+    ],
+
+    'save' => 'Save changes',
+    'reset' => 'Reset to defaults',
+    'reset_confirm' => 'Reset every setting back to its default value?',
+    'saved' => 'Settings saved successfully.',
+
+    'sections' => [
+        'status' => 'Plugin status',
+        'enabled' => 'Enable the mobile command bar',
+        'enabled_desc' => 'When disabled, nothing is rendered on the site at all.',
+        'show_labels' => 'Show labels under icons',
+        'show_cart_badge' => 'Show the cart item counter',
+        'dimensions' => 'Base dimensions',
+        'breakpoint' => 'Maximum width to display on',
+        'side_offset' => 'Side offset',
+        'bottom_offset' => 'Bottom offset',
+        'body_padding' => 'Bottom page padding',
+
+        'home_item' => 'Home item',
+        'menu_item' => 'Menu item',
+        'profile_item' => 'Account item',
+        'cart_item' => 'Cart item',
+        'label' => 'Label',
+        'url' => 'URL',
+        'icon' => 'Icon',
+        'show_item' => 'Show this item',
+
+        'smart_search' => 'Smart search',
+        'enable_search' => 'Enable search',
+        'search_button_label' => 'Button label',
+        'search_note' => 'Small caption',
+        'search_placeholder' => 'Search box placeholder',
+
+        'site_menu' => 'Site menu',
+        'menu_used' => 'Menu to pull links from',
+        'menu_auto' => 'Automatic (first menu)',
+        'menu_none_found' => 'No site menus found yet. Create one under Appearance → Menus, then pick it here.',
+        'shop_url' => 'Shop URL',
+        'blog_url' => 'Blog URL',
+        'blog' => 'Blog',
+        'products' => 'Products',
+        'account' => 'Account',
+
+        'account_display' => 'Account display',
+        'show_avatar' => 'Show user avatar',
+        'show_email' => 'Show user email',
+        'popup_title' => 'Popup title',
+        'member_subtitle' => 'Subtitle for signed-in users',
+        'guest_subtitle' => 'Subtitle for guests',
+
+        'panel_links' => 'Panel links',
+        'login_url' => 'Login page',
+        'register_url' => 'Register page',
+        'account_url' => 'My dashboard',
+        'downloads_url' => 'My downloads',
+        'orders_url' => 'My orders',
+
+        'guest_mode' => 'Guest mode',
+        'guest_message' => 'Introduction message',
+        'login_button_label' => 'Login button text',
+        'logout_label' => 'Logout button text',
+
+        'main_colors' => 'Main colors',
+        'accent' => 'Accent color',
+        'accent_dark' => 'Gradient second color',
+        'light_background' => 'Light background',
+        'dark_background' => 'Dark background',
+        'light_text' => 'Light text',
+        'dark_text' => 'Dark text',
+
+        'dimensions_effects' => 'Dimensions & effects',
+        'bar_height' => 'Bar height',
+        'bar_radius' => 'Bar corner radius',
+        'item_radius' => 'Item corner radius',
+        'icon_size' => 'Icon size',
+        'blur' => 'Blur intensity',
+
+        'light_dark_details' => 'Light & dark details',
+        'light_muted' => 'Light muted text',
+        'dark_muted' => 'Dark muted text',
+        'light_border' => 'Light border',
+        'dark_border' => 'Dark border',
+        'item_background_light' => 'Item background (light)',
+        'item_background_dark' => 'Item background (dark)',
+
+        'shadow' => 'Shadow',
+        'enable_shadow' => 'Enable bar shadow',
+        'shadow_value' => 'CSS shadow value',
+
+        'visibility_rules' => 'Visibility rules',
+        'hide_on_product' => 'Hide on product pages',
+        'hide_on_shop' => 'Hide on shop page',
+        'hide_on_product_cat' => 'Hide on product category pages',
+        'hide_on_product_tag' => 'Hide on product tag pages',
+        'show_logged_in' => 'Show for signed-in users',
+        'show_logged_out' => 'Show for guests',
+
+        'excluded_paths' => 'Excluded paths',
+        'excluded_paths_help' => 'One path per line. Example: /account or /landing/* (an asterisk works as a wildcard).',
+
+        'support_integration' => 'Live-support coordination',
+        'support_integration_desc' => 'When a support/chat popup opens, the bar is disabled and pushed below it.',
+        'support_open_z_index' => 'Bar z-index while support is open',
+        'support_open_z_index_help' => 'Default is 5; it should stay lower than the support widget layer.',
+        'support_selectors' => 'Support popup CSS selectors — one per line',
+        'support_selectors_help' => 'Automatic detection is also active. Add a class or ID here only if your support widget is not detected automatically.',
+
+        'custom_css' => 'Custom CSS',
+        'tools' => 'Import / export',
+        'export' => 'Download settings file',
+        'import' => 'Import file',
+        'danger_zone' => 'Full reset',
+        'danger_zone_desc' => 'All plugin settings are restored to their defaults.',
+    ],
+
+    'preview' => [
+        'title' => 'Live preview',
+        'subtitle' => 'Approximate mobile view',
+        'dark' => 'Dark',
+        'light' => 'Light',
+    ],
+];

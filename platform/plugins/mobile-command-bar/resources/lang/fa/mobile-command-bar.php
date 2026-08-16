@@ -1,0 +1,142 @@
+<?php
+
+return [
+    'name' => 'نوار فرمان موبایل',
+    'menu_name' => 'نوار فرمان موبایل',
+    'settings_title' => 'تنظیمات نوار فرمان موبایل',
+
+    'permissions' => [
+        'settings' => 'نوار فرمان موبایل - تنظیمات',
+    ],
+
+    'tabs' => [
+        'general' => 'تنظیمات عمومی',
+        'items' => 'آیتم‌ها و آیکن‌ها',
+        'menu' => 'منو و جست‌وجو',
+        'profile' => 'پاپ‌آپ حساب کاربری',
+        'appearance' => 'ظاهر و استایل',
+        'visibility' => 'قوانین نمایش',
+        'advanced' => 'ابزارها و پیشرفته',
+    ],
+
+    'save' => 'ذخیره تغییرات',
+    'reset' => 'بازنشانی تنظیمات',
+    'reset_confirm' => 'همه تنظیمات به حالت اولیه برگردد؟',
+    'saved' => 'تنظیمات با موفقیت ذخیره شد.',
+
+    'sections' => [
+        'status' => 'وضعیت افزونه',
+        'enabled' => 'فعال‌بودن نوار موبایل',
+        'enabled_desc' => 'با خاموش‌کردن این گزینه هیچ خروجی در سایت ایجاد نمی‌شود.',
+        'show_labels' => 'نمایش عنوان زیر آیکن‌ها',
+        'show_cart_badge' => 'نمایش شمارنده سبد خرید',
+        'dimensions' => 'ابعاد پایه',
+        'breakpoint' => 'حداکثر عرض نمایش',
+        'side_offset' => 'فاصله از کناره‌ها',
+        'bottom_offset' => 'فاصله از پایین',
+        'body_padding' => 'فضای انتهای صفحه',
+
+        'home_item' => 'آیتم خانه',
+        'menu_item' => 'آیتم منو',
+        'profile_item' => 'آیتم حساب',
+        'cart_item' => 'آیتم سبد خرید',
+        'label' => 'عنوان',
+        'url' => 'آدرس',
+        'icon' => 'آیکن',
+        'show_item' => 'نمایش این آیتم',
+
+        'smart_search' => 'جست‌وجوی هوشمند',
+        'enable_search' => 'فعال‌بودن جست‌وجو',
+        'search_button_label' => 'عنوان دکمه',
+        'search_note' => 'متن کوچک',
+        'search_placeholder' => 'متن داخل کادر جست‌وجو',
+
+        'site_menu' => 'منوی سایت',
+        'menu_used' => 'منوی مورد استفاده',
+        'menu_auto' => 'انتخاب خودکار (اولین منو)',
+        'menu_none_found' => 'هنوز هیچ منویی در سایت ساخته نشده. یک منو از بخش Appearance → Menus بسازید، سپس اینجا انتخابش کنید.',
+        'shop_url' => 'آدرس فروشگاه',
+        'blog_url' => 'آدرس وبلاگ',
+        'blog' => 'وبلاگ',
+        'products' => 'محصولات',
+        'account' => 'حساب کاربری',
+
+        'account_display' => 'نمایش اطلاعات حساب',
+        'show_avatar' => 'نمایش آواتار کاربر',
+        'show_email' => 'نمایش ایمیل کاربر',
+        'popup_title' => 'عنوان پاپ‌آپ',
+        'member_subtitle' => 'زیرعنوان کاربران عضو',
+        'guest_subtitle' => 'زیرعنوان کاربران مهمان',
+
+        'panel_links' => 'لینک‌های پنل',
+        'login_url' => 'صفحه ورود',
+        'register_url' => 'صفحه ثبت‌نام',
+        'account_url' => 'داشبورد من',
+        'downloads_url' => 'دانلودهای من',
+        'orders_url' => 'سفارش‌های من',
+
+        'guest_mode' => 'حالت مهمان',
+        'guest_message' => 'پیام معرفی',
+        'login_button_label' => 'متن دکمه ورود',
+        'logout_label' => 'متن خروج از حساب',
+
+        'main_colors' => 'رنگ‌های اصلی',
+        'accent' => 'رنگ اصلی',
+        'accent_dark' => 'رنگ دوم گرادیان',
+        'light_background' => 'پس‌زمینه لایت',
+        'dark_background' => 'پس‌زمینه دارک',
+        'light_text' => 'متن لایت',
+        'dark_text' => 'متن دارک',
+
+        'dimensions_effects' => 'ابعاد و افکت‌ها',
+        'bar_height' => 'ارتفاع نوار',
+        'bar_radius' => 'گردی نوار',
+        'item_radius' => 'گردی آیتم‌ها',
+        'icon_size' => 'اندازه آیکن',
+        'blur' => 'شدت بلور',
+
+        'light_dark_details' => 'جزئیات لایت و دارک',
+        'light_muted' => 'متن فرعی لایت',
+        'dark_muted' => 'متن فرعی دارک',
+        'light_border' => 'حاشیه لایت',
+        'dark_border' => 'حاشیه دارک',
+        'item_background_light' => 'پس‌زمینه آیتم در لایت',
+        'item_background_dark' => 'پس‌زمینه آیتم در دارک',
+
+        'shadow' => 'سایه',
+        'enable_shadow' => 'فعال‌کردن سایه نوار',
+        'shadow_value' => 'مقدار CSS سایه',
+
+        'visibility_rules' => 'قوانین نمایش',
+        'hide_on_product' => 'مخفی در صفحه محصول',
+        'hide_on_shop' => 'مخفی در صفحه فروشگاه',
+        'hide_on_product_cat' => 'مخفی در صفحه دسته‌بندی محصول',
+        'hide_on_product_tag' => 'مخفی در صفحه برچسب محصول',
+        'show_logged_in' => 'نمایش برای کاربران واردشده',
+        'show_logged_out' => 'نمایش برای کاربران مهمان',
+
+        'excluded_paths' => 'مسیرهای مستثنا',
+        'excluded_paths_help' => 'هر مسیر در یک خط. مثال: /account یا /landing/* — علامت * به‌عنوان wildcard پشتیبانی می‌شود.',
+
+        'support_integration' => 'هماهنگی با پشتیبانی آنلاین',
+        'support_integration_desc' => 'با بازشدن چت یا پاپ‌آپ پشتیبانی، نوار غیرفعال و به لایه پایین منتقل می‌شود.',
+        'support_open_z_index' => 'z-index نوار هنگام بازبودن پشتیبانی',
+        'support_open_z_index_help' => 'مقدار پیش‌فرض ۵ است؛ باید از لایه پنجره پشتیبانی کمتر باشد.',
+        'support_selectors' => 'انتخاب‌گرهای CSS پنجره پشتیبانی — هر مورد در یک خط',
+        'support_selectors_help' => 'تشخیص خودکار نیز فعال است. در صورت شناسایی‌نشدن پنجره پشتیبانی، کلاس یا ID بخش بازشونده را اینجا اضافه کن.',
+
+        'custom_css' => 'CSS اختصاصی',
+        'tools' => 'خروجی و ورودی تنظیمات',
+        'export' => 'دریافت فایل تنظیمات',
+        'import' => 'واردکردن فایل',
+        'danger_zone' => 'بازنشانی کامل',
+        'danger_zone_desc' => 'همه تنظیمات افزونه به حالت اولیه برمی‌گردد.',
+    ],
+
+    'preview' => [
+        'title' => 'پیش‌نمایش زنده',
+        'subtitle' => 'نمای تقریبی در موبایل',
+        'dark' => 'دارک',
+        'light' => 'لایت',
+    ],
+];
