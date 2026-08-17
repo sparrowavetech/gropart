@@ -36,7 +36,7 @@ class OtpController extends BaseController
             }
         }
 
-        return Theme::scope('ecommerce.customers.otp', compact('customer_id', 'customer'), 'plugins/ecommerce::customer.verify_otp')
+        return Theme::scope('ecommerce.customers.otp', compact('customer_id', 'customer'), 'plugins/sms::themes.customers.otp')
             ->render();
     }
 
@@ -52,14 +52,14 @@ class OtpController extends BaseController
             $customer->otp = null; // Clear OTP upon successful verification
             $customer->save();
 
-            if (is_plugin_active('sms') && setting('sms_otp_enabled')) {
+            if (is_plugin_active('sms') && setting('sms_registration_otp_enabled', setting('sms_otp_enabled'))) {
                 try {
                     $sms = new SmsHandler();
                     $sms->setModule(ECOMMERCE_MODULE_SCREEN_NAME);
                     if ($sms->templateEnabled(SmsEnum::WELCOME())) {
                         $sms->setVariableValues([
                             'customer_name' => $customer->name,
-                            'site_title'    => 'GROPART'
+                            'site_title'    => setting('admin_title') ?: config('app.name'),
                         ]);
                         $sms->sendUsingTemplate(SmsEnum::WELCOME(), $customer->phone);
                     }
@@ -70,10 +70,10 @@ class OtpController extends BaseController
 
             return $response
                 ->setNextUrl(route('customer.login'))
-                ->setMessage(trans('plugins/ecommerce::customer.otp_verify_success'));
+                ->setMessage(trans('plugins/sms::sms.otp_verify_success'));
         } else {
             throw ValidationException::withMessages([
-                'confirmation' => trans('plugins/ecommerce::customer.otp_verify_error'),
+                'confirmation' => trans('plugins/sms::sms.otp_verify_error'),
             ]);
         }
     }
@@ -89,7 +89,7 @@ class OtpController extends BaseController
             abort(404, 'Customer not found.');
         }
 
-        if (is_plugin_active('sms') && setting('sms_otp_enabled')) {
+        if (is_plugin_active('sms') && setting('sms_registration_otp_enabled', setting('sms_otp_enabled'))) {
             $otp = mt_rand(100000, 999999);
             $customer->otp = $otp;
             $customer->save();
@@ -129,7 +129,7 @@ class OtpController extends BaseController
 
         $customer->phone = $request->phone;
         
-        if (is_plugin_active('sms') && setting('sms_otp_enabled')) {
+        if (is_plugin_active('sms') && setting('sms_registration_otp_enabled', setting('sms_otp_enabled'))) {
             $otp = mt_rand(100000, 999999);
             $customer->otp = $otp;
             $customer->save();

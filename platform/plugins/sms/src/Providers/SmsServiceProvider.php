@@ -3,11 +3,11 @@
 namespace Botble\Sms\Providers;
 
 use Botble\Sms\Models\Sms;
-use Botble\Sms\Events\SendSmsEvent;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Foundation\AliasLoader;
 use Botble\Sms\Facades\SmsHelperFacade;
 use Illuminate\Support\ServiceProvider;
+use Botble\Sms\Providers\EventServiceProvider;
 use Illuminate\Routing\Events\RouteMatched;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Sms\Repositories\Eloquent\SmsRepository;
@@ -17,11 +17,7 @@ use Botble\Sms\Repositories\Caches\SmsCacheDecorator;
 class SmsServiceProvider extends ServiceProvider
 {
     use LoadAndPublishDataTrait;
-    protected $listen = [
-        SendSmsEvent::class => [
-            SendSmsListener::class,
-        ],
-    ];
+
     public function register()
     {
         $this->app->bind(SmsInterface::class, function () {
@@ -29,6 +25,7 @@ class SmsServiceProvider extends ServiceProvider
         });
         $loader = AliasLoader::getInstance();
         $loader->alias('SmsHelper', SmsHelperFacade::class);
+        $this->app->register(EventServiceProvider::class);
         $this->setNamespace('plugins/sms')->loadHelpers();
     }
 
@@ -81,14 +78,22 @@ class SmsServiceProvider extends ServiceProvider
                 'icon'        => 'fa fa-cog',
                 'url'         => route('sms.settings'),
                 'permissions' => ['sms.settings'],
+            ])->registerItem([
+                'id'          => 'cms-plugins-sms-delivery-report',
+                'priority'    => 3,
+                'parent_id'   => 'cms-plugins-sms',
+                'name'        => 'plugins/sms::sms.delivery_report.title',
+                'icon'        => 'fa fa-list',
+                'url'         => route('sms.delivery-reports.index'),
+                'permissions' => ['sms.delivery-reports.index'],
             ]);
         });
 
         $this->app->booted(function () {
             // Apply customer registration phone validation rule
             add_filter('ecommerce_customer_registration_form_validation_rules', function (array $rules) {
-                if (is_plugin_active('sms') && setting('sms_otp_enabled')) {
-                    $rules['phone'] = array_merge($rules['phone'] ?? [], ['required', 'min:10', 'max:10']);
+                if (is_plugin_active('sms') && $this->isRegistrationOtpEnabled()) {
+                    $rules['phone'] = array_merge($rules['phone'] ?? [], ['required', 'string', 'max:20']);
                     $rules['phone'] = array_filter($rules['phone'], fn($rule) => $rule !== 'nullable');
                 }
                 return $rules;
@@ -96,13 +101,31 @@ class SmsServiceProvider extends ServiceProvider
 
             // Apply checkout form validation rule
             add_filter('checkout_rules_request', function (array $rules) {
-                if (is_plugin_active('sms') && setting('sms_otp_enabled')) {
-                    $rules['address.phone'] = 'required|max:10|min:10';
+                if (is_plugin_active('sms') && $this->isRegistrationOtpEnabled()) {
+                    $rules['address.phone'] = 'required|string|max:20';
                 }
                 return $rules;
             }, 120);
+
+            add_filter(BASE_FILTER_AFTER_LOGIN_OR_REGISTER_FORM, function (?string $html, string $model): ?string {
+                if (
+                    ! is_plugin_active('sms') ||
+                    ! setting('sms_login_otp_enabled') ||
+                    $model !== \Botble\Ecommerce\Models\Customer::class ||
+                    ! request()->routeIs('customer.login')
+                ) {
+                    return $html;
+                }
+
+                return ($html ?: '') . view('plugins/sms::themes.customers.partials.login-otp-link')->render();
+            }, 20, 2);
         });
       //add_filter(BASE_FILTER_AFTER_SETTING_CONTENT, [$this, 'addSettings'], 249);
+    }
+
+    private function isRegistrationOtpEnabled(): bool
+    {
+        return (bool) setting('sms_registration_otp_enabled', setting('sms_otp_enabled'));
     }
      /**
      * @param null $data

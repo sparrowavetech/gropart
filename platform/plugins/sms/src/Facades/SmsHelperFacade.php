@@ -1,6 +1,6 @@
 <?php
 
-namespace Botble\Ecommerce\Facades;
+namespace Botble\Sms\Facades;
 
 use Botble\Sms\Supports\SmsHandler;
 use Illuminate\Support\Facades\Facade;

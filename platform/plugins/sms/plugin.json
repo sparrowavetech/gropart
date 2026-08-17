@@ -1,9 +1,11 @@
 {
+    "id": "sms",
     "name": "Sms",
     "namespace": "Botble\\Sms\\",
     "provider": "Botble\\Sms\\Providers\\SmsServiceProvider",
     "author": "Vikram Singh Rathore",
     "url": "https://www.linkedin.com/in/vikram-singh-rathore-999bb7134/",
     "version": "1.0",
+    "minimum_core_version": "7.3.0",
     "description": "Send sms notification"
 }

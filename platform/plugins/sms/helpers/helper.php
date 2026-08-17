@@ -2,7 +2,7 @@
 
 use Botble\Sms\Models\Sms;
 use Botble\Base\Enums\BaseStatusEnum;
-use Botble\Ecommerce\Facades\SmsHelperFacade;
+use Botble\Sms\Facades\SmsHelperFacade;
 if (!function_exists('get_setting_sms_template_content')) {
     /**
      * Get content of email template if module need to config email template

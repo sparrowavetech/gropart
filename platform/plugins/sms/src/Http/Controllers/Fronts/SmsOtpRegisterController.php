@@ -25,7 +25,7 @@ class SmsOtpRegisterController extends BaseRegisterController
 
         event(new Registered($customer));
 
-        if (is_plugin_active('sms') && setting('sms_otp_enabled')) {
+        if (is_plugin_active('sms') && setting('sms_registration_otp_enabled', setting('sms_otp_enabled'))) {
             $otp = mt_rand(100000, 999999);
             $customer->otp = $otp;
             $customer->save();

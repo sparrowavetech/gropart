@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
     /**
@@ -11,20 +12,24 @@ return new class extends Migration {
      */
     public function up()
     {
-        Schema::create('sms', function (Blueprint $table) {
-            $table->id();
-            $table->string('name', 255);
-            $table->string('status', 60)->default('pending');
-            $table->timestamps();
-        });
+        if (! Schema::hasTable('sms')) {
+            Schema::create('sms', function (Blueprint $table) {
+                $table->id();
+                $table->string('name', 255);
+                $table->string('status', 60)->default('pending');
+                $table->timestamps();
+            });
+        }
 
-        Schema::create('sms_translations', function (Blueprint $table) {
-            $table->string('lang_code');
-            $table->integer('sms_id');
-            $table->string('name', 255)->nullable();
+        if (! Schema::hasTable('sms_translations')) {
+            Schema::create('sms_translations', function (Blueprint $table) {
+                $table->string('lang_code');
+                $table->integer('sms_id');
+                $table->string('name', 255)->nullable();
 
-            $table->primary(['lang_code', 'sms_id'], 'sms_translations_primary');
-        });
+                $table->primary(['lang_code', 'sms_id'], 'sms_translations_primary');
+            });
+        }
     }
 
     /**

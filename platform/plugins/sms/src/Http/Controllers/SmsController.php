@@ -3,16 +3,16 @@
 namespace Botble\Sms\Http\Controllers;
 
 use Exception;
-use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
 use Botble\Sms\Forms\SmsForm;
 use Botble\Sms\Tables\SmsTable;
 use Botble\Base\Forms\FormBuilder;
-use Botble\Ecommerce\Models\Enquiry;
 use Botble\Sms\Http\Requests\SmsRequest;
 use Botble\Sms\Http\Requests\UpdateSettingsRequest;
+use Botble\Sms\Models\SmsLog;
+use Botble\Sms\Supports\SmsHandler;
+use Botble\Sms\Tables\SmsDeliveryReportTable;
 use Botble\Setting\Supports\SettingStore;
-use Botble\Ecommerce\Supports\OrderHelper;
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
@@ -20,6 +20,7 @@ use Botble\Base\Events\BeforeEditContentEvent;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Sms\Repositories\Interfaces\SmsInterface;
+use Illuminate\Support\Facades\Cache;
 
 class SmsController extends BaseController
 {
@@ -165,8 +166,10 @@ class SmsController extends BaseController
     public function getSettings()
     {
         page_title()->setTitle(trans('plugins/sms::sms.setting'));
-        $sms_url = setting('sms_url');
-        return view('plugins/sms::settings', compact('sms_url'));
+        $smsConfig = $this->smsSettingsConfig();
+        $smsBalance = app(SmsHandler::class)->getBalance();
+
+        return view('plugins/sms::settings', compact('smsConfig', 'smsBalance'));
     }
     /**
      * @param UpdateSettingsRequest $request
@@ -180,9 +183,12 @@ class SmsController extends BaseController
         BaseHttpResponse $response,
         SettingStore $settingStore
     ) {
-        foreach ($request->except([
-            '_token',
-        ]) as $settingKey => $settingValue) {
+        $settings = $request->except(['_token']);
+        $settings['sms_url'] = $this->buildSendUrl($request);
+        $settings['sms_delivery_report_url'] = $this->buildDeliveryUrl($request);
+        $settings['sms_balance_url'] = $this->buildBalanceUrl($request);
+
+        foreach ($settings as $settingKey => $settingValue) {
             $settingStore->set($settingKey, $settingValue);
         }
 
@@ -191,11 +197,128 @@ class SmsController extends BaseController
         return $response
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
-    public function test()
+
+    public function deliveryReports(SmsDeliveryReportTable $table)
     {
-        $enquiry = Enquiry::first();
-        $res = OrderHelper::sendEnquirySms($enquiry);
+        page_title()->setTitle(trans('plugins/sms::sms.delivery_report.title'));
 
+        $table->setAjaxUrl(route('sms.delivery-reports.data'));
 
+        return $table->renderTable();
+    }
+
+    public function deliveryReportsData(SmsDeliveryReportTable $table)
+    {
+        $this->syncRecentDeliveryReports();
+
+        return $table->ajax();
+    }
+
+    private function syncRecentDeliveryReports(): void
+    {
+        if (! Cache::add('sms_delivery_reports_sync_lock', true, 60)) {
+            return;
+        }
+
+        $handler = app(SmsHandler::class);
+
+        SmsLog::query()
+            ->whereNotNull('job_id')
+            ->where(function ($query) {
+                $query->whereNull('delivered_at')->orWhere('status', 'Submitted');
+            })
+            ->latest('id')
+            ->limit(20)
+            ->pluck('job_id')
+            ->each(fn (string $jobId) => $handler->getDeliveryReport($jobId));
+    }
+
+    private function smsSettingsConfig(): array
+    {
+        $send = $this->parseGatewayUrl((string) setting('sms_url'));
+        $delivery = $this->parseGatewayUrl((string) setting('sms_delivery_report_url'));
+        $balance = $this->parseGatewayUrl((string) setting('sms_balance_url'));
+        $query = $send['query'];
+
+        return [
+            'sms_base_api_url' => setting('sms_base_api_url') ?: $send['base_api_url'],
+            'sms_user' => setting('sms_user') ?: ($query['user'] ?? $query['User'] ?? ''),
+            'sms_password' => setting('sms_password') ?: ($query['password'] ?? $query['Password'] ?? ''),
+            'sms_send_api_call' => setting('sms_send_api_call') ?: ($send['api_call'] ?: 'SendSMS'),
+            'sms_sender_id' => setting('sms_sender_id') ?: ($query['senderid'] ?? $query['SenderId'] ?? ''),
+            'sms_channel' => setting('sms_channel') ?: ($query['channel'] ?? $query['Channel'] ?? ''),
+            'sms_dcs' => setting('sms_dcs') ?: ($query['DCS'] ?? '0'),
+            'sms_flashsms' => setting('sms_flashsms') ?: ($query['flashsms'] ?? '0'),
+            'sms_route' => setting('sms_route') ?: ($query['route'] ?? ''),
+            'sms_dlt_template_id' => setting('sms_dlt_template_id') ?: ($query['DLTTemplateId'] ?? '{{template_id}}'),
+            'sms_peid' => setting('sms_peid') ?: ($query['PEID'] ?? ''),
+            'sms_delivery_api_call' => setting('sms_delivery_api_call') ?: ($delivery['api_call'] ?: 'GetDelivery'),
+            'sms_balance_api_call' => setting('sms_balance_api_call') ?: ($balance['api_call'] ?: 'GetBalance'),
+        ];
+    }
+
+    private function parseGatewayUrl(string $url): array
+    {
+        $parts = parse_url($url) ?: [];
+        parse_str((string) ($parts['query'] ?? ''), $query);
+        $path = trim((string) ($parts['path'] ?? ''), '/');
+        $pathParts = $path === '' ? [] : explode('/', $path);
+        $apiCall = (string) array_pop($pathParts);
+        $port = isset($parts['port']) ? ':' . $parts['port'] : '';
+        $basePath = $pathParts ? '/' . implode('/', $pathParts) : '';
+        $baseApiUrl = empty($parts['scheme']) || empty($parts['host']) ? '' : $parts['scheme'] . '://' . $parts['host'] . $port . $basePath;
+
+        return compact('baseApiUrl') + [
+            'base_api_url' => rtrim($baseApiUrl, '/'),
+            'api_call' => $apiCall,
+            'query' => $query,
+        ];
+    }
+
+    private function buildSendUrl(Request $request): string
+    {
+        return $this->joinApiUrl($request->input('sms_base_api_url'), $request->input('sms_send_api_call', 'SendSMS')) . '?' . $this->buildQuery([
+            'user' => $request->input('sms_user'),
+            'password' => $request->input('sms_password'),
+            'senderid' => $request->input('sms_sender_id'),
+            'channel' => $request->input('sms_channel'),
+            'DCS' => $request->input('sms_dcs', '0'),
+            'flashsms' => $request->input('sms_flashsms', '0'),
+            'number' => '{{mobile}}',
+            'text' => '{{message}}',
+            'route' => $request->input('sms_route'),
+            'DLTTemplateId' => $request->input('sms_dlt_template_id', '{{template_id}}'),
+            'PEID' => $request->input('sms_peid'),
+        ]);
+    }
+
+    private function buildDeliveryUrl(Request $request): string
+    {
+        return $this->joinApiUrl($request->input('sms_base_api_url'), $request->input('sms_delivery_api_call', 'GetDelivery')) . '?' . $this->buildQuery([
+            'user' => '{{user}}',
+            'password' => '{{password}}',
+            'Jobid' => '{{job_id}}',
+        ]);
+    }
+
+    private function buildBalanceUrl(Request $request): string
+    {
+        return $this->joinApiUrl($request->input('sms_base_api_url'), $request->input('sms_balance_api_call', 'GetBalance')) . '?' . $this->buildQuery([
+            'User' => '{{user}}',
+            'Password' => '{{password}}',
+        ]);
+    }
+
+    private function joinApiUrl(?string $baseUrl, ?string $apiCall): string
+    {
+        return rtrim((string) $baseUrl, '/') . '/' . ltrim((string) $apiCall, '/');
+    }
+
+    private function buildQuery(array $parameters): string
+    {
+        return collect($parameters)
+            ->filter(fn ($value) => $value !== null && $value !== '')
+            ->map(fn ($value, $key) => rawurlencode((string) $key) . '=' . (str_contains((string) $value, '{{') ? $value : rawurlencode((string) $value)))
+            ->implode('&');
     }
 }

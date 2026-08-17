@@ -23,6 +23,11 @@ return [
     [
         'name'        => 'Setting',
         'flag'        => 'sms.settings',
-        'parent_flag' => 'sms.settings',
+        'parent_flag' => 'sms.index',
+    ],
+    [
+        'name' => 'SMS Delivery Report',
+        'flag' => 'sms.delivery-reports.index',
+        'parent_flag' => 'sms.index',
     ],
 ];

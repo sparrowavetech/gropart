@@ -18,8 +18,7 @@ class OtpChangePhoneRequest extends Request
                 'string',
                 ...explode('|', BaseHelper::getPhoneValidationRule()),
                 Rule::unique((new Customer())->getTable(), 'phone'),
-                'min:10',
-                'max:10',
+                'max:20',
             ],
         ];
     }
