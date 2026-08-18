@@ -28,7 +28,7 @@ class AdvancedCodHookListener
             },
             get_class($model),
             'advanced',
-            'low'
+            'high'
         );
     }
 
