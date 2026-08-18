@@ -2,11 +2,21 @@
 
 namespace Botble\Ecommerce\Http\Requests;
 
-use Botble\Support\Http\Requests\Request;
+use Botble\Base\Http\Requests\Concerns\HasPhoneFieldValidation;
 use Botble\Ecommerce\Facades\EcommerceHelperFacade;
+use Botble\Support\Http\Requests\Request;
 
 class EnquiryRequest extends Request
 {
+    use HasPhoneFieldValidation;
+
+    protected function prepareForValidation(): void
+    {
+        parent::prepareForValidation();
+
+        $this->preparePhoneForValidation();
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *

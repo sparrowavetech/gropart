@@ -66,19 +66,43 @@
                             </div>
                         </div>
                         <div class="col-sm-6">
-                            <div class="form-group">
+                            <div class="form-group @if ($errors->has('phone')) has-error @endif">
                                 <label
                                     class="required"
                                     for="shop-phone"
                                 >{{ __('Phone Number') }}</label>
-                                <input
-                                    class="form-control"
-                                    id="shop-phone"
-                                    name="phone"
-                                    type="text"
-                                    value="{{ old('phone', $store->phone) }}"
-                                    placeholder="{{ __('Shop phone') }}"
-                                >
+                                @if (setting('phone_number_enable_country_code', true))
+                                    <input
+                                        class="form-control js-phone-number-mask"
+                                        id="shop-phone"
+                                        name="phone_display"
+                                        autocomplete="phone"
+                                        type="tel"
+                                        data-country-code-selection="true"
+                                        value="{{ old('phone', $store->phone) }}"
+                                        placeholder="{{ __('Shop phone') }}"
+                                        required
+                                    >
+                                    <input
+                                        type="hidden"
+                                        name="phone"
+                                        id="shop-phone-full"
+                                        class="js-phone-number-full"
+                                        data-phone-field="phone_display"
+                                        value="{{ old('phone', $store->phone) }}"
+                                    >
+                                @else
+                                    <input
+                                        class="form-control js-phone-number-mask"
+                                        id="shop-phone"
+                                        name="phone"
+                                        autocomplete="phone"
+                                        type="tel"
+                                        value="{{ old('phone', $store->phone) }}"
+                                        placeholder="{{ __('Shop phone') }}"
+                                        required
+                                    >
+                                @endif
                                 @if ($errors->has('phone'))
                                     <span class="text-danger">{{ $errors->first('phone') }}</span>
                                 @endif
@@ -308,4 +332,9 @@
         </div>
         {!! Form::close() !!}
     </div>
+    @if (setting('phone_number_enable_country_code', true))
+        @once
+            @include('core/base::forms.fields.phone-number-script')
+        @endonce
+    @endif
 @stop

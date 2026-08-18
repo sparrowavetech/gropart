@@ -3,7 +3,9 @@
 namespace Botble\Ecommerce\Forms;
 
 use Botble\Base\Forms\FieldOptions\CheckboxFieldOption;
+use Botble\Base\Forms\FieldOptions\PhoneNumberFieldOption;
 use Botble\Base\Forms\Fields\OnOffCheckboxField;
+use Botble\Base\Forms\Fields\PhoneNumberField;
 use Botble\Base\Forms\Fields\TextField;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Ecommerce\Forms\Concerns\HasLocationFields;
@@ -32,10 +34,11 @@ class StoreLocatorForm extends FormAbstract
             )
             ->add(
                 'phone',
-                TextField::class,
-                TextFieldOption::make()
+                PhoneNumberField::class,
+                PhoneNumberFieldOption::make()
                     ->label(trans('plugins/ecommerce::ecommerce.phone'))
                     ->required()
+                    ->withCountryCodeSelection()
                     ->colspan(3)
             )
             ->add(

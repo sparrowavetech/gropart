@@ -11,6 +11,18 @@ use Illuminate\Validation\Rule;
 
 class InvoiceSettingRequest extends Request
 {
+    protected function prepareForValidation(): void
+    {
+        parent::prepareForValidation();
+
+        $phone = $this->input('company_phone_for_invoicing');
+        $phoneDisplay = $this->input('company_phone_for_invoicing_display');
+
+        if (! $phone && $phoneDisplay) {
+            $this->merge(['company_phone_for_invoicing' => $phoneDisplay]);
+        }
+    }
+
     public function rules(): array
     {
         return [

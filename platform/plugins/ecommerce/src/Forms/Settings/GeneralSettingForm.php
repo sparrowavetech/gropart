@@ -2,7 +2,9 @@
 
 namespace Botble\Ecommerce\Forms\Settings;
 
+use Botble\Base\Forms\FieldOptions\PhoneNumberFieldOption;
 use Botble\Base\Forms\FieldOptions\RepeaterFieldOption;
+use Botble\Base\Forms\Fields\PhoneNumberField;
 use Botble\Base\Forms\Fields\RepeaterField;
 use Botble\Base\Forms\Fields\TextField;
 use Botble\Ecommerce\Facades\EcommerceHelper;
@@ -52,12 +54,13 @@ class GeneralSettingForm extends SettingForm
             )
             ->add(
                 'store_phone',
-                TextField::class,
-                TextFieldOption::make()
+                PhoneNumberField::class,
+                PhoneNumberFieldOption::make()
                     ->label(trans('plugins/ecommerce::setting.general.form.store_phone'))
                     ->placeholder(trans('plugins/ecommerce::setting.general.form.store_phone_placeholder'))
                     ->helperText(trans('plugins/ecommerce::setting.general.form.store_phone_helper'))
                     ->value(get_ecommerce_setting('store_phone'))
+                    ->withCountryCodeSelection()
                     ->colspan(3)
             )
             ->add(

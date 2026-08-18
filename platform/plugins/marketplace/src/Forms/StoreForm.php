@@ -11,6 +11,7 @@ use Botble\Base\Forms\FieldOptions\HtmlFieldOption;
 use Botble\Base\Forms\FieldOptions\MediaImageFieldOption;
 use Botble\Base\Forms\FieldOptions\NameFieldOption;
 use Botble\Base\Forms\FieldOptions\OnOffFieldOption;
+use Botble\Base\Forms\FieldOptions\PhoneNumberFieldOption;
 use Botble\Base\Forms\FieldOptions\TextareaFieldOption;
 use Botble\Base\Forms\FieldOptions\TextFieldOption;
 use Botble\Base\Forms\Fields\EditorField;
@@ -18,6 +19,7 @@ use Botble\Base\Forms\Fields\EmailField;
 use Botble\Base\Forms\Fields\HtmlField;
 use Botble\Base\Forms\Fields\MediaImageField;
 use Botble\Base\Forms\Fields\OnOffCheckboxField;
+use Botble\Base\Forms\Fields\PhoneNumberField;
 use Botble\Base\Forms\Fields\SelectField;
 use Botble\Base\Forms\Fields\TextareaField;
 use Botble\Base\Forms\Fields\TextField;
@@ -54,15 +56,16 @@ class StoreForm extends FormAbstract
                     ->colspan(3)
             )
             ->add('email', EmailField::class, EmailFieldOption::make()->required()->colspan(3))
-            ->add('phone', TextField::class, [
-                'label' => trans('plugins/marketplace::store.forms.phone'),
-                'required' => true,
-                'attr' => [
-                    'placeholder' => trans('plugins/marketplace::store.forms.phone_placeholder'),
-                    'data-counter' => 15,
-                ],
-                'colspan' => 6,
-            ])
+            ->add(
+                'phone',
+                PhoneNumberField::class,
+                PhoneNumberFieldOption::make()
+                    ->label(trans('plugins/marketplace::store.forms.phone'))
+                    ->placeholder(trans('plugins/marketplace::store.forms.phone_placeholder'))
+                    ->required()
+                    ->withCountryCodeSelection()
+                    ->colspan(6)
+            )
             ->add('description', TextareaField::class, DescriptionFieldOption::make()->colspan(6))
             ->add('content', EditorField::class, ContentFieldOption::make()->colspan(6))
             ->addLocationFields()
