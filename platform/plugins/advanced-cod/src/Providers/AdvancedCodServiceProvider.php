@@ -22,7 +22,8 @@ class AdvancedCodServiceProvider extends ServiceProvider
             ->loadAndPublishTranslations()
             ->loadAndPublishViews()
             ->loadRoutes(['web', 'api'])
-            ->loadMigrations();
+            ->loadMigrations()
+            ->publishAssets();
 
         $this->app->booted(function () {
             if (is_in_admin(true)) {
