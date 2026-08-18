@@ -13,6 +13,10 @@ class SmsForm extends FormAbstract
 {
     public function buildForm(): void
     {
+        $model = $this->getModel();
+        $selectedTemplate = old('name', $model && $model->name ? (string) $model->name : null);
+        $variablesView = view('plugins/sms::partials.sms-variable', compact('selectedTemplate'))->render();
+
         $this
             ->setupModel(new Sms)
             ->setValidatorClass(SmsRequest::class)
@@ -23,7 +27,7 @@ class SmsForm extends FormAbstract
                 'attr'       => [
                     'class' => 'form-control select-full',
                 ],
-                'choices'    => SmsEnum::labels(),
+                'choices'    => SmsEnum::templateLabels(),
             ])
             ->add('template_id', 'number', [
                 'label'      => trans('plugins/sms::sms.template_id'),
@@ -36,7 +40,7 @@ class SmsForm extends FormAbstract
             ->addMetaBoxes([
                 'general' => [
                     'title' => trans('plugins/sms::sms.variable'),
-                    'content' => view('plugins/sms::partials.sms-variable')->render()
+                    'content' => $variablesView
                 ]])
             ->add('template', 'textarea', [
                 'label'      => trans('plugins/sms::sms.template'),
@@ -45,8 +49,7 @@ class SmsForm extends FormAbstract
                     'placeholder'  => trans('plugins/sms::sms.template_placeholder'),
                     'data-counter' => 500,
                 ],
-                 'content' => view(
-                        'plugins/sms::partials.sms-variable')->render(),
+                 'content' => $variablesView,
             ])
 
             ->add('status', 'customSelect', [

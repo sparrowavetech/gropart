@@ -36,6 +36,7 @@ class SmsOtpRegisterController extends BaseRegisterController
                 if ($sms->templateEnabled(SmsEnum::OTP())) {
                     $sms->setVariableValues([
                         'customer_name' => $customer->name,
+                        'customer_phone' => $customer->phone,
                         'otp'           => $otp,
                     ]);
                     $sms->sendUsingTemplate(

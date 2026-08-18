@@ -29,6 +29,10 @@ class EventServiceProvider extends ServiceProvider
             'Botble\Ecommerce\Events\OrderConfirmedEvent' => 'handleOrderConfirmed',
             'Botble\Ecommerce\Events\OrderCompletedEvent' => 'handleOrderCompleted',
             'Botble\Ecommerce\Events\OrderCancelledEvent' => 'handleOrderCancelled',
+            'Botble\Ecommerce\Events\OrderCreated' => 'handleOrderCreated',
+            'Botble\Ecommerce\Events\OrderPaymentConfirmedEvent' => 'handleOrderPaymentConfirmed',
+            'Botble\Ecommerce\Events\OrderReturnedEvent' => 'handleOrderReturned',
+            'Botble\Ecommerce\Events\ShippingStatusChanged' => 'handleShippingStatusChanged',
         ] as $event => $method) {
             if (class_exists($event)) {
                 Event::listen($event, [OrderSmsListener::class, $method]);

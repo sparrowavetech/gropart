@@ -62,8 +62,10 @@ class LoginOtpController extends BaseController
             $sms->setModule(ECOMMERCE_MODULE_SCREEN_NAME);
             $sms->setVariableValues([
                 'customer_name' => $customer->name,
+                'customer_phone' => $phone,
                 'otp' => $otp,
             ]);
+
             $sms->sendUsingTemplate(SmsEnum::OTP(), $phone);
         } catch (\Throwable $exception) {
             Log::error('Failed to send login OTP: ' . $exception->getMessage());

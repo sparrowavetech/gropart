@@ -6,6 +6,7 @@ use Botble\Sms\Models\Sms;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Foundation\AliasLoader;
 use Botble\Sms\Facades\SmsHelperFacade;
+use Botble\Sms\Observers\MarketplaceSmsObserver;
 use Illuminate\Support\ServiceProvider;
 use Botble\Sms\Providers\EventServiceProvider;
 use Illuminate\Routing\Events\RouteMatched;
@@ -90,6 +91,8 @@ class SmsServiceProvider extends ServiceProvider
         });
 
         $this->app->booted(function () {
+            $this->registerMarketplaceObservers();
+
             // Apply customer registration phone validation rule
             add_filter('ecommerce_customer_registration_form_validation_rules', function (array $rules) {
                 if (is_plugin_active('sms') && $this->isRegistrationOtpEnabled()) {
@@ -126,6 +129,19 @@ class SmsServiceProvider extends ServiceProvider
     private function isRegistrationOtpEnabled(): bool
     {
         return (bool) setting('sms_registration_otp_enabled', setting('sms_otp_enabled'));
+    }
+
+    private function registerMarketplaceObservers(): void
+    {
+        foreach ([
+            'Botble\Ecommerce\Models\Product',
+            'Botble\Marketplace\Models\Withdrawal',
+            'Botble\Marketplace\Models\Vendor',
+        ] as $model) {
+            if (class_exists($model)) {
+                $model::observe(MarketplaceSmsObserver::class);
+            }
+        }
     }
      /**
      * @param null $data

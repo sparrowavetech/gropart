@@ -196,7 +196,14 @@ class SmsHandler
     public function getVariables(string $type, string $module, string $name)
     {
         $this->template = $name;
-        return config($type . '.sms.sms');
+        $variables = config($type . '.sms.sms.variables', config($type . '.sms.sms', []));
+        $templateVariables = config($type . '.sms.sms.template_variables.' . $name);
+
+        if (! $templateVariables) {
+            return $variables;
+        }
+
+        return array_intersect_key($variables, array_flip($templateVariables));
     }
 
     /**

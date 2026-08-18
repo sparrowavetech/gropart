@@ -59,6 +59,7 @@ class OtpController extends BaseController
                     if ($sms->templateEnabled(SmsEnum::WELCOME())) {
                         $sms->setVariableValues([
                             'customer_name' => $customer->name,
+                            'customer_phone' => $customer->phone,
                             'site_title'    => setting('admin_title') ?: config('app.name'),
                         ]);
                         $sms->sendUsingTemplate(SmsEnum::WELCOME(), $customer->phone);
@@ -100,6 +101,7 @@ class OtpController extends BaseController
                 if ($sms->templateEnabled(SmsEnum::OTP())) {
                     $sms->setVariableValues([
                         'customer_name' => $customer->name,
+                        'customer_phone' => $customer->phone,
                         'otp'           => $otp,
                     ]);
                     $sms->sendUsingTemplate(SmsEnum::OTP(), $customer->phone);
@@ -140,6 +142,7 @@ class OtpController extends BaseController
                 if ($sms->templateEnabled(SmsEnum::OTP())) {
                     $sms->setVariableValues([
                         'customer_name' => $customer->name,
+                        'customer_phone' => $customer->phone,
                         'otp'           => $otp,
                     ]);
                     $sms->sendUsingTemplate(SmsEnum::OTP(), $customer->phone);
