@@ -1,10 +1,17 @@
 <div id="whatsapp-floating-button"></div>
 
+@php
+    $position = setting('whatsapp-floating-button.position', 'right');
+    $offsetX = (int) setting('whatsapp-floating-button.offset_x', 20);
+    $offsetY = (int) setting('whatsapp-floating-button.offset_y', 20);
+    $showPopup = (bool) setting('whatsapp-floating-button.show_popup', false);
+@endphp
+
 <style>
     #whatsapp-floating-button {
-        left: {{ setting('whatsapp-floating-button.position', 'right') ? 'auto' : setting('whatsapp-floating-button.offset_x', 20) . 'px' }} !important;
-        right: {{ setting('whatsapp-floating-button.position', 'right') ? setting('whatsapp-floating-button.offset_x', 20) . 'px' : 'auto' }} !important;
-        bottom: {{ setting('whatsapp-floating-button.offset_y', 20) }}px !important;
+        left: {{ $position === 'left' ? $offsetX . 'px' : 'auto' }} !important;
+        right: {{ $position === 'right' ? $offsetX . 'px' : 'auto' }} !important;
+        bottom: {{ $offsetY }}px !important;
     }
 </style>
 
@@ -15,16 +22,16 @@
         if (whatsappFloatingButton) {
             $(whatsappFloatingButton).floatingWhatsApp({
                 phone: "{{ setting('whatsapp-floating-button.phone_number') }}",
-                popupMessage: "{{ Str::limit(setting('whatsapp-floating-button.popup_message'), 220)}}",
-                showPopup: "{{ setting('whatsapp-floating-button.show_popup', false) }}",
-                headerTitle: "{{ setting('whatsapp-floating-button.popup_title') }}",
-                position: "{{ setting('whatsapp-floating-button.position', 'right') }}",
+                popupMessage: @json(Str::limit((string) setting('whatsapp-floating-button.popup_message'), 220)),
+                showPopup: {{ $showPopup ? 'true' : 'false' }},
+                headerTitle: @json((string) setting('whatsapp-floating-button.popup_title')),
+                position: "{{ $position }}",
                 size: "{{ setting('whatsapp-floating-button.size', 60) }}px",
                 backgroundColor: '#25D366',
-                showOnIE: !0,
+                showOnIE: true,
                 autoOpenTimeout: 0,
                 headerColor: '#128C7E',
-                zIndex: {{ setting('whatsapp-floating-button.z_index', 999) }},
+                zIndex: {{ (int) setting('whatsapp-floating-button.z_index', 999) }},
             });
         }
     });

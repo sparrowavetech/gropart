@@ -4,14 +4,13 @@ namespace Datlechin\WhatsAppFloatingButton\Http\Controllers;
 
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\PageTitle;
-use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\JsValidation\Facades\JsValidator;
-use Botble\Setting\Facades\Setting;
+use Botble\Setting\Http\Controllers\SettingController;
 use Datlechin\WhatsAppFloatingButton\Http\Requests\WhatsAppFloatingButtonSettingRequest;
 use Illuminate\Contracts\View\View;
 
-class WhatsAppFloatingButtonSettingController extends BaseController
+class WhatsAppFloatingButtonSettingController extends SettingController
 {
     public function edit(): View
     {
@@ -26,13 +25,6 @@ class WhatsAppFloatingButtonSettingController extends BaseController
 
     public function update(WhatsAppFloatingButtonSettingRequest $request): BaseHttpResponse
     {
-        foreach ($request->validated() as $key => $value) {
-            Setting::set(sprintf('whatsapp-floating-button.%s', $key), $value);
-        }
-
-        Setting::save();
-
-        return BaseHttpResponse::make()
-            ->setMessage(trans('core/base::notices.update_success_message'));
+        return $this->performUpdate($request->validated(), 'whatsapp-floating-button.');
     }
 }
