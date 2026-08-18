@@ -71,28 +71,45 @@ class MarketplaceSmsObserver
 
     private function handleVendorApproved(object $vendor): void
     {
-        if (! method_exists($vendor, 'wasChanged') || ! $vendor->wasChanged('confirmed_at')) {
+        if (! method_exists($vendor, 'wasChanged')) {
+            return;
+        }
+
+        $wasVerified = $vendor->wasChanged('vendor_verified_at') && ! empty($vendor->vendor_verified_at);
+        $wasConfirmed = $vendor->wasChanged('confirmed_at') && ! empty($vendor->confirmed_at);
+
+        if (! $wasVerified && ! $wasConfirmed) {
             return;
         }
 
         $store = $vendor->store ?? null;
+        $phone = ($store && $store->phone) ? $store->phone : ($vendor->phone ?? null);
 
-        if (! $store || ! $store->phone) {
+        if (! $phone) {
             return;
         }
 
-        $this->sendToStore(SmsEnum::VENDOR_ACCOUNT_APPROVED(), $store);
+        $this->sendToStore(SmsEnum::VENDOR_ACCOUNT_APPROVED(), $store ?: (object) [
+            'name' => $vendor->name ?? '',
+            'phone' => $phone,
+            'url' => '',
+        ]);
     }
 
     private function sendToStore(string $template, object $store, array $variables = []): void
     {
+        $phone = (string) ($store->phone ?? '');
+        if ($phone === '') {
+            return;
+        }
+
         $sms = new SmsHandler();
         $sms->setModule(ECOMMERCE_MODULE_SCREEN_NAME);
         $sms->setVariableValues(array_merge([
-            'store_name' => (string) $store->name,
-            'store_phone' => (string) $store->phone,
+            'store_name' => (string) ($store->name ?? ''),
+            'store_phone' => $phone,
             'store_link' => (string) ($store->url ?? ''),
         ], $variables));
-        $sms->sendUsingTemplate($template, $store->phone);
+        $sms->sendUsingTemplate($template, $phone);
     }
 }

@@ -88,8 +88,12 @@ class OrderSmsListener
     protected function sendSmsNotification(Order $order, string $template, array $extra = [], ?string $to = null): void
     {
         try {
-            $phone = $to ?: ($order->user->phone ?: ($order->address ? $order->address->phone : null));
-            if (!$phone) {
+            $customerName = $order->user ? $order->user->name : ($order->address ? $order->address->name : '');
+            $customerPhone = $order->user ? $order->user->phone : ($order->address ? $order->address->phone : '');
+            $customerEmail = $order->user ? $order->user->email : ($order->address ? $order->address->email : '');
+
+            $phone = $to ?: ($customerPhone ?: null);
+            if (! $phone) {
                 return;
             }
 
@@ -97,6 +101,12 @@ class OrderSmsListener
             $sms->setModule(ECOMMERCE_MODULE_SCREEN_NAME);
 
             if ($sms->templateEnabled($template)) {
+                $paymentMethod = '';
+                if ($order->payment && $order->payment->payment_channel) {
+                    $channel = $order->payment->payment_channel;
+                    $paymentMethod = is_object($channel) && method_exists($channel, 'label') ? $channel->label() : (string) $channel;
+                }
+
                 $sms->setVariableValues(array_merge([
                     'store_name'      => get_ecommerce_setting('store_name') ?: (setting('admin_title') ?: config('app.name')),
                     'store_address'   => get_ecommerce_setting('store_address'),
@@ -104,12 +114,12 @@ class OrderSmsListener
                     'store_link'      => url(''),
                     'order_id'        => $order->code,
                     'order_token'     => $order->token,
-                    'customer_name'   => BaseHelper::clean($order->user->name ?: ($order->address ? $order->address->name : '')),
-                    'customer_email'  => $order->user->email ?: ($order->address ? $order->address->email : ''),
-                    'customer_phone'  => $order->user->phone ?: ($order->address ? $order->address->phone : ''),
+                    'customer_name'   => BaseHelper::clean($customerName),
+                    'customer_email'  => $customerEmail,
+                    'customer_phone'  => $customerPhone,
                     'customer_address'=> $order->full_address,
                     'shipping_method' => $order->shipping_method_name,
-                    'payment_method'  => $order->payment && $order->payment->payment_channel ? $order->payment->payment_channel->label() : '',
+                    'payment_method'  => $paymentMethod,
                 ], $extra));
 
                 $sms->sendUsingTemplate($template, $phone);
