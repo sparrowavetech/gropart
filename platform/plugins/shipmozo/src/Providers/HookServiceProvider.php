@@ -201,6 +201,13 @@ class HookServiceProvider extends ServiceProvider
             return $html;
         }
 
+        $isValidContext = request()->is('products/*', 'product/*', '*/products/*', '*/product/*', '*quick-view*', 'ajax/quick-view/*')
+            || (request()->ajax() && request()->is('*quick*'));
+
+        if (! $isValidContext) {
+            return $html;
+        }
+
         return $html.view('plugins/shipmozo::pincode-check', compact('product'))->render();
     }
 
