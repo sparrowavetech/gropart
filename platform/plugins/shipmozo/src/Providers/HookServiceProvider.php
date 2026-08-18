@@ -234,15 +234,17 @@ class HookServiceProvider extends ServiceProvider
                                     '.Form::customSelect('warehouse_id', $options, $data->warehouse_id).'
                                     '.Form::helper(trans('plugins/shipmozo::shipmozo.shipmozo_warehouse_selector_hint')).'
                                 </div>
-                                <div class="col-md-6">
+                                 <div class="col-md-6">
+                                    '.($data->getKey() ? '
                                     <button type="button" id="shipmozo-create-warehouse-btn" class="btn btn-secondary w-100">
                                         <i class="ti ti-home-plus"></i> '.trans('plugins/shipmozo::shipmozo.create_warehouse_from_store').'
                                     </button>
-                                    '.Form::helper(trans('plugins/shipmozo::shipmozo.create_warehouse_from_store_hint')).'
+                                    '.Form::helper(trans('plugins/shipmozo::shipmozo.create_warehouse_from_store_hint')) : '').'
                                 </div>
                             </div>
                         </div>
                     </div>
+                    '.($data->getKey() ? '
                     <script>
                         document.getElementById("shipmozo-create-warehouse-btn")?.addEventListener("click", function(e) {
                             e.preventDefault();
@@ -265,7 +267,7 @@ class HookServiceProvider extends ServiceProvider
                                 }).catch(() => Botble.showError("Unable to create warehouse."));
                             }
                         });
-                    </script>',
+                    </script>' : ''),
                     'colspan' => 6,
                 ]);
         }
