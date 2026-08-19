@@ -41,6 +41,29 @@ class IndianGstHelper
         return $val ?: 'Rajasthan';
     }
 
+    public static function getStateCode(mixed $state): ?string
+    {
+        if (empty($state)) {
+            return null;
+        }
+
+        $states = self::getIndianStates();
+        $str = (string) $state;
+
+        if (isset($states[$str])) {
+            return $str;
+        }
+
+        $normalized = self::normalizeState($str);
+        foreach ($states as $code => $name) {
+            if (self::normalizeState($name) === $normalized) {
+                return $code;
+            }
+        }
+
+        return null;
+    }
+
     public static function getCompanyStateCode(): string
     {
         $val = (string) setting('indian_gst_default_company_state', '08');
