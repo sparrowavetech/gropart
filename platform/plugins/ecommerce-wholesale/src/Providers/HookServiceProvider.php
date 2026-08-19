@@ -779,17 +779,17 @@ class HookServiceProvider extends ServiceProvider
     {
         $subtotal = 0;
 
-        // Sum only the items in the given scope. The "_by_items" cart filters
-        // pass a per-vendor slice here (multivendor checkout); summing the full
-        // cart instead inflates each vendor's total to the whole-cart total,
-        // which breaks the marketplace proportional shipping split (every vendor
-        // then resolves a proportion of 1.0 and is charged the full shipping fee).
         foreach ($cartContent as $cartItem) {
             if (! $cartItem) {
                 continue;
             }
 
-            $subtotal += $cartItem->qty * $cartItem->price;
+            if (EcommerceHelper::isTaxEnabled() && $cartItem->options->get('price_includes_tax', false) && $cartItem->taxRate > 0) {
+                $basePrice = $cartItem->price / (1 + $cartItem->taxRate / 100);
+                $subtotal += EcommerceHelper::roundPrice($cartItem->qty * $basePrice);
+            } else {
+                $subtotal += $cartItem->qty * $cartItem->price;
+            }
         }
 
         return $subtotal;
