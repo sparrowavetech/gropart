@@ -16,12 +16,6 @@ class Plugin extends PluginOperationAbstract
             });
         }
 
-        if (Schema::hasTable('ec_products') && Schema::hasColumn('ec_products', 'hsn_code')) {
-            Schema::table('ec_products', function ($table) {
-                $table->dropColumn('hsn_code');
-            });
-        }
-
         if (Schema::hasTable('ec_orders')) {
             $columns = array_filter([
                 Schema::hasColumn('ec_orders', 'cod_prepayment_amount') ? 'cod_prepayment_amount' : null,

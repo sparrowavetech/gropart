@@ -5,8 +5,6 @@ namespace SparroWave\AdvancedCod\Providers;
 use Botble\Base\Facades\Assets;
 use SparroWave\AdvancedCod\Hooks\AdvancedCodCheckoutListener;
 use SparroWave\AdvancedCod\Hooks\AdvancedCodHookListener;
-use SparroWave\AdvancedCod\Hooks\ProductHsnHookListener;
-use Botble\Ecommerce\Events\ProductVariationCreated;
 use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 
@@ -26,18 +24,9 @@ class AdvancedCodServiceProvider extends ServiceProvider
             ->publishAssets();
 
         $this->app->booted(function () {
-            if (is_in_admin(true)) {
-                Assets::addScriptsDirectly('vendor/core/plugins/advanced-cod/js/product-hsn.js');
-            }
-
             add_action(BASE_ACTION_META_BOXES, [AdvancedCodHookListener::class, 'addProductMetaBox'], 120, 2);
             add_action(BASE_ACTION_AFTER_CREATE_CONTENT, [AdvancedCodHookListener::class, 'saveProductCodEligibility'], 120, 3);
             add_action(BASE_ACTION_AFTER_UPDATE_CONTENT, [AdvancedCodHookListener::class, 'saveProductCodEligibility'], 120, 3);
-            add_action(BASE_ACTION_AFTER_CREATE_CONTENT, [ProductHsnHookListener::class, 'saveProductHsnCode'], 121, 3);
-            add_action(BASE_ACTION_AFTER_UPDATE_CONTENT, [ProductHsnHookListener::class, 'saveProductHsnCode'], 121, 3);
-            add_filter('ecommerce_product_variation_form_start', [ProductHsnHookListener::class, 'renderHsnField'], 120, 2);
-
-            $this->app['events']->listen(ProductVariationCreated::class, [ProductHsnHookListener::class, 'saveVariationHsnCode']);
 
             add_filter('ecommerce_before_product_description', [AdvancedCodHookListener::class, 'addCodLabelToProductPage'], 120, 2);
             add_filter('ecommerce_product_detail_after_cart_actions', [AdvancedCodHookListener::class, 'addCodLabelToProductPage'], 120, 2);
