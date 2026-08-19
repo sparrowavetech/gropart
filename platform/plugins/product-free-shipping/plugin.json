@@ -1,0 +1,14 @@
+{
+    "id": "sparrowave/product-free-shipping",
+    "name": "Product Free Shipping",
+    "namespace": "SparroWave\\ProductFreeShipping\\",
+    "provider": "SparroWave\\ProductFreeShipping\\Providers\\ProductFreeShippingServiceProvider",
+    "author": "SparroWave Technologies",
+    "url": "https://www.sparrowave.com",
+    "version": "1.0.0",
+    "description": "Enable product-level free shipping flags, automatic weight deduction for courier rates, and universal theme badges.",
+    "minimum_core_version": "7.0.0",
+    "require": [
+        "ecommerce"
+    ]
+}
