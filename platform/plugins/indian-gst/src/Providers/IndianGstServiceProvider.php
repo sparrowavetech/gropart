@@ -111,7 +111,7 @@ class IndianGstServiceProvider extends ServiceProvider
 
             // Inject Tax Slab Products badge on Taxes Settings page without modifying core blade files
             add_filter(BASE_FILTER_FOOTER_LAYOUT_TEMPLATE, function ($html) {
-                if (! request()->routeIs('ecommerce.settings.taxes')) {
+                if (! request()->routeIs('tax.*') && ! request()->routeIs('ecommerce.settings.taxes*') && ! request()->is('admin/ecommerce/taxes*') && ! request()->is('admin/ecommerce/settings/taxes*')) {
                     return $html;
                 }
 
@@ -122,27 +122,50 @@ class IndianGstServiceProvider extends ServiceProvider
                     ->toArray();
 
                 $script = '<script>
-                    document.addEventListener("DOMContentLoaded", function () {
+                    (function () {
                         const taxStats = ' . json_encode($taxStats) . ';
-                        document.querySelectorAll("#tax-cards-container .tax-card").forEach(function (card) {
-                            const editBtn = card.querySelector("[data-bb-toggle=\"modal\"][data-target=\"#edit-tax-modal\"]");
-                            if (!editBtn) return;
-                            const url = editBtn.getAttribute("data-url") || "";
-                            const match = url.match(/taxes\/edit\/(\d+)/);
-                            if (!match) return;
-                            const taxId = match[1];
-                            const count = taxStats[taxId] || 0;
-                            const titleEl = card.querySelector(".card-title");
-                            if (titleEl && !card.querySelector(".tax-products-badge")) {
-                                const badge = document.createElement("a");
-                                badge.className = "badge bg-primary-subtle text-primary border border-primary-subtle text-decoration-none py-1 px-2 me-2 tax-products-badge";
-                                badge.href = "/admin/indian-gst/slabs/" + taxId + "/products";
-                                badge.title = "View mapped products in GST System";
-                                badge.innerHTML = "<i class=\"ti ti-package me-1\"></i> " + count + " products";
-                                titleEl.prepend(badge);
-                            }
-                        });
-                    });
+                        function injectTaxBadges() {
+                            const containers = document.querySelectorAll("[data-tax-id], .tax-card");
+                            containers.forEach(function (el) {
+                                let taxId = el.getAttribute("data-tax-id");
+                                if (!taxId) {
+                                    const editBtn = el.querySelector(".btn-edit-tax, [href*=\"taxes/edit\"], [href*=\"taxes/\"]");
+                                    if (editBtn) {
+                                        const href = editBtn.getAttribute("href") || "";
+                                        const match = href.match(/taxes\/edit\/(\d+)/) || href.match(/taxes\/(\d+)/);
+                                        if (match) taxId = match[1];
+                                    }
+                                }
+                                if (!taxId) return;
+
+                                const count = taxStats[taxId] || 0;
+                                const headerWrap = el.querySelector(".card-header .d-flex") || el.querySelector(".card-header") || el.querySelector("h4")?.parentElement;
+                                if (headerWrap && !el.querySelector(".tax-products-badge")) {
+                                    const badge = document.createElement("a");
+                                    badge.className = "badge bg-primary-subtle text-primary border border-primary-subtle text-decoration-none py-1 px-2 tax-products-badge";
+                                    badge.href = "/admin/indian-gst/slabs/" + taxId + "/products";
+                                    badge.title = "Click to view mapped products in Indian GST System";
+                                    badge.innerHTML = "<i class=\"ti ti-package me-1\"></i> " + count + " products";
+                                    
+                                    const titleEl = headerWrap.querySelector(".card-title, h4");
+                                    if (titleEl && titleEl.nextSibling) {
+                                        headerWrap.insertBefore(badge, titleEl.nextSibling);
+                                    } else {
+                                        headerWrap.appendChild(badge);
+                                    }
+                                }
+                            });
+                        }
+
+                        if (document.readyState === "loading") {
+                            document.addEventListener("DOMContentLoaded", injectTaxBadges);
+                        } else {
+                            injectTaxBadges();
+                        }
+                        window.addEventListener("load", injectTaxBadges);
+                        setTimeout(injectTaxBadges, 300);
+                        setTimeout(injectTaxBadges, 1000);
+                    })();
                 </script>';
 
                 return $html . $script;
