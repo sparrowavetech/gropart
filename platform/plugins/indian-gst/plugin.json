@@ -6,6 +6,6 @@
     "author": "Sparrowave Solutions",
     "url": "https://sparrowave.com",
     "version": "1.0.0",
-    "description": "Indian GST (CGST, SGST, IGST) compliance for Botble CMS.",
+    "description": "Indian GST (CGST, SGST, IGST, HSN, Reverse GST) compliance & multi-vendor invoicing for Botble CMS.",
     "minimum_core_version": "7.0.0"
 }
