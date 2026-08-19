@@ -17,6 +17,40 @@ class IndianGstHelper
         return (bool) setting('indian_gst_enabled', true);
     }
 
+    public static function getTaxSlabTitle(float|int $taxRate): string
+    {
+        static $slabMap = null;
+        if ($slabMap === null) {
+            try {
+                $slabMap = \Botble\Ecommerce\Models\Tax::query()
+                    ->where('status', \Botble\Base\Enums\BaseStatusEnum::PUBLISHED)
+                    ->pluck('title', 'percentage')
+                    ->toArray();
+            } catch (\Throwable $e) {
+                $slabMap = [];
+            }
+        }
+
+        $rateKey = (string) (float) $taxRate;
+        return $slabMap[$rateKey] ?? ('GST@' . (float) $taxRate . '%');
+    }
+
+    public static function getFormattedCartTaxClassesName(): string
+    {
+        $taxTitles = [];
+        try {
+            foreach (\Botble\Ecommerce\Facades\Cart::instance('cart')->content() as $cartItem) {
+                $taxRate = $cartItem->taxRate ?? 0;
+                if ($taxRate > 0) {
+                    $taxTitles[] = self::getTaxSlabTitle($taxRate);
+                }
+            }
+        } catch (\Throwable $e) {
+        }
+
+        return implode(', ', array_unique($taxTitles));
+    }
+
     public static function getCompanyState(): string
     {
         return self::getCompanyStateName();

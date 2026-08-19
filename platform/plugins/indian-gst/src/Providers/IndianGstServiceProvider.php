@@ -64,6 +64,93 @@ class IndianGstServiceProvider extends ServiceProvider
             // Dynamic Invoice Variables (IGST vs CGST+SGST, Seller GSTIN, HSN)
             add_filter('ecommerce_invoice_variables', [IndianGstInvoiceListener::class, 'handleInvoiceVariables'], 120, 2);
 
+            // Checkout Item Tax Label (Positioned right below price)
+            add_filter('ecommerce_cart_after_item_content', function (?string $html, $cartItem): ?string {
+                if (! \Botble\Ecommerce\Facades\EcommerceHelper::isTaxEnabled()) {
+                    return $html;
+                }
+
+                $taxRate = $cartItem->taxRate ?? 0;
+                if ($taxRate < 0) {
+                    return $html;
+                }
+
+                $label = \SparroWave\IndianGst\Supports\IndianGstHelper::getTaxSlabTitle($taxRate);
+
+                return ($html ?? '') . '<span class="ec-checkout-tax-badge-data d-none" data-tax-label="' . e($label) . '"></span>';
+            }, 120, 2);
+
+            // Checkout CSS: Hide default left-side item tax text
+            add_filter('ecommerce_checkout_header', function (?string $html): string {
+                return ($html ?? '') . '<style>.ec-checkout-item-tax { display: none !important; }</style>';
+            });
+
+            // Checkout Footer Script: Reposition item tax badge under price & update summary tax label
+            $checkoutScriptCallback = function (?string $html): string {
+                $cartTaxClasses = \SparroWave\IndianGst\Supports\IndianGstHelper::getFormattedCartTaxClassesName();
+
+                $script = '<script>
+                    (function () {
+                        const currentTaxSummary = ' . json_encode($cartTaxClasses ? ('(' . $cartTaxClasses . ')') : '') . ';
+
+                        function formatCheckoutGstUI() {
+                            // 1. Reposition tax badge under each product price in the right column
+                            document.querySelectorAll(".cart-item, .checkout-products-list .row, .order-item-list tr, .ec-checkout-product-row, .checkout-products-item, [class*=\"checkout-product\"]").forEach(function (row) {
+                                const badgeData = row.querySelector(".ec-checkout-tax-badge-data");
+                                const priceCol = row.querySelector(".col-auto.text-end, .text-end");
+                                if (badgeData && priceCol) {
+                                    const label = badgeData.getAttribute("data-tax-label");
+                                    if (label && !priceCol.querySelector(".ec-checkout-item-tax-badge")) {
+                                        const p = document.createElement("p");
+                                        p.className = "mb-0 ec-checkout-item-tax-badge text-end mt-1";
+                                        p.innerHTML = "<small class=\"text-muted d-inline-block px-1 rounded bg-light border\" style=\"font-size: 11px; font-weight: 500;\">" + label + "</small>";
+                                        priceCol.appendChild(p);
+                                    }
+                                }
+                            });
+
+                            // 2. Format Subtotal summary tax line (e.g. Tax: ₹ 917.15 (GST@18%))
+                            const taxSmallEls = document.querySelectorAll(".ec-checkout-tax-row small, .tax-price-text small");
+                            taxSmallEls.forEach(function (el) {
+                                if (currentTaxSummary) {
+                                    el.textContent = currentTaxSummary;
+                                } else {
+                                    let txt = el.textContent || "";
+                                    txt = txt.replace(/([a-zA-Z0-9@\s]+%\s*)-\s*\d+(\.\d+)?%/g, "$1");
+                                    txt = txt.replace(/-\s*(\d+(\.\d+)?%)/g, "$1");
+                                    el.textContent = txt;
+                                }
+                            });
+                        }
+
+                        if (document.readyState === "loading") {
+                            document.addEventListener("DOMContentLoaded", formatCheckoutGstUI);
+                        } else {
+                            formatCheckoutGstUI();
+                        }
+                        window.addEventListener("load", formatCheckoutGstUI);
+                        document.addEventListener("payment-form-reloaded", formatCheckoutGstUI);
+                        document.addEventListener("checkout-order-updated", formatCheckoutGstUI);
+                        if (window.jQuery) {
+                            window.jQuery(document).ajaxComplete(function() {
+                                setTimeout(formatCheckoutGstUI, 50);
+                            });
+                        }
+                        setInterval(formatCheckoutGstUI, 400);
+                    })();
+                </script>';
+
+                return ($html ?? '') . $script;
+            };
+
+            add_filter('ecommerce_checkout_footer', $checkoutScriptCallback);
+            add_filter(BASE_FILTER_FOOTER_LAYOUT_TEMPLATE, function ($html) use ($checkoutScriptCallback) {
+                if (! request()->routeIs('public.checkout*') && ! request()->is('checkout*')) {
+                    return $html;
+                }
+                return $checkoutScriptCallback($html);
+            });
+
             // Shipping Router
             add_filter('handle_shipping_fee', [IndianGstShippingListener::class, 'checkVendorShipping'], 120, 2);
 
