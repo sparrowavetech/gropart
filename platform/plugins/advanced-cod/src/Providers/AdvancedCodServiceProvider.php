@@ -29,6 +29,9 @@ class AdvancedCodServiceProvider extends ServiceProvider
             add_action(BASE_ACTION_AFTER_UPDATE_CONTENT, [AdvancedCodHookListener::class, 'saveProductCodEligibility'], 120, 3);
 
             add_filter('ecommerce_before_product_description', [AdvancedCodHookListener::class, 'addCodLabelToProductPage'], 120, 2);
+            add_filter('ecommerce_after_product_price', [AdvancedCodHookListener::class, 'addCodLabelToProductCard'], 120, 2);
+            add_filter('ecommerce_product_item_badges', [AdvancedCodHookListener::class, 'addCodLabelToProductCard'], 120, 2);
+            add_filter('ecommerce_product_loop_extra_html', [AdvancedCodHookListener::class, 'addCodLabelToProductCard'], 120, 2);
             add_filter('ecommerce_product_detail_after_cart_actions', [AdvancedCodHookListener::class, 'addCodLabelToProductPage'], 120, 2);
             
             // Register COD settings field
