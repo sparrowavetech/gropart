@@ -230,23 +230,27 @@ class HookServiceProvider extends ServiceProvider
 
             $form
                 ->add('shipmozo_warehouse_section', 'html', [
-                    'html' => '<div class="card widget meta-boxes mb-3">
-                        <div class="card-header">
-                            <h4 class="card-title">'.trans('plugins/shipmozo::shipmozo.shipmozo_warehouse').'</h4>
+                    'colspan' => 6,
+                    'html' => '<div class="card mb-3" style="background: linear-gradient(135deg, rgba(248, 250, 252, 0.9) 0%, rgba(241, 245, 249, 0.95) 100%); border: 1px solid #cbd5e1; border-radius: 8px;">
+                        <div class="card-header py-2 px-3" style="background: transparent; border-bottom: 1px solid rgba(203, 213, 225, 0.6);">
+                            <div class="d-flex align-items-center justify-content-between w-100">
+                                <h4 class="card-title text-dark fw-bold mb-0"><i class="ti ti-building-warehouse text-primary me-1"></i> '.trans('plugins/shipmozo::shipmozo.shipmozo_warehouse').'</h4>
+                                <span class="badge bg-azure-lt text-azure px-2 py-1"><i class="ti ti-truck me-1"></i> Logistics Origin</span>
+                            </div>
                         </div>
-                        <div class="card-body">
-                            <div class="row align-items-center">
+                        <div class="card-body p-3">
+                            <div class="row align-items-center g-3">
                                 <div class="col-md-6">
-                                    '.Form::label('warehouse_id', trans('plugins/shipmozo::shipmozo.shipmozo_warehouse'), ['class' => 'control-label']).'
+                                    '.Form::label('warehouse_id', trans('plugins/shipmozo::shipmozo.shipmozo_warehouse'), ['class' => 'form-label fw-medium mb-1']).'
                                     '.Form::customSelect('warehouse_id', $options, $data->warehouse_id).'
-                                    '.Form::helper(trans('plugins/shipmozo::shipmozo.shipmozo_warehouse_selector_hint')).'
+                                    <small class="form-hint text-muted mt-1 d-block" style="font-size: 12px; font-weight: normal; line-height: 1.4;">'.trans('plugins/shipmozo::shipmozo.shipmozo_warehouse_selector_hint').'</small>
                                 </div>
-                                 <div class="col-md-6">
+                                <div class="col-md-6">
                                     '.($data->getKey() ? '
-                                    <button type="button" id="shipmozo-create-warehouse-btn" class="btn btn-secondary w-100">
-                                        <i class="ti ti-home-plus"></i> '.trans('plugins/shipmozo::shipmozo.create_warehouse_from_store').'
+                                    <button type="button" id="shipmozo-create-warehouse-btn" class="btn btn-dark w-100 py-2">
+                                        <i class="ti ti-home-plus me-1"></i> '.trans('plugins/shipmozo::shipmozo.create_warehouse_from_store').'
                                     </button>
-                                    '.Form::helper(trans('plugins/shipmozo::shipmozo.create_warehouse_from_store_hint')) : '').'
+                                    <small class="form-hint text-muted mt-1 d-block text-center" style="font-size: 12px; font-weight: normal; line-height: 1.4;">'.trans('plugins/shipmozo::shipmozo.create_warehouse_from_store_hint').'</small>' : '').'
                                 </div>
                             </div>
                         </div>
