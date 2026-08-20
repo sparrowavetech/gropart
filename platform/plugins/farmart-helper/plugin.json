@@ -1,0 +1,14 @@
+{
+    "id": "sparrowave/farmart-helper",
+    "name": "Farmart Helper",
+    "namespace": "SparroWave\\FarmartHelper\\",
+    "provider": "SparroWave\\FarmartHelper\\Providers\\FarmartHelperServiceProvider",
+    "author": "SparroWave Technologies",
+    "url": "https://www.sparrowave.com",
+    "version": "1.0.0",
+    "description": "Non-invasive custom form extensions, country-code phone selection, location dropdowns, and request sanitizers for Gropart.",
+    "minimum_core_version": "7.0.0",
+    "require": [
+        "ecommerce"
+    ]
+}

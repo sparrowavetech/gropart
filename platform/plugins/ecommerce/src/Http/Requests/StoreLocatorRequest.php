@@ -3,22 +3,12 @@
 namespace Botble\Ecommerce\Http\Requests;
 
 use Botble\Base\Facades\BaseHelper;
-use Botble\Base\Http\Requests\Concerns\HasPhoneFieldValidation;
 use Botble\Base\Rules\EmailRule;
 use Botble\Base\Rules\OnOffRule;
 use Botble\Support\Http\Requests\Request;
 
 class StoreLocatorRequest extends Request
 {
-    use HasPhoneFieldValidation;
-
-    protected function prepareForValidation(): void
-    {
-        parent::prepareForValidation();
-
-        $this->preparePhoneForValidation();
-    }
-
     public function rules(): array
     {
         return [

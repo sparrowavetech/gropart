@@ -2,7 +2,6 @@
 
 namespace Botble\Ecommerce\Forms\Settings;
 
-use Botble\Base\Forms\FieldOptions\PhoneNumberFieldOption;
 use Botble\Base\Forms\FieldOptions\RadioFieldOption;
 use Botble\Base\Forms\FieldOptions\SelectFieldOption;
 use Botble\Base\Forms\FieldOptions\TextFieldOption;
@@ -11,22 +10,18 @@ use Botble\Base\Forms\Fields\GoogleFontsField;
 use Botble\Base\Forms\Fields\HtmlField;
 use Botble\Base\Forms\Fields\MediaImageField;
 use Botble\Base\Forms\Fields\OnOffCheckboxField;
-use Botble\Base\Forms\Fields\PhoneNumberField;
 use Botble\Base\Forms\Fields\RadioField;
 use Botble\Base\Forms\Fields\SelectField;
 use Botble\Base\Forms\Fields\TextField;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Facades\InvoiceHelper;
-use Botble\Ecommerce\Forms\Concerns\HasLocationFields;
 use Botble\Ecommerce\Http\Requests\Settings\InvoiceSettingRequest;
 use Botble\Setting\Forms\SettingForm;
 use Botble\Theme\Facades\Theme;
 
 class InvoiceSettingForm extends SettingForm
 {
-    use HasLocationFields;
-
     public function setup(): void
     {
         parent::setup();
@@ -64,52 +59,63 @@ class InvoiceSettingForm extends SettingForm
                     )))
                     ->colspan(6)
             )
-            ->addLocationFields(
-                countryAttributes: [
-                    'name' => 'company_country_for_invoicing',
-                    'value' => InvoiceHelper::getCompanyCountry(),
-                ],
-                stateAttributes: [
-                    'name' => 'company_state_for_invoicing',
-                    'value' => InvoiceHelper::getCompanyState(),
-                    'colspan' => 2,
-                ],
-                cityAttributes: [
-                    'name' => 'company_city_for_invoicing',
-                    'value' => InvoiceHelper::getCompanyCity(),
-                    'colspan' => 2,
-                ],
-                zipCodeAttributes: [
-                    'name' => 'company_zipcode_for_invoicing',
-                    'value' => InvoiceHelper::getCompanyZipCode(),
-                    'colspan' => 2,
-                ],
-                hiddenFields: ['address']
+            ->add(
+                'company_country_for_invoicing',
+                SelectField::class,
+                SelectFieldOption::make()
+                    ->label(trans('plugins/ecommerce::ecommerce.country'))
+                    ->choices(EcommerceHelper::getAvailableCountries())
+                    ->selected(InvoiceHelper::getCompanyCountry())
+                    ->searchable()
+                    ->colspan(2),
             )
+            ->add(
+                'company_state_for_invoicing',
+                TextField::class,
+                TextFieldOption::make()
+                    ->label(trans('plugins/ecommerce::ecommerce.state'))
+                    ->placeholder('New York')
+                    ->value(InvoiceHelper::getCompanyState())
+                    ->colspan(2)
+            )
+            ->add(
+                'company_city_for_invoicing',
+                TextField::class,
+                TextFieldOption::make()
+                    ->label(trans('plugins/ecommerce::ecommerce.city'))
+                    ->placeholder('New York City')
+                    ->value(InvoiceHelper::getCompanyCity())
+                    ->colspan(2)
+            )
+            ->when(EcommerceHelper::isZipCodeEnabled(), function (FormAbstract $form): void {
+                $form->add('company_zipcode_for_invoicing', TextField::class, [
+                    'label' => trans('plugins/ecommerce::setting.invoice.form.company_zipcode'),
+                    'placeholder' => trans('plugins/ecommerce::setting.invoice.form.company_zipcode_placeholder'),
+                    'helper_text' => trans('plugins/ecommerce::setting.invoice.form.company_zipcode_helper'),
+                    'value' => InvoiceHelper::getCompanyZipCode(),
+                    'colspan' => 3,
+                ]);
+            })
             ->add('company_email_for_invoicing', EmailField::class, [
                 'label' => trans('plugins/ecommerce::setting.invoice.form.company_email'),
                 'placeholder' => trans('plugins/ecommerce::setting.invoice.form.company_email_placeholder'),
                 'helper_text' => trans('plugins/ecommerce::setting.invoice.form.company_email_helper'),
                 'value' => get_ecommerce_setting('company_email_for_invoicing') ?: get_ecommerce_setting('store_email'),
-                'colspan' => 2,
+                'colspan' => 3,
             ])
-            ->add(
-                'company_phone_for_invoicing',
-                PhoneNumberField::class,
-                PhoneNumberFieldOption::make()
-                    ->label(trans('plugins/ecommerce::setting.invoice.form.company_phone'))
-                    ->placeholder(trans('plugins/ecommerce::setting.invoice.form.company_phone_placeholder'))
-                    ->helperText(trans('plugins/ecommerce::setting.invoice.form.company_phone_helper'))
-                    ->value(get_ecommerce_setting('company_phone_for_invoicing') ?: get_ecommerce_setting('store_phone'))
-                    ->withCountryCodeSelection()
-                    ->colspan(2)
-            )
+            ->add('company_phone_for_invoicing', TextField::class, [
+                'label' => trans('plugins/ecommerce::setting.invoice.form.company_phone'),
+                'placeholder' => trans('plugins/ecommerce::setting.invoice.form.company_phone_placeholder'),
+                'helper_text' => trans('plugins/ecommerce::setting.invoice.form.company_phone_helper'),
+                'value' => get_ecommerce_setting('company_phone_for_invoicing') ?: get_ecommerce_setting('store_phone'),
+                'colspan' => 3,
+            ])
             ->add('company_tax_id_for_invoicing', TextField::class, [
                 'label' => trans('plugins/ecommerce::setting.invoice.form.company_tax_id'),
                 'placeholder' => trans('plugins/ecommerce::setting.invoice.form.company_tax_id_placeholder'),
                 'helper_text' => trans('plugins/ecommerce::setting.invoice.form.company_tax_id_helper'),
                 'value' => get_ecommerce_setting('company_tax_id_for_invoicing') ?: get_ecommerce_setting('store_vat_number'),
-                'colspan' => 2,
+                'colspan' => 6,
             ])
             ->add('company_logo_for_invoicing', MediaImageField::class, [
                 'label' => trans('plugins/ecommerce::setting.invoice.form.company_logo'),

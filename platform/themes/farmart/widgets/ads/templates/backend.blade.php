@@ -13,10 +13,11 @@
     <div class="mb-3">
         <label class="form-label" for="widget_ads">{{ __('Select Ads') }}</label>
         {!! Form::customSelect(
-            'ads_key[]',
-            AdsManager::getData(true)->pluck('name', 'key')->toArray(),
-            Arr::wrap($config['ads_key'] ?? null),
-            ['class' => 'form-control select-full', 'multiple' => true],
+            'ads_key',
+            ['' => __('-- Select --')] +
+                AdsManager::getData(true)->pluck('name', 'key')->toArray(),
+            $config['ads_key'],
+            ['class' => 'form-control select-full'],
         ) !!}
     </div>
 

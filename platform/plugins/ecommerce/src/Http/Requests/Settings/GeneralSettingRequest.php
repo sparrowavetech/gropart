@@ -8,18 +8,6 @@ use Botble\Support\Http\Requests\Request;
 
 class GeneralSettingRequest extends Request
 {
-    protected function prepareForValidation(): void
-    {
-        parent::prepareForValidation();
-
-        $phone = $this->input('store_phone');
-        $phoneDisplay = $this->input('store_phone_display');
-
-        if (! $phone && $phoneDisplay) {
-            $this->merge(['store_phone' => $phoneDisplay]);
-        }
-    }
-
     public function rules(): array
     {
         return [

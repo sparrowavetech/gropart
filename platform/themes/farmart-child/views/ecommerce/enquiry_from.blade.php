@@ -75,7 +75,36 @@ $userCity = auth()->check() ? auth()->user()->city : '';
                 </div>
                 <div class="col-lg-6">
                     <div class="mb-3">
-                        <input id="phone" type="text" class="form-control py-3 px-3 @if ($errors->has('phone')) is-invalid @endif" name="phone" value="@if(auth()->check()) {{ auth()->user()->phone }} @endif" placeholder="{{ __('Phone Number') }} *" required>
+                        @if (setting('phone_number_enable_country_code', true))
+                            <input
+                                id="phone"
+                                type="tel"
+                                class="form-control js-phone-number-mask py-3 px-3 @if ($errors->has('phone')) is-invalid @endif"
+                                name="phone_display"
+                                data-country-code-selection="true"
+                                value="{{ old('phone', auth('customer')->check() ? auth('customer')->user()->phone : '') }}"
+                                placeholder="{{ __('Phone Number') }} *"
+                                required
+                            >
+                            <input
+                                type="hidden"
+                                name="phone"
+                                id="phone-full"
+                                class="js-phone-number-full"
+                                data-phone-field="phone_display"
+                                value="{{ old('phone', auth('customer')->check() ? auth('customer')->user()->phone : '') }}"
+                            >
+                        @else
+                            <input
+                                id="phone"
+                                type="tel"
+                                class="form-control js-phone-number-mask py-3 px-3 @if ($errors->has('phone')) is-invalid @endif"
+                                name="phone"
+                                value="{{ old('phone', auth('customer')->check() ? auth('customer')->user()->phone : '') }}"
+                                placeholder="{{ __('Phone Number') }} *"
+                                required
+                            >
+                        @endif
                         @if ($errors->has('phone'))
                         <div class="invalid-feedback">
                             {{ $errors->first('phone') }}
@@ -222,6 +251,12 @@ $userCity = auth()->check() ? auth()->user()->city : '';
 </div>
 {!! Form::close() !!}
 {!! Html::script('vendor/core/plugins/ecommerce/js/utilities.js') !!}
+
+@if (setting('phone_number_enable_country_code', true))
+    @once
+        @include('core/base::forms.fields.phone-number-script')
+    @endonce
+@endif
 
 <script>
     $(document).ready(function() {

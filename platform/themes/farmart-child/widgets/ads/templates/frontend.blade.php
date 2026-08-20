@@ -1,84 +1,36 @@
-@php
-    $slick = [
-        'rtl' => BaseHelper::isRtlEnabled(),
-        'appendArrows' => '.arrows-wrapper',
-        'arrows' => false,
-        'dots' => true,
-        'autoplay' => 'yes',
-        'infinite' => 'no',
-        'autoplaySpeed' => 3000,
-        'speed' => 800,
-        'slidesToShow' => 1,
-        'slidesToScroll' => 1,
-    ];
-
-    // Manually convert the array into a JSON string
-    $slickOptions = json_encode($slick);
-@endphp
-
 @if (is_plugin_active('ads'))
     @php
-        $ads_key = is_array($config['ads_key']) ? $config['ads_key'] : [$config['ads_key']];
+        $images = collect(Arr::wrap($config['ads_key'] ?? null))
+            ->filter(fn ($key) => is_string($key) || is_numeric($key))
+            ->map(fn ($key) => display_ads_advanced((string) $key, ['class' => 'd-flex justify-content-center']))
+            ->filter();
     @endphp
-    @if (is_array($config['ads_key']) && count($config['ads_key']) > 1)
-        <div class="lazyload" @if ($config['background']) data-bg="{{ RvMedia::getImageUrl($config['background']) }}" @endif>
-            <div id="ad-widget-sidbar" class="mb-5 slick-slides-carousel" data-slick='{{ $slickOptions }}'>
-                @foreach ($config['ads_key'] as $adKey)
-                    @php
-                        $image = display_ads_advanced($adKey, ['class' => 'd-flex justify-content-center']);
-                        if (!$image) continue;
-                    @endphp
-                    <div class="slick-slide">
-                        @php
-                            $size = 'xxxl';
-                            switch ($config['size']) {
-                                case 'large':
-                                    $size = 'xxl';
-                                    break;
-                                case 'medium':
-                                    $size = 'lg';
-                                    break;
-                            }
-                        @endphp
-                        <div class="container-{{ $size }}">
-                            <div class="row">
-                                <div class="my-4">
-                                    {!! $image !!}
-                                </div>
-                            </div>
+
+    @if ($images->isNotEmpty())
+        <div
+            class="lazyload"
+            @if ($config['background']) data-bg="{{ RvMedia::getImageUrl($config['background']) }}" @endif
+        >
+            @php
+                $size = 'xxxl';
+                switch ($config['size']) {
+                    case 'large':
+                        $size = 'xxl';
+                        break;
+                    case 'medium':
+                        $size = 'lg';
+                        break;
+                }
+            @endphp
+            <div class="container-{{ $size }}">
+                <div class="row">
+                    @foreach ($images as $image)
+                        <div class="my-5">
+                            {!! $image !!}
                         </div>
-                    </div>
-                @endforeach
-            </div>
-        </div>
-    @else
-        <div id="ad-widget-sidbar" class="mb-4">
-            @foreach ($ads_key as $adKey)
-                @php
-                    $image = display_ads_advanced($adKey, ['class' => 'd-flex justify-content-center']);
-                    if (!$image) continue;
-                @endphp
-                <div class="lazyload" @if ($config['background']) data-bg="{{ RvMedia::getImageUrl($config['background']) }}" @endif>
-                    @php
-                        $size = 'xxxl';
-                        switch ($config['size']) {
-                            case 'large':
-                                $size = 'xxl';
-                                break;
-                            case 'medium':
-                                $size = 'lg';
-                                break;
-                        }
-                    @endphp
-                    <div class="container-{{ $size }}">
-                        <div class="row">
-                            <div class="my-4">
-                                {!! $image !!}
-                            </div>
-                        </div>
-                    </div>
+                    @endforeach
                 </div>
-            @endforeach
+            </div>
         </div>
     @endif
 @endif

@@ -4,7 +4,6 @@ namespace Botble\Marketplace\Http\Requests;
 
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Facades\BaseHelper;
-use Botble\Base\Http\Requests\Concerns\HasPhoneFieldValidation;
 use Botble\Base\Rules\EmailRule;
 use Botble\Base\Rules\MediaImageRule;
 use Botble\Base\Rules\OnOffRule;
@@ -14,15 +13,6 @@ use Illuminate\Validation\Rule;
 
 class StoreRequest extends Request
 {
-    use HasPhoneFieldValidation;
-
-    protected function prepareForValidation(): void
-    {
-        parent::prepareForValidation();
-
-        $this->preparePhoneForValidation();
-    }
-
     public function rules(): array
     {
         return [

@@ -1,12 +1,5 @@
 @if (is_plugin_active('ads'))
-    @php
-        $images = collect(Arr::wrap($config['ads_key'] ?? null))
-            ->filter(fn ($key) => is_string($key) || is_numeric($key))
-            ->map(fn ($key) => display_ads_advanced((string) $key, ['class' => 'd-flex justify-content-center']))
-            ->filter();
-    @endphp
-
-    @if ($images->isNotEmpty())
+    @if ($image = display_ads_advanced($config['ads_key'], ['class' => 'd-flex justify-content-center']))
         <div
             class="lazyload"
             @if ($config['background']) data-bg="{{ RvMedia::getImageUrl($config['background']) }}" @endif
@@ -24,11 +17,9 @@
             @endphp
             <div class="container-{{ $size }}">
                 <div class="row">
-                    @foreach ($images as $image)
-                        <div class="my-5">
-                            {!! $image !!}
-                        </div>
-                    @endforeach
+                    <div class="my-5">
+                        {!! $image !!}
+                    </div>
                 </div>
             </div>
         </div>
