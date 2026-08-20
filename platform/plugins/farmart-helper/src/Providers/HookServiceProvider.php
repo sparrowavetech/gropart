@@ -5,8 +5,7 @@ namespace SparroWave\FarmartHelper\Providers;
 use Botble\Base\Forms\FieldOptions\PhoneNumberFieldOption;
 use Botble\Base\Forms\Fields\PhoneNumberField;
 use Botble\Base\Supports\ServiceProvider;
-use Botble\Ecommerce\Facades\InvoiceHelper;
-use Botble\Ecommerce\Forms\Concerns\HasLocationFields;
+use Botble\Ecommerce\Forms\Fronts\OrderTrackingForm;
 use Botble\Ecommerce\Forms\Settings\GeneralSettingForm;
 use Botble\Ecommerce\Forms\Settings\InvoiceSettingForm;
 use Botble\Ecommerce\Forms\StoreLocatorForm;
@@ -88,5 +87,56 @@ class HookServiceProvider extends ServiceProvider
                 }
             });
         }
+
+        // 5. Frontend Order Tracking Form Extension
+        if (class_exists(OrderTrackingForm::class)) {
+            OrderTrackingForm::extend(function (OrderTrackingForm $form) {
+                if ($form->has('phone')) {
+                    $form->modify(
+                        'phone',
+                        PhoneNumberField::class,
+                        PhoneNumberFieldOption::make()
+                            ->label(__('Phone number'))
+                            ->placeholder(__('Enter your phone number'))
+                            ->required()
+                            ->withCountryCodeSelection()
+                    );
+                }
+            });
+        }
+
+        // 6. Intelligent Order Tracking Phone Query Normalizer
+        add_filter('ecommerce_order_tracking_query', function ($query) {
+            $phone = request()->input('phone') ?: request()->input('phone_display');
+            if ($phone) {
+                $cleanDigits = preg_replace('/[^0-9]/', '', (string) $phone);
+                $last10 = substr($cleanDigits, -10);
+
+                if ($last10) {
+                    $query->orWhere(function ($q) use ($phone, $cleanDigits, $last10) {
+                        $code = request()->input('order_id');
+                        if ($code) {
+                            $q->where(function ($sub) use ($code) {
+                                $sub->where('ec_orders.code', $code)
+                                    ->orWhere('ec_orders.code', '#' . $code);
+                            });
+                        }
+                        $q->where(function ($sub) use ($phone, $cleanDigits, $last10) {
+                            $sub->whereHas('address', function ($addr) use ($phone, $cleanDigits, $last10) {
+                                $addr->where('phone', 'LIKE', "%{$last10}")
+                                    ->orWhere('phone', $phone)
+                                    ->orWhere('phone', "+{$cleanDigits}");
+                            })->orWhereHas('user', function ($usr) use ($phone, $cleanDigits, $last10) {
+                                $usr->where('phone', 'LIKE', "%{$last10}")
+                                    ->orWhere('phone', $phone)
+                                    ->orWhere('phone', "+{$cleanDigits}");
+                            });
+                        });
+                    });
+                }
+            }
+
+            return $query;
+        });
     }
 }
