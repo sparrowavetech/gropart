@@ -6,5 +6,5 @@
     "author": "Sparrowave Solutions",
     "url": "https://www.sparrowave.com",
     "version": "1.0.0",
-    "inherit_from": "farmart"
+    "inherit": "farmart"
 }

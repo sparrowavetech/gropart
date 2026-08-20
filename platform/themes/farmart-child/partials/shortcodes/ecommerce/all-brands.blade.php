@@ -1,0 +1,39 @@
+@php
+    $brands = get_all_brands(['status' => 'published']);
+@endphp
+<div class="widget-featured-brands all-brands py-5">
+    <div class="container-xxxl">
+        <div class="row">
+            <div class="col-12">
+                <div class="row align-items-center mb-2 widget-header">
+                    <h3 class="col-auto mb-0 py-2">{!! BaseHelper::clean($shortcode->title ?: __('All Brands')) !!}</h3>
+                </div>
+                <div class="featured-brands__body arrows-top-right row row-cols-xl-4 row-cols-lg-3 row-cols-md-2 row-cols-2 g-0">
+                @foreach ($brands as $brand)
+                    <div class="featured-brand-item col text-center">
+                        <div class="brand-item-body mx-2 py-2">
+                            <a href="{{ $brand->url }}">
+                                <div class="brand__thumb mb-2 img-fluid-eq">
+                                    <div class="img-fluid-eq__dummy"></div>
+                                    <div class="img-fluid-eq__wrap">
+                                        <img
+                                            class="mx-auto"
+                                            src="{{ RvMedia::getImageUrl($brand->logo, null, false, RvMedia::getDefaultImage()) }}"
+                                            alt="{{ $brand->name }}"
+                                        />
+                                    </div>
+                                </div>
+                                <div class="brand__text">
+                                    <h4 class="h6 fw-bold text-secondary brand__name">
+                                        {{ $brand->name }}
+                                    </h4>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                @endforeach
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

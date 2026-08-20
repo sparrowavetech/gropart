@@ -1,41 +1,18 @@
 <!DOCTYPE html>
 <html {!! Theme::htmlAttributes() !!}>
 <head>
-    <meta charset="utf-8">
-    <meta
-        http-equiv="X-UA-Compatible"
-        content="IE=edge"
-    >
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=5, user-scalable=1"
-    />
-    <meta
-        name="csrf-token"
-        content="{{ csrf_token() }}"
-    >
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=5, user-scalable=1" />
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
+    <meta name="robots" content="index, all, follow" />
+    <meta name="robots" content="sitelinkssearchbox" />
+    <meta name="robots" content="snippet" />
+    <meta name="robots" content="max-snippet:-1" />
+    <meta name="robots" content="max-image-preview:large" />
+    <meta name="googlebot" content="index, all, follow" />
 
     <link rel="stylesheet" href="{{ url('/') }}/themes/gropart/plugins/font-awesome/css/font-awesome.min.css" />
-    <style>
-        nav.navigation .navigation__right .d-sticky-header.header-middle {
-            display: none;
-        }
-        .header.header--sticky nav.navigation .navigation__right .d-sticky-header.header-middle {
-            display: block;
-            border-bottom: 0;
-            margin-top: 7px;
-        }
-        .header.header--sticky nav.navigation .navigation__right .header-recently-viewed {
-            display: none;
-        }
-        .header.header--sticky nav.navigation .navigation__right {
-            min-width:20%;
-        }
-        .header.header--sticky nav.navigation .navigation__right .header-middle.d-sticky-header .header__right {
-            width:100%;
-        }
-    </style>
-
     <style>
         :root {
             --primary-color: {{ theme_option('primary_color', '#fab528') }};
@@ -53,12 +30,27 @@
             --header-text-color: {{ theme_option('header_text_color', '#000') }};
             --header-text-secondary-color: {{ BaseHelper::hexToRgba(theme_option('header_text_color', '#000'), 0.5) }};
             --header-deliver-color: {{ BaseHelper::hexToRgba(theme_option('header_deliver_color', '#000'), 0.15) }};
-            --header-mobile-background-color: {{ theme_option('header_mobile_background_color', '#fff') }};
-            --header-mobile-icon-color: {{ theme_option('header_mobile_icon_color', '#222') }};
             --footer-text-color: {{ theme_option('footer_text_color', '#555') }};
             --footer-heading-color: {{ theme_option('footer_heading_color', '#555') }};
             --footer-hover-color: {{ theme_option('footer_hover_color', '#fab528') }};
             --footer-border-color: {{ theme_option('footer_border_color', '#dee2e6') }};
+        }
+        nav.navigation .navigation__right .d-sticky-header.header-middle {
+            display: none;
+        }
+        .header.header--sticky nav.navigation .navigation__right .d-sticky-header.header-middle {
+            display: block;
+            border-bottom: 0;
+            margin-top: 7px;
+        }
+        .header.header--sticky nav.navigation .navigation__right .header-recently-viewed {
+            display: none;
+        }
+        .header.header--sticky nav.navigation .navigation__right {
+            min-width:20%;
+        }
+        .header.header--sticky nav.navigation .navigation__right .header-middle.d-sticky-header .header__right {
+            width:100%;
         }
     </style>
 
@@ -100,18 +92,13 @@
             <div class="header-upper-top">
                 <div class="container-xxxl">
                     <div class="row align-items-center">
-                        <div class="col-md-12 text-center" style="position: relative;">
+                        <div class="col-md-12 text-center">
                             <p class="m-0">{!! theme_option('top_upper_header_text') !!}</p>
                             <span class="top-dismiss" id="top-dismiss">X</span>
                         </div>
                     </div>
                 </div>
             </div>
-            <script>
-                document.getElementById('top-dismiss')?.addEventListener('click', function() {
-                    this.closest('.header-upper-top').style.display = 'none';
-                });
-            </script>
         @endif
         <div @class([
             'header-top d-none d-lg-block',
@@ -137,11 +124,11 @@
                                                 </li>
                                             @else
                                                 <li class="become-vendor">
-                                                    <a class="become-vendor-link" href="{{ route('marketplace.vendor.become-vendor') }}"><i class="icon-users2"></i> {{ __('Become Partner') }}</a>
+                                                    <a class="become-vendor-link" href="{{ route('marketplace.vendor.become-vendor') }}"><i class="icon-users2"></i> {{ __('Become a vendor') }}</a>
                                                 </li>
                                             @endif
                                         @else
-                                            <li class="become-vendor"><a class="become-vendor-link" href="{{ route('customer.register') }}"><i class="icon-users2"></i> {{ __('Become Partner') }}</a></li>
+                                            <li class="become-vendor"><a class="become-vendor-link" href="{{ route('customer.register') }}"><i class="icon-users2"></i> {{ __('Become Vendor') }}</a></li>
                                         @endif
                                     @endif
                                     @if (is_plugin_active('language'))
@@ -189,8 +176,7 @@
                                             </li>
                                         @else
                                             <li><a href="{{ route('customer.login') }}"><i class="icon-enter"></i> {{ __('Login') }}</a></li>
-                                            <li><a href="{{ route('customer.register') }}"><i class="icon-user"></i> {{ __('Register') }}</a>
-                                            </li>
+                                            <li><a href="{{ route('customer.register') }}"><i class="icon-user"></i> {{ __('Register') }}</a></li>
                                         @endif
                                     @endif
                                 </ul>
@@ -208,26 +194,72 @@
             <div class="container-xxxl">
                 <div class="header-wrapper">
                     <div class="header-items header__left">
-                        <div class="logo">
-                            <a href="{{ BaseHelper::getHomepageUrl() }}">
-                                {!! Theme::getLogoImage(['style' => 'max-height: 45px']) !!}
-                            </a>
-                        </div>
+                        @if ($logo = theme_option('logo'))
+                            @php
+                                $height = theme_option('logo_height', 45);
+
+                                $attributes = [
+                                    'style' => sprintf('max-height: %s', is_numeric($height) ? "{$height}px" : $height),
+                                    'loading' => false,
+                                ];
+                            @endphp
+                            <div class="logo">
+                                <a href="{{ BaseHelper::getHomepageUrl() }}">
+                                    {{ RvMedia::image($logo, theme_option('site_title'), attributes: $attributes) }}
+                                </a>
+                            </div>
+                        @endif
                     </div>
                     <div class="header-items header__center">
                         @if (is_plugin_active('ecommerce'))
-                            {!! Theme::partial('header-search-ecommerce') !!}
+                            <x-plugins-ecommerce::fronts.ajax-search class="form--quick-search">
+                                <div
+                                    class="form-group--icon"
+                                    style="display: none"
+                                >
+                                    <div class="product-category-label">
+                                        <label for="product-category-select" class="text">{{ __('All Categories') }}</label>
+                                        <span class="svg-icon">
+                                            <svg>
+                                                <use
+                                                    href="#svg-icon-chevron-down"
+                                                    xlink:href="#svg-icon-chevron-down"
+                                                ></use>
+                                            </svg>
+                                        </span>
+                                    </div>
+                                    <x-plugins-ecommerce::fronts.ajax-search.categories-dropdown
+                                        class="form-control product-category-select"
+                                        id="product-category-select"
+                                    />
+                                </div>
+                                <x-plugins-ecommerce::fronts.ajax-search.input type="text" class="form-control input-search-product" />
+                                <button
+                                    class="btn"
+                                    type="submit"
+                                    aria-label="Submit"
+                                >
+                                    <span class="svg-icon">
+                                        <svg>
+                                            <use
+                                                href="#svg-icon-search"
+                                                xlink:href="#svg-icon-search"
+                                            ></use>
+                                        </svg>
+                                    </span>
+                                </button>
+                            </x-plugins-ecommerce::fronts.ajax-search>
                         @endif
                     </div>
                     <div class="header-items header__right">
-                        @if (theme_option('hotline'))
+                        <!--@if (theme_option('hotline'))
                             <div class="header__extra header-support">
                                 <div class="header-box-content">
                                     <span>{{ theme_option('hotline') }}</span>
                                     <p>{{ __('Support 24/7') }}</p>
                                 </div>
                             </div>
-                        @endif
+                        @endif-->
 
                         @if (is_plugin_active('ecommerce'))
                             @if (EcommerceHelper::isCompareEnabled())
@@ -322,7 +354,7 @@
                 <nav class="navigation">
                     <div class="container-xxxl">
                         <div class="navigation__left">
-                            @if (is_plugin_active('ecommerce'))
+                            @if(is_plugin_active('ecommerce'))
                                 @if (theme_option('enabled_product_categories_on_header', 'yes') == 'yes' && theme_option('enabled_product_categories_sidebar_on_header', 'yes') != 'yes')
                                     <div class="menu--product-categories">
                                         <div class="menu__toggle">
@@ -336,17 +368,15 @@
                                             </span>
                                             <span class="menu__toggle-title">{{ __('Shop by Category') }}</span>
                                         </div>
-                                        <div
-                                            class="menu__content"
+                                        <div class="menu__content"
                                             data-bb-toggle="init-categories-dropdown"
                                             data-bb-target=".menu--dropdown"
-                                            data-url="{{ route('public.ajax.categories-dropdown') }}"
-                                        >
+                                            data-url="{{ route('public.ajax.categories-dropdown') }}">
                                             <ul class="menu--dropdown"></ul>
                                         </div>
                                     </div>
                                 @endif
-                                @if (theme_option('enabled_product_categories_sidebar_on_header', 'yes') == 'yes')
+                                @if(theme_option('enabled_product_categories_sidebar_on_header', 'yes') == 'yes')
                                     <div class="menu--product-categories">
                                         <a class="menu__toggle toggle--sidebar" href="#navigation-desktop">
                                             <span class="svg-icon">
@@ -397,7 +427,6 @@
                                     </div>
                                 </div>
                             @endif
-
                             @if (is_plugin_active('ecommerce'))
                                 <div class="header-middle d-sticky-header">
                                     <div class="header-items header__right">
@@ -487,11 +516,13 @@
                 </div>
             </div>
             <div class="header-items-mobile header-items-mobile--center">
-                <div class="logo">
-                    <a href="{{ BaseHelper::getHomepageUrl() }}">
-                        {!! Theme::getLogoImage(['style' => 'max-height: 45px']) !!}
-                    </a>
-                </div>
+                @if ($logo)
+                    <div class="logo">
+                        <a href="{{ BaseHelper::getHomepageUrl() }}">
+                            {{ RvMedia::image($logo, theme_option('site_title'), attributes: $attributes) }}
+                        </a>
+                    </div>
+                @endif
             </div>
             <div class="header-items-mobile header-items-mobile--right">
                 <div class="search-form--mobile search-form--mobile-right search-panel">

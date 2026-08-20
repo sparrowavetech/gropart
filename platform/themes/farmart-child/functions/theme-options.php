@@ -1,8 +1,27 @@
 <?php
 
-app()->booted(function () {
+use Botble\Theme\Events\RenderingThemeOptionSettings;
+
+app('events')->listen(RenderingThemeOptionSettings::class, function (): void {
     if (function_exists('theme_option')) {
         theme_option()
+            ->setField([
+                'id' => 'enable_top_upper_header',
+                'section_id' => 'opt-text-subsection-general',
+                'type' => 'customSelect',
+                'label' => __('Enable Top Header CTA Banner?'),
+                'attributes' => [
+                    'name' => 'enable_top_upper_header',
+                    'list' => [
+                        'yes' => trans('core/base::base.yes'),
+                        'no' => trans('core/base::base.no'),
+                    ],
+                    'value' => 'yes',
+                    'options' => [
+                        'class' => 'form-control',
+                    ],
+                ],
+            ])
             ->setField([
                 'id' => 'top_upper_header_text',
                 'section_id' => 'opt-text-subsection-general',

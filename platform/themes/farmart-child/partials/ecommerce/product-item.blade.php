@@ -69,13 +69,9 @@
             {!! Theme::partial('star-rating', ['avg' => $product->reviews_avg, 'count' => $product->reviews_count]) !!}
         @endif
         {!! Theme::partial('ecommerce.product-price', compact('product')) !!}
-        @if ((bool) ($product->is_cod_eligible ?? false))
-            <div class="product-cod-label mt-1">
-                <span class="badge bg-success" style="background-color: #28a745 !important; color: white; padding: 2px 5px; font-size: 10px; border-radius: 4px;">
-                    <i class="ti ti-truck"></i> {{ __('COD Available') }}
-                </span>
-            </div>
-        @endif
+        <div class="product-item-badges d-flex flex-wrap align-items-center gap-1 mt-1" style="min-height: 20px;">
+            {!! apply_filters('ecommerce_after_product_price', null, $product) !!}
+        </div>
         @if (!empty($isFlashSale))
             <div class="deal-sold row mt-2">
                 @if (Botble\Ecommerce\Facades\FlashSale::isShowSaleCountLeft())
@@ -106,9 +102,9 @@
                     </div>
                 </div>
             </div>
-        @endisset
-</div>
-<div class="product-bottom-box">
-    {!! Theme::partial('ecommerce.product-cart-form', compact('product')) !!}
-</div>
+        @endif
+    </div>
+    <div class="product-bottom-box">
+        {!! Theme::partial('ecommerce.product-cart-form', compact('product')) !!}
+    </div>
 </div>
