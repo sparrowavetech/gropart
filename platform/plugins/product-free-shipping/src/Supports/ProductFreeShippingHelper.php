@@ -39,8 +39,15 @@ class ProductFreeShippingHelper
             return false;
         }
 
-        if (is_object($product) && isset($product->product_free_shipping)) {
-            return (bool) $product->product_free_shipping;
+        if (is_object($product)) {
+            if (isset($product->product_free_shipping)) {
+                return (bool) $product->product_free_shipping;
+            }
+
+            if (isset($product->id)) {
+                $p = Product::find($product->id);
+                return $p ? (bool) $p->product_free_shipping : false;
+            }
         }
 
         return false;

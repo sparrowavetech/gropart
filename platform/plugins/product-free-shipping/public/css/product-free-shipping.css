@@ -82,60 +82,13 @@
     margin-left: 4px !important;
 }
 
-/* 4. Grid & Carousel Card Height Equalization (Universal across Botble themes) */
-.slick-slides-carousel .slick-track,
-.products-listing .row,
-.product-grids {
-    display: flex !important;
-    flex-wrap: wrap !important;
-}
-
-.slick-slides-carousel .slick-slide {
-    height: auto !important;
-    display: flex !important;
-    flex-direction: column !important;
-}
-
-.slick-slides-carousel .slick-slide > div {
-    height: 100% !important;
-    display: flex !important;
-    flex-direction: column !important;
-}
-
-.product-inner,
-.product-item,
-.ps-product {
-    height: 100% !important;
-    display: flex !important;
-    flex-direction: column !important;
-    justify-content: space-between !important;
-}
-
-.product-details,
-.ps-product__content {
-    display: flex !important;
-    flex-direction: column !important;
-    flex: 1 1 auto !important;
-    justify-content: space-between !important;
-}
-
-.product-content-box {
-    display: flex !important;
-    flex-direction: column !important;
-    flex: 1 1 auto !important;
-    justify-content: space-between !important;
-}
-
+/* 4. Product Card Badge Container */
 .product-item-badges {
     min-height: 20px;
     display: flex;
     align-items: center;
     flex-wrap: wrap;
     gap: 4px;
-}
-
-.product-bottom-box {
-    margin-top: auto !important;
 }
 
 /* 5. Cart & Checkout Free Shipping Indicators */

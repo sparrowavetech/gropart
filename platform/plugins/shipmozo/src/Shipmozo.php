@@ -132,9 +132,23 @@ class Shipmozo
         $length = 0;
         $wide = 0;
         $height = 0;
+        $billableItemCount = 0;
 
         foreach ($items as $item) {
             $qty = max((int) Arr::get($item, 'qty', 1), 1);
+
+            // Check if this specific item has free delivery enabled
+            $isFreeShipping = false;
+            if (is_plugin_active('product-free-shipping') && class_exists(\SparroWave\ProductFreeShipping\Supports\ProductFreeShippingHelper::class)) {
+                $isFreeShipping = \SparroWave\ProductFreeShipping\Supports\ProductFreeShippingHelper::isProductFreeShipping($item);
+            }
+
+            if ($isFreeShipping) {
+                // Free shipping product -> skip adding weight and dimensions to ShipMozo billable payload
+                continue;
+            }
+
+            $billableItemCount++;
 
             // Decimal inputs (e.g. 0.200) mean Kilograms in Botble. ShipMozo expects integer Grams.
             $rawWeight = (float) Arr::get($item, 'weight', 0);
@@ -150,6 +164,11 @@ class Shipmozo
             $length = max($length, (float) Arr::get($item, 'length', 10));
             $wide = max($wide, (float) Arr::get($item, 'wide', Arr::get($item, 'width', 10)));
             $height = max($height, (float) Arr::get($item, 'height', 10));
+        }
+
+        // If all items in this package are free shipping, bypass ShipMozo rate calculation (Free Delivery applies)
+        if (! empty($items) && $billableItemCount === 0) {
+            return [];
         }
 
         // Enforce global minimum weight safely ensuring the payload is never 0
