@@ -15,6 +15,7 @@ return [
         'add-amount' => '금액 추가',
         'subtract-amount' => '금액 차감',
         'order-return' => '주문 반품',
+        'subscription-fee' => '구독료',
     ],
     'store_name' => '스토어명',
     'vendor_name' => '판매자명',

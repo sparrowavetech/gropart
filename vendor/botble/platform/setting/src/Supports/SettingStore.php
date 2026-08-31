@@ -4,6 +4,7 @@ namespace Botble\Setting\Supports;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
+use Throwable;
 
 abstract class SettingStore
 {
@@ -108,8 +109,33 @@ abstract class SettingStore
     public function load(bool $force = false): void
     {
         if (! $this->loaded || $force) {
-            $this->data = $this->read();
+            /**
+             * `$loaded` is set BEFORE read(), not after.
+             *
+             * read() hydrates Eloquent models, and the model layer calls setting()
+             * during hydration. With the flag set afterwards, that nested call
+             * re-entered load() -> read() -> hydrate -> load() and recursed until
+             * the PHP process died with no error output.
+             *
+             * A single-tenant install never noticed: settings are loaded once during
+             * boot, so the nested call always short-circuited. Reloading the store
+             * later in the request (as a multi-tenant install does on every tenant
+             * switch) is what makes it reachable.
+             *
+             * Setting the flag first makes a re-entrant read return the
+             * currently-known data (empty on a fresh instance) instead of looping.
+             */
             $this->loaded = true;
+
+            try {
+                $this->data = $this->read();
+            } catch (Throwable $exception) {
+                // A failed read must not be cached as "loaded", or every later get()
+                // would silently answer with defaults for the rest of the request.
+                $this->loaded = false;
+
+                throw $exception;
+            }
         }
     }
 

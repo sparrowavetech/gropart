@@ -15,6 +15,7 @@ return [
         'add-amount' => 'Bedrag Toevoegen',
         'subtract-amount' => 'Bedrag Aftrekken',
         'order-return' => 'Bestelling Retour',
+        'subscription-fee' => 'Abonnementskosten',
     ],
     'store_name' => 'Winkelnaam',
     'vendor_name' => 'Verkoper Naam',

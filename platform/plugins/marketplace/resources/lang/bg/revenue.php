@@ -15,6 +15,7 @@ return [
         'add-amount' => 'Добавете сума',
         'subtract-amount' => 'Извадете сума',
         'order-return' => 'Връщане на поръчка',
+        'subscription-fee' => 'Абонаментна такса',
     ],
     'store_name' => 'Име на магазина',
     'vendor_name' => 'Име на търговеца',

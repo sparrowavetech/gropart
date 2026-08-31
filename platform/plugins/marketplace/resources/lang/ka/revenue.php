@@ -15,6 +15,7 @@ return [
         'add-amount' => 'თანხის დამატება',
         'subtract-amount' => 'თანხის გამოკლება',
         'order-return' => 'შეკვეთის დაბრუნება',
+        'subscription-fee' => 'სააბონენტო გადასახადი',
     ],
     'store_name' => 'მაღაზიის სახელი',
     'vendor_name' => 'გამყიდველის სახელი',

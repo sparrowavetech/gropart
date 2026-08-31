@@ -12,7 +12,7 @@
             \Botble\Ecommerce\Forms\Fronts\Customer\AddressForm::create()
                 ->add('customer_id', 'hidden', ['value' => $form->getModel()->id])
                 ->remove('submit')
-                ->renderForm()
+                ->renderForm([], false, true, false)
         !!}
 
         <x-slot:footer>

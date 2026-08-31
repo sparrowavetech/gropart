@@ -2,7 +2,7 @@
 
 return [
     'name' => 'Fornecedores não verificados',
-    'verify' => 'Verifique o fornecedor ":nome"',
+    'verify' => 'Verifique o fornecedor ":name"',
     'forms' => [
         'email' => 'E-mail',
         'store_name' => 'Nome da loja',

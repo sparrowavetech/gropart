@@ -15,6 +15,7 @@ use Botble\Media\Models\MediaFile;
 use Botble\Media\Models\MediaFolder;
 use Botble\Media\Services\ThumbnailService;
 use Botble\Media\Services\UploadsManager;
+use Botble\Media\Supports\ImageMemoryGuard;
 use Botble\Media\Supports\ResponsiveImageSrcset;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -612,6 +613,18 @@ class RvMedia
             if ($this->canGenerateThumbnails($fileUpload->getMimeType())) {
                 $originalFilePath = $filePath;
 
+                $memoryGuard = ImageMemoryGuard::make($fileUpload->getRealPath());
+
+                if (! $memoryGuard->canProcess()) {
+                    return [
+                        'error' => true,
+                        'message' => trans('core/media::media.image_dimensions_too_large', [
+                            'dimensions' => $memoryGuard->getHumanReadableDimensions(),
+                            'megapixels' => $memoryGuard->getMegaPixels(),
+                        ]),
+                    ];
+                }
+
                 try {
                     $imageQuality = $this->getImageQuality();
                     $encoder = new AutoEncoder(quality: $imageQuality);
@@ -733,13 +746,7 @@ class RvMedia
 
     public function parseSize(int|string $size): float
     {
-        $unit = preg_replace('/[^bkmgtpezy]/i', '', $size); // Remove the non-unit characters from the size.
-        $size = (int) preg_replace('/[^0-9\.]/', '', $size); // Remove the non-numeric characters from the size.
-        if ($unit) {
-            return round($size * pow(1024, stripos('bkmgtpezy', $unit[0])));
-        }
-
-        return round($size);
+        return (float) ImageMemoryGuard::parseSize((string) $size);
     }
 
     public function generateThumbnails(MediaFile $file, ?UploadedFile $fileUpload = null, bool $overrideExisting = false): bool
@@ -750,6 +757,23 @@ class RvMedia
 
         if (! $this->isUsingCloud() && ! File::exists($this->getRealPath($file->url))) {
             return false;
+        }
+
+        // Decoding a very large image exhausts the memory limit, which is a fatal
+        // error that cannot be caught, so skip watermark & thumbnails for those files.
+        if (! $this->isUsingCloud()) {
+            $memoryGuard = ImageMemoryGuard::make($this->getRealPath($file->url));
+
+            if (! $memoryGuard->canProcess()) {
+                logger()->warning('Skipped generating thumbnails, image is too large to process.', [
+                    'file' => $file->url,
+                    'dimensions' => $memoryGuard->getHumanReadableDimensions(),
+                    'required_memory' => $memoryGuard->getRequiredMemory(),
+                    'memory_limit' => ini_get('memory_limit'),
+                ]);
+
+                return false;
+            }
         }
 
         $folderIds = json_decode(setting('media_folders_can_add_watermark', ''), true);
@@ -837,6 +861,10 @@ class RvMedia
                 $imageSource = $this->imageManager()->read($imageContent);
             } else {
                 if (! File::exists($watermarkPath)) {
+                    return false;
+                }
+
+                if (! ImageMemoryGuard::make($this->getRealPath($image))->canProcess()) {
                     return false;
                 }
 

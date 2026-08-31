@@ -50,6 +50,16 @@ return [
         'subscribed' => '已订阅',
         'unsubscribed' => '退订',
     ],
+    'email_templates' => [
+        // Admin email template
+        'admin_new_subscriber_title' => '新订阅者',
+        'admin_new_subscriber_message' => '有新用户订阅了您的新闻通讯：',
+
+        // Subscriber email template
+        'subscriber_success_title' => '订阅成功',
+        'subscriber_thank_you_message' => '感谢您订阅我们的新闻通讯！',
+        'subscriber_unsubscribe_instruction' => '要退订新闻通讯，请点击 :newsletter_unsubscribe_link',
+    ],
 
     'enter_your_email' => '输入您的电子邮件',
     'subscribe' => '订阅',

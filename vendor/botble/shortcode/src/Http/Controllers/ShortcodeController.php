@@ -129,7 +129,9 @@ class ShortcodeController extends BaseController
     protected function protectHtmlInAttributes(string $code): string
     {
         return preg_replace_callback(
-            '/(\w+)="([^"]*)"/',
+            // Values may contain escaped double quotes (\"), so the value part must skip over them
+            // instead of ending the match on the first quote it finds.
+            '/(\w+)="((?:[^"\\\\]|\\\\.)*)"/',
             function ($matches) {
                 $name = $matches[1];
                 $value = $matches[2];

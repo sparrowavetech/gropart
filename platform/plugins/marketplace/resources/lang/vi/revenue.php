@@ -15,6 +15,7 @@ return [
         'add-amount' => 'Cộng tiền',
         'subtract-amount' => 'Trừ tiền',
         'order-return' => 'Hoàn hàng',
+        'subscription-fee' => 'Phí đăng ký',
     ],
     'store_name' => 'Tên cửa hàng',
     'vendor_name' => 'Tên người bán',

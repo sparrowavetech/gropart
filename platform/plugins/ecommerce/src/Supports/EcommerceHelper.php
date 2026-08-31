@@ -2131,6 +2131,18 @@ class EcommerceHelper
                     ],
                 ],
             ]);
+
+            ThemeOption::setField([
+                'id' => 'ecommerce_product_gallery_video_controls',
+                'section_id' => 'opt-text-subsection-ecommerce',
+                'type' => 'onOff',
+                'label' => __('Show native player controls on product gallery videos'),
+                'attributes' => [
+                    'name' => 'ecommerce_product_gallery_video_controls',
+                    'value' => false,
+                ],
+                'helper' => __('Display the browser video controls (pause, seek, volume, fullscreen) on self-hosted product videos.'),
+            ]);
         });
     }
 

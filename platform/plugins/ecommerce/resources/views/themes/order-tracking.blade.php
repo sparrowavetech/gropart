@@ -1,9 +1,16 @@
 <section class="order-tracking">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            {!! $form->renderForm() !!}
+    {{-- The form renders its own container and card, see `plugins/ecommerce::forms.card`. --}}
+    {!! $form->renderForm() !!}
 
-            @include(EcommerceHelper::viewPath('includes.order-tracking-detail'))
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-xl-6 col-lg-8">
+                @if ($order)
+                    @include(EcommerceHelper::viewPath('includes.order-tracking-detail'))
+                @elseif (request()->filled(['order_id', EcommerceHelper::isOrderTrackingUsingPhone() ? 'phone' : 'email']))
+                    <p class="text-center text-danger">{{ __('Order not found!') }}</p>
+                @endif
+            </div>
         </div>
     </div>
 </section>

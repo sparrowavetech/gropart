@@ -15,6 +15,7 @@ return [
         'add-amount' => 'राशि जोड़ें',
         'subtract-amount' => 'राशि घटाएं',
         'order-return' => 'ऑर्डर वापसी',
+        'subscription-fee' => 'सदस्यता शुल्क',
     ],
     'store_name' => 'स्टोर नाम',
     'vendor_name' => 'विक्रेता नाम',

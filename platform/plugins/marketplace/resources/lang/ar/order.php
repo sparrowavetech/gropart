@@ -10,7 +10,7 @@ return [
     ],
     'products_are_from_different_vendors' => 'لا يمكن إنشاء الطلب! المنتجات من بائعين مختلفين.',
     'return' => [
-        'description' => 'عاد من الطلب #:الطلب',
+        'description' => 'عاد من الطلب #:order',
     ],
     'thank_you' => [
         'count_orders' => ':count طلبات',

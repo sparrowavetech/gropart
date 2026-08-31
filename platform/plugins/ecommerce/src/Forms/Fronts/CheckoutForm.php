@@ -25,6 +25,11 @@ use Throwable;
 
 class CheckoutForm extends FormFront
 {
+    public static function formTitle(): string
+    {
+        return __('Checkout form');
+    }
+
     public function setup(): void
     {
         $model = $this->getModel();

@@ -3,6 +3,7 @@
 return [
     'name' => '所在地',
     'all_states' => 'すべての州',
+    'slug' => 'スラッグ',
     'abbreviation' => '略語',
     'abbreviation_placeholder' => '例: カリフォルニア州',
     'import_type' => [

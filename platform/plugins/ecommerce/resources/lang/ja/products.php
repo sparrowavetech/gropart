@@ -3,6 +3,9 @@
 return [
     'name' => '商品',
     'description' => '在庫、価格、バリエーションを含む物理的およびデジタル商品を管理',
+    'rating' => '評価',
+    'star_and_up' => '星:count以上',
+    'stars_and_up' => '星:count以上',
     'create' => '新規商品',
     'create_product_type' => [
         'physical' => '新規物理商品',
@@ -155,7 +158,7 @@ return [
     'save_changes' => '変更を保存',
     'continue' => '続行',
     'edit_attribute' => '属性を編集',
-    'select_attribute' => '属性を選択',
+    'select_attribute' => ':nameを選択',
     'add_new_variation' => '新しいバリエーションを追加',
     'edit_variation' => 'バリエーションを編集',
     'generate_variations' => 'バリエーションを生成',
@@ -331,6 +334,7 @@ return [
         'multiple_options' => '複数のオプション',
         'multiple_options_available' => '複数のオプションが利用可能',
         'select' => '選択',
+        'select_options_hint' => '追加するオプションを選択',
         'selected_items_total' => '選択した商品の合計:',
         'add_selected_to_cart' => '選択した商品をカートに追加',
         'bundle_discount_with' => ':productとのバンドル割引',
@@ -446,7 +450,6 @@ return [
     'views' => '閲覧数',
     'total' => '合計',
     'view_on_frontend' => 'フロントエンドで表示',
-    'select_attribute' => ':nameを選択',
     'all_categories' => 'すべてのカテゴリ',
     'brands' => 'ブランド',
     'sku_1' => 'SKU:',
@@ -505,5 +508,7 @@ return [
         'load_more' => 'さらにロードする',
         'paste_url_alt' => 'または製品の URL を貼り付けます',
         'vs_separator' => 'vs',
+        'empty_description' => '最大4件の商品を並べて、仕様・価格・在庫状況の違いをひと目で比較できます。',
+        'browse_products' => '商品を見る',
     ],
 ];

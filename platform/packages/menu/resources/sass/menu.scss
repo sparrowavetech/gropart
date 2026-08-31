@@ -29,6 +29,44 @@
     color: var(--bb-body-color);
 }
 
+// Hidden until bulk delete is turned on - selecting items is a rare action, so the checkboxes
+// should not take up room in the row by default.
+// The drag handle is absolutely positioned over the whole row, so anything that has to stay
+// clickable must be positioned too, otherwise the handle paints on top of it and starts a drag.
+.menu-item-select {
+    display: none;
+    position: absolute;
+    left: 1px;
+    top: 1px;
+    z-index: 1;
+    height: 38px;
+    width: 34px;
+    margin: 0;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background-color: var(--bb-body-bg);
+    border-right: var(--bb-border-width) var(--bb-border-style) var(--bb-border-color);
+    border-top-left-radius: var(--bb-border-radius);
+    border-bottom-left-radius: var(--bb-border-radius);
+
+    .form-check-input {
+        margin: 0;
+        cursor: pointer;
+    }
+}
+
+.bulk-select-active {
+    .menu-item-select {
+        display: inline-flex;
+    }
+
+    .dd3-content {
+        // Room for the absolutely positioned selection checkbox.
+        padding-left: 40px;
+    }
+}
+
 .dd3-handle {
     position: absolute;
     margin: 0;

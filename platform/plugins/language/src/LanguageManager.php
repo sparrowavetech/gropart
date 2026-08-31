@@ -1021,7 +1021,14 @@ class LanguageManager
             // it tries to get it from the first segment of the url
             $locale = $this->request->segment(1);
 
-            $localeFromRequest = $this->request->input('language') ?: $this->request->header('X-LANGUAGE');
+            // The `language` input is the admin content-translation switcher. On the front-end it
+            // would swallow any form field that happens to be named `language` (e.g. the account
+            // "add language" form) and rewrite the whole public route group under that locale
+            // prefix, making the submitted URL 404. Use the forced check: plugins may filter
+            // is_in_admin() to treat front URLs as admin, and route names are not resolved yet
+            // at the point this runs. The X-LANGUAGE header stays honoured everywhere.
+            $localeFromRequest = (is_in_admin(true) ? $this->request->input('language') : null)
+                ?: $this->request->header('X-LANGUAGE');
 
             if ($localeFromRequest && is_string($localeFromRequest) && array_key_exists($localeFromRequest, $supportedLocales)) {
                 $locale = $localeFromRequest;

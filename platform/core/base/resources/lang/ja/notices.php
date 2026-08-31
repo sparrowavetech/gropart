@@ -12,7 +12,7 @@ return [
     'success' => '成功！',
     'info' => '情報！',
     'enum' => [
-        'validate_message' => 'The :attribute value you have entered is invalid.',
+        'validate_message' => '入力された :attribute の値は無効です。',
     ],
     'delete_failed_message' => 'アイテムが見つからないため、削除できませんでした。',
 ];

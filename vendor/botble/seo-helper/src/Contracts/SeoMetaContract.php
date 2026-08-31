@@ -102,6 +102,24 @@ interface SeoMetaContract extends RenderableContract
      */
     public function addMetas(array $meta);
 
+    /**
+     * Add a meta tag rendered with the `property` attribute instead of `name`,
+     * e.g. `article:published_time`. No prefix is applied.
+     *
+     * @param string $property
+     * @param string $content
+     * @return $this
+     */
+    public function addPropertyMeta($property, $content);
+
+    /**
+     * Add many `property` meta tags at once.
+     *
+     * @param array $meta
+     * @return $this
+     */
+    public function addPropertyMetas(array $meta);
+
     public function getAnalytics(): AnalyticsContract;
 
     public function getTitle();

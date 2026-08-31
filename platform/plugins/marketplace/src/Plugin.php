@@ -11,6 +11,10 @@ class Plugin extends PluginOperationAbstract
 {
     public static function remove(): void
     {
+        Schema::dropIfExists('mp_vendor_subscription_invoices');
+        Schema::dropIfExists('mp_vendor_subscription_logs');
+        Schema::dropIfExists('mp_vendor_subscriptions');
+        Schema::dropIfExists('mp_subscription_plans');
         Schema::dropIfExists('mp_messages');
         Schema::dropIfExists('mp_vendor_info');
         Schema::dropIfExists('mp_customer_revenues');
@@ -25,6 +29,10 @@ class Plugin extends PluginOperationAbstract
         });
 
         Schema::table('ec_products', function (Blueprint $table): void {
+            if (Schema::hasColumn('ec_products', 'unpublished_by_subscription_at')) {
+                $table->dropColumn('unpublished_by_subscription_at');
+            }
+
             if (Schema::hasColumn('ec_products', 'store_id')) {
                 $table->dropColumn('store_id');
             }
@@ -65,6 +73,16 @@ class Plugin extends PluginOperationAbstract
             'marketplace_fee_per_order',
             'marketplace_fee_withdrawal',
             'marketplace_payout_methods',
+            'marketplace_mode',
+            'marketplace_subscription_unpublish_products_on_expired',
+            'marketplace_subscription_grace_period_days',
+            'marketplace_subscription_reminder_days',
+            'marketplace_subscription_allow_balance_payment',
+            'marketplace_subscription_require_admin_approval',
+            'marketplace_subscription_payment_methods',
+            'marketplace_subscription_allow_vendor_cancel',
+            'marketplace_subscription_tax_enabled',
+            'marketplace_subscription_invoice_prefix',
         ]);
     }
 }

@@ -17,6 +17,7 @@ class BlogSettingRequest extends Request
                 'string',
                 Rule::in(['NewsArticle', 'News', 'Article', 'BlogPosting']),
             ],
+            'blog_heading_anchors_enabled' => new OnOffRule(),
         ];
     }
 }

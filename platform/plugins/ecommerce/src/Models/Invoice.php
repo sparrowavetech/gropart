@@ -4,6 +4,7 @@ namespace Botble\Ecommerce\Models;
 
 use Botble\Base\Models\BaseModel;
 use Botble\Ecommerce\Enums\InvoiceStatusEnum;
+use Botble\Ecommerce\Models\Concerns\HasUniqueCode;
 use Botble\Payment\Models\Payment;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,6 +13,8 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class Invoice extends BaseModel
 {
+    use HasUniqueCode;
+
     protected $table = 'ec_invoices';
 
     protected $fillable = [

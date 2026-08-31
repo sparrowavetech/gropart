@@ -1,24 +1,35 @@
 <?php
 
 return [
+    'name' => '商品仕様',
     'product_specification' => '商品仕様',
+    'import' => [
+        'name' => '商品仕様のインポート',
+        'description' => 'CSV／Excelファイルをアップロードして、商品仕様を一括でインポートします。',
+        'done_message' => ':count件の商品の仕様を更新しました。',
+        'rules' => [
+            'name' => '商品名は必須です。既存の親商品と一致する必要があります。',
+            'specification_table' => '仕様テーブル名は、既存の仕様テーブルと一致する必要があります。',
+            'specifications' => '仕様は「名称:値」の形式で入力し、「|」で区切ってください。',
+            'specifications_locale' => ':localeの仕様は「名称:値」の形式で入力し、「|」で区切ってください。',
+        ],
+    ],
+    'export' => [
+        'description' => '商品仕様をCSV／Excelファイルにエクスポートします。',
+    ],
     'specification_groups' => [
         'title' => '仕様グループ',
         'menu_name' => 'グループ',
-
         'create' => [
             'title' => '仕様グループを作成',
         ],
-
         'edit' => [
             'title' => '仕様グループを編集 ":name"',
         ],
     ],
-
     'specification_attributes' => [
         'title' => '仕様属性',
         'menu_name' => '属性',
-
         'group' => '関連グループ',
         'group_placeholder' => 'グループを選択',
         'name_placeholder' => '属性名を入力',
@@ -28,33 +39,26 @@ return [
         'default_value_placeholder' => 'デフォルト値を入力（任意）',
         'options' => [
             'heading' => 'オプション',
-
             'add' => [
                 'label' => '新しいオプションを追加',
             ],
         ],
-
         'create' => [
             'title' => '仕様属性を作成',
         ],
-
         'edit' => [
             'title' => '仕様属性を編集 ":name"',
         ],
     ],
-
     'specification_tables' => [
         'title' => '仕様テーブル',
         'menu_name' => 'テーブル',
-
         'create' => [
             'title' => '仕様テーブルを作成',
         ],
-
         'edit' => [
             'title' => '仕様テーブルを編集 ":name"',
         ],
-
         'fields' => [
             'groups' => 'このテーブルに表示するグループを選択',
             'name' => 'グループ名',
@@ -62,7 +66,6 @@ return [
             'sorting' => 'ソート',
         ],
     ],
-
     'product' => [
         'specification_table' => [
             'options' => 'オプション',
@@ -79,7 +82,6 @@ return [
             'not_set' => '未設定',
         ],
     ],
-
     'enums' => [
         'field_types' => [
             'text' => 'テキスト',

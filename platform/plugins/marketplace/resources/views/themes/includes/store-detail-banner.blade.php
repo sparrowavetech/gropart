@@ -23,7 +23,7 @@
                     @if (!MarketplaceHelper::hideStoreAddress() && $store->full_address)
                         <div class="bb-shop-banner-address d-flex gap-1">
                             <x-core::icon name="ti ti-map-pin" />
-                            {{ $store->full_address }}
+                            <a href="{{ $store->map_url }}" target="_blank" rel="nofollow noopener">{{ $store->full_address }}</a>
                         </div>
                     @endif
 

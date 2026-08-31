@@ -4,8 +4,10 @@ namespace Botble\Blog\Models;
 
 use Botble\ACL\Models\User;
 use Botble\Base\Casts\SafeContent;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Models\BaseModel;
 use Botble\Blog\Enums\PostStatusEnum;
+use Botble\Blog\Supports\HeadingAnchors;
 use Botble\Revision\RevisionableTrait;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -105,8 +107,47 @@ class Post extends BaseModel
                     return number_format((float) $timeToRead);
                 }
 
-                return number_format(ceil(str_word_count(strip_tags($this->content)) / 200));
+                return number_format(ceil($this->word_count / 200));
             }
+        );
+    }
+
+    /**
+     * Post body, with anchor ids added to its headings when the feature is enabled.
+     *
+     * Implemented as a read accessor rather than a render filter because there is no hook
+     * for post content - every theme renders `$post->content` straight into the view, so
+     * this is the only way the feature reaches existing themes without editing them.
+     *
+     * An accessor is also the safe choice: `save()` persists the stored attribute, not the
+     * accessor result, so generated ids can never be written back to the database.
+     *
+     * Frontend only, so the admin editor, translation exports and console commands keep
+     * seeing exactly what the author wrote.
+     */
+    protected function content(): Attribute
+    {
+        return Attribute::get(function (?string $value): ?string {
+            if (! $value || ! setting('blog_heading_anchors_enabled', false)) {
+                return $value;
+            }
+
+            if (! BaseHelper::isFrontendRequest()) {
+                return $value;
+            }
+
+            return HeadingAnchors::inject($value);
+        });
+    }
+
+    /**
+     * Number of words in the post content. Shared by the reading-time estimate and
+     * the structured-data (JSON-LD) `wordCount` property.
+     */
+    protected function wordCount(): Attribute
+    {
+        return Attribute::get(
+            fn (): int => $this->content ? str_word_count(strip_tags($this->content)) : 0
         );
     }
 

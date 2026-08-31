@@ -143,6 +143,12 @@ class PublicCartController extends BaseController
                 ->setMessage(trans('plugins/ecommerce::products.cart.product_not_exists'));
         }
 
+        if ($product->isExternalProduct()) {
+            return $response
+                ->setError()
+                ->setMessage(trans('plugins/ecommerce::products.cart.external_product'));
+        }
+
         if ($product->variations->isNotEmpty() && ! $product->is_variation && $product->defaultVariation->product->id) {
             $product = $product->defaultVariation->product;
         }
@@ -386,6 +392,12 @@ class PublicCartController extends BaseController
             return redirect()
                 ->route('public.cart')
                 ->with('error_msg', trans('plugins/ecommerce::products.cart.product_not_exists'));
+        }
+
+        if ($productModel->isExternalProduct()) {
+            return redirect()
+                ->route('public.cart')
+                ->with('error_msg', trans('plugins/ecommerce::products.cart.external_product'));
         }
 
         $originalProduct = $productModel->original_product;

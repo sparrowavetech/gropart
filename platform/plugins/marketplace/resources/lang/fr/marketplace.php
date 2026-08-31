@@ -2,7 +2,6 @@
 
 return [
     'name' => 'Marché',
-    'description' => 'Description détaillée',
     'hello' => 'Bonjour',
     'email' => [
         'title' => 'Marché',
@@ -74,6 +73,7 @@ return [
         'dear_admin' => 'Cher Administrateur,',
         'hello' => 'Bonjour,',
         'happy_selling' => 'Bonnes ventes !',
+        'thank_you_understanding' => 'Merci pour votre compréhension.',
         'email_sent_by_team' => 'Ce email a été envoyé par l\'équipe {{ site_title }}.',
         'contact_store_sent_from' => 'Ce email a été envoyé de :customer_name (:customer_email) via le formulaire de contact de votre profil sur :site_title.',
         'contact_store_reply_instruction' => 'Vous pouvez répondre directement à cet email pour répondre à :customer_name (:customer_email).',
@@ -124,12 +124,10 @@ return [
         'welcome_vendor_support' => 'Si vous avez des questions ou besoin d\'assistance en cours de route, notre équipe de support est là pour vous aider. N\'hésitez pas à nous contacter !',
         'login_vendor_account_button' => 'Se connecter à votre compte fournisseur',
         'welcome_vendor_closing' => 'Nous sommes impatients de voir votre magasin prospérer sur :site_title !',
-        // Low Stock
         'store_low_stock_title' => 'Alerte de stock faible',
         'store_low_stock_message' => 'Votre produit <strong>:product_name</strong> est bientôt en rupture de stock avec seulement <strong>:product_quantity</strong> article(s) restant(s). Le seuil de stock faible est fixé à <strong>:low_stock_threshold</strong>.',
         'store_low_stock_restock' => 'Veuillez réapprovisionner ce produit pour éviter de manquer des ventes.',
         'store_low_stock_view_product' => 'Voir le produit',
-
         'store_verified_title' => 'Vérification du Magasin Approuvée',
         'store_verified_message' => 'Félicitations ! Votre magasin a été vérifié avec succès sur <strong>:site_title</strong>. Ce badge de vérification aidera à établir la confiance avec vos clients.',
         'dear_store_owner' => 'Cher Propriétaire de :store_name,',
@@ -148,7 +146,6 @@ return [
         'verification_benefits_lost' => 'Les avantages de vérification ne sont plus actifs',
         'store_unverified_next_steps' => 'Si vous avez des questions sur cette décision ou souhaitez discuter de la re-vérification, veuillez <strong>contacter notre équipe de support</strong>.',
         'contact_support' => 'Contacter le Support',
-        'thank_you_understanding' => 'Merci pour votre compréhension.',
     ],
     'current_balance' => 'Solde actuel',
     'settings' => [
@@ -193,7 +190,6 @@ return [
         'hide_store_address_helper' => 'Si activé, l\'adresse du magasin sera masquée de la page publique du magasin.',
         'hide_store_social_links' => 'Masquer les liens sociaux du magasin ?',
         'hide_store_social_links_helper' => 'Si activé, les liens sociaux du magasin seront masqués de la page publique du magasin.',
-
         'hide_store_info_in_invoice' => 'Masquer les informations de la boutique sur la facture ?',
         'hide_store_info_in_invoice_helper' => 'Si cette option est activée, les factures utiliseront les informations du site principal au lieu des informations du vendeur/de la boutique.',
         'enable_vendor_categories_filter' => 'Activer le filtre des catégories de fournisseurs',
@@ -219,6 +215,8 @@ return [
         'allow_vendor_delete_their_orders_description' => 'Lorsqu\'il est activé, les fournisseurs peuvent gérer leur liste de commandes en supprimant les entrées indésirables. À utiliser avec prudence car les commandes supprimées peuvent avoir un impact sur les enregistrements de transactions.',
         'enable_messaging_system' => 'Activer le système de messagerie',
         'enable_messaging_system_description' => 'Si cette option est activée, les fournisseurs et les clients peuvent communiquer entre eux via le système de messagerie.',
+        'allow_vendor_manage_product_currency' => 'Autoriser les fournisseurs à gérer la devise des produits',
+        'allow_vendor_manage_product_currency_description' => 'Si cette option est activée, les fournisseurs peuvent sélectionner une devise pour leurs produits. Les prix seront convertis dans la devise par défaut pour l\'affichage.',
         'term_and_privacy_policy_url' => 'URL des conditions et politique de confidentialité',
         'show_vendor_registration_form_at_registration_page' => 'Afficher le formulaire d\'inscription du fournisseur sur la page d\'inscription',
         'show_vendor_registration_form_at_registration_page_description' => 'Si activé, le formulaire d\'inscription du fournisseur sera affiché sur la page d\'inscription.',
@@ -364,6 +362,7 @@ return [
     'insufficient_balance' => 'Solde insuffisant ou informations bancaires manquantes',
     'total_amount_exceeds_balance' => 'Le montant total (frais inclus) dépasse votre solde actuel',
     'registered_successfully' => 'Enregistré avec succès!',
+    'already_vendor' => 'Vous êtes déjà vendeur.',
     'updated_registration_successfully' => 'Informations d\'inscription mises à jour avec succès!',
     'updated_registration_info_successfully' => 'Informations d\'inscription mises à jour avec succès!',
     'missing_documentations' => 'Documents manquants! Veuillez télécharger votre certificat d\'incorporation et votre pièce d\'identité gouvernementale pour continuer.',
@@ -388,6 +387,7 @@ return [
     'account_number' => 'Numéro de compte',
     'upi_id' => 'ID UPI',
     'upi_id_helper' => 'C\'est facultatif. Si vous avez un ID UPI, vous pouvez le fournir ici. En savoir plus : https://support.google.com/pay/india/answer/10331134?hl=en',
+    'description' => 'Description détaillée',
     'paypal_id' => 'ID PayPal',
     'pickup_location' => 'Lieu de collecte',
     'pickup_location_helper' => 'Où souhaitez-vous récupérer votre paiement en espèces?',
@@ -416,6 +416,7 @@ return [
     'fees' => 'Frais',
     'congratulations_vendor' => 'Félicitations pour être un vendeur sur :site_title',
     'attract_customers_message' => 'Attirez vos clients avec les meilleurs produits.',
+    'choose_product_type_to_create' => 'Choisissez le type de produit que vous souhaitez créer :',
     'create_new_product_here' => 'Créez un nouveau produit <a href=":url">ici</a>',
     'no_orders_yet_message' => 'Vous avez :total produit(s) mais aucune commande pour le moment',
     'view_your_store_here' => 'Voir votre boutique <a href=":url">ici</a>',
@@ -428,6 +429,7 @@ return [
     'joined_on_date' => 'Rejoint le :date',
     'view_your_store' => 'Voir votre boutique',
     'go_to_homepage' => 'Aller à la page d\'accueil',
+    'go_to_customer_dashboard' => 'Tableau de bord client',
     'recent_orders' => 'Commandes récentes',
     'no_orders' => 'Aucune commande !',
     'view_full_orders' => 'Voir toutes les commandes',
@@ -443,5 +445,4 @@ return [
     'low_stock' => 'Stock faible',
     'out_of_stock' => 'Rupture de stock',
     'add_new_product' => 'Ajouter un nouveau produit',
-    'already_vendor' => 'Vous êtes déjà vendeur.',
 ];

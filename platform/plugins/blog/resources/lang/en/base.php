@@ -17,6 +17,8 @@ return [
         'enable_blog_post_schema' => 'Enable Schema for blog posts',
         'enable_blog_post_schema_description' => 'Learn more: https://schema.org/Article',
         'schema_type' => 'Schema type',
+        'enable_heading_anchors' => 'Add anchor links to post headings',
+        'enable_heading_anchors_description' => 'Gives each h2 and h3 in a post body an id, so sections can be linked and cited directly (e.g. /my-post#pricing). Headings you already gave an id keep it, and nothing inside code samples is changed. Only affects what visitors see - your stored content is untouched.',
     ],
     'blog_posts' => 'Blog posts',
     'blog_categories' => 'Blog categories',

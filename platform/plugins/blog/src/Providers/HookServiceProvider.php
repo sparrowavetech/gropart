@@ -138,10 +138,10 @@ class HookServiceProvider extends ServiceProvider
                         return $html;
                     }
 
-                    $schemaType = setting('blog_post_schema_type', 'NewsArticle');
+                    $schemaType = setting('blog_post_schema_type', 'BlogPosting');
 
                     if (! in_array($schemaType, ['NewsArticle', 'News', 'Article', 'BlogPosting'])) {
-                        $schemaType = 'NewsArticle';
+                        $schemaType = 'BlogPosting';
                     }
 
                     $schema = [
@@ -151,16 +151,13 @@ class HookServiceProvider extends ServiceProvider
                             '@type' => 'WebPage',
                             '@id' => $post->url,
                         ],
-                        'headline' => BaseHelper::clean($post->name),
-                        'description' => BaseHelper::clean($post->description),
+                        'url' => $post->url,
+                        'headline' => $this->cleanSchemaText($post->name),
+                        'description' => $this->cleanSchemaText($post->description),
+                        'inLanguage' => str_replace('_', '-', app()->getLocale()),
                         'image' => [
                             '@type' => 'ImageObject',
                             'url' => RvMedia::getImageUrl($post->image, null, false, RvMedia::getDefaultImage()),
-                        ],
-                        'author' => [
-                            '@type' => 'Person',
-                            'url' => BaseHelper::getHomepageUrl(),
-                            'name' => class_exists($post->author_type) ? $post->author->name : '',
                         ],
                         'publisher' => [
                             '@type' => 'Organization',
@@ -174,11 +171,99 @@ class HookServiceProvider extends ServiceProvider
                         'dateModified' => $post->updated_at->toIso8601String(),
                     ];
 
-                    return $html . Html::tag('script', json_encode($schema, JSON_UNESCAPED_UNICODE), ['type' => 'application/ld+json'])
-                        ->toHtml();
+                    // Reuse the model's null-safe author accessors instead of resolving the
+                    // morph relation here. Omit the whole entity when the author cannot be
+                    // resolved - an author with an empty name is invalid structured data.
+                    if ($authorName = $this->cleanSchemaText($post->author_name)) {
+                        $schema['author'] = array_filter([
+                            '@type' => 'Person',
+                            'name' => $authorName,
+                            'url' => $this->publicAuthorUrl($post->author_url),
+                        ]);
+                    }
+
+                    if ($section = $this->cleanSchemaText($post->first_category?->name)) {
+                        $schema['articleSection'] = $section;
+                    }
+
+                    // Only read tags when they are already loaded, to avoid adding a query
+                    // to every single-post render.
+                    if ($post->relationLoaded('tags') && $post->tags->isNotEmpty()) {
+                        $keywords = $post->tags
+                            ->map(fn ($tag) => $this->cleanSchemaText($tag->name))
+                            ->filter()
+                            ->implode(', ');
+
+                        if ($keywords) {
+                            $schema['keywords'] = $keywords;
+                        }
+                    }
+
+                    if ($wordCount = $post->word_count) {
+                        $schema['wordCount'] = $wordCount;
+                    }
+
+                    // JSON_HEX_TAG escapes < and > so no value can terminate the surrounding
+                    // <script> block. json_encode() does NOT escape them by default.
+                    return $html . Html::tag(
+                        'script',
+                        json_encode($schema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG),
+                        ['type' => 'application/ld+json']
+                    )->toHtml();
                 }, 35);
             }, 35, 2);
         }
+    }
+
+    /**
+     * Normalize a stored value for use inside JSON-LD.
+     *
+     * BaseHelper::clean() runs the value through HTMLPurifier, whose output is
+     * HTML-encoded ("&" becomes "&amp;"). JSON-LD is not HTML, so those entities must
+     * be decoded again or parsers receive the literal entity. strip_tags() stays because
+     * clean() returns the input untouched when `core.base.general.enable_less_secure_web`
+     * is enabled.
+     */
+    protected function cleanSchemaText(?string $value): ?string
+    {
+        if (! $value) {
+            return null;
+        }
+
+        $value = (string) BaseHelper::clean($value);
+
+        // Decode before stripping, and repeat until the value stops changing: doing it the
+        // other way round turns "&lt;script&gt;" into live "<script>" markup after the tags
+        // have already been removed.
+        do {
+            $previous = $value;
+            $value = strip_tags(html_entity_decode($value, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+        } while ($value !== $previous);
+
+        return trim((string) preg_replace('/\s+/', ' ', $value)) ?: null;
+    }
+
+    /**
+     * An author URL is only safe to publish when it is not an admin-panel URL.
+     *
+     * Botble's default author is an admin user whose `url` accessor points at
+     * `{admin_dir}/system/users/profile/{id}` - publishing that in structured data would
+     * disclose the admin directory (which sites customise as a hardening step) and make
+     * user IDs enumerable. Public author profiles (e.g. the member plugin) still pass.
+     */
+    protected function publicAuthorUrl(?string $url): ?string
+    {
+        if (! $url) {
+            return null;
+        }
+
+        $adminPrefix = trim((string) BaseHelper::getAdminPrefix(), '/');
+
+        if ($adminPrefix && Str::startsWith(ltrim((string) parse_url($url, PHP_URL_PATH), '/'), $adminPrefix . '/')) {
+            return null;
+        }
+
+        return $url;
     }
 
     public function addThemeOptions(): void

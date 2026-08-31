@@ -15,6 +15,7 @@ return [
         'add-amount' => 'Lisa summa',
         'subtract-amount' => 'Lahuta summa',
         'order-return' => 'Tellimuse tagastamine',
+        'subscription-fee' => 'Liitumistasu',
     ],
     'store_name' => 'Kaupluse nimi',
     'vendor_name' => 'Müüja nimi',

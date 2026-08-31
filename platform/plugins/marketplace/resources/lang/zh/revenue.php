@@ -15,6 +15,7 @@ return [
         'add-amount' => '增加金额',
         'subtract-amount' => '减少金额',
         'order-return' => '订单退货',
+        'subscription-fee' => '订阅费',
     ],
     'store_name' => '店铺名称',
     'vendor_name' => '卖家名称',

@@ -42,7 +42,7 @@ class BlogService
                  */
                 $post = Post::query()
                     ->where($condition)
-                    ->with(['categories', 'tags', 'slugable', 'categories.slugable', 'tags.slugable'])
+                    ->with(['categories', 'tags', 'slugable', 'categories.slugable', 'tags.slugable', 'author'])
                     ->firstOrFail();
 
                 Helper::handleViewCount($post, 'viewed_post');
@@ -58,10 +58,26 @@ class BlogService
                 $meta->setUrl($post->url);
                 $meta->setTitle($post->name);
                 $meta->setType('article');
+                $meta->addProperty('updated_time', $post->updated_at->toIso8601String());
 
                 SeoHelper::setSeoOpenGraph($meta);
 
                 SeoHelper::meta()->setUrl($post->url);
+
+                // article:* tags need the `property` attribute and no `og:` prefix, so they
+                // cannot go through SeoOpenGraph (which prefixes everything it renders).
+                // Note: no `name="author"` meta here - Meta::isLink() treats the name
+                // "author" as a <link rel="author"> tag. The author is exposed through
+                // article:author and the JSON-LD author entity instead.
+                SeoHelper::meta()->addPropertyMetas([
+                    'article:published_time' => $post->created_at->toIso8601String(),
+                    'article:modified_time' => $post->updated_at->toIso8601String(),
+                    'article:author' => $post->author_name,
+                    'article:section' => $post->first_category?->name,
+                    // A repeated meta name overwrites the previous one in MetaCollection,
+                    // so all tags are published as one comma-separated value.
+                    'article:tag' => $post->tags->pluck('name')->filter()->implode(', '),
+                ]);
 
                 if (function_exists('admin_bar')) {
                     AdminBar::registerLink(

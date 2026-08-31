@@ -117,6 +117,27 @@ class ProductForm extends FormAbstract
                     ->label(trans('core/base::forms.is_featured'))
                     ->defaultValue(false)
             )
+            ->when(EcommerceHelper::isCartEnabled(), function (): void {
+                // With the cart off the whole site is a catalog, so every product with an
+                // external URL links out already - the per-product toggle is redundant.
+                $this->add(
+                    'is_affiliate',
+                    OnOffField::class,
+                    OnOffFieldOption::make()
+                        ->label(trans('plugins/ecommerce::products.form.is_affiliate'))
+                        ->helperText(trans('plugins/ecommerce::products.form.is_affiliate_helper'))
+                        ->defaultValue(false)
+                );
+            })
+            ->add(
+                'external_url',
+                TextField::class,
+                TextFieldOption::make()
+                    ->label(trans('plugins/ecommerce::products.form.external_url'))
+                    ->helperText(trans('plugins/ecommerce::products.form.external_url_helper'))
+                    ->placeholder('https://')
+                    ->maxLength(400)
+            )
             ->add(
                 'is_new_until',
                 DatePickerField::class,

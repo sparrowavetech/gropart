@@ -307,8 +307,10 @@
                     config.onlyCountries = availableCountries;
                 }
 
-                // With a single allowed country there is nothing to pick, so keep the
-                // flag from opening a one-item dropdown the customer can trip over.
+                /*
+                 * With a single allowed country there is nothing to pick, so keep the
+                 * flag from opening a one-item dropdown the customer can trip over.
+                 */
                 if (availableCountries && availableCountries.length === 1) {
                     config.allowDropdown = false;
                 }
@@ -419,8 +421,13 @@
                 }
 
                 if (hasCountryCodeSelection) {
-                    const hiddenFieldId = element.id + '-full';
-                    const hiddenField = document.getElementById(hiddenFieldId);
+                    const fieldScope = element.form || element.closest('form') || document;
+                    const hiddenField =
+                        Array.from(fieldScope.querySelectorAll('.js-phone-number-full'))
+                            .find(function(field) {
+                                return field.dataset.phoneField === element.name;
+                            }) ||
+                        document.getElementById(element.id + '-full');
 
                     if (hiddenField) {
                         const updateHiddenField = function() {
@@ -450,24 +457,46 @@
                             }
                         };
 
-                        const initialValue = hiddenField.value || element.value;
-
-                        if (initialValue) {
-                            if (initialValue.startsWith('+')) {
-                                iti.setNumber(initialValue);
-                            } else if (initialValue) {
-                                element.value = initialValue;
+                        const toInternationalValue = function(rawValue) {
+                            if (rawValue.startsWith('00')) {
+                                return '+' + rawValue.slice(2);
                             }
 
-                            setTimeout(function() {
-                                updateHiddenField();
-                            }, 100);
-                        }
+                            if (rawValue.startsWith('+')) {
+                                return rawValue;
+                            }
 
-                        // A value that already carries the dial code (browser autofill,
-                        // a paste, or a number typed as +8801...) has to be handed to
-                        // setNumber, which re-derives the country and moves the dial
-                        // code back into the separate selector instead of dropping it.
+                            const digits = rawValue.replace(/\D/g, '');
+                            const countryData = iti.getSelectedCountryData();
+                            const dialCode = countryData && countryData.dialCode ? countryData.dialCode : '';
+
+                            if (! dialCode || ! countryData.iso2 || ! window.intlTelInputUtils) {
+                                return '';
+                            }
+
+                            if (digits.indexOf(dialCode) !== 0 || digits.length <= dialCode.length) {
+                                return '';
+                            }
+
+                            const asInternational = '+' + digits;
+                            const withoutDialCode = digits.slice(dialCode.length);
+
+                            if (
+                                window.intlTelInputUtils.isValidNumber(asInternational) &&
+                                window.intlTelInputUtils.isValidNumber(withoutDialCode, countryData.iso2)
+                            ) {
+                                return asInternational;
+                            }
+
+                            return '';
+                        };
+
+                        /*
+                         * A value that already carries the dial code (browser autofill,
+                         * a paste, or a number typed as +8801...) has to be handed to
+                         * setNumber, which re-derives the country and moves the dial
+                         * code back into the separate selector instead of dropping it.
+                         */
                         const applyInternationalValue = function() {
                             const rawValue = (element.value || '').trim();
 
@@ -475,17 +504,40 @@
                                 return;
                             }
 
-                            const fullNumber = rawValue.startsWith('00') ? '+' + rawValue.slice(2) : rawValue;
+                            const fullNumber = toInternationalValue(rawValue);
 
-                            if (! fullNumber.startsWith('+')) {
+                            if (! fullNumber) {
                                 return;
                             }
 
                             iti.setNumber(fullNumber);
                         };
 
-                        // Bulk insertions carry the dial code; a plain keystroke does not.
-                        // Re-parsing on every keystroke would fight the caret while typing.
+                        const initialValue = hiddenField.value || element.value;
+
+                        if (initialValue) {
+                            if (initialValue.startsWith('+')) {
+                                iti.setNumber(initialValue);
+                            } else {
+                                element.value = initialValue;
+                            }
+
+                            const normalizeInitialValue = function() {
+                                applyInternationalValue();
+                                updateHiddenField();
+                            };
+
+                            if (iti.promise && typeof iti.promise.then === 'function') {
+                                iti.promise.then(normalizeInitialValue, normalizeInitialValue);
+                            }
+
+                            setTimeout(normalizeInitialValue, 100);
+                        }
+
+                        /*
+                         * Bulk insertions carry the dial code; a plain keystroke does not.
+                         * Re-parsing on every keystroke would fight the caret while typing.
+                         */
                         const bulkInputTypes = ['insertFromPaste', 'insertFromDrop', 'insertReplacementText'];
 
                         element.addEventListener('countrychange', updateHiddenField);
@@ -506,6 +558,7 @@
                         const form = element.closest('form');
                         if (form) {
                             form.addEventListener('submit', function() {
+                                applyInternationalValue();
                                 updateHiddenField();
                             });
                         }

@@ -107,6 +107,13 @@ class ProductRequest extends Request
             'product_files_external.*.link' => ['required', 'url', 'max:400'],
             'product_files_external.*.size' => ['nullable', 'numeric', 'min:0', 'max:100000000'],
             'notify_attachment_updated' => ['nullable', 'bool'],
+            'is_affiliate' => ['nullable', 'boolean'],
+            'external_url' => [
+                'nullable',
+                Rule::requiredIf($this->boolean('is_affiliate')),
+                'url',
+                'max:400',
+            ],
             'taxes' => ['nullable', 'array'],
             'barcode' => [
                 'nullable',

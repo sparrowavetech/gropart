@@ -6,12 +6,15 @@ use Botble\Base\Models\BaseModel;
 use Botble\Ecommerce\Enums\OrderReturnReasonEnum;
 use Botble\Ecommerce\Enums\OrderReturnStatusEnum;
 use Botble\Ecommerce\Enums\OrderStatusEnum;
+use Botble\Ecommerce\Models\Concerns\HasUniqueCode;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class OrderReturn extends BaseModel
 {
+    use HasUniqueCode;
+
     protected $table = 'ec_order_returns';
 
     protected $fillable = [

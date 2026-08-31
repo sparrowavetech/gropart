@@ -8,6 +8,7 @@ use Botble\Setting\Models\Setting;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
+use Throwable;
 use UnexpectedValueException;
 
 class DatabaseSettingStore extends SettingStore
@@ -86,7 +87,15 @@ class DatabaseSettingStore extends SettingStore
             return [];
         }
 
-        return $this->parseReadData($this->newQuery()->get());
+        try {
+            return $this->parseReadData($this->newQuery()->get());
+        } catch (Throwable) {
+            // The settings table used to be probed with Schema::hasTable() before every
+            // read, which also happened to absorb an unreachable database. That probe is
+            // now skipped on installed sites, so keep the same graceful fallback here:
+            // run with defaults rather than failing the whole request.
+            return [];
+        }
     }
 
     public function parseReadData(Collection|array $data): ?array

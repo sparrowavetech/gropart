@@ -15,6 +15,7 @@ return [
         'add-amount' => 'Pievienot summu',
         'subtract-amount' => 'Atņemt summu',
         'order-return' => 'Pasūtījuma atgriešana',
+        'subscription-fee' => 'Abonēšanas maksa',
     ],
     'store_name' => 'Veikala nosaukums',
     'vendor_name' => 'Pārdevēja vārds',

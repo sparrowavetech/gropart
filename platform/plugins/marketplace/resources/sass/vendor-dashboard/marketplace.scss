@@ -866,6 +866,9 @@ a, a:hover, a:focus, a:active {
 
 .ps-copyright img {
     margin-bottom: 10px;
+    width: auto;
+    max-width: 100%;
+    max-height: 40px;
 }
 
 .ps-copyright p {
@@ -1259,6 +1262,8 @@ a, a:hover, a:focus, a:active {
 }
 
 .header--mobile .header__center img {
+    width: auto;
+    max-width: 100%;
     max-height: 30px;
 }
 

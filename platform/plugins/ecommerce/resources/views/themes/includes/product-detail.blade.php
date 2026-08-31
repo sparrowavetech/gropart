@@ -48,20 +48,22 @@
                         value="{{ $product->id }}"
                     />
 
-                    <div class="d-flex gap-4 mb-3">
-                        @include(EcommerceHelper::viewPath('includes.product-quantity'))
-                        <button
-                            type="submit"
-                            name="add-to-cart"
-                            class="bb-product-details-add-to-cart-btn btn btn-primary bb-btn-product-actions-icon"
-                            @disabled($product->isOutOfStock())
-                            data-bb-toggle="add-to-cart-in-form"
-                            {!! EcommerceHelper::jsAttributes('add-to-cart-in-form', $product) !!}
-                        >
-                            <x-core::icon name="ti ti-shopping-cart"/>
-                            {{ trans('plugins/ecommerce::ecommerce.add_to_cart') }}
-                        </button>
-                    </div>
+                    @if (EcommerceHelper::isCartEnabled())
+                        <div class="d-flex gap-4 mb-3">
+                            @include(EcommerceHelper::viewPath('includes.product-quantity'))
+                            <button
+                                type="submit"
+                                name="add-to-cart"
+                                class="bb-product-details-add-to-cart-btn btn btn-primary bb-btn-product-actions-icon"
+                                @disabled($product->isOutOfStock())
+                                data-bb-toggle="add-to-cart-in-form"
+                                {!! EcommerceHelper::jsAttributes('add-to-cart-in-form', $product) !!}
+                            >
+                                <x-core::icon name="ti ti-shopping-cart"/>
+                                {{ trans('plugins/ecommerce::ecommerce.add_to_cart') }}
+                            </button>
+                        </div>
+                    @endif
 
                     @if(EcommerceHelper::isWishlistEnabled() || EcommerceHelper::isCompareEnabled())
                         <div class="d-flex gap-4 mb-3">

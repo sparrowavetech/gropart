@@ -164,6 +164,47 @@ AdminHelper::registerRoutes(function (): void {
                 ]);
             });
 
+            Route::group(['prefix' => 'subscription-plans', 'as' => 'subscription-plans.'], function (): void {
+                Route::resource('', 'SubscriptionPlanController')
+                    ->parameters(['' => 'subscription_plan']);
+            });
+
+            Route::group(['prefix' => 'vendor-subscriptions', 'as' => 'vendor-subscriptions.'], function (): void {
+                Route::resource('', 'VendorSubscriptionController')
+                    ->parameters(['' => 'vendor_subscription'])
+                    ->except(['show', 'update']);
+
+                Route::post('approve/{vendor_subscription}', [
+                    'as' => 'approve',
+                    'uses' => 'VendorSubscriptionController@approve',
+                    'permission' => 'marketplace.vendor-subscriptions.approve',
+                ]);
+
+                Route::post('reject/{vendor_subscription}', [
+                    'as' => 'reject',
+                    'uses' => 'VendorSubscriptionController@reject',
+                    'permission' => 'marketplace.vendor-subscriptions.approve',
+                ]);
+
+                Route::post('extend/{vendor_subscription}', [
+                    'as' => 'extend',
+                    'uses' => 'VendorSubscriptionController@extend',
+                    'permission' => 'marketplace.vendor-subscriptions.edit',
+                ]);
+
+                Route::post('cancel/{vendor_subscription}', [
+                    'as' => 'cancel',
+                    'uses' => 'VendorSubscriptionController@cancel',
+                    'permission' => 'marketplace.vendor-subscriptions.edit',
+                ]);
+
+                Route::get('invoices/{invoice}', [
+                    'as' => 'invoices.download',
+                    'uses' => 'SubscriptionInvoiceController',
+                    'permission' => 'marketplace.vendor-subscriptions.index',
+                ])->wherePrimaryKey();
+            });
+
             Route::group(['prefix' => 'messages', 'as' => 'messages.'], function (): void {
                 Route::resource('', 'MessageController')->parameters(['' => 'message'])->only(['index', 'show', 'destroy']);
 

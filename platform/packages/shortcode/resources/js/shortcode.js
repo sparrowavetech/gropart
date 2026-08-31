@@ -55,8 +55,11 @@ $(() => {
             if ((!shortcodeAttribute || shortcodeAttribute !== 'content') && value) {
                 name = name.replace('[]', '')
                 if (value && typeof value === 'string') {
-                    value = value.replace(/"([^"]*)"/g, '"$1"')
-                    value = value.replace(/"/g, '"')
+                    // The value is stored as a shortcode attribute (name="value"), so any double quote
+                    // inside it would end the attribute early and drop the rest of the content.
+                    // Escape backslashes first, then double quotes, matching what the PHP parser
+                    // (ShortcodeCompiler::parseAttributes) unescapes with stripcslashes().
+                    value = value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')
                     value = value
                         .replace(/\r\n/g, '{{NEWLINE}}')
                         .replace(/\n/g, '{{NEWLINE}}')

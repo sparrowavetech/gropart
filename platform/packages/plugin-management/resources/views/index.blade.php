@@ -41,7 +41,7 @@
         .plugin-card .plugin-description {
             font-size: 0.8125rem;
             line-height: 1.5;
-            color: var(--tblr-secondary);
+            color: var(--bb-secondary);
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
@@ -53,7 +53,7 @@
             align-items: center;
             gap: 0.625rem;
             font-size: 0.75rem;
-            color: var(--tblr-secondary);
+            color: var(--bb-secondary);
         }
         .plugin-card .plugin-meta .meta-divider {
             width: 1px;
@@ -75,7 +75,7 @@
             background: #9ba4ae;
         }
         .plugin-card .card-footer {
-            background: var(--tblr-bg-surface-secondary, #f8fafc);
+            background: var(--bb-bg-surface-secondary, #f8fafc);
             border-top: 1px solid var(--bb-border-color);
             padding: 0.5rem 0.75rem;
         }
@@ -84,36 +84,36 @@
             padding: 0.25rem 0.625rem;
             border-color: transparent;
             background: transparent;
-            color: var(--tblr-secondary);
+            color: var(--bb-secondary);
         }
         .plugin-card .card-footer .btn:hover {
-            background: var(--tblr-bg-surface, #fff);
-            color: var(--tblr-body-color);
+            background: var(--bb-bg-surface, #fff);
+            color: var(--bb-body-color);
             border-color: var(--bb-border-color);
         }
         .plugin-card .card-footer .btn-activate {
-            color: var(--tblr-primary);
+            color: var(--bb-primary);
         }
         .plugin-card .card-footer .btn-activate:hover {
             background: rgba(var(--bb-primary-rgb), 0.06);
-            color: var(--tblr-primary);
+            color: var(--bb-primary);
             border-color: rgba(var(--bb-primary-rgb), 0.2);
         }
         .plugin-card .card-footer .btn-deactivate {
-            color: var(--tblr-warning);
+            color: var(--bb-warning);
         }
         .plugin-card .card-footer .btn-deactivate:hover {
-            background: rgba(var(--tblr-warning-rgb, 245, 159, 0), 0.06);
-            color: var(--tblr-warning);
-            border-color: rgba(var(--tblr-warning-rgb, 245, 159, 0), 0.2);
+            background: rgba(var(--bb-warning-rgb, 245, 159, 0), 0.06);
+            color: var(--bb-warning);
+            border-color: rgba(var(--bb-warning-rgb, 245, 159, 0), 0.2);
         }
         .plugin-card .card-footer .btn-remove {
-            color: var(--tblr-danger);
+            color: var(--bb-danger);
         }
         .plugin-card .card-footer .btn-remove:hover {
-            background: rgba(var(--tblr-danger-rgb, 214, 57, 57), 0.06);
-            color: var(--tblr-danger);
-            border-color: rgba(var(--tblr-danger-rgb, 214, 57, 57), 0.2);
+            background: rgba(var(--bb-danger-rgb, 214, 57, 57), 0.06);
+            color: var(--bb-danger);
+            border-color: rgba(var(--bb-danger-rgb, 214, 57, 57), 0.2);
         }
         .plugin-card .card-footer .btn-list {
             gap: 0.125rem;

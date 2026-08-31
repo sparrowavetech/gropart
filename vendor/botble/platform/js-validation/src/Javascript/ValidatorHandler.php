@@ -101,6 +101,20 @@ class ValidatorHandler
     {
         $jsRules = [];
         foreach ($rules as $rawRule) {
+            // Rule builders (Rule::unique(), Rule::exists(), Rule::in()) describe themselves as a
+            // rule string, so keep them - they parse normally and their remote check still works.
+            if (is_object($rawRule) && method_exists($rawRule, '__toString')) {
+                $rawRule = (string) $rawRule;
+            }
+
+            // Invokable rule objects and closures cannot describe themselves at all, so they used to
+            // fall through to remote validation - which re-POSTs the whole form to its own action on
+            // every change and shows a generic error whenever that round trip fails. There is nothing
+            // to validate client-side for them; the server still applies them on submit.
+            if (! is_string($rawRule)) {
+                continue;
+            }
+
             [$rule, $parameters] = $this->validator->parseRule($rawRule);
             [$jsAttribute, $jsRule, $jsParams] = $this->rules->getRule($attribute, $rule, $parameters, $rawRule);
             if ($this->isValidatable($jsRule, $includeRemote)) {

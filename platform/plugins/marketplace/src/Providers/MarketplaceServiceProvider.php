@@ -27,6 +27,7 @@ use Botble\Ecommerce\Tax\DTOs\TaxContext;
 use Botble\LanguageAdvanced\Supports\LanguageAdvancedManager;
 use Botble\Marketplace\Facades\MarketplaceHelper;
 use Botble\Marketplace\Http\Middleware\RedirectIfNotVendor;
+use Botble\Marketplace\Http\Middleware\RequireActiveVendorSubscription;
 use Botble\Marketplace\Models\Revenue;
 use Botble\Marketplace\Models\Scopes\HideProductsByLockedVendorScope;
 use Botble\Marketplace\Models\Store;
@@ -41,6 +42,7 @@ use Botble\Marketplace\Repositories\Interfaces\RevenueInterface;
 use Botble\Marketplace\Repositories\Interfaces\StoreInterface;
 use Botble\Marketplace\Repositories\Interfaces\VendorInfoInterface;
 use Botble\Marketplace\Repositories\Interfaces\WithdrawalInterface;
+use Botble\Marketplace\Services\VendorSubscriptionService;
 use Botble\SeoHelper\Facades\SeoHelper;
 use Botble\Slug\Facades\SlugHelper;
 use Botble\Theme\Facades\SiteMapManager;
@@ -58,6 +60,11 @@ class MarketplaceServiceProvider extends ServiceProvider
         if (! is_plugin_active('ecommerce')) {
             return;
         }
+
+        // Scoped, not bound: the reader memoises each vendor's current subscription for
+        // the request, and lazily creates the default free plan. Two instances would
+        // duplicate that work and make forget() meaningless.
+        $this->app->scoped(VendorSubscriptionService::class);
 
         $this->app->bind(StoreInterface::class, function () {
             return new StoreRepository(new Store());
@@ -78,6 +85,7 @@ class MarketplaceServiceProvider extends ServiceProvider
         Helper::autoload(__DIR__ . '/../../helpers');
 
         $this->app['router']->aliasMiddleware('vendor', RedirectIfNotVendor::class);
+        $this->app['router']->aliasMiddleware('vendor-subscription', RequireActiveVendorSubscription::class);
 
         AliasLoader::getInstance()->alias('MarketplaceHelper', MarketplaceHelper::class);
     }
@@ -176,6 +184,30 @@ class MarketplaceServiceProvider extends ServiceProvider
                     'permissions' => ['marketplace.reports'],
                 ])
                 ->when(
+                    MarketplaceHelper::isSubscriptionMode(),
+                    function (DashboardMenuSupport $dashboardMenu): void {
+                        $dashboardMenu
+                            ->registerItem([
+                                'id' => 'cms-plugins-marketplace-subscription-plans',
+                                'priority' => 6,
+                                'parent_id' => 'cms-plugins-marketplace',
+                                'name' => 'plugins/marketplace::subscription.plans.name',
+                                'icon' => 'ti ti-license',
+                                'url' => fn () => route('marketplace.subscription-plans.index'),
+                                'permissions' => ['marketplace.subscription-plans.index'],
+                            ])
+                            ->registerItem([
+                                'id' => 'cms-plugins-marketplace-vendor-subscriptions',
+                                'priority' => 7,
+                                'parent_id' => 'cms-plugins-marketplace',
+                                'name' => 'plugins/marketplace::subscription.subscriptions.name',
+                                'icon' => 'ti ti-receipt',
+                                'url' => fn () => route('marketplace.vendor-subscriptions.index'),
+                                'permissions' => ['marketplace.vendor-subscriptions.index'],
+                            ]);
+                    }
+                )
+                ->when(
                     MarketplaceHelper::isEnabledMessagingSystem(),
                     function (DashboardMenuSupport $dashboardMenu): void {
                         $dashboardMenu
@@ -208,6 +240,16 @@ class MarketplaceServiceProvider extends ServiceProvider
                     'url' => fn () => route('marketplace.vendor.products.index'),
                     'icon' => 'ti ti-package',
                 ])
+                ->when(MarketplaceHelper::isSubscriptionMode(), function (DashboardMenuSupport $dashboardMenu): void {
+                    $dashboardMenu
+                        ->registerItem([
+                            'id' => 'marketplace.vendor.subscriptions',
+                            'priority' => 7,
+                            'name' => trans('plugins/marketplace::subscription.vendor.menu'),
+                            'url' => fn () => route('marketplace.vendor.subscriptions.index'),
+                            'icon' => 'ti ti-license',
+                        ]);
+                })
                 ->when(EcommerceHelper::isProductSpecificationEnabled(), function (DashboardMenuSupport $dashboardMenu): void {
                     $dashboardMenu
                         ->registerItem([
@@ -396,6 +438,9 @@ class MarketplaceServiceProvider extends ServiceProvider
         $this->app->register(EventServiceProvider::class);
         $this->app->register(HookServiceProvider::class);
         $this->app->register(OrderSupportServiceProvider::class);
+        $this->app->register(SubscriptionPaymentServiceProvider::class);
+        $this->app->register(SubscriptionTaxServiceProvider::class);
+        $this->app->register(CommandServiceProvider::class);
 
         $this->app['events']->listen('eloquent.deleted: ' . Customer::class, function (Customer $customer): void {
             Revenue::query()->where('customer_id', $customer->getKey())->delete();

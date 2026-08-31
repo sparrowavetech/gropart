@@ -15,6 +15,7 @@ use Botble\Media\Repositories\Interfaces\MediaFileInterface;
 use Botble\Media\Repositories\Interfaces\MediaFolderInterface;
 use Botble\Media\Services\ThumbnailService;
 use Botble\Media\Services\UploadsManager;
+use Botble\Media\Supports\ImageMemoryGuard;
 use Botble\Media\Supports\Zipper;
 use Carbon\Carbon;
 use Exception;
@@ -801,13 +802,25 @@ class MediaController extends BaseController
                 }
 
                 try {
-                    $thumbnailService
+                    $cropped = $thumbnailService
                         ->setImage(RvMedia::getRealPath($fileUrl))
                         ->setSize((int) $cropData['width'], (int) $cropData['height'])
                         ->setCoordinates((int) $cropData['x'], (int) $cropData['y'])
                         ->setDestinationPath(File::dirname($fileUrl))
                         ->setFileName(File::name($fileUrl) . '.' . File::extension($fileUrl))
                         ->save('crop');
+
+                    // The image is too large to be decoded within the current memory limit.
+                    if ($cropped === false) {
+                        $memoryGuard = ImageMemoryGuard::make(RvMedia::getRealPath($fileUrl));
+
+                        return RvMedia::responseError(
+                            trans('core/media::media.image_dimensions_too_large', [
+                                'dimensions' => $memoryGuard->getHumanReadableDimensions(),
+                                'megapixels' => $memoryGuard->getMegaPixels(),
+                            ])
+                        );
+                    }
                 } catch (UnableToWriteFile $exception) {
                     $message = $exception->getMessage();
 

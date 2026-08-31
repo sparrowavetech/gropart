@@ -21,9 +21,10 @@
         <x-core::form.radio
             :name="$name"
             :value="$key"
-            {{-- Compare as strings: a loose == would check the option whose value is '' or 0
-                 whenever nothing is selected, because PHP treats those as equal to null. --}}
-            :checked="filled($selected) && (string) $key === (string) $selected"
+            {{-- Compare as strings so a loose == cannot check the option whose value is 0
+                 when nothing is selected. Null is cast to '', so a group that offers an
+                 explicit empty option (e.g. "Use default setting") still selects it. --}}
+            :checked="(string) $key === (string) $selected"
             :attributes="new Illuminate\View\ComponentAttributeBag($optionAttributes)"
         >
             {{ $option }}

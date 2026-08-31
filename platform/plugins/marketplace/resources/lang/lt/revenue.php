@@ -15,6 +15,7 @@ return [
         'add-amount' => 'Pridėti sumą',
         'subtract-amount' => 'Atimti sumą',
         'order-return' => 'Užsakymo grąžinimas',
+        'subscription-fee' => 'Prenumeratos mokestis',
     ],
     'store_name' => 'Parduotuvės pavadinimas',
     'vendor_name' => 'Pardavėjo pavadinimas',

@@ -15,6 +15,7 @@ abstract class PageSpeed
 
     public function handle(Request $request, Closure $next): Response
     {
+        /** @var Response $response */
         $response = $next($request);
 
         if (! OptimizerHelper::isEnabled()
@@ -32,7 +33,7 @@ abstract class PageSpeed
                 return $response;
             }
 
-            $html = $response->getContent();
+            $html = (string) $response->getContent();
             $newContent = $this->apply($html);
 
             return $response->setContent($newContent);

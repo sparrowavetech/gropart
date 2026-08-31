@@ -152,94 +152,87 @@
 </div>
 
 @if (!$totalProducts)
+    @php
+        $hasBothProductTypes = MarketplaceHelper::isVendorDigitalProductsEnabled() && ! EcommerceHelper::isDisabledPhysicalProduct();
+    @endphp
     <div class="row g-2 mb-3">
         <div class="col-12">
-            <svg
-                style="display: none;"
-                xmlns="http://www.w3.org/2000/svg"
+            {{-- Heading, message and call-to-action share one row so the empty state stays
+                 compact; the action stays vertically centred against the text block and only
+                 drops below it when the viewport is too narrow to hold both. --}}
+            <x-core::alert
+                type="success"
+                class="mb-0 d-block"
             >
-                <symbol
-                    id="check-circle-fill"
-                    fill="currentColor"
-                    viewBox="0 0 16 16"
-                >
-                    <path
-                        d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"
-                    />
-                </symbol>
-            </svg>
-            <div
-                class="alert alert-success d-block"
-                role="alert"
-            >
-                <h4 class="alert-heading">
-                    <svg
-                        class="bi flex-shrink-0 me-2"
-                        role="img"
-                        aria-label="Info:"
-                        width="24"
-                        height="24"
-                    >
-                        <use xlink:href="#check-circle-fill" />
-                    </svg>
-                    {{ trans('plugins/marketplace::marketplace.congratulations_vendor', ['site_title' => Theme::getSiteTitle()]) }}
-                </h4>
-                <p>{{ trans('plugins/marketplace::marketplace.attract_customers_message') }}</p>
-                <hr>
-                @if (MarketplaceHelper::isVendorDigitalProductsEnabled() && ! EcommerceHelper::isDisabledPhysicalProduct())
-                    <p class="mb-2">{{ trans('plugins/marketplace::marketplace.choose_product_type_to_create') }}</p>
-                    <div class="d-flex gap-2 flex-wrap">
-                        <a href="{{ route('marketplace.vendor.products.create') }}" class="btn btn-primary">
-                            <x-core::icon name="ti ti-package" />
-                            {{ \Botble\Ecommerce\Enums\ProductTypeEnum::PHYSICAL()->label() }}
-                        </a>
-                        <a href="{{ route('marketplace.vendor.products.create', ['product_type' => 'digital']) }}" class="btn btn-info">
-                            <x-core::icon name="ti ti-book-download" />
-                            {{ \Botble\Ecommerce\Enums\ProductTypeEnum::DIGITAL()->label() }}
-                        </a>
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                    <div>
+                        <h4 class="mb-1">
+                            {{ trans('plugins/marketplace::marketplace.congratulations_vendor', ['site_title' => Theme::getSiteTitle()]) }}
+                        </h4>
+                        <div class="text-secondary">
+                            {{ trans('plugins/marketplace::marketplace.attract_customers_message') }}
+                            @if ($hasBothProductTypes)
+                                {{ trans('plugins/marketplace::marketplace.choose_product_type_to_create') }}
+                            @endif
+                        </div>
                     </div>
-                @else
-                    <p class="mb-0">{!! BaseHelper::clean(trans('plugins/marketplace::marketplace.create_new_product_here', ['url' => route('marketplace.vendor.products.create')])) !!}</p>
-                @endif
-            </div>
+                    <div class="d-flex gap-2 flex-wrap">
+                        @if ($hasBothProductTypes)
+                            <a
+                                class="btn btn-primary"
+                                href="{{ route('marketplace.vendor.products.create') }}"
+                            >
+                                <x-core::icon name="ti ti-package" />
+                                {{ \Botble\Ecommerce\Enums\ProductTypeEnum::PHYSICAL()->label() }}
+                            </a>
+                            <a
+                                class="btn btn-info"
+                                href="{{ route('marketplace.vendor.products.create', ['product_type' => 'digital']) }}"
+                            >
+                                <x-core::icon name="ti ti-book-download" />
+                                {{ \Botble\Ecommerce\Enums\ProductTypeEnum::DIGITAL()->label() }}
+                            </a>
+                        @else
+                            <a
+                                class="btn btn-primary"
+                                href="{{ route('marketplace.vendor.products.create') }}"
+                            >
+                                <x-core::icon name="ti ti-plus" />
+                                {{ trans('plugins/marketplace::marketplace.add_new_product') }}
+                            </a>
+                        @endif
+                    </div>
+                </div>
+            </x-core::alert>
         </div>
     </div>
 @elseif (!$totalOrders)
     <div class="row g-2 mb-3">
         <div class="col-12">
-            <svg
-                style="display: none;"
-                xmlns="http://www.w3.org/2000/svg"
+            <x-core::alert
+                type="info"
+                class="mb-0 d-block"
             >
-                <symbol
-                    id="info-fill"
-                    fill="currentColor"
-                    viewBox="0 0 16 16"
-                >
-                    <path
-                        d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"
-                    />
-                </symbol>
-            </svg>
-            <div
-                class="alert alert-info d-block"
-                role="alert"
-            >
-                <h4 class="alert-heading">
-                    <svg
-                        class="bi flex-shrink-0 me-2"
-                        role="img"
-                        aria-label="Info:"
-                        width="24"
-                        height="24"
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                    <div>
+                        <h4 class="mb-1">
+                            {{ trans('plugins/marketplace::marketplace.no_orders_yet_message', ['total' => $totalProducts]) }}
+                        </h4>
+                        <div class="text-secondary">
+                            {{ trans('plugins/marketplace::marketplace.attract_customers_message') }}
+                        </div>
+                    </div>
+                    <a
+                        class="btn btn-primary"
+                        href="{{ $user->store->url }}"
+                        target="_blank"
+                        rel="noopener"
                     >
-                        <use xlink:href="#info-fill" />
-                    </svg>
-                    {{ trans('plugins/marketplace::marketplace.no_orders_yet_message', ['total' => $totalProducts]) }}
-                </h4>
-                <hr>
-                <p class="mb-0">{!! BaseHelper::clean(trans('plugins/marketplace::marketplace.view_your_store_here', ['url' => $user->store->url])) !!}</p>
-            </div>
+                        <x-core::icon name="ti ti-external-link" />
+                        {{ trans('plugins/marketplace::marketplace.view_your_store') }}
+                    </a>
+                </div>
+            </x-core::alert>
         </div>
     </div>
 @else

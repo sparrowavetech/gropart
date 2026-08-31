@@ -24,6 +24,13 @@ class CacheSettingRequest extends Request
             'widget_cache_ttl' => ['nullable', 'required_if:widget_cache_enabled,1', 'integer', 'min:1'],
             'cache_size_warning_threshold' => ['nullable', 'integer', 'min:1'],
             'cache_auto_clear_enabled' => [$onOffRule],
+            'enable_public_cache_control' => [$onOffRule],
+            'public_cache_max_age' => [
+                'nullable',
+                'required_if:enable_public_cache_control,1',
+                'integer',
+                'min:1',
+            ],
         ];
     }
 }

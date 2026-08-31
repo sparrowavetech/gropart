@@ -645,9 +645,12 @@ class HookServiceProvider extends ServiceProvider
                 $customCSSFile = Theme::getStyleIntegrationPath();
 
                 if (File::exists($customCSSFile)) {
+                    // TENANCY PATCH (platform/packages/tenancy): link the SAME filename
+                    // getStyleIntegrationPath() writes (suffixed per store under tenancy);
+                    // basename() is the stock name for a single-tenant install.
                     $html .= Html::style(
                         Theme::asset()
-                            ->url('css/style.integration.css?v=' . filectime($customCSSFile))
+                            ->url('css/' . basename($customCSSFile) . '?v=' . filectime($customCSSFile))
                     );
                 }
 

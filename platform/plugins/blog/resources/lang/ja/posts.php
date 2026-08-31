@@ -14,7 +14,6 @@ return [
         'is_featured' => 'この投稿を特集する',
         'note' => 'メモ内容',
         'format_type' => '形式',
-
     ],
     'cannot_delete' => '投稿を削除できませんでした',
     'post_deleted' => '投稿が削除されました',
@@ -26,8 +25,9 @@ return [
     'categories' => 'カテゴリー',
     'category' => 'カテゴリ',
     'author' => '著者',
-    'author_helper' => 'Select an author from admin users.',
-    'select_author' => 'Select author',
+    'author_helper' => '管理ユーザーから著者を選択してください。',
+    'select_author' => '著者を選択',
+    'is_featured' => '特集されていますか？',
     'export' => [
         'description' => '投稿をCSV/Excelファイルにエクスポートします。',
         'total' => '総投稿数',
@@ -40,7 +40,6 @@ return [
         'start_date_placeholder' => '開始日',
         'end_date' => '終了日',
         'end_date_placeholder' => '終了日',
-
     ],
     'import' => [
         'description' => 'CSV/Excelファイルから投稿をインポートします。',
@@ -53,11 +52,8 @@ return [
             'nullable_string_max_in' => ':attribute フィールドは空白のままにするか、指定された場合は最大:max文字の文字列である必要があり、次のいずれかの値である必要があります: :values。',
             'faq_schema_config' => 'FAQスキーマ設定は、指定された場合は有効な文字列である必要があります。',
             'faq_ids' => 'FAQ IDは、指定された場合は有効な配列である必要があります。',
-
         ],
-
     ],
-    'is_featured' => '特集されていますか？',
     'post_translations' => '投稿の翻訳',
     'export_post_translations' => '投稿の翻訳をエクスポート',
     'import_description' => 'CSV/Excelファイルから:nameの翻訳をインポートします。',

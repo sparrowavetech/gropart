@@ -50,7 +50,13 @@ return [
         'subscribed' => '購読しました',
         'unsubscribed' => '購読解除済み',
     ],
-
+    'email_templates' => [
+        'admin_new_subscriber_title' => '新しい購読者',
+        'admin_new_subscriber_message' => '新しいユーザーがニュースレターを購読しました:',
+        'subscriber_success_title' => '購読が完了しました',
+        'subscriber_thank_you_message' => 'ニュースレターをご購読いただきありがとうございます。',
+        'subscriber_unsubscribe_instruction' => 'ニュースレターの購読を解除するには、:newsletter_unsubscribe_link をクリックしてください',
+    ],
     'enter_your_email' => 'メールアドレスを入力してください',
     'subscribe' => '購読する',
     'newsletter_popup' => 'ニュースレターのポップアップ',

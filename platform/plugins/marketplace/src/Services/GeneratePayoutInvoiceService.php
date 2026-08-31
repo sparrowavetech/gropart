@@ -9,13 +9,14 @@ use Botble\Ecommerce\Supports\TwigExtension;
 use Botble\Marketplace\Enums\PayoutPaymentMethodsEnum;
 use Botble\Marketplace\Enums\WithdrawalStatusEnum;
 use Botble\Marketplace\Models\Withdrawal;
-use Botble\Media\Facades\RvMedia;
-use Botble\Theme\Facades\Theme;
+use Botble\Marketplace\Services\Concerns\HasInvoiceCompanyData;
 use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
 
 class GeneratePayoutInvoiceService
 {
+    use HasInvoiceCompanyData;
+
     public function __construct(
         protected ?Withdrawal $withdrawal = null
     ) {
@@ -54,39 +55,8 @@ class GeneratePayoutInvoiceService
 
     protected function getInvoiceData(): array
     {
-        $country = $this->getCompanyCountry();
-        $state = $this->getCompanyState();
-        $city = $this->getCompanyCity();
-
-        $logo = get_ecommerce_setting('company_logo_for_invoicing') ?: (theme_option('logo_in_invoices') ?: Theme::getLogo());
-
-        $companyName = get_ecommerce_setting('company_name_for_invoicing') ?: get_ecommerce_setting('store_name');
-        $companyAddress = get_ecommerce_setting('company_address_for_invoicing');
-        $companyPhone = get_ecommerce_setting('company_phone_for_invoicing') ?: get_ecommerce_setting('store_phone');
-        $companyEmail = get_ecommerce_setting('company_email_for_invoicing') ?: get_ecommerce_setting('store_email');
-        $companyTaxId = get_ecommerce_setting('company_tax_id_for_invoicing') ?: get_ecommerce_setting('store_vat_number');
-
-        if (! $companyAddress) {
-            $companyAddress = implode(', ', array_filter([ // @phpstan-ignore-line
-                get_ecommerce_setting('company_address_for_invoicing', get_ecommerce_setting('store_address')),
-                $city,
-                $state,
-                $country,
-            ]));
-        }
-
         return [
-            'company' => [
-                'logo' => $logo ? RvMedia::getRealPath($logo) : null,
-                'name' => $companyName,
-                'address' => $companyAddress,
-                'state' => $state,
-                'city' => $city,
-                'zipcode' => $this->getCompanyZipCode(),
-                'phone' => $companyPhone,
-                'email' => $companyEmail,
-                'tax_id' => $companyTaxId,
-            ],
+            'company' => $this->companyData(),
             'withdrawal' => $this->withdrawal,
             'withdrawal_fee_percentage' => round($this->withdrawal->fee / $this->withdrawal->amount * 100, 2),
             'withdrawal_status' => $this->withdrawal->status->label(),
@@ -162,25 +132,5 @@ class GeneratePayoutInvoiceService
             'withdrawal.bank_info.number' => trans('plugins/marketplace::withdrawal.invoice.variables.withdrawal_bank_info_number'),
             'withdrawal.bank_info.full_name' => trans('plugins/marketplace::withdrawal.invoice.variables.withdrawal_bank_info_full_name'),
         ];
-    }
-
-    public function getCompanyCountry(): ?string
-    {
-        return get_ecommerce_setting('company_country_for_invoicing', get_ecommerce_setting('store_country'));
-    }
-
-    public function getCompanyState(): ?string
-    {
-        return get_ecommerce_setting('company_state_for_invoicing', get_ecommerce_setting('store_state'));
-    }
-
-    public function getCompanyCity(): ?string
-    {
-        return get_ecommerce_setting('company_city_for_invoicing', get_ecommerce_setting('store_city'));
-    }
-
-    public function getCompanyZipCode(): ?string
-    {
-        return get_ecommerce_setting('company_zipcode_for_invoicing', get_ecommerce_setting('store_zip_code'));
     }
 }

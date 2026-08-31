@@ -15,6 +15,7 @@ return [
         'add-amount' => 'Dodaj iznos',
         'subtract-amount' => 'Oduzmi iznos',
         'order-return' => 'Povraćaj porudžbine',
+        'subscription-fee' => 'Претплата',
     ],
     'store_name' => 'Naziv prodavnice',
     'vendor_name' => 'Ime prodavca',

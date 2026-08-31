@@ -4,7 +4,7 @@
     "type": "package",
     "require": {
         "phpseclib/bcmath_compat": "^2.0",
-        "google/analytics-data": "^0.24",
+        "google/analytics-data": "^0.25",
         "symfony/cache": "^5.4|^6.0|^7.0|^8.0"
     }
 }

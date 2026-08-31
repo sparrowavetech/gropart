@@ -83,14 +83,22 @@ class SitemapContentTypeExclusionTest extends TestCase
         $response = $this->actingAs($admin)->put(route('sitemap.settings'), [
             'sitemap_enabled' => '1',
             'sitemap_items_per_page' => 1000,
-            'sitemap_pages_enabled' => '1',
+            'sitemap_pages_enabled' => '0',
             'sitemap_blog_tags_enabled' => '0',
             'indexnow_enabled' => '0',
         ]);
 
         $response->assertSessionHasNoErrors();
 
-        $this->assertEquals('0', setting('sitemap_blog_tags_enabled'));
-        $this->assertEquals('1', setting('sitemap_pages_enabled'));
+        // Pages is the only content type the sitemap package registers itself, so it is
+        // the one toggle guaranteed to exist in every installation.
+        $this->assertEquals('0', setting('sitemap_pages_enabled'));
+
+        // blog-tags is contributed by the blog plugin through the settings-form hook.
+        // Without the plugin the field is not part of the form, so the posted value is
+        // discarded rather than saved - only assert it where the plugin is installed.
+        if (class_exists('Botble\\Blog\\Providers\\HookServiceProvider')) {
+            $this->assertEquals('0', setting('sitemap_blog_tags_enabled'));
+        }
     }
 }

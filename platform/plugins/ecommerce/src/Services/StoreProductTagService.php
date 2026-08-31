@@ -3,6 +3,7 @@
 namespace Botble\Ecommerce\Services;
 
 use Botble\Base\Events\CreatedContentEvent;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Models\ProductTag;
 use Illuminate\Http\Request;
@@ -15,9 +16,15 @@ class StoreProductTagService
             return;
         }
 
-        $tags = $product->tags->pluck('name')->all();
+        $tags = $product->tags->pluck('name')->map(fn ($name) => trim((string) $name))->all();
 
-        $tagsInput = collect(json_decode((string) $request->input('tag'), true))->pluck('value')->all();
+        $tagsInput = collect(json_decode((string) $request->input('tag'), true))
+            ->pluck('value')
+            ->map(fn ($value) => trim((string) $value))
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
 
         if (count($tags) != count($tagsInput) || count(array_diff($tags, $tagsInput)) > 0) {
             $product->tags()->detach();
@@ -25,13 +32,12 @@ class StoreProductTagService
             $tagIds = [];
 
             foreach ($tagsInput as $tagName) {
-                if (! trim($tagName)) {
-                    continue;
-                }
+                // The name attribute is cast to SafeContent, which HTML-encodes on write (& => &amp;)
+                // and decodes on read. Look up using the encoded form so existing tags are matched
+                // instead of being re-created on every import.
+                $tag = ProductTag::query()->where('name', BaseHelper::clean($tagName))->first();
 
-                $tag = ProductTag::query()->where('name', $tagName)->first();
-
-                if ($tag === null && ! empty($tagName)) {
+                if ($tag === null) {
                     $tag = ProductTag::query()->create(['name' => $tagName]);
 
                     $request->merge(['slug' => $tagName]);
@@ -39,9 +45,7 @@ class StoreProductTagService
                     event(new CreatedContentEvent(PRODUCT_TAG_MODULE_SCREEN_NAME, $request, $tag));
                 }
 
-                if (! empty($tag)) {
-                    $tagIds[] = $tag->getKey();
-                }
+                $tagIds[] = $tag->getKey();
             }
 
             $product->tags()->sync(array_unique($tagIds));

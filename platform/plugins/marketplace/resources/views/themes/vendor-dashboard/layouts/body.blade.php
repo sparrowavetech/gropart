@@ -2,6 +2,56 @@
     $customer = auth('customer')->user();
 @endphp
 
+<style>
+    /* The profile actions are icon-only to keep the sidebar header compact. The theme
+       styles .ps-block__right children as block-level links, which collapses the inline
+       SVGs onto each other, so size and space them explicitly here. */
+    .vendor-profile-actions {
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+    }
+
+    .vendor-profile-actions > a {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.25rem;
+        height: 2.25rem;
+        border: 1px solid var(--bs-border-color, #dee2e6);
+        border-radius: var(--bs-border-radius, .375rem);
+        color: var(--bs-secondary-color, #6c757d);
+        background: transparent;
+        transition: background-color .15s ease, color .15s ease, border-color .15s ease;
+        /* Visual box stays 36px; the hit area is padded out to the 44px minimum. */
+        position: relative;
+    }
+
+    .vendor-profile-actions > a::after {
+        content: '';
+        position: absolute;
+        inset: -4px;
+    }
+
+    .vendor-profile-actions > a:hover,
+    .vendor-profile-actions > a:focus-visible {
+        background-color: var(--bs-secondary-bg, #e9ecef);
+        color: var(--bs-body-color, #212529);
+    }
+
+    .vendor-profile-actions > a.text-danger:hover,
+    .vendor-profile-actions > a.text-danger:focus-visible {
+        background-color: var(--bs-danger-bg-subtle, #f8d7da);
+        border-color: var(--bs-danger-border-subtle, #f1aeb5);
+        color: var(--bs-danger, #dc3545);
+    }
+
+    .vendor-profile-actions svg {
+        width: 1.125rem;
+        height: 1.125rem;
+    }
+</style>
+
 <header class="header--mobile">
     <div class="header__left">
         <button class="ps-drawer-toggle">
@@ -22,10 +72,10 @@
         </a>
     </div>
     <div class="header__right d-flex align-items-center gap-2">
-        <a class="header__site-link" href="{{ route('customer.overview') }}" title="{{ trans('plugins/marketplace::marketplace.go_to_customer_dashboard') }}">
+        <a class="header__site-link" href="{{ route('customer.overview') }}" title="{{ $mobileDashboard = trans('plugins/marketplace::marketplace.go_to_customer_dashboard') }}" aria-label="{{ $mobileDashboard }}">
             <x-core::icon name="ti ti-user" />
         </a>
-        <a class="header__site-link" href="{{ route('customer.logout') }}" title="{{ trans('plugins/marketplace::marketplace.logout') }}">
+        <a class="header__site-link" href="{{ route('customer.logout') }}" title="{{ $mobileLogout = trans('core/base::layouts.logout') }}" aria-label="{{ $mobileLogout }}">
             <x-core::icon name="ti ti-logout" />
         </a>
     </div>
@@ -75,21 +125,41 @@
                         <p>{{ trans('plugins/marketplace::marketplace.hello') }}, {{ $customer->name }}</p>
                         <small>{{ trans('plugins/marketplace::marketplace.joined_on_date', ['date' => $customer->created_at->translatedFormat('M d, Y')]) }}</small>
 
-                        @if ($customer?->store)
-                            <a href="{{ $customer->store->url }}" target="_blank" class="d-block mt-3">
-                                <x-core::icon name="ti ti-building-store" />
-                                {{ trans('plugins/marketplace::marketplace.view_your_store') }}
+                        {{-- Icon-only to keep the sidebar header compact. Each carries a
+                             title (tooltip) and an aria-label, since an icon alone gives
+                             screen readers nothing to announce. --}}
+                        <div class="vendor-profile-actions mt-3">
+                            @if ($customer?->store)
+                                <a
+                                    href="{{ $customer->store->url }}"
+                                    target="_blank"
+                                    rel="noopener"
+                                    title="{{ $viewStore = trans('plugins/marketplace::marketplace.view_your_store') }}"
+                                    aria-label="{{ $viewStore }}"
+                                >
+                                    <x-core::icon name="ti ti-building-store" />
+                                </a>
+                            @endif
+
+                            <a
+                                href="{{ route('customer.overview') }}"
+                                title="{{ $customerDashboard = trans('plugins/marketplace::marketplace.go_to_customer_dashboard') }}"
+                                aria-label="{{ $customerDashboard }}"
+                            >
+                                <x-core::icon name="ti ti-user" />
                             </a>
-                        @endif
-                        <a href="{{ route('customer.overview') }}" class="d-block mt-2">
-                            <x-core::icon name="ti ti-user" />
-                            {{ trans('plugins/marketplace::marketplace.go_to_customer_dashboard') }}
-                        </a>
-                    </div>
-                    <div class="ps-block__action">
-                        <a href="{{ route('customer.logout') }}">
-                            <x-core::icon name="ti ti-logout" />
-                        </a>
+
+                            {{-- Logout is destructive-ish, so it is separated and coloured
+                                 apart from the navigational actions. --}}
+                            <a
+                                href="{{ route('customer.logout') }}"
+                                class="text-danger ms-auto"
+                                title="{{ $logout = trans('core/base::layouts.logout') }}"
+                                aria-label="{{ $logout }}"
+                            >
+                                <x-core::icon name="ti ti-logout" />
+                            </a>
+                        </div>
                     </div>
                 </div>
                 <div class="ps-block--earning-count">
@@ -109,7 +179,6 @@
                                 <img
                                     src="{{ RvMedia::getImageUrl($logo) }}"
                                     alt="{{ $siteTitle }}"
-                                    style="max-height: 40px;"
                                 >
                             </a>
                         @endif

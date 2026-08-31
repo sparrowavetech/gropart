@@ -15,6 +15,7 @@ return [
         'add-amount' => 'Přidat částku',
         'subtract-amount' => 'Odečíst částku',
         'order-return' => 'Vrácení objednávky',
+        'subscription-fee' => 'Poplatek za předplatné',
     ],
     'store_name' => 'Název obchodu',
     'vendor_name' => 'Jméno prodejce',

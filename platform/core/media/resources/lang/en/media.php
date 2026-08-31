@@ -84,6 +84,7 @@ return [
     'file_too_big' => 'File is too big. Max file upload is :size bytes',
     'file_too_big_readable_size' => 'File is too big. Max file upload is :size.',
     'can_not_detect_file_type' => 'File type is not allowed or can not detect file type!',
+    'image_dimensions_too_large' => 'Image dimensions are too large to process (:dimensions - :megapixels MP). Please resize the image before uploading, or increase the PHP memory_limit on your server.',
     'upload_failed' => 'The file is NOT uploaded completely. The server allows max upload file size is :size . Please check your file size OR try to upload again in case of having network errors',
     'failed_to_crop_image' => 'The file cropping must be image type',
     'menu_name' => 'Media',

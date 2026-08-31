@@ -236,7 +236,7 @@ class ThemeController extends BaseController
     {
         abort_unless(config('packages.theme.general.enable_robots_txt_editor'), 404);
 
-        $path = public_path('robots.txt');
+        $path = apply_filters(FILTER_ROBOTS_TXT_PATH, public_path('robots.txt'));
 
         if (! File::isWritable($path)) {
             return $this
@@ -248,7 +248,21 @@ class ThemeController extends BaseController
         File::put($path, $request->input('robots_txt_content'));
 
         if ($request->hasFile('robots_txt_file')) {
-            $request->file('robots_txt_file')->move(public_path(), 'robots.txt');
+            // Write the upload to the same (filterable) path as the textarea above, so a
+            // multi-tenant install does not have one store's upload land on the shared
+            // file that every store is served.
+            $uploadedContent = file_get_contents($request->file('robots_txt_file')->getRealPath());
+
+            // Never let an unreadable upload truncate the existing robots.txt: the
+            // textarea content written above stays in place instead.
+            if ($uploadedContent === false) {
+                return $this
+                    ->httpResponse()
+                    ->setError()
+                    ->setMessage(trans('packages/theme::theme.robots_txt_file_not_readable'));
+            }
+
+            File::put($path, $uploadedContent);
         }
 
         return $this->httpResponse()->withUpdatedSuccessMessage();

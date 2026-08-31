@@ -4,6 +4,7 @@ namespace Botble\Media\Services;
 
 use Botble\Base\Facades\BaseHelper;
 use Botble\Media\Facades\RvMedia;
+use Botble\Media\Supports\ImageMemoryGuard;
 use Illuminate\Support\Facades\File;
 use Intervention\Image\Encoders\AutoEncoder;
 use Intervention\Image\Encoders\WebpEncoder;
@@ -115,6 +116,20 @@ class ThumbnailService
         }
 
         $destinationPath = sprintf('%s/%s', trim($this->destinationPath, '/'), $fileName);
+
+        // Decoding an oversized image would exhaust the memory limit (uncatchable fatal error).
+        $memoryGuard = ImageMemoryGuard::make($this->imagePath);
+
+        if (! $memoryGuard->canProcess()) {
+            logger()->warning('Skipped resizing image, it is too large to process.', [
+                'file' => $this->imagePath,
+                'dimensions' => $memoryGuard->getHumanReadableDimensions(),
+                'required_memory' => $memoryGuard->getRequiredMemory(),
+                'memory_limit' => ini_get('memory_limit'),
+            ]);
+
+            return false;
+        }
 
         $thumbImage = RvMedia::imageManager()->read($this->imagePath);
 

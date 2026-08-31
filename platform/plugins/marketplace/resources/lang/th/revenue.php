@@ -15,6 +15,7 @@ return [
         'add-amount' => 'เพิ่มจำนวนเงิน',
         'subtract-amount' => 'หักจำนวนเงิน',
         'order-return' => 'คืนสินค้าคำสั่งซื้อ',
+        'subscription-fee' => 'ค่าธรรมเนียมการสมัครสมาชิก',
     ],
     'store_name' => 'ชื่อร้านค้า',
     'vendor_name' => 'ชื่อผู้ขาย',

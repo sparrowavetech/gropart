@@ -392,6 +392,17 @@ class Manager
         $keys = $this->findJsonTranslations(core_path());
         $keys += $this->findJsonTranslations(package_path());
         $keys += $this->findJsonTranslations(plugin_path());
+
+        // A child theme only contains overridden files, so strings rendered from the
+        // parent theme's views would never be found when scanning the child theme alone.
+        if ($theme === Theme::getThemeName() && Theme::hasInheritTheme()) {
+            $inheritThemePath = theme_path(Theme::getInheritTheme());
+
+            if ($this->files->isDirectory($inheritThemePath)) {
+                $keys += $this->findJsonTranslations($inheritThemePath);
+            }
+        }
+
         $keys += $this->findJsonTranslations(theme_path($theme));
 
         ksort($keys);

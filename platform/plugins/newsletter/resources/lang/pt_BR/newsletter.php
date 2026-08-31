@@ -50,6 +50,16 @@ return [
         'subscribed' => 'Inscrito',
         'unsubscribed' => 'Inscrição cancelada',
     ],
+    'email_templates' => [
+        // Admin email template
+        'admin_new_subscriber_title' => 'Novo assinante',
+        'admin_new_subscriber_message' => 'Um novo usuário assinou sua newsletter:',
+
+        // Subscriber email template
+        'subscriber_success_title' => 'Inscrição realizada com sucesso',
+        'subscriber_thank_you_message' => 'Obrigado por assinar nossa newsletter!',
+        'subscriber_unsubscribe_instruction' => 'Para cancelar a inscrição na newsletter, clique em :newsletter_unsubscribe_link',
+    ],
 
     'enter_your_email' => 'Digite seu e-mail',
     'subscribe' => 'Inscrever-se',

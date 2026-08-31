@@ -38,11 +38,19 @@ class LocalizationRedirectFilter extends LaravelLocalizationMiddlewareBase
                 && count($params) === 2
                 && preg_match('/^[\w-]+\.(xml|xml-mobile|txt|ror-rss|ror-rdf|google-news)$/', $params[1]);
 
+            // The root crawler files (sitemap.xml, robots.txt, llms.txt…) are served
+            // by locale-agnostic routes and must never be redirected to a prefixed
+            // URL. Without this guard, `hideDefaultLocaleInURL() === false` makes the
+            // `elseif` below always true, so /sitemap.xml 302s to /{default}/sitemap.xml
+            // and PublicController::getSiteMap() never gets to emit the sitemap index.
+            $isRootCrawlerFile = count($params) === 1
+                && preg_match('/^[\w-]+\.(xml|xml-mobile|txt|ror-rss|ror-rdf|google-news)$/', $params[0]);
+
             if (! empty($locales[$localeCode])) {
                 if ($localeCode === $defaultLocale && $hideDefaultLocale && ! $isLocalizedSitemap) {
                     $redirection = Language::getNonLocalizedURL();
                 }
-            } elseif ($currentLocale !== $defaultLocale || ! $hideDefaultLocale) {
+            } elseif (! $isRootCrawlerFile && ($currentLocale !== $defaultLocale || ! $hideDefaultLocale)) {
                 if (! Language::getActiveLanguage(['lang_id'])->isEmpty()) {
                     $redirection = Language::getLocalizedURL(Session::get('language'), $request->fullUrl(), [], false);
                 }

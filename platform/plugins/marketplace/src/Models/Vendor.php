@@ -71,6 +71,11 @@ class Vendor extends Customer
         return $this->hasMany(Withdrawal::class, 'customer_id');
     }
 
+    public function subscriptions(): HasMany
+    {
+        return $this->hasMany(VendorSubscription::class, 'customer_id');
+    }
+
     public function getTotalRevenueAttribute(): float
     {
         return $this->revenues()->sum('sub_amount');

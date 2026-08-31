@@ -11,8 +11,10 @@ use Botble\Base\Forms\Fields\MultiCheckListField;
 use Botble\Base\Forms\Fields\NumberField;
 use Botble\Base\Forms\Fields\OnOffCheckboxField;
 use Botble\Ecommerce\Facades\EcommerceHelper;
+use Botble\Marketplace\Enums\MarketplaceModeEnum;
 use Botble\Marketplace\Enums\WithdrawalFeeTypeEnum;
 use Botble\Marketplace\Facades\MarketplaceHelper;
+use Botble\Marketplace\Forms\Settings\Concerns\HasSubscriptionFields;
 use Botble\Marketplace\Http\Requests\MarketPlaceSettingFormRequest;
 use Botble\Marketplace\Models\Store;
 use Botble\Media\Facades\RvMedia;
@@ -20,6 +22,8 @@ use Botble\Setting\Forms\SettingForm;
 
 class MarketplaceSettingForm extends SettingForm
 {
+    use HasSubscriptionFields;
+
     public function setup(): void
     {
         parent::setup();
@@ -45,6 +49,8 @@ class MarketplaceSettingForm extends SettingForm
             ->setSectionDescription(trans('plugins/marketplace::marketplace.settings.description'))
             ->setValidatorClass(MarketPlaceSettingFormRequest::class)
             ->contentOnly()
+            ->addMarketplaceModeField()
+            ->addOpenCollapsible('mode', MarketplaceModeEnum::COMMISSION, MarketplaceHelper::getMode())
             ->add(
                 'fee_per_order',
                 NumberField::class,
@@ -81,6 +87,8 @@ class MarketplaceSettingForm extends SettingForm
                     compact('commissionEachCategory')
                 )->render(),
             ])
+            ->addCloseCollapsible('mode', MarketplaceModeEnum::COMMISSION)
+            ->addSubscriptionFields()
             ->add(
                 'fee_withdrawal',
                 NumberField::class,

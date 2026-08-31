@@ -36,6 +36,9 @@ return [
     'enable_http_security_headers' => env('ENABLE_HTTP_SECURITY_HEADERS', true),
     'enable_public_cache_control' => env('CMS_PUBLIC_CACHE_CONTROL_ENABLED', false),
     'public_cache_max_age' => env('CMS_PUBLIC_CACHE_MAX_AGE', 600),
+    // Flag SVGs larger than this are served as a lazy <img> instead of being inlined
+    // into every page. 0 disables inlining entirely. See language_flag().
+    'max_inline_language_flag_size' => env('CMS_MAX_INLINE_LANGUAGE_FLAG_SIZE', 4096),
     'max_execution_time' => env('CMS_MAX_EXECUTION_TIME', 300),
     'memory_limit' => env('CMS_MEMORY_LIMIT'),
     'date_format' => [
@@ -471,6 +474,15 @@ return [
     'google_fonts_url' => env('CMS_GOOGLE_FONTS_URL', 'https://fonts.bunny.net'),
     'google_fonts_enabled' => env('CMS_GOOGLE_FONTS_ENABLED', true),
     'google_fonts_enabled_cache' => env('CMS_GOOGLE_FONTS_ENABLED_CACHE', true),
+
+    /*
+     * Inline the cached @font-face CSS into every page instead of linking it as a
+     * stylesheet. Linking is the default: the CSS is identical on every page (~27KB on a
+     * two-family theme), so inlining re-sends it on every response and the browser can
+     * never reuse it. The file is served from a content-hashed path, so it is safe to
+     * cache forever. Set to true to restore the previous inline behaviour.
+     */
+    'google_fonts_inline' => env('CMS_GOOGLE_FONTS_INLINE', false),
     'using_uuids_for_id' => env('CMS_USING_UUIDS_FOR_ID', false),
     'using_ulids_for_id' => env('CMS_USING_ULIDS_FOR_ID', false),
     'type_id' => env('CMS_USING_TYPE_ID', 'BIGINT'),

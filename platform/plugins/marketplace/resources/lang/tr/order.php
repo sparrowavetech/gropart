@@ -6,11 +6,11 @@ return [
     'shipping_option_required' => '":name" mağaza siparişi için gönderim seçeneği gereklidir.',
     'refund' => [
         'insufficient_balance' => 'Satıcının bakiyesi siparişi iade etmek için yeterli değil, bakiye: :balance',
-        'description' => '#:sipariş siparişinden para iadesi yapıldı',
+        'description' => '#:order siparişinden geri ödeme yapıldı',
     ],
     'products_are_from_different_vendors' => 'Sipariş oluşturulamıyor! Ürünler farklı satıcılardandır.',
     'return' => [
-        'description' => '#:siparişten geri dönüldü',
+        'description' => '#:order siparişinden iade edildi',
     ],
     'thank_you' => [
         'count_orders' => ':count sipariş',

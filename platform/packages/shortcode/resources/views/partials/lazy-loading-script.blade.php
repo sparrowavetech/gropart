@@ -7,7 +7,18 @@
                 var shortcodeId = element.getAttribute('data-shortcode-id');
 
                 const url = '{{ route('public.ajax.render-ui-block') }}';
-                const csrfToken = '{{ csrf_token() }}';
+
+                {{--
+                    Do NOT send a CSRF token from here, and do not print csrf_token() into this
+                    page. The endpoint already opts out of CSRF verification
+                    (routes/fronts.php: withoutMiddleware(PreventRequestForgery::class)) and only
+                    renders public content, so a token adds nothing.
+
+                    It also has a cost: PublicCacheControl treats any page whose body contains a
+                    CSRF marker as uncacheable, so inlining a token here silently made every page
+                    with a lazy shortcode non-cacheable.
+                    See platform/core/base/src/Http/Middleware/PublicCacheControl.php
+                --}}
 
                 const urlParams = new URLSearchParams(window.location.search);
                 const refLang = urlParams.get('ref_lang');
@@ -30,8 +41,7 @@
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'Accept': 'application/json',
-                            'X-CSRF-TOKEN': csrfToken
+                            'Accept': 'application/json'
                         },
                         body: JSON.stringify(requestBody)
                     })

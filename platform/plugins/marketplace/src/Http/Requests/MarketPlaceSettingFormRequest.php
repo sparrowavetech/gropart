@@ -4,9 +4,11 @@ namespace Botble\Marketplace\Http\Requests;
 
 use Botble\Base\Rules\OnOffRule;
 use Botble\Ecommerce\Http\Requests\ProductRequest as BaseProductRequest;
+use Botble\Marketplace\Enums\MarketplaceModeEnum;
 use Botble\Marketplace\Enums\PayoutPaymentMethodsEnum;
 use Botble\Marketplace\Enums\WithdrawalFeeTypeEnum;
 use Botble\Media\Facades\RvMedia;
+use Botble\Payment\Enums\PaymentMethodEnum;
 use Illuminate\Validation\Rule;
 
 class MarketPlaceSettingFormRequest extends BaseProductRequest
@@ -18,11 +20,31 @@ class MarketPlaceSettingFormRequest extends BaseProductRequest
                 'payout_methods' => [],
             ]);
         }
+
+        // Unchecking every box posts nothing at all, so a 'sometimes' rule would skip
+        // the key and leave the previous restriction in place — the admin could never
+        // go back to "all payment methods". Always send a normalised array.
+        $this->merge([
+            'subscription_payment_methods' => array_values(
+                array_filter((array) $this->input('subscription_payment_methods', []))
+            ),
+        ]);
     }
 
     public function rules(): array
     {
         $rules = [
+            'mode' => ['required', Rule::in(MarketplaceModeEnum::values())],
+            'subscription_unpublish_products_on_expired' => ['sometimes', new OnOffRule()],
+            'subscription_allow_balance_payment' => ['sometimes', new OnOffRule()],
+            'subscription_require_admin_approval' => ['sometimes', new OnOffRule()],
+            'subscription_grace_period_days' => 'sometimes|integer|min:0|max:365',
+            'subscription_allow_vendor_cancel' => ['sometimes', new OnOffRule()],
+            'subscription_tax_enabled' => ['sometimes', new OnOffRule()],
+            'subscription_invoice_prefix' => 'sometimes|nullable|string|max:20',
+            'subscription_payment_methods' => 'present|array',
+            'subscription_payment_methods.*' => ['nullable', 'string', Rule::in(PaymentMethodEnum::values())],
+            'subscription_reminder_days' => ['sometimes', 'nullable', 'string', 'regex:/^\\s*\\d+\\s*(,\\s*\\d+\\s*)*$/'],
             'payout_methods' => 'required|array:' . implode(',', PayoutPaymentMethodsEnum::values()),
             'payout_methods.*' => 'sometimes|in:0,1',
             'enable_commission_fee_for_each_category' => 'sometimes|in:0,1',

@@ -15,6 +15,7 @@ return [
         'add-amount' => 'Adăugare Sumă',
         'subtract-amount' => 'Scădere Sumă',
         'order-return' => 'Retur Comandă',
+        'subscription-fee' => 'Taxa de abonament',
     ],
     'store_name' => 'Nume Magazin',
     'vendor_name' => 'Nume Vânzător',

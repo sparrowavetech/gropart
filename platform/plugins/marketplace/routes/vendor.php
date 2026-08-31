@@ -14,6 +14,7 @@ use Botble\Marketplace\Http\Controllers\Fronts\SpecificationGroupController;
 use Botble\Marketplace\Http\Controllers\Fronts\SpecificationTableController;
 use Botble\Marketplace\Http\Controllers\Vendor\LanguageSettingController;
 use Botble\Marketplace\Http\Middleware\LocaleMiddleware;
+use Botble\Marketplace\Http\Middleware\RequireActiveVendorSubscription;
 use Illuminate\Support\Facades\Route;
 
 Route::group([
@@ -104,7 +105,22 @@ Route::group([
             ->only(['index']);
     }
 
-    Route::group(['prefix' => 'products', 'as' => 'products.'], function (): void {
+    Route::group(['prefix' => 'subscriptions', 'as' => 'subscriptions.'], function (): void {
+        Route::get('/', 'SubscriptionController@index')->name('index');
+        Route::get('plans', 'SubscriptionController@plans')->name('plans');
+        Route::get('checkout/{plan}', 'SubscriptionController@checkout')->name('checkout');
+        Route::post('checkout/{plan}', 'SubscriptionController@processCheckout')->name('process-checkout');
+        Route::match(['GET', 'POST'], 'callback', 'SubscriptionController@callback')->name('callback');
+        Route::match(['GET', 'POST'], 'cancel-payment', 'SubscriptionController@cancelPayment')->name('cancel-payment');
+        Route::post('auto-renew', 'SubscriptionController@toggleAutoRenew')->name('auto-renew');
+        Route::post('cancel', 'SubscriptionController@cancel')->name('cancel');
+
+        Route::get('invoices/{invoice}', 'SubscriptionInvoiceController')
+            ->name('invoices.download')
+            ->wherePrimaryKey();
+    });
+
+    Route::group(['prefix' => 'products', 'as' => 'products.', 'middleware' => [RequireActiveVendorSubscription::class]], function (): void {
         Route::resource('', 'ProductController')
             ->parameters(['' => 'product']);
 
@@ -261,7 +277,7 @@ Route::group([
             ->name('print');
     });
 
-    Route::group(['prefix' => 'coupons', 'as' => 'discounts.'], function (): void {
+    Route::group(['prefix' => 'coupons', 'as' => 'discounts.', 'middleware' => ['vendor-subscription:allow_coupons']], function (): void {
         Route::resource('', 'DiscountController')->parameters(['' => 'discount'])->except(['edit', 'update']);
 
         Route::post('generate-coupon', [
@@ -275,14 +291,14 @@ Route::group([
         'uses' => 'ProductController@ajaxProductOptionInfo',
     ]);
 
-    Route::prefix('export')->name('export.')->group(function (): void {
+    Route::prefix('export')->name('export.')->middleware([RequireActiveVendorSubscription::class])->group(function (): void {
         Route::group(['prefix' => 'products', 'as' => 'products.'], function (): void {
             Route::get('/', [ExportProductController::class, 'index'])->name('index');
             Route::post('/', [ExportProductController::class, 'store'])->name('store');
         });
     });
 
-    Route::prefix('import')->name('import.')->group(function (): void {
+    Route::prefix('import')->name('import.')->middleware(['vendor-subscription:allow_product_import'])->group(function (): void {
         Route::group(['prefix' => 'products', 'as' => 'products.'], function (): void {
             Route::get('/', [ImportProductController::class, 'index'])->name('index');
             Route::post('validate', [ImportProductController::class, 'validateData'])->name('validate');

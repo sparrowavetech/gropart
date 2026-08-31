@@ -160,7 +160,7 @@ class PdfRemoteHostSecurityTest extends TestCase
 
     public function test_mpdf_http_client_blocks_disallowed_host(): void
     {
-        $client = new HostRestrictedHttpClient(new SocketHttpClient(new NullLogger()), ['cms.test']);
+        $client = new HostRestrictedHttpClient(new SocketHttpClient(new NullLogger()), ['botble.com']);
 
         $response = $client->sendRequest(new Request('GET', 'http://169.254.169.254/latest/meta-data/'));
 
@@ -174,19 +174,19 @@ class PdfRemoteHostSecurityTest extends TestCase
 
         $this->assertSame(
             403,
-            $client->sendRequest(new Request('GET', 'http://cms.test/logo.png'))->getStatusCode()
+            $client->sendRequest(new Request('GET', 'https://botble.com/storage/general/logo.png'))->getStatusCode()
         );
     }
 
     public function test_mpdf_http_client_fetches_allowed_host(): void
     {
         $inner = new RecordingHttpClient();
-        $client = new HostRestrictedHttpClient($inner, ['cms.test']);
+        $client = new HostRestrictedHttpClient($inner, ['botble.com']);
 
-        $response = $client->sendRequest(new Request('GET', 'http://cms.test/logo.png'));
+        $response = $client->sendRequest(new Request('GET', 'https://botble.com/storage/general/logo.png'));
 
         // Allowed host is delegated to the real client and returns its response.
-        $this->assertSame(['http://cms.test/logo.png'], $inner->fetched);
+        $this->assertSame(['https://botble.com/storage/general/logo.png'], $inner->fetched);
         $this->assertSame(200, $response->getStatusCode());
         $this->assertSame('IMG', $response->getBody()->getContents());
     }
@@ -194,7 +194,7 @@ class PdfRemoteHostSecurityTest extends TestCase
     public function test_disallowed_host_is_not_delegated_to_inner_client(): void
     {
         $inner = new RecordingHttpClient();
-        $client = new HostRestrictedHttpClient($inner, ['cms.test']);
+        $client = new HostRestrictedHttpClient($inner, ['botble.com']);
 
         $response = $client->sendRequest(new Request('GET', 'http://169.254.169.254/latest/meta-data/'));
 
@@ -212,16 +212,20 @@ class PdfRemoteHostSecurityTest extends TestCase
     public function test_host_allow_list_ignores_port_documented_residual(): void
     {
         $inner = new RecordingHttpClient();
-        $client = new HostRestrictedHttpClient($inner, ['cms.test']);
+        $client = new HostRestrictedHttpClient($inner, ['botble.com']);
 
-        $response = $client->sendRequest(new Request('GET', 'http://cms.test:6379/'));
+        $response = $client->sendRequest(new Request('GET', 'https://botble.com:6379/'));
 
         $this->assertSame(200, $response->getStatusCode());
-        $this->assertSame(['http://cms.test:6379/'], $inner->fetched);
+        $this->assertSame(['https://botble.com:6379/'], $inner->fetched);
     }
 
     protected function captureBlockedHostLog(string $content): array
     {
+        // Pin the allow-list instead of relying on the app host: APP_URL differs between local
+        // (cms.test) and CI (localhost), which would otherwise flip these assertions.
+        add_filter('core_base_pdf_allowed_remote_hosts', fn () => ['botble.com']);
+
         $messages = [];
         Log::listen(function ($event) use (&$messages): void {
             $messages[] = $event->message;
@@ -237,20 +241,23 @@ class PdfRemoteHostSecurityTest extends TestCase
     public function test_blocked_remote_hosts_are_logged(): void
     {
         $messages = $this->captureBlockedHostLog(
-            '<img src="http://cms.test/logo.png"><img src="http://169.254.169.254/x">'
+            '<img src="https://botble.com/storage/general/logo.png"><img src="http://169.254.169.254/x">'
             . '<link href="https://evil-cdn.example.com/a.css">'
         );
 
         $this->assertCount(1, $messages);
         $this->assertStringContainsString('169.254.169.254', $messages[0]);
         $this->assertStringContainsString('evil-cdn.example.com', $messages[0]);
-        // The site's own host is allowed, so it must not be reported.
-        $this->assertStringNotContainsString('cms.test', $messages[0]);
+        // The allowed host must not be reported.
+        $this->assertStringNotContainsString('botble.com', $messages[0]);
     }
 
     public function test_no_log_when_all_hosts_allowed(): void
     {
-        $this->assertCount(0, $this->captureBlockedHostLog('<img src="http://cms.test/logo.png">'));
+        $this->assertCount(
+            0,
+            $this->captureBlockedHostLog('<img src="https://botble.com/storage/general/logo.png">')
+        );
     }
 }
 

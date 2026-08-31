@@ -18,7 +18,7 @@ return [
                 'to_user' => [
                     'title' => 'E -Mail an den Benutzer senden',
                     'description' => 'Vorlage zum Senden von E -Mails an den Abonnenten',
-                    'subject' => '{{Site_title}}: Abonnement bestätigt!',
+                    'subject' => '{{ site_title }}: Abonnement bestätigt!',
                     'newsletter_name' => 'Vollständiger Name des Benutzer, der Newsletter abonniert',
                     'newsletter_email' => 'E -Mail des Benutzer, der Newsletter abonniert',
                     'newsletter_unsubscribe_link' => 'Link für den Abbestellen -Newsletter',
@@ -49,6 +49,16 @@ return [
     'statuses' => [
         'subscribed' => 'Gezeichnet',
         'unsubscribed' => 'Abgemeldet',
+    ],
+    'email_templates' => [
+        // Admin email template
+        'admin_new_subscriber_title' => 'Neuer Abonnent',
+        'admin_new_subscriber_message' => 'Ein neuer Benutzer hat Ihren Newsletter abonniert:',
+
+        // Subscriber email template
+        'subscriber_success_title' => 'Erfolgreich abonniert',
+        'subscriber_thank_you_message' => 'Vielen Dank, dass Sie unseren Newsletter abonniert haben!',
+        'subscriber_unsubscribe_instruction' => 'Um den Newsletter abzubestellen, klicken Sie auf :newsletter_unsubscribe_link',
     ],
 
     'enter_your_email' => 'Geben Sie Ihre E-Mail-Adresse ein',

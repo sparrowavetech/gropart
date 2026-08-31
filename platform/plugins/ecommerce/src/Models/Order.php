@@ -11,6 +11,7 @@ use Botble\Ecommerce\Enums\ShippingStatusEnum;
 use Botble\Ecommerce\Events\ProductQuantityUpdatedEvent;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Facades\OrderHelper;
+use Botble\Ecommerce\Models\Concerns\HasUniqueCode;
 use Botble\Payment\Enums\PaymentStatusEnum;
 use Botble\Payment\Models\Payment;
 use Carbon\Carbon;
@@ -26,6 +27,8 @@ use Illuminate\Support\Facades\DB;
 
 class Order extends BaseModel
 {
+    use HasUniqueCode;
+
     protected $table = 'ec_orders';
 
     protected $fillable = [
@@ -108,7 +111,9 @@ class Order extends BaseModel
             }
         });
 
-        static::creating(fn (Order $order) => $order->code = static::generateUniqueCode());
+        static::creating(function (Order $order): void {
+            $order->code = static::generateUniqueCode();
+        });
     }
 
     public function user(): BelongsTo

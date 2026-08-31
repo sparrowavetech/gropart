@@ -51,6 +51,7 @@ use Botble\Marketplace\Models\VendorInfo;
 use Botble\Marketplace\Models\Withdrawal;
 use Botble\Marketplace\Services\CartValidateSameStore;
 use Botble\Marketplace\Services\GeneratePayoutInvoiceService;
+use Botble\Marketplace\Services\GenerateSubscriptionInvoiceService;
 use Botble\Media\Facades\RvMedia;
 use Botble\Slug\Facades\SlugHelper;
 use Botble\Table\Abstracts\TableAbstract;
@@ -397,6 +398,18 @@ class HookServiceProvider extends ServiceProvider
 
         add_filter('ecommerce_invoice_templates', function (array $templates): array {
             $generateWithdrawalInvoiceService = new GeneratePayoutInvoiceService();
+            $generateSubscriptionInvoiceService = new GenerateSubscriptionInvoiceService();
+
+            $templates = [
+                ...$templates,
+                'subscription' => [
+                    'label' => trans('plugins/marketplace::subscription.invoices.template_title'),
+                    'content' => fn () => $generateSubscriptionInvoiceService->getContent(),
+                    'variables' => fn () => $generateSubscriptionInvoiceService->getVariables(),
+                    'customized_path' => $generateSubscriptionInvoiceService->getCustomizedTemplatePath(),
+                    'preview' => fn () => $generateSubscriptionInvoiceService->preview(),
+                ],
+            ];
 
             return [
                 ...$templates,

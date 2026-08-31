@@ -15,6 +15,7 @@ return [
         'add-amount' => 'Magdagdag ng Halaga',
         'subtract-amount' => 'Magbawas ng Halaga',
         'order-return' => 'Pagbabalik ng Order',
+        'subscription-fee' => 'Bayad sa Subscription',
     ],
     'store_name' => 'Pangalan ng Tindahan',
     'vendor_name' => 'Pangalan ng Vendor',

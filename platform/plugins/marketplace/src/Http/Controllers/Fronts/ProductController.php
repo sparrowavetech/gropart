@@ -29,6 +29,7 @@ use Botble\Ecommerce\Services\StoreProductTagService;
 use Botble\Ecommerce\Traits\ProductActionsTrait;
 use Botble\Marketplace\Facades\MarketplaceHelper;
 use Botble\Marketplace\Forms\ProductForm;
+use Botble\Marketplace\Services\VendorSubscriptionService;
 use Botble\Marketplace\Tables\ProductTable;
 use Botble\Marketplace\Tables\ProductVariationTable;
 use Botble\Media\Facades\RvMedia;
@@ -57,6 +58,10 @@ class ProductController extends BaseController
 
     public function create()
     {
+        if ($response = $this->guardProductQuota()) {
+            return $response;
+        }
+
         if (EcommerceHelper::getCurrentCreationContextProductType() == ProductTypeEnum::DIGITAL) {
             $this->pageTitle(trans('plugins/ecommerce::products.create_product_type.digital'));
         } elseif (EcommerceHelper::getCurrentCreationContextProductType() == ProductTypeEnum::PHYSICAL) {
@@ -74,6 +79,10 @@ class ProductController extends BaseController
         StoreAttributesOfProductService $storeAttributesOfProductService,
         StoreProductTagService $storeProductTagService
     ) {
+        if ($response = $this->guardProductQuota()) {
+            return $response;
+        }
+
         $request->merge(['video_media' => $this->uploadVideoMedia($request)]);
 
         $request = $this->processRequestData($request);
@@ -654,5 +663,33 @@ class ProductController extends BaseController
         $this->pageTitle(trans('plugins/ecommerce::products.view', ['name' => $product->name]));
 
         return view('plugins/marketplace::themes.vendor-dashboard.products.view', $this->getProductViewData($product));
+    }
+
+    /**
+     * Stop a vendor who has used every product slot their plan grants. The
+     * subscription middleware already blocks vendors with no plan at all; this covers
+     * the quota, and gives a message pointing at the upgrade instead of a bare redirect.
+     */
+    protected function guardProductQuota()
+    {
+        if (! MarketplaceHelper::isSubscriptionMode()) {
+            return null;
+        }
+
+        $vendor = auth('customer')->user();
+
+        if (! $vendor || app(VendorSubscriptionService::class)->canCreateProduct($vendor)) {
+            return null;
+        }
+
+        $message = trans('plugins/marketplace::subscription.vendor.limit_reached');
+
+        if (request()->ajax() || request()->wantsJson()) {
+            return $this->httpResponse()->setError()->setMessage($message);
+        }
+
+        return redirect()
+            ->route('marketplace.vendor.subscriptions.plans')
+            ->with('error_msg', $message);
     }
 }

@@ -3,7 +3,7 @@
 return [
     'name' => 'الإيرادات',
     'edit' => 'تحديث رصيد المحفظة',
-    'view_store' => 'عرض المتجر ":متجر"',
+    'view_store' => 'عرض المتجر ":store"',
     'forms' => [
         'description_placeholder' => 'قم بتحديث المبلغ المحدد بالطلب رقم __ORDER_ID__ مع السبب: __REASON__',
         'amount' => 'كمية',
@@ -15,6 +15,7 @@ return [
         'add-amount' => 'أضف المبلغ',
         'subtract-amount' => 'طرح المبلغ',
         'order-return' => 'بعودة النظام',
+        'subscription-fee' => 'رسوم الاشتراك',
     ],
     'store_name' => 'اسم المتجر',
     'vendor_name' => 'اسم البائع',

@@ -3,7 +3,7 @@
 return [
     'id' => 'ID',
     'name' => '名前',
-    'slug' => 'ナメクジ',
+    'slug' => 'スラッグ',
     'title' => 'タイトル',
     'order_by' => '注文方法',
     'order' => '注文',

@@ -12,6 +12,7 @@ use Botble\Theme\ThemeOption\Fields\NumberField;
 use Botble\Theme\ThemeOption\Fields\SelectField;
 use Botble\Theme\ThemeOption\ThemeOptionSection;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\File;
 
 class Typography
 {
@@ -128,11 +129,14 @@ class Typography
             if (! in_array($value, $renderedFonts) && $fontFamily->isGoogleFont()) {
                 $fontWeights = $fontFamily->getFontWeights() ?: ['300', '400', '500', '600', '700'];
 
+                // Link the cached font CSS rather than inlining it: the same declarations
+                // (~13KB per family) are otherwise re-sent with every page and can never be
+                // reused by the browser. Opt back in with CMS_GOOGLE_FONTS_INLINE=true.
                 $fontFaces .= BaseHelper::googleFonts('https://fonts.googleapis.com/' . sprintf(
                     'css2?family=%s:wght@%s&display=swap',
                     urlencode($value),
                     implode(';', $fontWeights)
-                ));
+                ), (bool) config('core.base.general.google_fonts_inline', false));
 
                 $renderedFonts[] = $value;
             }
@@ -199,17 +203,43 @@ class Typography
 
         $styles .= '</style>';
 
-        $fontPreloads = '';
-
-        if ($fontFaces) {
-            // Extract the first woff2 font URL from the inlined @font-face CSS for preloading
-            if (preg_match('/url\(([^)]+\.woff2)/i', $fontFaces, $matches)) {
-                $fontUrl = trim($matches[1], '\'"');
-                $fontPreloads = '<link rel="preload" href="' . e($fontUrl) . '" as="font" type="font/woff2" crossorigin>';
-            }
-        }
+        $fontPreloads = $this->renderFontPreload($fontFaces);
 
         return $fontPreloads . $fontFaces . $styles;
+    }
+
+    /**
+     * Preload the first woff2 so the real font swaps in as early as possible.
+     *
+     * The URL lives in the @font-face CSS, which is normally linked rather than inlined -
+     * so when it is a <link> the declarations are read from the cached file on disk. Losing
+     * this preload would lengthen the fallback-font flash, which is exactly the kind of
+     * regression that moving the CSS out of the page could otherwise introduce.
+     */
+    protected function renderFontPreload(string $fontFaces): string
+    {
+        if (! $fontFaces) {
+            return '';
+        }
+
+        $css = $fontFaces;
+
+        // Linked stylesheet: resolve it back to the local file to read its declarations.
+        if (! str_contains($fontFaces, '@font-face') && preg_match('/href="([^"]+\.css)"/i', $fontFaces, $href)) {
+            $path = public_path(ltrim((string) parse_url($href[1], PHP_URL_PATH), '/'));
+
+            if (! File::exists($path)) {
+                return '';
+            }
+
+            $css = (string) File::get($path);
+        }
+
+        if (! preg_match('/url\(([^)]+\.woff2)/i', $css, $matches)) {
+            return '';
+        }
+
+        return '<link rel="preload" href="' . e(trim($matches[1], '\'"')) . '" as="font" type="font/woff2" crossorigin>';
     }
 
     public function renderThemeOptions(): void

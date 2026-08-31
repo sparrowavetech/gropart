@@ -31,7 +31,17 @@ class LoginForm extends AuthForm
                     ->label(trans('core/acl::auth.login.username'))
                     ->value(old(
                         'email',
-                        BaseHelper::hasDemoModeEnabled() ? config('core.base.general.demo.account.username') : null,
+                        /**
+                         * Fall back to a validated ?email= query parameter, so a flow
+                         * that sends a user to the login page from another domain can
+                         * prefill it: old() only reads session flash data, which does
+                         * not cross domains, and the email would be silently dropped.
+                         *
+                         * filter_var() before echoing: this value is reflected into
+                         * the form.
+                         */
+                        filter_var(request()->query('email'), FILTER_VALIDATE_EMAIL)
+                            ?: (BaseHelper::hasDemoModeEnabled() ? config('core.base.general.demo.account.username') : null),
                     ))
                     ->required()
                     ->attributes(['tabindex' => 1, 'placeholder' => trans('core/acl::auth.login.placeholder.username')])

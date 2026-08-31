@@ -82,6 +82,54 @@
                             {{ trans('packages/menu::menu.drag_drop_info') }}
                         </x-core::alert>
 
+                        <div class="menu-bulk-select-toggle d-none mb-3">
+                            <x-core::button
+                                type="button"
+                                size="sm"
+                                icon="ti ti-list-check"
+                                class="btn-toggle-bulk-select"
+                            >
+                                {{ trans('packages/menu::menu.bulk_delete') }}
+                            </x-core::button>
+                        </div>
+
+                        <div class="menu-bulk-actions d-none align-items-center gap-3 mb-3">
+                            <div class="form-check mb-0">
+                                <input
+                                    type="checkbox"
+                                    class="form-check-input"
+                                    id="menu-nodes-select-all"
+                                >
+                                <label
+                                    class="form-check-label"
+                                    for="menu-nodes-select-all"
+                                >{{ trans('packages/menu::menu.select_all') }}</label>
+                            </div>
+
+                            <x-core::button
+                                type="button"
+                                color="danger"
+                                size="sm"
+                                icon="ti ti-trash"
+                                class="btn-remove-selected-menu-nodes"
+                                disabled
+                            >
+                                {{ trans('packages/menu::menu.remove_selected') }}
+                                <span
+                                    class="ms-1"
+                                    data-selected-count
+                                ></span>
+                            </x-core::button>
+
+                            <x-core::button
+                                type="button"
+                                size="sm"
+                                class="btn-cancel-bulk-select"
+                            >
+                                {{ trans('packages/menu::menu.cancel') }}
+                            </x-core::button>
+                        </div>
+
                         <div
                             class="dd nestable-menu"
                             id="nestable"

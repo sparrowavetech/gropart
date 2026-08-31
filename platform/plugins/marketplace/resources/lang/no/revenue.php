@@ -15,6 +15,7 @@ return [
         'add-amount' => 'Legg til beløp',
         'subtract-amount' => 'Trekk fra beløp',
         'order-return' => 'Bestillingsretur',
+        'subscription-fee' => 'Abonnementsavgift',
     ],
     'store_name' => 'Butikknavn',
     'vendor_name' => 'Leverandørnavn',

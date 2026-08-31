@@ -15,6 +15,7 @@ return [
         'add-amount' => 'Összeg hozzáadása',
         'subtract-amount' => 'Összeg levonása',
         'order-return' => 'Rendelés visszaküldése',
+        'subscription-fee' => 'Előfizetési díj',
     ],
     'store_name' => 'Üzlet neve',
     'vendor_name' => 'Eladó neve',

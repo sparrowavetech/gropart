@@ -5,10 +5,12 @@ namespace Botble\Marketplace\Http\Controllers\Settings;
 use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Supports\Helper;
 use Botble\Ecommerce\Models\ProductCategory;
+use Botble\Marketplace\Enums\MarketplaceModeEnum;
 use Botble\Marketplace\Facades\MarketplaceHelper;
 use Botble\Marketplace\Forms\Settings\MarketplaceSettingForm;
 use Botble\Marketplace\Http\Requests\MarketPlaceSettingFormRequest;
 use Botble\Marketplace\Models\Store;
+use Botble\Marketplace\Services\SubscriptionProductVisibilityService;
 use Botble\Setting\Facades\Setting;
 use Illuminate\Support\Arr;
 
@@ -43,6 +45,7 @@ class MarketplaceSettingController extends SettingController
         }
 
         $preVerifyVendor = MarketplaceHelper::getSetting('verify_vendor', 1);
+        $preMode = MarketplaceHelper::getMode();
 
         if (in_array('fee_per_order', array_keys($validated))) {
             $value = $validated['fee_per_order'];
@@ -53,6 +56,20 @@ class MarketplaceSettingController extends SettingController
 
         if ($preVerifyVendor != MarketplaceHelper::getSetting('verify_vendor', 1)) {
             Helper::clearCache();
+        }
+
+        // Switching mode changes which admin and vendor menu items are registered,
+        // and both menus are cached per user.
+        if ($preMode !== MarketplaceHelper::getMode()) {
+            Helper::clearCache();
+            DashboardMenu::clearCaches();
+
+            // Leaving subscription mode strands anything expiry had unpublished: commission
+            // mode has no subscriptions, so nothing would ever republish them and the
+            // vendor's catalogue would stay dark with no way back.
+            if (MarketplaceHelper::getMode() === MarketplaceModeEnum::COMMISSION) {
+                app(SubscriptionProductVisibilityService::class)->restoreAll();
+            }
         }
 
         DashboardMenu::clearCachesForCurrentUser();

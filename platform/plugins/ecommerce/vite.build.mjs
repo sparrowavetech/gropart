@@ -50,7 +50,7 @@ export default {
         { src: 'resources/sass/report.scss', out: 'report.css' },
         { src: 'resources/sass/order-return.scss', out: 'order-return.css' },
         { src: 'resources/sass/widget.scss', out: 'widget.css' },
-        { src: 'resources/sass/front-auth.scss', out: 'front-auth.css' },
+        { src: 'resources/sass/front-card.scss', out: 'front-card.css' },
         { src: 'resources/sass/front-ecommerce.scss', out: 'front-ecommerce.css' },
         { src: 'resources/sass/front-ecommerce-missing-bootstrap.scss', out: 'front-ecommerce-missing-bootstrap.css' },
         { src: 'resources/sass/front-ecommerce-rtl.scss', out: 'front-ecommerce-rtl.css' },

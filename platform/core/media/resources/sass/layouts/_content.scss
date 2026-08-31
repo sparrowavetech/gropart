@@ -2,7 +2,11 @@
     display: flex;
     flex-direction: column;
     max-height: calc(100vh - 6rem);
-    min-height: 550px;
+    // No floor. .modal-content already has a definite height (see .modal-full)
+    // and this body is the flex item that fills it. The old flat 550px only
+    // ever bit on short viewports, where it pushed the gallery past the bottom
+    // of the modal and clipped the footer holding the Insert button.
+    min-height: 0;
 }
 
 .navbar .dropdown-menu-right {
@@ -43,12 +47,24 @@
             @include lib-css(flex-grow, 1);
             display: flex;
             @include lib-css(flex-direction, column);
+            // .rv-media-wrapper inherits flex-direction:column from .card, so
+            // this is a main-axis flex item and min-height:auto resolves to the
+            // content-based minimum (toolbar + the 400px .rv-media-main + status
+            // bar + footer). That floor made the column refuse to shrink, so on
+            // viewports under ~850px the footer was pushed past the
+            // overflow:hidden edge of the wrapper and the Insert button became
+            // unreachable. Let the column shrink; .rv-media-items scrolls.
+            min-height: 0;
 
             .rv-media-main {
                 @include lib-css(flex-grow, 1);
                 @include lib-css(flex-direction, row);
                 display: flex;
                 height: 400px;
+                // Flex items default to min-height:auto and refuse to shrink
+                // below their content, which can push the footer out of the
+                // overflow:hidden wrapper. Let this pane scroll internally.
+                min-height: 0;
             }
 
             .rv-dropdown-actions {

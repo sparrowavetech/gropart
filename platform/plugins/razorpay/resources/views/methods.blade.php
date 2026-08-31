@@ -73,7 +73,7 @@
                     $('head')[0].appendChild(script);
 
                     return result.promise();
-                }
+                };
 
                 var callRazorPayScript = function() {
                     loadExternalScript('https://checkout.razorpay.com/v1/checkout.js').then(function() {
@@ -140,13 +140,15 @@
                         });
                         window.rzpay.open();
                     });
-                }
+                };
 
-                // Persist the buyer's address to the order BEFORE opening the Razorpay popup.
-                // In this (website_embedded) mode the popup is paid FIRST and the checkout form
-                // submits afterwards; if the buyer pays but never returns, the address would
-                // otherwise never be saved. This mirrors the checkout save-information step so a
-                // captured payment always has its shipping address on the order.
+                /*
+                 * Persist the buyer's address to the order BEFORE opening the Razorpay popup.
+                 * In this (website_embedded) mode the popup is paid FIRST and the checkout form
+                 * submits afterwards; if the buyer pays but never returns, the address would
+                 * otherwise never be saved. This mirrors the checkout save-information step so a
+                 * captured payment always has its shipping address on the order.
+                 */
                 @php
                     $rzpSaveInformationUrl = '';
                     try {
@@ -173,12 +175,12 @@
                         contentType: false,
                         data: new FormData(form.get(0)),
                         timeout: 10000,
-                        // Proceed to payment whether the save succeeds, fails or times out - never block checkout.
+                        /* Proceed to payment whether the save succeeds, fails or times out - never block checkout. */
                         complete: function() {
                             done();
                         }
                     });
-                }
+                };
 
                 $(document).off('click', '.payment-checkout-btn').on('click', '.payment-checkout-btn', function(event) {
                     event.preventDefault();

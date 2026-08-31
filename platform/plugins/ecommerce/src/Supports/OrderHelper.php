@@ -1454,6 +1454,14 @@ class OrderHelper
 
     public function processOrderProductData(array|Collection $products, array $sessionData): array
     {
+        // Same guard as createOrUpdateIncompleteOrder(): the block below rewrites and deletes
+        // the order line items from the live cart, so a paid order must be left untouched.
+        $processingOrder = Order::query()->find(Arr::get($sessionData, 'created_order_id'));
+
+        if ($processingOrder && $this->isOrderLocked($processingOrder)) {
+            return $sessionData;
+        }
+
         $createdOrderProduct = Arr::get($sessionData, 'created_order_product');
 
         if (is_string($createdOrderProduct) && $createdOrderProduct !== '') {
@@ -1827,7 +1835,7 @@ class OrderHelper
         // finalized - stranding a paid order in Incomplete Orders (and, on the recover
         // path, overwriting its items/total from the live cart). If the order is already
         // finished, or a completed payment is linked to it, leave it untouched.
-        if ($order && ($order->is_finished || $this->hasCompletedPayment($order))) {
+        if ($order && $this->isOrderLocked($order)) {
             return $order;
         }
 
@@ -1852,6 +1860,19 @@ class OrderHelper
         do_action('ecommerce_create_order_from_data', $data, $order);
 
         return $order;
+    }
+
+    /**
+     * An order is "locked" once it is finished or a completed payment is linked to it.
+     * Nothing in the checkout flow may rewrite such an order from the live cart: the
+     * buyer can come back to checkout in the same session after paying (back button, a
+     * second tab left open, or they keep shopping and reopen checkout), and rebuilding
+     * the order from the newer cart would inflate the stored total while the gateway
+     * keeps the amount that was actually captured.
+     */
+    public function isOrderLocked(Order $order): bool
+    {
+        return $order->is_finished || $this->hasCompletedPayment($order);
     }
 
     protected function hasCompletedPayment(Order $order): bool

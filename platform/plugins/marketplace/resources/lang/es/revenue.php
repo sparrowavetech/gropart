@@ -3,7 +3,7 @@
 return [
     'name' => 'Ingresos',
     'edit' => 'Actualizar saldo de billetera',
-    'view_store' => 'Ver tienda ":tienda"',
+    'view_store' => 'Ver tienda ":store"',
     'forms' => [
         'description_placeholder' => 'Actualice el monto exacto con el pedido #__ORDER_ID__ con el motivo: __REASON__',
         'amount' => 'Cantidad',
@@ -15,6 +15,7 @@ return [
         'add-amount' => 'Agregar cantidad',
         'subtract-amount' => 'Restar cantidad',
         'order-return' => 'Devolución del pedido',
+        'subscription-fee' => 'Tarifa de suscripción',
     ],
     'store_name' => 'Nombre de la tienda',
     'vendor_name' => 'Nombre del vendedor',

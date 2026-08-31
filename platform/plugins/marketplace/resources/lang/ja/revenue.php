@@ -3,7 +3,7 @@
 return [
     'name' => '収益',
     'edit' => 'ウォレット残高を更新する',
-    'view_store' => 'ストア「:ストア」を表示',
+    'view_store' => 'ストア「:store」を表示',
     'forms' => [
         'description_placeholder' => '注文 #__ORDER_ID__ の正確な金額を理由: __REASON__ とともに更新します。',
         'amount' => '額',
@@ -15,6 +15,7 @@ return [
         'add-amount' => '金額を追加',
         'subtract-amount' => '減算金額',
         'order-return' => '注文の返品',
+        'subscription-fee' => '購読料',
     ],
     'store_name' => '店名',
     'vendor_name' => 'ベンダー名',

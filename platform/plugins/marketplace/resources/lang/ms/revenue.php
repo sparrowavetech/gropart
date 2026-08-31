@@ -15,6 +15,7 @@ return [
         'add-amount' => 'Tambah Jumlah',
         'subtract-amount' => 'Tolak Jumlah',
         'order-return' => 'Pemulangan Pesanan',
+        'subscription-fee' => 'Yuran Langganan',
     ],
     'store_name' => 'Nama Kedai',
     'vendor_name' => 'Nama Vendor',

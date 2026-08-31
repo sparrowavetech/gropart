@@ -42,6 +42,30 @@
                 transform: rotate(360deg);
             }
         }
+
+        {{--
+            Shared skeleton shimmer, used by every skeleton view a theme supplies through
+            $loadingView. It sits inside the once-block above, so a page with several lazy
+            blocks ships it a single time - each theme skeleton partial used to carry its
+            own copy. Keep prose out of CSS comments here: Blade compiles a bare @-word
+            even inside /* ... */, so writing the directive name literally would open a
+            second conditional and break the view.
+        --}}
+        @keyframes skeleton-loading {
+            0% {
+                background-position: -200% 0;
+            }
+
+            100% {
+                background-position: 200% 0;
+            }
+        }
+
+        .skeleton-loading-bg {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: skeleton-loading 1.5s infinite;
+        }
     </style>
 @endonce
 

@@ -906,7 +906,19 @@ class Theme implements ThemeContract
 
     public function getStyleIntegrationPath(): string
     {
-        return public_path($this->getThemeAssetsPath() . '/css/style.integration.css');
+        /**
+         * Filterable so a multi-tenant install can give each store its own file:
+         * this is a single shared file on disk, so without the filter one store
+         * saving Theme Options CSS overwrites every other store's live stylesheet.
+         *
+         * Every reader and writer of the custom CSS resolves the path through this
+         * method, and the <link> tag is built from basename() of what it returns,
+         * so a filter may rename the file but must keep it in the same folder.
+         */
+        return apply_filters(
+            FILTER_THEME_STYLE_INTEGRATION_PATH,
+            public_path($this->getThemeAssetsPath() . '/css/style.integration.css'),
+        );
     }
 
     public function fireEventGlobalAssets(): self

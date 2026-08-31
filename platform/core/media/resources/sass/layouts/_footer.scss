@@ -2,6 +2,10 @@
     padding: 10px;
     text-align: right;
     border-top: var(--bb-border-width) var(--bb-border-style) var(--bb-border-color);
+    // The wrapper is overflow:hidden, so if this bar is allowed to shrink the
+    // Insert button can be clipped with no way to scroll to it. Mirrors the
+    // guard .rv-media-status-bar below already has.
+    flex-shrink: 0;
 }
 
 // Status bar summarising the current folder (counts + total size).

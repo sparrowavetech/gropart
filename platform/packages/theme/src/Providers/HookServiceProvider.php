@@ -497,7 +497,11 @@ class HookServiceProvider extends ServiceProvider
             add_filter(THEME_FRONT_HEADER, function (?string $html): ?string {
                 $file = Theme::getStyleIntegrationPath();
                 if ($this->app['files']->exists($file)) {
-                    $html .= PHP_EOL . Html::style(Theme::asset()->url('css/style.integration.css?v=' . filectime($file)));
+                    // Link the same filename getStyleIntegrationPath() resolves to: a
+                    // multi-tenant install suffixes it per store (style.integration.<id>.css),
+                    // where a hardcoded 'style.integration.css' would fetch the shared file
+                    // of another store. basename() is style.integration.css by default.
+                    $html .= PHP_EOL . Html::style(Theme::asset()->url('css/' . basename($file) . '?v=' . filectime($file)));
                 }
 
                 return $html;

@@ -7,8 +7,10 @@ use Botble\Base\Forms\FieldOptions\SelectFieldOption;
 use Botble\Base\Forms\Fields\SelectField;
 use Botble\Base\Forms\Fields\TextField;
 use Botble\Blog\Models\Category;
+use Botble\Blog\Models\Post;
 use Botble\Widget\AbstractWidget;
 use Botble\Widget\Forms\WidgetForm;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 
@@ -30,11 +32,15 @@ class Categories extends AbstractWidget
 
         $categoryIds = Arr::get($config, 'category_ids', []);
 
+        $displayPostsCount = Arr::get($config, 'display_posts_count', 'yes') !== 'no';
+
         $categories = Category::query()
             ->select(['id', 'name'])
             ->with('slugable')
-            ->when($config['display_posts_count'], function ($query) {
-                return $query->withCount('posts');
+            ->when($displayPostsCount, function ($query) {
+                return $query->withCount([
+                    'posts' => fn ($query) => $query->wherePublished('posts.status'),
+                ]);
             })
             ->wherePublished()
             ->when($categoryIds, function ($query) use ($categoryIds) {
@@ -48,7 +54,47 @@ class Categories extends AbstractWidget
             ->orderByDesc('created_at')
             ->get();
 
+        if ($displayPostsCount) {
+            $this->addChildrenPostsCount($categories);
+        }
+
         return compact('categories');
+    }
+
+    /**
+     * A category page lists the posts of the category and of its published children, so categories
+     * having children must count those posts too, without counting a shared post twice.
+     */
+    protected function addChildrenPostsCount(EloquentCollection $categories): void
+    {
+        if ($categories->isEmpty()) {
+            return;
+        }
+
+        $childIdsByParent = Category::query()
+            ->wherePublished()
+            ->whereIn('parent_id', $categories->modelKeys())
+            ->whereColumn('id', '!=', 'parent_id')
+            ->select(['id', 'parent_id'])
+            ->get()
+            ->groupBy('parent_id')
+            ->map(fn (EloquentCollection $children) => $children->pluck('id')->all());
+
+        foreach ($categories as $category) {
+            $childIds = $childIdsByParent->get($category->getKey(), []);
+
+            if (! $childIds) {
+                continue;
+            }
+
+            $category->posts_count = Post::query()
+                ->wherePublished()
+                ->whereHas('categories', fn ($query) => $query->whereIn(
+                    'categories.id',
+                    array_merge([$category->getKey()], $childIds)
+                ))
+                ->count();
+        }
     }
 
     protected function settingForm(): WidgetForm|string|null

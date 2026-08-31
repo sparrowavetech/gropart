@@ -15,6 +15,7 @@ return [
         'add-amount' => 'Προσθήκη Ποσού',
         'subtract-amount' => 'Αφαίρεση Ποσού',
         'order-return' => 'Επιστροφή Παραγγελίας',
+        'subscription-fee' => 'Συνδρομή',
     ],
     'store_name' => 'Όνομα Καταστήματος',
     'vendor_name' => 'Όνομα Πωλητή',

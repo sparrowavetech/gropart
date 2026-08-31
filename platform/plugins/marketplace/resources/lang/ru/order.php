@@ -9,6 +9,9 @@ return [
         'description' => 'Отказались от заказа #:order',
     ],
     'products_are_from_different_vendors' => 'Не могу создать заказ! Продукты от разных продавцов.',
+    'return' => [
+        'description' => 'Вернулся из заказа #:order',
+    ],
     'thank_you' => [
         'count_orders' => ':count заказов',
         'order' => 'Заказ',

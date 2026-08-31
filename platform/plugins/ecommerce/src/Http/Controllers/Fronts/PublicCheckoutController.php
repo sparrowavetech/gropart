@@ -539,7 +539,14 @@ class PublicCheckoutController extends BaseController
 
         $sessionData = OrderHelper::checkAndCreateOrderAddress($addressData, $sessionData);
 
-        if (! isset($sessionData['created_order_product']) || $cartChangedSinceOrder) {
+        // Never rebuild the line items of an order that is already paid. createOrderFromData()
+        // above bails out on such an order, but this block is driven by the session flags
+        // alone, so without the same guard a buyer returning to checkout after paying would
+        // have the paid order's items replaced by whatever is in the cart now.
+        $orderToBuildProductsFor = Order::query()->find(Arr::get($sessionData, 'created_order_id'));
+        $canRebuildOrderProducts = $orderToBuildProductsFor && ! OrderHelper::isOrderLocked($orderToBuildProductsFor);
+
+        if ($canRebuildOrderProducts && (! isset($sessionData['created_order_product']) || $cartChangedSinceOrder)) {
             $weight = Cart::instance('cart')->weight();
 
             OrderProduct::query()->where(['order_id' => $sessionData['created_order_id']])->delete();
@@ -617,7 +624,9 @@ class PublicCheckoutController extends BaseController
                         ->where('id', $storeData['created_order_id'])
                         ->first();
 
-                    if ($order) {
+                    // Same guard as createOrUpdateIncompleteOrder(): this writes the order
+                    // total directly, so a paid order must be left alone.
+                    if ($order && ! OrderHelper::isOrderLocked($order)) {
                         $storeShippingAmount = Arr::get($storeData, 'shipping_amount', 0);
                         $shippingOption = Arr::get($storeData, 'shipping_option');
                         $storeShippingTaxAmount = EcommerceHelper::calculateShippingTax($storeShippingAmount);
@@ -649,7 +658,9 @@ class PublicCheckoutController extends BaseController
                     ->where('id', $sessionData['created_order_id'])
                     ->first();
 
-                if ($order) {
+                // Same guard as createOrUpdateIncompleteOrder(): this writes the order total
+                // directly, so a paid order must be left alone.
+                if ($order && ! OrderHelper::isOrderLocked($order)) {
                     $shippingAmount = Arr::get($sessionData, 'shipping_amount', 0);
                     $shippingOption = Arr::get($sessionData, 'shipping_option');
                     $orderShippingTaxAmount = EcommerceHelper::calculateShippingTax($shippingAmount);

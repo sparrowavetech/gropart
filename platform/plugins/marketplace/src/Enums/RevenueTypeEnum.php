@@ -10,6 +10,7 @@ use Illuminate\Support\HtmlString;
  * @method static RevenueTypeEnum ADD_AMOUNT()
  * @method static RevenueTypeEnum SUBTRACT_AMOUNT()
  * @method static RevenueTypeEnum ORDER_RETURN()
+ * @method static RevenueTypeEnum SUBSCRIPTION_FEE()
  */
 class RevenueTypeEnum extends Enum
 {
@@ -19,6 +20,8 @@ class RevenueTypeEnum extends Enum
 
     public const ORDER_RETURN = 'order-return';
 
+    public const SUBSCRIPTION_FEE = 'subscription-fee';
+
     public static $langPath = 'plugins/marketplace::revenue.types';
 
     public function toHtml(): HtmlString|string
@@ -27,6 +30,7 @@ class RevenueTypeEnum extends Enum
             self::ADD_AMOUNT => 'info',
             self::SUBTRACT_AMOUNT => 'danger',
             self::ORDER_RETURN => 'warning',
+            self::SUBSCRIPTION_FEE => 'purple',
             default => 'primary',
         };
 

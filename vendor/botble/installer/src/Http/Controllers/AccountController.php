@@ -13,6 +13,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\URL;
 
 class AccountController extends BaseController
@@ -29,7 +30,13 @@ class AccountController extends BaseController
     public function store(SaveAccountRequest $request, ActivateUserService $activateUserService): RedirectResponse
     {
         try {
-            User::query()->truncate();
+            // Clear any account left behind by an earlier install attempt.
+            // MySQL refuses TRUNCATE on a table referenced by a foreign key, and
+            // plugin tables routinely point at `users` through audit columns
+            // (who verified a vendor, who approved a payout), which made a fresh
+            // install die here with SQLSTATE[42000] 1701. Constraints are
+            // restored by withoutForeignKeyConstraints() even if this throws.
+            Schema::withoutForeignKeyConstraints(static fn () => User::query()->truncate());
 
             $user = new User();
             $user->fill(

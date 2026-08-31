@@ -15,6 +15,7 @@ return [
         'add-amount' => 'Lägg Till Belopp',
         'subtract-amount' => 'Dra Av Belopp',
         'order-return' => 'Beställningsretur',
+        'subscription-fee' => 'Prenumerationsavgift',
     ],
     'store_name' => 'Butiksnamn',
     'vendor_name' => 'Säljarnamn',

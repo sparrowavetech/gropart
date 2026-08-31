@@ -2,10 +2,24 @@
 
 namespace Resend\Service;
 
+use Resend\Contracts\Transporter;
+use Resend\Service\Broadcasts\ClickedLink;
 use Resend\ValueObjects\Transporter\Payload;
 
 class Broadcast extends Service
 {
+    public ClickedLink $clickedLinks;
+
+    /**
+     * Create a new broadcast service instance with the given transport.
+     */
+    public function __construct(Transporter $transporter)
+    {
+        $this->clickedLinks = new ClickedLink($transporter);
+
+        parent::__construct($transporter);
+    }
+
     /**
      * Retrieve a single broadcast.
      *
@@ -52,6 +66,23 @@ class Broadcast extends Service
     }
 
     /**
+     * Retrieve the recipients of a broadcast for a given event type.
+     *
+     * @param array{'type': string, 'email'?: string, 'bounce_type'?: string, 'limit'?: int, 'before'?: string, 'after'?: string} $options
+     * @return \Resend\Collection<\Resend\Broadcasts\Recipient>
+     *
+     * @see https://resend.com/docs/api-reference/broadcasts/list-broadcast-recipients
+     */
+    public function recipients(string $id, array $options): \Resend\Collection
+    {
+        $payload = Payload::list("broadcasts/{$id}/recipients", $options, ['type', 'email', 'bounce_type']);
+
+        $result = $this->transporter->request($payload);
+
+        return $this->createResource('broadcast-recipients', $result);
+    }
+
+    /**
      * Update a broadcast to send to your audience.
      *
      * @see https://resend.com/docs/api-reference/broadcasts/update-broadcast
@@ -73,6 +104,20 @@ class Broadcast extends Service
     public function send(string $broadcastId, array $parameters): \Resend\Broadcast
     {
         $payload = Payload::create("broadcasts/{$broadcastId}/send", $parameters);
+
+        $result = $this->transporter->request($payload);
+
+        return $this->createResource('broadcasts', $result);
+    }
+
+    /**
+     * Cancel a queued or scheduled broadcast.
+     *
+     * @see https://resend.com/docs/api-reference/broadcasts/cancel-broadcast
+     */
+    public function cancel(string $id): \Resend\Broadcast
+    {
+        $payload = Payload::cancel('broadcasts', $id);
 
         $result = $this->transporter->request($payload);
 

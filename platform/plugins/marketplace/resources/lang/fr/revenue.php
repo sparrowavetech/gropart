@@ -15,6 +15,7 @@ return [
         'add-amount' => 'Ajouter un montant',
         'subtract-amount' => 'Soustraire un montant',
         'order-return' => 'Retour de commande',
+        'subscription-fee' => 'Frais d\'abonnement',
     ],
     'store_name' => 'Nom du magasin',
     'vendor_name' => 'Nom du vendeur',

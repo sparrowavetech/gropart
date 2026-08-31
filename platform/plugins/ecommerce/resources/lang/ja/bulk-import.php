@@ -35,6 +35,7 @@ return [
         ],
     ],
     'import_failed_description' => 'インポートに失敗しました。以下のエラーをご確認ください！',
+    'location_not_matched' => ':attribute「:value」は選択された国の中に見つかりませんでした。ロケーション設定に表示されている正確な名称、またはそのIDを入力してください。',
     'column' => '列',
     'row' => '行',
     'attribute' => '属性',

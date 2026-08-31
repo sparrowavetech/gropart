@@ -52,6 +52,11 @@ class SeoMeta implements SeoMetaContract
     protected ?string $currentUrl = null;
 
     /**
+     * Meta tags rendered with the `property` attribute (article:*, profile:*, ...).
+     */
+    protected ?Entities\PropertyMetaCollection $properties = null;
+
+    /**
      * Make SeoMeta instance.
      */
     public function __construct()
@@ -61,6 +66,7 @@ class SeoMeta implements SeoMetaContract
         $this->misc(new Entities\MiscTags());
         $this->webmasters(new Entities\Webmasters());
         $this->analytics(new Entities\Analytics());
+        $this->properties = new Entities\PropertyMetaCollection();
     }
 
     /**
@@ -290,6 +296,50 @@ class SeoMeta implements SeoMetaContract
         return $this;
     }
 
+    /**
+     * Add a meta tag rendered with the `property` attribute instead of `name`.
+     *
+     * @param string $property
+     * @param string $content
+     *
+     * @return $this
+     */
+    /**
+     * The `property` meta collection, created on first use so the instance stays usable
+     * when it is built without the constructor (unserialize, container extension, ...).
+     */
+    protected function properties(): Entities\PropertyMetaCollection
+    {
+        return $this->properties ??= new Entities\PropertyMetaCollection();
+    }
+
+    public function addPropertyMeta($property, $content)
+    {
+        if (! $property || ! $content) {
+            return $this;
+        }
+
+        $this->properties()->add(['name' => $property, 'content' => $content]);
+
+        return $this;
+    }
+
+    /**
+     * Add many `property` meta tags at once, keyed by property name.
+     *
+     * @param array $meta
+     *
+     * @return $this
+     */
+    public function addPropertyMetas(array $meta)
+    {
+        foreach ($meta as $property => $content) {
+            $this->addPropertyMeta($property, $content);
+        }
+
+        return $this;
+    }
+
     public function getAnalytics(): AnalyticsContract
     {
         return $this->analytics;
@@ -316,6 +366,7 @@ class SeoMeta implements SeoMetaContract
             $this->title->render(),
             $this->description->render(),
             $this->misc->render(),
+            $this->properties()->render(),
             $this->webmasters->render(),
         ]));
     }

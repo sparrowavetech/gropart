@@ -13,6 +13,14 @@ use Symfony\Component\Mailer\Transport\Dsn;
 
 class MailConfigServiceProvider extends ServiceProvider
 {
+    /**
+     * Container key marking "mail already configured from admin settings".
+     *
+     * Forget this binding to have the next mailer resolution re-read the settings,
+     * which is how a multi-tenant install applies each store's own SMTP settings.
+     */
+    public const MAIL_CONFIGURED_FLAG = 'botble.mail.configured';
+
     public function boot(): void
     {
         $this->app->booted(function (): void {
@@ -29,13 +37,20 @@ class MailConfigServiceProvider extends ServiceProvider
             }
 
             $this->app->resolving(MailManager::class, function () use ($config): void {
-                static $configured = false;
-
-                if ($configured) {
+                /**
+                 * This guard is a container binding rather than a closure-local
+                 * `static`, which nothing outside could reset: a static froze the
+                 * first configuration for the whole process, so a multi-tenant install
+                 * delivered every store's mail through the first store's mail server.
+                 *
+                 * Behaviour is identical for a single-tenant install, where the flag
+                 * is simply never forgotten.
+                 */
+                if ($this->app->bound(self::MAIL_CONFIGURED_FLAG)) {
                     return;
                 }
 
-                $configured = true;
+                $this->app->instance(self::MAIL_CONFIGURED_FLAG, true);
 
                 $setting = $this->app->make(SettingStore::class);
 

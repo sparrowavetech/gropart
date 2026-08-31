@@ -15,6 +15,7 @@ return [
         'add-amount' => '增加金額',
         'subtract-amount' => '扣減金額',
         'order-return' => '訂單退貨',
+        'subscription-fee' => '訂閱費',
     ],
     'store_name' => '商店名稱',
     'vendor_name' => '賣家名稱',

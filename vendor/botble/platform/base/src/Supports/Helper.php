@@ -86,6 +86,15 @@ class Helper
 
     public static function isConnectedDatabase(): bool
     {
+        // Once the installer has finished, the settings table provably exists, so skip the
+        // probe: Schema::hasTable() queries information_schema on every request forever
+        // (~1ms on a local database, several times that on a remote one) to re-answer a
+        // question that cannot change. Callers still degrade gracefully if the database is
+        // unreachable - see DatabaseSettingStore::read().
+        if (File::exists(storage_path('installed'))) {
+            return true;
+        }
+
         try {
             return Schema::hasTable('settings');
         } catch (Throwable) {

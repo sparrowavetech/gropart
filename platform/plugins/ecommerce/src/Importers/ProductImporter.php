@@ -1395,6 +1395,8 @@ class ProductImporter extends Importer implements WithMapping
                     $value = [];
                 }
 
+                $value = array_values(array_filter(array_map('trim', $value), fn ($item) => $item !== ''));
+
                 break;
             case 'bool':
                 if (is_string($value) && (Str::lower($value) == 'false' || $value == '0' || Str::lower($value) == 'no')) {

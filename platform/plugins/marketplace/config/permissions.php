@@ -92,6 +92,53 @@ return [
     ],
 
     [
+        'name' => 'Subscription plans',
+        'flag' => 'marketplace.subscription-plans.index',
+        'parent_flag' => 'marketplace.index',
+    ],
+    [
+        'name' => 'Create',
+        'flag' => 'marketplace.subscription-plans.create',
+        'parent_flag' => 'marketplace.subscription-plans.index',
+    ],
+    [
+        'name' => 'Edit',
+        'flag' => 'marketplace.subscription-plans.edit',
+        'parent_flag' => 'marketplace.subscription-plans.index',
+    ],
+    [
+        'name' => 'Delete',
+        'flag' => 'marketplace.subscription-plans.destroy',
+        'parent_flag' => 'marketplace.subscription-plans.index',
+    ],
+
+    [
+        'name' => 'Vendor subscriptions',
+        'flag' => 'marketplace.vendor-subscriptions.index',
+        'parent_flag' => 'marketplace.index',
+    ],
+    [
+        'name' => 'Assign',
+        'flag' => 'marketplace.vendor-subscriptions.create',
+        'parent_flag' => 'marketplace.vendor-subscriptions.index',
+    ],
+    [
+        'name' => 'Edit',
+        'flag' => 'marketplace.vendor-subscriptions.edit',
+        'parent_flag' => 'marketplace.vendor-subscriptions.index',
+    ],
+    [
+        'name' => 'Approve/Reject',
+        'flag' => 'marketplace.vendor-subscriptions.approve',
+        'parent_flag' => 'marketplace.vendor-subscriptions.index',
+    ],
+    [
+        'name' => 'Delete',
+        'flag' => 'marketplace.vendor-subscriptions.destroy',
+        'parent_flag' => 'marketplace.vendor-subscriptions.index',
+    ],
+
+    [
         'name' => 'Messages',
         'flag' => 'marketplace.messages.index',
         'parent_flag' => 'marketplace.index',

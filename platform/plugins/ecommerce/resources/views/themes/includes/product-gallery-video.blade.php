@@ -17,6 +17,7 @@
                         id="{{ md5($video['url']) }}"
                         playsinline="playsinline"
                         muted
+                        @if (theme_option('ecommerce_product_gallery_video_controls', false)) controls @endif
                         preload="auto"
                         class="media-video"
                         aria-label="{{ $product->name }}"

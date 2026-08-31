@@ -15,6 +15,7 @@ return [
         'add-amount' => 'Добавить сумму',
         'subtract-amount' => 'Вычесть сумму',
         'order-return' => 'Возврат заказа',
+        'subscription-fee' => 'Абонентская плата',
     ],
     'store_name' => 'Название магазина',
     'vendor_name' => 'Название поставщика',

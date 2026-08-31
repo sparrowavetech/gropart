@@ -19,6 +19,14 @@
 >
     <div class="dd-handle dd3-handle"></div>
     <div class="dd3-content d-flex justify-content-between">
+        <label class="menu-item-select">
+            <input
+                type="checkbox"
+                class="form-check-input"
+                aria-label="{{ $row->title }}"
+                data-menu-node-select
+            >
+        </label>
         <div
             data-update="title"
             class="fw-medium text-truncate pe-4"

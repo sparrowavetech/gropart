@@ -147,6 +147,7 @@ class GetProductService
             'price_ranges' => array_values($queryVar['price_ranges']),
             'categories' => $queryVar['categories'],
             'tags' => $queryVar['tags'],
+            'labels' => $queryVar['labels'],
             'collections' => $queryVar['collections'],
             'collection' => $queryVar['collection'],
             'brands' => $queryVar['brands'],

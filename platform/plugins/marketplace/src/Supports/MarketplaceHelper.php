@@ -10,6 +10,7 @@ use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Facades\OrderHelper;
 use Botble\Ecommerce\Models\Order as OrderModel;
 use Botble\Ecommerce\Models\ProductCategory;
+use Botble\Marketplace\Enums\MarketplaceModeEnum;
 use Botble\Media\Facades\RvMedia;
 use Botble\Slug\Facades\SlugHelper;
 use Botble\Theme\Facades\Theme;
@@ -124,6 +125,76 @@ class MarketplaceHelper
     public function isCommissionCategoryFeeBasedEnabled(): bool
     {
         return (bool) $this->getSetting('enable_commission_fee_for_each_category');
+    }
+
+    public function getMode(): string
+    {
+        $mode = (string) $this->getSetting('mode', MarketplaceModeEnum::COMMISSION);
+
+        // Enum::values() yields Enum instances, not strings — compare against the raw map.
+        $allowed = array_values(MarketplaceModeEnum::toArray());
+
+        return in_array($mode, $allowed, true) ? $mode : MarketplaceModeEnum::COMMISSION;
+    }
+
+    public function isSubscriptionMode(): bool
+    {
+        return $this->getMode() === MarketplaceModeEnum::SUBSCRIPTION;
+    }
+
+    public function isCommissionMode(): bool
+    {
+        return $this->getMode() === MarketplaceModeEnum::COMMISSION;
+    }
+
+    public function isSubscriptionBalancePaymentEnabled(): bool
+    {
+        return $this->isSubscriptionMode() && (bool) $this->getSetting('subscription_allow_balance_payment', true);
+    }
+
+    public function subscriptionRequiresAdminApproval(): bool
+    {
+        return (bool) $this->getSetting('subscription_require_admin_approval', false);
+    }
+
+    public function subscriptionGracePeriodDays(): int
+    {
+        return max(0, (int) $this->getSetting('subscription_grace_period_days', 0));
+    }
+
+    /**
+     * @return array<int, int> Days before expiry to send a reminder, descending, de-duplicated.
+     */
+    public function subscriptionReminderDays(): array
+    {
+        $days = collect(explode(',', (string) $this->getSetting('subscription_reminder_days', '7,3,1')))
+            ->map(fn ($day) => (int) trim($day))
+            ->filter(fn (int $day) => $day > 0)
+            ->unique()
+            ->sortDesc()
+            ->values()
+            ->all();
+
+        return $days;
+    }
+
+    public function shouldUnpublishProductsOnSubscriptionExpired(): bool
+    {
+        return (bool) $this->getSetting('subscription_unpublish_products_on_expired', true);
+    }
+
+    /**
+     * @return array<int, string> Payment channels the admin allows for subscriptions. Empty = all enabled methods.
+     */
+    public function subscriptionPaymentMethods(): array
+    {
+        $methods = $this->getSetting('subscription_payment_methods', []);
+
+        if (is_string($methods)) {
+            $methods = json_decode($methods, true) ?: [];
+        }
+
+        return array_values(array_filter((array) $methods));
     }
 
     public function maxFilesizeUploadByVendor(): float

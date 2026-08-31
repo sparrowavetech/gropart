@@ -15,6 +15,7 @@ return [
         'add-amount' => 'Dodaj znesek',
         'subtract-amount' => 'Odštej znesek',
         'order-return' => 'Vračilo naročila',
+        'subscription-fee' => 'Naročnina',
     ],
     'store_name' => 'Ime trgovine',
     'vendor_name' => 'Ime prodajalca',

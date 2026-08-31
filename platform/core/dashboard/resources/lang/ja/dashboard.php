@@ -13,6 +13,7 @@ return [
     'save_setting_success' => 'ウィジェット設定が正常に保存されました。',
     'widget_not_exists' => 'ウィジェットが存在しません!',
     'manage_widgets' => 'ウィジェットの管理',
+    'manage_widgets_description' => 'ダッシュボードに表示するウィジェットを切り替えます。',
     'fullscreen' => '全画面表示',
     'title' => 'ダッシュボード',
     'predefined_ranges' => [

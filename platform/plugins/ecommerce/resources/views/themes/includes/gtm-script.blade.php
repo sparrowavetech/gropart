@@ -2,9 +2,11 @@
     window.addEventListener('load', function() {
         var trackedEvents = window.gtmTrackedEvents = window.gtmTrackedEvents || {};
 
-        // Debounce to prevent duplicate event firing within 2s for the same (event, productId) pair.
-        // Guards against rapid double-clicks and multiple dispatchers of ecommerce.cart.added
-        // (front-ecommerce.js, up-sale-bundle.js, front-upsale-crosssale.js all dispatch this event).
+        /*
+         * Debounce to prevent duplicate event firing within 2s for the same (event, productId) pair.
+         * Guards against rapid double-clicks and multiple dispatchers of ecommerce.cart.added
+         * (front-ecommerce.js, up-sale-bundle.js, front-upsale-crosssale.js all dispatch this event).
+         */
         function isEventTracked(eventName, productId) {
             var key = eventName + '_' + (productId || 'global');
             var now = Date.now();
@@ -15,11 +17,13 @@
             return false;
         }
 
-        // Match the server-side push mechanism (see GoogleTagManager::shouldUseGtag).
-        // For GTM-container / custom setups we push a single flat object so client-side
-        // events (add_to_cart, etc.) stay consistent with the server-rendered ones and
-        // never get the GA4 eventModel wrapper - which previously produced a duplicate,
-        // double-shaped add_to_cart push alongside the flat one.
+        /*
+         * Match the server-side push mechanism (see GoogleTagManager::shouldUseGtag).
+         * For GTM-container / custom setups we push a single flat object so client-side
+         * events (add_to_cart, etc.) stay consistent with the server-rendered ones and
+         * never get the GA4 eventModel wrapper - which previously produced a duplicate,
+         * double-shaped add_to_cart push alongside the flat one.
+         */
         var gtmUseGtag = @json(app(\Botble\Ecommerce\AdsTracking\GoogleTagManager::class)->shouldUseGtag());
 
         function pushEvent(eventName, eventData) {

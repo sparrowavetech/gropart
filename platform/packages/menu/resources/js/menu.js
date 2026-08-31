@@ -21,6 +21,68 @@ class MenuNestable {
         return result
     }
 
+    // Queue a node for deletion. Nothing is removed server-side until the menu is saved.
+    removeNode($item) {
+        const $deletedNodes = $('.form-save-menu input[name="deleted_nodes"]')
+
+        $deletedNodes.val($deletedNodes.val() + ' ' + $item.data('menu-item').id)
+
+        // Children are kept, they simply move up one level. Moving them re-parses the markup,
+        // which drops their selection, so it is restored right after.
+        const children = $item.find('> .dd-list').html()
+        if (children !== '' && children != null) {
+            const selectedIds = $item
+                .find('.dd-item')
+                .filter((index, el) => $(el).find('> .dd3-content [data-menu-node-select]').is(':checked'))
+                .map((index, el) => $(el).data('menu-item').id)
+                .get()
+
+            $item.before(children.replace('<script>', '').replace('<\\/script>', ''))
+
+            $('#nestable .dd-item')
+                .filter((index, el) => selectedIds.includes($(el).data('menu-item').id))
+                .find('> .dd3-content [data-menu-node-select]')
+                .prop('checked', true)
+        }
+
+        $item.remove()
+    }
+
+    isBulkSelectActive() {
+        return $('.core-menu-structure').hasClass('bulk-select-active')
+    }
+
+    toggleBulkSelect(active) {
+        $('.core-menu-structure').toggleClass('bulk-select-active', active)
+
+        if (!active) {
+            $('#nestable [data-menu-node-select]').prop('checked', false)
+        }
+
+        this.updateSelectionState()
+    }
+
+    updateSelectionState() {
+        const $checkboxes = $('#nestable [data-menu-node-select]')
+        const selectedCount = $checkboxes.filter(':checked').length
+        const $button = $('.btn-remove-selected-menu-nodes')
+
+        // Nothing to select once the menu is empty, so both states are hidden
+        const hasNodes = $checkboxes.length > 0
+        const isActive = hasNodes && this.isBulkSelectActive()
+
+        $('.menu-bulk-select-toggle').toggleClass('d-none', !hasNodes || isActive)
+        $('.menu-bulk-actions').toggleClass('d-none', !isActive).toggleClass('d-flex', isActive)
+
+        // The button component renders both the disabled attribute and the disabled class
+        $button.prop('disabled', selectedCount === 0).toggleClass('disabled', selectedCount === 0)
+        $button.find('[data-selected-count]').text(selectedCount ? `(${selectedCount})` : '')
+
+        $('#menu-nodes-select-all')
+            .prop('checked', $checkboxes.length > 0 && selectedCount === $checkboxes.length)
+            .prop('indeterminate', selectedCount > 0 && selectedCount < $checkboxes.length)
+    }
+
     // Main function to initiate the module
     init() {
         let depth = parseInt(this.$nestable.attr('data-depth'))
@@ -35,6 +97,7 @@ class MenuNestable {
         })
 
         this.handleNestableMenu()
+        this.updateSelectionState()
     }
 
     handleNestableMenu() {
@@ -128,17 +191,45 @@ class MenuNestable {
         $('.form-save-menu input[name="deleted_nodes"]').val('')
         $(document).on('click', '.nestable-menu .item-details .btn-remove', (e) => {
             e.preventDefault()
-            let $this = $(e.currentTarget)
-            let dd_item = $this.parents('.item-details').parent()
 
-            let $elm = $('.form-save-menu input[name="deleted_nodes"]')
-            // Add id of deleted nodes to delete in controller
-            $elm.val($elm.val() + ' ' + dd_item.data('menu-item').id)
-            let children = dd_item.find('> .dd-list').html()
-            if (children !== '' && children != null) {
-                dd_item.before(children.replace('<script>', '').replace('<\\/script>', ''))
-            }
-            dd_item.remove()
+            that.removeNode($(e.currentTarget).parents('.item-details').parent())
+            that.updateSelectionState()
+        })
+
+        // Bulk selection
+        $(document).on('click', '.btn-toggle-bulk-select', (e) => {
+            e.preventDefault()
+
+            that.toggleBulkSelect(true)
+        })
+
+        $(document).on('click', '.btn-cancel-bulk-select', (e) => {
+            e.preventDefault()
+
+            that.toggleBulkSelect(false)
+        })
+
+        $(document).on('change', '#nestable [data-menu-node-select]', () => that.updateSelectionState())
+
+        $(document).on('change', '#menu-nodes-select-all', (e) => {
+            $('#nestable [data-menu-node-select]').prop('checked', $(e.currentTarget).prop('checked'))
+
+            that.updateSelectionState()
+        })
+
+        $(document).on('click', '.btn-remove-selected-menu-nodes', (e) => {
+            e.preventDefault()
+
+            const items = $('#nestable [data-menu-node-select]:checked').closest('li.dd-item').get()
+
+            // Deepest first, so removing a parent never re-parents an item that is also selected
+            items
+                .sort((a, b) => $(b).parents('li.dd-item').length - $(a).parents('li.dd-item').length)
+                .forEach((item) => that.removeNode($(item)))
+
+            $('#menu-nodes-select-all').prop('checked', false)
+
+            that.updateSelectionState()
         })
 
         $(document).on('click', '.nestable-menu .item-details .btn-cancel', (e) => {
@@ -194,6 +285,8 @@ class MenuNestable {
         parent.find('.list-item li.active').removeClass('active').find('input[type=checkbox]').prop('checked', false)
 
         parent.find('.btn_remove_image').trigger('click')
+
+        this.updateSelectionState()
 
         Botble.initResources()
         Botble.initMediaIntegrate()

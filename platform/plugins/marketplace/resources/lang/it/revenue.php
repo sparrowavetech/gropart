@@ -15,6 +15,7 @@ return [
         'add-amount' => 'Aggiungi Importo',
         'subtract-amount' => 'Sottrai Importo',
         'order-return' => 'Reso Ordine',
+        'subscription-fee' => 'Commissione di abbonamento',
     ],
     'store_name' => 'Nome Negozio',
     'vendor_name' => 'Nome Venditore',

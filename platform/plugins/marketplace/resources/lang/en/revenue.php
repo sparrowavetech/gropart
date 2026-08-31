@@ -15,6 +15,7 @@ return [
         'add-amount' => 'Credit',
         'subtract-amount' => 'Debit',
         'order-return' => 'Order Return',
+        'subscription-fee' => 'Subscription Fee',
     ],
     'store_name' => 'Store Name',
     'vendor_name' => 'Vendor Name',

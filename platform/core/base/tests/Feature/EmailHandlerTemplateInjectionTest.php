@@ -62,12 +62,10 @@ class EmailHandlerTemplateInjectionTest extends TestCase
      */
     public function test_prepared_content_is_not_recompiled_by_send(): void
     {
-        $captured = null;
-        Event::listen(SendMailEvent::class, function (SendMailEvent $event) use (&$captured): bool {
-            $captured = $event->content;
-
-            return false;
-        });
+        // Fake the event instead of listening for it: SendMailListener is registered at boot, so
+        // it runs before any listener added here and would hand the mail to the mailer - which
+        // fails without a configured MAIL_FROM_ADDRESS (null in CI).
+        Event::fake([SendMailEvent::class]);
 
         $handler = new EmailHandler();
         $handler->setType('plugins')->setModule('test');
@@ -79,6 +77,13 @@ class EmailHandlerTemplateInjectionTest extends TestCase
 
         // Mimic sendUsingTemplate: content already prepared => send() must treat it as final.
         $handler->send($prepared, 'subject', 'to@example.com', [], true, true);
+
+        $captured = null;
+        Event::assertDispatched(SendMailEvent::class, function (SendMailEvent $event) use (&$captured): bool {
+            $captured = $event->content;
+
+            return true;
+        });
 
         $this->assertNotNull($captured);
         $this->assertStringContainsString('{{ 7*7 }}', $captured);

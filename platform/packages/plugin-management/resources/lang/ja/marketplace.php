@@ -38,4 +38,6 @@ return [
     'install_success' => 'プラグインが正常にインストールされました！',
     'update_success' => 'プラグインが正常に更新されました。',
     'minimum_core_version_error' => 'このプラグインをインストールできません。最小コアバージョンは :version です。',
+    'no_plugins_found' => 'プラグインが見つかりません',
+    'try_different_search' => '検索条件やフィルターを変更して、お探しのものを見つけてください。',
 ];

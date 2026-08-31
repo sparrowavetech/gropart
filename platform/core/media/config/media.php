@@ -168,4 +168,17 @@ return [
         '#c0392b',
     ],
     'use_storage_symlink' => env('RV_MEDIA_USE_STORAGE_SYMLINK', false),
+
+    /*
+     * Images are decoded into a raw bitmap (~4 bytes per pixel, x2 while resizing), so a small
+     * file with huge dimensions can exhaust PHP's memory limit - a fatal, uncatchable error.
+     *
+     * max_memory_limit: the highest value memory_limit may be raised to while processing an image.
+     * Set it to 0 to never raise the limit.
+     *
+     * max_image_pixels: hard cap on total pixels (width x height) of an uploaded image, it also
+     * protects against decompression bombs. 0 means no cap. E.g. 8000 * 8000 = 64000000.
+     */
+    'max_memory_limit' => env('RV_MEDIA_MAX_MEMORY_LIMIT', '512M'),
+    'max_image_pixels' => (int) env('RV_MEDIA_MAX_IMAGE_PIXELS', 0),
 ];

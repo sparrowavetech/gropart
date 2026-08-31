@@ -1,3 +1,41 @@
+# [13.3.0](https://github.com/yajra/laravel-datatables/compare/v13.2.0...v13.3.0) (2026-08-26)
+
+
+### Bug Fixes
+
+* scope the datatables request so its state does not outlive a request ([4eae92f](https://github.com/yajra/laravel-datatables/commit/4eae92f87bef25839a26a71bb7b756f44dbb937d))
+* share the datatables request instance under its class name ([99e5db2](https://github.com/yajra/laravel-datatables/commit/99e5db2a91e99f06d153bca3b190a61085e67a93))
+
+
+### Features
+
+* add a max_length config to cap the records per request ([b0dc99a](https://github.com/yajra/laravel-datatables/commit/b0dc99a842826b8966a1e0d334c913e2f14fb65f)), closes [#2493](https://github.com/yajra/laravel-datatables/issues/2493) [#1597](https://github.com/yajra/laravel-datatables/issues/1597)
+* allow ignoring the max_length cap ([a7cff68](https://github.com/yajra/laravel-datatables/commit/a7cff68a7ccda242c233c27b5c1a6db871174dc3))
+
+# [13.2.0](https://github.com/yajra/laravel-datatables/compare/v13.1.6...v13.2.0) (2026-08-14)
+
+
+### Bug Fixes
+
+* keep the relation constraints when joining an eager loaded relation ([dd6c591](https://github.com/yajra/laravel-datatables/commit/dd6c5910a073d8ff41149d4ad4ead35a1af0fa52)), closes [#1325](https://github.com/yajra/laravel-datatables/issues/1325)
+
+
+### Features
+
+* add processWith() to run a callback on each row before processing ([75e229f](https://github.com/yajra/laravel-datatables/commit/75e229f3dee292246a1ff68fa3039fa6a1acd154)), closes [#2862](https://github.com/yajra/laravel-datatables/issues/2862)
+
+
+### Performance Improvements
+
+* resolve collection sort columns once instead of per comparison ([25c92ac](https://github.com/yajra/laravel-datatables/commit/25c92acf542ba16c3027b1026eb04d155b2b6475)), closes [#1437](https://github.com/yajra/laravel-datatables/issues/1437)
+
+## [13.1.6](https://github.com/yajra/laravel-datatables/compare/v13.1.5...v13.1.6) (2026-07-31)
+
+
+### Bug Fixes
+
+* crash when searchPanes request includes an unregistered column ([94bed03](https://github.com/yajra/laravel-datatables/commit/94bed039811fd77acb65f5df45e10b0c077ec681))
+
 ## [13.1.5](https://github.com/yajra/laravel-datatables/compare/v13.1.4...v13.1.5) (2026-07-03)
 
 

@@ -3,7 +3,7 @@
     "description": "Social login plugin",
     "type": "package",
     "require": {
-        "laravel/socialite": "^5.24",
+        "laravel/socialite": "^5.30",
         "firebase/php-jwt": "^7.0",
         "google/apiclient": "^2.19"
     }

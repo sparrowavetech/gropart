@@ -10,6 +10,8 @@ use Illuminate\Foundation\Http\Events\RequestHandled;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Session\ArraySessionHandler;
+use Illuminate\Session\Store;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
 use Symfony\Component\HttpFoundation\Cookie;
@@ -29,6 +31,40 @@ class PublicCacheControlTest extends BaseTestCase
     {
         $handler = new PublicCacheControl();
         $handler->handleRequestHandled(new RequestHandled($request, $response));
+    }
+
+    protected function attachSession(Request $request, array $data = []): Request
+    {
+        $session = new Store('botble_session', new ArraySessionHandler(120));
+        $session->start();
+
+        foreach ($data as $key => $value) {
+            $session->put($key, $value);
+        }
+
+        $request->setLaravelSession($session);
+
+        return $request;
+    }
+
+    protected function makeUser(string $email = 'test@example.com', string $username = 'testuser'): User
+    {
+        Schema::disableForeignKeyConstraints();
+        User::query()->truncate();
+
+        $user = new User();
+        $user->forceFill([
+            'first_name' => 'Test',
+            'last_name' => 'User',
+            'email' => $email,
+            'username' => $username,
+            'password' => bcrypt('password'),
+        ]);
+        $user->save();
+
+        app(ActivateUserService::class)->activate($user);
+
+        return $user;
     }
 
     public function test_disabled_by_default_does_not_apply_cache_control(): void
@@ -384,5 +420,294 @@ class PublicCacheControlTest extends BaseTestCase
         $cookieNames = array_map(fn (Cookie $c) => $c->getName(), $response->headers->getCookies());
         $this->assertNotContains('XSRF-TOKEN', $cookieNames);
         $this->assertNotContains('botble_session', $cookieNames);
+    }
+
+    // --- Cookies on the REQUEST -------------------------------------------------
+    //
+    // Characterization + the behaviour change. Before this suite existed, nothing
+    // covered the request-cookie gate at all, so narrowing it turned no test red.
+
+    public function test_analytics_and_consent_cookies_do_not_block_public_cache(): void
+    {
+        config(['core.base.general.enable_public_cache_control' => true]);
+
+        $request = Request::create('/', 'GET');
+        $request->cookies->set('_ga', 'GA1.1.123.456');
+        $request->cookies->set('cookie_for_consent', '{"analytics":true}');
+
+        $response = new Response('Test content', 200, ['Cache-Control' => 'private']);
+
+        $this->invokeHandler($request, $response);
+
+        // The cookie-consent plugin now decides banner + consent state client-side, so
+        // these cookies change nothing in the body and must not cost cacheability.
+        $this->assertStringContainsString('public', $response->headers->get('Cache-Control'));
+    }
+
+    public function test_session_cookie_alone_does_not_block_public_cache(): void
+    {
+        config(['core.base.general.enable_public_cache_control' => true]);
+        config(['session.cookie' => 'botble_session']);
+
+        $request = Request::create('/', 'GET');
+        $request->cookies->set('botble_session', 'abc123');
+        $this->attachSession($request);
+
+        $response = new Response('Test content', 200, ['Cache-Control' => 'private']);
+
+        $this->invokeHandler($request, $response);
+
+        // An anonymous visitor who merely HAS a session still gets a URL-pure page.
+        $this->assertStringContainsString('public', $response->headers->get('Cache-Control'));
+    }
+
+    // --- Session STATE, which is what actually personalises a response -----------
+
+    public function test_flash_message_in_session_skips_cache_control(): void
+    {
+        config(['core.base.general.enable_public_cache_control' => true]);
+
+        $request = Request::create('/', 'GET');
+        $this->attachSession($request, ['success_msg' => 'Your message has been sent']);
+
+        $response = new Response('Test content', 200, ['Cache-Control' => 'private']);
+
+        $this->invokeHandler($request, $response);
+
+        // packages/theme::fronts.toast-notification prints session('success_msg') into
+        // the page; sharing that would broadcast one visitor's flash to everyone.
+        $this->assertEquals('private', $response->headers->get('Cache-Control'));
+    }
+
+    public function test_validation_errors_in_session_skip_cache_control(): void
+    {
+        config(['core.base.general.enable_public_cache_control' => true]);
+
+        $request = Request::create('/', 'GET');
+        $this->attachSession($request, ['errors' => ['email' => ['Invalid']]]);
+
+        $response = new Response('Test content', 200, ['Cache-Control' => 'private']);
+
+        $this->invokeHandler($request, $response);
+
+        $this->assertEquals('private', $response->headers->get('Cache-Control'));
+    }
+
+    public function test_flash_bag_payload_skips_cache_control(): void
+    {
+        config(['core.base.general.enable_public_cache_control' => true]);
+
+        $request = Request::create('/', 'GET');
+        $this->attachSession($request);
+        $request->session()->put('_flash.old', ['success_msg']);
+
+        $response = new Response('Test content', 200, ['Cache-Control' => 'private']);
+
+        $this->invokeHandler($request, $response);
+
+        $this->assertEquals('private', $response->headers->get('Cache-Control'));
+    }
+
+    public function test_language_session_keys_remain_inert(): void
+    {
+        config(['core.base.general.enable_public_cache_control' => true]);
+
+        $request = Request::create('/', 'GET');
+        $this->attachSession($request, ['language' => 'en', 'previous_language' => 'vi']);
+
+        $response = new Response('Test content', 200, ['Cache-Control' => 'private']);
+
+        $this->invokeHandler($request, $response);
+
+        // The language plugin writes these on every request; a non-default locale lives
+        // at its own prefixed URL, so they do not make the body vary per visitor.
+        $this->assertStringContainsString('public', $response->headers->get('Cache-Control'));
+    }
+
+    public function test_declared_personalising_cookie_skips_cache_control(): void
+    {
+        config(['core.base.general.enable_public_cache_control' => true]);
+        config(['app.debug' => true]);
+
+        add_filter('cms_public_cache_personalising_cookies', fn ($cookies) => [...$cookies, 'currency']);
+
+        $request = Request::create('/', 'GET');
+        $request->cookies->set('currency', 'EUR');
+
+        $response = new Response('Prices in EUR', 200, ['Cache-Control' => 'private']);
+
+        $this->invokeHandler($request, $response);
+
+        // Escape hatch for themes that render straight from a raw cookie; the old blanket
+        // cookie bail covered these by accident.
+        $this->assertEquals('private', $response->headers->get('Cache-Control'));
+        $this->assertEquals('request-cookie:currency', $response->headers->get('X-Public-Cache-Skip'));
+    }
+
+    public function test_undeclared_cookie_does_not_skip_cache_control(): void
+    {
+        config(['core.base.general.enable_public_cache_control' => true]);
+
+        $request = Request::create('/', 'GET');
+        $request->cookies->set('some_unrelated_cookie', 'value');
+
+        $response = new Response('Test content', 200, ['Cache-Control' => 'private']);
+
+        $this->invokeHandler($request, $response);
+
+        $this->assertStringContainsString('public', $response->headers->get('Cache-Control'));
+    }
+
+    public function test_broken_inert_session_keys_filter_does_not_disable_caching(): void
+    {
+        config(['core.base.general.enable_public_cache_control' => true]);
+
+        // A listener that forgets to return would hand back null; falling through to an
+        // empty inert list would silently switch public caching off for every session.
+        add_filter('cms_public_cache_inert_session_keys', fn () => null);
+
+        $request = Request::create('/', 'GET');
+        $this->attachSession($request);
+
+        $response = new Response('Test content', 200, ['Cache-Control' => 'private']);
+
+        $this->invokeHandler($request, $response);
+
+        $this->assertStringContainsString('public', $response->headers->get('Cache-Control'));
+    }
+
+    // --- Authentication across ALL guards, not just the default one -------------
+
+    public function test_member_guard_authentication_skips_cache_control(): void
+    {
+        config(['core.base.general.enable_public_cache_control' => true]);
+        config(['auth.guards.member' => ['driver' => 'session', 'provider' => 'users']]);
+        config(['app.debug' => true]);
+
+        $user = $this->makeUser('member@example.com', 'memberuser');
+        Auth::guard('member')->login($user);
+
+        $this->assertTrue(Auth::guard('member')->check(), 'member guard login did not take effect');
+        $this->assertFalse(Auth::guard()->check(), 'default guard must stay anonymous or this test proves nothing');
+
+        $request = Request::create('/', 'GET');
+        $response = new Response('Hello Test User', 200, ['Cache-Control' => 'private']);
+
+        $this->invokeHandler($request, $response);
+
+        // Regression guard: Auth::guard() checks only the DEFAULT guard, so a logged-in
+        // member used to be invisible here while the theme rendered their name+avatar.
+        $this->assertEquals('private', $response->headers->get('Cache-Control'));
+        // Assert WHY it was skipped - otherwise this passes for any unrelated bail.
+        $this->assertEquals('authenticated', $response->headers->get('X-Public-Cache-Skip'));
+
+        Auth::guard('member')->logout();
+    }
+
+    public function test_anonymous_on_all_guards_still_caches(): void
+    {
+        config(['core.base.general.enable_public_cache_control' => true]);
+        config(['auth.guards.member' => ['driver' => 'session', 'provider' => 'users']]);
+
+        $request = Request::create('/', 'GET');
+        $response = new Response('Test content', 200, ['Cache-Control' => 'private']);
+
+        $this->invokeHandler($request, $response);
+
+        $this->assertStringContainsString('public', $response->headers->get('Cache-Control'));
+    }
+
+    // --- Flash messages, detected from the rendered body ------------------------
+    //
+    // These cannot be detected from the session: StartSession ages the flash bag and
+    // saves the session before the response is returned, so a flash consumed while
+    // rendering is already forgotten by the time RequestHandled fires. Verified against
+    // a real flash through the kernel: the session arrives clean, while the body carries
+    // Theme.showSuccess(...) - which is what the old blanket cookie rule used to catch.
+
+    public function test_rendered_success_toast_skips_cache_control(): void
+    {
+        config(['core.base.general.enable_public_cache_control' => true]);
+        config(['app.debug' => true]);
+
+        $request = Request::create('/', 'GET');
+        $response = new Response(
+            '<html><body><script>Theme.showSuccess("Your message has been sent");</script></body></html>',
+            200,
+            ['Cache-Control' => 'private']
+        );
+
+        $this->invokeHandler($request, $response);
+
+        $this->assertEquals('private', $response->headers->get('Cache-Control'));
+        $this->assertEquals('flash-message', $response->headers->get('X-Public-Cache-Skip'));
+    }
+
+    public function test_rendered_error_toast_skips_cache_control(): void
+    {
+        config(['core.base.general.enable_public_cache_control' => true]);
+
+        $request = Request::create('/', 'GET');
+        $response = new Response(
+            '<html><body><script>Theme.showError("Something went wrong");</script></body></html>',
+            200,
+            ['Cache-Control' => 'private']
+        );
+
+        $this->invokeHandler($request, $response);
+
+        $this->assertEquals('private', $response->headers->get('Cache-Control'));
+    }
+
+    public function test_page_without_a_toast_is_still_publicly_cached(): void
+    {
+        config(['core.base.general.enable_public_cache_control' => true]);
+
+        $request = Request::create('/', 'GET');
+        $response = new Response(
+            '<html><body><script src="/toast.js"></script><p>No flash here.</p></body></html>',
+            200,
+            ['Cache-Control' => 'private']
+        );
+
+        $this->invokeHandler($request, $response);
+
+        // Loading toast.js is not evidence of a flash; only the show* calls are.
+        $this->assertStringContainsString('public', $response->headers->get('Cache-Control'));
+    }
+
+    // --- Locale must be addressable from the URL --------------------------------
+
+    public function test_hidden_default_locale_disabled_skips_cache_control(): void
+    {
+        config(['core.base.general.enable_public_cache_control' => true]);
+        setting()->set('language_hide_default', false)->save();
+
+        $request = Request::create('/', 'GET');
+        $response = new Response('Test content', 200, ['Cache-Control' => 'private']);
+
+        $this->invokeHandler($request, $response);
+
+        // With this off, a session locale renders at the locale-less URL, so the same
+        // URL can serve different languages.
+        $this->assertEquals('private', $response->headers->get('Cache-Control'));
+
+        setting()->set('language_hide_default', true)->save();
+    }
+
+    public function test_accept_language_negotiation_skips_cache_control(): void
+    {
+        config(['core.base.general.enable_public_cache_control' => true]);
+        setting()->set('language_auto_detect_user_language', true)->save();
+
+        $request = Request::create('/', 'GET');
+        $response = new Response('Test content', 200, ['Cache-Control' => 'private']);
+
+        $this->invokeHandler($request, $response);
+
+        // Locale negotiated from a header no shared cache varies on here.
+        $this->assertEquals('private', $response->headers->get('Cache-Control'));
+
+        setting()->set('language_auto_detect_user_language', false)->save();
     }
 }

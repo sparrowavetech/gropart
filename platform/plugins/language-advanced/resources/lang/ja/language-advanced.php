@@ -22,4 +22,5 @@ return [
     'export_model_translations' => ':model 翻訳',
     'import_description' => 'CSV/Excelファイルから:nameの翻訳をインポートします。',
     'export_description' => ':nameの翻訳をCSV/Excelファイルにエクスポートします。',
+    'page_translations' => 'ページ翻訳',
 ];

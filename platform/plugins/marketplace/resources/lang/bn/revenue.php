@@ -15,6 +15,7 @@ return [
         'add-amount' => 'পরিমাণ যোগ করুন',
         'subtract-amount' => 'পরিমাণ বিয়োগ করুন',
         'order-return' => 'অর্ডার রিটার্ন',
+        'subscription-fee' => 'সাবস্ক্রিপশন ফি',
     ],
     'store_name' => 'স্টোরের নাম',
     'vendor_name' => 'বিক্রেতার নাম',

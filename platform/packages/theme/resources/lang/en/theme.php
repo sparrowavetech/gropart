@@ -77,6 +77,7 @@ return [
     'robots_txt_sitemap_suggestion' => '<strong>Tip:</strong> You can link to your sitemap in your robots.txt content by adding: <code>Sitemap: :sitemap_url</code>',
     'robots_txt_file' => 'Upload robots.txt file',
     'robots_txt_file_helper' => 'If you want to upload a robots.txt file, please select it here.',
+    'robots_txt_file_not_readable' => 'The uploaded robots.txt file could not be read, so your robots.txt was left unchanged. Please try uploading it again.',
     'email_template_logo_helper_text' => 'If don\'t set, it will get from theme options logo in Admin -> Appearance -> Theme Options -> Logo.',
     'settings' => [
         'website_tracking' => [

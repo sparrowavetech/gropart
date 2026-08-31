@@ -9,7 +9,7 @@
                         <tbody>
                         <tr>
                             <td valign="middle" align="center">
-                                <img src="{{ 'warning' | icon_url }}" class="bb-va-middle" width="40" height="40" alt="Icon" />
+                                <img src="{{ 'alert-triangle' | icon_url }}" class="bb-va-middle" width="40" height="40" alt="Icon" />
                             </td>
                         </tr>
                         </tbody>
@@ -72,7 +72,7 @@
             <tr>
                 <td class="bb-content bb-text-center">
                     <a href="{{ contact_url }}" class="bb-btn bb-bg-blue">
-                        <span class="bb-btn-text">{{ 'plugins/marketplace::marketplace.email_templates.contact_support' | trans }}</span>
+                        <span class="bb-btn-span">{{ 'plugins/marketplace::marketplace.email_templates.contact_support' | trans }}</span>
                     </a>
                 </td>
             </tr>

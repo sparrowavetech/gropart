@@ -3,7 +3,7 @@
 return [
     'name' => 'Receitas',
     'edit' => 'Atualizar saldo da carteira',
-    'view_store' => 'Ver loja ":loja"',
+    'view_store' => 'Ver loja ":store"',
     'forms' => [
         'description_placeholder' => 'Atualize o valor exato com o pedido #__ORDER_ID__ com o motivo: __REASON__',
         'amount' => 'Quantia',
@@ -15,6 +15,7 @@ return [
         'add-amount' => 'Adicionar valor',
         'subtract-amount' => 'Subtrair valor',
         'order-return' => 'Devolução de pedido',
+        'subscription-fee' => 'Taxa de assinatura',
     ],
     'store_name' => 'Nome da loja',
     'vendor_name' => 'Nome do fornecedor',

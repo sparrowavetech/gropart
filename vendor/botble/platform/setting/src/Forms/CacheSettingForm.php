@@ -142,5 +142,32 @@ class CacheSettingForm extends SettingForm
                     )
                     ->addCloseCollapsible('enable_cache_site_map', '1');
             });
+
+        $this
+            ->add(
+                'enable_public_cache_control',
+                OnOffCheckboxField::class,
+                OnOffFieldOption::make()
+                    ->label(trans('core/setting::setting.cache.form.enable_public_cache_control'))
+                    ->helperText(trans('core/setting::setting.cache.form.enable_public_cache_control_helper'))
+                    ->value($publicCacheEnabled = setting(
+                        'enable_public_cache_control',
+                        config('core.base.general.enable_public_cache_control', false)
+                    ))
+            )
+            ->addOpenCollapsible('enable_public_cache_control', '1', (bool) $publicCacheEnabled)
+            ->add(
+                'public_cache_max_age',
+                NumberField::class,
+                NumberFieldOption::make()
+                    ->label(trans('core/setting::setting.cache.form.public_cache_max_age'))
+                    ->helperText(trans('core/setting::setting.cache.form.public_cache_max_age_helper'))
+                    ->value(setting(
+                        'public_cache_max_age',
+                        config('core.base.general.public_cache_max_age', 600)
+                    ))
+                    ->min(1)
+            )
+            ->addCloseCollapsible('enable_public_cache_control', '1');
     }
 }

@@ -15,6 +15,7 @@ return [
         'add-amount' => 'Lisää summa',
         'subtract-amount' => 'Vähennä summa',
         'order-return' => 'Tilauksen palautus',
+        'subscription-fee' => 'Tilausmaksu',
     ],
     'store_name' => 'Kaupan nimi',
     'vendor_name' => 'Myyjän nimi',

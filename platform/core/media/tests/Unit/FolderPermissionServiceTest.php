@@ -4,7 +4,6 @@ namespace Botble\Media\Tests\Unit;
 
 use Botble\ACL\Models\User;
 use Botble\Media\Models\MediaFolder;
-use Botble\Media\Models\MediaFolderPermission;
 use Botble\Media\Services\FolderPermissionService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Cache;
@@ -51,7 +50,7 @@ class FolderPermissionServiceTest extends TestCase
     protected function createFolder($userId = null, $parentId = null): MediaFolder
     {
         $userId =  ($userId ?? $this->createUser()->id);
-        $parentId = $parentId ?  $parentId : 0;
+        $parentId = $parentId ? $parentId : 0;
 
         return MediaFolder::create([
             'name' => 'Test Folder ' . uniqid(),

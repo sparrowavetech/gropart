@@ -25,7 +25,6 @@ return [
         'wrong_configuration' => 'アナリティクスを表示するには、Google Analytics クライアント ID を取得して設定に追加する必要があります。<br />JSON 認証情報も必要です。<br />ドキュメントを参照してください: :url',
         'google_analytics_information' => 'Google Analytics タグ ID を追加して Web サイトのトラフィックを追跡するには、管理 → 設定 → Web サイト追跡にアクセスします。',
         'enable_dashboard_widgets' => 'ダッシュボードウィジェットを有効にする',
-
         'status' => 'ステータスとテスト',
         'property_id_status' => 'プロパティID',
         'credentials_status' => '認証情報',
@@ -34,7 +33,6 @@ return [
         'not_configured' => '未設定',
         'enabled' => '有効',
         'disabled' => '無効',
-
         'test_connection' => '接続テスト',
         'testing' => 'テスト中...',
         'connection_success' => '接続成功！認証情報は有効です。',
@@ -44,10 +42,8 @@ return [
         'authentication_failed' => '認証に失敗しました。サービスアカウントの認証情報を確認してください。',
         'property_not_found' => 'プロパティが見つかりません。プロパティIDが正しいことを確認してください。',
         'api_not_enabled' => 'Google Analytics Data API が有効になっていません。Google Cloud Console で有効にしてください。',
-
         'current_property_id' => '現在のプロパティID',
         'service_account_email' => 'サービスアカウントメール',
-
         'setup_instructions' => 'セットアップ手順',
         'setup_steps' => 'Google Analytics を設定するには、以下の手順に従ってください',
         'step_1' => 'Google Cloud Console にアクセスしてサービスアカウントを作成',
@@ -55,7 +51,6 @@ return [
         'step_3' => 'プロジェクトで Google Analytics Data API を有効化',
         'step_4' => 'Google Analytics にアクセスしてサービスアカウントメールを閲覧者として追加',
         'step_5' => 'GA4 プロパティIDを入力し、上記に JSON 認証情報を貼り付け',
-
         'open_cloud_console' => 'Google Cloud Console',
         'open_analytics' => 'Google Analytics',
         'enable_analytics_api' => 'Analytics API を有効化',

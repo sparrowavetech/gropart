@@ -9,7 +9,7 @@ return [
         'title' => 'Stripe Webhook セットアップガイド',
         'description' => 'Stripe Webhook を設定するには、次の手順に従います。',
         'step_1_label' => 'Stripe ダッシュボードにログインする',
-        'step_1_description' => 'Access the :link and click on the "Add Endpoint" button in the "Webhooks" section of the "Developers" tab.',
+        'step_1_description' => ':link にアクセスし、「Developers」タブの「Webhooks」セクションにある「Add Endpoint」ボタンをクリックします。',
         'step_2_label' => 'イベントを選択してエンドポイントを構成する',
         'step_2_description' => 'Select the "payment_intent.succeeded" event and enter the following URL in the "Endpoint URL" field: :url',
         'step_3_label' => 'エンドポイントの追加',

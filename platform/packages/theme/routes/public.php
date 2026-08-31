@@ -17,9 +17,21 @@ Theme::registerRoutes(function (): void {
         // Dynamic llms.txt fallback (served only when public/llms.txt is absent).
         // Registered before the sitemap/catch-all routes so it always matches first.
         // Can be turned off via Admin -> Settings -> Sitemap -> Enable llms.txt.
-        if (setting('llms_txt_enabled', true)) {
-            Route::get('llms.txt', 'getLlmsTxt')->name('public.llms-txt');
-        }
+        // Registered unconditionally, and before the sitemap routes below: the sitemap
+        // catch-all `{key}.{extension}` accepts the `txt` extension, so a conditionally
+        // registered llms route would otherwise fall through to it and answer 200 with an
+        // empty sitemap body - which reads to a crawler as "this site has no content".
+        // Whether these endpoints are enabled is decided in the controller, which 404s.
+        // Registering them unconditionally also means toggling the setting takes effect
+        // without `artisan route:clear`.
+        Route::get('llms.txt', 'getLlmsTxt')->name('public.llms-txt');
+
+        // Full-content variant, opt-in: it republishes complete article bodies.
+        Route::get('llms-full.txt', 'getLlmsFullTxt')->name('public.llms-full-txt');
+
+        // Dynamic robots.txt carrying the AI crawler policy (served only when
+        // public/robots.txt is absent, same as llms.txt above).
+        Route::get('robots.txt', 'getRobotsTxt')->name('public.robots-txt');
 
         if (setting('sitemap_enabled', true)) {
             Route::get('sitemap.xml', 'getSiteMap')->name('public.sitemap');

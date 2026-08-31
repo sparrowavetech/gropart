@@ -16,7 +16,7 @@ class RobotsTxtEditorForm extends FormAbstract
 {
     public function setup(): void
     {
-        $isRobotsTxtWritable = File::isWritable($path = public_path('robots.txt'));
+        $isRobotsTxtWritable = File::isWritable($path = apply_filters(FILTER_ROBOTS_TXT_PATH, public_path('robots.txt')));
         $robotsTxtContent = $isRobotsTxtWritable && File::exists($path) ? File::get($path) : '';
         $sitemapUrl = Route::has('public.sitemap') ? route('public.sitemap') : null;
         $hasSitemapReference = stripos($robotsTxtContent, 'sitemap:') !== false;

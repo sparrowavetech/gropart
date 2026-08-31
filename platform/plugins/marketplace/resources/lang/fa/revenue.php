@@ -15,6 +15,7 @@ return [
         'add-amount' => 'افزودن مبلغ',
         'subtract-amount' => 'کسر مبلغ',
         'order-return' => 'مرجوعی سفارش',
+        'subscription-fee' => 'هزینه اشتراک',
     ],
     'store_name' => 'نام فروشگاه',
     'vendor_name' => 'نام فروشنده',

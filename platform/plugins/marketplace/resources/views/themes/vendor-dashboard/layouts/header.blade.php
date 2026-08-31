@@ -21,5 +21,6 @@
 @endif
 
 @if (File::exists($styleIntegration = Theme::getStyleIntegrationPath()))
-    {!! Html::style(Theme::asset()->url('css/style.integration.css?v=' . filectime($styleIntegration))) !!}
+    {{-- TENANCY PATCH (platform/packages/tenancy): link the SAME filename getStyleIntegrationPath() writes (suffixed per store under tenancy); basename() is the stock name for a single-tenant install. --}}
+    {!! Html::style(Theme::asset()->url('css/' . basename($styleIntegration) . '?v=' . filectime($styleIntegration))) !!}
 @endif

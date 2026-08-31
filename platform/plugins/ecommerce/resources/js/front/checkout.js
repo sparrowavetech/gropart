@@ -160,6 +160,22 @@ class MainCheckout {
             document.dispatchEvent(new CustomEvent('payment-form-reloaded'))
         }
 
+        // reCAPTCHA v3 tokens expire two minutes after they are issued, and the token is
+        // generated once on page load. Every time the form is refreshed over AJAX we mint a
+        // fresh one, otherwise a customer who spends a while picking a shipping or payment
+        // method submits an expired token and the order is rejected.
+        //
+        // v2 is skipped on purpose: it renders a checkbox the customer has already solved and
+        // refreshing calls grecaptcha.reset(), which would make them solve it again on every
+        // update. The .g-recaptcha placeholder only exists for v2.
+        const refreshCaptchaToken = () => {
+            if (typeof refreshRecaptcha === 'undefined' || document.querySelector('.g-recaptcha')) {
+                return
+            }
+
+            refreshRecaptcha()
+        }
+
         const updateCheckoutButtonStatus = () => {
             // Make a quick AJAX call to check if checkout is valid
             $.ajax({
@@ -188,7 +204,7 @@ class MainCheckout {
                             }
                         }
                     }
-                }
+                },
             })
         }
 
@@ -238,6 +254,7 @@ class MainCheckout {
                 complete: () => {
                     enablePaymentMethodsForm()
                     $('.shipping-info-loading').hide()
+                    refreshCaptchaToken()
                 },
             })
         }

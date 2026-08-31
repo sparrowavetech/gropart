@@ -15,6 +15,7 @@ return [
         'add-amount' => 'Tutar Ekle',
         'subtract-amount' => 'Tutar Çıkar',
         'order-return' => 'Sipariş iadesi',
+        'subscription-fee' => 'Abonelik Ücreti',
     ],
     'store_name' => 'Dükkan adı',
     'vendor_name' => 'Satıcı adı',

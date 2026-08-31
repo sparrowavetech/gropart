@@ -49,7 +49,29 @@ return [
     'back' => '戻る',
     'add' => '追加',
     'settings' => [
-        'enable_page_visual_builder' => 'Enable page visual builder',
-        'enable_page_visual_builder_helper' => 'Allow users to build pages visually using drag-and-drop shortcodes. Disable this to hide the visual builder option',
+        'enable_page_visual_builder' => 'ページビジュアルビルダーを有効にする',
+        'enable_page_visual_builder_helper' => 'ドラッグ＆ドロップのショートコードでページを視覚的に構築できるようにします。無効にすると、ビジュアルビルダーのオプションが非表示になります',
+    ],
+    'export' => [
+        'description' => 'ページを CSV/Excel ファイルにエクスポートします。',
+        'total' => '総ページ数',
+        'limit' => '上限',
+        'limit_placeholder' => 'すべてエクスポートする場合は空のままにしてください',
+        'all_status' => 'すべてのステータス',
+        'all_templates' => 'すべてのテンプレート',
+        'template' => 'テンプレート',
+        'start_date' => '開始日',
+        'start_date_placeholder' => '開始日',
+        'end_date' => '終了日',
+        'end_date_placeholder' => '終了日',
+    ],
+    'import' => [
+        'description' => 'CSV/Excel ファイルからページをインポートします。',
+        'done_message' => ':created 件のページを作成し、:updated 件のページを更新しました。',
+        'rules' => [
+            'nullable_string_max' => ':attribute は :max 文字以内の文字列で入力するか、空欄のままにできます。',
+            'nullable_string' => ':attribute は文字列で入力するか、空欄のままにできます。',
+            'in' => ':attribute は次のいずれかの値である必要があります: :values。',
+        ],
     ],
 ];

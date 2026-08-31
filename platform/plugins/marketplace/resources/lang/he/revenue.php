@@ -15,6 +15,7 @@ return [
         'add-amount' => 'הוסף סכום',
         'subtract-amount' => 'הפחת סכום',
         'order-return' => 'החזר הזמנה',
+        'subscription-fee' => 'דמי מנוי',
     ],
     'store_name' => 'שם חנות',
     'vendor_name' => 'שם ספק',

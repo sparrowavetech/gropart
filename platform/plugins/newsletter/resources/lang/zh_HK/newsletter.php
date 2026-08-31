@@ -50,6 +50,16 @@ return [
         'subscribed' => '訂閱',
         'unsubscribed' => '取消訂閱',
     ],
+    'email_templates' => [
+        // Admin email template
+        'admin_new_subscriber_title' => '新訂閱者',
+        'admin_new_subscriber_message' => '有新用戶訂閱了您的電子報：',
+
+        // Subscriber email template
+        'subscriber_success_title' => '訂閱成功',
+        'subscriber_thank_you_message' => '感謝您訂閱我們的電子報！',
+        'subscriber_unsubscribe_instruction' => '要取消訂閱電子報，請點擊 :newsletter_unsubscribe_link',
+    ],
 
     'enter_your_email' => '輸入您的電子郵件',
     'subscribe' => '訂閱',

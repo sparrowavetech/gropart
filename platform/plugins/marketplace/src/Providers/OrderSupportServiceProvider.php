@@ -202,6 +202,13 @@ class OrderSupportServiceProvider extends ServiceProvider
         $shippingFeeService = $this->app->make(HandleShippingFeeService::class);
         $applyCouponService = $this->app->make(HandleApplyCouponService::class);
 
+        // Resolve promotions for every store up front so the combined amount can be capped
+        // before any sub-order is priced. handleCheckoutOrderByStore() then reads the capped
+        // share from session; running the promotion service inside that per-store loop would
+        // grant a fixed amount promotion once per vendor.
+        $sessionCheckoutData = $this->applyCappedPromotionsForStores($groupedProducts, $token, $promotionService);
+        $mpSessionData = Arr::get($sessionCheckoutData, 'marketplace', []);
+
         // Used to charge the payment gateway's flat fee_fixed surcharge only once per order
         // (on the first store's sub-order) instead of once per vendor. See the comment in
         // handleCheckoutOrderByStore() for the full rationale.
@@ -390,6 +397,12 @@ class OrderSupportServiceProvider extends ServiceProvider
             return compact('error', 'message');
         }
 
+        // The loop above runs the coupon service once per vendor store, each time against
+        // that store's raw total, so a fixed amount coupon ("$150 off") would be granted
+        // once per store - N times the intended value for a cart spanning N stores. Cap
+        // the combined discount at what the same coupon yields against the whole cart.
+        $sessionMarketplaceData = $this->capCartWideCouponDiscount($sessionMarketplaceData, $results);
+
         $couponDiscountAmount = collect($sessionMarketplaceData)->sum('coupon_discount_amount');
 
         OrderHelper::setOrderSessionData($token, [
@@ -398,6 +411,145 @@ class OrderSupportServiceProvider extends ServiceProvider
         ]);
 
         return $successData;
+    }
+
+    /**
+     * Scale the per-store coupon discounts down so their sum never exceeds the amount the
+     * coupon yields when evaluated against the entire cart. Coupon types that are meant to
+     * accumulate per store (percentage, per-every-item) already sum to that value, so they
+     * pass through untouched.
+     */
+    protected function capCartWideCouponDiscount(array $sessionMarketplaceData, Collection $results): array
+    {
+        $discount = $results
+            ->first(fn ($result) => ! Arr::get($result, 'error') && Arr::get($result, 'data.discount'));
+
+        $discount = Arr::get($discount, 'data.discount');
+
+        if (! $discount) {
+            return $sessionMarketplaceData;
+        }
+
+        $amounts = collect($sessionMarketplaceData)
+            ->map(fn ($storeData) => (float) Arr::get($storeData, 'coupon_discount_amount', 0))
+            ->filter(fn (float $amount) => $amount > 0);
+
+        $appliedAmount = $amounts->sum();
+
+        if (! $appliedAmount) {
+            return $sessionMarketplaceData;
+        }
+
+        // Called without cart data so the service evaluates the coupon against the full cart.
+        $maxAmount = (float) Arr::get(
+            $this->app->make(HandleApplyCouponService::class)->getCouponDiscountAmount($discount),
+            'discount_amount',
+            0
+        );
+
+        if ($maxAmount <= 0 || $appliedAmount <= $maxAmount) {
+            return $sessionMarketplaceData;
+        }
+
+        return $this->applyDistributedDiscount($sessionMarketplaceData, $amounts, $maxAmount, 'coupon_discount_amount');
+    }
+
+    /**
+     * Run the promotion service for every store, then cap the combined result and persist it
+     * so each vendor sub-order can be priced from its capped share.
+     */
+    protected function applyCappedPromotionsForStores(
+        array|Collection $groupedProducts,
+        string $token,
+        HandleApplyPromotionsService $promotionService
+    ): array {
+        foreach ($groupedProducts as $storeId => $productsInStore) {
+            $cartItems = $productsInStore['products']->pluck('cartItem');
+            $rawTotal = Cart::instance('cart')->rawTotalByItems($cartItems);
+            $countCart = Cart::instance('cart')->countByItems($cartItems);
+
+            // Deliberately no productItems key, mirroring the call this replaced in
+            // handleCheckoutOrderByStore(): the service then resolves product promotions from
+            // the whole cart. Passing this store's products would narrow that set and change
+            // more than the capping this fix is meant to introduce.
+            $promotionService->execute($token, compact('cartItems', 'rawTotal', 'countCart'), "marketplace.$storeId.");
+        }
+
+        $sessionCheckoutData = OrderHelper::getOrderSessionData($token);
+
+        $sessionMarketplaceData = $this->capCartWidePromotionDiscount(
+            (array) Arr::get($sessionCheckoutData, 'marketplace', [])
+        );
+
+        return OrderHelper::mergeOrderSessionData($token, ['marketplace' => $sessionMarketplaceData]);
+    }
+
+    /**
+     * Promotions run through the same per-store loop as coupons, so a fixed amount promotion
+     * is granted once per vendor. Unlike coupons they apply automatically, with no code for
+     * the buyer to enter, so every multi-vendor order is affected while one is active.
+     */
+    protected function capCartWidePromotionDiscount(array $sessionMarketplaceData): array
+    {
+        $amounts = collect($sessionMarketplaceData)
+            ->map(fn ($storeData) => (float) Arr::get($storeData, 'promotion_discount_amount', 0))
+            ->filter(fn (float $amount) => $amount > 0);
+
+        if (! $amounts->sum()) {
+            return $sessionMarketplaceData;
+        }
+
+        // Called without cart data so the service evaluates promotions against the full cart.
+        $maxAmount = (float) $this->app->make(HandleApplyPromotionsService::class)
+            ->getPromotionDiscountAmount();
+
+        if ($maxAmount <= 0 || $amounts->sum() <= $maxAmount) {
+            return $sessionMarketplaceData;
+        }
+
+        return $this->applyDistributedDiscount($sessionMarketplaceData, $amounts, $maxAmount, 'promotion_discount_amount');
+    }
+
+    /**
+     * Write the distributed shares back into each store's session data under $key.
+     */
+    protected function applyDistributedDiscount(
+        array $sessionMarketplaceData,
+        Collection $amounts,
+        float $maxAmount,
+        string $key
+    ): array {
+        foreach ($this->distributeDiscountAmount($amounts, $maxAmount) as $storeId => $storeAmount) {
+            $storeData = Arr::get($sessionMarketplaceData, $storeId, []);
+            Arr::set($storeData, $key, $storeAmount);
+            Arr::set($sessionMarketplaceData, $storeId, $storeData);
+        }
+
+        return $sessionMarketplaceData;
+    }
+
+    /**
+     * Split a cart-wide discount across stores proportionally to the amount each one was
+     * granted. The last store absorbs the rounding remainder so the shares always add up
+     * to exactly $maxAmount.
+     */
+    protected function distributeDiscountAmount(Collection $amounts, float $maxAmount): array
+    {
+        $appliedAmount = $amounts->sum();
+        $lastStoreId = $amounts->keys()->last();
+        $distributedAmount = 0;
+        $storeAmounts = [];
+
+        foreach ($amounts as $storeId => $amount) {
+            $storeAmount = $storeId === $lastStoreId
+                ? round($maxAmount - $distributedAmount, 2)
+                : round($maxAmount * $amount / $appliedAmount, 2);
+
+            $distributedAmount += $storeAmount;
+            $storeAmounts[$storeId] = $storeAmount;
+        }
+
+        return $storeAmounts;
     }
 
     public function handleCheckoutOrderByStore(
@@ -428,8 +580,12 @@ class OrderSupportServiceProvider extends ServiceProvider
             $shippingMethodInput = $request->input('shipping_method', $order?->shipping_method ?? ShippingMethodEnum::DEFAULT);
         }
 
-        $promotionDiscountAmount = $promotionService
-            ->execute($token, compact('cartItems', 'rawTotal', 'countCart'), "marketplace.$storeId.");
+        $shippingMethodInput = $this->resolveShippingValueForStore($shippingMethodInput, $storeId)
+            ?: ($order?->shipping_method ?? ShippingMethodEnum::DEFAULT);
+
+        // Primed and capped by processPostCheckoutOrder() before this loop. Re-running the
+        // promotion service here would recompute the uncapped per-store amount.
+        $promotionDiscountAmount = (float) Arr::get($sessionStoreData, 'promotion_discount_amount', 0);
 
         $couponDiscountAmount = 0;
         if ($couponCode) {
@@ -446,9 +602,12 @@ class OrderSupportServiceProvider extends ServiceProvider
             if (MarketplaceHelper::isChargeShippingPerVendor()) {
                 $shippingData = $this->getShippingData($sessionStoreData, $orderAmount, $products, $paymentMethod);
 
-                $shippingOptionInput = $request->input("shipping_option.$storeId")
-                    ?: Arr::get($sessionStoreData, 'shipping_option')
-                    ?: $order?->shipping_option;
+                $shippingOptionInput = $this->resolveShippingValueForStore(
+                    $request->input("shipping_option.$storeId")
+                        ?: Arr::get($sessionStoreData, 'shipping_option')
+                        ?: $order?->shipping_option,
+                    $storeId
+                );
 
                 $shippingMethodData = $shippingFeeService
                     ->execute(
@@ -492,9 +651,12 @@ class OrderSupportServiceProvider extends ServiceProvider
                         $paymentMethod
                     );
 
-                    $shippingOptionInput = $request->input('shipping_option')
-                        ?: Arr::get($sessionStoreData, 'shipping_option')
-                        ?: $order?->shipping_option;
+                    $shippingOptionInput = $this->resolveShippingValueForStore(
+                        $request->input('shipping_option')
+                            ?: Arr::get($sessionStoreData, 'shipping_option')
+                            ?: $order?->shipping_option,
+                        $storeId
+                    );
 
                     $shippingMethodData = $shippingFeeService
                         ->execute(
@@ -583,6 +745,9 @@ class OrderSupportServiceProvider extends ServiceProvider
                     ?: Arr::get($sessionStoreData, 'shipping_option')
                     ?: $order?->shipping_option;
             }
+
+            $finalShippingOption = $this->resolveShippingValueForStore($finalShippingOption, $storeId)
+                ?: $order?->shipping_option;
         }
 
         $requestData = $request->except(['shipping_option', 'shipping_method']);
@@ -708,6 +873,23 @@ class OrderSupportServiceProvider extends ServiceProvider
         $productCollection = $isGroupedStructure ? $products['products'] : $products;
 
         return EcommerceHelper::getShippingData($productCollection, $session, $origin, $orderTotal, $paymentMethod);
+    }
+
+    /**
+     * Shipping method/option can be stored keyed by store id (per-vendor checkout posts
+     * `shipping_method[$storeId]`), so the same session/old-input key may hold either a scalar
+     * or an array depending on which flow wrote it last. Resolve it down to the current store's
+     * scalar before it is cast to string or persisted on the order.
+     */
+    protected function resolveShippingValueForStore(mixed $value, int|string $storeId): mixed
+    {
+        if (! is_array($value)) {
+            return $value;
+        }
+
+        $value = Arr::get($value, $storeId, Arr::first($value));
+
+        return is_array($value) ? null : $value;
     }
 
     public function processPaymentMethodPostCheckout(Request $request, int|float $totalAmount): array
@@ -934,6 +1116,9 @@ class OrderSupportServiceProvider extends ServiceProvider
             } else {
                 $defaultShippingMethod = $request->input('shipping_method') ?: Arr::get($sessionCheckoutData, 'shipping_method', ShippingMethodEnum::DEFAULT);
             }
+
+            $defaultShippingMethod = $this->resolveShippingValueForStore($defaultShippingMethod, $storeId);
+
             $defaultShippingOption = null;
             if ($isAvailableShipping) {
                 if (MarketplaceHelper::isChargeShippingPerVendor()) {
@@ -966,9 +1151,12 @@ class OrderSupportServiceProvider extends ServiceProvider
                 }
 
                 if (! $defaultShippingMethod) {
-                    $defaultShippingMethod = old(
-                        "shipping_method.$storeId",
-                        Arr::get($vendorSessionData, 'shipping_method', Arr::first(array_keys($shipping)))
+                    $defaultShippingMethod = $this->resolveShippingValueForStore(
+                        old(
+                            "shipping_method.$storeId",
+                            Arr::get($vendorSessionData, 'shipping_method', Arr::first(array_keys($shipping)))
+                        ),
+                        $storeId
                     );
                 }
 
@@ -1001,10 +1189,13 @@ class OrderSupportServiceProvider extends ServiceProvider
                             $defaultShippingOption = $optionRequest;
                         }
                     } else {
-                        $defaultShippingOptionFromSession = Arr::get(
-                            $vendorSessionData,
-                            'shipping_option',
-                            $defaultShippingOption
+                        $defaultShippingOptionFromSession = $this->resolveShippingValueForStore(
+                            Arr::get(
+                                $vendorSessionData,
+                                'shipping_option',
+                                $defaultShippingOption
+                            ),
+                            $storeId
                         );
 
                         $defaultShippingMethodValue = (array) Arr::get($shipping, $defaultShippingMethod, []);
@@ -1058,6 +1249,10 @@ class OrderSupportServiceProvider extends ServiceProvider
                 'is_available_shipping' => $isAvailableShipping,
             ];
         }
+
+        // The promotion service ran once per store above, each time against that store's own
+        // subtotal, so cap the combined amount before it is summed or written back to session.
+        $marketplaceData = collect($this->capCartWidePromotionDiscount($marketplaceData->all()));
 
         if (MarketplaceHelper::isChargeShippingPerVendor()) {
             $shippingAmount = $marketplaceData->pluck('shipping_amount')->sum();
@@ -1364,6 +1559,12 @@ class OrderSupportServiceProvider extends ServiceProvider
                 ?: $order?->shipping_option;
         }
 
+        $storeKey = $store && $store->id ? $store->id : 0;
+        $shippingMethod = $this->resolveShippingValueForStore($shippingMethod, $storeKey)
+            ?: ($order?->shipping_method ?? ShippingMethodEnum::DEFAULT);
+        $shippingOption = $this->resolveShippingValueForStore($shippingOption, $storeKey)
+            ?: $order?->shipping_option;
+
         $generalData = [
             'user_id' => $currentUserId,
             'shipping_method' => $shippingMethod,
@@ -1475,19 +1676,25 @@ class OrderSupportServiceProvider extends ServiceProvider
 
             if ($vendorInfo->id) {
                 $orderAmountWithoutShippingFee = $order->amount - $order->shipping_amount - ($order->shipping_tax_amount ?? 0) - $order->tax_amount - $order->payment_fee;
-                if (! MarketplaceHelper::isCommissionCategoryFeeBasedEnabled()) {
-                    $feePercentage = MarketplaceHelper::getSetting('fee_per_order', 0);
-                    $fee = $orderAmountWithoutShippingFee * ($feePercentage / 100);
+                if (MarketplaceHelper::isSubscriptionMode()) {
+                    // Subscription mode is mutually exclusive with commission: the admin earns
+                    // from subscription plans instead, so the vendor keeps 100% of every order.
+                    $fee = 0;
                 } else {
-                    $fee = $this->calculatorCommissionFeeByProduct($order->products);
-                }
+                    if (! MarketplaceHelper::isCommissionCategoryFeeBasedEnabled()) {
+                        $feePercentage = MarketplaceHelper::getSetting('fee_per_order', 0);
+                        $fee = $orderAmountWithoutShippingFee * ($feePercentage / 100);
+                    } else {
+                        $fee = $this->calculatorCommissionFeeByProduct($order->products);
+                    }
 
-                // Add the fixed commission fee, charged once per vendor sub-order.
-                // Each order in the marketplace already belongs to a single store, so this
-                // applies per vendor. Covers the flat part of payment gateway fees (e.g. Stripe/PayPal €0.25).
-                $fixedFee = (float) MarketplaceHelper::getSetting('fee_per_order_fixed', 0);
-                if ($fixedFee > 0) {
-                    $fee += $fixedFee;
+                    // Add the fixed commission fee, charged once per vendor sub-order.
+                    // Each order in the marketplace already belongs to a single store, so this
+                    // applies per vendor. Covers the flat part of payment gateway fees (e.g. Stripe/PayPal €0.25).
+                    $fixedFee = (float) MarketplaceHelper::getSetting('fee_per_order_fixed', 0);
+                    if ($fixedFee > 0) {
+                        $fee += $fixedFee;
+                    }
                 }
 
                 // Never let the total commission exceed the order sub-amount (avoid a negative vendor payout).
@@ -1551,6 +1758,10 @@ class OrderSupportServiceProvider extends ServiceProvider
 
     protected function calculatorCommissionFeeByProduct(Collection $orderProducts): float|int
     {
+        if (MarketplaceHelper::isSubscriptionMode()) {
+            return 0;
+        }
+
         /**
          * @var EloquentCollection $orderProducts
          */
@@ -1624,7 +1835,10 @@ class OrderSupportServiceProvider extends ServiceProvider
                 if ($order->payment_fee > 0) {
                     $refundAmount = $refundAmount - $order->payment_fee;
                 }
-                if (! MarketplaceHelper::isCommissionCategoryFeeBasedEnabled()) {
+                if (MarketplaceHelper::isSubscriptionMode()) {
+                    // No commission was taken on the original order, so none is refunded here.
+                    $fee = 0;
+                } elseif (! MarketplaceHelper::isCommissionCategoryFeeBasedEnabled()) {
                     $feePercentage = MarketplaceHelper::getSetting('fee_per_order', 0);
                     $fee = $refundAmount * ($feePercentage / 100);
                 } else {

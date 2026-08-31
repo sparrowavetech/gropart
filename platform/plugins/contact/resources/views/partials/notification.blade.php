@@ -7,12 +7,12 @@
         tabindex="-1"
     >
         <x-core::icon name="ti ti-mail" />
-        <span class="badge bg-red text-red-fg badge-pill">{{ number_format($contacts->count()) }}</span>
+        <span class="badge bg-red text-red-fg badge-pill">{{ number_format($contacts->total()) }}</span>
     </button>
     <div class="dropdown-menu dropdown-menu-arrow dropdown-menu-end dropdown-menu-card">
         <x-core::card>
             <x-core::card.header>
-                <x-core::card.title>{!! BaseHelper::clean(trans('plugins/contact::contact.new_msg_notice', ['count' => $contacts->count()])) !!}</x-core::card.title>
+                <x-core::card.title>{!! BaseHelper::clean(trans('plugins/contact::contact.new_msg_notice', ['count' => $contacts->total()])) !!}</x-core::card.title>
                 <x-core::card.actions>
                     <a href="{{ route('contacts.index') }}">{{ trans('plugins/contact::contact.view_all') }}</a>
                 </x-core::card.actions>
@@ -55,7 +55,7 @@
                     </a>
                 @endforeach
             </div>
-            @if ($contacts->count() > 10)
+            @if ($contacts->total() > 10)
                 <x-core::card.footer class="text-center border-top">
                     <a href="{{ route('contacts.index') }}">{{ trans('plugins/contact::contact.view_all') }}</a>
                 </x-core::card.footer>

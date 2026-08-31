@@ -15,6 +15,7 @@ return [
         'add-amount' => 'Betrag hinzufügen',
         'subtract-amount' => 'Betrag abziehen',
         'order-return' => 'Bestellrückgabe',
+        'subscription-fee' => 'Abonnementgebühr',
     ],
     'store_name' => 'Shop-Name',
     'vendor_name' => 'Verkäufername',

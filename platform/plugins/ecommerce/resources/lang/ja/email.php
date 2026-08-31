@@ -1,14 +1,13 @@
 <?php
 
 return [
-    'name' => 'Ecommerce',
+    'name' => 'Eコマース',
     'description' => 'Ecommerceのメールテンプレート設定',
     'welcome_title' => '歓迎',
     'welcome_description' => 'ユーザーがサイトにアカウントを登録した際にメールを送信',
     'welcome_subject' => '{{ site_title }}へようこそ！',
     'customer_new_order_title' => '注文確認',
     'customer_new_order_description' => '注文が行われた際に顧客に確認メールを送信',
-
     'order_cancellation_title' => '注文キャンセル',
     'customer_order_cancellation_description' => '顧客が注文をキャンセルした際に送信',
     'admin_order_cancellation_title' => '注文キャンセル（管理者による）',
@@ -16,29 +15,22 @@ return [
     'order_cancellation_to_admin_title' => '注文キャンセル（管理者宛て）',
     'order_cancellation_to_admin_description' => '顧客が注文をキャンセルした際に管理者に送信',
     'order_cancellation_to_admin_subject' => '注文{{ order_id }}が顧客によってキャンセルされました',
-
     'delivery_confirmation_title' => '配送確認',
     'delivery_confirmation_description' => '注文が配送中の際に顧客に送信',
-
     'order_delivered_title' => '注文配送完了',
     'order_delivered_description' => '注文が配送完了した際に顧客に送信',
-
     'admin_new_order_title' => '新規注文の通知',
     'admin_new_order_description' => '注文が行われた際に管理者に送信',
-
     'order_confirmation_title' => '注文確認',
     'order_confirmation_description' => '管理者によって注文が確認された際に顧客に送信',
-
     'payment_confirmation_title' => '支払い確認',
     'payment_confirmation_description' => '支払いが確認された際に顧客に送信',
-
     'order_recover_title' => '未完了注文',
     'order_recover_description' => '未完了注文について顧客にリマインダーを送信',
     'view_order' => '注文を確認',
     'link_go_to_our_shop' => 'または<a href=":link">ショップにアクセス</a>',
     'order_number' => '注文番号: <strong>:order_id</strong>',
     'order_information' => '注文情報:',
-
     'order_return_request_title' => '注文返品リクエスト',
     'order_return_request_description' => '顧客が注文を返品する際に送信',
     'confirm_email_title' => 'メール確認',
@@ -81,6 +73,9 @@ return [
     'customer_deletion_request_confirmation_title' => 'アカウント削除確認',
     'customer_deletion_request_confirmation_description' => 'ユーザーがアカウント削除をリクエストした際に確認メールを送信',
     'customer_deletion_request_confirmation_subject' => 'アカウント削除リクエストを確認してください',
+    'customer_deletion_verification_code_title' => 'アカウント削除の確認コード',
+    'customer_deletion_verification_code_description' => 'モバイルアプリからアカウントの削除を申請したお客様に確認コードを送信します',
+    'customer_deletion_verification_code_subject' => 'アカウント削除の確認コード',
     'customer_deletion_request_completed_title' => 'アカウント削除完了',
     'customer_deletion_request_completed_description' => 'ユーザーのアカウントが削除された際にメールを送信',
     'customer_deletion_request_completed_subject' => 'アカウントが削除されました',

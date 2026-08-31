@@ -120,25 +120,35 @@ class InteractsWithDatabaseFileTest extends TestCase
 
     public function test_falls_through_entire_chain_to_base_path_database_sql(): void
     {
-        // Use a preset id that has NO matching files anywhere.
-        // The fallback chain should land on base_path('database.sql')
-        // which exists in this project.
+        // Use a preset id that has NO matching files anywhere, so the lookup falls all
+        // the way through to base_path('database.sql').
+        //
+        // Not every project ships that file (scripts built on the CMS often do not), so
+        // create it when it is missing rather than asserting it as a precondition - the
+        // fallback behaviour under test is the same either way.
         $baseDefault = base_path('database.sql');
-        $this->assertTrue(
-            File::exists($baseDefault),
-            'Precondition: database.sql must exist at project root for this test.'
-        );
+
+        if (! File::exists($baseDefault)) {
+            File::put($baseDefault, '-- test placeholder');
+            $this->tempFiles[] = $baseDefault;
+        }
+
+        $handled = null;
 
         $service = Mockery::mock(ImportDatabaseService::class);
         $service->shouldReceive('handle')
             ->once()
-            ->with($baseDefault);
+            ->andReturnUsing(function (string $path) use (&$handled): void {
+                $handled = $path;
+            });
 
         $this->makeTraitConsumer()->run(
             $service,
             'no-matching-file-' . uniqid(),
             'also-nonexistent-' . uniqid() . '.sql'
         );
+
+        $this->assertSame($baseDefault, $handled);
     }
 
     public function test_explicit_file_takes_precedence_over_conventional_file(): void

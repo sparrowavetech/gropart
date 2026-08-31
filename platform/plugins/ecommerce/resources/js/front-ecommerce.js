@@ -284,10 +284,18 @@ class Ecommerce {
                 })
             })
             .on('click', '.bb-product-filter-link', (e) => {
-                e.preventDefault()
-
                 const currentTarget = $(e.currentTarget)
                 const form = currentTarget.closest('form')
+
+                // The category tree is also rendered outside the shop filter, for example in a
+                // homepage sidebar. There is no filter form to submit there, so the link is just
+                // a link to the category page - let the browser follow it.
+                if (!form.length) {
+                    return
+                }
+
+                e.preventDefault()
+
                 const parent = currentTarget.closest('.bb-product-filter')
                 const categoryId = currentTarget.data('id')
 
@@ -962,18 +970,51 @@ class Ecommerce {
                 videoElement.play()
 
                 $button.closest('.bb-product-video').addClass('bb-product-video-playing')
-
-                videoElement.addEventListener('ended', () => {
-                    $button.closest('.bb-product-video').removeClass('bb-product-video-playing')
-                    videoElement.currentTime = 0;
-                    videoElement.pause();
-                });
-
-                videoElement.addEventListener('pause', () => {
-                    if (videoElement.ended) return;
-                    $button.closest('.bb-product-video').removeClass('bb-product-video-playing')
-                });
             })
+
+            // When the theme option enables native `controls`, playback can start or stop
+            // from the control bar or a click on the video itself - the overlay button
+            // state must follow the element's real play/pause events, not only the
+            // trigger button. Without `controls`, only the trigger button and the slider
+            // autoplay drive playback, so the overlay is left alone to keep the muted
+            // autoplay behavior. Media events do not bubble, so listen in the capture phase.
+            if (!window.bbProductVideoEventsBound) {
+                window.bbProductVideoEventsBound = true
+
+                document.addEventListener(
+                    'play',
+                    (e) => {
+                        if (e.target.controls) {
+                            $(e.target).closest('.bb-product-video').addClass('bb-product-video-playing')
+                        }
+                    },
+                    true
+                )
+
+                document.addEventListener(
+                    'pause',
+                    (e) => {
+                        if (e.target.controls && !e.target.ended) {
+                            $(e.target).closest('.bb-product-video').removeClass('bb-product-video-playing')
+                        }
+                    },
+                    true
+                )
+
+                document.addEventListener(
+                    'ended',
+                    (e) => {
+                        const $wrapper = $(e.target).closest('.bb-product-video')
+
+                        if ($wrapper.length) {
+                            e.target.currentTime = 0
+                            e.target.pause()
+                            $wrapper.removeClass('bb-product-video-playing')
+                        }
+                    },
+                    true
+                )
+            }
 
             // Lazy YouTube/Vimeo: swap the thumbnail facade for the real iframe on click.
             // Keeps the heavy embed player (and its third-party JS) off the page until the

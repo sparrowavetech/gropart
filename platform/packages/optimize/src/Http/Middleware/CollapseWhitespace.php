@@ -12,16 +12,30 @@ class CollapseWhitespace extends PageSpeed
             '/(\s)+/s' => '\\1',
         ];
 
-        $blocks = preg_split('/(<\/?pre[^>]*>)/', $buffer, -1, PREG_SPLIT_DELIM_CAPTURE);
-        $buffer = '';
-        foreach ($blocks as $i => $block) {
-            if ($i % 4 == 2) {
-                $buffer .= $block;
-            } else {
-                $buffer .= $this->replace($replace, $block);
-            }
+        // Line breaks are meaningful inside these tags, so they are pulled out
+        // before collapsing and put back afterwards. Collapsing a <script> onto
+        // a single line makes the first "//" comment swallow the rest of the
+        // block, which breaks the whole script with a syntax error.
+        $preserved = [];
+
+        $buffer = preg_replace_callback(
+            '#<(pre|textarea|script)\b[^>]*>.*?</\1\s*>#is',
+            function (array $matches) use (&$preserved): string {
+                $placeholder = sprintf('<!--bb-preserved-block-%d-->', count($preserved));
+
+                $preserved[$placeholder] = $matches[0];
+
+                return $placeholder;
+            },
+            $buffer
+        );
+
+        $buffer = $this->replace($replace, $buffer);
+
+        if (! $preserved) {
+            return $buffer;
         }
 
-        return $buffer;
+        return str_replace(array_keys($preserved), array_values($preserved), $buffer);
     }
 }

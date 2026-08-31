@@ -98,4 +98,19 @@ trait LocationTrait
             ])),
         );
     }
+
+    protected function mapUrl(): Attribute
+    {
+        return Attribute::make(
+            get: function (): ?string {
+                $address = $this->full_address;
+
+                if (! $address) {
+                    return null;
+                }
+
+                return 'https://www.google.com/maps/search/?api=1&query=' . urlencode($address);
+            },
+        );
+    }
 }

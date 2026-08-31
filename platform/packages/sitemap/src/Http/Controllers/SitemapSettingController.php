@@ -8,6 +8,7 @@ use Botble\Sitemap\Events\SitemapUpdatedEvent;
 use Botble\Sitemap\Forms\Settings\SitemapSettingForm;
 use Botble\Sitemap\Http\Requests\SitemapSettingRequest;
 use Botble\Sitemap\Services\IndexNowService;
+use Botble\Theme\Supports\AiCrawlerPolicy;
 use Exception;
 use Illuminate\Http\JsonResponse;
 
@@ -40,6 +41,14 @@ class SitemapSettingController extends SettingController
             ClearCacheService::make()->clearFrameworkCache();
 
             event(new SitemapUpdatedEvent());
+        }
+
+        // The web server serves public/robots.txt before Laravel routing, so the AI crawler
+        // policy only takes effect once it is written into that file.
+        if (! AiCrawlerPolicy::syncRobotsTxtFile($request->input('ai_crawler_policy'))) {
+            return $response->setMessage(trans('packages/sitemap::sitemap.settings.ai_crawler_robots_not_writable', [
+                'path' => apply_filters(FILTER_ROBOTS_TXT_PATH, public_path('robots.txt')),
+            ]));
         }
 
         return $response->withUpdatedSuccessMessage();
