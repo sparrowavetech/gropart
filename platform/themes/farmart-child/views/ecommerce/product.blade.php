@@ -50,18 +50,7 @@
                                 <a href="{{ $product->store->url }}">
                                     {{ $product->store->name }}
                                 </a>
-                                @if($product->store->is_verified)
-                                    <img class="verified-store-main" src="{{ asset('/storage/stores/verified.png')}}" alt="Verified" style="max-height: 20px; vertical-align: middle;">
-                                @endif
-                                @if($product->store->shop_category)
-                                    @php
-                                        $shopCategory = $product->store->shop_category;
-                                        $categoryLabel = ($shopCategory instanceof \Botble\Marketplace\Enums\ShopTypeEnum) 
-                                            ? $shopCategory->label() 
-                                            : (\Botble\Marketplace\Enums\ShopTypeEnum::getLabel($shopCategory) ?: $shopCategory);
-                                    @endphp
-                                    <small class="badge bg-warning text-dark">{{ $categoryLabel }}</small>
-                                @endif
+                                @vendorBadges($product->store)
                             </div>
                         @endif
 

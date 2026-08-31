@@ -60,18 +60,7 @@
                                                 <span class="text-secondary">{{ __('Vendor') }}: </span>
                                                 <span class="text-primary ms-1">
                                                     <a href="{{ $store->url }}">{{ $store->name }}</a>
-                                                    @if($store->is_verified)
-                                                        <img class="verified-store" src="{{ asset('/storage/stores/verified.png')}}" alt="Verified" style="max-height: 16px; vertical-align: middle;">
-                                                    @endif
-                                                    @if($store->shop_category)
-                                                        @php
-                                                            $shopCategory = $store->shop_category;
-                                                            $categoryLabel = ($shopCategory instanceof \Botble\Marketplace\Enums\ShopTypeEnum) 
-                                                                ? $shopCategory->label() 
-                                                                : (\Botble\Marketplace\Enums\ShopTypeEnum::getLabel($shopCategory) ?: $shopCategory);
-                                                        @endphp
-                                                        <small class="badge bg-warning text-dark">{{ $categoryLabel }}</small>
-                                                    @endif
+                                                    @vendorBadges($store)
                                                 </span>
                                             </div>
                                         @endif

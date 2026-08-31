@@ -45,18 +45,7 @@
         @if (is_plugin_active('marketplace') && $product->store->id)
             <div class="sold-by-meta">
                 <a href="{{ $product->store->url }}" tabindex="0">{{ $product->store->name }}</a>
-                @if($product->store->is_verified)
-                    <img class="verified-store" src="{{ asset('/storage/stores/verified.png')}}" alt="Verified" style="max-height: 14px; vertical-align: middle;">
-                @endif
-                @if($product->store->shop_category)
-                    @php
-                        $shopCategory = $product->store->shop_category;
-                        $categoryLabel = ($shopCategory instanceof \Botble\Marketplace\Enums\ShopTypeEnum) 
-                            ? $shopCategory->label() 
-                            : (\Botble\Marketplace\Enums\ShopTypeEnum::getLabel($shopCategory) ?: $shopCategory);
-                    @endphp
-                    <small class="badge bg-warning text-dark" style="font-size: 10px; padding: 2px 4px;">{{ $categoryLabel }}</small>
-                @endif
+                @vendorBadges($product->store)
             </div>
         @endif
         <h3 class="product__title">

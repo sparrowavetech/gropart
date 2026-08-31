@@ -23,18 +23,7 @@
                                 <div class="store-title d-flex align-items-center">
                                     <h2 class="h5 mb-0">
                                         <a href="{{ $store->url }}">{{ $store->name }}</a>
-                                        @if($store->is_verified)
-                                            <img class="verified-store-main" src="{{ asset('/storage/stores/verified.png')}}" alt="Verified" style="max-height: 18px; vertical-align: middle;">
-                                        @endif
-                                        @if($store->shop_category)
-                                            @php
-                                                $shopCategory = $store->shop_category;
-                                                $categoryLabel = ($shopCategory instanceof \Botble\Marketplace\Enums\ShopTypeEnum) 
-                                                    ? $shopCategory->label() 
-                                                    : (\Botble\Marketplace\Enums\ShopTypeEnum::getLabel($shopCategory) ?: $shopCategory);
-                                            @endphp
-                                            <small class="badge bg-warning text-white" style="font-size: 10px; padding: 2px 4px;">{{ $categoryLabel }}</small>
-                                        @endif
+                                        @vendorBadges($store)
                                     </h2>
                                 </div>
                                 @if (method_exists($store, 'isOnVacation') && $store->isOnVacation())

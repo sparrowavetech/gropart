@@ -112,12 +112,7 @@
                                                     <small class="text-muted">{{ __('Sold by') }}: <a
                                                             href="{{ $product->original_product->store->url }}"
                                                             class="text-primary fw-medium">{{ $product->original_product->store->name }}</a>
-                                                            @if($product->store->is_verified)
-                                                            <img class="verified-store-main" src="{{ asset('/storage/stores/verified.png')}}" alt="Verified" style="height: 16px; vertical-align: middle; margin-left: 2px;">
-                                                            @endif
-                                                            @if (!empty($product->store->shop_category))
-                                                            <small class="badge bg-warning text-dark ms-1">{{ is_object($product->store->shop_category) && method_exists($product->store->shop_category, 'label') ? $product->store->shop_category->label() : $product->store->shop_category }}</small>
-                                                            @endif
+                                                            @vendorBadges($product->original_product->store)
                                                     </small>
                                                 </p>
                                             @endif

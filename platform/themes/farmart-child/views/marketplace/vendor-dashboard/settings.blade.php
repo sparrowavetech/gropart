@@ -154,8 +154,22 @@
                                     <span class="text-danger">{{ $errors->first('slug') }}</span>
                                 @endif
                                 <span class="d-inline-block"><small
-                                        data-base-url="{{ route('public.store', old('slug', '')) }}"
-                                    >{{ route('public.store', old('slug', $store->slug)) }}</small></span>
+                                        data-base-url="{{ route('public.store', old('slug', $store->slug ?: 'store')) }}"
+                                    >{{ route('public.store', old('slug', $store->slug ?: 'store')) }}</small></span>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="required" for="shop-category">{{ __('Shop Type') }}</label>
+                                <select class="form-control form-select" id="shop-category" name="shop_category" required>
+                                    <option value="">{{ __('Select Shop Type') }}</option>
+                                    @foreach(\SparroWave\VendorVerifiedBadge\Enums\ShopTypeEnum::labels() as $categoryValue => $categoryLabel)
+                                        <option value="{{ $categoryValue }}" @selected(old('shop_category', $store->shop_category) === $categoryValue)>{{ $categoryLabel }}</option>
+                                    @endforeach
+                                </select>
+                                @if ($errors->has('shop_category'))
+                                    <span class="text-danger">{{ $errors->first('shop_category') }}</span>
+                                @endif
                             </div>
                         </div>
                     </div>
