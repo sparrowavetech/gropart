@@ -1,0 +1,14 @@
+{
+    "id": "sparrowave/vendor-verified-badge",
+    "name": "Vendor Verified & Type Badge",
+    "namespace": "SparroWave\\VendorVerifiedBadge\\",
+    "provider": "SparroWave\\VendorVerifiedBadge\\Providers\\VendorVerifiedBadgeServiceProvider",
+    "author": "SparroWave Technologies",
+    "url": "https://sparrowavetech.com",
+    "version": "1.0.0",
+    "description": "Comprehensive Vendor Verification Badge, Vendor Type (Shop Category), Profile Completion Score Tracker, and Dashboard Gating System for Botble Marketplace.",
+    "require": [
+        "ecommerce",
+        "marketplace"
+    ]
+}

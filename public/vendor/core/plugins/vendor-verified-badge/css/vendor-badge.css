@@ -1,0 +1,35 @@
+.verified-store-badge,
+.verified-store,
+.verified-store-main,
+.verified-store-info {
+    max-height: 18px;
+    height: 18px;
+    width: auto;
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 3px;
+    margin-right: 2px;
+    transition: transform 0.2s ease-in-out;
+}
+
+.verified-store-badge:hover,
+.verified-store:hover,
+.verified-store-main:hover {
+    transform: scale(1.1);
+}
+
+.vendor-shop-type-badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 7px;
+    border-radius: 4px;
+    vertical-align: middle;
+    display: inline-block;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+}
+
+.table .vendor-shop-type-badge {
+    font-size: 10px;
+    padding: 2px 6px;
+}

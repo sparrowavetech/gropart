@@ -1,0 +1,17 @@
+{
+    "name": "sparrowave/vendor-verified-badge",
+    "description": "Vendor Verified & Type Badge plugin for Botble Marketplace",
+    "type": "botble-plugin",
+    "autoload": {
+        "psr-4": {
+            "SparroWave\\VendorVerifiedBadge\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "SparroWave\\VendorVerifiedBadge\\Providers\\VendorVerifiedBadgeServiceProvider"
+            ]
+        }
+    }
+}
