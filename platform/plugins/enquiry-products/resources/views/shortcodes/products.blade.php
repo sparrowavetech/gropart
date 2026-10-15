@@ -1,0 +1,1 @@
+<section class="ep-shell"><h2>{{ $title }}</h2><p><a href="{{ route('public.enquiry-products.index') }}">{{ __('plugins/enquiry-products::messages.search_all_enquiry_equipment') }} →</a></p>@include('plugins/enquiry-products::partials.products')</section>

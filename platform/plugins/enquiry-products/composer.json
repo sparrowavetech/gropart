@@ -1,0 +1,9 @@
+{
+    "name": "sparrowave/enquiry-products",
+    "type": "package",
+    "autoload": {
+        "psr-4": {
+            "SparroWave\\EnquiryProducts\\": "src/"
+        }
+    }
+}

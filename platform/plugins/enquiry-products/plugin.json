@@ -1,0 +1,13 @@
+{
+    "id": "sparrowave/enquiry-products",
+    "name": "Enquiry Products",
+    "namespace": "SparroWave\\EnquiryProducts\\",
+    "provider": "SparroWave\\EnquiryProducts\\Providers\\EnquiryProductsServiceProvider",
+    "author": "SparroWave Technologies",
+    "version": "1.0.0",
+    "description": "Dedicated equipment enquiry catalog, search, category filters and vendor enquiries. No child theme required.",
+    "minimum_core_version": "7.6.0",
+    "require": [
+        "ecommerce"
+    ]
+}
